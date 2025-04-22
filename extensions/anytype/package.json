@@ -176,6 +176,9 @@
                       "includes": "ot-task"
                     },
                     {
+                      "includes": "bafyreigs5crqbryk2sq45ig4p6uqkcbmntuyosc1djvdeqoydj23b6d1mm"
+                    },
+                    {
                       "includes": [
                         "ot-collection",
                         "ot-set"
@@ -206,67 +209,6 @@
           }
         ],
         "usedAsExample": true
-      },
-      {
-        "input": "@anytype approve bob as an editor in my personal space",
-        "mocks": {
-          "get-spaces": [
-            {
-              "object": "space",
-              "id": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d",
-              "name": "My Personal Space"
-            }
-          ],
-          "get-members": [
-            {
-              "object": "member",
-              "name": "Bob",
-              "id": "_participant_bafyreihliylimyqct5vbyc2jqsoanibku656jj2uwwhulx4tctb4qw346q_1lcu0r85yg10d_ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "identity": "ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "global_name": "bob",
-              "status": "pending",
-              "role": "no_permissions"
-            }
-          ],
-          "approve-member": [
-            {
-              "object": "member",
-              "name": "Bob",
-              "id": "_participant_bafyreihliylimyqct5vbyc2jqsoanibku656jj2uwwhulx4tctb4qw346q_1lcu0r85yg10d_ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "identity": "ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "global_name": "bob",
-              "status": "active",
-              "role": "editor"
-            }
-          ]
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "get-spaces",
-              "arguments": {}
-            }
-          },
-          {
-            "callsTool": {
-              "name": "get-members",
-              "arguments": {
-                "spaceId": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d"
-              }
-            }
-          },
-          {
-            "callsTool": {
-              "name": "approve-member",
-              "arguments": {
-                "spaceId": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d",
-                "memberIdentity": "ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-                "role": "editor"
-              }
-            }
-          }
-        ],
-        "usedAsExample": false
       },
       {
         "input": "@anytype create a new page in my personal space explaining the concept of privacy",
@@ -563,66 +505,6 @@
         "usedAsExample": false
       },
       {
-        "input": "@anytype reject bob's request to join my personal space",
-        "mocks": {
-          "get-spaces": [
-            {
-              "object": "space",
-              "id": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d",
-              "name": "My Personal Space"
-            }
-          ],
-          "get-members": [
-            {
-              "object": "member",
-              "name": "Bob",
-              "id": "_participant_bafyreihliylimyqct5vbyc2jqsoanibku656jj2uwwhulx4tctb4qw346q_1lcu0r85yg10d_ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "identity": "ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "global_name": "bob",
-              "status": "pending",
-              "role": "no_permissions"
-            }
-          ],
-          "reject-member": [
-            {
-              "object": "member",
-              "name": "Bob",
-              "id": "_participant_bafyreihliylimyqct5vbyc2jqsoanibku656jj2uwwhulx4tctb4qw346q_1lcu0r85yg10d_ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "identity": "ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "global_name": "bob",
-              "status": "rejected",
-              "role": "no_permissions"
-            }
-          ]
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "get-spaces",
-              "arguments": {}
-            }
-          },
-          {
-            "callsTool": {
-              "name": "get-members",
-              "arguments": {
-                "spaceId": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d"
-              }
-            }
-          },
-          {
-            "callsTool": {
-              "name": "reject-member",
-              "arguments": {
-                "memberIdentity": "ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-                "spaceId": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d"
-              }
-            }
-          }
-        ],
-        "usedAsExample": false
-      },
-      {
         "input": "@anytype remove the garlic pasta recipe from the 'recipe' list in my personal space",
         "mocks": {
           "get-spaces": [
@@ -689,65 +571,6 @@
           }
         ],
         "usedAsExample": true
-      },
-      {
-        "input": "@anytype remove bob from my personal space",
-        "mocks": {
-          "get-spaces": [
-            {
-              "object": "space",
-              "id": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d",
-              "name": "My Personal Space"
-            }
-          ],
-          "get-members": [
-            {
-              "object": "member",
-              "name": "Alice",
-              "id": "_participant_bafyreihliylimyqct7vbyc2jqsoanibku612jj4uwwhulx9tctb4qw346q_2lcu0r85yg10d_AAHTtt1wuQEnaYBNZ5Cyfcvs6DqPqxgn8KXDVa4avsUkMuha",
-              "identity": "AAHTtt1wuQEnaYBNZ5Cyfcvs6DqPqxgn8KXDVa4avsUkMuha",
-              "global_name": "alice",
-              "status": "active",
-              "role": "owner"
-            },
-            {
-              "object": "member",
-              "name": "Bob",
-              "id": "_participant_bafyreihliylimyqct5vbyc2jqsoanibku656jj2uwwhulx4tctb4qw346q_1lcu0r85yg10d_ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "identity": "ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "global_name": "bob",
-              "status": "active",
-              "role": "editor"
-            }
-          ],
-          "remove-member": []
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "get-spaces",
-              "arguments": {}
-            }
-          },
-          {
-            "callsTool": {
-              "name": "get-members",
-              "arguments": {
-                "spaceId": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d"
-              }
-            }
-          },
-          {
-            "callsTool": {
-              "name": "remove-member",
-              "arguments": {
-                "spaceId": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d",
-                "memberIdentity": "ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun"
-              }
-            }
-          }
-        ],
-        "usedAsExample": false
       },
       {
         "input": "@anytype search for objects globally",
@@ -824,67 +647,6 @@
           }
         ],
         "usedAsExample": true
-      },
-      {
-        "input": "@anytype make bob an editor in my personal space",
-        "mocks": {
-          "get-spaces": [
-            {
-              "object": "space",
-              "id": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d",
-              "name": "My Personal Space"
-            }
-          ],
-          "get-members": [
-            {
-              "object": "member",
-              "name": "Bob",
-              "id": "_participant_bafyreihliylimyqct5vbyc2jqsoanibku656jj2uwwhulx4tctb4qw346q_1lcu0r85yg10d_ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "identity": "ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "global_name": "bob",
-              "status": "active",
-              "role": "viewer"
-            }
-          ],
-          "update-member": [
-            {
-              "object": "member",
-              "name": "Bob",
-              "id": "_participant_bafyreihliylimyqct5vbyc2jqsoanibku656jj2uwwhulx4tctb4qw346q_1lcu0r85yg10d_ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "identity": "ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-              "global_name": "bob",
-              "status": "active",
-              "role": "editor"
-            }
-          ]
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "get-spaces",
-              "arguments": {}
-            }
-          },
-          {
-            "callsTool": {
-              "name": "get-members",
-              "arguments": {
-                "spaceId": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d"
-              }
-            }
-          },
-          {
-            "callsTool": {
-              "name": "update-member",
-              "arguments": {
-                "spaceId": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d",
-                "memberIdentity": "ABKbJdn422NCyvSrwD2OW9N4YKbKTToDhWkvKzYLucMUGqun",
-                "role": "editor"
-              }
-            }
-          }
-        ],
-        "usedAsExample": false
       }
     ]
   },
