@@ -1,9 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
 import { DebugInfo, Tab, Preferences } from "../types";
-import SessionUtils, { SESSION_FILE_PATHS } from "./sessionUtils";
 import fs from "fs";
 import path from "path";
 import os from "os";
+
+// Import the new utility modules
+import { formatError } from "./common/errorUtils";
+import { validateExecutablePath, SESSION_FILE_PATHS } from "./common/pathUtils";
+import { isRunning } from "./browserUtils";
+import { findSessionFile, parseSessionYaml } from "./sessionManager";
 
 export async function fetchQutebrowserTabs(): Promise<Tab[]> {
   const debugInfo: DebugInfo = {
@@ -31,18 +36,16 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
           debugInfo.note = "Removed stale not-running marker file";
         }
       } catch (e) {
-        const errorMessage = e instanceof Error ? e.message : String(e);
+        debugInfo.errors.push(`Marker file error: ${formatError(e)}`);
         console.error("Error checking not-running marker:", e);
-        debugInfo.errors.push(`Marker file error: ${errorMessage}`);
       }
     }
   } catch (e) {
-    const errorMessage = e instanceof Error ? e.message : String(e);
+    debugInfo.errors.push(`Temp directory error: ${formatError(e)}`);
     console.error("Error accessing tmp directory:", e);
-    debugInfo.errors.push(`Temp directory error: ${errorMessage}`);
   }
 
-  const qutebrowserRunning = await SessionUtils.isRunning();
+  const qutebrowserRunning = await isRunning();
   debugInfo.qutebrowser_running = qutebrowserRunning;
 
   if (!qutebrowserRunning) {
@@ -52,6 +55,14 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
   const preferences = getPreferenceValues<Preferences>();
   const qutebrowserPath = preferences.qutebrowserPath || "/opt/homebrew/bin/qutebrowser";
   debugInfo.qutebrowser_path = qutebrowserPath;
+
+  // Check if the qutebrowser executable exists
+  try {
+    validateExecutablePath(qutebrowserPath);
+  } catch (e) {
+    debugInfo.errors.push(`Qutebrowser executable not found at "${qutebrowserPath}"`);
+    throw e;
+  }
 
   // Check if SESSION_FILE_PATHS array has any entries
   if (SESSION_FILE_PATHS.length === 0) {
@@ -73,7 +84,7 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
         console.log(`Found autosave file: ${mainAutoSavePath} (${ageInSeconds}s old, ${stats.size} bytes)`);
       } catch (e) {
         console.error("Error checking autosave file:", e);
-        debugInfo.errors.push(`Autosave check error: ${e}`);
+        debugInfo.errors.push(`Autosave check error: ${formatError(e)}`);
       }
     } else {
       debugInfo.autosave_exists = false;
@@ -81,14 +92,14 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
     }
   }
 
-  const content = SessionUtils.findSessionFile(debugInfo);
+  const content = findSessionFile(debugInfo);
   let tabs: Tab[] = [];
 
   if (content) {
     try {
-      tabs = SessionUtils.parseSessionYaml(content);
+      tabs = parseSessionYaml(content);
     } catch (e) {
-      debugInfo.errors.push(`Failed to parse session YAML: ${e}`);
+      debugInfo.errors.push(`Failed to parse session YAML: ${formatError(e)}`);
       console.error("Error parsing session YAML:", e);
     }
     if (tabs.length > 0) {
@@ -100,7 +111,7 @@ export async function fetchQutebrowserTabs(): Promise<Tab[]> {
   }
 
   if (tabs.length === 0) {
-    debugInfo.qutebrowser_running = await SessionUtils.isRunning();
+    debugInfo.qutebrowser_running = await isRunning();
     tabs = [
       {
         window: 0,

@@ -2,6 +2,8 @@ import { List, ActionPanel, Action, Clipboard, showToast, Toast, closeMainWindow
 import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import { Tab } from "../types";
+import { formatError } from "../utils/common/errorUtils";
+import { sanitizeCommandString } from "../utils/common/stringUtils";
 
 interface TabListItemProps {
   tab: Tab;
@@ -20,18 +22,19 @@ export function TabListItem({ tab, onFocus, refreshTabs }: TabListItemProps) {
 
   const openInBrowser = (url: string) => {
     try {
-      exec(`open "${url}"`, (error) => {
+      const safeUrl = sanitizeCommandString(url);
+      exec(`open "${safeUrl}"`, (error) => {
         if (error) {
           showFailureToast({
             title: "Failed to open URL",
-            message: error.message,
+            message: formatError(error),
           });
         }
       });
     } catch (err) {
       showFailureToast({
         title: "Failed to open URL",
-        message: err instanceof Error ? err.message : String(err),
+        message: formatError(err),
       });
     }
   };
@@ -50,7 +53,7 @@ export function TabListItem({ tab, onFocus, refreshTabs }: TabListItemProps) {
     } catch (err) {
       showFailureToast({
         title: "Failed to focus tab",
-        message: err instanceof Error ? err.message : String(err),
+        message: formatError(err),
       });
     }
   };

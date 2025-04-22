@@ -3,7 +3,9 @@ import { useState, useCallback } from "react";
 import { usePromise, showFailureToast } from "@raycast/utils";
 import { Preferences, Tab } from "../types";
 import { fetchQutebrowserTabs } from "../utils/tabFetcher";
-import SessionUtils from "../utils/sessionUtils";
+import { formatError } from "../utils/common/errorUtils";
+import { sanitizeCommandString } from "../utils/common/stringUtils";
+import { executeCommand } from "../utils/browserUtils";
 
 export function useQutebrowserTabs() {
   const preferences = getPreferenceValues<Preferences>();
@@ -18,7 +20,7 @@ export function useQutebrowserTabs() {
     onError: (error) => {
       showFailureToast({
         title: "Failed to fetch tabs",
-        message: SessionUtils.formatError(error),
+        message: formatError(error),
       });
     },
   });
@@ -35,14 +37,14 @@ export function useQutebrowserTabs() {
   const focusTab = useCallback(
     async (tab: Tab) => {
       try {
-        const safeUrl = tab.url.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-        await SessionUtils.executeCommand(qutebrowserPath, `:tab-select ${safeUrl}`);
+        const safeUrl = sanitizeCommandString(tab.url);
+        await executeCommand(qutebrowserPath, `:tab-select ${safeUrl}`);
 
         return true;
       } catch (err) {
         showFailureToast({
           title: "Failed to focus tab",
-          message: SessionUtils.formatError(err),
+          message: formatError(err),
         });
         return false;
       }
@@ -53,13 +55,13 @@ export function useQutebrowserTabs() {
   const openSearchInNewTab = useCallback(
     async (query: string) => {
       try {
-        const safeQuery = query.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-        await SessionUtils.executeCommand(qutebrowserPath, `:open -t DEFAULT ${safeQuery}`);
+        const safeQuery = sanitizeCommandString(query);
+        await executeCommand(qutebrowserPath, `:open -t DEFAULT ${safeQuery}`);
         return true;
       } catch (err) {
         showFailureToast({
           title: "Failed to open search",
-          message: SessionUtils.formatError(err),
+          message: formatError(err),
         });
         return false;
       }
@@ -70,13 +72,13 @@ export function useQutebrowserTabs() {
   const openUrlInNewTab = useCallback(
     async (url: string) => {
       try {
-        const safeUrl = url.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-        await SessionUtils.executeCommand(qutebrowserPath, `:open -t ${safeUrl}`);
+        const safeUrl = sanitizeCommandString(url);
+        await executeCommand(qutebrowserPath, `:open -t ${safeUrl}`);
         return true;
       } catch (err) {
         showFailureToast({
           title: "Failed to open URL",
-          message: SessionUtils.formatError(err),
+          message: formatError(err),
         });
         return false;
       }
@@ -92,7 +94,7 @@ export function useQutebrowserTabs() {
     tabs,
     filteredTabs,
     isLoading,
-    error: error ? String(error) : null,
+    error: error ? formatError(error) : null,
     searchText,
     setSearchText,
     focusTab,
