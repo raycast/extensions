@@ -175,11 +175,11 @@ export default function Command() {
           style: Toast.Style.Success,
           title: "Relationship created successfully",
         });
-      } catch (error) {
+      } catch {
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to create relationship",
-          message: error instanceof Error ? error.message : "Unknown error occurred",
+          message: "An error occurred while creating the relationship",
         });
       }
     },
