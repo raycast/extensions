@@ -1,5 +1,6 @@
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
+  root: true,
   extends: [
     "@raycast/eslint-config",
     "plugin:@typescript-eslint/recommended",
@@ -7,6 +8,13 @@ module.exports = {
     "plugin:react-hooks/recommended"
   ],
   parser: "@typescript-eslint/parser",
+  parserOptions: {
+    ecmaVersion: 2020,
+    sourceType: "module",
+    ecmaFeatures: {
+      jsx: true
+    }
+  },
   plugins: ["@typescript-eslint", "react", "react-hooks"],
   rules: {
     "@typescript-eslint/explicit-function-return-type": "off",
