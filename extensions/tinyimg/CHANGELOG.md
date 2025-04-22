@@ -1,3 +1,6 @@
 # TinyIMG Changelog
 
-## [Initial Version] - 2025-04-02
+## [Initial Version] - {PR_MERGE_DATE}
+
+## [Bug fixes] - {PR_MERGE_DATE}
+- fix case-sensitive file suffixes
