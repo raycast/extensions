@@ -5,6 +5,7 @@ export interface RegexHistoryItem {
   pattern: string;
   flags: string[];
   timestamp: number;
+  isPinned: boolean;
 }
 
 export let selectedRegex: RegexHistoryItem | undefined;

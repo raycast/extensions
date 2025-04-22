@@ -75,7 +75,7 @@ export default function Command() {
       return;
     }
 
-    const newItem = { pattern, flags, timestamp: Date.now() };
+    const newItem = { pattern, flags, timestamp: Date.now(), isPinned: false };
     const filteredHistory = historyItems.filter(
       (item) => item.pattern !== pattern || item.flags.join("") !== flags.join("")
     );
