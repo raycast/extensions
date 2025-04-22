@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   ActionPanel,
   Action,
@@ -460,15 +459,6 @@ function processSensorsData(
   }
 
   return { sensors: sensorsData, missingSensors };
-}
-
-// Define an interface for the location data
-interface UserLocation {
-  latitude: number;
-  longitude: number;
-  city: string;
-  region: string;
-  country: string;
 }
 
 // Helper function to fetch user's location with 1-hour cache
