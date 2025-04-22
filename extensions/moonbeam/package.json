@@ -93,9 +93,11 @@
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
     "eslint": "8.55.0",
+    "path-type": "6.0.0",
     "prettier": "3.5.3",
     "typescript": "5.3.3"
   },
+  "eslintIgnore": [],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
