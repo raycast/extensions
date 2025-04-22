@@ -56,8 +56,14 @@ export default function History() {
     <List
       isLoading={isLoading}
       navigationTitle="Regex History"
-      actions={<Action title="Clear History" onAction={() => setItems([])} />}
+      actions={
+        <Action title="Clear History" shortcut={Keyboard.Shortcut.Common.RemoveAll} onAction={() => setItems([])} />
+      }
     >
+      {items?.length === 0 ? (
+        <List.EmptyView title="No history items" description="Start testing regex patterns to populate your history" />
+      ) : null}
+
       <List.Section title="Pinned">
         {items?.map((item, index) =>
           item.isPinned ? (
