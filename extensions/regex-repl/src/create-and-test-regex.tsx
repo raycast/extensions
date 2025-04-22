@@ -86,6 +86,10 @@ export default function Command() {
     }
 
     setHistoryItems(filteredHistory);
+    showToast({
+      title: "Saved to History",
+      style: Toast.Style.Success,
+    });
   };
 
   const validateThenShowDetails = async (values: Values) => {
