@@ -2,10 +2,6 @@ import { Action, ActionPanel, Form, getPreferenceValues, showToast, Toast } from
 import { useState } from "react";
 import { sendMessage } from "./api";
 
-interface Preferences {
-  apiKey?: string;
-}
-
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
   const preferences = getPreferenceValues<Preferences>();
