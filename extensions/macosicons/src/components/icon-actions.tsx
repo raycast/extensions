@@ -37,7 +37,7 @@ export function IconActions({
           }}
         />
       ) : (
-        <ActionPanel.Submenu title="Apply Icon To" icon={Icon.PlusTopRightSquare} isLoading={isApplicationsLoading}>
+        <ActionPanel.Submenu title="Apply Icon to" icon={Icon.PlusTopRightSquare} isLoading={isApplicationsLoading}>
           {(applications ?? []).map((app) => (
             <Action
               title={app.name}
