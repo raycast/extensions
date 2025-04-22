@@ -72,8 +72,6 @@ export default function Command() {
 
   if (cache.get(prefKey) !== points) {
     // if the points have changed, clear the cache
-    // cache.set(readKey, JSON.stringify([]));
-    // cache.set(seenKey, JSON.stringify([]));
     cache.clear();
   }
 
@@ -109,6 +107,18 @@ export default function Command() {
         <MenuItems error={error} stories={stories} setStories={setStories} readStories={readStories} points={points} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Mark All As Read"
+          icon={Icon.Checkmark}
+          onAction={() => {
+            stories.forEach(({ external_url }) => {
+              readStories.add(external_url);
+            });
+            cache.set(readKey, JSON.stringify(Array.from(readStories)));
+            // force update the icon
+            setStories((prev) => structuredClone(prev));
+          }}
+        />
         <MenuBarExtra.Item
           title="Open Preferences"
           onAction={openExtensionPreferences}
