@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-04-22
 
 - Add option to fetch all results, i.e. perform multiple API requests for each result page
 - Set maximum items for raindrop requests
