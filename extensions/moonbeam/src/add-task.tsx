@@ -111,7 +111,9 @@ export default function Command() {
           title: "Task created successfully",
         });
       } catch (error) {
-        showFailureToast(error, { title: "Failed to create task" });
+        showFailureToast(error instanceof Error ? error : new Error("Failed to create task"), {
+          title: "Failed to create task",
+        });
       }
     },
   });
