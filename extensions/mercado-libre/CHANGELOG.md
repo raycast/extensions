@@ -1,5 +1,9 @@
 # Mercado Libre Changelog
 
+## [Deprecation] - {PR_MERGE_DATE}
+
+- The extension has been deprecated as the API it relies on is no longer available.
+
 ## [Enhancements] - 2025-01-26
 
 - Added support for Ecuadorian marketplace.
