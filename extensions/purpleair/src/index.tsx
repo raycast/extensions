@@ -412,12 +412,16 @@ function processSensorsData(
     returnedSensorIds.add(sensorId);
 
     const name = fieldIndices.name !== undefined ? (sensorArray[fieldIndices.name] as string) : "Unknown";
-    const humidity = fieldIndices.humidity !== undefined ? (sensorArray[fieldIndices.humidity] as number) : 0;
-    
+
+    // Apply humidity adjustment (+4%) to correct offset
+    const rawHumidity = fieldIndices.humidity !== undefined ? (sensorArray[fieldIndices.humidity] as number) : 0;
+    const humidity = Math.max(0, rawHumidity + 4); // Add 4% but ensure it doesn't go below 0
+
     // Apply temperature adjustment (-8°F) to correct permanent offset
-    const rawTemperature = fieldIndices.temperature !== undefined ? (sensorArray[fieldIndices.temperature] as number) : 0;
+    const rawTemperature =
+      fieldIndices.temperature !== undefined ? (sensorArray[fieldIndices.temperature] as number) : 0;
     const temperature = rawTemperature - 8; // Subtract 8°F to adjust for permanent offset
-    
+
     const locationType =
       fieldIndices.location_type !== undefined ? (sensorArray[fieldIndices.location_type] as number) : undefined;
     const latitude = fieldIndices.latitude !== undefined ? (sensorArray[fieldIndices.latitude] as number) : undefined;

@@ -14,7 +14,8 @@
 - Improved navigation between sensor list and detail views
 - Enhanced AQI calculation logic
 - Updated dependencies to latest versions
-
+- Added corrections for Temperature and Humidity data
+  
 ### Code Quality
 - Removed unused interfaces and streamlined code structure
 - Added debug logging for troubleshooting API responses
