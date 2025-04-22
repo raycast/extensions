@@ -13,10 +13,6 @@ import {
 import { useEffect, useState } from "react";
 import { Channel, fetchChannels, sendMessage } from "./api";
 
-interface Preferences {
-  apiKey?: string;
-}
-
 function SendMessageForm({ channel }: { channel: Channel }) {
   const [isLoading, setIsLoading] = useState(false);
   const { pop } = useNavigation();
