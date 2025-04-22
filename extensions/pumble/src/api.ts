@@ -1,9 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-}
-
 const BASE_URL = "https://pumble-api-keys.addons.marketplace.cake.com";
 
 export interface User {
