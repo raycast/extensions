@@ -10,7 +10,7 @@ import {
   List,
   useNavigation,
 } from "@raycast/api";
-import { usePromise, useCachedPromise, withCache } from "@raycast/utils";
+import { usePromise, useCachedPromise, withCache, showFailureToast } from "@raycast/utils";
 import { useRef, useEffect } from "react";
 import fetch from "node-fetch";
 import { AQIReport, aqiFromPM } from "./purpleAir";
@@ -469,6 +469,7 @@ const getUserLocation = withCache(
     const response = await fetch("https://ipwho.is/");
     if (!response.ok) {
       console.debug("Location API Error:", response.status, response.statusText);
+      showFailureToast("Failed to fetch location data");
       throw new Error("Failed to fetch location data");
     }
 
