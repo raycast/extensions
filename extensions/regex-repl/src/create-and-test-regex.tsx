@@ -46,10 +46,12 @@ export default function Command() {
   const [error, setError] = useState(false);
   const toastRef = useRef<Toast>(null);
 
+  const firstMount = useRef(true);
   useEffect(() => {
-    if (historyItems && historyItems.length > 0) {
+    if (historyItems && historyItems.length > 0 && firstMount.current) {
       setPattern(historyItems[0].pattern);
       setFlags(historyItems[0].flags);
+      firstMount.current = false;
     }
   }, [historyItems]);
 
