@@ -8,6 +8,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useForm } from "@raycast/utils";
+import * as chrono from "chrono-node";
 
 interface Preferences {
   apiToken: string;
@@ -23,6 +24,31 @@ const generateSourceId = (): string => {
   const timestamp = Date.now().toString(36);
   const random = Math.random().toString(36).substring(2, 8);
   return `${timestamp}-${random}`;
+};
+
+const parseDateFromText = (
+  text: string,
+): { cleanText: string; dueDate?: string } => {
+  const parsedDate = chrono.parseDate(text);
+  if (!parsedDate) {
+    return { cleanText: text };
+  }
+
+  // Extract the date part from the text
+  const dateMatch = text.match(/\b(on|by|due|before|after)\s+([^,]+)/i);
+  if (dateMatch) {
+    const dateText = dateMatch[0];
+    const cleanText = text.replace(dateText, "").trim();
+    return {
+      cleanText,
+      dueDate: parsedDate.toISOString().split("T")[0],
+    };
+  }
+
+  return {
+    cleanText: text,
+    dueDate: parsedDate.toISOString().split("T")[0],
+  };
 };
 
 export default function Command() {
@@ -60,12 +86,15 @@ export default function Command() {
       }
 
       try {
+        const { cleanText, dueDate } = parseDateFromText(values.name);
+
         const requestBody = {
-          name: values.name,
+          name: cleanText,
           description: values.description || null,
           area_id: preferences.areaId,
           source: "raycast",
           source_id: generateSourceId(),
+          ...(dueDate && { due_date: dueDate }),
         };
 
         const response = await fetch("https://api.lunatask.app/v1/tasks", {
@@ -110,7 +139,7 @@ export default function Command() {
     >
       <Form.TextField
         title="Task Name"
-        placeholder="Enter task name"
+        placeholder="Enter task name (e.g., 'Call mom tomorrow' or 'Pay bills on 15th')"
         {...itemProps.name}
       />
       <Form.TextArea

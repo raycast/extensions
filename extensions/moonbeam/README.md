@@ -1,64 +1,51 @@
 # Moonbeam - Lunatask Quick Add
 
-A Raycast extension for quickly adding tasks, notes, and relationships to Lunatask.
+A Raycast extension for quickly adding tasks, notes, relationships, and habits to Lunatask.
 
-## Setup
+## Features
+- **Quick Tasks**: Add tasks to your default area
+- **Floating Notes**: Create notes in your default notebook
+- **Relationship Management**: Add and categorize contacts
+- **Habit Tracking**: Track and complete habits on the go
 
-1. Get your Lunatask API token:
-   - Go to [Lunatask Settings](https://app.lunatask.app/settings)
-   - Navigate to the "API" section
-   - Generate a new API token
+## Quick Start
+1. Get your Lunatask Access Token:
+   - Go to "Settings" > "Access tokens"
+   - Create a new Access Token or copy an existing one
 
 2. Get your Area ID:
-   - Open Lunatask
-   - Go to the area where you want tasks to be created
-   - Copy the ID from the URL (it's the last part of the URL)
+   - Right-click on your desired area
+   - Select "Area Settings"
+   - Click "Copy Area ID" at the bottom left
 
 3. Get your Notebook ID:
-   - Open Lunatask
-   - Go to the notebook where you want notes to be created
-   - Copy the ID from the URL (it's the last part of the URL)
+   - Click the cog icon next to your notebook
+   - Click "Copy Notebook ID"
 
-4. Configure the extension:
+4. Configure Moonbeam:
    - Open Raycast Preferences
    - Go to Extensions → Moonbeam
-   - Enter your API token, Area ID, and Notebook ID (all required for the extension to work)
+   - Enter your Access Token, Area ID, and Notebook ID
+
+## About
+Moonbeam is designed as a lightweight companion to Lunatask, perfect for quick capture. While Lunatask remains your primary task and note management tool, Moonbeam helps you quickly add items on the fly.
+
+- Tasks are added to your configured default area
+- Notes are created in your specified default notebook
+- Relationships can be added with strength levels and contact details
+- Habits can be tracked and completed with a single click
 
 ## Commands
+- **Add Task**: Quick task entry with natural language support
+- **Add Note**: Create notes with markdown support
+- **Add Relationship**: Add contacts with relationship strength and details
+- **Manage Habits**: Track and complete your daily habits
 
-### Add Task
-Quickly add a task to Lunatask with natural language date parsing.
-
-Examples:
-- "Clear inbox tomorrow"
-- "Call mom on Friday"
-- "Pay bills on 15th of April"
-
-### Add Note
-Create a new note in your configured notebook.
-
-Features:
-- Markdown support
-- Automatic date setting
-- Title and content fields
-
-### Add Relationship
-Add a new person to your relationships.
-
-Features:
-- Set relationship strength
-- Add contact information
-- Set birthday
-
-### Manage Habits
-Track and manage your habits.
-
-Features:
-- View all configured habits
-- Mark habits as completed
-- Add new habits
-- Remove habits
+## Requirements
+- Lunatask account
+- Access Token from Lunatask
+- Default area ID for tasks
+- Default notebook ID for notes
 
 ## Support
-
-If you encounter any issues or have suggestions, please [open an issue](https://github.com/raycast/extensions/issues) on GitHub.
+Found an issue? Have a suggestion? [Open an issue](https://github.com/raycast/extensions/issues) on GitHub.
