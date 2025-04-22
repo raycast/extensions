@@ -114,7 +114,7 @@ function SensorList({
   const abortable = useRef<AbortController | null>(null);
   const {
     isLoading,
-    data: sensors,
+    data: sensorsData,
     error,
   } = usePromise(
     async (url: string) => {
@@ -129,11 +129,15 @@ function SensorList({
 
       // Parse response and process sensor data
       const responseJson = (await response.json()) as PurpleAirResponse;
-      return processSensorsData(responseJson);
+      console.debug("PurpleAir response:", JSON.stringify(responseJson, null, 2));
+      return processSensorsData(responseJson, sensorIndices);
     },
     [url],
     { abortable }
   );
+
+  const sensors = sensorsData?.sensors;
+  const missingSensors = sensorsData?.missingSensors;
 
   // Get user location data using our cached hook
   const { data: locationData, isLoading: isLocationLoading } = useCachedPromise(
@@ -218,6 +222,33 @@ function SensorList({
       items.push(
         ...sensorIndices.map((sensorId) => (
           <List.Item key={sensorId} title={`Sensor ${sensorId}`} subtitle="Error loading" icon={Icon.ExclamationMark} />
+        ))
+      );
+    }
+
+    // Add missing sensors with more informative error messages
+    if (missingSensors && missingSensors.length > 0) {
+      items.push(
+        ...missingSensors.map((missingSensor) => (
+          <List.Item
+            key={`missing-${missingSensor.sensorId}`}
+            title={`Sensor ${missingSensor.sensorId}`}
+            subtitle="Private Sensor needs a specific Read Key"
+            icon={{ source: Icon.Lock, tintColor: "red" }}
+            accessories={[
+              { text: "Missing Data", icon: Icon.XmarkCircle },
+              { tag: { value: "Add Read Key", color: "red" } },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={() => openCommandPreferences()} />
+                <Action.OpenInBrowser
+                  title="Learn About Read Keys"
+                  url="https://community.purpleair.com/t/making-api-calls-with-the-purpleair-api/180"
+                />
+              </ActionPanel>
+            }
+          />
         ))
       );
     }
@@ -323,10 +354,24 @@ interface PurpleAirResponse {
   // Add other fields if needed, like api_version, time_stamp, etc.
 }
 
+interface MissingSensorError {
+  sensorId: string;
+  isPrivate: boolean;
+}
+
 // Helper functions for processing sensor data
-function processSensorsData(response: PurpleAirResponse): SensorData[] {
+function processSensorsData(
+  response: PurpleAirResponse,
+  requestedSensorIds: string[]
+): {
+  sensors: SensorData[];
+  missingSensors: MissingSensorError[];
+} {
   if (!response || !response.fields || !response.data) {
-    return [];
+    return {
+      sensors: [],
+      missingSensors: requestedSensorIds.map((id) => ({ sensorId: id, isPrivate: true })),
+    };
   }
 
   // Get indices of fields we need
@@ -338,8 +383,12 @@ function processSensorsData(response: PurpleAirResponse): SensorData[] {
 
   // Process each sensor
   const sensorsData: SensorData[] = [];
+  const returnedSensorIds = new Set<string>();
+
   response.data.forEach((sensorArray: (string | number)[]) => {
     const sensorId = sensorArray[0].toString();
+    returnedSensorIds.add(sensorId);
+
     const name = fieldIndices.name !== undefined ? (sensorArray[fieldIndices.name] as string) : "Unknown";
     const humidity = fieldIndices.humidity !== undefined ? (sensorArray[fieldIndices.humidity] as number) : 0;
     const temperature = fieldIndices.temperature !== undefined ? (sensorArray[fieldIndices.temperature] as number) : 0;
@@ -398,7 +447,19 @@ function processSensorsData(response: PurpleAirResponse): SensorData[] {
     });
   });
 
-  return sensorsData;
+  // Identify missing sensors - likely private ones without a read key
+  const missingSensors: MissingSensorError[] = [];
+
+  for (const requestedId of requestedSensorIds) {
+    if (!returnedSensorIds.has(requestedId)) {
+      missingSensors.push({
+        sensorId: requestedId,
+        isPrivate: true, // Assume it's private if it's missing
+      });
+    }
+  }
+
+  return { sensors: sensorsData, missingSensors };
 }
 
 // Define an interface for the location data
@@ -480,7 +541,9 @@ const fetchNearestSensor = withCache(
     const responseJson = await response.json();
     console.debug("PurpleAir nearest sensor response:", JSON.stringify(responseJson, null, 2));
 
-    const sensors = processSensorsData(responseJson as PurpleAirResponse);
+    // For the nearest sensor, we don't need to track missing sensors
+    // since we're just looking for any available sensor in the area
+    const { sensors } = processSensorsData(responseJson as PurpleAirResponse, []);
     console.debug(`Found ${sensors.length} sensors in the area`);
 
     // Add distance to each sensor
