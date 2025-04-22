@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+
 /** @module NamespaceFetcher */
-import UrlProcessor from "./UrlProcessor.js";
+import ShortcutVerifier from "./ShortcutVerifier";
+import UrlProcessor from "./UrlProcessor";
 import jsyaml from "js-yaml";
 
 export default class NamespaceFetcher {
@@ -189,7 +193,7 @@ export default class NamespaceFetcher {
       if (!namespaceInfo.url) {
         continue;
       }
-      const promise = this.env.fetch(namespaceInfo.url, {
+      const promise = fetch(namespaceInfo.url, {
         cache: this.env.reload ? "reload" : "default",
       });
       promises.push(promise);
@@ -226,7 +230,7 @@ export default class NamespaceFetcher {
   processShortcuts(shortcuts, namespaceName) {
     shortcuts = this.checkKeySyntax(shortcuts, namespaceName);
     for (const key in shortcuts) {
-      shortcuts[key] = this.convertToObject(shortcuts[key]);
+      shortcuts[key] = NamespaceFetcher.convertToObject(shortcuts[key]);
       if (shortcuts[key].include) {
         shortcuts[key].include = this.convertIncludeToObject(shortcuts[key].include);
       }
@@ -295,7 +299,7 @@ export default class NamespaceFetcher {
    * @param {string|Object} shortcut - The shortcut to convert
    * @returns {Object} The converted shortcut object
    */
-  convertToObject(shortcut) {
+  static convertToObject(shortcut) {
     if (typeof shortcut === "string") {
       const url = shortcut;
       shortcut = {
@@ -372,8 +376,8 @@ export default class NamespaceFetcher {
         country: this.env.country,
       });
       namespaceName = include.namespace || namespaceName;
-      if (!namespaceInfos[namespaceName]) {
-        this.env.logger.warning(`Namespace "${namespaceName}" does not exist.`);
+      if (!namespaceInfos[namespaceName] || !namespaceInfos[namespaceName].shortcuts) {
+        this.env.logger.warning(`Namespace "${namespaceName}" does not exist or has no shortcuts.`);
         continue;
       }
       let shortcutToInclude = namespaceInfos[namespaceName].shortcuts[key];
@@ -450,7 +454,7 @@ export default class NamespaceFetcher {
   addInfoAll(namespaceInfos) {
     for (const namespaceInfo of Object.values(namespaceInfos)) {
       for (const key in namespaceInfo.shortcuts) {
-        namespaceInfo.shortcuts[key] = this.addInfo(namespaceInfo.shortcuts[key], key, namespaceInfo.name);
+        namespaceInfo.shortcuts[key] = NamespaceFetcher.addInfo(namespaceInfo.shortcuts[key], key, namespaceInfo.name);
       }
     }
     return namespaceInfos;
@@ -465,8 +469,8 @@ export default class NamespaceFetcher {
    *
    * @return {object} shortcut - Shortcut with info.
    */
-  addInfo(shortcut, key, namespaceName) {
-    shortcut = this.convertToObject(shortcut);
+  static addInfo(shortcut, key, namespaceName) {
+    shortcut = NamespaceFetcher.convertToObject(shortcut);
     shortcut.key = key;
     [shortcut.keyword, shortcut.argumentCount] = key.split(" ");
     shortcut.argumentCount = parseInt(shortcut.argumentCount);
@@ -505,13 +509,13 @@ export default class NamespaceFetcher {
   }
 
   verify(shortcut) {
-    if (!shortcut.url && !shortcut.deprecated) {
-      this.env.logger.error(`Missing url in ${shortcut.namespace}.${shortcut.key}.`);
+    const error = ShortcutVerifier.checkIfHasUrl(shortcut);
+    if (error) {
+      this.env.logger.error(error);
     }
-    if (shortcut.url && shortcut.argumentCount != Object.keys(shortcut.arguments).length) {
-      this.env.logger.warning(
-        `Mismatch in argumentCount of key and arguments.length of url in "${shortcut.namespace}.${shortcut.key}".`,
-      );
+    const warning = ShortcutVerifier.checkIfArgCountMatches(shortcut);
+    if (warning) {
+      this.env.logger.warning(warning);
     }
   }
 

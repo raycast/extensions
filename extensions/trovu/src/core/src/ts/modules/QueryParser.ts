@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+
 /** @module QueryParser */
-import Helper from "./Helper.js";
 import countriesList from "countries-list";
+import splitLimit from "split-limit";
 
 /** Parse a query. */
 
@@ -43,7 +46,7 @@ export default class QueryParser {
   static getKeywordAndArgumentString(query) {
     let keyword, argumentString;
 
-    [keyword, argumentString] = Helper.splitKeepRemainder(query, " ", 2);
+    [keyword, argumentString] = splitLimit(query, " ", 2);
 
     if (typeof keyword === "undefined") {
       keyword = "";
@@ -88,11 +91,11 @@ export default class QueryParser {
     //   but don't split up country namespace names.
     let extraNamespaceName;
     if (keyword.match(/.\./)) {
-      [extraNamespaceName, keyword] = Helper.splitKeepRemainder(keyword, ".", 2);
+      [extraNamespaceName, keyword] = splitLimit(keyword, ".", 2);
       // If extraNamespace started with a dot, it will be empty
       // so let's split it again, and add the dot.
-      if (extraNamespaceName == "") {
-        [extraNamespaceName, keyword] = Helper.splitKeepRemainder(keyword, ".", 2);
+      if (extraNamespaceName === "") {
+        [extraNamespaceName, keyword] = splitLimit(keyword, ".", 2);
         extraNamespaceName = "." + extraNamespaceName;
       }
     }
