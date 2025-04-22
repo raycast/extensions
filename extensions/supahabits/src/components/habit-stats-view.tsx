@@ -48,39 +48,43 @@ export default function HabitStatsView({ habit }: HabitStatsViewProps) {
     });
 
     // Format each week
-    return weeks.map((week) => {
-      const weekStart = formatShortDate(week[0].date);
-      const weekEnd = formatShortDate(week[week.length - 1].date);
-      
-      // Create a row of emojis for the days
-      const dayIcons = week.map(day => day.completed ? "🟢" : "⚪️").join(" ");
-      
-      // Create a row of short dates
-      const dayDates = week.map(day => {
-        const shortDate = formatShortDate(day.date).split("/")[1]; // Just get the day number
-        return shortDate.padStart(2, " ");
-      }).join(" ");
-      
-      return `### ${weekStart} - ${weekEnd}\n\n${dayIcons}\n${dayDates}`;
-    }).join("\n\n");
+    return weeks
+      .map((week) => {
+        const weekStart = formatShortDate(week[0].date);
+        const weekEnd = formatShortDate(week[week.length - 1].date);
+
+        // Create a row of emojis for the days
+        const dayIcons = week.map((day) => (day.completed ? "🟢" : "⚪️")).join(" ");
+
+        // Create a row of short dates
+        const dayDates = week
+          .map((day) => {
+            const shortDate = formatShortDate(day.date).split("/")[1]; // Just get the day number
+            return shortDate.padStart(2, " ");
+          })
+          .join(" ");
+
+        return `### ${weekStart} - ${weekEnd}\n\n${dayIcons}\n${dayDates}`;
+      })
+      .join("\n\n");
   };
 
   const renderTrackHistory = (tracks: HabitStats["tracks"]) => {
     if (!tracks || tracks.length === 0) return "No tracking history";
-    
+
     // Create table header
     let tableContent = "| Date | Source | Created At |\n";
     tableContent += "|------|--------|------------|\n";
-    
+
     // Add table rows for the 10 most recent tracks
     tracks.slice(0, 10).forEach((track) => {
       const source = track.source || "-";
       const formattedDate = formatDate(track.completed_date);
       const createdAt = new Date(track.created_at).toLocaleString();
-      
+
       tableContent += `| ${formattedDate} | ${source} | ${createdAt} |\n`;
     });
-    
+
     return tableContent;
   };
 
