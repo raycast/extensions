@@ -1,6 +1,6 @@
 # Zeabur Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-04-22
 
 - Added the search templates command to search templates in the [Zeabur Templates](https://zeabur.com/templates).
 
