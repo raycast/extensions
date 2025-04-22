@@ -87,12 +87,14 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.11",
-    "@types/node": "^18.8.3",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
+    "@types/node": "18.8.3",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0",
+    "@typescript-eslint/eslint-plugin": "6.21.0",
+    "@typescript-eslint/parser": "6.21.0",
     "eslint": "8.55.0",
     "prettier": "3.5.3",
-    "typescript": "^5.3.3"
+    "typescript": "5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

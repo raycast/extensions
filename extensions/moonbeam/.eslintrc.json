@@ -1,3 +1,3 @@
 {
-  "extends": "@raycast/eslint-config"
+  "extends": ["@raycast/eslint-config", "plugin:@typescript-eslint/recommended"]
 } 
