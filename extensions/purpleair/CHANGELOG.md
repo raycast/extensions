@@ -7,6 +7,7 @@
 - Added support for private sensors with read keys
 - Added feature to show the nearest PurpleAir sensor based on user's location
 - Added preference toggle to enable/disable the nearest sensor feature
+- Added preference for Celsius/Fahrenheit temperature display
 
 ### Improvements
 - Streamlined sensor data handling for better performance

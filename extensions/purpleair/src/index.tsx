@@ -20,6 +20,7 @@ interface Preferences {
   api_key: string;
   read_keys: string;
   show_nearest: boolean;
+  use_celsius: boolean;
 }
 
 interface SensorData {
@@ -45,6 +46,20 @@ interface SensorData {
   distance?: number; // Distance from user's location in km (for nearest sensor)
   latitude?: number;
   longitude?: number;
+}
+
+// Utility function to convert Fahrenheit to Celsius
+function fahrenheitToCelsius(fahrenheit: number): number {
+  return (fahrenheit - 32) * (5 / 9);
+}
+
+// Utility function to format temperature based on user preference
+function formatTemperature(temperature: number, useCelsius: boolean): string {
+  if (useCelsius) {
+    const celsius = fahrenheitToCelsius(temperature);
+    return `${celsius.toFixed(1)}°C`;
+  }
+  return `${temperature.toFixed(1)}°F`;
 }
 
 export default function Command() {
@@ -285,6 +300,8 @@ function SensorListItem({ sensorData, onSelect }: { sensorData: SensorData; onSe
 
   const locationInfo = getLocationTypeIcon();
 
+  const preferences = getPreferenceValues<Preferences>();
+
   return (
     <List.Item
       title={sensorData.name}
@@ -292,7 +309,7 @@ function SensorListItem({ sensorData, onSelect }: { sensorData: SensorData; onSe
       icon={getAQIIcon(sensorData.currentAQI.Description)}
       accessories={[
         ...(locationInfo.text ? [{ text: locationInfo.text, icon: locationInfo.icon }] : []),
-        { text: `Temp: ${sensorData.temperature}°` },
+        { text: `Temp: ${formatTemperature(sensorData.temperature, preferences.use_celsius)}` },
         { text: `Humidity: ${sensorData.humidity}%` },
       ]}
       actions={
@@ -314,6 +331,8 @@ function SensorDetail({ sensorData }: { sensorData: SensorData }) {
     return "Unknown";
   };
 
+  const preferences = getPreferenceValues<Preferences>();
+
   return (
     <Detail
       isLoading={false}
@@ -325,7 +344,10 @@ function SensorDetail({ sensorData }: { sensorData: SensorData }) {
           <Detail.Metadata.Label title="AQI" text={sensorData.currentAQI.Number.toString()} />
           <Detail.Metadata.Label title="Description" text={sensorData.currentAQI.Description} />
           <Detail.Metadata.Label title="Location Type" text={getLocationType()} />
-          <Detail.Metadata.Label title="Temperature" text={sensorData.temperature.toString()} />
+          <Detail.Metadata.Label
+            title="Temperature"
+            text={formatTemperature(sensorData.temperature, preferences.use_celsius)}
+          />
           <Detail.Metadata.Label title="Humidity" text={sensorData.humidity.toString()} />
           <Detail.Metadata.Label title="AQI - 10 Minutes" text={sensorData.aqi10Minutes.Number.toString()} />
           <Detail.Metadata.Label title="AQI - 30 Minutes" text={sensorData.aqi30Minutes.Number.toString()} />

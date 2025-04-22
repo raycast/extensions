@@ -49,6 +49,15 @@
           "type": "password",
           "required": false,
           "label": "Read Keys"
+        },
+        {
+          "name": "use_celsius",
+          "title": "Use Celsius for Temperature",
+          "description": "Display temperature in Celsius instead of Fahrenheit",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Use Celsius"
         }
       ]
     }
