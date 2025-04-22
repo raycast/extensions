@@ -2,10 +2,6 @@ import { Action, ActionPanel, Detail, getPreferenceValues, Icon, List, showToast
 import { useEffect, useState } from "react";
 import { fetchUsers, User } from "./api";
 
-interface Preferences {
-  apiKey?: string;
-}
-
 export default function Command() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
