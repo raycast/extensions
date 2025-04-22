@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Keyboard, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { HISTORY_KEY, RegexHistoryItem, setSelectedRegex } from "../utils/history";
 
@@ -80,7 +80,22 @@ export default function History() {
                       pop();
                     }}
                   />
-                  <Action title="Unpin" onAction={() => unpinHistoryItem(index)} />
+                  <Action
+                    title="Copy to Clipboard"
+                    shortcut={Keyboard.Shortcut.Common.Copy}
+                    onAction={() => {
+                      Clipboard.copy(`/${item.pattern}/${item.flags.join("")}`);
+                      showToast({
+                        title: "Copied to Clipboard",
+                        style: Toast.Style.Success,
+                      });
+                    }}
+                  />
+                  <Action
+                    title="Unpin"
+                    shortcut={Keyboard.Shortcut.Common.Pin}
+                    onAction={() => unpinHistoryItem(index)}
+                  />
                 </ActionPanel>
               }
             />
@@ -108,6 +123,17 @@ export default function History() {
                     title="Delete"
                     shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => deleteHistoryItem(index)}
+                  />
+                  <Action
+                    title="Copy to Clipboard"
+                    shortcut={Keyboard.Shortcut.Common.Copy}
+                    onAction={() => {
+                      Clipboard.copy(`/${item.pattern}/${item.flags.join("")}`);
+                      showToast({
+                        title: "Copied to Clipboard",
+                        style: Toast.Style.Success,
+                      });
+                    }}
                   />
                   <Action title="Pin" shortcut={Keyboard.Shortcut.Common.Pin} onAction={() => pinHistoryItem(index)} />
                 </ActionPanel>
