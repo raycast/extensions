@@ -70,7 +70,7 @@ export default function Command() {
   }, [pattern, flags, text]);
 
   const addToHistory = async (pattern: string, flags: string[]) => {
-    if (isHistoryLoading || !historyItems) {
+    if (isHistoryLoading || historyItems === undefined) {
       console.log("History is loading or not loaded");
       return;
     }
