@@ -117,8 +117,9 @@ function SensorList({
     error,
   } = usePromise(
     async (url: string) => {
+      abortable.current = new AbortController();
       const response = await fetch(url, {
-        signal: abortable.current?.signal,
+        signal: abortable.current.signal,
         headers: { "X-API-Key": apiKey },
       });
 
