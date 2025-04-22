@@ -1,6 +1,6 @@
 # Model Context Protocol Changelog
 
-## [Fix instruction] - 2025-04-12
+## [Fix instruction] - {PR_MERGE_DATE}
 
 * Improve instructions and evals examples
 
