@@ -29,6 +29,13 @@ interface OpdsEntry {
   content: string;
 }
 
+interface OpdsFeed {
+  feed: {
+    entry?: OpdsEntry | OpdsEntry[];
+    link: OpdsLink[];
+  };
+}
+
 export const baseSiteUrl = "https://flibusta.site";
 const defaultHeaders = {
   "User-Agent":
@@ -44,8 +51,8 @@ const parser = new xml2js.Parser({
 function parseOpdsBook(entry: OpdsEntry): OpdsBook {
   const downloadLinks: OpdsBook["downloadLinks"] = {};
 
-  // Parse download links
   const links = Array.isArray(entry.link) ? entry.link : [entry.link];
+
   if (links) {
     links.forEach((link: OpdsLink) => {
       if (link.rel === "http://opds-spec.org/acquisition/open-access") {
@@ -57,7 +64,6 @@ function parseOpdsBook(entry: OpdsEntry): OpdsBook {
     });
   }
 
-  // Parse cover image
   const coverLink = Array.isArray(entry.link)
     ? entry.link.find((link: OpdsLink) => link.rel === "http://opds-spec.org/image")
     : null;
@@ -86,22 +92,50 @@ function parseOpdsBook(entry: OpdsEntry): OpdsBook {
   };
 }
 
-async function fetchOpdsXml(url: string): Promise<string> {
-  const response = await axios.get(url, { headers: defaultHeaders });
-  return response.data;
+async function fetchOpdsXml(url: string, signal?: AbortSignal): Promise<string> {
+  try {
+    const response = await axios.get(url, {
+      headers: defaultHeaders,
+      signal: signal,
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isCancel(error)) {
+      throw new Error("Request was cancelled");
+    }
+
+    if (axios.isAxiosError(error)) {
+      throw new Error(`Failed to fetch OPDS data: ${error.message}`);
+    }
+
+    throw error;
+  }
 }
 
-export async function searchBooks(query: string): Promise<OpdsBook[]> {
-  if (query.length === 0) {
+export async function searchBooks(query: string, signal?: AbortSignal): Promise<OpdsBook[]> {
+  if (!query || query.length === 0) {
     return [];
   }
 
-  const url = `${baseSiteUrl}/opds/search?searchType=books&searchTerm=${encodeURIComponent(query)}`;
-  const xml = await fetchOpdsXml(url);
-  const result = await parser.parseStringPromise(xml);
+  try {
+    const url = `${baseSiteUrl}/opds/search?searchType=books&searchTerm=${encodeURIComponent(query)}`;
+    const xml = await fetchOpdsXml(url, signal);
+    const result = (await parser.parseStringPromise(xml)) as OpdsFeed;
 
-  const feed = result.feed;
-  const entries = Array.isArray(feed.entry) ? feed.entry : [feed.entry];
+    const feed = result.feed;
 
-  return entries.map(parseOpdsBook);
+    if (!feed || !feed.entry) {
+      return [];
+    }
+
+    const entries = Array.isArray(feed.entry) ? feed.entry : [feed.entry];
+    return entries.map(parseOpdsBook);
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "Request was cancelled") {
+        throw error;
+      }
+    }
+    throw new Error(`Failed to search books: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
