@@ -17,7 +17,17 @@
       "name": "create-and-test-regex",
       "title": "Create And Test RegEx",
       "description": "Create and test a Regular Expression",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "use-last-used-pattern",
+          "label": "Use last used pattern",
+          "description": "Use the last used pattern as the default pattern",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {

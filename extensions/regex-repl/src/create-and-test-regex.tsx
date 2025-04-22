@@ -4,8 +4,10 @@ import {
   Clipboard,
   Detail,
   Form,
+  getPreferenceValues,
   Keyboard,
   List,
+  openCommandPreferences,
   showToast,
   Toast,
   useNavigation,
@@ -32,6 +34,7 @@ const flagOptions = [
 ];
 
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences.CreateAndTestRegex>();
   const { push } = useNavigation();
   const {
     value: historyItems,
@@ -48,6 +51,10 @@ export default function Command() {
 
   const firstMount = useRef(true);
   useEffect(() => {
+    if (!preferences["use-last-used-pattern"]) {
+      return;
+    }
+
     if (historyItems && historyItems.length > 0 && firstMount.current) {
       setPattern(historyItems[0].pattern);
       setFlags(historyItems[0].flags);
@@ -123,6 +130,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.Push target={<QuickReference />} title="Show Quick Reference" />
+          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
           <Action.Push
             target={<History />}
             title="Show History"
