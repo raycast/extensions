@@ -1,6 +1,6 @@
 # Mercado Libre Changelog
 
-## [Deprecation] - {PR_MERGE_DATE}
+## [Deprecation] - 2025-04-22
 
 - The extension has been deprecated as the API it relies on is no longer available.
 
