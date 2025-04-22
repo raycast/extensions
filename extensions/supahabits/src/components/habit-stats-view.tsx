@@ -19,7 +19,7 @@ export default function HabitStatsView({ habit }: HabitStatsViewProps) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${secret}`,
       },
-    }
+    },
   );
 
   const formatDate = (dateString: string) => {
@@ -29,16 +29,16 @@ export default function HabitStatsView({ habit }: HabitStatsViewProps) {
 
   const formatShortDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' });
+    return date.toLocaleDateString(undefined, { month: "numeric", day: "numeric" });
   };
 
   const renderStreakTimeline = (streakData: { date: string; completed: boolean }[]) => {
     if (!streakData || streakData.length === 0) return "No streak data available";
-    
+
     // Group days by week for better visualization
     const weeks: { date: string; completed: boolean }[][] = [];
     let currentWeek: { date: string; completed: boolean }[] = [];
-    
+
     streakData.forEach((day, index) => {
       currentWeek.push(day);
       if (currentWeek.length === 7 || index === streakData.length - 1) {
@@ -46,7 +46,7 @@ export default function HabitStatsView({ habit }: HabitStatsViewProps) {
         currentWeek = [];
       }
     });
-    
+
     // Format each week
     return weeks.map((week) => {
       const weekStart = formatShortDate(week[0].date);
@@ -57,8 +57,8 @@ export default function HabitStatsView({ habit }: HabitStatsViewProps) {
       
       // Create a row of short dates
       const dayDates = week.map(day => {
-        const shortDate = formatShortDate(day.date).split('/')[1]; // Just get the day number
-        return shortDate.padStart(2, ' ');
+        const shortDate = formatShortDate(day.date).split("/")[1]; // Just get the day number
+        return shortDate.padStart(2, " ");
       }).join(" ");
       
       return `### ${weekStart} - ${weekEnd}\n\n${dayIcons}\n${dayDates}`;
@@ -73,7 +73,7 @@ export default function HabitStatsView({ habit }: HabitStatsViewProps) {
     tableContent += "|------|--------|------------|\n";
     
     // Add table rows for the 10 most recent tracks
-    tracks.slice(0, 10).forEach(track => {
+    tracks.slice(0, 10).forEach((track) => {
       const source = track.source || "-";
       const formattedDate = formatDate(track.completed_date);
       const createdAt = new Date(track.created_at).toLocaleString();
@@ -94,7 +94,7 @@ export default function HabitStatsView({ habit }: HabitStatsViewProps) {
     }
 
     const { habit: habitData, stats } = habitStats;
-    
+
     return `# ${habitData.name} Stats
 
 ## Summary
