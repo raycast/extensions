@@ -14,6 +14,7 @@
     {
       "name": "get-workflows",
       "title": "Get Active Shortcuts Workflows",
+      "subtitle": "BarCuts Companion",
       "description": "Returns the workflows you've tagged as relevant to the currently active app, or as always available",
       "mode": "view"
     }

@@ -23,7 +23,7 @@ export default function Command() {
   if (!appPath) {
     showToast({
       style: Toast.Style.Failure,
-      title: "Could not find BarCuts in /Applications, exiting!",
+      title: "Could not find BarCuts on your Mac, exiting!",
     });
 
     return (
@@ -84,15 +84,11 @@ export default function Command() {
               <Action
                 icon={Icon.Play}
                 title="Run Workflow"
-                onAction={() => {
-                  runAppleScript(`
-                    tell application "Shortcuts Events"
-                      ignoring application responses
-                        run shortcut id "${wf.workflowID}"
-                      end ignoring
-                    end tell
-                  `);
-                  closeMainWindow({ popToRootType: PopToRootType.Immediate });
+                onAction={async () => {
+                  await runWorkflow(wf.workflowID);
+                  await closeMainWindow({
+                    popToRootType: PopToRootType.Immediate,
+                  });
                 }}
               />
               <Action.OpenInBrowser
@@ -107,4 +103,21 @@ export default function Command() {
       ))}
     </List>
   );
+}
+
+async function runWorkflow(workflowID: string) {
+  try {
+    await runAppleScript(`
+      tell application "Shortcuts Events"
+        ignoring application responses
+          run shortcut id "${workflowID}"
+        end ignoring
+      end tell
+    `);
+  } catch (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: `Failed to run workflow: ${error}`,
+    });
+  }
 }
