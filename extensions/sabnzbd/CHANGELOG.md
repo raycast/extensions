@@ -1,6 +1,6 @@
 # SABnzbd Changelog
 
-## [Add README] - {PR_MERGE_DATE}
+## [Add README] - 2025-04-23
 
 - Add a README file with instructions on how to get started
 
