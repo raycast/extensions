@@ -11,7 +11,7 @@ import {
   Icon,
   getSelectedText,
 } from "@raycast/api";
-import { useLocalStorage, useCachedState } from "@raycast/utils";
+import { useLocalStorage, useCachedState, showFailureToast } from "@raycast/utils";
 
 import { useEffect, useState, useCallback } from "react";
 import { translate, TranslatedText, getTranslatedSentence } from "./shared-packages/translate";
@@ -150,7 +150,6 @@ function ManageLangSets() {
             lS.label === manageLangSetsLabel ? (
               <ActionPanel>
                 <Action.Push icon={Icon.Plus} title="Add New Language Set" target={<AddLangSet />} />
-                <Action.Push icon={Icon.Plus} title="Add New Language Set" target={<AddLangSet />} />
               </ActionPanel>
             ) : (
               <ActionPanel>
@@ -224,10 +223,12 @@ export default function Command() {
   useEffect(() => {
     void (async () => {
       try {
-        const text = await getSelectedText();
-        if (autoPasteSelectedText) setSearchText(text || "");
+        if (autoPasteSelectedText) {
+          const text = await getSelectedText();
+          setSearchText(text || "");
+        }
       } catch (err) {
-        console.error("error getting selected text", err);
+        showFailureToast(err, { title: "Could not get selected text" });
         if (autoPasteSelectedText) setSearchText("");
       }
     })();
@@ -243,7 +244,7 @@ export default function Command() {
         const res = await translate(selected?.sourceLangKey, selected?.targetLangKey, text);
         setTranslatedText(res);
       } catch (err) {
-        showToast({ title: "Error translating text", style: Toast.Style.Failure });
+        showFailureToast(err, { title: "Error translating text" });
         console.error("error translating", err);
       } finally {
         setIsLoading(false);
@@ -339,16 +340,6 @@ export default function Command() {
         <ActionPanel>
           {!isAuthenticated ? (
             <>
-              <Action.Push
-                icon={Icon.ArrowRightCircleFilled}
-                title={`Connect Google Profile`}
-                target={<AuthorizationComponent authProvider="google" />}
-              />
-              <Action.Push
-                icon={Icon.ArrowRightCircle}
-                title={`Connect GitHub Profile`}
-                target={<AuthorizationComponent authProvider="github" />}
-              />
               <Action.Push
                 icon={Icon.ArrowRightCircleFilled}
                 title={`Connect Google Profile`}

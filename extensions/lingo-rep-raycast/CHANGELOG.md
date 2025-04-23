@@ -1,6 +1,6 @@
 # LingoRep Changelog
 
-## [Add Auto Paste Selected Text] - 2025-04-22
+## [Add Auto Paste Selected Text] - {PR_MERGE_DATE}
 
 - add ability to configure extension to auto paste selected text
 - update translate package to latest version
