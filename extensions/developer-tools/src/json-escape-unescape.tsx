@@ -1,49 +1,49 @@
-import { Action, ActionPanel, Clipboard, Form, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useEffect } from "react";
 import { addSlashes, removeSlashes } from "slashes";
-
+import { copyWithFeedback } from "./utils/clipboard";
 interface JSONUnescapeForm {
   escaped: string;
   unescaped: string;
 }
 
 export default function Command() {
-  const { handleSubmit, itemProps, values, setValue } = useForm<JSONUnescapeForm>({
+  const { itemProps, values, setValue } = useForm<JSONUnescapeForm>({
     initialValues: {
       escaped: "",
       unescaped: "",
     },
     onSubmit: (formValues: JSONUnescapeForm) => {
-      Clipboard.copy(formValues.unescaped);
-      showHUD("Copied unescaped text to clipboard");
+      copyWithFeedback(formValues.unescaped);
     },
   });
 
-  useEffect(() => {
-    const newUnescaped = removeSlashes(values.escaped);
-    if (newUnescaped !== values.unescaped) {
-      setValue("unescaped", newUnescaped);
-    }
-  }, [values.escaped]);
+  const setEscaped = (value: string) => {
+    setValue("escaped", value);
+    const newUnescaped = removeSlashes(value);
+    setValue("unescaped", newUnescaped);
+  };
 
-  useEffect(() => {
-    const newEscaped = addSlashes(values.unescaped);
-    if (newEscaped !== values.escaped) {
-      setValue("escaped", newEscaped);
-    }
-  }, [values.unescaped]);
+  const setUnescaped = (value: string) => {
+    setValue("unescaped", value);
+    const newEscaped = addSlashes(value);
+    setValue("escaped", newEscaped);
+  };
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Copy Unescaped Text" onSubmit={handleSubmit} />
+          <Action
+            title="Copy Unescaped Text"
+            onAction={() => {
+              copyWithFeedback(values.unescaped);
+            }}
+          />
           <Action
             title="Copy Escaped Text"
             onAction={() => {
-              Clipboard.copy(values.escaped);
-              showHUD("Copied escaped text to clipboard");
+              copyWithFeedback(values.escaped);
             }}
           />
         </ActionPanel>
@@ -53,14 +53,14 @@ export default function Command() {
         {...itemProps.escaped}
         title="Escaped JSON String"
         placeholder="Enter JSON string to unescape"
-        onChange={(value) => setValue("escaped", value)}
+        onChange={setEscaped}
         autoFocus
       />
       <Form.TextArea
         {...itemProps.unescaped}
         title="Unescaped JSON String"
         placeholder="Enter JSON string to escape"
-        onChange={(value) => setValue("unescaped", value)}
+        onChange={setUnescaped}
       />
     </Form>
   );

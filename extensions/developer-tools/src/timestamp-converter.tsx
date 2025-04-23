@@ -6,12 +6,14 @@ import {
   Form,
   getPreferenceValues,
   getSelectedText,
+  Keyboard,
   LaunchProps,
   openCommandPreferences,
   showHUD,
 } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm, useLocalStorage } from "@raycast/utils";
 import { useEffect, useMemo } from "react";
+import { copyWithFeedback } from "./utils/clipboard";
 
 interface TimestampForm {
   dateObject: Date;
@@ -100,11 +102,6 @@ const tryGetSelectedTextAndUpdate = async (updaterFn: (text: string) => void) =>
   }
 };
 
-const copyWithFeedback = (content: string) => {
-  Clipboard.copy(content);
-  showHUD("Copied to clipboard");
-};
-
 const STORAGE_KEY_USE_MILLISECONDS = "convert-timestamp::use-milliseconds";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.TimestampConverter }>) {
@@ -184,7 +181,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
       },
     },
     onSubmit: (formValues: TimestampForm) => {
-      copyWithFeedback(formValues.timestamp);
+      Clipboard.paste(formValues.timestamp);
+      showHUD("Pasted timestamp");
     },
   });
 
@@ -289,11 +287,11 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Copy Timestamp" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Paste Timestamp" onSubmit={handleSubmit} />
           <Action
-            title="Copy Timestamp in Milliseconds"
+            title="Copy Timestamp"
+            shortcut={Keyboard.Shortcut.Common.Copy}
             onAction={() => copyWithFeedback(values.timestamp)}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
           />
           <Action
             title={`Toggle Timestamp Format (${useMilliseconds ? "Milliseconds" : "Seconds"})`}

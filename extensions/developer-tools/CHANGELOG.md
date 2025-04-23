@@ -1,6 +1,6 @@
 # Developer Tools Changelog
 
-## [Enhancements] - 2025-04-17
+## [Enhancements] - {PR_MERGE_DATE}
 
 - Added timestamp converter command
   - Convert Unix timestamps to date/time and vice versa

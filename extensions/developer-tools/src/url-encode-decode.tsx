@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Clipboard, Form, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useEffect } from "react";
+import { copyWithFeedback } from "./utils/clipboard";
 
 interface URLEncodeForm {
   decoded: string;
@@ -8,45 +8,41 @@ interface URLEncodeForm {
 }
 
 export default function Command() {
-  const { handleSubmit, itemProps, values, setValue } = useForm<URLEncodeForm>({
+  const { itemProps, values, setValue } = useForm<URLEncodeForm>({
     initialValues: {
       decoded: "",
       encoded: "",
     },
     onSubmit: (formValues: URLEncodeForm) => {
-      Clipboard.copy(formValues.encoded);
-      showHUD("Copied encoded URL to clipboard");
+      copyWithFeedback(formValues.encoded);
     },
   });
 
-  useEffect(() => {
-    const newEncoded = encodeURIComponent(values.decoded);
-    if (newEncoded !== values.encoded) {
-      setValue("encoded", newEncoded);
-    }
-  }, [values.decoded]);
+  const setEncoded = (value: string) => {
+    setValue("encoded", value);
+    const newDecoded = decodeURIComponent(value);
+    setValue("decoded", newDecoded);
+  };
 
-  useEffect(() => {
+  const setDecoded = (value: string) => {
+    setValue("decoded", value);
     try {
-      const newDecoded = decodeURIComponent(values.encoded);
-      if (newDecoded !== values.decoded) {
-        setValue("decoded", newDecoded);
-      }
+      const newEncoded = encodeURIComponent(value);
+      setValue("encoded", newEncoded);
     } catch (e) {
       console.error(e);
     }
-  }, [values.encoded]);
+  };
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Copy Encoded URL" onSubmit={handleSubmit} />
+          <Action title="Copy Encoded URL" onAction={() => copyWithFeedback(values.encoded)} />
           <Action
             title="Copy Decoded URL"
             onAction={() => {
-              Clipboard.copy(values.decoded);
-              showHUD("Copied decoded URL to clipboard");
+              copyWithFeedback(values.decoded);
             }}
           />
         </ActionPanel>
@@ -56,7 +52,7 @@ export default function Command() {
         {...itemProps.decoded}
         title="Decoded"
         placeholder="Enter text to URL encode"
-        onChange={(value) => setValue("decoded", value)}
+        onChange={setDecoded}
         autoFocus
       />
       <Form.TextArea
@@ -64,7 +60,7 @@ export default function Command() {
         title="Encoded"
         placeholder="Enter text to URL decode"
         value={values.encoded}
-        onChange={(value) => setValue("encoded", value)}
+        onChange={setEncoded}
       />
     </Form>
   );
