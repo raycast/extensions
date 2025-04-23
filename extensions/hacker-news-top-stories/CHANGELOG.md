@@ -1,6 +1,6 @@
 # Hacker News Top Stories Changelog
 
-## [Updade Mark As Read button] - {PR_MERGE_DATE}
+## [Update Mark As Read button] - {PR_MERGE_DATE}
 
 Hides "mark all as read" if there are no stories.
 Adds a keyboard shortcut to mark all stories as read.
