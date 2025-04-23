@@ -37,13 +37,13 @@
     },
     {
       "name": "url-encode-decode",
-      "title": "Url Encode / Decode",
+      "title": "URL Encode / Decode",
       "description": "Encode / Decode a URL",
       "mode": "view"
     },
     {
       "name": "json-escape-unescape",
-      "title": "Json Escape / Unescape",
+      "title": "JSON Escape / Unescape",
       "description": "Escape / Unescape a JSON string",
       "mode": "view"
     }
