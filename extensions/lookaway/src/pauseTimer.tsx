@@ -1,5 +1,5 @@
-import { runLookAwayCommand } from './utils'
+import { runLookAwayCommand } from './utils';
 
 export default async function Command() {
-    await runLookAwayCommand('pause', 'lkwypaus', 'Paused work mode')
+  await runLookAwayCommand('pause', 'lkwypaus', 'Paused work mode');
 }
