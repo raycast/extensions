@@ -3,13 +3,9 @@
  */
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  warpApp: "stable" | "preview";
-}
-
 // Get the app name based on the selected release
 export const getAppName = (): string => {
-  const { warpApp } = getPreferenceValues<Preferences>();
+  const { warpApp } = getPreferenceValues<ExtensionPreferences>();
   return warpApp === "preview" ? "Warp Preview" : "Warp";
 };
 

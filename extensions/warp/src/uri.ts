@@ -1,11 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  warpApp: "stable" | "preview";
-}
-
 const getWarpUri = (path: string) => {
-  const { warpApp } = getPreferenceValues<Preferences>();
+  const { warpApp } = getPreferenceValues<ExtensionPreferences>();
   const scheme = warpApp === "preview" ? "warppreview://" : "warp://";
   return `${scheme}${path}`;
 };
