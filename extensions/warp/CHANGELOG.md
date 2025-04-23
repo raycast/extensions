@@ -1,6 +1,6 @@
 # Warp Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-04-23
 
 - Added build preference to select between [Warp](https://www.warp.dev) and [Warp Preview](https://www.warp.dev/blog/warp-preview) Releases.
 - Updated extension icon.
