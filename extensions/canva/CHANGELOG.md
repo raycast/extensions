@@ -1,5 +1,5 @@
 # Canva Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-04-23
 
 - View Designs and Open in Browser
