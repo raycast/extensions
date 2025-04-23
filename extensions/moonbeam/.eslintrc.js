@@ -1,14 +1,11 @@
-/** @type {import('eslint').Linter.Config} */
 module.exports = {
-  extends: [
-    "@raycast/eslint-config",
-    "plugin:@typescript-eslint/recommended"
-  ],
-  parser: "@typescript-eslint/parser",
-  plugins: ["@typescript-eslint"],
+  extends: ["@raycast/eslint-config"],
+  parserOptions: {
+    ecmaVersion: 2020,
+    sourceType: "module"
+  },
+  ignorePatterns: ["node_modules/", "dist/"],
   rules: {
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
+    // Add any custom rules here if needed
   }
-};
+}; 

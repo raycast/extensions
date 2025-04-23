@@ -86,24 +86,20 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.14.0",
-    "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.0",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "eslint": "9.24.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "18.8.3",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0",
+    "eslint": "8.51.0",
+    "prettier": "3.0.3",
+    "typescript": "5.2.2"
   },
-  "eslintIgnore": [],
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "install-deps": "npm install --include=dev",
-    "publish:raycast": "npm run install-deps --legacy-peer-deps && ray lint --fix && ray publish"
+    "publish:raycast": "ray lint --fix && ray publish"
   }
 }
