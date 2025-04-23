@@ -9,6 +9,9 @@
     "Productivity"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "commands": [
     {
       "name": "add-task",
@@ -90,7 +93,7 @@
     "@types/node": "18.8.3",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.0",
-    "eslint": "8.51.0",
+    "eslint": "8.57.1",
     "prettier": "3.0.3",
     "typescript": "5.2.2"
   },
