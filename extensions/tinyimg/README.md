@@ -1,13 +1,12 @@
 # TinyIMG
 
-This project was inspired by TinyPNG, it doesn't require an API key. All compression happens locally, with no restrictions whatsoever.
+This project was inspired by TinyPNG; it doesn't require an API key. All compression happens locally, with no restrictions whatsoever.
 
 ## Commands
 
-| name                       | description                       |
-| -------------------------- | --------------------------------- |
-| `Compress Selected Images` | Compress selected images.         | 
-
+| name                       | description               |
+| -------------------------- | ------------------------- |
+| `Compress Selected Images` | Compress selected images. |
 
 ## Binary
 
