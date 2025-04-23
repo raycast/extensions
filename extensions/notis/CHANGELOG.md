@@ -1,7 +1,6 @@
 # Notis Changelog
 
 ## [Pause audio playback] - {PR_MERGE_DATE}
-
 - Add a pause button to the audio playback to the menu bar command
 - Prevented multiple audio files from playing at once in the history view
 

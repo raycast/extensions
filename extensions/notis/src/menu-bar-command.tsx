@@ -422,7 +422,7 @@ export default function Command() {
 
       await showHUD("🔊 Playing audio...");
 
-      // Get ffplay path from preferencesor use default
+      // Get ffplay path from preferences or use default
       const preferences = getPreferenceValues<Preferences>();
       const ffmpegPath = preferences.ffmpegPath?.trim() || "ffmpeg";
       const ffplayPath = ffmpegPath.endsWith("ffmpeg")
@@ -471,7 +471,7 @@ export default function Command() {
         ? ffmpegPath.replace(/ffmpeg$/, "ffplay")
         : path.join(path.dirname(ffmpegPath), "ffplay");
 
-      await execPromise(`pkill -f "${ffplayPath}"`).catch(() => {
+      await execPromise(`pkill -f ${JSON.stringify(ffplayPath)}`).catch(() => {
         console.log("No ffplay processes found to kill");
       });
 
