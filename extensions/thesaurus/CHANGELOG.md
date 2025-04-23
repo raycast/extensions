@@ -1,6 +1,6 @@
 # Thesaurus (Merriam Webster) Changelog
 
-## [Search Selected Text] - {PR_MERGE_DATE}
+## [Search Selected Text] - 2025-04-23
 
 - Added the ability to search selected text. Simply highlight the word, then run the "Thesaurus Search Selected" command.
 
