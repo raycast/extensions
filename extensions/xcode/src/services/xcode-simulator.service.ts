@@ -199,7 +199,7 @@ export class XcodeSimulatorService {
       }
     }
     // Open URL in simulator
-    return execAsync(["xcrun", "simctl", "openurl", simulator?.udid ?? "booted", trimmedUrl].join(" ")).then(() => {
+    return execAsync(["xcrun", "simctl", "openurl", simulator?.udid ?? "booted", `"${trimmedUrl}"`].join(" ")).then(() => {
       // Silently launch Simulator application
       XcodeSimulatorService.launchSimulatorApplication();
     });

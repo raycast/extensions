@@ -1,6 +1,6 @@
 # Xcode Changelog
 
-## [Add Xcode Runtimes Management] - {PR_MERGE_DATE}
+## [Add Xcode Runtimes Management] - 2025-04-15
 
 - Add Xcode runtimes listing and management command
 - Add a delete unsupported Xcode runtimes command
