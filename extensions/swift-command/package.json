@@ -5,6 +5,9 @@
   "description": "Efficiently manage and access Linux command snippets for faster execution",
   "icon": "extension-icon-512.png",
   "author": "aaron_lin",
+  "contributors": [
+    "felix_wortmann"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -14,6 +17,12 @@
       "name": "manage-commands",
       "title": "Manage Swift Command",
       "description": "Manage command snippets",
+      "mode": "view"
+    },
+    {
+      "name": "import-alias-command",
+      "title": "Import alias commands from ~/.bashrc or ~/.zshrc",
+      "description": "Import your existing shell aliases from bash or zsh configuration files into Swift Command",
       "mode": "view"
     }
   ],
@@ -40,7 +49,7 @@
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5",
-    "vitest": "^2.0.5"
+    "vitest": "^3.1.2"
   },
   "scripts": {
     "build": "ray build -e dist -o dist",
