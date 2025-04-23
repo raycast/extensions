@@ -1,14 +1,4 @@
 {
-  "singleQuote": true,
-  "trailingComma": "es5",
-  "printWidth": 100,
-  "tabWidth": 2,
-  "semi": false,
-  "bracketSpacing": true,
-  "bracketSameLine": false,
-  "arrowParens": "always",
-  "endOfLine": "lf",
-  "proseWrap": "preserve",
-  "insertPragma": false,
-  "requirePragma": false
-} 
+  "printWidth": 120,
+  "singleQuote": false
+}
