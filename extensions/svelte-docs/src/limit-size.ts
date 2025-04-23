@@ -8,8 +8,8 @@ export function limit_size(
   if (!items) return [];
   let current_size = JSON.stringify(items).length;
   while (current_size > SIZE_LIMIT) {
-    items.pop();
-    current_size = JSON.stringify(items).length;
+    const removed = items.pop();
+    current_size -= JSON.stringify(removed).length;
   }
   return items;
 }
