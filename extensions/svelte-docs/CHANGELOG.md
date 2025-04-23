@@ -1,5 +1,9 @@
 # Svelte Docs Changelog
 
+## [Improve AI command to search the svelte docs] - {PR_MERGE_DATE}
+
+The AI command now is more explicit in the query request avoiding common words that would return bad results. In case the returned dataset is too large it will also slim down the output until it's a decent size to prevent failing for a message to big. I've also moved the evals to `ai.json` to de-clutter the `package.json`
+
 ## [AI command to search the svelte docs] - 2025-04-19
 
 Adds a new AI tool to the svelte extension, allowing users to query the svelte docs through LLMs
