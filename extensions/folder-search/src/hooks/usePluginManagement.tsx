@@ -88,7 +88,7 @@ export function usePluginManagement() {
         log("error", "usePluginManagement", `Instance #${instanceIdRef.current}: Error loading plugins`, {
           error: error instanceof Error ? error.message : String(error),
         });
-        showFailureToast({ title: "Could not read plugins" });
+        showFailureToast(error, { title: "Could not read plugins" });
         setHasCheckedPlugins(true);
       }
     };
