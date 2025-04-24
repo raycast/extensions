@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List, popToRoot, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import path from "node:path";
 import { useEffect, useState } from "react";
 import fs from "fs";
@@ -148,14 +149,14 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
           />
         )}
 
-        {files.map((file, index) => {
+        {files.map((file) => {
           const filePath = path.join(directoryPath, file);
           const result = createSpotlightResult(filePath);
           const pinnedIndex = pinnedResults.findIndex((pin) => pin.path === filePath);
 
           return (
             <List.Item
-              key={index + 1} // Offset by 1 to account for parent dir item
+              key={filePath}
               title={file}
               icon={{ fileIcon: filePath }}
               accessories={resultIsPinned(result) ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []}

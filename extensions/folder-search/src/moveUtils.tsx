@@ -120,8 +120,9 @@ export async function moveFinderItems(
           destination: destinationFile,
           timestamp: new Date().toISOString(),
         });
-        await showFailureToast(e, { title: "Error moving file" });
-        return { success: false, movedCount, skippedCount };
+        await showFailureToast(e, { title: `Error moving ${sourceFileName}` });
+        skippedCount++;
+        continue;
       }
     }
 
