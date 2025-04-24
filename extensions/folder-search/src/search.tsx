@@ -106,8 +106,8 @@ export default function Command(props: LaunchProps) {
                 popToRoot({ clearSearchBar: true });
               }
             } catch (error) {
-              // Error is already handled in moveFinderItems, but we need to catch it here
-              // to prevent unhandled promise rejections
+              // Show error to user with showFailureToast
+              showFailureToast(error, { title: "Could not move Finder selection" });
               console.error("Error in Move Finder Selection action:", error);
             }
           }}
