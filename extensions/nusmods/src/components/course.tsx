@@ -139,7 +139,6 @@ const CourseDetail: React.FC<{
 
   const { isLoading, data, error } = useFetch(`${API_BASE_URL}/${currentAcadYear}/modules/${props.moduleCode}.json`, {
     keepPreviousData: true,
-    initialData: {} as CourseSummary,
     parseResponse,
   });
 
@@ -149,26 +148,26 @@ const CourseDetail: React.FC<{
     <Detail
       isLoading={isLoading}
       navigationTitle={props.moduleCode}
-      markdown={error ? "Something went wrong, please report this issue" : generateMarkdown(data)}
+      markdown={error ? "Unable to load course details." : generateMarkdown(data)}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={nusModsUrl} />
         </ActionPanel>
       }
       metadata={
-        error ? undefined : (
+        error || !data ? undefined : (
           <Detail.Metadata>
-            <Detail.Metadata.Label title="Module Code" text={data?.moduleCode} />
-            <Detail.Metadata.Label title="Academic Year" text={data?.acadYear} />
-            <Detail.Metadata.Label title="Module Title" text={data?.title} />
-            <Detail.Metadata.Label title="Department" text={data?.department} />
-            <Detail.Metadata.Label title="Faculty" text={data?.faculty} />
-            <Detail.Metadata.Label title="Module Credit" text={data?.moduleCredit} />
-            {data?.gradingBasisDescription && (
-              <Detail.Metadata.Label title="Grading Basis" text={data?.gradingBasisDescription} />
+            <Detail.Metadata.Label title="Module Code" text={data.moduleCode} />
+            <Detail.Metadata.Label title="Academic Year" text={data.acadYear} />
+            <Detail.Metadata.Label title="Module Title" text={data.title} />
+            <Detail.Metadata.Label title="Department" text={data.department} />
+            <Detail.Metadata.Label title="Faculty" text={data.faculty} />
+            <Detail.Metadata.Label title="Module Credit" text={data.moduleCredit} />
+            {data.gradingBasisDescription && (
+              <Detail.Metadata.Label title="Grading Basis" text={data.gradingBasisDescription} />
             )}
-            {data?.prerequisite && <Detail.Metadata.Label title="Prerequisite" text={data?.prerequisite} />}
-            {data?.preclusion && <Detail.Metadata.Label title="Preclusion" text={data?.preclusion} />}
+            {data.prerequisite && <Detail.Metadata.Label title="Prerequisite" text={data.prerequisite} />}
+            {data.preclusion && <Detail.Metadata.Label title="Preclusion" text={data.preclusion} />}
 
             <Detail.Metadata.Separator />
 
