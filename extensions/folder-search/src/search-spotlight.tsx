@@ -53,7 +53,7 @@ export async function searchSpotlight(
         search,
         safeSearchScope(searchScope),
         searchFilter,
-        folderSpotlightSearchAttributes as [],
+        folderSpotlightSearchAttributes as string[],
         abortable
       );
 
