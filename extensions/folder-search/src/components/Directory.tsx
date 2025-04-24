@@ -96,6 +96,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
         .sort();
       setFiles(items);
     } catch (error) {
+      showFailureToast(error, { title: "Error reading directory" });
       log("error", "Directory", "Error reading directory", { error, path: directoryPath });
     } finally {
       setIsLoading(false);
