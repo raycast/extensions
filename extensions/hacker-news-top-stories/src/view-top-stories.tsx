@@ -107,18 +107,21 @@ export default function Command() {
         <MenuItems error={error} stories={stories} setStories={setStories} readStories={readStories} points={points} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title="Mark All As Read"
-          icon={Icon.Checkmark}
-          onAction={() => {
-            stories.forEach(({ external_url }) => {
-              readStories.add(external_url);
-            });
-            cache.set(readKey, JSON.stringify(Array.from(readStories)));
-            // force update the icon
-            setStories((prev) => structuredClone(prev));
-          }}
-        />
+        {stories.length > 0 ? (
+          <MenuBarExtra.Item
+            title="Mark All As Read"
+            icon={Icon.Checkmark}
+            onAction={() => {
+              stories.forEach(({ external_url }) => {
+                readStories.add(external_url);
+              });
+              cache.set(readKey, JSON.stringify(Array.from(readStories)));
+              // force update the icon
+              setStories((prev) => [...prev]);
+            }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+          />
+        ) : null}
         <MenuBarExtra.Item
           title="Open Preferences"
           onAction={openExtensionPreferences}
@@ -164,7 +167,7 @@ const MenuItems = ({ error, stories, setStories, readStories, points }: MenuItem
         readStories.add(story.external_url);
         cache.set(readKey, JSON.stringify(Array.from(readStories)));
         // force update the icon
-        setStories((prev) => structuredClone(prev));
+        setStories((prev) => [...prev]);
         open(story.external_url);
       }}
     />
