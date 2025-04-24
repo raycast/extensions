@@ -75,7 +75,7 @@ export async function moveFinderItems(
 
           const overwrite = await confirmAlert({
             title: "Overwrite the existing file?",
-            message: sourceFileName + " already exists in " + destinationFolder,
+            message: `${sourceFileName} already exists in ${destinationFolder}`,
           });
 
           if (overwrite) {
