@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { ActionPanel, List, Action, showToast, Toast, clearSearchBar, getPreferenceValues, Icon } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  showToast,
+  Toast,
+  clearSearchBar,
+  getPreferenceValues,
+  Icon,
+  popToRoot,
+} from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 function applicationNameFromPath(path: string): string {
@@ -151,6 +161,8 @@ export default function Command({ launchContext }: CommandProps) {
               <Action
                 title="Quit All"
                 onAction={async () => {
+                  let remainingApps = [...apps];
+
                   for (const app of apps) {
                     if (
                       preferences.excludeApplications
@@ -164,15 +176,18 @@ export default function Command({ launchContext }: CommandProps) {
                     const success = await quitAppWithToast(app.name);
 
                     if (success) {
-                      setApps((prevApps) => {
-                        const index = prevApps.findIndex((a) => a.name === app.name);
-                        return index >= 0 ? prevApps.toSpliced(index, 1) : prevApps;
-                      });
+                      remainingApps = remainingApps.filter((a) => a.name !== app.name);
                     }
                   }
 
+                  setApps(remainingApps);
+
                   if (searchText) {
                     clearSearchBar();
+                  }
+
+                  if (remainingApps.length == 0) {
+                    popToRoot({ clearSearchBar: true });
                   }
                 }}
               />
