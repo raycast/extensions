@@ -2,7 +2,7 @@ import TonWeb from "tonweb";
 import { Address } from "tonweb/dist/types/utils/address";
 
 export function isTestnet(address: string): boolean {
-  return address.startsWith("k") || address.startsWith("0");
+  return address.startsWith("kQ") || address.startsWith("0Q");
 }
 
 export function isValidTonAddressOrDomain(address: string): boolean {
