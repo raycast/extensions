@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [Update brew install command] - {PR_MERGE_DATE}
+## [Update brew install command] - 2025-04-24
 
 - Update the brew install command from Firefox to Zen Browser.
 
