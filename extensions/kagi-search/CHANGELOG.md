@@ -1,6 +1,6 @@
 # Kagi Search Changelog
 
-## [1.2.1] - {PR_MERGE_DATE}
+## [1.2.1] - 2025-04-24
 * Made API features optional
 
 ## [1.1.0] - 2025-04-02
