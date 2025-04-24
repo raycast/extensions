@@ -196,7 +196,8 @@ const CourseDetail: React.FC<{
       console.error("Failed to parse course details", JSON.stringify(parseResult.error));
       showToast({
         title: "Validation error",
-        message: "Unexpected course details data received, please report this issue.",
+        message: "Unexpected course details data received from NUSMods API, please report this issue.",
+        style: Toast.Style.Failure,
       });
       return null;
     }
