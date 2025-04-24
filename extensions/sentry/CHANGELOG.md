@@ -1,5 +1,10 @@
 # Sentry Changelog
 
+## [Show issues for Sentry orgs stored in Europe] - {PR_MERGE_DATE}
+
+- Show issues for Sentry orgs stored in Europe, previously it was showing only projects in the US.
+- Give more space to the issue title in the issues list view.
+
 ## [Fix command when user has multiple orgs and projects with same name] - 2024-07-25
 
 ## [Added pagination] - 2024-03-27
