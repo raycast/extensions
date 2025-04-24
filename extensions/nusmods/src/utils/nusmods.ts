@@ -53,6 +53,7 @@ export const CourseDetailsSchema = z.object({
   workload: z.optional(z.array(z.number()).check(z.length(5))),
   preclusion: z.optional(z.string()),
   prerequisite: z.optional(z.string()),
+  corequisite: z.optional(z.string()),
   prereqTree: z.optional(PrereqSchema),
   fulfillRequirements: z.optional(z.array(z.string())),
 });

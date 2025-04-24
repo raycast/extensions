@@ -157,6 +157,10 @@ const generateMarkdown = (data?: CourseDetails | null) => {
     sections.push("\n---");
     sections.push(`\n## Preclusion\n${data.preclusion}`);
   }
+  if (data.corequisite) {
+    sections.push("\n---");
+    sections.push(`\n## Corequisite\n${data.corequisite}`);
+  }
   if (data.prereqTree) {
     sections.push("\n---");
     sections.push(`\n## Prerequisites\n${formatPrereqTree(data.prereqTree, data.prerequisite)}`);
