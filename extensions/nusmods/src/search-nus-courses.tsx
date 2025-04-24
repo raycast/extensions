@@ -3,7 +3,7 @@ import { showFailureToast, useFetch } from "@raycast/utils";
 import { useCallback } from "react";
 import { CourseSummaryList } from "./components/course";
 import { API_BASE_URL } from "./utils/constants";
-import { CourseSummary, CourseSummaryListSchema } from "./utils/nusmods";
+import { CourseSummaryListSchema } from "./utils/nusmods";
 
 const now = new Date();
 const lastYear = now.getFullYear() - 1;
@@ -46,13 +46,12 @@ export default function Command() {
 
   const { isLoading, data, error } = useFetch(`${API_BASE_URL}/${currentAcadYear}/moduleList.json`, {
     keepPreviousData: true,
-    initialData: [] as Array<CourseSummary>,
     parseResponse,
   });
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search for courses...">
-      {error ? (
+      {error || !data ? (
         <List.EmptyView icon={Icon.Bug} title="Error fetching course summaries" description="Please try again later." />
       ) : (
         <CourseSummaryList courseSummaries={data} />
