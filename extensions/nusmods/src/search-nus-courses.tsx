@@ -1,5 +1,6 @@
 import { Icon, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import * as z from "@zod/mini";
 import { useCallback, useState } from "react";
 import { CourseSummaryList } from "./components/course";
 import { API_BASE_URL } from "./utils/constants";
@@ -48,7 +49,7 @@ export default function Command() {
 
     const parsedResult = await CourseSummaryListSchema.safeParseAsync(data);
     if (!parsedResult.success) {
-      console.error("Validation error:", parsedResult.error);
+      console.error(z.prettifyError(parsedResult.error));
       showToast({
         title: "Validation error",
         message: "Unexpected course summaries data received from NUSMods API, please report this issue",

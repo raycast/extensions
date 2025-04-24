@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import * as z from "@zod/mini";
 import { useCallback } from "react";
 import { API_BASE_URL, WEBSITE_BASE_URL } from "../utils/constants";
 import { CourseDetails, CourseDetailsSchema, CourseSummary, Prereq, SemesterData, Timetable } from "../utils/nusmods";
@@ -194,7 +195,7 @@ const CourseDetail: React.FC<{
 
     const parseResult = await CourseDetailsSchema.safeParseAsync(data);
     if (!parseResult.success) {
-      console.error("Failed to parse course details", JSON.stringify(parseResult.error));
+      console.error(z.prettifyError(parseResult.error));
       showToast({
         title: "Validation error",
         message: "Unexpected course details data received from NUSMods API, please report this issue.",
