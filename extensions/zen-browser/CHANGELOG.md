@@ -1,5 +1,9 @@
 # Zen Changelog
 
+## [Update brew install command] - 2025-04-24
+
+- Update the brew install command from Firefox to Zen Browser.
+
 ## [Add Browser Default Search Engine] - 2025-04-22
 
 - Added the ability to use the user's default browser search engine set within Zen as the search engine.
