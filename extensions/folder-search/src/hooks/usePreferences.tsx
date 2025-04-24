@@ -28,7 +28,7 @@ export function usePreferences() {
             const preferences = JSON.parse(maybePreferences as string);
 
             // Update state with loaded preferences
-            setSearchScope(preferences?.searchScope || "");
+            setSearchScope(preferences?.searchScope || userInfo().homedir);
             setIsShowingDetail(preferences?.isShowingDetail !== undefined ? preferences.isShowingDetail : true);
             setShowNonCloudLibraryPaths(preferences?.showNonCloudLibraryPaths || false);
 
