@@ -5,11 +5,7 @@ import path from "path";
 import type { Preferences } from "./types";
 import { loadSites, sitesToXml } from "./utils";
 
-interface ExportSitesFormProps {
-  onDone: () => void;
-}
-
-export function ExportSitesForm({ onDone }: ExportSitesFormProps) {
+export function ExportSitesForm({ onDone }: { onDone: () => void }) {
   // read the xmlFolder preference
   const { xmlFolder } = getPreferenceValues<Preferences>();
   const [defaultDir] = useState<string>(xmlFolder || path.join(process.env.HOME || "", "Documents"));
@@ -56,5 +52,6 @@ export function ExportSitesForm({ onDone }: ExportSitesFormProps) {
 }
 
 export default function ExportSitesCommand() {
+  // Command entrypoint – supplies a no-op onDone so the form always gets it
   return <ExportSitesForm onDone={() => {}} />;
 }

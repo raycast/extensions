@@ -82,14 +82,8 @@ export function getCategories(sites: Site[]): string[] {
  * Load sites from LocalStorage, initializing to empty XML if needed.
  */
 export async function loadSites(): Promise<Site[]> {
-  await LocalStorage.removeItem("sites").catch(() => {});
-
-  let raw: string | null = null;
-  try {
-    raw = await LocalStorage.getItem<string>(STORAGE_KEY);
-  } catch {
-    raw = null;
-  }
+  // getItem<T>() returns Promise<T | null | undefined>, so coerce undefined → null
+  const raw = (await LocalStorage.getItem<string>(STORAGE_KEY)) ?? null;
 
   if (!raw || !raw.trim().startsWith("<?xml")) {
     const empty = `<?xml version="1.0"?><sites></sites>`;

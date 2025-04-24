@@ -15,7 +15,7 @@ import { getFavicon } from "@raycast/utils";
 import type { Site, Preferences } from "./types";
 import { AddSitesForm } from "./addsite";
 import { ImportSitesForm } from "./importsites";
-import ExportSitesForm from "./exportsites";
+import { ExportSitesForm } from "./exportsites";
 import { loadSites, saveSites, getCategories } from "./utils";
 
 export default function DailySites() {
@@ -34,17 +34,7 @@ export default function DailySites() {
 
   // if the user hasn’t yet set XML folder, show the “welcome” screen:
   if (!xmlFolder) {
-    return (
-      <EmptyView
-        icon="🔽"
-        title="Welcome to Daily Sites"
-        actions={
-          <ActionPanel>
-            <Action.OpenPreferences title="Open Settings" />
-          </ActionPanel>
-        }
-      />
-    );
+    return <List.EmptyView icon="🔽" title="Welcome to Daily Sites" />;
   }
 
   useEffect(() => {
