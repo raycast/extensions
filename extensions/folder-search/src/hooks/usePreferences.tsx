@@ -114,6 +114,7 @@ export function usePreferences() {
         log("error", "usePreferences", "Error saving preferences", {
           error: error instanceof Error ? error.message : String(error),
         });
+        showFailureToast({ title: "Could not save preferences" });
       }
     };
 
