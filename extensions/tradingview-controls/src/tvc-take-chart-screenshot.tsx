@@ -3,11 +3,16 @@ import { runAppleScript } from "run-applescript";
 import { TVCLogger } from "./logger";
 import { TVCChangeChartInterval } from "./tvc-change-chart-interval";
 import { TVCOpenSymbol } from "./tvc-open-symbol";
-import { TVCChangeChartIntervalArgs, TVCTakeChartScreenshotArgs } from "./types";
+import {
+  TVCChangeChartIntervalArgs,
+  TVCTakeChartScreenshotArgs,
+} from "./types";
 
 const context = "src/tvc-take-chart-screenshot.tsx";
 
-export async function TVCTakeChartScreenshot(props: LaunchProps<{ arguments: TVCTakeChartScreenshotArgs }>) {
+export async function TVCTakeChartScreenshot(
+  props: LaunchProps<{ arguments: TVCTakeChartScreenshotArgs }>
+) {
   TVCLogger.log("TVCTakeChartScreenshot", { ...props, context });
   TVCLogger.log("Taking screenshot of symbol in TradingView...", { context });
 

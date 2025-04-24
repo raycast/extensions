@@ -15,7 +15,9 @@ type TVCAddSymbolToWatchlistArgs = TVCSymbolArg;
  * Adds a symbol to the watchlist in TradingView.
  * @param props Launch arguments.
  */
-export default async function TVCAddSymbolToWatchlist(props: LaunchProps<{ arguments: TVCAddSymbolToWatchlistArgs }>) {
+export default async function TVCAddSymbolToWatchlist(
+  props: LaunchProps<{ arguments: TVCAddSymbolToWatchlistArgs }>
+) {
   TVCLogger.log("TVCAddSymbolToWatchlist", { ...props, context });
   TVCLogger.log("Adding symbol to watchlist in TradingView...", { context });
 

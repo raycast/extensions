@@ -10,7 +10,9 @@ interface TVCAddNoteToSymbolArgs extends TVCSymbolArg {
   note: string;
 }
 
-export default async function TVCAddNoteToSymbol(props: LaunchProps<{ arguments: TVCAddNoteToSymbolArgs }>) {
+export default async function TVCAddNoteToSymbol(
+  props: LaunchProps<{ arguments: TVCAddNoteToSymbolArgs }>
+) {
   TVCLogger.log("TVCAddNoteToSymbol", { ...props, context });
   TVCLogger.log("Adding note to symbol in TradingView...", { context });
 

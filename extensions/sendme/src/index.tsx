@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, useNavigation, Icon } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  useNavigation,
+  Icon,
+} from "@raycast/api";
 // Add the missing import for globalSessions
 import { globalSessions } from "./sessionManager";
 import { SessionsList } from "./components/SessionsList";
@@ -116,7 +124,11 @@ export default function Command() {
           {sendmeInstalled ? (
             <Action.SubmitForm title="Share File" onSubmit={handleSubmit} />
           ) : (
-            <Action title="Install Sendme" icon={Icon.Download} onAction={triggerSendmeInstall} />
+            <Action
+              title="Install Sendme"
+              icon={Icon.Download}
+              onAction={triggerSendmeInstall}
+            />
           )}
 
           {sessionCount > 0 && (

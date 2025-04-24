@@ -1,4 +1,9 @@
-import { showHUD, Clipboard, getSelectedText, getPreferenceValues } from "@raycast/api";
+import {
+  showHUD,
+  Clipboard,
+  getSelectedText,
+  getPreferenceValues,
+} from "@raycast/api";
 import { en_ru, ru_en } from "./Dict";
 import { exec as Exec } from "child_process";
 import { promisify } from "util";
@@ -44,13 +49,23 @@ function switchStringLayout(string: string): string {
   return chars.map((ch) => switchCharacterLayout(ch)).join("");
 }
 
-async function switchKeyboardLayout(preferences: Preferences, targetLayout: Layout): Promise<void> {
+async function switchKeyboardLayout(
+  preferences: Preferences,
+  targetLayout: Layout,
+): Promise<void> {
   const languages = await getInstalledLayoutNames();
   // console.log("installed layout names are " + languages.join(", "));
   // console.log("target layout is " + targetLayout);
-  const targetLayoutName = targetLayout === Layout.LAT ? preferences.latLayoutName : preferences.cyrLayoutName;
+  const targetLayoutName =
+    targetLayout === Layout.LAT
+      ? preferences.latLayoutName
+      : preferences.cyrLayoutName;
   if (!languages.includes(targetLayoutName)) {
-    await showHUD("Layout " + targetLayoutName + " is not installed. Please install it or update the preferences");
+    await showHUD(
+      "Layout " +
+        targetLayoutName +
+        " is not installed. Please install it or update the preferences",
+    );
     return;
   }
 
@@ -67,7 +82,11 @@ async function switchKeyboardLayout(preferences: Preferences, targetLayout: Layo
 
   while (attempts > 0) {
     const modifierKey = preferences.layoutSwitchModifier;
-    await exec(`osascript -e 'tell application "System Events" to keystroke " " using ` + modifierKey + ` down'`);
+    await exec(
+      `osascript -e 'tell application "System Events" to keystroke " " using ` +
+        modifierKey +
+        ` down'`,
+    );
     const activeLayoutName = await getActiveLayoutName();
     // console.log("active layout after switch is " + activeLayoutName);
     if (activeLayoutName === targetLayoutName) {
@@ -103,7 +122,9 @@ function switchCharacterLayout(char: string): string {
 }
 
 async function getInstalledLayoutNames(): Promise<string[]> {
-  const result = await exec(`defaults read ~/Library/Preferences/com.apple.HIToolbox.plist AppleEnabledInputSources`);
+  const result = await exec(
+    `defaults read ~/Library/Preferences/com.apple.HIToolbox.plist AppleEnabledInputSources`,
+  );
   return result.stdout
     .split("\n")
     .filter((line) => line.includes("KeyboardLayout Name"))
@@ -111,7 +132,9 @@ async function getInstalledLayoutNames(): Promise<string[]> {
 }
 
 async function getActiveLayoutName(): Promise<string> {
-  const result = await exec(`defaults read ~/Library/Preferences/com.apple.HIToolbox.plist AppleSelectedInputSources`);
+  const result = await exec(
+    `defaults read ~/Library/Preferences/com.apple.HIToolbox.plist AppleSelectedInputSources`,
+  );
   return result.stdout
     .split("\n")
     .filter((line) => line.includes("KeyboardLayout Name"))

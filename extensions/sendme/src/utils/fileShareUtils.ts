@@ -11,7 +11,9 @@ export interface FileShareResult {
   failedFiles: string[];
 }
 
-export async function shareMultipleFiles(filePaths: string[]): Promise<FileShareResult> {
+export async function shareMultipleFiles(
+  filePaths: string[],
+): Promise<FileShareResult> {
   const result: FileShareResult = {
     successCount: 0,
     failureCount: 0,

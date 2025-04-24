@@ -1,4 +1,13 @@
-import { Detail, ActionPanel, Action, Icon, Clipboard, showToast, Toast, confirmAlert } from "@raycast/api";
+import {
+  Detail,
+  ActionPanel,
+  Action,
+  Icon,
+  Clipboard,
+  showToast,
+  Toast,
+  confirmAlert,
+} from "@raycast/api";
 import { format } from "date-fns";
 import { ShareSession } from "../types";
 import { globalSessions } from "../sessionManager";
@@ -12,7 +21,8 @@ export function SessionDetails({ session, onClose }: SessionDetailsProps) {
   const stopSession = async () => {
     const confirmed = await confirmAlert({
       title: `Stop sharing ${session.fileName}?`,
-      message: "This will terminate the sendme process and prevent further downloads.",
+      message:
+        "This will terminate the sendme process and prevent further downloads.",
       primaryAction: {
         title: "Stop Sharing",
       },
@@ -101,7 +111,10 @@ ${session.isDetached ? `\n> ⚠️ This is a recovered session from a previous r
       }
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Actions" text="Press ⌘C to copy, ⌘⌫ to stop sharing" />
+          <Detail.Metadata.Label
+            title="Actions"
+            text="Press ⌘C to copy, ⌘⌫ to stop sharing"
+          />
         </Detail.Metadata>
       }
     />

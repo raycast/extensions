@@ -1,4 +1,14 @@
-import { ActionPanel, Form, showToast, Toast, Clipboard, Action, Icon, Detail, useNavigation } from "@raycast/api";
+import {
+  ActionPanel,
+  Form,
+  showToast,
+  Toast,
+  Clipboard,
+  Action,
+  Icon,
+  Detail,
+  useNavigation,
+} from "@raycast/api";
 import { exec, spawn } from "child_process";
 import { promisify } from "util";
 import { useState, useEffect, useRef } from "react";
@@ -61,7 +71,11 @@ export default function ReceiveCommand() {
   };
 
   // Show download progress and final result
-  const showDownloadDetails = (output: string, targetDir: string, error?: Error) => {
+  const showDownloadDetails = (
+    output: string,
+    targetDir: string,
+    error?: Error,
+  ) => {
     push(
       <Detail
         markdown={`# File Download ${error ? "Error" : "Results"}
@@ -100,7 +114,10 @@ ${!error ? `\n\nFiles were downloaded to: \`${targetDir}\`` : ""}
   };
 
   // Process to download file with real-time output
-  const downloadFile = async (ticket: string, targetDir: string): Promise<string> => {
+  const downloadFile = async (
+    ticket: string,
+    targetDir: string,
+  ): Promise<string> => {
     return new Promise((resolve, reject) => {
       try {
         const sendmePath = getSendmePath();
@@ -154,7 +171,10 @@ ${!error ? `\n\nFiles were downloaded to: \`${targetDir}\`` : ""}
   };
 
   // Terminal fallback for downloading
-  const runInTerminal = async (ticket: string, targetDir: string): Promise<void> => {
+  const runInTerminal = async (
+    ticket: string,
+    targetDir: string,
+  ): Promise<void> => {
     // Escape special characters in paths
     const escapedPath = targetDir.replace(/"/g, '\\"');
     const escapedTicket = ticket.replace(/"/g, '\\"');
@@ -181,7 +201,10 @@ ${!error ? `\n\nFiles were downloaded to: \`${targetDir}\`` : ""}
   };
 
   // Main submission handler
-  async function handleSubmit(values: { ticket: string; downloadDir: string[] }) {
+  async function handleSubmit(values: {
+    ticket: string;
+    downloadDir: string[];
+  }) {
     try {
       const { ticket, downloadDir } = values;
 
@@ -197,7 +220,9 @@ ${!error ? `\n\nFiles were downloaded to: \`${targetDir}\`` : ""}
 
       // Validate ticket format
       if (!isValidTicket(ticket)) {
-        throw new Error("Invalid ticket format. Tickets should start with 'blob' followed by alphanumeric characters.");
+        throw new Error(
+          "Invalid ticket format. Tickets should start with 'blob' followed by alphanumeric characters.",
+        );
       }
 
       setIsLoading(true);
@@ -278,7 +303,11 @@ ${!error ? `\n\nFiles were downloaded to: \`${targetDir}\`` : ""}
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Download File" icon={Icon.Download} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Download File"
+            icon={Icon.Download}
+            onSubmit={handleSubmit}
+          />
           <Action
             title="Download Via Terminal"
             icon={Icon.Terminal}
@@ -314,7 +343,9 @@ ${!error ? `\n\nFiles were downloaded to: \`${targetDir}\`` : ""}
         }}
       />
 
-      {downloadProgress && <Form.Description title="Download Progress" text={downloadProgress} />}
+      {downloadProgress && (
+        <Form.Description title="Download Progress" text={downloadProgress} />
+      )}
 
       <Form.Description
         title="About Downloading Files"

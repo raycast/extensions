@@ -119,7 +119,11 @@ export function SessionsList() {
         </ActionPanel>
       }
       searchBarAccessory={
-        <List.Dropdown tooltip="Keyboard shortcuts" storeValue={false} onChange={() => {}}>
+        <List.Dropdown
+          tooltip="Keyboard shortcuts"
+          storeValue={false}
+          onChange={() => {}}
+        >
           <List.Dropdown.Item title="⌘D - View details" value="details" />
           <List.Dropdown.Item title="⌘C - Copy ticket" value="copy" />
           <List.Dropdown.Item title="⌘⌫ - Stop sharing" value="stop" />
@@ -140,7 +144,9 @@ export function SessionsList() {
               {
                 text: session.isDetached ? "Recovered" : "Active",
                 icon: Icon.CircleFilled,
-                tooltip: session.isDetached ? "Recovered session from previous run" : "Sharing active",
+                tooltip: session.isDetached
+                  ? "Recovered session from previous run"
+                  : "Sharing active",
               },
               {
                 tooltip: "⌘⌫ to stop sharing",
@@ -156,21 +162,38 @@ export function SessionsList() {
                       text={session.isDetached ? "Recovered" : "Active"}
                       icon={{
                         source: Icon.CircleFilled,
-                        tintColor: session.isDetached ? Color.Orange : Color.Green,
+                        tintColor: session.isDetached
+                          ? Color.Orange
+                          : Color.Green,
                       }}
                     />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="File" text={session.fileName} />
+                    <List.Item.Detail.Metadata.Label
+                      title="File"
+                      text={session.fileName}
+                    />
                     <List.Item.Detail.Metadata.Label
                       title="Started"
                       text={format(session.startTime, "MMM d, yyyy h:mm a")}
                     />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Ticket" text={session.ticket} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Ticket"
+                      text={session.ticket}
+                    />
                     <List.Item.Detail.Metadata.TagList title="Actions">
-                      <List.Item.Detail.Metadata.TagList.Item text="⌘D View Details" color={Color.Blue} />
-                      <List.Item.Detail.Metadata.TagList.Item text="⌘C Copy Ticket" color={Color.Purple} />
-                      <List.Item.Detail.Metadata.TagList.Item text="⌘⌫ Stop Sharing" color={Color.Red} />
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text="⌘D View Details"
+                        color={Color.Blue}
+                      />
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text="⌘C Copy Ticket"
+                        color={Color.Purple}
+                      />
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text="⌘⌫ Stop Sharing"
+                        color={Color.Red}
+                      />
                     </List.Item.Detail.Metadata.TagList>
                   </List.Item.Detail.Metadata>
                 }
@@ -182,7 +205,9 @@ export function SessionsList() {
                   <Action
                     title="View Details"
                     icon={Icon.Eye}
-                    onAction={() => push(<SessionDetails session={session} onClose={pop} />)}
+                    onAction={() =>
+                      push(<SessionDetails session={session} onClose={pop} />)
+                    }
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                   />
                   <Action
