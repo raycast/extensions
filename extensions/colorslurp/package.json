@@ -148,5 +148,8 @@
     "@raycast/api": "^1.38.3",
     "@raycast/utils": "^1.4.16",
     "osascript-tag": "^0.1.2"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
