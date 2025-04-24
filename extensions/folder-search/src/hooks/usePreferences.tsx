@@ -3,13 +3,14 @@ import { LocalStorage, environment } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { log } from "../utils";
 import { SpotlightSearchPreferences } from "../types";
+import { userInfo } from "os";
 
 /**
  * Hook for managing user preferences
  */
 export function usePreferences() {
-  const [searchScope, setSearchScope] = useState<string>("");
-  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(true);
+  const [searchScope, setSearchScope] = useState<string>(userInfo().homedir);
+  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
   const [showNonCloudLibraryPaths, setShowNonCloudLibraryPaths] = useState<boolean>(false);
   const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
 
