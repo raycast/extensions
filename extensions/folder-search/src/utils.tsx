@@ -329,7 +329,7 @@ export function isCloudStoragePath(path: string): boolean {
 }
 
 export function isLibraryPath(path: string): boolean {
-  return path.includes(`${process.env.HOME}/Library`);
+  return path.includes(`${userHomeDir}/Library`);
 }
 
 export function shouldShowPath(path: string, showNonCloudLibraryPaths: boolean): boolean {
