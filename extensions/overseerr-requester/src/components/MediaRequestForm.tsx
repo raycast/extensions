@@ -1,6 +1,15 @@
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { MediaResult, ArrSettings, ServerTestResponse, TVShowSeason, TVShowDetails, Preferences } from "../types";
+import {
+  MediaResult,
+  ArrSettings,
+  ServerTestResponse,
+  TVShowSeason,
+  TVShowDetails,
+  Preferences,
+  ServerTag,
+} from "../types";
+import { normalizeApiUrl } from "utils";
 
 /**
  * Form component for submitting media requests to Radarr/Sonarr
@@ -15,9 +24,12 @@ export function MediaRequestForm({ media }: { media: MediaResult }) {
   const [isLoading, setIsLoading] = useState(true);
   const [seasons, setSeasons] = useState<TVShowSeason[]>([]);
   const [selectedSeasons, setSelectedSeasons] = useState<number[]>([]);
+  const [availableTags, setAvailableTags] = useState<ServerTag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   // Determine which service to use based on media type
   const settingsEndpoint = media.mediaType === "movie" ? "radarr" : "sonarr";
+  const baseApiUrl = normalizeApiUrl(apiUrl);
 
   /**
    * Fetches server settings and details from Radarr/Sonarr
@@ -26,20 +38,26 @@ export function MediaRequestForm({ media }: { media: MediaResult }) {
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const response = await fetch(`${apiUrl}/settings/${settingsEndpoint}`, {
+        const response = await fetch(`${baseApiUrl}/settings/${settingsEndpoint}`, {
           headers: {
             "X-Api-Key": apiKey,
             accept: "application/json",
           },
         });
 
-        if (!response.ok) throw new Error("Failed to fetch settings");
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Error response body:", errorText);
+          throw new Error(`Failed to fetch settings: ${response.status} ${response.statusText}`);
+        }
+
         const data = await response.json();
+
         setSettings(data);
 
         // Get server details directly without user selection
         if (data.length > 0) {
-          const testResponse = await fetch(`${apiUrl}/settings/${settingsEndpoint}/test`, {
+          const testResponse = await fetch(`${baseApiUrl}/settings/${settingsEndpoint}/test`, {
             method: "POST",
             headers: {
               "X-Api-Key": apiKey,
@@ -57,6 +75,10 @@ export function MediaRequestForm({ media }: { media: MediaResult }) {
           if (!testResponse.ok) throw new Error("Failed to fetch server details");
           const serverData = await testResponse.json();
           setServerDetails(serverData);
+          // Set available tags from server response
+          if (serverData.tags) {
+            setAvailableTags(serverData.tags);
+          }
         }
       } catch (err) {
         console.error("Settings fetch error:", err);
@@ -71,7 +93,7 @@ export function MediaRequestForm({ media }: { media: MediaResult }) {
     }
 
     fetchSettings();
-  }, [apiUrl, apiKey, settingsEndpoint]);
+  }, [baseApiUrl, apiKey, settingsEndpoint]);
 
   /**
    * Fetches additional details for TV shows including season information
@@ -82,7 +104,7 @@ export function MediaRequestForm({ media }: { media: MediaResult }) {
       if (media.mediaType !== "tv") return;
 
       try {
-        const response = await fetch(`${apiUrl}/tv/${media.id}`, {
+        const response = await fetch(`${baseApiUrl}/tv/${media.id}`, {
           headers: {
             "X-Api-Key": apiKey,
             accept: "application/json",
@@ -98,23 +120,18 @@ export function MediaRequestForm({ media }: { media: MediaResult }) {
     }
 
     fetchTVShowDetails();
-  }, [media.id, media.mediaType, apiUrl, apiKey]);
+  }, [media.id, media.mediaType, baseApiUrl, apiKey]);
 
   /**
    * Handles form submission and sends request to the API
-   * @param values - Form values including profile, rootFolder, and tag
+   * @param values - Form values including profile, rootFolder, and tags
    */
-  async function handleSubmit(values: { profile: string; rootFolder: string; tag: string }) {
+  async function handleSubmit(values: { profile: string; rootFolder: string; tags: string[] }) {
     try {
-      console.log("Submitting request with data:", {
-        mediaType: media.mediaType,
-        mediaId: media.id,
-        serverId: settings[0]?.id,
-        profileId: parseInt(values.profile),
-        rootFolder: values.rootFolder,
-        tags: values.tag ? [values.tag] : [],
-        seasons: media.mediaType === "tv" ? (selectedSeasons.length > 0 ? selectedSeasons : "all") : undefined,
-      });
+      // Convert tag strings to numeric IDs
+      const tagIds = values.tags
+        .map((tagLabel) => availableTags.find((tag) => tag.label === tagLabel)?.id)
+        .filter((id): id is number => id !== undefined);
 
       const requestBody = {
         mediaType: media.mediaType === "tv" ? "tv" : "movie",
@@ -122,13 +139,15 @@ export function MediaRequestForm({ media }: { media: MediaResult }) {
         serverId: settings[0]?.id,
         profileId: parseInt(values.profile),
         rootFolder: values.rootFolder,
-        tags: values.tag ? [values.tag] : [],
+        tags: tagIds.length > 0 ? tagIds : undefined,
         ...(media.mediaType === "tv" && {
           seasons: selectedSeasons.length > 0 ? selectedSeasons : "all",
         }),
       };
 
-      const response = await fetch(`${apiUrl}/request`, {
+      console.log("Submitting request with data:", requestBody);
+
+      const response = await fetch(`${baseApiUrl}/request`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -169,6 +188,11 @@ export function MediaRequestForm({ media }: { media: MediaResult }) {
    */
   const handleSeasonChange = (seasonNumbers: string[]) => {
     setSelectedSeasons(seasonNumbers.map((n) => parseInt(n)));
+  };
+
+  // Handle tag selection changes
+  const handleTagChange = (tagLabels: string[]) => {
+    setSelectedTags(tagLabels);
   };
 
   // Show loading state while fetching initial data
@@ -216,8 +240,20 @@ export function MediaRequestForm({ media }: { media: MediaResult }) {
         </Form.TagPicker>
       )}
 
-      {/* Optional Tag Field */}
-      <Form.TextField id="tag" title="Tag" placeholder="Add an optional tag for this request..." />
+      {/* Tag Selection */}
+      {availableTags.length > 0 && (
+        <Form.TagPicker
+          id="tags"
+          title="Tags"
+          placeholder="Select tags (optional)"
+          value={selectedTags}
+          onChange={handleTagChange}
+        >
+          {availableTags.map((tag) => (
+            <Form.TagPicker.Item key={tag.id} value={tag.label} title={tag.label} />
+          ))}
+        </Form.TagPicker>
+      )}
     </Form>
   );
 }

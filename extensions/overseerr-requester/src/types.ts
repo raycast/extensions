@@ -159,11 +159,20 @@ export interface RootFolder {
 }
 
 /**
- * Server test response containing profiles and folders
+ * Server tag configuration
+ */
+export interface ServerTag {
+  label: string;
+  id: number;
+}
+
+/**
+ * Server test response containing profiles, folders, and tags
  */
 export interface ServerTestResponse {
   profiles: ServerProfile[];
   rootFolders: RootFolder[];
+  tags?: ServerTag[]; // Add tags to the response type
 }
 
 /**

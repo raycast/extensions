@@ -3,7 +3,7 @@
   "name": "overseerr-requester",
   "title": "Overseerr Requester",
   "description": "Request movies from your Overseerr instance directly from Raycast.",
-  "icon": "extension-icon.png",
+  "icon": "overseerr.png",
   "author": "connor_pink",
   "categories": [
     "Media"
