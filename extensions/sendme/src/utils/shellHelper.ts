@@ -8,9 +8,7 @@ const execAsync = promisify(exec);
  * Execute a shell command with improved environment
  * This uses the full shell environment unlike Node's spawn/exec
  */
-export async function executeCommand(
-  command: string,
-): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+export async function executeCommand(command: string): Promise<{ stdout: string; stderr: string; exitCode: number }> {
   try {
     console.log(`Executing command: ${command}`);
     const { stdout, stderr } = await execAsync(command, {
@@ -35,10 +33,7 @@ export async function executeCommand(
 /**
  * Run a command in a new Terminal window and return right away
  */
-export async function runInTerminal(
-  command: string,
-  pwd?: string,
-): Promise<void> {
+export async function runInTerminal(command: string, pwd?: string): Promise<void> {
   const workingDir = pwd || process.env.HOME || ".";
   const escapedDir = workingDir.replace(/"/g, '\\"');
   const escapedCommand = command.replace(/"/g, '\\"');

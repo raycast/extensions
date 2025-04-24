@@ -4,11 +4,11 @@
   "title": "Color Casket",
   "description": "Handy Color Utilities",
   "icon": "command-icon.png",
-  "author": "slava.razum",
+  "author": "slavarazum",
   "contributors": [
     "fe9lix",
     "pernielsentikaer",
-    "tzfeng"
+    "fengtianze"
   ],
   "categories": [
     "Design Tools",

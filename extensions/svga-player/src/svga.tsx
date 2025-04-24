@@ -55,10 +55,7 @@ export default async function Main() {
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title:
-          error instanceof Error
-            ? error.message
-            : "Failed to read current focus",
+        title: error instanceof Error ? error.message : "Failed to read current focus",
       });
       return true;
     }

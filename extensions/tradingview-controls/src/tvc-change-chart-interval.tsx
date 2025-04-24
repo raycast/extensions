@@ -9,9 +9,7 @@ const context = "src/tvc-add-symbol-to-watchlist.tsx";
  * Changes the interval of a chart in TradingView.
  * @param props Launch arguments.
  */
-export async function TVCChangeChartInterval(
-  props: LaunchProps<{ arguments: TVCChangeChartIntervalArgs }>
-) {
+export async function TVCChangeChartInterval(props: LaunchProps<{ arguments: TVCChangeChartIntervalArgs }>) {
   const { interval } = props.arguments;
   TVCLogger.log("TVCChangeChartInterval", { ...props, context });
   TVCLogger.log("Changing chart interval in TradingView...", { context });

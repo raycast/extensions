@@ -30,25 +30,23 @@ export const getSendmePath = async (): Promise<string> => {
 
   // Last resort - check path
   try {
-    const { stdout } = await new Promise<{ stdout: string; stderr: string }>(
-      (resolve) => {
-        const proc = spawn("which", ["sendme"]);
-        let stdout = "";
-        let stderr = "";
+    const { stdout } = await new Promise<{ stdout: string; stderr: string }>((resolve) => {
+      const proc = spawn("which", ["sendme"]);
+      let stdout = "";
+      let stderr = "";
 
-        proc.stdout.on("data", (data) => {
-          stdout += data.toString().trim();
-        });
+      proc.stdout.on("data", (data) => {
+        stdout += data.toString().trim();
+      });
 
-        proc.stderr.on("data", (data) => {
-          stderr += data.toString().trim();
-        });
+      proc.stderr.on("data", (data) => {
+        stderr += data.toString().trim();
+      });
 
-        proc.on("close", () => {
-          resolve({ stdout, stderr });
-        });
-      },
-    );
+      proc.on("close", () => {
+        resolve({ stdout, stderr });
+      });
+    });
 
     if (stdout && fs.existsSync(stdout)) {
       return stdout;
@@ -80,10 +78,7 @@ export const extractTicket = (output: string): string | null => {
 };
 
 // Fix async promise executor pattern
-export const startSendmeProcess = (
-  filePath: string,
-  sessionId: string,
-): Promise<string> => {
+export const startSendmeProcess = (filePath: string, sessionId: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     // Helper function to handle the logic that was previously in the async function
     const initializeProcess = async () => {
@@ -145,9 +140,7 @@ export const startSendmeProcess = (
             extractedTicket = ticket;
 
             // Update existing session with process and ticket
-            const session = globalSessions
-              .getSessions()
-              .find((s) => s.id === sessionId);
+            const session = globalSessions.getSessions().find((s) => s.id === sessionId);
             if (session) {
               session.process = childProcess;
               session.pid = childProcess.pid;
@@ -171,9 +164,7 @@ export const startSendmeProcess = (
             extractedTicket = ticket;
 
             // Update existing session with process and ticket
-            const session = globalSessions
-              .getSessions()
-              .find((s) => s.id === sessionId);
+            const session = globalSessions.getSessions().find((s) => s.id === sessionId);
             if (session) {
               session.process = childProcess;
               session.pid = childProcess.pid;

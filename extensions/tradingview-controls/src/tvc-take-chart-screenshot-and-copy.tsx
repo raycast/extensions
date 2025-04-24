@@ -3,10 +3,7 @@ import { runAppleScript } from "run-applescript";
 import { TVCLogger } from "./logger";
 import { TVCChangeChartInterval } from "./tvc-change-chart-interval";
 import { TVCOpenSymbol } from "./tvc-open-symbol";
-import {
-  TVCChangeChartIntervalArgs,
-  TVCTakeChartScreenshotArgs,
-} from "./types";
+import { TVCChangeChartIntervalArgs, TVCTakeChartScreenshotArgs } from "./types";
 
 const context = "src/tvc-take-chart-screenshot-and-copy.tsx";
 

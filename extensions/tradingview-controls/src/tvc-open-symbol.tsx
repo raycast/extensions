@@ -16,9 +16,7 @@ type TVCOpenSymbolArgs = TVCSymbolArg;
  * Raycast command to open a symbol in TradingView.
  * @param props Launch arguments.
  */
-export async function TVCOpenSymbol(
-  props: LaunchProps<{ arguments: TVCOpenSymbolArgs }>
-) {
+export async function TVCOpenSymbol(props: LaunchProps<{ arguments: TVCOpenSymbolArgs }>) {
   TVCLogger.log("TVCOpenSymbol", { context });
   TVCLogger.log(props.arguments, { context });
   TVCLogger.log("Opening symbol in TradingView...", { context });
@@ -49,15 +47,11 @@ export async function TVCOpenSymbol(
       const retryStatus = await launchAndFocusApplication();
       if (!retryStatus) {
         TVCLogger.error("TradingView did not launch in time.", { context });
-        TVCLogger.error(
-          "Please try opening the TradingView app manually, then trying again.",
-          { context }
-        );
+        TVCLogger.error("Please try opening the TradingView app manually, then trying again.", { context });
         showToast({
           style: Toast.Style.Failure,
           title: "TradingView did not launch in time.",
-          message:
-            "Please try opening the TradingView app manually, then trying again.",
+          message: "Please try opening the TradingView app manually, then trying again.",
         });
       }
     }

@@ -2,19 +2,8 @@ import { spawn } from "child_process";
 import { homedir } from "os";
 import { existsSync } from "fs";
 import { join } from "path";
-import {
-  showHUD,
-  confirmAlert,
-  getPreferenceValues,
-  showToast,
-  Toast,
-  open,
-} from "@raycast/api";
-import {
-  executeCommand,
-  runInTerminal,
-  installSendmeWithBrewViaTerminal,
-} from "./shellHelper";
+import { showHUD, confirmAlert, getPreferenceValues, showToast, Toast, open } from "@raycast/api";
+import { executeCommand, runInTerminal, installSendmeWithBrewViaTerminal } from "./shellHelper";
 
 // Define the interface before using it
 interface Preferences {
@@ -184,10 +173,7 @@ async function installWithCurl(): Promise<boolean> {
     });
 
     // Use runInTerminal from shellHelper instead of direct AppleScript execution
-    await runInTerminal(
-      "curl -fsSL https://iroh.computer/sendme.sh -o ~/sendme && chmod +x ~/sendme",
-      homedir(),
-    );
+    await runInTerminal("curl -fsSL https://iroh.computer/sendme.sh -o ~/sendme && chmod +x ~/sendme", homedir());
 
     await showToast({
       style: Toast.Style.Success,
@@ -260,9 +246,7 @@ export async function ensureSendmeAvailable(): Promise<boolean> {
   const shouldInstall = await confirmAlert({
     title: "Sendme Not Found",
     message: `The sendme tool is required but not found on your system. Would you like to install it? ${
-      hasHomebrew
-        ? "We'll use Homebrew since it's installed."
-        : "We'll use a Terminal command to install it."
+      hasHomebrew ? "We'll use Homebrew since it's installed." : "We'll use a Terminal command to install it."
     }`,
     primaryAction: {
       title: "Install sendme",
@@ -279,9 +263,7 @@ export async function ensureSendmeAvailable(): Promise<boolean> {
     console.log("User chose to install manually");
     // Handle manual installation
     open("https://github.com/n0-computer/sendme#installation");
-    await showHUD(
-      "Installation cancelled. Please install sendme manually to use this extension.",
-    );
+    await showHUD("Installation cancelled. Please install sendme manually to use this extension.");
     return false;
   }
 }
