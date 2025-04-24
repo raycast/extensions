@@ -3,14 +3,7 @@ import { showFailureToast, useFetch } from "@raycast/utils";
 import { useCallback } from "react";
 import { currentAcadYear } from "../search-nus-courses";
 import { API_BASE_URL, WEBSITE_BASE_URL } from "../utils/constants";
-import {
-  CourseDetails,
-  CourseDetailsSchema,
-  CourseSummary,
-  PrereqTree,
-  SemesterData,
-  Timetable,
-} from "../utils/nusmods";
+import { CourseDetails, CourseDetailsSchema, CourseSummary, Prereq, SemesterData, Timetable } from "../utils/nusmods";
 
 const formatWorkload = (workload?: number[]) => {
   if (!workload) return null;
@@ -18,12 +11,12 @@ const formatWorkload = (workload?: number[]) => {
   return workload.map((hours, i) => `- ${categories[i]}: ${hours} hours`).join("\n");
 };
 
-const formatPrereqTree = (tree?: PrereqTree): string => {
+const formatPrereqTree = (tree?: Prereq): string => {
   if (!tree) return "";
 
   const sections: string[] = [];
 
-  const dfs = (node: PrereqTree | string, depth: number = 0) => {
+  const dfs = (node: Prereq | string, depth: number = 0) => {
     const indent = " ".repeat(depth * 2);
 
     if (typeof node === "string") {
