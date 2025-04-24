@@ -217,7 +217,7 @@ const CourseDetail: React.FC<{
     <Detail
       isLoading={isLoading}
       navigationTitle={props.moduleCode}
-      markdown={error ? "Unable to load course details." : generateMarkdown(data)}
+      markdown={error || !data ? "Unable to load course details." : generateMarkdown(data)}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={nusModsUrl} />
@@ -235,9 +235,11 @@ const CourseDetail: React.FC<{
             {data.gradingBasisDescription && (
               <Detail.Metadata.Label title="Grading Basis" text={data.gradingBasisDescription} />
             )}
-            {data?.fulfillRequirements && (
+            {data.fulfillRequirements && (
               <Detail.Metadata.TagList title="Fulfill Requirements">
-                {data?.fulfillRequirements.map((req) => <Detail.Metadata.TagList.Item key={req} text={req} />)}
+                {data.fulfillRequirements.map((req) => (
+                  <Detail.Metadata.TagList.Item key={req} text={req} />
+                ))}
               </Detail.Metadata.TagList>
             )}
             <Detail.Metadata.Separator />
