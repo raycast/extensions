@@ -1,7 +1,6 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
-import { showFailureToast, useFetch } from "@raycast/utils";
+import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { useCallback } from "react";
-import { currentAcadYear } from "../search-nus-courses";
 import { API_BASE_URL, WEBSITE_BASE_URL } from "../utils/constants";
 import { CourseDetails, CourseDetailsSchema, CourseSummary, Prereq, SemesterData, Timetable } from "../utils/nusmods";
 
@@ -11,10 +10,14 @@ const formatWorkload = (workload?: number[]) => {
   return workload.map((hours, i) => `- ${categories[i]}: ${hours} hours`).join("\n");
 };
 
-const formatPrereqTree = (tree?: Prereq): string => {
+const formatPrereqTree = (tree?: Prereq, prerequisite?: string): string => {
   if (!tree) return "";
 
   const sections: string[] = [];
+
+  if (prerequisite) {
+    sections.push(prerequisite);
+  }
 
   const dfs = (node: Prereq | string, depth: number = 0) => {
     const indent = " ".repeat(depth * 2);
@@ -37,6 +40,7 @@ const formatPrereqTree = (tree?: Prereq): string => {
     }
   };
 
+  sections.push("#### Prerequisite Tree");
   sections.push("```");
   dfs(tree);
   sections.push("```");
@@ -44,11 +48,59 @@ const formatPrereqTree = (tree?: Prereq): string => {
   return sections.join("\n");
 };
 
-const formatTimetableSlot = (slot: Timetable): string => {
-  const venue = slot.venue.trim() ? ` at ${slot.venue}` : "";
-  const size = slot.size ? ` (${slot.size} students)` : "";
-  const day = slot.day ? ` on ${slot.day}` : "";
-  return `- ${slot.lessonType}${day} (${slot.startTime}-${slot.endTime}${venue})${size}`;
+const formatTimetableSlots = (timetable: Timetable[]): string => {
+  if (!timetable?.length) return "";
+
+  const grouped = timetable.reduce(
+    (acc, slot) => {
+      const key = `${slot.lessonType}`;
+      if (!acc[key]) {
+        acc[key] = new Map<string, Timetable[]>();
+      }
+      if (!acc[key].has(slot.classNo)) {
+        acc[key].set(slot.classNo, []);
+      }
+      acc[key].get(slot.classNo)?.push(slot);
+      return acc;
+    },
+    {} as Record<string, Map<string, Timetable[]>>,
+  );
+
+  const sections: string[] = [];
+
+  const formatClass = (slot: Timetable, index: number) => {
+    sections.push(`- Session ${index + 1}`);
+    sections.push(`  - ${slot.day}: ${slot.startTime} - ${slot.endTime}`);
+    if (slot.venue) {
+      sections.push(`  - Venue: ${slot.venue}`);
+    }
+    if (slot.size) {
+      sections.push(`  - Class Size: ${slot.size}`);
+    }
+  };
+
+  const sortedEntries = Object.entries(grouped).toSorted(([a], [b]) => a.localeCompare(b));
+  for (const [lessonType, classSessions] of sortedEntries) {
+    const sortedClassSessions = Array.from(classSessions.entries()).sort(([a], [b]) => {
+      const aNum = parseInt(a);
+      const bNum = parseInt(b);
+      if (isNaN(aNum) || isNaN(bNum)) {
+        return a.localeCompare(b);
+      }
+
+      return aNum - bNum;
+    });
+
+    sortedClassSessions.forEach(([classNo, sessions]) => {
+      sections.push(`\n#### ${lessonType} (group ${classNo})`);
+
+      sessions.forEach((session, index) => {
+        formatClass(session, index);
+      });
+    });
+  }
+
+  return sections.join("\n");
 };
 
 const formatTimetable = (semesterData: Array<SemesterData>) => {
@@ -56,7 +108,11 @@ const formatTimetable = (semesterData: Array<SemesterData>) => {
 
   const sections: string[] = [];
 
-  semesterData.forEach((sem) => {
+  semesterData.forEach((sem, index) => {
+    if (index > 0) {
+      sections.push("\n---");
+    }
+
     const semesterDetails: string[] = [`### Semester ${sem.semester}`];
 
     if (sem.examDate) {
@@ -65,13 +121,12 @@ const formatTimetable = (semesterData: Array<SemesterData>) => {
     }
 
     if (sem.examDuration) {
-      semesterDetails.push(`- Exam Duration: ${sem.examDuration} hours`);
+      semesterDetails.push(`- Exam Duration: ${sem.examDuration} minutes`);
     }
 
     if (sem.timetable?.length) {
-      semesterDetails.push("#### Timetable");
-      const timetableSlots = sem.timetable.map(formatTimetableSlot);
-      semesterDetails.push(...timetableSlots);
+      semesterDetails.push("\n### Timetable");
+      semesterDetails.push(formatTimetableSlots(sem.timetable));
     }
 
     sections.push(semesterDetails.join("\n"));
@@ -91,13 +146,20 @@ const generateMarkdown = (data?: CourseDetails | null) => {
     sections.push(`\n## Additional Information\n${data.additionalInformation}`);
   }
   if (data.workload) {
+    sections.push("\n---");
     sections.push(`\n## Weekly Workload\n${formatWorkload(data.workload)}`);
   }
   if (data.semesterData?.length) {
+    sections.push("\n---");
     sections.push(`\n## Semester Information\n${formatTimetable(data.semesterData)}`);
   }
+  if (data.preclusion) {
+    sections.push("\n---");
+    sections.push(`\n## Preclusion\n${data.preclusion}`);
+  }
   if (data.prereqTree) {
-    sections.push(`\n## Prerequisites\n${formatPrereqTree(data.prereqTree)}`);
+    sections.push("\n---");
+    sections.push(`\n## Prerequisites\n${formatPrereqTree(data.prereqTree, data.prerequisite)}`);
   }
 
   return sections.join("\n");
@@ -105,21 +167,26 @@ const generateMarkdown = (data?: CourseDetails | null) => {
 
 const CourseDetail: React.FC<{
   moduleCode: string;
+  acadYear: string;
 }> = (props) => {
   const parseResponse = useCallback(async (res: Response) => {
     if (!res.ok) {
-      showFailureToast({
+      console.error("Failed to fetch course details:", res.status, res.statusText);
+      showToast({
         title: "Failed to fetch course details",
         message: "Please try again later.",
+        style: Toast.Style.Failure,
       });
       return null;
     }
 
     const data = await res.json();
     if (!data) {
-      showFailureToast({
+      console.error("Failed to unmarshal course details");
+      showToast({
         title: "Failed to unmarshal course details",
         message: "Please try again later.",
+        style: Toast.Style.Failure,
       });
       return null;
     }
@@ -127,7 +194,7 @@ const CourseDetail: React.FC<{
     const parseResult = await CourseDetailsSchema.safeParseAsync(data);
     if (!parseResult.success) {
       console.error("Failed to parse course details", JSON.stringify(parseResult.error));
-      showFailureToast({
+      showToast({
         title: "Validation error",
         message: "Unexpected course details data received, please report this issue.",
       });
@@ -137,8 +204,7 @@ const CourseDetail: React.FC<{
     return parseResult.data;
   }, []);
 
-  const { isLoading, data, error } = useFetch(`${API_BASE_URL}/${currentAcadYear}/modules/${props.moduleCode}.json`, {
-    keepPreviousData: true,
+  const { isLoading, data, error } = useFetch(`${API_BASE_URL}/${props.acadYear}/modules/${props.moduleCode}.json`, {
     parseResponse,
   });
 
@@ -166,16 +232,12 @@ const CourseDetail: React.FC<{
             {data.gradingBasisDescription && (
               <Detail.Metadata.Label title="Grading Basis" text={data.gradingBasisDescription} />
             )}
-            {data.prerequisite && <Detail.Metadata.Label title="Prerequisite" text={data.prerequisite} />}
-            {data.preclusion && <Detail.Metadata.Label title="Preclusion" text={data.preclusion} />}
-
-            <Detail.Metadata.Separator />
-
             {data?.fulfillRequirements && (
               <Detail.Metadata.TagList title="Fulfill Requirements">
                 {data?.fulfillRequirements.map((req) => <Detail.Metadata.TagList.Item key={req} text={req} />)}
               </Detail.Metadata.TagList>
             )}
+            <Detail.Metadata.Separator />
             <Detail.Metadata.Link title="Open in NUSMods" target={nusModsUrl} text="NUSMods" />
           </Detail.Metadata>
         )
@@ -186,8 +248,9 @@ const CourseDetail: React.FC<{
 
 export const CourseSummaryList: React.FC<{
   courseSummaries: Array<CourseSummary>;
+  acadYear: string;
 }> = (props) => {
-  const { courseSummaries } = props;
+  const { courseSummaries, acadYear } = props;
 
   return courseSummaries.length === 0 ? (
     <List.EmptyView icon={Icon.Bird} title="No courses found" description="Try a different academic year." />
@@ -205,7 +268,10 @@ export const CourseSummaryList: React.FC<{
         ]}
         actions={
           <ActionPanel>
-            <Action.Push title="Show Details" target={<CourseDetail moduleCode={courseSummary.moduleCode} />} />
+            <Action.Push
+              title="Show Details"
+              target={<CourseDetail moduleCode={courseSummary.moduleCode} acadYear={acadYear} />}
+            />
           </ActionPanel>
         }
       />

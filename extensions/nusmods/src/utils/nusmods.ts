@@ -20,7 +20,7 @@ export const TimetableSchema = z.object({
 
 export const SemesterDataSchema = z.object({
   semester: z.number(),
-  examDate: z.optional(z.string()),
+  examDate: z.optional(z.iso.datetime({ offset: true, local: true })),
   examDuration: z.optional(z.number()),
   timetable: z.optional(z.array(TimetableSchema)),
 });
