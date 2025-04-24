@@ -10,14 +10,10 @@ const formatWorkload = (workload?: number[]) => {
   return workload.map((hours, i) => `- ${categories[i]}: ${hours} hours`).join("\n");
 };
 
-const formatPrereqTree = (tree?: Prereq, prerequisite?: string): string => {
+const formatPrereqTree = (tree?: Prereq): string => {
   if (!tree) return "";
 
   const sections: string[] = [];
-
-  if (prerequisite) {
-    sections.push(prerequisite);
-  }
 
   const dfs = (node: Prereq | string, depth: number = 0) => {
     const indent = " ".repeat(depth * 2);
@@ -163,7 +159,8 @@ const generateMarkdown = (data?: CourseDetails | null) => {
   }
   if (data.prereqTree) {
     sections.push("\n---");
-    sections.push(`\n## Prerequisites\n${formatPrereqTree(data.prereqTree, data.prerequisite)}`);
+    sections.push(`\n## Prerequisites\n${data.prerequisite}`);
+    sections.push(`\n${formatPrereqTree(data.prereqTree)}`);
   }
 
   return sections.join("\n");
