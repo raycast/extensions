@@ -39,15 +39,6 @@ export const PrereqSchema = z.union([
   }),
 ]);
 
-export const PrereqTreeSchema = z.union([
-  z.interface({
-    and: z.array(PrereqSchema),
-  }),
-  z.interface({
-    or: z.array(PrereqSchema),
-  }),
-]);
-
 export const CourseDetailsSchema = z.object({
   acadYear: z.string(),
   description: z.string(),
@@ -62,14 +53,13 @@ export const CourseDetailsSchema = z.object({
   workload: z.optional(z.array(z.number()).check(z.length(5))),
   preclusion: z.optional(z.string()),
   prerequisite: z.optional(z.string()),
-  prereqTree: z.optional(PrereqTreeSchema),
+  prereqTree: z.optional(PrereqSchema),
   fulfillRequirements: z.optional(z.array(z.string())),
 });
 
 export type CourseSummary = z.infer<typeof CourseSummarySchema>;
 export type CourseSummaryList = z.infer<typeof CourseSummaryListSchema>;
 export type Prereq = z.infer<typeof PrereqSchema>;
-export type PrereqTree = z.infer<typeof PrereqTreeSchema>;
 export type Timetable = z.infer<typeof TimetableSchema>;
 export type SemesterData = z.infer<typeof SemesterDataSchema>;
 export type CourseDetails = z.infer<typeof CourseDetailsSchema>;
