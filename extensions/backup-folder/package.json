@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "backup-folder",
+  "title": "Backup a Folder",
+  "description": "Backup a folder to a specified location using GTAR",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dawescc/raycast-extensions.git"
+  },
+  "icon": "extension_icon.png",
+  "author": "dawes",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "gtarPath",
+      "title": "Path to gtar",
+      "description": "Full path to the GNU tar (gtar) executable. Defaults to Homebrew location.",
+      "type": "textfield",
+      "required": false,
+      "default": "/opt/homebrew/bin/gtar",
+      "placeholder": "/opt/homebrew/bin/gtar"
+    },
+    {
+      "name": "sourceDirectory",
+      "title": "Source Directory to Backup",
+      "description": "Full path to the directory you want to back up (e.g., /Users/you/Projects or ~/Projects).",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "~/path/to/backup"
+    },
+    {
+      "name": "backupDestination",
+      "title": "Backup Destination Directory",
+      "description": "Full path to the directory where backup archives (.tar.gz) will be stored.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "~/path/to/store/backups"
+    },
+    {
+      "name": "archivePrefix",
+      "title": "Archive Filename Prefix",
+      "description": "Optional prefix for the backup filename. If left blank, defaults to the name of the source directory (e.g., 'Projects_').",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Defaults to source folder name"
+    },
+    {
+      "name": "retentionDays",
+      "title": "Backup Retention (Days)",
+      "description": "Delete backups older than this many days when running 'Clean Old Backups'. Set to 0 or leave blank to disable cleanup.",
+      "type": "textfield",
+      "required": false,
+      "default": "30",
+      "placeholder": "e.g., 30"
+    },
+    {
+      "name": "moveToTrash",
+      "title": "Move Old Backups to Trash",
+      "description": "Instead of permanently deleting, move files older than retention period to the system Trash.",
+      "type": "checkbox",
+      "label": "Move to Trash instead of deleting",
+      "required": false,
+      "default": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "backup-folder",
+      "title": "Create New Backup",
+      "subtitle": "Create a timestamped archive of your source folder",
+      "description": "Immediately creates a compressed backup (.tar.gz) of the source folder defined in preferences, saving it to the destination folder.",
+      "mode": "no-view"
+    },
+    {
+      "name": "cleanup-backups",
+      "title": "Apply Backup Retention",
+      "subtitle": "Remove expired backup archives",
+      "description": "Scans the backup destination and removes archive files older than the retention period set in preferences (moves to Trash or deletes permanently).",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
