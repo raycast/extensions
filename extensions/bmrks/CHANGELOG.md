@@ -1,6 +1,6 @@
 # bmrks Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-04-24
 
 - Improved title generation for bookmarks
 - Added support for drafts
