@@ -46,7 +46,9 @@ const formatPrereqTree = (tree?: Prereq): string => {
 
 const formatTimetableSlot = (slot: Timetable): string => {
   const venue = slot.venue.trim() ? ` at ${slot.venue}` : "";
-  return `- ${slot.lessonType} (${slot.day} ${slot.startTime}-${slot.endTime}${venue})`;
+  const size = slot.size ? ` (${slot.size} students)` : "";
+  const day = slot.day ? ` on ${slot.day}` : "";
+  return `- ${slot.lessonType}${day} (${slot.startTime}-${slot.endTime}${venue})${size}`;
 };
 
 const formatTimetable = (semesterData: Array<SemesterData>) => {

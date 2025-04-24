@@ -13,9 +13,9 @@ export const TimetableSchema = z.object({
   startTime: z.string(),
   endTime: z.string(),
   venue: z.string(),
-  day: z.string(),
+  day: z.optional(z.string()),
   lessonType: z.string(),
-  size: z.number(),
+  size: z.optional(z.number()),
 });
 
 export const SemesterDataSchema = z.object({
