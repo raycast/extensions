@@ -1,11 +1,12 @@
 import { execSync } from "child_process";
-import { showToast, Toast, closeMainWindow } from "@raycast/api";
+import { closeMainWindow } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function main() {
   try {
     await closeMainWindow();
     execSync('hs -c "moveWindowReasonableSize()"');
-  } catch {
-    await showToast({ style: Toast.Style.Failure, title: "Is Hammerspoon running?" });
+  } catch (error) {
+    await showFailureToast(error, { title: "Is Hammerspoon running?" });
   }
 }

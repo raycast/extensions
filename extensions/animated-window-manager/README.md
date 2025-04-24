@@ -7,7 +7,7 @@ Bring macOS-native-feeling window movements to your desktop with clean animation
 - ⬅️ Left Half
 - ➡️ Right Half
 - 🔳 Maximize
-- 💬 Reasonable Size (~60% centered)
+- 💬 Reasonable Size (~30% centered)
 
 No jarring jumps. Just smooth, polished transitions.
 
@@ -20,7 +20,7 @@ This extension uses [Hammerspoon](https://www.hammerspoon.org) to apply window a
 ### ✅ One-liner setup (Hammerspoon + animation config)
 
 ```bash
-brew install --cask hammerspoon && curl -o ~/.hammerspoon/init.lua https://raw.githubusercontent.com/MatheusChein/animated-window-manager/main/hammerspoon/init.lua && open -a Hammerspoon
+brew install --cask hammerspoon && curl -o ~/.hammerspoon/init.lua https://raw.githubusercontent.com/raycast/extensions/tree/main/extensions/animated-window-manager/main/hammerspoon/init.lua && open -a Hammerspoon
 ```
 
 > ☝️ This installs Hammerspoon, applies the animated layout config, and opens the app.
@@ -169,4 +169,4 @@ This project was built to make macOS window management feel less robotic and mor
 
 ## 📬 Suggestions?
 
-Open an issue or submit a pull request on [GitHub](https://github.com/MatheusChein/animated-window-manager). Happy snapping! ⚡️
+Open an issue or submit a pull request on [GitHub](https://github.com/raycast/extensions/tree/main/extensions/animated-window-manager). Happy snapping! ⚡️

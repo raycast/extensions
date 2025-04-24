@@ -2,7 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "animated-window-manager",
   "title": "Animated Window Manager",
-  "description": "Simple window manager, but with smooth animations",
+  "subtitle": "Simple window manager, but with smooth animations",
+  "description": "Manage your windows with macOS-like animations",
   "icon": "animated-windows.png",
   "author": "matheuschein",
   "categories": [
@@ -34,6 +35,7 @@
     {
       "name": "reasonable-size",
       "title": "Animate Reasonable Size",
+      "subtitle": "30% width, 70% height, centered",
       "description": "Set your window to a reasonable size with a smooth animation",
       "mode": "no-view",
       "icon": "reasonable-size.png"
