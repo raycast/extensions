@@ -286,7 +286,7 @@ export const maybeMoveResultToTrash = async (result: SpotlightSearchResult, resu
       style: Alert.ActionStyle.Destructive,
       onAction: () => {
         trash(result.path);
-        showFailureToast({ title: "Moved to Trash", message: folderName(result) });
+        showToast({ title: "Moved to Trash", message: folderName(result), style: Toast.Style.Success });
         resultWasTrashed();
       },
     },
