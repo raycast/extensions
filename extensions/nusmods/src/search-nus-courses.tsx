@@ -32,7 +32,7 @@ export default function Command() {
         message: "Please try again later.",
         style: Toast.Style.Failure,
       });
-      return [];
+      return null;
     }
 
     const data = await res.json();
@@ -43,7 +43,7 @@ export default function Command() {
         message: "Please try again later.",
         style: Toast.Style.Failure,
       });
-      return [];
+      return null;
     }
 
     const parsedResult = await CourseSummaryListSchema.safeParseAsync(data);
@@ -54,7 +54,7 @@ export default function Command() {
         message: "Unexpected course summaries data received from NUSMods API, please report this issue",
         style: Toast.Style.Failure,
       });
-      return [];
+      return null;
     }
 
     return parsedResult.data;
