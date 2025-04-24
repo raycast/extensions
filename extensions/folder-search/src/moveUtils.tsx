@@ -153,6 +153,7 @@ export async function moveFinderItems(
       destinationFolder,
       timestamp: new Date().toISOString(),
     });
+    await showFailureToast(error, { title: "Unexpected error during move operation" });
     throw error;
   }
 }
