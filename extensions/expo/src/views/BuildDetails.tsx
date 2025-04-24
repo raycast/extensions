@@ -1,15 +1,15 @@
 import { showToast, Toast, ActionPanel, Detail, Action, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useEffect } from "react";
 import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
-import { getAuthHeaders } from "../lib/utils";
+import { isObjectEmpty } from "../lib/utils";
 import { Build, BuildDetailsResponse } from "../lib/types/build-details.types";
 import generateBuildMarkdown from "../lib/markdown/generateBuildMarkdown";
 import LogsViewer from "./LogsViewer";
+import useAuth from "../hooks/useAuth";
 
 export default function BuildDetails({ buildId }: { buildId: string }) {
-  const [headers, setHeaders] = useState<Record<string, string> | null>(null);
+  const { authHeaders } = useAuth();
 
   const BuildDetailsPayload = JSON.stringify([
     {
@@ -25,8 +25,8 @@ export default function BuildDetails({ buildId }: { buildId: string }) {
   const { isLoading, data } = useFetch(BASE_URL, {
     body: BuildDetailsPayload,
     method: "post",
-    headers: headers || {},
-    execute: headers === null ? false : true,
+    headers: authHeaders,
+    execute: !isObjectEmpty(authHeaders),
     parseResponse: async (resp) => {
       const data = (await resp.json()) as BuildDetailsResponse;
       if ("errors" in data) {
@@ -38,7 +38,6 @@ export default function BuildDetails({ buildId }: { buildId: string }) {
       return data[0].data.builds.byId;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching project builds",
         message: (error as Error)?.message || "",
@@ -47,14 +46,6 @@ export default function BuildDetails({ buildId }: { buildId: string }) {
     },
     initialData: null,
   });
-
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
 
   function getExpoLink(build: Build) {
     if (!build || !build.__typename) {

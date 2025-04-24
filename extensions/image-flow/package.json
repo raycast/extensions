@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "image-flow",
+  "title": "Imageflow",
+  "description": "Image Flow is a powerful optimization tool for images and files, enabling you to process them efficiently with workflows.",
+  "icon": "icon.png",
+  "author": "Godruoyi",
+  "categories": ["Media", "Other"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "process-image",
+      "title": "Process Image",
+      "description": "Optimize, resize, and compress images in your custom workflow",
+      "mode": "view"
+    },
+    {
+      "name": "process-file",
+      "title": "Process File",
+      "description": "Process your images with custom workflows, such as uploading, renaming, etc",
+      "mode": "view"
+    },
+    {
+      "name": "process-all",
+      "title": "Process with Specific Workflow",
+      "description": "Specify a workflow to process images or files",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workflow",
+      "description": "Your configuration for the workflow",
+      "type": "file",
+      "required": true,
+      "title": "Workflow YAML File"
+    }
+  ],
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.749.0",
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0",
+    "file-type": "^20.1.0",
+    "js-yaml": "^4.1.0",
+    "node-fetch": "^3.3.2",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

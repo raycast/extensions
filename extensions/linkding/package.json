@@ -21,12 +21,6 @@
       "mode": "view"
     },
     {
-      "name": "manage-account",
-      "title": "Manage Linkding Accounts",
-      "description": "Mange your Linkding Accounts and Servers",
-      "mode": "view"
-    },
-    {
       "name": "create-bookmarks",
       "title": "Create Bookmark",
       "description": "Create new Bookmarks",
@@ -34,6 +28,20 @@
     }
   ],
   "preferences": [
+    {
+      "title": "Server URL",
+      "name": "serverUrl",
+      "description": "URL from Linkding instance",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "title": "API key",
+      "name": "apiKey",
+      "description": "API key from Linkding instance",
+      "type": "password",
+      "required": true
+    },
     {
       "title": "New bookmarks",
       "name": "createBookmarksAsUnread",
@@ -63,8 +71,8 @@
   "dependencies": {
     "@raycast/api": "^1.91.0",
     "@raycast/utils": "^1.18.1",
-    "axios": "^1.8.4",
-    "cheerio": "^1.0.0-rc.12"
+    "cheerio": "^1.0.0-rc.12",
+    "fuse.js": "^7.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

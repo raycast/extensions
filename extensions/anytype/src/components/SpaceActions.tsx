@@ -1,19 +1,28 @@
-import { Action, ActionPanel, Icon, showToast, Toast, Keyboard, Clipboard } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import ObjectList from "./ObjectList";
-import { Space } from "../helpers/schemas";
+import { ObjectList } from ".";
+import { Space } from "../models";
+import {
+  addPinned,
+  anytypeSpaceDeeplink,
+  localStorageKeys,
+  moveDownInPinned,
+  moveUpInPinned,
+  removePinned,
+} from "../utils";
 
 type SpaceActionsProps = {
   space: Space;
-  mutate: MutatePromise<Space[]>;
+  mutate: MutatePromise<Space[]>[];
+  isPinned: boolean;
 };
 
-export default function SpaceActions({ space, mutate }: SpaceActionsProps) {
-  const spaceUrl = `anytype://main/object/_blank_/spaceId/${space.id}`;
-  const chatUrl = `anytype://main/chat/${space.workspace_object_id}/spaceId/${space.id}`;
+export function SpaceActions({ space, mutate, isPinned }: SpaceActionsProps) {
+  const spaceDeeplink = anytypeSpaceDeeplink(space.id);
+  const pinSuffix = localStorageKeys.suffixForSpaces;
 
   async function handleCopyLink() {
-    await Clipboard.copy(spaceUrl);
+    await Clipboard.copy(spaceDeeplink);
     await showToast({
       title: "Link copied",
       message: "The space link has been copied to your clipboard",
@@ -21,11 +30,38 @@ export default function SpaceActions({ space, mutate }: SpaceActionsProps) {
     });
   }
 
+  async function handleMoveUpInFavorites() {
+    await moveUpInPinned(space.id, space.id, pinSuffix);
+    await Promise.all(mutate.map((mutateFunc) => mutateFunc()));
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Moved Up in Pinned",
+    });
+  }
+
+  async function handleMoveDownInFavorites() {
+    await moveDownInPinned(space.id, space.id, pinSuffix);
+    await Promise.all(mutate.map((mutateFunc) => mutateFunc()));
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Moved Down in Pinned",
+    });
+  }
+
+  async function handlePin() {
+    if (isPinned) {
+      await removePinned(space.id, space.id, pinSuffix, space.name, "Space");
+    } else {
+      await addPinned(space.id, space.id, pinSuffix, space.name, "Space");
+    }
+    await Promise.all(mutate.map((mutateFunc) => mutateFunc()));
+  }
+
   async function handleRefresh() {
     await showToast({ style: Toast.Style.Animated, title: "Refreshing spaces" });
     if (mutate) {
       try {
-        await mutate();
+        await Promise.all(mutate.map((mutateFunc) => mutateFunc()));
         await showToast({ style: Toast.Style.Success, title: "Spaces refreshed" });
       } catch (error) {
         await showToast({
@@ -40,17 +76,11 @@ export default function SpaceActions({ space, mutate }: SpaceActionsProps) {
   return (
     <ActionPanel title={space.name}>
       <ActionPanel.Section>
-        <Action.Push icon={Icon.List} title="View Objects" target={<ObjectList key={space.id} spaceId={space.id} />} />
+        <Action.Push icon={Icon.List} title="View Objects" target={<ObjectList key={space.id} space={space} />} />
         <Action.OpenInBrowser
           icon={{ source: "../assets/anytype-icon.png" }}
           title="Open Space in Anytype"
-          url={spaceUrl}
-        />
-        <Action.OpenInBrowser
-          icon={Icon.Bubble}
-          title="Open Chat in Anytype"
-          url={chatUrl}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          url={spaceDeeplink}
         />
       </ActionPanel.Section>
 
@@ -60,6 +90,30 @@ export default function SpaceActions({ space, mutate }: SpaceActionsProps) {
         shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
         onAction={handleCopyLink}
       />
+
+      <Action
+        icon={isPinned ? Icon.StarDisabled : Icon.Star}
+        title={isPinned ? "Unpin Space" : "Pin Space"}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+        onAction={handlePin}
+      />
+      {isPinned && (
+        <>
+          <Action
+            icon={Icon.ArrowUp}
+            title="Move Up in Pinned" // eslint-disable-line @raycast/prefer-title-case
+            shortcut={{ modifiers: ["opt", "cmd"], key: "arrowUp" }}
+            onAction={handleMoveUpInFavorites}
+          />
+          <Action
+            icon={Icon.ArrowDown}
+            title="Move Down in Pinned" // eslint-disable-line @raycast/prefer-title-case
+            shortcut={{ modifiers: ["opt", "cmd"], key: "arrowDown" }}
+            onAction={handleMoveDownInFavorites}
+          />
+        </>
+      )}
+
       <ActionPanel.Section>
         <Action
           icon={Icon.RotateClockwise}

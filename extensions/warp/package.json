@@ -2,13 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "warp",
   "title": "Warp",
-  "description": "Open Warp tabs/windows and launch configurations.",
-  "icon": "extension-icon.png",
+  "description": "Open Warp tabs/windows and Launch Configurations.",
+  "icon": "warp-icon.png",
   "author": "joetannenbaum",
   "contributors": [
     "theRubberDuckiee",
     "hakob_nersesian",
-    "kamil_drzastwa"
+    "kamil_drzastwa",
+    "chrismessina",
+    "pernielsentikaer"
   ],
   "pastContributors": [
     "danulqua"
@@ -50,6 +52,26 @@
       "title": "Open in Warp",
       "description": "Open selected Finder items in Warp.",
       "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "warpApp",
+      "default": "stable",
+      "required": false,
+      "title": "Warp Release",
+      "description": "Select which Warp release to use when opening a directory or launch configuration.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Warp",
+          "value": "stable"
+        },
+        {
+          "title": "Warp Preview",
+          "value": "preview"
+        }
+      ]
     }
   ],
   "dependencies": {
