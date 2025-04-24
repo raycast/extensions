@@ -1,6 +1,6 @@
 import { Color, Icon, List } from "@raycast/api";
 import { folderName, enclosingFolderName, formatDate } from "../utils";
-import { ReactNode } from "react";
+import { JSX } from "react";
 import { SpotlightSearchResult } from "../types";
 
 interface FolderListSectionProps {
@@ -8,7 +8,7 @@ interface FolderListSectionProps {
   results: SpotlightSearchResult[];
   isShowingDetail: boolean;
   resultIsPinned: (result: SpotlightSearchResult) => boolean;
-  renderActions: (result: SpotlightSearchResult, resultIndex: number) => ReactNode;
+  renderActions: (result: SpotlightSearchResult, resultIndex: number) => JSX.Element;
 }
 
 export function FolderListSection({
@@ -57,8 +57,7 @@ export function FolderListSection({
               }
             />
           }
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          actions={renderActions(result, resultIndex) as any}
+          actions={renderActions(result, resultIndex)}
         />
       ))}
     </List.Section>

@@ -4,9 +4,7 @@ import fs from "fs";
 import * as yup from "yup";
 import path from "path";
 import os from "os";
-
 import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
-import { showFailureToast } from "@raycast/utils";
 
 // Logging configuration
 const LOG_ENABLED = true; // Set to true to enable all logging
