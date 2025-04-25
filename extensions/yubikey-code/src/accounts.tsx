@@ -18,9 +18,10 @@ export function AccountDetail(props: {
   accountKey: string;
   actionType: ActionType;
   requiresTouch: boolean;
+  usageCallback: () => void;
 }): React.JSX.Element {
-  const { accountKey, actionType, requiresTouch } = props;
-  const { isLoading, result } = processAccountCode(accountKey, actionType);
+  const { accountKey, actionType, requiresTouch, usageCallback } = props;
+  const { isLoading, result } = processAccountCode(accountKey, actionType, usageCallback);
   const displayText = requiresTouch && isLoading ? "Touch your YubiKey..." : result;
 
   return <Detail isLoading={isLoading} markdown={displayText} />;
@@ -72,13 +73,13 @@ export function getAccountList(): {
   return { accounts, isLoading, error };
 }
 
-function processAccountCode(key: string, actionType: ActionType) {
+function processAccountCode(key: string, actionType: ActionType, usageCallback: () => void) {
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [result, setResult] = useState<string>("");
 
   useEffect(() => {
-    executeCodeCommand(key, actionType, setError, setIsLoading, setResult);
+    executeCodeCommand(key, actionType, setError, setIsLoading, setResult, usageCallback);
   }, []);
 
   return { error, isLoading, result };
@@ -89,7 +90,8 @@ export function executeCodeCommand(
   actionType: ActionType,
   errorCallback: (error: string) => void = () => null,
   isLoadingCallback: (isLoading: boolean) => void = () => null,
-  resultCallback: (result: string) => void = () => null
+  resultCallback: (result: string) => void = () => null,
+  usageCallback: () => void = () => {}
 ) {
   execFile(ykmanExecutable(), ["oath", "accounts", "code", key, "-s"], (error, stdout) => {
     if (error) {
@@ -98,6 +100,7 @@ export function executeCodeCommand(
     }
 
     isLoadingCallback(false);
+    usageCallback();
 
     switch (actionType) {
       case ActionType.Copy:

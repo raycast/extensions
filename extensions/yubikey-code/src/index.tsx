@@ -3,6 +3,7 @@ import { ExecFileException } from "child_process";
 import React, { useState } from "react";
 import { getAccountIcon, getIconOverrides, getIconPack, IconSubmenu } from "./icons";
 import { AccountDetail, executeCodeCommand, getAccountList, ykmanExecutable } from "./accounts";
+import { getActiveWindow, getUsageData, makeUsageSorter, updateUsage } from "./usage";
 
 interface Preference {
   ykmanPath: string;
@@ -33,6 +34,10 @@ export default function Command() {
   const [overrides, setOverrides] = useState<number>(0);
   const iconOverrides = getIconOverrides(overrides);
 
+  const [usages, setUsages] = useState<number>(0);
+  const usageData = getUsageData(usages);
+  const activeWindow = getActiveWindow();
+
   if (!isLoading && accountResults.length === 0) {
     const description = error
       ? "The ykman command failed to list your accounts."
@@ -47,45 +52,61 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Accounts">
-      {accountResults.map((account, index) => {
-        const { name, details, requiresTouch, key } = account;
+      {!isLoading && accountResults
+        .map((account) => {
+          const { name, details, requiresTouch, key } = account;
 
-        return (
-          <List.Item
-            icon={getAccountIcon(iconPackResult, iconOverrides, account)}
-            title={name}
-            subtitle={details}
-            key={index}
-            accessories={[
-              {
-                icon: requiresTouch ? Icon.Fingerprint : Icon.LockUnlocked,
-                tooltip: requiresTouch ? "Touch Required" : "No Touch Required",
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <PrimaryAction accountKey={key} requiresTouch={requiresTouch} />
-                <SecondaryAction accountKey={key} requiresTouch={requiresTouch} />
-                <Action.Push
-                  title="Reveal Code"
-                  icon={Icon.Eye}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  target={
-                    <AccountDetail accountKey={key} actionType={ActionType.Reveal} requiresTouch={requiresTouch} />
-                  }
-                />
-                <IconSubmenu accountKey={key} iconPack={iconPack} onOverride={() => setOverrides(overrides + 1)} />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+          const usageCallback = () => {
+            updateUsage(key, activeWindow);
+            setUsages(usages + 1);
+          };
+
+          return (
+            <List.Item
+              icon={getAccountIcon(iconPackResult, iconOverrides, account)}
+              title={name}
+              subtitle={details}
+              key={key}
+              accessories={[
+                {
+                  icon: requiresTouch ? Icon.Fingerprint : Icon.LockUnlocked,
+                  tooltip: requiresTouch ? "Touch Required" : "No Touch Required",
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <PrimaryAction accountKey={key} requiresTouch={requiresTouch} usageCallback={usageCallback} />
+                  <SecondaryAction accountKey={key} requiresTouch={requiresTouch} usageCallback={usageCallback} />
+                  <Action.Push
+                    title="Reveal Code"
+                    icon={Icon.Eye}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                    target={
+                      <AccountDetail
+                        accountKey={key}
+                        actionType={ActionType.Reveal}
+                        requiresTouch={requiresTouch}
+                        usageCallback={usageCallback}
+                      />
+                    }
+                  />
+                  <IconSubmenu accountKey={key} iconPack={iconPack} onOverride={() => setOverrides(overrides + 1)} />
+                </ActionPanel>
+              }
+            />
+          );
+        })
+        .sort(makeUsageSorter(usageData, activeWindow))}
     </List>
   );
 }
 
-function PrimaryAction(props: { accountKey: string; requiresTouch: boolean }): React.JSX.Element {
-  const { accountKey, requiresTouch } = props;
+function PrimaryAction(props: {
+  accountKey: string;
+  requiresTouch: boolean;
+  usageCallback: () => void;
+}): React.JSX.Element {
+  const { accountKey, requiresTouch, usageCallback } = props;
   const title = isCopyPrimary ? "Copy Code" : "Paste Code";
   const icon = isCopyPrimary ? Icon.CopyClipboard : Icon.Document;
 
@@ -93,15 +114,33 @@ function PrimaryAction(props: { accountKey: string; requiresTouch: boolean }): R
     <Action.Push
       title={title}
       icon={icon}
-      target={<AccountDetail accountKey={accountKey} actionType={primaryActionType} requiresTouch={requiresTouch} />}
+      target={
+        <AccountDetail
+          accountKey={accountKey}
+          actionType={primaryActionType}
+          requiresTouch={requiresTouch}
+          usageCallback={usageCallback}
+        />
+      }
     />
   ) : (
-    <Action title={title} icon={icon} onAction={() => executeCodeCommand(accountKey, primaryActionType)} />
+    <Action
+      title={title}
+      icon={icon}
+      onAction={() => {
+        executeCodeCommand(accountKey, primaryActionType);
+        usageCallback();
+      }}
+    />
   );
 }
 
-function SecondaryAction(props: { accountKey: string; requiresTouch: boolean }): React.JSX.Element {
-  const { accountKey, requiresTouch } = props;
+function SecondaryAction(props: {
+  accountKey: string;
+  requiresTouch: boolean;
+  usageCallback: () => void;
+}): React.JSX.Element {
+  const { accountKey, requiresTouch, usageCallback } = props;
   const title = isCopyPrimary ? "Paste Code" : "Copy Code";
   const icon = isCopyPrimary ? Icon.Document : Icon.CopyClipboard;
 
@@ -109,10 +148,24 @@ function SecondaryAction(props: { accountKey: string; requiresTouch: boolean }):
     <Action.Push
       title={title}
       icon={icon}
-      target={<AccountDetail accountKey={accountKey} actionType={secondaryActionType} requiresTouch={requiresTouch} />}
+      target={
+        <AccountDetail
+          accountKey={accountKey}
+          actionType={secondaryActionType}
+          requiresTouch={requiresTouch}
+          usageCallback={usageCallback}
+        />
+      }
     />
   ) : (
-    <Action title={title} icon={icon} onAction={() => executeCodeCommand(accountKey, secondaryActionType)} />
+    <Action
+      title={title}
+      icon={icon}
+      onAction={() => {
+        executeCodeCommand(accountKey, secondaryActionType);
+        usageCallback();
+      }}
+    />
   );
 }
 
