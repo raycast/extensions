@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timestamp-editor",
+  "title": "Timestamp Editor",
+  "description": "Edit unix timestamp with ease",
+  "icon": "icon.png",
+  "author": "wxiaoyun",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "timestamp-editor",
+      "title": "Timestamp Editor",
+      "description": "Convert Unix timestamps and display their components with timezone support",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "use-selected-text",
+          "title": "Use Selected Text",
+          "description": "Always try to use the selected text as the input for the command first",
+          "label": "Use selected text of the frontmost application",
+          "type": "checkbox",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "timestamp",
+          "title": "Timestamp",
+          "description": "The timestamp to convert",
+          "placeholder": "Enter a timestamp",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "latest",
+    "slashes": "^3.0.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^22.14.1",
+    "@types/react": "19.1.2",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
