@@ -677,7 +677,7 @@
   ],
   "dependencies": {
     "@raycast-community/ui": "^0.1.1",
-    "@raycast/api": "^1.94.2",
+    "@raycast/api": "^1.96.1",
     "@raycast/utils": "^1.19.1",
     "home-assistant-js-websocket": "^8.2.0",
     "javascript-time-ago": "^2.5.11",

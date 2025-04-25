@@ -2,7 +2,7 @@ import { ha } from "@lib/common";
 import getEntity from "./get-entities";
 
 type Input = {
-  /** The service to call (e.g., 'turn_on', 'turn_off', 'toggle').
+  /** The service to call (e.g., 'turn_on', 'turn_off', 'start', 'stop', 'toggle').
    * Do not include the domain prefix.
    */
   service: string;
