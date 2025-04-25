@@ -80,7 +80,7 @@ function processAccountCode(key: string, actionType: ActionType, usageCallback: 
 
   useEffect(() => {
     executeCodeCommand(key, actionType, setError, setIsLoading, setResult, usageCallback);
-  }, []);
+  }, [key, actionType, usageCallback]);
 
   return { error, isLoading, result };
 }

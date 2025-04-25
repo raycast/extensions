@@ -52,51 +52,52 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Accounts">
-      {!isLoading && accountResults
-        .map((account) => {
-          const { name, details, requiresTouch, key } = account;
+      {!isLoading &&
+        accountResults
+          .map((account) => {
+            const { name, details, requiresTouch, key } = account;
 
-          const usageCallback = () => {
-            updateUsage(key, activeWindow);
-            setUsages(usages + 1);
-          };
+            const usageCallback = () => {
+              updateUsage(key, activeWindow);
+              setUsages(usages + 1);
+            };
 
-          return (
-            <List.Item
-              icon={getAccountIcon(iconPackResult, iconOverrides, account)}
-              title={name}
-              subtitle={details}
-              key={key}
-              accessories={[
-                {
-                  icon: requiresTouch ? Icon.Fingerprint : Icon.LockUnlocked,
-                  tooltip: requiresTouch ? "Touch Required" : "No Touch Required",
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <PrimaryAction accountKey={key} requiresTouch={requiresTouch} usageCallback={usageCallback} />
-                  <SecondaryAction accountKey={key} requiresTouch={requiresTouch} usageCallback={usageCallback} />
-                  <Action.Push
-                    title="Reveal Code"
-                    icon={Icon.Eye}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                    target={
-                      <AccountDetail
-                        accountKey={key}
-                        actionType={ActionType.Reveal}
-                        requiresTouch={requiresTouch}
-                        usageCallback={usageCallback}
-                      />
-                    }
-                  />
-                  <IconSubmenu accountKey={key} iconPack={iconPack} onOverride={() => setOverrides(overrides + 1)} />
-                </ActionPanel>
-              }
-            />
-          );
-        })
-        .sort(makeUsageSorter(usageData, activeWindow))}
+            return (
+              <List.Item
+                icon={getAccountIcon(iconPackResult, iconOverrides, account)}
+                title={name}
+                subtitle={details}
+                key={key}
+                accessories={[
+                  {
+                    icon: requiresTouch ? Icon.Fingerprint : Icon.LockUnlocked,
+                    tooltip: requiresTouch ? "Touch Required" : "No Touch Required",
+                  },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <PrimaryAction accountKey={key} requiresTouch={requiresTouch} usageCallback={usageCallback} />
+                    <SecondaryAction accountKey={key} requiresTouch={requiresTouch} usageCallback={usageCallback} />
+                    <Action.Push
+                      title="Reveal Code"
+                      icon={Icon.Eye}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                      target={
+                        <AccountDetail
+                          accountKey={key}
+                          actionType={ActionType.Reveal}
+                          requiresTouch={requiresTouch}
+                          usageCallback={usageCallback}
+                        />
+                      }
+                    />
+                    <IconSubmenu accountKey={key} iconPack={iconPack} onOverride={() => setOverrides(overrides + 1)} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })
+          .sort(makeUsageSorter(usageData, activeWindow))}
     </List>
   );
 }
