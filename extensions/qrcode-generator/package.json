@@ -7,14 +7,15 @@
   "author": "Melvynx",
   "contributors": [
     "d2a",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "heytommy"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Generate QR Code",
-      "description": "Generate a QR code from a URL in PNG format that will be automatically opened.",
+      "description": "Generate a QR code from a URL in PNG or SVG format that will be automatically opened.",
       "mode": "view",
       "preferences": [
         {
@@ -65,6 +66,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
