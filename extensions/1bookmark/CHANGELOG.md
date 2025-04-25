@@ -1,6 +1,6 @@
 # 1bookmark Changelog
 
-## [Index Ranking System] - {PR_MERGE_DATE}
+## [Index Ranking System] - 2025-04-25
 
 - 0.10.0
 - 📱 Index ranking is now available. It boosts bookmarks that are more relevant to the search keyword.
