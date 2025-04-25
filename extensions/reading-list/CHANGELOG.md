@@ -1,6 +1,6 @@
 # Reading List Changelog
 
-## [1.0.0] - 2024-04-24
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 

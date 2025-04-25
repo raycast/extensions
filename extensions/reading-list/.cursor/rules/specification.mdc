@@ -3,64 +3,97 @@ description:
 globs: 
 alwaysApply: false
 ---
-# Raycast拡張の仕様
+# Reading List Extension Specification
 
-## 概要
+## Overview
 
-ざっくりいうと後で読む機能。サクッとWebページを追加しサクッとそのページを読める。
+A quick and easy way to save web pages for later reading. Add pages with a single command and organize them with custom tags.
 
-## 機能
+## Features
 
-### 追加
+### Page Management
 
-- コマンド: Add Page
-- 引数: URL
+- Command: Add Page
+- Arguments: URL
+- Functionality:
+  - Saves the page with metadata (title, description, image, favicon)
+  - Automatically detects if the page already exists
+  - Updates existing pages if URL matches
 
-URLを受け取って保存する。
+### Tag Management
 
-### タグ管理
+- Command: Create Tag
+- Arguments: None
+- Functionality:
+  - Creates new tags with custom names and colors
+  - Tag name validation:
+    - Maximum 10 characters
+    - Only alphanumeric characters and hyphens allowed
+    - Unique names required
 
-- コマンド: Create Tag
-- 引数: なし
+### Page Listing
 
-新しいタグを作成する。
+- Command: List Pages
+- Arguments: None
+- Functionality:
+  - Displays saved pages with:
+    - Title
+    - URL
+    - Description
+    - Image preview
+    - Favicon
+    - Tags
+    - Creation/Update timestamps
+    - Read status
 
-### 一覧表示
+### Page Actions
 
-- コマンド: Show List
-- 引数: なし
+- Open in browser (marks as read)
+- Toggle read status
+- Delete page
+- Add/remove tags
 
-保存したページの一覧を表示する。以下の情報を表示：
-- タイトル
-- URL
-- 追加日時
-- ステータス（未読/既読）
+## Data Structure
 
-#### 一覧表示/ページ操作
+### Page
 
-各ページに対して以下の操作が可能：
-- ブラウザで開く(開いたら既読)
-- 既読/未読の切り替え
-- 削除
-
-## データ構造
-
-### ページ情報
-```typescript
+```ts
 interface Page {
-  id: string;          // ユニークID
-  title: string;       // ページタイトル
-  url: string;         // URL
-  createdAt: Date;     // 追加日時
-  isRead: boolean;     // 既読フラグ
+  url: string;         // Unique URL
+  title: string;       // Page title
+  description: string; // Page description
+  imageUrl: string;    // Preview image URL
+  faviconUrl: string;  // Favicon URL
+  tagIds: string[];    // Associated tag IDs
+  createdAt: string;   // ISO timestamp
+  updatedAt: string;   // ISO timestamp
+  isRead: boolean;     // Read status
 }
 ```
 
-## 技術要件
+### Tag
 
-- データの永続化：Raycast のstorage apiを利用する
-- URLからタイトル取得：OGPまたはtitleタグから取得
-- エラーハンドリング：
-  - 無効なURL
-  - ページ取得失敗
-  - ストレージ操作失敗
+```ts
+interface Tag {
+  id: string;    // Unique ID
+  name: string;  // Tag name
+  color: string; // Tag color
+}
+```
+
+## Technical Requirements
+
+- Data Persistence: Raycast Storage API
+- Metadata Extraction: OGP and HTML meta tags
+- Error Handling:
+  - Invalid URLs
+  - Failed page fetches
+  - Storage operation failures
+  - Tag validation errors
+
+## UI/UX
+- Modern, clean interface
+- Color-coded tags for easy identification
+- Quick actions for common operations
+- Toast notifications for feedback
+- Form validation with clear error messages
