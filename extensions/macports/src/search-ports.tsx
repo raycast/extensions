@@ -1,0 +1,70 @@
+import { List, Detail } from "@raycast/api";
+import { useFetch, usePromise } from "@raycast/utils";
+import { useState } from "react";
+import { URLSearchParams } from "node:url";
+import { isMacPortsInstalled } from "./exec";
+import type { SearchResult } from "./types";
+import SearchListItem from "./components/SearchListItem";
+import type { MacPortsResponse } from "./types";
+import { Onboarding } from "./components/Onboarding";
+
+interface SearchPortsProps {
+  arguments: {
+    query?: string;
+  };
+}
+
+export default function Command(props: SearchPortsProps) {
+  const [searchText, setSearchText] = useState(props.arguments.query || "");
+  const url = `https://ports.macports.org/api/v1/ports${searchText.length ? `?${new URLSearchParams({ search: searchText })}` : ""}`;
+
+  const { data: isInstalled, isLoading: isCheckingInstallation } = usePromise(async () => isMacPortsInstalled());
+
+  const { data, isLoading } = useFetch(url, {
+    parseResponse: parseFetchResponse,
+    keepPreviousData: true,
+  });
+
+  if (isCheckingInstallation) {
+    return <Detail isLoading markdown="Checking MacPorts installation..." />;
+  }
+
+  if (!isInstalled) {
+    return <Onboarding />;
+  }
+
+  return (
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search Macports..."
+      throttle
+      searchText={searchText}
+    >
+      {data && data.length > 0 && (
+        <List.Section title="Results" subtitle={`${data.length}`}>
+          {data.map((searchResult) => (
+            <SearchListItem key={searchResult.name} searchResult={searchResult} />
+          ))}
+        </List.Section>
+      )}
+    </List>
+  );
+}
+
+async function parseFetchResponse(response: Response) {
+  const json = (await response.json()) as MacPortsResponse | { code: string; message: string };
+
+  if (!response.ok || "message" in json) {
+    throw new Error("message" in json ? json.message : response.statusText);
+  }
+
+  return json.results.map((result) => {
+    return {
+      name: result.name,
+      description: result.description,
+      username: result.maintainers.map((maintainer) => maintainer.name).join(", "),
+      url: result.homepage,
+    } as SearchResult;
+  });
+}

@@ -1,0 +1,49 @@
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { installPort, listInstalledPorts, uninstallPort } from "../exec";
+import type { SearchResult } from "../types";
+import PortDetails from "../port-details";
+import { usePromise } from "@raycast/utils";
+
+export default function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+  const { data: installedPortsResult } = usePromise(async () => listInstalledPorts(), []);
+
+  const isInstalled = installedPortsResult?.includes(searchResult.name);
+
+  return (
+    <List.Item
+      title={searchResult.name}
+      subtitle={searchResult.description}
+      accessories={[{ text: searchResult.username }]}
+      icon={isInstalled ? { source: Icon.Check, tintColor: Color.Green } : undefined}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action.Push title="Details" target={<PortDetails portName={searchResult.name} />} />
+            <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
+          </ActionPanel.Section>
+
+          {!isInstalled && (
+            <ActionPanel.Section>
+              <Action.CopyToClipboard
+                title="Copy Install Command"
+                content={`sudo port install ${searchResult.name}`}
+                shortcut={{ modifiers: ["cmd"], key: "." }}
+              />
+              <Action title="Install" onAction={() => installPort(searchResult.name)} />
+            </ActionPanel.Section>
+          )}
+          {isInstalled && (
+            <ActionPanel.Section>
+              <Action.CopyToClipboard
+                title="Copy Uninstall Command"
+                content={`sudo port uninstall ${searchResult.name}`}
+                shortcut={{ modifiers: ["cmd"], key: "." }}
+              />
+              <Action title="Uninstall" onAction={() => uninstallPort(searchResult.name)} />
+            </ActionPanel.Section>
+          )}
+        </ActionPanel>
+      }
+    />
+  );
+}
