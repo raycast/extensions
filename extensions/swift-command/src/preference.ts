@@ -16,11 +16,7 @@ export function getDatasourcePath(): string {
 }
 
 export function getDatasourceFolderPath(): string {
-  const datasourcePath = preferences.datasourcePath;
-  const folderPath = environment.supportPath;
-  if (!path.isAbsolute(datasourcePath)) {
-    return folderPath;
-  } else {
-    return path.dirname(datasourcePath);
-  }
+  const datasourcePath = getDatasourcePath();
+  return path.dirname(datasourcePath);
+}
 }
