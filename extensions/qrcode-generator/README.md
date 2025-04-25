@@ -6,4 +6,4 @@ Generate a QR code from a URL in PNG or SVG format that will be automatically op
 
 - [Melvynx](https://github.com/melvynx)
 - [darmiel](https://github.com/darmiel)
-- [heytommy](https://github.com/heytommy)
+- [hetommy](https://github.com/hetommy)
