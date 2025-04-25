@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "developer-tools",
-  "title": "Developer Tools",
-  "description": "A collection of developer tools at your fingertips",
+  "name": "timestamp-editor",
+  "title": "Timestamp Editor",
+  "description": "Edit unix timestamp with ease",
   "icon": "icon.png",
   "author": "wxiaoyun",
   "categories": [
@@ -11,8 +11,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "timestamp-converter",
-      "title": "Timestamp Converter",
+      "name": "timestamp-editor",
+      "title": "Timestamp Editor",
       "description": "Convert Unix timestamps and display their components with timezone support",
       "mode": "view",
       "preferences": [
@@ -34,18 +34,6 @@
           "type": "text"
         }
       ]
-    },
-    {
-      "name": "url-encode-decode",
-      "title": "URL Encode / Decode",
-      "description": "Encode / Decode a URL",
-      "mode": "view"
-    },
-    {
-      "name": "json-escape-unescape",
-      "title": "JSON Escape / Unescape",
-      "description": "Escape / Unescape a JSON string",
-      "mode": "view"
     }
   ],
   "dependencies": {

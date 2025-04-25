@@ -104,8 +104,8 @@ const tryGetSelectedTextAndUpdate = async (updaterFn: (text: string) => void) =>
 
 const STORAGE_KEY_USE_MILLISECONDS = "convert-timestamp::use-milliseconds";
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.TimestampConverter }>) {
-  const preferences = getPreferenceValues<Preferences.TimestampConverter>();
+export default function Command(props: LaunchProps<{ arguments: Arguments.TimestampEditor }>) {
+  const preferences = getPreferenceValues<Preferences.TimestampEditor>();
   const { value: useMilliseconds, setValue: setUseMilliseconds } = useLocalStorage(STORAGE_KEY_USE_MILLISECONDS, false);
 
   const timestampDate = tryParseTimestampOrDefault(props.arguments.timestamp);
@@ -292,6 +292,11 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
             title="Copy Timestamp"
             shortcut={Keyboard.Shortcut.Common.Copy}
             onAction={() => copyWithFeedback(values.timestamp)}
+          />
+          <Action
+            title="Copy Date"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            onAction={() => copyWithFeedback(values.dateObject.toISOString())}
           />
           <Action
             title={`Toggle Timestamp Format (${useMilliseconds ? "Milliseconds" : "Seconds"})`}
