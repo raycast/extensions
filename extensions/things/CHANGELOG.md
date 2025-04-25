@@ -1,6 +1,10 @@
 # Things Changelog
 
-## [✨ Menu Bar Todo] - 2025-04-14
+## [✨ Fix Complete Menu Bar Action] - 2025-04-25
+
+- Fix `Complete` menu bar action to mark the first incomplete todo as complete, rather than completing the first item in the list, even if it is already marked as completed.
+
+## [✨ Menu Bar Todo] - 2025-04-25
 
 - Update the menu bar to display only incomplete todos from today’s list
 
