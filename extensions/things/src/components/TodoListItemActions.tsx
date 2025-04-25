@@ -180,9 +180,9 @@ New title:
 
   function timeEntries(command: FilteredCommandListName) {
     const now = new Date();
-    const startHour = command === 'today' ? now.getHours() : 0;
-    const startMinute = command === 'today' ? Math.ceil(now.getMinutes() / 15) * 15 : 0;
     const times = [];
+    const startHour = command === 'today' ? now.getHours() : 0;
+    let startMinute = command === 'today' ? Math.ceil(now.getMinutes() / 15) * 15 : 0;
 
     for (let hour = startHour; hour < 24; hour++) {
       for (let minute = startMinute; minute < 60; minute += 15) {
@@ -191,6 +191,11 @@ New title:
         const formattedMinute = minute.toString().padStart(2, '0');
         times.push(`${formattedHour}:${formattedMinute}`);
       }
+
+      // Reset `startMinute` to `0`, as we want to make sure that, if on the
+      // current time, the minutes are, for example, 50, we don't add any times
+      // for the current hour but do add times for the next hours.
+      startMinute = 0;
     }
 
     return times;
@@ -290,7 +295,11 @@ New title:
         />
 
         {(commandListName === 'today' || commandListName === 'upcoming') && (
-          <ActionPanel.Submenu title="Set Reminder" shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}>
+          <ActionPanel.Submenu
+            title="Set Reminder"
+            shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
+            icon={Icon.Bell}
+          >
             <Action title="Clear" onAction={() => setReminder(null, commandListName)} />
 
             {timeEntries(commandListName).map((time) => (
