@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [✨ Reminders] - {PR_MERGE_DATE}
+
+- Update the "Today" and "Upcoming" lists to allow updating todo's reminders
+
 ## [✨ Menu Bar Todo] - 2025-04-14
 
 - Update the menu bar to display only incomplete todos from today’s list
@@ -52,6 +56,7 @@
 Ever wanted to add a new to-do to Things with plain, natural text? Well, it's possible now with the new `Quick Add To-Do` command. Just type in your to-do text, maybe set some notes and checklist items and you're good to go.
 
 Under the hood, it'll analyze and process your text to extract these parameters:
+
 - The title
 - The start date
 - The project or area the to-do belongs to
@@ -61,6 +66,7 @@ Under the hood, it'll analyze and process your text to extract these parameters:
 - If it's completed or canceled
 
 Here are some examples:
+
 - Book flights today in my Trips list
 - Add milk to my groceries list for tomorrow with Errand tag
 - Respond to mails
@@ -77,6 +83,7 @@ A big update has been released for the Things extension. Here's what's new:
 ### New actions
 
 You now have additional actions for your to-dos:
+
 - Schedule
 - Move to a project/area
 - Edit the title or notes

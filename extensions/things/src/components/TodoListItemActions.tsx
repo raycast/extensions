@@ -38,6 +38,9 @@ type TodoListItemActionsProps = {
   refreshTodos: () => void;
 };
 
+/** List of command list names for which the todo's reminder can be updated. */
+type FilteredCommandListName = Extract<CommandListName, 'today' | 'upcoming'>;
+
 export default function TodoListItemActions({
   todo,
   refreshTodos,
@@ -143,6 +146,20 @@ New title:
     await updateAction({ deadline: date.toISOString() }, { title: 'Set deadline' });
   }
 
+  async function setReminder(time: string | null, commandListName: CommandListName) {
+    if (commandListName !== 'today' && commandListName !== 'upcoming') {
+      return;
+    }
+
+    const when = commandListName === 'today' ? 'today' : 'tomorrow';
+
+    if (time) {
+      await updateAction({ when: `${when}@${time}` }, { title: 'Updated Reminder' });
+    } else {
+      await updateAction({ when }, { title: 'Removed Reminder' });
+    }
+  }
+
   async function deleteToDo() {
     if (
       await confirmAlert({
@@ -159,6 +176,24 @@ New title:
       });
       refreshTodos();
     }
+  }
+
+  function timeEntries(command: FilteredCommandListName) {
+    const now = new Date();
+    const startHour = command === 'today' ? now.getHours() : 0;
+    const startMinute = command === 'today' ? Math.ceil(now.getMinutes() / 15) * 15 : 0;
+    const times = [];
+
+    for (let hour = startHour; hour < 24; hour++) {
+      for (let minute = startMinute; minute < 60; minute += 15) {
+        // Format the time as HH:MM
+        const formattedHour = hour.toString().padStart(2, '0');
+        const formattedMinute = minute.toString().padStart(2, '0');
+        times.push(`${formattedHour}:${formattedMinute}`);
+      }
+    }
+
+    return times;
   }
 
   return (
@@ -253,6 +288,16 @@ New title:
           }}
           type={Action.PickDate.Type.Date}
         />
+
+        {(commandListName === 'today' || commandListName === 'upcoming') && (
+          <ActionPanel.Submenu title="Set Reminder" shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}>
+            <Action title="Clear" onAction={() => setReminder(null, commandListName)} />
+
+            {timeEntries(commandListName).map((time) => (
+              <Action key={time} title={time} onAction={() => setReminder(time, commandListName)} />
+            ))}
+          </ActionPanel.Submenu>
+        )}
 
         {environment.canAccess(AI) && (
           <Action
