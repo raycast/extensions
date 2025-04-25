@@ -1,10 +1,10 @@
-import { Icon, List, showToast, Toast } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { Icon, List } from "@raycast/api";
+import { showFailureToast, useStreamJSON } from "@raycast/utils";
 import * as z from "@zod/mini";
 import { useCallback, useState } from "react";
 import { CourseSummaryList } from "./components/course";
 import { API_BASE_URL } from "./utils/constants";
-import { CourseSummaryListSchema } from "./utils/nusmods";
+import { CourseSummary, CourseSummarySchema } from "./utils/nusmods";
 
 const now = new Date();
 const currentYear = now.getFullYear();
@@ -19,59 +19,66 @@ const fallbackAcadYear = isFirstHalfOfTheYear // Its possible NUSMods API do not
 export default function Command() {
   const [acadYear, setAcadYear] = useState(currentAcadYear);
 
-  const parseResponse = useCallback(async (res: Response) => {
-    if (!res.ok) {
-      if (acadYear !== fallbackAcadYear) {
-        console.info("Switching to fallback academic year:", fallbackAcadYear);
-        setAcadYear(fallbackAcadYear);
-        return [];
-      }
-
-      console.error("Failed to fetch course summaries:", res.status, res.statusText);
-      showToast({
-        title: "Failed to fetch course summaries",
-        message: "Please try again later.",
-        style: Toast.Style.Failure,
-      });
-      return null;
+  const onError = useCallback((error: Error) => {
+    if (acadYear !== fallbackAcadYear) {
+      console.info("Switching to fallback academic year:", fallbackAcadYear);
+      setAcadYear(fallbackAcadYear);
+      return;
     }
 
-    const data = await res.json();
-    if (!data) {
-      console.error("Failed to unmarshal course summaries");
-      showToast({
-        title: "Failed to unmarshal course summaries",
-        message: "Please try again later.",
-        style: Toast.Style.Failure,
-      });
-      return null;
-    }
+    console.error("Error fetching course summaries:", error);
+    showFailureToast(error, {
+      title: "Error fetching course summaries",
+      message: "Please try again later.",
+    });
+  }, []);
 
-    const parsedResult = await CourseSummaryListSchema.safeParseAsync(data);
+  const [searchText, setSearchText] = useState("");
+
+  const filter = useCallback(
+    (item: CourseSummary | null) => {
+      if (!item) return false;
+      if (!searchText) return true;
+
+      const searchTextLower = searchText.toLocaleLowerCase();
+
+      if (item.moduleCode.toLocaleLowerCase().includes(searchTextLower)) return true;
+      if (item.title.toLocaleLowerCase().includes(searchTextLower)) return true;
+
+      return false;
+    },
+    [searchText],
+  );
+
+  const transform = useCallback((item: unknown) => {
+    const parsedResult = CourseSummarySchema.safeParse(item);
     if (!parsedResult.success) {
       console.error(z.prettifyError(parsedResult.error));
-      showToast({
-        title: "Validation error",
-        message: "Unexpected course summaries data received from NUSMods API, please report this issue",
-        style: Toast.Style.Failure,
-      });
       return null;
     }
-
     return parsedResult.data;
   }, []);
 
-  const { isLoading, data, error } = useFetch(`${API_BASE_URL}/${acadYear}/moduleList.json`, {
+  const { isLoading, data, error, pagination } = useStreamJSON(`${API_BASE_URL}/${acadYear}/moduleList.json`, {
     keepPreviousData: true,
-    parseResponse,
+    filter,
+    transform,
+    onError,
   });
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder={`Search for courses in ${acadYear.replace("-", "/")}`}>
+    <List
+      isLoading={isLoading}
+      filtering={false}
+      throttle
+      pagination={pagination}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder={`Search for courses in ${acadYear.replace("-", "/")}`}
+    >
       {error || !data ? (
         <List.EmptyView icon={Icon.Bug} title="Error fetching course summaries" description="Please try again later." />
       ) : (
-        <CourseSummaryList courseSummaries={data} acadYear={acadYear} />
+        <CourseSummaryList courseSummaries={data as CourseSummary[]} acadYear={acadYear} />
       )}
     </List>
   );
