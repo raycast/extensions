@@ -1,5 +1,5 @@
 # Hardcover Changelog
 
-## [Added Extension to Store] - {PR_MERGE_DATE}
+## [Added Extension to Store] - 2025-04-25
 
 - Publish extension to the Raycast Store.
