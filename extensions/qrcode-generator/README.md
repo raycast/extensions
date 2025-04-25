@@ -1,8 +1,9 @@
 # QR Code Generator
 
-Generate a QR code from a URL in PNG format that will be automatically opened.
+Generate a QR code from a URL in PNG or SVG format that will be automatically opened.
 
 ## Contributors
 
 - [Melvynx](https://github.com/melvynx)
 - [darmiel](https://github.com/darmiel)
+- [heytommy](https://github.com/heytommy)
