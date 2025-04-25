@@ -1,6 +1,6 @@
 # Quit Applications Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-25
 
 - Added `Quit All Applications` to quit all applications at once
 
