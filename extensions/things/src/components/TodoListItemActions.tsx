@@ -146,12 +146,8 @@ New title:
     await updateAction({ deadline: date.toISOString() }, { title: 'Set deadline' });
   }
 
-  async function setReminder(time: string | null, commandListName: CommandListName) {
-    if (commandListName !== 'today' && commandListName !== 'upcoming') {
-      return;
-    }
-
-    const when = commandListName === 'today' ? 'today' : 'tomorrow';
+  async function setReminder(time: string | null, command: FilteredCommandListName) {
+    const when = command === 'today' ? 'today' : 'tomorrow';
 
     if (time) {
       await updateAction({ when: `${when}@${time}` }, { title: 'Updated Reminder' });
