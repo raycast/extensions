@@ -9,9 +9,17 @@ export const copyWithFeedback = async (text: string) => {
     return;
   }
 
-  await Clipboard.copy(text);
-  showToast({
-    title: "Copied to clipboard",
-    style: Toast.Style.Success,
-  });
+  try {
+    await Clipboard.copy(text);
+    showToast({
+      title: "Copied to clipboard",
+      style: Toast.Style.Success,
+    });
+  } catch {
+    showToast({
+      title: "Failed to copy",
+      message: "An error occurred while copying to clipboard.",
+      style: Toast.Style.Failure,
+    });
+  }
 };

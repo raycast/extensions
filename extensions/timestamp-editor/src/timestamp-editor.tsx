@@ -188,7 +188,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Timest
 
   const updateFromTimestamp = (timestamp: string) => {
     const isMilliseconds = timestamp.length === 13;
-    const time = new Date(parseInt(timestamp) * (isMilliseconds ? 1 : 1000));
+    const time = new Date(parseInt(timestamp, 10) * (isMilliseconds ? 1 : 1000));
     updateFromDate(time);
   };
 
