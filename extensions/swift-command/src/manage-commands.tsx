@@ -330,7 +330,7 @@ function CommandListItem(props: {
   return (
     <List.Item
       title={props.item.data}
-      key={props.item.data}
+      key={props.item.id}
       subtitle={props.item.remark}
       detail={
         <List.Item.Detail
