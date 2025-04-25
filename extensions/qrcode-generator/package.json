@@ -2,19 +2,20 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qrcode-generator",
   "title": "QR Code Generator",
-  "description": "Generate QR code for an URL",
+  "description": "Generate QR codes in PNG or SVG format. SVG output is vector-based and perfect for design work.",
   "icon": "command-icon.png",
   "author": "Melvynx",
   "contributors": [
     "d2a",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "heytommy"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Generate QR Code",
-      "description": "Generate a QR code from a URL in PNG format that will be automatically opened.",
+      "description": "Generate a QR code from a URL in PNG or SVG format. SVG output is high-resolution and perfect for design work.",
       "mode": "view",
       "preferences": [
         {
@@ -25,11 +26,11 @@
           "title": "Primary Action",
           "data": [
             {
-              "title": "Save to disk",
+              "title": "Save to Disk",
               "value": "save"
             },
             {
-              "title": "Show inline",
+              "title": "Show Inline",
               "value": "inline"
             }
           ]
@@ -39,7 +40,7 @@
     {
       "name": "clipboard",
       "title": "Generate QR Code from Clipboard",
-      "description": "Generate a QR Code from Clipboard and show it directly in Raycast",
+      "description": "Generate a QR code from clipboard and show it directly in Raycast",
       "mode": "view"
     }
   ],
@@ -50,7 +51,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^20.8.10",
+    "@types/node": "^18.16.0",
     "@types/qrcode": "^1.5.1",
     "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
@@ -65,6 +66,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
