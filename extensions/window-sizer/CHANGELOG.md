@@ -1,11 +1,11 @@
 # Window Sizer Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-25
 
 - Fixed handling of window size addition when no window is in focus
 - Improved toast notification for Restore Previous Size when no focused window
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-25
 
 - Added loading state to prevent list flicker during data fetching
 - Improved error handling for AppleScript operations
@@ -13,21 +13,21 @@
 - Enhanced logging messages for better debugging
 - Fixed window size restoration logic
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-25
 
 - Improved window positioning logic during resize
 - Enhanced previous window size restoration
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-25
 
 - Remove the default size in the add page
 - Fix typo in the add page
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-25
 
 - Fix toast emoji
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-04-25
 
 ### Features
 
