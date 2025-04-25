@@ -1,7 +1,7 @@
 import { StorageService } from "./storage";
 
 export class PinnedProjectsService {
-  private static storage = new StorageService("pinned");
+  private static readonly storage = new StorageService("pinned");
 
   static async pinItem(project: string) {
     await PinnedProjectsService.storage.addItem(project);

@@ -5,7 +5,7 @@ export class StorageService {
 
   async getItems(): Promise<string[]> {
     const itemsString = await LocalStorage.getItem<string>(this.storageKey);
-    return itemsString ? itemsString.split(";") : [];
+    return itemsString ? JSON.parse(itemsString) : [];
   }
 
   async addItem(item: string): Promise<void> {
@@ -27,6 +27,6 @@ export class StorageService {
   }
 
   async saveItems(items: string[]): Promise<void> {
-    await LocalStorage.setItem(this.storageKey, items.join(";"));
+    await LocalStorage.setItem(this.storageKey, JSON.stringify(items));
   }
 }

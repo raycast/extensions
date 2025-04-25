@@ -28,7 +28,6 @@ export interface ExtPreferences {
   ide: Application;
   ide2: Application;
   ide3: Application;
-  preferredTerminal: Application;
   projectContainsFilter: string;
   recentlyOpenLimit: number;
   searchDepth: number;

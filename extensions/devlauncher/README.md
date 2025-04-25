@@ -26,14 +26,13 @@ This Raycast extension provides two commands to quickly launch projects and file
 
 The extension uses the following preferences, which can be configured in the Raycast extension settings:
 
-* **`projectsDirectory`**: The root directory to search for projects (semicolon-separated for multiple directories).  Example: `/Users/username/Projects;/Users/username/IdeaProjects`
+* **`projectsDirectory`**: The root directory to search for projects (semicolon-separated for multiple directories).  Example: `/Users/username/Projects;/Users/username/ArchivedProjects`
 * **`ide`**: Your primary IDE application (e.g., IntelliJ IDEA).
 * **`ide2`**: A secondary IDE application (optional).
 * **`ide3`**: A tertiary IDE application (optional).
 * **`recentlyOpenLimit`**: The maximum number of recently opened items to store.
-* **`projectContainsFilter`**: A semicolon-separated list of strings to filter packages with certain files (e.g., `package.json;.git;pom.xml;build.grade`).
+* **`projectContainsFilter`**: A semicolon-separated list of strings to filter packages with certain files (e.g., `package.json;.git;pom.xml;build.gradle`).
 * **`searchDepth`**: The maximum search depth (number of subdirectories) when searching for projects.
-* **`preferredTerminal`**: Your preferred terminal application (e.g., iTerm2, Terminal).
 
 ## Contributing
 

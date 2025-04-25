@@ -64,7 +64,7 @@
           "required": false,
           "default": "3",
           "placeholder": "3",
-          "title": "Maximum number of recently open projects"
+          "title": "Maximum number of recently opened projects"
         },
         {
           "name": "projectContainsFilter",

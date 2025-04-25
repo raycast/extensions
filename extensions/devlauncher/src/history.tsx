@@ -2,7 +2,7 @@ import { ExtPreferences } from "./types";
 import { StorageService } from "./storage";
 
 export class HistoryService {
-  private static storage = new StorageService("history");
+  private static readonly storage = new StorageService("history");
 
   static async saveToHistory(preferences: ExtPreferences, projectPath: string) {
     const historyLimit = preferences.recentlyOpenLimit || 0;
