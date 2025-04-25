@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 
 export const useFrontmostApp = () => {
   return useCachedPromise(
-    async () => {
+    () => async () => {
       const apps: Application[] = [];
       try {
         const app = await getFrontmostApplication();

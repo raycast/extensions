@@ -225,10 +225,7 @@ export default function Command() {
           }
 
           // If it's a duplicate, find and update the existing command
-          const existingCommand = existingCommands.find((cmd) => {
-            return cmd.data === alias.command;
-            return cmd.data === alias.command;
-          });
+          const existingCommand = existingCommands.find((cmd) => cmd.data === alias.command);
           if (existingCommand) {
             // Use alias name if description is missing
             dataSource.update(existingCommand.id, alias.command, alias.description || alias.name || "", args);

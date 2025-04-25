@@ -19,4 +19,3 @@ export function getDatasourceFolderPath(): string {
   const datasourcePath = getDatasourcePath();
   return path.dirname(datasourcePath);
 }
-}

@@ -21,6 +21,7 @@
     },
     {
       "name": "import-alias-command",
+      "subtitle": "Swift Command",
       "title": "Import Alias Commands from ~/.bashrc or ~/.zshrc",
       "description": "Import your existing shell aliases from bash or zsh configuration files into Swift Command",
       "mode": "view"
