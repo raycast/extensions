@@ -4,5 +4,6 @@ export interface Delivery {
   trackingNumber: string;
   carrier: string;
   manualDeliveryDate?: Date;
+  manualMarkedAsDelivered?: boolean;
   debug?: boolean;
 }

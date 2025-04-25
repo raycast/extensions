@@ -49,10 +49,9 @@
     "@trpc/client": "^11.0.0-rc.604",
     "@trpc/react-query": "^11.0.0-rc.604",
     "@trpc/server": "^11.0.0-rc.604",
-    "axios": "^1.7.7",
+    "axios": "^1.8.4",
     "fuzzysort": "^3.1.0",
     "ini": "^4.1.1",
-    "jotai": "^2.10.1",
     "node-fetch": "^3.3.2",
     "radash": "^12.1.0",
     "simple-plist": "^1.4.0-0",
@@ -82,5 +81,8 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "clean": "rm -rf dist"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

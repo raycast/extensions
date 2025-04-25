@@ -11,3 +11,36 @@ export interface Documentation {
     };
   };
 }
+
+// Type definitions for the deploy project
+export interface CreateUploadSessionResponse {
+  presign_url: string;
+  presign_header: Record<string, string>;
+  upload_id: string;
+}
+
+export interface PrepareUploadResponse {
+  url: string;
+}
+
+export interface ErrorResponse {
+  error: string;
+}
+
+// Type definitions for the zeabur graphql API
+export interface Template {
+  data: {
+    templates: {
+      edges: {
+        node: TemplateInfo;
+      }[];
+    };
+  };
+}
+
+export interface TemplateInfo {
+  code: string;
+  name: string;
+  description: string;
+  iconURL: string;
+}

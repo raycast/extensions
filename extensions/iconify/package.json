@@ -115,7 +115,7 @@
   "dependencies": {
     "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.18.0",
-    "axios": "^1.8.2",
+    "axios": "^1.8.4",
     "react-hooks-global-state": "^2.1.0"
   },
   "devDependencies": {
@@ -125,5 +125,8 @@
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

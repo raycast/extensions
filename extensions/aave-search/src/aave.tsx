@@ -22,8 +22,15 @@ function getVersionPriority(name: string): number {
 }
 
 function comp(a: ListItem, b: ListItem) {
-  const aInProduction = !ChainList[a.chainId as keyof typeof ChainList].testnet;
-  const bInProduction = !ChainList[b.chainId as keyof typeof ChainList].testnet;
+  const aChain = ChainList[a.chainId as keyof typeof ChainList];
+  const bChain = ChainList[b.chainId as keyof typeof ChainList];
+
+  if (!aChain || !bChain) {
+    return 0;
+  }
+
+  const aInProduction = !aChain.testnet;
+  const bInProduction = !bChain.testnet;
 
   if (aInProduction && !bInProduction) {
     return -1;

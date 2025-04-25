@@ -1,5 +1,10 @@
 # Language Detector Changelog
 
+## [Enhancement] - 2025-03-31
+
+- Add new detector - [franc](https://npmjs.com/franc)
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2025-03-20
 
 - Cache selected options

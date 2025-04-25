@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## [Fixes] - 2025-04-09
+
+- Better handling of shared exit node ([#18258](https://github.com/raycast/extensions/issues/18258))
+
 ## [Add new features] - 2025-01-02
 
 - Add `netcheck` command
