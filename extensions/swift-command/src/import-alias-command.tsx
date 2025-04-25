@@ -226,7 +226,7 @@ export default function Command() {
 
           // If it's a duplicate, find and update the existing command
           const existingCommand = existingCommands.find((cmd) => {
-            console.log("Existing command found:", existingCommand, cmd.data, alias.command);
+            return cmd.data === alias.command;
             return cmd.data === alias.command;
           });
           if (existingCommand) {
