@@ -21,7 +21,7 @@ Think & Write in English, Not your First Language - AI-powered writing assistant
 
 ## Prerequisites
 
-- **Raycast Pro subscription required**
+- **Raycast Pro subscription with AI access required**
 - Default model: Gemini 2.0 flash
 
 ## Installation
