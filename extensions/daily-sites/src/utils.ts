@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { Site } from "./types";
 
 const STORAGE_KEY = "sitesXml";
@@ -87,7 +88,9 @@ export async function loadSites(): Promise<Site[]> {
 
   if (!raw || !raw.trim().startsWith("<?xml")) {
     const empty = `<?xml version="1.0"?><sites></sites>`;
-    await LocalStorage.setItem(STORAGE_KEY, empty).catch(() => {});
+    await LocalStorage.setItem(STORAGE_KEY, empty).catch((error) =>
+      showFailureToast(error, { title: "Failed to initialize sites storage" }),
+    );
     return [];
   }
 
@@ -108,5 +111,9 @@ export async function loadSites(): Promise<Site[]> {
 export async function saveSites(sites: Site[]): Promise<void> {
   const sorted = sortSites(sites);
   const xml = sitesToXml(sorted);
-  await LocalStorage.setItem(STORAGE_KEY, xml);
+  try {
+    await LocalStorage.setItem(STORAGE_KEY, xml);
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to save sites" });
+  }
 }

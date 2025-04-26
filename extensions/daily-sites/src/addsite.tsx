@@ -8,43 +8,50 @@ interface AddSitesFormProps {
   initialValues?: Site;
 }
 
+// Helper to validate URL syntax + protocol
+function isValidHttpUrl(input: string): boolean {
+  try {
+    const url = new URL(input.trim());
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
   const initialCat = initialValues?.category ?? "uncategorized";
 
-  // whether to display field error messages
-  const [showErrors, setShowErrors] = useState<boolean>(false);
-
-  // form state
+  const [showErrors, setShowErrors] = useState(false);
   const [categories, setCategories] = useState<string[]>(() => Array.from(new Set([initialCat, "custom"])));
-  const [name, setName] = useState<string>(initialValues?.name ?? "");
-  const [url, setUrl] = useState<string>(initialValues?.url ?? "");
-  const [category, setCategory] = useState<string>(initialCat);
-  const [customCategory, setCustomCategory] = useState<string>("");
+  const [name, setName] = useState(initialValues?.name ?? "");
+  // Default URL value to "https://" when creating a new site
+  const [url, setUrl] = useState(initialValues?.url ?? "https://");
+  const [category, setCategory] = useState(initialCat);
+  const [customCategory, setCustomCategory] = useState("");
 
-  // load existing categories
   useEffect(() => {
     (async () => {
       const all = await loadSites();
-      const baseCategories = getCategories(all);
-      const merged = Array.from(new Set([initialCat, "custom", ...baseCategories]));
-      setCategories(merged);
+      const baseCats = getCategories(all);
+      setCategories(Array.from(new Set([initialCat, "custom", ...baseCats])));
     })();
   }, [initialCat]);
 
-  // validation rules
+  // Validation rules
   const nameError = name.trim() === "" ? "Name is required" : undefined;
-  const urlError = url.trim() === "" ? "URL is required" : undefined;
+  const urlError =
+    url.trim() === ""
+      ? "URL is required"
+      : !isValidHttpUrl(url)
+        ? "Must be a valid http:// or https:// URL"
+        : undefined;
 
   async function handleSubmit(values: { name: string; url: string; category: string; customCategory?: string }) {
-    // enable showing errors
     setShowErrors(true);
-
-    // only proceed if valid
     if (nameError || urlError) {
       return;
     }
 
-    // determine final category
     const finalCategory =
       values.category === "custom" ? values.customCategory?.trim() || "uncategorized" : values.category;
 
@@ -54,7 +61,6 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
       category: finalCategory,
     };
 
-    // persist
     const existing = await loadSites();
     const updated = initialValues
       ? existing.map((s) => (s.url === initialValues.url ? newSite : s))
@@ -77,23 +83,23 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
       <Form.TextField
         id="name"
         title="Name"
+        placeholder="My Favorite Site"
         value={name}
-        onChange={(value) => {
-          setName(value);
+        onChange={(v) => {
+          setName(v);
           setShowErrors(false);
         }}
-        placeholder="My Favorite Site"
         error={showErrors ? nameError : undefined}
       />
       <Form.TextField
         id="url"
         title="URL"
+        placeholder="https://"
         value={url}
-        onChange={(value) => {
-          setUrl(value);
+        onChange={(v) => {
+          setUrl(v);
           setShowErrors(false);
         }}
-        placeholder="https://example.com"
         error={showErrors ? urlError : undefined}
       />
       <Form.Dropdown id="category" title="Category" value={category} onChange={setCategory}>
@@ -123,7 +129,7 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
   );
 }
 
-// Default command entrypoint that supplies a no-op onDone
+// Wrapper so Raycast always passes onDone
 export default function AddSiteCommand() {
   return <AddSitesForm onDone={() => {}} />;
 }

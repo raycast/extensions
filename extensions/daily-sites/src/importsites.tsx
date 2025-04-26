@@ -1,5 +1,6 @@
 import React from "react";
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import type { Preferences } from "./types";
 import { parseSitesXml, loadSites, saveSites } from "./utils";
@@ -23,9 +24,9 @@ export function ImportSitesForm({ onDone }: ImportSitesFormProps) {
       await saveSites([...existing, ...newSites]);
       await showToast(Toast.Style.Success, `Imported ${newSites.length} new site(s)`);
       onDone();
-    } catch (e) {
-      console.error(e);
-      await showToast(Toast.Style.Failure, "Import failed");
+    } catch (error) {
+      console.error(error);
+      await showFailureToast(error, { title: "Could not import sites" });
     }
   }
 

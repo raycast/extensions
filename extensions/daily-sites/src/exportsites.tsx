@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
 import type { Preferences } from "./types";
@@ -18,9 +19,9 @@ export function ExportSitesForm({ onDone }: { onDone: () => void }) {
       fs.writeFileSync(out, xml, "utf8");
       await showToast(Toast.Style.Success, "Exported sites");
       onDone();
-    } catch (e) {
-      console.error(e);
-      await showToast(Toast.Style.Failure, "Export failed");
+    } catch (error) {
+      console.error(error);
+      await showFailureToast(error, { title: "Could not export sites" });
     }
   }
 

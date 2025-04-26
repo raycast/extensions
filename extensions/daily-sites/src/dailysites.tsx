@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
+import { getFavicon, showFailureToast } from "@raycast/utils";
 import type { Site, Preferences } from "./types";
 import { AddSitesForm } from "./addsite";
 import { ImportSitesForm } from "./importsites";
@@ -27,9 +27,14 @@ export default function DailySites() {
   const [editingSite, setEditingSite] = useState<Site | undefined>();
 
   async function refresh() {
-    const loaded = await loadSites();
-    setSites(loaded);
-    setCategories(getCategories(loaded));
+    try {
+      const loaded = await loadSites();
+      setSites(loaded);
+      setCategories(getCategories(loaded));
+    } catch (error) {
+      console.error("Error loading sites:", error);
+      await showToast(Toast.Style.Failure, "Failed to load sites");
+    }
   }
 
   // if the user hasn’t yet set XML folder, show the “welcome” screen:
@@ -59,7 +64,7 @@ export default function DailySites() {
       await showToast(Toast.Style.Success, "Site deleted");
     } catch (error) {
       console.error("handleDelete error:", error);
-      await showToast(Toast.Style.Failure, "Error deleting site");
+      showFailureToast(error, { title: "Error deleting site" });
     }
   }
 
@@ -123,6 +128,7 @@ export default function DailySites() {
 
   return (
     <List
+      isLoading={sites.length === 0}
       searchBarPlaceholder="Filter by name, URL or category…"
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by category" value={filterCategory} onChange={setFilterCategory}>
@@ -135,7 +141,7 @@ export default function DailySites() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Your Sites" subtitle={`${filtered.length}`}>
+      <List.Section title="Your Sites">
         {filtered.map((site) => (
           <List.Item
             key={site.url}
