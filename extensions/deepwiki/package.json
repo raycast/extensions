@@ -5,8 +5,24 @@
   "title": "Deepwiki",
   "description": "Search and open DeepWiki pages for GitHub repositories.",
   "icon": "deep-wiki.png",
-  "author": "viveknair",
+  "author": "vivek",
   "license": "MIT",
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
+  "screenshots": [
+    {
+      "title": "DeepWiki Search",
+      "description": "Search for repositories indexed by DeepWiki.",
+      "image": "assets/screenshot-search.png"
+    },
+    {
+      "title": "DeepWiki Open",
+      "description": "Open a DeepWiki page for a specific GitHub repo URL or org/repo identifier.",
+      "image": "assets/screenshot-open.png"
+    }
+  ],
   "commands": [
     {
       "name": "open-deepwiki",
