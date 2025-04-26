@@ -1,5 +1,5 @@
 import { List, Detail } from "@raycast/api";
-import { useFetch, usePromise } from "@raycast/utils";
+import { showFailureToast, useFetch, usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { URLSearchParams } from "node:url";
 import { isMacPortsInstalled, listInstalledPorts } from "./exec";
@@ -28,6 +28,9 @@ export default function Command(props: SearchPortsProps) {
   const { data, isLoading } = useFetch(url, {
     parseResponse: parseFetchResponse,
     keepPreviousData: true,
+    onError: async (error) => {
+      await showFailureToast(error, { title: "Failed to fetch MacPorts data" });
+    },
   });
 
   if (isCheckingInstallation) {
@@ -46,6 +49,7 @@ export default function Command(props: SearchPortsProps) {
       throttle
       searchText={searchText}
     >
+      {data?.length === 0 && <List.EmptyView title="No Results" description="Try a different search term" />}
       {data && data.length > 0 && (
         <List.Section title="Results" subtitle={`${data.length}`}>
           {data.map((searchResult) => (

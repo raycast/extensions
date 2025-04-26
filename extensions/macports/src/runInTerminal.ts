@@ -1,5 +1,5 @@
 import { closeMainWindow, getApplications, type Image } from "@raycast/api";
-import { runAppleScript, useCachedPromise } from "@raycast/utils";
+import { runAppleScript, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 
 const preferences = getPreferenceValues();
@@ -86,9 +86,13 @@ export const useTerminalApp = () => {
     terminalIcon: data ? icons[preferences.terminalApp] : icons.terminal,
     terminalName: data ? names[preferences.terminalApp] : names.terminal,
     runCommandInTerminal: async (command: string) => {
-      const cmd = data ? appleScripts[preferences.terminalApp](command) : appleScripts.terminal(command);
-      await runAppleScript(cmd);
-      await closeMainWindow();
+      try {
+        const cmd = data ? appleScripts[preferences.terminalApp](command) : appleScripts.terminal(command);
+        await runAppleScript(cmd);
+        await closeMainWindow();
+      } catch (error) {
+        showFailureToast(error, { title: "Could not run command in terminal" });
+      }
     },
   };
 };

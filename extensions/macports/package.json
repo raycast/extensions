@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "macports",
-  "title": "Macports",
+  "title": "MacPorts",
   "description": "Search and install macports",
   "icon": "icon.png",
   "author": "guide",
@@ -13,6 +13,7 @@
     {
       "name": "search-ports",
       "title": "Search Ports",
+      "subtitle": "MacPorts",
       "description": "Search and install macports",
       "mode": "view",
       "arguments": [
@@ -27,6 +28,7 @@
     {
       "name": "list-installed",
       "title": "List Installed Ports",
+      "subtitle": "MacPorts",
       "description": "View and manage installed MacPorts packages",
       "mode": "view"
     }

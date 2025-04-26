@@ -1,6 +1,7 @@
 import { exec, execSync } from "node:child_process";
 import type { PortDetails, Maintainer } from "./types";
 import { extractPortDetails } from "./util";
+import { showFailureToast } from "@raycast/utils";
 
 const env = Object.assign({}, process.env, {
   PATH: "/opt/local/bin:/usr/local/bin:/usr/bin:/opt/homebrew/bin",
@@ -32,11 +33,21 @@ async function fetchGithubAvatars(maintainers: Maintainer[]): Promise<Record<str
 }
 
 export function installPort(name: string) {
-  return execSync(`sudo port install ${name}`, { env });
+  try {
+    return execSync(`sudo port install ${name}`, { env });
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to install port" });
+    throw error;
+  }
 }
 
 export function uninstallPort(name: string) {
-  return execSync(`sudo port uninstall ${name}`, { env });
+  try {
+    return execSync(`sudo port uninstall ${name}`, { env });
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to uninstall port" });
+    throw error;
+  }
 }
 
 export async function listInstalledPorts(): Promise<string[]> {
@@ -73,7 +84,7 @@ export async function getPortDetails(name: string): Promise<PortDetails> {
   return new Promise((resolve, reject) => {
     exec(`port info ${name}`, { env }, async (error, stdout) => {
       if (error) {
-        console.log("error:", error);
+        console.error("error:", error);
         reject(error);
         return;
       }

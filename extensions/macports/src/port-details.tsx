@@ -79,6 +79,8 @@ export default function PortDetails({ portName }: Props) {
           {installed && (
             <Action
               title="Uninstall"
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd"], key: "delete" }}
               onAction={async () => {
                 const options = {
                   title: "Confirm Uninstall",
@@ -90,7 +92,7 @@ export default function PortDetails({ portName }: Props) {
                 };
 
                 if (await confirmAlert(options)) {
-                  await uninstallPort(portName);
+                  uninstallPort(portName);
                 }
               }}
             />
