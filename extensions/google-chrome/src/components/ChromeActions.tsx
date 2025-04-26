@@ -24,7 +24,7 @@ function NewTabActions({ query, url }: { query?: string; url?: string }): ReactE
 
   return (
     <ActionPanel title="New Tab">
-      <Action onAction={() => openNewTab({ query, profileCurrent, openTabInProfile })} title={actionTitle} />
+      <Action onAction={() => openNewTab({ url, query, profileCurrent, openTabInProfile })} title={actionTitle} />
     </ActionPanel>
   );
 }

@@ -37,15 +37,19 @@ export default function Command() {
   const classifiedInput: ClassifiedInput = classifyInput(searchText || "");
   let actionTitle: string;
   let actions: ReactNode;
+  let icon: Icon;
 
   if (!classifiedInput.value) {
     actionTitle = "Open Empty Tab";
+    icon = Icon.Plus;
     actions = <ChromeActions.NewTab />;
   } else if (classifiedInput.type === "url") {
     actionTitle = `Open URL "${searchText}"`;
+    icon = Icon.Globe;
     actions = <ChromeActions.NewTab url={classifiedInput.value} />;
   } else {
     actionTitle = `Search "${searchText}"`;
+    icon = Icon.MagnifyingGlass;
     actions = <ChromeActions.NewTab query={searchText} />;
   }
 
@@ -56,11 +60,7 @@ export default function Command() {
       searchBarAccessory={<ChromeProfileDropDown />}
     >
       <List.Section key={"new-tab"} title={"New Tab"}>
-        <List.Item
-          title={actionTitle}
-          icon={{ source: !searchText ? Icon.Plus : Icon.MagnifyingGlass }}
-          actions={actions}
-        />
+        <List.Item title={actionTitle} icon={icon} actions={actions} />
       </List.Section>
       <List.Section key={"open-tabs"} title={"Open Tabs - All"}>
         {dataTab?.map((tab) => (

@@ -32,7 +32,7 @@ export function classifyInput(input: string): ClassifiedInput {
   const ipv4Regex =
     /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?::\d+)?$/;
   if (ipv4Regex.test(trimmedInput)) {
-    return { type: "url", value: `http://${trimmedInput}` };
+    return { type: "url", value: `https://${trimmedInput}` };
   }
 
   // localhost (potentially with port)
