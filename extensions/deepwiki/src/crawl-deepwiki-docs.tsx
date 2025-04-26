@@ -51,13 +51,13 @@ async function crawlPage(
   queue: string[],
   allContent: string[],
   stats: CrawlStats,
+  crawlToast: Toast,
 ): Promise<void> {
   if (!url.startsWith(baseUrl)) {
     return
   }
 
-  await showToast(Toast.Style.Animated, `Crawling: ${url}`)
-  stats.attempted++
+  crawlToast.title = `Crawling: ${url}`
 
   let response: FetchResponse | null = null
   try {
@@ -111,7 +111,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
     return
   }
 
-  const initialToast = await showToast(Toast.Style.Animated, `Starting crawl for ${repoIdentifier}...`)
+  const crawlToast = await showToast(Toast.Style.Animated, `Starting crawl for ${repoIdentifier}...`)
 
   const visited = new Set<string>()
   const queue: string[] = []
@@ -131,7 +131,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
 
   const checkCompletion = () => {
     if (queue.length === 0 && activeCount.current === 0) {
-      initialToast.hide()
+      crawlToast.hide()
       resolveCompletion()
     }
   }
@@ -156,7 +156,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
         }
         visited.add(urlWithoutHash)
 
-        await crawlPage(url, baseUrl, visited, queue, allContent, crawlStats)
+        crawlStats.attempted++
+        await crawlPage(url, baseUrl, visited, queue, allContent, crawlStats, crawlToast)
 
         while (queue.length > 0 && activeCount.current < MAX_CONCURRENCY) {
           crawlWorker()
