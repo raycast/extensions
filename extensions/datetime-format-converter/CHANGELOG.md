@@ -1,6 +1,10 @@
 # Datetime formatter Changelog
 
 
+## [Fix] - 2024-12-15
+
+- Fixed issue where `utcIsoFormat` was not showing the correct UTC time.
+
 ## [Update] - 2024-12-12
 
 - Added `Insert Natural Language Date` command to convert natural language into a specified date format.

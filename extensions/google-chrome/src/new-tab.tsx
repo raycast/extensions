@@ -54,7 +54,12 @@ export default function Command() {
       {orderByLastVisited(profile, profileHistories).map((p) => (
         <List.Section key={p.profile.id} title={`History - ${p.profile.name}`}>
           {p.data?.map((e) => (
-            <ChromeListItems.TabHistory key={`${p.profile.id}-${e.id}`} entry={e} profile={p.profile.id} />
+            <ChromeListItems.TabHistory
+              key={`${p.profile.id}-${e.id}`}
+              entry={e}
+              profile={p.profile.id}
+              type="History"
+            />
           ))}
         </List.Section>
       ))}

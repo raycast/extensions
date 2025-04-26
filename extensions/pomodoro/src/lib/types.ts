@@ -19,19 +19,6 @@ export type GiphyResponse = {
   };
 };
 
-export type Preferences = {
-  focusIntervalDuration: string;
-  shortBreakIntervalDuration: string;
-  longBreakIntervalDuration: string;
-  enableFocusWhileFocused: boolean;
-  completionImage: string;
-  sound: string;
-  enableTimeOnMenuBar: boolean;
-  giphyAPIKey: string;
-  enableImage: boolean;
-  enableQuote: boolean;
-};
-
 export type IntervalType = "focus" | "short-break" | "long-break";
 
 type Part = {

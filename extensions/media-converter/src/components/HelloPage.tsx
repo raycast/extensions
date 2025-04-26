@@ -12,7 +12,7 @@ This extension allows you to easily convert between different media formats usin
 ## Features:
 - Simple one-click conversion
 - Support for multiple files at once
-- Video formats: MP4, AVI, MKV, MOV, MPG
+- Video formats: MP4, AVI, MKV, MOV, MPG, WEBM
 - Image formats: JPG, PNG, WebP
 - Audio formats: MP3, AAC, WAV, FLAC
 - Automatic FFmpeg installation if not present

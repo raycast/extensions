@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nuxt-ui",
+  "title": "Nuxt UI",
+  "description": "Supercharge your Nuxt UI workflow",
+  "icon": "icon.png",
+  "author": "HugoRCD",
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-component-theme",
+      "title": "Search Component Theme",
+      "description": "Open the selected component theme",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "componentName",
+          "type": "text",
+          "placeholder": "button, input, etc..."
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-nuxt-ui-documentation",
+      "title": "Get Nuxt UI Documentation",
+      "description": "Get the full Nuxt UI documentation in Markdown format."
+    },
+    {
+      "name": "get-component-source-code",
+      "title": "Get Component Source Code",
+      "description": "Get the complete source code for a specified Nuxt UI component."
+    },
+    {
+      "name": "get-component-theme",
+      "title": "Get Component Theme",
+      "description": "Get the complete theme (use to customize the component through the `:ui` prop) for a specified Nuxt UI component."
+    },
+    {
+      "name": "get-available-components",
+      "title": "Get All Available Components",
+      "description": "Get the list of all available components."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "prefix",
+      "title": "Prefix",
+      "type": "textfield",
+      "description": "The prefix you use for your components",
+      "placeholder": "U",
+      "required": false,
+      "default": "U"
+    },
+    {
+      "name": "version",
+      "title": "Documentation Version",
+      "type": "dropdown",
+      "description": "The version of Nuxt UI you want to use",
+      "placeholder": "v3",
+      "required": false,
+      "default": "v3",
+      "data": [
+        {
+          "title": "v3",
+          "value": "v3"
+        },
+        {
+          "title": "v2",
+          "value": "v2"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "ofetch": "^1.4.1",
+    "scule": "^1.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.5",
+    "@types/react": "19.0.10",
+    "automd": "^0.4.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "evals": "npx ray evals"
+  }
+}

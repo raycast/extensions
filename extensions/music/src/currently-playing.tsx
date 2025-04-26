@@ -8,6 +8,6 @@ export default async () => {
   await pipe(
     music.currentTrack.getCurrentTrack(),
     TE.map((track) => updateCommandMetadata({ subtitle: `${track.name} - ${track.artist}` })),
-    TE.mapLeft(() => updateCommandMetadata({ subtitle: "Could not get currently playing track" }))
+    TE.mapLeft(() => updateCommandMetadata({ subtitle: "Could not get currently playing track" })),
   )();
 };

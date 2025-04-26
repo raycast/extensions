@@ -1,12 +1,5 @@
-import { SWRConfig } from 'swr';
-
-import { cacheConfig } from '@lib/cache';
-import { TransactionCreationForm } from '@components/transactions/transactionCreationForm';
+import { TransactionCreateForm } from '@components/transactions/transactionCreateForm';
 
 export default function Command() {
-  return (
-    <SWRConfig value={cacheConfig}>
-      <TransactionCreationForm />
-    </SWRConfig>
-  );
+  return <TransactionCreateForm />;
 }

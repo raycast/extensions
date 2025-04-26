@@ -1,5 +1,16 @@
 # Apple Reminders Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Add new "Upcoming" grouping option] - 2025-02-10
+
+- Add a new mode which allows group reminders by when they are upcoming in the `My Reminders` view.
+
+## [Add "Overdue" view and default date setting] - 2025-02-10
+
+- A new "Overdue" view has been added, displaying only reminders that are overdue.
+- There's now an option to automatically set the default date of new reminders to the current day.
+
 ## [Add weekdays and weekends options for recurring reminders] - 2024-12-04
 
 - Add weekdays and weekends options for recurring reminders in the `Create Reminder` command.
@@ -18,7 +29,7 @@ The Create Reminder command will automatically pre-fill the title with the initi
 
 ## [Change AI model for Quick Add Reminder] - 2024-05-23
 
-Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo.
+Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo. 
 
 ## [Add Saved Locations] - 2024-04-16
 

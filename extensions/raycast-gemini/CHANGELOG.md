@@ -1,5 +1,58 @@
 # Google Gemini Changelog
 
+## [New Model] - 2025-04-25
+
+- 🆕 New Model: Gemini 2.5 Flash Experimental
+
+## [New Model and Code Improvements] - 2025-03-26
+
+- 🆕 New Model: Gemini 2.5 Pro Experimental
+- 🛠️ Code Improvements: show error messages, and add new error code handling
+
+## [Fix Create Chat Functionality] - 2025-03-24
+
+- 🛠️ aiChat - Fixed the issue where the "Create Chat" functionality always set the chat name to "New Chat X" instead of using the name provided by the user.
+  - Updated the `CreateChat` component to use the chat name provided by the user. If the user does not provide a chat name, the `createNewChatName` function is used as a fallback.
+  - Added validation to ensure that the chat name is unique and not blank.
+
+## [Updated Models] - 2025-03-15
+
+- ⬆️ Upgrade the Gemini 2.0 Flash from preview to release
+- ⚠️ Add alerts to models that will be deprecated in Sep 2025
+
+## [New Command] - 2025-03-12
+
+- 🆕 New Command: Command History: now you can 📜 view your command history.
+
+## [New Command] - 2025-03-10
+
+- 🆕 New Command: Ask About Selected Screen Area
+
+## [New Models and Features] - 2025-02-24
+
+- 🤖 Update model variants
+- ⚙️ Set default model to Gemini 2.0 Flash which is already production ready
+- 🙋 Support custom model names as a supplement for listed common models.
+
+## [Append Selected Text to Chat] - 2025-02-04
+
+- Ability to append selected text to the chat command with the `Append to Chat` command. Shortcut: `Ctrl + Shift + V`
+
+## [Improved Translate Command] - 2025-01-17
+
+- 🔄 Translate Selected Text: now you can set first and second target language.
+  - All languages are by default translated to first target language.
+  - First target language is translated to second target language.
+  - Force Target Language overrides first target language.
+
+## [Gemini Flash 2.0 and More Customization] - 2025-01-02
+
+Features:
+
+- 🆕 Add new Models for Gemini 2.0 Flash Experimental, Gemini Experimental 1206, Gemini 2.0 Flash Thinking Experimental and LearnLM 1.5 Pro Experimental
+- 🧹 Allow prompts to be customizable in Raycast Settings
+- 🗯️ Add ability to add a default Translate language, and also ability to override with a parameter
+
 ## [Add Translate Command] - 2024-09-02
 
 More Features:

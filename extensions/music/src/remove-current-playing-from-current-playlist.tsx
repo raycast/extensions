@@ -13,10 +13,10 @@ export default async () => {
       showToast({
         style: Toast.Style.Success,
         title: `Removed "${track.name}" (${track.album} - ${track.artist}) from "${track.playlist}".`,
-      })
+      }),
     ),
     TE.mapLeft(() =>
-      showToast({ style: Toast.Style.Failure, title: "Error while removing current track from current playlist" })
-    )
+      showToast({ style: Toast.Style.Failure, title: "Error while removing current track from current playlist" }),
+    ),
   )();
 };

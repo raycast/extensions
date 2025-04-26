@@ -2,30 +2,28 @@ import axios from "axios";
 import * as yaml from "js-yaml";
 import Ajv from "ajv";
 
-type DataType = "ports" | "styles";
+export type DataType = "ports" | "userstyles";
 
 const ajv = new Ajv();
 
-const BASE_URLS = {
-  ports: "https://raw.githubusercontent.com/catppuccin/catppuccin",
-  styles: "https://raw.githubusercontent.com/catppuccin/userstyles",
-};
-
-const FILE_PATHS = {
+const DATA_LOCATIONS = {
   ports: {
-    main: "/main/resources/ports.yml",
-    fallback: "/a1ce9a7c29c6aa323f43caa88f21bf51faa91c3a/resources/ports.yml",
-    schema: "/main/resources/ports.schema.json",
+    repository: "catppuccin/catppuccin",
+    yaml_path: "resources/ports.yml",
+    schema_path: "resources/ports.schema.json",
+    fallback_hash: "a1ce9a7c29c6aa323f43caa88f21bf51faa91c3a",
   },
-  styles: {
-    main: "/main/scripts/userstyles.yml",
-    fallback: "/4ee2fffe0492ec2be6d744f770a1cdaa98226d44/scripts/userstyles.yml",
-    schema: "/main/scripts/userstyles.schema.json",
+  userstyles: {
+    repository: "catppuccin/userstyles",
+    yaml_path: "scripts/userstyles.yml",
+    schema_path: "scripts/userstyles.schema.json",
+    fallback_hash: "4ee2fffe0492ec2be6d744f770a1cdaa98226d44",
   },
 };
 
-const getURL = (type: DataType, version: "main" | "fallback" | "schema"): string => {
-  return `${BASE_URLS[type]}${FILE_PATHS[type][version]}`;
+const getURL = (type: DataType, version: "main" | "fallback", schema: boolean = false): string => {
+  const locations = DATA_LOCATIONS[type];
+  return `https://raw.githubusercontent.com/${locations.repository}/${version == "fallback" ? locations.fallback_hash : version}/${schema ? locations.schema_path : locations.yaml_path}`;
 };
 
 const dataCache: { [key in DataType]?: unknown } = {};
@@ -53,7 +51,7 @@ const fetchData = async <T>(type: DataType): Promise<T> => {
   try {
     const [dataJSON, schema] = await Promise.all([
       fetchYAML(getURL(type, "main")),
-      fetchSchema(getURL(type, "schema")),
+      fetchSchema(getURL(type, "main", true)),
     ]);
 
     if (!validateSchema<T>(dataJSON, schema)) {
@@ -71,13 +69,4 @@ const fetchData = async <T>(type: DataType): Promise<T> => {
   }
 };
 
-const isValidUrl = (url: string) => {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-export { fetchData, isValidUrl };
+export { fetchData };

@@ -1,4 +1,4 @@
-import { OpenAITranslateResult } from "./../types";
+import { OpenAITranslateResult, QueryWordInfo } from "./../types";
 /*
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
@@ -17,12 +17,8 @@ import { DetectedLangModel } from "../detectLanguage/types";
 import { requestLingueeDictionary } from "../dictionary/linguee/linguee";
 import { formatLingueeDisplaySections } from "../dictionary/linguee/parse";
 import { updateYoudaoDictionaryDisplay } from "../dictionary/youdao/formatData";
-import { QueryWordInfo, YoudaoDictionaryFormatResult } from "../dictionary/youdao/types";
-import {
-  playYoudaoWordAudioAfterDownloading,
-  requestYoudaoWebDictionary,
-  requestYoudaoWebTranslate,
-} from "../dictionary/youdao/youdao";
+import { playYoudaoWordAudioAfterDownloading, requestYoudaoWebDictionary } from "../dictionary/youdao/youdao";
+import { requestYoudaoWebTranslate } from "../dictionary/youdao/youdaoTranslate";
 import { englishLanguageItem } from "../language/consts";
 import { getAutoSelectedTargetLanguageItem, getLanguageItemFromYoudaoCode } from "../language/languages";
 import { LanguageItem } from "../language/type";
@@ -54,6 +50,7 @@ import {
   sortedQueryResults,
   updateTranslationMarkdown,
 } from "./utils";
+import { YoudaoDictionaryFormatResult } from "../dictionary/youdao/types";
 
 console.log(`enter dataManager.ts`);
 

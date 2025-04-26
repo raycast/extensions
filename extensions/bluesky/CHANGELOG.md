@@ -1,5 +1,15 @@
 # Bluesky Changelog
 
+## [Maintenance Release] - 2025-03-06
+
+- in `Notifications`, fix `initialRes.body?.cancel` error (related: [Issue #14814 comment](https://github.com/raycast/extensions/issues/14814#issuecomment-2396432584)) 
+- chore: update `@atproto/api` so we have better TS typing (ref: [@atproto/api v0.14.0 release notes](https://docs.bsky.app/blog/api-v0-14-0-release-notes))
+
+## [Updated Logo] - 2025-01-10
+
+- Update logo to use Bluesky logo from Press Kit
+- Fix `Timeline` not loading when there is a blocked post (ref: [Issue #16245](https://github.com/raycast/extensions/issues/))
+
 ## [Fixes] - 2024-11-13
 
 - Fix `Timeline` not loading due to error in `parser` (ref: [Issue #15318](https://github.com/raycast/extensions/issues/15318))

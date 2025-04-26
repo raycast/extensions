@@ -3,6 +3,7 @@ import EventSource from "eventsource";
 import { getMatchUrl, SearchEvent, SearchMatch, AlertKind, LATEST_VERSION } from "./stream";
 import { LinkBuilder, Sourcegraph } from "..";
 import { getProxiedAgent } from "../gql/fetchProxy";
+import { LocalStorage } from "@raycast/api";
 
 export interface SearchResult {
   url: string;
@@ -36,6 +37,7 @@ export interface SearchHandlers {
   onSuggestions: (suggestions: Suggestion[], top: boolean) => void;
   onAlert: (alert: Alert) => void;
   onProgress: (progress: Progress) => void;
+  onDone: () => void;
 }
 
 // Copied by hand from https://sourcegraph.sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+f:graphql+%22enum+SearchPatternType+%7B%22&patternType=keyword&case=yes&sm=0
@@ -50,7 +52,7 @@ export type PatternType =
   | "nls";
 
 export async function performSearch(
-  abort: AbortSignal,
+  abort: AbortController,
   src: Sourcegraph,
   query: string,
   patternType: PatternType,
@@ -66,7 +68,7 @@ export async function performSearch(
     ["q", query],
     ["v", LATEST_VERSION],
     ["t", patternType],
-    ["display", "200"],
+    ["display", "1500"],
   ]);
   const requestURL = link.new(src, "/.api/search/stream", parameters);
   const headers: { [key: string]: string } = {
@@ -74,6 +76,11 @@ export async function performSearch(
   };
   if (src.token) {
     headers["Authorization"] = `token ${src.token}`;
+  }
+  // sourcegraphDotCom() constructor sets the anonymous user ID so only read it here.
+  const anonymousUserID = (await LocalStorage.getItem("anonymous-user-id")) as string;
+  if (anonymousUserID) {
+    headers["X-Sourcegraph-Actor-Anonymous-UID"] = anonymousUserID;
   }
 
   // There's a bit of TypeScript trickery here, as we've added the agent
@@ -88,11 +95,12 @@ export async function performSearch(
      */
     const resolveStream = () => {
       stream.close();
+      abort.abort();
       resolve();
     };
 
     // signal cancelling
-    abort.addEventListener("abort", resolveStream);
+    abort.signal.addEventListener("abort", resolveStream);
 
     // matches from the Sourcegraph API
     stream.addEventListener("matches", (message) => {
@@ -225,6 +233,9 @@ export async function performSearch(
     });
 
     // done indicator
-    stream.addEventListener("done", resolveStream);
+    stream.addEventListener("done", () => {
+      handlers.onDone();
+      resolveStream();
+    });
   });
 }

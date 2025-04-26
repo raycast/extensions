@@ -17,6 +17,7 @@ export type MaskedEmail = {
   description: string;
   url: string | null;
   lastMessageAt: string;
+  createdAt: string;
 };
 
 function normalisePrefix(prefix: string): string {
@@ -63,7 +64,7 @@ export async function createMaskedEmail(prefix = "", description = "") {
           accountId: session.primaryAccounts[MaskedEmailCapability],
           create: {
             "raycast-masked-email": {
-              state: MaskedEmailState.Enabled,
+              state: MaskedEmailState.Pending,
               description,
               emailPrefix: normalisePrefix(prefix),
             },

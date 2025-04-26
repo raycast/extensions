@@ -1,5 +1,13 @@
 # Folder Search Changelog
 
+## [Fixes] - 2025-04-12
+- **fixed** Search results flickering when using fallback command by adding 150ms debounce to search updates
+- **improved** Search text handling by removing fixDoubleConcat workaround and relying on debouncing to handle rapid text changes
+
+## [New Features] - 2025-03-13
+
+- **added** 'Move' action for selected finder items
+
 ## [New Features] - 2024-08-20
 
 - **added** Pins can now be ordered by `Move Pin Up` and `Move Pin Down` actions

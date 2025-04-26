@@ -3,7 +3,7 @@
   "name": "bluesky",
   "title": "Bluesky",
   "description": "Browse through your Bluesky timeline. Create new posts, find people, and view your notifications.",
-  "icon": "extension-icon.png",
+  "icon": "bsky-logo-1.png",
   "author": "dharamkapila",
   "categories": [
     "Communication",
@@ -104,10 +104,10 @@
     }
   ],
   "dependencies": {
-    "@atproto/api": "^0.13.15",
+    "@atproto/api": "^0.14.7",
     "@atproto/uri": "^0.1.1",
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
     "cross-fetch": "^3.1.5",
     "use-debounce": "^9.0.4"
   },

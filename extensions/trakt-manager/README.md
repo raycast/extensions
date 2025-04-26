@@ -4,13 +4,7 @@ Control your Trakt account directly from Raycast.
 
 ## Usage
 
-Trakt Manager enables you to control your Trakt account directly from Raycast. It provides a set of commands to perform various actions on your account like adding shows to watchlist, checking-in on shows, and more. It allows you to sign in to your Trakt account using OAuth and then perform actions on your account.
-
-> [!IMPORTANT]
-> Please note that you would need a VIP account to be able to perform actions like add to watchlist or check-in.
-
-> [!NOTE]
-> Since Trakt doesn't provide a way to get the poster images, this extension makes use of a read only TMDB API bearer token to fetch the poster images from TMDB.
+Trakt Manager enables you to control your Trakt account directly from Raycast. It provides a set of commands to perform various actions on your account like adding items to watchlist, marking items as watched, and many more. It allows you to sign in to your Trakt account using OAuth and then perform actions on your account.
 
 ## Commands
 
@@ -21,6 +15,10 @@ Search for movies by title.
 ### Search Shows
 
 Search for shows by title.
+
+### Search Episodes
+
+Search for episodes by title.
 
 ### Watchlist
 
@@ -34,15 +32,10 @@ Get the list of shows that are up next.
 
 Lists movies and shows that are in your history.
 
-### Refresh
+### Recommendation
 
-Refreshes the cache from API.
-
-> [!NOTE]
-> This command also runs in the background every 6 hours to keep the cache up to date.
+Lists recommended movies and shows.
 
 ## Powered by
 
-<img src="https://trakt.tv/assets/branding/logos/wide/pixels/trakt-wide-red-black-eb9e7093a42b12fd46f65ea6ca9ef118462b657847842f427dc1b553c309df2f.png" alt="Trakt" width="400"/>
-<br />
-<img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg" alt="TMDB" width="400"/>
+<img src="https://trakt.tv/assets/logos/logo.tagline.positive-29126460f3e6cbf05387c299752cd30b076b25997363d71487d26123265b3d3e.svg" alt="Trakt" width="400"/>

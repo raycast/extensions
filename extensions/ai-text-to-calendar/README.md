@@ -13,11 +13,28 @@ AI Text to Calendar is a [Raycast](https://raycast.com/) extension that converts
 
 Configure the extension via `Raycast Settings > Extensions > AI Text to Calendar`.
 
-| Property       | Label          | Type   | Required | Description                                      |
-| -------------- | -------------- | ------ | -------- | ------------------------------------------------ |
-| `openAiApiKey` | OpenAI API Key | string | true     | Your personal OpenAI API key                     |
-| `language`     | Language       | string | true     | Language of the input text (e.g., English, 日本語) |
+| Property   | Label              | Type   | Required | Description                                                                                        |
+| ---------- | ------------------ | ------ | -------- | -------------------------------------------------------------------------------------------------- |
+| `apiKey`   | AI Service API Key | string | true     | Your personal AI service API key                                                                   |
+| `model`    | Model Name         | string | false    | LLM model name, default is `gpt-4o-mini`                                                           |
+| `language` | Language           | string | false    | Language of the output text, default is `English`                                                  |
+| `endpoint` | Endpoint           | string | false    | LLM service endpoint (e.g., <https://api.deepseek.com/v1>), default is `https://api.openai.com/v1` |
+
+## TODO
+
+- [ ] User default settings (e.g., default date, time)
+- [ ] With supplementary information (e.g., selected text + user input)
+- [ ] Support for other calendar services (e.g., use Apple Script or Shortcut for Apple Calendar)
 
 ## License
 
 This project is licensed under the MIT License.
+
+## Example Test Cases
+
+| Test Case                                            | gpt-4o-mini works? | gpt-4o works? |
+| ---------------------------------------------------- | ------------------ | ------------- |
+| `play tennis with Mike tommorrow at 5pm in the park` | ✓                  | ✓             |
+| `Math class next Monday at 10am in lecture hall`     | x                  | ✓             |
+
+Tips: try to use advanced LLM models for better results, especially for date reasoning.

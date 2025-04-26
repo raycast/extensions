@@ -20,12 +20,15 @@ import {
   updateTodo,
   handleError,
   List as TList,
-  UpdateTodoParams,
+  TodoParams,
 } from '../api';
 import { getChecklistItemsWithAI, listItems, statusIcons } from '../helpers';
 import { capitalize } from '../utils';
 
 import EditTodo from './EditTodo';
+
+// Match URLs with protocols, with optional //
+const URL_REGEX = /([a-zA-Z][a-zA-Z0-9.+-]+):(?:\/\/\S+|%\S+)/;
 
 type TodoListItemActionsProps = {
   todo: Todo;
@@ -49,7 +52,9 @@ export default function TodoListItemActions({
 
   const area = todo.area || todo.project?.area;
 
-  async function updateAction(args: UpdateTodoParams, successToastOptions: Toast.Options) {
+  const notesURL = todo.notes.match(URL_REGEX)?.[0];
+
+  async function updateAction(args: TodoParams, successToastOptions: Toast.Options) {
     try {
       await updateTodo(todo.id, args);
       await showToast({
@@ -273,6 +278,17 @@ New title:
           onAction={deleteToDo}
         />
       </ActionPanel.Section>
+
+      {notesURL && (
+        <ActionPanel.Section>
+          <Action.OpenInBrowser
+            title="Open URL From Notes"
+            url={notesURL}
+            shortcut={{ modifiers: ['cmd', 'shift'], key: 'o' }}
+          />
+          <Action.CopyToClipboard title="Copy URL From Notes" content={notesURL} />
+        </ActionPanel.Section>
+      )}
 
       <ActionPanel.Section>
         <Action.CopyToClipboard

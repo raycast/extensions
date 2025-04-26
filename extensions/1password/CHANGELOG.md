@@ -1,5 +1,24 @@
 # 1Password Changelog
 
+## [Moved contributor] - 2025-02-24
+
+## [Moved contributor] - 2025-02-03
+
+## [Enhancements] - 2025-02-12
+
+- Give a guid page when the user not install 1Password CLI
+
+## [Maintenance] - 2025-01-19
+
+- Remove unused Bun lockfile
+- Fix types
+- Bump all dependencies to the latest
+
+## [Chore] - 2025-01-09
+
+- Moved contributor to past contributors
+- Bump all dependencies to the latest
+
 ## [Chore] - 2024-12-02
 
 - Add readme & FAQ

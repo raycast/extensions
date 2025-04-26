@@ -11,7 +11,12 @@ export async function sendToDaily(text: string, headless?: boolean) {
   } else {
     await showToast({ style: Toast.Style.Animated, title: "Sending to Daily Card" });
   }
-  const fetched = await superfetch("/v1/cards/daily", "put", { apiKey, body: { markup: text } });
+  const now = new Date();
+  const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const fetched = await superfetch("/v1/cards/daily", "put", {
+    apiKey,
+    body: { markup: text, local_date: localDate },
+  });
   await showHUD(fetched.ok ? `✅ Added to Daily Card` : `🚫 Error: ${fetched.body.detail}`);
   popToRoot({ clearSearchBar: true });
 }

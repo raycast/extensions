@@ -1,6 +1,6 @@
 import { ActionPanel, List, Action, Icon, useNavigation, Toast, Image, Color, showToast, Form } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { useState, Fragment, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
 
@@ -57,10 +57,10 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
       isLoading={loading}
       searchBarPlaceholder={`Manage batch changes on ${srcName}`}
       onSearchTextChange={setSearchText}
-      enableFiltering={true}
+      filtering={true}
       selectedItemId={showSuggestions ? "first-result" : undefined}
     >
-      {showSuggestions ? (
+      {showSuggestions && (
         <List.Section title={"Suggestions"}>
           <List.Item
             title="Create a batch change"
@@ -72,8 +72,6 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
             }
           />
         </List.Section>
-      ) : (
-        <Fragment />
       )}
 
       <List.Section title={"Batch changes"}>

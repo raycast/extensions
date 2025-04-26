@@ -1,5 +1,9 @@
 # Rebrandly Changelog
 
+## [Delete Link] - 2025-02-10
+
+- Use `ctrl`+`x` to execute "Delete Link" `Action`
+
 ## [Update Logo + Create Link] - 2024-11-09
 
 - Filter by "Starred"

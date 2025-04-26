@@ -1,5 +1,27 @@
 # Home Assistant Changelog
 
+## [Update] - 2025-03-13
+
+- Added preference to Dashboard command to allow opening specific HA page.
+
+## [Update] 2025-03-10
+
+- Added Custom Entities command to allow to add specific entities to the list.
+
+## [✨ AI Enhancements] - 2025-02-21
+
+- Added AI tools.
+
+## [Update] - 2024-12-17
+
+- Fixed grammar in alert message of the `Updates` command.
+- Removed unnecessary emoji from the update status of the `Updates` command.
+
+## [Update] - 2024-12-16
+
+- Updated search bar placeholder of the `Assist` command.
+- Fixed icon color of the `Assist` command.
+
 ## [Update] - 2024-12-06
 
 - Renamed `Mediaplayers` and `Mediaplayer Menu` commands to `Media Players` and `Media Player Menu`.

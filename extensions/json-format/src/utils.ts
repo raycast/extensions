@@ -34,24 +34,29 @@ export async function formatJS(text: string) {
 }
 
 function unescapeJsonString(str: string): string {
-  return str.replace(/\\(["\\/bfnrt]|u[0-9a-fA-F]{4})/g, function (match, p1) {
-    const unescapeMap: { [key: string]: string } = {
-      '"': '"',
-      "\\": "\\",
-      "/": "/",
-      b: "\b",
-      f: "\f",
-      n: "\n",
-      r: "\r",
-      t: "\t",
-    };
+  // Only unscape if the entire payload is deemed escaped.
+  // Test for this by cheking if the starting quote character for the first key in the JSON payload is escaped.
+  // If it is, its most-likely the entire payload is escaped. Hence un-escape.
+  return /^[^"]+\\".*$/.test(str)
+    ? str.replace(/\\(["\\/bfnrt]|u[0-9a-fA-F]{4})/g, function (match, p1) {
+        const unescapeMap: { [key: string]: string } = {
+          '"': '"',
+          "\\": "\\",
+          "/": "/",
+          b: "\b",
+          f: "\f",
+          n: "\n",
+          r: "\r",
+          t: "\t",
+        };
 
-    if (p1[0] === "u") {
-      return String.fromCharCode(parseInt(p1.slice(1), 16));
-    } else {
-      return unescapeMap[p1] || p1;
-    }
-  });
+        if (p1[0] === "u") {
+          return String.fromCharCode(parseInt(p1.slice(1), 16));
+        } else {
+          return unescapeMap[p1] || p1;
+        }
+      })
+    : str;
 }
 
 export async function copyFormattedJs(result: string) {

@@ -1,23 +1,22 @@
 import { Account, BskyRecord, Post, PostReason } from "../types/types";
-import { AppBskyActorDefs, AppBskyFeedDefs } from "@atproto/api";
 import {
-  BlueskyImageEmbedType,
-  BlueskyPostEmbedType,
-  BlueskyProfileUrlBase,
-  BlueskyRepostType,
-  PostEndHorizontalLine,
-} from "./constants";
+  $Typed,
+  AppBskyActorDefs,
+  AppBskyEmbedImages,
+  AppBskyEmbedRecord,
+  AppBskyFeedDefs,
+  AppBskyFeedPost,
+} from "@atproto/api";
+import { BlueskyProfileUrlBase, PostEndHorizontalLine } from "./constants";
 
 import { Notification as BskyNotification } from "@atproto/api/dist/client/types/app/bsky/notification/listNotifications";
 import { Notification } from "../types/types";
 import { NotificationReasonMapping } from "../config/notificationReasonMapping";
-import { PostView, ReasonRepost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
-import { ViewImage } from "@atproto/api/dist/client/types/app/bsky/embed/images";
+import { isBlockedPost, isPostView, isReasonRepost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { ViewRecord } from "@atproto/api/dist/client/types/app/bsky/embed/record";
 import { getMarkdownText } from "../libs/atp";
 import { getPostUrl } from "./common";
 import { getReadableDate } from "./date";
-import { ProfileViewBasic } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 
 export const getLikesUrl = (handle: string, uri: string) => {
   return `${getPostUrl(handle, uri)}/liked-by`;
@@ -82,7 +81,7 @@ ${getImageMarkdown(imageEmbeds)}
   )})    ↓ [${post.replyCount}](${getPostUrl(post.author.handle, post.uri)})
 
 _[${postTime}](${getPostUrl(post.author.handle, post.uri)})_  ${
-    post.embed?.$type === BlueskyPostEmbedType ? "" : PostEndHorizontalLine
+    AppBskyEmbedRecord.isView(post.embed) ? "" : PostEndHorizontalLine
   }
 `;
 };
@@ -149,20 +148,21 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
   const posts: Post[] = await Promise.all(
     bskyFeed
       .filter((item) => item !== null && item.post !== null)
-      .filter((item) => item.post.record)
+      .filter((item) => AppBskyFeedPost.isRecord(item.post.record))
+      .filter((item) => !isBlockedPost(item.reply?.root))
       .map(async (item) => {
         let postReason: PostReason = null;
 
-        if (item.reason && item.reason.$type === BlueskyRepostType) {
-          const author = (item.reason as ReasonRepost).by;
+        if (isReasonRepost(item.reason)) {
+          const author = item.reason.by;
           postReason = {
             type: "repost",
-            authorName: author.displayName ? author.displayName : author.handle,
+            authorName: author.displayName || author.handle,
           };
         }
 
-        if (item.reply && Object.keys(item.reply).length > 0 && item.reply.parent.notFound !== true) {
-          const author = item.reply.parent.author as ProfileViewBasic;
+        if (item.reply && Object.keys(item.reply).length > 0 && isPostView(item.reply.parent)) {
+          const { author } = item.reply.parent;
           postReason = {
             type: "reply",
             authorName: author.displayName ? author.displayName : author.handle,
@@ -171,34 +171,39 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
 
         let imageEmbeds: string[] = [];
 
-        if (item.post.embed?.$type === BlueskyImageEmbedType) {
-          imageEmbeds = (item.post.embed.images as ViewImage[]).map((item: ViewImage) => item.thumb);
+        if (AppBskyEmbedImages.isView(item.post.embed)) {
+          imageEmbeds = item.post.embed.images.map((item) => item.thumb);
         }
 
         let markdownView = "";
 
-        if (item.reply?.root && item.reply?.root.uri !== item.reply?.parent.uri && item.reply.root.notFound !== true) {
+        if (
+          item.reply &&
+          isPostView(item.reply.root) &&
+          isPostView(item.reply.parent) &&
+          item.reply.root.uri !== item.reply.parent.uri
+        ) {
           let imageEmbeds: string[] = [];
-          const root = item.reply.root as PostView;
-          if (root.embed?.$type === BlueskyImageEmbedType) {
-            imageEmbeds = (root.embed.images as ViewImage[]).map((item: ViewImage) => item.thumb);
+          const { root } = item.reply;
+          if (AppBskyEmbedImages.isView(root.embed)) {
+            imageEmbeds = root.embed.images.map((item) => item.thumb);
           }
 
           markdownView = markdownView + (await getPostMarkdownView(root, imageEmbeds));
         }
-
-        if (item.reply?.parent && item.reply.parent.notFound !== true) {
+        if (isPostView(item.reply?.parent)) {
           let imageEmbeds: string[] = [];
-          const parent = item.reply.parent as PostView;
-          if (parent.embed?.$type === BlueskyImageEmbedType) {
-            imageEmbeds = (parent.embed.images as ViewImage[]).map((item: ViewImage) => item.thumb);
+          const parent = item.reply.parent;
+          if (AppBskyEmbedImages.isView(parent.embed)) {
+            imageEmbeds = parent.embed.images.map((item) => item.thumb);
           }
 
           markdownView = markdownView + (await getPostMarkdownView(parent, imageEmbeds));
         }
 
         let quotedMarkdown = "";
-        if (item.post.embed?.$type === BlueskyPostEmbedType && item.post.embed.record) {
+        // not sure if we still need the `&& item.post.embed.record` - leave until sure
+        if (AppBskyEmbedRecord.isView(item.post.embed) && item.post.embed.record) {
           const postAuthor = item.post.author.displayName ? item.post.author.displayName : item.post.author.handle;
           postReason = {
             type: "quote",
@@ -209,10 +214,9 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
           const embeddedPostRecord = item.post.embed.record as ViewRecord;
 
           if (embeddedPostRecord.embeds && embeddedPostRecord.embeds?.length > 0) {
-            if (embeddedPostRecord.embeds[0]?.$type === BlueskyImageEmbedType) {
-              embeddedPostImages = (embeddedPostRecord.embeds[0].images as ViewImage[]).map(
-                (item: ViewImage) => item.thumb,
-              );
+            const embed = embeddedPostRecord.embeds[0];
+            if (AppBskyEmbedImages.isView(embed)) {
+              embeddedPostImages = embed.images.map((item) => item.thumb);
             }
           }
 
@@ -224,9 +228,9 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
         }
 
         let repostMarkdown = "";
-        if (item.reason && item.reason.$type === BlueskyRepostType && item.post.embed?.$type !== BlueskyPostEmbedType) {
-          const repostAuthor = item.reason.by as AppBskyActorDefs.ProfileViewBasic;
-          const displayName = repostAuthor.displayName ? repostAuthor.displayName : "";
+        if (item.reason && isReasonRepost(item.reason)) {
+          const repostAuthor = item.reason.by;
+          const displayName = repostAuthor.displayName || "";
           repostMarkdown = getRepostMarkdown(displayName, repostAuthor.handle);
         }
 
@@ -234,14 +238,18 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
           uri: item.post.uri,
           cid: item.post.cid,
           viewer: item.post.author.viewer,
-          text: (item.post.record as BskyRecord).text,
+          text: (item.post.record as $Typed<AppBskyFeedPost.Record>).text,
           imageEmbeds,
           reason: postReason,
-          createdAt: (item.post.record as BskyRecord).createdAt,
+          createdAt: (item.post.record as $Typed<AppBskyFeedPost.Record>).createdAt,
           createdByUser: {
             did: item.post.author.did,
             handle: item.post.author.handle,
-            blockedUri: item.post.viewer && item.post.viewer.blocking ? (item.post.viewer.blocking as string) : "",
+            blockedUri:
+              // This is done for legacy reasons. "blocking" does not exist on ViewerState but we have assumed it is so we don't break anything - might remove in future
+              item.post.viewer && (item.post.viewer as AppBskyFeedDefs.ViewerState & { blocking?: string }).blocking
+                ? ((item.post.viewer as AppBskyFeedDefs.ViewerState & { blocking?: string }).blocking as string)
+                : "",
             displayName: item.post.author.displayName ? item.post.author.displayName : "",
             avatarUrl: item.post.author.avatar ? item.post.author.avatar : "",
           },

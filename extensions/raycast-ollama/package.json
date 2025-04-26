@@ -184,6 +184,13 @@
       "mode": "view"
     },
     {
+      "name": "ollama-ps",
+      "title": "Loaded Models",
+      "subtitle": "Ollama",
+      "description": "Show models loaded on ram",
+      "mode": "view"
+    },
+    {
       "name": "ollama-custom-create",
       "title": "Create Custom Command",
       "subtitle": "Ollama",

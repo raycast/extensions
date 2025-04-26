@@ -1,29 +1,26 @@
-import "./util/fetchPolyfill";
-import { useState, useEffect } from "react";
-import { ActionPanel, Action, Detail, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { setActiveSite, Site } from "./api/site";
+import "cross-fetch/polyfill";
+import { ActionPanel, Action, Detail, Icon, List, useNavigation } from "@raycast/api";
+import { setActiveSite } from "./api/site";
 import { fetchSites } from "./api/atlassian";
 import { authorizeSite } from "./api/auth";
+import { usePromise } from "@raycast/utils";
 
 export default function Command() {
   const { pop } = useNavigation();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [sites, setSites] = useState<Site[]>([]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        await authorizeSite(false);
-        const sites = await fetchSites();
-        setSites(sites);
-        setIsLoading(false);
-      } catch (error) {
-        console.error(error);
-        setIsLoading(false);
-        showToast({ style: Toast.Style.Failure, title: String(error) });
-      }
-    })();
-  }, []);
+  const { isLoading, data: sites = [] } = usePromise(
+    async () => {
+      await authorizeSite(false);
+      const sites = await fetchSites();
+      return sites;
+    },
+    [],
+    {
+      failureToastOptions: {
+        title: "Could not load sites",
+      },
+    }
+  );
 
   if (isLoading) {
     return <Detail isLoading={isLoading} />;

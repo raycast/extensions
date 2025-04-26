@@ -51,7 +51,7 @@ export default function FindNotebooksCommand({ src }: { src: Sourcegraph }) {
       selectedItemId={length > 0 ? "first-result" : undefined}
       throttle
     >
-      {!loading && !searchText ? (
+      {!loading && !searchText && (
         <List.Section title={"Suggestions"}>
           <List.Item
             title="Create a search notebook"
@@ -63,17 +63,15 @@ export default function FindNotebooksCommand({ src }: { src: Sourcegraph }) {
             }
           />
         </List.Section>
-      ) : (
-        <Fragment />
       )}
 
-      {notebooks && (
-        <List.Section title={searchText ? "Notebooks" : "Recent notebooks"}>
-          {notebooks.map((n, i) => (
-            <NotebookResultItem id={i === 0 ? "first-result" : undefined} key={nanoid()} notebook={n} src={src} />
-          ))}
-        </List.Section>
-      )}
+      {loading && length === 0 && <List.EmptyView title={"Loading..."} />}
+
+      <List.Section title={searchText ? "Notebooks" : "Recent notebooks"}>
+        {notebooks?.map((n, i) => (
+          <NotebookResultItem id={i === 0 ? "first-result" : undefined} key={nanoid()} notebook={n} src={src} />
+        ))}
+      </List.Section>
     </List>
   );
 }

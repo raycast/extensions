@@ -1,6 +1,7 @@
 import { Grid, Action, ActionPanel, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import saveImage from "./functions/saveImage";
 import copyFileToClipboard from "./functions/copyFileToClipboard";
+import { setWallpaper } from "./functions/setWallpaper";
 import DisplayArtwork from "./display-artwork";
 import { useFetch } from "@raycast/utils";
 import { Artwork } from "./types";
@@ -46,7 +47,14 @@ function GetPopularArt() {
                   icon={Icon.Eye}
                 />
                 <Action
-                  title="Copy Image to Clipboard"
+                  title="Set Desktop Wallpaper"
+                  onAction={() => {
+                    setWallpaper({ url: artwork.full_url, id: artwork.username });
+                  }}
+                  icon={Icon.Monitor}
+                />
+                <Action
+                  title="Copy to Clipboard"
                   onAction={() => copyFileToClipboard({ url: artwork.full_url, id: artwork.username })}
                   icon={Icon.CopyClipboard}
                 />

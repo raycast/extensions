@@ -19,7 +19,9 @@ export default function () {
     const filteredFlights = allFlights?.filter((flight) => {
         if (filter.type === 'future') return dayjs.unix(flight.depTimeOriginal).isAfter(dayjs())
         if (filter.type === 'all') return true
-        return dayjs.unix(flight.depTimeOriginal).year().toString() === filter.year
+        const depTime = dayjs.unix(flight.depTimeOriginal)
+        if (depTime.isAfter(dayjs())) return false
+        return depTime.year().toString() === filter.year
     })
 
     if (filter.type === 'future') filteredFlights?.reverse()
@@ -49,137 +51,153 @@ export default function () {
                 </List.Dropdown>
             }
         >
-            {filteredFlights?.map((flight) => {
-                const link = `https://live.flighty.app/${flight.id}`
+            <List.Section title={filteredFlights ? `${filteredFlights.length} Flights` : undefined}>
+                {filteredFlights?.map((flight) => {
+                    const link = `https://live.flighty.app/${flight.id}`
 
-                const depTimeOriginal = dayjs.unix(flight.depTimeOriginal).tz(flight.depTz)
-                const depTimeActual = (() => {
-                    if (flight.depTimeActual !== null) return dayjs.unix(flight.depTimeActual).tz(flight.depTz)
-                    if (flight.depTimeEstimated !== null) return dayjs.unix(flight.depTimeEstimated).tz(flight.depTz)
-                    return null
-                })()
+                    const depTimeOriginal = dayjs.unix(flight.depTimeOriginal).tz(flight.depTz)
+                    const depTimeActual = (() => {
+                        if (flight.depTimeActual !== null) return dayjs.unix(flight.depTimeActual).tz(flight.depTz)
+                        if (flight.depTimeEstimated !== null) return dayjs.unix(flight.depTimeEstimated).tz(flight.depTz)
+                        return null
+                    })()
 
-                const arrTimeOriginal = flight.arrTimeOriginal ? dayjs.unix(flight.arrTimeOriginal).tz(flight.arrTz) : null
-                const arrTimeActual = (() => {
-                    if (flight.arrTimeActual !== null) return dayjs.unix(flight.arrTimeActual).tz(flight.arrTz)
-                    if (flight.arrTimeEstimated !== null) return dayjs.unix(flight.arrTimeEstimated).tz(flight.arrTz)
-                    return null
-                })()
+                    const arrTimeOriginal = flight.arrTimeOriginal ? dayjs.unix(flight.arrTimeOriginal).tz(flight.arrTz) : null
+                    const arrTimeActual = (() => {
+                        if (flight.arrTimeActual !== null) return dayjs.unix(flight.arrTimeActual).tz(flight.arrTz)
+                        if (flight.arrTimeEstimated !== null) return dayjs.unix(flight.arrTimeEstimated).tz(flight.arrTz)
+                        return null
+                    })()
 
-                const depDate = depTimeOriginal.format(depTimeOriginal.year() === dayjs().year() ? 'ddd, D MMM' : 'ddd, D MMM YYYY')
+                    const depDate = depTimeOriginal.format(depTimeOriginal.year() === dayjs().year() ? 'ddd, D MMM' : 'ddd, D MMM YYYY')
 
-                const durationOriginal = arrTimeOriginal ? arrTimeOriginal.diff(depTimeOriginal, 'minute') : null
-                const durationActual = depTimeActual && arrTimeActual ? arrTimeActual.diff(depTimeActual, 'minute') : null
+                    const durationOriginal = arrTimeOriginal ? arrTimeOriginal.diff(depTimeOriginal, 'minute') : null
+                    const durationActual = depTimeActual && arrTimeActual ? arrTimeActual.diff(depTimeActual, 'minute') : null
 
-                return (
-                    <List.Item
-                        key={flight.id}
-                        icon={{
-                            source: {
-                                light: `https://live.flighty.app/content/airlines:light_${flight.airlineIcao.toLowerCase()}.svg`,
-                                dark: `https://live.flighty.app/content/airlines:dark_${flight.airlineIcao.toLowerCase()}.svg`,
-                            },
-                            fallback: Icon.Airplane,
-                        }}
-                        title={`${flight.airlineIata} ${flight.number}`}
-                        accessories={[{text: depDate}]}
-                        keywords={[
-                            flight.number,
-                            flight.airlineIata,
-                            flight.airlineIcao,
-                            flight.airlineName,
+                    return (
+                        <List.Item
+                            key={flight.id}
+                            icon={{
+                                source: {
+                                    light: `https://live.flighty.app/content/airlines:light_${flight.airlineIcao.toLowerCase()}.svg`,
+                                    dark: `https://live.flighty.app/content/airlines:dark_${flight.airlineIcao.toLowerCase()}.svg`,
+                                },
+                                fallback: Icon.Airplane,
+                            }}
+                            title={`${flight.airlineIata} ${flight.number}`}
+                            accessories={[{text: depDate}]}
+                            keywords={[
+                                flight.number,
+                                flight.airlineIata,
+                                flight.airlineIcao,
+                                flight.airlineName,
 
-                            flight.depAirportIata,
-                            flight.depCity,
-                            flight.arrAirportIata,
-                            flight.arrCity,
+                                flight.depAirportIata,
+                                flight.depCity,
+                                flight.arrAirportIata,
+                                flight.arrCity,
 
-                            flight.aircraftIata,
-                            flight.aircraftIcao,
-                            flight.aircraftName,
-                            flight.aircraftTailNumber,
-                        ].filter((s) => s !== null)}
-                        actions={
-                            <ActionPanel title="Flight">
-                                <Action.OpenInBrowser title="Open in Flighty" url={link} />
-                                <Action.CopyToClipboard title="Copy Link" content={link} />
-                            </ActionPanel>
-                        }
-                        detail={
-                            <List.Item.Detail
-                                metadata={
-                                    <List.Item.Detail.Metadata>
-                                        <List.Item.Detail.Metadata.Label title="Airline" text={flight.airlineName} />
-                                        <List.Item.Detail.Metadata.Label title="Flight Number" text={`${flight.airlineIata} ${flight.number}`} />
+                                flight.aircraftIata,
+                                flight.aircraftIcao,
+                                flight.aircraftName,
+                                flight.aircraftTailNumber,
 
-                                        <List.Item.Detail.Metadata.Label title="Date" text={depDate} />
+                                flight.pnr,
+                            ].filter((s) => s !== null)}
+                            actions={
+                                <ActionPanel title="Flight">
+                                    <Action.OpenInBrowser title="Open in Flighty" url={link} />
+                                    <Action.CopyToClipboard title="Copy Link" content={link} />
+                                    {flight.pnr && <Action.CopyToClipboard title="Copy Booking Code" content={flight.pnr} />}
+                                </ActionPanel>
+                            }
+                            detail={
+                                <List.Item.Detail
+                                    metadata={
+                                        <List.Item.Detail.Metadata>
+                                            <List.Item.Detail.Metadata.Label title="Airline" text={flight.airlineName} />
+                                            <List.Item.Detail.Metadata.Label title="Flight Number" text={`${flight.airlineIata} ${flight.number}`} />
 
-                                        <List.Item.Detail.Metadata.Label title="From" text={`${flight.depCity} (${flight.depAirportIata})`} />
-                                        <List.Item.Detail.Metadata.Label title="To" text={`${flight.arrCity} (${flight.arrAirportIata})`} />
+                                            <List.Item.Detail.Metadata.Label title="Date" text={depDate} />
 
-                                        <List.Item.Detail.Metadata.Separator />
+                                            <List.Item.Detail.Metadata.Label title="From" text={`${flight.depCity} (${flight.depAirportIata})`} />
+                                            <List.Item.Detail.Metadata.Label title="To" text={`${flight.arrCity} (${flight.arrAirportIata})`} />
 
-                                        <List.Item.Detail.Metadata.Label title="Departure - Scheduled" text={depTimeOriginal.format(timeFormat)} />
-                                        <List.Item.Detail.Metadata.Label
-                                            title="Departure - Actual"
-                                            text={(() => {
-                                                if (depTimeActual === null) return '-'
-                                                return {
-                                                    value: formatRelativeTime(depTimeOriginal, depTimeActual),
-                                                    color: depTimeActual > depTimeOriginal ? Color.Red : Color.Green,
-                                                }
-                                            })()}
-                                        />
+                                            <List.Item.Detail.Metadata.Separator />
 
-                                        <List.Item.Detail.Metadata.Label
-                                            title="Arrival - Scheduled"
-                                            text={(() => {
-                                                if (arrTimeOriginal === null) return '-'
-                                                return formatRelativeTime(depTimeOriginal, arrTimeOriginal)
-                                            })()}
-                                        />
-                                        <List.Item.Detail.Metadata.Label
-                                            title="Arrival - Actual"
-                                            text={(() => {
-                                                if (arrTimeActual === null) return '-'
-                                                if (arrTimeOriginal === null) return formatRelativeTime(depTimeOriginal, arrTimeActual)
-                                                return {
-                                                    value: formatRelativeTime(depTimeOriginal, arrTimeActual),
-                                                    color: arrTimeActual > arrTimeOriginal ? Color.Red : Color.Green,
-                                                }
-                                            })()}
-                                        />
+                                            <List.Item.Detail.Metadata.Label title="Departure - Scheduled" text={depTimeOriginal.format(timeFormat)} />
+                                            <List.Item.Detail.Metadata.Label
+                                                title="Departure - Actual"
+                                                text={(() => {
+                                                    if (depTimeActual === null) return '-'
+                                                    return {
+                                                        value: formatRelativeTime(depTimeOriginal, depTimeActual),
+                                                        color: depTimeActual > depTimeOriginal ? Color.Red : Color.Green,
+                                                    }
+                                                })()}
+                                            />
+                                            <List.Item.Detail.Metadata.Label title="Departure Terminal" text={flight.depTerminal ?? '-'} />
+                                            <List.Item.Detail.Metadata.Label title="Departure Gate" text={flight.depGate ?? '-'} />
 
-                                        <List.Item.Detail.Metadata.Label
-                                            title="Duration - Scheduled"
-                                            text={(() => {
-                                                if (durationOriginal === null) return '-'
-                                                return `${Math.floor(durationOriginal / 60)}h ${durationOriginal % 60}m`
-                                            })()}
-                                        />
-                                        <List.Item.Detail.Metadata.Label
-                                            title="Duration - Actual"
-                                            text={(() => {
-                                                if (durationActual === null) return '-'
-                                                if (durationOriginal === null) return `${Math.floor(durationActual / 60)}h ${durationActual % 60}m`
-                                                return {
-                                                    value: `${Math.floor(durationActual / 60)}h ${durationActual % 60}m`,
-                                                    color: durationActual > durationOriginal ? Color.Red : Color.Green,
-                                                }
-                                            })()}
-                                        />
+                                            <List.Item.Detail.Metadata.Label
+                                                title="Arrival - Scheduled"
+                                                text={(() => {
+                                                    if (arrTimeOriginal === null) return '-'
+                                                    return formatRelativeTime(depTimeOriginal, arrTimeOriginal)
+                                                })()}
+                                            />
+                                            <List.Item.Detail.Metadata.Label
+                                                title="Arrival - Actual"
+                                                text={(() => {
+                                                    if (arrTimeActual === null) return '-'
+                                                    if (arrTimeOriginal === null) return formatRelativeTime(depTimeOriginal, arrTimeActual)
+                                                    return {
+                                                        value: formatRelativeTime(depTimeOriginal, arrTimeActual),
+                                                        color: arrTimeActual > arrTimeOriginal ? Color.Red : Color.Green,
+                                                    }
+                                                })()}
+                                            />
+                                            <List.Item.Detail.Metadata.Label title="Arrival Terminal" text={flight.arrTerminal ?? '-'} />
+                                            <List.Item.Detail.Metadata.Label title="Arrival Gate" text={flight.arrGate ?? '-'} />
+                                            <List.Item.Detail.Metadata.Label title="Arrival Baggage Belt" text={flight.arrBaggageBelt ?? '-'} />
 
-                                        <List.Item.Detail.Metadata.Separator />
+                                            <List.Item.Detail.Metadata.Label
+                                                title="Duration - Scheduled"
+                                                text={(() => {
+                                                    if (durationOriginal === null) return '-'
+                                                    return `${Math.floor(durationOriginal / 60)}h ${durationOriginal % 60}m`
+                                                })()}
+                                            />
+                                            <List.Item.Detail.Metadata.Label
+                                                title="Duration - Actual"
+                                                text={(() => {
+                                                    if (durationActual === null) return '-'
+                                                    if (durationOriginal === null) return `${Math.floor(durationActual / 60)}h ${durationActual % 60}m`
+                                                    return {
+                                                        value: `${Math.floor(durationActual / 60)}h ${durationActual % 60}m`,
+                                                        color: durationActual > durationOriginal ? Color.Red : Color.Green,
+                                                    }
+                                                })()}
+                                            />
 
-                                        <List.Item.Detail.Metadata.Label title="Aircraft" text={flight.aircraftName ?? undefined} />
-                                        <List.Item.Detail.Metadata.Label title="Distance" text={`${flight.distance} km`} />
-                                    </List.Item.Detail.Metadata>
-                                }
-                            />
-                        }
-                    />
-                )
-            })}
+                                            <List.Item.Detail.Metadata.Separator />
+
+                                            <List.Item.Detail.Metadata.Label title="Aircraft" text={flight.aircraftName ?? undefined} />
+                                            <List.Item.Detail.Metadata.Label title="Aircraft Registration" text={flight.aircraftTailNumber ?? '-'} />
+                                            <List.Item.Detail.Metadata.Label title="Distance" text={`${flight.distance} km`} />
+
+                                            <List.Item.Detail.Metadata.Separator />
+
+                                            <List.Item.Detail.Metadata.Label title="Booking Code" text={flight.pnr ?? '-'} />
+                                            <List.Item.Detail.Metadata.Label title="Seat Number" text={flight.seatNumber ?? '-'} />
+                                        </List.Item.Detail.Metadata>
+                                    }
+                                />
+                            }
+                        />
+                    )
+                })}
+            </List.Section>
             {error && <List.EmptyView icon={Icon.Warning} description={error.message} />}
         </List>
     )

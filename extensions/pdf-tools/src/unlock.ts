@@ -24,12 +24,10 @@ export default async function Command(props: { arguments: { password: string } }
 
     await closeMainWindow();
 
-    for (let i = 0; i < selectedItems.length; i++) {
-      const item = selectedItems[i];
-
+    for (const item of selectedItems) {
       await showToast({
         style: Toast.Style.Animated,
-        title: `Unlocking "${path.basename(selectedItems[i].path)}" [${i + 1} of ${selectedItems.length}]`,
+        title: `Unlocking "${path.basename(item.path)}"`,
       });
 
       await unlock(item.path, password);

@@ -1,18 +1,16 @@
 import { ActionPanel, Action, List } from "@raycast/api";
 import { SearchList } from "./components/SearchList";
-import { isValidUrl } from "./utils/data.util";
 import { getDefaultIcon, getIcon } from "./utils/icons.util";
-import type { UserStyleDetails } from "./types";
+import type { Userstyle } from "./types";
 
-const getAppLink = (appLink?: string | string[]) => {
-  if (!appLink) return undefined;
+const getAppLink = (appLink: string | string[]) => {
   return Array.isArray(appLink) ? appLink[0] : appLink;
 };
 
-export default function SearchUserStyles() {
-  const renderItem = (styleKey: string, userStyleDetails: UserStyleDetails) => {
-    const githubLink = `https://github.com/catppuccin/userstyles/tree/main/styles/${styleKey}`;
-    const appLink = getAppLink(userStyleDetails.readme?.["app-link"]);
+export default function SearchUserstyles() {
+  const renderItem = (identifier: string, userstyle: Userstyle) => {
+    const githubLink = `https://github.com/catppuccin/userstyles/tree/main/styles/${identifier}`;
+    const appLink = getAppLink(userstyle.readme["app-link"]);
     // remove www http https & trailing slashes if present
     const formattedAppLink = appLink
       .replace("https://", "")
@@ -22,38 +20,25 @@ export default function SearchUserStyles() {
 
     return (
       <List.Item
-        key={styleKey}
-        title={Array.isArray(userStyleDetails.name) ? userStyleDetails.name.join(" / ") : userStyleDetails.name}
-        subtitle={`Categories: ${userStyleDetails.categories?.join(", ") || "None"}`}
-        accessories={appLink ? [{ text: formattedAppLink }] : undefined}
+        key={identifier}
+        title={Array.isArray(userstyle.name) ? userstyle.name.join(" / ") : userstyle.name}
+        subtitle={`Categories: ${userstyle.categories?.join(", ") || "None"}`}
+        accessories={[{ text: formattedAppLink }]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser url={githubLink} title="Open GitHub" />
-            {appLink && isValidUrl(appLink) && <Action.OpenInBrowser url={appLink} title="Open App Link" />}
+            <Action.OpenInBrowser url={appLink} title="Open App Link" />
           </ActionPanel>
         }
         icon={{
-          value: userStyleDetails.icon
-            ? getIcon(userStyleDetails.icon, userStyleDetails.color)
-            : getDefaultIcon(userStyleDetails.color),
-          tooltip: styleKey,
+          value: userstyle.icon ? getIcon(userstyle.icon, userstyle.color) : getDefaultIcon(userstyle.color),
+          tooltip: identifier,
         }}
       />
     );
   };
 
-  const filterFunction = (styleKey: string, userStyleDetails: UserStyleDetails, searchText: string) => {
-    const lowerSearchText = searchText.toLowerCase();
-    const styleName = Array.isArray(userStyleDetails.name) ? userStyleDetails.name.join(" ") : userStyleDetails.name;
-    return styleName.toLowerCase().includes(lowerSearchText) || styleKey.toLowerCase().includes(lowerSearchText);
-  };
-
   return (
-    <SearchList<UserStyleDetails>
-      dataKey="styles"
-      searchBarPlaceholder="Search userstyles..."
-      renderItem={renderItem}
-      filterFunction={filterFunction}
-    />
+    <SearchList<Userstyle> dataKey="userstyles" searchBarPlaceholder="Search userstyles..." renderItem={renderItem} />
   );
 }

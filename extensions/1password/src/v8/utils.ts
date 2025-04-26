@@ -9,7 +9,7 @@ import { useExec } from "@raycast/utils";
 
 export type ActionID = string;
 
-const preferences = getPreferenceValues();
+const preferences = getPreferenceValues<ExtensionPreferences>();
 
 export class ExtensionError extends Error {
   public title: string;
@@ -25,9 +25,16 @@ export class CommandLineMissingError extends ExtensionError {}
 export class ZshMissingError extends ExtensionError {}
 export class ConnectionError extends ExtensionError {}
 
-export const CLI_PATH = [preferences.cliPath, "/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) =>
-  existsSync(path),
-);
+export const getCliPath = () => {
+  const cliPath = [preferences.cliPath, "/usr/local/bin/op", "/opt/homebrew/bin/op"]
+    .filter(Boolean)
+    .find((path) => (path ? existsSync(path) : false));
+
+  if (!cliPath) {
+    throw new CommandLineMissingError("1Password CLI is not found. Please set the path in the extension preferences.");
+  }
+  return cliPath;
+};
 
 export const ZSH_PATH = [preferences.zshPath, "/bin/zsh"].find((path) => existsSync(path));
 
@@ -72,8 +79,9 @@ export function actionsForItem(item: Item): ActionID[] {
 }
 
 export function op(args: string[]) {
-  if (CLI_PATH) {
-    const stdout = execFileSync(CLI_PATH, args, { maxBuffer: 4096 * 1024 });
+  const cliPath = getCliPath();
+  if (cliPath) {
+    const stdout = execFileSync(cliPath, args, { maxBuffer: 4096 * 1024 });
     return stdout.toString();
   }
   throw Error("1Password CLI is not found!");
@@ -101,11 +109,11 @@ export const checkZsh = () => {
 };
 
 export const signIn = (account?: string) =>
-  execSync(`${CLI_PATH} signin ${account ? account : ""}`, { shell: ZSH_PATH });
+  execSync(`${getCliPath()} signin ${account ? account : ""}`, { shell: ZSH_PATH });
 
 export const getSignInStatus = () => {
   try {
-    execSync(`${CLI_PATH} whoami`);
+    execSync(`${getCliPath()} whoami`);
     return true;
   } catch (stderr) {
     return false;
@@ -113,7 +121,7 @@ export const getSignInStatus = () => {
 };
 
 export const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (data: T) => T) => {
-  return useExec<T, U>(CLI_PATH, [...args, "--format=json"], {
+  return useExec<T, U>(getCliPath(), [...args, "--format=json"], {
     parseOutput: ({ stdout, stderr, error, exitCode }) => {
       if (error) handleErrors(error.message);
       if (stderr) handleErrors(stderr);
@@ -140,7 +148,7 @@ export const usePasswords2 = ({
   execute: boolean;
 }) =>
   useExec<Item[], ExtensionError>(
-    CLI_PATH,
+    getCliPath(),
     ["--account", account, "items", "list", "--long", "--format=json", ...flags],
     {
       parseOutput: ({ stdout, stderr, error, exitCode }) => {
@@ -184,7 +192,7 @@ export const useCategories = () =>
 export const useAccount = () => useOp<User, ExtensionError>(["whoami"]);
 
 export const useAccounts = <T = User[], U = ExtensionError>(execute = true) =>
-  useExec<T, U>(CLI_PATH, ["account", "list", "--format=json"], {
+  useExec<T, U>(getCliPath(), ["account", "list", "--format=json"], {
     parseOutput: ({ stdout, stderr, error, exitCode }) => {
       if (error) handleErrors(error.message);
       if (stderr) handleErrors(stderr);

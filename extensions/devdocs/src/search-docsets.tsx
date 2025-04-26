@@ -8,8 +8,10 @@ export default function SearchDocsets(): JSX.Element {
   const { data, isLoading } = useFetch<Doc[]>(`https://devdocs.io/docs/docs.json`, {});
   const defaultDocs = { docs: ["css", "html", "http", "javascript", "dom"].join("/") };
   const { value: docSlugsStorage } = useLocalStorage("docs", JSON.stringify(defaultDocs));
+  const [searchText, setSearchText] = useState("");
 
   const [documentations, setDocumentations] = useState<[Doc[], Doc[]]>([[], []]);
+  const [filteredDocs, filterDocs] = useState(documentations);
 
   useEffect(() => {
     const docSlugsObject = JSON.parse(docSlugsStorage || "{}");
@@ -30,19 +32,28 @@ export default function SearchDocsets(): JSX.Element {
     }
   }, [isLoading]);
 
+  useEffect(() => {
+    filterDocs([
+      // return exact match if alias is used
+      documentations[0].filter((item) => item.alias && item.alias === searchText.toLowerCase()),
+      documentations[1].filter((item) => item.alias && item.alias === searchText.toLowerCase()),
+    ]);
+  }, [searchText, documentations]);
+
   return (
-    <List isLoading={isLoading}>
-      {documentations[0].length > 0 && (
-        <>
-          <List.Section title="Preferred">
-            {documentations[0]?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}
-          </List.Section>
-          <List.Section title="Available">
-            {documentations[1]?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}
-          </List.Section>
-        </>
-      )}
+    <List isLoading={isLoading} filtering={true} onSearchTextChange={setSearchText}>
+      {((filteredDocs[0].length > 0 || filteredDocs[1].length) > 0 && DocumentationSection(filteredDocs)) ||
+        (documentations[0].length > 0 && documentations[1].length && DocumentationSection(documentations))}
     </List>
+  );
+}
+
+function DocumentationSection(docs: [Doc[], Doc[]]): JSX.Element {
+  return (
+    <>
+      <List.Section title="Preferred">{docs[0]?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List.Section>
+      <List.Section title="Available">{docs[1]?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List.Section>
+    </>
   );
 }
 
@@ -61,6 +72,7 @@ function DocItem({ doc }: { doc: Doc }): JSX.Element {
         fallback: Icon.Book,
       }}
       subtitle={doc.version}
+      keywords={doc.alias ? [doc.alias] : undefined}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

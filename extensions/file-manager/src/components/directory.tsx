@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import { Action, ActionPanel, Detail, getPreferenceValues, List } from "@raycast/api";
 import { useState } from "react";
-import { getDirectoryData, createItem, getStartDirectory, iCloudDrivePath } from "../utils";
+import { execSync } from "child_process";
+import { getDirectoryData, createItem, getStartDirectory, iCloudDrivePath, escapeShellArg } from "../utils";
 import { FileDataType } from "../types";
 import parser, { GitIgnoreHelper } from "@gerhobbelt/gitignore-parser";
 
@@ -42,6 +43,18 @@ export function Directory(props: { path: string; ignores: GitIgnoreHelper[]; ini
       const path = f.name + (f.type === "directory" ? "/" : "");
       for (const ignore of props.ignores) {
         if (ignore.denies(path)) {
+          return false;
+        }
+      }
+      if (!preferences.showHiddenFiles) {
+        const fullPath = `${props.path}/${f.name}`;
+        const escapedPath = escapeShellArg(fullPath);
+        const statOutput = execSync(`stat -f%f ${escapedPath}`, {
+          encoding: "utf8",
+        }).trim();
+        const fileFlags = parseInt(statOutput, 10);
+
+        if (fileFlags & (1 << 15)) {
           return false;
         }
       }

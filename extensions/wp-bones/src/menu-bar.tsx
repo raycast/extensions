@@ -132,7 +132,7 @@ export default function Command() {
           icon="brand-discord.svg"
           title="Discord"
           onAction={() => {
-            open("https://discord.gg/dCP5NajK");
+            open("https://discord.gg/5bdVyycU8F");
           }}
         />
         <MenuBarExtra.Item

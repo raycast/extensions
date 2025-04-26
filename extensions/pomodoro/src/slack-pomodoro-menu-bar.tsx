@@ -1,6 +1,6 @@
 import { MenuBarExtra, Icon, launchCommand, LaunchType, Image, Color } from "@raycast/api";
 import { useState } from "react";
-import { FocusText, LongBreakText, ShortBreakText } from "./lib/constants";
+import { FocusText, LongBreakText, ShortBreakText, TimeStoppedPlaceholder } from "./lib/constants";
 import { getCurrentInterval, isPaused, duration, preferences, progress } from "./lib/intervals";
 import { secondsToTime } from "./lib/secondsToTime";
 import { Interval, IntervalType } from "./lib/types";
@@ -73,11 +73,12 @@ export function TogglePomodoroTimer() {
     icon = { source: `tomato-${progressInTenth}.png`, tintColor: IconTint };
   }
 
-  const title = currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : "--:--";
+  const stopedPlaceholder = preferences.hideTimeWhenStopped ? undefined : TimeStoppedPlaceholder;
+  const title = currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : stopedPlaceholder;
 
   return (
     <MenuBarExtra icon={icon} title={preferences.enableTimeOnMenuBar ? title : undefined} tooltip={"Pomodoro"}>
-      {preferences.enableTimeOnMenuBar ? null : <MenuBarExtra.Item icon="⏰" title={title} />}
+      {preferences.enableTimeOnMenuBar ? null : <MenuBarExtra.Item icon="⏰" title={TimeStoppedPlaceholder} />}
       {currentInterval ? (
         <>
           {isPaused(currentInterval) ? (

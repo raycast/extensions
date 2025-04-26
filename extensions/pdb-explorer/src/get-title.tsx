@@ -134,7 +134,7 @@ export default function Command(props: LaunchProps<{ arguments: ProteinArguments
 Released: ${new Date(protein.rcsb_accession_info.initial_release_date).toLocaleDateString()}
 
 ## Polymer Entities
-${protein.polymer_entities
+${(protein.polymer_entities || [])
   .map(
     (entity) =>
       `* ${entity.rcsb_id}: ${entity.rcsb_polymer_entity?.pdbx_description || "Unknown"} (Chain${
@@ -143,17 +143,21 @@ ${protein.polymer_entities
   )
   .join("\n")}
 
-## Small Molecules
-${protein.nonpolymer_entities
-  .map((entity) => {
-    const chemComp = entity.nonpolymer_comp.chem_comp;
-    const descriptor = entity.nonpolymer_comp.rcsb_chem_comp_descriptor;
-    return `* ${chemComp.id}
+## Small Molecules / non-polymer entities
+${
+  !protein.nonpolymer_entities || protein.nonpolymer_entities.length === 0
+    ? "No small molecule ligands present"
+    : protein.nonpolymer_entities
+        .map((entity) => {
+          const chemComp = entity.nonpolymer_comp.chem_comp;
+          const descriptor = entity.nonpolymer_comp.rcsb_chem_comp_descriptor;
+          return `* ${chemComp.id}
   * Name: ${chemComp.name}
   * Formula: ${chemComp.formula}
   * InChI Key: ${descriptor?.InChIKey || "N/A"}`;
-  })
-  .join("\n")}`;
+        })
+        .join("\n")
+}`;
   } else if (!isLoading && !protein) {
     markdown = "No data found";
   }

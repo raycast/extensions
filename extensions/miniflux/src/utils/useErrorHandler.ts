@@ -3,12 +3,18 @@ import { MinifluxApiError } from "./types";
 import { useCallback } from "react";
 
 export const useErrorHandler = () => {
-  const handleError = useCallback((error: MinifluxApiError) => {
-    let errorMessage = error.error_message || "Failed to load feeds";
+  const handleError = useCallback((error: unknown) => {
+    let errorMessage = "An unknown error occurred";
 
-    if (error?.code === "401") {
-      errorMessage = "Invalid Credentials. Check your API key and try again.";
-      popToRoot({ clearSearchBar: true });
+    if (error instanceof MinifluxApiError) {
+      errorMessage = error.message;
+
+      if (error.code === "401") {
+        errorMessage = "Invalid credentials, check your API key and try again";
+        popToRoot({ clearSearchBar: true });
+      }
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
     }
 
     showToast(Toast.Style.Failure, errorMessage);

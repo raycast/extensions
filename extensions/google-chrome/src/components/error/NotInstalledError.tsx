@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
 import { DEFAULT_ERROR_TITLE, DownloadText } from "../../constants";
 import { cpus } from "os";
@@ -39,7 +39,7 @@ export function NotInstalledError() {
       actions={
         <ActionPanel>
           {isLoading && (
-            <ActionPanel.Item
+            <Action
               title="Install with Homebrew"
               onAction={async () => {
                 if (!isLoading) return;

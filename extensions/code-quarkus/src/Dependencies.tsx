@@ -1,28 +1,36 @@
 import fetch from "node-fetch";
-import { Action, ActionPanel, Form, showToast, Toast, popToRoot } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  openCommandPreferences,
+  popToRoot,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import path from "path";
 import { writeFileSync } from "fs";
 import { QuarkusVersion } from "./models/QuarkusVersion";
 import { Configuration } from "./models/Configuration";
 import { Dependency } from "./models/Dependency";
+import { getCodeQuarkusUrl, getParams, openInIDE, unzipFile } from "./utils";
+import { showInFinder } from "@raycast/api";
+import { BASE_URL, fetchQuarkusExtensions } from "./api";
+import { getPreferenceValues } from "@raycast/api";
+import { CodePreferences } from "./models/CodePreferences";
 
 export function Dependencies({ version, configuration }: { version: QuarkusVersion; configuration: Configuration }) {
+  const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [dependencies, setDependencies] = useState<Dependency[]>([]);
+  const preferences = getPreferenceValues<CodePreferences>();
 
   async function fetchDependencies() {
     try {
       setIsLoading(true);
-      console.log("Fetching dependencies...");
-      //const response = {ok:false, status:'', statusText:'',json: () => Promise.resolve([])};
-      const response = await fetch(
-        `https://code.quarkus.io/api/extensions/stream/${version.key}?platformOnly=false`,
-        {},
-      );
-
-      console.log("Response status:", response.status);
-
+      const response = await fetchQuarkusExtensions(version.key);
       if (!response.ok) {
         throw new Error(`Failed to fetch Quarkus dependencies: ${response.status} ${response.statusText}`);
       }
@@ -50,32 +58,8 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
   }
 
   function generateQuarkusUrl(config: Configuration): string {
-    const baseUrl = "https://code.quarkus.io/d";
-    const params = new URLSearchParams();
-
-    // Add the required fields
-    params.set("j", config.javaVersion);
-    params.set("S", config.quarkusVersion);
-    params.set("cn", "code.quarkus.io");
-
-    // Add build tool
-    params.set("b", config.buildTool);
-
-    // Add group ID, artifact ID, and version if provided
-    if (config.group) params.set("g", config.group);
-    if (config.artifact) params.set("a", config.artifact);
-
-    // Add starter code flag
-    params.set("nc", config.starterCode ? "false" : "true");
-
-    // Add dependencies
-    if (config.dependencies) {
-      config.dependencies.forEach((dependency) => {
-        params.append("e", dependency);
-      });
-    }
-
-    // Return the generated URL
+    const baseUrl = `${BASE_URL}/d`;
+    const params = getParams(config);
     return `${baseUrl}?${params.toString()}`;
   }
 
@@ -100,11 +84,20 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
       // Convert the response to a buffer
       const buffer = await response.buffer();
 
-      // Save to Downloads folder (macOS)
       const homeDir = process.env.HOME;
-      const downloadsPath = path.join(homeDir || "", "Downloads", `${configuration.artifact}.zip`);
+      let dir = path.join(homeDir || "", "Downloads");
+      console.log("preferences", JSON.stringify(preferences));
+      if (preferences.directory) {
+        dir = preferences.directory;
+      }
+      const downloadsPath = path.join(dir, `${configuration.artifact}.zip`);
+      console.log("configured directory:", downloadsPath);
 
       writeFileSync(downloadsPath, buffer);
+
+      await afterDownload(dir);
+
+      await popToRoot();
 
       await showToast({
         style: Toast.Style.Success,
@@ -122,8 +115,46 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
     }
   }
 
+  async function afterDownload(dir: string): Promise<void> {
+    const directoryPath = path.join(dir, configuration.artifact);
+    const downloadsPath = `${directoryPath}.zip`;
+    if (!preferences.unzip) return;
+    const success = unzipFile(downloadsPath, dir);
+    if (!success) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Failed to unzip project",
+      });
+      return;
+    }
+
+    if (preferences.showInFinder) {
+      console.debug("opening finder", directoryPath);
+      await showInFinder(directoryPath);
+    }
+    if (!preferences.openInIDE) {
+      console.debug("Not opening an IDE");
+      return;
+    }
+    if (!preferences.ide) {
+      console.warn("Not IDE configured");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No IDE selected",
+        message: "Please select an IDE in extension preferences",
+      });
+      return;
+    }
+    await openInIDE(directoryPath, preferences.ide);
+  }
+
   function setConfigDependencies(deps: string[]) {
     configuration.dependencies = deps;
+  }
+
+  function getUrl() {
+    return getCodeQuarkusUrl(configuration);
   }
 
   useEffect(() => {
@@ -159,14 +190,19 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title="Generate Project" />
+          <Action title="Back" onAction={pop} />
+          <Action.OpenInBrowser url={getUrl()} />
+          <Action.CopyToClipboard title="Copy Quarkus Configuration" content={getUrl()} />
+          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
         </ActionPanel>
       }
+      navigationTitle={"Add dependencies to your new Quarkus project"}
     >
-      <Form.Description text="Add dependencies to your new Quarkus project" />
       <Form.Description title="Quarkus version" text={version?.platformVersion + (version?.lts ? " [LTS]" : "")} />
       <Form.Description title="Build tool" text={configuration.buildTool} />
       <Form.Description title="Group" text={configuration.group} />
       <Form.Description title="Artifact" text={configuration.artifact} />
+      <Form.Description title="Version" text={configuration.version} />
       <Form.Description title="Java version" text={configuration.javaVersion} />
       <Form.Description title="Sarter Code" text={configuration.starterCode ? "Yes" : "No"} />
       <Form.Separator />

@@ -84,11 +84,11 @@ function ShareSecretAction() {
 
       await Clipboard.copy((body as any).authenticated_url);
 
-      toast.style = Feedback.Toast.Style.Success;
+      toast.style = Toast.Style.Success;
       toast.title = "Shared secret";
       toast.message = "Copied link to clipboard";
     } catch (error) {
-      toast.style = Feedback.Toast.Style.Failure;
+      toast.style = Toast.Style.Failure;
       toast.title = "Failed sharing secret";
       toast.message = String(error);
     }

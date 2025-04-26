@@ -57,11 +57,11 @@ const VISITED_REPOSITORIES_LENGTH = 25;
 export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment) {
   const { application, baseClonePath, repositoryCloneProtocol } = getPreferenceValues<Preferences.SearchRepositories>();
   const applicationPath = application?.path.replaceAll(" ", "\\ ");
-  const clonePath = `${baseClonePath}/${repository.nameWithOwner}`;
+  const clonePath = `${baseClonePath}/${repository.name}`;
   const openCommand = `open -a ${applicationPath} ${clonePath}`;
 
   const toast = await showToast({
-    title: `Opening ${repository.nameWithOwner}`,
+    title: `Opening ${repository.name}`,
     message: `at ${clonePath}`,
     style: Toast.Style.Animated,
   });
@@ -70,7 +70,7 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment)
     const cloneCommand = buildCloneCommand(repository.nameWithOwner, repositoryCloneProtocol);
 
     try {
-      execSync(cloneCommand);
+      execSync(cloneCommand, { cwd: baseClonePath });
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Error while cloning the repository";
@@ -81,7 +81,7 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment)
   }
 
   try {
-    execSync(openCommand);
+    execSync(openCommand, { cwd: baseClonePath });
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Error while opening the repository";

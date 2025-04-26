@@ -1,5 +1,19 @@
 # Messages Changelog
 
+## [Added Keyword] - 2025-02-26
+
+Added a "2FA" keyword for improved discovery
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Fix `Paste Latest OTP Code` Command for Phone numbers] - 2025-02-10
+
+Added a number filter for OTP Code messages that include phone/cellular numbers that should not be used as OTP Codes for this command.
+
+## [Direct link to System Settings] - 2025-01-19
+
+Added a direct link to System Settings when full disk access is required for the `Paste Latest OTP Code` command.
+
 ## [Add `Paste Latest OTP Code` command] - 2024-10-11
 
 Automatically finds and pastes the most recent one-time password (OTP) from your messages.

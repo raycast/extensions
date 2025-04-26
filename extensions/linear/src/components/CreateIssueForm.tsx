@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { IssuePriorityValue, User } from "@linear/sdk";
 import {
   Clipboard,
   Form,
@@ -11,33 +11,31 @@ import {
   showToast,
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { IssuePriorityValue, User } from "@linear/sdk";
+import { useEffect, useState } from "react";
 
-import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
-import { createIssue, CreateIssuePayload } from "../api/createIssue";
 import { attachLinkUrl, createAttachment } from "../api/attachments";
-
-import useLabels from "../hooks/useLabels";
-import useStates from "../hooks/useStates";
-import useTeams from "../hooks/useTeams";
+import { createIssue, CreateIssuePayload } from "../api/createIssue";
+import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
+import { getCycleOptions } from "../helpers/cycles";
+import { getErrorMessage } from "../helpers/errors";
+import { getEstimateScale } from "../helpers/estimates";
+import { getLinksFromNewLines } from "../helpers/links";
+import { getMilestoneIcon } from "../helpers/milestones";
+import { priorityIcons } from "../helpers/priorities";
+import { getProjectIcon } from "../helpers/projects";
+import { getOrderedStates, getStatusIcon } from "../helpers/states";
+import { getTeamIcon } from "../helpers/teams";
+import { getUserIcon } from "../helpers/users";
 import useCycles from "../hooks/useCycles";
 import useIssues from "../hooks/useIssues";
-import useProjects from "../hooks/useProjects";
+import useLabels from "../hooks/useLabels";
 import useMilestones from "../hooks/useMilestones";
-
-import { getEstimateScale } from "../helpers/estimates";
-import { getOrderedStates, getStatusIcon } from "../helpers/states";
-import { getErrorMessage } from "../helpers/errors";
-import { priorityIcons } from "../helpers/priorities";
-import { getUserIcon } from "../helpers/users";
-import { getCycleOptions } from "../helpers/cycles";
-import { getProjectIcon, projectStatusText } from "../helpers/projects";
-import { getTeamIcon } from "../helpers/teams";
+import useProjects from "../hooks/useProjects";
+import useStates from "../hooks/useStates";
+import useTeams from "../hooks/useTeams";
+import useUsers from "../hooks/useUsers";
 
 import IssueDetail from "./IssueDetail";
-import { getMilestoneIcon } from "../helpers/milestones";
-import useUsers from "../hooks/useUsers";
-import { getLinksFromNewLines } from "../helpers/links";
 
 type CreateIssueFormProps = {
   assigneeId?: string;
@@ -173,7 +171,11 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             links: "",
           });
 
-          hasMoreThanOneTeam && autofocusField ? focus(autofocusField) : focus("title");
+          if (hasMoreThanOneTeam && autofocusField) {
+            focus(autofocusField);
+          } else {
+            focus("title");
+          }
 
           const links = getLinksFromNewLines(values.links);
           if (links.length > 0) {
@@ -289,6 +291,102 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Issue" />
+          <ActionPanel.Section>
+            <Action
+              title="Focus Title"
+              icon={Icon.TextInput}
+              onAction={() => focus("title")}
+              shortcut={{ modifiers: ["cmd"], key: "e" }}
+            />
+            <Action
+              title="Focus Description"
+              icon={Icon.TextInput}
+              onAction={() => focus("description")}
+              shortcut={{ modifiers: ["ctrl"], key: "e" }}
+            />
+            <Action
+              title="Focus Status"
+              icon={Icon.Circle}
+              onAction={() => focus("stateId")}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            />
+            <Action
+              title="Focus Priority"
+              icon={Icon.LevelMeter}
+              onAction={() => focus("priority")}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            />
+            <Action
+              title="Focus Assignee"
+              icon={Icon.AddPerson}
+              onAction={() => focus("assigneeId")}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            />
+            {scale ? (
+              <Action
+                title="Focus Estimate"
+                icon={{ source: { light: "light/estimate.svg", dark: "dark/estimate.svg" } }}
+                onAction={() => focus("estimate")}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+              />
+            ) : null}
+            <Action
+              title="Focus Due Date"
+              icon={Icon.Calendar}
+              onAction={() => focus("dueDate")}
+              shortcut={{ modifiers: ["opt", "shift"], key: "d" }}
+            />
+            <Action
+              title="Focus Labels"
+              icon={Icon.Tag}
+              onAction={() => focus("labelIds")}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+            />
+            {hasCycles ? (
+              <Action
+                title="Focus Cycle"
+                icon={{ source: { light: "light/cycle.svg", dark: "dark/cycle.svg" } }}
+                onAction={() => focus("cycleId")}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              />
+            ) : null}
+            {hasProjects ? (
+              <Action
+                title="Focus Project"
+                icon={{ source: { light: "light/project.svg", dark: "dark/project.svg" } }}
+                onAction={() => focus("projectId")}
+                shortcut={{ modifiers: ["ctrl", "shift"], key: "p" }}
+              />
+            ) : null}
+            {hasMilestones ? (
+              <Action
+                title="Focus Milestone"
+                icon={{ source: { light: "light/milestone.svg", dark: "dark/milestone.svg" } }}
+                onAction={() => focus("milestoneId")}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+              />
+            ) : null}
+            {hasIssues ? (
+              <Action
+                title="Focus Parent Issue"
+                icon={{ source: { light: "light/backlog.svg", dark: "dark/backlog.svg" } }}
+                onAction={() => focus("parentId")}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+              />
+            ) : null}
+            <Action
+              title="Focus Attachments"
+              icon={Icon.NewDocument}
+              onAction={() => focus("attachments")}
+              shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "a" }}
+            />
+            <Action
+              title="Focus Links"
+              icon={Icon.Link}
+              onAction={() => focus("links")}
+              shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "l" }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       isLoading={isLoadingTeams || isLoadingUsers || props.isLoading}
@@ -425,7 +523,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           {projects.map((project) => {
             return (
               <Form.Dropdown.Item
-                title={`${project.name} (${projectStatusText[project.state]})`}
+                title={`${project.name} (${project.status.name})`}
                 value={project.id}
                 key={project.id}
                 icon={getProjectIcon(project)}

@@ -3,6 +3,7 @@ import fs from "fs";
 import { getFFmpegPath } from "./ffmpeg";
 import { execPromise } from "./exec";
 import { execSync } from "child_process";
+import { runAppleScript } from "@raycast/utils";
 
 const config = {
   ffmpegOptions: {
@@ -31,28 +32,18 @@ const config = {
       audioCodec: "mp3",
       fileExtension: ".mpg",
     },
+    webm: {
+      videoCodec: "libvpx-vp9",
+      audioCodec: "libopus",
+      fileExtension: ".webm",
+    },
   },
 };
 
-const imageConfig = {
-  jpg: {
-    fileExtension: ".jpg",
-    quality: "100",
-  },
-  png: {
-    fileExtension: ".png",
-    quality: "lossless",
-  },
-  webp: {
-    fileExtension: ".webp",
-    quality: "100",
-  },
-  heic: {
-    fileExtension: ".heic",
-  },
-};
+export type VideoOutputFormats = keyof typeof config.ffmpegOptions;
 
-const audioConfig = {
+// Audio configuration
+export const audioConfig = {
   mp3: {
     audioCodec: "libmp3lame",
     fileExtension: ".mp3",
@@ -71,7 +62,49 @@ const audioConfig = {
   },
 };
 
-function getUniqueOutputPath(filePath: string, extension: string): string {
+export type AudioOutputFormats = keyof typeof audioConfig;
+
+// Image configuration
+interface ImageFormatConfig {
+  fileExtension: string;
+  nsType?: string;
+  sipsFormat?: string;
+  useFFmpeg?: boolean;
+}
+
+const imageConfig: Record<string, ImageFormatConfig> = {
+  jpg: {
+    fileExtension: ".jpg",
+    nsType: "NSJPEGFileType",
+    sipsFormat: "jpeg",
+  },
+  png: {
+    fileExtension: ".png",
+    nsType: "NSPNGFileType",
+    sipsFormat: "png",
+  },
+  webp: {
+    fileExtension: ".webp",
+    useFFmpeg: true,
+  },
+  heic: {
+    fileExtension: ".heic",
+    sipsFormat: "heic",
+  },
+  tiff: {
+    fileExtension: ".tiff",
+    nsType: "NSTIFFFileType",
+    sipsFormat: "tiff",
+  },
+  avif: {
+    fileExtension: ".avif",
+    useFFmpeg: true,
+  },
+};
+
+export type ImageOutputFormats = "jpg" | "png" | "webp" | "heic" | "tiff";
+
+export function getUniqueOutputPath(filePath: string, extension: string): string {
   const outputFilePath = filePath.replace(path.extname(filePath), extension);
   let finalOutputPath = outputFilePath;
   let counter = 1;
@@ -86,48 +119,133 @@ function getUniqueOutputPath(filePath: string, extension: string): string {
   return finalOutputPath;
 }
 
+async function convertUsingNSBitmapImageRep(inputPath: string, outputPath: string, format: string) {
+  return runAppleScript(`
+    use framework "Foundation"
+    use framework "AppKit"
+    
+    -- Load the image
+    set inputURL to POSIX file "${inputPath}" as string
+    set inputData to current application's NSData's dataWithContentsOfFile:inputURL
+    set inputImage to current application's NSImage's alloc()'s initWithData:inputData
+    
+    -- Convert to bitmap representation
+    set tiffData to inputImage's TIFFRepresentation()
+    set bitmap to current application's NSBitmapImageRep's alloc()'s initWithData:tiffData
+    
+    -- Convert to desired format
+    set outputData to bitmap's representationUsingType:(current application's ${format}) |properties|:(missing value)
+    
+    -- Save to file
+    outputData's writeToFile:"${outputPath}" atomically:false
+  `);
+}
+
+export async function convertImage(filePath: string, outputFormat: keyof typeof imageConfig): Promise<string> {
+  const formatOptions = imageConfig[outputFormat];
+  if (!formatOptions) {
+    throw new Error(`Unsupported output format: ${outputFormat}`);
+  }
+
+  const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);
+  const inputExt = path.extname(filePath).toLowerCase().slice(1);
+
+  try {
+    if (outputFormat === "webp") {
+      const tempPngPath = getUniqueOutputPath(filePath, ".png");
+      execSync(`sips --setProperty format png "${filePath}" --out "${tempPngPath}"`);
+
+      const ffmpegPath = await getFFmpegPath();
+      await execPromise(`"${ffmpegPath}" -i "${tempPngPath}" -c:v libwebp -quality 100 "${finalOutputPath}"`);
+
+      fs.unlinkSync(tempPngPath);
+      return finalOutputPath;
+    }
+
+    // Handle conversion from WebP
+    if (inputExt === "webp") {
+      const ffmpegPath = await getFFmpegPath();
+      const tempPngPath = getUniqueOutputPath(filePath, ".png");
+      await execPromise(`"${ffmpegPath}" -i "${filePath}" "${tempPngPath}"`);
+
+      if (outputFormat === "png") {
+        return tempPngPath;
+      }
+
+      if (outputFormat === "avif") {
+        const ffmpegPath = await getFFmpegPath();
+        await execPromise(`"${ffmpegPath}" -i "${tempPngPath}" -c:v libaom-av1 -crf 30 "${finalOutputPath}"`);
+        fs.unlinkSync(tempPngPath);
+        return finalOutputPath;
+      }
+
+      if (formatOptions.sipsFormat) {
+        execSync(`sips --setProperty format ${formatOptions.sipsFormat} "${tempPngPath}" --out "${finalOutputPath}"`);
+      } else if (formatOptions.nsType) {
+        await convertUsingNSBitmapImageRep(tempPngPath, finalOutputPath, formatOptions.nsType);
+      }
+
+      fs.unlinkSync(tempPngPath);
+      return finalOutputPath;
+    }
+
+    if (outputFormat === "avif") {
+      const ffmpegPath = await getFFmpegPath();
+      await execPromise(`"${ffmpegPath}" -i "${filePath}" -c:v libaom-av1 -crf 30 "${finalOutputPath}"`);
+      return finalOutputPath;
+    }
+
+    if (formatOptions.sipsFormat) {
+      execSync(`sips --setProperty format ${formatOptions.sipsFormat} "${filePath}" --out "${finalOutputPath}"`);
+      return finalOutputPath;
+    }
+
+    if (formatOptions.nsType) {
+      await convertUsingNSBitmapImageRep(filePath, finalOutputPath, formatOptions.nsType);
+      return finalOutputPath;
+    }
+
+    throw new Error(`Unsupported output format: ${outputFormat}`);
+  } catch (error) {
+    const err = error as Error;
+    throw new Error(`Failed to convert image: ${err.message}`);
+  }
+}
+
+export async function optimizeImage(filePath: string, quality: number = 100): Promise<string> {
+  const ext = path.extname(filePath).toLowerCase();
+  const finalOutputPath = getUniqueOutputPath(filePath, `_optimized${ext}`);
+
+  try {
+    switch (ext) {
+      case ".heic":
+        execSync(
+          `sips --setProperty format heic --setProperty formatOptions ${quality} "${filePath}" --out "${finalOutputPath}"`,
+        );
+        break;
+      case ".jpg":
+      case ".jpeg":
+        await convertUsingNSBitmapImageRep(filePath, finalOutputPath, "NSJPEGFileType");
+        break;
+      default:
+        throw new Error(`Optimization not supported for ${ext} files`);
+    }
+    return finalOutputPath;
+  } catch (error) {
+    const err = error as Error;
+    throw new Error(`Failed to optimize image: ${err.message}`);
+  }
+}
+
 export async function convertVideo(
   filePath: string,
-  outputFormat: "mp4" | "avi" | "mkv" | "mov" | "mpg",
+  outputFormat: "mp4" | "avi" | "mkv" | "mov" | "mpg" | "webm",
 ): Promise<string> {
   const formatOptions = config.ffmpegOptions[outputFormat];
   const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);
 
   const ffmpegPath = await getFFmpegPath();
   const command = `"${ffmpegPath}" -i "${filePath}" -vcodec ${formatOptions.videoCodec} -acodec ${formatOptions.audioCodec} "${finalOutputPath}"`;
-
-  await execPromise(command);
-
-  return finalOutputPath;
-}
-
-export async function convertImage(filePath: string, outputFormat: "jpg" | "png" | "webp" | "heic"): Promise<string> {
-  const formatOptions = imageConfig[outputFormat];
-  const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);
-
-  if (outputFormat === "heic") {
-    // Use sips for HEIC conversion
-    execSync(`sips --setProperty format heic "${filePath}" --out "${finalOutputPath}"`);
-    return finalOutputPath;
-  }
-
-  // Use FFmpeg for other image formats
-  const ffmpegPath = await getFFmpegPath();
-  let command;
-
-  switch (outputFormat) {
-    case "jpg":
-      command = `"${ffmpegPath}" -i "${filePath}" -qmin 1 -qmax 1 "${finalOutputPath}"`;
-      break;
-    case "png":
-      command = `"${ffmpegPath}" -i "${filePath}" -compression_level 0 "${finalOutputPath}"`;
-      break;
-    case "webp":
-      command = `"${ffmpegPath}" -i "${filePath}" -lossless 1 -quality 100 "${finalOutputPath}"`;
-      break;
-    default:
-      command = `"${ffmpegPath}" -i "${filePath}" -q:v 1 "${finalOutputPath}"`;
-  }
 
   await execPromise(command);
 

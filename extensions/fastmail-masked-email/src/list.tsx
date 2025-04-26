@@ -1,45 +1,17 @@
-import { Action, ActionPanel, Color, Icon, Image, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Color, Icon, Image, List, Toast, showToast } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import { MaskedEmail, MaskedEmailState, updateMaskedEmailState, retrieveAllMaskedEmails } from "./fastmail";
 
-type Preferences = {
-  show_deleted: boolean;
-  show_pending: boolean;
-};
+type MaskedEmailStateFilter = MaskedEmailState | "";
 
 export default function Command() {
-  const { show_deleted, show_pending } = getPreferenceValues<Preferences>();
   const [maskedEmails, setMaskedEmails] = useState<MaskedEmail[]>([]);
-
-  const updateMaskedEmails = (emails: MaskedEmail[]) => {
-    const sortOrder: { [key in MaskedEmailState]: number } = {
-      [MaskedEmailState.Deleted]: 0,
-      [MaskedEmailState.Disabled]: 1,
-      [MaskedEmailState.Pending]: 2,
-      [MaskedEmailState.Enabled]: 3,
-    };
-
-    setMaskedEmails(
-      emails
-        .filter((email) => {
-          if (email.state === MaskedEmailState.Deleted && show_deleted === false) {
-            return false;
-          }
-
-          if (email.state === MaskedEmailState.Pending && show_pending === false) {
-            return false;
-          }
-
-          return true;
-        })
-        .sort((lhs, rhs) => sortOrder[rhs.state] - sortOrder[lhs.state]),
-    );
-  };
+  const [filter, setFilter] = useState<MaskedEmailStateFilter>("");
 
   const updateMaskedEmail = async (email: MaskedEmail, state: MaskedEmailState) => {
     await updateMaskedEmailState(email, state);
 
-    updateMaskedEmails(maskedEmails.map((e) => (e.id === email.id ? { ...e, state } : e)));
+    setMaskedEmails(maskedEmails.map((e) => (e.id === email.id ? { ...e, state } : e)));
   };
 
   const toggleMaskedEmail = async (email: MaskedEmail) => {
@@ -104,15 +76,51 @@ export default function Command() {
     const listMaskedEmails = async () => {
       const emails = await retrieveAllMaskedEmails();
 
-      updateMaskedEmails(emails);
+      setMaskedEmails(emails);
     };
 
     listMaskedEmails().catch(console.error);
   }, []);
 
+  const filteredSortedMaskedEmails = useMemo(() => {
+    const sortOrder: { [key in MaskedEmailState]: number } = {
+      [MaskedEmailState.Deleted]: 0,
+      [MaskedEmailState.Disabled]: 1,
+      [MaskedEmailState.Pending]: 2,
+      [MaskedEmailState.Enabled]: 3,
+    };
+
+    return maskedEmails
+      .filter((email) => {
+        if (filter === "") {
+          return true;
+        }
+
+        return email.state === filter;
+      })
+      .sort((lhs, rhs) => new Date(rhs.createdAt).getTime() - new Date(lhs.createdAt).getTime())
+      .sort((lhs, rhs) => sortOrder[rhs.state] - sortOrder[lhs.state]);
+  }, [maskedEmails, filter]);
+
   return (
-    <List isLoading={maskedEmails.length <= 0}>
-      {maskedEmails.map((email) => {
+    <List
+      isLoading={maskedEmails.length <= 0}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Masked Email State"
+          onChange={(value) => {
+            setFilter(value as MaskedEmailStateFilter);
+          }}
+        >
+          <List.Dropdown.Item title="All" value={""} />
+          <List.Dropdown.Item title="Active" value={MaskedEmailState.Enabled} />
+          <List.Dropdown.Item title="Blocked" value={MaskedEmailState.Disabled} />
+          <List.Dropdown.Item title="Pending" value={MaskedEmailState.Pending} />
+          <List.Dropdown.Item title="Deleted" value={MaskedEmailState.Deleted} />
+        </List.Dropdown>
+      }
+    >
+      {filteredSortedMaskedEmails.map((email) => {
         const canBlockUnblock = [MaskedEmailState.Enabled, MaskedEmailState.Disabled].includes(email.state);
         const canRestore = email.state === MaskedEmailState.Deleted;
         const canView = email.state !== MaskedEmailState.Pending;
@@ -124,7 +132,10 @@ export default function Command() {
             title={email.email}
             subtitle={email.forDomain || email.description}
             keywords={[email.description]}
-            accessories={[accessoryForMaskedEmail(email)]}
+            accessories={[
+              { date: new Date(email.createdAt), tooltip: `Created ${new Date(email.createdAt).toLocaleString()}` },
+              accessoryForMaskedEmail(email),
+            ]}
             actions={
               <ActionPanel title={email.email}>
                 <Action.CopyToClipboard title="Copy Masked Email" content={email.email} />

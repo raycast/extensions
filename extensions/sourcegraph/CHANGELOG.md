@@ -1,5 +1,29 @@
 # Changelog
 
+## [Branding updates and workspaces](https://github.com/raycast/extensions/pull/16793) - 2025-02-03
+
+- **search**: We've updated colors throughout the extension to match Sourcegraph's refreshed branding.
+- **doc**: [Sourcegraph workspaces](https://workspaces.sourcegraph.com) are a new, easy way to get started with using Sourcegraph for Raycast to search your private code - we've added a few links throughout the extension and our setup docs.
+
+## [New logo](https://github.com/raycast/extensions/pull/16697) - 2025-01-29
+
+- **all**: Sourcegraph got a new logo! All extension and command icons have been updated.
+- **doc**: Updated documentation to indicate [Sourcegraph workspaces](https://workspaces.sourcegraph.com) compatibility.
+- **batch-changes**: The Batch Changes command is now disabled by default.
+- **notebooks**: The Notebook command is now disabled by default.
+
+## [Bug fixes](https://github.com/raycast/extensions/pull/15956) - 2024-12-19
+
+- **search**: Fix some issues where results do not reset when a search returns no results or fails.
+
+## [Smoother search and bug fixes](https://github.com/raycast/extensions/pull/15862) - 2024-12-14
+
+- **search**: Opening a query in browser now correctly preserves the selected pattern type from the pattern type selector.
+- **search**: Typing during ongoing searches should feel less jittery, as the suggestion view is now less likely to show up randomly.
+- **search**: Loading state looks better with a better no-results view that shows progress and options to continue the search in browser or cancel it entirely.
+- **dotcom**: When using 'Public code on Sourcegraph.com' commands, if an access token is not provided a random anonymous user ID is now generated and used with API requests and telemetry for diagnostics. Telemetry can be disabled in the extension preferences.
+- **doc**: 'Sourcegraph.com' commands are now called 'Public code on Sourcegraph.com', and 'Sourcegraph instance' commands are now just referred to as 'Sourcegraph' commands.
+
 ## [Search improvements, pattern selector, and proxy support](https://github.com/raycast/extensions/pull/15625) - 2024-11-30
 
 - **search**: The search pattern selector is now enabled by default, allowing you to easily toggle between standard, literal, regexp, and other search patterns. This can be disabled in the extension preferences if you find the dropdown takes up too much space in the search bar.

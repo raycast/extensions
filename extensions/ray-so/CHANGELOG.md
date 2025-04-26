@@ -1,5 +1,9 @@
 # Ray.so Changelog
 
+## [Fix submitting form] - 2024-12-29
+
+- Submitted form now is passing data that user sees.
+
 ## [New themes and order] - 2024-08-05
 
 - Added Supabase, Tailwind, Bitmap, Noir, Ice, Sand and Forest color themes.

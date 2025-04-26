@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { v2 as cloudinary } from "cloudinary";
 
-const preferences = getPreferenceValues();
+const preferences = getPreferenceValues<Preferences>();
 
 const RESOURCE_INCLUDED_KEYS = ["height", "public_id", "resource_type", "secure_url", "width"];
 
@@ -27,12 +27,11 @@ export async function uploadImage(path: string) {
  * searchAssets
  */
 
-interface SearchAssets {
-  query?: string;
-  tag?: string;
+interface SearchAssets extends Arguments.Search {
+  cursor?: string;
 }
 
-export async function searchAssets({ query, tag }: SearchAssets) {
+export async function searchAssets({ query, tag, cursor }: SearchAssets) {
   const expressionSegments = [];
 
   if (query) {
@@ -45,9 +44,14 @@ export async function searchAssets({ query, tag }: SearchAssets) {
 
   const expression = expressionSegments.join(" AND ");
 
-  const { resources } = await cloudinary.search.expression(expression).max_results(30).execute();
+  const { next_cursor, resources } = await cloudinary.search
+    .expression(expression)
+    .max_results(30)
+    .next_cursor(cursor)
+    .execute();
 
-  return resources.map((resource: object) => sanitizeResource(resource));
+  const sanitized = resources.map((resource: object) => sanitizeResource(resource));
+  return { resources: sanitized, next_cursor: next_cursor as string | undefined };
 }
 
 /**

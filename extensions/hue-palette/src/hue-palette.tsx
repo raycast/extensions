@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getHue } from "./utils";
 import { Hue } from "./types";
-import HueDetail from "./hue-detail";
+import HueDetail from "./components/hue-detail";
 
 export default function Command() {
   const { push } = useNavigation();
@@ -25,31 +25,31 @@ export default function Command() {
             {
               tooltip: hue.colors[0],
               icon: {
-                source: `https://hue-palette.com/api/hue-color-image/${hue.colors[0].replace("#", "")}`,
+                source: `https://hue-palette.zeabur.app/hue-color-image/${hue.colors[0].replace("#", "")}`,
               },
             },
             {
               tooltip: hue.colors[1],
               icon: {
-                source: `https://hue-palette.com/api/hue-color-image/${hue.colors[1].replace("#", "")}`,
+                source: `https://hue-palette.zeabur.app/hue-color-image/${hue.colors[1].replace("#", "")}`,
               },
             },
             {
               tooltip: hue.colors[2],
               icon: {
-                source: `https://hue-palette.com/api/hue-color-image/${hue.colors[2].replace("#", "")}`,
+                source: `https://hue-palette.zeabur.app/hue-color-image/${hue.colors[2].replace("#", "")}`,
               },
             },
             {
               tooltip: hue.colors[3],
               icon: {
-                source: `https://hue-palette.com/api/hue-color-image/${hue.colors[3].replace("#", "")}`,
+                source: `https://hue-palette.zeabur.app/hue-color-image/${hue.colors[3].replace("#", "")}`,
               },
             },
             {
               tooltip: hue.colors[4],
               icon: {
-                source: `https://hue-palette.com/api/hue-color-image/${hue.colors[4].replace("#", "")}`,
+                source: `https://hue-palette.zeabur.app/hue-color-image/${hue.colors[4].replace("#", "")}`,
               },
             },
           ]}

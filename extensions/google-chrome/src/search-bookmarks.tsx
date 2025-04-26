@@ -23,7 +23,7 @@ export default function Command() {
       searchBarAccessory={<ChromeProfileDropDown onProfileSelected={revalidate} />}
     >
       {data?.map((e) => (
-        <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} />
+        <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} type="Bookmark" />
       ))}
     </List>
   );

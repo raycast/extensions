@@ -39,9 +39,14 @@ export const fetchLatestHash = async () => {
 
   const text = response.data as string;
 
-  const keyRegex = /concat\("([a-zA-Z0-9]+)"\)/g;
-  const matches = [...text.matchAll(keyRegex)];
-  const hashParts = matches.map((match) => match[1]);
+  const apiFindRegex = /fetch\("\/api\/ouch\/"\s*\.concat\("([^"]+)"\)\s*\.concat\("([^"]+)"\)/;
+  const match = text.match(apiFindRegex);
+
+  let hashParts: string[] = [];
+  if (match) {
+    hashParts = [match[1], match[2]];
+  }
+
   const hash = hashParts.join("");
 
   if (hash) {

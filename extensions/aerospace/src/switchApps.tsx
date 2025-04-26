@@ -16,9 +16,12 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Switch
   const workspace = props.arguments.workspace ? props.arguments.workspace : defaultWorkspace;
 
   useEffect(() => {
-    const updatedWindows = getWindows(workspace);
-    setWindows(updatedWindows);
-    console.log({ updatedWindows });
+    const f = async () => {
+      const updatedWindows = await getWindows(workspace);
+      setWindows(updatedWindows);
+      console.log({ updatedWindows });
+    };
+    f();
   }, []);
 
   const uniqueWorkspaces = useMemo(() => {

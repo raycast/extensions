@@ -11,16 +11,16 @@
     "pernielsentikaer",
     "cb372",
     "henrik-dmg",
-    "spacedog",
-    "JakeMoosey",
     "superwhys",
     "lukah",
     "litomore",
-    "Lemon",
     "vimtor"
   ],
   "past_contributors": [
-    "Davidwalser"
+    "Davidwalser",
+    "JakeMoosey",
+    "spacedog",
+    "Lemon"
   ],
   "categories": [
     "Security"
@@ -181,17 +181,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.86.1",
+    "@raycast/api": "^1.89.0",
     "@raycast/utils": "^1.18.1",
-    "fast-glob": "^3.3.2"
+    "fast-glob": "^3.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.10.1",
+    "@types/node": "^22.10.7",
     "@types/react": "18.3.12",
     "eslint": "^8.57.1",
-    "prettier": "^3.4.1",
-    "typescript": "^5.7.2"
+    "prettier": "^3.4.2",
+    "react": "^18.3.1",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",

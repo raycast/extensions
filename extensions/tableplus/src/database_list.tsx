@@ -6,7 +6,10 @@ import { ConnectionListItem } from "./components/ConnectionListItem";
 import { getAvatarIcon } from "@raycast/utils";
 
 export default function DatabaseList() {
-  const [state, setState] = useState<{ isLoading: boolean; connections?: Group[] }>({ isLoading: true });
+  const [state, setState] = useState<{
+    isLoading: boolean;
+    connections?: Group[];
+  }>({ isLoading: true });
   const [filterDriver, setFilterDriver] = useState("");
 
   useEffect(() => {

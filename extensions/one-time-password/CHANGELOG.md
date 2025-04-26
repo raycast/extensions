@@ -1,5 +1,9 @@
 # One Time Password Changelog
 
+## 2025-02-11
+
+- Provided additional error information when a QR code scan fails.
+
 ## 2024-12-04
 
 - Icons will now be displayed black or white depending on the system appearance.

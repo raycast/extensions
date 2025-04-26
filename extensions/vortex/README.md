@@ -21,6 +21,8 @@ To connect, create new app connection and paste generated pairing secret into Vo
 - View balance
 - View transaction list
 - See transaction details
+- Redeem Cashu Tokens
+- Redeem LNURL Vouchers
 
 ## Support
 

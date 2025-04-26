@@ -1,5 +1,28 @@
 # Arc Changelog
 
+## [Improvements] - 2025-04-16
+
+- When opening a new incognito window, open a blank tab if no URL is given.
+  - A previous update caused a regression where this behavior was no longer
+    supported.
+
+## [Suggest opening URL] - 2025-03-31
+
+When searching for a URL, offer to open the URL 
+
+## [✨ AI Enhancements] - 2025-02-21
+
+AI Tools to:
+
+- Search Tabs
+- Search History
+- Open New Window
+- Open New Blank Window
+- Open New Little Arc Window
+- Open New Incognito Window
+- Open New Tab
+- Search Spaces
+
 ## [Improvements] - 2024-10-25
 
 - `Search Tabs` now can search with url and search title with chinese pinyin.

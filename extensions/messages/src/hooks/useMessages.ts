@@ -27,7 +27,7 @@ export type SQLMessage = ChatParticipant & {
 };
 
 export type Message = SQLMessage & {
-  avatar: Image.ImageLike;
+  avatar?: Image.ImageLike;
   sender: string;
   senderName: string;
 };

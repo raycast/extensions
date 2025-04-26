@@ -1,8 +1,9 @@
 import { useFetch } from "@raycast/utils";
 import { API_HEADERS, API_URL, MAX_PAGE_SIZE } from "./config";
 import { BrandedLink, ErrorResponse } from "./interfaces";
+import { Response as FetchResponse } from "node-fetch";
 
-export const parseResponse = async (response: Response) => {
+export const parseResponse = async (response: Response | FetchResponse) => {
   const result = await response.json();
   if (!response.ok) {
     const res = result as ErrorResponse;

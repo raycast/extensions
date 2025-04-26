@@ -25,6 +25,13 @@
       "title": "Search Folders",
       "description": "Search for folders on your Mac",
       "mode": "view"
+    },
+    {
+      "name": "move",
+      "title": "Move to a Folder",
+      "subtitle": "Folder Search",
+      "description": "Move selected files to a folder",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -79,5 +86,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

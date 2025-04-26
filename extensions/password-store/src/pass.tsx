@@ -5,7 +5,7 @@ import { getOptionIcon, getPasswordIcon } from "./utils/icons.util";
 import { getLastUsedPassword } from "./utils/password.util";
 import { runCmd } from "./utils/cmd.util";
 import { performAction } from "./utils/action.util";
-import { Option, Password, Preferences } from "./interfaces";
+import { Option, Password } from "./interfaces";
 import url from "url";
 
 /**
@@ -28,7 +28,7 @@ export default function Command(): JSX.Element {
         showOtpFirst: lastUsedPassword.option === "Password",
       });
 
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues();
     const passPath = preferences.PASSWORDS_PATH;
 
     // Get all password files
@@ -84,7 +84,7 @@ function PasswordOptions(props: { selectedPassword: string; showOtpFirst: boolea
     try {
       // Get the decrypted contents of the file
       // Run command to get decrypted contents of the file
-      const preferences = getPreferenceValues<Preferences>();
+      const preferences = getPreferenceValues();
       const gpgKey = preferences.GPG_KEY;
       const passPath = preferences.PASSWORDS_PATH;
 

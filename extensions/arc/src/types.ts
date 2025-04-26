@@ -18,6 +18,7 @@ export type TabLocation = "topApp" | "pinned" | "unpinned";
 export type Space = {
   id: string;
   title?: string;
+  isActive: boolean;
 };
 
 export type Download = {

@@ -15,33 +15,12 @@
       "name": "index",
       "title": "Download Threads Video",
       "description": "Download threads video with URL",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "threadsUrl",
-          "description": "Threads URL",
-          "type": "text",
-          "placeholder": "Threads URL",
-          "required": true
-        }
-      ]
-    }
-  ],
-  "preferences": [
-    {
-      "name": "videoDownloadPath",
-      "title": "Video Download Path",
-      "description": "Path to save downloaded videos",
-      "type": "directory",
-      "required": false
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.84.3",
-    "@raycast/utils": "^1.17.0",
-    "axios": "^1.7.7",
-    "cheerio": "^1.0.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

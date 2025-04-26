@@ -34,6 +34,11 @@ export type Data = {
 
 export function useReminders() {
   return useCachedPromise(() => {
-    return getData() as Promise<Data>;
+    try {
+      return getData() as Promise<Data>;
+    } catch (error) {
+      console.error("Failed to fetch reminders:", error);
+      return Promise.resolve({ reminders: [], lists: [] } as Data);
+    }
   });
 }

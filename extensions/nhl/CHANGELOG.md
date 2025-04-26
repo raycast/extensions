@@ -1,5 +1,10 @@
 # NHL Changelog
 
+## [Version 1.0.1] - 2024-12-24
+
+- Bugfix: Fixed game detail due to the NHL changing how they represent team names
+- Bugfix: Fixed a bug that showed GAA and GFA as % instead of decimal points
+
 ## [Initial Version] - 2024-12-06
 
 - Adds NHL extension

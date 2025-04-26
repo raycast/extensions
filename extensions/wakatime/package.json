@@ -23,16 +23,7 @@
       "subtitle": "WakaTime",
       "title": "Show Public Leaderboard",
       "description": "Check your rank against others all around the world.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "apiKey",
-          "description": "Use your WakaTime API key to use your account",
-          "type": "password",
-          "required": false,
-          "title": "WakaTime API Key"
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "private-leaderboards",
@@ -58,28 +49,37 @@
       "type": "password",
       "description": "Use your WakaTime API key to use your account",
       "placeholder": "Enter your API key from https://wakatime.com/settings"
+    },
+    {
+      "name": "apiBaseUrl",
+      "description": "Configure custom API base URL",
+      "type": "textfield",
+      "required": false,
+      "title": "WakaTime API Base URL",
+      "default": "https://wakatime.com/api/v1"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.18",
-    "date-fns": "^2.29.3",
-    "node-fetch": "^3.3.0"
+    "@raycast/api": "^1.96.0",
+    "@raycast/utils": "^1.19.1",
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
-    "@types/node": "^18.14.0",
-    "@types/react": "^18.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.52.0",
-    "@typescript-eslint/parser": "^5.52.0",
-    "eslint": "^8.34.0",
-    "eslint-config-prettier": "^8.6.0",
-    "prettier": "^2.8.4",
-    "typescript": "^4.9.5"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.14.1",
+    "@types/react": "^19.1.2",
+    "eslint": "^9.24.0",
+    "eslint-config-prettier": "^8.10.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.30.1"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
