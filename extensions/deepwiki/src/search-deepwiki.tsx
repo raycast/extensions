@@ -1,9 +1,9 @@
-import * as React from "react"
-import { useState, useEffect, useCallback } from "react"
-import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType } from "@raycast/api"
-import fetch from "node-fetch"
-import * as cheerio from "cheerio"
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, showToast, Toast } from "@raycast/api"
 import { showFailureToast } from "@raycast/utils"
+import * as cheerio from "cheerio"
+import fetch from "node-fetch"
+import * as React from "react"
+import { useCallback, useEffect, useState } from "react"
 
 interface RepoResult {
   id: string // Using org/repo as ID
@@ -130,6 +130,24 @@ export default function Command(): React.ReactElement {
               <ActionPanel>
                 <Action.OpenInBrowser title="Open in Deepwiki" url={repo.deepWikiUrl} />
                 <Action.OpenInBrowser title="Open in GitHub" url={repo.githubUrl} />
+                <Action
+                  title="Crawl and Copy Docs"
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+                  onAction={async () => {
+                    try {
+                      await launchCommand({
+                        name: "crawl-deepwiki-docs",
+                        type: LaunchType.UserInitiated,
+                        arguments: { repoIdentifier: repo.orgRepo },
+                      })
+                    } catch (error) {
+                      showFailureToast(error, {
+                        title: "Failed to start crawl command",
+                      })
+                    }
+                  }}
+                />
                 <Action
                   title="Open Deepwiki Page Command"
                   icon={Icon.Terminal}
