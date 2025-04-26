@@ -38,11 +38,17 @@ export default async function Command(props: LaunchProps<{ arguments: OpenDeepWi
     }
 
     await open(targetUrl)
-  } catch (error: any) {
+  } catch (error: unknown) {
+    let message = "An unknown error occurred."
+    if (error instanceof Error) {
+      message = error.message
+    } else if (typeof error === "string") {
+      message = error
+    }
     await showToast({
       style: Toast.Style.Failure,
-      title: "Invalid Input",
-      message: error.message,
+      title: "Invalid Input or Error Opening",
+      message: message,
     })
   }
 }

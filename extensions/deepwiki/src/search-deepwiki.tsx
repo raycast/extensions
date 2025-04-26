@@ -87,12 +87,18 @@ export default function Command(): React.ReactElement {
       }
 
       setResults(parsedResults)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("[DeepWiki Search] Search failed:", error)
+      let message = "Could not fetch results from DeepWiki"
+      if (error instanceof Error) {
+        message = error.message
+      } else if (typeof error === "string") {
+        message = error
+      }
       await showToast({
         style: Toast.Style.Failure,
         title: "Search Failed",
-        message: error.message || "Could not fetch results from DeepWiki",
+        message: message,
       })
       setResults([]) // Clear results on error
     } finally {

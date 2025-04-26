@@ -1,0 +1,6 @@
+{
+  "extends": "@raycast/eslint-config",
+  "rules": {
+    // You can add project-specific rule overrides here if needed
+  }
+}
