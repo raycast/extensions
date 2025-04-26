@@ -3,7 +3,7 @@
  */
 const isDev = process.env.NODE_ENV !== "production";
 
-enum LogLevel {
+export enum LogLevel {
   DEBUG,
   INFO,
   WARN,
