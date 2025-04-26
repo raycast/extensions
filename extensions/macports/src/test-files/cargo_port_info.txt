@@ -1,7 +1,7 @@
 cargo @0.85.0 (devel)
 Variants:             mirror_all_architectures, universal
 
-Description:          Cargo downloads your Rust project’s dependencies and compiles your project.
+Description:          Cargo downloads your Rust project's dependencies and compiles your project.
 Homepage:             https://crates.io
 
 Build Dependencies:   pkgconfig, cmake, rust

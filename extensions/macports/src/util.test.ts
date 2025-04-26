@@ -18,7 +18,7 @@ const testRunsMap = new Map<string, TestRun>([
       portName: "cargo",
       expected: {
         name: "cargo",
-        description: "Cargo downloads your Rust project’s dependencies and compiles your project.",
+        description: "Cargo downloads your Rust project's dependencies and compiles your project.",
         homepage: "https://crates.io",
         maintainers: [
           {
@@ -61,11 +61,11 @@ const testRunsMap = new Map<string, TestRun>([
 ]);
 
 describe("extractPortDetails", () => {
-  it("should accurately extract port details", () => {
-    for (const [portName, testRun] of testRunsMap.entries()) {
+  for (const [portName, testRun] of testRunsMap.entries()) {
+    it(`should extract port details correctly for ${portName}`, () => {
       const fileContent = readFileSync(join(__dirname, "test-files", testRun.fileName), "utf-8");
       const details = extractPortDetails(portName, fileContent);
       expect(details).toEqual(testRun.expected);
-    }
-  });
+    });
+  }
 });
