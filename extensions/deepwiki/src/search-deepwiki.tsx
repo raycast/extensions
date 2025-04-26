@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react"
 import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType } from "@raycast/api"
 import fetch from "node-fetch"
 import * as cheerio from "cheerio"
+import { showFailureToast } from "@raycast/utils"
 
 interface RepoResult {
   id: string // Using org/repo as ID
@@ -77,19 +78,19 @@ export default function Command(): React.ReactElement {
         if ($("body").text().includes("Which repo would you like to understand?")) {
           // Noop
         } else {
-          console.warn("[DeepWiki Search] No results found and page structure seems unexpected.")
+          console.warn("[Deepwiki Search] No results found and page structure seems unexpected.")
           await showToast({
             style: Toast.Style.Failure,
             title: "Could not parse results",
-            message: "The DeepWiki page structure might have changed or an error occurred.",
+            message: "The Deepwiki page structure might have changed or an error occurred.",
           })
         }
       }
 
       setResults(parsedResults)
     } catch (error: unknown) {
-      console.error("[DeepWiki Search] Search failed:", error)
-      let message = "Could not fetch results from DeepWiki"
+      console.error("[Deepwiki Search] Search failed:", error)
+      let message = "Could not fetch results from Deepwiki"
       if (error instanceof Error) {
         message = error.message
       } else if (typeof error === "string") {
@@ -120,7 +121,7 @@ export default function Command(): React.ReactElement {
       {results.length === 0 && !isLoading && searchText ? (
         <List.EmptyView
           title="No Repositories Found"
-          description={`Could not find any matching repositories on DeepWiki for "${searchText}".`}
+          description={`Could not find any matching repositories on Deepwiki for "${searchText}".`}
         />
       ) : (
         results.map((repo: RepoResult) => (
@@ -144,8 +145,7 @@ export default function Command(): React.ReactElement {
                         arguments: { repoIdentifier: repo.orgRepo },
                       })
                     } catch (error) {
-                      showToast({
-                        style: Toast.Style.Failure,
+                      showFailureToast(error, {
                         title: "Failed to launch command",
                       })
                     }

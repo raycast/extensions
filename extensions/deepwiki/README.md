@@ -1,29 +1,29 @@
-# DeepWiki Raycast Extension
+# Deepwiki Raycast Extension
 
-This extension allows you to quickly search for and open GitHub repositories on [DeepWiki](https://deepwiki.com/).
+This extension allows you to quickly search for and open GitHub repositories on [Deepwiki](https://deepwiki.com/).
 
 ## Features
 
-- **Open DeepWiki Page:** Quickly open the DeepWiki page for a specific GitHub repository using its URL or `owner/repo` identifier.
-- **Search DeepWiki Repos:** Search for repositories indexed by DeepWiki directly within Raycast.
+- **Open Deepwiki Page:** Quickly open the Deepwiki page for a specific GitHub repository using its URL or `owner/repo` identifier.
+- **Search Deepwiki Repos:** Search for repositories indexed by Deepwiki directly within Raycast.
 
 ## Commands
 
-### Open DeepWiki Page
+### Open Deepwiki Page
 
-- **Action:** Opens a DeepWiki page.
-- **Input:** Accepts a GitHub repository URL (e.g., `https://github.com/microsoft/vscode`), a DeepWiki URL (e.g., `https://deepwiki.com/microsoft/vscode`), or just the `owner/repo` identifier (e.g., `microsoft/vscode`).
-- **Usage:** Activate Raycast, type `Open DeepWiki Page`, enter the repository identifier, and press Enter.
+- **Action:** Opens a Deepwiki page.
+- **Input:** Accepts a GitHub repository URL (e.g., `https://github.com/microsoft/vscode`), a Deepwiki URL (e.g., `https://deepwiki.com/microsoft/vscode`), or just the `owner/repo` identifier (e.g., `microsoft/vscode`).
+- **Usage:** Activate Raycast, type `Open Deepwiki Page`, enter the repository identifier, and press Enter.
 
-### Search DeepWiki Repos
+### Search Deepwiki Repos
 
-- **Action:** Searches DeepWiki for indexed repositories.
-- **Usage:** Activate Raycast, type `Search DeepWiki Repos`, and start typing your search query (e.g., `react`, `typescript`, `vscode`).
+- **Action:** Searches Deepwiki for indexed repositories.
+- **Usage:** Activate Raycast, type `Search Deepwiki Repos`, and start typing your search query (e.g., `react`, `typescript`, `vscode`).
 - **Results:** Displays a list of matching repositories. Selecting a result provides actions:
-  - Open the repository's page on DeepWiki (Primary Action).
+  - Open the repository's page on Deepwiki (Primary Action).
   - Open the repository's page on GitHub.
-  - Use the "Open DeepWiki Page" command with the selected repo.
-  - Copy DeepWiki URL, GitHub URL, or `owner/repo` identifier to the clipboard.
+  - Use the "Open Deepwiki Page" command with the selected repo.
+  - Copy Deepwiki URL, GitHub URL, or `owner/repo` identifier to the clipboard.
 
 ## Setup
 

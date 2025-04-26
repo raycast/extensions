@@ -3,7 +3,7 @@
   "name": "deepwiki",
   "version": "0.1.0",
   "title": "Deepwiki",
-  "description": "Search and open DeepWiki pages for GitHub repositories.",
+  "description": "Search and open Deepwiki pages for GitHub repositories.",
   "icon": "deep-wiki.png",
   "author": "vivek",
   "license": "MIT",
@@ -13,13 +13,13 @@
   ],
   "screenshots": [
     {
-      "title": "DeepWiki Search",
-      "description": "Search for repositories indexed by DeepWiki.",
+      "title": "Deepwiki Search",
+      "description": "Search for repositories indexed by Deepwiki.",
       "image": "assets/screenshot-search.png"
     },
     {
-      "title": "DeepWiki Open",
-      "description": "Open a DeepWiki page for a specific GitHub repo URL or org/repo identifier.",
+      "title": "Deepwiki Open",
+      "description": "Open a Deepwiki page for a specific GitHub repo URL or org/repo identifier.",
       "image": "assets/screenshot-open.png"
     }
   ],
@@ -27,7 +27,7 @@
     {
       "name": "open-deepwiki",
       "title": "Open Deepwiki Page",
-      "description": "Open DeepWiki for a specific GitHub repo URL or org/repo identifier.",
+      "description": "Open Deepwiki for a specific GitHub repo URL or org/repo identifier.",
       "mode": "no-view",
       "arguments": [
         {
@@ -41,13 +41,13 @@
     {
       "name": "search-deepwiki",
       "title": "Search Deepwiki Repos",
-      "description": "Search repositories indexed by DeepWiki.",
+      "description": "Search repositories indexed by Deepwiki.",
       "mode": "view"
     },
     {
       "name": "crawl-deepwiki-docs",
-      "title": "Crawl DeepWiki Docs",
-      "description": "Crawl all documentation pages for a DeepWiki repository and copy content to clipboard.",
+      "title": "Crawl Deepwiki Docs",
+      "description": "Crawl all documentation pages for a Deepwiki repository and copy content to clipboard.",
       "mode": "no-view",
       "arguments": [
         {

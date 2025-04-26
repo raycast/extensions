@@ -1,11 +1,11 @@
 import { LaunchProps, open, showToast, Toast } from "@raycast/api"
 import { URL } from "url"
 
-interface OpenDeepWikiArguments {
+interface OpenDeepwikiArguments {
   repoIdentifier: string
 }
 
-export default async function Command(props: LaunchProps<{ arguments: OpenDeepWikiArguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: OpenDeepwikiArguments }>) {
   const { repoIdentifier } = props.arguments
   const deepWikiBaseUrl = "https://deepwiki.com/"
 
@@ -13,7 +13,7 @@ export default async function Command(props: LaunchProps<{ arguments: OpenDeepWi
 
   try {
     if (repoIdentifier.startsWith(deepWikiBaseUrl)) {
-      // Already a DeepWiki URL
+      // Already a Deepwiki URL
       new URL(repoIdentifier) // Validate URL format
       targetUrl = repoIdentifier
     } else if (repoIdentifier.startsWith("https://github.com/")) {
@@ -34,7 +34,7 @@ export default async function Command(props: LaunchProps<{ arguments: OpenDeepWi
         throw new Error("Invalid org/repo format. Expected 'org/repo'.")
       }
     } else {
-      throw new Error("Invalid input. Provide a DeepWiki URL, GitHub URL, or 'org/repo'.")
+      throw new Error("Invalid input. Provide a Deepwiki URL, GitHub URL, or 'org/repo'.")
     }
 
     await open(targetUrl)
