@@ -1,5 +1,8 @@
 # Xcode Changelog
 
+## [Fix open URL] -  2025-04-25
+- Fix the open URL in Simulator command to support URLs with query parameters.
+
 ## [Add Xcode Runtimes Management] - 2025-04-15
 
 - Add Xcode runtimes listing and management command
