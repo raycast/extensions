@@ -38,9 +38,6 @@ type TodoListItemActionsProps = {
   refreshTodos: () => void;
 };
 
-/** List of command list names for which the todo's reminder can be updated. */
-type FilteredCommandListName = Extract<CommandListName, 'today' | 'upcoming'>;
-
 export default function TodoListItemActions({
   todo,
   refreshTodos,
@@ -146,16 +143,6 @@ New title:
     await updateAction({ deadline: date.toISOString() }, { title: 'Set deadline' });
   }
 
-  async function setReminder(time: string | null, command: FilteredCommandListName) {
-    const when = command === 'today' ? 'today' : 'tomorrow';
-
-    if (time) {
-      await updateAction({ when: `${when}@${time}` }, { title: 'Updated Reminder' });
-    } else {
-      await updateAction({ when }, { title: 'Removed Reminder' });
-    }
-  }
-
   async function deleteToDo() {
     if (
       await confirmAlert({
@@ -172,29 +159,6 @@ New title:
       });
       refreshTodos();
     }
-  }
-
-  function timeEntries(command: FilteredCommandListName) {
-    const now = new Date();
-    const times = [];
-    const startHour = command === 'today' ? now.getHours() : 0;
-    let startMinute = command === 'today' ? Math.ceil(now.getMinutes() / 15) * 15 : 0;
-
-    for (let hour = startHour; hour < 24; hour++) {
-      for (let minute = startMinute; minute < 60; minute += 15) {
-        // Format the time as HH:MM
-        const formattedHour = hour.toString().padStart(2, '0');
-        const formattedMinute = minute.toString().padStart(2, '0');
-        times.push(`${formattedHour}:${formattedMinute}`);
-      }
-
-      // Reset `startMinute` to `0`, as we want to make sure that, if on the
-      // current time, the minutes are, for example, 50, we don't add any times
-      // for the current hour but do add times for the next hours.
-      startMinute = 0;
-    }
-
-    return times;
   }
 
   return (
@@ -244,8 +208,30 @@ New title:
             title="Date…"
             icon={Icon.Calendar}
             min={new Date()}
-            onChange={(date) => schedule(date ? date.toISOString() : 'anytime')}
-            type={Action.PickDate.Type.Date}
+            onChange={(date) => {
+              if (date) {
+                // Before proceeding, we need to ensure we create a date time in the user's timezone.
+                const offset = new Date().getTimezoneOffset();
+                const scheduleDate = new Date(date.getTime() - offset * 60 * 1000);
+                schedule(scheduleDate.toISOString());
+
+                // Not sure if we can always trust this but, as it seems to be
+                // undocumented behaviour but, by default, when using an
+                // `Action.PickDate` component for date time, if the user only
+                // selects a date, for example, 'Tomorrow', then the date's
+                // milliseconds will be set to 1.
+                // We can leverage this to understand if the user actually
+                // specified a time or not.
+                if (date.getMilliseconds() === 1) {
+                  schedule(`${scheduleDate.getFullYear()}/${scheduleDate.getMonth() + 1}/${scheduleDate.getDate()}/`);
+                } else {
+                  schedule(scheduleDate.toISOString());
+                }
+              } else {
+                schedule('anytime');
+              }
+            }}
+            type={Action.PickDate.Type.DateTime}
           />
           <Action {...listItems.someday} onAction={() => schedule('someday')} />
         </ActionPanel.Submenu>
@@ -289,20 +275,6 @@ New title:
           }}
           type={Action.PickDate.Type.Date}
         />
-
-        {(commandListName === 'today' || commandListName === 'upcoming') && (
-          <ActionPanel.Submenu
-            title="Set Reminder"
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
-            icon={Icon.Bell}
-          >
-            <Action title="Clear" onAction={() => setReminder(null, commandListName)} />
-
-            {timeEntries(commandListName).map((time) => (
-              <Action key={time} title={time} onAction={() => setReminder(time, commandListName)} />
-            ))}
-          </ActionPanel.Submenu>
-        )}
 
         {environment.canAccess(AI) && (
           <Action
