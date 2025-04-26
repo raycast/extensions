@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, confirmAlert, Detail } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Detail, Image } from "@raycast/api";
 import { getPortDetails, isPortInstalled, uninstallPort } from "./exec";
 import { usePromise } from "@raycast/utils";
 import { useTerminalApp } from "./runInTerminal";
@@ -13,7 +13,6 @@ export default function PortDetails({ portName }: Props) {
     [portName],
   );
   const { data: installed } = usePromise(async (portName) => await isPortInstalled(portName), [portName]);
-
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 
   if (isLoading) {
@@ -26,38 +25,47 @@ export default function PortDetails({ portName }: Props) {
 
   const { name, description, homepage, maintainers, variants, dependencies } = portDetails;
 
-  const formatMaintainers = (maintainers: Array<{ email?: string; github?: string }>) => {
-    return maintainers
-      .map((maintainer) => {
-        const parts = [];
-        if (maintainer.email) {
-          parts.push(`📧 ${maintainer.email}`);
-        }
-        if (maintainer.github) {
-          parts.push(`🐙 [${maintainer.github}](https://github.com/${maintainer.github})`);
-        }
-        return parts.join(" ");
-      })
-      .join("\n\n");
-  };
-
   return (
     <Detail
       isLoading={isLoading}
-      markdown={`# ${name}
-    
-🌐 [${homepage}](${homepage})
+      markdown={`# ${name}\n\n${description}`}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Link title="Homepage" target={homepage} text={homepage} />
 
-${description}
+          {maintainers.length > 0 && (
+            <Detail.Metadata.TagList title="Maintainers">
+              {maintainers.map((maintainer) => {
+                const username = maintainer.github || maintainer.email || "";
 
-### Maintainers
-${formatMaintainers(maintainers)}
+                return (
+                  <Detail.Metadata.TagList.Item
+                    key={username}
+                    text={username}
+                    icon={maintainer.avatarUrl ? { source: maintainer.avatarUrl, mask: Image.Mask.Circle } : undefined}
+                  />
+                );
+              })}
+            </Detail.Metadata.TagList>
+          )}
 
-### Variants
-${variants.join(", ")}
+          {variants.length > 0 && (
+            <Detail.Metadata.TagList title="Variants">
+              {variants.map((variant) => (
+                <Detail.Metadata.TagList.Item text={variant} key={variant} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
 
-### Dependencies
-${dependencies.join(", ")}`}
+          {dependencies.length > 0 && (
+            <Detail.Metadata.TagList title="Dependencies">
+              {dependencies.map((dependency) => (
+                <Detail.Metadata.TagList.Item text={dependency} key={dependency} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+        </Detail.Metadata>
+      }
       actions={
         <ActionPanel>
           {!installed && (
@@ -68,8 +76,6 @@ ${dependencies.join(", ")}`}
               onAction={() => runCommandInTerminal(`sudo port install ${portName}`)}
             />
           )}
-          <Action.CopyToClipboard title="Copy Install Command" content={`sudo port install ${portName}`} />
-          <Action.OpenInBrowser title="Open Homepage in Browser" url={homepage} />
           {installed && (
             <Action
               title="Uninstall"
@@ -89,6 +95,8 @@ ${dependencies.join(", ")}`}
               }}
             />
           )}
+          <Action.CopyToClipboard title="Copy Install Command" content={`sudo port install ${portName}`} />
+          <Action.OpenInBrowser title="Open Homepage in Browser" url={homepage} />
         </ActionPanel>
       }
     />

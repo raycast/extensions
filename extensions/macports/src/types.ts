@@ -42,9 +42,9 @@ export interface DependsOn {
 }
 
 export type Maintainer = {
-  // name: string;
   email?: string;
   github?: string;
+  avatarUrl?: string;
 };
 
 export type PortDetails = {
