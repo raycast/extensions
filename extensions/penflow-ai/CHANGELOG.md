@@ -1,6 +1,6 @@
 # Penflow AI Changelog
 
-## [1.0.1] - 2025-02-28
+## [1.0.1] - {PR_MERGE_DATE}
 
 - Switched AI model to Gemini 2.0 Flash
 - Fixed input lag issues
