@@ -5,7 +5,10 @@ export async function insertBookmark(bookmark: Omit<Bookmark, "created_at"> & { 
 }
 
 export async function getGroups(userId: string) {
-  return supabase.from("groups").select("id, name, slug").eq("user_id", userId);
+  return supabase
+    .from("groups")
+    .select("id, name, slug, user_id, colors")
+    .eq("user_id", userId);
 }
 
 export async function deleteBookmark(id: string) {

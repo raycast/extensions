@@ -1,7 +1,7 @@
-import React from "react";
 import colorString from "color-string";
+import React from "react";
 import { User } from "@supabase/supabase-js";
-import { FormValidation, useForm, showFailureToast } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
@@ -9,32 +9,21 @@ import {
   Icon,
   PopToRootType,
   Toast,
+  getPreferenceValues,
   showHUD,
   showToast,
-  getPreferenceValues,
+  showFailureToast,
 } from "@raycast/api";
-import { useGroups } from "../lib/use-groups";
 import * as db from "../lib/db";
 import { ensureValidUrl } from "../lib/ensure-valid-url";
-import { useActiveTab } from "../lib/use-active-tab";
+import { useActiveTab, getActiveTabFromBrowser } from "../lib/use-active-tab";
+import { useGroups } from "../lib/use-groups";
 import { isUrlLike } from "../lib/is-url-like";
+import { fetchMicrolinkData } from "../lib/use-microlink";
 import AuthenticatedView from "./components/authenticated-view";
-import { BMRKS_SERVICE_NAME, HOST_URL } from "./constants";
+import { BMRKS_SERVICE_NAME, HOST_URL, SUPPORTED_BROWSERS } from "./constants";
 
-interface MicrolinkResponse {
-  data: {
-    title?: string;
-    logo?: {
-      url: string;
-      type: string;
-      size: number;
-      height: number;
-      width: number;
-    };
-  };
-}
-
-// Define BookmarkValues interface outside the component so it can be used in props
+// Define BookmarkValues interface outside the component so it can be used in useForm
 interface BookmarkValues {
   groupId: string;
   value: string;
@@ -65,23 +54,18 @@ function CreateBookmark({ user }: { user: User }) {
 
         // Try to get both title and logo from Microlink API
         try {
-          const response = await fetch(
-            `https://api.microlink.io?url=${encodeURIComponent(validUrl)}&data.title&data.logo`,
-          );
-          if (response.ok) {
-            const data = (await response.json()) as MicrolinkResponse;
-
+          const data = await fetchMicrolinkData(validUrl);
+          if (data) {
             // Use title from API if not provided by user
             if (!title && data.data?.title) {
               title = data.data.title;
             }
-
             // Get logo URL if available
             if (data.data?.logo?.url) {
               faviconUrl = data.data.logo.url;
             }
           } else {
-            await showFailureToast("Failed to fetch metadata", new Error(`Status: ${response.status}`));
+            await showFailureToast("Failed to fetch metadata", new Error(`Microlink API returned no data`));
           }
         } catch (error) {
           await showFailureToast("Error fetching metadata", error instanceof Error ? error : new Error(String(error)));
@@ -169,85 +153,114 @@ function CreateBookmark({ user }: { user: User }) {
 
   // Store the previous URL to detect changes
   const previousUrlRef = React.useRef("");
+  const [initialized, setInitialized] = React.useState(false);
 
+  // Only set value/title from activeTab on initial mount
   React.useEffect(() => {
-    if (activeTab) {
+    if (activeTab && !initialized) {
       setValue("value", activeTab.url);
       setValue("title", activeTab.title);
+      previousUrlRef.current = activeTab.url;
+      setInitialized(true);
     }
-  }, [activeTab]);
+  }, [activeTab, initialized, setValue]);
 
+  // If ESC is pressed and form is cleared, reset initialized
   React.useEffect(() => {
-    if (values.value === "") {
+    if (values.value === "" && initialized) {
       setValue("title", undefined);
       previousUrlRef.current = "";
-      return;
+      setInitialized(false);
     }
+  }, [values.value, initialized, setValue]);
 
-    // Check if the URL has changed significantly (different domain)
-    const urlChanged = () => {
-      if (!isUrlLike(values.value) || !isUrlLike(previousUrlRef.current)) {
-        return true; // Consider it changed if either isn't a URL
-      }
-
-      try {
-        const currentDomain = new URL(ensureValidUrl(values.value)).hostname;
-        const previousDomain = new URL(ensureValidUrl(previousUrlRef.current)).hostname;
-        return currentDomain !== previousDomain;
-      } catch {
-        return true; // If URL parsing fails, consider it changed
-      }
-    };
-
-    // Reset title if URL domain has changed
-    if (isUrlLike(values.value) && urlChanged()) {
-      setValue("title", undefined);
-    }
-
-    // Auto-fetch title and favicon when a URL is entered
-    const fetchMetadataForUrl = async () => {
-      // Read user preference for title enhancement
-      const preferences = getPreferenceValues<{ enhanceTitle: boolean }>();
-      if (!preferences.enhanceTitle) {
-        previousUrlRef.current = values.value;
-        return;
-      }
-
-      if (isUrlLike(values.value) && (!values.title || urlChanged())) {
-        try {
-          const validUrl = ensureValidUrl(values.value);
-          const response = await fetch(
-            `https://api.microlink.io?url=${encodeURIComponent(validUrl)}&data.title&data.logo`,
-          );
-
-          if (response.ok) {
-            const data = (await response.json()) as MicrolinkResponse;
-            if (data.data?.title) {
-              setValue("title", data.data.title);
-            }
-          } else {
-            await showFailureToast("Failed to auto-fetch metadata", new Error(`Status: ${response.status}`));
-          }
-        } catch (error) {
-          await showFailureToast(
-            "Error auto-fetching metadata",
-            error instanceof Error ? error : new Error(String(error)),
-          );
-          // Continue with fallbacks - we don't want to interrupt the user experience
-        }
-      }
-
-      // Update the previous URL reference
-      previousUrlRef.current = values.value;
-    };
-
-    // Add a small delay to avoid excessive API calls while typing
-    const debounceTimer = setTimeout(fetchMetadataForUrl, 500);
-    return () => clearTimeout(debounceTimer);
-  }, [values.value]);
-
+  const [titleManuallyEdited, setTitleManuallyEdited] = React.useState(false);
   const valueIsUrl = isUrlLike(values.value);
   const activeGroup = groups && groups.find((group) => group.id === values.groupId);
+
+  // Track if title field is focused
+  const [titleFocused, setTitleFocused] = React.useState(false);
+
+  // Reset titleManuallyEdited to false on every URL change, unless title is focused or was edited after last URL change
+  React.useEffect(() => {
+    if (!valueIsUrl) {
+      setTitleManuallyEdited(false);
+      return;
+    }
+    // Only reset if not focused and not manually edited after last change
+    if (!titleFocused) {
+      setTitleManuallyEdited(false);
+    }
+    // If focused or manually edited, do not reset
+  }, [values.value]);
+
+  // Debounced effect: fetch title from Microlink when URL changes, unless user edited title
+  React.useEffect(() => {
+    if (!valueIsUrl || titleManuallyEdited) return;
+    let cancelled = false;
+    async function fetchTitle() {
+      const preferences = getPreferenceValues<{ enhanceTitle: boolean }>();
+      if (!preferences.enhanceTitle) return;
+      try {
+        const validUrl = ensureValidUrl(values.value);
+        const data = await fetchMicrolinkData(validUrl);
+        if (!cancelled && data?.data?.title) {
+          setValue("title", data.data.title);
+        } else if (!cancelled) {
+          await showToast({
+            style: Toast.Style.Animated,
+            title: "Could not fetch title",
+            message: "Microlink API did not return a title.",
+          });
+        }
+      } catch {
+        if (!cancelled) {
+          await showToast({
+            style: Toast.Style.Animated,
+            title: "Could not fetch title",
+            message: "Microlink API request failed.",
+          });
+        }
+      }
+    }
+    const timer = setTimeout(fetchTitle, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [values.value, valueIsUrl, titleManuallyEdited, setValue]);
+
+  // Detect manual edits to the title field
+  const titleFieldProps = {
+    ...itemProps.title,
+    onFocus: () => setTitleFocused(true),
+    onBlur: () => setTitleFocused(false),
+    onChange: (newTitle: string) => {
+      setTitleManuallyEdited(true);
+      itemProps.title.onChange?.(newTitle);
+    },
+  };
+
+  // Handler to fetch active tab from a specific browser and update form
+  async function fetchTabFromBrowser(browser: string) {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: `Getting link from ${browser}` });
+      const tab = await getActiveTabFromBrowser(browser);
+      if (!tab) throw new Error("No active tab found");
+      setValue("value", tab.url);
+      setValue("title", tab.title);
+      await showToast({ style: Toast.Style.Success, title: `Link from ${browser} loaded` });
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: `Could not get link from ${browser}` });
+    }
+  }
+
+  // Reset titleManuallyEdited if URL is cleared or form is reset
+  React.useEffect(() => {
+    if (!valueIsUrl && titleManuallyEdited) {
+      setTitleManuallyEdited(false);
+    }
+  }, [valueIsUrl, titleManuallyEdited]);
 
   return (
     <Form
@@ -263,6 +276,15 @@ function CreateBookmark({ user }: { user: User }) {
               />
             )}
           </ActionPanel.Section>
+          <ActionPanel.Section title="Get Link from Browser">
+            {SUPPORTED_BROWSERS.map((browser: string) => (
+              <Action
+                key={browser}
+                title={`Get Link from ${browser.replace("Browser", "")}`.trim()}
+                onAction={() => fetchTabFromBrowser(browser)}
+              />
+            ))}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -275,12 +297,38 @@ function CreateBookmark({ user }: { user: User }) {
         placeholder="Enter a URL, color code, or text"
         info={valueIsUrl ? "URL detected - title field available below" : undefined}
         {...itemProps.value}
+        onBlur={async () => {
+          // Only fetch if valid URL, title not manually edited, and title field not focused
+          if (isUrlLike(values.value) && !titleManuallyEdited && !titleFocused) {
+            const preferences = getPreferenceValues<{ enhanceTitle: boolean }>();
+            if (!preferences.enhanceTitle) return;
+            try {
+              const validUrl = ensureValidUrl(values.value);
+              const data = await fetchMicrolinkData(validUrl);
+              if (data?.data?.title) {
+                setValue("title", data.data.title);
+              } else {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Could not fetch title",
+                  message: "Microlink API did not return a title.",
+                });
+              }
+            } catch {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Could not fetch title",
+                message: "Microlink API request failed.",
+              });
+            }
+          }
+        }}
       />
       {valueIsUrl && (
         <Form.TextField
           title="Link Title"
           placeholder="Custom title for your bookmark (optional)"
-          {...itemProps.title}
+          {...titleFieldProps}
         />
       )}
     </Form>

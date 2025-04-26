@@ -1,6 +1,6 @@
 <p align="center">
    <img src="https://raw.githubusercontent.com/raycast/extensions/20022cf4e7e465042b1e161ec4a2df475de0aac5/extensions/bmrks/assets/og.png">
- </p>
+</p>
 
 Companion bookmarking utility for [(Basic) Bookmarks](https://bmrks.com).
 
@@ -8,11 +8,13 @@ Companion bookmarking utility for [(Basic) Bookmarks](https://bmrks.com).
 
 ### Create Bookmark
 
-Create a new bookmark, whether it's a URL, a color, or a note. You can also select a group to save the bookmark to.
+Create a new bookmark, whether it's a URL, a color, or a note. You can also save the bookmark to a group.
 
 When this command is triggered while a browser window is in focus, it will automatically pre-fill the URL and title fields.
 
 Currently supports Chrome, Safari, Brave, Arc.
+
+Tip: Use the [Raycast Browser Extension](https://www.raycast.com/browser-extension) to retrieve the active tab from a supported browser.
 
 ### Search Bookmarks
 

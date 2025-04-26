@@ -1,10 +1,13 @@
 import React from "react";
 import { User } from "@supabase/supabase-js";
+
 import { Action, ActionPanel, Icon, Image, List, Toast, showToast } from "@raycast/api";
+
+import { deleteBookmark, moveBookmarkToGroup } from "../lib/db";
+import { getHostname } from "../lib/get-hostname";
 import { useGroups } from "../lib/use-groups";
 import { useBookmarks } from "../lib/use-bookmarks";
-import { getHostname } from "../lib/get-hostname";
-import { deleteBookmark, moveBookmarkToGroup } from "../lib/db";
+
 import AuthenticatedView from "./components/authenticated-view";
 
 export function SearchBookmarks({ user }: { user: User }) {

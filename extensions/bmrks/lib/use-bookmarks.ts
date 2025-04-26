@@ -1,5 +1,4 @@
 import { useCachedPromise } from "@raycast/utils";
-
 import * as db from "../lib/db";
 
 export function useBookmarks(groupId: string) {

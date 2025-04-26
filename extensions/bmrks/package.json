@@ -5,7 +5,8 @@
   "description": "Companion bookmarking utility for bmrks.com",
   "categories": [
     "Applications",
-    "Productivity"
+    "Productivity",
+    "Web"
   ],
   "icon": "icon.png",
   "author": "rauno",

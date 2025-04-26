@@ -1,10 +1,14 @@
 # bmrks Changelog
 
-## [Improvement] - 2025-04-24
+## [Improvement] - {PR_MERGE_DATE}
 
-- Reverted reliance on Raycast Browser Extension 
-- Leveraged Raycast Browser Extension for bookmark title with microlink fallback
+- Added ability to import Links from other browsers
+- Enhanced use of Raycast Browser Extension and restored AppleScript fallback
 - Removed support for Raycast drafts
+- Refactored bookmark title logic to use Raycast Browser Extension with Microlink fallback
+- Moved Microlink API logic into a dedicated utility
+- Updated `create-bookmark.tsx` to use the new `fetchMicrolinkData` utility
+- Cleaned up imports
 
 ## [Improvement] - 2025-04-12
 

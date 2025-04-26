@@ -1,5 +1,5 @@
-import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { createClient } from "@supabase/supabase-js";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 
 // These are not sensitive. Has access to public operations, like auth.
 const supabaseUrl = "https://nswbygdrtmlsfuyqsokv.supabase.co";

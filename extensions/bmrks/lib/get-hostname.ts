@@ -1,3 +1,3 @@
-export function getHostname(url: string) {
-  return url.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split("/")[0];
+export function getHostname(url: string): string {
+  return new URL(url).hostname;
 }
