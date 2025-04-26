@@ -1,5 +1,9 @@
 # One Time Password Changelog
 
+## {PR_MERGE_DATE}
+
+- Added Primary Action switch between Copy to Clipboard and Paste to Active App.
+
 ## 2025-02-11
 
 - Provided additional error information when a QR code scan fails.
