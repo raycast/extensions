@@ -39,7 +39,9 @@ function validatePortName(name: string): boolean {
 
 export function sanitizePortName(name: string): string {
   if (!validatePortName(name)) {
-    throw new Error("Invalid port name. Port names can only contain letters, numbers, underscores, plus signs, and hyphens.");
+    throw new Error(
+      "Invalid port name. Port names can only contain letters, numbers, underscores, plus signs, and hyphens.",
+    );
   }
   return name;
 }

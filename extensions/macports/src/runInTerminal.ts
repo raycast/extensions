@@ -39,11 +39,11 @@ const appBundleIds: { [key in TerminalApp]: string } = {
 };
 
 function escapeAppleScriptString(str: string): string {
-  return str.replace(/[\\"]/g, '\\$&').replace(/\n/g, '\\n');
+  return str.replace(/[\\"]/g, "\\$&").replace(/\n/g, "\\n");
 }
 
 function escapeShellCommand(str: string): string {
-  return str.replace(/(['"\\$`])/g, '\\$1');
+  return str.replace(/(['"\\$`])/g, "\\$1");
 }
 
 const runCommandInTermAppleScript = (c: string, terminalApp: string): string => {
