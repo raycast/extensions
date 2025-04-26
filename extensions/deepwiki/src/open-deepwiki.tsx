@@ -1,4 +1,5 @@
 import { LaunchProps, open, showToast, Toast } from "@raycast/api"
+import { showFailureToast } from "@raycast/utils"
 import { URL } from "url"
 
 interface OpenDeepwikiArguments {
@@ -45,10 +46,6 @@ export default async function Command(props: LaunchProps<{ arguments: OpenDeepwi
     } else if (typeof error === "string") {
       message = error
     }
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid Input or Error Opening",
-      message: message,
-    })
+    showFailureToast(error, { title: "Invalid Input or Error Opening" })
   }
 }
