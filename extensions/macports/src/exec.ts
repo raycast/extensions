@@ -39,6 +39,11 @@ export async function listInstalledPorts(): Promise<string[]> {
   }
 }
 
+export async function isPortInstalled(name: string): Promise<boolean> {
+  const installedPorts = await listInstalledPorts();
+  return installedPorts.includes(name);
+}
+
 export async function getPortDetails(name: string): Promise<PortDetails> {
   return new Promise((resolve, reject) => {
     exec(`port info ${name}`, { env }, (error, stdout) => {

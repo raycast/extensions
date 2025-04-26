@@ -52,5 +52,49 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest"
-  }
+  },
+  "preferences": [
+    {
+      "name": "terminalApp",
+      "type": "dropdown",
+      "required": false,
+      "default": "terminal",
+      "title": "Terminal Application",
+      "data": [
+        {
+          "title": "Alacritty",
+          "value": "alacritty"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
+          "title": "Hyper",
+          "value": "hyper"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        },
+        {
+          "title": "kitty",
+          "value": "kitty"
+        },
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "Warp",
+          "value": "warp"
+        },
+        {
+          "title": "WezTerm",
+          "value": "wezterm"
+        }
+      ],
+      "description": "The terminal application/emulator to use when using any Run in Terminal action."
+    }
+  ]
 }
