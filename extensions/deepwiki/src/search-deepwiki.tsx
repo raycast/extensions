@@ -75,10 +75,7 @@ export default function Command(): React.ReactElement {
       })
 
       if (parsedResults.length === 0 && !isLoading && query && $(resultSelector).length === 0) {
-        if ($("body").text().includes("Which repo would you like to understand?")) {
-          // Noop
-        } else {
-          console.warn("[Deepwiki Search] No results found and page structure seems unexpected.")
+        if (!$("body").text().includes("Which repo would you like to understand?")) {
           await showToast({
             style: Toast.Style.Failure,
             title: "Could not parse results",
@@ -89,7 +86,6 @@ export default function Command(): React.ReactElement {
 
       setResults(parsedResults)
     } catch (error: unknown) {
-      console.error("[Deepwiki Search] Search failed:", error)
       let message = "Could not fetch results from Deepwiki"
       if (error instanceof Error) {
         message = error.message
