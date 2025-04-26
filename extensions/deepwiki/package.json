@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepwiki",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "title": "Deepwiki",
-  "description": "Search and open Deepwiki pages for GitHub repositories.",
+  "description": "Search, open, and crawl DeepWiki pages for GitHub repositories.",
   "icon": "deep-wiki.png",
   "author": "vivek",
   "license": "MIT",
@@ -13,14 +13,24 @@
   ],
   "screenshots": [
     {
-      "title": "Deepwiki Search",
-      "description": "Search for repositories indexed by Deepwiki.",
+      "title": "DeepWiki Search",
+      "description": "Search for repositories indexed by DeepWiki.",
       "image": "assets/screenshot-search.png"
     },
     {
-      "title": "Deepwiki Open",
-      "description": "Open a Deepwiki page for a specific GitHub repo URL or org/repo identifier.",
+      "title": "DeepWiki Open",
+      "description": "Open a DeepWiki page for a specific GitHub repo URL or org/repo identifier.",
       "image": "assets/screenshot-open.png"
+    },
+    {
+      "title": "DeepWiki Crawl",
+      "description": "Initiate a crawl of repository documentation directly from search results.",
+      "image": "assets/screenshot-crawl-1.png"
+    },
+    {
+      "title": "DeepWiki Crawl Progress",
+      "description": "View the progress of the documentation crawl via toasts.",
+      "image": "assets/screenshot-crawl-2.png"
     }
   ],
   "commands": [
