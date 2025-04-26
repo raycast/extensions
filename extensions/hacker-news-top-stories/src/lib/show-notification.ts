@@ -25,11 +25,17 @@ const PATH = [
 function shellEscape(str: string) {
   return `'${str.replace(/'/g, `'\\''`)}'`;
 }
+function appleScriptEscape(str: string) {
+  return str.replace(/"/g, '\\"');
+}
+function isImage(obj: unknown): obj is Image {
+  return typeof obj === "object" && obj !== null && "source" in obj;
+}
 function extractUrlFromImageLike(favicon?: Image.ImageLike) {
   if (typeof favicon === "string") return favicon;
   if (favicon instanceof URL) return favicon.toString();
-  if (typeof favicon === "object" && favicon !== null && "source" in favicon) {
-    const src = (favicon as Image).source;
+  if (isImage(favicon)) {
+    const src = favicon.source;
     if (typeof src === "string") return src;
     if (src instanceof URL) return src.toString();
     if (typeof src === "object" && src !== null && "light" in src && src.light) {
@@ -50,7 +56,7 @@ export async function showNotification({ title, message, icon, url }: Notificati
     await execAsync(`terminal-notifier ${args.join(" ")}`, { env: { ...process.env, PATH } });
   } catch {
     await runAppleScript(`
-      display notification "${message.replace(/"/g, '\\"')}" with title "${title.replace(/"/g, '\\"')}"
+      display notification "${appleScriptEscape(message)}" with title "${appleScriptEscape(title)}"
     `);
   }
 }
