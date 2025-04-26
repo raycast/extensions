@@ -1,5 +1,5 @@
 import { showToast, Toast, Clipboard, LaunchProps } from "@raycast/api"
-import fetch from "node-fetch"
+import fetch, { Response as FetchResponse } from "node-fetch"
 import * as cheerio from "cheerio"
 import { URL } from "url"
 
@@ -7,6 +7,13 @@ const MAX_CONCURRENCY = 5 // Limit concurrent fetches
 
 interface Arguments {
   repoIdentifier: string
+}
+
+// Define a type for tracking crawl statistics
+interface CrawlStats {
+  attempted: number
+  successful: number
+  failed: number
 }
 
 function isValidHttpUrl(string: string): boolean {
@@ -43,21 +50,25 @@ async function crawlPage(
   visited: Set<string>,
   queue: string[],
   allContent: string[],
+  stats: CrawlStats,
 ): Promise<void> {
   if (!url.startsWith(baseUrl)) {
-    console.warn(`[CrawlPage Skip] URL ${url} does not start with base ${baseUrl}`)
     return
   }
 
   await showToast(Toast.Style.Animated, `Crawling: ${url}`)
+  stats.attempted++
 
+  let response: FetchResponse | null = null
   try {
-    const response = await fetch(url)
+    response = await fetch(url)
+
     if (!response.ok) {
-      console.error(`[CrawlPage Fetch Error] Failed ${url}: ${response.statusText}`)
-      await showToast(Toast.Style.Failure, `Failed to fetch ${url}: ${response.statusText}`)
+      stats.failed++
       return
     }
+
+    stats.successful++
     const html = await response.text()
     const $ = cheerio.load(html)
 
@@ -65,8 +76,6 @@ async function crawlPage(
     const pageContent = $(contentSelector).text().trim()
     if (pageContent) {
       allContent.push(`## Page: ${url}\n\n${pageContent}\n\n---\n\n`)
-    } else {
-      console.warn(`[CrawlPage No Content] No content found with selector '${contentSelector}' on ${url}`)
     }
 
     $("a[href]").each((_, element) => {
@@ -76,18 +85,16 @@ async function crawlPage(
         const absoluteUrlWithoutHash = absoluteUrl.split("#")[0]
 
         if (absoluteUrl.startsWith(baseUrl) && !visited.has(absoluteUrlWithoutHash)) {
-          visited.add(absoluteUrlWithoutHash)
           queue.push(absoluteUrl)
         }
       }
     })
   } catch (error) {
-    console.error(`[CrawlPage Error] Error crawling ${url}:`, error)
-    await showToast(
-      Toast.Style.Failure,
-      `Error crawling ${url}`,
-      error instanceof Error ? error.message : "Unknown error",
-    )
+    if (response) {
+      stats.failed++
+    } else {
+      stats.failed++
+    }
   }
 }
 
@@ -115,6 +122,13 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
     resolveCompletion = resolve
   })
 
+  // Initialize crawl statistics
+  const crawlStats: CrawlStats = {
+    attempted: 0,
+    successful: 0,
+    failed: 0,
+  }
+
   const checkCompletion = () => {
     if (queue.length === 0 && activeCount.current === 0) {
       initialToast.hide()
@@ -123,12 +137,17 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
   }
 
   const crawlWorker = async () => {
+    if (activeCount.current >= MAX_CONCURRENCY) {
+      return
+    }
     activeCount.current++
     try {
-      while (queue.length > 0) {
+      let keepWorking = true
+      while (keepWorking) {
         const url = queue.shift()
         if (!url) {
-          continue
+          keepWorking = false
+          break
         }
 
         const urlWithoutHash = url.split("#")[0]
@@ -137,20 +156,23 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
         }
         visited.add(urlWithoutHash)
 
-        await crawlPage(url, baseUrl, visited, queue, allContent)
+        await crawlPage(url, baseUrl, visited, queue, allContent, crawlStats)
+
+        while (queue.length > 0 && activeCount.current < MAX_CONCURRENCY) {
+          crawlWorker()
+        }
       }
-    } catch (e) {
-      console.error("[Worker Error] Uncaught error in worker loop:", e)
     } finally {
       activeCount.current--
       checkCompletion()
     }
   }
 
+  // Seed the queue
   queue.push(baseUrl)
 
-  const initialWorkers = Math.min(MAX_CONCURRENCY, queue.length)
-  for (let i = 0; i < initialWorkers; i++) {
+  // Start initial workers
+  for (let i = 0; i < Math.min(MAX_CONCURRENCY, 1); i++) {
     crawlWorker()
   }
 
@@ -158,16 +180,25 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
 
   await completionPromise
 
+  let finalTitle = "Crawl Complete"
+  let finalMessage = `Crawled ${crawlStats.successful} pages successfully.`
+  let finalStyle = Toast.Style.Success
+
+  if (crawlStats.failed > 0) {
+    finalTitle = "Crawl Complete with Errors"
+    finalMessage = `Crawled ${crawlStats.successful} pages successfully. ${crawlStats.failed} pages failed to fetch or process.`
+    finalStyle = Toast.Style.Success
+  }
+
   if (allContent.length > 0) {
     const finalContent = allContent.join("\n")
     await Clipboard.copy(finalContent)
-    await showToast(Toast.Style.Success, "Crawl Complete", `Copied content for ${visited.size} pages to clipboard.`)
+    await showToast(finalStyle, finalTitle, `${finalMessage} Copied content to clipboard.`)
   } else {
-    console.error("[Completion] Failure: No content extracted.")
-    await showToast(
-      Toast.Style.Failure,
-      "Crawl Failed",
-      "No content extracted. Check the base URL or website structure.",
-    )
+    finalMessage = `No content extracted after attempting ${crawlStats.attempted} pages.`
+    if (crawlStats.failed > 0) {
+      finalMessage += ` ${crawlStats.failed} pages failed.`
+    }
+    await showToast(Toast.Style.Failure, "Crawl Failed", `${finalMessage} Check base URL or website structure.`)
   }
 }
