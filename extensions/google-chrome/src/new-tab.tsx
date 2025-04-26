@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 import { getPreferenceValues, Icon, List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { ChromeActions, ChromeListItems } from "./components";
@@ -7,6 +7,7 @@ import { useCachedState } from "@raycast/utils";
 import { ChromeProfile, HistoryEntry, Preferences, SearchResult } from "./interfaces";
 import ChromeProfileDropDown from "./components/ChromeProfileDropdown";
 import { CHROME_PROFILE_KEY, CHROME_PROFILES_KEY, DEFAULT_CHROME_PROFILE_ID } from "./constants";
+import { classifyInput, ClassifiedInput } from "./util/classify-input";
 
 type HistoryContainer = {
   profile: ChromeProfile;
@@ -33,6 +34,21 @@ export default function Command() {
     return errorViewTab || errorViewHistory;
   }
 
+  const classifiedInput: ClassifiedInput = classifyInput(searchText || "");
+  let actionTitle: string;
+  let actions: ReactNode;
+
+  if (!classifiedInput.value) {
+    actionTitle = "Open Empty Tab";
+    actions = <ChromeActions.NewTab />;
+  } else if (classifiedInput.type === "url") {
+    actionTitle = `Open URL "${searchText}"`;
+    actions = <ChromeActions.NewTab url={classifiedInput.value} />;
+  } else {
+    actionTitle = `Search "${searchText}"`;
+    actions = <ChromeActions.NewTab query={searchText} />;
+  }
+
   return (
     <List
       onSearchTextChange={setSearchText}
@@ -41,9 +57,9 @@ export default function Command() {
     >
       <List.Section key={"new-tab"} title={"New Tab"}>
         <List.Item
-          title={!searchText ? "Open Empty Tab" : `Search "${searchText}"`}
+          title={actionTitle}
           icon={{ source: !searchText ? Icon.Plus : Icon.MagnifyingGlass }}
-          actions={<ChromeActions.NewTab query={searchText} />}
+          actions={actions}
         />
       </List.Section>
       <List.Section key={"open-tabs"} title={"Open Tabs - All"}>
