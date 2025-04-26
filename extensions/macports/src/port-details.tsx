@@ -28,7 +28,7 @@ export default function PortDetails({ portName }: Props) {
   return (
     <Detail
       isLoading={isLoading}
-      markdown={`# ${name}\n\n${description}`}
+      markdown={`# ${name}\n\n${description || 'No description available'}`}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Link title="Homepage" target={homepage} text={homepage} />
