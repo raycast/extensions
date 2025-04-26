@@ -1,4 +1,4 @@
-import { LaunchProps, open, showToast, Toast } from "@raycast/api"
+import { LaunchProps, open } from "@raycast/api"
 import { showFailureToast } from "@raycast/utils"
 import { URL } from "url"
 
@@ -40,12 +40,6 @@ export default async function Command(props: LaunchProps<{ arguments: OpenDeepwi
 
     await open(targetUrl)
   } catch (error: unknown) {
-    let message = "An unknown error occurred."
-    if (error instanceof Error) {
-      message = error.message
-    } else if (typeof error === "string") {
-      message = error
-    }
     showFailureToast(error, { title: "Invalid Input or Error Opening" })
   }
 }
