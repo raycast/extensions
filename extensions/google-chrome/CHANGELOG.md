@@ -1,5 +1,8 @@
 # Google Chrome Changelog
 
+## [Add fuzzy search for bookmarks] - {PR_MERGE_DATE}
+- Add fuzzy search for bookmarks
+
 ## [Add Copy Title action for Search Tab] - 2025-04-22
 - Add the ability to create new incognito window.
 

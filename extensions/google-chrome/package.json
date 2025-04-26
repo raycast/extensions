@@ -16,7 +16,8 @@
     "a-laughlin",
     "tleo19",
     "Tarocch1",
-    "santiago_perez"
+    "santiago_perez",
+    "oscmarb"
   ],
   "license": "MIT",
   "commands": [
@@ -289,11 +290,34 @@
       "required": false,
       "title": "Open Tab In Profile",
       "type": "dropdown"
+    },
+    {
+      "data": [
+        {
+          "title": "Default(exact)",
+          "value": "default"
+        },
+        {
+          "title": "Balanced",
+          "value": "balanced"
+        },
+        {
+          "title": "Loose",
+          "value": "loose"
+        }
+      ],
+      "default": "default",
+      "description": "When 'Default(exact)', it returns truly exact results, with no tolerance for variations, making it suitable for precise searches. When 'Balanced', it balances accuracy and flexibility, allowing for relevant matches with minor deviations. When 'Loose', it offers the most flexibility, capturing a broader range of potential matches and allowing for greater variation from the initial query.",
+      "name": "bookmarksSearchAccuracy",
+      "required": false,
+      "title": "Bookmarks Search Accuracy",
+      "type": "dropdown"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.18.1",
+    "fuse.js": "^7.1.0",
     "run-applescript": "^6.0.0",
     "sql.js": "^1.12.0"
   },

@@ -2,7 +2,7 @@ import { HistoryEntry, SearchResult } from "../interfaces";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
 import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
-import { getBookmarks } from "../util";
+import { filterElements, getBookmarks, getBookmarksFuzzyThreshold } from "../util";
 
 export function useBookmarkSearch(
   query?: string
@@ -22,13 +22,7 @@ export function useBookmarkSearch(
   useEffect(() => {
     getBookmarks(profile)
       .then((bookmarks) => {
-        setData(
-          bookmarks.filter(
-            (bookmark) =>
-              bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
-              bookmark.url.toLowerCase().includes(query?.toLowerCase() || "")
-          )
-        );
+        setData(filterElements(bookmarks, query, ["title", "url"], getBookmarksFuzzyThreshold()));
         setIsLoading(false);
       })
       .catch((e) => {

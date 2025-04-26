@@ -9,6 +9,7 @@ import {
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../interfaces";
 import { BookmarkDirectory, HistoryEntry, RawBookmarks } from "../interfaces";
+import Fuse from "fuse.js";
 
 type ChromeFile = "History" | "Bookmarks";
 const userLibraryDirectoryPath = () => {
@@ -81,6 +82,42 @@ export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> =>
     throw new Error(NO_BOOKMARKS_MESSAGE);
   }
 
-  const fileBuffer = await fs.promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
+  const fileBuffer = await fs.promises.readFile(bookmarksFilePath, {
+    encoding: "utf-8",
+  });
   return extractBookmarks(JSON.parse(fileBuffer));
 };
+
+const fuzzyDefaultPreferenceName = "default";
+const fuzzyDefaultThreshold = 0;
+const fuzzySearchPreferencesMap = new Map<string, number>([
+  [fuzzyDefaultPreferenceName, fuzzyDefaultThreshold],
+  ["balanced", 0.4],
+  ["loose", 0.7],
+]);
+
+export function filterElements<T>(items: T[], query: string | undefined, keys: string[], threshold: number) {
+  if (!query) {
+    return items;
+  }
+
+  if (threshold) {
+    const fuse = new Fuse(items, {
+      threshold: threshold,
+      keys: keys,
+    });
+
+    return fuse.search(query).map((result) => result.item);
+  }
+
+  return items.filter((item: T) =>
+    keys.some((key) => (item as unknown as Record<string, string>)[key].toLowerCase().includes(query.toLowerCase()))
+  );
+}
+
+export function getBookmarksFuzzyThreshold(): number {
+  return (
+    fuzzySearchPreferencesMap.get(getPreferenceValues().bookmarksSearchAccuracy ?? fuzzyDefaultPreferenceName) ??
+    fuzzyDefaultThreshold
+  );
+}
