@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useState, useEffect, useCallback } from "react"
-import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType, LaunchProps } from "@raycast/api"
+import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType } from "@raycast/api"
 import fetch from "node-fetch"
 import * as cheerio from "cheerio"
 
@@ -61,7 +61,7 @@ export default function Command(): React.ReactElement {
           .trim()
 
         if (orgRepo) {
-          if (!parsedResults.some((r: RepoResult) => r.orgRepo === orgRepo)) {
+          if (!parsedResults.some((r: RepoResult) => r.orgRepo === orgRepo))
             parsedResults.push({
               id: orgRepo,
               orgRepo: orgRepo,
@@ -70,12 +70,12 @@ export default function Command(): React.ReactElement {
               deepWikiUrl: deepWikiUrl,
               githubUrl: `https://github.com/${orgRepo}`,
             })
-          }
         }
       })
 
       if (parsedResults.length === 0 && !isLoading && query && $(resultSelector).length === 0) {
         if ($("body").text().includes("Which repo would you like to understand?")) {
+          // Noop
         } else {
           console.warn("[DeepWiki Search] No results found and page structure seems unexpected.")
           await showToast({
@@ -125,10 +125,10 @@ export default function Command(): React.ReactElement {
             accessories={repo.stars ? [{ text: repo.stars, icon: Icon.Star }] : []}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open in DeepWiki" url={repo.deepWikiUrl} />
+                <Action.OpenInBrowser title="Open in Deepwiki" url={repo.deepWikiUrl} />
                 <Action.OpenInBrowser title="Open in GitHub" url={repo.githubUrl} />
                 <Action
-                  title="Open DeepWiki Page Command"
+                  title="Open Deepwiki Page Command"
                   icon={Icon.Terminal}
                   onAction={async () => {
                     try {
@@ -145,9 +145,9 @@ export default function Command(): React.ReactElement {
                     }
                   }}
                 />
-                <Action.CopyToClipboard title="Copy DeepWiki URL" content={repo.deepWikiUrl} />
+                <Action.CopyToClipboard title="Copy Deepwiki URL" content={repo.deepWikiUrl} />
                 <Action.CopyToClipboard title="Copy GitHub URL" content={repo.githubUrl} />
-                <Action.CopyToClipboard title="Copy Org/Repo" content={repo.orgRepo} />
+                <Action.CopyToClipboard title="Copy Org/repo" content={repo.orgRepo} />
               </ActionPanel>
             }
           />

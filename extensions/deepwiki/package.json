@@ -2,15 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepwiki",
   "version": "0.1.0",
-  "title": "DeepWiki",
+  "title": "Deepwiki",
   "description": "Search and open DeepWiki pages for GitHub repositories.",
-  "icon": "command-icon.png",
-  "author": "Your Name",
+  "icon": "deep-wiki.png",
+  "author": "viveknair",
   "license": "MIT",
   "commands": [
     {
       "name": "open-deepwiki",
-      "title": "Open DeepWiki Page",
+      "title": "Open Deepwiki Page",
       "description": "Open DeepWiki for a specific GitHub repo URL or org/repo identifier.",
       "mode": "no-view",
       "arguments": [
@@ -24,7 +24,7 @@
     },
     {
       "name": "search-deepwiki",
-      "title": "Search DeepWiki Repos",
+      "title": "Search Deepwiki Repos",
       "description": "Search repositories indexed by DeepWiki.",
       "mode": "view"
     }
@@ -36,7 +36,7 @@
     "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "~20.11.1",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
