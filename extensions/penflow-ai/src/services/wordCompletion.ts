@@ -96,6 +96,7 @@ export async function processInput(input: string, options?: AIRequestOptions): P
     return suggestions;
   } catch (error) {
     logger.error("Error processing input:", error);
+    showFailureToast(error, { title: "Could not process input" });
     throw error;
   }
 }
