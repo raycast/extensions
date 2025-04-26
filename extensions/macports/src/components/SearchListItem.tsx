@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List } from "@raycast/api";
 import { installPort, uninstallPort } from "../exec";
 import type { SearchResult } from "../types";
 import PortDetails from "../port-details";
@@ -34,7 +34,25 @@ export default function SearchListItem({ searchResult }: { searchResult: SearchR
                 content={`sudo port uninstall ${searchResult.name}`}
                 shortcut={{ modifiers: ["cmd"], key: "." }}
               />
-              <Action title="Uninstall" onAction={() => uninstallPort(searchResult.name)} />
+              <Action
+                title="Uninstall"
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                onAction={async () => {
+                  const options = {
+                    title: "Confirm Uninstall",
+                    message: `Are you sure you want to uninstall ${searchResult.name}?`,
+                    primaryAction: {
+                      title: "Uninstall",
+                      style: Alert.ActionStyle.Destructive,
+                    },
+                  };
+
+                  if (await confirmAlert(options)) {
+                    uninstallPort(searchResult.name);
+                  }
+                }}
+              />
             </ActionPanel.Section>
           )}
         </ActionPanel>

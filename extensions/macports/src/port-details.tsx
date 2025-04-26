@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, confirmAlert, Detail, Image } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, Image } from "@raycast/api";
 import { getPortDetails, isPortInstalled, uninstallPort } from "./exec";
 import { usePromise } from "@raycast/utils";
 import { useTerminalApp } from "./runInTerminal";
@@ -79,6 +79,7 @@ export default function PortDetails({ portName }: Props) {
           {installed && (
             <Action
               title="Uninstall"
+              icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["cmd"], key: "delete" }}
               onAction={async () => {
