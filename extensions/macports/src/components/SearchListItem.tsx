@@ -1,11 +1,9 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { installPort, listInstalledPorts, uninstallPort } from "../exec";
+import { installPort, uninstallPort } from "../exec";
 import type { SearchResult } from "../types";
 import PortDetails from "../port-details";
-import { usePromise } from "@raycast/utils";
 
 export default function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
-
   return (
     <List.Item
       title={searchResult.name}
