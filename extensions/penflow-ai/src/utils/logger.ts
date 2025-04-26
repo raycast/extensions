@@ -1,5 +1,5 @@
 /**
- * 简单日志模块，根据环境设置日志输出级别
+ * Simple logging module, sets log output level based on environment.
  */
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -30,7 +30,7 @@ function log(level: LogLevel, ...args: any[]) {
         console.error(...args);
         break;
       default:
-        console.log(...args);
+        console.error("Unknown log level:", level, ...args);
     }
   }
 }

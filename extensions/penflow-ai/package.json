@@ -69,5 +69,9 @@
   "config": {
     "timeout": 300000,
     "fetch-retries": 5
+  },
+  "aievals": {
+    "dataset": "datasets/my-dataset.jsonl",
+    "metrics": ["accuracy", "latency"]
   }
 }

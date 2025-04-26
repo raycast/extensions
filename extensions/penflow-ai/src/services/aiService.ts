@@ -1,14 +1,16 @@
-import { AI } from "@raycast/api";
+import { AI, showToast, Toast } from "@raycast/api";
 import { AIRequestOptions, Message, WritingStyle } from "../utils/types";
 import { getWordCompletionPrompt, getTranslationPrompt } from "../utils/prompts";
-import { handleError, debounce } from "../utils/helpers";
+import { debounce } from "../utils/helpers";
 import { logger } from "../utils/logger";
 
-// 默认模型配置，仅配置一次
+const MIN_TRANSLATION_VARIANTS = 4;
+
+// Default model configuration, set only once
 const DEFAULT_MODEL = "google-gemini-2.0-flash";
 
 function logAICall(type: string, input: string, messages: Message[], response?: string) {
-  // 调试日志仅在开发环境下输出
+  // Debug logs only output in development environment
   logger.debug(`${type}${input ? ` - ${input}` : ""}`);
   if (response) {
     logger.debug(`Response: ${response}`);
@@ -17,18 +19,23 @@ function logAICall(type: string, input: string, messages: Message[], response?: 
 
 export async function processWithModel(messages: Message[], _options?: AIRequestOptions): Promise<string> {
   try {
-    // 仅保留记录 AI API 请求日志
+    // Only log AI API request
     logAICall("Request", "", messages);
 
     const response = await AI.ask(messages[messages.length - 1].content, {
-      model: DEFAULT_MODEL as unknown as AI.Model,
+      model: DEFAULT_MODEL as AI.Model,
     });
 
-    // 仅保留记录 AI API 返回日志
+    // Only log AI API response
     logAICall("Response", "", messages, response.trim());
     return response.trim();
   } catch (error) {
-    handleError(error, "AI processing");
+    logger.error("AI processing failed:", error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "AI Processing Failed",
+      message: error instanceof Error ? error.message : String(error),
+    });
     throw error;
   }
 }
@@ -39,16 +46,21 @@ export async function getWordCompletions(input: string, options?: AIRequestOptio
 
     const response = await processWithModel(messages, options);
 
-    // 修改为返回8个建议
+    // Changed to return 8 suggestions
     const completions = response
       .split("\n")
       .map((s) => s.trim())
       .filter((s) => s.length > 0)
-      .slice(0, 8); // 从之前的 5 改为 8
+      .slice(0, 8); // Changed from 5 to 8
 
     return completions.length > 0 ? completions : [response];
   } catch (error) {
-    handleError(error, "word completion");
+    logger.error("Word completion failed:", error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Word Completion Failed",
+      message: error instanceof Error ? error.message : String(error),
+    });
     throw error;
   }
 }
@@ -59,15 +71,20 @@ export async function translateMixedText(text: string, options?: AIRequestOption
 
     const response = await processWithModel(messages, options);
 
-    // 解析各个变体
+    // Parse different variants
     const results = response
       .split("\n")
       .filter((line) => line.includes(": "))
       .map((line) => line.split(": ")[1].trim());
 
-    return results.length >= 4 ? results : [response];
+    return results.length >= MIN_TRANSLATION_VARIANTS ? results : [response];
   } catch (error) {
-    handleError(error, "translation");
+    logger.error("Translation failed:", error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Translation Failed",
+      message: error instanceof Error ? error.message : String(error),
+    });
     throw error;
   }
 }
@@ -80,5 +97,5 @@ export function getCurrentAISettings() {
   };
 }
 
-// 可选：若需要对输入做防抖处理，可以导出防抖版本
+// Optional: Export debounced version if input debouncing is needed
 export const debouncedProcessWithModel = debounce(processWithModel, 1000);

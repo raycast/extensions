@@ -1,6 +1,12 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { Suggestion } from "../../utils/types";
 
+const SUGGESTION_TYPE_TEXT: Record<Suggestion['type'], string> = {
+  completion: "Completion",
+  translation: "Translation",
+  polish: "Polish",
+};
+
 interface WritingSuggestionsProps {
   suggestions: Suggestion[];
 }
@@ -23,17 +29,12 @@ export function WritingSuggestions({ suggestions }: WritingSuggestionsProps) {
     <List.Section title="Writing Suggestions">
       {validSuggestions.map((suggestion, index) => (
         <List.Item
-          key={index}
+          key={`${suggestion.type}-${suggestion.text}-${index}`}
           title={suggestion.text}
           icon={Icon.Text}
           accessories={[
             {
-              text:
-                suggestion.type === "completion"
-                  ? "Completion"
-                  : suggestion.type === "translation"
-                    ? "Translation"
-                    : "Polish",
+              text: SUGGESTION_TYPE_TEXT[suggestion.type] ?? "Suggestion",
               tooltip: "Suggestion type",
             },
           ]}

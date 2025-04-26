@@ -1,6 +1,6 @@
 import { getWordCompletions, translateMixedText, processWithModel } from "./aiService";
 import { AIRequestOptions, Suggestion } from "../utils/types";
-import { AI } from "@raycast/api";
+import { AI, showToast, Toast } from "@raycast/api";
 import { getPolishPrompt } from "../utils/prompts";
 import { logger } from "../utils/logger";
 
@@ -28,7 +28,7 @@ export async function processInput(input: string, options?: AIRequestOptions): P
   // Removed debug log for input reception
 
   if (!input.trim() || input.length > 1000) {
-    // 输入为空或者过长，直接返回空数组，不记录详细信息
+    // Input is empty or too long, return empty array directly, do not log details
     return [];
   }
 
@@ -96,7 +96,11 @@ export async function processInput(input: string, options?: AIRequestOptions): P
     return suggestions;
   } catch (error) {
     logger.error("Error processing input:", error);
-    showFailureToast(error, { title: "Could not process input" });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not process input",
+      message: error instanceof Error ? error.message : String(error),
+    });
     throw error;
   }
 }
