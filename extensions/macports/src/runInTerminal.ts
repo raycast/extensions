@@ -38,32 +38,49 @@ const appBundleIds: { [key in TerminalApp]: string } = {
   wezterm: "com.github.wez.wezterm",
 };
 
-const runCommandInTermAppleScript = (c: string, terminalApp: string): string => `
+function escapeAppleScriptString(str: string): string {
+  return str.replace(/[\\"]/g, '\\$&').replace(/\n/g, '\\n');
+}
+
+function escapeShellCommand(str: string): string {
+  return str.replace(/(['"\\$`])/g, '\\$1');
+}
+
+const runCommandInTermAppleScript = (c: string, terminalApp: string): string => {
+  const escapedCommand = escapeAppleScriptString(escapeShellCommand(c));
+  return `
     tell application "${terminalApp}" to activate
     tell application "System Events" to tell process "${terminalApp}"
         keystroke "t" using command down
         delay 0.5
-        keystroke "${c}"
+        keystroke "${escapedCommand}"
         keystroke return
     end tell
   `;
+};
 
 const appleScripts: { [key in TerminalApp]: (c: string) => string } = {
   alacritty: (c: string) => runCommandInTermAppleScript(c, names.alacritty),
   ghostty: (c: string) => runCommandInTermAppleScript(c, names.ghostty),
   hyper: (c: string) => runCommandInTermAppleScript(c, names.hyper),
-  iterm: (c: string) => `
+  iterm: (c: string) => {
+    const escapedCommand = escapeAppleScriptString(escapeShellCommand(c));
+    return `
     tell application "iTerm"
-      set newWindow to create window with default profile command "bash -c '${c}; read -n 1 -s -r -p \\"Press any key to exit - will not quit\\" ; echo' ; exit"
+      set newWindow to create window with default profile command "bash -c '${escapedCommand}; read -n 1 -s -r -p \\"Press any key to exit - will not quit\\" ; echo' ; exit"
     end tell
-    `,
+    `;
+  },
   kitty: (c: string) => runCommandInTermAppleScript(c, names.kitty),
-  terminal: (c: string) => `
+  terminal: (c: string) => {
+    const escapedCommand = escapeAppleScriptString(escapeShellCommand(c));
+    return `
     tell application "Terminal"
       do shell script "open -a 'Terminal'"
-      do script "echo ; ${c} ; bash -c 'read -n 1 -s -r -p \\"Press any key to exit - will not quit\\"' ; exit" in selected tab of the front window
+      do script "echo ; ${escapedCommand} ; bash -c 'read -n 1 -s -r -p \\"Press any key to exit - will not quit\\"' ; exit" in selected tab of the front window
     end tell
-  `,
+    `;
+  },
   warp: (c: string) => runCommandInTermAppleScript(c, names.warp),
   wezterm: (c: string) => runCommandInTermAppleScript(c, names.wezterm),
 };

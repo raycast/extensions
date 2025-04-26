@@ -31,3 +31,15 @@ export function extractPortDetails(name: string, info: string): PortDetails {
     dependencies: extractValue("Library Dependencies") ? parseList(extractValue("Library Dependencies")) : [],
   };
 }
+
+function validatePortName(name: string): boolean {
+  const validPortNameRegex = /^[a-zA-Z0-9_+-]+$/;
+  return validPortNameRegex.test(name);
+}
+
+export function sanitizePortName(name: string): string {
+  if (!validatePortName(name)) {
+    throw new Error("Invalid port name. Port names can only contain letters, numbers, underscores, plus signs, and hyphens.");
+  }
+  return name;
+}

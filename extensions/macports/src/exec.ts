@@ -1,6 +1,6 @@
 import { exec, execSync } from "node:child_process";
 import type { PortDetails, Maintainer } from "./types";
-import { extractPortDetails } from "./util";
+import { extractPortDetails, sanitizePortName } from "./util";
 import { showFailureToast } from "@raycast/utils";
 
 const env = Object.assign({}, process.env, {
@@ -34,7 +34,8 @@ async function fetchGithubAvatars(maintainers: Maintainer[]): Promise<Record<str
 
 export function installPort(name: string) {
   try {
-    return execSync(`sudo port install ${name}`, { env });
+    const safeName = sanitizePortName(name);
+    return execSync(`sudo port install ${safeName}`, { env });
   } catch (error) {
     showFailureToast(error, { title: "Failed to install port" });
     throw error;
@@ -43,7 +44,8 @@ export function installPort(name: string) {
 
 export function uninstallPort(name: string) {
   try {
-    return execSync(`sudo port uninstall ${name}`, { env });
+    const safeName = sanitizePortName(name);
+    return execSync(`sudo port uninstall ${safeName}`, { env });
   } catch (error) {
     showFailureToast(error, { title: "Failed to uninstall port" });
     throw error;
