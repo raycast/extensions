@@ -1,6 +1,6 @@
 import { List, Detail } from "@raycast/api";
 import { useFetch, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { URLSearchParams } from "node:url";
 import { isMacPortsInstalled } from "./exec";
 import type { SearchResult } from "./types";
@@ -16,7 +16,12 @@ interface SearchPortsProps {
 
 export default function Command(props: SearchPortsProps) {
   const [searchText, setSearchText] = useState(props.arguments.query || "");
-  const url = `https://ports.macports.org/api/v1/ports${searchText.length ? `?${new URLSearchParams({ search: searchText })}` : ""}`;
+  const url = useMemo(() => {
+    const params = searchText.length
+      ? new URLSearchParams({ search: searchText })
+      : new URLSearchParams({ categories: "devel" });
+    return `https://ports.macports.org/api/v1/ports?${params}`;
+  }, [searchText]);
 
   const { data: isInstalled, isLoading: isCheckingInstallation } = usePromise(async () => isMacPortsInstalled());
 
@@ -63,7 +68,7 @@ async function parseFetchResponse(response: Response) {
     return {
       name: result.name,
       description: result.description,
-      username: result.maintainers.map((maintainer) => maintainer.name).join(", "),
+      username: result.maintainers.map((maintainer) => maintainer.github).join(", "),
       url: result.homepage,
     } as SearchResult;
   });
