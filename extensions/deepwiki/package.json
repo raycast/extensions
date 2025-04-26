@@ -43,6 +43,20 @@
       "title": "Search Deepwiki Repos",
       "description": "Search repositories indexed by DeepWiki.",
       "mode": "view"
+    },
+    {
+      "name": "crawl-deepwiki-docs",
+      "title": "Crawl DeepWiki Docs",
+      "description": "Crawl all documentation pages for a DeepWiki repository and copy content to clipboard.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "repoIdentifier",
+          "type": "text",
+          "required": true,
+          "placeholder": "GitHub URL or org/repo (e.g., microsoft/monaco-editor)"
+        }
+      ]
     }
   ],
   "dependencies": {
