@@ -23,7 +23,7 @@ export default function PortDetails({ portName }: Props) {
     return <Detail markdown="No details found for this port." />;
   }
 
-  const { name, description, homepage, maintainers, variants, dependencies } = portDetails;
+  const { name, description, homepage, maintainers, variants, dependencies, version } = portDetails;
 
   return (
     <Detail
@@ -32,6 +32,12 @@ export default function PortDetails({ portName }: Props) {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Link title="Homepage" target={homepage} text={homepage} />
+
+          {version && (
+            <Detail.Metadata.TagList title="Version">
+              <Detail.Metadata.TagList.Item text={version} key={version} />
+            </Detail.Metadata.TagList>
+          )}
 
           {maintainers.length > 0 && (
             <Detail.Metadata.TagList title="Maintainers">

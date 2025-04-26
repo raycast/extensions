@@ -76,6 +76,7 @@ async function parseFetchResponse(response: Response) {
       username: result.maintainers.map((maintainer) => maintainer.github).join(", "),
       url: result.homepage,
       installed: installedPortsResult?.includes(result.name),
+      version: result.version,
     } as SearchResult;
   });
 }

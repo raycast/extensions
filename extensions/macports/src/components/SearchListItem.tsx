@@ -8,7 +8,7 @@ export default function SearchListItem({ searchResult }: { searchResult: SearchR
     <List.Item
       title={searchResult.name}
       subtitle={searchResult.description}
-      accessories={[{ text: searchResult.username }]}
+      accessories={[{ text: searchResult.version }]}
       icon={searchResult.installed ? { source: Icon.CheckCircle, tintColor: Color.Green } : undefined}
       actions={
         <ActionPanel>

@@ -4,6 +4,7 @@ export interface SearchResult {
   username?: string;
   url: string;
   installed: boolean;
+  version?: string;
 }
 
 export interface MacPortsResponse {
@@ -55,4 +56,5 @@ export type PortDetails = {
   maintainers: Maintainer[];
   variants: string[];
   dependencies: string[];
+  version: string;
 };

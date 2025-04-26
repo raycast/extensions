@@ -1,5 +1,10 @@
 import type { Maintainer, PortDetails } from "./types";
 
+export function extractVersion(portLine: string): string {
+  const versionMatch = portLine.match(/@(\d+\.\d+\.\d+)/);
+  return versionMatch ? versionMatch[1] : "";
+}
+
 export function extractPortDetails(name: string, info: string): PortDetails {
   function extractValue(key: string): string {
     const regex = new RegExp(`^${key}:\\s*([\\s\\S]*?)(?=^[A-Z][a-zA-Z\\s]+:|$)`, "im");
@@ -22,8 +27,12 @@ export function extractPortDetails(name: string, info: string): PortDetails {
     }));
   }
 
+  const firstLine = info.split("\n")[0];
+  const version = extractVersion(firstLine);
+
   return {
     name,
+    version,
     description: extractValue("Description"),
     homepage: extractValue("Homepage"),
     maintainers: parseMaintainers(),
