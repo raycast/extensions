@@ -2,7 +2,17 @@ import React from "react";
 import colorString from "color-string";
 import { User } from "@supabase/supabase-js";
 import { FormValidation, useForm, showFailureToast } from "@raycast/utils";
-import { Action, ActionPanel, Form, Icon, PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  PopToRootType,
+  Toast,
+  showHUD,
+  showToast,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useGroups } from "../lib/use-groups";
 import * as db from "../lib/db";
 import { ensureValidUrl } from "../lib/ensure-valid-url";
@@ -31,8 +41,8 @@ interface BookmarkValues {
   title?: string;
 }
 
-function CreateBookmark({ user, draftValues }: { user: User; draftValues?: BookmarkValues }) {
-  const { handleSubmit, itemProps, setValue, values, reset } = useForm<BookmarkValues>({
+function CreateBookmark({ user }: { user: User }) {
+  const { handleSubmit, itemProps, setValue, values } = useForm<BookmarkValues>({
     async onSubmit(values) {
       const isValidColor = Boolean(colorString.get(values.value));
 
@@ -157,31 +167,15 @@ function CreateBookmark({ user, draftValues }: { user: User; draftValues?: Bookm
   const activeTab = useActiveTab();
   const { data: groups, isLoading: isLoadingGroups } = useGroups(user);
 
-  // Track if we're loading from a draft to prevent overwriting with active tab
-  const [isLoadingDraft, setIsLoadingDraft] = React.useState(false);
+  // Store the previous URL to detect changes
+  const previousUrlRef = React.useRef("");
 
-  // Initialize form with draft values if available
   React.useEffect(() => {
-    if (draftValues && Object.keys(draftValues).length > 0) {
-      // We have draft values, load them and prevent active tab capture
-      setIsLoadingDraft(true);
-
-      if (draftValues.groupId) setValue("groupId", draftValues.groupId);
-      if (draftValues.value) setValue("value", draftValues.value);
-      if (draftValues.title) setValue("title", draftValues.title);
-    }
-  }, [draftValues]);
-
-  // Only capture active tab URL if not loading from a draft
-  React.useEffect(() => {
-    if (activeTab && !isLoadingDraft) {
+    if (activeTab) {
       setValue("value", activeTab.url);
       setValue("title", activeTab.title);
     }
-  }, [activeTab, isLoadingDraft]);
-
-  // Store the previous URL to detect changes
-  const previousUrlRef = React.useRef("");
+  }, [activeTab]);
 
   React.useEffect(() => {
     if (values.value === "") {
@@ -212,6 +206,13 @@ function CreateBookmark({ user, draftValues }: { user: User; draftValues?: Bookm
 
     // Auto-fetch title and favicon when a URL is entered
     const fetchMetadataForUrl = async () => {
+      // Read user preference for title enhancement
+      const preferences = getPreferenceValues<{ enhanceTitle: boolean }>();
+      if (!preferences.enhanceTitle) {
+        previousUrlRef.current = values.value;
+        return;
+      }
+
       if (isUrlLike(values.value) && (!values.title || urlChanged())) {
         try {
           const validUrl = ensureValidUrl(values.value);
@@ -262,21 +263,8 @@ function CreateBookmark({ user, draftValues }: { user: User; draftValues?: Bookm
               />
             )}
           </ActionPanel.Section>
-
-          <ActionPanel.Section>
-            <Action
-              title="Discard Draft"
-              icon={Icon.Trash}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
-              onAction={() => {
-                reset({ groupId: "", value: "", title: "" });
-                showToast({ style: Toast.Style.Success, title: "Draft Discarded" });
-              }}
-            />
-          </ActionPanel.Section>
         </ActionPanel>
       }
-      enableDrafts
     >
       <Form.Dropdown title="Group" placeholder="Select a group for your bookmark" {...itemProps.groupId}>
         {groups && groups.map((group) => <Form.Dropdown.Item key={group.id} value={group.id} title={group.name} />)}
@@ -299,10 +287,6 @@ function CreateBookmark({ user, draftValues }: { user: User; draftValues?: Bookm
   );
 }
 
-export default function Command(props: { draftValues?: BookmarkValues }) {
-  return (
-    <AuthenticatedView
-      component={(componentProps) => <CreateBookmark {...componentProps} draftValues={props.draftValues} />}
-    />
-  );
+export default function Command() {
+  return <AuthenticatedView component={(componentProps) => <CreateBookmark {...componentProps} />} />;
 }

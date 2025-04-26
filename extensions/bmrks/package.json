@@ -44,6 +44,13 @@
       "title": "Password",
       "description": "Your password on bmrks.com",
       "placeholder": "********"
+    },
+    {
+      "name": "enhanceTitle",
+      "type": "checkbox",
+      "label": "Enhance titles",
+      "description": "Enhance titles for new bookmarks using Microlink",
+      "required": false
     }
   ],
   "dependencies": {

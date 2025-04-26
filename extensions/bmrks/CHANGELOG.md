@@ -2,6 +2,12 @@
 
 ## [Improvement] - 2025-04-24
 
+- Reverted reliance on Raycast Browser Extension 
+- Leveraged Raycast Browser Extension for bookmark title with microlink fallback
+- Removed support for Raycast drafts
+
+## [Improvement] - 2025-04-12
+
 - Improved title generation for bookmarks
 - Added support for drafts
 Replaced AppleScript with Raycast's native Browser Extension API for retrieving active tabs
