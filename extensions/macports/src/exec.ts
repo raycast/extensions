@@ -1,4 +1,6 @@
 import { exec, execSync } from "node:child_process";
+import type { PortDetails } from "./types";
+import { extractPortDetails } from "./util";
 
 const env = Object.assign({}, process.env, {
   PATH: "/opt/local/bin:/usr/local/bin:/usr/bin:/opt/homebrew/bin",
@@ -37,59 +39,19 @@ export async function listInstalledPorts(): Promise<string[]> {
   }
 }
 
-type Maintainer = {
-  email?: string;
-  github?: string;
-};
-
-type PortDetails = {
-  name: string;
-  description: string;
-  homepage: string;
-  maintainers: Maintainer[];
-  variants: string[];
-  dependencies: string[];
-};
-
 export async function getPortDetails(name: string): Promise<PortDetails> {
   return new Promise((resolve, reject) => {
     exec(`port info ${name}`, { env }, (error, stdout) => {
       if (error) {
+        console.log("error:", error);
         reject(error);
         return;
       }
 
       const info = stdout.toString();
+      const details = extractPortDetails(name, info);
 
-      function extractValue(key: string): string {
-        const regex = new RegExp(`^${key}:\\s*([\\s\\S]*?)(?=^[A-Z][a-zA-Z\\s]+:|$)`, "im");
-        const match = info.match(regex);
-        return match ? match[1].trim() : "";
-      }
-
-      function parseList(value: string): string[] {
-        return value
-          .split(",")
-          .map((item) => item.trim())
-          .filter(Boolean);
-      }
-
-      function parseMaintainers(): Maintainer[] {
-        const pairs = info.matchAll(/Email:\s*([^,\s]+),\s*GitHub:\s*([^,\s]+)/g);
-        return Array.from(pairs).map((match) => ({
-          email: match[1],
-          github: match[2],
-        }));
-      }
-
-      resolve({
-        name,
-        description: extractValue("Description"),
-        homepage: extractValue("Homepage"),
-        maintainers: parseMaintainers(),
-        variants: parseList(extractValue("Variants")),
-        dependencies: extractValue("Library Dependencies") ? parseList(extractValue("Library Dependencies")) : [],
-      });
+      resolve(details);
     });
   });
 }

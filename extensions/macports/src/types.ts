@@ -31,12 +31,6 @@ export interface Port {
   depends_on: DependsOn[];
 }
 
-export interface Maintainer {
-  name: string;
-  github: string;
-  ports_count?: number;
-}
-
 export interface Dependency {
   type: string;
   ports: (string | null)[];
@@ -46,3 +40,18 @@ export interface DependsOn {
   type: string;
   ports: string[];
 }
+
+export type Maintainer = {
+  // name: string;
+  email?: string;
+  github?: string;
+};
+
+export type PortDetails = {
+  name: string;
+  description: string;
+  homepage: string;
+  maintainers: Maintainer[];
+  variants: string[];
+  dependencies: string[];
+};

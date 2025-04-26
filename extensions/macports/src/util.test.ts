@@ -1,0 +1,69 @@
+import { describe, expect, it } from "vitest";
+import { extractPortDetails } from "./util";
+import type { PortDetails } from "./types";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+type TestRun = {
+  fileName: string;
+  portName: string;
+  expected: PortDetails;
+};
+
+const testRunsMap = new Map<string, TestRun>([
+  [
+    "cargo",
+    {
+      fileName: "cargo_port_info.txt",
+      portName: "cargo",
+      expected: {
+        name: "cargo",
+        description: "Cargo downloads your Rust project’s dependencies and compiles your project.",
+        homepage: "https://crates.io",
+        maintainers: [
+          {
+            email: "mcalhoun@macports.org",
+            github: "MarcusCalhoun-Lopez",
+          },
+        ],
+        variants: ["mirror_all_architectures", "universal"],
+        dependencies: ["curl", "libgit2", "libssh2", "zlib", "openssl3"],
+      },
+    },
+  ],
+  [
+    "cmake",
+    {
+      fileName: "cmake_port_info.txt",
+      portName: "cmake",
+      expected: {
+        name: "cmake",
+        description:
+          "An extensible, open-source system that manages the build process in an operating system and compiler independent manner. Unlike many cross-platform systems, CMake is designed to be used in conjunction with the native build environment. The cmake release port is updated roughly every few months.",
+        homepage: "https://cmake.org",
+        maintainers: [
+          {
+            email: "michaelld@macports.org",
+            github: "michaelld",
+          },
+          {
+            email: "mascguy@macports.org",
+            github: "mascguy",
+          },
+        ],
+        variants: ["universal"],
+        dependencies: ["libcxx", "curl", "expat", "zlib", "bzip2", "libarchive", "ncurses"],
+      },
+    },
+  ],
+]);
+
+describe("extractPortDetails", () => {
+  it("should accurately extract port details", () => {
+    for (const [portName, testRun] of testRunsMap.entries()) {
+      const fileContent = readFileSync(join(__dirname, "test-files", testRun.fileName), "utf-8");
+      const details = extractPortDetails(portName, fileContent);
+      expect(details).toEqual(testRun.expected);
+    }
+  });
+});
