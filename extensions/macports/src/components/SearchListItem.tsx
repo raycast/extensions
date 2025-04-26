@@ -5,16 +5,13 @@ import PortDetails from "../port-details";
 import { usePromise } from "@raycast/utils";
 
 export default function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
-  const { data: installedPortsResult } = usePromise(async () => listInstalledPorts(), []);
-
-  const isInstalled = installedPortsResult?.includes(searchResult.name);
 
   return (
     <List.Item
       title={searchResult.name}
       subtitle={searchResult.description}
       accessories={[{ text: searchResult.username }]}
-      icon={isInstalled ? { source: Icon.Check, tintColor: Color.Green } : undefined}
+      icon={searchResult.installed ? { source: Icon.CheckCircle, tintColor: Color.Green } : undefined}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -22,7 +19,7 @@ export default function SearchListItem({ searchResult }: { searchResult: SearchR
             <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
           </ActionPanel.Section>
 
-          {!isInstalled && (
+          {!searchResult.installed && (
             <ActionPanel.Section>
               <Action.CopyToClipboard
                 title="Copy Install Command"
@@ -32,7 +29,7 @@ export default function SearchListItem({ searchResult }: { searchResult: SearchR
               <Action title="Install" onAction={() => installPort(searchResult.name)} />
             </ActionPanel.Section>
           )}
-          {isInstalled && (
+          {searchResult.installed && (
             <ActionPanel.Section>
               <Action.CopyToClipboard
                 title="Copy Uninstall Command"

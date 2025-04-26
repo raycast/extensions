@@ -2,7 +2,7 @@ import { List, Detail } from "@raycast/api";
 import { useFetch, usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { URLSearchParams } from "node:url";
-import { isMacPortsInstalled } from "./exec";
+import { isMacPortsInstalled, listInstalledPorts } from "./exec";
 import type { SearchResult } from "./types";
 import SearchListItem from "./components/SearchListItem";
 import type { MacPortsResponse } from "./types";
@@ -59,17 +59,20 @@ export default function Command(props: SearchPortsProps) {
 
 async function parseFetchResponse(response: Response) {
   const json = (await response.json()) as MacPortsResponse | { code: string; message: string };
+  const installedPortsResult = await listInstalledPorts();
 
+  
   if (!response.ok || "message" in json) {
     throw new Error("message" in json ? json.message : response.statusText);
   }
-
+  
   return json.results.map((result) => {
     return {
       name: result.name,
       description: result.description,
       username: result.maintainers.map((maintainer) => maintainer.github).join(", "),
       url: result.homepage,
+      installed: installedPortsResult?.includes(result.name),
     } as SearchResult;
   });
 }

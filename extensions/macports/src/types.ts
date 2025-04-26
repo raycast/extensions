@@ -3,6 +3,7 @@ export interface SearchResult {
   description?: string;
   username?: string;
   url: string;
+  installed: boolean;
 }
 
 export interface MacPortsResponse {
