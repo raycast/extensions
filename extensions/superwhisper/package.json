@@ -22,6 +22,14 @@
       "icon": "superwhisper-light-icon.png"
     },
     {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "superwhisper",
+      "description": "Search through your recording history",
+      "mode": "view",
+      "icon": "superwhisper-light-icon.png"
+    },
+    {
       "name": "select-mode",
       "title": "Select Mode",
       "subtitle": "superwhisper",
@@ -50,7 +58,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.64.4",
-    "@raycast/utils": "^1.16.1"
+    "@raycast/utils": "^1.16.1",
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
