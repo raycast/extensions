@@ -43,8 +43,8 @@
           "name": "numberOfChars",
           "required": false,
           "type": "text",
-          "description": "指定した文字数で日本語の文字列を生成します",
-          "placeholder": "文字数"
+          "description": "Number of characters to generate",
+          "placeholder": "Number of characters"
         }
       ]
     }
