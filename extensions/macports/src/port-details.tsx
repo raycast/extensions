@@ -28,7 +28,7 @@ export default function PortDetails({ portName }: Props) {
   return (
     <Detail
       isLoading={isLoading}
-      markdown={`# ${name}\n\n${description || 'No description available'}`}
+      markdown={`# ${name}\n\n${description || "No description available"}`}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Link title="Homepage" target={homepage} text={homepage} />
@@ -42,7 +42,7 @@ export default function PortDetails({ portName }: Props) {
           {maintainers.length > 0 && (
             <Detail.Metadata.TagList title="Maintainers">
               {maintainers.map((maintainer) => {
-                const username = maintainer.github || maintainer.email || "";
+                const username = maintainer.github || maintainer.email || "unspecified";
 
                 return (
                   <Detail.Metadata.TagList.Item
@@ -87,7 +87,7 @@ export default function PortDetails({ portName }: Props) {
               title="Uninstall"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd"], key: "delete" }}
+              shortcut={{ modifiers: ["ctrl"], key: "x" }}
               onAction={async () => {
                 const options = {
                   title: "Confirm Uninstall",

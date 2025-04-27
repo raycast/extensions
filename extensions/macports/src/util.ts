@@ -1,7 +1,7 @@
 import type { Maintainer, PortDetails } from "./types";
 
 export function extractVersion(portLine: string): string {
-  const versionMatch = portLine.match(/@(\d+\.\d+\.\d+)/);
+  const versionMatch = portLine.match(/@([\d.]+)(?:\s|$)/);
   return versionMatch ? versionMatch[1] : "";
 }
 
@@ -20,7 +20,7 @@ export function extractPortDetails(name: string, info: string): PortDetails {
   }
 
   function parseMaintainers(): Maintainer[] {
-    const pairs = info.matchAll(/Email:\s*([^,\s]+),\s*GitHub:\s*([^,\s]+)/g);
+    const pairs = info.matchAll(/Email:\s*([^\s,]+)\s*[,\s]+GitHub:\s*([^\s,]+)/gi);
     return Array.from(pairs).map((match) => ({
       email: match[1],
       github: match[2],

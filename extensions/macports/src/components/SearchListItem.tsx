@@ -32,12 +32,11 @@ export default function SearchListItem({ searchResult }: { searchResult: SearchR
               <Action.CopyToClipboard
                 title="Copy Uninstall Command"
                 content={`sudo port uninstall ${searchResult.name}`}
-                shortcut={{ modifiers: ["cmd"], key: "." }}
               />
               <Action
                 title="Uninstall"
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                shortcut={{ modifiers: ["ctrl"], key: "x" }}
                 onAction={async () => {
                   const options = {
                     title: "Confirm Uninstall",

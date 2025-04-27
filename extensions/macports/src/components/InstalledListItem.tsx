@@ -14,7 +14,7 @@ export default function InstalledListItem({ port }: { port: string }) {
             title="Uninstall"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd"], key: "delete" }}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
             onAction={async () => {
               const options = {
                 title: "Confirm Uninstall",
