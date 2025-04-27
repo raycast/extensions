@@ -5,7 +5,7 @@ export async function insertBookmark(bookmark: Omit<Bookmark, "created_at"> & { 
 }
 
 export async function getGroups(userId: string) {
-  return supabase.from("groups").select("id, name, slug").eq("user_id", userId);
+  return supabase.from("groups").select("id, name, slug").eq("user_id", userId).returns<Group[]>();
 }
 
 export async function deleteBookmark(id: string) {
@@ -17,7 +17,7 @@ export async function moveBookmarkToGroup(bookmarkId: string, groupId: string) {
 }
 
 export async function getBookmarks() {
-  return supabase.from("bookmarks").select("*").order("created_at", { ascending: false });
+  return supabase.from("bookmarks").select("*").order("created_at", { ascending: false }).returns<Bookmark[]>();
 }
 
 export async function getBookmarksByGroupId(groupId: string) {
@@ -25,7 +25,8 @@ export async function getBookmarksByGroupId(groupId: string) {
     .from("bookmarks")
     .select("*")
     .eq("group_id", groupId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .returns<Bookmark[]>();
 }
 
 export interface Bookmark {
