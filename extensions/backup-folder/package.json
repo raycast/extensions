@@ -60,6 +60,23 @@
       "name": "deletePermanently",
       "default": false,
       "required": false
+    },
+    {
+      "name": "userExcludePatterns",
+      "title": "Custom Exclude Patterns",
+      "description": "Enter custom patterns to exclude, separated by commas (,). These will override or append to the default patterns.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g., */logs,*.tmp,vendor/*"
+    },
+    {
+      "name": "overrideDefaultPatterns",
+      "title": "Override Default Patterns",
+      "label": "Override default patterns instead of appending",
+      "description": "If checked, only the patterns entered above will be used. If unchecked, custom patterns are added to the defaults.",
+      "type": "checkbox",
+      "required": false,
+      "defaultValue": true
     }
   ],
   "commands": [

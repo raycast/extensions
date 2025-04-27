@@ -3,20 +3,11 @@ import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { getExcludePatterns } from "./lib/exclude-pattern";
 
 // --- Configuration ---
 const DEFAULT_GTAR_PATH = "/opt/homebrew/bin/gtar"; // Default path for GNU tar if not specified in preferences
-const EXCLUDE_PATTERNS: ReadonlyArray<string> = [
-  // Patterns to exclude during backup
-  "*/node_modules",
-  "*/.next",
-  "*/.DS_Store",
-  "*/build",
-  "*/dist",
-  "*/.cache",
-  "*/.idea",
-  "*/.svelte-kit",
-];
+const EXCLUDE_PATTERNS: ReadonlyArray<string> = getExcludePatterns();
 const LOCK_KEY = "backupLock"; // LocalStorage key to prevent concurrent backups
 
 // --- Preferences Interface ---
