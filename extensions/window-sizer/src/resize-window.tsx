@@ -71,6 +71,41 @@ function AddCustomResolutionForm({
       );
 
       if (!existsInCustom && !existsInPredefined) {
+        // Check if current window size matches the size being added
+        try {
+          const windowInfo = await getWindowInfo();
+          const currentWindowWidth = windowInfo.width;
+          const currentWindowHeight = windowInfo.height;
+
+          // Check if current window already has the same size
+          if (currentWindowWidth === parsedWidth && currentWindowHeight === parsedHeight) {
+            // Add new custom resolution
+            customResolutions.push({
+              width: parsedWidth,
+              height: parsedHeight,
+              title: resolutionTitle,
+              isCustom: true,
+            });
+
+            // Save updated custom resolutions
+            await LocalStorage.setItem("custom-resolutions", JSON.stringify(customResolutions));
+
+            // Show toast indicating already at this size
+            await showToast({
+              style: Toast.Style.Success,
+              title: `Size added`,
+            });
+
+            // Refresh list and return to parent view, without closing main window
+            onCustomResolutionAdded();
+            pop();
+            return;
+          }
+        } catch (error) {
+          console.error("Error checking current window size:", error);
+          // Continue with original logic if window size check fails
+        }
+
         // Add new custom resolution
         customResolutions.push({
           width: parsedWidth,

@@ -6,6 +6,7 @@
 - Feature: Get Current Size
 - Fix: Position of the window when restoring previous size
 - Fix: Toasts when size exceeds the screen
+- Fix: Toast when adding a size identical to the current size
 
 ## [Update] - 2025-04-25
 
