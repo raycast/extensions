@@ -2,7 +2,7 @@
 
 ![extension-icon](./assets/extension-icon.png)
 
-A Raycast plugin for generating dummy text in both Japanese and English. 
+A Raycast extension for generating dummy text in both Japanese and English.
 Easily generate text with a specified character count and copy it to your clipboard.
 
 ## Features
