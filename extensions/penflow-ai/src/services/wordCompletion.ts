@@ -25,8 +25,6 @@ function needsCompletion(text: string): boolean {
 
 // Main input processing function
 export async function processInput(input: string, options?: AIRequestOptions): Promise<Suggestion[]> {
-  // Removed debug log for input reception
-
   if (!input.trim() || input.length > 1000) {
     // Input is empty or too long, return empty array directly, do not log details
     return [];
@@ -40,9 +38,7 @@ export async function processInput(input: string, options?: AIRequestOptions): P
   try {
     // If contains Chinese, return translation and refinement results
     if (containsChinese(input)) {
-      // Removed debug log for Chinese text detection
       const translatedTexts = await translateMixedText(input, aiOptions);
-      // Removed debug log for received translations
       const results = translatedTexts.map((text) => ({
         text: text.toString(),
         type: "translation" as const,
@@ -56,9 +52,7 @@ export async function processInput(input: string, options?: AIRequestOptions): P
 
     // If the last word is incomplete and total words <= 2, only return completion suggestions
     if (needsCompletion(input) && totalWords <= 2) {
-      // Removed debug log for word completions
       const completions = await getWordCompletions(lastSegment, aiOptions);
-      // Removed debug log for received completions
       const results = completions.map((text) => ({
         text: text.toString(),
         type: "completion" as const,
@@ -68,9 +62,7 @@ export async function processInput(input: string, options?: AIRequestOptions): P
 
     // Other cases, return both completion and refinement suggestions
     if (needsCompletion(input)) {
-      // Removed debug log for word completions
       const completions = await getWordCompletions(lastSegment, aiOptions);
-      // Removed debug log for received completions
       suggestions.push(
         ...completions.slice(0, 3).map((text) => ({
           text: text.toString(),
@@ -81,9 +73,7 @@ export async function processInput(input: string, options?: AIRequestOptions): P
 
     // If not a simple completion scenario, add refinement suggestions
     if (totalWords > 1) {
-      // Removed debug log for getting polish suggestions
       const polishResults = await polishText(input, aiOptions);
-      // Removed debug log for received polish results
       suggestions.push(
         ...polishResults.map((text) => ({
           text: text.toString(),
@@ -92,7 +82,6 @@ export async function processInput(input: string, options?: AIRequestOptions): P
       );
     }
 
-    // Removed debug log for returning final suggestions
     return suggestions;
   } catch (error) {
     logger.error("Error processing input:", error);
