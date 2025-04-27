@@ -37,7 +37,7 @@ export async function ensureAuthenticated(): Promise<boolean> {
         console.log("Successfully authenticated with Apple ID");
         return true;
       }
-      return true; // Assume authenticated if we can't determine
+      return false; // Force re-authentication if we can't determine status
     }
   } catch (error) {
     console.error("Authentication error:", error);
@@ -128,6 +128,8 @@ export function formatDate(dateString: string | undefined): string {
   if (!dateString) return "Unknown";
 
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Invalid Date";
+
   return date.toLocaleDateString(undefined, {
     year: "numeric",
     month: "long",

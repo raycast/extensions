@@ -166,7 +166,7 @@
     "@raycast/api": "^1.93.1",
     "@raycast/utils": "^1.17.0",
     "@types/stream-json": "^1.7.8",
-    "child_process": "^1.0.2",
+    "axios": "^1.6.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2",
     "stream-chain": "^2.2.5",
