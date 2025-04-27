@@ -2,7 +2,7 @@
 
 ## [Fix AppleScript fallback for non-premium users] - {PR_MERGE_DATE}
 
-- Fixed ApplecScript fallback for functions that use premium-only API endpoints. Most commands now work without a premium subscription except queuing, cycleRepat (AppleScript can only toggle context off/on) and device selection.
+- Fixed AppleScript fallback for functions that use premium-only API endpoints. Most commands now work without a premium subscription except queuing, cycleRepeat (AppleScript can only toggle context off/on) and device selection.
 
 ## [Fix Select Device] - 2025-02-26
 
