@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Fix AppleScript fallback for non-premium users] - {PR_MERGE_DATE}
+
+- Fixed ApplecScript fallback for functions that use premium-only API endpoints. Most commands now work without a premium subscription except queuing, cycleRepat (AppleScript can only toggle context off/on) and device selection.
+
 ## [Fix Select Device] - 2025-02-26
 
 - Fixed a possibly undefined issue from Select Devices command
