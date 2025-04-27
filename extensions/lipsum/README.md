@@ -2,7 +2,7 @@
 
 ![extension-icon](./assets/extension-icon.png)
 
-A Raycast extension for generating dummy text in both Japanese and English.
+A Raycast extension for generating dummy text in both Japanese and English. 
 Easily generate text with a specified character count and copy it to your clipboard.
 
 ## Features
@@ -11,6 +11,10 @@ Easily generate text with a specified character count and copy it to your clipbo
 - Specify the number of characters
 - Copy to clipboard
 - Streamline your design and development prototyping work
+
+## Screencast
+
+https://github.com/user-attachments/assets/44d32225-05a9-4084-905c-04456b2d8ded
 
 ## Development
 
@@ -27,8 +31,6 @@ npm run dev
 # Publish
 npm run publish
 ```
-
-~~Or install directly from the Raycast Extensions Store.~~
 
 ## Usage
 

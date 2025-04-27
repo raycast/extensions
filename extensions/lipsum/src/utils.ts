@@ -5,5 +5,5 @@ export const safeNumberArg = (arg: string | undefined): number => {
     return 1;
   }
   const parsed = parseInt(arg, 10);
-  return isNaN(parsed) ? 0 : Math.min(parsed, MAX_NUMBER);
+  return isNaN(parsed) ? 1 : Math.min(Math.max(0, parsed), MAX_NUMBER);
 };

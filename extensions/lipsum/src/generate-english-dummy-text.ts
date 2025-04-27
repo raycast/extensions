@@ -1,13 +1,18 @@
 import { LaunchProps } from "@raycast/api";
 import { showHUD, Clipboard } from "@raycast/api";
 import { safeNumberArg } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function main(props: LaunchProps<{ arguments: { numberOfChars: string } }>) {
-  const { numberOfChars } = props.arguments;
-  const safeNumberOfChars = safeNumberArg(numberOfChars);
-  const dummyText = generateEnglishDummyText(safeNumberOfChars);
-  await Clipboard.copy(dummyText);
-  await showHUD("Copied dummy text to clipboard");
+  try {
+    const { numberOfChars } = props.arguments;
+    const safeNumberOfChars = safeNumberArg(numberOfChars);
+    const dummyText = generateEnglishDummyText(safeNumberOfChars);
+    await Clipboard.copy(dummyText);
+    await showHUD("Copied dummy text to clipboard");
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to generate dummy text" });
+  }
 }
 
 const generateEnglishDummyText = (numberOfChars: number): string => {
@@ -137,7 +142,6 @@ const generateEnglishDummyText = (numberOfChars: number): string => {
     // Longer words (7+ chars)
     "another",
     "because",
-    "between",
     "building",
     "business",
     "children",
