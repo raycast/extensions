@@ -165,9 +165,12 @@
   "dependencies": {
     "@raycast/api": "^1.93.1",
     "@raycast/utils": "^1.17.0",
+    "@types/react-dom": "^19.1.2",
     "@types/stream-json": "^1.7.8",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "stream-chain": "^2.2.5",
     "stream-json": "^1.9.1"
   },
@@ -176,10 +179,10 @@
     "@types/lodash": "^4.17.16",
     "@types/node": "^20.10.2",
     "@types/node-fetch": "^2.6.12",
-    "@types/react": "18.3.3",
+    "@types/react": "^19.1.2",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build",
