@@ -1,2 +1,2 @@
-- [] Make ipatool use optional
-- [] Allow app searching without triggering auth
+- [ ] Make ipatool use optional
+- [ ] Allow app searching without triggering auth
