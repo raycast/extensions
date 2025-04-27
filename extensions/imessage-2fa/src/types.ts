@@ -32,7 +32,7 @@ export interface VerificationLink {
   type: "verification" | "sign-in";
   messageId: string;
   source: "email" | "imessage";
-  message_date: string;
+  messageDate: string;
   sender: string;
   displayText: string;
 }

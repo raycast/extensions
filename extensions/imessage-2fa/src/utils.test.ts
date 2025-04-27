@@ -160,6 +160,7 @@ describe("Testing verification link extraction", () => {
     const signInResult = extractVerificationLink(htmlSignIn);
     expect(signInResult).not.toBeNull();
     expect(signInResult?.url).toBe("https://app.example.org/login?token=xyz789");
+    expect(signInResult?.type).toBe("sign-in");
   });
 
   test("Email with escaped HTML entities", () => {

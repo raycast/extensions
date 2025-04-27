@@ -94,7 +94,7 @@ export default function Command() {
             ...linkInfo,
             messageId: message.guid,
             source: message.source || "email",
-            message_date: message.message_date,
+            messageDate: message.message_date,
             sender: message.sender,
             displayText: message.displayText,
           });
@@ -102,7 +102,7 @@ export default function Command() {
       });
 
       // Sort links by date (newest first)
-      links.sort((a, b) => new Date(b.message_date).getTime() - new Date(a.message_date).getTime());
+      links.sort((a, b) => new Date(b.messageDate).getTime() - new Date(a.messageDate).getTime());
 
       // Limit to the 10 most recent links
       return links.slice(0, 10);
@@ -144,7 +144,7 @@ export default function Command() {
     if (verificationLinks.length > 0 && preferences.enableVerificationLinks !== false) {
       // Links are already sorted by date (newest first)
       mostRecentLink = verificationLinks[0];
-      mostRecentLinkTime = new Date(mostRecentLink.message_date).getTime();
+      mostRecentLinkTime = new Date(mostRecentLink.messageDate).getTime();
     }
 
     // Determine which is more recent and select it
@@ -272,7 +272,7 @@ const LinkItem = React.memo(({ link }: { link: VerificationLink }) => {
       id={`link-${link.source}-${link.messageId}`}
       icon={icon}
       title={title}
-      subtitle={new Date(link.message_date).toLocaleTimeString()}
+      subtitle={new Date(link.messageDate).toLocaleTimeString()}
       accessories={[
         {
           text: link.source === "email" ? "Email" : "iMessage",
@@ -297,7 +297,7 @@ function LinkDetail(props: { link: VerificationLink }) {
           />
           <List.Item.Detail.Metadata.Label title="URL" text={props.link.url} />
           <List.Item.Detail.Metadata.Label title="From" text={props.link.sender} />
-          <List.Item.Detail.Metadata.Label title="Date" text={formatDate(new Date(props.link.message_date))} />
+          <List.Item.Detail.Metadata.Label title="Date" text={formatDate(new Date(props.link.messageDate))} />
           <List.Item.Detail.Metadata.Label title="Source" text={props.link.source === "email" ? "Email" : "iMessage"} />
         </List.Item.Detail.Metadata>
       }
@@ -326,7 +326,7 @@ function LinkActions(props: { link: VerificationLink }) {
         <Action.CopyToClipboard
           title="Copy Link and Message Details"
           content={`${props.link.url}\nFrom: ${props.link.sender}\nDate: ${formatDate(
-            new Date(props.link.message_date)
+            new Date(props.link.messageDate)
           )}\n\nMessage:\n${props.link.displayText}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />

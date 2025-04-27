@@ -174,7 +174,7 @@ function decodeBody(bodyPart: gmail_v1.Schema$MessagePart | null): string {
     // Replace soft line breaks (= followed by newline)
     decodedBody = decodedBody.replace(/=\r?\n/g, "");
     // Replace encoded characters (=XX)
-    decodedBody = decodedBody.replace(/=([0-9A-F]{2})/g, (_, hex) => {
+    decodedBody = decodedBody.replace(/=([0-9A-Fa-f]{2})/g, (_, hex) => {
       try {
         return String.fromCharCode(parseInt(hex, 16));
       } catch (e) {
@@ -296,7 +296,6 @@ export async function getGmailMessages(searchType: SearchType, since: Date): Pro
   try {
     const gmail = await getAuthorizedGmailClient();
     const prefs = getPreferenceValues<Preferences>();
-    // const lookbackMinutes = calculateLookBackMinutes(prefs.lookBackUnit, parseInt(prefs.lookBackAmount || "1", 10)); // This line is unused
 
     // Convert cutoff time to Unix timestamp for Gmail query
     const queryTime = Math.floor(since.getTime() / 1000);
@@ -397,16 +396,8 @@ export async function checkGmailAuth(): Promise<boolean> {
   }
 }
 
-// Comment out the unused interface
-// interface CachedMessage {
-//   message: Message;
-//   hasCode: boolean;
-//   timestamp: number;
-// }
-
 export function useGmail(options: { searchText?: string; searchType: SearchType; enabled?: boolean }) {
   const [data, setData] = useState<Message[]>([]);
-  // const [permissionView, setPermissionView] = useState<JSX.Element | null>(null); // This state setter is unused
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
   const [isInitialLoadStarted, setIsInitialLoadStarted] = useState(false);
   const isLoadingRef = useRef(false);
