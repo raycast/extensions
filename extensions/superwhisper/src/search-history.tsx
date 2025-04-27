@@ -88,19 +88,7 @@ export default function Command() {
           key={recording.directory}
           icon={Icon.Document}
           title={format(recording.timestamp, "yyyy/MM/dd HH:mm:ss")}
-          detail={
-            <List.Item.Detail
-              markdown={recording.meta.rawResult}
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label
-                    title="Directory"
-                    text={recording.directory}
-                  />
-                </List.Item.Detail.Metadata>
-              }
-            />
-          }
+          detail={<List.Item.Detail markdown={recording.meta.rawResult} />}
           actions={
             <ActionPanel>
               <Action.ShowInFinder
