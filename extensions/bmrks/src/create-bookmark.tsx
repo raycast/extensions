@@ -12,7 +12,6 @@ import {
   getPreferenceValues,
   showHUD,
   showToast,
-  showFailureToast,
 } from "@raycast/api";
 import * as db from "../lib/db";
 import { ensureValidUrl } from "../lib/ensure-valid-url";
@@ -289,7 +288,13 @@ function CreateBookmark({ user }: { user: User }) {
       }
     >
       <Form.Dropdown title="Group" placeholder="Select a group for your bookmark" {...itemProps.groupId}>
-        {groups && groups.map((group) => <Form.Dropdown.Item key={group.id} value={group.id} title={group.name} />)}
+        {groups && groups.length > 0 ? (
+          groups.map((group) => (
+            <Form.Dropdown.Item key={group.id} value={group.id} title={group.name || `Group ${group.id}`} />
+          ))
+        ) : (
+          <Form.Dropdown.Item value="all" title="Bookmarks" />
+        )}
       </Form.Dropdown>
       <Form.Separator />
       <Form.TextField

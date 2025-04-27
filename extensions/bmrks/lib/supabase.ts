@@ -22,18 +22,63 @@ class RaycastStorage {
 }
 
 export async function authorize() {
-  const rawSession = await LocalStorage.getItem("session");
-  const session = rawSession ? JSON.parse(String(rawSession)) : null;
-  const { email, password } = getPreferenceValues<Preferences>();
+  try {
+    const rawSession = await LocalStorage.getItem("session");
+    const session = rawSession ? JSON.parse(String(rawSession)) : null;
+    
+    // Get preferences, log email (not password for security)
+    const prefs = getPreferenceValues<Preferences>();
+    console.log("Auth using email:", prefs.email ? "✓ Email provided" : "✗ No email");
+    
+    if (!prefs.email || !prefs.password) {
+      return { 
+        user: null, 
+        error: { message: "Missing email or password in preferences" } 
+      };
+    }
 
-  if (session && email === session.user?.email) {
-    const { data, error } = await supabase.auth.setSession(session);
-    await LocalStorage.setItem("session", JSON.stringify(data.session));
-    return { user: data.user, error };
-  } else {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    await LocalStorage.setItem("session", JSON.stringify(data.session));
-    return { user: data.user, error };
+    // Try to restore session if it exists and email matches
+    if (session && prefs.email === session.user?.email) {
+      console.log("Attempting to restore existing session");
+      const { data, error } = await supabase.auth.setSession(session);
+      
+      if (error) {
+        console.error("Session restore failed:", error.message);
+        // Session invalid - try login with password
+        const loginResult = await supabase.auth.signInWithPassword({ 
+          email: prefs.email, 
+          password: prefs.password 
+        });
+        
+        await LocalStorage.setItem("session", JSON.stringify(loginResult.data.session));
+        console.log("Login result:", loginResult.error ? "Failed" : "Success");
+        return { user: loginResult.data.user, error: loginResult.error };
+      }
+      
+      await LocalStorage.setItem("session", JSON.stringify(data.session));
+      console.log("Session restored successfully");
+      return { user: data.user, error };
+    } else {
+      // No valid session - sign in with password
+      console.log("No valid session, signing in with password");
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email: prefs.email, 
+        password: prefs.password 
+      });
+      
+      if (data.session) {
+        await LocalStorage.setItem("session", JSON.stringify(data.session));
+      }
+      
+      console.log("Login result:", error ? "Failed" : "Success");
+      return { user: data.user, error };
+    }
+  } catch (err) {
+    console.error("Authentication error:", err);
+    return { 
+      user: null, 
+      error: { message: err instanceof Error ? err.message : "Unknown authentication error" } 
+    };
   }
 }
 

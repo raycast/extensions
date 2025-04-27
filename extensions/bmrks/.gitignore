@@ -12,5 +12,7 @@ compiled_raycast_swift
 # misc
 .DS_Store
 
-# Windsurf
+# AI
 .windsurfrules
+CLAUDE.md
+

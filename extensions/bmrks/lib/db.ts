@@ -5,10 +5,16 @@ export async function insertBookmark(bookmark: Omit<Bookmark, "created_at"> & { 
 }
 
 export async function getGroups(userId: string) {
-  return supabase
-    .from("groups")
-    .select("id, name, slug, user_id, colors")
-    .eq("user_id", userId);
+  if (!userId) {
+    console.error("getGroups called with empty userId");
+    return { data: null, error: { message: "User ID is missing" } };
+  }
+
+  // Simple direct query without the colors column
+  return await supabase
+    .from('groups')
+    .select('id, name, slug, user_id')
+    .eq('user_id', userId);
 }
 
 export async function deleteBookmark(id: string) {
@@ -48,5 +54,4 @@ export interface Group {
   name: string;
   slug: string;
   user_id: string;
-  colors?: string[];
 }
