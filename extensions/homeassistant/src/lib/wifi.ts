@@ -15,10 +15,7 @@ export function getWifiSSIDSync(): string | null | undefined {
     const ssid = ssid_line.split(":")[1] || null;
 
     return ssid?.trim();
-  } catch (
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    error
-  ) {
+  } catch {
     return undefined;
   }
 }
