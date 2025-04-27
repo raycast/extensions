@@ -51,6 +51,11 @@ export function useRecordings() {
     error,
   } = useCachedPromise(
     async () => {
+      const isInstalled = await isSuperwhisperInstalled();
+      if (!isInstalled) {
+        throw new Error("Superwhisper is not installed");
+      }
+
       const recordingsPath = join(homedir(), "Documents", "superwhisper", "recordings");
 
       if (!existsSync(recordingsPath)) {
@@ -86,8 +91,15 @@ export function useRecordings() {
     [],
     {
       failureToastOptions: {
-        title: "Failed to load recordings",
-        message: "Please make sure you have made recordings first.",
+        title: `Failed to fetch recordings`,
+        message: "Check if Superwhisper is installed and recordings directory is correct.",
+        primaryAction: {
+          title: "Install from superwhisper.com",
+          onAction: async (toast) => {
+            await open("https://superwhisper.com");
+            await toast.hide();
+          },
+        },
       },
     },
   );
