@@ -119,6 +119,14 @@
       "name": "respectRayignore",
       "required": true,
       "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Enable searching by file permissions",
+      "label": "Search by File Permissions",
+      "name": "searchByPermissions",
+      "required": true,
+      "type": "checkbox"
     }
   ],
   "dependencies": {

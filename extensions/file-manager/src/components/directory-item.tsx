@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List, Toast, environment, popToRoot, showToast } from "@raycast/api";
 import { RenameForm, deleteDirectory } from "../utils";
 import { Directory } from "./directory";
-import { FileDataType } from "../types";
+import { FileDataType, Preferences } from "../types";
 import { GitIgnoreHelper } from "@gerhobbelt/gitignore-parser";
 
 export function DirectoryItem(props: {
@@ -25,6 +25,7 @@ export function DirectoryItem(props: {
       id={filePath}
       title={props.fileData.name}
       subtitle={props.preferences.showFilePermissions ? props.fileData.permissions : ""}
+      keywords={props.preferences.searchByPermissions ? [props.fileData.permissions] : undefined}
       icon={{ fileIcon: filePath }}
       quickLook={{ path: filePath, name: props.fileData.name }}
       actions={
