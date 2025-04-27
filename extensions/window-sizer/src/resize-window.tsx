@@ -257,7 +257,19 @@ async function getWindowInfo(): Promise<{ x: number; y: number; width: number; h
 }
 
 // Get screen scale factor
+// Add cache variables
+let cachedScaleFactor: number | null = null;
+let cachedScaleFactorTimestamp = 0;
+const SCALE_FACTOR_CACHE_DURATION = 60 * 60 * 1000; // 1 hour cache duration
+
 async function getScreenScaleFactor(): Promise<number> {
+  // Check if cache is valid
+  const now = Date.now();
+  if (cachedScaleFactor !== null && now - cachedScaleFactorTimestamp < SCALE_FACTOR_CACHE_DURATION) {
+    console.log(`Using cached scale factor: ${cachedScaleFactor}`);
+    return cachedScaleFactor;
+  }
+
   try {
     // Use a more reliable approach with system_profiler command
     const getScaleFactorScript = `
@@ -280,6 +292,9 @@ async function getScreenScaleFactor(): Promise<number> {
       if (nativeWidth > 0 && scaledWidth > 0) {
         const scaleFactor = nativeWidth / scaledWidth;
         console.log(`Detected scale factor: ${scaleFactor} (native: ${nativeWidth}, scaled: ${scaledWidth})`);
+        // Update cache
+        cachedScaleFactor = scaleFactor;
+        cachedScaleFactorTimestamp = now;
         return scaleFactor;
       }
     }
@@ -287,21 +302,41 @@ async function getScreenScaleFactor(): Promise<number> {
     // If we can't extract specific values, check for "Retina" keyword
     if (result.toLowerCase().includes("retina")) {
       console.log("Detected Retina display, using scale factor 2.0");
+      // Update cache
+      cachedScaleFactor = 2.0;
+      cachedScaleFactorTimestamp = now;
       return 2.0;
     }
 
     // Default to 1.0 if no scaling is detected
     console.log("Could not detect scale factor, using default 1.0");
+    // Update cache
+    cachedScaleFactor = 1.0;
+    cachedScaleFactorTimestamp = now;
     return 1.0;
   } catch (error) {
     console.error("Error detecting screen scale factor:", error);
-    // Default to 1.0 on error
+    // Default to 1.0 on error, but don't cache errors
     return 1.0;
   }
 }
 
+// Add cache variables for screen dimensions
+let cachedScreenDimensions: { width: number; height: number; scaleFactor: number } | null = null;
+let cachedScreenDimensionsTimestamp = 0;
+const SCREEN_DIMENSIONS_CACHE_DURATION = 60 * 60 * 1000; // 1 hour cache duration
+
 // Get primary screen dimensions with scale factor consideration
 async function getPrimaryScreenDimensions(): Promise<{ width: number; height: number; scaleFactor: number }> {
+  // Check if cache is valid
+  const now = Date.now();
+  if (cachedScreenDimensions !== null && now - cachedScreenDimensionsTimestamp < SCREEN_DIMENSIONS_CACHE_DURATION) {
+    console.log(
+      `Using cached screen dimensions: ${cachedScreenDimensions.width}×${cachedScreenDimensions.height} (scale factor: ${cachedScreenDimensions.scaleFactor})`,
+    );
+    return cachedScreenDimensions;
+  }
+
   try {
     // Get scale factor first
     const scaleFactor = await getScreenScaleFactor();
@@ -327,6 +362,9 @@ async function getPrimaryScreenDimensions(): Promise<{ width: number; height: nu
 
       if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
         console.log(`Primary screen dimensions: ${width}×${height} (scale factor: ${scaleFactor})`);
+        // Update cache
+        cachedScreenDimensions = { width, height, scaleFactor };
+        cachedScreenDimensionsTimestamp = now;
         return { width, height, scaleFactor };
       }
     }
@@ -339,13 +377,20 @@ async function getPrimaryScreenDimensions(): Promise<{ width: number; height: nu
 
       if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
         console.log(`Primary screen dimensions (via regex): ${width}×${height} (scale factor: ${scaleFactor})`);
+        // Update cache
+        cachedScreenDimensions = { width, height, scaleFactor };
+        cachedScreenDimensionsTimestamp = now;
         return { width, height, scaleFactor };
       }
     }
 
     // If all parsing methods fail, use default dimensions
     const defaultDimensions = getDefaultScreenSize();
-    return { ...defaultDimensions, scaleFactor };
+    const result = { ...defaultDimensions, scaleFactor };
+    // Update cache
+    cachedScreenDimensions = result;
+    cachedScreenDimensionsTimestamp = now;
+    return result;
   } catch (error) {
     console.error("Error getting screen dimensions:", error);
     // Return default screen size if any error occurs
@@ -427,6 +472,20 @@ export default function ResizeWindow() {
   const [customResolutions, setCustomResolutions] = useState<Resolution[]>([]);
   const { push } = useNavigation();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Pre-fetch screen info on component initialization
+  useEffect(() => {
+    async function initScreenInfo() {
+      try {
+        // Pre-fetch screen information
+        await getPrimaryScreenDimensions();
+      } catch (error) {
+        console.error("Error pre-fetching screen info:", error);
+      }
+    }
+
+    initScreenInfo();
+  }, []);
 
   // Predefined resolutions
   const predefinedResolutions: Resolution[] = [
@@ -511,15 +570,16 @@ export default function ResizeWindow() {
       console.log(`Screen dimensions: ${screenWidth}×${screenHeight} (scale factor: ${scaleFactor})`);
       console.log(`Requested window size: ${width}×${height}`);
 
+      // Check if the original requested size exceeds the logical screen dimensions (this is the only criteria for showing warnings)
+      let widthExceeds = width > screenWidth;
+      let heightExceeds = height > screenHeight;
+
+      console.log(`Width exceeds logical screen: ${widthExceeds}, Height exceeds logical screen: ${heightExceeds}`);
+
+      // Adjust window size if needed
       let adjustedWidth = width;
       let adjustedHeight = height;
       let sizeExceedsMessage = null;
-
-      // Check if requested dimensions exceed screen dimensions and adjust if needed
-      const widthExceeds = width > screenWidth;
-      const heightExceeds = height > screenHeight;
-
-      console.log(`Width exceeds screen: ${widthExceeds}, Height exceeds screen: ${heightExceeds}`);
 
       if (widthExceeds && heightExceeds) {
         adjustedWidth = screenWidth;
@@ -604,6 +664,38 @@ export default function ResizeWindow() {
 
             if (actualWidth !== adjustedWidth || actualHeight !== adjustedHeight) {
               console.log(`Requested size differs from applied size. Actual: ${logSizeDisplay}`);
+
+              // Check if the original requested size exceeds the actual applied size
+              const requestedWidth = width;
+              const requestedHeight = height;
+
+              if (requestedWidth > actualWidth || requestedHeight > actualHeight) {
+                console.log(
+                  `Original request (${requestedWidth}×${requestedHeight}) exceeds applied size (${actualWidth}×${actualHeight})`,
+                );
+
+                // If the original requested size exceeds the actual applied size, ensure warnings are shown
+                if (requestedWidth > actualWidth && requestedHeight > actualHeight) {
+                  widthExceeds = true;
+                  heightExceeds = true;
+                } else if (requestedWidth > actualWidth) {
+                  widthExceeds = true;
+                } else if (requestedHeight > actualHeight) {
+                  heightExceeds = true;
+                }
+              }
+            }
+
+            // Also check if the actual applied size exceeds the screen dimensions
+            if (actualWidth > screenWidth) {
+              widthExceeds = true;
+            }
+            if (actualHeight > screenHeight) {
+              heightExceeds = true;
+            }
+
+            if (widthExceeds || heightExceeds) {
+              console.log(`Size exceeds limits: Width=${widthExceeds}, Height=${heightExceeds}`);
             }
 
             // Update adjusted size for data storage
@@ -614,18 +706,24 @@ export default function ResizeWindow() {
 
         console.log("New window position and size: X:", newX, "Y:", newY, "W:", adjustedWidth, "H:", adjustedHeight);
 
-        // Show message with the final size and appropriate prefix when size exceeds screen
-        if (sizeExceedsMessage) {
-          // Create message that preserves the prefix but uses actual size
-          let prefixMessage = "";
-          if (widthExceeds && heightExceeds) {
-            prefixMessage = "🟡 Size exceeds screen. ";
-          } else if (widthExceeds) {
-            prefixMessage = "🟡 Width exceeds screen. ";
-          } else if (heightExceeds) {
-            prefixMessage = "🟡 Height exceeds screen. ";
-          }
+        // Prepare message to display
+        let prefixMessage = "";
+
+        // Set prefix message based on whether dimensions exceed logical screen size
+        if (widthExceeds && heightExceeds) {
+          prefixMessage = "🟡 Size exceeds screen. ";
+        } else if (widthExceeds) {
+          prefixMessage = "🟡 Width exceeds screen. ";
+        } else if (heightExceeds) {
+          prefixMessage = "🟡 Height exceeds screen. ";
+        }
+
+        // Display appropriate message
+        if (prefixMessage) {
           await showHUD(`${prefixMessage}Resized to ${finalSizeDisplay}`);
+        } else if (sizeExceedsMessage) {
+          // For compatibility with other potential adjustment scenarios
+          await showHUD(`Resized to ${finalSizeDisplay}`);
         } else {
           await showHUD(`🔲 Resized to ${finalSizeDisplay}`);
         }
