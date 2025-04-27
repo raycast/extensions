@@ -10,8 +10,7 @@
   "icon": "icon.png",
   "author": "raunofreiberg",
   "contributors": [
-    "peduarte",
-    "faker"
+    "peduarte"
   ],
   "license": "MIT",
   "commands": [
