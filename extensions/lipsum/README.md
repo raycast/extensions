@@ -16,8 +16,7 @@ Easily generate text with a specified character count and copy it to your clipbo
 
 ```bash
 # Clone this repository
-git clone https://github.com/seita1996/lipsum
-cd lipsum
+git clone https://github.com/raycast/extensions.git && cd extensions/lipsum
 
 # Install dependencies
 npm install
