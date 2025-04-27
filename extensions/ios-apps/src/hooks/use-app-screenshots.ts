@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { AppDetails } from "../types";
 import { downloadScreenshots } from "../utils/itunes-api";
 
@@ -57,7 +57,7 @@ export function useAppScreenshots() {
         error: error instanceof Error ? error : new Error(String(error)),
         downloadPath: null,
       });
-      await showToast(Toast.Style.Failure, "Failed to download screenshots", String(error));
+      await showFailureToast(error, { title: "Failed to download screenshots" });
       return null;
     }
   }, []);

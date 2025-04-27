@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { AppDetails } from "../types";
 import { downloadIPA } from "../ipatool";
 import { downloadScreenshots } from "../utils/itunes-api";
@@ -27,7 +28,8 @@ export function AppActions({ app, onDownload, onDownloadScreenshots }: AppAction
       return await downloadIPA(app.bundleId, app.name, app.version, app.price);
     } catch (error) {
       console.error("Error downloading app:", error);
-      throw error;
+      showFailureToast({ title: "Error downloading app", message: String(error) });
+      return null;
     }
   };
 
@@ -41,7 +43,8 @@ export function AppActions({ app, onDownload, onDownloadScreenshots }: AppAction
       return await downloadScreenshots(app.bundleId, app.name, app.version, app.price);
     } catch (error) {
       console.error("Error downloading screenshots:", error);
-      throw error;
+      showFailureToast({ title: "Error downloading screenshots", message: String(error) });
+      return null;
     }
   };
 

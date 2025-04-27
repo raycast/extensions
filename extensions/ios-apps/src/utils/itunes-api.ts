@@ -3,6 +3,7 @@ import nodeFetch from "node-fetch";
 import fs from "fs";
 import path from "path";
 import { promisify } from "util";
+import { showFailureToast } from "@raycast/utils";
 import { showToast, Toast, showHUD } from "@raycast/api";
 import { AppDetails, ITunesResponse, ITunesResult } from "../types";
 import { getDownloadsDirectory } from "./paths";
@@ -70,7 +71,9 @@ export async function fetchITunesAppDetails(bundleId: string): Promise<ITunesRes
 
     const response = await fetch(url);
     if (!response.ok) {
-      console.error(`[iTunes API] Request failed with status: ${response.status}`);
+      const errorMsg = `[iTunes API] Request failed with status: ${response.status}`;
+      console.error(errorMsg);
+      showFailureToast({ title: "Failed to fetch app details", message: errorMsg });
       return null;
     }
 

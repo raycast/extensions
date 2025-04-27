@@ -7,6 +7,16 @@ import { IPATOOL_PATH, preferences } from "./paths";
 const execAsync = promisify(exec);
 
 /**
+ * Logs in to Apple ID using ipatool and user preferences.
+ */
+async function loginToAppleId(): Promise<void> {
+  await execAsync(
+    `${IPATOOL_PATH} auth login -e "${preferences.appleId}" -p "${preferences.password}" --format json --non-interactive`,
+  );
+  console.log("Successfully authenticated with Apple ID");
+}
+
+/**
  * Ensures the user is authenticated with Apple ID
  */
 export async function ensureAuthenticated(): Promise<boolean> {
@@ -21,20 +31,15 @@ export async function ensureAuthenticated(): Promise<boolean> {
 
       if (!status.authenticated) {
         // If not authenticated, login
-        await execAsync(
-          `${IPATOOL_PATH} auth login -e "${preferences.appleId}" -p "${preferences.password}" --format json --non-interactive`,
-        );
-        console.log("Successfully authenticated with Apple ID");
+        await loginToAppleId();
+        return true;
       }
       return true;
     } catch (parseError) {
       // If we can't parse as JSON, check if it contains "Not authenticated"
       if (stdout.includes("Not authenticated")) {
         // If not authenticated, login
-        await execAsync(
-          `${IPATOOL_PATH} auth login -e "${preferences.appleId}" -p "${preferences.password}" --format json --non-interactive`,
-        );
-        console.log("Successfully authenticated with Apple ID");
+        await loginToAppleId();
         return true;
       }
       return false; // Force re-authentication if we can't determine status
@@ -43,10 +48,7 @@ export async function ensureAuthenticated(): Promise<boolean> {
     console.error("Authentication error:", error);
     // Try to login anyway
     try {
-      await execAsync(
-        `${IPATOOL_PATH} auth login -e "${preferences.appleId}" -p "${preferences.password}" --format json --non-interactive`,
-      );
-      console.log("Successfully authenticated with Apple ID");
+      await loginToAppleId();
       return true;
     } catch (loginError) {
       console.error("Login error:", loginError);
@@ -114,8 +116,9 @@ export function extractFilePath(text: string, defaultPath: string): string {
 export function renderStarRating(rating: number | undefined): string {
   if (rating === undefined) return "No Rating";
 
-  const fullStars = Math.floor(rating);
-  const halfStar = rating % 1 >= 0.5;
+  const boundedRating = Math.min(Math.max(rating, 0), 5);
+  const fullStars = Math.floor(boundedRating);
+  const halfStar = boundedRating % 1 >= 0.5;
   const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
   return "★".repeat(fullStars) + (halfStar ? "½" : "") + "☆".repeat(emptyStars);
