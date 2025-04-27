@@ -1,6 +1,6 @@
 # lipsum
 
-![extension-icon](https://github.com/user-attachments/assets/f63b1106-07b4-43af-9802-f2465d896305)
+![extension-icon](./assets/extension-icon.png)
 
 A Raycast plugin for generating dummy text in both Japanese and English. 
 Easily generate text with a specified character count and copy it to your clipboard.
