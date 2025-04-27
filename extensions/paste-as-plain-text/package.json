@@ -6,7 +6,8 @@
   "icon": "paste-icon.png",
   "author": "koinzhang",
   "contributors": [
-    "pantajoe"
+    "pantajoe",
+    "kero13"
   ],
   "categories": [
     "Developer Tools",
@@ -129,6 +130,7 @@
     "axios": "^1.8.4",
     "cheerio": "^1.0.0",
     "fs-extra": "^11.2.0",
+    "json5": "^2.2.3",
     "validator": "^13.12.0"
   },
   "devDependencies": {

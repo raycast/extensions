@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-import { getFilterTasks } from "../../src/api";
+import { getFilterTasks } from "../api";
 import { filterSort } from "../helpers/filters";
 import { QuickLinkView, ViewMode } from "../home";
 import useCachedData from "../hooks/useCachedData";

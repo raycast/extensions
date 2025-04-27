@@ -17,12 +17,10 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
   const { push } = useNavigation();
 
   useEffect(() => {
-    // Initialize service with provided gcloudPath and projectId
     const networkService = new NetworkService(gcloudPath, projectId);
     setService(networkService);
 
     const initializeData = async () => {
-      // Show initial loading toast
       const loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Loading firewall rules...",
@@ -30,11 +28,9 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
       });
 
       try {
-        // Fetch firewall rules
         const fetchedRules = await networkService.getFirewallRules();
         setRules(fetchedRules);
 
-        // Fetch VPCs in the background for the create form
         fetchVPCs(networkService);
 
         loadingToast.hide();
@@ -108,7 +104,6 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
     }
   }, [service]);
 
-  // Filter rules based on search text
   const filteredRules = rules.filter(
     (rule) =>
       rule.name.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -347,7 +342,6 @@ interface FirewallRuleFormValues {
   enableLogging?: boolean;
 }
 
-// Interface for creating rules (matches NetworkService.createFirewallRule)
 interface FirewallRuleOptions {
   description?: string;
   direction: "INGRESS" | "EGRESS";
@@ -411,7 +405,6 @@ function CreateFirewallRuleForm({ vpcs, onRuleCreated, service }: CreateFirewall
         enableLogging: values.enableLogging,
       };
 
-      // Add sources and destinations based on direction
       if (values.direction === "INGRESS") {
         if (values.sourceRanges) {
           ruleOptions.sourceRanges = values.sourceRanges.split(",").map((r) => r.trim());
@@ -423,7 +416,6 @@ function CreateFirewallRuleForm({ vpcs, onRuleCreated, service }: CreateFirewall
           ruleOptions.targetTags = values.targetTags.split(",").map((t) => t.trim());
         }
       } else {
-        // EGRESS
         if (values.destinationRanges) {
           ruleOptions.destinationRanges = values.destinationRanges.split(",").map((r) => r.trim());
         }
@@ -432,13 +424,11 @@ function CreateFirewallRuleForm({ vpcs, onRuleCreated, service }: CreateFirewall
         }
       }
 
-      // Set up protocol and ports
       const protocolConfig = {
         protocol: values.protocol,
         ports: values.ports ? values.ports.split(",").map((p) => p.trim()) : undefined,
       };
 
-      // Set allowed or denied based on rule type
       if (values.ruleType === "allow") {
         ruleOptions.allowed = [protocolConfig];
       } else {

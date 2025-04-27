@@ -10,8 +10,11 @@ import {
   Color,
   useNavigation,
   Alert,
+  Form,
+  Image,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { showFailureToast } from "@raycast/utils";
+import { useState, useEffect, useCallback } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { homedir } from "os";
@@ -20,13 +23,16 @@ import { CloudStorageUploader } from "../../utils/FilePicker";
 import { CloudStorageDownloader } from "../../utils/FileDownloader";
 import { formatFileSize, validateFile, getFileInfo } from "../../utils/FileUtils";
 import ObjectVersionsView from "./ObjectVersionsView";
+import { ServiceViewBar } from "../../utils/ServiceViewBar";
 
 const execPromise = promisify(exec);
+const ITEMS_PER_PAGE = 11;
 
 interface StorageObjectsViewProps {
   projectId: string;
   gcloudPath: string;
   bucketName: string;
+  prefix?: string;
 }
 
 interface StorageObject {
@@ -35,6 +41,12 @@ interface StorageObject {
   size: string;
   updated: string;
   contentType: string;
+  isFolder: boolean;
+}
+
+interface Folder {
+  name: string;
+  path: string;
 }
 
 interface GCloudObject {
@@ -48,30 +60,89 @@ interface GCloudObject {
   md5Hash?: string;
 }
 
-export default function StorageObjectsView({ projectId, gcloudPath, bucketName }: StorageObjectsViewProps) {
+export default function StorageObjectsView({
+  projectId,
+  gcloudPath,
+  bucketName,
+  prefix = "",
+}: StorageObjectsViewProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const [objects, setObjects] = useState<StorageObject[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [displayedFolders, setDisplayedFolders] = useState<Folder[]>([]);
+  const [displayedObjects, setDisplayedObjects] = useState<StorageObject[]>([]);
+  const [allItems, setAllItems] = useState<{ folders: Folder[]; objects: StorageObject[] }>({
+    folders: [],
+    objects: [],
+  });
+  const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { push, pop } = useNavigation();
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
     fetchObjects();
+  }, [prefix]);
+
+  useEffect(() => {
+    const startIdx = 0;
+    const endIdx = currentPage * ITEMS_PER_PAGE;
+
+    // Calculate how many items we can show in total for this page
+    const totalItemsToShow = Math.min(endIdx, allItems.folders.length + allItems.objects.length);
+
+    // First, try to fill with folders
+    const foldersToShow = allItems.folders.slice(startIdx, Math.min(endIdx, allItems.folders.length));
+
+    // Then fill remaining slots with objects
+    const objectsStartIdx = 0;
+    const objectsEndIdx = Math.max(0, totalItemsToShow - foldersToShow.length);
+    const objectsToShow = allItems.objects.slice(objectsStartIdx, objectsEndIdx);
+
+    setDisplayedFolders(foldersToShow);
+    setDisplayedObjects(objectsToShow);
+
+    // Calculate if we have more items to show
+    const totalItems = allItems.folders.length + allItems.objects.length;
+    const currentlyShowing = foldersToShow.length + objectsToShow.length;
+    setHasMore(currentlyShowing < totalItems);
+  }, [currentPage, allItems]);
+
+  const updateItems = useCallback((newFolders: Folder[], newObjects: StorageObject[]) => {
+    setAllItems((prev) => {
+      // Use Sets to ensure uniqueness based on path for folders and id for objects
+      const uniqueFolders = new Set([...prev.folders.map((f) => f.path), ...newFolders.map((f) => f.path)]);
+      const uniqueObjects = new Set([...prev.objects.map((o) => o.id), ...newObjects.map((o) => o.id)]);
+
+      return {
+        folders: [...uniqueFolders].map(
+          (path) => newFolders.find((f) => f.path === path) || prev.folders.find((f) => f.path === path)!,
+        ),
+        objects: [...uniqueObjects].map(
+          (id) => newObjects.find((o) => o.id === id) || prev.objects.find((o) => o.id === id)!,
+        ),
+      };
+    });
   }, []);
 
   async function fetchObjects() {
+    if (isFetching) return;
+
+    setIsFetching(true);
     setIsLoading(true);
     setError(null);
+    setCurrentPage(1);
+    setAllItems({ folders: [], objects: [] });
 
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Loading objects...",
-      message: `Bucket: ${bucketName}`,
+      message: `Bucket: ${bucketName}${prefix ? ` Prefix: ${prefix}` : ""}`,
     });
 
     try {
-      const command = `${gcloudPath} storage objects list gs://${bucketName} --project=${projectId} --format=json`;
+      const command = `${gcloudPath} storage ls gs://${bucketName}${prefix ? "/" + prefix : ""}`;
 
-      // console.log(`Executing list command: ${command}`);
+      //console.log(`Executing list command: ${command}`);
       const { stdout, stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -79,36 +150,138 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
       }
 
       if (!stdout || stdout.trim() === "") {
-        setObjects([]);
+        setIsLoading(false);
         loadingToast.hide();
         showToast({
           style: Toast.Style.Success,
           title: "No objects found",
-          message: `Bucket "${bucketName}" is empty`,
+          message: `Bucket "${bucketName}${prefix ? `/${prefix}` : ""}" is empty`,
         });
-        setIsLoading(false);
         return;
       }
 
-      const result = JSON.parse(stdout);
+      const lines = stdout.trim().split("\n");
+      //console.log(`Found ${lines.length} items in response`);
 
-      const formattedObjects = result.map((obj: GCloudObject) => {
-        return {
-          id: obj.id || obj.name,
-          name: obj.name,
-          size: formatFileSize(obj.size ? parseInt(obj.size) : 0),
-          updated: obj.updated || new Date().toISOString(),
-          contentType: obj.contentType || guessContentTypeFromName(obj.name),
-        };
-      });
+      let batchFolders: Folder[] = [];
+      let batchObjects: StorageObject[] = [];
+      const BATCH_SIZE = 5;
 
-      setObjects(formattedObjects);
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) continue;
+
+        if (trimmedLine.endsWith("/")) {
+          // This is a folder
+          const folderPath = trimmedLine.replace("gs://" + bucketName + "/", "");
+          let folderName = folderPath;
+
+          if (prefix && folderPath.startsWith(prefix + "/")) {
+            folderName = folderPath.substring(prefix.length + 1);
+          }
+
+          if (folderName.endsWith("/")) {
+            folderName = folderName.slice(0, -1);
+          }
+
+          batchFolders.push({
+            name: folderName,
+            path: folderPath.slice(0, -1),
+          });
+
+          if (batchFolders.length >= BATCH_SIZE) {
+            updateItems(batchFolders, []);
+            batchFolders = [];
+          }
+        } else {
+          // This is an object
+          const objectPath = trimmedLine.replace("gs://" + bucketName + "/", "");
+          let objectName = objectPath;
+
+          if (prefix && objectPath.startsWith(prefix + "/")) {
+            objectName = objectPath.substring(prefix.length + 1);
+          }
+
+          if (objectName.includes(".gcloud_temp_empty")) {
+            continue;
+          }
+
+          if (objectName.includes("/")) {
+            const firstSegment = objectName.split("/")[0];
+            const inferredFolderPath = prefix ? `${prefix}/${firstSegment}` : firstSegment;
+
+            const folderExists =
+              allItems.folders.some((f) => f.path === inferredFolderPath) ||
+              batchFolders.some((f) => f.path === inferredFolderPath);
+
+            if (!folderExists) {
+              batchFolders.push({
+                name: firstSegment,
+                path: inferredFolderPath,
+              });
+
+              if (batchFolders.length >= BATCH_SIZE) {
+                updateItems(batchFolders, []);
+                batchFolders = [];
+              }
+            }
+            continue;
+          }
+
+          try {
+            const detailsCommand = `${gcloudPath} storage objects describe gs://${bucketName}/${objectPath} --format=json --project=${projectId}`;
+            const { stdout: detailsOutput, stderr: detailsError } = await execPromise(detailsCommand);
+
+            if (detailsError && detailsError.includes("ERROR")) {
+              console.warn(`Error getting details for ${objectName}:`, detailsError);
+              continue;
+            }
+
+            const details = JSON.parse(detailsOutput);
+
+            batchObjects.push({
+              id: details.id || details.name || objectName,
+              name: objectName,
+              size: formatFileSize(details.size ? parseInt(details.size) : 0),
+              updated: details.updated || details.timeCreated || new Date().toISOString(),
+              contentType: details.contentType || guessContentTypeFromName(objectName),
+              isFolder: false,
+            });
+
+            if (batchObjects.length >= BATCH_SIZE) {
+              updateItems([], batchObjects);
+              batchObjects = [];
+            }
+          } catch (detailsError) {
+            console.warn(`Failed to get details for ${objectName}:`, detailsError);
+            batchObjects.push({
+              id: objectName,
+              name: objectName,
+              size: "Unknown",
+              updated: new Date().toISOString(),
+              contentType: guessContentTypeFromName(objectName),
+              isFolder: false,
+            });
+
+            if (batchObjects.length >= BATCH_SIZE) {
+              updateItems([], batchObjects);
+              batchObjects = [];
+            }
+          }
+        }
+      }
+
+      // Update any remaining items in the batches
+      if (batchFolders.length > 0 || batchObjects.length > 0) {
+        updateItems(batchFolders, batchObjects);
+      }
 
       loadingToast.hide();
+      setIsLoading(false);
       showToast({
         style: Toast.Style.Success,
-        title: "Objects loaded",
-        message: `Found ${formattedObjects.length} objects`,
+        title: "Content loaded",
+        message: `Found ${allItems.folders.length} folders and ${allItems.objects.length} objects`,
       });
     } catch (error: unknown) {
       loadingToast.hide();
@@ -130,17 +303,29 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
 
       setError(`${errorTitle}: ${errorMessage}`);
 
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: errorTitle,
         message: errorMessage,
       });
     } finally {
+      setIsFetching(false);
       setIsLoading(false);
     }
   }
 
+  function loadMoreItems() {
+    setCurrentPage((prev) => prev + 1);
+  }
+
+  function navigateToFolder(folder: Folder) {
+    push(
+      <StorageObjectsView projectId={projectId} gcloudPath={gcloudPath} bucketName={bucketName} prefix={folder.path} />,
+    );
+  }
+
   async function deleteObject(objectName: string) {
+    const fullObjectPath = prefix ? `${prefix}/${objectName}` : objectName;
+
     if (
       await confirmAlert({
         title: "Delete Object",
@@ -159,9 +344,9 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
       });
 
       try {
-        const command = `${gcloudPath} storage rm gs://${bucketName}/${objectName} --project=${projectId} --quiet`;
+        const command = `${gcloudPath} storage rm gs://${bucketName}/${fullObjectPath} --project=${projectId}`;
 
-        // console.log(`Executing delete command: ${command}`);
+        //console.log(`Executing delete command: ${command}`);
         const { stderr } = await execPromise(command);
 
         if (stderr && stderr.includes("ERROR")) {
@@ -191,8 +376,7 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
           errorMessage = `The object "${objectName}" was not found. It may have been deleted already.`;
         }
 
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: errorTitle,
           message: errorMessage,
         });
@@ -200,10 +384,10 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // This function is used indirectly through CloudStorageDownloader
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   async function performDownload(objectName: string, downloadPath?: string) {
     if (downloadPath) {
-      // If downloadPath is provided, download directly to that path
       const downloadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Downloading object...",
@@ -211,9 +395,10 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
       });
 
       try {
-        // Use the correct command: gcloud storage cp for copying files from buckets
-        const command = `${gcloudPath} storage cp gs://${bucketName}/${objectName} ${downloadPath} --project=${projectId}`;
+        const fullObjectPath = prefix ? `${prefix}/${objectName}` : objectName;
+        const command = `${gcloudPath} storage cp gs://${bucketName}/${fullObjectPath} ${downloadPath} --project=${projectId}`;
 
+        //console.log(`Executing download command: ${command}`);
         const { stderr } = await execPromise(command);
 
         if (stderr && stderr.includes("ERROR")) {
@@ -230,7 +415,6 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
         downloadingToast.hide();
         console.error("Error downloading object:", error);
 
-        // Provide more user-friendly error messages for common errors
         let errorMessage = error instanceof Error ? error.message : String(error);
         let errorTitle = "Failed to download object";
 
@@ -247,14 +431,12 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
           }
         }
 
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: errorTitle,
           message: errorMessage,
         });
       }
     } else {
-      // If no downloadPath is provided, show the download picker
       const safeFileName = objectName.split("/").pop() || "download";
 
       push(
@@ -270,7 +452,6 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
   }
 
   async function uploadObject(filePath: string) {
-    // Validate the file first
     const isValid = await validateFile(filePath);
     if (!isValid) return;
 
@@ -284,10 +465,13 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
     });
 
     try {
-      // Use the correct command: gcloud storage cp for copying files to buckets
-      const command = `${gcloudPath} storage cp ${filePath} gs://${bucketName}/${fileInfo.name} --project=${projectId}`;
+      const destinationPath = prefix
+        ? `gs://${bucketName}/${prefix}/${fileInfo.name}`
+        : `gs://${bucketName}/${fileInfo.name}`;
 
-      // console.log(`Executing upload command: ${command}`);
+      const command = `${gcloudPath} storage cp ${filePath} ${destinationPath} --project=${projectId}`;
+
+      //console.log(`Executing upload command: ${command}`);
       const { stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -298,7 +482,7 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
       showToast({
         style: Toast.Style.Success,
         title: "Upload complete",
-        message: fileInfo.name,
+        message: `Uploaded to ${destinationPath}`,
       });
 
       fetchObjects();
@@ -306,7 +490,6 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
       uploadingToast.hide();
       console.error("Error uploading object:", error);
 
-      // Provide more user-friendly error messages for common errors
       let errorMessage = error instanceof Error ? error.message : String(error);
       let errorTitle = "Failed to upload object";
 
@@ -321,15 +504,13 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
         errorMessage = `Cannot read from ${filePath}. Please check your file permissions.`;
       }
 
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: errorTitle,
         message: errorMessage,
       });
     }
   }
 
-  // Modify the selectAndUploadFile function to use the CloudStorageUploader component
   async function selectAndUploadFile() {
     push(
       <CloudStorageUploader
@@ -340,21 +521,21 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
     );
   }
 
-  // Add a new function to handle direct file download using the native save dialog
   async function directDownloadObject(objectName: string) {
+    const fullObjectPath = prefix ? `${prefix}/${objectName}` : objectName;
     const safeFileName = objectName.split("/").pop() || "download";
 
     const downloadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Downloading object...",
-      message: objectName,
+      message: fullObjectPath,
     });
 
     try {
       const tempDownloadPath = join(homedir(), "Downloads", safeFileName);
-      const command = `${gcloudPath} storage cp gs://${bucketName}/${objectName} ${tempDownloadPath} --project=${projectId}`;
+      const command = `${gcloudPath} storage cp gs://${bucketName}/${fullObjectPath} ${tempDownloadPath} --project=${projectId}`;
 
-      // console.log(`Executing download command: ${command}`);
+      //console.log(`Executing download command: ${command}`);
       const { stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -380,38 +561,39 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
           errorMessage = "You don't have permission to download this object.";
         } else if (errorMessage.includes("not found") || errorMessage.includes("404")) {
           errorTitle = "Object not found";
-          errorMessage = `The object "${objectName}" was not found.`;
+          errorMessage = `The object "${fullObjectPath}" was not found.`;
         } else if (errorMessage.includes("EACCES") || errorMessage.includes("access denied")) {
           errorTitle = "Access denied";
           errorMessage = `Cannot write to the download location. Please check your file permissions.`;
         }
       }
 
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: errorTitle,
         message: errorMessage,
       });
     }
   }
 
-  function getContentTypeIcon(contentType: string) {
+  function getContentTypeIcon(contentType: string): Image.Source {
     if (contentType.startsWith("image/")) {
-      return { source: Icon.Image, tintColor: Color.Purple };
+      return Icon.Image;
     } else if (contentType.startsWith("text/")) {
-      return { source: Icon.Text, tintColor: Color.Blue };
+      return Icon.Text;
     } else if (contentType.startsWith("application/pdf")) {
-      return { source: Icon.Document, tintColor: Color.Red };
+      return Icon.Document;
     } else if (contentType.startsWith("application/json")) {
-      return { source: Icon.Code, tintColor: Color.Yellow };
+      return Icon.Code;
     } else if (contentType.startsWith("application/")) {
-      return { source: Icon.Download, tintColor: Color.Green };
+      return Icon.Download;
     } else {
-      return { source: Icon.Document, tintColor: Color.PrimaryText };
+      return Icon.Document;
     }
   }
 
   async function viewObjectDetails(objectName: string) {
+    const fullObjectPath = prefix ? `${prefix}/${objectName}` : objectName;
+
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Loading object details...",
@@ -419,9 +601,9 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
     });
 
     try {
-      const command = `${gcloudPath} storage objects describe gs://${bucketName}/${objectName} --project=${projectId} --format=json`;
+      const command = `${gcloudPath} storage objects describe gs://${bucketName}/${fullObjectPath} --format=json --project=${projectId}`;
 
-      // console.log(`Executing describe command: ${command}`);
+      //console.log(`Executing describe command: ${command}`);
       const { stdout, stderr } = await execPromise(command);
 
       if (stderr && stderr.includes("ERROR")) {
@@ -435,7 +617,7 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
       const detailsMarkdown =
         `# Object Details\n\n` +
         `**Name:** ${objectName}\n\n` +
-        `**Bucket:** ${bucketName}\n\n` +
+        `**Bucket:** ${bucketName}${prefix ? `/${prefix}` : ""}\n\n` +
         `**Size:** ${formatFileSize(objectData.size ? parseInt(objectData.size) : 0)}\n\n` +
         `**Content Type:** ${objectData.contentType || guessContentTypeFromName(objectName)}\n\n` +
         `**Created:** ${objectData.timeCreated ? new Date(objectData.timeCreated).toLocaleString() : "Unknown"}\n\n` +
@@ -451,6 +633,7 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
             <Detail.Metadata>
               <Detail.Metadata.Label title="Name" text={objectName} />
               <Detail.Metadata.Label title="Bucket" text={bucketName} />
+              {prefix && <Detail.Metadata.Label title="Folder" text={prefix} />}
               <Detail.Metadata.Separator />
               <Detail.Metadata.Label
                 title="Size"
@@ -487,7 +670,7 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
                       projectId={projectId}
                       gcloudPath={gcloudPath}
                       bucketName={bucketName}
-                      objectName={objectName}
+                      objectName={fullObjectPath}
                     />,
                   )
                 }
@@ -522,8 +705,7 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
       console.error("Error fetching object details:", error);
 
       const errorMessage = error instanceof Error ? error.message : String(error);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to fetch object details",
         message: errorMessage,
       });
@@ -567,6 +749,106 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
     return contentTypeMap[ext] || "application/octet-stream";
   }
 
+  async function createFolder(folderName: string) {
+    if (!folderName) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid folder name",
+        message: "Please provide a valid folder name",
+      });
+      return;
+    }
+
+    let normalizedName = folderName.trim();
+    normalizedName = normalizedName.replace(/^\/+|\/+$/g, "");
+
+    const folderPath = normalizedName + "/";
+
+    let fullPath;
+    if (prefix) {
+      fullPath = `${prefix}/${folderPath}`;
+    } else {
+      fullPath = folderPath;
+    }
+
+    const gcsPath = `gs://${bucketName}/${fullPath}`;
+
+    const creatingToast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Creating folder...",
+      message: fullPath,
+    });
+
+    try {
+      const tempFile = join(homedir(), ".gcloud_temp_empty");
+      await execPromise(`touch ${tempFile}`);
+
+      const command = `${gcloudPath} storage cp ${tempFile} ${gcsPath} --project=${projectId}`;
+      //console.log(`Creating folder with command: ${command}`);
+
+      const { stderr } = await execPromise(command);
+
+      await execPromise(`rm ${tempFile}`);
+
+      if (stderr && stderr.includes("ERROR")) {
+        throw new Error(stderr);
+      }
+
+      creatingToast.hide();
+      showToast({
+        style: Toast.Style.Success,
+        title: "Folder created",
+        message: `Created folder: ${fullPath}`,
+      });
+
+      fetchObjects();
+    } catch (error: unknown) {
+      creatingToast.hide();
+      console.error("Error creating folder:", error);
+
+      let errorMessage = error instanceof Error ? error.message : String(error);
+      let errorTitle = "Failed to create folder";
+
+      if (errorMessage.includes("Permission denied") || errorMessage.includes("403")) {
+        errorTitle = "Permission denied";
+        errorMessage = "You don't have permission to create folders in this bucket.";
+      }
+
+      showFailureToast({
+        title: errorTitle,
+        message: errorMessage,
+      });
+    }
+  }
+
+  function showCreateFolderForm() {
+    push(
+      <Form
+        navigationTitle="Create Folder"
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm
+              title="Create Folder"
+              onSubmit={({ name }) => {
+                pop();
+                createFolder(name);
+              }}
+            />
+            <Action title="Cancel" onAction={pop} shortcut={{ modifiers: ["cmd"], key: "escape" }} />
+          </ActionPanel>
+        }
+      >
+        <Form.TextField
+          id="name"
+          title="Folder Name"
+          placeholder="my-folder"
+          info={`Creates a folder in ${prefix ? prefix + "/" : ""}`}
+          autoFocus
+        />
+      </Form>,
+    );
+  }
+
   if (error) {
     return (
       <List isLoading={false}>
@@ -584,12 +866,15 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
     );
   }
 
+  const showCurrentPath = prefix ? `${bucketName}/${prefix}` : bucketName;
+
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search objects..."
-      navigationTitle={`Objects in ${bucketName}`}
+      navigationTitle={`Objects in ${showCurrentPath}`}
       isShowingDetail
+      searchBarAccessory={<ServiceViewBar projectId={projectId} gcloudPath={gcloudPath} serviceName="storage" />}
       actions={
         <ActionPanel>
           <Action
@@ -599,10 +884,16 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
             onAction={selectAndUploadFile}
           />
           <Action
+            title="Create Folder"
+            icon={Icon.NewFolder}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+            onAction={showCreateFolderForm}
+          />
+          <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={fetchObjects}
+            onAction={() => fetchObjects()}
           />
           <Action
             title="Back to Buckets"
@@ -613,10 +904,10 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
         </ActionPanel>
       }
     >
-      {objects.length === 0 && !isLoading ? (
+      {displayedFolders.length === 0 && displayedObjects.length === 0 && !isLoading ? (
         <List.EmptyView
-          title="No objects found"
-          description={`Bucket "${bucketName}" is empty. Upload a file to get started.`}
+          title="No items found"
+          description={`Bucket "${showCurrentPath}" is empty. Upload a file or create a folder to get started.`}
           icon={{ source: Icon.Folder, tintColor: Color.Blue }}
           actions={
             <ActionPanel>
@@ -626,7 +917,21 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 onAction={selectAndUploadFile}
               />
-              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchObjects} />
+              <Action
+                title="Create Folder"
+                icon={Icon.NewFolder}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                onAction={showCreateFolderForm}
+              />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => fetchObjects()} />
+              {prefix && (
+                <Action
+                  title="Go Back"
+                  icon={Icon.ArrowLeft}
+                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  onAction={pop}
+                />
+              )}
               <Action
                 title="Back to Buckets"
                 icon={Icon.ArrowLeft}
@@ -637,33 +942,67 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
           }
         />
       ) : (
-        <List.Section title={`Objects in ${bucketName}`} subtitle={`${objects.length} objects`}>
-          {objects.map((obj) => (
+        <List.Section title="Contents">
+          {prefix && (
+            <List.Item
+              title=".."
+              subtitle="Parent Directory"
+              icon={Icon.ArrowUp}
+              accessories={[{ text: "Go back" }]}
+              actions={
+                <ActionPanel>
+                  <Action title="Go Up" icon={Icon.ArrowUp} onAction={pop} />
+                </ActionPanel>
+              }
+            />
+          )}
+
+          {displayedFolders.map((folder) => (
+            <List.Item
+              key={folder.path}
+              title={folder.name}
+              subtitle="Folder"
+              icon={Icon.Folder}
+              accessories={[{ icon: Icon.ChevronRight }]}
+              actions={
+                <ActionPanel>
+                  <Action title="Open Folder" icon={Icon.Folder} onAction={() => navigateToFolder(folder)} />
+                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => fetchObjects()} />
+                  <Action
+                    title="Upload File"
+                    icon={Icon.Upload}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    onAction={selectAndUploadFile}
+                  />
+                  <Action
+                    title="Create Folder"
+                    icon={Icon.NewFolder}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                    onAction={showCreateFolderForm}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+
+          {displayedObjects.map((obj) => (
             <List.Item
               key={obj.id}
               title={obj.name}
               subtitle={obj.contentType}
-              icon={getContentTypeIcon(obj.contentType)}
-              accessories={[
-                { text: obj.size, tooltip: "Size" },
-                { text: new Date(obj.updated).toLocaleDateString(), tooltip: "Last Updated" },
-              ]}
+              icon={{ source: getContentTypeIcon(obj.contentType) }}
+              accessories={[{ text: obj.size }]}
               detail={
                 <List.Item.Detail
-                  markdown={`# ${obj.name.split("/").pop() || obj.name}\n\n**Size:** ${obj.size}\n\n**Content Type:** ${obj.contentType}\n\n**Last Updated:** ${new Date(obj.updated).toLocaleString()}`}
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label title="Name" text={obj.name} />
-                      <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label title="Size" text={obj.size} />
-                      <List.Item.Detail.Metadata.Label title="Content Type" text={obj.contentType} />
+                      <List.Item.Detail.Metadata.Label title="Type" text={obj.contentType} />
                       <List.Item.Detail.Metadata.Label
-                        title="Last Updated"
+                        title="Last Modified"
                         text={new Date(obj.updated).toLocaleString()}
                       />
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label title="Bucket" text={bucketName} />
-                      <List.Item.Detail.Metadata.Label title="Project" text={projectId} />
                     </List.Item.Detail.Metadata>
                   }
                 />
@@ -699,17 +1038,35 @@ export default function StorageObjectsView({ projectId, gcloudPath, bucketName }
                     shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
                     onAction={() => deleteObject(obj.name)}
                   />
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchObjects} />
+                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => fetchObjects()} />
                   <Action
                     title="Upload File"
                     icon={Icon.Upload}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
                     onAction={selectAndUploadFile}
                   />
+                  <Action
+                    title="Create Folder"
+                    icon={Icon.NewFolder}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                    onAction={showCreateFolderForm}
+                  />
                 </ActionPanel>
               }
             />
           ))}
+
+          {hasMore && (
+            <List.Item
+              title="Load More..."
+              icon={Icon.Plus}
+              actions={
+                <ActionPanel>
+                  <Action title="Load More" icon={Icon.Plus} onAction={loadMoreItems} />
+                </ActionPanel>
+              }
+            />
+          )}
         </List.Section>
       )}
     </List>

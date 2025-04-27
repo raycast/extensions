@@ -92,7 +92,6 @@
       "description": "Skips to the next chapter in YouTube Music.",
       "mode": "no-view",
       "disabledByDefault": true
-
     },
     {
       "name": "previous-chapter",
@@ -122,5 +121,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

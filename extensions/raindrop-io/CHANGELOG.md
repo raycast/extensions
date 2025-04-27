@@ -1,12 +1,17 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2025-04-22
+
+- Add option to fetch all results, i.e. perform multiple API requests for each result page
+- Set maximum items for raindrop requests
+
 ## [Enhancements] - 2025-02-05
 
-Add option to specify sorting behavior
+- Add option to specify sorting behavior
 
 ## [Enhancements] - 2025-01-05
 
-Add tags display preference and update bookmark item rendering
+- Add tags display preference and update bookmark item rendering
 
 ## [Enhancements] - 2025-01-02
 

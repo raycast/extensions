@@ -17,12 +17,10 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
   const [service, setService] = useState<ComputeService | null>(null);
 
   useEffect(() => {
-    // Initialize service with provided gcloudPath and projectId
     const computeService = new ComputeService(gcloudPath, projectId);
     setService(computeService);
 
     const initializeData = async () => {
-      // Show initial loading toast
       const loadingToast = showToast({
         style: Toast.Style.Animated,
         title: "Loading Compute Engine disks...",
@@ -30,12 +28,9 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
       });
 
       try {
-        // Fetch disks immediately - don't set loading state right away
-        // which allows rendering a loading state with empty list as fallback
         const fetchedDisks = await computeService.getDisks();
         setDisks(fetchedDisks);
 
-        // Then fetch zones in the background
         fetchZones(computeService);
 
         loadingToast.then((toast) => toast.hide());
@@ -66,7 +61,6 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
       setZones(zonesList);
     } catch (error: Error | unknown) {
       console.error("Error fetching zones:", error);
-      // Don't show error toast for zones, as it's not critical
     }
   };
 
@@ -108,7 +102,6 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
   }, [service, fetchDisks]);
 
   const handleZoneChange = async (newZone: string | undefined) => {
-    // Convert "all" to undefined for filtering
     const zoneFilter = newZone === "all" ? undefined : newZone;
     setSelectedZone(zoneFilter);
 
@@ -144,7 +137,6 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
     }
   };
 
-  // Filter disks based on search text
   const filteredDisks = disks.filter((disk) => disk.name.toLowerCase().includes(searchText.toLowerCase()));
 
   const getStatusColor = (status: string) => {
@@ -159,13 +151,11 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
   };
 
   const formatZone = (zone: string) => {
-    // Extract zone name from full path
     const parts = zone.split("/");
     return parts[parts.length - 1];
   };
 
   const formatDiskType = (type: string) => {
-    // Extract disk type from full path
     const parts = type.split("/");
     return parts[parts.length - 1];
   };
@@ -173,7 +163,6 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
   const getAttachedToText = (users?: string[]) => {
     if (!users || users.length === 0) return "Not attached";
 
-    // Extract instance names from full paths
     return users
       .map((user) => {
         const parts = user.split("/");

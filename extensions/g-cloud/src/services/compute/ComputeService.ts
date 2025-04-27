@@ -413,20 +413,29 @@ export class ComputeService {
    * Stop a compute instance
    * @param name Instance name
    * @param zone Zone of the instance
-   * @returns Promise indicating success
+   * @returns Promise indicating success and VM status information
    */
-  async stopInstance(name: string, zone: string): Promise<boolean> {
+  async stopInstance(name: string, zone: string): Promise<{ success: boolean; isTimedOut?: boolean }> {
     try {
       const command = `compute instances stop ${name} --zone=${zone}`;
       await executeGcloudCommand(this.gcloudPath, command, this.projectId);
       this.clearCache("instances");
-      return true;
+      return { success: true };
     } catch (error: unknown) {
+      // Check if this is a timeout error during VM stopping
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes("timed out") && errorMessage.includes("stop")) {
+        // VMs can take a while to stop, and we might timeout but the operation continues
+        // This is expected behavior for some instances, so mark as "stopping"
+        this.clearCache("instances");
+        return { success: true, isTimedOut: true };
+      }
+
       showFailureToast({
         title: "Failed to Stop Instance",
-        message: error instanceof Error ? error.message : "Unknown error",
+        message: errorMessage,
       });
-      return false;
+      return { success: false };
     }
   }
 
