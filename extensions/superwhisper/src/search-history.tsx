@@ -43,6 +43,16 @@ ${recording.meta.llmResult}
                 title="Show in Finder"
                 path={join(homedir(), "Documents", "superwhisper", "recordings", recording.directory)}
               />
+              <Action.CopyToClipboard
+                title="Copy Raw Result"
+                content={recording.meta.rawResult}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              />
+              <Action.CopyToClipboard
+                title="Copy LLM Result"
+                content={recording.meta.llmResult}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+              />
             </ActionPanel>
           }
         />
