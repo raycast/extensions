@@ -1,9 +1,11 @@
 import { open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { isSuperwhisperInstalled } from "./utils";
-import { readdirSync, readFileSync } from "fs";
+import { readdirSync, readFileSync, existsSync, statSync } from "fs";
 import { Mode } from "./select-mode";
 import { getPreferenceValues } from "@raycast/api";
+import { homedir } from "os";
+import { join } from "path";
 
 export function useModes() {
   const {
@@ -40,4 +42,55 @@ export function useModes() {
   );
 
   return { modes, isLoading: (!modes && !error) || isLoading, error };
+}
+
+export function useRecordings() {
+  const {
+    data: recordings,
+    isLoading,
+    error,
+  } = useCachedPromise(
+    async () => {
+      const recordingsPath = join(homedir(), "Documents", "superwhisper", "recordings");
+
+      if (!existsSync(recordingsPath)) {
+        throw new Error("Recording directory not found. Please make a recording first.");
+      }
+
+      const directories = readdirSync(recordingsPath)
+        .filter((dir) => /^\d+$/.test(dir))
+        .map((dir) => ({
+          dir,
+          path: join(recordingsPath, dir),
+        }));
+
+      if (directories.length === 0) {
+        throw new Error("No recordings found. Please make a recording first.");
+      }
+
+      const recordingsList = directories.map((directory) => {
+        const metaPath = join(directory.path, "meta.json");
+        const meta = JSON.parse(readFileSync(metaPath, "utf-8"));
+        const stats = statSync(metaPath);
+
+        return {
+          directory: directory.dir,
+          meta,
+          timestamp: stats.mtime,
+        };
+      });
+
+      recordingsList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      return recordingsList;
+    },
+    [],
+    {
+      failureToastOptions: {
+        title: "Failed to load recordings",
+        message: "Please make sure you have made recordings first.",
+      },
+    },
+  );
+
+  return { recordings, isLoading: (!recordings && !error) || isLoading, error };
 }
