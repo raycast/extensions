@@ -3,11 +3,11 @@
   "name": "gmail-single-email",
   "title": "Gmail - Single Email",
   "description": "View the single latest email from your Gmail inbox",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "icon": "gmail.png",
-  "author": "tonka3000",
+  "author": "darksoothingshadow",
   "contributors": [
-    "darksoothingshadow"
+    "tonka3000"
   ],
   "categories": [
     "Communication"
