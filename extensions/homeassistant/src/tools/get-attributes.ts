@@ -26,7 +26,6 @@ type Input = {
 /**
  * Get full state and attributes for specific entities from Home Assistant.
  * IMPORTANT: Collect ALL needed entity IDs and request them in a SINGLE call.
- * DO NOT make multiple calls to this tool for different entities in the same conversation turn.
  * @param {Input} input The arguments containing the entity IDs.
  * @param {string[]} input.entity_ids An array of entity IDs to fetch attributes for.
  * @returns {Promise<{ entities: Entity[] }>}

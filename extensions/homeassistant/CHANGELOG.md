@@ -6,6 +6,7 @@
 - Added `get-attributes` tool to fetch entity states and attributes
 - Enhanced `run-service` tool to ensure each call only contains entities that need the same operation
 - Added comprehensive AI instructions for handling Home Assistant device control
+- Added a new example prompt to the AI Extension
 
 ## [Update] - 2025-03-13
 
