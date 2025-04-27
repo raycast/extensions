@@ -26,7 +26,17 @@ export default function Command() {
           key={recording.directory}
           icon={Icon.Document}
           title={format(recording.timestamp, "yyyy/MM/dd HH:mm:ss")}
-          detail={<List.Item.Detail markdown={recording.meta.rawResult} />}
+          detail={
+            <List.Item.Detail
+              markdown={`
+### Raw Result
+${recording.meta.rawResult}
+
+### LLM Result
+${recording.meta.llmResult}
+`}
+            />
+          }
           actions={
             <ActionPanel>
               <Action.ShowInFinder
