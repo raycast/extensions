@@ -9,7 +9,6 @@ interface Recording {
   directory: string;
   meta: {
     rawResult: string;
-    // その他のメタデータフィールド
   };
   timestamp: Date;
 }
@@ -58,7 +57,6 @@ export default function Command() {
         };
       });
 
-      // 日付の新しい順にソート
       recordingsList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
       setRecordings(recordingsList);
     } catch (error) {
