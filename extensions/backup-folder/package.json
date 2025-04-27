@@ -53,13 +53,13 @@
       "placeholder": "e.g., 30"
     },
     {
-      "name": "moveToTrash",
-      "title": "Move Old Backups to Trash",
-      "description": "Instead of permanently deleting, move files older than retention period to the system Trash.",
+      "title": "Delete Permanently",
+      "label": "Delete permanently instead of moving to Trash",
+      "description": "Check this to permanently delete files older than the retention period. If unchecked (default), files will be moved to the system Trash.",
       "type": "checkbox",
-      "label": "Move to Trash instead of deleting",
-      "required": false,
-      "default": true
+      "name": "deletePermanently",
+      "default": false,
+      "required": false
     }
   ],
   "commands": [

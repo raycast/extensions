@@ -1,6 +1,5 @@
-import { getPreferenceValues, showToast, Toast, LocalStorage, showHUD } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, LocalStorage, showHUD, trash } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { spawn } from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
@@ -14,7 +13,7 @@ interface Preferences {
   backupDestination: string;
   archivePrefix?: string;
   retentionDays?: string;
-  moveToTrash?: boolean;
+  deletePermanently?: boolean; // Changed from moveToTrash
 }
 
 // --- Utility Functions ---
@@ -58,54 +57,6 @@ function parseTimestamp(timestampStr: string): Date | null {
   return date;
 }
 
-/**
- * Moves a file to the system trash (macOS `.Trash`) using the native 'mv' command.
- * Handles potential filename collisions in the Trash directory by appending a counter.
- * @param filePath The absolute path to the file to trash.
- * @throws Error if the 'mv' command fails.
- */
-async function moveToTrashUsingMV(filePath: string): Promise<void> {
-  const trashPath = path.join(os.homedir(), ".Trash");
-  const baseName = path.basename(filePath);
-  let destinationPath = path.join(trashPath, baseName); // Initial target path in Trash
-
-  // Check for existing file in Trash and append counter if needed
-  let counter = 0;
-  while (fs.existsSync(destinationPath)) {
-    counter++;
-    const ext = path.extname(baseName);
-    const nameWithoutExt = baseName.substring(0, baseName.length - ext.length);
-    // Append counter like "filename 1.txt", "filename 2.txt" etc.
-    destinationPath = path.join(trashPath, `${nameWithoutExt} ${counter}${ext}`);
-  }
-
-  console.log(`Using 'mv' to move to Trash: ${path.basename(filePath)} -> ${path.basename(destinationPath)}`);
-
-  return new Promise((resolve, reject) => {
-    const child = spawn("mv", [filePath, destinationPath], { stdio: "pipe" }); // Pipe stdio to capture errors
-    let stderrOutput = "";
-
-    child.stderr?.on("data", (data) => {
-      stderrOutput += data.toString();
-    });
-
-    child.on("error", (spawnError) => {
-      console.error(`Spawn error for 'mv' command on ${path.basename(filePath)}:`, spawnError);
-      reject(new Error(`Failed to start 'mv' process: ${spawnError.message}`));
-    });
-
-    child.on("close", (code) => {
-      if (code === 0) {
-        resolve(); // Command succeeded
-      } else {
-        const errorMsg = `'mv' command failed with exit code ${code} for ${path.basename(filePath)}. ${stderrOutput ? `Stderr: ${stderrOutput.trim()}` : ""}`;
-        console.error(errorMsg);
-        reject(new Error(errorMsg));
-      }
-    });
-  });
-}
-
 // --- Raycast Command Export for Cleanup ---
 
 export default async function cleanupCommand() {
@@ -131,8 +82,8 @@ export default async function cleanupCommand() {
       throw new Error("Source directory preference is required to determine the default archive prefix.");
 
     const backupDestination = resolvePath(prefs.backupDestination);
-    const sourceDirectory = prefs.sourceDirectory ? resolvePath(prefs.sourceDirectory) : ""; // Resolve only if needed
-    const shouldMoveToTrash = prefs.moveToTrash ?? true; // Default to moving to trash
+    const sourceDirectory = prefs.sourceDirectory ? resolvePath(prefs.sourceDirectory) : "";
+    const shouldDeletePermanently = prefs.deletePermanently ?? false; // Default to NOT deleting permanently
 
     let resolvedArchivePrefix = prefs.archivePrefix?.trim();
     if (!resolvedArchivePrefix) {
@@ -156,7 +107,7 @@ export default async function cleanupCommand() {
       throw new Error(`Backup destination directory not found or invalid: ${backupDestination}`);
     }
     console.log(
-      `Config: Retention=${retentionDays}d, Dest=${path.basename(backupDestination)}, Prefix=${resolvedArchivePrefix}, Trash=${shouldMoveToTrash}`,
+      `Config: Retention=${retentionDays}d, Dest=${path.basename(backupDestination)}, Prefix=${resolvedArchivePrefix}, PermanentDelete=${shouldDeletePermanently}`,
     );
 
     // --- 5. Calculate Cutoff Timestamp ---
@@ -212,23 +163,24 @@ export default async function cleanupCommand() {
 
     // --- 8. Process Files (Delete or Trash) ---
     if (filesToDelete.length > 0) {
-      const actionVerb = shouldMoveToTrash ? "Moving to Trash" : "Deleting";
+      const actionVerb = shouldDeletePermanently ? "Deleting Permanently" : "Moving to Trash";
       currentToast.message = `${actionVerb} ${filesToDelete.length} old backup file${filesToDelete.length === 1 ? "" : "s"}...`;
       filesToDelete.sort((a, b) => a.date.getTime() - b.date.getTime()); // Process oldest first
 
       for (const fileInfo of filesToDelete) {
         const baseName = path.basename(fileInfo.path);
         try {
-          if (shouldMoveToTrash) {
-            await moveToTrashUsingMV(fileInfo.path);
-          } else {
+          if (shouldDeletePermanently) {
             console.log(`Permanently deleting: ${baseName}`);
-            fs.unlinkSync(fileInfo.path);
+            fs.unlinkSync(fileInfo.path); // Use unlinkSync for permanent delete
+          } else {
+            console.log(`Moving to Trash: ${baseName}`);
+            await trash(fileInfo.path); // Use @raycast/api trash function
           }
           filesProcessed++;
         } catch (err) {
           errorsProcessing++;
-          const errorAction = shouldMoveToTrash ? "TRASH VIA MV" : "DELETE";
+          const errorAction = shouldDeletePermanently ? "DELETE PERMANENTLY" : "TRASH";
           console.error(`!!! FAILED TO ${errorAction}: ${baseName} !!!`);
           console.error("!!! Error Details:", err); // Log the full error
         }
@@ -237,7 +189,7 @@ export default async function cleanupCommand() {
 
     // --- 9. Show Final Result Toast ---
     await currentToast.hide(); // Hide progress toast first
-    const pastTenseAction = shouldMoveToTrash ? "Moved to Trash" : "Deleted";
+    const pastTenseAction = shouldDeletePermanently ? "Deleted Permanently" : "Moved to Trash";
     let finalMessage = "";
 
     if (filesProcessed === filesToDelete.length && filesProcessed > 0) {
@@ -252,7 +204,7 @@ export default async function cleanupCommand() {
     }
 
     if (errorsProcessing > 0 && filesProcessed < filesToDelete.length) {
-      const errorVerb = shouldMoveToTrash ? "trash" : "delete";
+      const errorVerb = shouldDeletePermanently ? "delete permanently" : "trash";
       finalMessage += ` Failed to ${errorVerb} ${errorsProcessing} file${errorsProcessing === 1 ? "" : "s"}. See logs for details.`;
     }
 
@@ -292,7 +244,6 @@ export default async function cleanupCommand() {
       } catch (removeLockError) {
         console.error("!!! CRITICAL: Failed to remove cleanup lock !!!");
         console.error("Lock Removal Error:", removeLockError);
-        // Consider notifying user differently if lock isn't released?
       }
     } else {
       console.log("Cleanup lock was not acquired, skipping removal.");
