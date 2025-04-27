@@ -85,14 +85,19 @@ function AddCustomResolutionForm({
         // Check if window exists by attempting to get window info
         try {
           // Try to get window info, this will throw an error if no window is focused
-          await getWindowInfo();
+          const windowInfo = await getWindowInfo();
+          console.log("Window info obtained for custom resolution:", windowInfo);
 
-          // Trigger refresh
+          // Trigger refresh first
           onCustomResolutionAdded();
 
-          // If window info is successfully obtained, close Raycast window and apply resolution
+          // If window info is successfully obtained, apply resolution immediately
           await closeMainWindow();
+
+          // Use the provided callback to resize the window
           await onResizeWindow(parsedWidth, parsedHeight);
+
+          // No need to return or pop here as the window is closed
         } catch (error) {
           console.error("Error checking window:", error);
 
@@ -114,8 +119,6 @@ function AddCustomResolutionForm({
             });
           }
         }
-
-        return;
       } else {
         // Resolution already exists - show toast but keep form open
         const title = existsInPredefined
@@ -218,6 +221,166 @@ async function getWindowInfo(): Promise<{ x: number; y: number; width: number; h
   }
 }
 
+// Get screen scale factor
+async function getScreenScaleFactor(): Promise<number> {
+  try {
+    // Use a more reliable approach with system_profiler command
+    const getScaleFactorScript = `
+      do shell script "system_profiler SPDisplaysDataType | grep -E 'Resolution|Retina'"
+    `;
+
+    const result = await runAppleScript(getScaleFactorScript);
+    console.log("Screen info for scale detection:", result);
+
+    // Try to extract resolution information from the result
+    // Example output: "Resolution: 3456 x 2234 Retina" or "Resolution: 3456 x 2234 (1728 x 1117) @ 60Hz"
+    const resolutionMatch = result.match(/Resolution:\s+(\d+)\s+x\s+(\d+)/i);
+    const scaledResolutionMatch = result.match(/\((\d+)\s+x\s+(\d+)\)/i);
+
+    if (resolutionMatch && scaledResolutionMatch) {
+      // If we have both native and scaled resolution, calculate scale factor
+      const nativeWidth = parseInt(resolutionMatch[1], 10);
+      const scaledWidth = parseInt(scaledResolutionMatch[1], 10);
+
+      if (nativeWidth > 0 && scaledWidth > 0) {
+        const scaleFactor = nativeWidth / scaledWidth;
+        console.log(`Detected scale factor: ${scaleFactor} (native: ${nativeWidth}, scaled: ${scaledWidth})`);
+        return scaleFactor;
+      }
+    }
+
+    // If we can't extract specific values, check for "Retina" keyword
+    if (result.toLowerCase().includes("retina")) {
+      console.log("Detected Retina display, using scale factor 2.0");
+      return 2.0;
+    }
+
+    // Default to 1.0 if no scaling is detected
+    console.log("Could not detect scale factor, using default 1.0");
+    return 1.0;
+  } catch (error) {
+    console.error("Error detecting screen scale factor:", error);
+    // Default to 1.0 on error
+    return 1.0;
+  }
+}
+
+// Get primary screen dimensions with scale factor consideration
+async function getPrimaryScreenDimensions(): Promise<{ width: number; height: number; scaleFactor: number }> {
+  try {
+    // Get scale factor first
+    const scaleFactor = await getScreenScaleFactor();
+
+    // Use AppleScript to get screen dimensions with a single comma as delimiter
+    const getScreenSizeScript = `
+      tell application "Finder"
+        set desktopBounds to bounds of window of desktop
+        set screenWidth to item 3 of desktopBounds as integer
+        set screenHeight to item 4 of desktopBounds as integer
+        return (screenWidth as string) & "," & (screenHeight as string)
+      end tell
+    `;
+
+    const screenInfoResult = await runAppleScript(getScreenSizeScript);
+    console.log("Screen info result:", screenInfoResult);
+
+    // Parse result using comma as delimiter
+    const parts = screenInfoResult.split(",");
+    if (parts.length >= 2) {
+      const width = parseInt(parts[0].trim(), 10);
+      const height = parseInt(parts[1].trim(), 10);
+
+      if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
+        console.log(`Primary screen dimensions: ${width}×${height} (scale factor: ${scaleFactor})`);
+        return { width, height, scaleFactor };
+      }
+    }
+
+    // If delimiter parsing fails, try extracting all numbers with regex
+    const dimensions = screenInfoResult.match(/\d+/g);
+    if (dimensions && dimensions.length >= 2) {
+      const width = parseInt(dimensions[0], 10);
+      const height = parseInt(dimensions[1], 10);
+
+      if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
+        console.log(`Primary screen dimensions (via regex): ${width}×${height} (scale factor: ${scaleFactor})`);
+        return { width, height, scaleFactor };
+      }
+    }
+
+    // If all parsing methods fail, use default dimensions
+    const defaultDimensions = getDefaultScreenSize();
+    return { ...defaultDimensions, scaleFactor };
+  } catch (error) {
+    console.error("Error getting screen dimensions:", error);
+    // Return default screen size if any error occurs
+    const defaultDimensions = getDefaultScreenSize();
+    return { ...defaultDimensions, scaleFactor: 1.0 };
+  }
+}
+
+// Helper function to get default screen size
+function getDefaultScreenSize(): { width: number; height: number } {
+  // Common MacBook resolutions
+  const commonResolutions = [
+    { width: 2560, height: 1600 }, // MacBook Pro 16"
+    { width: 2560, height: 1440 }, // Common external monitors
+    { width: 1920, height: 1080 }, // Full HD
+    { width: 1440, height: 900 }, // Older MacBooks
+  ];
+
+  // Return first reasonable resolution
+  console.log("Using default screen size");
+  return commonResolutions[0];
+}
+
+// Maximize window to screen size
+async function maximizeWindow() {
+  try {
+    // Save current window size for later restoration
+    const currentWindowInfo = await getWindowInfo();
+    const { width: currentWidth, height: currentHeight } = currentWindowInfo;
+
+    // Store current size in local storage
+    const sizeData = { width: currentWidth, height: currentHeight, timestamp: Date.now() };
+    console.log("Saving window size before maximizing:", JSON.stringify(sizeData));
+    await LocalStorage.setItem("previous-window-size", JSON.stringify(sizeData));
+
+    // Get screen dimensions
+    const { width, height } = await getPrimaryScreenDimensions();
+
+    // Close main window first to avoid showing loading state
+    await closeMainWindow();
+
+    const maximizeWindowScript = `
+      tell application "System Events"
+        set frontApp to first application process whose frontmost is true
+        set frontAppName to name of frontApp
+        tell process frontAppName
+          set frontWindow to first window
+          set position of frontWindow to {0, 0}
+          set size of frontWindow to {${width}, ${height}}
+        end tell
+      end tell
+    `;
+
+    // Apply the maximize operation
+    await runAppleScript(maximizeWindowScript);
+    await showHUD(`🔲 Window Maximized`);
+    await popToRoot();
+  } catch (error) {
+    console.error("Error maximizing window:", error);
+
+    // Check if the error is related to no focused window
+    const errorStr = String(error);
+    if (errorStr.includes("frontmost") || errorStr.includes("window") || errorStr.includes("process")) {
+      await showHUD("🛑 No focused window");
+    } else {
+      await showHUD("🛑 Failed to maximize window");
+    }
+  }
+}
+
 export default function ResizeWindow() {
   const [isLoading, setIsLoading] = useState(true);
   const [customResolutions, setCustomResolutions] = useState<Resolution[]>([]);
@@ -291,13 +454,57 @@ export default function ResizeWindow() {
         return;
       }
 
+      // Get screen dimensions to check if requested size fits
+      const { width: screenWidth, height: screenHeight, scaleFactor } = await getPrimaryScreenDimensions();
+      console.log(`Screen dimensions: ${screenWidth}×${screenHeight} (scale factor: ${scaleFactor})`);
+      console.log(`Requested window size: ${width}×${height}`);
+
+      let adjustedWidth = width;
+      let adjustedHeight = height;
+      let sizeExceedsMessage = null;
+
+      // Check if requested dimensions exceed screen dimensions and adjust if needed
+      const widthExceeds = width > screenWidth;
+      const heightExceeds = height > screenHeight;
+
+      console.log(`Width exceeds screen: ${widthExceeds}, Height exceeds screen: ${heightExceeds}`);
+
+      if (widthExceeds && heightExceeds) {
+        adjustedWidth = screenWidth;
+        adjustedHeight = screenHeight;
+        sizeExceedsMessage = `Size exceeds screen. Resized to ${adjustedWidth}×${adjustedHeight}`;
+        console.log("Both dimensions exceed screen size. Adjusting both.");
+      } else if (widthExceeds) {
+        adjustedWidth = screenWidth;
+        sizeExceedsMessage = `Width exceeds screen. Resized to ${adjustedWidth}×${adjustedHeight}`;
+        console.log("Width exceeds screen size. Adjusting width only.");
+      } else if (heightExceeds) {
+        adjustedHeight = screenHeight;
+        sizeExceedsMessage = `Height exceeds screen. Resized to ${adjustedWidth}×${adjustedHeight}`;
+        console.log("Height exceeds screen size. Adjusting height only.");
+      }
+
+      // Format display size (accounting for scale factor)
+      const displayWidth = Math.round(adjustedWidth);
+      const displayHeight = Math.round(adjustedHeight);
+      const physicalWidth = Math.round(adjustedWidth * scaleFactor);
+      const physicalHeight = Math.round(adjustedHeight * scaleFactor);
+
+      // Create message with both display and physical sizes if they differ
+      let sizeDisplay = `${displayWidth}×${displayHeight}`;
+      if (scaleFactor !== 1.0) {
+        sizeDisplay += ` (${physicalWidth}×${physicalHeight} pixels)`;
+      }
+
+      console.log(`Adjusted window size: ${sizeDisplay}`);
+
       // Calculate the center point of the current window
       const centerX = currentX + currentWidth / 2;
       const centerY = currentY + currentHeight / 2;
 
       // Calculate new position to maintain the same center point
-      const newX = Math.round(centerX - width / 2);
-      const newY = Math.round(centerY - height / 2);
+      const newX = Math.max(0, Math.round(centerX - adjustedWidth / 2));
+      const newY = Math.max(0, Math.round(centerY - adjustedHeight / 2));
 
       // Close main window first to avoid showing loading state
       await closeMainWindow();
@@ -311,20 +518,70 @@ export default function ResizeWindow() {
             tell process frontAppName
               set frontWindow to first window
               set position of frontWindow to {${newX}, ${newY}}
-              set size of frontWindow to {${width}, ${height}}
+              set size of frontWindow to {${adjustedWidth}, ${adjustedHeight}}
+              -- Get actual size after setting to verify
+              set actualSize to size of frontWindow
+              return (item 1 of actualSize as string) & "," & (item 2 of actualSize as string)
             end tell
           end tell
         `;
 
         // Apply the new position and size
-        await runAppleScript(setWindowSizeScript);
+        const resultSize = await runAppleScript(setWindowSizeScript);
+        console.log("AppleScript result (actual size applied):", resultSize);
+
+        // Parse the actual size that was applied
+        const actualSizeParts = resultSize.split(",");
+        let finalSizeDisplay = sizeDisplay;
+
+        if (actualSizeParts.length === 2) {
+          const actualWidth = parseInt(actualSizeParts[0].trim(), 10);
+          const actualHeight = parseInt(actualSizeParts[1].trim(), 10);
+
+          if (!isNaN(actualWidth) && !isNaN(actualHeight)) {
+            // Create display message with the actual size that was applied - only logical size
+            finalSizeDisplay = `${actualWidth}×${actualHeight}`;
+
+            // Still log the full info with physical pixels for debugging
+            let logSizeDisplay = finalSizeDisplay;
+            if (scaleFactor !== 1.0) {
+              const actualPhysicalWidth = Math.round(actualWidth * scaleFactor);
+              const actualPhysicalHeight = Math.round(actualHeight * scaleFactor);
+              logSizeDisplay += ` (${actualPhysicalWidth}×${actualPhysicalHeight} pixels)`;
+            }
+
+            if (actualWidth !== adjustedWidth || actualHeight !== adjustedHeight) {
+              console.log(`Requested size differs from applied size. Actual: ${logSizeDisplay}`);
+            }
+
+            // Update adjusted size for data storage
+            adjustedWidth = actualWidth;
+            adjustedHeight = actualHeight;
+          }
+        }
 
         const sizeData = { width: currentWidth, height: currentHeight, timestamp: Date.now() };
         console.log("Saved previous window size data:", JSON.stringify(sizeData));
-        console.log("New window position and size: X:", newX, "Y:", newY, "W:", width, "H:", height);
+        console.log("New window position and size: X:", newX, "Y:", newY, "W:", adjustedWidth, "H:", adjustedHeight);
 
         await LocalStorage.setItem("previous-window-size", JSON.stringify(sizeData));
-        await showHUD(`🔲 Resized to ${width}×${height}`);
+
+        // Show message with the final size and appropriate prefix when size exceeds screen
+        if (sizeExceedsMessage) {
+          // Create message that preserves the prefix but uses actual size
+          let prefixMessage = "";
+          if (widthExceeds && heightExceeds) {
+            prefixMessage = "🟡 Size exceeds screen. ";
+          } else if (widthExceeds) {
+            prefixMessage = "🟡 Width exceeds screen. ";
+          } else if (heightExceeds) {
+            prefixMessage = "🟡 Height exceeds screen. ";
+          }
+          await showHUD(`${prefixMessage}Resized to ${finalSizeDisplay}`);
+        } else {
+          await showHUD(`🔲 Resized to ${finalSizeDisplay}`);
+        }
+
         await popToRoot();
       } catch (error) {
         console.error("Error setting window size:", error);
@@ -432,6 +689,31 @@ export default function ResizeWindow() {
     }
   }
 
+  // Function to get and display current window size
+  async function getCurrentWindowSize() {
+    try {
+      const { width, height } = await getWindowInfo();
+
+      // Format display size
+      const displaySize = `${width}×${height}`;
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Current window size: ${displaySize}`,
+      });
+    } catch (error) {
+      console.error("Error getting window size:", error);
+
+      // Check if the error is related to no focused window
+      const errorStr = String(error);
+      if (errorStr.includes("frontmost") || errorStr.includes("window") || errorStr.includes("process")) {
+        await showHUD("🛑 No focused window");
+      } else {
+        await showHUD("🛑 Failed to get window size");
+      }
+    }
+  }
+
   // Refresh custom resolutions list
   async function refreshCustomResolutions() {
     setRefreshTrigger((prev) => prev + 1);
@@ -486,11 +768,29 @@ export default function ResizeWindow() {
 
       <List.Section title="Options">
         <List.Item
+          icon={Icon.Maximize}
+          title="Maximize Window"
+          actions={
+            <ActionPanel>
+              <Action title="Maximize Window" onAction={maximizeWindow} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
           icon={Icon.RotateAntiClockwise}
           title="Restore Previous Size"
           actions={
             <ActionPanel>
               <Action title="Restore Previous Size" onAction={restorePreviousSize} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          icon={Icon.Info}
+          title="Get Current Size"
+          actions={
+            <ActionPanel>
+              <Action title="Get Current Size" onAction={getCurrentWindowSize} />
             </ActionPanel>
           }
         />

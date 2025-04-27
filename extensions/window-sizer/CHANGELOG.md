@@ -1,5 +1,11 @@
 # Window Sizer Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Feature: Maximize Window
+- Feature: Get Current Size
+- Fix: Toasts when size exceeds the screen
+
 ## [Update] - 2025-04-25
 
 - Fixed handling of window size addition when no window is in focus
