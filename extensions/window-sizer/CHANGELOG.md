@@ -4,6 +4,7 @@
 
 - Feature: Maximize Window
 - Feature: Get Current Size
+- Fix: Position of the window when restoring previous size
 - Fix: Toasts when size exceeds the screen
 
 ## [Update] - 2025-04-25

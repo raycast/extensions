@@ -339,11 +339,17 @@ async function maximizeWindow() {
   try {
     // Save current window size for later restoration
     const currentWindowInfo = await getWindowInfo();
-    const { width: currentWidth, height: currentHeight } = currentWindowInfo;
+    const { x: currentX, y: currentY, width: currentWidth, height: currentHeight } = currentWindowInfo;
 
-    // Store current size in local storage
-    const sizeData = { width: currentWidth, height: currentHeight, timestamp: Date.now() };
-    console.log("Saving window size before maximizing:", JSON.stringify(sizeData));
+    // Store current size and position in local storage
+    const sizeData = {
+      width: currentWidth,
+      height: currentHeight,
+      x: currentX,
+      y: currentY,
+      timestamp: Date.now(),
+    };
+    console.log("Saving window size and position before maximizing:", JSON.stringify(sizeData));
     await LocalStorage.setItem("previous-window-size", JSON.stringify(sizeData));
 
     // Get screen dimensions
@@ -444,6 +450,17 @@ export default function ResizeWindow() {
   async function resizeWindow(width: number, height: number) {
     try {
       const { x: currentX, y: currentY, width: currentWidth, height: currentHeight } = await getWindowInfo();
+
+      // Store current position and size in local storage before making any changes
+      const sizeData = {
+        width: currentWidth,
+        height: currentHeight,
+        x: currentX,
+        y: currentY,
+        timestamp: Date.now(),
+      };
+      console.log("Saving window position and size before resizing:", JSON.stringify(sizeData));
+      await LocalStorage.setItem("previous-window-size", JSON.stringify(sizeData));
 
       // Check if the window is already at the requested size
       if (currentWidth === width && currentHeight === height) {
@@ -560,11 +577,7 @@ export default function ResizeWindow() {
           }
         }
 
-        const sizeData = { width: currentWidth, height: currentHeight, timestamp: Date.now() };
-        console.log("Saved previous window size data:", JSON.stringify(sizeData));
         console.log("New window position and size: X:", newX, "Y:", newY, "W:", adjustedWidth, "H:", adjustedHeight);
-
-        await LocalStorage.setItem("previous-window-size", JSON.stringify(sizeData));
 
         // Show message with the final size and appropriate prefix when size exceeds screen
         if (sizeExceedsMessage) {
@@ -618,8 +631,8 @@ export default function ResizeWindow() {
         const savedSize = JSON.parse(savedSizeStr);
         console.log("Parsed size data:", savedSize);
 
-        const { width, height } = savedSize;
-        console.log(`Restoring to: W: ${width}, H: ${height}`);
+        const { width, height, x, y } = savedSize;
+        console.log(`Restoring to: W: ${width}, H: ${height}, X: ${x}, Y: ${y}`);
 
         // Ensure width and height are valid positive integers
         if (
@@ -635,7 +648,7 @@ export default function ResizeWindow() {
           return;
         }
 
-        const { x: currentX, y: currentY, width: currentWidth, height: currentHeight } = await getWindowInfo();
+        const { width: currentWidth, height: currentHeight } = await getWindowInfo();
 
         // Check if the window is already at the previous size
         if (currentWidth === width && currentHeight === height) {
@@ -646,13 +659,20 @@ export default function ResizeWindow() {
           return;
         }
 
-        // Calculate the center point of the current window
-        const centerX = currentX + currentWidth / 2;
-        const centerY = currentY + currentHeight / 2;
+        // Use saved position if available, otherwise calculate center-based position
+        let newX = x;
+        let newY = y;
 
-        // Calculate new position to maintain the same center point
-        const newX = Math.round(centerX - width / 2);
-        const newY = Math.round(centerY - height / 2);
+        // If position data is not available (for backward compatibility)
+        if (typeof newX !== "number" || typeof newY !== "number") {
+          const { x: currentX, y: currentY } = await getWindowInfo();
+          // Calculate the center point of the current window
+          const centerX = currentX + currentWidth / 2;
+          const centerY = currentY + currentHeight / 2;
+          // Calculate new position to maintain the same center point
+          newX = Math.round(centerX - width / 2);
+          newY = Math.round(centerY - height / 2);
+        }
 
         try {
           // Execute AppleScript to restore window size while maintaining the center
