@@ -11,28 +11,6 @@
     "Documentation",
     "Developer Tools"
   ],
-  "screenshots": [
-    {
-      "title": "DeepWiki Search",
-      "description": "Search for repositories indexed by DeepWiki.",
-      "image": "assets/screenshot-search.png"
-    },
-    {
-      "title": "DeepWiki Open",
-      "description": "Open a DeepWiki page for a specific GitHub repo URL or org/repo identifier.",
-      "image": "assets/screenshot-open.png"
-    },
-    {
-      "title": "DeepWiki Crawl",
-      "description": "Initiate a crawl of repository documentation directly from search results.",
-      "image": "assets/screenshot-crawl-1.png"
-    },
-    {
-      "title": "DeepWiki Crawl Progress",
-      "description": "View the progress of the documentation crawl via toasts.",
-      "image": "assets/screenshot-crawl-2.png"
-    }
-  ],
   "commands": [
     {
       "name": "open-deepwiki",
