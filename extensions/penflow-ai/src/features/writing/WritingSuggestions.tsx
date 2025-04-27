@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { Suggestion } from "../../utils/types";
 
-const SUGGESTION_TYPE_TEXT: Record<Suggestion['type'], string> = {
+const SUGGESTION_TYPE_TEXT: Record<Suggestion["type"], string> = {
   completion: "Completion",
   translation: "Translation",
   polish: "Polish",
