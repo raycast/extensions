@@ -1,6 +1,6 @@
 # superwhisper Changelog
 
-## [Added Seaerch History] - 2025-04-27
+## [Added Search History] - 2025-04-27
 
 ## [Improvements to select mode] - 2024-07-09
 
