@@ -1,5 +1,9 @@
 # Quit Applications Changelog
 
+## [Update] - 2025-04-25
+
+- Added `Quit All Applications` to quit all applications at once
+
 ## [Update] - 2024-09-03
 
 - Transitions component to from a class component to a function component

@@ -98,7 +98,7 @@ const EventActions = ({
           <Action.CopyToClipboard
             title="Copy Meeting Link"
             content={event.conferenceData.entryPoints[0].uri}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
           />
         )}
       </ActionPanel.Section>

@@ -11,7 +11,7 @@ export class ZenActions {
 function NewTabAction({ query }: { query?: string }) {
   return (
     <ActionPanel title="New Tab">
-      <ActionPanel.Item onAction={() => openNewTab(query)} title={query ? `Search "${query}"` : "Open Empty Tab"} />
+      <Action onAction={() => openNewTab(query)} title={query ? `Search "${query}"` : "Open Empty Tab"} />
     </ActionPanel>
   );
 }
@@ -40,7 +40,7 @@ function ZenGoToTab(props: { tab: Tab }) {
     await setActiveTab(props.tab);
     await closeMainWindow();
   }
-  return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
+  return <Action title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
 
 function ZenHistoryTab({ url }: { url: string }) {
@@ -48,5 +48,5 @@ function ZenHistoryTab({ url }: { url: string }) {
     await openHistoryTab(url);
     await closeMainWindow();
   }
-  return <ActionPanel.Item title="Open in Zen" icon={{ source: Icon.Eye }} onAction={handleAction} />;
+  return <Action title="Open in Zen" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
