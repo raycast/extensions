@@ -105,7 +105,9 @@ export async function searchITunesApps(term: string, limit = 20): Promise<ITunes
 
     const response = await fetch(url);
     if (!response.ok) {
-      console.error(`[iTunes API] Search request failed with status: ${response.status}`);
+      const errorMsg = `[iTunes API] Search request failed with status: ${response.status}`;
+      console.error(errorMsg);
+      showFailureToast({ title: "Failed to search apps", message: errorMsg });
       return [];
     }
 
