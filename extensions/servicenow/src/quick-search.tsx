@@ -8,7 +8,7 @@ import { Instance } from "./types";
 
 export default function Search(props: LaunchProps) {
   const { instanceName, query } = props.arguments;
-  const { instances, setSelectedInstance } = useInstances();
+  const { instances, setSelectedInstance, selectedInstance } = useInstances();
 
   if (instances.length === 0) {
     showToast(Toast.Style.Failure, "No instances found", "Please create an instance profile first");
@@ -16,10 +16,17 @@ export default function Search(props: LaunchProps) {
     return;
   }
 
-  const instance = instances.find(
-    (i: Instance) =>
-      i.name.toLowerCase() === instanceName.toLowerCase() || i.alias?.toLowerCase() === instanceName.toLowerCase(),
-  );
+  let instance;
+  if (instanceName) {
+    instance = instances.find(
+      (i: Instance) =>
+        i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
+        i.alias?.toLowerCase().includes(instanceName.toLowerCase()),
+    );
+  } else {
+    instance = selectedInstance;
+  }
+
   if (!instance) {
     showToast(
       Toast.Style.Failure,
