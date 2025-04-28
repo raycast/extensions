@@ -1,4 +1,15 @@
-import { Alert, Icon, Cache, closeMainWindow, confirmAlert, getPreferenceValues, popToRoot, trash, showToast, Toast } from "@raycast/api";
+import {
+  Alert,
+  Icon,
+  Cache,
+  closeMainWindow,
+  confirmAlert,
+  getPreferenceValues,
+  popToRoot,
+  trash,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import fs from "fs";
 import * as yup from "yup";
