@@ -74,5 +74,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

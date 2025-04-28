@@ -1,5 +1,14 @@
 # Zen Changelog
 
+## [Update brew install command] - 2025-04-24
+
+- Update the brew install command from Firefox to Zen Browser.
+
+## [Add Browser Default Search Engine] - 2025-04-22
+
+- Added the ability to use the user's default browser search engine set within Zen as the search engine.
+- Changed the default search engine to the Browser Default.
+
 ## [Changing the name of app called] - 2025-03-21
 
 - Changed name of app being called from "Zen Browser" to "Zen"
