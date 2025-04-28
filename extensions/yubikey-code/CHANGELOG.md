@@ -1,5 +1,9 @@
 # YubiKey Code Changelog
 
+## [New Feature] - 2025-04-25
+
+- Updated list view to sort accounts by usage
+
 ## [New Feature] - 2024-02-19
 
 - Add preference for providing an icon pack
