@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-domain",
   "title": "Search Domain",
-  "description": "Search Domain Name Without Needing API",
-  "icon": "search domain logo edited.png",
+  "description": "Search domain names quickly with instant availability check",
+  "icon": "extension-icon.png",
   "author": "hasanakay",
   "categories": [
     "Productivity"
@@ -13,7 +13,7 @@
     {
       "name": "search-domain",
       "title": "Search Domain",
-      "description": "Search Domain Name Without Needing API",
+      "description": "Search Domain Name",
       "mode": "view"
     }
   ],

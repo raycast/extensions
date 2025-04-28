@@ -1,5 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, open, List, LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
+import { API_ENDPOINT } from "./constants";
 
 // Define a type for domain query history
 interface QueryHistory {
@@ -29,7 +31,11 @@ export default function Command() {
           const parsedHistory = JSON.parse(savedHistory) as QueryHistory[];
           setQueryHistory(parsedHistory);
         } catch (error) {
-          console.error("Error parsing history:", error);
+          // Use showFailureToast for consistent error handling
+          showFailureToast({
+            title: "History Error",
+            message: `Failed to parse history data: ${error instanceof Error ? error.message : String(error)}`,
+          });
         }
       }
     }
@@ -44,9 +50,7 @@ export default function Command() {
     setIsAvailable(false);
     await showToast({ style: Toast.Style.Animated, title: "Checking...", message: domainToCheck });
     try {
-      const response = await fetch(
-        `https://5qbo4f2ir7.execute-api.eu-west-1.amazonaws.com/default/Search_Domain_For_Raycast_Extension?domain=${encodeURIComponent(domainToCheck)}`,
-      );
+      const response = await fetch(`${API_ENDPOINT}?domain=${encodeURIComponent(domainToCheck)}`);
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
@@ -131,8 +135,9 @@ export default function Command() {
         `Network Error: An error occurred during domain query: ${error instanceof Error ? error.message : String(error)}`,
       );
       setIsAvailable(false);
-      await showToast({
-        style: Toast.Style.Failure,
+
+      // Using showFailureToast from @raycast/utils for more consistent error handling
+      await showFailureToast({
         title: "Query Failed",
         message: error instanceof Error ? error.message : "Unknown network error occurred",
       });
