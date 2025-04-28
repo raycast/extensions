@@ -29,7 +29,7 @@ export type Timetable = Lesson[];
 const untis = async () => {
   const { school, key, schoolNumber, username, url } = useSettings();
 
-  const qrData = `untis://setschool?url=${url.trim()}&school=${school.trim()}&user=${username.trim()}&key=${key}&schoolNumber=${schoolNumber.trim()}`;
+  const qrData = `untis://setschool?url=${encodeURIComponent(url.trim())}&school=${encodeURIComponent(school.trim())}&user=${encodeURIComponent(username.trim())}&key=${encodeURIComponent(key)}&schoolNumber=${encodeURIComponent(schoolNumber.trim())}`;
 
   const untis = new WebUntisQR(qrData, "RaycastUntis", authenticator, URL);
 
