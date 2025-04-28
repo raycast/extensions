@@ -1,9 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 import * as React from "react";
-
 import spotlight from "./libs/node-spotlight";
-import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
-import { safeSearchScope } from "./utils";
+import { SpotlightSearchResult, SpotlightSearchPreferences } from "./types";
+import path from "path";
+import { safeSearchScope, log } from "./utils";
 
 const folderSpotlightSearchAttributes = [
   "kMDItemDisplayName",
@@ -18,52 +18,122 @@ const folderSpotlightSearchAttributes = [
   "kMDItemUseCount",
 ];
 
-const searchSpotlight = (
+export async function searchSpotlight(
   search: string,
-  searchScope: string,
-  abortable: React.MutableRefObject<AbortController | null | undefined> | undefined,
-  callback: (result: SpotlightSearchResult) => void
-): Promise<void> => {
-  const { maxResults } = getPreferenceValues<SpotlightSearchPreferences>();
+  searchScope: "pinned" | "user" | "all",
+  abortable?: React.MutableRefObject<AbortController | null | undefined>
+): Promise<SpotlightSearchResult[]> {
+  log("debug", "searchSpotlight", "Starting search with parameters", {
+    search,
+    searchScope,
+    abortable: !!abortable?.current,
+  });
 
+  const { maxResults } = getPreferenceValues<SpotlightSearchPreferences>();
   const isExactSearch = search.startsWith("[") && search.endsWith("]");
 
-  return new Promise((resolve, reject) => {
-    const spotlightSearchAttributes: string[] = folderSpotlightSearchAttributes;
-    const searchFilter = isExactSearch
-      ? ["kMDItemContentType=='public.folder'", `kMDItemDisplayName == '${search.replace(/[[|\]]/gi, "")}'`]
-      : ["kMDItemContentType=='public.folder'", `kMDItemDisplayName = "*${search}*"cd`];
+  const searchFilter = isExactSearch
+    ? ["kMDItemContentType=='public.folder'", `kMDItemDisplayName == '${search.replace(/[[|\]]/gi, "")}'`]
+    : ["kMDItemContentType=='public.folder'", `kMDItemDisplayName = "*${search}*"cd`];
 
-    let resultsCount = 0;
-
-    // folder hard-coded into search
-    spotlight(search, safeSearchScope(searchScope), searchFilter, spotlightSearchAttributes as [], abortable)
-      .on("data", (result: SpotlightSearchResult) => {
-        if (resultsCount < maxResults) {
-          // keep emitting the match and
-          // incr resultsCount (since a folder was found)
-          resultsCount++;
-          callback(result);
-        } else if (resultsCount >= maxResults) {
-          // bail/abort on results >= maxResults
-          abortable?.current?.abort();
-
-          // allow results to stabilize via usePromise()
-          // for onData()
-          setTimeout(() => {
-            resolve();
-          }, 0);
-        }
-
-        // keep searching...
-      })
-      .on("error", (e: Error) => {
-        reject(e);
-      })
-      .on("end", () => {
-        resolve();
-      });
+  log("debug", "searchSpotlight", "Generated search filter", {
+    filter: searchFilter,
+    isExactSearch,
+    maxResults,
   });
-};
 
-export { searchSpotlight };
+  try {
+    log("debug", "searchSpotlight", "Executing Spotlight search");
+
+    const results = await new Promise<SpotlightSearchResult[]>((resolve, reject) => {
+      const searchResults: SpotlightSearchResult[] = [];
+      let resultsCount = 0;
+
+      const searchStream = spotlight(
+        search,
+        safeSearchScope(searchScope),
+        searchFilter,
+        folderSpotlightSearchAttributes as string[],
+        abortable
+      );
+
+      searchStream.on("data", (result: SpotlightSearchResult) => {
+        if (resultsCount < maxResults) {
+          resultsCount++;
+          searchResults.push(result);
+          log("debug", "searchSpotlight", "Received result", {
+            resultCount: resultsCount,
+            path: result.path,
+          });
+        } else if (resultsCount >= maxResults) {
+          log("debug", "searchSpotlight", "Max results reached, aborting", {
+            maxResults,
+          });
+          abortable?.current?.abort();
+        }
+      });
+
+      searchStream.on("end", () => {
+        log("debug", "searchSpotlight", "Spotlight search completed", {
+          resultCount: searchResults.length,
+        });
+        resolve(searchResults);
+      });
+
+      searchStream.on("error", (error: Error) => {
+        // Check if this is an AbortError (which is expected during typing)
+        if (error.name === "AbortError" || error.message.includes("aborted")) {
+          log("debug", "searchSpotlight", "Search aborted", {
+            search,
+            searchScope,
+          });
+        } else {
+          log("error", "searchSpotlight", "Error during search", {
+            error,
+            search,
+            searchScope,
+          });
+        }
+        reject(error);
+      });
+    });
+
+    const filteredResults = results
+      .filter((result: SpotlightSearchResult) => {
+        if (searchScope === "pinned") {
+          return false;
+        }
+        if (searchScope === "user") {
+          return result.path.startsWith("/Users/");
+        }
+        return true;
+      })
+      .map((result: SpotlightSearchResult) => ({
+        ...result,
+        kMDItemFSName: result.kMDItemFSName || path.basename(result.path),
+      }));
+
+    log("debug", "searchSpotlight", "Filtered results", {
+      originalCount: results.length,
+      filteredCount: filteredResults.length,
+      searchScope,
+    });
+
+    return filteredResults;
+  } catch (error: unknown) {
+    // Check if this is an AbortError, which is expected during typing
+    if (error instanceof Error && (error.name === "AbortError" || error.message.includes("aborted"))) {
+      log("debug", "searchSpotlight", "Search aborted", {
+        search,
+        searchScope,
+      });
+    } else {
+      log("error", "searchSpotlight", "Error during search", {
+        error,
+        search,
+        searchScope,
+      });
+    }
+    throw error;
+  }
+}
