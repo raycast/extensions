@@ -1,16 +1,5 @@
 # bmrks Changelog
 
-## [Improvement] - 2025-04-24
-
-- Improved title generation for bookmarks
-- Added support for drafts
-Replaced AppleScript with Raycast's native Browser Extension API for retrieving active tabs
-- Extracted service name and host URL into reusable constants
-- Added constants.ts file for global constants management
-- Refactored create-bookmark.tsx to use the new constants
-- Improved code maintainability by centralizing configuration values
-- Updated dependencies and Supabase client
-
 ## [Improvement] - 2024-03-08
 
 - Changed error display from markdown view to empty list view.
