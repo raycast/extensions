@@ -5,7 +5,7 @@ const USER = use_prod ? username : `${username}-test`;
 const PASS = use_prod ? token : dev_token;
 
 export const API_URL = use_prod ? "https://api.name.com/v4/" : "https://api.dev.name.com/v4/";
-export const API_HEADERS = {
+export const headers = {
     Accept: "application/json",
     "Content-Type": "application/json",
     Authorization: `Basic ${btoa(`${USER}:${PASS}`)}`
