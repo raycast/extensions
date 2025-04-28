@@ -2,8 +2,9 @@ import { Action, ActionPanel, Form, getPreferenceValues, open, showToast, Toast 
 import QRCode from "qrcode";
 import { useState } from "react";
 import { generateQRCode, getQRCodePath, QRCodeView } from "./utils";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, useForm, showFailureToast } from "@raycast/utils";
 import fs from "fs";
+import { QR_OPTIONS, SVG_OPTIONS } from "./config";
 
 interface FormValues {
   url: string;
@@ -23,33 +24,41 @@ export default function Command() {
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
-      console.log({ values });
       if (values.inline) {
-        const qrData = await generateQRCode(values.url, values.format);
-        if (qrData) {
+        try {
+          const qrData = await generateQRCode(values.url, values.format);
+          if (!qrData) {
+            throw new Error("Failed to generate QR code");
+          }
           setQrData(qrData);
+        } catch (error) {
+          await showFailureToast({
+            title: "Error",
+            message: error instanceof Error ? error.message : "Failed to generate QR code",
+          });
         }
       } else {
-        const path = getQRCodePath(values.url, values.format);
-        if (values.format === "svg") {
-          QRCode.toString(values.url, { type: "svg", width: 1536, color: { dark: "#000000", light: "none" } })
-            .then((svg) => {
-              fs.writeFileSync(path, svg);
-              showToast(Toast.Style.Success, "QRCode saved", `You can find it here: ${path}`);
-              open(path);
-            })
-            .catch((error: Error) => {
-              showToast(Toast.Style.Failure, "Error generating QR code", error.message);
+        try {
+          const path = getQRCodePath(values.url, values.format);
+          if (values.format === "svg") {
+            const svg = await QRCode.toString(values.url, {
+              type: "svg",
+              width: SVG_OPTIONS.width,
+              color: SVG_OPTIONS.color,
             });
-        } else {
-          QRCode.toFile(path, values.url, { width: 512, color: { dark: "#000000", light: "#0000" } })
-            .then(() => {
-              showToast(Toast.Style.Success, "QRCode saved", `You can find it here: ${path}`);
-              open(path);
-            })
-            .catch((error: Error) => {
-              showToast(Toast.Style.Failure, "Error generating QR code", error.message);
-            });
+            fs.writeFileSync(path, svg);
+            showToast(Toast.Style.Success, "QRCode saved", `You can find it here: ${path}`);
+            open(path);
+          } else {
+            await QRCode.toFile(path, values.url, QR_OPTIONS);
+            showToast(Toast.Style.Success, "QRCode saved", `You can find it here: ${path}`);
+            open(path);
+          }
+        } catch (error) {
+          await showFailureToast({
+            title: "Error",
+            message: error instanceof Error ? error.message : "Failed to save QR code",
+          });
         }
       }
     },
