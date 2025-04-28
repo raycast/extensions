@@ -1,6 +1,6 @@
 # Hacker News Top Stories Changelog
 
-## [Add Notifications Support] - {PR_MERGE_DATE}
+## [Add Notifications Support] - 2025-04-28
 
 Adds an option to show native Mac notifications for new stories.
 Adds an option to show the icon from the story, or the hacker new icon.
