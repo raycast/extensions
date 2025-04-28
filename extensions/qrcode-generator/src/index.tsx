@@ -3,6 +3,7 @@ import QRCode from "qrcode";
 import { useState } from "react";
 import { generateQRCode, getQRCodePath, QRCodeView } from "./utils";
 import { FormValidation, useForm } from "@raycast/utils";
+import fs from "fs";
 
 interface FormValues {
   url: string;
@@ -31,9 +32,9 @@ export default function Command() {
       } else {
         const path = getQRCodePath(values.url, values.format);
         if (values.format === "svg") {
-          QRCode.toString(values.url, { type: "svg", width: 512, color: { dark: "#000000", light: "none" } })
+          QRCode.toString(values.url, { type: "svg", width: 1536, color: { dark: "#000000", light: "none" } })
             .then((svg) => {
-              require("fs").writeFileSync(path, svg);
+              fs.writeFileSync(path, svg);
               showToast(Toast.Style.Success, "QRCode saved", `You can find it here: ${path}`);
               open(path);
             })

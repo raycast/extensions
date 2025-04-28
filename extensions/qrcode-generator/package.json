@@ -2,21 +2,17 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qrcode-generator",
   "title": "QR Code Generator",
-  "description": "Generate QR code for an URL",
+  "description": "Generate QR codes from text or URLs.",
   "icon": "command-icon.png",
   "author": "Melvynx",
-  "contributors": [
-    "d2a",
-    "pernielsentikaer",
-    "hetommy"
-  ],
+  "contributors": ["heytommy"],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Generate QR Code",
       "subtitle": "QR Code Generator",
-      "description": "Generate a QR code from a URL in PNG or SVG format that will be automatically opened.",
+      "description": "Generate a QR code from text or URL",
       "mode": "view",
       "preferences": [
         {
@@ -59,7 +55,7 @@
       "name": "clipboard",
       "title": "Generate QR Code from Clipboard",
       "subtitle": "QR Code Generator",
-      "description": "Generate a QR Code from Clipboard and show it directly in Raycast",
+      "description": "Generate a QR code from clipboard content",
       "mode": "view"
     }
   ],

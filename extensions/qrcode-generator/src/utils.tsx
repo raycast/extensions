@@ -6,8 +6,8 @@ const QR_OPTIONS = {
   width: 512,
   color: {
     dark: "#000000",
-    light: "#0000" // transparent for PNG, will be handled for SVG
-  }
+    light: "#0000", // transparent for PNG, will be handled for SVG
+  },
 };
 
 export async function generateQRCode(URL: string | undefined, format: "png" | "svg" = "png") {
@@ -27,7 +27,11 @@ export async function generateQRCode(URL: string | undefined, format: "png" | "s
 
   try {
     if (format === "svg") {
-      const svg = await QRCode.toString(URL, { type: "svg", width: QR_OPTIONS.width, color: { dark: QR_OPTIONS.color.dark, light: "none" } });
+      const svg = await QRCode.toString(URL, {
+        type: "svg",
+        width: QR_OPTIONS.width,
+        color: { dark: QR_OPTIONS.color.dark, light: "none" },
+      });
       return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
     } else {
       return await QRCode.toDataURL(URL, QR_OPTIONS);
