@@ -12,6 +12,7 @@ import useFavorites from "../hooks/useFavorites";
 import { filter } from "lodash";
 import { getIconForModules } from "../utils/getIconForModules";
 import FavoriteForm from "./FavoriteForm";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function NavigationMenu(props: { groupId?: string }) {
   const { groupId = "" } = props;
@@ -249,7 +250,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                         <ModuleItem
                           key={m.id}
                           module={m}
-                          url={url}
+                          url={buildServiceNowUrl(instanceName, m.uri || "")}
                           revalidate={() => {
                             revalidate();
                             revalidateFavorites();
@@ -269,7 +270,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
                     <ModuleItem
                       key={module.id}
                       module={module}
-                      url={url}
+                      url={buildServiceNowUrl(instanceName, module.uri || "")}
                       revalidate={() => {
                         revalidate();
                         revalidateFavorites();

@@ -5,6 +5,7 @@ import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import FavoriteForm from "./FavoriteForm";
 import Actions from "./Actions";
 import { extractParamFromURL } from "../utils/extractParamFromURL";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function FavoriteItem(props: {
   favorite: Favorite;
@@ -16,8 +17,7 @@ export default function FavoriteItem(props: {
   const { favorite: favorite, revalidate, removeFromFavorites, group = "", section = "" } = props;
   const { selectedInstance } = useInstances();
   const { name: instanceName = "", full } = selectedInstance || {};
-  const instanceUrl = `https://${instanceName}.service-now.com`;
-  const path = favorite.url?.startsWith("/") ? favorite.url : `/${favorite.url}` || "";
+  const path = (favorite.url?.startsWith("/") ? favorite.url : `/${favorite.url}`) || "";
 
   if (favorite.separator) {
     return favorite.favorites?.map((f) => {
@@ -34,7 +34,7 @@ export default function FavoriteItem(props: {
     });
   }
 
-  const url = `${instanceUrl}${path}`;
+  const url = buildServiceNowUrl(instanceName, path);
   const table = favorite.table ? favorite.table : extractParamFromURL(url).path;
   const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 
