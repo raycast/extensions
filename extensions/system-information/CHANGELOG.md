@@ -1,6 +1,6 @@
 # System Information Changelog
 
-## [AI Tools] - 2025-03-21
+## [AI Tools] - {PR_MERGE_DATE}
 - Interact and perform the same functionality as the extension but simply with AI tools.
 - Reordered storage row to be at the top, so user wont have to scroll down to see it.
 
