@@ -1,0 +1,16 @@
+{
+  "name": "reboot-raycast",
+  "title": "Reboot Raycast",
+  "description": "Reboot Raycast by quitting and restarting",
+  "author": "Arth Shah",
+  "commands": [
+    {
+      "name": "reboot-raycast",
+      "title": "Reboot Raycast",
+      "description": "Reboots Raycast by killing the process and relaunching it with a short delay.",
+      "mode": "compact",
+      "icon": "icon.png"
+    }
+  ],
+  "categories": ["System", "Utilities"]
+}
