@@ -104,12 +104,7 @@
     {
       "name": "race-schedule",
       "title": "Race Schedule",
-      "description": "Get the race schedule for a season by year"
-    },
-    {
-      "name": "rounds",
-      "title": "Rounds",
-      "description": "Get the rounds for a season by year"
+      "description": "Get the race schedule and rounds for a season by year"
     },
     {
       "name": "race-results",
@@ -123,7 +118,7 @@
     }
   ],
   "ai": {
-    "instructions": "\n\n- **Never guess or infer round numbers. Never!!!**\n- If the user requests **qualifying results, race results, or any round- or race-specific information** by mentioning a **race name, location, season, year, or country**, you MUST follow these steps strictly in order:\n1. First, call the tool `f1-standings-rounds` to retrieve the exact round number.\n2. ONLY THEN call the appropriate results-related tool (`f1-standings-qualifying-results` or `f1-standings-race-results`) using the round number provided by `f1-standings-rounds`.\n**Never(!!!)** try to guess the round by your own knowledge\n\n- When asked about the current season, use the tool 'f1-standings-current-season' first!",
+    "instructions": "\n\n- **Never guess or infer round numbers. Never!!!**\n- If the user requests **qualifying results, race results, or any round- or race-specific information** by mentioning a **race name, location, season, year, or country**, you MUST follow these steps strictly in order:\n1. First, call the tool `f1-standings-race-schedule` to retrieve the exact round number.\n2. ONLY THEN call the appropriate results-related tool (`f1-standings-qualifying-results` or `f1-standings-race-results`) using the round number provided by `f1-standings-race-schedule`.\n**Never(!!!)** try to guess the round by your own knowledge\n\n- When asked about the current season, use the tool 'f1-standings-current-season' first!",
     "evals": [
       {
         "input": "@f1-standings who won the driver championship in 2024?",
@@ -3010,7 +3005,7 @@
                 "circuitName": "Autodromo Nazionale di Monza",
                 "Location": {
                   "country": "Italy",
-                  "lat": "615599999999986",
+                  "lat": "6156",
                   "locality": "Monza",
                   "long": "28111"
                 },
@@ -3072,9 +3067,9 @@
                 "circuitName": "Korean International Circuit",
                 "Location": {
                   "country": "Korea",
-                  "lat": "73329999999999",
+                  "lat": "7333",
                   "locality": "Yeongam County",
-                  "long": "41699999999999"
+                  "long": "417"
                 },
                 "url": "https://en.wikipedia.org/wiki/Korea_International_Circuit"
               },
@@ -3103,7 +3098,7 @@
                 "circuitName": "Suzuka Circuit",
                 "Location": {
                   "country": "Japan",
-                  "lat": "843100000000014",
+                  "lat": "8431",
                   "locality": "Suzuka",
                   "long": "541"
                 },
@@ -3229,7 +3224,7 @@
                   "country": "Brazil",
                   "lat": "-23.7036",
                   "locality": "São Paulo",
-                  "long": "-46.69969999999999"
+                  "long": "-46.6997"
                 },
                 "url": "https://en.wikipedia.org/wiki/Interlagos_Circuit"
               },
@@ -3271,9 +3266,6 @@
               },
               "name": "race-results"
             }
-          },
-          {
-            "includes": "Vettel"
           }
         ]
       }

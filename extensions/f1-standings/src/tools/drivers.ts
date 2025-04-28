@@ -2,12 +2,13 @@ import fetch from "node-fetch";
 import { DriversResponse } from "../types";
 import { BASE_API_URL } from "../constants";
 import { showFailureToast } from "@raycast/utils";
+import currentSeason from "./current-season";
 
 type Input = {
   /**
    * Year of the season
    */
-  year: number;
+  year?: number;
 };
 
 /**
@@ -15,7 +16,15 @@ type Input = {
  */
 export default async function drivers(input: Input) {
   try {
-    const res = await fetch(`${BASE_API_URL}/f1/${input.year}/drivers.json`, {
+    let year = input.year;
+    if (year === null) {
+      const cs = await currentSeason();
+      if (cs === null) {
+        throw new Error("Could not fetch current season");
+      }
+      year = cs.season;
+    }
+    const res = await fetch(`${BASE_API_URL}/f1/${year}/drivers.json`, {
       method: "get",
     });
     if (res.status !== 200) {
