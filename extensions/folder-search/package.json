@@ -9,7 +9,9 @@
     "search"
   ],
   "author": "omarshahine",
+  "author": "omarshahine",
   "contributors": [
+    "GastroGeek",
     "GastroGeek",
     "fengtianze",
     "ridemountainpig"
@@ -42,6 +44,15 @@
       "required": false,
       "title": "Maximum Results",
       "type": "textfield"
+    },
+    {
+      "default": true,
+      "description": "Filter out non-user visible folders in ~/Library. This does not affect cloud storage folders (iCloud Drive, Dropbox, OneDrive, Google Drive) which will always be shown.",
+      "label": "Filter Library Folders",
+      "name": "filterLibraryFolders",
+      "required": false,
+      "title": "Filter System Library Folders",
+      "type": "checkbox"
     },
     {
       "default": true,
