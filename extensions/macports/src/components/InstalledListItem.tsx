@@ -8,7 +8,7 @@ export default function InstalledListItem({ port }: { port: string }) {
       title={port}
       actions={
         <ActionPanel>
-          <Action.Push title="Details" target={<PortDetails portName={port} />} />
+          <Action.Push icon={Icon.Info} title="Details" target={<PortDetails portName={port} />} />
           <Action.OpenInBrowser title="Open in Browser" url={`https://ports.macports.org/port/${port}`} />
           <Action
             title="Uninstall"

@@ -13,7 +13,7 @@ export default function SearchListItem({ searchResult }: { searchResult: SearchR
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Push title="Details" target={<PortDetails portName={searchResult.name} />} />
+            <Action.Push title="Details" icon={Icon.Info} target={<PortDetails portName={searchResult.name} />} />
             <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
           </ActionPanel.Section>
 

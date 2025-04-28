@@ -36,7 +36,7 @@ export function Onboarding() {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            title="Download MacPorts"
+            title="Download Macports"
             url="https://www.macports.org/install.php"
             icon={Icon.Download}
           />
