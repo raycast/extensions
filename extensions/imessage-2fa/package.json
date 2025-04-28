@@ -167,5 +167,8 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "test": "jest"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

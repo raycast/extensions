@@ -10,6 +10,7 @@ import {
   Color,
   useNavigation,
   Form,
+  Alert,
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { exec } from "child_process";
@@ -70,10 +71,8 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
   const [error, setError] = useState<string | null>(null);
   const { push, pop } = useNavigation();
 
-  // Cache stored in a ref to persist between renders
   const cache = useRef<Map<string, unknown>>(new Map());
 
-  // Function to invalidate cache entries matching a pattern
   function invalidateCache(pattern: RegExp) {
     for (const key of Array.from(cache.current.keys())) {
       if (pattern.test(key)) {
@@ -82,18 +81,15 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
     }
   }
 
-  // Optimized command execution with caching
   async function executeCommand(gcloudPath: string, command: string, options: CommandOptions = {}) {
     const { projectId, formatJson = true, quiet = false, retries = 0 } = options;
 
-    // Build the full command
     const projectFlag = projectId ? ` --project=${projectId}` : "";
     const formatFlag = formatJson ? " --format=json" : "";
     const quietFlag = quiet ? " --quiet" : "";
 
     const fullCommand = `${gcloudPath} ${command}${projectFlag}${formatFlag}${quietFlag}`;
 
-    // Check cache first
     const cacheKey = fullCommand;
     if (cache.current.has(cacheKey)) {
       return cache.current.get(cacheKey);
@@ -116,7 +112,6 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
 
       const result = JSON.parse(stdout);
 
-      // Cache the result
       cache.current.set(cacheKey, result);
 
       return result;
@@ -133,7 +128,6 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
     }
   }
 
-  // Memoized fetch function to avoid recreating it on every render
   const fetchLifecycleRules = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -145,9 +139,7 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
     });
 
     try {
-      // Use the optimized command execution with caching
-      const result = await executeCommand(gcloudPath, `storage buckets describe gs://${bucketName}`, {
-        projectId,
+      const result = await executeCommand(gcloudPath, `storage buckets describe gs://${bucketName} --format=json`, {
         retries: 1,
       });
 
@@ -165,7 +157,6 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
 
       const rules = Array.isArray(result.lifecycle.rule) ? result.lifecycle.rule : [result.lifecycle.rule];
 
-      // Add IDs to rules if they don't have them
       const rulesWithIds = rules.map((rule: LifecycleRule, index: number) => {
         return {
           ...rule,
@@ -185,7 +176,6 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
       loadingToast.hide();
       console.error("Error fetching lifecycle rules:", error);
 
-      // Provide more user-friendly error messages for common errors
       let errorMessage = String(error);
       let errorTitle = "Failed to load lifecycle rules";
 
@@ -204,7 +194,6 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
     }
   }, [projectId, gcloudPath, bucketName]);
 
-  // Initial load
   useEffect(() => {
     fetchLifecycleRules();
   }, [fetchLifecycleRules]);
@@ -212,15 +201,14 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
   async function deleteRule(ruleId: string) {
     const options = {
       title: "Delete Lifecycle Rule",
-      message: `Are you sure you want to delete rule "${ruleId}"?`,
+      message: `Are you sure you want to delete the rule "${ruleId}"?`,
       icon: Icon.Trash,
       primaryAction: {
         title: "Delete",
-        style: Action.Style.Destructive,
+        style: Alert.ActionStyle.Destructive,
       },
     };
 
-    // @ts-expect-error The type definition for confirmAlert options doesn't match the actual API
     if (await confirmAlert(options)) {
       const deletingToast = await showToast({
         style: Toast.Style.Animated,
@@ -229,13 +217,10 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
       });
 
       try {
-        // First, get all current rules
         const currentRules = [...lifecycleRules];
 
-        // Filter out the rule to delete
         const updatedRules = currentRules.filter((rule) => rule.id !== ruleId);
 
-        // Create a temporary JSON file with the updated lifecycle configuration
         const tempFilePath = `${os.tmpdir()}/lifecycle-${bucketName}-${Date.now()}.json`;
 
         const lifecycleConfig = {
@@ -246,14 +231,10 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
 
         fs.writeFileSync(tempFilePath, JSON.stringify(lifecycleConfig, null, 2));
 
-        // Update the bucket with the new lifecycle configuration
         await executeCommand(gcloudPath, `storage buckets update gs://${bucketName} --lifecycle-file=${tempFilePath}`, {
-          projectId,
-          formatJson: false,
           quiet: true,
         });
 
-        // Clean up the temporary file
         fs.unlinkSync(tempFilePath);
 
         deletingToast.hide();
@@ -263,16 +244,13 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
           message: `Rule "${ruleId}" deleted`,
         });
 
-        // Invalidate the cache
         invalidateCache(new RegExp(`gs://${bucketName}`));
 
-        // Refresh the rules list
         fetchLifecycleRules();
       } catch (error) {
         deletingToast.hide();
         console.error("Error deleting lifecycle rule:", error);
 
-        // Provide more user-friendly error messages for common errors
         let errorMessage = String(error);
         let errorTitle = "Failed to delete lifecycle rule";
 
@@ -374,7 +352,6 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
     });
 
     try {
-      // Validate age if provided
       if (formValues.age) {
         const age = parseInt(formValues.age);
         if (isNaN(age) || age <= 0) {
@@ -382,20 +359,18 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
         }
       }
 
-      // Validate createdBefore date format if provided
       if (formValues.createdBefore) {
         const dateRegex = /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$/;
         if (!dateRegex.test(formValues.createdBefore)) {
           throw new Error("Created Before date must be in YYYY-MM-DD format");
         }
-        // Validate if it's a valid date (e.g., not 2023-02-31)
+
         const date = new Date(formValues.createdBefore);
         if (isNaN(date.getTime())) {
           throw new Error("Created Before must be a valid date");
         }
       }
 
-      // Build the rule object
       const rule: LifecycleRule = {
         id: formValues.id || `rule-${Date.now()}`,
         action: {
@@ -404,12 +379,10 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
         condition: {},
       };
 
-      // Add storage class if action is SetStorageClass
       if (formValues.action === "SetStorageClass") {
         rule.action.storageClass = formValues.storageClass;
       }
 
-      // Add conditions
       if (formValues.age) {
         rule.condition.age = parseInt(formValues.age);
       }
@@ -426,13 +399,10 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
         rule.condition.numNewerVersions = parseInt(formValues.numNewerVersions);
       }
 
-      // Get current rules
       const currentRules = [...lifecycleRules];
 
-      // Add the new rule
       const updatedRules = [...currentRules, rule];
 
-      // Create a temporary JSON file with the updated lifecycle configuration
       const tempFilePath = `${os.tmpdir()}/lifecycle-${bucketName}-${Date.now()}.json`;
 
       const lifecycleConfig = {
@@ -443,14 +413,10 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
 
       fs.writeFileSync(tempFilePath, JSON.stringify(lifecycleConfig, null, 2));
 
-      // Update the bucket with the new lifecycle configuration
       await executeCommand(gcloudPath, `storage buckets update gs://${bucketName} --lifecycle-file=${tempFilePath}`, {
-        projectId,
-        formatJson: false,
         quiet: true,
       });
 
-      // Clean up the temporary file
       fs.unlinkSync(tempFilePath);
 
       creatingToast.hide();
@@ -460,17 +426,14 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
         message: `Rule "${rule.id}" added`,
       });
 
-      // Invalidate the cache
       invalidateCache(new RegExp(`gs://${bucketName}`));
 
-      // Refresh the rules list and go back to the list view
       pop();
       fetchLifecycleRules();
     } catch (error) {
       creatingToast.hide();
       console.error("Error creating lifecycle rule:", error);
 
-      // Provide more user-friendly error messages for common errors
       let errorMessage = String(error);
       let errorTitle = "Failed to create lifecycle rule";
 
@@ -484,19 +447,17 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
   }
 
   function viewRuleDetails(rule: LifecycleRule) {
-    // Format the condition for display
     const conditionEntries = Object.entries(rule.condition)
       .filter(([, value]) => value !== undefined)
       .map(([key, value]) => {
-        // Format arrays
         if (Array.isArray(value)) {
           return `**${formatConditionKey(key)}:** ${value.join(", ")}`;
         }
-        // Format booleans
+
         if (typeof value === "boolean") {
           return `**${formatConditionKey(key)}:** ${value ? "Yes" : "No"}`;
         }
-        // Default formatting
+
         return `**${formatConditionKey(key)}:** ${value}`;
       });
 
@@ -574,13 +535,10 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
     );
   }
 
-  // Helper function to format condition keys for display
   function formatConditionKey(key: string): string {
-    // Convert camelCase to Title Case with spaces
     return key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
   }
 
-  // Helper function to get an icon for a rule based on its action
   function getRuleIcon(rule: LifecycleRule) {
     if (rule.action.type === "Delete") {
       return { source: Icon.Trash, tintColor: Color.Red };
@@ -591,7 +549,6 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
     }
   }
 
-  // Helper function to get a subtitle for a rule
   function getRuleSubtitle(rule: LifecycleRule): string {
     if (rule.action.type === "Delete") {
       return "Delete objects";
@@ -602,7 +559,6 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
     }
   }
 
-  // Helper function to get accessories for a rule
   function getRuleAccessories(rule: LifecycleRule) {
     const accessories = [];
 

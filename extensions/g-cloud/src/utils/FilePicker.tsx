@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, useNavigation, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, Icon, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { ReactNode, useState } from "react";
 import { openFilePicker } from "./NativeFilePicker";
@@ -15,10 +15,6 @@ export interface FilePickerProps {
   children?: ReactNode;
 }
 
-/**
- * A reusable file picker component that allows users to paste file paths
- * or use the native macOS file picker
- */
 export function FilePicker({
   onFilePicked,
   title = "Select File",
@@ -32,8 +28,11 @@ export function FilePicker({
   const { pop } = useNavigation();
   const [filePath, setFilePath] = useState<string>("");
   const [error, setError] = useState<string | undefined>();
+  const [isValidating, setIsValidating] = useState(false);
 
   const handleBrowse = async () => {
+    if (isValidating) return;
+
     try {
       setError(undefined);
       const selectedPath = await openFilePicker({
@@ -61,6 +60,8 @@ export function FilePicker({
   };
 
   const handleSubmit = async (values: { filePath: string }) => {
+    if (isValidating) return;
+
     if (!values.filePath) {
       setError("Please select a file or enter a valid file path");
       await showFailureToast({
@@ -72,8 +73,19 @@ export function FilePicker({
 
     try {
       setError(undefined);
-      // Validate the file before proceeding
+      setIsValidating(true);
+
+      const validatingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Validating file...",
+        message: values.filePath,
+      });
+
       const isValid = await validateFile(values.filePath);
+
+      validatingToast.hide();
+      setIsValidating(false);
+
       if (isValid) {
         onFilePicked(values.filePath);
         pop();
@@ -81,6 +93,7 @@ export function FilePicker({
         setError("Invalid file path or file type");
       }
     } catch (error) {
+      setIsValidating(false);
       console.error("Error validating file:", error);
       setError(error instanceof Error ? error.message : "Failed to validate file");
       await showFailureToast({
@@ -96,7 +109,7 @@ export function FilePicker({
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={submitTitle}
+            title={isValidating ? "Validating…" : submitTitle}
             icon={submitTitle.toLowerCase().includes("upload") ? Icon.Upload : Icon.Check}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
             onSubmit={handleSubmit}
@@ -126,16 +139,13 @@ export function FilePicker({
       />
       <Form.Description
         title="Options"
-        text="You can either paste a file path or click 'Browse...' to select a file using the native file picker."
+        text="You can either paste a file path or click 'Browse…' to select a file using the native file picker."
       />
       {children}
     </Form>
   );
 }
 
-/**
- * A specialized version of FilePicker for uploading files to cloud storage
- */
 export function CloudStorageUploader({
   onFilePicked,
   destinationInfo,
@@ -152,7 +162,7 @@ export function CloudStorageUploader({
       onFilePicked={onFilePicked}
       title={title}
       placeholder="/path/to/your/file.txt"
-      info="Enter the full path to the file you want to upload or click 'Browse...'"
+      info="Enter the full path to the file you want to upload or click 'Browse…'"
       submitTitle="Upload"
       cancelTitle="Cancel"
       allowedFileTypes={allowedFileTypes}

@@ -1,5 +1,9 @@
 # Google Calendar Changelog
 
+## [1.2.1] - {PR_MERGE_DATE}
+
+- Changed "Copy Meeting Link" action shortcut to "cmd + shift + ," to not conflict with "Copy Event Title"
+
 ## [1.2.0] - {PR_MERGE_DATE}
 
 - Added listing of calendars (request [#17411](https://github.com/raycast/extensions/issues/17411))
