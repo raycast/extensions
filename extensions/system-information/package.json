@@ -42,7 +42,7 @@
     {
       "name": "check-system-info",
       "title": "Check System Info",
-      "description": "Get basic system information including hostname, chip, memory, and macOS version"
+      "description": "Get basic system information including hostname, chip, memory, macOS version, and serial number"
     },
     {
       "name": "check-network",
