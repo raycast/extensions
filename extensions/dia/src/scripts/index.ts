@@ -41,16 +41,7 @@ export async function createNewIncognitoWindow(): Promise<void> {
     tell application "Dia"
       activate
       tell application "System Events"
-        tell process "Dia"
-          tell menu bar item "File" of menu bar 1
-            click
-            tell menu item "New Window" of menu "File"
-              click
-              delay 0.1
-              click menu item "New Incognito Window" of menu 1
-            end tell
-          end tell
-        end tell
+        keystroke "n" using {command down, shift down}
       end tell
     end tell
   `);
