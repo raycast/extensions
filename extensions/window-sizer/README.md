@@ -15,6 +15,7 @@ This extension uses AppleScript to interact with windows, providing the followin
 - Create and save custom window sizes
 - Apply common window sizes with a single click
 - Restore previous window size
+- Get current window size
 
 ## Usage
 
@@ -38,5 +39,5 @@ The application comes with several common screen sizes:
 ## Notes
 
 - Make sure to authorize Raycast to control application windows using AppleScript
+- Maximization operations only work correctly on the main display
 - Some applications may restrict window resizing
-- Maximization operations only work correctly on the main display.

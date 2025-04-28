@@ -1,5 +1,9 @@
 # Window Sizer Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Fix: Screenshots & README
+
 ## [Update] - 2025-04-28
 
 - Feature: Maximize Window
