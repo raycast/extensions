@@ -1,6 +1,6 @@
 # Messages 2FA Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-28
 
 - Add the functionality for directly opening verification/ sign-in links that were received via Email (Apple Mail / Gmail)
 
