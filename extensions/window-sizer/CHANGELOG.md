@@ -1,6 +1,6 @@
 # Window Sizer Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-28
 
 - Feature: Maximize Window
 - Feature: Get Current Size
