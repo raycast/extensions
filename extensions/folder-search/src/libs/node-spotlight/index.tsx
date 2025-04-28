@@ -72,8 +72,9 @@ const spotlight = (
         if (value === "(null)") {
           value = null;
         } else if (attributes[attr] && typeof attributes[attr] === "function") {
-          const f: (s: string) => string = attributes[attr];
-          value = f(value);
+          const parser = attributes[attr];
+          const parsedValue = parser(value);
+          value = parsedValue !== null ? String(parsedValue) : null;
         }
 
         if (value) {
