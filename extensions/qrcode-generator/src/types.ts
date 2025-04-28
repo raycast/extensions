@@ -1,3 +1,4 @@
 export interface PreferencesType {
-  primaryAction: "save" | "show";
+  primaryAction: "save" | "inline";
+  defaultFormat: "png" | "svg";
 }
