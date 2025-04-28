@@ -1,17 +1,18 @@
-import { closeMainWindow, showToast, Toast } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { spawn } from "child_process";
 
-export default async function main() {
-  await closeMainWindow();
-  await showToast({ style: Toast.Style.Animated, title: "Restarting Raycast..." });
+export default async function Command() {
+  await showHUD("Rebooting Raycast...");
 
-  // Use spawn to create a detached child process that survives Raycast quitting
+  // Add a tiny artificial delay before killing
+  await new Promise((resolve) => setTimeout(resolve, 300)); // 300ms delay
+
   const subprocess = spawn(
     "/bin/bash",
     [
       "-c",
       `
-    sleep .5;
+    sleep 0.5;
     open -a "Raycast"
   `,
     ],
@@ -21,8 +22,7 @@ export default async function main() {
     },
   );
 
-  subprocess.unref(); // Detach from Raycast
+  subprocess.unref();
 
-  // Now kill Raycast (including this extension)
   spawn("killall", ["Raycast"]);
 }
