@@ -1,6 +1,6 @@
 # PurpleAir Changelog
 
-## [Major Enhancement] - {PR_MERGE_DATE}
+## [Major Enhancement] - 2025-04-28
 
 ### New Features
 - Added support for multiple sensor indices - now you can monitor several locations at once
