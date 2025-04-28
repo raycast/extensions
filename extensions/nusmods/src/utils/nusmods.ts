@@ -29,12 +29,17 @@ export const PrereqSchema = z.union([
   z.string(),
   z.interface({
     get and() {
-      return z.array(z.lazy(() => PrereqSchema));
+      return z.array(PrereqSchema);
     },
   }),
   z.interface({
     get or() {
-      return z.array(z.lazy(() => PrereqSchema));
+      return z.array(PrereqSchema);
+    },
+  }),
+  z.interface({
+    get nOf() {
+      return z.tuple([z.number(), z.array(PrereqSchema)]);
     },
   }),
 ]);
