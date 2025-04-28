@@ -39,5 +39,5 @@ The application comes with several common screen sizes:
 ## Notes
 
 - Make sure to authorize Raycast to control application windows using AppleScript
-- Maximization operations only work correctly on the main display
+- Maximization operations only work correctly on the main screen
 - Some applications may restrict window resizing
