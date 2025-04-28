@@ -1,4 +1,4 @@
-import { BrowserExtension, environment, LocalStorage, WindowManagement } from "@raycast/api";
+import { BrowserExtension, environment, getFrontmostApplication, LocalStorage } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import Values = LocalStorage.Values;
 
@@ -13,7 +13,7 @@ interface AccountUsage {
 
 type UsageData = Map<string, AccountUsage>;
 
-export interface WindowDetails {
+export interface AppDetails {
   name: string;
   tabHostnames: string[];
 }
@@ -47,26 +47,24 @@ export function getUsageData(usages: number) {
 }
 
 export function getActiveWindow() {
-  const [windowDetails, setWindowDetails] = useState<WindowDetails>();
+  const [windowDetails, setWindowDetails] = useState<AppDetails>();
 
   async function fetchActiveWindow() {
     try {
-      const activeWindow = await WindowManagement.getActiveWindow();
-      const activeWindowDetails: WindowDetails = {
+      const activeApp = await getFrontmostApplication();
+      const activeAppDetails: AppDetails = {
         name: "",
         tabHostnames: [],
       };
 
-      if (activeWindow.application) {
-        activeWindowDetails.name = activeWindow.application.name;
+      activeAppDetails.name = activeApp.name;
 
-        if (environment.canAccess(BrowserExtension) && supportedBrowser.includes(activeWindow.application.name)) {
-          const tabs = await BrowserExtension.getTabs();
-          activeWindowDetails.tabHostnames = tabs.filter((t) => t.active).map((t) => new URL(t.url).hostname);
-        }
-
-        setWindowDetails(activeWindowDetails);
+      if (environment.canAccess(BrowserExtension) && supportedBrowser.includes(activeApp.name)) {
+        const tabs = await BrowserExtension.getTabs();
+        activeAppDetails.tabHostnames = tabs.filter((t) => t.active).map((t) => new URL(t.url).hostname);
       }
+
+      setWindowDetails(activeAppDetails);
     } catch (error) {
       console.error("Failed loading active window: ", error);
     }
@@ -79,7 +77,7 @@ export function getActiveWindow() {
   return windowDetails;
 }
 
-export async function updateUsage(accountKey: string, activeWindow: WindowDetails | undefined) {
+export async function updateUsage(accountKey: string, activeWindow: AppDetails | undefined) {
   if (!activeWindow) {
     return;
   }
@@ -119,7 +117,7 @@ export async function updateUsage(accountKey: string, activeWindow: WindowDetail
 
 export function makeUsageSorter(
   usageData: Map<string, AccountUsage> | undefined,
-  activeWindow: WindowDetails | undefined
+  activeWindow: AppDetails | undefined
 ): (a: React.JSX.Element, b: React.JSX.Element) => number {
   return (a: React.JSX.Element, b: React.JSX.Element): number => {
     const keyA = a.key || "";
