@@ -2,8 +2,6 @@ import { fetchLawContent, parseArticles } from "../services/lawService";
 import { Article } from "../types";
 
 type Input = {
-  /** The question asked */
-  query: string;
   /** The list of laws to analyze */
   laws: {
     /** The name of the law */
