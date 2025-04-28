@@ -1,6 +1,6 @@
 # Threads Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-28
 
 - Updated the `Download Threads Media` command to download media from Threads.
 
