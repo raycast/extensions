@@ -20,6 +20,7 @@ import { moveFinderItems } from "./moveUtils";
 import { FolderListSection, Directory } from "./components";
 import path from "node:path";
 import { userInfo } from "os";
+import { showFailureToast } from "@raycast/utils";
 
 // allow string indexing on Icons
 interface IconDictionary {
