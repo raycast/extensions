@@ -264,6 +264,7 @@
   "danblancas/search-clojuredocs": "clojuredocs-search",
   "guide/close-apps": "close-apps",
   "qeude/close-finder": "close-finder",
+  "adam_vyborny/cloud-cli-login-statuses": "cloud-cli-login-statuses",
   "destiner/cloudflare": "cloudflare",
   "anandubajith/cloudflare-warp": "cloudflare-warp",
   "colbyfayock/cloudinary": "cloudinary",
