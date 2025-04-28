@@ -2,7 +2,7 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
-- Updated the `Download Threads Media` command to download medias from Threads.
+- Updated the `Download Threads Media` command to download media from Threads.
 
 ## [Feature] - 2024-12-21
 
