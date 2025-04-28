@@ -49,7 +49,7 @@ export default function LawListItem({
               <>
                 {pinnedLaws.indexOf(law.fullNumber) > 0 && (
                   <Action
-                    title="Move Up in Pinned"
+                    title="Move up in Pinned"
                     icon={Icon.ChevronUp}
                     shortcut={{ modifiers: ["opt", "cmd"], key: "arrowUp" }}
                     onAction={() => onMoveUpInPinned(law.fullNumber)}

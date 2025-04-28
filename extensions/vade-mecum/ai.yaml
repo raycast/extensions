@@ -1,0 +1,89 @@
+instructions: |
+  1) Forneça uma explicação objetiva de como cada artigo citado apoia a resposta.
+  2) Ao mencionar uma lei pela primeira vez, inclua um link markdown para ela.
+  3) Transcreva os dispositivos legais citados por meio do uso da sintaxe markdown para blocos de citação (`>`) sem utilizar nenhuma outra sintaxe para citar os artigos (e.g., `*`, `-`, `1.`).
+  4) Introduza as citações por dois pontos (`:`).
+  5) Inclua o número dos artigos citados no bloco de citação.
+  6) Explique os principais conceitos e termos legais mencionados nos artigos, fornecendo, quando necessário, exemplos que ilustram a interpretação dos dispositivos legais.
+evals:
+  - input: "@vade-mecum Quais são os direitos do titular de dados pessoais?"
+    mocks:
+      get-laws:
+        - name: "Constituição Federal"
+          fullNumber: "Constituição Federal de 1988"
+          url: "https://www.planalto.gov.br/ccivil_03/constituicao/ConstituicaoCompilado.htm"
+        - name: "Código Civil"
+          fullNumber: "Lei nº 10.406, de 10 de janeiro de 2002"
+          url: "https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm"
+        - name: "Lei Geral de Proteção de Dados Pessoais"
+          fullNumber: "Lei nº 13.709, de 14 de agosto de 2018"
+          url: "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/L13709compilado.htm"
+      get-articles:
+        - lawName: "Lei Geral de Proteção de Dados Pessoais"
+          articles:
+            - title: "Art. 18"
+              content: "Art. 18. O titular dos dados pessoais tem direito a obter do controlador, em relação aos dados do titular por ele tratados, a qualquer momento e mediante requisição:\n\nI - confirmação da existência de tratamento;\n\nII - acesso aos dados;\n\nIII - correção de dados incompletos, inexatos ou desatualizados;\n\nIV - anonimização, bloqueio ou eliminação de dados desnecessários, excessivos ou tratados em desconformidade com o disposto nesta Lei;\n\nV - portabilidade dos dados a outro fornecedor de serviço ou produto, mediante requisição expressa, de acordo com a regulamentação da autoridade nacional, observados os segredos comercial e industrial; (Redação dada pela Lei nº 13.853, de 2019) Vigência\n\nVI - eliminação dos dados pessoais tratados com o consentimento do titular, exceto nas hipóteses previstas no art. 16 desta Lei;\n\nVII - informação das entidades públicas e privadas com as quais o controlador realizou uso compartilhado de dados;\n\nVIII - informação sobre a possibilidade de não fornecer consentimento e sobre as consequências da negativa;\n\nIX - revogação do consentimento, nos termos do § 5º do art. 8º desta Lei.\n\n§ 1º O titular dos dados pessoais tem o direito de peticionar em relação aos seus dados contra o controlador perante a autoridade nacional.\n\n§ 2º O titular pode opor-se a tratamento realizado com fundamento em uma das hipóteses de dispensa de consentimento, em caso de descumprimento ao disposto nesta Lei.\n\n§ 3º Os direitos previstos neste artigo serão exercidos mediante requerimento expresso do titular ou de representante legalmente constituído, a agente de tratamento.\n\n§ 4º Em caso de impossibilidade de adoção imediata da providência de que trata o § 3º deste artigo, o controlador enviará ao titular resposta em que poderá:\n\nI - comunicar que não é agente de tratamento dos dados e indicar, sempre que possível, o agente; ou\n\nII - indicar as razões de fato ou de direito que impedem a adoção imediata da providência.\n\n§ 5º O requerimento referido no § 3º deste artigo será atendido sem custos para o titular, nos prazos e nos termos previstos em regulamento.\n\n§ 6º O responsável deverá informar, de maneira imediata, aos agentes de tratamento com os quais tenha realizado uso compartilhado de dados a correção, a eliminação, a anonimização ou o bloqueio dos dados, para que repitam idêntico procedimento, exceto nos casos em que esta comunicação seja comprovadamente impossível ou implique esforço desproporcional. (Redação dada pela Lei nº 13.853, de 2019) Vigência\n\n§ 7º A portabilidade dos dados pessoais a que se refere o inciso V do caput deste artigo não inclui dados que já tenham sido anonimizados pelo controlador.\n\n§ 8º O direito a que se refere o § 1º deste artigo também poderá ser exercido perante os organismos de defesa do consumidor."
+    expected:
+      - callsTool:
+          name: "get-laws"
+          arguments: {}
+      - callsTool:
+          name: "get-articles"
+          arguments:
+            laws.0.name: "Lei Geral de Proteção de Dados Pessoais"
+            laws.0.fullNumber: "Lei nº 13.709, de 14 de agosto de 2018"
+            laws.0.url: "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/L13709compilado.htm"
+      - matches: "]\\(https://www\\.planalto\\.gov\\.br/ccivil_03/_ato2015-2018/2018/lei/[Ll]13709compilado\\.htm\\)"
+      - includes: "Art. 18"
+  - input: "@vade-mecum Em que situações uma área é considerada livre para fins de pesquisa mineral?"
+    mocks:
+      get-articles:
+        - lawName: "Código de Mineração"
+          articles:
+            - content: "Art. 18. A área objetivada em requerimento de autorização e pesquisa ou de registro de licença será considerada livre, desde que não se enquadre em quaisquer das seguintes hipóteses: (Redação dada pela Lei nº 6.403, de 1976)\n\nI - se a área estiver vinculada a autorização de pesquisa, registro de licença, concessão da lavra, manifesto de mina ou permissão de reconhecimento geológico; (Redação dada pela Lei nº 6.403, de 1976)\n\nII - se a área for objeto de pedido anterior de autorização de pesquisa, salvo se este estiver sujeito a indeferimento, aos seguintes casos: (Redação dada pela Lei nº 6.403, de 1976)\n\nIII - se a área for objeto de requerimento anterior de registro de licença, ou estiver vinculada a licença, cujo registro venha a ser requerido dentro do prazo de 30 (trinta) dias de sua expedição; (Incluído pela Lei nº 6.403, de 1976)\n\nIV - se a área estiver vinculada a requerimento de renovação de autorização de pesquisa, tempestivamente apresentado, e pendente de decisão; (Incluído pela Lei nº 6.403, de 1976)\n\nV - se a área estiver vinculada a autorização de pesquisa, com relatório dos respectivos trabalhos tempestivamente apresentado, e pendente de decisão; (Incluído pela Lei nº 6.403, de 1976)\n\nVI - se a área estiver vinculada a autorização de pesquisa, com relatório dos respectivos trabalhos aprovado, e na vigência do direito de requerer a concessão da lavra, atribuído nos termos do Art. 31 deste Código. (Incluído pela Lei nº 6.403, de 1976)\n\n§ 1º Não estando livre a área pretendida, o requerimento será indeferido por despacho do Diretor-Geral do Departamento Nacional da Produção Mineral (D.N.P.M.), assegurada ao interessado a restituição de uma das vias das peças apresentadas em duplicata, bem como dos documentos públicos, integrantes da respectiva instrução. (Renumerado do Parágrafo único para § 1º com nova redação dada pela Lei nº 6.403, de 1976)\n\n§ 2º Ocorrendo interferência parcial da área objetivada no requerimento, como área onerada nas circunstâncias referidas nos itens I a VI deste artigo, e desde que a realização da pesquisa, ou a execução do aproveitamento mineral por licenciamento, na parte remanescente, seja considerada técnica e economicamente viável, a juízo do Departamento Nacional da Produção Mineral - D.N.P.M. - será facultada ao requerente a modificação do pedido para retificação da área originalmente definida, procedendo-se, neste caso, de conformidade com o disposto nos §§ 1º e 2º do artigo anterior. (Incluído pela Lei nº 6.403, de 1976)"
+              title: "Art. 18"
+      get-laws:
+        - name: "Constituição Federal"
+          fullNumber: "Constituição Federal de 1988"
+          url: "https://www.planalto.gov.br/ccivil_03/constituicao/ConstituicaoCompilado.htm"
+        - name: "Código Civil"
+          fullNumber: "Lei nº 10.406, de 10 de janeiro de 2002"
+          url: "https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm"
+        - name: "Código de Mineração"
+          fullNumber: "Decreto-Lei nº 227, de 28 de fevereiro de 1967"
+          url: "https://www.planalto.gov.br/ccivil_03/decreto-lei/Del0227compilado.htm"
+    expected:
+      - callsTool:
+          name: "get-laws"
+          arguments: {}
+      - callsTool:
+          name: "get-articles"
+          arguments:
+            laws.0.name: "Código de Mineração"
+            laws.0.fullNumber: "Decreto-Lei nº 227, de 28 de fevereiro de 1967"
+            laws.0.url: "https://www.planalto.gov.br/ccivil_03/decreto-lei/Del0227compilado.htm"
+      - matches: "]\\(https://www\\.planalto\\.gov\\.br/ccivil_03/decreto-lei/[Dd]el0227compilado\\.htm\\)"
+      - includes: "Art. 18"
+  - input: "@vade-mecum Em quais hipóteses pode o credor exigir o vencimento antecipado da dívida prevista em contrato?"
+    mocks:
+      get-laws:
+        - name: "Código Civil"
+          fullNumber: "Lei nº 10.406, de 10 de janeiro de 2002"
+          url: "https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm"
+      get-articles:
+        - lawName: "Código Civil"
+          articles:
+            - title: "Art. 333"
+              content: "Art. 333. Ao credor assistirá o direito de cobrar a dívida antes de vencido o prazo estipulado no contrato ou marcado neste Código:\n\nI - no caso de falência do devedor, ou de concurso de credores;\n\nII - se os bens, hipotecados ou empenhados, forem penhorados em execução por outro credor;\n\nIII - se cessarem, ou se se tornarem insuficientes, as garantias do débito, fidejussórias, ou reais, e o devedor, intimado, se negar a reforçá-las.\n\nParágrafo único. Nos casos deste artigo, se houver, no débito, solidariedade passiva, não se reputará vencido quanto aos outros devedores solventes."
+    expected:
+      - callsTool:
+          name: "get-laws"
+          arguments: {}
+      - callsTool:
+          name: "get-articles"
+          arguments:
+            laws.0.name: "Código Civil"
+            laws.0.fullNumber: "Lei nº 10.406, de 10 de janeiro de 2002"
+            laws.0.url: "https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm"
+      - matches: "]\\(https://www\\.planalto\\.gov\\.br/ccivil_03/leis/2002/[Ll]10406compilada\\.htm\\)"
+      - includes: "Art. 333"
