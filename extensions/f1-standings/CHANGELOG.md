@@ -1,6 +1,6 @@
 # F1 Standings Changelog
 
-## [🧠 Added AI Extensions] - {PR_MERGE_DATE}
+## [🧠 Added AI Extensions] - 2025-04-28
 
 - Added AI extensions to Formula 1
 
