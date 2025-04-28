@@ -1,6 +1,6 @@
 import { parseDate, parseString, parseBoolean, parseArray, parseArrayOfStrings } from "./parse";
 
-const attributes = {
+const attributes: { [key: string]: (s: string) => any } = {
   _kMDItemOwnerUserID: parseInt,
   kMDItemAcquisitionMake: parseString,
   kMDItemAcquisitionModel: parseString,

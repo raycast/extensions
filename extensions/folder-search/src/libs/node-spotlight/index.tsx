@@ -17,7 +17,7 @@ const spotlight = (
   query: string,
   dir: string | null = null,
   filter: string[] | null = null,
-  attrs = [],
+  attrs: string[] = [],
   abortable: React.MutableRefObject<AbortController | null | undefined> | undefined
 ) => {
   if (process.platform !== "darwin") throw new Error(process.platform + " is not supported.");
