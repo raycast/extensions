@@ -3,7 +3,7 @@ import { ExecFileException } from "child_process";
 import React, { useState } from "react";
 import { getAccountIcon, getIconOverrides, getIconPack, IconSubmenu } from "./icons";
 import { AccountDetail, executeCodeCommand, getAccountList, ykmanExecutable } from "./accounts";
-import { getActiveWindow, getUsageData, makeUsageSorter, updateUsage } from "./usage";
+import { getActiveApp, getUsageData, makeUsageSorter, updateUsage } from "./usage";
 
 interface Preference {
   ykmanPath: string;
@@ -36,7 +36,7 @@ export default function Command() {
 
   const [usages, setUsages] = useState<number>(0);
   const usageData = getUsageData(usages);
-  const activeWindow = getActiveWindow();
+  const activeApp = getActiveApp();
 
   if (!isLoading && accountResults.length === 0) {
     const description = error
@@ -58,7 +58,7 @@ export default function Command() {
             const { name, details, requiresTouch, key } = account;
 
             const usageCallback = () => {
-              updateUsage(key, activeWindow);
+              updateUsage(key, activeApp);
               setUsages(usages + 1);
             };
 
@@ -97,7 +97,7 @@ export default function Command() {
               />
             );
           })
-          .sort(makeUsageSorter(usageData, activeWindow))}
+          .sort(makeUsageSorter(usageData, activeApp))}
     </List>
   );
 }
