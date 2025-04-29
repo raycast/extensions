@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Removed unused image assets to reduce package size
 
-## [1.0.0] - 2025-04-27
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 
