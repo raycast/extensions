@@ -141,6 +141,7 @@ All animations use native-feeling macOS transitions.
    open -a Hammerspoon
    ```
 
+
 ---
 
 ## 🚀 How It Works
