@@ -8,7 +8,10 @@ import fetch from "cross-fetch";
 export function OAuthClientId() {
   const prefs = getPreferenceValues();
   const clientid = prefs.clientid as string | undefined;
-  return clientid || "";
+  if (!clientid) {
+    throw new Error("Google OAuth client ID not configured in preferences");
+  }
+  return clientid;
 }
 
 export const client = new OAuth.PKCEClient({
