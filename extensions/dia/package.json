@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dia",
   "title": "Dia",
-  "description": "Extension for The Browser Company new browser currently in Alpha.",
+  "description": "Extension for The Browser Company's new browser, currently in alpha.",
   "icon": "appIcon.png",
   "author": "tleo19",
   "categories": [
