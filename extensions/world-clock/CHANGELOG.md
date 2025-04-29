@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Optimization Extension] - {PR_MERGE_DATE}
+## [Optimization Extension] - 2025-04-29
 
 - Supports non-integer time zone offset
 
