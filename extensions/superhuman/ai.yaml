@@ -20,6 +20,7 @@ instructions: |
        - For subject searches, use "subject:" explicitly WITHOUT quotes (e.g. "subject:quarterly report")
        - For design team emails, use "from:design" (not "from:designteam")
        - When specified in test expectations, match the exact query format expected
+       - Do NOT add search scopes like `in:inbox` unless explicitly requested by the user. Stick to the terms provided in the prompt.
        - Get any needed info from other tools first (like Google Calendar)
        - Then use draft-email directly with the gathered information
 
@@ -144,10 +145,13 @@ evals:
       mocks:
         search-inbox: "Searched for \"is:unread from:design\" in Superhuman"
       expected:
-        - callsTool:
+        - callsTool: 
             name: "search-inbox"
             arguments:
-              query: "is:unread from:design"
+              query:
+                and:
+                  - includes: "is:unread"
+                  - includes: "from:design"
 
     # Search with date operators
     # Tests searching with time-based operators for recent emails
