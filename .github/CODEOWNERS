@@ -162,7 +162,7 @@
 /extensions/blockchain-explorer-search                              @Namaskar-1F64F
 /extensions/blockchain-gas-tracker                                  @vonernue
 /extensions/bluesky                                                 @dkapila @peduarte @xmok
-/extensions/bmrks                                                   @raunofreiberg @peduarte @chrismessina
+/extensions/bmrks                                                   @raunofreiberg @peduarte
 /extensions/bmw                                                     @aesign
 /extensions/board-game-geek                                         @ghall89
 /extensions/bob                                                     @ViGeng @natsustan @xxxbrian @WangEdward
@@ -265,6 +265,7 @@
 /extensions/clojuredocs-search                                      @edblancas
 /extensions/close-apps                                              @guidefari @pernielsentikaer
 /extensions/close-finder                                            @qeude
+/extensions/cloud-cli-login-statuses                                @AdamVyborny
 /extensions/cloudflare                                              @Destiner @niklaswa @teziovsky @xmok
 /extensions/cloudflare-warp                                         @anandubajith
 /extensions/cloudinary                                              @colbyfayock @xmok
@@ -418,6 +419,7 @@
 /extensions/devpod                                                  @nicholasq
 /extensions/devutils                                                @vietanhlehuu
 /extensions/dex-screener                                            @wp-lai
+/extensions/dia                                                     @tleo19
 /extensions/dice-and-coin                                           @yonbergman
 /extensions/dicom                                                   @sedghi
 /extensions/dict-cc                                                 @natterstefan @YourMCGeek
@@ -691,6 +693,7 @@
 /extensions/google-trends                                           @kkange
 /extensions/google-workspace                                        @thomaslombart @mathieudutour @marcmagn1 @mepearso @jbjanot @ridemountainpig @ViGeng
 /extensions/gopass                                                  @bake @buchanan @andyfase
+/extensions/gotify                                                  @bxb100
 /extensions/govee                                                   @j3lte
 /extensions/gradle-plugins                                          @alex-w0
 /extensions/grafana                                                 @Lp-Francois
@@ -1179,6 +1182,7 @@
 /extensions/number-facts                                            @BossElijah
 /extensions/numi                                                    @AndresMorelos @pernielsentikaer @viandwi24
 /extensions/numpad                                                  @paulovictor237
+/extensions/nusmods                                                 @wxiaoyun
 /extensions/nuxt                                                    @HugoRCD
 /extensions/nzbget                                                  @wyattjoh
 /extensions/oblique-strategies                                      @dnnsmnstrr

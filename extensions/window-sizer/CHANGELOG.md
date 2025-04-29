@@ -1,5 +1,17 @@
 # Window Sizer Changelog
 
+## [Update] - 2025-04-28
+
+- Fix: Screenshots and README
+
+## [Update] - 2025-04-28
+
+- Feature: Maximize Window
+- Feature: Get Current Size
+- Fix: Position of the window when restoring previous size
+- Fix: Toasts when size exceeds the screen
+- Fix: Toast when adding a size identical to the current size
+
 ## [Update] - 2025-04-25
 
 - Fixed handling of window size addition when no window is in focus
