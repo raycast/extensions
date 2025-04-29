@@ -1,6 +1,6 @@
 # Messages 2FA Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-04-29
 - Resolves issue with code extraction for iMessage
 
 ## [Update] - 2025-04-28
