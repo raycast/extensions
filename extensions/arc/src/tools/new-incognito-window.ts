@@ -23,21 +23,23 @@ export const config: NewTabSearchConfigs = {
 };
 
 const tool = async ({ url }: Input) => {
-  let NewIncognitoWindow = "";
-
   if (url) {
-    NewIncognitoWindow = url;
-    const NewIncognitoWindowAsSearch = `${config[NewIncognitoWindowPreferences.engine as keyof NewTabSearchConfigs]}${encodeURIComponent(NewIncognitoWindow)}`;
-    NewIncognitoWindow = isURL(NewIncognitoWindow) ? NewIncognitoWindow : NewIncognitoWindowAsSearch;
+    if (!isURL(url)) {
+      url = `${config[NewIncognitoWindowPreferences.engine as keyof NewTabSearchConfigs]}${encodeURIComponent(url)}`;
+    }
   } else {
-    NewIncognitoWindow = NewIncognitoWindowPreferences.url;
+    url = NewIncognitoWindowPreferences.url;
   }
 
-  if (await validateURL(NewIncognitoWindow)) {
+  if (!url) {
+    // No URL given or set in preferences, so open blank incognito window.
+    await makeNewWindow({ incognito: true });
+  } else if (await validateURL(url)) {
     // Append https:// if protocol is missing
-    const openURL = !/^\S+?:\/\//i.test(NewIncognitoWindow) ? "https://" + NewIncognitoWindow : NewIncognitoWindow;
-
-    await makeNewWindow({ incognito: true, url: openURL });
+    if (!/^\S+?:\/\//i.test(url)) {
+      url = "https://" + url;
+    }
+    await makeNewWindow({ incognito: true, url });
   }
 };
 

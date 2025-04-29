@@ -106,6 +106,10 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
             output: {
                 associatedSpaces: {
                     myTags: string[];
+                    myRole: import(".prisma/client").$Enums.TeamRole;
+                    myImage: string | null;
+                    myNickname: string | null;
+                    myAuthEmail: string | null;
                     tags: {
                         description: string | null;
                         spaceId: string;
@@ -240,6 +244,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 url: string;
                 tags: string[];
                 author: string;
+                authorEmail: string;
                 deletedAt: Date | null;
                 updatedAt: Date;
             };
@@ -249,15 +254,16 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 spaceIds: string[];
             };
             output: {
-                description: string | null;
-                spaceId: string;
                 id: string;
-                createdAt: Date;
+                authorEmail: string;
+                authorName: string;
+                spaceId: string;
+                spaceName: string;
+                tags: string[];
                 name: string;
                 url: string;
-                tags: string[];
-                author: string;
-                deletedAt: Date | null;
+                description: string | null;
+                createdAt: Date;
                 updatedAt: Date;
             }[];
         }>;
@@ -272,6 +278,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 url: string;
                 tags: string[];
                 author: string;
+                authorEmail: string;
                 deletedAt: Date | null;
                 updatedAt: Date;
             }[];
@@ -304,12 +311,26 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 url: string;
                 tags: string[];
                 author: string;
+                authorEmail: string;
                 deletedAt: Date | null;
                 updatedAt: Date;
             };
         }>;
+        import: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                tags: string[];
+                bookmarks: {
+                    name: string;
+                    url: string;
+                    description?: string | undefined;
+                }[];
+                browserName: string;
+            };
+            output: void;
+        }>;
     }>;
-    team: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+    space: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
         ctx: {
             db: import(".prisma/client").PrismaClient<{
                 log: "error"[];
@@ -348,13 +369,23 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
             };
             output: void;
         }>;
-        leave: import("@trpc/server").TRPCQueryProcedure<{
-            input: string;
+        leave: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+            };
             output: void;
         }>;
         get: import("@trpc/server").TRPCQueryProcedure<{
-            input: string;
-            output: {
+            input: {
+                spaceId: string;
+            };
+            output: ({
+                _count: {
+                    tags: number;
+                    bookmarks: number;
+                    users: number;
+                };
+            } & {
                 type: import(".prisma/client").$Enums.SpaceType;
                 status: string | null;
                 description: string | null;
@@ -363,7 +394,16 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 name: string;
                 updatedAt: Date;
                 image: string | null;
-            } | null;
+            }) | null;
+        }>;
+        update: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                description?: string | undefined;
+                name?: string | undefined;
+                image?: string | undefined;
+            };
+            output: void;
         }>;
         removeUser: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -491,7 +531,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
     }, {
         create: import("@trpc/server").TRPCMutationProcedure<{
             input: {
-                type: "APP_OPEN" | "LOGIN" | "LOGOUT" | "BOOKMARK_OPEN" | "BOOKMARK_COPY" | "BOOKMARK_CREATED" | "BOOKMARK_UPDATED" | "BOOKMARK_DELETED" | "SUBSCRIBE_TAG" | "UNSUBSCRIBE_TAG" | "TAG_CREATED" | "TAG_UPDATED" | "TAG_DELETED" | "TEAM_CREATED" | "TEAM_UPDATED" | "TEAM_DELETED" | "TEAM_MEMBER_INVITED" | "TEAM_MEMBER_JOINED" | "TEAM_MEMBER_LEFT" | "TEAM_MEMBER_REMOVED" | "TEAM_MEMBER_ROLE_CHANGED" | "TEAM_PLAN_CHANGED";
+                type: "APP_OPEN" | "LOGIN" | "LOGOUT" | "BOOKMARK_OPEN" | "BOOKMARK_COPY" | "BOOKMARK_CREATED" | "BOOKMARK_UPDATED" | "BOOKMARK_DELETED" | "BOOKMARK_IMPORTED_FROM_BROWSER" | "SUBSCRIBE_TAG" | "UNSUBSCRIBE_TAG" | "TAG_CREATED" | "TAG_UPDATED" | "TAG_DELETED" | "SPACE_CREATED" | "SPACE_UPDATED" | "SPACE_DELETED" | "SPACE_MEMBER_INVITED" | "SPACE_MEMBER_JOINED" | "SPACE_MEMBER_LEFT" | "SPACE_MEMBER_REMOVED" | "SPACE_MEMBER_ROLE_CHANGED" | "SPACE_PLAN_CHANGED";
                 spaceId: string;
                 data: Record<string, string>;
             };

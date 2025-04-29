@@ -1,6 +1,16 @@
 # Vercast Changelog
 
-# [2.8] - 2025-02-21
+## [2.10] - 2025-04-09
+
+- Added `Check Domain Availability` command and AI tool to check if a domain is available
+
+## [2.9] - 2025-03-12
+
+- Update items in `Search Components`
+- Fix extension stuck loading when Token Length is invalid
+- Fix extension would crash when Token invalid
+
+## [2.8] - 2025-02-21
 
 - Added AI tools
 

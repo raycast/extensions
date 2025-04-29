@@ -14,6 +14,7 @@ type GetOpenAISummaryProps = {
 };
 
 export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetOpenAISummaryProps) => {
+  const abortController = new AbortController();
   const preferences = getPreferenceValues() as OpenAIPreferences;
   const { creativity, openaiApiToken, language, openaiEndpoint, openaiModel } = preferences;
 
@@ -47,21 +48,21 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
       message: SUMMARIZING_VIDEO.message,
     });
 
-    const chatCompletion = openai.beta.chat.completions.stream({
+    const stream = openai.beta.chat.completions.stream({
       model: openaiModel || OPENAI_MODEL,
       temperature: parseInt(creativity),
       messages: [{ role: "user", content: aiInstructions }],
       stream: true,
     });
 
-    chatCompletion.on("content", (delta) => {
+    stream.on("content", (delta) => {
       setSummary((result) => {
         if (result === undefined) return delta || undefined;
         return result + delta || result;
       });
     });
 
-    chatCompletion.finalChatCompletion().then(() => {
+    stream.finalChatCompletion().then(() => {
       setSummaryIsLoading(false);
       showToast({
         style: Toast.Style.Success,
@@ -70,7 +71,8 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
       });
     });
 
-    chatCompletion.on("error", (error) => {
+    stream.on("error", (error) => {
+      if (abortController.signal.aborted) return;
       setSummaryIsLoading(false);
       showToast({
         style: Toast.Style.Failure,
@@ -78,5 +80,9 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
         message: error.message,
       });
     });
+
+    return () => {
+      abortController.abort();
+    };
   }, [transcript]);
 };

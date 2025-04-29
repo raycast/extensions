@@ -1,4 +1,4 @@
-import { SpaceType } from "@repo/db";
+import type { SpaceType, UserAndSpace } from "@repo/db";
 export declare class SpaceService {
     create(p: {
         type: SpaceType;
@@ -6,10 +6,16 @@ export declare class SpaceService {
         name: string;
         image: string;
         description: string;
-    }): Promise<void>;
+    }): Promise<string>;
     get(p: {
         spaceId: string;
-    }): Promise<{
+    }): Promise<({
+        _count: {
+            tags: number;
+            bookmarks: number;
+            users: number;
+        };
+    } & {
         type: import(".prisma/client").$Enums.SpaceType;
         status: string | null;
         description: string | null;
@@ -18,7 +24,7 @@ export declare class SpaceService {
         name: string;
         updatedAt: Date;
         image: string | null;
-    } | null>;
+    }) | null>;
     leave(p: {
         email: string;
         spaceId: string;
@@ -39,8 +45,14 @@ export declare class SpaceService {
         role: import(".prisma/client").$Enums.TeamRole;
     } | null>;
     removeMember(p: {
+        targetUserAndSpace: UserAndSpace;
         actorEmail: string;
-        targetEmail: string;
+    }): Promise<void>;
+    update(p: {
+        email: string;
         spaceId: string;
+        name?: string;
+        image?: string;
+        description?: string;
     }): Promise<void>;
 }

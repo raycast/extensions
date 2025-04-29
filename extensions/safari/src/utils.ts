@@ -5,9 +5,8 @@ import osascript from "osascript-tag";
 import { URL } from "url";
 import { langAdaptor } from "./lang-adaptor";
 import { HistoryItem, LooseTab } from "./types";
-import { runAppleScript } from "@raycast/utils";
 
-export const { safariAppIdentifier }: Preferences = getPreferenceValues();
+export const { safariAppIdentifier, enableFuzzySearch }: Preferences = getPreferenceValues();
 
 export const executeJxa = async (script: string) => {
   try {
@@ -96,7 +95,13 @@ export const search = function (collection: LooseTab[], keys: Array<FuseOptionKe
   const _formatCost = performance.now() - _formatPerf;
 
   const _searchPerf = performance.now();
-  const result = new Fuse(formattedCollection, { keys, threshold: 0.35 }).search(searchText).map((x) => x.item);
+  const result = new Fuse(formattedCollection, {
+    keys,
+    threshold: enableFuzzySearch ? 0.35 : 0,
+    ignoreLocation: true,
+  })
+    .search(searchText)
+    .map((x) => x.item);
   const _searchCost = performance.now() - _searchPerf;
 
   if (process.env.NODE_ENV === "development") {
@@ -127,17 +132,3 @@ export const groupHistoryByDay = (groups: Map<string, HistoryItem[]>, entry: His
   groups.set(date, group);
   return groups;
 };
-
-export async function getCurrentTabName() {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return name of front document`);
-}
-
-export async function getCurrentTabURL() {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return URL of front document`);
-}
-
-export type ContentType = "text" | "source";
-
-export async function getCurrentTabContents(type: ContentType) {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return ${type} of front document`);
-}

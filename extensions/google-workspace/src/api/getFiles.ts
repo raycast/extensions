@@ -1,6 +1,6 @@
-import { getOAuthToken } from "./googleAuth";
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
+import { getOAuthToken } from "./googleAuth";
 
 export enum QueryTypes {
   fileName = "fileName",

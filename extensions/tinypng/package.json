@@ -107,7 +107,7 @@
     "eslint": "^8.51.0",
     "prettier": "^3.3.1",
     "typescript": "^5.4.5",
-    "vitest": "^2.1.1"
+    "vitest": "^2.1.9"
   },
   "scripts": {
     "build": "ray build -e dist",

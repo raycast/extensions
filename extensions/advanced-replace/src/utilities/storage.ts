@@ -1,11 +1,11 @@
 import { confirmAlert, LocalStorage, showToast, Toast } from "@raycast/api";
-import { ReplacementOption } from "../types";
+import { Entry } from "../types";
 
-export async function getSavedItems(): Promise<ReplacementOption[]> {
+export async function getSavedItems(): Promise<Entry[]> {
   return JSON.parse((await LocalStorage.getItem("regexOptions")) ?? JSON.stringify([]));
 }
 
-export async function setSavedItems(options: ReplacementOption[] | undefined) {
+export async function setSavedItems(options: Entry[] | undefined) {
   if (!options) {
     await showToast({
       style: Toast.Style.Failure,
@@ -17,7 +17,7 @@ export async function setSavedItems(options: ReplacementOption[] | undefined) {
   return LocalStorage.setItem("regexOptions", JSON.stringify(options));
 }
 
-export async function deleteSavedItem(item: ReplacementOption) {
+export async function deleteSavedItem(item: Entry) {
   if (
     await confirmAlert({
       title: "Really delete the item?",

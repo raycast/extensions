@@ -123,7 +123,8 @@
     "@raycast/api": "^1.55.2",
     "@raycast/utils": "^1.9.0",
     "axios": "^0.27.2",
-    "curl-string": "^1.1.1"
+    "curl-string": "^1.1.1",
+    "jsonpath-plus": "^10.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

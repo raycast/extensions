@@ -3,6 +3,10 @@ export declare class UserService {
     get(email: string): Promise<{
         associatedSpaces: {
             myTags: string[];
+            myRole: import(".prisma/client").$Enums.TeamRole;
+            myImage: string | null;
+            myNickname: string | null;
+            myAuthEmail: string | null;
             tags: {
                 description: string | null;
                 spaceId: string;

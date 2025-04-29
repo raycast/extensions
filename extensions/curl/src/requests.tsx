@@ -16,6 +16,7 @@ import axios from "axios";
 import ResultView from "./views/Result";
 import RequestDetails from "./views/RequestDetails";
 import { methodColors } from "../utils";
+import { JSONPath } from "jsonpath-plus";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const curlString = require("curl-string");
@@ -76,9 +77,13 @@ export default function Requests() {
     axios({ ...payloadWithoutMeta })
       .then(async (res) => {
         response = res;
+
+        const jsonPathQuery = meta?.jsonPathQuery || "";
+        const jsonPathQueryResult = JSONPath({ wrap: false, path: jsonPathQuery, json: response.data });
+
         const result = { method: payload.method, response };
 
-        push(<ResultView result={result as never} curl={generatedCurl} />);
+        push(<ResultView result={result as never} curl={generatedCurl} jsonPathResult={jsonPathQueryResult} />);
       })
       .catch((err) => {
         showToast({

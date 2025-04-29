@@ -55,6 +55,14 @@ export async function fetchList(tasklist: string, showCompleted = false): Promis
       notes: item.notes,
     }))
     .sort((a, b) => {
+      // First sort completed tasks by completion date (most recent first)
+      if (a.status === "completed" && b.status === "completed") {
+        const completedDateA = a.completed ? new Date(a.completed) : null;
+        const completedDateB = b.completed ? new Date(b.completed) : null;
+        return (completedDateB?.getTime() ?? 0) - (completedDateA?.getTime() ?? 0);
+      }
+
+      // Then handle non-completed tasks with due dates
       const dueDateA = a.due !== undefined ? new Date(a.due) : null;
       const dueDateB = b.due !== undefined ? new Date(b.due) : null;
 

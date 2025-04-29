@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Update] - 2025-03-05
+
+- Added support for Trae CN.
+
 ## [Update] - 2025-03-03
 
 - Fixed support for VSCodium - Insiders.

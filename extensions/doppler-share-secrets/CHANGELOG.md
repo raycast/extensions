@@ -1,5 +1,11 @@
 # Doppler Changelog
 
+## [Routine Maintenance] - {PR_MERGE_DATE}
+
+- Migrate to `@raycast/api@1.94.0`
+- Use ESLint 9 flag config
+- Bump all dependencies to the latest
+
 ## [New Logo + View Projects] - 2024-12-12
 
 - New Logo!

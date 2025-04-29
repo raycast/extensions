@@ -10,7 +10,8 @@
     "arronhunt",
     "ronaldheft",
     "hitolaus",
-    "taschaub"
+    "taschaub",
+    "omaerkhan"
   ],
   "pastContributors": [
     "navtoj"
@@ -100,6 +101,15 @@
       ]
     },
     {
+      "name": "enableVerificationLinks",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Enable Verification Links",
+      "description": "Show verification and sign-in links from messages",
+      "label": "Show verification/sign-in links"
+    },
+    {
       "data": [
         {
           "title": "Days",
@@ -141,7 +151,7 @@
   "dependencies": {
     "@googleapis/gmail": "^1.2.0",
     "@raycast/api": "^1.75.1",
-    "@raycast/utils": "^1.15.0",
+    "@raycast/utils": "^1.19.1",
     "@use-it/interval": "^1.0.0",
     "googleapis-common": "^7.0.0"
   },
@@ -166,5 +176,8 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "test": "jest"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

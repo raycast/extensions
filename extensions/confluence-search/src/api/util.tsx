@@ -1,4 +1,4 @@
-import fetch, { RequestInfo } from "node-fetch";
+import fetch from "cross-fetch";
 import { client } from "./oauth";
 
 export async function get(url: RequestInfo, signal?: AbortSignal) {
@@ -8,7 +8,6 @@ export async function get(url: RequestInfo, signal?: AbortSignal) {
   const response = await fetch(url, {
     method: "GET",
     signal,
-    compress: true,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${tokenSet?.accessToken}`,

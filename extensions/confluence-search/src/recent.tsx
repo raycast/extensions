@@ -1,4 +1,4 @@
-import "./util/fetchPolyfill";
+import "cross-fetch/polyfill";
 
 import { List, showToast, Toast } from "@raycast/api";
 import { useContext } from "react";
