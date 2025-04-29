@@ -212,20 +212,16 @@ New title:
               if (date) {
                 // Before proceeding, we need to ensure we create a date time in the user's timezone.
                 const offset = new Date().getTimezoneOffset();
-                const scheduleDate = new Date(date.getTime() - offset * 60 * 1000);
-                schedule(scheduleDate.toISOString());
+                const scheduleDate = new Date(date.getTime() - offset * 60 * 1000).toISOString();
 
-                // Not sure if we can always trust this but, as it seems to be
-                // undocumented behaviour but, by default, when using an
-                // `Action.PickDate` component for date time, if the user only
-                // selects a date, for example, 'Tomorrow', then the date's
-                // milliseconds will be set to 1.
-                // We can leverage this to understand if the user actually
-                // specified a time or not.
-                if (date.getMilliseconds() === 1) {
-                  schedule(`${scheduleDate.getFullYear()}/${scheduleDate.getMonth() + 1}/${scheduleDate.getDate()}/`);
+                // Check if the date is actually a full day, in which case we
+                // simply want to provide the date, without time, to Things, as
+                // Things relies on the time being present to determine whether
+                // to add a reminder.
+                if (Action.PickDate.isFullDay(date)) {
+                  schedule(scheduleDate.split('T', 1)[0]);
                 } else {
-                  schedule(scheduleDate.toISOString());
+                  schedule(scheduleDate);
                 }
               } else {
                 schedule('anytime');
