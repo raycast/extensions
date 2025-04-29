@@ -9,15 +9,6 @@ export function EmptyView(props: {
   description?: string;
 }) {
   const { title, extensionPreferences, actions, description } = props;
-  console.log("EmptyView title:", title);
-  console.log("EmptyView actions type:", actions ? typeof actions : "undefined");
-
-  if (actions) {
-    console.log("EmptyView actions isValidElement:", React.isValidElement(actions));
-    if (React.isValidElement(actions)) {
-      console.log("EmptyView actions type.name:", actions.type.toString().substring(0, 50));
-    }
-  }
 
   // Helper function to determine if the node is already an ActionPanel
   const isActionPanel = (node: React.ReactNode): boolean => {
@@ -37,7 +28,6 @@ export function EmptyView(props: {
       try {
         finalActions = <ActionPanel>{actions}</ActionPanel>;
       } catch (error) {
-        console.error("Error wrapping actions in ActionPanel:", error);
         // Fallback to a safe default
         finalActions = (
           <ActionPanel>

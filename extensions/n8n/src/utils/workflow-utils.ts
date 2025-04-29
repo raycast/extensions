@@ -15,6 +15,9 @@ interface WebhookDetails {
   nodeId: string; // Include node ID for reference if needed
 }
 
+// Valid HTTP methods according to RFC 7231 and common extensions
+const VALID_HTTP_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "CONNECT", "TRACE"];
+
 /**
  * Checks if a workflow contains a webhook trigger node and returns its details.
  * Currently assumes the first node of type 'n8n-nodes-base.webhook' is the trigger.
@@ -22,39 +25,32 @@ interface WebhookDetails {
  * @returns WebhookDetails object if found, otherwise null.
  */
 export function getWebhookDetails(workflow: Workflow): WebhookDetails | null {
-  console.log(
-    `Checking webhook details for workflow: ${workflow?.name || "undefined"} (ID: ${workflow?.id || "undefined"})`
-  );
-
   if (!workflow || !Array.isArray(workflow.nodes)) {
-    console.log(`Workflow or nodes array is missing for workflow: ${workflow?.id || "undefined"}`);
     return null;
   }
 
-  console.log(`Workflow has ${workflow.nodes.length} nodes`);
-
   const webhookNode = workflow.nodes.find((node: Node) => node.type === "n8n-nodes-base.webhook");
-
-  console.log(`Webhook node found: ${webhookNode ? "yes" : "no"}`);
 
   if (webhookNode) {
     const params = webhookNode.parameters as WebhookNodeParams;
-    console.log(`Webhook node parameters: ${JSON.stringify(params)}`);
 
-    // Normalize method, handling empty string case
-    const method = params.httpMethod?.trim() ? params.httpMethod.trim().toUpperCase() : undefined;
-    const path = params.path;
+    // Normalize and validate method
+    let method = params.httpMethod?.trim().toUpperCase() || "";
+    const path = params.path?.trim() || "";
 
-    console.log(`Method: ${method || "undefined"}, Path: ${path || "undefined"}`);
+    // Validate method is a standard HTTP method
+    if (method && !VALID_HTTP_METHODS.includes(method)) {
+      // Default to GET if invalid method provided
+      method = "GET";
+    }
 
+    // Ensure both method and path exist
     if (method && path) {
       return {
         method: method,
         path: path,
         nodeId: webhookNode.id || "unknown", // Use node ID if available
       };
-    } else {
-      console.log(`Missing method or path in webhook node parameters`);
     }
   }
 

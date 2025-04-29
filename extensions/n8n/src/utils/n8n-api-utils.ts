@@ -1,4 +1,5 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 // fetch and FetchResult are no longer needed from @raycast/utils, use global fetch/Response
 // Response and RequestInit are globally available, no need for node-fetch import
 import { Workflow, Tag } from "../types/types";
@@ -18,50 +19,33 @@ async function fetchN8nApi<T>(
   endpoint: string,
   options: RequestInit = {} // Use global RequestInit
 ): Promise<T> {
-  console.log(`fetchN8nApi called for endpoint: ${endpoint}`);
-
   let fullUrl = "";
   let headers: Record<string, string> = {};
 
-  try {
-    const { instanceUrl, apiKey } = getAPICredentials();
-    console.log(
-      `Got credentials - instanceUrl: ${instanceUrl ? "defined" : "undefined"}, apiKey: ${
-        apiKey ? "defined" : "undefined"
-      }`
-    );
+  const { instanceUrl, apiKey } = getAPICredentials();
 
-    // Ensure URL doesn't end with a slash and endpoint doesn't start with one
-    const baseUrl = instanceUrl.endsWith("/") ? instanceUrl.slice(0, -1) : instanceUrl;
-    const apiEndpoint = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
-    fullUrl = `${baseUrl}/api/v1/${apiEndpoint}`;
-    console.log(`Full URL: ${fullUrl}`);
+  // Ensure URL doesn't end with a slash and endpoint doesn't start with one
+  const baseUrl = instanceUrl.endsWith("/") ? instanceUrl.slice(0, -1) : instanceUrl;
+  const apiEndpoint = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
+  fullUrl = `${baseUrl}/api/v1/${apiEndpoint}`;
 
-    headers = {
-      ...(options.headers as Record<string, string>), // Assume existing headers are string records
-      Accept: "application/json",
-      "X-N8N-API-KEY": apiKey,
-    };
+  headers = {
+    ...(options.headers as Record<string, string>), // Assume existing headers are string records
+    Accept: "application/json",
+    "X-N8N-API-KEY": apiKey,
+  };
 
-    if (options.body) {
-      headers["Content-Type"] = "application/json";
-    }
-
-    console.log(`Request headers: ${Object.keys(headers).join(", ")}`);
-  } catch (error) {
-    console.error("Error in fetchN8nApi setup:", error);
-    throw error;
+  if (options.body) {
+    headers["Content-Type"] = "application/json";
   }
 
   try {
-    console.log(`Making fetch request to: ${fullUrl}`);
     // Use global fetch, which returns a Promise<Response> directly
     const response: Response = await fetch(fullUrl, {
       ...options,
       headers: headers,
     });
     // const response = fetchResult.response; // No longer needed
-    console.log(`Fetch response status: ${response.status}`);
 
     if (!response.ok) {
       let errorBody = "Unknown error";
@@ -73,7 +57,6 @@ async function fetchN8nApi<T>(
         // Fallback if parsing fails
         errorBody = await response.text();
       }
-      console.error(`n8n API Error (${response.status}): ${errorBody}`);
       throw new Error(`HTTP error ${response.status}: ${errorBody}`);
     }
 
@@ -84,12 +67,9 @@ async function fetchN8nApi<T>(
 
     return (await response.json()) as T;
   } catch (error) {
-    console.error("Error fetching n8n API:", error);
-    // Use showToast for consistent error reporting
-    await showToast({
-      style: Toast.Style.Failure,
+    // Use showFailureToast for consistent error reporting
+    await showFailureToast(error, {
       title: "API Request Failed",
-      message: error instanceof Error ? error.message : String(error),
     });
     // Re-throw the error to be caught by the calling command
     throw error;
@@ -109,12 +89,9 @@ export async function getAllTagsAPI(): Promise<Tag[]> {
     const response = await fetchN8nApi<{ data: Tag[] }>("tags");
     return response.data || []; // Return empty array if data is missing
   } catch (error) {
-    console.error("Failed to fetch n8n tags:", error);
     // Show a toast, but allow the command to proceed without tags
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Could not load tags",
-      message: error instanceof Error ? error.message : String(error),
     });
     return []; // Return empty array on error so the command doesn't completely break
   }
@@ -124,15 +101,8 @@ export async function getAllTagsAPI(): Promise<Tag[]> {
 
 export async function getAllWorkflowsAPI(): Promise<Workflow[]> {
   // According to docs, the response is { data: Workflow[] }
-  console.log("Calling getAllWorkflowsAPI");
-  try {
-    const response = await fetchN8nApi<{ data: Workflow[] }>("workflows");
-    console.log("getAllWorkflowsAPI response:", response);
-    return response.data || []; // Return empty array if data is missing
-  } catch (error) {
-    console.error("Error in getAllWorkflowsAPI:", error);
-    throw error; // Re-throw to be caught by the calling component
-  }
+  const response = await fetchN8nApi<{ data: Workflow[] }>("workflows");
+  return response.data || []; // Return empty array if data is missing
 }
 
 export async function activateWorkflowAPI(id: string, active: boolean): Promise<void> {
@@ -186,12 +156,9 @@ export async function triggerWebhook(
       body: responseBody,
     };
   } catch (error) {
-    console.error("Error triggering webhook:", error);
-    // Use showToast for consistent error reporting
-    await showToast({
-      style: Toast.Style.Failure,
+    // Use showFailureToast for consistent error reporting
+    await showFailureToast(error, {
       title: "Webhook Request Failed",
-      message: error instanceof Error ? error.message : String(error),
     });
     // Re-throw or return a specific error structure
     throw error;
