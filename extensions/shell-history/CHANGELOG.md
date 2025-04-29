@@ -1,6 +1,6 @@
 # Shell History Changelog
 
-## [Fix Error] - {PR_MERGE_DATE}
+## [Fix Error] - 2025-04-29
 
 - Fix the problem of not finding the path to the ZSH and Bash history files
 - Optimize command execution logic in terminals such as Warp
