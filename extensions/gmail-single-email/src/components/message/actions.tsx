@@ -203,7 +203,11 @@ export function MessageDownloadAttachmentAction(props: {
       showToast(Toast.Style.Failure, "Cannot download", "Message ID is missing");
       return;
     }
-    await downloadAndOpenAttachment(gmail, message.id, attachment.attachmentId, attachment.filename);
+    try {
+      await downloadAndOpenAttachment(gmail, message.id, attachment.attachmentId, attachment.filename);
+    } catch (error) {
+      showFailureToast(error, { title: "Could not download attachment" });
+    }
   }
 
   return (
