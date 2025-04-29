@@ -38,7 +38,7 @@ evals:
       mocks:
         draft-email: "Email draft created successfully for sarah@example.com"
       expected:
-        - callsTool: 
+        - callsTool:
             name: "draft-email"
             arguments:
               recipient: "sarah@example.com"
@@ -49,7 +49,7 @@ evals:
       mocks:
         search-inbox: "Searched for \"from:john subject:quarterly report\" in Superhuman"
       expected:
-        - callsTool: 
+        - callsTool:
             name: "search-inbox"
             arguments:
               query: "from:john subject:quarterly report"
@@ -145,7 +145,7 @@ evals:
       mocks:
         search-inbox: "Searched for \"is:unread from:design\" in Superhuman"
       expected:
-        - callsTool: 
+        - callsTool:
             name: "search-inbox"
             arguments:
               query:
