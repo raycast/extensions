@@ -105,7 +105,7 @@ export default function Command() {
                         // Check if doc.id exists in panels and if panelId is valid
                         if (!panels[doc.id] || !panelId || !panels[doc.id][panelId]) {
                           // if no AI generated notes exist, look for original notes
-                          if(doc.notes_markdown) {
+                          if (doc.notes_markdown) {
                             return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\n${doc.notes_markdown}`;
                           }
                           return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\nNo content available for this note.`;
@@ -115,7 +115,7 @@ export default function Command() {
                         const panelData = panels[doc.id][panelId];
                         const htmlContent = panelData?.original_content || "";
 
-                        let markdownContent = doc.notes_markdown || "" + '\n\n';
+                        let markdownContent = doc.notes_markdown || "" + "\n\n";
                         try {
                           markdownContent += convertHtmlToMarkdown(htmlContent);
                         } catch (error) {
