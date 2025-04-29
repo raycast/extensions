@@ -1,5 +1,7 @@
 # Weather Changelog
 
+## [Chore: Renamed file] - {PR_MERGE_DATE}
+
 ## [SF Symbols] - 2024-03-04
 
 - Ensure design consistency by using SF Symbols and unicode characters.
