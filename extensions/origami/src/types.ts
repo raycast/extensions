@@ -70,10 +70,16 @@ export interface UploadFilesFieldValue {
 export interface Instance {
   instance_data: {
     _id: string;
-    field_groups: FieldGroup[];
-    archived: boolean;
     insertTimestamp: string;
+    archived: boolean;
+    ui_data: UIData;
+    field_groups: FieldGroup[];
   };
+}
+
+export interface UIData {
+  url: string;
+  name: string;
 }
 
 export interface EntityDataResponse {

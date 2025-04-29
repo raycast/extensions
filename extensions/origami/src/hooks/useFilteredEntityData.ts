@@ -60,6 +60,7 @@ export function useFilteredEntityData(
         orderby: [adjustedFieldDataName || fieldDataName, "asc"],
         limit: [page * pageSize, pageSize],
         with_archive: showArchived ? 1 : 0,
+        ui_data: 1,
         filter,
       }),
       execute: shouldExecute,
