@@ -9,11 +9,8 @@
    - Enable the Places API and Maps JavaScript API
    - Create an API key under APIs & Services > Credentials
    - Enter this API key in the Raycast extension preferences
-
 2. Enter your home address in the Raycast preferences. It will be used to quickly pull up directions to your home.
-
 3. Select your preferred mode of travel. This will be the default for all searches.
-
 4. For full functionality, you should allow [Google Maps](https://www.google.com/maps) to access your location in your preferred browser. This way, `Get Me Home` and `Get Me Somewhere` will immediately pull up directions starting from your current location.
 
 ## Searching
@@ -25,33 +22,41 @@ Use the extension's search fields as you would use the ones on Google Maps. They
 This extension provides several AI tools that can be used with Raycast AI to enhance your Google Maps experience:
 
 ### Find Places
+
 Find places by name or description. Simply ask Raycast AI to find places matching your query.
 
 **Example prompts:**
+
 - "Find coffee shops in San Francisco"
 - "Show me pizza restaurants near downtown"
 - "What are some parks in Seattle?"
 
 ### Get Directions
+
 Get directions between locations with your preferred mode of transportation.
 
 **Example prompts:**
+
 - "How do I get to the Empire State Building?"
 - "Get directions from Central Park to Times Square"
 - "Show me walking directions to the nearest grocery store"
 
 ### Get Place Details
+
 Get detailed information about a specific place, including address, phone number, website, opening hours, and reviews.
 
 **Example prompts:**
+
 - "Tell me about Golden Gate Park"
 - "What are the details for Statue of Liberty?"
 - "Show me information about Eiffel Tower"
 
 ### Search Nearby Places
+
 Find places of a specific type near a location.
 
 **Example prompts:**
+
 - "Find restaurants near my home"
 - "What are some open cafes near Central Park?"
 - "Show me gas stations within 5 miles of my current location"
