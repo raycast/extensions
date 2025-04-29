@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [AI Tools Enhancement] - {PR_MERGE_DATE}
+## [AI Tools Enhancement] - 2025-04-29
 
 - Improved `get-entities` tool to only return essential entity information
 - Added `get-attributes` tool to fetch entity states and attributes
