@@ -20,6 +20,7 @@ import { loadSites, saveSites, getCategories } from "./utils";
 
 export default function DailySites() {
   const { xmlFolder } = getPreferenceValues<Preferences>();
+  const [isLoading, setIsLoading] = useState(true);
   const [sites, setSites] = useState<Site[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [filterCategory, setFilterCategory] = useState<string>("");
@@ -43,7 +44,10 @@ export default function DailySites() {
   }
 
   useEffect(() => {
-    refresh();
+    setTimeout(() => {
+      refresh();
+      setIsLoading(false);
+    }, 1500);
   }, []);
 
   async function handleDelete(site: Site) {
@@ -128,7 +132,7 @@ export default function DailySites() {
 
   return (
     <List
-      isLoading={sites.length === 0}
+      isLoading={isLoading}
       searchBarPlaceholder="Filter by name, URL or category…"
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by category" value={filterCategory} onChange={setFilterCategory}>
