@@ -34,7 +34,7 @@ function moveWindowLeftAnimated()
     h = frame.h
   }
 
-   win:move(targetFrame, nil, true, 0.2)
+  win:move(targetFrame, nil, true, 0.2)
 end
 
 -- Move window to the right half
