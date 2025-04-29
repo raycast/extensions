@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## Fix Description - 2025-05-29
+## Fix Description - {PR_MERGE_DATE}
 
 - Updated the description to fix grammatical issues
 
