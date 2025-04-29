@@ -8,7 +8,7 @@ import { ITERM2, TERMINAL } from "./constants";
 import { runAppleScript } from "@raycast/utils";
 import shellQuote from "shell-quote";
 import { showCustomHud, truncate } from "./common-utils";
-import { spawnSync } from "node:child_process";
+import { execSync, spawnSync } from "node:child_process";
 
 export const defaultZshHistoryFilePath = path.join(os.homedir(), ".zsh_history");
 export const defaultBashHistoryFilePath = path.join(os.homedir(), ".bash_history");
@@ -32,7 +32,7 @@ export function getShellHistoryFilePath(shell: Shell) {
   if (shell === Shell.ZSH || shell === Shell.BASH) {
     try {
       const shellCommand = shell === Shell.ZSH ? "zsh" : "bash";
-      const result = spawnSync(shellCommand, ["-i", "-c", "echo $HISTFILE"], { encoding: "utf8" });
+      const result = spawnSync(shellCommand, ["-i", "-c", "'echo $HISTFILE'"], { encoding: "utf8", shell: true });
       if (result.error) {
         throw result.error;
       }
@@ -40,11 +40,14 @@ export function getShellHistoryFilePath(shell: Shell) {
         throw new Error(`Shell exited with code ${result.status}: ${result.stderr}`);
       }
       const historyFilePath = result.stdout.trim();
-      if (historyFilePath) {
-        shellHistoryPath = historyFilePath;
+      if (historyFilePath.length <= 0) {
+        throw new Error("Shell history file path is empty");
       }
+      shellHistoryPath = historyFilePath;
     } catch (e) {
-      console.error(e);
+      if (e instanceof Error) {
+        console.error("Error getting shell history file path:", e.message);
+      }
       shellHistoryPath = shell === Shell.ZSH ? defaultZshHistoryFilePath : defaultBashHistoryFilePath;
     }
   } else if (shell === Shell.FISH) {
@@ -85,7 +88,7 @@ export async function getShellHistoryZshFromFiles(maxLineCount: number = parseIn
     const history = parseZshShellHistory(commands, Shell.ZSH);
     return removeDuplicates ? removeArrayDuplicates(history.reverse()) : history.reverse();
   } catch (e) {
-    // ignore
+    console.error("Error reading zsh history file:", e);
   }
   return [];
 }
@@ -100,7 +103,7 @@ export async function getShellHistoryBashFromFiles(maxLineCount: number = parseI
     const history = parseBashShellHistory(commands, Shell.BASH);
     return removeDuplicates ? removeArrayDuplicates(history.reverse()) : history.reverse();
   } catch (e) {
-    // ignore
+    console.error("Error reading bash history file:", e);
   }
   return [];
 }
@@ -115,7 +118,7 @@ export async function getShellHistoryFishFromFiles(maxLineCount: number = parseI
     const history = parseFishShellHistory(commands, Shell.FISH);
     return removeDuplicates ? removeArrayDuplicates(history.reverse()) : history.reverse();
   } catch (e) {
-    // ignore
+    console.error("Error reading fish history file:", e);
   }
   return [];
 }
@@ -321,16 +324,19 @@ end tell
 }
 
 function pressDownEnterScript(command: string, term: Terminal) {
+  const safeCmd = command.replace(/"/g, '\\"');
   return `
 tell application "${term.application.name}"
   activate
-  delay 0.5
+  delay 0.3
+  set the clipboard to "${safeCmd}"
   tell application "System Events"
-    keystroke "${command}" 
+    key code 9 using {command down}
+    delay 0.1
     key code 36
   end tell
 end tell
-  `;
+`;
 }
 
 export const getCliIcon = (cliType: CliType | undefined) => {

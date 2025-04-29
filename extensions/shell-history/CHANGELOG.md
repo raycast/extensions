@@ -1,5 +1,10 @@
 # Shell History Changelog
 
+## [Fix Error] - {PR_MERGE_DATE}
+
+- Fix the problem of not finding the path to the ZSH and Bash history files
+- Optimize command execution logic in terminals such as Warp
+
 ## [Respect HISTFILE] - 2025-01-19
 
 - Support [Ghostty](https://ghostty.org) Terminal app
