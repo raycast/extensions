@@ -20,7 +20,6 @@ A powerful Raycast extension for searching, managing, and organizing folders on 
   - Creation date
   - Modification date
   - Use count
-  - File permissions
   - File size
 
 ### 🚀 Quick Actions
@@ -77,7 +76,7 @@ exports.FolderSearchPlugin = {
 
   // a function which takes the result that was selected at the time of execution and returns a valid AppleScript. This AppleScript is what gets executed.
   appleScript: (result) => {
-    return `do shell script "open ${result.path}"`;
+    return `do shell script "open '${result.path}'"`;
   }
 }
 ```
@@ -101,7 +100,7 @@ Plugin Folder Path Format:
 - Trailing slash is optional (both `/path/to/plugins` and `/path/to/plugins/` work)
 - The path must exist and be readable
 - Common paths:
-  - Default: `~/Library/Application Support/Raycast/extensions/folder-search/plugins/`
+  - Default: `/Users/<username>/Library/Application Support/Raycast/extensions/folder-search/plugins/`
   - Development: `/path/to/your/folder-search/plugins/`
 
 ### 🎯 Keyboard Shortcuts
@@ -110,12 +109,12 @@ Plugin Folder Path Format:
 - `⌘ + .` - Copy folder
 - `⌘ + ⇧ + .` - Copy folder name
 - `⌘ + ⇧ + ,` - Copy folder path
-- `⌘ + ⇧ + l` - Create quicklink
-- `⌘ + ⇧ + p` - Toggle pin status
-- `⌘ + ⇧ + d` - Toggle details view
-- `⌘ + ⇧ + s` - Move Finder selection to folder
-- `⌘ + o` - Open with...
-- `⌃ + x` - Move to Trash
+- `⌘ + ⇧ + L` - Create quicklink
+- `⌘ + ⇧ + P` - Toggle pin status
+- `⌘ + ⇧ + D` - Toggle details view
+- `⌘ + ⇧ + S` - Move Finder selection to folder
+- `⌘ + O` - Open with...
+- `⌃ + X` - Move to Trash
 
 ### 📊 Advanced Features
 - Support for cloud storage paths (iCloud, Dropbox, Google Drive, OneDrive)

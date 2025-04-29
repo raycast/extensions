@@ -1,4 +1,4 @@
-import { confirmAlert, getSelectedFinderItems, showToast, Toast, open } from "@raycast/api";
+import { confirmAlert, getSelectedFinderItems, showToast, Toast, open, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import fse from "fs-extra";
@@ -66,8 +66,19 @@ export async function moveFinderItems(
           timestamp: new Date().toISOString(),
         });
 
-        const exists = await fse.pathExists(destinationFile);
-        if (exists) {
+        // Check if source and destination are the same before showing overwrite prompt
+        if (item.path === destinationFile) {
+          log("debug", "moveFinderItems", "Source and destination are the same", {
+            file: item.path,
+            timestamp: new Date().toISOString(),
+          });
+          await showFailureToast({ title: "The source and destination file are the same" });
+          skippedCount++;
+          continue;
+        }
+
+        // Check if file exists and prompt for overwrite
+        if (await fse.pathExists(destinationFile)) {
           log("debug", "moveFinderItems", "File exists at destination", {
             file: destinationFile,
             timestamp: new Date().toISOString(),
@@ -75,19 +86,10 @@ export async function moveFinderItems(
 
           const overwrite = await confirmAlert({
             title: "Overwrite the existing file?",
-            message: `${sourceFileName} already exists in ${destinationFolder}`,
+            message: `${sourceFileName} already exists in ${path.basename(destinationFolder)}`,
           });
 
           if (overwrite) {
-            if (item.path === destinationFile) {
-              log("debug", "moveFinderItems", "Source and destination are the same", {
-                file: item.path,
-                timestamp: new Date().toISOString(),
-              });
-              await showFailureToast({ title: "The source and destination file are the same" });
-              skippedCount++;
-              continue;
-            }
             await fse.move(item.path, destinationFile, { overwrite: true });
             movedCount++;
             log("debug", "moveFinderItems", "File moved with overwrite", {
@@ -100,14 +102,13 @@ export async function moveFinderItems(
               file: sourceFileName,
               timestamp: new Date().toISOString(),
             });
-            await showFailureToast({ title: "Cancelling move for " + sourceFileName });
             skippedCount++;
             continue;
           }
         } else {
           await fse.move(item.path, destinationFile);
           movedCount++;
-          log("debug", "moveFinderItems", "File moved successfully", {
+          log("debug", "moveFinderItems", "File moved", {
             source: item.path,
             destination: destinationFile,
             timestamp: new Date().toISOString(),
@@ -120,7 +121,10 @@ export async function moveFinderItems(
           destination: destinationFile,
           timestamp: new Date().toISOString(),
         });
-        await showFailureToast(e, { title: `Error moving ${sourceFileName}` });
+        await showFailureToast({
+          title: `Error moving ${sourceFileName}`,
+          message: e instanceof Error ? e.message : "Unknown error",
+        });
         skippedCount++;
         continue;
       }
@@ -133,28 +137,37 @@ export async function moveFinderItems(
       timestamp: new Date().toISOString(),
     });
 
-    if (movedCount === 0) {
+    if (movedCount === 0 && skippedCount === 0) {
       await showFailureToast({ title: "No files were moved" });
       return { success: false, movedCount: 0, skippedCount };
-    } else if (skippedCount > 0) {
-      await showFailureToast({
-        title: `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}, skipped ${skippedCount} item(s)`,
-      });
-    } else {
-      await showToast({
-        title: "Successfully moved to folder",
-        message: `Moved ${movedCount} ${movedCount === 1 ? "file" : "files"} to ${path.basename(destinationFolder)}`,
-      });
     }
 
-    return { success: movedCount > 0, movedCount, skippedCount };
+    if (movedCount > 0) {
+      log("debug", "moveFinderItems", "Showing success HUD", {
+        movedCount,
+        skippedCount,
+        timestamp: new Date().toISOString(),
+      });
+      await showHUD(
+        `Moved ${movedCount} ${movedCount === 1 ? "file" : "files"} to ${path.basename(destinationFolder)}`
+      );
+      log("debug", "moveFinderItems", "Success HUD shown", {
+        timestamp: new Date().toISOString(),
+      });
+      return { success: true, movedCount, skippedCount };
+    }
+
+    return { success: false, movedCount, skippedCount };
   } catch (error) {
     log("error", "moveFinderItems", "Unexpected error in move operation", {
       error,
       destinationFolder,
       timestamp: new Date().toISOString(),
     });
-    await showFailureToast(error, { title: "Unexpected error during move operation" });
+    await showFailureToast({
+      title: "Unexpected error during move operation",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
     throw error;
   }
 }

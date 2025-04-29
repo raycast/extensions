@@ -58,19 +58,20 @@ export async function searchSpotlight(
       );
 
       searchStream.on("data", (result: SpotlightSearchResult) => {
-        if (resultsCount < maxResults) {
-          resultsCount++;
-          searchResults.push(result);
-          log("debug", "searchSpotlight", "Received result", {
-            resultCount: resultsCount,
-            path: result.path,
-          });
-        } else if (resultsCount >= maxResults) {
+        if (resultsCount >= maxResults) {
           log("debug", "searchSpotlight", "Max results reached, aborting", {
             maxResults,
           });
           abortable?.current?.abort();
+          return;
         }
+
+        resultsCount++;
+        searchResults.push(result);
+        log("debug", "searchSpotlight", "Received result", {
+          resultCount: resultsCount,
+          path: result.path,
+        });
       });
 
       searchStream.on("end", () => {
@@ -101,11 +102,25 @@ export async function searchSpotlight(
     const filteredResults = results
       .filter((result: SpotlightSearchResult) => {
         if (searchScope === "pinned") {
-          return false;
+          log("debug", "searchSpotlight", "Processing pinned scope result", {
+            path: result.path,
+            name: result.kMDItemFSName,
+          });
+          return true;
         }
         if (searchScope === "user") {
-          return result.path.startsWith("/Users/");
+          const isUserPath = result.path.startsWith("/Users/");
+          log("debug", "searchSpotlight", "Processing user scope result", {
+            path: result.path,
+            name: result.kMDItemFSName,
+            isUserPath,
+          });
+          return isUserPath;
         }
+        log("debug", "searchSpotlight", "Processing all scope result", {
+          path: result.path,
+          name: result.kMDItemFSName,
+        });
         return true;
       })
       .map((result: SpotlightSearchResult) => ({

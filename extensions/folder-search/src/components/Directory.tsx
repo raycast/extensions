@@ -139,7 +139,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
                       icon={!resultIsPinned(parentResult) ? Icon.Star : Icon.StarDisabled}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                       onAction={() => {
-                        handleTogglePin(parentResult, parentPinnedIndex !== -1 ? parentPinnedIndex : 0);
+                        handleTogglePin(parentResult, parentPinnedIndex);
                       }}
                     />
                   );
@@ -186,7 +186,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
                     icon={!resultIsPinned(result) ? Icon.Star : Icon.StarDisabled}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                     onAction={() => {
-                      handleTogglePin(result, pinnedIndex !== -1 ? pinnedIndex : 0);
+                      handleTogglePin(result, pinnedIndex);
                     }}
                   />
                   <ActionPanel.Section>
