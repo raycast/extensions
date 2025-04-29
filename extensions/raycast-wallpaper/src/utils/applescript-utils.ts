@@ -60,7 +60,6 @@ export const autoSetWallpaper = async (wallpaper: RaycastWallpaper) => {
 
   try {
     const actualPath = fixedPathName;
-    console.log("actualPath", actualPath);
 
     if (!existsSync(actualPath)) {
       await cachePicture(wallpaper);
@@ -72,4 +71,17 @@ export const autoSetWallpaper = async (wallpaper: RaycastWallpaper) => {
   } catch (err) {
     console.error(err);
   }
+};
+
+const scriptSystemAppearance = `tell application "System Events" to tell appearance preferences to get dark mode`;
+export const getSystemAppearance = async () => {
+  try {
+    const result = await runAppleScript(scriptSystemAppearance);
+    if (result == "true") {
+      return "dark";
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return "light";
 };

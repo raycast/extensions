@@ -1,5 +1,10 @@
 # Raycast Wallpaper Changelog
 
+## [Respect system appearance] - {PR_MERGE_DATE}
+
+- Support to set whether the wallpaper is Light or Dark appearance wallpaper.
+- Support to set whether the Auto Switch Raycast Wallpaper command respects the system appearance
+
 ## [Remove error dialog] - 2024-09-30
 
 - Remove error dialog that pops up not as expected

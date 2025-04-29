@@ -1,9 +1,9 @@
-import { Grid, Icon } from "@raycast/api";
+import { Color, Grid, Icon } from "@raycast/api";
 import React from "react";
 import { RaycastWallpaperWithInfo } from "../types/types";
 import { RaycastWallpaperEmptyView } from "./raycast-wallpaper-empty-view";
 import { ActionOnRaycastWallpaper } from "./action-on-raycast-wallpaper";
-import { getThumbnailUrl } from "../utils/common-utils";
+import { capitalizeFirstLetter, getThumbnailUrl } from "../utils/common-utils";
 import { columns, layout } from "../types/preferences";
 
 export function RaycastWallpaperGrid(props: {
@@ -30,6 +30,7 @@ export function RaycastWallpaperGrid(props: {
     >
       <RaycastWallpaperEmptyView layout={layout} />
       {raycastWallpapers.map((value, index) => {
+        const appearanceIcon = value.appearance == "light" ? Icon.Sun : Icon.Moon;
         return (
           <Grid.Item
             id={index + ""}
@@ -44,7 +45,17 @@ export function RaycastWallpaperGrid(props: {
                 setSelectedItem={setSelectedItem}
               />
             }
-            accessory={value.exclude ? { icon: Icon.XMarkTopRightSquare, tooltip: "Excluded From Auto Switch" } : {}}
+            accessory={
+              value.exclude
+                ? {
+                    icon: { source: Icon.XMarkTopRightSquare, tintColor: Color.SecondaryText },
+                    tooltip: "Excluded From Auto Switch",
+                  }
+                : {
+                    icon: { source: appearanceIcon, tintColor: Color.SecondaryText },
+                    tooltip: capitalizeFirstLetter(value.appearance),
+                  }
+            }
           />
         );
       })}
