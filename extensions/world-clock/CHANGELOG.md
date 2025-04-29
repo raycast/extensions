@@ -1,5 +1,9 @@
 # World Clock Changelog
 
+## [Optimization Extension] - {PR_MERGE_DATE}
+
+- Supports non-integer time zone offset
+
 ## [Refactor Extension] - 2025-01-20
 
 - Refactoring extensions to replace the api used, now using [TimeAPI](https://www.timeapi.io)
