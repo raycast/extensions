@@ -1,6 +1,6 @@
 # NUSMods Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-04-29
 
 ### Added
 - Initial release of NUSMods extension for Raycast
