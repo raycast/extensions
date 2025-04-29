@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, showToast, Toast } from "@raycast/api"
 import { showFailureToast } from "@raycast/utils"
-import * as cheerio from "cheerio"
 import fetch from "node-fetch"
 import * as React from "react"
 import { useCallback, useEffect, useState } from "react"
@@ -12,6 +11,14 @@ interface RepoResult {
   stars: string
   deepWikiUrl: string
   githubUrl: string
+}
+
+interface ApiRepoResult {
+  // id: string // We'll generate our ID from repo_name
+  repo_name: string // Contains owner/repo
+  description: string
+  stargazers_count?: number | string
+  // last_modified, language, topics are also available if needed later
 }
 
 export default function Command(): React.ReactElement {
@@ -29,64 +36,69 @@ export default function Command(): React.ReactElement {
     setIsLoading(true)
 
     try {
-      const searchUrl = `https://deepwiki.com/?q=${encodeURIComponent(query)}`
-      const response = await fetch(searchUrl)
+      const searchUrl = `https://api.devin.ai/ada/list_public_indexes?search_repo=${encodeURIComponent(query)}`
+      const response = await fetch(searchUrl, {
+        headers: {
+          accept: "*/*",
+          "accept-language": "en,en-US;q=0.9",
+        },
+        method: "GET",
+      })
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        // Log the raw response text on error for debugging
+        const errorText = await response.text()
+        console.error("API Error Response Body:", errorText)
+        throw new Error(`API error! status: ${response.status} ${response.statusText}`)
       }
 
-      const html = await response.text()
-      const $ = cheerio.load(html)
+      // Log raw response body before parsing
+      const responseBodyText = await response.text()
+      console.log("Raw API Response Body:", responseBodyText)
 
-      const parsedResults: RepoResult[] = []
+      // Parse the JSON response with error handling
+      let apiResults: ApiRepoResult[] = []
+      try {
+        const parsedJson = JSON.parse(responseBodyText)
+        // console.log("Parsed JSON:", parsedJson) // Remove log
 
-      const resultSelector = "a.block.h-full.min-h-32"
-      const foundElements = $(resultSelector)
+        // Access the indices array
+        if (parsedJson && Array.isArray(parsedJson.indices)) {
+          apiResults = parsedJson.indices as ApiRepoResult[]
+        } else {
+          console.error("Parsed JSON does not contain an 'indices' array:", parsedJson)
+          throw new Error("API response is not in the expected format (object with indices array).")
+        }
+      } catch (parseError: unknown) {
+        console.error("Failed to parse JSON response:", parseError)
+        // console.error("Raw response text was:", responseBodyText) // Remove log
+        throw new Error("Failed to parse API response.")
+      }
 
-      foundElements.each((_index: number, element: cheerio.Element) => {
-        const linkElement = $(element)
-        const relativePath = linkElement.attr("href") || ""
-        const deepWikiUrl = `https://deepwiki.com${relativePath}`
-
-        const org = linkElement.find("span.text-text-light.mr-1").text().trim()
-        const repo = linkElement.find("span.ml-1.text-white").text().trim()
-        const orgRepo = org && repo ? `${org}/${repo}` : ""
-
-        const description = linkElement.find("p.text-secondary-gray").text().trim()
-
-        const stars = linkElement
-          .find("svg[viewBox='0 0 256 256']")
-          .next("span.text-secondary-gray.text-xs")
-          .text()
-          .trim()
-
-        if (orgRepo) {
-          if (!parsedResults.some((r: RepoResult) => r.orgRepo === orgRepo))
-            parsedResults.push({
-              id: orgRepo,
-              orgRepo: orgRepo,
-              description: description || "No description available",
-              stars: stars,
-              deepWikiUrl: deepWikiUrl,
-              githubUrl: `https://github.com/${orgRepo}`,
-            })
+      // Map API results to our RepoResult interface
+      const parsedResults: RepoResult[] = apiResults.map((item) => {
+        const orgRepo = item.repo_name // Directly use repo_name
+        // Extract owner and repo for the Deepwiki URL (assuming owner/repo format)
+        const [owner, repo] = orgRepo.split("/")
+        const stars = item.stargazers_count !== undefined ? String(item.stargazers_count) : ""
+        return {
+          id: orgRepo, // Use orgRepo as ID
+          orgRepo: orgRepo,
+          description: item.description || "No description available",
+          stars: stars,
+          // Construct Deepwiki URL using extracted owner/repo
+          deepWikiUrl: owner && repo ? `https://deepwiki.com/${owner}/${repo}` : `https://deepwiki.com/${orgRepo}`, // Fallback just in case
+          githubUrl: `https://github.com/${orgRepo}`,
         }
       })
 
-      if (parsedResults.length === 0 && !isLoading && query && $(resultSelector).length === 0) {
-        if (!$("body").text().includes("Which repo would you like to understand?")) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Could not parse results",
-            message: "The Deepwiki page structure might have changed or an error occurred.",
-          })
-        }
-      }
+      const uniqueResults = parsedResults.filter(
+        (repo, index, self) => index === self.findIndex((r) => r.orgRepo === repo.orgRepo),
+      )
 
-      setResults(parsedResults)
+      setResults(uniqueResults)
     } catch (error: unknown) {
-      let message = "Could not fetch results from Deepwiki"
+      let message = "Could not fetch results from API"
       if (error instanceof Error) {
         message = error.message
       } else if (typeof error === "string") {
@@ -97,7 +109,7 @@ export default function Command(): React.ReactElement {
         title: "Search Failed",
         message: message,
       })
-      setResults([]) // Clear results on error
+      setResults([])
     } finally {
       setIsLoading(false)
     }
