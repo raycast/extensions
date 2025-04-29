@@ -5,7 +5,7 @@ export function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "unknown error";
 }
 
-export function getFirstValidLetter(text: string | null | undefined, fallback?: string) {
+export function getFirstValidLetter(text: string | null | undefined, fallback?: string): string | undefined {
   if (!text) {
     return;
   }
