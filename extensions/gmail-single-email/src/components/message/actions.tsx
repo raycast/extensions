@@ -115,7 +115,7 @@ export function MessageDeleteAction(props: { message: gmail_v1.Schema$Message; o
         props.onRevalidate();
       }
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+      showFailureToast(error, { title: "Failed to move mail to trash" });
     }
   };
   return (
