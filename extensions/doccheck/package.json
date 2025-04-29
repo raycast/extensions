@@ -158,7 +158,7 @@
   "dependencies": {
     "@raycast/api": "^1.48.9",
     "@raycast/utils": "^1.5.2",
-    "axios": "^1.3.4",
+    "axios": "^1.8.4",
     "cheerio": "^1.0.0-rc.12",
     "node-html-markdown": "^1.3.0"
   },

@@ -14,7 +14,7 @@ import { useState, Fragment } from "react";
 import { Bundle } from "../types";
 import { getChromeProfiles } from "../utils/chrome";
 
-const preferences: Preferences.CreateLinkBundle = getPreferenceValues();
+const { defaultNewWindow, defaultIncognitoWindow, defaultOpenInDefaultBrowser } = getPreferenceValues();
 
 interface BundleFormProps {
   bundle?: Bundle;
@@ -26,15 +26,16 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
   const [title, setTitle] = useState(bundle?.title || "");
   const [titleError, setTitleError] = useState<string | undefined>();
   const [description, setDescription] = useState(bundle?.description || "");
+  const [openInDefaultBrowser, setOpenInDefaultBrowser] = useState(
+    bundle?.openInDefaultBrowser || defaultOpenInDefaultBrowser || false,
+  );
   const [chromeProfileDirectory, setChromeProfileDirectory] = useState(bundle?.chromeProfileDirectory || "Default");
   const [linkInputs, setLinkInputs] = useState<{ url: string; error?: string }[]>(
     bundle?.links.length ? bundle.links.map((url) => ({ url })) : [{ url: "" }],
   );
-  const [openInNewWindow, setOpenInNewWindow] = useState(
-    bundle?.openInNewWindow || preferences.defaultNewWindow || false,
-  );
+  const [openInNewWindow, setOpenInNewWindow] = useState(bundle?.openInNewWindow || defaultNewWindow || false);
   const [openInIncognitoWindow, setOpenInIncognitoWindow] = useState(
-    bundle?.openInIncognitoWindow || preferences.defaultIncognitoWindow || false,
+    bundle?.openInIncognitoWindow || defaultIncognitoWindow || false,
   );
 
   const validateTitle = (value: string) => {
@@ -123,6 +124,7 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
       chromeProfileDirectory: chromeProfileDirectory,
       openInNewWindow: openInNewWindow,
       openInIncognitoWindow: openInIncognitoWindow,
+      openInDefaultBrowser: openInDefaultBrowser,
     }).then((success) => {
       if (success) pop();
     });
@@ -149,17 +151,35 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
         error={titleError}
       />
       <Form.TextField id="description" title="Bundle Description" value={description} onChange={setDescription} />
+
       <Form.Separator />
 
-      <Form.Checkbox id="newWindow" label="Open in New Window" value={openInNewWindow} onChange={setOpenInNewWindow} />
       <Form.Checkbox
-        id="incognito"
-        label="Open in Incognito Window"
-        value={openInIncognitoWindow}
-        onChange={setOpenInIncognitoWindow}
+        id="openInDefaultBrowser"
+        label="Open in Default Browser"
+        value={openInDefaultBrowser}
+        onChange={setOpenInDefaultBrowser}
       />
 
-      {!openInIncognitoWindow && (
+      {!openInDefaultBrowser && (
+        <>
+          <Form.Separator />
+          <Form.Checkbox
+            id="newWindow"
+            label="Open in New Window"
+            value={openInNewWindow}
+            onChange={setOpenInNewWindow}
+          />
+          <Form.Checkbox
+            id="incognito"
+            label="Open in Incognito Window"
+            value={openInIncognitoWindow}
+            onChange={setOpenInIncognitoWindow}
+          />
+        </>
+      )}
+
+      {!openInDefaultBrowser && !openInIncognitoWindow && (
         <Form.Dropdown
           id="chromeProfile"
           title="Chrome Profile"

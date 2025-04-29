@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { AI, Action, ActionPanel, Clipboard, environment, Form, Icon, LaunchProps, Toast } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { callbackLaunchCommand, LaunchOptions } from "raycast-cross-extension";
 import { Detector } from "raycast-language-detector";
-import { detectLanguage, detector, emptyResult, supportedDetectors } from "./utils.js";
+import { detectLanguage, emptyResult, getValidAiModels, supportedDetectors, useDetector, useModel } from "./utils.js";
+import { Model } from "./types.js";
 
 type LaunchContext = {
   content?: string;
@@ -14,11 +15,14 @@ export default function TextToDetect({ launchContext = {} }: LaunchProps<{ launc
   const { content, callbackLaunchOptions } = launchContext;
   const [languageName, setLanguageName] = useState("");
   const [isDetecting, setIsDetecting] = useState(false);
+  const [supportedModels, setSupportedModels] = useCachedState<Model[]>("supported-models", []);
+  const [selectedDetector, setSelectedDetector] = useDetector();
+  const [selectedModel, setSelectedModel] = useModel();
   const canAccessAi = environment.canAccess(AI);
 
   useEffect(() => {
     if (content && callbackLaunchOptions) {
-      detectLanguage(content)
+      detectLanguage(content, selectedDetector, selectedModel)
         .catch(() => emptyResult)
         .then((result) => {
           callbackLaunchCommand(callbackLaunchOptions, result);
@@ -26,10 +30,9 @@ export default function TextToDetect({ launchContext = {} }: LaunchProps<{ launc
     }
   }, []);
 
-  const { handleSubmit, itemProps } = useForm<{ content: string; detector: string }>({
+  const { handleSubmit, itemProps } = useForm<{ content: string; detector: string; model: string }>({
     initialValues: {
       content: content ?? "",
-      detector: detector === "ai" && !canAccessAi ? "languagedetect" : detector,
     },
     onSubmit: async (values) => {
       if (isDetecting) return;
@@ -38,7 +41,7 @@ export default function TextToDetect({ launchContext = {} }: LaunchProps<{ launc
       try {
         setLanguageName("");
         setIsDetecting(true);
-        const { languageName } = await detectLanguage(values.content, values.detector as Detector);
+        const { languageName } = await detectLanguage(values.content, selectedDetector, selectedModel);
         setLanguageName(languageName);
         toast.hide();
       } catch (error) {
@@ -63,11 +66,21 @@ export default function TextToDetect({ launchContext = {} }: LaunchProps<{ launc
     },
   });
 
+  useEffect(() => {
+    if (canAccessAi && selectedDetector === Detector.AI) {
+      getValidAiModels()
+        .then(setSupportedModels)
+        .catch(() => []);
+    } else {
+      setSupportedModels([]);
+    }
+  }, [selectedDetector]);
+
   return (
     <Form
       actions={
         <ActionPanel>
-          {!canAccessAi && itemProps.detector.value === Detector.AI ? (
+          {!canAccessAi && selectedDetector === Detector.AI ? (
             <Action.OpenInBrowser icon={Icon.StarCircle} title="Try Raycast Pro" url="https://raycast.com/pro" />
           ) : (
             <Action.SubmitForm icon={Icon.Stars} title="Detect Language" onSubmit={handleSubmit} />
@@ -85,12 +98,14 @@ export default function TextToDetect({ launchContext = {} }: LaunchProps<{ launc
       />
       <Form.Dropdown
         title="Detector"
-        info={
-          itemProps.detector.value === "ai" && !canAccessAi
-            ? "This feature requires Raycast Pro subscription."
-            : undefined
-        }
+        info={selectedDetector === "ai" && !canAccessAi ? "This feature requires Raycast Pro subscription." : undefined}
         {...itemProps.detector}
+        value={undefined}
+        defaultValue={selectedDetector}
+        onChange={(value) => {
+          itemProps.detector.onChange?.(value);
+          setSelectedDetector(value as Detector);
+        }}
       >
         {supportedDetectors
           .sort((a, b) => {
@@ -111,6 +126,22 @@ export default function TextToDetect({ launchContext = {} }: LaunchProps<{ launc
             />
           ))}
       </Form.Dropdown>
+      {supportedModels.length > 0 && (
+        <Form.Dropdown
+          title="AI Model"
+          {...itemProps.model}
+          value={undefined}
+          defaultValue={selectedModel}
+          onChange={(value) => {
+            setSelectedModel(value);
+          }}
+        >
+          <Form.Dropdown.Item key="default" value="" title="Default" />
+          {supportedModels.map((model) => (
+            <Form.Dropdown.Item key={model.id} value={model.id} title={model.name} />
+          ))}
+        </Form.Dropdown>
+      )}
       {languageName && <Form.Description title="Language" text={languageName} />}
     </Form>
   );

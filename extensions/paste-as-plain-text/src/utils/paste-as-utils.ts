@@ -1,8 +1,9 @@
 import { Clipboard, closeMainWindow, Toast, updateCommandMetadata } from "@raycast/api";
 import { extractNumber, extractUrl, fetchTitle, isEmpty, showCustomHUD, transform } from "./common-utils";
 import { autoFetchTitle, PasteFormat, replaceClipboard } from "../types/types";
-import { isJSON, isURL } from "validator";
+import { isURL } from "validator";
 import fse from "fs-extra";
+import JSON5 from "json5";
 import { fileURLToPath } from "node:url";
 
 export async function pasteAs(advancedPasteFormat: string) {
@@ -24,11 +25,16 @@ export async function pasteAs(advancedPasteFormat: string) {
     }
     case PasteFormat.JSON: {
       // paste as json
-      if (isJSON(pasteStr)) {
-        pasteStr = JSON.stringify(JSON.parse(pasteStr), null, 2);
-        realPasteFormatIcon = "📦";
-        realPasteFormat = PasteFormat.JSON;
+      let objType;
+      try {
+        objType = JSON5.parse(pasteStr);
+      } catch (e) {
+        console.log("Invalid object type:", e);
+        break;
       }
+      pasteStr = JSON.stringify(objType, null, 2);
+      realPasteFormatIcon = "📦";
+      realPasteFormat = PasteFormat.JSON;
       break;
     }
     case PasteFormat.URL: {

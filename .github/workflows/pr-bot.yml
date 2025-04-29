@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Get changed extensions
         id: get_changed_extensions
-        uses: raycast/github-actions/get-changed-extensions@v1.16.0
+        uses: raycast/github-actions/get-changed-extensions@v1.17.0
         with:
           github_event_name: ${{ github.event_name }}
 

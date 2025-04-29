@@ -19,7 +19,7 @@ const { primaryAction } = getPreferenceValues<{
   primaryAction: primaryActionEnum;
 }>();
 
-const { iconColor } = getPreferenceValues<{ iconColor: iconColorEnum }>();
+const { iconColor, customColor } = getPreferenceValues<{ iconColor: iconColorEnum; customColor?: string }>();
 
 const service = new Service();
 
@@ -49,7 +49,16 @@ function Command() {
       {icons.map((icon) => {
         const { set, id, body, width, height } = icon;
         const { id: setId, title: setName } = set;
-        const svgIcon = toSvg(body, width, height, iconColor);
+        const svgIcon = toSvg(
+          body,
+          width,
+          height,
+          iconColor === iconColorEnum.customColor &&
+            customColor &&
+            /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(customColor)
+            ? customColor
+            : iconColor,
+        );
         const dataURIIcon = toDataURI(svgIcon);
 
         const paste = (

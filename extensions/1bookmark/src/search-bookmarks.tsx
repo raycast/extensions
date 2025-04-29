@@ -1,46 +1,39 @@
-import { List, Cache, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
-import { useAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { sessionTokenAtom } from "@/states/session-token.state";
+
 import { Spaces } from "./views/SpacesView";
 import { BookmarkItem } from "./components/BookmarkItem";
 import { BookmarkFilter } from "./components/BookmarkFilter";
 import { LoginView } from "./views/LoginView";
 import { useMe } from "./hooks/use-me.hook";
-import { useBookmarks } from "./hooks/use-bookmarks.hook";
+import { useMyBookmarks } from "./hooks/use-bookmarks.hook";
 import { usePrepareBookmarkSearch } from "./hooks/use-prepare-bookmark-search.hook";
 import { useBookmarkSearch } from "./hooks/use-bookmark-search.hook";
+import { useFilterBookmark } from "./hooks/use-filter-bookmark.hook";
 import { RequiredActions } from "./components/BookmarkItemActionPanel";
-
-const cache = new Cache();
+import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
+import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
+import { cache } from "./utils/cache.util";
+import { useCachedState } from "@raycast/utils";
+import { CACHED_KEY_RANKING_ENTRIES } from "./utils/constants.util";
+import { RankingEntries } from "./types";
 
 export function Body() {
-  const [sessionToken] = useAtom(sessionTokenAtom);
-  const me = useMe(sessionToken);
+  const me = useMe();
+  const { enabledSpaceIds } = useEnabledSpaces();
+  const { data, isFetching, isFetched, refetch: refetchBookmarks } = useMyBookmarks();
+  const [rankingEntries, setRankingEntries] = useCachedState<RankingEntries>(CACHED_KEY_RANKING_ENTRIES, {});
+
   const [keyword, setKeyword] = useState("");
-
-  const spaceIds = useMemo(() => {
-    return me?.data?.associatedSpaces.map((s) => s.id) || [];
-  }, [me.data]);
-
-  const {
-    data,
-    isFetching,
-    isFetched,
-    refetch: refetchBookmarks,
-  } = useBookmarks({
-    sessionToken,
-    spaceIds,
-    me: me.data,
-  });
+  useEffect(() => {
+    cache.set("keyword", keyword);
+  }, [keyword]);
 
   const refetch = useCallback(() => {
     refetchBookmarks();
     me.refetch();
-    setAfter1Sec(false);
-    setTimeout(() => setAfter1Sec(true), 1000);
-  }, [refetchBookmarks]);
+  }, [refetchBookmarks, me.refetch]);
 
   const selectedTags = useMemo(() => {
     if (!me.data) return [];
@@ -52,32 +45,38 @@ export function Body() {
 
   // Prepare bookmark data for fuzzysort search
   // The prepare operation is performed only once if the data doesn't change
-  const searchData = usePrepareBookmarkSearch({
-    data,
-    selectedTags,
-  });
+  const preparedData = usePrepareBookmarkSearch({ data, selectedTags });
 
-  // Perform actual search using prepared data
-  // Search results are updated whenever the keyword changes
-  const { filteredTaggedList, filteredUntaggedList } = useBookmarkSearch({
+  // First, apply filters based on special characters
+  const filteredData = useFilterBookmark({
     keyword,
-    searchData,
+    taggedPrepare: preparedData.taggedPrepare,
+    untaggedPrepare: preparedData.untaggedPrepare,
   });
 
-  const [after1Sec, setAfter1Sec] = useState(false);
-  useEffect(() => {
-    // If this is not here, LoginView will briefly appear.
-    setTimeout(() => setAfter1Sec(true), 1000);
-  }, []);
+  // Then, perform search on the filtered results
+  const { searchedTaggedList, searchedUntaggedList } = useBookmarkSearch({
+    keyword: filteredData.cleanKeyword,
+    taggedPrepare: filteredData.filteredTaggedPreparedBookmarks,
+    untaggedPrepare: filteredData.filteredUntaggedPreparedBookmarks,
+    taggedBookmarks: preparedData.taggedBookmarks,
+    untaggedBookmarks: preparedData.untaggedBookmarks,
+    rankingEntries,
+  });
 
-  const loggedOutStatus = !sessionToken && after1Sec;
-  useEffect(() => {
-    // Clear data when logged out.
-    if (loggedOutStatus) {
-      cache.remove("me");
-      cache.remove("bookmarks");
-    }
-  }, [loggedOutStatus]);
+  const { loggedOutStatus } = useLoggedOutStatus();
+
+  const { hasSpaceFilter, hasCreatorFilter, hasTagFilter } = filteredData;
+  const hasFilter = hasSpaceFilter || hasCreatorFilter || hasTagFilter;
+  const filterText = useMemo(() => {
+    const helpTexts = [
+      hasSpaceFilter ? `"!<spaceName>"` : "",
+      hasCreatorFilter ? `"@<creator>"` : "",
+      hasTagFilter ? `"#<tag>#"` : "",
+    ].filter(Boolean);
+
+    return hasFilter ? `Filtered by ${helpTexts.join(", ")} pattern` : "";
+  }, [hasSpaceFilter, hasCreatorFilter, hasTagFilter, hasFilter]);
 
   if (loggedOutStatus) {
     return <LoginView />;
@@ -113,27 +112,60 @@ export function Body() {
     );
   }
 
+  if (searchedTaggedList.length < 1 && searchedUntaggedList.length < 1 && hasFilter) {
+    return (
+      <List
+        isLoading={isFetching || !me.data}
+        searchBarAccessory={me.data && enabledSpaceIds && <BookmarkFilter spaceIds={enabledSpaceIds} me={me.data} />}
+        searchText={keyword}
+        onSearchTextChange={setKeyword}
+      >
+        <List.Section title={`No results found. ${filterText}`}>
+          <List.Item icon={Icon.Folder} title="!<spaceName> (filter by space name) " />
+          <List.Item icon={Icon.Person} title="@<creator> (filter by creator) " />
+          <List.Item icon={Icon.Tag} title="#<tag># (filter by tag) " />
+        </List.Section>
+      </List>
+    );
+  }
+
   return (
     <List
       isLoading={isFetching || !me.data}
-      searchBarAccessory={me.data && <BookmarkFilter spaceIds={spaceIds} me={me.data} />}
+      searchBarAccessory={me.data && enabledSpaceIds && <BookmarkFilter spaceIds={enabledSpaceIds} me={me.data} />}
       searchText={keyword}
       onSearchTextChange={setKeyword}
     >
-      <List.Section
-        title={`${filteredTaggedList.length} tagged out of ${filteredTaggedList.length + filteredUntaggedList.length} results`}
-      >
-        {filteredTaggedList.map((item) => (
-          <BookmarkItem key={item.id} bookmark={item} me={me.data} refetch={refetch} />
-        ))}
-      </List.Section>
-      <List.Section
-        title={`${filteredUntaggedList.length} untagged out of ${filteredTaggedList.length + filteredUntaggedList.length} results`}
-      >
-        {filteredUntaggedList.map((item) => (
-          <BookmarkItem key={item.id} bookmark={item} me={me.data} refetch={refetch} />
-        ))}
-      </List.Section>
+      {/* Display search results */}
+      {searchedTaggedList.length > 0 && (
+        <List.Section title={`${searchedTaggedList.length} tagged items${filterText ? ` - ${filterText}` : ""}`}>
+          {searchedTaggedList.map((item) => (
+            <BookmarkItem
+              key={item.id}
+              bookmark={item}
+              me={me.data}
+              refetch={refetch}
+              rankingEntries={rankingEntries}
+              setRankingEntries={setRankingEntries}
+            />
+          ))}
+        </List.Section>
+      )}
+
+      {searchedUntaggedList.length > 0 && (
+        <List.Section title={`${searchedUntaggedList.length} untagged items${filterText ? ` - ${filterText}` : ""}`}>
+          {searchedUntaggedList.map((item) => (
+            <BookmarkItem
+              key={item.id}
+              bookmark={item}
+              me={me.data}
+              refetch={refetch}
+              rankingEntries={rankingEntries}
+              setRankingEntries={setRankingEntries}
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }

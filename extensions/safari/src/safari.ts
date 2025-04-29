@@ -61,17 +61,17 @@ export async function addToReadingList(url: string) {
 }
 
 export async function getCurrentTabName() {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return name of front document`);
+  return await runAppleScript(`tell application "${safariAppIdentifier}" to return name of current tab in window 1`);
 }
 
 export async function getCurrentTabURL() {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return URL of front document`);
+  return await runAppleScript(`tell application "${safariAppIdentifier}" to return URL of current tab in window 1`);
 }
 
 export type ContentType = "text" | "source";
 
 export async function getCurrentTabContents(type: ContentType) {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return ${type} of front document`);
+  return await runAppleScript(`tell application "${safariAppIdentifier}" to return ${type} of current tab in window 1`);
 }
 
 export async function getTabContents(windowId: number, tabIndex: number, type: ContentType) {

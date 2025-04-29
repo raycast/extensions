@@ -29,7 +29,9 @@ export function usePinnedEntries() {
   return {
     pinnedEntries: entries,
     pinEntry: (entry: ZedEntry) => setEntries((s) => toDict([entry, ...toArray(s)])),
-    unpinEntry: (entry: PinnedZedEntry) => setEntries((s) => toDict(toArray(s).filter((e) => e.uri !== entry.uri))),
+    unpinEntry: (entry: Pick<PinnedZedEntry, "uri">) =>
+      setEntries((s) => toDict(toArray(s).filter((e) => e.uri !== entry.uri))),
+    unpinAllEntries: () => setEntries({}),
     moveUp: (entry: PinnedZedEntry) =>
       setEntries((s) => {
         const arr = toArray(s);

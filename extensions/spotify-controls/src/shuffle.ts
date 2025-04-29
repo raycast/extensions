@@ -13,7 +13,7 @@ export default async () => {
     await showToast({
       title: result === "true" ? "Shuffle On" : "Shuffle Off",
     });
-  } catch (_) {
+  } catch {
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed toggling shuffle",

@@ -1,5 +1,15 @@
 # Arc Changelog
 
+## [Improvements] - 2025-04-16
+
+- When opening a new incognito window, open a blank tab if no URL is given.
+  - A previous update caused a regression where this behavior was no longer
+    supported.
+
+## [Suggest opening URL] - 2025-03-31
+
+When searching for a URL, offer to open the URL 
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 AI Tools to:

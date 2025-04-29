@@ -1,74 +1,162 @@
-import { SpaceObject, Detail, Member } from "../helpers/schemas";
-import { getIconWithFallback } from "../helpers/icon";
 import { getPreferenceValues } from "@raycast/api";
-
-/**
- * Map raw `SpaceObject` item into display-ready data, including details, icons, etc.
- */
-export async function mapObject(object: SpaceObject): Promise<SpaceObject> {
-  const getDetail = (id: string): Detail["details"] | undefined =>
-    object.details?.find((detail) => detail.id === id)?.details;
-
-  // Resolve object icon
-  const icon = await getIconWithFallback(object.icon, object.layout);
-
-  // Extract 'created' details
-  const createdDateString = getDetail("created_date")?.created_date as string;
-  const createdDate = createdDateString ? new Date(createdDateString) : new Date(0);
-  const createdByDetails = getDetail("created_by")?.details as Member;
-  const createdBy = {
-    name: createdByDetails?.name || "Unknown",
-    icon: await getIconWithFallback(createdByDetails?.icon, "participant"),
-    globalName: createdByDetails?.global_name || "",
-  };
-
-  // Extract 'last modified' details
-  const lastModifiedDateString = getDetail("last_modified_date")?.last_modified_date as string;
-  const lastModifiedDate = lastModifiedDateString ? new Date(lastModifiedDateString) : new Date(0);
-  const lastModifiedByDetails = getDetail("last_modified_by")?.details as Member;
-  const lastModifiedBy = {
-    name: lastModifiedByDetails?.name || "Unknown",
-    icon: await getIconWithFallback(lastModifiedByDetails?.icon, "participant"),
-    globalName: lastModifiedByDetails?.global_name || "",
-  };
-
-  return {
-    ...object,
-    icon,
-    blocks: undefined, // remove blocks to improve performance, as they're not used in the UI
-    name: object.name || object.snippet || "Untitled",
-    type: object.type || "Unknown Type",
-    details: object.details.map((detail) => {
-      const { id, details } = detail;
-
-      return {
-        ...detail,
-        details: {
-          ...details,
-          ...(id === "created_date" && { created_date: createdDate.toISOString() }),
-          ...(id === "created_by" && { createdBy }),
-          ...(id === "last_modified_date" && { last_modified_date: lastModifiedDate.toISOString() }),
-          ...(id === "last_modified_by" && { lastModifiedBy }),
-        },
-      };
-    }),
-  };
-}
+import { getObjectWithoutMappedDetails } from "../api";
+import { Property, RawSpaceObject, SortProperty, SpaceObject } from "../models";
+import { colorMap, getIconWithFallback } from "../utils";
+import { mapType } from "./types";
 
 /**
  * Efficiently map raw `SpaceObject` items to essential display-ready data.
  * Only includes necessary fields for list rendering for performance.
  */
-export async function mapObjects(objects: SpaceObject[]): Promise<SpaceObject[]> {
+export async function mapObjects(objects: RawSpaceObject[]): Promise<SpaceObject[]> {
+  const { sort } = getPreferenceValues();
+
   return Promise.all(
     objects.map(async (object) => {
       return {
         ...object,
-        icon: await getIconWithFallback(object.icon, object.layout),
-        name: object.name || object.snippet || "Untitled",
-        type: object.type || "Unknown Type",
-        details: object.details?.filter((detail) => detail.id === getPreferenceValues().sort) || [],
+        icon: await getIconWithFallback(object.icon, object.layout, object.type),
+        name: object.name || `${object.snippet.split("\n")[0]}...` || "Untitled",
+        type: await mapType(object.type),
+        properties: object.properties?.filter((property) => {
+          if (sort === SortProperty.Name) {
+            // When sorting by name, keep the 'LastModifiedDate' property for tooltip purposes
+            return property.id === SortProperty.LastModifiedDate;
+          }
+          return property.id === sort;
+        }),
       };
+    }),
+  );
+}
+
+/**
+ * Map raw `SpaceObject` item into display-ready data, including details, icons, etc.
+ */
+export async function mapObject(object: RawSpaceObject): Promise<SpaceObject> {
+  const icon = await getIconWithFallback(object.icon, object.layout, object.type);
+
+  const mappedProperties = await Promise.all(
+    (object.properties || []).map(async (property) => {
+      let mappedProperty: Property = {
+        id: property.id,
+        name: property.name,
+        format: property.format,
+      };
+
+      switch (property.format) {
+        case "text":
+          mappedProperty = {
+            ...mappedProperty,
+            text: typeof property.text === "string" ? property.text.trim() : "",
+          };
+          break;
+        case "number":
+          mappedProperty = {
+            ...mappedProperty,
+            number: property.number !== undefined && property.number !== null ? property.number : 0,
+          };
+          break;
+        case "select":
+          if (property.select) {
+            mappedProperty = {
+              ...mappedProperty,
+              select: {
+                id: property.select.id || "",
+                name: property.select.name || "",
+                color: colorMap[property.select.color] || property.select.color,
+              },
+            };
+          }
+          break;
+        case "multi_select":
+          if (property.multi_select) {
+            mappedProperty = {
+              ...mappedProperty,
+              multi_select: property.multi_select.map((tag) => ({
+                id: tag.id || "",
+                name: tag.name || "",
+                color: colorMap[tag.color] || tag.color,
+              })),
+            };
+          }
+          break;
+        case "date":
+          mappedProperty = {
+            ...mappedProperty,
+            date: property.date ? new Date(property.date).toISOString() : "",
+          };
+          break;
+        case "file":
+          if (property.file) {
+            mappedProperty = {
+              ...mappedProperty,
+              file: await mapObjectWithoutDetails(object.space_id, property.file),
+            };
+          }
+          break;
+        case "checkbox":
+          mappedProperty = {
+            ...mappedProperty,
+            checkbox: property.checkbox || false,
+          };
+          break;
+        case "url":
+          mappedProperty = {
+            ...mappedProperty,
+            url: typeof property.url === "string" ? property.url.trim() : "",
+          };
+          break;
+        case "email":
+          mappedProperty = {
+            ...mappedProperty,
+            email: typeof property.email === "string" ? property.email.trim() : "",
+          };
+          break;
+        case "phone":
+          mappedProperty = {
+            ...mappedProperty,
+            phone: typeof property.phone === "string" ? property.phone.trim() : "",
+          };
+          break;
+        case "object":
+          if (property.object) {
+            mappedProperty = {
+              ...mappedProperty,
+              object: await mapObjectWithoutDetails(object.space_id, property.object),
+            };
+          }
+          break;
+        default:
+          console.warn(`Unknown property format: ${property.format}`);
+      }
+
+      return mappedProperty;
+    }),
+  );
+
+  return {
+    ...object,
+    icon,
+    name: object.name || `${object.snippet.split("\n")[0]}...` || "Untitled",
+    type: await mapType(object.type),
+    properties: mappedProperties,
+  };
+}
+
+export async function mapObjectWithoutDetails(spaceId: string, object: SpaceObject[]): Promise<SpaceObject[]> {
+  const rawItems = Array.isArray(object) ? object : [object];
+  return await Promise.all(
+    rawItems.map(async (item) => {
+      if (typeof item === "string") {
+        const fetched = await getObjectWithoutMappedDetails(spaceId, item);
+        if (!fetched) {
+          throw new Error(`getRawObject returned null for item ${item}`);
+        }
+        return fetched;
+      } else {
+        return item;
+      }
     }),
   );
 }
