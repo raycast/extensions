@@ -1,0 +1,4 @@
+# Exclude planning documents from git archive (used when creating releases)
+PLAN.md export-ignore
+REFACTORING_PLAN.md export-ignore
+PROJECT_REF.md export-ignore

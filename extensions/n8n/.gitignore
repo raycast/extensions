@@ -8,6 +8,11 @@
 raycast-env.d.ts
 .history/
 
+# Planning documents
+PLAN.md
+REFACTORING_PLAN.md
+PROJECT_REF.md
+
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
