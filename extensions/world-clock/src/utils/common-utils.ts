@@ -92,7 +92,7 @@ export const calculateDateTimeByOffset = (offset: string) => {
   const targetDate = new Date(targetMillis);
 
   const date_time = targetDate.toLocaleTimeString("en-US", {
-    hour12: false,
+    hour12: !hour24,
     hour: "2-digit",
     minute: "2-digit",
   });
