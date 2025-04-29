@@ -24,7 +24,6 @@
     {
       "name": "search-nus-courses",
       "title": "Search NUS Courses",
-      "subtitle": "Search and explore NUS course offerings for current academic year",
       "description": "Quickly find NUS modules by code or title, view comprehensive course details including prerequisites, workload, timetables, and exam schedules.",
       "mode": "view"
     }
