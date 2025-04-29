@@ -1,6 +1,6 @@
 # Weather Changelog
 
-## [Chore: Renamed file] - {PR_MERGE_DATE}
+## [Chore: Renamed file] - 2025-04-29
 
 ## [SF Symbols] - 2024-03-04
 
