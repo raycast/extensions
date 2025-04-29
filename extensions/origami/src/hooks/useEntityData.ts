@@ -37,6 +37,7 @@ export function useEntityData(entityDataName: string, pageSize: number = 25, sho
         type: 2,
         limit: [page * pageSize, pageSize],
         with_archive: showArchived ? 1 : 0,
+        ui_data: 1,
       }),
       execute: !!entityDataName,
       keepPreviousData: true,
