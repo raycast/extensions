@@ -77,7 +77,7 @@ const scriptSystemAppearance = `tell application "System Events" to tell appeara
 export const getSystemAppearance = async () => {
   try {
     const result = await runAppleScript(scriptSystemAppearance);
-    if (result == "true") {
+    if (result === "true") {
       return "dark";
     }
   } catch (e) {

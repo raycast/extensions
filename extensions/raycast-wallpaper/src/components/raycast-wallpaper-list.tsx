@@ -28,7 +28,7 @@ export function RaycastWallpaperList(props: {
     >
       <RaycastWallpaperEmptyView layout={layout} />
       {raycastWallpapers.map((value, index) => {
-        const appearanceIcon = value.appearance == "light" ? Icon.Sun : Icon.Moon;
+        const appearanceIcon = value.appearance === "light" ? Icon.Sun : Icon.Moon;
         return (
           <List.Item
             id={index + ""}

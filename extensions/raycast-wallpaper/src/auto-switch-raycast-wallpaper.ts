@@ -80,7 +80,7 @@ async function setRandomWallpaper(raycastWallpaperList: RaycastWallpaper[], excl
   }
   if (finalWallpaperList.length === 0) {
     if (environment.launchType === LaunchType.UserInitiated) {
-      showFailureToast("No wallpaper found", { title: "No wallpaper found" }).then();
+      await showFailureToast("No wallpaper found", { title: "No wallpaper found" });
     }
     return;
   }

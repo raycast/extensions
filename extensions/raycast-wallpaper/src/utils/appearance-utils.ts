@@ -146,7 +146,7 @@ const getWallpaperAppearance = () => {
   }
 };
 
-export const getAppearanceByTitle = (value: string): string => {
+export const getAppearanceByTitle = (value: string): "light" | "dark" => {
   const appearanceList = getWallpaperAppearance();
   const wallpaper = appearanceList.find((item) => item.title === value);
   return wallpaper ? wallpaper.appearance : "light";

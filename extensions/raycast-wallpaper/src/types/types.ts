@@ -5,12 +5,12 @@ export type RaycastWallpaper = {
 
 export type AppearancedWallpaper = {
   title: string;
-  appearance: string;
+  appearance: "light" | "dark";
 };
 
 export type RaycastWallpaperWithInfo = {
   title: string;
   url: string;
   exclude: boolean;
-  appearance: string;
+  appearance: "light" | "dark";
 };
