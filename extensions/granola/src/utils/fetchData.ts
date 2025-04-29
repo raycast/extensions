@@ -29,6 +29,7 @@ export function fetchGranolaData(route: string) {
           Authorization: `Bearer ${accessToken}`,
         }
       : undefined,
+    execute: !!accessToken, // Prevent API calls when accessToken is undefined
   });
 
   if (error) {

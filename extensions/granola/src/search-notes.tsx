@@ -104,20 +104,25 @@ export default function Command() {
 
                         // Check if doc.id exists in panels and if panelId is valid
                         if (!panels[doc.id] || !panelId || !panels[doc.id][panelId]) {
+                          // if no AI generated notes exist, look for original notes
+                          if(doc.notes_markdown) {
+                            return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\n${doc.notes_markdown}`;
+                          }
                           return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\nNo content available for this note.`;
                         }
 
                         // Safely access the content with fallback
                         const panelData = panels[doc.id][panelId];
                         const htmlContent = panelData?.original_content || "";
-                        let markdownContent;
+
+                        let markdownContent = doc.notes_markdown || "" + '\n\n';
                         try {
-                          markdownContent = convertHtmlToMarkdown(htmlContent);
+                          markdownContent += convertHtmlToMarkdown(htmlContent);
                         } catch (error) {
                           console.error(`Error converting note ${doc.id} content to markdown:`, error);
-                          markdownContent = htmlContent; // Fallback to original content
+                          markdownContent += htmlContent; // Fallback to original content
                         }
-                        return `# ${doc.title}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\n${markdownContent}`;
+                        return `# ${doc.title}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\n${markdownContent}\n\n --- \n\n${doc.notes_markdown}`;
                       })()}
                       actions={
                         <ActionPanel>

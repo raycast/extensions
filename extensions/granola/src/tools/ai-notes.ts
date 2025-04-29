@@ -58,7 +58,7 @@ export default function tool(input: Input) {
       const note: Note = {
         title: panel.title,
         date: panel.created_at,
-        content: convertHtmlToMarkdown(panel.original_content),
+        content: `Original Notes:\n\n${panel.notes_markdown}\n\nAI Notes:\n\n${convertHtmlToMarkdown(panel.original_content)}`,
       };
       notes.push(note);
     }
