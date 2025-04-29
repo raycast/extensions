@@ -31,7 +31,7 @@
     {
       "name": "findNearbyPlaces",
       "title": "Find Nearby Places",
-      "subtitle": "Google Places",
+      "subtitle": "Google Maps",
       "description": "Find places near your home or current location.",
       "mode": "view"
     },{

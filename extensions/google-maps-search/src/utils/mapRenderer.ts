@@ -111,7 +111,7 @@ export async function generateStaticMapUrl(options: RenderMapOptions): Promise<{
     console.log("Generating map for places:", options.places);
 
     // Track which places were successfully added to the map
-    const successfulPlaces: Array<{ name: string; coords: { lat: number; lng: number } }> = [];
+    let successfulPlaces: Array<{ name: string; coords: { lat: number; lng: number } }> = [];
     const failedPlaces: string[] = [];
 
     // Base URL
@@ -314,8 +314,7 @@ export async function generateStaticMapUrl(options: RenderMapOptions): Promise<{
         failedPlaces.push(...removedPlaces.map((p) => p.name));
 
         // Update the successfulPlaces array
-        successfulPlaces.length = 0;
-        successfulPlaces.push(...limitedSuccessfulPlaces);
+        successfulPlaces = [...limitedSuccessfulPlaces];
       }
     }
 
@@ -413,7 +412,9 @@ export async function renderSingleLocationMap(
 
     if (!locationCoords) {
       console.error(`Could not geocode location: ${location}`);
-      return "";
+      return `> **Error:** Could not geocode location: \
+${location}\
+\n`;
     }
   } else {
     locationCoords = location;

@@ -33,7 +33,7 @@ export type SortOrder = "none" | "distance" | "rating" | "price" | "price-desc";
  * Corresponds to the preferences defined in package.json.
  */
 export interface Preferences {
-  apiKey: unknown;
+  apiKey: string;
   homeAddress: string;
   preferredMode: TransportType;
   preferredOrigin: OriginOption;

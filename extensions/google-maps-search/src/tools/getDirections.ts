@@ -40,11 +40,9 @@ export async function getDirections(input: GetDirectionsInput): Promise<string> 
     }
 
     // Validate destination and origin by geocoding
-    if (input.destination) {
-      const destCoords = await geocodeAddress(input.destination);
-      if (!destCoords) {
-        return `I couldn't find the destination "${input.destination}". Please try a different address or place name.`;
-      }
+    const destCoords = await geocodeAddress(input.destination);
+    if (!destCoords) {
+      return `I couldn't find the destination "${input.destination}". Please try a different address or place name.`;
     }
 
     if (input.origin) {

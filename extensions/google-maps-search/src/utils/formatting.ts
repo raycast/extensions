@@ -111,7 +111,14 @@ export function formatDistance(distance: number, unit: "km" | "m" = "m", options
   const unitSystem = options?.unitSystem || preferences.unitSystem || "metric";
 
   // Convert to meters for consistency
-  const meters = unit === "km" ? distance * 1000 : distance;
+  let meters: number;
+  if (unit === "km") {
+    meters = distance * 1000;
+  } else if (unit === "m") {
+    meters = distance;
+  } else {
+    throw new Error(`Unsupported unit: ${unit}`);
+  }
 
   if (unitSystem === "imperial") {
     // Convert to miles
@@ -277,9 +284,9 @@ export function formatPlaceResults(places: PlaceSearchResult[], userLocation: { 
     }
 
     // Add Google Maps link
-    markdown += `[View on Google Maps](${makeSearchURL(
-      encodeURIComponent(`${place.name} ${place.address || place.vicinity || ""}`)
-    )})\n\n`;
+    const encodedName = encodeURIComponent(place.name);
+    const encodedAddress = encodeURIComponent(place.address || place.vicinity || "");
+    markdown += `[View on Google Maps](${makeSearchURL(`${encodedName} ${encodedAddress}`)})\n\n`;
 
     // Add separator between places
     markdown += `---\n\n`;

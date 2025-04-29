@@ -154,7 +154,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceDetails> {
     },
   });
 
-  if (response.data.status !== "OK") {
+  if (response.data.status !== Status.OK) {
     throw new Error(`Place details API error: ${response.data.status}`);
   }
 
@@ -329,7 +329,7 @@ export async function getDirections(
     };
   } catch (error) {
     console.error("Error getting directions:", error);
-    throw error;
+    return null;
   }
 }
 
@@ -396,23 +396,7 @@ export async function getNearbyPlaces(
     return response.data.results.map((result) => {
       // Validate location data to prevent errors
       if (!result.geometry?.location?.lat || !result.geometry?.location?.lng) {
-        console.error("Missing location data in result:", result.name);
-        return {
-          placeId: "",
-          name: "",
-          address: "",
-          location: {
-            lat: 0,
-            lng: 0,
-          },
-          types: [],
-          rating: 0,
-          userRatingsTotal: 0,
-          photoReference: "",
-          vicinity: "",
-          priceLevel: 0,
-          openNow: false,
-        };
+        throw new Error(`Missing location data in result: ${result.name}`);
       }
 
       return {
@@ -462,8 +446,10 @@ export function getStaticMapUrl(
   // Add markers
   if (markers && markers.length > 0) {
     markers.forEach((marker, index) => {
-      const label = marker.label || String.fromCharCode(65 + index); // A, B, C, etc.
-      url += `&markers=color:red%7Clabel:${label}%7C${marker.lat},${marker.lng}`;
+      const label = encodeURIComponent(marker.label || String.fromCharCode(65 + index)); // A, B, C, etc.
+      const lat = encodeURIComponent(marker.lat);
+      const lng = encodeURIComponent(marker.lng);
+      url += `&markers=color:red%7Clabel:${label}%7C${lat},${lng}`;
     });
   }
 

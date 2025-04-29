@@ -15,24 +15,40 @@ import { PlaceDetailView } from "../components/placeDetailView";
  * @param placeType Optional place type that was searched for
  * @returns Object containing navigation functions
  */
+/**
+ * Creates navigation functions for handling place search results and details
+ * @param push Navigation push function from useNavigation hook
+ * @param pop Navigation pop function from useNavigation hook
+ * @param places Array of place search results
+ * @param HomeComponent Component to return to when navigating back from search results
+ * @param placeType Optional place type that was searched for
+ * @returns Object containing navigation functions
+ */
 export function createPlaceNavigation(
   push: Navigation["push"],
+  pop: () => void,
   places: PlaceSearchResult[],
   HomeComponent: React.ComponentType,
   placeType?: string
 ): {
-  navigateToResults: () => void;
+  /**
+   * Navigates to the search results list
+   * @param isLoading Whether results are still loading
+   */
+  navigateToResults: (isLoading: boolean) => void;
   navigateToDetails: (selectedPlaceId: string) => void;
 } {
-  // Navigate to search results with a simplified navigation pattern
-  // Note: isLoading is managed within PlaceDetailView component during place details fetch
-  const navigateToResults = () => {
+  /**
+   * Navigates to the search results list
+   * @param isLoading Whether results are still loading
+   */
+  const navigateToResults = (isLoading: boolean) => {
     push(
       <PlaceSearchResults
         places={places}
-        isLoading={false}
+        isLoading={isLoading}
         onSelectPlace={(selectedPlaceId) => navigateToDetails(selectedPlaceId)}
-        onBack={() => push(<HomeComponent />)}
+        onBack={() => pop()}
         placeType={placeType}
       />
     );
@@ -40,7 +56,7 @@ export function createPlaceNavigation(
 
   // Navigate to place details with a simplified back function
   const navigateToDetails = (selectedPlaceId: string) => {
-    push(<PlaceDetailView placeId={selectedPlaceId} onBack={() => navigateToResults()} />);
+    push(<PlaceDetailView placeId={selectedPlaceId} onBack={() => navigateToResults(false)} />);
   };
 
   return {

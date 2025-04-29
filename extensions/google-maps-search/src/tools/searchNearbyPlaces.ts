@@ -45,8 +45,14 @@ export async function searchNearbyPlaces(input: SearchNearbyPlacesInput): Promis
     if (!preferences.googlePlacesApiKey) {
       throw new Error("Google Places API key is required");
     }
-    const radius = input.radius || 1000;
-    const limit = input.limit || 5;
+    const radius = typeof input.radius === "number" && input.radius > 0 ? input.radius : 1000;
+    if (typeof input.radius === "number" && input.radius <= 0) {
+      console.warn(`Invalid radius value (${input.radius}), defaulting to 1000.`);
+    }
+    const limit = typeof input.limit === "number" && input.limit > 0 ? input.limit : 5;
+    if (typeof input.limit === "number" && input.limit <= 0) {
+      console.warn(`Invalid limit value (${input.limit}), defaulting to 5.`);
+    }
 
     // Geocode the location to get coordinates
     const locationCoords = await geocodeAddress(input.location);

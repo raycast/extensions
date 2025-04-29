@@ -134,7 +134,17 @@ export async function getStorageItem<T>(
     }
 
     // Parse the value if it's a string
-    const parsedValue = typeof value === "string" ? JSON.parse(value) : value;
+    let parsedValue: unknown;
+    if (typeof value === "string") {
+      try {
+        parsedValue = JSON.parse(value);
+      } catch (parseError) {
+        console.warn(`Failed to parse stored JSON for key "${key}", returning default value`, parseError);
+        return defaultValue;
+      }
+    } else {
+      parsedValue = value;
+    }
 
     // If a validator is provided, use it to check the type
     if (validator && !validator(parsedValue)) {

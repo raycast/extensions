@@ -39,7 +39,6 @@ export function PlaceListView({
   const debouncedSetEmptyView = useCallback(
     debounce((isEmpty: boolean) => {
       setShowEmptyView(isEmpty);
-      return true; // Return value for the Promise
     }, EMPTY_VIEW_DELAY),
     []
   );

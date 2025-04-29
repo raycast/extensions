@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { getPreferenceValues, showToast, openExtensionPreferences, Toast } from "@raycast/api";
+import { getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { Preferences, PlaceSearchResult, OriginOption } from "../types";
 import { getNearbyPlaces } from "../utils/googlePlacesApi";
 import { showFailureToast } from "@raycast/utils";
@@ -16,7 +16,6 @@ export function useNearbyPlaces() {
   const searchNearbyPlaces = useCallback(
     async (placeType: string, origin: OriginOption, customAddress: string, radius: number, openNow = false) => {
       setIsLoading(true);
-      let toast: Toast | undefined;
 
       try {
         // Verify API key
@@ -32,21 +31,13 @@ export function useNearbyPlaces() {
           return null;
         }
 
-        // Show loading toast
-        toast = await showToast({
-          style: Toast.Style.Animated,
-          title: "Searching for nearby places...",
-        });
-
         // Get search location based on origin type
         const searchLocation = await getSearchLocation(origin, customAddress);
         if (!searchLocation) {
-          if (toast) {
-            showFailureToast({
-              title: "Search failed",
-              message: "Failed to get search location",
-            });
-          }
+          showFailureToast({
+            title: "Search failed",
+            message: "Failed to get search location",
+          });
           return null;
         }
 
@@ -55,20 +46,14 @@ export function useNearbyPlaces() {
           const results = await getNearbyPlaces(searchLocation, placeType, radius, openNow);
           setPlaces(results);
 
-          // Update toast on success
-          if (toast) {
-            toast.message = `Found ${results.length} places`;
-            toast.style = Toast.Style.Success;
-          }
-
           return results;
         } catch (error) {
-          handleSearchError(error, toast);
+          handleSearchError(error);
           return null;
         }
       } catch (error) {
         console.error("Unexpected error in searchNearbyPlaces:", error);
-        handleSearchError(error, toast);
+        handleSearchError(error);
         return null;
       } finally {
         setIsLoading(false);
@@ -91,23 +76,12 @@ export function useNearbyPlaces() {
 
     // Fallback for any other cases (shouldn't happen with current enum values)
     console.warn(`Unexpected origin option: ${origin}, using home address as fallback`);
-    await showToast({
-      style: Toast.Style.Animated,
-      title: "Using Home Address",
-      message: "Using home address as fallback",
-    });
     return geocodePlace(preferences.homeAddress, { source: "home" });
   };
 
   // Helper function to handle search errors
-  const handleSearchError = (error: unknown, toast: Toast | undefined) => {
-    if (toast) {
-      showFailureToast({
-        title: "Search failed",
-        message: "Unknown error occurred",
-      });
-    }
-
+  const handleSearchError = (error: unknown) => {
+    // Only show specific error messages below
     if (error instanceof Error && error.message.includes("ZERO_RESULTS")) {
       showFailureToast({
         title: "No Places Found",

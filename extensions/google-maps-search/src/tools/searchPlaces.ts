@@ -22,6 +22,9 @@ type SearchPlacesInput = {
 /**
  * Tool for finding places by search query
  */
+// Default maximum number of results to return if not specified
+const DEFAULT_LIMIT = 3;
+
 export async function searchPlaces(input: SearchPlacesInput): Promise<string> {
   try {
     // Get API key from preferences if needed in searchPlaces
@@ -36,7 +39,7 @@ export async function searchPlaces(input: SearchPlacesInput): Promise<string> {
     }
 
     // Ensure limit is a positive number
-    const limit = Math.max(1, input.limit || 3);
+    const limit = Math.max(1, input.limit || DEFAULT_LIMIT);
     const topResults = results.slice(0, limit);
     let response = `Here are some places matching "${input.query}":\n\n`;
 

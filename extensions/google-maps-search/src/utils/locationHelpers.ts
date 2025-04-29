@@ -10,25 +10,33 @@ export const EARTH_RADIUS_KM = 6371;
 
 /**
  * Format a location (either string address or coordinates) to a string
- * @param location Location as string, coordinates object, or separate lat/lng values
+ * @param location Location as string
  * @returns Formatted location string
  */
-export function formatLocation(location: string | { lat: number; lng: number } | number, lng?: number): string {
-  // Case 1: Already a string
-  if (typeof location === "string") {
-    return location;
+export function formatLocation(location: string): string;
+/**
+ * Format a location object with lat/lng properties
+ * @param location Location object
+ * @returns Formatted location string
+ */
+export function formatLocation(location: { lat: number; lng: number }): string;
+/**
+ * Format separate latitude and longitude values
+ * @param lat Latitude
+ * @param lng Longitude
+ * @returns Formatted location string
+ */
+export function formatLocation(lat: number, lng: number): string;
+export function formatLocation(locationOrLat: string | { lat: number; lng: number } | number, lng?: number): string {
+  if (typeof locationOrLat === "string") {
+    return locationOrLat;
   }
-
-  // Case 2: Separate lat/lng parameters
-  if (typeof location === "number" && typeof lng === "number") {
-    return `${location},${lng}`;
+  if (typeof locationOrLat === "number" && typeof lng === "number") {
+    return `${locationOrLat},${lng}`;
   }
-
-  // Case 3: Location object with lat/lng properties
-  if (isValidLocation(location)) {
-    return `${location.lat},${location.lng}`;
+  if (isValidLocation(locationOrLat)) {
+    return `${locationOrLat.lat},${locationOrLat.lng}`;
   }
-
   throw new Error("Invalid location format");
 }
 

@@ -49,7 +49,7 @@ interface NearbyPlacesFormValues {
 }
 
 export function NearbyPlacesSearchForm() {
-  const { push } = useNavigation();
+  const { push, pop } = useNavigation();
   const { searchNearbyPlaces, isLoading } = useNearbyPlaces();
 
   // Use localStorage to persist form values with proper default values
@@ -87,8 +87,8 @@ export function NearbyPlacesSearchForm() {
       );
 
       if (places && places.length > 0) {
-        const { navigateToResults } = createPlaceNavigation(push, places, NearbyPlacesSearchForm, values.placeType);
-        navigateToResults();
+        const placeNavigation = createPlaceNavigation(push, pop, places, NearbyPlacesSearchForm, values.placeType);
+        placeNavigation.navigateToResults(isLoading);
       } else {
         await showFailureToast({
           title: "No places found",
@@ -129,7 +129,6 @@ export function NearbyPlacesSearchForm() {
     validation: {
       radius: (value) => {
         if (!value) return "Please enter a radius value";
-
         const num = parseFloat(value);
         if (isNaN(num)) {
           return "Please enter a valid number";
@@ -140,6 +139,7 @@ export function NearbyPlacesSearchForm() {
         if (num > 50) {
           return "Radius must be at most 50";
         }
+        return undefined;
       },
       customAddress: (value) => {
         if (values.origin === OriginOption.Custom) {
@@ -163,6 +163,7 @@ export function NearbyPlacesSearchForm() {
             return "Address contains invalid special characters";
           }
         }
+        return undefined;
       },
     },
   });

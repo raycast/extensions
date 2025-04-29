@@ -1,5 +1,10 @@
 import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+
+// Maximum allowed map dimensions for the API
+const MAX_MAP_WIDTH = 640;
+const MAX_MAP_HEIGHT = 640;
+const DEFAULT_MAP_SIZE = `${MAX_MAP_WIDTH}x${MAX_MAP_HEIGHT}`;
 import { Preferences } from "../types";
 import { renderMap } from "../utils/mapRenderer";
 
@@ -104,9 +109,16 @@ export async function showPlacesOnMap(input: ShowPlacesOnMapInput): Promise<stri
     }
 
     // Validate map size if provided
-    const size = input.size || "600x400";
+    const size = input.size || DEFAULT_MAP_SIZE;
     if (size && !/^\d+x\d+$/.test(size)) {
-      return "Map size must be in the format 'widthxheight', e.g., '600x400'.";
+      return `Map size must be in the format 'widthxheight', e.g., '${DEFAULT_MAP_SIZE}'.`;
+    }
+    // Check max dimensions (API limit: MAX_MAP_WIDTH x MAX_MAP_HEIGHT)
+    const [widthStr, heightStr] = size.split("x");
+    const width = parseInt(widthStr, 10);
+    const height = parseInt(heightStr, 10);
+    if (width > MAX_MAP_WIDTH || height > MAX_MAP_HEIGHT) {
+      return `Map size cannot exceed ${MAX_MAP_WIDTH}x${MAX_MAP_HEIGHT} pixels.`;
     }
 
     console.log("Rendering map with places:", placesList);

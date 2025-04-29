@@ -1,0 +1,87 @@
+# Raycast Extension Development Rules
+
+# Project Structure & Organization
+- Organize code into logical directories: components, hooks, types, utils, tools
+- Use lowercase with dashes for directories (e.g., components/place-search)
+- Structure files with exports first, followed by subcomponents, helpers, and types
+- Keep files focused on a single responsibility; split complex components
+
+# TypeScript Best Practices
+- Use TypeScript for all code with strict mode enabled
+- Create dedicated type files in a types directory with clear organization
+- Use interfaces for object shapes and export them with `export interface`
+- Create reusable interfaces for common structures (e.g., GeoLocation, Duration)
+- Use enums for fixed sets of related values with PascalCase naming
+- Export types explicitly with `export type` syntax for better type safety
+- Avoid using `any` type; create proper type definitions instead
+- Use type predicates (e.g., `isString(value): value is string`) for runtime type checking
+- Create a barrel file (index.ts) in the types directory for centralized type exports
+
+# Type Safety & Validation
+- Implement runtime type validation for all external data
+- Create dedicated validator functions that return error messages
+- Extract magic numbers into named constants with clear documentation
+- Validate function parameters with defensive programming techniques
+- Use early returns with descriptive error messages for invalid inputs
+- Create type-safe storage helpers with proper JSON serialization checks
+- Use TypeScript's type predicate pattern for runtime type checking
+
+# Component Structure
+- Use functional components with explicit TypeScript interfaces
+- Define component props interfaces at the top of the file
+- Use Raycast's UI components (List, Form, ActionPanel) following documentation
+- Implement proper loading and error states for async operations
+- Use Raycast's hooks (usePromise, useLocalStorage) for state management
+- Extract complex logic into custom hooks for better reusability
+
+# State Management
+- Use React's useState and useEffect hooks for local state
+- Implement custom hooks for complex state logic
+- Use Raycast's useLocalStorage hook for persistent storage
+- Validate stored values with type predicates before using them
+- Implement proper error handling with toast notifications
+
+# Code Style & Formatting
+- Use functional and declarative programming patterns; avoid classes
+- Follow consistent naming conventions (PascalCase for components, camelCase for functions)
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
+- Prefer named exports for better code organization and imports
+- Use JSDoc comments for functions and types with proper documentation
+- Place constants at the top of files after imports
+- Group related functions and constants together
+
+# Error Handling
+- Implement comprehensive error handling for all async operations
+- Use try/catch blocks with specific error messages
+- Create reusable error handling utilities
+- Show user-friendly error messages with toast notifications
+- Include technical details in console logs for debugging
+- Provide actionable feedback for user errors
+
+# API Integration
+- Create dedicated API helper functions in separate files
+- Implement proper error handling for API requests
+- Use TypeScript interfaces for API request and response types
+- Extract API-specific logic into dedicated utility functions
+- Implement proper validation for API parameters
+
+# Performance Optimization
+- Implement debouncing for search inputs and other frequent events
+- Extract constants outside of component functions
+- Avoid unnecessary re-renders with proper dependency arrays
+- Use memoization for expensive calculations
+- Implement proper loading states for async operations
+
+# Accessibility & UX
+- Follow Raycast's design guidelines for consistent user experience
+- Provide clear feedback for user actions with toast notifications
+- Implement proper keyboard navigation and shortcuts
+- Use Raycast's Action components for user interactions
+- Ensure all user inputs have proper validation and feedback
+
+# Testing & Debugging
+- Add descriptive console logs for debugging
+- Implement proper error boundaries for component failures
+- Use TypeScript's type system to catch errors at compile time
+- Follow defensive programming practices to prevent runtime errors
+- Use proper logging for debugging and monitoring

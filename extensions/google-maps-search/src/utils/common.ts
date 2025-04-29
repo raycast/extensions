@@ -224,7 +224,7 @@ export function formatDistance(
       return `${Math.round(distanceKm * 1000)} m`;
     } else if (distanceKm < 10) {
       // Show one decimal place for distances under 10 km
-      return `${distanceKm.toFixed(1)}km`;
+      return `${distanceKm.toFixed(1)} km`;
     } else {
       // Round to nearest km for larger distances
       return `${Math.round(distanceKm)} km`;
@@ -238,10 +238,10 @@ export function formatDistance(
       return `${Math.round(distanceMiles * 5280)} ft`;
     } else if (distanceMiles < 10) {
       // Show one decimal place for distances under 10 miles
-      return `${distanceMiles.toFixed(1)}mi`;
+      return `${distanceMiles.toFixed(1)} mi`;
     } else {
       // Round to nearest mile for larger distances
-      return `${Math.round(distanceMiles)}mi`;
+      return `${Math.round(distanceMiles)} mi`;
     }
   }
 }

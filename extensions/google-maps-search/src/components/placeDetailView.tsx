@@ -85,7 +85,7 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
         }
       })
       .catch((error) => {
-        console.error("Error rendering map:", error);
+        showFailureToast("Failed to render map", { message: error.message });
       });
   }, [placeDetails, preferences.showMapInSidebar]);
 
