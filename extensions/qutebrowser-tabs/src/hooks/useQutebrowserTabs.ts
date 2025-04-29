@@ -18,9 +18,8 @@ export function useQutebrowserTabs() {
     revalidate,
   } = usePromise(fetchQutebrowserTabs, [], {
     onError: (error) => {
-      showFailureToast({
+      showFailureToast(error, {
         title: "Failed to fetch tabs",
-        message: formatError(error),
       });
     },
   });
@@ -42,9 +41,8 @@ export function useQutebrowserTabs() {
 
         return true;
       } catch (err) {
-        showFailureToast({
+        showFailureToast(err, {
           title: "Failed to focus tab",
-          message: formatError(err),
         });
         return false;
       }
@@ -59,9 +57,8 @@ export function useQutebrowserTabs() {
         await executeCommand(qutebrowserPath, `:open -t DEFAULT ${safeQuery}`);
         return true;
       } catch (err) {
-        showFailureToast({
+        showFailureToast(err, {
           title: "Failed to open search",
-          message: formatError(err),
         });
         return false;
       }
@@ -76,9 +73,8 @@ export function useQutebrowserTabs() {
         await executeCommand(qutebrowserPath, `:open -t ${safeUrl}`);
         return true;
       } catch (err) {
-        showFailureToast({
+        showFailureToast(err, {
           title: "Failed to open URL",
-          message: formatError(err),
         });
         return false;
       }

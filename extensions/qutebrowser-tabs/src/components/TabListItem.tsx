@@ -25,16 +25,14 @@ export function TabListItem({ tab, onFocus, refreshTabs }: TabListItemProps) {
       const safeUrl = sanitizeCommandString(url);
       exec(`open "${safeUrl}"`, (error) => {
         if (error) {
-          showFailureToast({
+          showFailureToast(error, {
             title: "Failed to open URL",
-            message: formatError(error),
           });
         }
       });
     } catch (err) {
-      showFailureToast({
+      showFailureToast(err, {
         title: "Failed to open URL",
-        message: formatError(err),
       });
     }
   };
@@ -45,15 +43,15 @@ export function TabListItem({ tab, onFocus, refreshTabs }: TabListItemProps) {
       if (success) {
         await closeMainWindow();
       } else {
-        showFailureToast({
+        showToast({
           title: "Failed to focus tab",
+          style: Toast.Style.Failure,
           message: "Could not focus the selected tab in qutebrowser",
         });
       }
     } catch (err) {
-      showFailureToast({
+      showFailureToast(err, {
         title: "Failed to focus tab",
-        message: formatError(err),
       });
     }
   };
