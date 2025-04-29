@@ -1,6 +1,6 @@
 # Stickies Changelog
 
-## [Fix Bug] - {PR_MERGE_DATE}
+## [Fix Bug] - 2025-04-29
 
 - Fix the problem of commands not taking effect due to keyboard layout.
 
