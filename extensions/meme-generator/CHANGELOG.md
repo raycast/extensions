@@ -1,6 +1,6 @@
 # Meme generator Changelog
 
-## [✨AI Enhancements 🫧] - {PR_MERGE_DATE}
+## [✨AI Enhancements 🫧] - 2025-04-29
 
 - Add AI-generated meme tool
 
