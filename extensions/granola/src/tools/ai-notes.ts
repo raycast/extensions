@@ -1,6 +1,7 @@
 import getCache from "../utils/getCache";
-import convertHtmlToMarkdown from "../utils/convertHtmltoMarkdown";
+import { convertDocumentToMarkdown } from "../utils/convertJsonNodes";
 import { showFailureToast } from "@raycast/utils";
+import { DocumentStructure } from "../utils/types";
 
 type Input = {
   /**
@@ -54,11 +55,11 @@ export default function tool(input: Input) {
   for (const docId in content) {
     for (const panelId in content[docId]) {
       const panel = content[docId][panelId];
-      if (!panel?.title || !panel?.created_at || !panel?.original_content) continue;
+      if (!panel?.title || !panel?.created_at || !panel?.content) continue;
       const note: Note = {
         title: panel.title,
         date: panel.created_at,
-        content: `Original Notes:\n\n${panel.notes_markdown}\n\nAI Notes:\n\n${convertHtmlToMarkdown(panel.original_content)}`,
+        content: convertDocumentToMarkdown(panel.content as DocumentStructure),
       };
       notes.push(note);
     }

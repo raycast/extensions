@@ -4,14 +4,9 @@ import { getPanelId } from "./utils/getPanelId";
 import getCache from "./utils/getCache";
 import { fetchGranolaData } from "./utils/fetchData";
 import convertHtmlToMarkdown from "./utils/convertHtmltoMarkdown";
-import { GetDocumentsResponse, Doc, NoteActionsProps } from "./utils/types";
+import { Doc, NoteActionsProps, NoteData, DocumentStructure } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
-
-interface NoteData {
-  isLoading: boolean;
-  data: GetDocumentsResponse;
-  revalidate: () => void;
-}
+import { convertDocumentToMarkdown } from "./utils/convertJsonNodes";
 
 const sortNotesByDate = (docs: Doc[] | undefined): Doc[] => {
   if (!docs) return [];
@@ -111,18 +106,10 @@ export default function Command() {
                           return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\nNo content available for this note.`;
                         }
 
-                        // Safely access the content with fallback
                         const panelData = panels[doc.id][panelId];
-                        const htmlContent = panelData?.original_content || "";
+                        const htmlContent = convertDocumentToMarkdown(panelData?.content as DocumentStructure);
 
-                        let markdownContent = doc.notes_markdown || "" + "\n\n";
-                        try {
-                          markdownContent += convertHtmlToMarkdown(htmlContent);
-                        } catch (error) {
-                          console.error(`Error converting note ${doc.id} content to markdown:`, error);
-                          markdownContent += htmlContent; // Fallback to original content
-                        }
-                        return `# ${doc.title}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\n${markdownContent}\n\n --- \n\n${doc.notes_markdown}`;
+                        return `# ${doc.title}\n\n Created at: ${new Date(doc.created_at).toLocaleString()}\n\n---\n\n${htmlContent}`;
                       })()}
                       actions={
                         <ActionPanel>

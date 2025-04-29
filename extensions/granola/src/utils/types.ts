@@ -1,5 +1,31 @@
 import { ReactNode } from "react";
 
+export interface NodeAttrs {
+  id: string;
+  isSelected?: boolean;
+  level?: number;
+  href?: string;
+}
+
+export interface ContentNode {
+  type: string;
+  attrs?: NodeAttrs;
+  content?: ContentNode[];
+  text?: string;
+}
+
+export interface Attachment {
+  content: string;
+  kind: string;
+  name: string;
+}
+
+export interface DocumentStructure {
+  attachments: Attachment[];
+  type?: string;
+  content?: ContentNode[];
+}
+
 export interface NoteData {
   isLoading: boolean;
   data: GetDocumentsResponse | undefined;
