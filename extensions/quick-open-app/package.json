@@ -10,6 +10,7 @@
     {
       "name": "open-app",
       "title": "Open App",
+      "subtitle": "Quick Open App",
       "description": "Quickly open the application you selected in preferences",
       "mode": "no-view",
       "preferences": [
