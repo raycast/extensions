@@ -8,7 +8,7 @@ import { ITERM2, TERMINAL } from "./constants";
 import { runAppleScript } from "@raycast/utils";
 import shellQuote from "shell-quote";
 import { showCustomHud, truncate } from "./common-utils";
-import { execSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 export const defaultZshHistoryFilePath = path.join(os.homedir(), ".zsh_history");
 export const defaultBashHistoryFilePath = path.join(os.homedir(), ".bash_history");
