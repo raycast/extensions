@@ -194,7 +194,7 @@ export function useEmails(options: UseEmailsOptions) {
         }
 
         // For "code" search type, check if there's a code or link
-        const code = extractCode(email.displayText);
+        const code = email.displayText ? extractCode(email.displayText) : null;
         const hasCode = code !== null;
 
         // Also check for verification links (only if enabled in preferences)
