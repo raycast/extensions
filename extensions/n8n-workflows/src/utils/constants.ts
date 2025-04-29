@@ -11,4 +11,3 @@ export const TAGS_API_PATH = "/api/v1/tags";
 // UI texts
 export const INVALID_CREDENTIALS_MESSAGE = "Please check your API credentials in extension preferences";
 export const FILTER_APPLIED_INDICATOR = " (Filtered)";
-export const DETAIL_VIEW_KEY = "n8nDetailViewPreference";

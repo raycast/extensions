@@ -8,7 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- (Add future changes here)
+- Added support for cloud and self-hosted n8n instances
+- Added filtering for triggerable workflows
+- Added ability to save triggerable workflows with query parameters
+
+### Changed
+- Removed activate/deactivate workflows functionality
 
 ## [1.0.0] - {PR_MERGE_DATE}
 

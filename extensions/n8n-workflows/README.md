@@ -23,7 +23,6 @@ This extension provides the following commands:
 *   **Search Workflows:**
     *   Search through all your n8n workflows.
     *   Filter workflows by tags (you can choose to remember the last used filter via preferences).
-    *   Activate or deactivate workflows directly from Raycast.
     *   View workflow details (ID, creation/update times, tags).
     *   Open workflows in your n8n instance.
 *   **Search Triggerable Webhooks:**
@@ -38,24 +37,20 @@ This extension provides the following commands:
 
 ## Screenshots
 
-*(Add screenshots here to showcase the extension's UI)*
-
 *   **Search Workflows:**
-    `![Search Workflows](assets/screenshots/search-workflows.png)`
-*   **Workflow Detail View:**
-    `![Workflow Detail](assets/screenshots/workflow-detail.png)`
+    ![Search Workflows](assets/screenshots/CleanShot%202025-04-15%20at%2011.17.18@2x.png)
 *   **Search Triggerable Webhooks:**
-    `![Search Webhooks](assets/screenshots/search-webhooks.png)`
+    ![Search Webhooks](assets/screenshots/CleanShot%202025-04-15%20at%2011.17.37@2x.png)
 *   **Trigger Webhook Form:**
-    `![Trigger Form](assets/screenshots/trigger-form.png)`
-*   **Save Command Form:**
-    `![Save Command Form](assets/screenshots/save-command-form.png)`
-*   **Run Saved Command:**
-    `![Run Saved Command](assets/screenshots/run-saved-command.png)`
-
-*(Please ensure you create these screenshots and place them in the `assets/screenshots` directory)*
+    ![Trigger Form](assets/screenshots/CleanShot%202025-04-15%20at%2011.17.46@2x.png)
 
 ## Limitations
 
-*   The "Search Workflows" command allows activating/deactivating workflows but does not support arbitrary execution of workflows that do not start with a webhook trigger.
+*   The "Search Workflows" command does not support arbitrary execution of workflows that do not start with a webhook trigger.
 *   Webhook triggering requires the target workflow to be active and have a Webhook node as its starting point.
+
+## Recent Enhancements
+
+*   **Cloud and Self-Hosted Support:** The extension now supports both cloud and self-hosted n8n instances.
+*   **Improved Webhook Filtering:** Added enhanced filtering capabilities for triggerable workflows.
+*   **Query Parameters for Saved Workflows:** You can now save triggerable workflows with query parameters for repeated use.
