@@ -382,13 +382,13 @@ ${argsDisplay}
               }
             />
           )}
+          <Action.CopyToClipboard title="Copy Command" content={props.item.data} />
           <Action
             title="Execute in Terminal"
             icon={Icon.Terminal}
             onAction={handleExecuteInTerminal}
             shortcut={{ modifiers: ["cmd"], key: "t" }}
           />
-          <Action.CopyToClipboard title="Copy Command" content={props.item.data} />
           <CreateCommandAction onCreate={props.onCreate} command={props.searchBarText} />
           <Action.Push
             title="Edit Command"
