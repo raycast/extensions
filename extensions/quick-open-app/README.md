@@ -24,3 +24,5 @@ This Raycast extension allows you to quickly open an application that you have p
 ## Configuration
 
 - **Application**: Select the application you wish to launch via the command.
+
+will update new features in the future
