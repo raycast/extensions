@@ -2,7 +2,6 @@ import { List, ActionPanel, Action, Clipboard, showToast, Toast, closeMainWindow
 import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import { Tab } from "../types";
-import { formatError } from "../utils/common/errorUtils";
 import { sanitizeCommandString } from "../utils/common/stringUtils";
 
 interface TabListItemProps {
