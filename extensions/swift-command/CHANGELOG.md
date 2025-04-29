@@ -1,6 +1,6 @@
 # Swift Command Changelog
 
-## [Add Import Alias Command] - {PR_MERGE_DATE}
+## [Add Import Alias Command] - 2025-04-29
 
 ### Added
 
