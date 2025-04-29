@@ -19,10 +19,16 @@ This extension uses [Hammerspoon](https://www.hammerspoon.org) to apply window a
 
 ### ✅ One-liner setup (Hammerspoon + animation config)
 
+For bash and zsh:
+
 ```bash
-brew install --cask hammerspoon && curl -o ~/.hammerspoon/init.lua https://raw.githubusercontent.com/raycast/extensions/refs/heads/main/extensions/animated-window-manager/hammerspoon/init.lua && \
-if [[ $(uname -m) == 'arm64' ]]; then sudo ln -s ~/.hammerspoon/hs /opt/homebrew/bin/hs; else sudo ln -s ~/.hammerspoon/hs /usr/local/bin/hs; fi && \
-open -a Hammerspoon
+brew install --cask hammerspoon && mkdir -p ~/.hammerspoon && curl -o ~/.hammerspoon/init.lua https://raw.githubusercontent.com/raycast/extensions/refs/heads/main/extensions/animated-window-manager/hammerspoon/init.lua && (if [[ $(uname -m) == 'arm64' ]]; then sudo ln -s ~/.hammerspoon/hs /opt/homebrew/bin/hs; else sudo ln -s ~/.hammerspoon/hs /usr/local/bin/hs; fi) && open -a Hammerspoon
+```
+
+For Fish shell:
+
+```bash
+bash -c 'brew install --cask hammerspoon && mkdir -p ~/.hammerspoon && curl -o ~/.hammerspoon/init.lua https://raw.githubusercontent.com/raycast/extensions/refs/heads/main/extensions/animated-window-manager/hammerspoon/init.lua && if [[ $(uname -m) == "arm64" ]]; then sudo ln -sf ~/.hammerspoon/hs /opt/homebrew/bin/hs; else sudo ln -sf ~/.hammerspoon/hs /usr/local/bin/hs; fi && open -a Hammerspoon'
 ```
 
 > ☝️ This installs Hammerspoon, applies the animated layout config, symlinks hs CLI to the correct location based on architecture (Apple or Intel chip) and opens Hammerspoon.
@@ -140,7 +146,6 @@ All animations use native-feeling macOS transitions.
    ```
    open -a Hammerspoon
    ```
-
 
 ---
 
