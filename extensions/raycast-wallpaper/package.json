@@ -122,15 +122,6 @@
       "interval": "5m",
       "preferences": [
         {
-          "name": "respectAppearance",
-          "title": "Theme",
-          "description": "Respect system appearance when setting wallpaper.",
-          "type": "checkbox",
-          "default": true,
-          "required": false,
-          "label": "Respect System Appearance"
-        },
-        {
           "name": "applyTo",
           "title": "Apply Wallpaper To",
           "description": "Apply the wallpaper to which monitor. Valid only when you are using an extended monitor.",
@@ -179,6 +170,17 @@
           ]
         }
       ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "respectAppearance",
+      "title": "Appearance",
+      "description": "Respect system appearance when setting wallpaper.",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Respect System Appearance"
     }
   ],
   "dependencies": {

@@ -4,7 +4,7 @@ import { RaycastWallpaperWithInfo } from "../types/types";
 import { RaycastWallpaperEmptyView } from "./raycast-wallpaper-empty-view";
 import { ActionOnRaycastWallpaper } from "./action-on-raycast-wallpaper";
 import { capitalizeFirstLetter, getThumbnailUrl } from "../utils/common-utils";
-import { layout } from "../types/preferences";
+import { layout, respectAppearance } from "../types/preferences";
 
 export function RaycastWallpaperList(props: {
   raycastWallpapers: RaycastWallpaperWithInfo[];
@@ -29,6 +29,9 @@ export function RaycastWallpaperList(props: {
       <RaycastWallpaperEmptyView layout={layout} />
       {raycastWallpapers.map((value, index) => {
         const appearanceIcon = value.appearance === "light" ? Icon.Sun : Icon.Moon;
+        const accessories = respectAppearance
+          ? [{ icon: appearanceIcon, tooltip: capitalizeFirstLetter(value.appearance) }]
+          : [];
         return (
           <List.Item
             id={index + ""}
@@ -36,9 +39,7 @@ export function RaycastWallpaperList(props: {
             icon={{ source: getThumbnailUrl(value.url) }}
             title={value.title}
             accessories={
-              value.exclude
-                ? [{ icon: Icon.XMarkTopRightSquare, tooltip: "Excluded From Auto Switch" }]
-                : [{ icon: appearanceIcon, tooltip: capitalizeFirstLetter(value.appearance) }]
+              value.exclude ? [{ icon: Icon.XMarkTopRightSquare, tooltip: "Excluded From Auto Switch" }] : accessories
             }
             detail={<List.Item.Detail isLoading={false} markdown={`![](${getThumbnailUrl(value.url)})`} />}
             actions={
