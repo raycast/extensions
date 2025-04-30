@@ -1,11 +1,10 @@
 import { showFailureToast } from "@raycast/utils";
-import { getErrorDetails, getStatus } from "./shared";
 import Disconnect from "./disconnect";
 import Connect from "./connect";
 import { showToast, Toast } from "@raycast/api";
+import { getStatus } from "./shared";
 
 export default async function Toggle() {
-  let subtitle = "Tailscale";
   try {
     const isConnected = await isTailscaleConnected();
 
