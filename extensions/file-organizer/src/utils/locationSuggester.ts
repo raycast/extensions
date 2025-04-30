@@ -23,9 +23,7 @@ export async function suggestLocations(fileInfo: FileInfo): Promise<LocationSugg
     }
   }
 
-  // Add type-based default locations
-  const defaultLocations = getDefaultLocations(fileInfo);
-  suggestions.push(...defaultLocations);
+  suggestions.push(...getDefaultLocations(fileInfo));
 
   // Deduplicate suggestions based on path
   const uniqueSuggestions: LocationSuggestion[] = [];
@@ -76,14 +74,12 @@ async function scanDirectory(
     // Track directories for recursion
     const subDirs: string[] = [];
 
-    // First pass: collect directories for recursion
     for (const entry of entries) {
       if (entry.isDirectory()) {
         subDirs.push(path.join(directory, entry.name));
       }
     }
 
-    // Calculate directory match score using the central calculation function
     const { score, reason } = calculateDirectoryScore(
       path.basename(directory),
       entries.map((entry) => entry.name),
@@ -91,7 +87,6 @@ async function scanDirectory(
       fileInfo,
     );
 
-    // Lower threshold to catch more potential matches
     if (score > 0.15) {
       suggestions.push({
         path: directory,
@@ -144,9 +139,7 @@ function calculateDirectoryScore(
     bestNameMatch = Math.max(bestNameMatch, similarity);
   }
 
-  // Calculate final score with weights
-  // if bestName match is 0 then ignore it and calculate score based on directory name
-  // if parentDirScore is not null then use it and calculate score based on directory name and bestNameMatch
+  // Calculate final score
   let finalScore;
   let reason = "";
   if (bestNameMatch === 0 && parentDirScore !== null) {
@@ -201,7 +194,6 @@ function normalizeDates(input: string): string {
 }
 
 /**
- * Simple string similarity function (simplified Levenshtein-like approach)
  * Returns a value between 0 (completely different) and 1 (identical)
  */
 function calculateStringSimilarity(str1: string, str2: string): number {

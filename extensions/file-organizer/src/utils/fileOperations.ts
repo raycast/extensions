@@ -13,16 +13,13 @@ const access = promisify(fs.access);
  */
 export async function moveFile(sourcePath: string, destDir: string): Promise<string> {
   try {
-    // Check if destination directory exists
     try {
       await access(destDir, fs.constants.W_OK);
     } catch {
-      // Create the directory if it doesn't exist
       await mkdir(destDir, { recursive: true });
       await showToast(Toast.Style.Success, "Created directory", destDir);
     }
 
-    // Get the filename from the source path
     const fileName = path.basename(sourcePath);
     const destinationPath = path.join(destDir, fileName);
 
