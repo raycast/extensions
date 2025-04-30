@@ -30,7 +30,6 @@ type Input = {
    * @example "spotify"
    * @example "threads"
    * @example "tiktok"
-   * @example "twitter/x"
    * @example "x/twitter"
    * @example "youtube"
    *

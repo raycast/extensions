@@ -75,12 +75,12 @@ export const defaultSites: Site[] = [
   {
     name: "Threads",
     value: "threads",
-    urlTemplate: "https://www.threads.net/@{profile}",
+    urlTemplate: "https://www.threads.net/{profile}",
   },
   {
     name: "TikTok",
     value: "tiktok",
-    urlTemplate: "https://www.tiktok.com/@{profile}",
+    urlTemplate: "https://www.tiktok.com/{profile}",
   },
   {
     name: "X",
@@ -90,7 +90,7 @@ export const defaultSites: Site[] = [
   {
     name: "YouTube",
     value: "youtube",
-    urlTemplate: "https://www.youtube.com/user/{profile}",
+    urlTemplate: "https://www.youtube.com/@{profile}",
   },
 ];
 
