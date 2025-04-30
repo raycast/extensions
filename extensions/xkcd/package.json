@@ -19,6 +19,10 @@
     "Fun",
     "Web"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "dependencies": {
     "@raycast/api": "^1.31.0",
     "jotai": "^1.4.0",

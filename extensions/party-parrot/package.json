@@ -9,6 +9,10 @@
   "categories": [
     "Fun"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "index",
