@@ -4,9 +4,9 @@ A Raycast extension that helps you organize files by suggesting the most appropr
 
 ## Features
 
+- **Organize files**: Especially useful for files that you need to archive but do not need to access frequently.
 - **Intelligent Location Suggestions**: Analyzes file attributes to recommend where it should be stored
 - **Quick File Organization**: Move files to their proper location with just a few clicks
-- **Flexible Configuration**: Customize which directories to scan and exclude
 
 ## How It Works
 
@@ -23,4 +23,3 @@ The extension suggests locations based on several factors:
 - File name matching
 - Folder name matching
 - Parent folder matching
-
