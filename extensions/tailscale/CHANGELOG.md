@@ -1,6 +1,6 @@
 # Tailscale Changelog
 
-## [Add new features] - 2025-04-10
+## [Add new features] - {PR_MERGE_DATE}
 
 - Add `toggle connection` command
 
