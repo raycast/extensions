@@ -1,5 +1,5 @@
-import { Action, ActionPanel, closeMainWindow, Icon, List, PopToRootType, showToast, Toast } from "@raycast/api";
-import { runAppleScript, useExec } from "@raycast/utils";
+import { Action, ActionPanel, closeMainWindow, Icon, List, PopToRootType } from "@raycast/api";
+import { runAppleScript, showFailureToast, useExec } from "@raycast/utils";
 import { useMemo } from "react";
 import { execSync } from "child_process";
 import { CLIOutput, PreparedCLIOutput } from "./types.d";
@@ -21,10 +21,7 @@ try {
 
 export default function Command() {
   if (!appPath) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Could not find BarCuts on your Mac, exiting!",
-    });
+    showFailureToast({ title: "Could not find BarCuts on your Mac, exiting!" });
 
     return (
       <List searchBarPlaceholder="BarCuts not found …">
@@ -52,8 +49,7 @@ export default function Command() {
       };
     } catch (e) {
       console.error("Failed to parse BarCuts CLI output:", e);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Failed to load workflow list",
         message: "Could not parse data from BarCuts CLI.",
       });
@@ -88,10 +84,10 @@ export default function Command() {
                 icon={Icon.Play}
                 title="Run Workflow"
                 onAction={async () => {
-                  await runWorkflow(wf.workflowID);
                   await closeMainWindow({
                     popToRootType: PopToRootType.Immediate,
                   });
+                  await runWorkflow(wf.workflowID);
                 }}
               />
               <Action.OpenInBrowser
@@ -118,9 +114,6 @@ async function runWorkflow(workflowID: string) {
       end tell
     `);
   } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: `Failed to run workflow: ${error}`,
-    });
+    showFailureToast({ title: `Failed to run workflow: ${error}` });
   }
 }
