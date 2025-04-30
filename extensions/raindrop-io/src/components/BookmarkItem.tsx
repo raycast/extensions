@@ -14,6 +14,19 @@ import { Bookmark } from "../types";
 import { getFavicon } from "@raycast/utils";
 import fetch from "node-fetch";
 
+function ActionEditBookmark(props: { bookmark: Bookmark }) {
+  const { bookmark } = props;
+
+  return (
+    <Action.OpenInBrowser
+      title={`Edit Bookmark`}
+      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      url={`https://app.raindrop.io/my/-1/item/${bookmark._id}/edit`}
+      icon={Icon.Pencil}
+    />
+  );
+}
+
 export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: () => void }) {
   const { bookmark, revalidate } = props;
 
@@ -172,6 +185,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
                       title="Open Permanent Copy"
                       url={`https://api.raindrop.io/v1/raindrop/${bookmark._id}/cache`}
                     />
+                    <ActionEditBookmark bookmark={bookmark} />
                   </ActionPanel>
                 }
                 metadata={
@@ -195,6 +209,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
               />
             }
           />
+          <ActionEditBookmark bookmark={bookmark} />
           <Action
             onAction={handleDelete}
             title="Delete Bookmark"
