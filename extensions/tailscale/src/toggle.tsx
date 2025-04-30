@@ -28,7 +28,6 @@ export default async function Toggle() {
     }
   } catch (err) {
     await showFailureToast(err, { title: "Failed to toggle connection" });
-    subtitle = getErrorDetails(err, "").title;
   }
 }
 
