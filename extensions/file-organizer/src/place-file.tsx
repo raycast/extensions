@@ -192,7 +192,13 @@ export default function Command() {
         await showToast(Toast.Style.Success, "Finding suitable locations...");
 
         // Get location suggestions
-        const suggestions = await suggestLocations(fileInfo);
+        const suggestions = await Promise.race([
+          suggestLocations(fileInfo),
+          // add timeout to prevent running a long time on slow machines with big files systems
+          new Promise<LocationSuggestion[]>((_, reject) =>
+            setTimeout(() => reject(new Error("Location suggestion timed out after 10 seconds")), 10000),
+          ),
+        ]);
 
         if (suggestions.length === 0) {
           setStatus(LoadingStatus.ERROR);

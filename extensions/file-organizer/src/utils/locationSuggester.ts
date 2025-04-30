@@ -16,14 +16,7 @@ export async function suggestLocations(fileInfo: FileInfo): Promise<LocationSugg
   for (const directory of scanDirectories) {
     try {
       // Initial call passes null for parentDirScore to indicate no parent
-      const dirSuggestions = await scanDirectory(
-        directory,
-        fileInfo,
-        scanDepth || 4, // Default to depth 4 if not specified
-        excludeDirectories,
-        0,
-        null,
-      );
+      const dirSuggestions = await scanDirectory(directory, fileInfo, scanDepth, excludeDirectories, 0, null);
       suggestions.push(...dirSuggestions);
     } catch (error) {
       console.error(`Error scanning directory ${directory}:`, error);

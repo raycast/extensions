@@ -10,7 +10,7 @@ interface Preferences {
 
 const DEFAULT_PREFERENCES: Preferences = {
   scanDirectories: ["~/Documents", "~/Desktop", "~/Downloads", "~/Pictures", "~/Movies", "~/Music"],
-  scanDepth: 11,
+  scanDepth: 10,
   excludeDirectories: ["~/Library", "~/node_modules", "~/.git", "~/Applications", "~/.npm", "~/.vscode"],
 };
 
