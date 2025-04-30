@@ -11,9 +11,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "organize-file",
-      "title": "Organize File",
-      "subtitle": "Find where a file should go",
+      "name": "place-file",
+      "title": "Place File",
       "description": "Suggests the most suitable location for a selected file based on its characteristics",
       "mode": "view"
     }

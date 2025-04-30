@@ -11,7 +11,7 @@ A Raycast extension that helps you organize files by suggesting the most appropr
 ## How It Works
 
 1. Select a file in Finder
-2. Trigger the "Organize File" command in Raycast
+2. Trigger the "Place File" command in Raycast
 3. The extension analyzes your file and scans your system for relevant locations
 4. Choose from suggested locations based on confidence scores
 5. The file is moved to your chosen location
