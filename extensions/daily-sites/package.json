@@ -11,7 +11,6 @@
     "Web"
   ],
   "license": "MIT",
-  
   "preferences": [
     {
       "type": "directory",
@@ -22,7 +21,6 @@
       "required": true
     }
   ],
-  
   "commands": [
     {
       "name": "dailysites",
@@ -53,10 +51,8 @@
       "mode": "view"
     }
   ],
-  
-  
   "dependencies": {
-    "@raycast/api": "^1.96.0",
+    "@raycast/api": "^1.97.0",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
