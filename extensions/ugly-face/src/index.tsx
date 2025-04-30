@@ -55,8 +55,8 @@ function Command() {
   }, [backgroundColor, hairColor, size]);
 
   const download = async (filename: string, suffix?: number): Promise<void> => {
+    const toast = await showToast(Toast.Style.Animated, "Downloading image", "Please wait...");
     try {
-      await showToast(Toast.Style.Animated, "Downloading image", "Please wait...");
       const data = fs.readFileSync(environment.supportPath + `/${filename}`);
 
       const ext = path.extname(filename);
@@ -68,9 +68,13 @@ function Command() {
       }
 
       fs.writeFileSync(savePath, data);
-      await showToast(Toast.Style.Success, "Image Downloaded!", DOWNLOADS_DIR);
+      toast.style = Toast.Style.Success;
+      toast.title = "Image Downloaded!";
+      toast.message = DOWNLOADS_DIR;
     } catch (error) {
-      await showFailureToast(error, { title: "Failed to download image" });
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to download image";
+      toast.message = String(error);
     }
   };
 

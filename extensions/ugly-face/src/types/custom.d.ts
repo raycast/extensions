@@ -1,4 +1,4 @@
 declare module "*.wasm" {
-  const value: string;
+  const value: WebAssembly.Module;
   export default value;
 }

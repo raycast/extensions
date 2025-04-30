@@ -1,6 +1,6 @@
 # Ugly Face Changelog
 
-## [Chore] - 2025-04-30
+## [Chore] - {PR_MERGE_DATE}
 - Updated dependencies.
 
 ## [Feat] - 2024-06-27

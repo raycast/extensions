@@ -23,7 +23,7 @@ This extension build for [ugly-avatar](https://github.com/txstc55/ugly-avatar)
 
 Currently, you need to clone this repo and install it locally in developer mode.
 
-You will need to have [Node.js](https://nodejs.org) and [pnpm](https://pnpm.io/) installed.
+You will need to have [Node.js](https://nodejs.org) installed.
 
 1. Clone this repo `git clone https://github.com/bxb100/ugly-face.git`
 2. Go to the folder `cd ugly-face`
