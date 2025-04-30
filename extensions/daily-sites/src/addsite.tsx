@@ -138,7 +138,7 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
           title="Custom Category"
           placeholder="Enter custom category"
           value={customCategory}
-          onChange={setCustomCategory}
+          onChange={(value) => setCustomCategory(value.trim())}
         />
       )}
     </Form>
