@@ -2,7 +2,7 @@ import { Action, ActionPanel, closeMainWindow, Icon, List, PopToRootType, showTo
 import { runAppleScript, useExec } from "@raycast/utils";
 import { useMemo } from "react";
 import { execSync } from "child_process";
-import { CLIOutput, WorkflowItem } from "./types.d";
+import { CLIOutput, PreparedCLIOutput } from "./types.d";
 
 let appPath: string | undefined;
 try {
@@ -37,16 +37,19 @@ export default function Command() {
   const { isLoading, data } = useExec(`${appPath}/Contents/MacOS/barcuts-cli`);
 
   // Parse BarCuts data
-  const workflows = useMemo<WorkflowItem[]>(() => {
+  const { appName, workflows } = useMemo<PreparedCLIOutput>(() => {
     try {
       const cliOutput: CLIOutput = JSON.parse(data || "{}") || {};
-      return [
-        ...cliOutput.activeWorkflows,
-        ...(cliOutput.globalWorkflows || []).map((wf) => ({
-          ...wf,
-          isGlobal: true,
-        })),
-      ];
+      return {
+        appName: cliOutput.activeAppName,
+        workflows: [
+          ...cliOutput.activeWorkflows,
+          ...(cliOutput.globalWorkflows || []).map((wf) => ({
+            ...wf,
+            isGlobal: true,
+          })),
+        ],
+      };
     } catch (e) {
       console.error("Failed to parse BarCuts CLI output:", e);
       showToast({
@@ -54,7 +57,7 @@ export default function Command() {
         title: "Failed to load workflow list",
         message: "Could not parse data from BarCuts CLI.",
       });
-      return [];
+      return { appName: "", workflows: [] };
     }
   }, [data]);
 
@@ -78,7 +81,7 @@ export default function Command() {
         <List.Item
           key={wf.workflowID}
           title={wf.fullTitle}
-          subtitle={wf.isGlobal ? "Global workflow" : undefined}
+          subtitle={wf.isGlobal ? "Global workflow" : `${appName} workflow`}
           actions={
             <ActionPanel>
               <Action

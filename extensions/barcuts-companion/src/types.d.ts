@@ -1,7 +1,13 @@
 export type CLIOutput = {
+  activeAppID: string;
+  activeAppName: string;
   activeWorkflows: WorkflowItem[];
   globalWorkflows: WorkflowItem[];
-  activeAppID: string;
+};
+
+export type PreparedCLIOutput = {
+  appName: string;
+  workflows: WorkflowItem[];
 };
 
 export type WorkflowItem = {
