@@ -14,7 +14,7 @@
     {
       "name": "move-left",
       "title": "Animate Window Left",
-      "subtitle": "Left 50% of screen",
+      "subtitle": "Animated Window Manager",
       "description": "Move your window to the left of your screen with a smooth animation",
       "mode": "no-view",
       "icon": "move-left.png"
@@ -22,7 +22,7 @@
     {
       "name": "move-right",
       "title": "Animate Window Right",
-      "subtitle": "Right 50% of screen",
+      "subtitle": "Animated Window Manager",
       "description": "Move your window to the right of your screen with a smooth animation",
       "mode": "no-view",
       "icon": "move-right.png"
@@ -30,7 +30,7 @@
     {
       "name": "maximize",
       "title": "Animate Window Maximize",
-      "subtitle": "Whole width, whole height",
+      "subtitle": "Animated Window Manager",
       "description": "Maximize your window to the full size of your screen with a smooth animation",
       "mode": "no-view",
       "icon": "maximize.png"
@@ -38,7 +38,7 @@
     {
       "name": "reasonable-size",
       "title": "Animate Reasonable Size",
-      "subtitle": "30% width, 70% height, centered",
+      "subtitle": "Animated Window Manager",
       "description": "Set your window to a reasonable size with a smooth animation",
       "mode": "no-view",
       "icon": "reasonable-size.png"
