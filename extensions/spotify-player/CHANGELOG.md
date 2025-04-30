@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [✨ AI Enhancements] - 2025-04-22
+## [✨ AI Enhancements] - {PR_MERGE_DATE}
 
 - Added AI queue interaction (e.g.,"@spotify add 10 random jazz songs to my queue").
 
