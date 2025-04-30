@@ -44,10 +44,8 @@ export default function DailySites() {
   }
 
   useEffect(() => {
-    setTimeout(() => {
-      refresh();
-      setIsLoading(false);
-    }, 1500);
+    // kick off loading, then clear spinner as soon as done
+    refresh().then(() => setIsLoading(false));
   }, []);
 
   async function handleDelete(site: Site) {
@@ -132,7 +130,7 @@ export default function DailySites() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={sites.length > 0 && isLoading}
       searchBarPlaceholder="Filter by name, URL or category…"
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by category" value={filterCategory} onChange={setFilterCategory}>

@@ -15,7 +15,7 @@ export function ImportSitesForm({ onDone }: ImportSitesFormProps) {
 
   async function handleSubmit(values: { file: string[] }) {
     try {
-      const xmlPath = values.file[0]; /* or `${xmlFolder}/yourfile.xml` */
+      const xmlPath = values.file[0];
       const xml = await fs.promises.readFile(xmlPath, "utf-8");
       const imported = parseSitesXml(xml);
       const existing = await loadSites();

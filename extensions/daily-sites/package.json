@@ -16,7 +16,7 @@
       "type": "directory",
       "name": "xmlFolder",
       "title": "XML Folder",
-      "description": "Where your exported sites XML file will live",
+      "description": "Where your exported sites XML file will live.",
       "default": "~/Documents",
       "required": true
     }

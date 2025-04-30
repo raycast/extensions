@@ -62,6 +62,11 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
     };
 
     const existing = await loadSites();
+    const isDuplicate = !initialValues && existing.some((s) => s.url === newSite.url);
+    if (isDuplicate) {
+      showToast(Toast.Style.Failure, "A site with this URL already exists");
+      return;
+    }
     const updated = initialValues
       ? existing.map((s) => (s.url === initialValues.url ? newSite : s))
       : [...existing, newSite];

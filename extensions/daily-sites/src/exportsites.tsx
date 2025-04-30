@@ -16,7 +16,8 @@ export function ExportSitesForm({ onDone }: { onDone: () => void }) {
       const sites = await loadSites();
       const xml = sitesToXml(sites);
       const out = path.join(values.folder[0], `${values.filename || "sites"}.xml`);
-      fs.writeFileSync(out, xml, "utf8");
+      // ↓ non‐blocking write
+      await fs.promises.writeFile(out, xml, "utf8");
       await showToast(Toast.Style.Success, "Exported sites");
       onDone();
     } catch (error) {
