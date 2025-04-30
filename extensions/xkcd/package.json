@@ -19,6 +19,10 @@
     "Fun",
     "Web"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "dependencies": {
     "@raycast/api": "^1.31.0",
     "jotai": "^1.4.0",
@@ -31,6 +35,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.5.3",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },

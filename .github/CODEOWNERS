@@ -59,6 +59,7 @@
 /extensions/android-screen-capture                                  @Leaking
 /extensions/android-versions                                        @bruce3x
 /extensions/anilist-airing-schedule                                 @yeskunall
+/extensions/animated-window-manager                                 @MatheusChein
 /extensions/anki                                                    @anton-suprun
 /extensions/anna-s-archive                                          @j3lte
 /extensions/anonaddy                                                @httpjamesm @pernielsentikaer @mormubis
@@ -699,6 +700,7 @@
 /extensions/grafana                                                 @Lp-Francois
 /extensions/grafbase                                                @mlafeldt @notrab
 /extensions/grammari-x                                              @hakob8956 @ridemountainpig
+/extensions/granola                                                 @RobErskine
 /extensions/graphcalc                                               @cluzier @luarmr
 /extensions/graphcdn                                                @mathieudutour @xmok
 /extensions/greip                                                   @gre-dev @pernielsentikaer
@@ -1414,6 +1416,7 @@
 /extensions/quip                                                    @justin0u0 @liznear
 /extensions/quit-applications                                       @mackopes @jrnxf @3llomi @sxn @codesjedi @ridemountainpig
 /extensions/quoterism                                               @fisenkodv
+/extensions/qutebrowser-tabs                                        @barlevalon
 /extensions/r-pkg-search                                            @gadenbuie
 /extensions/rabbit-hole                                             @RobErskine
 /extensions/radicle                                                 @sebastinez
@@ -1695,7 +1698,7 @@
 /extensions/sportssync                                              @daniyalmaster693
 /extensions/spotify-beta                                            @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon
 /extensions/spotify-controls                                        @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer @yansq @amureki
-/extensions/spotify-player                                          @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @erics118 @hjoelh @hobhouse @jatindotdev @the-devbear @rfaccio @badta5te @andyburris @thomaslombart @rhesamu @mpatel283 @LitoMore @EnneEmme @lineville @tsibog @viethung0823
+/extensions/spotify-player                                          @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @erics118 @hjoelh @hobhouse @jatindotdev @the-devbear @rfaccio @badta5te @andyburris @thomaslombart @rhesamu @mpatel283 @LitoMore @EnneEmme @lineville @tsibog @viethung0823 @eyalevy23
 /extensions/spring-initializr                                       @danvega
 /extensions/spryker-docs                                            @DinisEsteves
 /extensions/sql-format                                              @tonngw @jfkisafk
@@ -1732,6 +1735,7 @@
 /extensions/sun-moon-times                                          @DannySeidel
 /extensions/supabase-docs                                           @Isaiah-Hamilton
 /extensions/supahabits                                              @gon250
+/extensions/superhuman                                              @jlokos
 /extensions/supernotes                                              @connebs @tobeagram @peduarte @mattdelliott
 /extensions/supernova                                               @JiriTrecak
 /extensions/superpassgen                                            @techvlad
@@ -1748,7 +1752,7 @@
 /extensions/svgo                                                    @kaichii @kgrhartlage @dangkhoipro
 /extensions/svgr                                                    @rickMcGavin
 /extensions/swap-commas-dots                                        @brunopicinin
-/extensions/swift-command                                           @aaronlinv
+/extensions/swift-command                                           @aaronlinv @aaronlinv
 /extensions/swift-evolution                                         @BProg @dehesa @pernielsentikaer
 /extensions/swift-package-index                                     @maximkrouk @japanese-goblinn
 /extensions/swift-repl                                              @nakajima @pernielsentikaer
@@ -1771,6 +1775,7 @@
 /extensions/tarot                                                   @RiverCui
 /extensions/tasklink                                                @jrodalo
 /extensions/taskplane                                               @albingroen
+/extensions/tautulli                                                @andromidasj
 /extensions/tc-no-generator                                         @denizyoldas
 /extensions/team-time                                               @DavidNaak
 /extensions/teamgantt                                               @knownasilya
