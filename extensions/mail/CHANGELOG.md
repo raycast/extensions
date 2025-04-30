@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [New Feature] - 2025-04-30
+
+- Add "Paste Latest OTP Code" command
+
 ## [New Feature] - 2025-04-07
 
 - Add russian aliases for folders
