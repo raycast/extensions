@@ -109,7 +109,7 @@ export default function Command() {
     }
   };
 
-  const title = getTitle();
+  const title = getTitle() as string;
 
   return (
     <MenuBarExtra title={title} isLoading={isLoading}>
