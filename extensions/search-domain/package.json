@@ -13,7 +13,8 @@
     {
       "name": "search-domain",
       "title": "Search Domain",
-      "description": "Search Domain Name",
+      "description": "Search domain names quickly with instant availability check",
+      "subtitle": "Domain Checker",
       "mode": "view"
     }
   ],
