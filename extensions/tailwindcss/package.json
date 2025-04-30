@@ -5,10 +5,21 @@
   "description": "Utilities to work with Tailwind CSS",
   "icon": "tailwind-icon.png",
   "author": "vimtor",
-  "contributors": ["cy-98", "emilsharier", "pernielsentikaer", "erich2s", "ridemountainpig", "jor",
+  "contributors": [
+    "cy-98",
+    "emilsharier",
+    "pernielsentikaer",
+    "erich2s",
+    "ridemountainpig",
+    "jor",
     "garrill",
-    "olafvanmidden"],
+    "olafvanmidden"
+  ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-documentation",
