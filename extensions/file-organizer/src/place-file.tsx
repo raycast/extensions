@@ -1,4 +1,15 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, confirmAlert, Alert, showHUD } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  confirmAlert,
+  Alert,
+  showHUD,
+  popToRoot,
+} from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
 import { analyzeFile } from "./utils/fileAnalyzer";
 import { suggestLocations } from "./utils/locationSuggester";
@@ -207,6 +218,9 @@ export default function Command() {
           // Sort by confidence
           setLocations(suggestions.sort((a, b) => b.confidence - a.confidence));
           setStatus(LoadingStatus.READY);
+
+          // Bring the Raycast window to the front once search is complete
+          await popToRoot({ clearSearchBar: false });
         }
       } catch (error) {
         console.error(error);

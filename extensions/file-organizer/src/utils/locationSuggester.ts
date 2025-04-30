@@ -8,6 +8,9 @@ import { levenshteinDistanceNormalized } from "./levenshtein";
 
 const readdir = promisify(fs.readdir);
 
+const INCLUSION_THRESHOLD = 0.15;
+const HIGH_SIMILARITY_THRESHOLD = 0.8;
+
 export async function suggestLocations(fileInfo: FileInfo): Promise<LocationSuggestion[]> {
   const { scanDirectories, scanDepth, excludeDirectories } = await getPreferences();
   const suggestions: LocationSuggestion[] = [];
@@ -83,11 +86,11 @@ async function scanDirectory(
     const { score, reason } = calculateDirectoryScore(
       path.basename(directory),
       entries.map((entry) => entry.name),
-      parentDirScore,
+      parentDirScore ?? 0,
       fileInfo,
     );
 
-    if (score > 0.15) {
+    if (score > INCLUSION_THRESHOLD) {
       suggestions.push({
         path: directory,
         confidence: score,
@@ -116,7 +119,7 @@ async function scanDirectory(
 function calculateDirectoryScore(
   dirName: string,
   directoryFileNames: string[],
-  parentDirScore: number | null,
+  parentDirScore: number = 0,
   fileInfo: FileInfo,
 ): { score: number; reason: string } {
   // Calculate directory name similarity
@@ -140,22 +143,16 @@ function calculateDirectoryScore(
   }
 
   // Calculate final score
-  let finalScore;
+  const finalScore = dirNameScore * 0.2 + parentDirScore * 0.2 + bestNameMatch * 0.6;
+
   let reason = "";
-  if (bestNameMatch === 0 && parentDirScore !== null) {
-    finalScore = (dirNameScore * 0.8 + parentDirScore * 0.2) * 0.8;
+  if (bestNameMatch > HIGH_SIMILARITY_THRESHOLD) {
+    reason = "Exact or partial name match";
+  } else if (dirNameScore > HIGH_SIMILARITY_THRESHOLD) {
     reason = "Similar to parent directory";
-  } else if (bestNameMatch !== 0 && parentDirScore !== null) {
-    // Incorporate parent directory context with 30% weight
-    finalScore = dirNameScore * 0.2 + bestNameMatch * 0.6 + parentDirScore * 0.2;
-    reason = "Overall similarity";
-  } else if (bestNameMatch !== 0 && parentDirScore === null) {
-    // Without parent context, directory name has higher weight
-    finalScore = dirNameScore * 0.3 + bestNameMatch * 0.7;
-    reason = "Similar to file name";
+  } else if (parentDirScore > HIGH_SIMILARITY_THRESHOLD) {
+    reason = "Similar to parent directory";
   } else {
-    // Without parent context, directory name has higher weight
-    finalScore = dirNameScore * 0.3 + bestNameMatch * 0.7;
     reason = "Similar to file name";
   }
 

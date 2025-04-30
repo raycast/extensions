@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { promisify } from "util";
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 const rename = promisify(fs.rename);
 const mkdir = promisify(fs.mkdir);
@@ -46,7 +47,7 @@ export async function moveFile(sourcePath: string, destDir: string): Promise<str
     }
   } catch (error) {
     console.error("Error moving file:", error);
-    await showToast(Toast.Style.Failure, "Failed to move file", String(error));
+    await showFailureToast(error, { title: "Failed to move file" });
     throw error;
   }
 }

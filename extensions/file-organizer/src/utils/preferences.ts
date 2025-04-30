@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { homedir } from "os";
 import path from "path";
 
@@ -8,39 +8,58 @@ interface Preferences {
   excludeDirectories: string[];
 }
 
-const DEFAULT_PREFERENCES: Preferences = {
-  scanDirectories: ["~/Documents", "~/Desktop", "~/Downloads", "~/Pictures", "~/Movies", "~/Music"],
-  scanDepth: 10,
-  excludeDirectories: ["~/Library", "~/node_modules", "~/.git", "~/Applications", "~/.npm", "~/.vscode"],
-};
+interface RaycastPreferences {
+  scanDirectories: string;
+  scanDepth: string;
+  excludeDirectories: string;
+}
 
-const PREF_KEY = "file-organizer-preferences";
+// Convert comma-separated string to array and resolve home paths
+function parseDirectoriesPreference(dirString: string): string[] {
+  return dirString
+    .split(",")
+    .map((dir) => dir.trim())
+    .filter(Boolean)
+    .map(resolveHomePath);
+}
 
 export async function getPreferences(): Promise<Preferences> {
   try {
-    const storedPrefs = await LocalStorage.getItem<string>(PREF_KEY);
+    // Get preferences from Raycast
+    const raycastPrefs = getPreferenceValues<RaycastPreferences>();
 
-    if (storedPrefs) {
-      const parsed = JSON.parse(storedPrefs) as Partial<Preferences>;
-      // Ensure all fields exist with defaults as fallback
-      return {
-        scanDirectories: parsed.scanDirectories || DEFAULT_PREFERENCES.scanDirectories,
-        scanDepth: parsed.scanDepth || DEFAULT_PREFERENCES.scanDepth,
-        excludeDirectories: parsed.excludeDirectories || DEFAULT_PREFERENCES.excludeDirectories,
-      };
-    }
+    const parsed = parseInt(raycastPrefs.scanDepth, 10);
+    // Parse directory strings into arrays
+    const preferences: Preferences = {
+      scanDirectories: parseDirectoriesPreference(raycastPrefs.scanDirectories),
+      scanDepth: isNaN(parsed) ? 10 : parsed,
+      excludeDirectories: parseDirectoriesPreference(raycastPrefs.excludeDirectories),
+    };
 
-    // If no preferences found, store defaults and return them
-    await savePreferences(DEFAULT_PREFERENCES);
-    return DEFAULT_PREFERENCES;
+    return preferences;
   } catch (error) {
     console.error("Error loading preferences:", error);
-    return DEFAULT_PREFERENCES;
+    // Fallback to default preferences if there's an error
+    return {
+      scanDirectories: [
+        resolveHomePath("~/Documents"),
+        resolveHomePath("~/Desktop"),
+        resolveHomePath("~/Downloads"),
+        resolveHomePath("~/Pictures"),
+        resolveHomePath("~/Movies"),
+        resolveHomePath("~/Music"),
+      ],
+      scanDepth: 10,
+      excludeDirectories: [
+        resolveHomePath("~/Library"),
+        resolveHomePath("~/node_modules"),
+        resolveHomePath("~/.git"),
+        resolveHomePath("~/Applications"),
+        resolveHomePath("~/.npm"),
+        resolveHomePath("~/.vscode"),
+      ],
+    };
   }
-}
-
-export async function savePreferences(preferences: Preferences): Promise<void> {
-  await LocalStorage.setItem(PREF_KEY, JSON.stringify(preferences));
 }
 
 export function resolveHomePath(dirPath: string): string {

@@ -17,6 +17,32 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "scanDirectories",
+      "title": "Scan Directories (comma-separated)",
+      "description": "Directories to scan for suggesting file locations (comma-separated)",
+      "type": "textfield",
+      "default": "~/Documents,~/Desktop,~/Downloads,~/Pictures,~/Movies,~/Music",
+      "required": true
+    },
+    {
+      "name": "scanDepth",
+      "title": "Scan Depth (Has to be a numer)",
+      "description": "How deep to scan in directory trees (Has to be a number)",
+      "type": "textfield",
+      "default": "10",
+      "required": true
+    },
+    {
+      "name": "excludeDirectories",
+      "title": "Exclude Directories (comma-separated)",
+      "description": "Directories to exclude from scanning (comma-separated)",
+      "type": "textfield",
+      "default": "~/Library,~/node_modules,~/.git,~/Applications,~/.npm,~/.vscode",
+      "required": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.96.3",
     "@raycast/utils": "^1.17.0",
