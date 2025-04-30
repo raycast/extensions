@@ -1,7 +1,7 @@
 import getCache from "../utils/getCache";
 import { convertDocumentToMarkdown } from "../utils/convertJsonNodes";
 import { showFailureToast } from "@raycast/utils";
-import { DocumentStructure } from "../utils/types";
+import { Document, DocumentStructure } from "../utils/types";
 
 type Input = {
   /**
@@ -14,7 +14,7 @@ type Input = {
    * - ISO 8601 format (e.g., "2025-03-07")
    * - Relative dates: "today", "yesterday"
    * - Time ranges: "last week", "last month"
-   * If the message contains "most recent", or anything similar, the date should be empty
+   * If the message contains "most recent", or anything similar, the date should be empty. Use all time using the user's local machine time.
    */
   date?: string;
   /**
@@ -30,7 +30,7 @@ type Note = {
   title: string;
   /**
    * The date of when the note was created
-   * Use this in conjunction with the user's time, for example: "All notes from today", "All notes from yesterday", "All notes from the last week"
+   * Use this in conjunction with the user's local time, for example: "All notes from today", "All notes from yesterday", "All notes from the last week"
    */
   date: string;
   /**
@@ -44,25 +44,25 @@ type Note = {
  */
 export default function tool(input: Input) {
   const cache = getCache();
-  const content = cache?.state?.documentPanels;
+  const documents = Object.values(cache?.state?.documents) as Document[];
   const notes: Note[] = [];
 
-  if (!content) {
+  if (!documents) {
     return [];
   }
 
   // Collect all notes first
-  for (const docId in content) {
-    for (const panelId in content[docId]) {
-      const panel = content[docId][panelId];
-      if (!panel?.title || !panel?.created_at || !panel?.content) continue;
-      const note: Note = {
-        title: panel.title,
-        date: panel.created_at,
-        content: convertDocumentToMarkdown(panel.content as DocumentStructure),
-      };
-      notes.push(note);
-    }
+  for (const document of documents) {
+    if (!document?.title || !document?.created_at || !document?.notes?.content) continue;
+
+    console.log(new Date(document.created_at).toISOString());
+
+    const note: Note = {
+      title: document.title,
+      date: new Date(document.created_at).toISOString(),
+      content: convertDocumentToMarkdown(document.notes as unknown as DocumentStructure),
+    };
+    notes.push(note);
   }
 
   // If no notes found, return empty array
