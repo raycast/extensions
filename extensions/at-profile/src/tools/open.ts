@@ -15,16 +15,24 @@ type Input = {
   profile: string;
   /**
    * The site to open the profile on.
-   * @example "raycast"
-   * @example "threads"
-   * @example "twitter/x"
-   * @example "github"
+   * @example "behance"
+   * @example "codepen"
+   * @example "devto"
+   * @example "dribbble"
    * @example "facebook"
-   * @example "reddit"
-   * @example "youtube"
+   * @example "github"
    * @example "instagram"
    * @example "linkedin"
+   * @example "medium"
+   * @example "producthunt"
+   * @example "raycast"
+   * @example "reddit"
+   * @example "spotify"
+   * @example "threads"
    * @example "tiktok"
+   * @example "twitter/x"
+   * @example "x/twitter"
+   * @example "youtube"
    *
    * twitter and x should lead to x
    * The site must be on the example list

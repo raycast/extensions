@@ -6,7 +6,8 @@
   "icon": "at-icon.png",
   "author": "chrismessina",
   "contributors": [
-    "pedrecal"
+    "pedrecal",
+    "thomasjost"
   ],
   "categories": [
     "Web"
@@ -38,32 +39,28 @@
           "required": true,
           "data": [
             {
-              "title": "Raycast",
-              "value": "raycast"
+              "title": "Behance",
+              "value": "behance"
             },
             {
-              "title": "Threads",
-              "value": "threads"
+              "title": "CodePen",
+              "value": "codepen"
             },
             {
-              "title": "X/Twitter",
-              "value": "x"
+              "title": "Dev.to",
+              "value": "devto"
             },
             {
-              "title": "GitHub",
-              "value": "github"
+              "title": "Dribbble",
+              "value": "dribbble"
             },
             {
               "title": "Facebook",
               "value": "facebook"
             },
             {
-              "title": "Reddit",
-              "value": "reddit"
-            },
-            {
-              "title": "YouTube",
-              "value": "youtube"
+              "title": "GitHub",
+              "value": "github"
             },
             {
               "title": "Instagram",
@@ -74,8 +71,40 @@
               "value": "linkedin"
             },
             {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Product Hunt",
+              "value": "producthunt"
+            },
+            {
+              "title": "Raycast",
+              "value": "raycast"
+            },
+            {
+              "title": "Reddit",
+              "value": "reddit"
+            },
+            {
+              "title": "Spotify",
+              "value": "spotify"
+            },
+            {
+              "title": "Threads",
+              "value": "threads"
+            },
+            {
               "title": "TikTok",
               "value": "tiktok"
+            },
+            {
+              "title": "X/Twitter",
+              "value": "x"
+            },
+            {
+              "title": "YouTube",
+              "value": "youtube"
             }
           ]
         }
