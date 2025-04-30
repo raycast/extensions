@@ -28,8 +28,8 @@
     },
     {
       "name": "scanDepth",
-      "title": "Scan Depth (Has to be a numer)",
-      "description": "How deep to scan in directory trees (Has to be a number)",
+      "title": "Scan Depth (Has to be a number)",
+      "description": "Maximum depth to scan in directory trees",
       "type": "textfield",
       "default": "10",
       "required": true

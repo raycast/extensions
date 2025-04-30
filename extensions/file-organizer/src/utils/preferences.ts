@@ -23,7 +23,7 @@ function parseDirectoriesPreference(dirString: string): string[] {
     .map(resolveHomePath);
 }
 
-export async function getPreferences(): Promise<Preferences> {
+export function getPreferences(): Preferences {
   try {
     // Get preferences from Raycast
     const raycastPrefs = getPreferenceValues<RaycastPreferences>();
@@ -32,7 +32,7 @@ export async function getPreferences(): Promise<Preferences> {
     // Parse directory strings into arrays
     const preferences: Preferences = {
       scanDirectories: parseDirectoriesPreference(raycastPrefs.scanDirectories),
-      scanDepth: isNaN(parsed) ? 10 : parsed,
+      scanDepth: isNaN(parsed) || parsed < 0 ? 10 : parsed,
       excludeDirectories: parseDirectoriesPreference(raycastPrefs.excludeDirectories),
     };
 
