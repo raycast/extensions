@@ -1,4 +1,4 @@
-import { CustomersListRequest } from "@polar-sh/sdk/models/operations";
+import { CustomersListRequest } from "@polar-sh/sdk/dist/commonjs/models/operations/customerslist";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useContext } from "react";
 import { PolarContext } from "../providers";

@@ -38,7 +38,7 @@ export default function Fixture() {
   }, [championship]);
 
   const matchday = groupBy(matches, (m) =>
-    format(new Date(m.date_time), "eeee, dd MMM yyyy")
+    format(new Date(m.date_time), "eeee, dd MMM yyyy"),
   );
 
   return (

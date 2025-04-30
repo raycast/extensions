@@ -1,5 +1,14 @@
 # Adhan time Changelog
 
+## [Update] - 2025-04-10
+
+- UI: Added indication for current prayer time using colored icon
+- UI: Added countdown for next prayer time
+- UI: Added different icons for each prayer time
+- UI: Split prayer times into two section: Prayers and Times
+- Chore: Code refactor
+- Chore: Update dependencies
+
 ## [Update] - 2023-01-18
 
 - Preference: Add the option to show hours by the 12 hours system

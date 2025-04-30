@@ -70,6 +70,21 @@ export const ConnectorProviders: Record<ConnectorProvider, ConnectorProviderConf
     color: Color.Yellow,
     name: "Web Crawler",
   },
+  bigquery: {
+    icon: "icons/bigquery.svg",
+    color: Color.Blue,
+    name: "BigQuery",
+  },
+  salesforce: {
+    icon: "icons/salesforce.svg",
+    color: Color.Red,
+    name: "Salesforce",
+  },
+  gong: {
+    icon: "icons/gong.svg",
+    color: Color.Green,
+    name: "Gong",
+  },
 };
 
 const GREETINGS = [

@@ -1,5 +1,9 @@
 # BetterDisplay Changelog
 
+## [Feature] - 2025-04-17
+
+* Added the ability to control the displays using Raycast AI (Raycast Pro required).
+
 ## [Feature] - 2025-03-03
 
 * Added the ability to change contrast.

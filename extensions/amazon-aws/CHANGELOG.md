@@ -1,5 +1,14 @@
 # Amazon AWS Changelog
 
+## [Console command] 2025-04-25
+- Update WAF & Shield path to '/wafv2/homev2/home' for WAFv2 migration
+- Update AWS Firewall Manager path to '/wafv2/fmsv2/home' for Firewall Manager v2
+- Add common abbreviations 'cfn' for CloudFormation and 'sfn' for Step Functions
+
+## [S3 command] - 2025-04-15
+
+- Add "Copy S3 URI" action
+
 ## [Secrets command] - 2024-12-06
 
 - Add actions to copy individual secret values [#14582](https://github.com/raycast/extensions/issues/14582)

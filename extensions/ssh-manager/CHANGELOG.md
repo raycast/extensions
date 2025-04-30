@@ -1,4 +1,8 @@
-# ssh-manager Changelog
+# SSH Manager Changelog
+
+## [Add Ghostty Support] - 2025-04-04
+
+- Added support for Ghostty as an option to open ssh connections.
 
 ## [Improvements] - 2025-03-25
 

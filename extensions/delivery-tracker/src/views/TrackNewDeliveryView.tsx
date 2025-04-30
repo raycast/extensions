@@ -63,7 +63,7 @@ export default function TrackNewDeliveryView({
   const showDatePickerIfNecessary = async (carrierId: string) => {
     const carrier = carriers.get(carrierId);
 
-    const shouldShowDatePicker = carrier === undefined ? true : !(await carrier.ableToTrackRemotely());
+    const shouldShowDatePicker = carrier === undefined ? true : !carrier.ableToTrackRemotely();
     setShowDatePicker(shouldShowDatePicker);
   };
 

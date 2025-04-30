@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Detail, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
 import { DEFAULT_ERROR_TITLE, DownloadText } from "../../constants";
 
@@ -10,7 +10,7 @@ export function NotInstalledError() {
       actions={
         <ActionPanel>
           {!isLoading && (
-            <ActionPanel.Item
+            <Action
               title="Install with Homebrew"
               onAction={async () => {
                 if (isLoading) return;
@@ -21,7 +21,7 @@ export function NotInstalledError() {
                 await toast.show();
 
                 try {
-                  execSync(`brew install --cask firefox`);
+                  execSync(`brew install --cask zen-browser`);
                   await toast.hide();
                 } catch {
                   await toast.hide();

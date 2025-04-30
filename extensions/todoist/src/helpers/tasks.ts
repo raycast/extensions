@@ -1,6 +1,9 @@
+import { isSameDay } from "date-fns";
+import { isBefore } from "date-fns";
+
 import { Task } from "../api";
 
-import { isExactTimeTask } from "./dates";
+import { getToday, isExactTimeTask } from "./dates";
 
 export const searchBarPlaceholder = "Filter tasks by name, priority, project, label or assignee";
 
@@ -18,9 +21,9 @@ export function getTaskAppUrl(id: string) {
   return `todoist://task?id=${id}`;
 }
 
-export function getTasksForTodayOrUpcomingView(tasks: Task[], userId: string) {
+export function getTasksForUpcomingView(tasks: Task[], userId: string) {
   const filteredTasks = tasks.filter((t) => {
-    if (!t.due) {
+    if (!t.due && !t.deadline) {
       return false;
     }
 
@@ -32,31 +35,75 @@ export function getTasksForTodayOrUpcomingView(tasks: Task[], userId: string) {
   });
 
   // Sorts tasks based on the following criteria, in order:
-  // 1. Due date type (datetime due dates appear first)
-  // 2. Due date and time (earliest first)
+  // 1. Tasks with time components first, sorted by earliest time
+  // 2. Tasks without time components, sorted by earliest date
   // 3. Priority (highest first)
-  // 4. Day order (lowest first)
+  // 4. Deadline (earliest first)
+  // 5. Day order (lowest first)
   return filteredTasks.sort((a, b) => {
-    if (!a.due || !b.due) {
-      return 0;
+    // Check if tasks have time components
+    const aHasTime = a.due ? isExactTimeTask(a) : false;
+    const bHasTime = b.due ? isExactTimeTask(b) : false;
+
+    // If one task has time and the other doesn't, prioritize the one with time
+    if (aHasTime !== bHasTime) {
+      return aHasTime ? -1 : 1;
     }
 
-    const aIsExactTime = isExactTimeTask(a);
-    const bIsExactTime = isExactTimeTask(b);
-    if (aIsExactTime !== bIsExactTime) {
-      return bIsExactTime ? 1 : -1;
+    // If both tasks have due dates with time components, compare them
+    if (aHasTime && bHasTime && a.due && b.due) {
+      const aDue = new Date(a.due.date);
+      const bDue = new Date(b.due.date);
+
+      if (aDue.getTime() !== bDue.getTime()) {
+        return aDue.getTime() - bDue.getTime();
+      }
+    }
+    // If both tasks have due dates without time components, compare them
+    else if (!aHasTime && !bHasTime && a.due && b.due) {
+      const aDue = new Date(a.due.date);
+      const bDue = new Date(b.due.date);
+
+      if (aDue.getTime() !== bDue.getTime()) {
+        return aDue.getTime() - bDue.getTime();
+      }
+    }
+    // If only one task has a due date, prioritize it
+    else if (a.due && !b.due) {
+      return -1;
+    } else if (!a.due && b.due) {
+      return 1;
     }
 
-    const bDue = new Date(b.due.date);
-    const aDue = new Date(a.due.date);
-    if (aDue.getTime() !== bDue.getTime()) {
-      return aDue.getTime() - bDue.getTime();
-    }
-
+    // Then compare priorities
     if (a.priority !== b.priority) {
       return b.priority - a.priority;
     }
 
+    // Then compare deadlines
+    if (a.deadline && b.deadline) {
+      const aDeadline = new Date(a.deadline.date);
+      const bDeadline = new Date(b.deadline.date);
+
+      if (aDeadline.getTime() !== bDeadline.getTime()) {
+        return aDeadline.getTime() - bDeadline.getTime();
+      }
+    }
+    // If only one task has a deadline, prioritize it
+    else if (a.deadline && !b.deadline) {
+      return -1;
+    } else if (!a.deadline && b.deadline) {
+      return 1;
+    }
+
+    // Finally, compare day order
     return a.day_order - b.day_order;
+  });
+}
+
+export function getTasksForTodayView(tasks: Task[], userId: string) {
+  return getTasksForUpcomingView(tasks, userId).filter((t) => {
+    if (!t.due) return false;
+    return isBefore(new Date(t.due.date), getToday()) || isSameDay(new Date(t.due.date), getToday());
   });
 }

@@ -1,8 +1,12 @@
+import type { KNOWN_RANGES } from "./utils";
+
 export {};
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace WakaTime {
+    export type KNOWN_RANGE = keyof typeof KNOWN_RANGES;
+
     interface User {
       data: {
         /** unique id of user */

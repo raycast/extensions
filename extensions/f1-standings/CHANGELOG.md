@@ -1,5 +1,9 @@
 # F1 Standings Changelog
 
+## [🧠 Added AI Extensions] - 2025-04-28
+
+- Added AI extensions to Formula 1
+
 ## [🌐 Switched to new API] - 2025-01-28
 
 - Due to deprecation of the Ergast API now using the replacement: https://api.jolpi.ca/ergast/f1/
