@@ -2,6 +2,7 @@ import getCache from "../utils/getCache";
 import { convertDocumentToMarkdown } from "../utils/convertJsonNodes";
 import { showFailureToast } from "@raycast/utils";
 import { Document, DocumentStructure } from "../utils/types";
+import { getTranscript } from "../utils/fetchData";
 
 type Input = {
   /**
@@ -21,6 +22,16 @@ type Input = {
    * Optional content filter
    */
   contentFilter?: string;
+  /**
+   * Whether to include the full transcript for each note
+   * Set to true when user asks for specific quotes, meeting details, or conversation transcripts
+   */
+  includeTranscript?: boolean;
+  /**
+   * Optional specific note ID to fetch transcript for
+   * Use when a user refers to a specific note they want to examine in detail
+   */
+  noteId?: string;
 };
 
 type Note = {
@@ -37,12 +48,21 @@ type Note = {
    * Content of the note in HTML. It will be converted into Markdown at a later step.
    */
   content: string;
+  /**
+   * Optional full transcript of the note/meeting
+   * Only included when explicitly requested or for detailed inquiries
+   */
+  transcript?: string;
+  /**
+   * The ID of the note, useful for follow-up queries
+   */
+  id: string;
 };
 
 /**
  * Returns a list of notes from Granola that match the provided filters
  */
-export default function tool(input: Input) {
+export default async function tool(input: Input): Promise<Note[]> {
   const cache = getCache();
   const documents = Object.values(cache?.state?.documents) as Document[];
   const notes: Note[] = [];
@@ -55,12 +75,11 @@ export default function tool(input: Input) {
   for (const document of documents) {
     if (!document?.title || !document?.created_at || !document?.notes?.content) continue;
 
-    console.log(new Date(document.created_at).toISOString());
-
     const note: Note = {
       title: document.title,
       date: new Date(document.created_at).toISOString(),
       content: convertDocumentToMarkdown(document.notes as unknown as DocumentStructure),
+      id: document.id,
     };
     notes.push(note);
   }
@@ -73,14 +92,22 @@ export default function tool(input: Input) {
   // Sort notes by date (newest first)
   notes.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  // If no date specified or explicitly asking for latest, return most recent note
-  // const inputLower = input.date?.toLowerCase() || '';
-  // if (!input.date || inputLower === 'most recent' || inputLower === 'latest' || inputLower === 'last') {
-  //   return [notes[0]];
-  // }
+  // Handle specific note ID request - return just that note with transcript
+  if (input.noteId) {
+    const specificNote = notes.find((note) => note.id === input.noteId);
+    if (specificNote) {
+      try {
+        specificNote.transcript = await getTranscript(input.noteId);
+        return [specificNote];
+      } catch (error) {
+        // If transcript fetch fails, still return the note without transcript
+        return [specificNote];
+      }
+    }
+  }
 
   // Filter notes based on criteria
-  return notes.filter((note) => {
+  const filteredNotes = notes.filter((note) => {
     // Apply title filter if provided
     if (input.title && !note.title.toLowerCase().includes(input.title.toLowerCase())) {
       return false;
@@ -128,4 +155,26 @@ export default function tool(input: Input) {
 
     return true;
   });
+
+  // If transcript inclusion is requested, fetch transcripts for filtered notes
+  // This could be slow for multiple notes, so we limit to the most relevant ones
+  if (input.includeTranscript) {
+    const notesWithTranscripts = filteredNotes.slice(0, 3); // Limit to first 3 most recent matching notes
+
+    // Fetch transcripts in parallel with Promise.all
+    await Promise.all(
+      notesWithTranscripts.map(async (note) => {
+        try {
+          note.transcript = await getTranscript(note.id);
+        } catch (error) {
+          // If transcript fetch fails, continue without it
+          console.error(`Failed to fetch transcript for note ${note.id}:`, error);
+        }
+      }),
+    );
+
+    return notesWithTranscripts;
+  }
+
+  return filteredNotes;
 }

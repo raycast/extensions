@@ -1,7 +1,7 @@
-import { useFetch } from "@raycast/utils";
+import { useFetch, showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import getAccessToken from "./getAccessToken";
-import { GetDocumentsResponse } from "./types";
+import { GetDocumentsResponse, TranscriptSegment } from "./types";
 
 export function fetchGranolaData(route: string) {
   const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
@@ -29,7 +29,7 @@ export function fetchGranolaData(route: string) {
           Authorization: `Bearer ${accessToken}`,
         }
       : undefined,
-    execute: !!accessToken, // Prevent API calls when accessToken is undefined
+    execute: !!accessToken,
   });
 
   if (error) {
@@ -37,4 +37,55 @@ export function fetchGranolaData(route: string) {
   }
 
   return { isLoading: isLoading || !accessToken, data, revalidate };
+}
+
+const TRANSCRIPT_NOT_FOUND_MESSAGE = "Transcript not available for this note.";
+
+export async function getTranscript(docId: string): Promise<string> {
+  const url = `https://api.granola.ai/v1/get-document-transcript`;
+  try {
+    const token = await getAccessToken();
+    const requestBody = { document_id: docId };
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      let errorText = await response.text();
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorText = errorJson.message || errorText;
+      } catch (e) {
+        // Use raw text if parsing fails
+      }
+      throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+    }
+
+    const transcriptSegments = (await response.json()) as TranscriptSegment[];
+
+    if (!transcriptSegments || transcriptSegments.length === 0) {
+      return TRANSCRIPT_NOT_FOUND_MESSAGE;
+    }
+
+    let formattedTranscript = "";
+    transcriptSegments.forEach((segment) => {
+      if (segment.source === "microphone") {
+        formattedTranscript += `**Me:** ${segment.text}\n\n`;
+      } else if (segment.source === "system") {
+        formattedTranscript += `**System:** ${segment.text}\n\n`;
+      } else {
+        formattedTranscript += `${segment.text}\n\n`;
+      }
+    });
+    return formattedTranscript.trim();
+  } catch (error) {
+    showFailureToast({ title: "Failed to Fetch Transcript", message: String(error) });
+    throw error;
+  }
 }
