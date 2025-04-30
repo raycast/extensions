@@ -17,9 +17,10 @@ import { useCallback, useEffect, useState } from "react";
 import * as fs from "node:fs";
 import { homedir } from "os";
 import { showFailureToast, useCachedState, useForm } from "@raycast/utils";
-import { initWasm, Resvg } from "../lib/resvg";
 import path from "node:path";
 import debounce from "lodash.debounce";
+import wasm from "@resvg/resvg-wasm/index_bg.wasm";
+import { initWasm, Resvg } from "@resvg/resvg-wasm";
 import Shortcut = Keyboard.Shortcut;
 
 const DOWNLOADS_DIR = `${homedir()}/Downloads`;
@@ -130,12 +131,12 @@ function Command() {
             }
           />
           <Action.CopyToClipboard
-            title={"Copy PNG"}
+            title={"Copy Png"}
             content={{ file: environment.supportPath + "/face.png" }}
             shortcut={Shortcut.Common.Copy}
           />
           <Action
-            title={"Download PNG"}
+            title={"Download Png"}
             icon={Icon.Download}
             onAction={() => download("face.png")}
             shortcut={{
@@ -214,8 +215,9 @@ const SizeForm = ({
   );
 };
 
-initWasm(fs.readFileSync(path.join(environment.assetsPath, "index_bg.wasm")))
-  .then(() => {
+export default function () {
+  (async () => {
+    await initWasm(wasm);
     render(<Command />);
-  })
-  .catch((e) => showFailureToast(e));
+  })().catch((e) => showFailureToast(e));
+}

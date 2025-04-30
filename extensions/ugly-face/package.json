@@ -9,7 +9,10 @@
     "pernielsentikaer"
   ],
   "license": "MIT",
-  "categories": ["Fun", "Media"],
+  "categories": [
+    "Fun",
+    "Media"
+  ],
   "commands": [
     {
       "name": "index",
@@ -19,20 +22,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.73.2",
-    "@raycast/utils": "^1.15.0",
+    "@raycast/api": "^1.96.3",
+    "@raycast/utils": "^1.19.1",
+    "@resvg/resvg-wasm": "^2.6.2",
     "lodash.debounce": "^4.0.8",
-    "react-dom": "^18.3.1"
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/lodash.debounce": "^4.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "@types/react-dom": "^18.3.0",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@types/node": "22.14.1",
+    "@types/react": "19.1.2",
+    "@types/react-dom": "19.1.2",
+    "prettier": "^3.5.3",
+    "eslint": "^9.22.0",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
