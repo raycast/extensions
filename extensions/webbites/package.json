@@ -2,7 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "webbites",
   "title": "Webbites",
-  "description": "Search through your WebBites bookmarks",
+  "subtitle": "WebBites, the AI based bookmark manager",
+  "description": "Search your WebBites.io bookmarks",
   "icon": "webbites-extension-icon.png",
   "author": "elias_ruiz_monserrat",
   "categories": [
@@ -14,8 +15,26 @@
     {
       "name": "webbites",
       "title": "Webbites",
-      "description": "Search through your WebBites bookmarks",
-      "mode": "view"
+      "description": "Search your WebBites.io bookmarks",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "email",
+          "title": "Email",
+          "description": "Your WebBites account email",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Enter your email"
+        },
+        {
+          "name": "password",
+          "title": "Password",
+          "description": "Your WebBites account password",
+          "type": "password",
+          "required": false,
+          "placeholder": "Enter your password"
+        }
+      ]
     }
   ],
   "dependencies": {

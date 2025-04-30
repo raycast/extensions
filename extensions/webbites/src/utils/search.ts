@@ -78,7 +78,6 @@ export const search = async (
     const response = await axios({
       method: "post",
       url: "https://api.webbites.io/search",
-      // url: "http://localhost:3003/search",
       headers: {
         "Content-Type": "application/json",
         "X-Parse-Session-Token": sessionToken,

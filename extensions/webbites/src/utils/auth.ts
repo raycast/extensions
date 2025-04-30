@@ -71,11 +71,9 @@ export const login = async (
 
     return user;
   } catch (error) {
-    console.error("Login error:", error);
-    showFailureToast({
-      title: "Login failed",
-      message: (error as Error).message,
-    });
+    console.error("Login error:");
+    // console.error("Login error:", error);
+    showFailureToast(error, { title: "Login failed" });
     throw new Error(`Login failed: ${(error as Error).message}`);
   }
 };

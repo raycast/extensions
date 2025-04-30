@@ -9,13 +9,16 @@ import {
   Detail,
   LocalStorage,
   List,
+  getPreferenceValues,
+  openExtensionPreferences,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, getFavicon } from "@raycast/utils";
 
-import LoginView from "./components/LoginView";
+// LoginView no longer needed as we're opening preferences directly
 import {
   isLoggedIn,
   logout,
+  login,
   // getCurrentUser,
   initializeParse,
 } from "./utils/auth";
@@ -27,18 +30,13 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-  // Define proper types instead of using 'any'
-  // interface User {
-  //   id: string;
-  //   username: string;
-  //   email: string;
-  // }
-
   interface BookmarkItem {
     objectId: string;
     siteTitle: string;
     url: string;
+    createdAt: Date;
     description?: string;
+    textNote?: string;
     siteScreenshot?: { url: string };
     OGImage?: string;
     siteLogo?: string;
@@ -46,7 +44,6 @@ export default function Command() {
     title?: string;
   }
 
-  // const [user, setUser] = useState<User | null>(null);
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState<BookmarkItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -76,24 +73,48 @@ export default function Command() {
         const cachedResults = await LocalStorage.getItem<string>(
           "webbites_cached_results",
         );
+
         if (cachedResults) {
           try {
             const parsedResults = JSON.parse(cachedResults) as BookmarkItem[];
             setSearchResults(parsedResults);
-            console.log("Loaded cached results:", parsedResults.length);
+            // console.log("Loaded cached results:", parsedResults.length);
           } catch (e) {
             console.error("Error parsing cached results:", e);
           }
         }
 
+        // Check authentication status
         await checkAuthStatus();
+
+        // If not authenticated, try to login with preferences
+        if (!isAuthenticated) {
+          // Get credentials from preferences
+          const preferences = getPreferenceValues<{
+            email: string;
+            password: string;
+          }>();
+
+          // Attempt login if credentials exist
+          preferences.email = "";
+          if (preferences.email && preferences.password) {
+            try {
+              await login(preferences.email, preferences.password);
+              await checkAuthStatus();
+              await handleLoggedIn();
+            } catch (error) {
+              console.error("Auto-login error:", error);
+              // Authentication will remain false, triggering the preferences screen
+            }
+          }
+          // If no credentials or login fails, the useEffect will open preferences
+        }
       } catch (error) {
         console.error("Initialization error:", error);
         setIsAuthenticated(false);
         setIsLoading(false);
-        showFailureToast({
+        showFailureToast(error, {
           title: "Error initializing WebBites, try again",
-          message: (error as Error).message,
         });
       }
     };
@@ -115,6 +136,7 @@ export default function Command() {
   }, [searchText]);
 
   const checkAuthStatus = async () => {
+    console.log("Checking authentication status...");
     setIsLoading(true);
     // console.log("Checking authentication status...");
 
@@ -135,7 +157,7 @@ export default function Command() {
 
   const handleLoggedIn = async () => {
     try {
-      console.log("User logged in, updating state...");
+      // console.log("User logged in, updating state...");
       const results = await search({
         searchTerm: "",
         orderBy: "newFirst", // or whatever default sorting you want
@@ -157,18 +179,14 @@ export default function Command() {
           "webbites_cached_results",
           JSON.stringify(uniqueResults),
         );
-        console.log("Cached", uniqueResults.length, "results to LocalStorage");
+        // console.log("Cached", uniqueResults.length, "results to LocalStorage");
       }
     } catch (error) {
       console.log("Error during log in search:", error);
     }
   };
 
-  const handleLoginSuccess = async () => {
-    console.log("Login successful, updating state...");
-    await checkAuthStatus();
-    await handleLoggedIn();
-  };
+  // handleLoginSuccess removed as we're now handling login directly in initialization
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -185,6 +203,9 @@ export default function Command() {
       // Verify LocalStorage is cleared
       const sessionToken = await LocalStorage.getItem("webbites_session_token");
       console.log("Session token after logout:", sessionToken);
+
+      // After logout, automatically open preferences to allow user to update credentials
+      await openExtensionPreferences();
     } catch (error) {
       console.error("Error during logout:", error);
     } finally {
@@ -225,6 +246,18 @@ export default function Command() {
         hitsPerPage: hitsPerPage,
       });
 
+      if (searchTerm?.length === 0) {
+        const uniqueResults =
+          results.hits?.filter(
+            (hit, index, self) =>
+              index === self.findIndex((h) => h.objectId === hit.objectId),
+          ) || [];
+        await LocalStorage.setItem(
+          "webbites_cached_results",
+          JSON.stringify(uniqueResults),
+        );
+      }
+
       if (page === 0) {
         setSearchResults(results.hits || []);
       } else {
@@ -258,9 +291,31 @@ export default function Command() {
     await handleSearch(searchText, nextPage);
   };
 
-  // Show login view if not authenticated
+  // If not authenticated, open extension preferences directly
+  useEffect(() => {
+    if (isAuthenticated === false) {
+      // Show a message to the user
+      console.log("User not authenticated, opening preferences...");
+
+      const error = new Error("User not authenticated");
+      showFailureToast(error, { title: "Login required" });
+
+      // Open preferences automatically
+      openExtensionPreferences();
+    }
+  }, [isAuthenticated]);
+
+  // Show loading or preferences screen if not authenticated
   if (isAuthenticated === false) {
-    return <LoginView onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <Detail
+        markdown="
+# WebBites Login Required
+Opening extension preferences...
+"
+      />
+    );
+    // return <Detail markdown="# WebBites Login Required\n\nOpening extension preferences..." />;
   }
 
   // Show loading screen while checking authentication
@@ -294,11 +349,35 @@ export default function Command() {
     }
   };
 
+  // Map of content types to their corresponding icons
+  const CONTENT_TYPE_ICONS = {
+    textNote: Icon.Pencil,
+    image: Icon.Image,
+    game: Icon.GameController,
+    movie: Icon.FilmStrip,
+    music: Icon.Music,
+    website: Icon.Link,
+  } as const;
+
+  const getIconType = (result: BookmarkItem) => {
+    const iconSource =
+      CONTENT_TYPE_ICONS[result.type as keyof typeof CONTENT_TYPE_ICONS];
+    return iconSource ? { source: iconSource } : { source: Icon.Link };
+  };
+
   const getFaviconForList = (result: BookmarkItem) => {
+    // First check for content type specific icons
+    const contentTypeIcon = getIconType(result);
+    if (result.type && result.type !== "website") {
+      return contentTypeIcon;
+    }
+
+    // For websites, use site logo or favicon
     if (result.siteLogo) {
       return result.siteLogo;
     }
-    return { source: Icon.Globe };
+
+    return result.url ? getFavicon(result.url) : contentTypeIcon;
   };
 
   const renderEmptyGridView = () => {
@@ -353,6 +432,38 @@ export default function Command() {
     );
   };
 
+  const removeHtml = (html: string) => {
+    return html.replace(/<[^>]*>/g, "").trim(); // Remove HTML tags using regex
+  };
+
+  const getDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      year: "2-digit",
+      month: "short",
+      day: "numeric",
+      hour12: true,
+    };
+    return new Date(date).toLocaleString("en-US", options);
+  };
+
+  const bookmarkTitle = (result: BookmarkItem, isList = false) => {
+    const icons = {
+      image: "🏞️ ",
+      game: "🎮 ",
+      movie: "🎬 ",
+      music: "🎵 ",
+      textNote: "📝 ",
+    };
+
+    const title =
+      result.type == "textNote"
+        ? removeHtml(result.textNote ? result.textNote : "")
+        : result.siteTitle;
+
+    if (isList) return title;
+    return `${result.type ? icons[result.type as keyof typeof icons] || "" : ""}${title}`;
+  };
+
   // Render function for grid items
   const renderGridItems = () => {
     // If we have results and we're not actively searching, show them
@@ -364,9 +475,13 @@ export default function Command() {
             value: {
               source: getBookmarkImage(result),
             },
-            tooltip: result.title || "Bookmark",
+            tooltip:
+              result.type == "textNote"
+                ? removeHtml(result.textNote ? result.textNote : "")
+                : result.siteTitle,
           }}
-          title={result.siteTitle || "Untitled Bookmark"}
+          // title={result.type }
+          title={bookmarkTitle(result)}
           actions={getCommonActions(result)}
         />
       ));
@@ -381,9 +496,12 @@ export default function Command() {
             value: {
               source: getBookmarkImage(result),
             },
-            tooltip: result.title || "Bookmark",
+            tooltip:
+              result.type == "textNote"
+                ? removeHtml(result.textNote ? result.textNote : "")
+                : result.siteTitle,
           }}
-          title={result.siteTitle || "Untitled Bookmark"}
+          title={bookmarkTitle(result)}
           actions={getCommonActions(result)}
         />
       ));
@@ -398,7 +516,13 @@ export default function Command() {
     result ? (
       <ActionPanel>
         <ActionPanel.Section>
-          <Action.OpenInBrowser url={result.url} />
+          <Action.OpenInBrowser
+            url={
+              result.type == "textNote"
+                ? `https://www.webbites.io/app?bookmarkId=${result.objectId}`
+                : result.url
+            }
+          />
           <Action.CopyToClipboard content={result.url} title="Copy URL" />
           <Action.OpenInBrowser
             url={`https://www.webbites.io/app?bookmarkId=${result.objectId}`}
@@ -412,6 +536,11 @@ export default function Command() {
             icon={{ source: Icon.Logout }}
             title="Logout"
             onAction={handleLogout}
+          />
+          <Action
+            icon={{ source: Icon.Gear }}
+            title="Open Extension Preferences"
+            onAction={openExtensionPreferences}
           />
         </ActionPanel.Section>
       </ActionPanel>
@@ -469,10 +598,15 @@ export default function Command() {
           : searchResults.map((result, index) => (
               <List.Item
                 key={result.objectId || index}
-                title={result.siteTitle || "Untitled Bookmark"}
+                title={bookmarkTitle(result, true)}
                 subtitle={result.url}
                 icon={getFaviconForList(result)}
-                accessories={[{ text: result.description || "" }]}
+                accessories={[
+                  { text: getDate(result.createdAt) },
+                  { icon: getIconType(result) },
+                ]}
+                keywords={["sssii"]}
+                id={result.objectId}
                 actions={getCommonActions(result)}
               />
             ))}
