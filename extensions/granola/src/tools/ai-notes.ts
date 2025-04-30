@@ -73,7 +73,7 @@ export default async function tool(input: Input): Promise<Note[]> {
 
   // Collect all notes first
   for (const document of documents) {
-    if (!document?.title || !document?.created_at || !document?.notes?.content) continue;
+    if (!document?.title || !document?.created_at || !document?.notes?.content || !document?.id) continue;
 
     const note: Note = {
       title: document.title,
