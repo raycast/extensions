@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-04-30
 
 - Added Granola extension
 - Added `New Note` command, which starts a new note and recording immediately in Granola
