@@ -30,11 +30,22 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
   const [customCategory, setCustomCategory] = useState("");
 
   useEffect(() => {
+    let isActive = true;
+
     (async () => {
       const all = await loadSites();
+      if (!isActive) {
+        // component unmounted—abort
+        return;
+      }
       const baseCats = getCategories(all);
       setCategories(Array.from(new Set([initialCat, "custom", ...baseCats])));
     })();
+
+    return () => {
+      // flip the flag on unmount
+      isActive = false;
+    };
   }, [initialCat]);
 
   // Validation rules
