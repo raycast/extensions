@@ -136,7 +136,9 @@ function validateIconIndex(data: unknown): data is IconIndexEntry[] {
       typeof item.Category === "string" &&
       ["Yes", "No"].includes(item.PNG as string) &&
       ["Yes", "No"].includes(item.SVG as string) &&
-      ["Yes", "No"].includes(item.WebP as string),
+      ["Yes", "No"].includes(item.WebP as string) &&
+      ["Yes", "No"].includes(item.Light as string) &&
+      ["Yes", "No"].includes(item.Dark as string),
   );
 }
 
