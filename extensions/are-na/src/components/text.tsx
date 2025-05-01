@@ -13,7 +13,16 @@ export function TextBlockView({ block }: TextBlockViewProps) {
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "";
-    return new Date(dateString).toLocaleString();
+    const date = new Date(dateString);
+    const formatter = new Intl.DateTimeFormat(undefined, {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+    });
+    return formatter.format(date);
   };
 
   return (

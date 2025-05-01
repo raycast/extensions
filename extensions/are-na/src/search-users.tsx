@@ -29,7 +29,7 @@ function Actions({ user }: { user: User }) {
 
 function UserListItem({ user }: { user: User }) {
   return (
-    <List.Item icon={{ source: "extension-icon.svg" }} title={user.full_name ?? ""} actions={<Actions user={user} />} />
+    <List.Item icon={{ source: "extension-icon.png" }} title={user.full_name ?? ""} actions={<Actions user={user} />} />
   );
 }
 
