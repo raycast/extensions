@@ -74,7 +74,7 @@ export default async function Command() {
               return value.length <= 10;
             })
             .reduceRight(function (prev: string, curr: string) {
-              if (prev.length > curr.length) {
+              if (prev.length >= curr.length) {
                 return prev;
               } else {
                 return curr;
