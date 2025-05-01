@@ -34,43 +34,6 @@ A Raycast extension for finding and using self-hosted icons from the selfh.st se
    - Download icon
    - View light/dark variants (when available)
 
-## Development
-
-### Prerequisites
-
-- Node.js 16 or later
-- npm or yarn
-- Raycast development environment
-
-### Setup
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/selfh-st-icons.git
-   cd selfh-st-icons
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start development server:
-   ```bash
-   npm run dev
-   ```
-
-### Build
-
-To build the extension:
-
-```bash
-npm run build
-```
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 

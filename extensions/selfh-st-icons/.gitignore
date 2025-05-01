@@ -5,14 +5,10 @@
 
 # Raycast specific files
 raycast-env.d.ts
-.raycast-swift-build
-.swiftpm
-compiled_raycast_swift
 
 # misc
 .DS_Store
 
-# Logs
 # Logs
 logs
 *.log
@@ -31,7 +27,3 @@ dev-debug.log
 *.njsproj
 *.sln
 *.sw?
-# OS specific
-# Task files
-tasks.json
-tasks/ 
