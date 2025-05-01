@@ -71,7 +71,7 @@ export default async function Command() {
         if (validCodes.length > 0) {
           phoneFilteredOTP = validCodes.filter(function(value: string) {
             return value.length <= 10;
-          }).reduceRight(function(prev: string, curr: string, _i: number, _arr: string[]) {
+          }).reduceRight(function(prev: string, curr: string) {
             if (prev.length > curr.length) 
                 return prev;
             else 
