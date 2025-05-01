@@ -17,7 +17,7 @@
      - Pick up to 10 `.app` bundles from your `/Applications` folder.
      - Drag-and-drop tags to reorder—this defines your hotkey mapping.
    - **Stage 2: Projects Selection**
-     - Select any repo in your Projects Directory.
+     - Select any repo in your projects directory.
      - Instantly open in your chosen apps via Cmd+1, Cmd+2, … Cmd+9, Cmd+0.
 
 3. **Hotkey Mapping**

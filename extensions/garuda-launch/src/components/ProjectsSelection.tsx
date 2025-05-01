@@ -21,7 +21,7 @@ export const ProjectsSelection: React.FC<Props> = ({ base, appEntries }) => {
   })();
 
   return (
-    <List searchBarPlaceholder="Select a project…" isLoading={repos.length === 0}>
+    <List searchBarPlaceholder="Select a project…">
       <List.Section title="Projects">
         {repos.map((proj) => {
           const target = join(base, proj);

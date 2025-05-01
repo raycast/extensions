@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "garuda-launch",
   "title": "Garuda Launch",
-  "description": "Garuda Launch lightweight launcher that cuts straight to coding",
+  "description": "A lightweight launcher that cuts straight to coding",
   "icon": "garuda-launch-logo-512.png",
   "author": "gywreb",
   "categories": [
@@ -23,7 +23,7 @@
     {
       "name": "garuda-launch",
       "title": "Garuda Launch",
-      "description": "Garuda Launch lightweight launcher that cuts straight to coding",
+      "description": "Start running a lightweight launcher that cuts straight to coding",
       "mode": "view",
       "entry": "src/garuda-launch.tsx"
     }

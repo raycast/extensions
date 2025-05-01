@@ -2,10 +2,17 @@ import { useGarudaLaunchContext } from '@hooks/useGarudaLaunchContext';
 import { Action, ActionPanel, Form, LocalStorage } from '@raycast/api';
 import { showFailureToast } from '@raycast/utils';
 import { APPS_KEY } from '@utils/constants';
-import { readApplications } from '@utils/helpers';
+import { readApplications, validateSelectedApplications } from '@utils/helpers';
 
 export const AppsSetup: React.FC = () => {
-  const apps = readApplications();
+  const apps = (() => {
+    try {
+      return readApplications() || [];
+    } catch {
+      return [];
+    }
+  })();
+
   const { setStage, setSelectedApps } = useGarudaLaunchContext();
 
   return (
@@ -16,23 +23,15 @@ export const AppsSetup: React.FC = () => {
           <Action.SubmitForm
             title="Continue"
             onSubmit={async (values: { apps: string[] }) => {
-              if (!values.apps.length) {
-                showFailureToast(new Error('Validation error'), {
-                  title: 'Select at least one app',
-                });
-                return;
-              }
-              if (values.apps.length > 10) {
-                showFailureToast(new Error('Validation error'), { title: 'Max 10 apps allowed' });
-                return;
-              }
+              const isValid = validateSelectedApplications(values.apps);
+              if (!isValid) return;
+
               try {
                 await LocalStorage.setItem(APPS_KEY, JSON.stringify(values.apps));
                 setSelectedApps(values.apps);
                 setStage('ProjectsSelection');
               } catch (error) {
                 showFailureToast(error, { title: 'Could not save selected apps' });
-                return;
               }
             }}
           />
@@ -45,10 +44,7 @@ export const AppsSetup: React.FC = () => {
         info="Search & select up to 10 apps. Drag tags to reorder."
       >
         {apps.map((app) => {
-          const name = app
-            .split('/')
-            .pop()!
-            .replace(/\.app$/, '');
+          const name = (app.split('/').pop() || '').replace(/\.app$/, '');
           return (
             <Form.TagPicker.Item key={app} value={app} title={name} icon={{ fileIcon: app }} />
           );

@@ -1,3 +1,4 @@
+import { showFailureToast } from '@raycast/utils';
 import { existsSync, readdirSync } from 'fs';
 import { homedir } from 'os';
 import { join, resolve } from 'path';
@@ -45,4 +46,21 @@ export function readProjects(base: string): string[] {
   } catch {
     return [];
   }
+}
+
+/**
+ * Handle applications selection validations.
+ */
+export function validateSelectedApplications(apps: string[]) {
+  let isValid = true;
+  if (!apps.length) {
+    isValid = false;
+    showFailureToast(new Error('Validation error'), {
+      title: 'Select at least one app',
+    });
+  } else if (apps.length > 10) {
+    isValid = false;
+    showFailureToast(new Error('Validation error'), { title: 'Max 10 apps allowed' });
+  }
+  return isValid;
 }
