@@ -15,7 +15,3 @@ export function useArena() {
     });
   }, [accessToken]);
 }
-
-export function getConfiguration(): Preferences {
-  return getPreferenceValues<Preferences>();
-}

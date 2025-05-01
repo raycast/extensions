@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { List, LaunchProps, ActionPanel, Action } from "@raycast/api";
 import { useArena } from "./hooks/useArena";
 import type { SearchUsersResponse, User } from "./api/types";
-import { usePromise } from "@raycast/utils";
+import { usePromise, showFailureToast } from "@raycast/utils";
 
 interface SearchArguments {
   query: string;
@@ -39,8 +39,17 @@ export default function Command(props: LaunchProps<{ arguments: SearchArguments 
   const { query } = props.arguments;
   const { data, isLoading } = usePromise(
     async (q: string): Promise<SearchUsersResponse> => {
-      const response = await arena.search(q).users({ per: 100 });
-      return response;
+      try {
+        const response = await arena.search(q).users({ per: 100 });
+        return response;
+      } catch (error) {
+        showFailureToast({
+          title: "Error",
+          message: "Failed to fetch users",
+          error,
+        });
+        throw error;
+      }
     },
     [query],
     {
