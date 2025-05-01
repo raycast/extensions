@@ -1,9 +1,9 @@
 # Deep Research Changelog
 
-## [Minor Prompt Updates] - {PR_MERGE_DATE}
+## [Minor Prompt Updates] - 2025-05-01
 
 Updates to the system prompts to improve performance.
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-05-01
 
 Added initial Deep Research implementation, with a command to view prior research sessions.
