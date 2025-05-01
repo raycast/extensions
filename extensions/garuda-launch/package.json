@@ -47,7 +47,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"...\" && exit 1",
+    "prepublishOnly": "ray lint && ray build",
     "publish": "npx @raycast/api@latest publish"
   }
 }

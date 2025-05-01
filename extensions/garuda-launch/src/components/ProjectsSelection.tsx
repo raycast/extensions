@@ -1,4 +1,6 @@
-import { Action, ActionPanel, Keyboard, List, LocalStorage } from '@raycast/api';
+import { useGarudaLaunchContext } from '@hooks/useGarudaLaunchContext';
+import { Action, ActionPanel, Keyboard, List, LocalStorage, showToast } from '@raycast/api';
+import { showFailureToast } from '@raycast/utils';
 import { APPS_KEY } from '@utils/constants';
 import { readProjects } from '@utils/helpers';
 import { join } from 'path';
@@ -9,10 +11,17 @@ interface Props {
 }
 
 export const ProjectsSelection: React.FC<Props> = ({ base, appEntries }) => {
-  const repos = readProjects(base);
+  const { setStage, setSelectedApps } = useGarudaLaunchContext();
+  const repos = (() => {
+    try {
+      return readProjects(base) || [];
+    } catch {
+      return [];
+    }
+  })();
 
   return (
-    <List searchBarPlaceholder="Select a project…">
+    <List searchBarPlaceholder="Select a project…" isLoading={repos.length === 0}>
       <List.Section title="Projects">
         {repos.map((proj) => {
           const target = join(base, proj);
@@ -35,7 +44,14 @@ export const ProjectsSelection: React.FC<Props> = ({ base, appEntries }) => {
                     title="Reset Applications"
                     icon={{ source: 'arrow.counterclockwise' }}
                     onAction={async () => {
-                      await LocalStorage.removeItem(APPS_KEY);
+                      try {
+                        await LocalStorage.removeItem(APPS_KEY);
+                        setStage('AppsSetup');
+                        setSelectedApps([]);
+                        showToast({ title: 'Applications reset successfully' });
+                      } catch (error) {
+                        showFailureToast(error, { title: 'Failed to reset applications' });
+                      }
                     }}
                   />
                 </ActionPanel>

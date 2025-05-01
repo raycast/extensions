@@ -1,5 +1,6 @@
 import { useGarudaLaunchContext } from '@hooks/useGarudaLaunchContext';
 import { Action, ActionPanel, Form, LocalStorage, showToast, Toast } from '@raycast/api';
+import { showFailureToast } from '@raycast/utils';
 import { APPS_KEY } from '@utils/constants';
 import { readApplications } from '@utils/helpers';
 
@@ -23,9 +24,14 @@ export const AppsSetup: React.FC = () => {
                 showToast({ style: Toast.Style.Failure, title: 'Max 10 apps allowed' });
                 return;
               }
-              await LocalStorage.setItem(APPS_KEY, JSON.stringify(values.apps));
-              setSelectedApps(values.apps);
-              setStage('ProjectsSelection');
+              try {
+                await LocalStorage.setItem(APPS_KEY, JSON.stringify(values.apps));
+                setSelectedApps(values.apps);
+                setStage('ProjectsSelection');
+              } catch (error) {
+                showFailureToast(error, { title: 'Could not save selected apps' });
+                return;
+              }
             }}
           />
         </ActionPanel>
