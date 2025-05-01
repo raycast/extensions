@@ -21,11 +21,10 @@ export function readApplications(): string[] {
       readdirSync(dir)
         .filter((n) => n.endsWith('.app'))
         .forEach((name) => {
-          const full = resolve(join(dir, name));
-          if (existsSync(full)) foundApps.add(full);
+          foundApps.add(resolve(join(dir, name)));
         });
     } catch {
-      return [];
+      // Empty catch - directory may not exist
     }
   });
 
