@@ -44,7 +44,7 @@ export default async function Command() {
 
       if (potentialMatches) {
         // We'll skip any that are right next to parentheses, dashes, or plus signs
-        const phoneChars = /[()\-+]/;
+        const phoneChars = /[()\-+.:/]/;
         const validCodes: string[] = [];
 
         for (const code of potentialMatches) {
