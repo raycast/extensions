@@ -10,6 +10,7 @@ import {
 import { FC, useState, useEffect } from "react";
 import { getIconCdnUrl, IconIndexEntry, downloadIconFile } from "./utils/icons";
 import { KEYBOARD_SHORTCUTS, getPreferences } from "./utils/preferences";
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * Props for the ActionPanelForIcon component
@@ -230,7 +231,13 @@ export const ActionPanelForIcon: FC<Props> = ({
         <Action
           title={`Download ${firstFormat.label}`}
           onAction={async () => {
-            if (!defaultUrl || !defaultFilename) return;
+            if (!defaultUrl || !defaultFilename) {
+              await showFailureToast({
+                title: "Download Failed",
+                message: "Icon URL or filename not available"
+              });
+              return;
+            }
             try {
               await downloadIconFile(
                 defaultUrl,

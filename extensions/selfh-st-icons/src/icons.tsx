@@ -28,7 +28,7 @@ import PreferencesView from "./preferences";
  * @returns The normalized string with special characters removed
  */
 const normalize = (str: string): string =>
-  str.toLowerCase().replace(/[-\\s_]+/g, "");
+  str.toLowerCase().replace(/[-\s_]+/g, "");
 
 /**
  * Manages a windowed view of icons with pagination and search filtering.
@@ -292,7 +292,7 @@ const Command: FC = () => {
             }
           />
           <Grid.Item
-            content="https://cdn.jsdelivr.net/gh/selfhst/icons/png/selfh-st.png"
+            content="../assets/store/icon.png"
             title="Visit selfh.st"
             actions={
               <ActionPanel>

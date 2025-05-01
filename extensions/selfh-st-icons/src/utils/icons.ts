@@ -1,30 +1,11 @@
+/// <reference lib="dom" />
+/// <reference lib="dom.iterable" />
+
 import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
 import os from "os";
-
-/**
- * Basic icon information interface
- */
-export interface Icon {
-  /** Unique identifier for the icon */
-  id: string;
-  /** Display name of the icon */
-  name: string;
-  /** URL to the icon resource */
-  url: string;
-  /** Associated tags for searching */
-  tags: string[];
-}
-
-/**
- * Search for icons based on a query string.
- * @returns Promise resolving to array of matching icons
- */
-export async function searchIcons(): Promise<Icon[]> {
-  // TODO: Implement icon search functionality
-  return [];
-}
 
 /**
  * Structure of each entry in the icons.json index file.
@@ -293,7 +274,12 @@ export async function downloadIconFile(
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      throw new NetworkError(`HTTP ${response.status}: ${response.statusText}`);
+      const error = new NetworkError(`HTTP ${response.status}: ${response.statusText}`);
+      await showFailureToast({
+        title: "Failed to download icon",
+        message: error.message
+      });
+      throw error;
     }
 
     const buffer = await response.arrayBuffer();
@@ -310,9 +296,18 @@ export async function downloadIconFile(
 
     await fs.promises.writeFile(targetPath, Buffer.from(buffer));
   } catch (err) {
-    if (err instanceof IconError) throw err;
-    throw new DownloadError(
-      err instanceof Error ? err.message : "Failed to download icon",
-    );
+    if (err instanceof IconError) {
+      await showFailureToast({
+        title: "Icon Download Failed",
+        message: err.message
+      });
+      throw err;
+    }
+    const error = new DownloadError(err instanceof Error ? err.message : "Failed to download icon");
+    await showFailureToast({
+      title: "Icon Download Failed",
+      message: error.message
+    });
+    throw error;
   }
 }
