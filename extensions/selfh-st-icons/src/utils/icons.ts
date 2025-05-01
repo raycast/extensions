@@ -187,31 +187,33 @@ export async function getIconIndex({
 }> {
   try {
     if (!forceRefresh) {
-      try {
-        const [cached, lastFetchedStr] = await Promise.all([
-          LocalStorage.getItem<string>(ICON_INDEX_KEY),
-          LocalStorage.getItem<string>(ICON_INDEX_LAST_FETCHED_KEY),
-        ]);
+      const [cached, lastFetchedStr] = await Promise.all([
+        LocalStorage.getItem<string>(ICON_INDEX_KEY),
+        LocalStorage.getItem<string>(ICON_INDEX_LAST_FETCHED_KEY),
+      ]);
 
-        if (cached && lastFetchedStr) {
-          const lastFetched = parseInt(lastFetchedStr, 10);
+      if (cached && lastFetchedStr) {
+        const lastFetched = parseInt(lastFetchedStr, 10);
+        if (!isNaN(lastFetched)) {
           const age = Date.now() - lastFetched;
 
           if (age < CACHE_DURATION_MS) {
-            const data = JSON.parse(cached);
-            if (validateIconIndex(data)) {
-              return { data, fromCache: true, lastFetched };
+            try {
+              const data = JSON.parse(cached);
+              if (validateIconIndex(data)) {
+                return { data, fromCache: true, lastFetched };
+              }
+            } catch {
+              // If parsing fails, continue to fetch
             }
           }
         }
-      } catch {
-        // If cache read fails, continue to fetch
       }
     }
 
     const data = await refreshIconIndex();
     return { data, fromCache: false, lastFetched: Date.now() };
-  } catch (err) {
+  } catch (error) {
     // Try to use cached data as fallback
     try {
       const [cached, lastFetchedStr] = await Promise.all([
@@ -220,24 +222,29 @@ export async function getIconIndex({
       ]);
 
       if (cached) {
-        const data = JSON.parse(cached);
-        if (validateIconIndex(data)) {
-          const lastFetched = lastFetchedStr
-            ? parseInt(lastFetchedStr, 10)
-            : undefined;
-          return {
-            data,
-            fromCache: true,
-            lastFetched,
-            error: err instanceof Error ? err.message : "Unknown error",
-          };
+        try {
+          const data = JSON.parse(cached);
+          if (validateIconIndex(data)) {
+            const lastFetched =
+              lastFetchedStr && !isNaN(parseInt(lastFetchedStr, 10))
+                ? parseInt(lastFetchedStr, 10)
+                : undefined;
+            return {
+              data,
+              fromCache: true,
+              lastFetched,
+              error: error instanceof Error ? error.message : "Unknown error",
+            };
+          }
+        } catch {
+          // If parsing fails, throw original error
         }
       }
     } catch {
       // If fallback fails, throw original error
     }
 
-    throw err;
+    throw error;
   }
 }
 
