@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Fix `Paste Latest OTP Code` Command for Phone numbers] - 2025-05-01
+## [Fix OTP Code Parsing for Messages with Special Characters] - {PR_MERGE_DATE}
 
 Fixed issues with wrong number being parsed by adding additional common characters the regex and adding a bit more logic to select the largest OTP from the filtered list.
 
