@@ -1,20 +1,11 @@
 import Parse from "parse/node.js";
 import { LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { UserData } from "../types";
 
 // Constants
 const SESSION_TOKEN_KEY = "webbites_session_token";
 const USER_DATA_KEY = "webbites_user_data";
-
-// Define the structure of user data
-interface UserData {
-  objectId: string;
-  username: string;
-  email: string;
-  _sessionToken?: string;
-  createdAt?: Date;
-  [key: string]: string | Date | undefined;
-}
 
 // Simple user class that mimics Parse.User's basic functionality
 export class SimpleUser {
@@ -58,7 +49,7 @@ export const getSimpleCurrentUser = async (): Promise<SimpleUser | null> => {
     // Check if we have stored user data
     const userDataString = await LocalStorage.getItem<string>(USER_DATA_KEY);
     if (!userDataString) {
-      console.log("No stored user data found");
+      console.log("No stored user data found 2");
       return null;
     }
 

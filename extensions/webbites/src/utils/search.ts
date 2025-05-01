@@ -2,36 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import { getSimpleCurrentUser } from "./userHelpers";
 import { showFailureToast } from "@raycast/utils";
 import axios from "axios"; // Use axios instead of fetch
-
-interface SearchFilters {
-  // Add specific filter types as needed
-  [key: string]: string | number | boolean | null;
-}
-
-interface BookmarkItem {
-  objectId: string;
-  siteTitle: string;
-  url: string;
-  description?: string;
-  siteScreenshot?: { url: string };
-  OGImage?: string;
-  siteLogo?: string;
-  type?: string;
-}
-
-interface SearchOptions {
-  searchTerm?: string | null;
-  filters?: SearchFilters | null;
-  orderBy?: string;
-  page?: number;
-  hitsPerPage?: number;
-}
-
-interface SearchResult {
-  hits: BookmarkItem[];
-  totalHits: number;
-  page: number;
-}
+import { SearchOptions, SearchResult } from "../types";
 
 /**
  * Performs a search request to the server

@@ -24,25 +24,12 @@ import {
 } from "./utils/auth";
 import { search } from "./utils/search";
 import { getSimpleCurrentUser } from "./utils/userHelpers";
+import { BookmarkItem } from "./types";
 
 export default function Command() {
   const [columns, setColumns] = useState(3);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-  interface BookmarkItem {
-    objectId: string;
-    siteTitle: string;
-    url: string;
-    createdAt: Date;
-    description?: string;
-    textNote?: string;
-    siteScreenshot?: { url: string };
-    OGImage?: string;
-    siteLogo?: string;
-    type?: string;
-    title?: string;
-  }
 
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState<BookmarkItem[]>([]);
@@ -96,7 +83,6 @@ export default function Command() {
           }>();
 
           // Attempt login if credentials exist
-          preferences.email = "";
           if (preferences.email && preferences.password) {
             try {
               await login(preferences.email, preferences.password);
@@ -597,16 +583,14 @@ Opening extension preferences...
           ? renderEmptyListView()
           : searchResults.map((result, index) => (
               <List.Item
-                key={result.objectId || index}
                 title={bookmarkTitle(result, true)}
+                key={result.objectId || index}
                 subtitle={result.url}
                 icon={getFaviconForList(result)}
                 accessories={[
                   { text: getDate(result.createdAt) },
                   { icon: getIconType(result) },
                 ]}
-                keywords={["sssii"]}
-                id={result.objectId}
                 actions={getCommonActions(result)}
               />
             ))}

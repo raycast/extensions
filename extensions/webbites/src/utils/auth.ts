@@ -119,7 +119,7 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
     // Check if we have stored user data
     const userDataString = await LocalStorage.getItem<string>(USER_DATA_KEY);
     if (!userDataString) {
-      console.log("No stored user data found");
+      console.log("No stored user data found 1");
       return null;
     }
 
