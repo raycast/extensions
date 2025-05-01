@@ -1,11 +1,20 @@
 import { List, Icon } from "@raycast/api";
 import { useState, useCallback } from "react";
-import { TapData, updateTapData } from "./tempoCalculator";
+import { TapData, updateTapData, TempoConfig, DEFAULT_CONFIG } from "./tempoCalculator";
 
 export default function Command() {
+  // Custom configuration - could be loaded from preferences in the future
+  const [config] = useState<TempoConfig>({
+    ...DEFAULT_CONFIG,
+    // Override any defaults here if needed
+    decimalPlaces: 0, // Show 1 decimal place
+    smoothingFactor: 0.9, // Slightly stronger smoothing than default
+  });
+
   const [tapData, setTapData] = useState<TapData>({
     timestamps: [],
     bpm: null,
+    rawBpm: null,
   });
 
   const [searchText, setSearchText] = useState("");
@@ -16,8 +25,8 @@ export default function Command() {
       if (newText.length > searchText.length) {
         const now = Date.now();
 
-        // Create new tap data immutably
-        const newTapData = updateTapData(tapData, now);
+        // Create new tap data immutably with the current config
+        const newTapData = updateTapData(tapData, now, config);
 
         // Log data to console
         console.log("Tap timestamp:", now);
@@ -27,14 +36,15 @@ export default function Command() {
             ? Array.from(newTapData.timestamps.slice(1)).map((t, i) => t - newTapData.timestamps[i])
             : [],
         );
-        console.log("Current BPM:", newTapData.bpm);
+        console.log("Raw BPM:", newTapData.rawBpm);
+        console.log("Smoothed BPM:", newTapData.bpm);
 
         setTapData(newTapData);
       }
 
       setSearchText(newText);
     },
-    [searchText, tapData],
+    [searchText, tapData, config],
   );
 
   const getLastTapTime = useCallback((timestamps: ReadonlyArray<number>) => {
@@ -47,7 +57,7 @@ export default function Command() {
         <List.Item
           icon={Icon.Heartbeat}
           title={`${tapData.bpm} BPM`}
-          subtitle={`Based on ${tapData.timestamps.length} taps`}
+          subtitle={`Based on ${tapData.timestamps.length} taps${tapData.rawBpm !== tapData.bpm ? ` (Raw: ${tapData.rawBpm})` : ""}`}
           accessories={[{ text: `Last tap: ${getLastTapTime(tapData.timestamps)}` }]}
         />
       ) : (
