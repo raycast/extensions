@@ -82,7 +82,7 @@ export async function fetchTags(): Promise<string[]> {
 }
 
 // Function to create a bookmark
-export async function createBookmark(data: BookmarkData): Promise<any> {
+export async function createBookmark(data: BookmarkData): Promise<unknown> {
   // TODO: Implement actual API call to create a bookmark
   console.log("Creating bookmark with data:", data);
   // Placeholder remains for now

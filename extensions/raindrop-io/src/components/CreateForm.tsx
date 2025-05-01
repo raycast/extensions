@@ -1,18 +1,14 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon, AI, environment, Toast, showToast } from "@raycast/api";
-import { FormValidation, useCachedState, useForm } from "@raycast/utils";
+import { useCachedState, useForm } from "@raycast/utils";
 import fetch, { Response } from "node-fetch";
-import { useEffect, useState, useCallback, FormEvent } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { CollectionCreationResponse, FormValues } from "../types";
 
 import { useRequest } from "../hooks/useRequest";
 import { useTags } from "../hooks/useTags";
 
-import {
-  fetchCollections as apiFetchCollections,
-  fetchTags as apiFetchTags,
-  Collection as ApiCollection,
-} from "../lib/raindrop-api";
-import { getAiSuggestions, AISuggestions } from "../lib/ai-suggestions";
+import { fetchCollections as apiFetchCollections, fetchTags as apiFetchTags } from "../lib/raindrop-api";
+import { getAiSuggestions } from "../lib/ai-suggestions";
 
 // Define Preferences interface locally or move to types.ts if preferred
 interface Preferences {

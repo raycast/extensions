@@ -122,7 +122,10 @@ ${collectionsText}
     console.log("Raw AI Response:", aiResponse); // For debugging
 
     // --- Response Parsing (Crucial & Error-Prone) ---
-    let suggestions: AISuggestions = { suggestedTags: [], suggestedCollectionId: null };
+    const suggestions: { suggestedTags: string[]; suggestedCollectionId: number | null } = {
+      suggestedTags: [],
+      suggestedCollectionId: null,
+    };
     try {
       // --- Clean the response ---
       // Remove markdown code fences (```json ... ``` or ``` ... ```)
