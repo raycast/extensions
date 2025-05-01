@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Enhancements] - 2025-04-30
+## [Enhancements] - {PR_MERGE_DATE}
 
 - Add Edit Bookmark action ([#18855](https://github.com/raycast/extensions/issues/18855))
 
