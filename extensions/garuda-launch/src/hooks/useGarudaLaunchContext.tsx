@@ -1,10 +1,5 @@
-import {
-  getPreferenceValues,
-  LocalStorage,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from '@raycast/api';
+import { getPreferenceValues, LocalStorage, openExtensionPreferences } from '@raycast/api';
+import { showFailureToast } from '@raycast/utils';
 import { APPS_KEY, Stages } from '@utils/constants';
 import { expandHome } from '@utils/helpers';
 import { existsSync } from 'fs';
@@ -22,18 +17,22 @@ interface GarudaLaunchContextStates {
   loading: boolean;
 }
 
+interface GarudaLaunchPreferences {
+  projectsPath: string;
+}
+
 type GarudaLaunchContextType = GarudaLaunchContextActions & GarudaLaunchContextStates;
 
 const GarudaLaunchContext = createContext<GarudaLaunchContextType | undefined>(undefined);
 
 export const useGarudaLaunchContext = (): GarudaLaunchContextType => {
   const context = useContext(GarudaLaunchContext);
-  if (!context) throw new Error('useGarudaLaunch must be used within GarudaLaunchProvider');
+  if (!context) throw new Error('useGarudaLaunchContext must be used within GarudaLaunchProvider');
   return context;
 };
 
 export const GarudaLaunchProvider = (props: PropsWithChildren) => {
-  const { projectsPath } = getPreferenceValues<Preferences>();
+  const { projectsPath } = getPreferenceValues<GarudaLaunchPreferences>();
   const base = expandHome(projectsPath);
 
   const [stage, setStage] = useState<Stages>('AppsSetup');
@@ -43,13 +42,16 @@ export const GarudaLaunchProvider = (props: PropsWithChildren) => {
   // Validate projects path
   useEffect(() => {
     if (!existsSync(base)) {
-      showToast({ style: Toast.Style.Failure, title: 'Please configure your projects directory' });
+      showFailureToast(new Error('Projects directory not found'), {
+        title: 'Please configure your projects directory',
+      });
       openExtensionPreferences();
     }
   }, [base]);
 
   // Load apps from storage
   useEffect(() => {
+    let mounted = true;
     (async () => {
       const stored = await LocalStorage.getItem<string>(APPS_KEY);
       let apps: string[] = [];
@@ -57,18 +59,24 @@ export const GarudaLaunchProvider = (props: PropsWithChildren) => {
         apps = stored ? JSON.parse(stored) : [];
       } catch (error: unknown) {
         if (error instanceof Error) {
-          showToast({ style: Toast.Style.Failure, title: error.message });
+          showFailureToast(error, { title: error.message });
         } else {
-          showToast({ style: Toast.Style.Failure, title: 'An unknown error occurred' });
+          showFailureToast(new Error('An unknown error occurred'), {
+            title: 'An unknown error occurred',
+          });
         }
       }
-      const limited = apps.slice(0, 10);
-      setSelectedApps(limited);
-      setStage(limited.length > 0 ? 'ProjectsSelection' : 'AppsSetup');
-      setLoading(false);
+      if (mounted) {
+        const limited = apps.slice(0, 10);
+        setSelectedApps(limited);
+        setStage(limited.length > 0 ? 'ProjectsSelection' : 'AppsSetup');
+        setLoading(false);
+      }
     })();
+    return () => {
+      mounted = false;
+    };
   }, []);
-
   return (
     <GarudaLaunchContext.Provider
       value={{ base, stage, selectedApps, loading, setStage, setSelectedApps }}

@@ -1,6 +1,6 @@
-# GarudaLaunch
+# Garuda Launch
 
-**GarudaLaunch** is a Raycast extension that gives you lightning-fast access to your favorite developer apps and project folders. Inspired by the mythical Garuda, it soars through your local projects and lets you open any repo in up to ten different applications with a single hotkey.
+**Garuda Launch** is a Raycast extension that gives you lightning-fast access to your favorite developer apps and project folders. Inspired by the mythical Garuda, it soars through your local projects and lets you open any repo in up to ten different applications with a single hotkey.
 
 ---
 
@@ -9,7 +9,7 @@
 1. **Configurable Projects Path**
 
    - Set your “Projects Directory” once in Raycast Preferences.
-   - GarudaLaunch will list every sub-folder inside that directory as a “repo.”
+   - Garuda Launch will list every sub-folder inside that directory as a “repo.”
 
 2. **Multi-Stage Setup Flow**
 
@@ -35,9 +35,4 @@
 
 ## 🚀 Installation
 
-1. Clone this repo into your Raycast extensions folder:
-
-   ```bash
-   git clone https://github.com/your-org/garuda-launch.git ~/.raycast/extensions/garuda-launch
-   cd ~/.raycast/extensions/garuda-launch
-   ```
+Install this extension from the Raycast Store

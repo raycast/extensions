@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from 'fs';
+import { readdirSync } from 'fs';
 import { homedir } from 'os';
 import { join, resolve } from 'path';
 
@@ -27,7 +27,9 @@ export function readApplications(appsDir: string = '/Applications'): string[] {
  */
 export function readProjects(base: string): string[] {
   try {
-    return readdirSync(base).filter((name) => statSync(join(base, name)).isDirectory());
+    return readdirSync(base, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name);
   } catch {
     return [];
   }
