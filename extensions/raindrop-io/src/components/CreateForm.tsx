@@ -179,21 +179,19 @@ export const CreateForm = (props: CreateFormProps) => {
       if (!url || url === lastSuggestedUrl || !aiTaggingEnabled || !environment.canAccess(AI) || isAiLoading) {
         return;
       }
-
       if (!url.match(/^(https?|file):\/\//i)) {
         return;
       }
+      if (isAiLoading) return;
 
       setIsAiLoading(true);
       let suggestionsApplied = false;
       try {
-        const currentTags = tagsData?.items?.map((t) => t._id) || [];
-        const currentCollections: ApiCollection[] = collections.map((c) => ({ _id: Number(c.value), title: c.label }));
-        const validCollections = currentCollections.filter((c) => !isNaN(c._id));
+        const [currentTags, currentCollections] = await Promise.all([apiFetchTags(), apiFetchCollections()]);
+        const validCollections = currentCollections.filter((c) => typeof c._id === "number" && !isNaN(c._id));
 
         if (currentTags.length === 0 && validCollections.length === 0) {
-          console.log("Skipping AI suggestions: No tag/collection context available yet.");
-          setIsAiLoading(false);
+          console.log("Skipping AI suggestions: No tag/collection context available from API.");
           return;
         }
 
@@ -212,7 +210,12 @@ export const CreateForm = (props: CreateFormProps) => {
           suggestionsApplied = true;
         }
       } catch (error) {
-        console.error("Error triggering AI suggestions:", error);
+        console.error("Error triggering AI suggestions (or fetching context):", error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to get AI context",
+          message: error instanceof Error ? error.message : String(error),
+        });
       } finally {
         setIsAiLoading(false);
         if (suggestionsApplied) {
@@ -220,7 +223,7 @@ export const CreateForm = (props: CreateFormProps) => {
         }
       }
     },
-    [aiTaggingEnabled, isAiLoading, setValue, tagsData, collections, lastSuggestedUrl],
+    [aiTaggingEnabled, isAiLoading, setValue, lastSuggestedUrl],
   );
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
+import { CollectionsResponse, TagsResponse } from "../types"; // Import response types
 
 // Define interfaces based on Raindrop API documentation
 // (These might need refinement based on actual API usage in the extension)
@@ -14,8 +15,10 @@ export interface Collection {
   // other collection fields...
 }
 
-export interface Tag {
-  _id: string; // Tags seem to be just strings in many responses
+// Interface for Tag items from the API (matching TagsResponse)
+export interface TagItem {
+  _id: string;
+  count: number;
 }
 
 export interface BookmarkData {
@@ -40,52 +43,49 @@ function getAuthHeaders(): { Authorization: string } {
 
 // Function to fetch collections
 export async function fetchCollections(): Promise<Collection[]> {
-  // TODO: Implement actual API call to fetch collections
-  // Example structure:
-  // const response = await fetch(`${API_ENDPOINT}/collections`, { headers: getAuthHeaders() });
-  // if (!response.ok) throw new Error('Failed to fetch collections');
-  // const data = await response.json();
-  // return data.items;
-  console.log("Fetching collections...");
-  // Placeholder data
-  await new Promise(resolve => setTimeout(resolve, 50)); // Simulate network delay
-  return [
-    { _id: 1, title: "Reading List" },
-    { _id: -1, title: "Unsorted" },
-    { _id: 123, title: "Tech" },
-  ];
+  console.log("Fetching collections via API...");
+  try {
+    const response = await fetch(`${API_ENDPOINT}/collections`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch collections: ${response.status} ${errorText}`);
+    }
+    const data = (await response.json()) as CollectionsResponse;
+    // Ensure we return only the Collection type, matching the return signature
+    return data.items.map((item) => ({ _id: item._id, title: item.title }));
+  } catch (error) {
+    console.error("Error in fetchCollections:", error);
+    throw error; // Re-throw error to be caught by caller
+  }
 }
 
 // Function to fetch tags
 export async function fetchTags(): Promise<string[]> {
-  // TODO: Implement actual API call to fetch tags
-  // Example structure:
-  // const response = await fetch(`${API_ENDPOINT}/tags`, { headers: getAuthHeaders() });
-  // if (!response.ok) throw new Error('Failed to fetch tags');
-  // const data = await response.json();
-  // return data.items.map(tag => tag._id); // Assuming tags are returned this way
-  console.log("Fetching tags...");
-  // Placeholder data
-  await new Promise(resolve => setTimeout(resolve, 50)); // Simulate network delay
-  return ["article", "tech", "javascript", "raycast", "productivity"];
+  console.log("Fetching tags via API...");
+  try {
+    const response = await fetch(`${API_ENDPOINT}/tags`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch tags: ${response.status} ${errorText}`);
+    }
+    const data = (await response.json()) as TagsResponse;
+    // Return just the tag names (strings)
+    return data.items.map((tag: TagItem) => tag._id);
+  } catch (error) {
+    console.error("Error in fetchTags:", error);
+    throw error; // Re-throw error to be caught by caller
+  }
 }
 
 // Function to create a bookmark
 export async function createBookmark(data: BookmarkData): Promise<any> {
   // TODO: Implement actual API call to create a bookmark
-  // This might reuse existing logic from the 'add' command file.
-  // Example structure:
-  // const response = await fetch(`${API_ENDPOINT}/raindrop`, {
-  //   method: 'POST',
-  //   headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(data),
-  // });
-  // if (!response.ok) {
-  //   const errorBody = await response.text();
-  //   throw new Error(`Failed to create bookmark: ${response.status} ${errorBody}`);
-  // }
-  // return await response.json();
   console.log("Creating bookmark with data:", data);
-  await new Promise(resolve => setTimeout(resolve, 100)); // Simulate network delay
-  return { result: true, item: { ...data, _id: Date.now() } }; // Simulate success response
-} 
+  // Placeholder remains for now
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  return { result: true, item: { ...data, _id: Date.now() } };
+}
