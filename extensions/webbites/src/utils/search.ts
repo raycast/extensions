@@ -43,7 +43,7 @@ export const search = async (
     return response.data.search;
   } catch (error) {
     console.error("Search error:", error);
-    handleSearchError(error);
+    handleSearchError(error as Error);
     throw error;
   }
 };
