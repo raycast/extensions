@@ -1,5 +1,7 @@
 # OpenVPN Changelog
 
+## [Updated README] - {PR_MERGE_DATE}
+
 ## [Handle multiple profiles] - 2024-08-01
 
 ### ✨ New
