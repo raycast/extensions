@@ -13,7 +13,7 @@ import {
   setPreferences,
   Preferences,
 } from "./utils/preferences";
-
+import { showFailureToast } from "@raycast/utils";
 export default function PreferencesView() {
   const { pop } = useNavigation();
   const [preferences, setPreferencesState] = useState<Preferences>();
