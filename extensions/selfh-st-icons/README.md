@@ -2,7 +2,7 @@
 
 A Raycast extension for finding and using self-hosted icons from the selfh.st service. This extension allows you to easily search, preview, and use icons in various formats (PNG, SVG, WebP) with support for both light and dark variants.
 
-![Selfh.st Icons Screenshot](/metadata/selfh-st-icons-1.png)
+![Selfh.st Icons Screenshot](../metadata/selfh-st-icons-1.png)
 
 
 ## Features
