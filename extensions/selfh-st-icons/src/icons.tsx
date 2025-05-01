@@ -182,7 +182,7 @@ const Command: FC = () => {
 
         if (result.error) {
           showToast({
-            style: Toast.Style.Failure,
+            style: Toast.Style.Success,
             title: "Using cached data",
             message: result.error,
           });
