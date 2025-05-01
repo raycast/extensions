@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import { CollectionsResponse, TagsResponse } from "../types"; // Import response types
+import { Collection, CollectionsResponse, TagsResponse, CollectionCreationResponse } from "../types"; // Import response types
 
 // Define interfaces based on Raindrop API documentation
 // (These might need refinement based on actual API usage in the extension)
@@ -9,25 +9,19 @@ interface Preferences {
   // other preferences...
 }
 
-export interface Collection {
-  _id: number;
-  title: string;
-  // other collection fields...
-}
-
 // Interface for Tag items from the API (matching TagsResponse)
 export interface TagItem {
   _id: string;
   count: number;
 }
 
-export interface BookmarkData {
+// Define BookmarkData based on fields needed for creation
+export interface BookmarkCreationData {
   link: string;
   title?: string;
-  excerpt?: string;
   tags?: string[];
-  collectionId?: number;
-  // other fields as needed...
+  collectionId?: string; // ID used in creation might be string
+  pleaseParse?: object; // Include this as it's used in the existing logic
 }
 
 const API_ENDPOINT = "https://api.raindrop.io/rest/v1";
@@ -53,8 +47,8 @@ export async function fetchCollections(): Promise<Collection[]> {
       throw new Error(`Failed to fetch collections: ${response.status} ${errorText}`);
     }
     const data = (await response.json()) as CollectionsResponse;
-    // Ensure we return only the Collection type, matching the return signature
-    return data.items.map((item) => ({ _id: item._id, title: item.title }));
+    // Now returns the full Collection type from types.ts
+    return data.items;
   } catch (error) {
     console.error("Error in fetchCollections:", error);
     throw error; // Re-throw error to be caught by caller
@@ -81,11 +75,56 @@ export async function fetchTags(): Promise<string[]> {
   }
 }
 
-// Function to create a bookmark
-export async function createBookmark(data: BookmarkData): Promise<unknown> {
-  // TODO: Implement actual API call to create a bookmark
-  console.log("Creating bookmark with data:", data);
-  // Placeholder remains for now
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  return { result: true, item: { ...data, _id: Date.now() } };
+// Function to create a new collection (Helper for createBookmark)
+// Takes title, returns the new collection object
+export async function createCollectionAPI(title: string): Promise<Collection> {
+  console.log(`Creating collection via API: ${title}`);
+  const preferences: Preferences = getPreferenceValues();
+  try {
+    const response = await fetch(`${API_ENDPOINT}/collection`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ title, parent: { $id: {} } }), // Assuming root level creation
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to create collection: ${response.status} ${errorText}`);
+    }
+    const data = (await response.json()) as CollectionCreationResponse;
+    return data.item;
+  } catch (error) {
+    console.error("Error in createCollectionAPI:", error);
+    throw error;
+  }
+}
+
+// Function to create one or more bookmarks
+// Accepts an array of items matching the API structure
+export async function createBookmarksAPI(items: BookmarkCreationData[]): Promise<unknown> {
+  console.log("Creating bookmarks via API with items:", items);
+  try {
+    const response = await fetch(`${API_ENDPOINT}/raindrops`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ items }), // Send the items array directly
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to create bookmark(s): ${response.status} ${errorText}`);
+    }
+    // Return the parsed response (or just success status)
+    const responseData = await response.json();
+    console.log("Bookmark creation response:", responseData);
+    return responseData; // Return the actual response
+  } catch (error) {
+    console.error("Error in createBookmarksAPI:", error);
+    throw error;
+  }
 }
