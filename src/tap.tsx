@@ -1,16 +1,37 @@
-import { List, Icon, Color } from "@raycast/api";
-import { useState, useCallback } from "react";
-import { TapData, updateTapData, TempoConfig, DEFAULT_CONFIG } from "./tempoCalculator";
+import {
+  Action,
+  ActionPanel,
+  clearSearchBar,
+  Color,
+  environment,
+  getPreferenceValues,
+  Icon,
+  List,
+  openCommandPreferences,
+} from "@raycast/api";
+import { useCallback, useState } from "react";
+import { DEFAULT_CONFIG, TapData, TempoConfig, updateTapData } from "./tempoCalculator";
+
+interface Preferences {
+  decimalPlaces: string;
+  smoothingFactor: "none" | "low" | "mid" | "high";
+  tempoChangeThreshold: "low" | "mid" | "high";
+  pauseThreshold: "low" | "mid" | "high";
+  resetAfterPause: boolean;
+}
 
 export default function Command() {
-  // Custom configuration - could be loaded from preferences in the future
+  // Get user preferences
+  const preferences = getPreferenceValues<Preferences>();
+
+  // Use preferences or fall back to defaults
   const [config] = useState<TempoConfig>({
     ...DEFAULT_CONFIG,
-    // Override any defaults here if needed
-    decimalPlaces: 1, // Show 1 decimal place
-    smoothingFactor: 0.4, // Higher initial smoothing, will adapt based on tap consistency
-    tempoChangeThreshold: 1.7, // Slightly more sensitive tempo change detection
-    pauseThreshold: 1500, // 1.5 seconds pause indicates potential tempo change
+    decimalPlaces: parseInt(preferences.decimalPlaces) as 0 | 1 | 2,
+    smoothingFactor: getSmoothing(preferences.smoothingFactor),
+    tempoChangeThreshold: getTempoChangeThreshold(preferences.tempoChangeThreshold),
+    pauseThreshold: getPauseThreshold(preferences.pauseThreshold),
+    resetAfterPause: preferences.resetAfterPause,
   });
 
   const [tapData, setTapData] = useState<TapData>({
@@ -30,33 +51,16 @@ export default function Command() {
       if (newText.length > searchText.length) {
         const now = Date.now();
 
-        // Create new tap data immutably with the current config
         const newTapData = updateTapData(tapData, now, config);
 
-        // Log data to console
-        console.log("Tap timestamp:", now);
-        console.log(
-          "Tap intervals:",
-          newTapData.timestamps.length >= 2
-            ? Array.from(newTapData.timestamps.slice(1)).map((t, i) => t - newTapData.timestamps[i])
-            : [],
-        );
-        console.log("Raw BPM:", newTapData.rawBpm);
-        console.log("Smoothed BPM:", newTapData.bpm);
-        console.log("Variance:", newTapData.variance);
-        console.log("Tempo change detected:", newTapData.tempoChangeDetected);
-
         setTapData(newTapData);
+        clearSearchBar();
       }
 
       setSearchText(newText);
     },
     [searchText, tapData, config],
   );
-
-  const getLastTapTime = useCallback((timestamps: ReadonlyArray<number>) => {
-    return timestamps.length > 0 ? new Date(timestamps[timestamps.length - 1]).toLocaleTimeString() : "None";
-  }, []);
 
   // Get variance indicator based on tapData.variance
   const getConsistencyIndicator = useCallback((variance: number | null) => {
@@ -67,10 +71,6 @@ export default function Command() {
     if (variance < 2000) return { text: "Consistency: Good", color: Color.Blue };
     if (variance < 10000) return { text: "Consistency: Average", color: Color.Yellow };
     return { text: "Consistency: Poor", color: Color.Red };
-  }, []);
-
-  const getTapCount = useCallback((timestamps: ReadonlyArray<number>) => {
-    return `${timestamps.length} tap${timestamps.length !== 1 ? "s" : ""}`;
   }, []);
 
   const getTitle = useCallback((data: TapData) => {
@@ -89,13 +89,8 @@ export default function Command() {
         <List.Item
           icon={tapData.tempoChangeDetected ? Icon.ArrowClockwise : Icon.Heartbeat}
           title={getTitle(tapData)}
-          subtitle={`Raw: ${tapData.rawBpm} BPM`}
+          subtitle={environment.isDevelopment ? `Raw: ${tapData.rawBpm} BPM` : undefined}
           accessories={[
-            {
-              text: getTapCount(tapData.timestamps),
-              icon: Icon.Dot,
-              tooltip: `Based on ${tapData.timestamps.length} taps`,
-            },
             {
               text: getConsistencyIndicator(tapData.variance).text,
               icon: Icon.Dot,
@@ -105,14 +100,65 @@ export default function Command() {
                 color: tapData.tempoChangeDetected ? Color.Purple : getConsistencyIndicator(tapData.variance).color,
               },
             },
-            {
-              text: `Last tap: ${getLastTapTime(tapData.timestamps)}`,
-            },
           ]}
+          actions={
+            <ActionPanel>
+              <Action title="Open Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
+            </ActionPanel>
+          }
         />
       ) : (
-        <List.EmptyView title="Tap Tempo" description="Tap any key repeatedly to calculate BPM" />
+        <List.EmptyView
+          title="Tap Tempo"
+          description="Tap any key repeatedly to calculate BPM"
+          actions={
+            <ActionPanel>
+              <Action title="Open Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
+            </ActionPanel>
+          }
+        />
       )}
     </List>
   );
 }
+
+const getSmoothing = (value: "none" | "low" | "mid" | "high"): number => {
+  switch (value) {
+    case "none":
+      return 0; // No smoothing
+    case "low":
+      return 0.2; // Light smoothing
+    case "mid":
+      return 0.4; // Moderate smoothing
+    case "high":
+      return 0.7; // Heavy smoothing
+    default:
+      return 0.4; // Fallback to moderate
+  }
+};
+
+const getTempoChangeThreshold = (value: "low" | "mid" | "high"): number => {
+  switch (value) {
+    case "low":
+      return 1.3; // High sensitivity (detects small changes)
+    case "mid":
+      return 1.7; // Medium sensitivity
+    case "high":
+      return 2.2; // Low sensitivity (only detects larger changes)
+    default:
+      return 1.7; // Fallback to medium
+  }
+};
+
+const getPauseThreshold = (value: "low" | "mid" | "high"): number => {
+  switch (value) {
+    case "low":
+      return 800; // Short pause (800ms)
+    case "mid":
+      return 1500; // Medium pause (1.5s)
+    case "high":
+      return 3000; // Long pause (3s)
+    default:
+      return 1500; // Fallback to medium
+  }
+};

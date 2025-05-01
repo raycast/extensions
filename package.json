@@ -16,7 +16,109 @@
       "name": "tap",
       "title": "tap",
       "description": "",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "decimalPlaces",
+          "title": "Decimal Places",
+          "description": "Number of decimal places to show in BPM",
+          "type": "dropdown",
+          "required": false,
+          "default": "1",
+          "data": [
+            {
+              "title": "0",
+              "value": "0"
+            },
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "name": "smoothingFactor",
+          "title": "Smoothing",
+          "description": "How much to smooth BPM values",
+          "type": "dropdown",
+          "required": false,
+          "default": "mid",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Low",
+              "value": "low"
+            },
+            {
+              "title": "Medium",
+              "value": "mid"
+            },
+            {
+              "title": "High",
+              "value": "high"
+            }
+          ]
+        },
+        {
+          "name": "tempoChangeThreshold",
+          "title": "Tempo Change Sensitivity",
+          "description": "How sensitive the app is to tempo changes",
+          "type": "dropdown",
+          "required": false,
+          "default": "mid",
+          "data": [
+            {
+              "title": "High Sensitivity",
+              "value": "low"
+            },
+            {
+              "title": "Medium Sensitivity",
+              "value": "mid"
+            },
+            {
+              "title": "Low Sensitivity",
+              "value": "high"
+            }
+          ]
+        },
+        {
+          "name": "pauseThreshold",
+          "title": "Pause Duration",
+          "description": "How long of a pause indicates a potential tempo change",
+          "type": "dropdown",
+          "required": false,
+          "default": "mid",
+          "data": [
+            {
+              "title": "Short",
+              "value": "low"
+            },
+            {
+              "title": "Medium",
+              "value": "mid"
+            },
+            {
+              "title": "Long",
+              "value": "high"
+            }
+          ]
+        },
+        {
+          "name": "resetAfterPause",
+          "title": "Reset After Pause",
+          "description": "Whether to reset calculations after a long pause",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
     }
   ],
   "dependencies": {

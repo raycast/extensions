@@ -21,7 +21,7 @@ export interface TempoConfig {
 export const DEFAULT_CONFIG: TempoConfig = {
   decimalPlaces: 2,
   smoothingFactor: 0.3, // Moderate smoothing
-  maxTaps: 10,
+  maxTaps: 8,
   varianceThreshold: 5000, // Milliseconds squared - adjust based on testing
   minTapsForConfidence: 4, // Need at least 4 taps to start reducing smoothing
   tempoChangeThreshold: 1.8, // Detect tempo changes where intervals change by 80% or more
