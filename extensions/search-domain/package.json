@@ -25,10 +25,12 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "20.10.5",
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "22.14.0",
     "@types/react": "18.2.45",
-    "eslint": "^8.56.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "prettier": "^3.1.1",
     "typescript": "^5.3.3"
   },
