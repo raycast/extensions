@@ -14,7 +14,8 @@
     "j3lte",
     "rien7",
     "teziovsky",
-    "pewpeo"
+    "pewpeo",
+    "macn"
   ],
   "license": "MIT",
   "commands": [
@@ -89,27 +90,27 @@
         },
         {
           "value": "created",
-          "title": "Date \u2191"
+          "title": "Date ↑"
         },
         {
           "value": "-created",
-          "title": "Date \u2193"
+          "title": "Date ↓"
         },
         {
           "value": "title",
-          "title": "Name \u2191"
+          "title": "Name ↑"
         },
         {
           "value": "-title",
-          "title": "Name \u2193"
+          "title": "Name ↓"
         },
         {
           "value": "domain",
-          "title": "Sites \u2191"
+          "title": "Sites ↑"
         },
         {
           "value": "-domain",
-          "title": "Sites \u2193"
+          "title": "Sites ↓"
         },
         {
           "value": "score",
@@ -128,6 +129,14 @@
       "description": "Always use the last selected collection instead of All Bookmarks.",
       "default": false,
       "label": "Use always the last selected collection"
+    },
+    {
+      "name": "aiTaggingEnabled",
+      "type": "checkbox",
+      "label": "Enable AI suggestions (Advanced AI)",
+      "description": "Auto-suggest tags/collection using Raycast AI.",
+      "required": false,
+      "default": false
     },
     {
       "name": "additionalItemToDisplayInList",
