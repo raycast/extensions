@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "garuda-launch",
+  "title": "Garuda Launch",
+  "description": "Garuda Launch lightweight launcher that cuts straight to coding",
+  "icon": "garuda-launch-logo-512.png",
+  "author": "gywreb",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "projectsPath",
+      "type": "directory",
+      "title": "Your projects directory",
+      "description": "The parent folder containing all your repos",
+      "placeholder": "~/path/to/your/repos",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "garuda-launch",
+      "title": "Garuda Launch",
+      "description": "Garuda Launch lightweight launcher that cuts straight to coding",
+      "mode": "view",
+      "entry": "src/garuda-launch.tsx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.96.3",
+    "@raycast/utils": "^1.19.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"...\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

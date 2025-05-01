@@ -1,0 +1,11 @@
+{
+  "singleQuote": true,
+  "trailingComma": "all",
+  "semi": true,
+  "printWidth": 100,
+  "bracketSpacing": true,
+  "importOrder": ["<THIRD_PARTY_MODULES>", "^(\\./|\\.)', '^../"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "importOrderParserPlugins": ["decorators-legacy", "typescript", "jsx"]
+}
