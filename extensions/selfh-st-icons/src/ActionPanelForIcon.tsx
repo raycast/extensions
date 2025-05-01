@@ -234,7 +234,7 @@ export const ActionPanelForIcon: FC<Props> = ({
             if (!defaultUrl || !defaultFilename) {
               await showFailureToast({
                 title: "Download Failed",
-                message: "Icon URL or filename not available"
+                message: "Icon URL or filename not available",
               });
               return;
             }

@@ -274,10 +274,12 @@ export async function downloadIconFile(
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      const error = new NetworkError(`HTTP ${response.status}: ${response.statusText}`);
+      const error = new NetworkError(
+        `HTTP ${response.status}: ${response.statusText}`,
+      );
       await showFailureToast({
         title: "Failed to download icon",
-        message: error.message
+        message: error.message,
       });
       throw error;
     }
@@ -299,14 +301,16 @@ export async function downloadIconFile(
     if (err instanceof IconError) {
       await showFailureToast({
         title: "Icon Download Failed",
-        message: err.message
+        message: err.message,
       });
       throw err;
     }
-    const error = new DownloadError(err instanceof Error ? err.message : "Failed to download icon");
+    const error = new DownloadError(
+      err instanceof Error ? err.message : "Failed to download icon",
+    );
     await showFailureToast({
       title: "Icon Download Failed",
-      message: error.message
+      message: error.message,
     });
     throw error;
   }
