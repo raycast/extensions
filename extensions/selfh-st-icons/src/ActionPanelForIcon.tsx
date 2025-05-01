@@ -99,7 +99,7 @@ export const ActionPanelForIcon: FC<Props> = ({
         const prefs = await getPreferences();
         setDownloadLocation(prefs.downloadLocation);
       } catch (error) {
-        console.error("Failed to load preferences:", error);
+        showFailureToast(error, { title: "Failed to load preferences" });
       }
     };
     loadPreferences();
