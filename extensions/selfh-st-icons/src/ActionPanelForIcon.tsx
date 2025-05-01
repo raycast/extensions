@@ -136,13 +136,7 @@ export const ActionPanelForIcon: FC<Props> = ({
         message: downloadFilename,
       });
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Download Failed",
-        message,
-      });
+      showFailureToast(error, { title: "Download Failed" });
     }
   };
 
