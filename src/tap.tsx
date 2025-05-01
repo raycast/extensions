@@ -103,6 +103,13 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
+              <Action.CopyToClipboard
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Copy BPM"
+                content={`${tapData.bpm}`}
+                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                icon={Icon.Clipboard}
+              />
               <Action title="Open Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
             </ActionPanel>
           }
