@@ -18,35 +18,22 @@
       "mode": "view"
     }
   ],
-  "tools": [
-    {
-      "name": "get-laws",
-      "title": "Get Laws",
-      "description": "Get a list of all laws available in the extension"
-    },
-    {
-      "name": "get-articles",
-      "title": "Get Articles",
-      "description": "Retrieve articles from the laws relevant to the query"
-    }
-  ],
   "dependencies": {
-    "@raycast/api": "^1.96.1",
-    "@raycast/utils": "^1.19.1",
-    "cheerio": "^1.0.0",
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.4",
+    "cheerio": "^1.0.0-rc.12",
     "iconv-lite": "^0.6.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "19.1.0",
-    "eslint": "^9.24.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "evals": "ray evals",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
