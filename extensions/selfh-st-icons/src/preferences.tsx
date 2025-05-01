@@ -45,11 +45,7 @@ export default function PreferencesView() {
         showToast({ style: Toast.Style.Success, title: "Preferences saved" });
         pop();
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to save preferences",
-          message: String(error),
-        });
+        showFailureToast(error, { title: "Failed to save preferences" });
       }
     },
     [pop],
