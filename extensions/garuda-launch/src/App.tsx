@@ -13,7 +13,7 @@ export const App: React.FC = () => {
 
   const appEntries = selectedApps.map((app, i) => ({
     path: app,
-    name: resolve(app).split('/').pop() ?? 'Unknown App'.replace(/\.app$/, ''),
+    name: (resolve(app).split('/').pop() ?? 'Unknown App').replace(/\.app$/, ''),
     hotkey: (i + 1).toString(),
   }));
 
