@@ -1,5 +1,5 @@
 import { useGarudaLaunchContext } from '@hooks/useGarudaLaunchContext';
-import { Action, ActionPanel, Form, LocalStorage, showToast, Toast } from '@raycast/api';
+import { Action, ActionPanel, Form, LocalStorage } from '@raycast/api';
 import { showFailureToast } from '@raycast/utils';
 import { APPS_KEY } from '@utils/constants';
 import { readApplications } from '@utils/helpers';
@@ -17,11 +17,13 @@ export const AppsSetup: React.FC = () => {
             title="Continue"
             onSubmit={async (values: { apps: string[] }) => {
               if (!values.apps.length) {
-                showToast({ style: Toast.Style.Failure, title: 'Select at least one app' });
+                showFailureToast(new Error('Validation error'), {
+                  title: 'Select at least one app',
+                });
                 return;
               }
               if (values.apps.length > 10) {
-                showToast({ style: Toast.Style.Failure, title: 'Max 10 apps allowed' });
+                showFailureToast(new Error('Validation error'), { title: 'Max 10 apps allowed' });
                 return;
               }
               try {

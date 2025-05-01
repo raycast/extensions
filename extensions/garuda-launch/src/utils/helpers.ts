@@ -1,4 +1,4 @@
-import { readdirSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
 import { homedir } from 'os';
 import { join, resolve } from 'path';
 
@@ -10,16 +10,29 @@ export function expandHome(path: string): string {
 }
 
 /**
- * Reads all .app bundles in /Applications and returns their full paths.
+ * Reads all .app bundles in your devices and returns their full paths.
  */
-export function readApplications(appsDir: string = '/Applications'): string[] {
-  try {
-    return readdirSync(appsDir)
-      .filter((name) => name.endsWith('.app'))
-      .map((name) => resolve(join(appsDir, name)));
-  } catch {
-    return [];
-  }
+export function readApplications(): string[] {
+  const scanDirs = ['/Applications', '/System/Applications', join(homedir(), 'Applications')];
+
+  const foundApps = new Set<string>();
+  scanDirs.forEach((dir) => {
+    try {
+      readdirSync(dir)
+        .filter((n) => n.endsWith('.app'))
+        .forEach((name) => {
+          const full = resolve(join(dir, name));
+          if (existsSync(full)) foundApps.add(full);
+        });
+    } catch {
+      return [];
+    }
+  });
+
+  const finderApp = '/System/Library/CoreServices/Finder.app';
+  if (existsSync(finderApp)) foundApps.add(finderApp);
+
+  return Array.from(foundApps).sort();
 }
 
 /**
