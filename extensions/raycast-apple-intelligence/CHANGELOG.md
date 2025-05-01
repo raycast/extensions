@@ -1,6 +1,6 @@
 # Apple Intelligence Changelog
 
-## [Localization] - {PR_MERGE_DATE}
+## [Localization] - 2025-05-01
 
 This update introduces localization for the extension.
 
