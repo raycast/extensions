@@ -97,6 +97,10 @@ export default function PreferencesView() {
         placeholder="24"
         defaultValue={String(preferences.refreshInterval)}
         info="How often to refresh the icon index"
+        validation={{
+          value: /^[1-9]\d*$/,
+          message: "Please enter a positive number"
+        }}
       />
     </Form>
   );
