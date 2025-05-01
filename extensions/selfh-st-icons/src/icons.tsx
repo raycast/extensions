@@ -318,7 +318,7 @@ const Command: FC = () => {
           />
         </Grid.Section>
       )}
-      <Grid.Section title="Icons" subtitle={error}>
+      <Grid.Section title="Icons">
         {filteredIcons.map((icon) => (
           <Grid.Item
             key={icon.Reference}
