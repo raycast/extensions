@@ -1,5 +1,9 @@
 # Messages Changelog
 
+## [Fix `Paste Latest OTP Code` Command for Phone numbers] - 2025-05-01
+
+Fixed issues with wrong number being parsed by adding additional common characters the regex and adding a bit more logic to select the largest OTP from the filtered list.
+
 ## [Added Keyword] - 2025-02-26
 
 Added a "2FA" keyword for improved discovery
