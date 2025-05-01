@@ -44,6 +44,7 @@ export default async function Command() {
 
       if (potentialMatches) {
         // We'll skip any that are right next to parentheses, dashes, or plus signs
+        // We'll skip any that are right next to parentheses, dashes, plus signs, periods, colons, or forward slashes
         const phoneChars = /[()\-+.:/]/;
         const validCodes: string[] = [];
 
@@ -67,7 +68,7 @@ export default async function Command() {
 
         // If any valid codes remain retrieve the "best"
         // The "best" is sort of subjective but most OTP's are 6-8 digits but could be
-        // 4-10 in length. This filters any OTP > 10 and selects the longest.
+        // 4-10 in length. This keeps OTPs <= 10 digits and selects the longest.
         if (validCodes.length > 0) {
           phoneFilteredOTP = validCodes
             .filter(function (value: string) {
