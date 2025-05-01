@@ -23,7 +23,7 @@
           "title": "Email",
           "description": "Your WebBites account email",
           "type": "textfield",
-          "required": false,
+          "required": true,
           "placeholder": "Enter your email"
         },
         {
@@ -31,7 +31,7 @@
           "title": "Password",
           "description": "Your WebBites account password",
           "type": "password",
-          "required": false,
+          "required": true,
           "placeholder": "Enter your password"
         }
       ]

@@ -1,6 +1,6 @@
-import React from "react";
-import { useState, useEffect, useRef } from "react";
+// webbites.tsx - Refactored
 
+import React, { useState, useEffect, useRef } from "react";
 import {
   ActionPanel,
   Action,
@@ -14,106 +14,147 @@ import {
 } from "@raycast/api";
 import { showFailureToast, getFavicon } from "@raycast/utils";
 
-// LoginView no longer needed as we're opening preferences directly
-import {
-  isLoggedIn,
-  logout,
-  login,
-  // getCurrentUser,
-  initializeParse,
-} from "./utils/auth";
+import { isLoggedIn, logout, login, initializeParse } from "./utils/auth";
 import { search } from "./utils/search";
-import { getSimpleCurrentUser } from "./utils/userHelpers";
+import { getSimpleCurrentUser, clearUserData } from "./utils/userHelpers";
 import { BookmarkItem } from "./types";
 
+// Constants
+const HITS_PER_PAGE = 40;
+const CACHED_RESULTS_KEY = "webbites_cached_results";
+const SESSION_TOKEN_KEY = "webbites_session_token";
+
+// Content type icons mapping
+const CONTENT_TYPE_ICONS = {
+  textNote: Icon.Pencil,
+  image: Icon.Image,
+  game: Icon.GameController,
+  movie: Icon.FilmStrip,
+  music: Icon.Music,
+  website: Icon.Link,
+} as const;
+
+// Type emoji mapping
+const TYPE_EMOJI = {
+  image: "🏞️ ",
+  game: "🎮 ",
+  movie: "🎬 ",
+  music: "🎵 ",
+  textNote: "📝 ",
+};
+
+const noResultsMessage = (searchText: string) => {
+  return `No results found for "${searchText}"`;
+};
+
+const noBookmarksMessage = "No bookmarks found";
+
 export default function Command() {
+  // State
   const [columns, setColumns] = useState(3);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState<BookmarkItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  // Remove setters from state variables that aren't modified after initialization
-  const [hitsPerPage] = useState(40);
-  const [orderBy] = useState("newFirst");
   const [hasMoreResults, setHasMoreResults] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const isInitialized = useRef(false);
-  // Add this to keep previous results while searching
-  const previousResults = useRef<BookmarkItem[]>([]);
 
-  // Initialize app when component mounts
+  // Refs
+  const isInitialized = useRef(false);
+  const previousResults = useRef<BookmarkItem[]>([]);
+  const searchTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Initialize app
   useEffect(() => {
-    // Prevent duplicate initialization
     if (isInitialized.current) return;
     isInitialized.current = true;
 
-    const initialize = async () => {
-      // console.log("Initializing WebBites...");
-
-      try {
-        initializeParse();
-
-        // Load cached results from LocalStorage first
-        const cachedResults = await LocalStorage.getItem<string>(
-          "webbites_cached_results",
-        );
-
-        if (cachedResults) {
-          try {
-            const parsedResults = JSON.parse(cachedResults) as BookmarkItem[];
-            setSearchResults(parsedResults);
-            // console.log("Loaded cached results:", parsedResults.length);
-          } catch (e) {
-            console.error("Error parsing cached results:", e);
-          }
-        }
-
-        // Check authentication status
-        await checkAuthStatus();
-
-        // If not authenticated, try to login with preferences
-        if (!isAuthenticated) {
-          // Get credentials from preferences
-          const preferences = getPreferenceValues<{
-            email: string;
-            password: string;
-          }>();
-
-          // Attempt login if credentials exist
-          if (preferences.email && preferences.password) {
-            try {
-              await login(preferences.email, preferences.password);
-              await checkAuthStatus();
-              await handleLoggedIn();
-            } catch (error) {
-              console.error("Auto-login error:", error);
-              // Authentication will remain false, triggering the preferences screen
-            }
-          }
-          // If no credentials or login fails, the useEffect will open preferences
-        }
-      } catch (error) {
-        console.error("Initialization error:", error);
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        showFailureToast(error, {
-          title: "Error initializing WebBites, try again",
-        });
-      }
-    };
-
-    initialize();
+    initializeApp();
   }, []);
 
-  // Modified useEffect to handle search
+  const initializeApp = async () => {
+    setIsLoading(true);
+    try {
+      // Load cached results first for faster initial rendering
+      await loadCachedResults();
+
+      // Initialize Parse
+      initializeParse();
+
+      // Handle authentication
+      const authenticated = await checkAuthStatus();
+
+      // If not authenticated, try to log in with credentials from preferences
+      if (!authenticated) {
+        await tryAutoLogin();
+      }
+    } catch (error) {
+      console.error("Initialization error:", error);
+      setIsAuthenticated(false);
+      showFailureToast(error, {
+        title: "Error initializing WebBites, try again",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadCachedResults = async () => {
+    try {
+      const cachedResults =
+        await LocalStorage.getItem<string>(CACHED_RESULTS_KEY);
+      const sessionToken =
+        await LocalStorage.getItem<string>(SESSION_TOKEN_KEY);
+      if (cachedResults && sessionToken) {
+        const parsedResults = JSON.parse(cachedResults) as BookmarkItem[];
+        setSearchResults(parsedResults);
+        setIsLoading(false);
+        setIsAuthenticated(true);
+      }
+    } catch (error) {
+      console.error("Error loading cached results:", error);
+    }
+  };
+
+  const checkAuthStatus = async (): Promise<boolean> => {
+    try {
+      const authenticated = await isLoggedIn();
+      setIsAuthenticated(authenticated);
+      return authenticated;
+    } catch (error) {
+      console.error("Error checking auth status:", error);
+      setIsAuthenticated(false);
+      setSearchResults([]);
+      return false;
+    }
+  };
+
+  const tryAutoLogin = async () => {
+    try {
+      const preferences = getPreferenceValues<{
+        email: string;
+        password: string;
+      }>();
+
+      if (preferences.email && preferences.password) {
+        await login(preferences.email, preferences.password);
+        await handleLoggedIn();
+        await checkAuthStatus(); // Refresh auth state after login
+      }
+    } catch (error) {
+      console.error("Auto-login error 1:", error);
+      setSearchResults([]);
+      setIsAuthenticated(false);
+    }
+  };
+
+  // Handle search when searchText changes
   useEffect(() => {
     const debounceTimeout = setTimeout(() => {
       // Reset pagination when search text changes
       setCurrentPage(0);
-      // Don't clear search results here, just start searching
       setHasMoreResults(true);
       handleSearch();
     }, 400);
@@ -121,77 +162,55 @@ export default function Command() {
     return () => clearTimeout(debounceTimeout);
   }, [searchText]);
 
-  const checkAuthStatus = async () => {
-    console.log("Checking authentication status...");
-    setIsLoading(true);
-    // console.log("Checking authentication status...");
-
-    try {
-      // First check if we have a valid session
-      const authenticated = await isLoggedIn();
-      setIsAuthenticated(authenticated);
-
-      return true;
-    } catch (error) {
-      console.error("Error checking auth status:", error);
-      setIsAuthenticated(false);
-      return false;
-    } finally {
-      setIsLoading(false);
+  // Show preferences if not authenticated
+  useEffect(() => {
+    if (isAuthenticated === false) {
+      // const error = new Error("User not authenticated");
+      // showFailureToast(error, { title: "Login required" });
     }
-  };
+  }, [isAuthenticated]);
 
   const handleLoggedIn = async () => {
     try {
-      // console.log("User logged in, updating state...");
       const results = await search({
         searchTerm: "",
-        orderBy: "newFirst", // or whatever default sorting you want
+        orderBy: "newFirst",
         page: 0,
-        hitsPerPage: hitsPerPage,
+        hitsPerPage: HITS_PER_PAGE,
       });
-      // Remove duplicate items based on objectId
-      const uniqueResults =
-        results.hits?.filter(
-          (hit, index, self) =>
-            index === self.findIndex((h) => h.objectId === hit.objectId),
-        ) || [];
-      setSearchResults(uniqueResults || []);
-      setHasMoreResults(uniqueResults?.length === hitsPerPage);
 
-      // Cache the results to LocalStorage
-      if (uniqueResults.length > 0) {
-        await LocalStorage.setItem(
-          "webbites_cached_results",
-          JSON.stringify(uniqueResults),
-        );
-        // console.log("Cached", uniqueResults.length, "results to LocalStorage");
-      }
+      // Remove duplicate items
+      const uniqueResults = removeDuplicateItems(results.hits || []);
+      setSearchResults(uniqueResults);
+      setHasMoreResults(uniqueResults.length === HITS_PER_PAGE);
+
+      // Cache results
+      await cacheResults(uniqueResults);
     } catch (error) {
-      console.log("Error during log in search:", error);
+      console.error("Error during log in search:", error);
     }
   };
 
-  // handleLoginSuccess removed as we're now handling login directly in initialization
+  const removeDuplicateItems = (items: BookmarkItem[]) => {
+    return items.filter(
+      (item, index, self) =>
+        index === self.findIndex((i) => i.objectId === item.objectId),
+    );
+  };
+
+  const cacheResults = async (results: BookmarkItem[]) => {
+    if (results.length > 0) {
+      await LocalStorage.setItem(CACHED_RESULTS_KEY, JSON.stringify(results));
+    }
+  };
 
   const handleLogout = async () => {
     setIsLoading(true);
-    console.log("Logging out...");
-
     try {
       await logout();
       setIsAuthenticated(false);
-      console.log("Logout complete");
-
-      // Clear cached results when logging out
-      await LocalStorage.removeItem("webbites_cached_results");
-
-      // Verify LocalStorage is cleared
-      const sessionToken = await LocalStorage.getItem("webbites_session_token");
-      console.log("Session token after logout:", sessionToken);
-
-      // After logout, automatically open preferences to allow user to update credentials
-      await openExtensionPreferences();
+      setSearchResults([]);
+      await clearUserData();
     } catch (error) {
       console.error("Error during logout:", error);
     } finally {
@@ -199,51 +218,40 @@ export default function Command() {
     }
   };
 
-  // Add this new ref to track search timing
-  const searchTimer = useRef<NodeJS.Timeout | null>(null);
-
   const handleSearch = async (text?: string, page: number = 0) => {
     const searchTerm = text !== undefined ? text : searchText;
-
     const user = await getSimpleCurrentUser();
 
-    if (isSearching || !user) return;
+    if (!user) return;
+    if (isSearching) return;
 
     // Clear any existing timer
     if (searchTimer.current) {
       clearTimeout(searchTimer.current);
     }
 
-    // Start searching immediately
     setIsSearching(true);
 
-    // Store current results before replacing them
-    if (page === 1) {
+    // Store current results before searching
+    if (page === 0) {
       previousResults.current = searchResults;
     }
-
-    // console.log(`Searching for: ${searchTerm}, page: ${page}`);
 
     try {
       const results = await search({
         searchTerm,
-        orderBy: orderBy,
-        page: page,
-        hitsPerPage: hitsPerPage,
+        orderBy: "newFirst",
+        page,
+        hitsPerPage: HITS_PER_PAGE,
       });
 
+      // Cache empty search results
       if (searchTerm?.length === 0) {
-        const uniqueResults =
-          results.hits?.filter(
-            (hit, index, self) =>
-              index === self.findIndex((h) => h.objectId === hit.objectId),
-          ) || [];
-        await LocalStorage.setItem(
-          "webbites_cached_results",
-          JSON.stringify(uniqueResults),
-        );
+        const uniqueResults = removeDuplicateItems(results.hits || []);
+        await cacheResults(uniqueResults);
       }
 
+      // Update results based on page
       if (page === 0) {
         setSearchResults(results.hits || []);
       } else {
@@ -253,20 +261,15 @@ export default function Command() {
         ]);
       }
 
-      setHasMoreResults(results.hits?.length === hitsPerPage);
-      // console.log(`Found ${results.hits?.length || 0} results for page ${page}`);
+      setHasMoreResults(results.hits?.length === HITS_PER_PAGE);
     } catch (error) {
-      console.error("Search error 1:", error);
+      console.error("Search error:", error);
 
-      // If first page search fails, restore previous results
+      // Restore previous results on error
       if (page === 0) {
         setSearchResults(previousResults.current);
       }
     } finally {
-      // Clear the timer and set searching to false
-      if (searchTimer.current) {
-        clearTimeout(searchTimer.current);
-      }
       setIsSearching(false);
     }
   };
@@ -277,38 +280,7 @@ export default function Command() {
     await handleSearch(searchText, nextPage);
   };
 
-  // If not authenticated, open extension preferences directly
-  useEffect(() => {
-    if (isAuthenticated === false) {
-      // Show a message to the user
-      console.log("User not authenticated, opening preferences...");
-
-      const error = new Error("User not authenticated");
-      showFailureToast(error, { title: "Login required" });
-
-      // Open preferences automatically
-      openExtensionPreferences();
-    }
-  }, [isAuthenticated]);
-
-  // Show loading or preferences screen if not authenticated
-  if (isAuthenticated === false) {
-    return (
-      <Detail
-        markdown="
-# WebBites Login Required
-Opening extension preferences...
-"
-      />
-    );
-    // return <Detail markdown="# WebBites Login Required\n\nOpening extension preferences..." />;
-  }
-
-  // Show loading screen while checking authentication
-  if (isLoading || isAuthenticated === null) {
-    return <Detail markdown="Loading WebBites..." />;
-  }
-
+  // Helper functions for rendering
   const getBookmarkImage = (result: BookmarkItem) => {
     // Early return for most common case
     if (result.siteScreenshot?.url) return result.siteScreenshot.url;
@@ -335,16 +307,6 @@ Opening extension preferences...
     }
   };
 
-  // Map of content types to their corresponding icons
-  const CONTENT_TYPE_ICONS = {
-    textNote: Icon.Pencil,
-    image: Icon.Image,
-    game: Icon.GameController,
-    movie: Icon.FilmStrip,
-    music: Icon.Music,
-    website: Icon.Link,
-  } as const;
-
   const getIconType = (result: BookmarkItem) => {
     const iconSource =
       CONTENT_TYPE_ICONS[result.type as keyof typeof CONTENT_TYPE_ICONS];
@@ -366,63 +328,7 @@ Opening extension preferences...
     return result.url ? getFavicon(result.url) : contentTypeIcon;
   };
 
-  const renderEmptyGridView = () => {
-    // Only show "no results" when not searching and actually have no results
-    let title =
-      searchText && !isSearching
-        ? "No results found for your search"
-        : "No bookmarks found";
-    let description =
-      searchText && !isSearching
-        ? "Try a different search term"
-        : "Add some bookmarks to get started";
-
-    if (isLoading || isAuthenticated === null || isSearching) {
-      title = "Loading WebBites...";
-      description = "Please wait...";
-    }
-
-    return (
-      <Grid.EmptyView
-        title={title}
-        description={description}
-        icon={{ source: "webbites-logo-medium.png" }}
-        actions={getCommonActions()}
-      />
-    );
-  };
-
-  const renderEmptyListView = () => {
-    // Only show "no results" when not searching and actually have no results
-    let title =
-      searchText && !isSearching
-        ? "No results found for your search"
-        : "No bookmarks found";
-    let description =
-      searchText && !isSearching
-        ? "Try a different search term"
-        : "Add some bookmarks to get started";
-
-    if (isLoading || isSearching || isAuthenticated === null) {
-      title = "Loading WebBites...";
-      description = "Please wait...";
-    }
-
-    return (
-      <List.EmptyView
-        title={title}
-        description={description}
-        icon={{ source: "webbites-logo-medium.png" }}
-        actions={getCommonActions()}
-      />
-    );
-  };
-
-  const removeHtml = (html: string) => {
-    return html.replace(/<[^>]*>/g, "").trim(); // Remove HTML tags using regex
-  };
-
-  const getDate = (date: Date) => {
+  const formatDate = (date: Date) => {
     const options: Intl.DateTimeFormatOptions = {
       year: "2-digit",
       month: "short",
@@ -432,69 +338,22 @@ Opening extension preferences...
     return new Date(date).toLocaleString("en-US", options);
   };
 
-  const bookmarkTitle = (result: BookmarkItem, isList = false) => {
-    const icons = {
-      image: "🏞️ ",
-      game: "🎮 ",
-      movie: "🎬 ",
-      music: "🎵 ",
-      textNote: "📝 ",
-    };
+  const removeHtml = (html: string = "") => {
+    return html.replace(/<[^>]*>/g, "").trim();
+  };
 
+  const getBookmarkTitle = (result: BookmarkItem, isList = false) => {
     const title =
-      result.type == "textNote"
-        ? removeHtml(result.textNote ? result.textNote : "")
+      result.type === "textNote"
+        ? removeHtml(result.textNote || "")
         : result.siteTitle;
 
     if (isList) return title;
-    return `${result.type ? icons[result.type as keyof typeof icons] || "" : ""}${title}`;
-  };
 
-  // Render function for grid items
-  const renderGridItems = () => {
-    // If we have results and we're not actively searching, show them
-    if (searchResults.length > 0 && !isSearching) {
-      return searchResults.map((result, index) => (
-        <Grid.Item
-          key={result.objectId || index}
-          content={{
-            value: {
-              source: getBookmarkImage(result),
-            },
-            tooltip:
-              result.type == "textNote"
-                ? removeHtml(result.textNote ? result.textNote : "")
-                : result.siteTitle,
-          }}
-          // title={result.type }
-          title={bookmarkTitle(result)}
-          actions={getCommonActions(result)}
-        />
-      ));
-    }
-
-    // Keep showing old results while searching if we have them
-    if (isSearching && searchResults.length > 0) {
-      return searchResults.map((result, index) => (
-        <Grid.Item
-          key={result.objectId || index}
-          content={{
-            value: {
-              source: getBookmarkImage(result),
-            },
-            tooltip:
-              result.type == "textNote"
-                ? removeHtml(result.textNote ? result.textNote : "")
-                : result.siteTitle,
-          }}
-          title={bookmarkTitle(result)}
-          actions={getCommonActions(result)}
-        />
-      ));
-    }
-
-    // Only show empty view when we're truly empty (not during search transitions)
-    return renderEmptyGridView();
+    const emoji = result.type
+      ? TYPE_EMOJI[result.type as keyof typeof TYPE_EMOJI] || ""
+      : "";
+    return `${emoji}${title}`;
   };
 
   // Common actions for both grid and list views
@@ -504,7 +363,7 @@ Opening extension preferences...
         <ActionPanel.Section>
           <Action.OpenInBrowser
             url={
-              result.type == "textNote"
+              result.type === "textNote"
                 ? `https://www.webbites.io/app?bookmarkId=${result.objectId}`
                 : result.url
             }
@@ -534,13 +393,91 @@ Opening extension preferences...
       <ActionPanel>
         <ActionPanel.Section>
           <Action
-            icon={{ source: Icon.Logout }}
-            title="Logout"
-            onAction={handleLogout}
+            icon={{ source: Icon.Gear }}
+            title="Log in"
+            onAction={openExtensionPreferences}
           />
         </ActionPanel.Section>
       </ActionPanel>
     );
+
+  const emptyStateMessage = () => {
+    let title =
+      searchText && !isSearching
+        ? noResultsMessage(searchText)
+        : noBookmarksMessage;
+    let description =
+      searchText && !isSearching
+        ? "Try a different search term"
+        : "Add some bookmarks to get started";
+
+    if (isLoading || isAuthenticated === null || isSearching) {
+      title = "Loading WebBites...";
+      description = "Please wait...";
+    }
+
+    if (isAuthenticated == false) {
+      title = "Login required";
+      description = "Please log in to access your bookmarks";
+    }
+
+    return { title, description };
+  };
+  // Empty state components
+  const renderEmptyGridView = () => {
+    const { title, description } = emptyStateMessage();
+
+    return (
+      <Grid.EmptyView
+        title={title}
+        description={description}
+        icon={{ source: "webbites-logo-medium.png" }}
+        actions={getCommonActions()}
+      />
+    );
+  };
+
+  const renderEmptyListView = () => {
+    const { title, description } = emptyStateMessage();
+
+    return (
+      <List.EmptyView
+        title={title}
+        description={description}
+        icon={{ source: "webbites-logo-medium.png" }}
+        actions={getCommonActions()}
+      />
+    );
+  };
+
+  // Render grid items
+  const renderGridItems = () => {
+    if (searchResults.length > 0) {
+      return searchResults.map((result, index) => (
+        <Grid.Item
+          key={result.objectId || index}
+          content={{
+            value: {
+              source: getBookmarkImage(result),
+            },
+            tooltip:
+              result.type === "textNote"
+                ? removeHtml(result.textNote || "")
+                : result.siteTitle,
+          }}
+          title={getBookmarkTitle(result)}
+          actions={getCommonActions(result)}
+        />
+      ));
+    }
+
+    return renderEmptyGridView();
+  };
+
+  // Loading state
+  if (isLoading || isAuthenticated === null) {
+    return <Detail markdown="Loading WebBites..." />;
+  }
 
   // Render List view
   if (viewMode === "list") {
@@ -551,7 +488,7 @@ Opening extension preferences...
         pagination={{
           onLoadMore: loadMoreResults,
           hasMore: hasMoreResults,
-          pageSize: hitsPerPage,
+          pageSize: HITS_PER_PAGE,
         }}
         onSearchTextChange={setSearchText}
         searchBarPlaceholder="Search your WebBites..."
@@ -578,17 +515,16 @@ Opening extension preferences...
           </List.Dropdown>
         }
       >
-        {/* Keep showing previous results while searching */}
         {searchResults.length === 0
           ? renderEmptyListView()
           : searchResults.map((result, index) => (
               <List.Item
-                title={bookmarkTitle(result, true)}
+                title={getBookmarkTitle(result, true)}
                 key={result.objectId || index}
                 subtitle={result.url}
                 icon={getFaviconForList(result)}
                 accessories={[
-                  { text: getDate(result.createdAt) },
+                  { text: formatDate(result.createdAt) },
                   { icon: getIconType(result) },
                 ]}
                 actions={getCommonActions(result)}
@@ -605,14 +541,14 @@ Opening extension preferences...
       inset={Grid.Inset.Zero}
       aspectRatio={"16/9"}
       fit={Grid.Fit.Fill}
-      isLoading={isLoading || isSearching} // Only show loading on initial load, not during search
+      isLoading={isLoading || isSearching}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search your WebBites..."
       pagination={{
         onLoadMore: loadMoreResults,
         hasMore: hasMoreResults,
-        pageSize: hitsPerPage,
+        pageSize: HITS_PER_PAGE,
       }}
       searchBarAccessory={
         <Grid.Dropdown
@@ -642,9 +578,6 @@ Opening extension preferences...
             <Grid.Dropdown.Item title="Large" value="3" />
             <Grid.Dropdown.Item title="Medium" value="5" />
             <Grid.Dropdown.Item title="Small" value="8" />
-            {/* <Grid.Dropdown.Item title="Large" value="3" icon={Icon.Circle} />
-            <Grid.Dropdown.Item title="Medium" value="5" icon={Icon.Circle} />
-            <Grid.Dropdown.Item title="Small" value="8" icon={Icon.Circle} /> */}
           </Grid.Dropdown.Section>
         </Grid.Dropdown>
       }

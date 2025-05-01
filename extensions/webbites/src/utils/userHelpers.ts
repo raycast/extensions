@@ -1,3 +1,5 @@
+// utils/userHelpers.ts - Refactored
+
 import Parse from "parse/node.js";
 import { LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
@@ -7,7 +9,9 @@ import { UserData } from "../types";
 const SESSION_TOKEN_KEY = "webbites_session_token";
 const USER_DATA_KEY = "webbites_user_data";
 
-// Simple user class that mimics Parse.User's basic functionality
+/**
+ * Simple user class that mimics Parse.User's basic functionality
+ */
 export class SimpleUser {
   private data: UserData;
 
@@ -39,26 +43,17 @@ export class SimpleUser {
   getSessionToken(): string | null {
     return this.data._sessionToken || null;
   }
-
-  // Add other getter methods as needed
 }
 
-// Get current user using the SimpleUser approach
+/**
+ * Get current user using the SimpleUser approach
+ * @returns Promise resolving to SimpleUser or null
+ */
 export const getSimpleCurrentUser = async (): Promise<SimpleUser | null> => {
   try {
-    // Check if we have stored user data
-    const userDataString = await LocalStorage.getItem<string>(USER_DATA_KEY);
-    if (!userDataString) {
-      console.log("No stored user data found 2");
-      return null;
-    }
-
-    // Parse the user data
-    let userData;
-    try {
-      userData = JSON.parse(userDataString);
-    } catch (error) {
-      console.error("Error parsing stored user data:", error);
+    // Get stored user data
+    const userData = await getUserData();
+    if (!userData) {
       return null;
     }
 
@@ -76,7 +71,32 @@ export const getSimpleCurrentUser = async (): Promise<SimpleUser | null> => {
   }
 };
 
-// Helper function to make authenticated Parse API requests
+/**
+ * Get user data from storage
+ * @returns UserData object or null
+ */
+export const getUserData = async (): Promise<UserData | null> => {
+  try {
+    const userDataString = await LocalStorage.getItem<string>(USER_DATA_KEY);
+
+    if (!userDataString) {
+      return null;
+    }
+
+    return JSON.parse(userDataString);
+  } catch (error) {
+    console.error("Error parsing stored user data:", error);
+    return null;
+  }
+};
+
+/**
+ * Make an authenticated request to the Parse API
+ * @param endpoint API endpoint
+ * @param method HTTP method
+ * @param data Request data
+ * @returns Promise resolving to response data
+ */
 export const makeAuthenticatedRequest = async (
   endpoint: string,
   method = "GET",
@@ -88,12 +108,7 @@ export const makeAuthenticatedRequest = async (
       throw new Error("No session token available");
     }
 
-    // const headers = {
-    //   "X-Parse-Application-Id": Parse.applicationId,
-    //   "X-Parse-REST-API-Key": Parse.javaScriptKey,
-    //   "X-Parse-Session-Token": sessionToken,
-    //   "Content-Type": "application/json",
-    // };
+    // Set up headers
     const headers: Record<string, string> = {
       "X-Parse-Application-Id": Parse.applicationId,
       "Content-Type": "application/json",
@@ -105,6 +120,7 @@ export const makeAuthenticatedRequest = async (
 
     headers["X-Parse-Session-Token"] = sessionToken;
 
+    // Make the request
     const url = `${Parse.serverURL}/${endpoint}`;
     const options: RequestInit = {
       method,
@@ -128,4 +144,11 @@ export const makeAuthenticatedRequest = async (
     console.error("Authenticated request error:", error);
     throw error;
   }
+};
+
+/**
+ * Clear all user data from local storage
+ */
+export const clearUserData = async () => {
+  await LocalStorage.clear();
 };

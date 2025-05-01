@@ -1,3 +1,5 @@
+// types/index.ts
+
 /**
  * Common type definitions for the WebBites Raycast extension
  */
