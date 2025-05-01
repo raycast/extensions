@@ -29,11 +29,7 @@ export default function PreferencesView() {
       setPreferencesState(prefs);
       setIsLoading(false);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load preferences",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Failed to load preferences" });
     }
   };
 
