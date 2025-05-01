@@ -23,6 +23,9 @@ async function createCollection({
     body: JSON.stringify({ title, parent: { $id: {} } }),
   });
 
+  if (!response.ok) {
+    throw new Error(`Failed to create collection: ${response.statusText}`);
+  }
   return (await response.json()) as CollectionCreationResponse;
 }
 
