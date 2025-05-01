@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "description": "Search your Raindrop.io bookmarks",
   "icon": "raindrop-icon-big.png",
-  "author": "lardissone",
+  "author": "macnason",
   "contributors": [
     "shubham",
     "pernielsentikaer",
@@ -14,8 +14,7 @@
     "j3lte",
     "rien7",
     "teziovsky",
-    "pewpeo",
-    "macnason"
+    "pewpeo"
   ],
   "license": "MIT",
   "commands": [

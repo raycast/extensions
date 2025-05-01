@@ -79,7 +79,6 @@ export async function fetchTags(): Promise<string[]> {
 // Takes title, returns the new collection object
 export async function createCollectionAPI(title: string): Promise<Collection> {
   console.log(`Creating collection via API: ${title}`);
-  const preferences: Preferences = getPreferenceValues();
   try {
     const response = await fetch(`${API_ENDPOINT}/collection`, {
       method: "POST",
