@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2025-05-01
+
+- Added experimental AI-powered suggestions for tags and collections when creating bookmarks (requires Raycast Pro).
+
 ## [Enhancements] - 2025-04-22
 
 - Add option to fetch all results, i.e. perform multiple API requests for each result page
@@ -10,7 +14,6 @@
 - Add option to specify sorting behavior
 
 ## [Enhancements] - 2025-01-05
-
 - Add tags display preference and update bookmark item rendering
 
 ## [Enhancements] - 2025-01-02
@@ -86,10 +89,5 @@
 ## [Initial version] - 2021-10-19
 
 - Adds commands for search and get latest bookmarks
-
-## [Unreleased]
-
-- **Raindrop.io:** Added experimental AI-powered suggestions for tags and collections when creating bookmarks (requires Raycast Pro).
-- Add Add Bookmark Command
 
 ## [Initial Version] - 2024-05-14
