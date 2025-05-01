@@ -10,11 +10,19 @@ ITT is a minimalist yet powerful Raycast extension that helps you stay on track 
 - ⏱️ Custom Timers
 Set a countdown for any duration in hours and minutes. Perfect for short tasks, Pomodoro-style work blocks, or countdowns to meetings.
 - 🖥️ Large Screen Reminder
-When the timer ends, a massive full-screen message pops up, making it impossible to ignore. You’ll definitely notice.
+When the timer ends, a massive full-screen message centred on the monitor that currently holds your mouse cursor pops up, making it impossible to ignore. You’ll definitely notice.
 - 🕒 Live Countdown in Menu Bar
 Keep track of the remaining time right in the menu bar, so you’re always aware without breaking your flow.
 - 🧘‍♂️ Focus Without Fear
 Dive deep into your work. ITT will make sure you won’t forget that important call, meeting, or errand.
+
+## Prerequisites
+
+Large Screen Reminder requires the following Python libraries:
+
+```bash
+python3 -m pip install --user pyautogui PyQt5 screeninfo
+```
 
 ## Use Cases
 - Timebox focused work sessions
