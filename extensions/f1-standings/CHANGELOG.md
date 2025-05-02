@@ -2,7 +2,7 @@
 
 ## [🐞 Fixed default values for AI tools] - {PR_MERGE_DATE}
 
-- Added AI extensions to Formula 1
+- Fixed default values for AI tools
 
 ## [🧠 Added AI Extensions] - 2025-04-28
 
