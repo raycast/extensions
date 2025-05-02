@@ -7,7 +7,7 @@ import {
   Toast,
   LocalStorage,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   getPreferences,
   setPreferences,

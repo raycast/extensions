@@ -40,7 +40,6 @@ const ICON_INDEX_URL =
   "https://raw.githubusercontent.com/selfhst/cdn/main/directory/icons.json";
 const ICON_INDEX_KEY = "iconIndex";
 const ICON_INDEX_LAST_FETCHED_KEY = "iconIndexLastFetched";
-const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 /**
  * Base error class for icon-related operations
