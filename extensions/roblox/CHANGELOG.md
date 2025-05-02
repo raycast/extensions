@@ -1,6 +1,6 @@
 # Roblox Changelog
 
-## [Windows Support] - 2025-05-02
+## [Windows Support] - {PR_MERGE_DATE}
 
 - feat: Added Windows support.
 
