@@ -11,6 +11,7 @@ export default function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [project, setProject] = useState<Project | undefined>();
   const [employee, setEmployee] = useState<Employee | undefined>();
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [task, setTask] = useState<Task>();
 
@@ -20,18 +21,61 @@ export default function Command() {
   useEffect(() => {
     StorageRepository.getEmployee().then((emp) => {
       if (emp) {
+        setInput("");
         setEmployee(emp);
-        HTTPRepository.GetProjects(emp).then((projectList) => setProjects(projectList));
       } else {
-        return;
+        HTTPRepository.GetEmployees().then((empList) => setEmployees(empList));
       }
     });
   }, []);
 
   useEffect(() => {
+    if (employee) {
+      setInput("");
+      HTTPRepository.GetProjects(employee).then((projectList) => setProjects(projectList));
+    }
+  }, [employee]);
+
+  useEffect(() => {
     setInput("");
     if (employee && project) HTTPRepository.GetTasks(employee, project).then((taskList) => setTasks(taskList));
   }, [project]);
+
+  function renderEmployeeList(empList: Employee[]) {
+    return (
+      <List onSearchTextChange={(value) => setInput(value)} searchText={input}>
+        {empList
+          .filter((emp) => emp.username.toLowerCase().includes(input))
+          .map((emp) => (
+            <List.Item
+              key={emp.id}
+              title={emp.username}
+              actions={
+                <ActionPanel>
+                  {emp.id === employee?.id ? (
+                    <Action
+                      icon={Icon.Trash}
+                      title="Unpick User"
+                      onAction={() => StorageRepository.removeEmployee().then(() => setEmployee(undefined))}
+                    />
+                  ) : (
+                    <Action
+                      icon={Icon.Person}
+                      title="Choose User"
+                      onAction={() => StorageRepository.setEmployee(emp).then(() => setEmployee(emp))}
+                    />
+                  )}
+                </ActionPanel>
+              }
+            />
+          ))}
+      </List>
+    );
+  }
+
+  if (!employee) {
+    return renderEmployeeList(employees);
+  }
 
   function renderProjectList(projList: Project[]) {
     return (
@@ -42,9 +86,10 @@ export default function Command() {
             <List.Item
               key={proj.id}
               title={proj.name}
+              subtitle={proj.status}
               actions={
                 <ActionPanel>
-                  <Action icon={Icon.Person} title="Choose Project" onAction={() => setProject(proj)} />
+                  <Action icon={Icon.PlusCircle} title="Choose Project" onAction={() => setProject(proj)} />
                 </ActionPanel>
               }
             />
@@ -62,6 +107,7 @@ export default function Command() {
             <List.Item
               key={task.id}
               title={task.title}
+              subtitle={task.status}
               actions={
                 <ActionPanel>
                   <Action icon={Icon.Person} title="Choose Task" onAction={() => [setTask(task)]} />
