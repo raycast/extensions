@@ -160,9 +160,9 @@ const Command: FC = () => {
 
     // Set up interval to check for preference changes
     const checkInterval = setInterval(async () => {
-      const lastUpdate = await LocalStorage.getItem("preferences_updated");
+      const lastUpdate = await LocalStorage.getItem("selfhst_preferences_updated");
       if (lastUpdate) {
-        await LocalStorage.removeItem("preferences_updated");
+        await LocalStorage.removeItem("selfhst_preferences_updated");
         loadPrefs();
       }
     }, 1000); // Check every second

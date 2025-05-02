@@ -34,7 +34,7 @@ export default function PreferencesView() {
         });
         // Store the last update timestamp to trigger the main view's watcher
         await LocalStorage.setItem(
-          "preferences_updated",
+          "selfhst_preferences_updated",
           Date.now().toString(),
         );
         showToast({
