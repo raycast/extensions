@@ -209,23 +209,26 @@ New title:
             icon={Icon.Calendar}
             min={new Date()}
             onChange={(date) => {
-              if (date) {
-                // Before proceeding, we need to ensure we create a date time in the user's timezone.
-                const offset = new Date().getTimezoneOffset();
-                const scheduleDate = new Date(date.getTime() - offset * 60 * 1000).toISOString();
-
-                // Check if the date is actually a full day, in which case we
-                // simply want to provide the date, without time, to Things, as
-                // Things relies on the time being present to determine whether
-                // to add a reminder.
-                if (Action.PickDate.isFullDay(date)) {
-                  schedule(scheduleDate.split('T', 1)[0]);
-                } else {
-                  schedule(scheduleDate);
-                }
-              } else {
+              if (!date) {
                 schedule('anytime');
+                return;
               }
+
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, '0');
+              const day = String(date.getDate()).padStart(2, '0');
+              const datePart = `${year}-${month}-${day}`;
+
+              // If the user picked a full day, we avoid providing the time, as
+              // Things leverages the time part to understand whether a reminder
+              // should be set.
+              if (Action.PickDate.isFullDay(date)) {
+                schedule(datePart);
+              }
+
+              const hours = String(date.getHours()).padStart(2, '0');
+              const minutes = String(date.getMinutes()).padStart(2, '0');
+              schedule(`${datePart}@${hours}:${minutes}`);
             }}
             type={Action.PickDate.Type.DateTime}
           />
