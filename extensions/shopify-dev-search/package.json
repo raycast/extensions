@@ -10,9 +10,20 @@
     {
       "name": "shopify-graphql-search",
       "title": "Search Shopify Developer Docs",
-      "subtitle": "GraphQL API",
+      "subtitle": "Shopify GraphQL API",
       "description": "Quickly search the Shopify developer and GraphQL documentation.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "api_version",
+          "required": false,
+          "title": "Shopify API Version",
+          "description": "The version of the Shopify API to search for.",
+          "type": "textfield",
+          "placeholder": "2025-04",
+          "defaultValue": "2025-04"
+        }
+      ]
     }
   ],
   "dependencies": {
