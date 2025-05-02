@@ -14,9 +14,9 @@ import { DEFAULT_CONFIG, TapData, TempoConfig, updateTapData } from "./tempoCalc
 
 interface Preferences {
   decimalPlaces: string;
-  smoothingFactor: "none" | "low" | "mid" | "high";
-  tempoChangeThreshold: "low" | "mid" | "high";
-  pauseThreshold: "low" | "mid" | "high";
+  smoothingFactor: string;
+  tempoChangeThreshold: string;
+  pauseThreshold: string;
   resetAfterPause: boolean;
 }
 
@@ -28,9 +28,9 @@ export default function Command() {
   const [config] = useState<TempoConfig>({
     ...DEFAULT_CONFIG,
     decimalPlaces: parseInt(preferences.decimalPlaces) as 0 | 1 | 2,
-    smoothingFactor: getSmoothing(preferences.smoothingFactor),
-    tempoChangeThreshold: getTempoChangeThreshold(preferences.tempoChangeThreshold),
-    pauseThreshold: getPauseThreshold(preferences.pauseThreshold),
+    smoothingFactor: parseFloat(preferences.smoothingFactor),
+    tempoChangeThreshold: parseFloat(preferences.tempoChangeThreshold),
+    pauseThreshold: parseInt(preferences.pauseThreshold),
     resetAfterPause: preferences.resetAfterPause,
   });
 
@@ -128,44 +128,3 @@ export default function Command() {
     </List>
   );
 }
-
-const getSmoothing = (value: "none" | "low" | "mid" | "high"): number => {
-  switch (value) {
-    case "none":
-      return 0; // No smoothing
-    case "low":
-      return 0.2; // Light smoothing
-    case "mid":
-      return 0.4; // Moderate smoothing
-    case "high":
-      return 0.7; // Heavy smoothing
-    default:
-      return 0.4; // Fallback to moderate
-  }
-};
-
-const getTempoChangeThreshold = (value: "low" | "mid" | "high"): number => {
-  switch (value) {
-    case "low":
-      return 1.3; // High sensitivity (detects small changes)
-    case "mid":
-      return 1.7; // Medium sensitivity
-    case "high":
-      return 2.2; // Low sensitivity (only detects larger changes)
-    default:
-      return 1.7; // Fallback to medium
-  }
-};
-
-const getPauseThreshold = (value: "low" | "mid" | "high"): number => {
-  switch (value) {
-    case "low":
-      return 800; // Short pause (800ms)
-    case "mid":
-      return 1500; // Medium pause (1.5s)
-    case "high":
-      return 3000; // Long pause (3s)
-    default:
-      return 1500; // Fallback to medium
-  }
-};

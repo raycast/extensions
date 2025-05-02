@@ -1,10 +1,10 @@
 export interface TapData {
   readonly timestamps: ReadonlyArray<number>;
   readonly bpm: number | null;
-  readonly rawBpm: number | null; // Store the raw BPM value before smoothing
-  readonly variance: number | null; // Store the variance of intervals
-  readonly recentIntervals: ReadonlyArray<number>; // Store recent intervals for tempo change detection
-  readonly tempoChangeDetected: boolean; // Flag when a tempo change is detected
+  readonly rawBpm: number | null;
+  readonly variance: number | null;
+  readonly recentIntervals: ReadonlyArray<number>;
+  readonly tempoChangeDetected: boolean;
 }
 
 export interface TempoConfig {
@@ -16,17 +16,19 @@ export interface TempoConfig {
   readonly tempoChangeThreshold: number; // Ratio threshold for detecting tempo change (e.g., 1.8 means 80% change)
   readonly pauseThreshold: number; // Milliseconds threshold for considering a pause in tapping
   readonly resetAfterPause: boolean; // Whether to reset calculations after a long pause
+  readonly recentIntervalsWindow: number; // Number of recent intervals to use for tempo change detection
 }
 
 export const DEFAULT_CONFIG: TempoConfig = {
   decimalPlaces: 2,
-  smoothingFactor: 0.3, // Moderate smoothing
+  smoothingFactor: 0.3,
   maxTaps: 8,
-  varianceThreshold: 5000, // Milliseconds squared - adjust based on testing
-  minTapsForConfidence: 4, // Need at least 4 taps to start reducing smoothing
-  tempoChangeThreshold: 1.8, // Detect tempo changes where intervals change by 80% or more
-  pauseThreshold: 2000, // 2 seconds pause indicates potential tempo change
-  resetAfterPause: true, // Reset after long pauses
+  varianceThreshold: 5000,
+  minTapsForConfidence: 4,
+  tempoChangeThreshold: 1.8,
+  pauseThreshold: 2000,
+  resetAfterPause: true,
+  recentIntervalsWindow: 4,
 };
 
 /**
@@ -40,10 +42,10 @@ export const createIntervals = (timestamps: ReadonlyArray<number>): ReadonlyArra
 /**
  * Calculates the average of an array of numbers
  * @param values Array of numbers
- * @returns Average value
+ * @returns Average value or null for empty arrays
  */
-export const calculateAverage = (values: ReadonlyArray<number>): number =>
-  values.length > 0 ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+export const calculateAverage = (values: ReadonlyArray<number>): number | null =>
+  values.length > 0 ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
 
 /**
  * Calculates the variance of an array of numbers
@@ -56,8 +58,11 @@ export const calculateVariance = (values: ReadonlyArray<number>): number => {
   }
 
   const avg = calculateAverage(values);
+  if (avg === null) return 0;
+
   const squaredDiffs = values.map((value) => Math.pow(value - avg, 2));
-  return calculateAverage(squaredDiffs);
+  const avgSquaredDiffs = calculateAverage(squaredDiffs);
+  return avgSquaredDiffs !== null ? avgSquaredDiffs : 0;
 };
 
 /**
@@ -127,7 +132,7 @@ export const detectTempoChange = (
  * @param avgInterval Average interval in milliseconds
  * @returns Precise BPM value (not rounded)
  */
-export const intervalToBPM = (avgInterval: number): number => 60000 / avgInterval;
+export const intervalToBPM = (avgInterval: number): number => (avgInterval > 0 ? 60000 / avgInterval : 0);
 
 /**
  * Rounds a number to the specified number of decimal places
@@ -235,7 +240,9 @@ export const calculatePreciseBPM = (timestamps: ReadonlyArray<number>): number |
     return null;
   }
 
-  return intervalToBPM(calculateAverage(createIntervals(timestamps)));
+  const intervals = createIntervals(timestamps);
+  const avgInterval = calculateAverage(intervals);
+  return avgInterval !== null ? intervalToBPM(avgInterval) : null;
 };
 
 /**
@@ -324,13 +331,12 @@ export const updateTapData = (
   const variance = intervals.length > 1 ? calculateVariance(intervals) : null;
 
   // For tempo change detection, maintain a sliding window of recent intervals
-  const recentIntervalsWindow = 4; // Use last 4 intervals to detect changes
   let newRecentIntervals: ReadonlyArray<number> = [];
 
   // If we have a new interval, add it to recent intervals
   if (intervals.length > 0) {
     const latestInterval = intervals[intervals.length - 1];
-    newRecentIntervals = addTimestamp(currentData.recentIntervals || [], latestInterval, recentIntervalsWindow);
+    newRecentIntervals = addTimestamp(currentData.recentIntervals || [], latestInterval, config.recentIntervalsWindow);
   }
 
   // Detect tempo change if we have enough intervals

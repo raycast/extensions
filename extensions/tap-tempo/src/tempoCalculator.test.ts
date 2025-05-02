@@ -35,8 +35,8 @@ describe("createIntervals", () => {
 });
 
 describe("calculateAverage", () => {
-  test("returns 0 for empty array", () => {
-    expect(calculateAverage([])).toBe(0);
+  test("returns null for empty array", () => {
+    expect(calculateAverage([])).toBeNull();
   });
 
   test("calculates average for single value", () => {

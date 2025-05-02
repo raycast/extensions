@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tap-tempo",
   "title": "Tap Tempo",
-  "description": "gets the bpm your tapping",
+  "description": "Measure the tempo (BPM) of music by tapping your keyboard to the beat.",
   "icon": "extension-icon.png",
   "author": "kyrregjerstad",
   "categories": [
@@ -46,23 +46,23 @@
           "description": "How much to smooth BPM values",
           "type": "dropdown",
           "required": false,
-          "default": "mid",
+          "default": "0.4",
           "data": [
             {
               "title": "None",
-              "value": "none"
+              "value": "0"
             },
             {
               "title": "Low",
-              "value": "low"
+              "value": "0.2"
             },
             {
               "title": "Medium",
-              "value": "mid"
+              "value": "0.4"
             },
             {
               "title": "High",
-              "value": "high"
+              "value": "0.7"
             }
           ]
         },
@@ -72,19 +72,19 @@
           "description": "How sensitive the app is to tempo changes",
           "type": "dropdown",
           "required": false,
-          "default": "mid",
+          "default": "1.7",
           "data": [
             {
-              "title": "High Sensitivity",
-              "value": "low"
+              "title": "Low",
+              "value": "2.2"
             },
             {
-              "title": "Medium Sensitivity",
-              "value": "mid"
+              "title": "Medium",
+              "value": "1.7"
             },
             {
-              "title": "Low Sensitivity",
-              "value": "high"
+              "title": "High",
+              "value": "1.3"
             }
           ]
         },
@@ -94,19 +94,19 @@
           "description": "How long of a pause indicates a potential tempo change",
           "type": "dropdown",
           "required": false,
-          "default": "mid",
+          "default": "1500",
           "data": [
             {
               "title": "Short",
-              "value": "low"
+              "value": "800"
             },
             {
               "title": "Medium",
-              "value": "mid"
+              "value": "1500"
             },
             {
               "title": "Long",
-              "value": "high"
+              "value": "3000"
             }
           ]
         },
