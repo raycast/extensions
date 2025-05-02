@@ -1,5 +1,6 @@
 import { executeWritingToolCommand } from "./api";
+import { CommandNumber, CommandTitle } from "./Command";
 
 export default async function main() {
-  await executeWritingToolCommand(15);
+  await executeWritingToolCommand(CommandNumber.COMPOSE, CommandTitle.COMPOSE);
 }

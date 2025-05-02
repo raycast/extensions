@@ -19,11 +19,19 @@ This extension uses [Hammerspoon](https://www.hammerspoon.org) to apply window a
 
 ### ✅ One-liner setup (Hammerspoon + animation config)
 
+For bash and zsh:
+
 ```bash
-brew install --cask hammerspoon && curl -o ~/.hammerspoon/init.lua https://raw.githubusercontent.com/raycast/extensions/tree/main/extensions/animated-window-manager/main/hammerspoon/init.lua && open -a Hammerspoon
+brew install --cask hammerspoon && mkdir -p ~/.hammerspoon && curl -o ~/.hammerspoon/init.lua https://raw.githubusercontent.com/raycast/extensions/refs/heads/main/extensions/animated-window-manager/hammerspoon/init.lua && (if [[ $(uname -m) == 'arm64' ]]; then sudo ln -s ~/.hammerspoon/hs /opt/homebrew/bin/hs; else sudo ln -s ~/.hammerspoon/hs /usr/local/bin/hs; fi) && open -a Hammerspoon
 ```
 
-> ☝️ This installs Hammerspoon, applies the animated layout config, and opens the app.
+For Fish shell:
+
+```bash
+bash -c 'brew install --cask hammerspoon && mkdir -p ~/.hammerspoon && curl -o ~/.hammerspoon/init.lua https://raw.githubusercontent.com/raycast/extensions/refs/heads/main/extensions/animated-window-manager/hammerspoon/init.lua && if [[ $(uname -m) == "arm64" ]]; then sudo ln -sf ~/.hammerspoon/hs /opt/homebrew/bin/hs; else sudo ln -sf ~/.hammerspoon/hs /usr/local/bin/hs; fi && open -a Hammerspoon'
+```
+
+> ☝️ This installs Hammerspoon, applies the animated layout config, symlinks hs CLI to the correct location based on architecture (Apple or Intel chip) and opens Hammerspoon.
 
 ---
 
@@ -49,87 +57,95 @@ All animations use native-feeling macOS transitions.
    ```
 
 2. **Enable CLI access**  
-   Make sure the `hs` CLI is available:
+   Create a symlink to expose the Hammerspoon CLI (`hs`) to your system.
+
+   For Apple Silicon (M1, M2, M3 Macs):
+
+   ```bash
+   sudo ln -s ~/.hammerspoon/hs /opt/homebrew/bin/hs
+   ```
+
+   For Intel Macs:
 
    ```bash
    sudo ln -s ~/.hammerspoon/hs /usr/local/bin/hs
    ```
 
-3. **Enable IPC in your `~/.hammerspoon/init.lua`**
-
-   ```lua
-   require("hs.ipc") -- Enables CLI execution
-   ```
-
-4. **Add the layout functions**  
+3. **Add the layout functions**  
    Paste this into `~/.hammerspoon/init.lua`:
 
-```lua
-require("hs.ipc")
+   ```lua
+   require("hs.ipc")
 
-function moveWindowLeftAnimated()
-  local win = hs.window.focusedWindow()
-  if not win then return end
+   function moveWindowLeftAnimated()
+     local win = hs.window.focusedWindow()
+     if not win then return end
 
-  local screen = win:screen()
-  local frame = screen:frame()
+     local screen = win:screen()
+     local frame = screen:frame()
 
-  local targetFrame = {
-    x = frame.x,
-    y = frame.y,
-    w = frame.w / 2,
-    h = frame.h
-  }
+     local targetFrame = {
+       x = frame.x,
+       y = frame.y,
+       w = frame.w / 2,
+       h = frame.h
+     }
 
-  win:move(targetFrame, nil, true, 0.3)
-end
+     win:move(targetFrame, nil, true, 0.3)
+   end
 
-function moveWindowRightAnimated()
-  local win = hs.window.focusedWindow()
-  if not win then return end
+   function moveWindowRightAnimated()
+     local win = hs.window.focusedWindow()
+     if not win then return end
 
-  local screen = win:screen()
-  local frame = screen:frame()
+     local screen = win:screen()
+     local frame = screen:frame()
 
-  local targetFrame = {
-    x = frame.x + (frame.w / 2),
-    y = frame.y,
-    w = frame.w / 2,
-    h = frame.h
-  }
+     local targetFrame = {
+       x = frame.x + (frame.w / 2),
+       y = frame.y,
+       w = frame.w / 2,
+       h = frame.h
+     }
 
-  win:move(targetFrame, nil, true, 0.3)
-end
+     win:move(targetFrame, nil, true, 0.3)
+   end
 
-function maximizeWindowAnimated()
-  local win = hs.window.focusedWindow()
-  if not win then return end
+   function maximizeWindowAnimated()
+     local win = hs.window.focusedWindow()
+     if not win then return end
 
-  local screen = win:screen()
-  local frame = screen:frame()
+     local screen = win:screen()
+     local frame = screen:frame()
 
-  win:move(frame, nil, true, 0.3)
-end
+     win:move(frame, nil, true, 0.3)
+   end
 
-function moveWindowReasonableSize()
-  local win = hs.window.focusedWindow()
-  if not win then return end
+   function moveWindowReasonableSize()
+     local win = hs.window.focusedWindow()
+     if not win then return end
 
-  local screen = win:screen()
-  local frame = screen:frame()
+     local screen = win:screen()
+     local frame = screen:frame()
 
-  local targetWidth = frame.w * 0.6
-  local targetHeight = frame.h * 0.7
-  local targetFrame = {
-    x = frame.x + ((frame.w - targetWidth) / 2),
-    y = frame.y + ((frame.h - targetHeight) / 2),
-    w = targetWidth,
-    h = targetHeight
-  }
+     local targetWidth = frame.w * 0.6
+     local targetHeight = frame.h * 0.7
+     local targetFrame = {
+       x = frame.x + ((frame.w - targetWidth) / 2),
+       y = frame.y + ((frame.h - targetHeight) / 2),
+       w = targetWidth,
+       h = targetHeight
+     }
 
-  win:move(targetFrame, nil, true, 0.3)
-end
-```
+     win:move(targetFrame, nil, true, 0.3)
+   end
+   ```
+
+4. **Open Hammerspoon and load the config**
+
+   ```
+   open -a Hammerspoon
+   ```
 
 ---
 
