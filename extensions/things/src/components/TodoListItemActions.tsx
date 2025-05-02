@@ -224,6 +224,7 @@ New title:
               // should be set.
               if (Action.PickDate.isFullDay(date)) {
                 schedule(datePart);
+                return;
               }
 
               const hours = String(date.getHours()).padStart(2, '0');
