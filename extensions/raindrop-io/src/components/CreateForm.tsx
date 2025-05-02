@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, getPreferenceValues, Icon, AI, environment, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, Toast, showToast } from "@raycast/api";
 import { useCachedState, useForm } from "@raycast/utils";
 import fetch, { Response } from "node-fetch";
 import { useEffect, useState, useCallback } from "react";
@@ -21,12 +21,6 @@ interface Preferences {
   token: string;
   aiTaggingEnabled?: boolean;
   // Add other preferences used in this file if necessary
-}
-
-// Define TagItem interface matching useTags hook structure if possible
-interface TagItem {
-  _id: string;
-  count?: number; // Assuming count might be present from types.ts
 }
 
 type CreateFormProps = {
@@ -295,6 +289,7 @@ export const CreateForm = (props: CreateFormProps) => {
           // Revert back to Icon.Stars
           const icon = newSuggestedTags.includes(tagId) ? Icon.Stars : undefined;
 
+          // Use tagId directly, no need for TagItem interface here
           return <Form.TagPicker.Item key={tagId} value={tagId} title={tagId} icon={icon} />;
         })}
       </Form.TagPicker>
