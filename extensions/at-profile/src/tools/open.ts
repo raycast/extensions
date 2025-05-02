@@ -30,10 +30,9 @@ type Input = {
    * @example "spotify"
    * @example "threads"
    * @example "tiktok"
-   * @example "x/twitter"
+   * @example "x"
    * @example "youtube"
    *
-   * twitter and x should lead to x
    * The site must be on the example list
    *
    */
