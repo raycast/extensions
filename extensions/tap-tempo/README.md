@@ -8,7 +8,6 @@ Measure the tempo (BPM) of music by tapping your keyboard to the beat.
 2. Tap any key to the beat of the music
 3. The BPM (beats per minute) will be calculated and displayed
 
-No additional configuration is required to use this extension.
 
 ## Preferences
 
