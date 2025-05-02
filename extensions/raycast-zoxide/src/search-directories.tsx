@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { SearchResult } from "@components/search-result";
 import { AddFromFinderAction } from "@components/add-from-finder-action";
 import { SpotlightResults } from "@components/spotlight-results";
@@ -16,14 +16,14 @@ export default function Command() {
     isLoading,
     data,
     revalidate: queryZoxide,
-  } = useZoxide(`query -ls`, {
+  } = useZoxide("query -ls", {
     keepPreviousData: true,
     execute: false,
     failureToastOptions: { title: "Error querying zoxide" },
   });
 
   // Query zoxide results once on load and reset removed keys
-  useMemo(() => {
+  useEffect(() => {
     setRemovedKeys([]);
     queryZoxide();
   }, []);
@@ -39,13 +39,15 @@ export default function Command() {
     if (!fzfResults || !fzfResults.length) return [];
     return fzfResults
       .split("\n")
-      .map((row: string): SearchResult => {
-        const [score, path] = (row.trim().match(/^\s*([\d.]+)\s+(.*)$/) || []).slice(1);
+      .flatMap((row: string): SearchResult | undefined => {
+        const [, score, path] = row.trim().match(/^\s*([\d.]+)\s+(.*)$/) || [];
+        if (!path) return; // Skip if path is not found
         const originalPath = path;
         const friendlyPath = makeFriendly(path);
         const key = base64Encode(originalPath);
         return { key, score, path: friendlyPath, originalPath } as SearchResult;
       })
+      .filter((result: SearchResult | undefined) => !!result)
       .filter((result: SearchResult) => {
         return !removedKeys.includes(result.key);
       });

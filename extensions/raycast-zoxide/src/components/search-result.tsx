@@ -1,38 +1,47 @@
 import { ActionPanel, Action, List, open, Icon, showToast, Toast } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { useCachedState, showFailureToast } from "@raycast/utils";
 import { AddFromFinderAction } from "@components/add-from-finder-action";
 import { useZoxide } from "@hooks/use-zoxide";
 import { basename, dirname } from "path";
+import { base64ShellSanitize } from "@utils/misc";
 
 export const SearchResult = ({ searchResult }: { searchResult: SearchResult }) => {
   const [, setRemovedKeys] = useCachedState<string[]>("removed-keys", []);
 
-  const { revalidate: addQuery } = useZoxide(`add "${searchResult.originalPath}"`, {
+  const { revalidate: addQuery } = useZoxide(`add "${base64ShellSanitize(searchResult.originalPath)}"`, {
     keepPreviousData: false,
     execute: false,
   });
 
-  const { revalidate: removeQuery } = useZoxide(`remove "${searchResult.originalPath}"`, {
+  const { revalidate: removeQuery } = useZoxide(`remove "${base64ShellSanitize(searchResult.originalPath)}"`, {
     keepPreviousData: false,
     execute: false,
   });
 
   const folder = basename(searchResult.path);
-  const parent = dirname(searchResult.path) == "." ? "/" : dirname(searchResult.path);
+  const parent = dirname(searchResult.path) === "." ? "/" : dirname(searchResult.path);
 
   const openResult = async () => {
-    await addQuery();
-    open(searchResult.originalPath);
+    try {
+      await addQuery();
+      open(searchResult.originalPath);
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to open folder" });
+    }
   };
 
   const removeResult = async () => {
-    await removeQuery();
-    setRemovedKeys((prev) => prev.concat([searchResult.key]));
-    showToast({
-      style: Toast.Style.Success,
-      title: "Removed from zoxide",
-      message: searchResult.path,
-    });
+    try {
+      await removeQuery();
+      setRemovedKeys((prev) => prev.concat([searchResult.key]));
+      showToast({
+        style: Toast.Style.Success,
+        title: "Removed from zoxide",
+        message: searchResult.path,
+      });
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to remove from zoxide" });
+    }
   };
 
   return (

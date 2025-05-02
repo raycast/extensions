@@ -15,12 +15,14 @@
     {
       "name": "search-directories",
       "title": "Search Directories",
+      "subtitle": "zoxide",
       "description": "Search frequently used directories using zoxide.",
       "mode": "view"
     },
     {
       "name": "add-from-finder",
       "title": "Add from Finder",
+      "subtitle": "zoxide",
       "description": "Add the directory of the selected folder in Finder to zoxide. If there is no selection the directory of the open finder window will be used.",
       "mode": "no-view"
     }

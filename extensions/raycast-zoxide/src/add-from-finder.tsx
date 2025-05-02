@@ -14,9 +14,6 @@ export default async function Command() {
     title: "Adding directory to zoxide...",
   });
 
-  // Wait for a bit to ensure the toast is shown
-  await new Promise((resolve) => setTimeout(resolve, 250));
-
   try {
     finderPath = await runAppleScript(`
       tell application "Finder"
@@ -53,7 +50,11 @@ export default async function Command() {
     toast.style = Toast.Style.Success;
     toast.title = "Added to zoxide";
     toast.message = makeFriendly(finderPath);
-    launchCommand({ name: "search-directories", type: LaunchType.UserInitiated });
+    try {
+      launchCommand({ name: "search-directories", type: LaunchType.UserInitiated });
+    } catch (error) {
+      console.error("Failed to launch search-directories:", error);
+    }
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to add to zoxide";
