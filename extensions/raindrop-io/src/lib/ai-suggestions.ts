@@ -1,6 +1,6 @@
 import { AI, environment, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
-import { Collection } from "./raindrop-api"; // Assuming Collection interface is exported
+import { Collection } from "../types"; // Correct import path for Collection
 
 // Basic URL Scraper (Placeholder - Needs Improvement for Robustness)
 // Attempts to fetch basic metadata or fallback to partial body content
@@ -103,9 +103,10 @@ ${collectionsText}
 ---
 
 **Instructions:**
-1. Suggest 1-5 relevant tags for this content. Prefer tags from the user's existing list if they are highly relevant. If no existing tags fit well, suggest new, relevant, lowercase tags.
-2. Identify the *single* most relevant collection ID from the user's existing list. Do not suggest a collection that isn't listed.
-3. Respond *only* in JSON format with the following structure: 
+1. Suggest 1-3 relevant tags that best describe the **main subject matter** of the web page content, primarily considering the URL, Title, and Description.
+2. **Strongly prefer** suggesting tags from the User's Existing Tags list *only if they accurately describe the main subject matter*. If no existing tags fit well, suggest new, relevant, lowercase tags capturing the core subject. **Ignore terms related to common web UI elements (like 'login', 'button', 'form', 'menu'), page structure, or standard website functionality unless they are the *primary topic* of the page itself.** New tags should be reasonably specific to the topic (e.g., 'chess', 'web development', 'cooking') but avoid excessive detail or temporary specifics (e.g., 'queen's gambit opening', 'navbar color', 'summer sale 2024').
+3. Identify the *single* most relevant collection ID from the user's existing list that best reflects the **primary category or overall purpose** of the content (e.g., 'Games', 'Software Development', 'News Articles', 'Recipes'). Do not suggest a collection that isn't listed.
+4. Respond *only* in JSON format with the following structure:
    {
      "suggestedTags": ["tag1", "tag2"],
      "suggestedCollectionId": <collection_id> 

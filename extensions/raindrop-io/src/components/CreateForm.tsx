@@ -64,6 +64,7 @@ export const CreateForm = (props: CreateFormProps) => {
 
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [lastSuggestedUrl, setLastSuggestedUrl] = useState<string | undefined>(undefined);
+  const [newSuggestedTags, setNewSuggestedTags] = useState<string[]>([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -186,6 +187,12 @@ export const CreateForm = (props: CreateFormProps) => {
 
         if (suggestions) {
           setValue("tags", suggestions.suggestedTags);
+
+          const newlySuggested = suggestions.suggestedTags.filter(
+            (suggestedTag) => !currentTags.includes(suggestedTag),
+          );
+          setNewSuggestedTags(newlySuggested);
+
           if (suggestions.suggestedCollectionId !== null) {
             const suggestedIdStr = suggestions.suggestedCollectionId.toString();
             const collectionExists = validCollections.some((c: Collection) => c._id.toString() === suggestedIdStr);
@@ -210,15 +217,25 @@ export const CreateForm = (props: CreateFormProps) => {
         }
       }
     },
-    [aiTaggingEnabled, isAiLoading, setValue, lastSuggestedUrl],
+    [aiTaggingEnabled, isAiLoading, setValue, lastSuggestedUrl, tagsData],
   );
 
   useEffect(() => {
     if (!values.link) {
       setLastSuggestedUrl(undefined);
+      setNewSuggestedTags([]);
     }
     triggerAiSuggestions(values.link);
   }, [values.link, triggerAiSuggestions]);
+
+  // --- Prepare tags for TagPicker ---
+  const existingTagItems = tagsData?.items ?? [];
+  const existingTagIds = existingTagItems.map((t) => t._id);
+  const selectedTagIds = values.tags ?? []; // Tags currently selected in the form
+
+  // Combine existing tags and currently selected tags, ensuring uniqueness
+  const allTagIdsToRender = [...new Set([...existingTagIds, ...selectedTagIds])];
+  // --- End Prepare tags ---
 
   // Use the Collection type from the hook if it's defined and suitable
   // Or define a local type matching the hook's return structure
@@ -272,7 +289,14 @@ export const CreateForm = (props: CreateFormProps) => {
         <Form.TextField {...itemProps.newCollection} title="New Collection" placeholder="Name" />
       )}
       <Form.TagPicker {...itemProps.tags} title="Tags">
-        {tagsData?.items?.map(({ _id }: TagItem) => <Form.TagPicker.Item key={_id} value={_id} title={_id} />)}
+        {/* Render items based on the combined list */}
+        {allTagIdsToRender.map((tagId) => {
+          // Determine icon: If this tagId is in our state of newly suggested tags, show the icon.
+          // Revert back to Icon.Stars
+          const icon = newSuggestedTags.includes(tagId) ? Icon.Stars : undefined;
+
+          return <Form.TagPicker.Item key={tagId} value={tagId} title={tagId} icon={icon} />;
+        })}
       </Form.TagPicker>
     </Form>
   );
