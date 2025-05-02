@@ -1,5 +1,12 @@
 # raycast-ollama Changelog
 
+## [Improvement and Fix] - 2025-04-02
+
+- [Improvement] Implemented support for Mcp Server. README.md for more information on how to use it.
+- [Improvement] On Command "Manage Models" and "Loaded Models" opening last selected server is the default choice.
+- [Improvement] Implemented an empty view on Command "Manage Models" and "Loaded Models" when no models are installed or loaded.
+- [Fix] Error loading models on changing models form when one or more Ollama server was unreachable.
+
 ## [Fix] - 2025-02-24
 
 - Improved Ollama streaming processing leading to better performance when using remote Ollama server.
