@@ -2,11 +2,12 @@ import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { getPanelId } from "./utils/getPanelId";
 import getCache from "./utils/getCache";
-import { fetchGranolaData } from "./utils/fetchData";
+import { fetchGranolaData, getTranscript } from "./utils/fetchData";
 import convertHtmlToMarkdown from "./utils/convertHtmltoMarkdown";
 import { Doc, NoteActionsProps, NoteData, DocumentStructure } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
 import { convertDocumentToMarkdown } from "./utils/convertJsonNodes";
+import { useState, useEffect } from "react";
 
 const sortNotesByDate = (docs: Doc[] | undefined): Doc[] => {
   if (!docs) return [];
@@ -44,6 +45,47 @@ const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
     </>
   );
 };
+
+// New component to display the full transcript
+function FullTranscriptDetail({ docId, title }: { docId: string; title: string }) {
+  const [transcript, setTranscript] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function fetchTranscript() {
+      setIsLoading(true);
+      try {
+        const fetchedTranscript = await getTranscript(docId);
+        setTranscript(fetchedTranscript);
+      } catch (error) {
+        showFailureToast({ title: "Failed to load transcript", message: String(error) });
+        setTranscript("Failed to load transcript."); // Show error in detail view
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchTranscript();
+  }, [docId]); // Re-run effect if docId changes
+
+  const markdownContent = `# ${title}\n\n\n---\n${transcript}`;
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdownContent}
+      navigationTitle={`Transcript: ${title}`}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard
+            title="Copy Transcript"
+            content={markdownContent}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
 
 export default function Command() {
   let noteData: NoteData;
@@ -113,6 +155,11 @@ export default function Command() {
                       })()}
                       actions={
                         <ActionPanel>
+                          <Action.Push
+                            title="View Transcript"
+                            icon={Icon.Waveform}
+                            target={<FullTranscriptDetail docId={doc.id} title={doc.title ?? untitledNoteTitle} />}
+                          />
                           <NoteActions doc={doc} panels={panels} />
                         </ActionPanel>
                       }
