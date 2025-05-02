@@ -3,7 +3,7 @@
   "name": "chibisafe",
   "title": "Chibisafe",
   "description": "Chibisafe extension for Uploading Files, Creating Snippets and Short Links",
-  "icon": "extension-icon.png",
+  "icon": "chibisafe.png",
   "author": "lajlev",
   "categories": [
     "Productivity"
