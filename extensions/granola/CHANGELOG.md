@@ -1,5 +1,13 @@
 # Granola Changelog
 
+## [1.2] - {PR_MERGE_DATE}
+
+### 🐞 Bug Fixes
+- Fixed issue where certain queries were not working as expected
+
+### 🔄 Refactors and Improvements
+- Move AI instructions and evals from package.json to ai.yaml
+
 ## [1.1] - 2025-05-02
 
 ### ✨ New Features
