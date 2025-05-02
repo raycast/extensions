@@ -294,7 +294,7 @@ const Command: FC = () => {
             }
           />
           <Grid.Item
-            content="../assets/store/icon.png"
+            content="https://cdn.jsdelivr.net/gh/selfhst/icons/png/selfh-st.png"
             title="Visit selfh.st"
             actions={
               <ActionPanel>
