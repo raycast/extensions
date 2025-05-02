@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chibisafe",
   "title": "Chibisafe",
-  "description": "Chibisafe extension for Uploading Files, Creating Snippets and Short Links",
+  "description": "Chibisafe (open source) extension for Uploading Files, Creating Snippets and Short Links",
   "icon": "chibisafe.png",
   "author": "lajlev",
   "categories": [
