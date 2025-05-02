@@ -57,7 +57,7 @@ export function useSearchResults(query: string, category?: string) {
   }, [query, category]);
 
   let url = `https://shopify.dev/search/autocomplete?query=${encodeURIComponent(query)}&version=${getApiVersion()}&page=${page}`;
-  console.log("URL", url);
+
   if (category && category !== "all") {
     url += `&content_category=${encodeURIComponent(category)}`;
   }

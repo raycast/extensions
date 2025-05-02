@@ -31,7 +31,7 @@ export function formatBreadcrumbs(breadcrumb?: string, contentCategory?: string)
 
   const parts = breadcrumb.split(" / ");
   // Skip the first 3 parts (docs / api / etc)
-  const relevantParts = parts.slice(3);
+  const relevantParts = parts.length > 3 ? parts.slice(3) : parts;
 
   if (relevantParts.length === 0) return contentCategory || "";
 

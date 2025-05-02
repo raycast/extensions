@@ -29,8 +29,8 @@ function CategoryDropdown(props: { categories: CategoryOption[]; onCategoryChang
 const Command = () => {
   const [query, setQuery] = useState<string>("");
   const { categoryOptions } = useSearchCategories(query);
-  const [categoryId, setCategoryId] = useState<string>("");
-  const { data, isLoading, pagination } = useSearchResults(query, categoryId);
+  const [category, setCategory] = useState<string>("");
+  const { data, isLoading, pagination } = useSearchResults(query, category);
 
   return (
     <List
@@ -39,7 +39,7 @@ const Command = () => {
       onSearchTextChange={setQuery}
       searchBarPlaceholder="Search Shopify documentation..."
       searchBarAccessory={
-        <CategoryDropdown categories={categoryOptions} onCategoryChange={(newId) => setCategoryId(newId)} />
+        <CategoryDropdown categories={categoryOptions} onCategoryChange={(newId) => setCategory(newId)} />
       }
       pagination={pagination}
       isShowingDetail
