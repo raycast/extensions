@@ -40,6 +40,7 @@ const ICON_INDEX_URL =
   "https://raw.githubusercontent.com/selfhst/cdn/main/directory/icons.json";
 const ICON_INDEX_KEY = "iconIndex";
 const ICON_INDEX_LAST_FETCHED_KEY = "iconIndexLastFetched";
+const ICON_CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/selfhst/icons";
 
 /**
  * Base error class for icon-related operations
@@ -269,7 +270,7 @@ export function getIconCdnUrl(
   } else if (variant === "dark") {
     variantSuffix = "-dark";
   }
-  return `https://cdn.jsdelivr.net/gh/selfhst/icons/${format}/${reference}${variantSuffix}.${format}`;
+  return `${ICON_CDN_BASE_URL}/${format}/${reference}${variantSuffix}.${format}`;
 }
 
 /**
