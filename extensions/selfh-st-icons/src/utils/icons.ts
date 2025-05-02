@@ -6,6 +6,7 @@ import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
 import os from "os";
+import { getPreferences } from "./preferences";
 
 /**
  * Structure of each entry in the icons.json index file.
@@ -196,8 +197,10 @@ export async function getIconIndex({
         const lastFetched = parseInt(lastFetchedStr, 10);
         if (!isNaN(lastFetched)) {
           const age = Date.now() - lastFetched;
+          const prefs = await getPreferences();
+          const cacheDurationMs = prefs.refreshInterval * 60 * 60 * 1000; // Convert hours to milliseconds
 
-          if (age < CACHE_DURATION_MS) {
+          if (age < cacheDurationMs) {
             try {
               const data = JSON.parse(cached);
               if (validateIconIndex(data)) {

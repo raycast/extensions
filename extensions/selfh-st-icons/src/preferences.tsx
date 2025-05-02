@@ -14,10 +14,51 @@ import {
   Preferences,
 } from "./utils/preferences";
 import { showFailureToast } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
+
+interface PreferencesFormValues {
+  refreshInterval: string;
+}
+
 export default function PreferencesView() {
   const { pop } = useNavigation();
   const [preferences, setPreferencesState] = useState<Preferences>();
   const [isLoading, setIsLoading] = useState(true);
+
+  const { handleSubmit, itemProps } = useForm<PreferencesFormValues>({
+    onSubmit: async (values) => {
+      try {
+        await setPreferences({
+          ...preferences,
+          refreshInterval: parseInt(values.refreshInterval),
+        });
+        // Store the last update timestamp to trigger the main view's watcher
+        await LocalStorage.setItem(
+          "preferences_updated",
+          Date.now().toString(),
+        );
+        showToast({
+          style: Toast.Style.Success,
+          title: "Preferences updated",
+          message: `Refresh interval set to ${values.refreshInterval} hours`,
+        });
+        pop();
+      } catch (error) {
+        showFailureToast(error, { title: "Failed to save preferences" });
+      }
+    },
+    validation: {
+      refreshInterval: (value) => {
+        if (!value) {
+          return "The refresh interval is required";
+        }
+        const num = parseInt(value);
+        if (isNaN(num) || num < 1) {
+          return "Please enter a positive number";
+        }
+      },
+    },
+  });
 
   useEffect(() => {
     loadPreferences();
@@ -32,24 +73,6 @@ export default function PreferencesView() {
       showFailureToast(error, { title: "Failed to load preferences" });
     }
   };
-
-  const handleSubmit = useCallback(
-    async (values: Preferences) => {
-      try {
-        await setPreferences(values);
-        // Store the last update timestamp to trigger the main view's watcher
-        await LocalStorage.setItem(
-          "preferences_updated",
-          Date.now().toString(),
-        );
-        showToast({ style: Toast.Style.Success, title: "Preferences saved" });
-        pop();
-      } catch (error) {
-        showFailureToast(error, { title: "Failed to save preferences" });
-      }
-    },
-    [pop],
-  );
 
   if (!preferences || isLoading) {
     return null;
@@ -92,15 +115,10 @@ export default function PreferencesView() {
       />
 
       <Form.TextField
-        id="refreshInterval"
-        title="Refresh Interval (hours)"
+        {...itemProps.refreshInterval}
+        title="Refresh Interval"
         placeholder="24"
-        defaultValue={String(preferences.refreshInterval)}
-        info="How often to refresh the icon index"
-        validation={{
-          value: /^[1-9]\d*$/,
-          message: "Please enter a positive number"
-        }}
+        info="How often to refresh the icon index (in hours)"
       />
     </Form>
   );
