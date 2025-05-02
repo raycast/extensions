@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [1.1] - {PR_MERGE_DATE}
+## [1.1] - 2025-05-02
 
 ### ✨ New Features
 - Added transcript fetching capability to view full meeting transcripts
