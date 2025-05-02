@@ -128,7 +128,7 @@ export const CreateForm = (props: CreateFormProps) => {
     },
     validation: {
       link: (value: string | undefined) => {
-        if (!value) return "The item must't be empty";
+        if (!value) return "The item must not be empty";
         if (!value.match(/^(https?|file):\/\//i)) {
           return "Please enter a valid URL (starting with http://, https://, or file://)";
         }

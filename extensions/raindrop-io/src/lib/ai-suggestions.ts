@@ -139,8 +139,8 @@ ${collectionsText}
       // Attempt to parse the CLEANED JSON response
       const parsed = JSON.parse(cleanedResponse);
 
-      if (Array.isArray(parsed.suggestedTags) && parsed.suggestedTags.every((t: string) => typeof t === "string")) {
-        suggestions.suggestedTags = parsed.suggestedTags;
+      if (Array.isArray(parsed.suggestedTags) && parsed.suggestedTags.every((t: string) => typeof t === "string" && t.trim().length > 0)) {
+        suggestions.suggestedTags = parsed.suggestedTags.map(t => t.trim());
       }
 
       // Validate collection ID against existing collections

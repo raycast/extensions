@@ -134,7 +134,7 @@
       "name": "aiTaggingEnabled",
       "type": "checkbox",
       "label": "Enable AI suggestions (Advanced AI)",
-      "description": "Auto-suggest tags/collection using Raycast AI.",
+      "description": "Auto-suggest tags/collection using Raycast AI (Requires Raycast Pro).",
       "required": false,
       "default": false
     },
