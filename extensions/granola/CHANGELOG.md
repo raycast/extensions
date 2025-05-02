@@ -1,5 +1,12 @@
 # Granola Changelog
 
+## [1.1] - 2025-05-02
+
+### ✨ New Features
+- Added transcript fetching capability to view full meeting transcripts
+- Enhanced AI integration to support searching and extracting information from transcripts
+
+
 ## [Initial Version] - 2025-04-30
 
 - Added Granola extension

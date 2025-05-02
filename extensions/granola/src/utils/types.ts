@@ -160,3 +160,13 @@ export interface Attendee {
   name?: string;
   email?: string;
 }
+
+export interface TranscriptSegment {
+  document_id: string;
+  start_timestamp: string;
+  text: string;
+  source: "system" | "microphone" | string;
+  id: string;
+  is_final: boolean;
+  end_timestamp: string;
+}
