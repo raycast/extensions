@@ -75,7 +75,7 @@ export default function PreferencesView() {
   };
 
   if (!preferences || isLoading) {
-    return null;
+    return <Form isLoading={true} />;
   }
 
   return (
