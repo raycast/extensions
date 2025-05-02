@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "upcoming-holidays",
   "title": "Upcoming Holidays",
-  "description": "Show upcoming holidays for a country",
+  "description": "Show upcoming holidays for a country or region",
   "icon": "calendar-icon.png",
   "author": "rodrigouroz",
+  "contributors": [
+    "YourMCGeek"
+  ],
   "categories": [
     "Data",
     "Productivity"
@@ -12,33 +15,54 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "upcoming-holidays",
       "title": "List Upcoming Holidays",
-      "description": "Allows you to see the upcoming holidays for a country",
-      "mode": "view"
+      "description": "Allows you to see the upcoming holidays for a country and region (if applicable)",
+      "mode": "view",
+      "subtitle": "Upcoming Holidays"
+    },
+    {
+      "name": "all-holidays",
+      "title": "List All Holidays",
+      "description": "Allows you to see all the holidays, past and future, for a country and region (if applicable)",
+      "mode": "view",
+      "subtitle": "Upcoming Holidays"
+    },
+    {
+      "name": "today-holidays",
+      "title": "List Today's Holidays",
+      "description": "Allows you to see all holidays happening today for a country and region (if applicable)",
+      "mode": "view",
+      "subtitle": "Upcoming Holidays"
+    },
+    {
+      "name": "pinned-locations",
+      "title": "List Pinned Location Holidays",
+      "description": "Allows you to see all upcoming holidays happening in your pinned locations",
+      "mode": "view",
+      "subtitle": "Upcoming Holidays"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.2",
-    "country-locale-map": "^1.8.0",
-    "moment": "^2.29.3",
-    "node-fetch": "^3.2.4",
-    "swr": "^1.3.0"
+    "@raycast/api": "^1.97.0",
+    "@raycast/utils": "^1.19.1",
+    "country-locale-map": "^1.9.9",
+    "date-holidays": "^3.24.2",
+    "moment": "^2.30.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "~22.15.3",
+    "@types/react": "^19.1.2",
+    "eslint": "^9.26.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

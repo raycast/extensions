@@ -32,8 +32,9 @@ export const buildMarkdown = (
 
   return sortedHolidays
     .map(({ start, name, englishName }) => {
-      const formattedDate = moment(start).format("dddd, MMMM Do");
-      const relativeDate = moment(start).fromNow();
+      const date = moment(start);
+      const formattedDate = date.format("dddd, MMMM Do");
+      const relativeDate = date.fromNow();
 
       let dateInfo = "";
       if (showStartDate) {

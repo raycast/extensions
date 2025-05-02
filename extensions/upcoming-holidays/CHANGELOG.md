@@ -2,7 +2,8 @@
 
 ## [Overhaul] - {PR_MERGE_DATE}
 
-- Update extension to allow for regions, pinning is also supported and has it's own dedicated view. Additionally, updated data source for fetching holidays.
+- Update extension to allow for regions, pinning is also supported and has it's own dedicated view.
+- Updated data source for fetching holidays.
 
 ## [Initial Version] - 2022-06-04
 
