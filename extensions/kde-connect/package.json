@@ -12,15 +12,15 @@
   "commands": [
     {
       "name": "index",
-      "title": "KDE Connect Devices",
-      "subtitle": "List and Perform Actions",
+      "title": "List Devices",
+      "subtitle": "List KDE Connect Devices",
       "description": "List and pair devices to use with KDE Connect",
       "mode": "view"
     },
     {
       "name": "send",
-      "title": "Send to KDE Connect",
-      "subtitle": "To the Favourite Device",
+      "title": "Send to Device",
+      "subtitle": "To the Favourite KDE Connect Device",
       "description": "Send string, path or URL to the favourite KDE Connect device",
       "mode": "no-view",
       "arguments": [

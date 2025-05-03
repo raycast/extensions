@@ -59,6 +59,18 @@ export default function Command() {
     setFavouriteDevice(device?.id);
   };
 
+  const tryCommand = (command: () => Promise<unknown>) => () => {
+    try {
+      command();
+    } catch (error) {
+      showToast({
+        title: "Failed to send content",
+        style: Toast.Style.Failure,
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+
   if (appOk === false) {
     return <GetKDEConnect />;
   }
@@ -107,18 +119,17 @@ export default function Command() {
                   <Action
                     title="Ping"
                     icon={Icon.Network}
-                    onAction={() => {
-                      connect.ping(item.id);
-                    }}
+                    onAction={tryCommand(async () => {
+                      await connect.ping(item.id);
+                    })}
                   />
                   <Action
                     title="Unpair"
                     icon={Icon.Trash}
-                    onAction={() => {
-                      connect.unpairDevice(item.id).then(() => {
-                        refreshDevices();
-                      });
-                    }}
+                    onAction={tryCommand(async () => {
+                      await connect.unpairDevice(item.id);
+                      refreshDevices();
+                    })}
                   />
                 </ActionPanel>
               }
@@ -142,13 +153,12 @@ export default function Command() {
                   <Action
                     title="Pair Device"
                     icon={Icon.Link}
-                    onAction={() => {
+                    onAction={tryCommand(async () => {
                       setLoading(true);
-                      connect.pairDevice(item.id).then(() => {
-                        setLoading(false);
-                        refreshDevices();
-                      });
-                    }}
+                      await connect.pairDevice(item.id);
+                      setLoading(false);
+                      refreshDevices();
+                    })}
                   />
                 </ActionPanel>
               }
