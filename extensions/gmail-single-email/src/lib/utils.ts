@@ -45,6 +45,6 @@ export async function toastifiedPromiseCall(args: {
       args.onAfterCall();
     }
   } catch (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+    showFailureToast(error, { title: "Error" });
   }
 }
