@@ -17,7 +17,7 @@ export function getFirstValidLetter(text: string | null | undefined, fallback?: 
   return fallback;
 }
 
-export async function sleep(delayMs: number) {
+export async function sleep(delayMs: number): Promise<void> {
   await setTimeout(delayMs);
 }
 
