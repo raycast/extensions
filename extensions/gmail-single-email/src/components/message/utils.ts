@@ -6,10 +6,12 @@ const emailAddressRegex = /^\s*(?:"?([^"<>]+)"?\s*)?<(.+@[^>]+)>\s*$/;
 // Basic regex to check if a string looks like an email address
 const basicEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function getAddressParts(text: string | undefined | null): {
-  name: string | undefined;
-  email: string | undefined;
-} | undefined {
+export function getAddressParts(text: string | undefined | null):
+  | {
+      name: string | undefined;
+      email: string | undefined;
+    }
+  | undefined {
   if (!text) {
     return undefined;
   }
@@ -39,8 +41,13 @@ export function extractPlainTextBody(payload: gmail_v1.Schema$MessagePart | unde
 
   // Recursive helper function
   function findPlainTextPart(part: gmail_v1.Schema$MessagePart): string | undefined {
-    import { gmail_v1 } from "@googleapis/gmail";
-import { showFailureToast } from "@raycast/utils";
+    if (part.mimeType === "text/plain" && part.body?.data) {
+      try {
+        return Buffer.from(part.body.data, "base64").toString("utf8");
+      } catch (e) {
+        console.error("Failed to decode base64 body:", e);
+        return undefined;
+      }
     }
 
     // If it's a multipart message, search its parts

@@ -1,4 +1,5 @@
 import { showToast, Toast, Action, Icon, environment, Alert, confirmAlert, Keyboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { gmail_v1 } from "googleapis";
 import {
   markMessageAsArchived as apiMarkMessageAsArchived,
@@ -115,8 +116,7 @@ export function MessageDeleteAction(props: { message: gmail_v1.Schema$Message; o
         props.onRevalidate();
       }
     } catch (error) {
-      import { showToast, Toast, Action, Icon, environment, Alert, confirmAlert, Keyboard } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+      showFailureToast(error, { title: "Failed to move mail to trash" });
     }
   };
   return (

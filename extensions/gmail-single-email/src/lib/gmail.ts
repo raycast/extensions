@@ -2,6 +2,7 @@ import { gmail as gmailclient, auth, gmail_v1 } from "@googleapis/gmail";
 import { authorize, client, OAuthClientId } from "./oauth";
 import { GaxiosResponse } from "googleapis-common";
 import { showToast, Toast, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils"; // Added import
 import * as fs from "fs/promises"; // Use promises version
 import * as os from "os";
 import * as path from "path";
@@ -133,10 +134,14 @@ export async function markMessageAsUnread(message: gmail_v1.Schema$Message) {
 }
 
 export async function moveMessageToTrash(message: gmail_v1.Schema$Message) {
-  if (message.id === undefined) {
+  // Ensure message.id is not null before passing to the API
+  if (message.id === null || message.id === undefined) {
+    console.error("Cannot move message to trash: ID is missing");
+    await showFailureToast("Cannot move message to trash: ID is missing");
     return;
   }
   const gmail = await getAuthorizedGmailClient();
+  // Pass the validated message.id (which is now guaranteed to be a string)
   await gmail.users.messages.trash({ userId: "me", id: message.id });
 }
 

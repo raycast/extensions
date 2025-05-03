@@ -69,7 +69,8 @@ export function SingleEmailDetailView(props: {
   const bodyContent = extractPlainTextBody(message?.payload);
 
   // Build the main markdown content
-  let markdown = `# ${subject.replace(/([\[\]\\`*_{}()#+\-.!])/g, '\\$1')}\n\n`;
+  // Removed unnecessary escape for backtick in the regex
+  let markdown = `# ${subject.replace(/([\\*_{}()#+-.!])/g, "\\$1")}\n\n`;
   // Use extracted body or fallback to snippet
   markdown += bodyContent || message?.snippet || "No content available.";
 
