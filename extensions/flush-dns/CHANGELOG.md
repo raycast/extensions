@@ -1,6 +1,6 @@
 # Flush DNS Changelog
 
-## [Windows] - {PR_MERGE_DATE}
+## [Windows Support] - {PR_MERGE_DATE}
 
 - Added Windows support.
 
