@@ -1,15 +1,20 @@
+import { isWithinInterval } from "date-fns";
 import { useAPI } from "./use-api";
 import { useTournaments } from "./use-tournaments";
 
 export function useRankings(leagueId: string) {
   const { tournaments } = useTournaments(leagueId);
 
-  const tournamentId = tournaments?.[0].id;
+  const tournament = tournaments?.find((t) => {
+    const startTime = new Date(t.startDate);
+    const endTime = new Date(t.endDate);
+    return isWithinInterval(new Date(), { start: startTime, end: endTime });
+  });
 
   const { data, isLoading } = useAPI<TournamentStagesResponse>({
     query: "getStandingsV3",
-    params: { tournamentId },
-    execute: !!tournamentId,
+    params: { tournamentId: tournament?.id },
+    execute: !!tournament,
   });
 
   return {

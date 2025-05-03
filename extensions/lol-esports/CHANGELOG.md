@@ -3,6 +3,7 @@
 ## [AI Tools] - {PR_MERGE_DATE}
 
 - Add new AI tools to get leagues, schedules and standings
+- Fix `Show Schedule` command
 
 ## [Fixes & Improvements] - 2024-03-28
 
