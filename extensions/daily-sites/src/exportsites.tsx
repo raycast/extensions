@@ -46,7 +46,6 @@ export function ExportSitesForm({ onDone }: { onDone: () => void }) {
         id="filename"
         title="Filename"
         defaultValue="dailysites"
-        placeholder="dailysites"
         info="Your exported file will be saved with a .xml extension"
       />
     </Form>
