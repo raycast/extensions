@@ -20,14 +20,13 @@ export class KDEConnect {
   }
 
   private executeCommand(command: string | null): Promise<string> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       if (command === null) {
         throw "Command exection error: command is null";
       }
       exec(`'${appPath}' ${command} 2> /tmp/kde-connect-raycast.log`, (err, stdout) => {
         if (err) {
-          resolve(stdout);
-          console.log(err);
+          reject(err);
         } else {
           resolve(stdout);
         }
