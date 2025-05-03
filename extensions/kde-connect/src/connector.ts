@@ -117,7 +117,7 @@ export const KDECFunctions: { [key: string]: KDECFunction } = {
   },
   // args: [path/URL]
   share: (params) => {
-    if (!params.deviceID || !params.args) {
+    if (!params.deviceID || !params.args || params.args.length === 0) {
       return null;
     }
     return `-d ${params.deviceID} --share "${params.args[0]}"`;
