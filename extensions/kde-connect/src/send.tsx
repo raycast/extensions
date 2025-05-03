@@ -94,6 +94,10 @@ export default async function Command(props: LaunchProps<{ arguments: ShareArgum
           shownToast.title = "Sent";
           shownToast.message = undefined;
           shownToast.style = Toast.Style.Success;
+        }).catch((error) => {
+          shownToast.title = "Failed to send text";
+          shownToast.message = error.message;
+          shownToast.style = Toast.Style.Failure;
         });
         break;
 
