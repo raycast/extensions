@@ -99,7 +99,8 @@ function buildJql(query: string): string {
 }
 
 function jqlFor(query: string): string {
-  return isIssueKey(query) ? `key=${query}` : buildJql(query);
+  const trimmedQuery = query.trim();
+  return isIssueKey(trimmedQuery) ? `key=${trimmedQuery}` : buildJql(query);
 }
 
 export async function searchIssues(query: string): Promise<ResultItem[]> {

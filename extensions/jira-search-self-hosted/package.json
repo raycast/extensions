@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jira-search-self-hosted",
-  "title": "Jira Search (Self-Hosted)",
+  "title": "Jira Search (self-hosted)",
   "description": "Search for Jira issues (more tolerant and powerful than built-in), projects, and boards on Jira Server instances.",
   "icon": "command-icon.png",
   "author": "emanguy",
@@ -11,35 +11,36 @@
     "ryanp",
     "LunaticMuch",
     "nick318",
-    "marinsokol"
+    "marinsokol",
+    "hayden_barnes"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "issue",
       "title": "Search Issues",
-      "subtitle": "Jira Search (Self-Hosted)",
+      "subtitle": "Jira Search (Self-hosted)",
       "description": "Search Jira issues by text, type and project",
       "mode": "view"
     },
     {
       "name": "open-issues",
       "title": "Open Issues",
-      "subtitle": "Jira Search (Self-Hosted)",
+      "subtitle": "Jira Search (Self-hosted)",
       "description": "Search Jira issues assinged to current user by text, type and project",
       "mode": "view"
     },
     {
       "name": "board",
       "title": "Search Boards",
-      "subtitle": "Jira Search (Self-Hosted)",
+      "subtitle": "Jira Search (Self-hosted)",
       "description": "Search Jira boards by title",
       "mode": "view"
     },
     {
       "name": "project",
       "title": "Search Projects",
-      "subtitle": "Jira Search (Self-Hosted)",
+      "subtitle": "Jira Search (Self-hosted)",
       "description": "Search Jira projects by title",
       "mode": "view"
     }
@@ -71,17 +72,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.0",
+    "@raycast/api": "^1.97.0",
+    "@raycast/utils": "^1.19.1",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@types/node": "^20.5.7",
-    "@types/react": "^18.2.21",
+    "@types/react": "^19.1.2",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "@typescript-eslint/parser": "^6.5.0",
     "eslint": "^8.48.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.3",
+    "react": "^18.1.0",
     "react-devtools": "^4.28.0",
     "typescript": "^5.2.2"
   },
@@ -90,6 +93,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "node publish.mjs"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
