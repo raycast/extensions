@@ -66,62 +66,33 @@ export class KDEConnect {
     });
   }
 
-  pairDevice(deviceID: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.executeCommand(KDECFunctions.pairDevice({ deviceID: deviceID }))
-        .then(() => {
-          resolve();
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+  pairDevice(deviceID: string): Promise<string> {
+    return this.executeCommand(KDECFunctions.pairDevice({ deviceID: deviceID }));
   }
 
-  unpairDevice(deviceID?: string): Promise<void> {
+  unpairDevice(deviceID?: string): Promise<string> {
     const targetDeviceID = deviceID || this.deviceID;
     if (!targetDeviceID) {
       return Promise.reject("No deviceID set");
     }
-    return new Promise((resolve, reject) => {
-      this.executeCommand(KDECFunctions.unpairDevice({ deviceID: targetDeviceID }))
-        .then(() => {
-          resolve();
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+
+    return this.executeCommand(KDECFunctions.unpairDevice({ deviceID: targetDeviceID }));
   }
 
-  share(path: string): Promise<void> {
+  share(path: string): Promise<string> {
     if (!this.deviceID) {
       return Promise.reject("No deviceID set");
     }
-    return new Promise((resolve, reject) => {
-      this.executeCommand(KDECFunctions.share({ deviceID: this.deviceID, args: [path] }))
-        .then(() => {
-          resolve();
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+
+    return this.executeCommand(KDECFunctions.share({ deviceID: this.deviceID, args: [path] }));
   }
 
-  sendText(str: string): Promise<void> {
+  sendText(str: string): Promise<string> {
     if (!this.deviceID) {
       return Promise.reject("No deviceID set");
     }
-    return new Promise((resolve, reject) => {
-      this.executeCommand(KDECFunctions.sendText({ deviceID: this.deviceID, args: [str] }))
-        .then(() => {
-          resolve();
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+
+    return this.executeCommand(KDECFunctions.sendText({ deviceID: this.deviceID, args: [str] }));
   }
 
   async sendFiles(paths: string[], toast?: Toast) {
@@ -139,34 +110,20 @@ export class KDEConnect {
     }
   }
 
-  sendSMS(destination: string, str: string): Promise<void> {
+  sendSMS(destination: string, str: string): Promise<string> {
     if (!this.deviceID) {
       return Promise.reject("No deviceID set");
     }
-    return new Promise((resolve, reject) => {
-      this.executeCommand(KDECFunctions.sendSms({ deviceID: this.deviceID, args: [destination, str] }))
-        .then(() => {
-          resolve();
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+
+    return this.executeCommand(KDECFunctions.sendSms({ deviceID: this.deviceID, args: [destination, str] }));
   }
 
-  ping(deviceID: string): Promise<void> {
+  ping(deviceID: string): Promise<string> {
     const targetDeviceID = deviceID || this.deviceID;
     if (!targetDeviceID) {
       return Promise.reject("No deviceID set");
     }
-    return new Promise((resolve, reject) => {
-      this.executeCommand(KDECFunctions.ping({ deviceID: targetDeviceID }))
-        .then(() => {
-          resolve();
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+
+    return this.executeCommand(KDECFunctions.ping({ deviceID: targetDeviceID }));
   }
 }
