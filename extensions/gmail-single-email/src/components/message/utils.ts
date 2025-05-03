@@ -40,14 +40,19 @@ export function extractPlainTextBody(payload: gmail_v1.Schema$MessagePart | unde
   }
 
   // Recursive helper function
+  // Helper function to decode base64 content
+  function decodeBase64Body(data: string): string | undefined {
+    try {
+      return Buffer.from(data, "base64").toString("utf8");
+    } catch (e) {
+      console.error("Failed to decode base64 body:", e);
+      return undefined;
+    }
+  }
+
   function findPlainTextPart(part: gmail_v1.Schema$MessagePart): string | undefined {
     if (part.mimeType === "text/plain" && part.body?.data) {
-      try {
-        return Buffer.from(part.body.data, "base64").toString("utf8");
-      } catch (e) {
-        console.error("Failed to decode base64 body:", e);
-        return undefined;
-      }
+      return decodeBase64Body(part.body.data);
     }
 
     // If it's a multipart message, search its parts

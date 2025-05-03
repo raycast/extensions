@@ -1,5 +1,6 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { setTimeout } from "timers/promises";
+import { showFailureToast } from "@raycast/utils";
 
 export function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "unknown error";
