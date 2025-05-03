@@ -53,7 +53,7 @@
       "title": "Get Schedule",
       "description": "Get a league schedule and matches"
     }
-      ],
+  ],
   "dependencies": {
     "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.19.0",
