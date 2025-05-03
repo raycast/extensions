@@ -132,7 +132,7 @@ export class KDEConnect {
       try {
         for (const path of paths) {
           toast && (toast.message = `Sending ${path}`);
-          this.executeCommand(KDECFunctions.share({ deviceID: this.deviceID, args: [path] }));
+          await this.executeCommand(KDECFunctions.share({ deviceID: this.deviceID, args: [path] }));
         }
         if (toast) {
           toast.title = "Files Sent";
