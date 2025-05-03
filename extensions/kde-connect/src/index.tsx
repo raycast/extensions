@@ -229,7 +229,8 @@ function DeviceActions(props: { device: KDEDevice; connect: KDEConnect }) {
     try {
       switch (sendType) {
         case SendType.SMS:
-          await props.connect.sendSMS(values.destination as string, values.content);
+          if (!values.destination) throw new Error("Phone number is required for SMS");
+          await props.connect.sendSMS(values.destination, values.content);
           break;
 
         case SendType.URL:
