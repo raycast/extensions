@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, popToRoot } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
@@ -53,7 +53,7 @@ export function ExportSitesForm({ onDone }: { onDone: () => void }) {
   );
 }
 
+// Direct‐launch command wrapper
 export default function ExportSitesCommand() {
-  // Command entrypoint – supplies a no-op onDone so the form always gets it
-  return <ExportSitesForm onDone={() => {}} />;
+  return <ExportSitesForm onDone={async () => await popToRoot()} />;
 }

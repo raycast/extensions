@@ -1,5 +1,6 @@
+// addsite.tsx
 import React, { useEffect, useState } from "react";
-import { ActionPanel, Form, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Form, Action, showToast, Toast, confirmAlert, popToRoot } from "@raycast/api";
 import type { Site } from "./types";
 import { loadSites, saveSites, getCategories } from "./utils";
 
@@ -24,31 +25,24 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
   const [showErrors, setShowErrors] = useState(false);
   const [categories, setCategories] = useState<string[]>(() => Array.from(new Set([initialCat, "custom"])));
   const [name, setName] = useState(initialValues?.name ?? "");
-  // Default URL value to "https://" when creating a new site
   const [url, setUrl] = useState(initialValues?.url ?? "https://");
   const [category, setCategory] = useState(initialCat);
   const [customCategory, setCustomCategory] = useState("");
 
   useEffect(() => {
     let isActive = true;
-
     (async () => {
       const all = await loadSites();
-      if (!isActive) {
-        // component unmounted—abort
-        return;
-      }
+      if (!isActive) return;
       const baseCats = getCategories(all);
       setCategories(Array.from(new Set([initialCat, "custom", ...baseCats])));
     })();
-
     return () => {
-      // flip the flag on unmount
       isActive = false;
     };
   }, [initialCat]);
 
-  // Validation rules
+  // validation rules
   const nameError = name.trim() === "" ? "Name is required" : undefined;
   const urlError =
     url.trim() === ""
@@ -73,17 +67,48 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
     };
 
     const existing = await loadSites();
-    const isDuplicate = !initialValues && existing.some((s) => s.url === newSite.url);
-    if (isDuplicate) {
-      showToast(Toast.Style.Failure, "A site with this URL already exists");
-      return;
+
+    // Prevent duplicates on add
+    if (!initialValues) {
+      if (existing.some((s) => s.url === newSite.url)) {
+        await showToast(Toast.Style.Failure, "Site already exists");
+        return;
+      }
+    } else {
+      // Prevent duplicates on edit if URL changed to one that exists
+      if (initialValues.url !== newSite.url && existing.some((s) => s.url === newSite.url)) {
+        await showToast(Toast.Style.Failure, "Another site with that URL already exists");
+        return;
+      }
     }
+
+    // persist
     const updated = initialValues
       ? existing.map((s) => (s.url === initialValues.url ? newSite : s))
       : [...existing, newSite];
 
     await saveSites(updated);
     await showToast(Toast.Style.Success, initialValues ? "Site updated" : "Site added");
+
+    // Ask user if they want to add another
+    const again = await confirmAlert({
+      title: "Add another site?",
+      message: "Would you like to add one more site?",
+      primaryAction: { title: "Yes" },
+      dismissAction: { title: "No" },
+    });
+
+    if (again) {
+      // reset form fields
+      setName("");
+      setUrl("https://");
+      setCategory("uncategorized");
+      setCustomCategory("");
+      setShowErrors(false);
+      return;
+    }
+
+    // not adding another → navigate back
     onDone();
   }
 
@@ -138,7 +163,7 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
           title="Custom Category"
           placeholder="Enter custom category"
           value={customCategory}
-          onChange={(value) => setCustomCategory(value.trim())}
+          onChange={(v) => setCustomCategory(v.trim())}
         />
       )}
     </Form>
@@ -147,5 +172,12 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
 
 // Wrapper so Raycast always passes onDone
 export default function AddSiteCommand() {
-  return <AddSitesForm onDone={() => {}} />;
+  return (
+    <AddSitesForm
+      onDone={async () => {
+        // runs when Add Site is invoked directly
+        await popToRoot();
+      }}
+    />
+  );
 }

@@ -1,15 +1,11 @@
 import React from "react";
-import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, popToRoot } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import type { Preferences } from "./types";
 import { parseSitesXml, loadSites, saveSites } from "./utils";
 
-interface ImportSitesFormProps {
-  onDone: () => void;
-}
-
-export function ImportSitesForm({ onDone }: ImportSitesFormProps) {
+export function ImportSitesForm({ onDone }: { onDone: () => void }) {
   // read the xmlFolder preference
   const { xmlFolder } = getPreferenceValues<Preferences>();
 
@@ -52,7 +48,7 @@ export function ImportSitesForm({ onDone }: ImportSitesFormProps) {
   );
 }
 
-// Default command export that provides a dummy onDone
+// Direct‐launch command wrapper
 export default function ImportSitesCommand() {
-  return <ImportSitesForm onDone={() => {}} />;
+  return <ImportSitesForm onDone={async () => await popToRoot()} />;
 }
