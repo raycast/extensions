@@ -23,7 +23,7 @@ export function useRankings(leagueId: string) {
   };
 }
 
-interface TournamentStagesResponse {
+export interface TournamentStagesResponse {
   data: {
     standings: StandingsItem[];
   };
