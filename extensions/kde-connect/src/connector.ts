@@ -55,7 +55,7 @@ export async function startApp() {
   showHUD("KDE Connect is starting...");
 
   return new Promise<void>((resolve, reject) => {
-    execSync("open -jg " + mainApp);
+    execSync(`open -jg '${mainApp}'`);
 
     let tryCount = 0;
 

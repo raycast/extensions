@@ -1,4 +1,15 @@
-import { ActionPanel, Action, Icon, List, LocalStorage, Form, useNavigation, showToast, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  LocalStorage,
+  Form,
+  useNavigation,
+  showToast,
+  Toast,
+  Keyboard,
+} from "@raycast/api";
 import React, { useEffect, useRef, useState } from "react";
 import { KDEConnect, KDEDevice } from "./device";
 import { SendType, SendTypeAllCases, appExists, startApp } from "./connector";
@@ -18,7 +29,6 @@ export default function Command() {
   const refreshDevices = async () => {
     setLoading(true);
     await startApp();
-    console.log("App ready");
     const discoveredDevices = await connect.listDevices();
     setDevices(discoveredDevices);
     setLoading(false);
@@ -59,9 +69,9 @@ export default function Command() {
     setFavouriteDevice(device?.id);
   };
 
-  const tryCommand = (command: () => Promise<unknown>) => () => {
+  const tryCommand = (command: () => Promise<unknown>) => async () => {
     try {
-      command();
+      await command();
     } catch (error) {
       showToast({
         title: "Failed to send content",
@@ -76,7 +86,21 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={loading}>
+    <List
+      isLoading={loading}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Refresh"
+            icon={Icon.RotateClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={tryCommand(async () => {
+              refreshDevices();
+            })}
+          />
+        </ActionPanel>
+      }
+    >
       <List.Section title="Paired Devices">
         {devices
           .filter((entry) => entry.paired)
@@ -131,6 +155,14 @@ export default function Command() {
                       refreshDevices();
                     })}
                   />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.RotateClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={tryCommand(async () => {
+                      refreshDevices();
+                    })}
+                  />
                 </ActionPanel>
               }
             />
@@ -156,7 +188,15 @@ export default function Command() {
                     onAction={tryCommand(async () => {
                       setLoading(true);
                       await connect.pairDevice(item.id);
+                      refreshDevices();
                       setLoading(false);
+                    })}
+                  />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.RotateClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={tryCommand(async () => {
                       refreshDevices();
                     })}
                   />
@@ -169,7 +209,6 @@ export default function Command() {
   );
 }
 
-// TODO: implement all types
 function DeviceActions(props: { device: KDEDevice; connect: KDEConnect }) {
   const { pop } = useNavigation();
   const [sendType, setSendType] = useState<SendType>(SendType.Text);
