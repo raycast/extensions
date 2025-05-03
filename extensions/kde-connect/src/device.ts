@@ -121,7 +121,7 @@ export class KDEConnect {
   }
 
   ping(deviceID: string): Promise<string> {
-    const targetDeviceID = deviceID || this.deviceID;
+    const targetDeviceID = this.deviceID || deviceID;
     if (!targetDeviceID) {
       return Promise.reject("No deviceID set");
     }
