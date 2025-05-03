@@ -67,9 +67,11 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
         push(<ResultView result={result as never} curl={curl} jsonPathResult={""} />);
       })
       .catch((err) => {
+        const data = err.response?.data;
+        const errorMessage = typeof data === "string" ? data : data?.message || data?.error || data?.detail;
         showToast({
           title: "Error",
-          message: err.message,
+          message: `${err.message}${errorMessage ? `\n${errorMessage.toString()}` : ""}`,
           style: Toast.Style.Failure,
         });
       })
