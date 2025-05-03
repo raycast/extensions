@@ -1,6 +1,7 @@
 import { WorkflowState } from "@linear/sdk";
 import { Image } from "@raycast/api";
 import { groupBy } from "lodash";
+
 import { IssueState } from "../api/getIssues";
 
 type IconAsset = {
@@ -42,7 +43,7 @@ export function getOrderedStates(
     StateType.started,
     StateType.completed,
     StateType.canceled,
-  ]
+  ],
 ) {
   if (states.length === 0) {
     return [];

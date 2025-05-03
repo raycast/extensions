@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "link-bundles",
+  "title": "Link Bundles",
+  "description": "Efficiently manage and launch groups of links in specific Chrome profiles.",
+  "icon": "icon_.png",
+  "author": "toni_birka",
+  "contributors": [
+    "alexs"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-link-bundles",
+      "title": "Search Link Bundles",
+      "description": "Browse, search, and manage your saved link bundles.",
+      "mode": "view"
+    },
+    {
+      "name": "create-link-bundle",
+      "title": "Create Link Bundle",
+      "description": "Create a new bundle of links with custom title, description, and optionally, Chrome profile assignment.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultOpenInDefaultBrowser",
+          "title": "Default values for flags in a form",
+          "label": "Open in Default Browser",
+          "description": "Whether new bundles should open in the default browser instead of Chrome",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "defaultNewWindow",
+          "label": "Open in New Window",
+          "description": "Whether new bundles should open in a new window",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "defaultIncognitoWindow",
+          "label": "Open in Incognito Window",
+          "description": "Whether new bundles should open in an incognito window",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "preferences": [
+    {
+      "name": "chromeApplicationDirectory",
+      "title": "Chrome Application Directory",
+      "description": "Path to Google Chrome application directory",
+      "type": "directory",
+      "required": false,
+      "default": "/Applications"
+    },
+    {
+      "name": "chromeProfilesDirectory",
+      "title": "Chrome Profiles Directory",
+      "description": "Path to Chrome profiles directory",
+      "type": "directory",
+      "required": false,
+      "default": "~/Library/Application Support/Google/Chrome"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

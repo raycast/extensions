@@ -5,6 +5,9 @@
   "description": "Useful Android commands to list projects and emulators",
   "icon": "command-icon.png",
   "author": "mibrahimdev",
+  "contributors": [
+    "3llomi"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -28,16 +31,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.0",
+    "@raycast/api": "^1.79.0",
     "expand-tilde": "^2.0.2"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.33.1",
-    "@typescript-eslint/parser": "^5.33.1",
+    "@raycast/eslint-config": "1.0.5",
+    "@types/expand-tilde": "^2.0.0",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-react": "^7.30.1",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "preferences": [
@@ -57,6 +61,14 @@
       "type": "textfield",
       "required": true,
       "default": "~/Library/Android/sdk"
+    },
+    {
+      "title": "Android AVD",
+      "name": "androidAVD",
+      "description": "Locate Android AVD path",
+      "type": "textfield",
+      "required": true,
+      "default": "~/.android/avd"
     }
   ],
   "scripts": {

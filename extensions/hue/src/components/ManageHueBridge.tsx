@@ -4,6 +4,7 @@ import { SendHueMessage } from "../hooks/useHue";
 import { pathToFileURL } from "url";
 import ActionStyle = Alert.ActionStyle;
 import Style = Toast.Style;
+import React from "react";
 
 const successImagePath = pathToFileURL(`${environment.assetsPath}/bridge-success.png`).href;
 const failureImagePath = pathToFileURL(`${environment.assetsPath}/bridge-failure.png`).href;
@@ -24,6 +25,8 @@ const noBridgeFoundMessage = `
 ![Not Found](${connectImagePath})
 
 Your Hue Bridge must be switched on, plugged into your router via an Ethernet cable and connected to the same Wi-Fi network as your device. All three blue lights on the Hue Bridge should be on.
+
+You can manually enter the IP address of your Hue Bridge in this extension’s preferences.
 `;
 
 const linkWithBridgeMessage = `
@@ -32,6 +35,14 @@ const linkWithBridgeMessage = `
 ![Press Button](${buttonImagePath})
 
 Press the link button in the center of the bridge and press enter.
+`;
+
+const failedToLoadPreferencesMessage = `
+# Failed to load preferences
+
+![Failure](${failureImagePath})
+
+Please make sure you have entered a valid Hue Bridge IP address.
 `;
 
 const failedToLinkMessage = `
@@ -70,8 +81,8 @@ You can remove your saved Hue Bridge by using the ‘Unlink Hue Bridge’ action
  */
 export default function ManageHueBridge(
   hueBridgeState: HueBridgeState,
-  sendHueMessage: SendHueMessage
-): JSX.Element | null {
+  sendHueMessage: SendHueMessage,
+): React.JSX.Element | null {
   const unlinkSavedBridge = async () => {
     await confirmAlert({
       title: "Are you sure you want to unlink the configured Hue Bridge?",
@@ -79,24 +90,33 @@ export default function ManageHueBridge(
     });
   };
 
-  let contextActions: JSX.Element[] = [];
+  let contextActions: React.JSX.Element[] = [];
   let markdown = "";
   const toast = new Toast({ style: Style.Animated, title: "" });
 
   switch (hueBridgeState.value) {
+    case "loadingPreferences":
     case "loadingCredentials":
     case "discoveringUsingPublicApi":
     case "connected":
       return null;
+    case "failedToLoadPreferences":
+      markdown = failedToLoadPreferencesMessage;
+      break;
     case "connecting":
       toast.message = "Connecting to Hue Bridge…";
       toast.show().then();
       return null;
     case "failedToConnect":
-      toast.hide().then();
       contextActions = [
         <Action key="retryConnect" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
-        <Action key="unlink" title="Unlink Saved Hue Bridge" onAction={unlinkSavedBridge} icon={Icon.Trash} />,
+        <Action
+          key="unlink"
+          title="Unlink Saved Hue Bridge"
+          onAction={unlinkSavedBridge}
+          style={Action.Style.Destructive}
+          icon={Icon.Trash}
+        />,
       ];
       markdown = failedToConnectMessage;
       break;
@@ -106,6 +126,9 @@ export default function ManageHueBridge(
       toast.show().then();
       break;
     case "noBridgeFound":
+      contextActions = [
+        <Action key="retryLink" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
+      ];
       markdown = noBridgeFoundMessage;
       toast.hide().then();
       break;
@@ -126,12 +149,17 @@ export default function ManageHueBridge(
         <Action key="retryLink" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
       ];
       markdown = failedToLinkMessage;
-      toast.hide().then();
       break;
     case "linked":
       contextActions = [
         <Action key="done" title="Done" onAction={() => sendHueMessage("DONE")} icon={Icon.Check} />,
-        <Action key="unlink" title="Unlink Saved Hue Bridge" onAction={unlinkSavedBridge} icon={Icon.Trash} />,
+        <Action
+          key="unlink"
+          title="Unlink Saved Hue Bridge"
+          onAction={unlinkSavedBridge}
+          style={Action.Style.Destructive}
+          icon={Icon.Trash}
+        />,
       ];
       markdown = linkedMessage;
       toast.hide().then();

@@ -40,6 +40,10 @@ interface ZoneItem {
   type: string;
   development_mode: number;
   name_servers: string[];
+  modified_on: string;
+  created_on: string;
+  activated_on: string;
+  permissions: string[];
 }
 
 interface Zone {
@@ -90,7 +94,7 @@ interface PageItem {
   name: string;
   subdomain: string;
   domains: string;
-  source: SourceItem;
+  source?: SourceItem;
   latest_deployment: DeploymentItem;
 }
 
@@ -106,7 +110,7 @@ interface Source {
 interface Page {
   name: string;
   subdomain: string;
-  source: Source;
+  source?: Source;
   status: DeploymentStatus;
 }
 
@@ -182,9 +186,8 @@ class Service {
     if (this.cache.has('accounts')) {
       data = JSON.parse(this.cache.get('accounts')!) as Response<AccountItem[]>;
     } else {
-      const response = await this.client.get<Response<AccountItem[]>>(
-        'accounts',
-      );
+      const response =
+        await this.client.get<Response<AccountItem[]>>('accounts');
       data = response.data;
       this.cache.set('accounts', JSON.stringify(data));
     }
@@ -233,9 +236,9 @@ class Service {
     return result.map((item) => formatZone(item));
   }
 
-  async getZone(id: string): Promise<Zone> {
+  async getZone(id: string): Promise<ZoneItem> {
     const response = await this.client.get<Response<ZoneItem>>(`zones/${id}`);
-    return formatZone(response.data.result);
+    return response.data.result;
   }
 
   async listDnsRecords(zoneId: string): Promise<DnsRecord[]> {
@@ -346,14 +349,16 @@ function formatPage(item: PageItem): Page {
   return {
     name,
     subdomain,
-    source: {
-      type: source.type,
-      config: {
-        owner: source.config.owner,
-        repo: source.config.repo_name,
-        autopublishEnabled: source.config.deployments_enabled,
-      },
-    },
+    source: source
+      ? {
+          type: source.type,
+          config: {
+            owner: source.config.owner,
+            repo: source.config.repo_name,
+            autopublishEnabled: source.config.deployments_enabled,
+          },
+        }
+      : undefined,
     status: latest_deployment.latest_stage.status,
   };
 }

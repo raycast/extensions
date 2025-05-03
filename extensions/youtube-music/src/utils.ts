@@ -1,61 +1,117 @@
+import { Application, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { Application, getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-// Extension should work with any Chromium or Firefox (not sure) based browser, but it impossible to check every such browser.
-// So i cannot confirm that extension will work with any else browser except that listed below.
 type SupportedBrowsers = "Safari" | "Chrome" | "YouTube Music" | "Microsoft Edge";
+type UrlPreference = "music" | "youtube" | "both";
+
+interface Preferences {
+  browser: Application;
+  urlPreference: UrlPreference;
+}
 
 interface OsaError {
   stderr: string;
 }
 
+/**
+ * Escapes JavaScript so it can safely be inserted into AppleScript.
+ */
+function escapeJS(js: string): string {
+  return js
+    .replace(/\\/g, "\\\\") // escape backslashes
+    .replace(/"/g, '\\"') // escape double quotes
+    .replace(/\n/g, "\\n"); // escape newlines
+}
+
+/**
+ * Generates the AppleScript command to run JavaScript in a browser tab.
+ */
 function runJS(browser: SupportedBrowsers | string, code: string): string {
-  if (browser === "Safari") {
-    return `do javascript "${code}"`;
-  } else {
-    return `execute javascript "${code}"`;
+  const escaped = escapeJS(code);
+  return browser === "Safari" ? `do javascript "${escaped}"` : `execute javascript "${escaped}"`;
+}
+
+/**
+ * Returns the URL-matching AppleScript condition based on user preferences.
+ */
+function getUrlCondition(preference: UrlPreference): string {
+  switch (preference) {
+    case "music":
+      return 'URL contains "music.youtube.com"';
+    case "youtube":
+      return 'URL contains "youtube.com" and URL does not contain "music.youtube.com"';
+    case "both":
+      return '(URL contains "music.youtube.com" or (URL contains "youtube.com" and URL does not contain "music.youtube.com"))';
+    default:
+      return 'URL contains "music.youtube.com"';
   }
 }
 
-export async function runJSInYouTubeMusicTab(code: string) {
-  const browser = getPreferenceValues<{ browser: Application }>().browser;
+/**
+ * Executes JavaScript inside a matching YouTube or YouTube Music tab in the selected browser.
+ */
+export async function runJSInYouTubeMusicTab(code: string): Promise<string | false> {
+  const preferences = getPreferenceValues<Preferences>();
+  const { browser, urlPreference } = preferences;
 
   try {
-    const jsResult = await runAppleScript(`
-            tell application "${browser.name}"
-                repeat with w in (every window)		
-                    repeat with t in (every tab whose URL contains "music.youtube.com") of w
-                      tell t
-                         return ${runJS(browser.name, code)}
-                      end tell
-                    end repeat	
-                end repeat
+    const result = await runAppleScript(`
+      tell application "${browser.name}"
+        repeat with w in (every window)
+          repeat with t in (every tab whose ${getUrlCondition(urlPreference)}) of w
+            tell t
+              try
+                return ${runJS(browser.name, code)}
+              on error errMsg
+                return "JS Error: " & errMsg
+              end try
             end tell
-            return "false"
-        `);
+          end repeat
+        end repeat
+      end tell
+      return "false"
+    `);
 
-    if (jsResult === "false") {
+    if (result === "false") {
       await showToast({
         style: Toast.Style.Failure,
-        title: "The YouTube Music tab was not found",
-        message: `Try to check selected browser in extension preferences.`,
+        title: "No matching YouTube tab found",
+        message: "Check your browser and URL preference in settings.",
       });
-
       return false;
     }
 
-    return jsResult;
+    return result;
   } catch (e) {
     const message = (e as OsaError).stderr;
 
     if (message.includes("Allow JavaScript from Apple Events")) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Cannot run JavaScript in selected browser.",
-        message: `Enable the 'Allow JavaScript from Apple Events' option in ${browser.name}'s Develop menu.`,
+        title: "JavaScript not allowed",
+        message: `Enable "Allow JavaScript from Apple Events" in ${browser.name}'s Develop menu.`,
+      });
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "AppleScript execution failed",
+        message,
       });
     }
 
     return false;
   }
 }
+
+export const goToChapter = {
+  next: `(function() {
+    const activeChapter = document.querySelector('ytd-macro-markers-list-item-renderer[active]');
+    const nextChapter = activeChapter?.nextElementSibling;
+    nextChapter?.querySelector('a')?.click();
+  })();`,
+  previous: `(function(){
+    const activeChapter = document.querySelector('ytd-macro-markers-list-item-renderer[active]');
+    const previousChapter = activeChapter?.previousElementSibling;
+    previousChapter?.querySelector('a')?.click();
+  })();`,
+};

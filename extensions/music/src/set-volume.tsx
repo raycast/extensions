@@ -36,7 +36,7 @@ export default function SetVolume(props: ArgumentsLaunchProps) {
   useEffect(() => {
     pipe(
       music.player.volume.get,
-      handleTaskEitherError((error) => error, setVolume)
+      handleTaskEitherError((error) => error, setVolume),
     )();
   }, []);
 
@@ -50,7 +50,7 @@ export default function SetVolume(props: ArgumentsLaunchProps) {
         showHUD(`Volume set to ${volumeArg}`);
         popToRoot();
         closeMainWindow();
-      })
+      }),
     )();
   }, [volumeArg]);
 
@@ -83,7 +83,7 @@ function Actions({ value }: { value: number }) {
       TE.map(() => {
         showHUD(`Volume set to ${value}`);
         closeMainWindow();
-      })
+      }),
     )();
 
     pop();

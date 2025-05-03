@@ -8,7 +8,7 @@ import { AppleDeveloperDocumentationEntryTypeIcon } from "../../shared/apple-dev
  */
 export function AppleDeveloperDocumentationListSearchBarAccessory(props: {
   onChange: (entryType: AppleDeveloperDocumentationEntryType | undefined) => void;
-}): JSX.Element {
+}) {
   return (
     <List.Dropdown
       onChange={(entryType) =>

@@ -1,19 +1,19 @@
-import { useCallback, useEffect, useState } from "react";
-import { runShortcut, Shortcut } from "../util/shortcut";
 import { LocalStorage } from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
 import { ANNOTATIONS_SHORTCUTS } from "../build-in-shortcuts/annotation";
 import { CASES_SHORTCUTS } from "../build-in-shortcuts/case";
 import { CODERS_SHORTCUTS } from "../build-in-shortcuts/coder";
+import { DELETIONS_SHORTCUTS } from "../build-in-shortcuts/deletion";
 import { FORMAT_SHORTCUTS } from "../build-in-shortcuts/format";
 import { MARKDOWNS_SHORTCUTS } from "../build-in-shortcuts/markdown";
 import { TIMES_SHORTCUTS } from "../build-in-shortcuts/time";
-import { fetchItemInput, fetchItemInputSelectedFirst } from "../util/input";
 import { Preferences } from "../types/preferences";
-import { DELETIONS_SHORTCUTS } from "../build-in-shortcuts/deletion";
+import { fetchItemInput } from "../util/input";
+import { runShortcut, Shortcut } from "../util/shortcut";
 
 export const getShortcuts = (refresh: number, preferences: Preferences) => {
   const [userShortcuts, setUserShortcuts] = useState<Shortcut[]>([]);
-  const [allShortcuts, setAllShortcuts] = useState<Shortcut[]>([]);
+  const [buildInShortcuts, setBuildInShortcuts] = useState<Shortcut[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
@@ -49,7 +49,7 @@ export const getShortcuts = (refresh: number, preferences: Preferences) => {
     if (preferences.time) {
       _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(TIMES_SHORTCUTS)];
     }
-    setAllShortcuts([..._userShortcuts.concat(_buildInShortcuts)]);
+    setBuildInShortcuts(_buildInShortcuts);
     setLoading(false);
   }, [refresh]);
 
@@ -57,16 +57,24 @@ export const getShortcuts = (refresh: number, preferences: Preferences) => {
     void fetchData();
   }, [fetchData]);
 
-  return { allShortcuts: allShortcuts, userShortcuts: userShortcuts, loading: loading };
+  return {
+    userShortcuts: userShortcuts,
+    buildInShortcuts: buildInShortcuts,
+    allShortcuts: [...userShortcuts, ...buildInShortcuts],
+    loading: loading,
+  };
 };
 
-export const getShortcutsListDetail = (allShortcuts: Shortcut[], selectId: number, refresh: number) => {
+export const getShortcutsListDetail = (allShortcuts: Shortcut[], selectId: string, refresh: number) => {
   const [detail, setDetail] = useState<string>("");
   const fetchData = useCallback(async () => {
     //get shortcuts list detail
     if (allShortcuts.length > 0) {
       const _inputItem = await fetchItemInput();
-      setDetail(runShortcut(_inputItem, allShortcuts[selectId].tactions));
+      const selectShortcut = allShortcuts.find((shortcut) => shortcut.id === selectId);
+      if (selectShortcut) {
+        setDetail(runShortcut(_inputItem, selectShortcut.tactions));
+      }
     }
   }, [selectId, refresh]);
 

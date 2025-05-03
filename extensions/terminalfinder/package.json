@@ -2,9 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "terminalfinder",
   "title": "Terminal Finder",
-  "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp) and vice versa",
+  "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp, WezTerm) and vice versa",
   "icon": "command-icon.png",
   "author": "yedongze",
+  "contributors": [
+    "Ianvs",
+    "anirudh_gupta"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -29,8 +33,29 @@
       "mode": "no-view"
     },
     {
+      "name": "clipboardToWez",
+      "title": "Clipboard → WezTerm",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
+      "name": "clipboardToGhostty",
+      "title": "Clipboard → Ghostty",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
       "name": "finderToITerm",
-      "title": "Finder → ITerm",
+      "title": "Finder → iTerm",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
+      "name": "finderToGhostty",
+      "title": "Finder → Ghostty",
       "subtitle": "Open Path",
       "description": "Open current Finder directory in Terminal",
       "mode": "no-view"
@@ -45,6 +70,13 @@
     {
       "name": "finderToWarp",
       "title": "Finder → Warp",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
+      "name": "finderToWez",
+      "title": "Finder → WezTerm",
       "subtitle": "Open Path",
       "description": "Open current Finder directory in Terminal",
       "mode": "no-view"
@@ -69,6 +101,20 @@
       "subtitle": "Open Path",
       "description": "Open current Finder directory in Terminal",
       "mode": "no-view"
+    },
+    {
+      "name": "wezToFinder",
+      "title": "WezTerm → Finder",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
+      "name": "ghosttyToFinder",
+      "title": "Ghostty → Finder",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -82,10 +128,14 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "prettier": "^3.1.1"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

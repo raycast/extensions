@@ -1,4 +1,4 @@
-# Window & Search Bar
+# Raycast Window & Search Bar
 
 ## API Reference
 
@@ -9,7 +9,7 @@ Clear the text in the search bar.
 #### Signature
 
 ```typescript
-async function clearSearchBar(options: { forceScrollToTop: boolean }): Promise<void>;
+async function clearSearchBar(options?: { forceScrollToTop?: boolean }): Promise<void>;
 ```
 
 #### Parameters
@@ -27,7 +27,7 @@ Closes the main Raycast window.
 #### Signature
 
 ```typescript
-async function closeMainWindow(options: { clearRootSearch: boolean; popToRootType?: PopToRootType }): Promise<void>;
+async function closeMainWindow(options?: { clearRootSearch?: boolean; popToRootType?: PopToRootType }): Promise<void>;
 ```
 
 #### Example
@@ -67,7 +67,7 @@ Pops the navigation stack back to root search.
 #### Signature
 
 ```typescript
-async function popToRoot(options: { clearSearchBar: boolean }): Promise<void>;
+async function popToRoot(options?: { clearSearchBar?: boolean }): Promise<void>;
 ```
 
 #### Example

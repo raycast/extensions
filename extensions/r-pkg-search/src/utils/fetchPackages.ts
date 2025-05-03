@@ -1,5 +1,4 @@
-import { showToast, Toast, ToastStyle } from '@raycast/api'
-import { link } from 'fs'
+import { showToast, Toast } from '@raycast/api'
 import fetch from 'node-fetch'
 import {
   Links,
@@ -15,20 +14,46 @@ const splitDepends = (depends: string): string[] => {
 
   return depends
     .split(', ')
-    .map((dep) => dep.replace(' (*)', ''))
-    .filter((s) => s !== '')
+    .map(dep => dep.replace(' (*)', ''))
+    .filter(s => s !== '')
 }
+
+type PackageSearchItem = {
+  _source: PackageSource
+  _score: number
+}
+
+type PackageSource = {
+  BugReports: string
+  URL: string
+  Package: string
+  Author: string
+  Version: string
+  Title: string
+  Description: string
+  Date: string
+  'Date/Publication': string
+  License: string
+  Depends: string
+  Imports: string
+  Suggests: string
+  SystemRequirements: string
+  downloads: number
+  revdeps: number
+}
+
+type PackageSearchJsonResponse = { hits: { hits: PackageSearchItem[] } }
 
 export const fetchPackages = async (
   searchTerm = '',
 ): Promise<RpkgFetchResponse> => {
   try {
     const response = await fetch(
-      `http://search.r-pkg.org/_search?q=${searchTerm}&size=25`,
+      `https://search.r-pkg.org/package/_search?q=${searchTerm}&size=25`,
     )
-    const json: any = await response.json()
+    const json = (await response.json()) as PackageSearchJsonResponse
     const pkgs = json.hits.hits
-      .map((hit: any) => {
+      .map(hit => {
         const { _source: src } = hit
 
         const links = {} as Links
@@ -71,12 +96,9 @@ export const fetchPackages = async (
           package: pkg,
           searchScore: hit._score + (src.Package === searchTerm ? 100 : 0),
           highlight: searchTerm,
-        }
+        } as RpkgResultModel
       })
-      .sort(
-        (a: RpkgResultModel, b: RpkgResultModel) =>
-          b.searchScore - a.searchScore,
-      )
+      .sort((a, b) => b.searchScore - a.searchScore)
     return pkgs as RpkgFetchResponse
   } catch (error) {
     console.error(error)

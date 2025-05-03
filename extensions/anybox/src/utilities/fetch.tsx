@@ -1,5 +1,6 @@
 import fetch, { FetchError } from "node-fetch";
 import { closeMainWindow, showToast, Toast, open, getApplications } from "@raycast/api";
+import { Link } from "./searchRequest";
 
 interface SidebarItemProp {
   id: string; // UUID
@@ -7,7 +8,7 @@ interface SidebarItemProp {
   color: string; // HEX color
   icon: string; // SF Symbol Name
   count: number; // Number of links in the list.
-  type: "filter" | "collection" | "preset";
+  type: "filter" | "tag" | "preset" | "folder";
 }
 
 interface PresetProp extends SidebarItemProp {
@@ -18,9 +19,12 @@ interface FilterProp extends SidebarItemProp {
   type: "filter";
 }
 
-export interface CollectionProp extends SidebarItemProp {
-  type: "collection";
-  heading?: string;
+export interface TagProp extends SidebarItemProp {
+  type: "tag";
+}
+
+export interface FolderProp extends SidebarItemProp {
+  type: "folder";
 }
 
 export interface AnydockProfile {
@@ -31,7 +35,9 @@ export interface AnydockProfile {
 }
 async function isAnyboxInstalled() {
   const applications = await getApplications();
-  return applications.some(({ bundleId }) => bundleId === "cc.anybox.Anybox");
+  return applications.some(
+    ({ bundleId }) => bundleId === "cc.anybox.Anybox" || bundleId === "ltd.anybox.Anybox-setapp",
+  );
 }
 
 export async function checkForAnyboxInstallation() {
@@ -53,13 +59,13 @@ export async function checkForAnyboxInstallation() {
   }
 }
 
-function request(path: string, method: string, body?: any, closeWindow = false) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function request(path: string, method: string, body?: any, closeWindow = false, headers = {}) {
+  const combinedHeaders = { ...headers, "Content-Type": "application/json" };
   return fetch(`http://127.0.0.1:6391/${path}`, {
     method,
     body: JSON.stringify(body),
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: combinedHeaders,
   })
     .then((res) => {
       if (res.status === 200) {
@@ -88,8 +94,8 @@ export function handleError(error: FetchError) {
       message: "It looks like Anybox is not running.",
       primaryAction: {
         title: "Open Anybox",
-        onAction: (toast) => {
-          open("open", "cc.anybox.Anybox");
+        onAction: async (toast) => {
+          open("anybox://show");
           toast.hide();
         },
       },
@@ -119,32 +125,37 @@ export function getAndCloseMainWindow(command: string) {
   return GET(`${command}`, true);
 }
 
-export async function fetchCollections() {
-  return GET("collections") as Promise<CollectionProp[]>;
+export async function fetchTags() {
+  return GET("tags") as Promise<[TagProp]>;
+}
+
+export async function fetchFolders() {
+  return GET("folders") as Promise<[FolderProp]>;
 }
 
 export async function fetchProfiles() {
   return GET("anydock-profiles") as Promise<[AnydockProfile]>;
 }
 
-export async function getCollections() {
-  return GET("collections") as Promise<[CollectionProp]>;
+export async function fetchSearchEngines(key: string) {
+  return request("search-engines", "GET", undefined, false, { "x-api-key": key }) as Promise<[Link]>;
 }
 
-export async function getFilters() {
+async function fetchFilters() {
   return GET("filters") as Promise<[FilterProp]>;
 }
 
-export async function getPresetSidebarItems() {
+async function fetchPresetSidebarItems() {
   return GET("presets") as Promise<[PresetProp]>;
 }
 
 export async function fetchSidebar() {
-  const presets = getPresetSidebarItems();
-  const filters = getFilters();
-  const collections = getCollections();
-  return Promise.all([presets, filters, collections]).then(([presets, filters, collections]) => {
-    const result = [...presets, ...filters, ...collections];
+  const presets = fetchPresetSidebarItems();
+  const filters = fetchFilters();
+  const tags = fetchTags();
+  const folders = fetchFolders();
+  return Promise.all([presets, filters, tags, folders]).then(([presets, filters, tags, folders]) => {
+    const result = [...presets, ...filters, ...tags, ...folders];
     return result;
   });
 }

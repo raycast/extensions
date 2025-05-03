@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "warp",
+  "title": "Warp",
+  "description": "Open Warp tabs/windows and Launch Configurations.",
+  "icon": "warp-icon.png",
+  "author": "joetannenbaum",
+  "contributors": [
+    "theRubberDuckiee",
+    "hakob_nersesian",
+    "kamil_drzastwa",
+    "chrismessina",
+    "pernielsentikaer"
+  ],
+  "pastContributors": [
+    "danulqua"
+  ],
+  "owner": "warpdotdev",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "launch-config",
+      "title": "Open Launch Configuration",
+      "description": "Open a Warp Launch Configuration.",
+      "mode": "view"
+    },
+    {
+      "name": "open-directory",
+      "title": "Open Directory",
+      "description": "Open a directory in Warp.",
+      "mode": "view"
+    },
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "description": "Open a tab in Warp.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "description": "Open a window in Warp.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-selected-finder-item",
+      "title": "Open in Warp",
+      "description": "Open selected Finder items in Warp.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "warpApp",
+      "default": "stable",
+      "required": false,
+      "title": "Warp Release",
+      "description": "Select which Warp release to use when opening a directory or launch configuration.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Warp",
+          "value": "stable"
+        },
+        {
+          "title": "Warp Preview",
+          "value": "preview"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.4.8",
+    "node-spotlight": "^1.0.0",
+    "yaml": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

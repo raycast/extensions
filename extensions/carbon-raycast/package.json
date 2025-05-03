@@ -49,6 +49,10 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "publish": "ray publish",
+    "postinstall": "node node_modules/puppeteer/install.js"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -5,6 +5,9 @@
   "description": "Show Recently used files and folders in Raycast",
   "icon": "recents.png",
   "author": "GastroGeek",
+  "contributors": [
+    "kgrhartlage"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -59,7 +62,6 @@
   "dependencies": {
     "@raycast/api": "^1.40.3",
     "mdfind": "^1.0.0",
-    "moment": "^2.29.4",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
@@ -78,5 +80,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,11 +1,14 @@
+import type { IGif as GiphyGif } from "@giphy/js-types";
 // Height of the list item detail window when metadata is shown
 const DETAIL_WINDOW_HEIGHT = 190;
 
 export interface IGif {
-  id: string | number;
+  id: string;
   title: string;
   url?: string;
   slug: string;
+  download_url: string;
+  download_name: string;
   preview_gif_url: string;
   gif_url: string;
   metadata?: {
@@ -24,13 +27,14 @@ export interface IGif {
     tags?: string[];
   };
   attribution?: string;
+  video?: GiphyGif["video"];
 }
 
-export type APIOpt = { offset?: number; limit?: number; abort?: AbortController };
+export type APIOpt = { offset?: number; limit?: number; next?: string };
 
 export interface IGifAPI {
-  search: (term: string, opt?: APIOpt) => Promise<IGif[]>;
-  trending: (opt?: APIOpt) => Promise<IGif[]>;
+  search: (term: string, opt?: APIOpt) => Promise<{ results: IGif[]; next?: string }>;
+  trending: (opt?: APIOpt) => Promise<{ results: IGif[]; next?: string }>;
   gifs: (id: string[]) => Promise<IGif[]>;
 }
 

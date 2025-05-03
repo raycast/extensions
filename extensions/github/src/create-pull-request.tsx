@@ -1,12 +1,12 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, useNavigation, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
 import PullRequestDetail from "./components/PullRequestDetail";
-import View from "./components/View";
 import { getErrorMessage } from "./helpers/errors";
 import { getGitHubUser } from "./helpers/users";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyRepositories } from "./hooks/useRepositories";
 
 type PullRequestFormValues = {
@@ -31,6 +31,8 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   const { push } = useNavigation();
   const { data: repositories } = useMyRepositories();
   const { github } = getGitHubClient();
+  const [fromQuery, setFromQuery] = useState("");
+  const [intoQuery, setIntoQuery] = useState("");
 
   const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<PullRequestFormValues>({
     async onSubmit(values) {
@@ -59,7 +61,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
 
           // It's not possible to add a PR to a project from the initPullRequest call
           await Promise.all(
-            values.projects.map((projectId) => github.addPullRequestToProject({ pullRequestId, projectId }))
+            values.projects.map((projectId) => github.addPullRequestToProject({ pullRequestId, projectId })),
           );
 
           const pullRequest = updateResult?.updatePullRequest?.pullRequest;
@@ -123,7 +125,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
     },
   });
 
-  const { data } = useCachedPromise(
+  const { data, isLoading } = useCachedPromise(
     (repository) => {
       const selectedRepository = repositories?.find((r) => r.id === repository);
 
@@ -134,12 +136,10 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       return github.dataForRepository({ owner: selectedRepository.owner.login, name: selectedRepository.name });
     },
     [values.repository],
-    { execute: !!values.repository }
+    { execute: !!values.repository },
   );
 
-  const intoBranch = data?.repository?.defaultBranchRef;
-
-  const branches = data?.repository?.refs?.nodes?.filter((node) => intoBranch?.id !== node?.id && !!node?.name);
+  const defaultBranch = data?.repository?.defaultBranchRef;
 
   const collaborators = data?.repository?.collaborators?.nodes;
 
@@ -151,18 +151,55 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
 
   const milestones = data?.repository?.milestones?.nodes;
 
-  useEffect(() => {
-    const template = data?.repository?.pullRequestTemplateLowercase ?? data?.repository?.pullRequestTemplateUppercase;
+  const searchRepoBranches = (repo: string, query: string) => {
+    const selectedRepository = repositories?.find((r) => r.id === repo);
 
-    if (template && "text" in template && template.text && !values.description) {
-      setValue("description", template.text);
+    if (!selectedRepository) {
+      return Promise.resolve(null);
+    }
+
+    return github.searchRepositoryBranches({
+      owner: selectedRepository.owner.login,
+      name: selectedRepository.name,
+      query: query.trim(),
+    });
+  };
+
+  const { data: fromData, isLoading: isLoadingFrom } = useCachedPromise(
+    searchRepoBranches,
+    [values.repository, fromQuery],
+    { execute: !!values.repository && fromQuery.trim().length > 0 },
+  );
+
+  const { data: intoData, isLoading: isLoadingInto } = useCachedPromise(
+    searchRepoBranches,
+    [values.repository, intoQuery],
+    { execute: !!values.repository && intoQuery.trim().length > 0 },
+  );
+
+  const fromBranches = (fromData?.repository?.refs?.nodes ?? data?.repository?.refs?.nodes)?.filter(
+    (node) => defaultBranch?.id !== node?.id && !!node?.name,
+  );
+
+  const intoBranches = (intoData?.repository?.refs?.nodes ?? data?.repository?.refs?.nodes)?.filter(
+    (node) => node?.name !== values.from,
+  );
+
+  useEffect(() => {
+    const template = data?.repository?.pullRequestTemplates?.[0];
+
+    if (template && template.body && !values.description) {
+      setValue("description", template.body);
+    }
+
+    if (defaultBranch) {
+      setValue("into", defaultBranch.name);
     }
   }, [data]);
 
   useEffect(() => {
     setValue("from", "");
     setValue("into", "");
-    setValue("title", "");
     setValue("description", "");
     setValue("reviewers", []);
     setValue("assignees", []);
@@ -179,6 +216,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
         </ActionPanel>
       }
       enableDrafts
+      isLoading={isLoading}
     >
       <Form.Dropdown {...itemProps.repository} title="Repository" storeValue>
         {repositories?.map((repository) => {
@@ -193,9 +231,15 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
         })}
       </Form.Dropdown>
 
-      <Form.Dropdown {...itemProps.from} title="From">
-        {branches
-          ? branches.map((branch) => {
+      <Form.Dropdown
+        {...itemProps.from}
+        title="From"
+        isLoading={isLoadingFrom}
+        throttle
+        onSearchTextChange={setFromQuery}
+      >
+        {fromBranches
+          ? fromBranches.map((branch) => {
               if (!branch) {
                 return null;
               }
@@ -205,8 +249,23 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
           : null}
       </Form.Dropdown>
 
-      <Form.Dropdown {...itemProps.into} title="Into">
-        {intoBranch ? <Form.Dropdown.Item title={intoBranch.name} value={intoBranch.name} /> : null}
+      <Form.Dropdown
+        {...itemProps.into}
+        title="Into"
+        storeValue
+        isLoading={isLoadingInto}
+        throttle
+        onSearchTextChange={setIntoQuery}
+      >
+        {intoBranches
+          ? intoBranches.map((branch) => {
+              if (!branch) {
+                return null;
+              }
+
+              return <Form.Dropdown.Item key={branch?.id} title={branch.name} value={branch.name} />;
+            })
+          : null}
       </Form.Dropdown>
 
       <Form.Checkbox {...itemProps.draft} label="As draft" />
@@ -290,10 +349,4 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   );
 }
 
-export default function Command(props: { draftValues?: PullRequestFormValues }) {
-  return (
-    <View>
-      <PullRequestForm draftValues={props.draftValues} />
-    </View>
-  );
-}
+export default withGitHubClient(PullRequestForm);

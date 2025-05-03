@@ -1,50 +1,88 @@
 import { useEffect, useState } from "react";
 import { List, ActionPanel, Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
-import { archiveMemo, deleteMemo, getAllMemos, getRequestUrl, restoreMemo } from "./api";
-import { MemoInfoResponse, ROW_STATUS, ROW_STATUS_KEY } from "./types";
+import { archiveMemo, deleteMemo, getAllMemos, getMe, getRequestUrl, getResourceBinToBase64, restoreMemo } from "./api";
+import { MemoInfoResponse, ROW_STATUS } from "./types";
 
 export default function MemosListCommand(): JSX.Element {
   const [searchText, setSearchText] = useState("");
-  const [rowStatus, setRowStatus] = useState<ROW_STATUS_KEY>(ROW_STATUS.NORMAL);
-  const { isLoading, data, revalidate } = getAllMemos(rowStatus);
+  const [currentUserId, setCurrentUserId] = useState<number>();
+  const [state, setState] = useState(ROW_STATUS.NORMAL);
+  const { isLoading, data, revalidate, pagination } = getAllMemos(currentUserId, { state });
+  const { isLoading: isLoadingUser, data: user } = getMe();
   const [filterList, setFilterList] = useState<MemoInfoResponse[]>([]);
 
-  const rowStatusList: ROW_STATUS_KEY[] = [ROW_STATUS.NORMAL, ROW_STATUS.ARCHIVED];
-
-  const onRowStatusChange = (newValue: ROW_STATUS_KEY) => {
-    setRowStatus(newValue);
-    revalidate();
-  };
+  useEffect(() => {
+    if (!isLoadingUser && user.name) {
+      const userId = +user.name.split("/")[1];
+      setCurrentUserId(userId);
+    }
+  }, [isLoadingUser]);
 
   useEffect(() => {
-    setFilterList(data?.data?.filter((item) => item.content.includes(searchText)) || []);
+    if (currentUserId) {
+      revalidate();
+    }
+  }, [currentUserId]);
+
+  useEffect(() => {
+    const dataList = data || [];
+
+    setFilterList(
+      dataList
+        .filter((item) => item.content.includes(searchText))
+        .map((item) => {
+          item.markdown = item.content;
+          if (item.resources.length > 0) {
+            getItemMarkdown(item);
+          }
+          return item;
+        }) || [],
+    );
   }, [searchText]);
 
   useEffect(() => {
-    setFilterList(data?.data || []);
+    const dataList = data || [];
+    setFilterList(
+      dataList.map((item) => {
+        item.markdown = item.content;
+
+        if (item.resources.length > 0) {
+          getItemMarkdown(item);
+        }
+
+        return item;
+      }),
+    );
   }, [data]);
 
   function getItemUrl(item: MemoInfoResponse) {
-    const url = getRequestUrl(`/m/${item.id}`);
+    const url = getRequestUrl(`/${item.name}`);
 
     return url;
   }
 
-  function getItemMarkdown(item: MemoInfoResponse) {
-    const { content, resourceList } = item;
+  async function getItemMarkdown(item: MemoInfoResponse) {
+    const { content, resources } = item;
     let markdown = content;
 
-    resourceList.forEach((resource, index) => {
-      const resourceUrl = getRequestUrl(`/o/r/${resource.id}/${resource.filename}`);
+    const resourceMarkdowns = await Promise.all(
+      resources.map(async (resource) => {
+        const resourceBlobUrl = await getResourceBinToBase64(resource.name, resource.filename);
+        return `\n\n![${resource.filename}](${resourceBlobUrl})`;
+      }),
+    );
 
-      if (index === 0) {
-        markdown += "\n\n";
-      }
+    markdown += resourceMarkdowns.join("");
 
-      markdown += ` ![${resource.filename}](${resourceUrl})`;
+    setFilterList((prevList) => {
+      const updatedList = prevList.map((prevItem) => {
+        if (prevItem.name === item.name) {
+          return { ...prevItem, markdown };
+        }
+        return prevItem;
+      });
+      return updatedList;
     });
-
-    return markdown;
   }
 
   async function onArchive(item: MemoInfoResponse) {
@@ -62,7 +100,7 @@ export default function MemosListCommand(): JSX.Element {
         style: Toast.Style.Animated,
         title: "Archive...",
       });
-      const res = await archiveMemo(item.id).catch(() => {
+      const res = await archiveMemo(item.name).catch(() => {
         //
       });
 
@@ -91,7 +129,7 @@ export default function MemosListCommand(): JSX.Element {
         style: Toast.Style.Animated,
         title: "Delete...",
       });
-      const res = await deleteMemo(item.id).catch(() => {
+      const res = await deleteMemo(item.name).catch(() => {
         //
       });
 
@@ -120,7 +158,7 @@ export default function MemosListCommand(): JSX.Element {
         style: Toast.Style.Animated,
         title: "Restore...",
       });
-      const res = await restoreMemo(item.id).catch(() => {
+      const res = await restoreMemo(item.name).catch(() => {
         //
       });
 
@@ -154,35 +192,32 @@ export default function MemosListCommand(): JSX.Element {
       navigationTitle="Search Memos"
       searchBarPlaceholder="Search your memo..."
       isShowingDetail
+      pagination={pagination}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Select Row Status"
-          storeValue={true}
+          tooltip="Dropdown With Items"
           onChange={(newValue) => {
-            onRowStatusChange(newValue as ROW_STATUS_KEY);
+            setState(newValue as ROW_STATUS);
           }}
         >
-          <List.Dropdown.Section title="Row Status">
-            {rowStatusList.map((status) => (
-              <List.Dropdown.Item key={status} title={status} value={status} />
-            ))}
-          </List.Dropdown.Section>
+          <List.Dropdown.Item title={ROW_STATUS.NORMAL} value={ROW_STATUS.NORMAL} />
+          <List.Dropdown.Item title={ROW_STATUS.ARCHIVED} value={ROW_STATUS.ARCHIVED} />
         </List.Dropdown>
       }
     >
       {filterList.map((item) => (
         <List.Item
-          key={item.id}
+          key={item.name}
           title={item.content}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={getItemUrl(item)} />
-              {(item.rowStatus === ROW_STATUS.NORMAL && archiveComponent(item)) || null}
-              {(item.rowStatus === ROW_STATUS.ARCHIVED && restoreComponent(item)) || null}
-              {(item.rowStatus === ROW_STATUS.ARCHIVED && deleteComponent(item)) || null}
+              {(item.state === ROW_STATUS.NORMAL && archiveComponent(item)) || null}
+              {(item.state === ROW_STATUS.ARCHIVED && restoreComponent(item)) || null}
+              {(item.state === ROW_STATUS.ARCHIVED && deleteComponent(item)) || null}
             </ActionPanel>
           }
-          detail={<List.Item.Detail markdown={getItemMarkdown(item)} />}
+          detail={<List.Item.Detail markdown={item.markdown} />}
         />
       ))}
     </List>

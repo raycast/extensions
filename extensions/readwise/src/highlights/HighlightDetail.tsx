@@ -45,10 +45,7 @@ export const HighlightDetail = ({ item }: { item: Highlight }) => {
           <Detail.Metadata.Separator />
         </Detail.Metadata>
       }
-      markdown={joinStringsWithDelimiter(
-        [`## Hightlight\n${item.text}`, item.note && `## Notes\n${item.note}`],
-        "\n\n"
-      )}
+      markdown={joinStringsWithDelimiter([`## Highlight\n${item.text}`, item.note && `## Notes\n${item.note}`], "\n\n")}
     />
   );
 };

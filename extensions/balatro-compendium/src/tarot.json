@@ -1,0 +1,112 @@
+[
+  {
+    "Name": "The Fool",
+    "Appearance": "fool.png",
+    "Effect": "Spawns the last Tarot or Planet card used during this run. Excludes The Fool"
+  },
+  {
+    "Name": "The Magician",
+    "Appearance": "magician.png",
+    "Effect": "Enhances 1 selected card into a Lucky Card"
+  },
+  {
+    "Name": "The High Priestess",
+    "Appearance": "high_priestess.png",
+    "Effect": "Spawns up to 2 random Planet cards. Must have room"
+  },
+  {
+    "Name": "The Empress",
+    "Appearance": "empress.png",
+    "Effect": "Enhances up to 2 selected cards to Mult Cards"
+  },
+  {
+    "Name": "The Emperor",
+    "Appearance": "emperor.png",
+    "Effect": "Creates up to 2 random Tarot cards. Must have room"
+  },
+  {
+    "Name": "The Hierophant",
+    "Appearance": "hierophant.png",
+    "Effect": "Enhances up to 2 selected cards to Bonus Cards"
+  },
+  {
+    "Name": "The Lovers",
+    "Appearance": "lovers.png",
+    "Effect": "Enhances 1 selected card into a Wild Card"
+  },
+  {
+    "Name": "The Chariot",
+    "Appearance": "chariot.png",
+    "Effect": "Enhances 1 selected card into a Steel Card"
+  },
+  {
+    "Name": "Justice",
+    "Appearance": "justice.png",
+    "Effect": "Enhances 1 selected cardinto a Glass Card"
+  },
+  {
+    "Name": "The Hermit",
+    "Appearance": "hermit.png",
+    "Effect": "  Doubles money. Max of $20."
+  },
+  {
+    "Name": "The Wheel of Fortune",
+    "Appearance": "wheel.png",
+    "Effect": "1 in 4 chance to add Foil, Holographic, or Polychrome edition to a random Joker"
+  },
+  {
+    "Name": "Strength",
+    "Appearance": "strength.png",
+    "Effect": "Increases rank of up to 2 selected cards by 1"
+  },
+  {
+    "Name": "The Hanged Man",
+    "Appearance": "hanged_man.png",
+    "Effect": "Destroys up to 2 selected cards"
+  },
+  {
+    "Name": "Death",
+    "Appearance": "death.png",
+    "Effect": "Select 2 cards, convert the left card into the right card."
+  },
+  {
+    "Name": "Temperance",
+    "Appearance": "temperance.png",
+    "Effect": "Gives the total sell value of all current Jokers. Max of $50."
+  },
+  {
+    "Name": "The Devil",
+    "Appearance": "devil.png",
+    "Effect": "Enhances 1 selected card into a Gold Card"
+  },
+  {
+    "Name": "The Tower",
+    "Appearance": "tower.png",
+    "Effect": "Enhances 1 selected card into a Stone Card"
+  },
+  {
+    "Name": "The Star",
+    "Appearance": "star.png",
+    "Effect": "Converts up to 3 selected cards to ♦️"
+  },
+  {
+    "Name": "The Moon",
+    "Appearance": "moon.png",
+    "Effect": "Converts up to 3 selected cards to ♣️"
+  },
+  {
+    "Name": "The Sun",
+    "Appearance": "sun.png",
+    "Effect": "Converts up to 3 selected cards to ♥️"
+  },
+  {
+    "Name": "Judgement",
+    "Appearance": "judgement.png",
+    "Effect": "Spawns a random Joker card. Must have room"
+  },
+  {
+    "Name": "The World",
+    "Appearance": "world.png",
+    "Effect": "Converts up to 3 selected cards to ♠️"
+  }
+]

@@ -2,11 +2,9 @@ import { Action, ActionPanel } from "@raycast/api";
 import { useState } from "react";
 
 import { IssueResult } from "../../api/getIssues";
-
-import useCycles from "../../hooks/useCycles";
-
-import { getLinearClient } from "../../helpers/withLinearClient";
+import { getLinearClient } from "../../api/linearClient";
 import { formatCycle, FormattedCycle, getCycleOptions } from "../../helpers/cycles";
+import useCycles from "../../hooks/useCycles";
 
 import { UpdateIssueParams } from "./IssueActions";
 
@@ -88,7 +86,7 @@ export default function CycleSubmenus({
         />
 
         {!cycles && isLoadingCycles ? (
-          <Action title="Loading..." />
+          <Action title="Loading…" />
         ) : (
           getCycleOptions(cycles || []).map((cycle) => (
             <Action

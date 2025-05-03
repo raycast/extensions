@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bed-time-calculator",
+  "title": "Bed Time Calculator",
+  "description": "This is a simple extension for Raycast that will help you calculate the best time to sleep or wake up.",
+  "icon": "extension_icon.png",
+  "author": "khlebobul",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sleep-now",
+      "title": "Sleep Now",
+      "description": "I'm going to sleep right now and want to know when to wake up",
+      "mode": "view"
+    },
+    {
+      "name": "sleep-at",
+      "title": "Sleep At",
+      "description": "I know when I'll fall asleep and want to know when to wake up",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "sleepAtTime",
+          "placeholder": "Sleep At (HH:MM)",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "wake-up-at",
+      "title": "Wake Up At",
+      "description": "I know when I'll wake up and want to know when I should fall asleep",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "wakeUpTime",
+          "placeholder": "Wake up Time (HH:MM)",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

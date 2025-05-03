@@ -1,30 +1,30 @@
-import { Action, ActionPanel, Icon, showToast, open, Toast, launchCommand, LaunchType } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
-import { useMemo } from "react";
+import { Action, ActionPanel, Icon, LaunchType, Toast, launchCommand, open, showToast } from "@raycast/api";
+import { MutatePromise, usePromise } from "@raycast/utils";
 
+import { getGitHubClient } from "../api/githubClient";
 import { getErrorMessage } from "../helpers/errors";
-import { getNotificationSubtitle, getNotificationTypeTitle, getGitHubURL } from "../helpers/notifications";
-import { getGitHubClient } from "../helpers/withGithubClient";
-import { NotificationsResponse } from "../notifications";
-
-export type Notification = NotificationsResponse["data"][0];
+import { getGitHubURL, getNotificationSubtitle, getNotificationTypeTitle } from "../helpers/notifications";
+import { NotificationWithIcon } from "../notifications";
 
 type NotificationActionsProps = {
-  notification: Notification;
+  notification: NotificationWithIcon;
   userId?: string;
-  mutateList: MutatePromise<Notification[] | undefined>;
+  mutateList: MutatePromise<NotificationWithIcon[] | undefined>;
 };
 
 export default function NotificationActions({ notification, userId, mutateList }: NotificationActionsProps) {
   const { octokit } = getGitHubClient();
 
-  const url = useMemo(() => getGitHubURL(notification, userId), [notification, userId]);
+  const { data: url } = usePromise(
+    (notification, userId) => getGitHubURL(notification, userId),
+    [notification, userId],
+  );
 
   async function markNotificationAsRead() {
     await showToast({ style: Toast.Style.Animated, title: "Marking notification as read" });
 
     try {
-      await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+      await octokit.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
       await mutateList();
       await launchCommand({ name: "unread-notifications", type: LaunchType.UserInitiated });
 
@@ -41,10 +41,59 @@ export default function NotificationActions({ notification, userId, mutateList }
     }
   }
 
-  async function openNotificationAndMarkAsRead() {
+  async function markNotificationAsDone() {
+    await showToast({ style: Toast.Style.Animated, title: "Marking notification as done" });
+
     try {
-      await open(url);
-      await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+      await octokit.activity.markThreadAsDone({ thread_id: parseInt(notification.id) });
+      await mutateList();
+      await launchCommand({ name: "unread-notifications", type: LaunchType.UserInitiated });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Marked notification as done",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed marking notification as done",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function openNotification(isUnreadNotification: boolean) {
+    try {
+      if (url) {
+        await open(url);
+      }
+
+      if (isUnreadNotification) {
+        await octokit.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+        await mutateList();
+      }
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed opening notification",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function acceptInvitation() {
+    try {
+      const invitations = await octokit.repos.listInvitationsForAuthenticatedUser();
+
+      const invitation = invitations.data.find(
+        (invitation: { repository: { url: string } }) => invitation.repository.url === notification.repository.url,
+      );
+
+      await octokit.repos.acceptInvitationForAuthenticatedUser({
+        invitation_id: invitation?.id || 0,
+      });
+
+      open(notification.repository.html_url);
       await mutateList();
     } catch (error) {
       await showToast({
@@ -59,7 +108,7 @@ export default function NotificationActions({ notification, userId, mutateList }
     await showToast({ style: Toast.Style.Animated, title: "Marking all notifications as read" });
 
     try {
-      await octokit.rest.activity.markNotificationsAsRead();
+      await octokit.activity.markNotificationsAsRead();
       await mutateList();
       await launchCommand({ name: "unread-notifications", type: LaunchType.UserInitiated });
 
@@ -80,12 +129,12 @@ export default function NotificationActions({ notification, userId, mutateList }
     await showToast({ style: Toast.Style.Animated, title: "Unsubscribing" });
 
     try {
-      await octokit.rest.activity.deleteThreadSubscription({ thread_id: parseInt(notification.id) });
+      await octokit.activity.deleteThreadSubscription({ thread_id: parseInt(notification.id) });
       await mutateList();
 
       await showToast({
         style: Toast.Style.Success,
-        title: "Unsusbcribed",
+        title: "Unsubscribed",
       });
     } catch (error) {
       await showToast({
@@ -96,55 +145,56 @@ export default function NotificationActions({ notification, userId, mutateList }
     }
   }
 
+  const isRepoInvitation = notification.subject.type === "RepositoryInvitation";
+
   return (
     <ActionPanel title={getNotificationSubtitle(notification)}>
       <Action
-        title="Open in Browser"
+        title={isRepoInvitation ? "Accept Invitation" : "Open in Browser"}
         icon={Icon.Globe}
-        onAction={() => (notification.unread ? openNotificationAndMarkAsRead() : open(url))}
+        onAction={() => (isRepoInvitation ? acceptInvitation() : openNotification(notification.unread))}
+      />
+      {notification.unread ? (
+        <>
+          <Action title="Mark as Read" icon={Icon.Circle} onAction={markNotificationAsRead} />
+
+          <Action
+            title="Mark All as Read"
+            icon={Icon.Circle}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            onAction={markAllNotificationsAsRead}
+          />
+        </>
+      ) : null}
+
+      <Action
+        title="Mark as Done"
+        icon={Icon.Circle}
+        onAction={markNotificationAsDone}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
       />
 
+      <Action
+        title="Unsubscribe"
+        icon={Icon.BellDisabled}
+        shortcut={{ modifiers: ["cmd"], key: "." }}
+        onAction={unsubscribe}
+      />
       <ActionPanel.Section>
-        {notification.unread ? (
-          <>
-            <Action
-              title="Mark as Read"
-              icon={Icon.Circle}
-              shortcut={{ modifiers: ["cmd"], key: "enter" }}
-              onAction={markNotificationAsRead}
-            />
-
-            <Action
-              title="Mark All as Read"
-              icon={Icon.Circle}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-              onAction={markAllNotificationsAsRead}
-            />
-          </>
+        {url ? (
+          <Action.CopyToClipboard
+            content={url}
+            title={`Copy ${getNotificationTypeTitle(notification)} URL`}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          />
         ) : null}
-
-        <Action
-          title="Unsubscribe"
-          icon={Icon.BellDisabled}
-          shortcut={{ modifiers: ["cmd"], key: "." }}
-          onAction={unsubscribe}
-        />
-      </ActionPanel.Section>
-
-      <ActionPanel.Section>
-        <Action.CopyToClipboard
-          content={url}
-          title={`Copy ${getNotificationTypeTitle(notification)} URL`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-        />
 
         <Action.CopyToClipboard
           content={notification.subject.title}
-          title={`Copy ${notification.subject.type} Title`}
+          title={`Copy ${getNotificationTypeTitle(notification)} Title`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
       </ActionPanel.Section>
-
       <ActionPanel.Section>
         <Action
           icon={Icon.ArrowClockwise}

@@ -11,14 +11,45 @@
   "categories": [
     "Developer Tools"
   ],
+  "engines": {
+    "node": ">=20.11"
+  },
   "license": "MIT",
-  "packageManager": "npm@9.2.0",
+  "packageManager": "npm@10.2.4",
+  "dependencies": {
+    "@raycast/api": "1.70.3",
+    "@scaleway/configuration-loader": "1.0.3",
+    "@scaleway/sdk": "2.23.0",
+    "@scaleway/use-dataloader": "5.0.0",
+    "base64-js": "1.5.1",
+    "cross-fetch": "4.0.0",
+    "react": "18.2.0"
+  },
+  "devDependencies": {
+    "@scaleway/eslint-config-react": "3.18.0",
+    "@scaleway/tsconfig": "1.1.1",
+    "@types/node": "20.12.5",
+    "@types/react": "18.2.74",
+    "@typescript-eslint/eslint-plugin": "7.6.0",
+    "@typescript-eslint/parser": "7.6.0",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "9.1.0",
+    "prettier": "3.2.5",
+    "typescript": "5.4.4"
+  },
   "commands": [
     {
       "name": "appleSilicon",
       "title": "Apple Silicon",
       "icon": "appleSilicon.webp",
       "description": "Apple Silicon",
+      "mode": "view"
+    },
+    {
+      "name": "blockStorage",
+      "title": "Block Storage",
+      "icon": "blockStorage.webp",
+      "description": "Block Storage",
       "mode": "view"
     },
     {
@@ -41,6 +72,13 @@
       "description": "Get information about iam",
       "mode": "view",
       "icon": "iam.webp"
+    },
+    {
+      "name": "ipam",
+      "title": "IPAM",
+      "description": "Get information about ipam",
+      "mode": "view",
+      "icon": "ipam.webp"
     },
     {
       "name": "databases",
@@ -99,20 +137,6 @@
       "icon": "k8s.webp"
     },
     {
-      "name": "mnq",
-      "title": "Messaging & Queuing",
-      "description": "Get information about Messaging & Queuing",
-      "mode": "view",
-      "icon": "mnq.webp"
-    },
-    {
-      "name": "privateNetworks",
-      "title": "Private Networks",
-      "description": "Get information about Private Networks",
-      "mode": "view",
-      "icon": "privateNetworks.webp"
-    },
-    {
       "name": "functions",
       "title": "Serverless Functions",
       "description": "Get information about Serverless Functions",
@@ -134,6 +158,13 @@
       "icon": "transactionalEmail.webp"
     },
     {
+      "name": "vpc",
+      "title": "Virtual Private Netwoks",
+      "description": "Get information about Private Networks",
+      "mode": "view",
+      "icon": "privateNetworks.webp"
+    },
+    {
       "name": "webhosting",
       "title": "Web Hosting",
       "description": "Get information about webhosting",
@@ -148,27 +179,6 @@
       "icon": "secretManager.webp"
     }
   ],
-  "dependencies": {
-    "@raycast/api": "1.48.7",
-    "@scaleway/configuration-loader": "1.0.0",
-    "@scaleway/sdk": "1.2.0",
-    "@scaleway/use-dataloader": "4.0.0",
-    "base64-js": "^1.5.1",
-    "cross-fetch": "^3.1.5",
-    "react": "18.2.0"
-  },
-  "devDependencies": {
-    "@scaleway/eslint-config-react": "3.15.3",
-    "@scaleway/tsconfig": "1.1.0",
-    "@types/node": "18.14.6",
-    "@types/react": "18.0.28",
-    "@typescript-eslint/eslint-plugin": "5.54.1",
-    "@typescript-eslint/parser": "5.54.1",
-    "eslint": "8.35.0",
-    "eslint-config-prettier": "8.7.0",
-    "prettier": "2.8.4",
-    "typescript": "4.9.5"
-  },
   "preferences": [
     {
       "name": "accessKey",

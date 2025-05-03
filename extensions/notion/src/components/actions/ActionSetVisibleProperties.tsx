@@ -1,54 +1,48 @@
-import { ActionPanel, Color, Action, Image } from "@raycast/api";
-import { DatabaseProperty } from "../../utils/types";
+import { ActionPanel, Color, Action, Icon } from "@raycast/api";
 
-/**
- * An action to set the properties that are visible in a form/view
- */
+import { getPropertyIcon, DatabaseProperty } from "../../utils/notion";
+
 export function ActionSetVisibleProperties(props: {
-  title?: string;
-  icon?: Image.ImageLike;
   databaseProperties: DatabaseProperty[];
   selectedPropertiesIds?: string[];
   onSelect: (propertyId: string) => void;
   onUnselect: (propertyId: string) => void;
-}): JSX.Element {
-  const {
-    databaseProperties,
-    onSelect,
-    onUnselect,
-    title = "Show / Hide Properties...",
-    icon = { source: "./icon/shown.png", tintColor: Color.PrimaryText },
-    selectedPropertiesIds = [],
-  } = props;
+}) {
+  const { databaseProperties, onSelect, onUnselect, selectedPropertiesIds = [] } = props;
+
+  const selectedProperties = selectedPropertiesIds.map((id) => databaseProperties.find((dp) => dp.id === id));
+  const unselectedProperties = databaseProperties.filter((dp) => !selectedPropertiesIds.includes(dp.id));
 
   return (
-    <ActionPanel.Submenu title={title} icon={icon}>
+    <ActionPanel.Submenu
+      title="Show/Hide Properties"
+      icon={Icon.Eye}
+      shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "p" }}
+    >
       <ActionPanel.Section>
-        {selectedPropertiesIds?.map((propertyId) => {
-          const property = databaseProperties.find((dp) => dp.id === propertyId);
-          if (!property) return;
-
-          return (
-            <Action
-              key={`selected-property-${property.id}`}
-              icon={{ source: "./icon/" + property.type + ".png", tintColor: Color.PrimaryText }}
-              title={property.name + "  ✓"}
-              onAction={() => onUnselect(property.id)}
-            />
-          );
-        })}
+        {selectedProperties.map(
+          (property) =>
+            property && (
+              <Action
+                key={`selected-property-${property.id}`}
+                icon={getPropertyIcon(property)}
+                title={`${property.name}  ✓`}
+                onAction={() => onUnselect(property.id)}
+              />
+            ),
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
-        {databaseProperties
-          ?.filter((dp) => !selectedPropertiesIds.includes(dp.id))
-          .map((dp) => (
+        {unselectedProperties.map((dp) => {
+          return (
             <Action
               key={`unselected-property-${dp.id}`}
-              icon={{ source: "./icon/" + dp.type + "_secondary.png", tintColor: Color.SecondaryText }}
+              icon={{ source: getPropertyIcon(dp), tintColor: Color.SecondaryText }}
               title={dp.name}
               onAction={() => onSelect(dp.id)}
             />
-          ))}
+          );
+        })}
       </ActionPanel.Section>
     </ActionPanel.Submenu>
   );

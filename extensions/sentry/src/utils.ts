@@ -69,7 +69,11 @@ export function getIcon(issue: Issue) {
 }
 
 export function getKeywords(issue: Issue) {
-  return issue.assignedTo ? [issue.assignedTo.name] : undefined;
+  const keywords: string[] = [issue.shortId];
+  if (issue.assignedTo?.name) {
+    keywords.push(issue.assignedTo.name);
+  }
+  return keywords;
 }
 
 export function getBaseUrl() {

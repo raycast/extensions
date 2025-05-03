@@ -1,10 +1,45 @@
 # GitHub Gist Changelog
 
+## [Update GitHub Gist] - 2025-02-02
+
+- Add a new preference to set the default gist tag.
+
+## [Reduce GitHub Authentication] - 2024-07-16
+
+- Reduce GitHub authentication permissions to access only GitHub Gist content
+- Fix the issue of **Open in Ray.so** command displaying garbled code
+- Add new Action: Save as Quicklink
+
+## [OAuth2.0 Support] - 2024-07-11
+
+- Uses Raycast OAuth2.0 GitHub integration with `repo read:user gist` scopes.
+- ⚠️Disables the personal access token preference. Users can delete their tokens after successful OAuth2.0 connection.
+- Minor refactoring and updated dependencies.
+
+## [Refactor Command] - 2024-07-03
+
+- Simplify the code and improve performance
+- Use useForm to optimise performance
+- Support saving gist as snippets
+
+## [Add Copy Raw Link action] - 2023-11-09
+
+- Add action to copy the raw link of the gist file
+
+## [Update] - 2023-07-26
+
+- Updated dependencies
+
+## [Update] - 2023-04-12
+
+- Updated dependencies
+- Enable syntax highlighting
+
 ## [Update] - 2023-04-12
 
 - Updated dependencies
 
-## [Optimize extension] - 2022-09-30 
+## [Optimize extension] - 2022-09-30
 
 - Optimize Search Gists command loading speed
 

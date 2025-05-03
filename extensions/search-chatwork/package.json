@@ -5,6 +5,9 @@
   "description": "Search chats through all the room",
   "icon": "cw-icon.png",
   "author": "nagauta",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Communication",
     "Applications",
@@ -18,20 +21,54 @@
       "subtitle": "Chatwork",
       "description": "search chats at Chatwork",
       "mode": "view"
+    },
+    {
+      "name": "search-rooms",
+      "title": "Search Rooms",
+      "subtitle": "Chatwork",
+      "description": "search rooms at Chatwork",
+      "mode": "view"
+    },
+    {
+      "name": "search-contacts",
+      "title": "Search Contacts",
+      "subtitle": "Chatwork",
+      "description": "search contacts at Chatwork",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useChatworkApiKey",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "use Chatwork API Key",
+      "description": "Show Connection Driver",
+      "label": "switch auth way to api key"
+    },
+    {
+      "name": "chatworkApiKey",
+      "type": "password",
+      "title": "Chatwork API Key",
+      "required": false,
+      "description": "type your Chatwork api key for auth",
+      "placeholder": "xxxxxxxxxx",
+      "label": "Chatwork api key"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.2",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -39,6 +76,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

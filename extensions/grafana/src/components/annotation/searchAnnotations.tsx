@@ -1,4 +1,6 @@
-import { ActionPanel, List, showToast, ToastStyle } from "@raycast/api";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// TODO: remove any types and be fully-type safe
+import { ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { DeleteAnnotationAction, PatchAnnotationAction } from "./annotationActions";
 import { useState, useEffect, useRef } from "react";
 import { AbortError } from "node-fetch";
@@ -104,7 +106,7 @@ function useSearch() {
         isLoading: false,
       }));
       console.error("search error", error);
-      showToast(ToastStyle.Failure, "Could not perform search", String(error));
+      showToast(Toast.Style.Failure, "Could not perform search", String(error));
     }
   }
 

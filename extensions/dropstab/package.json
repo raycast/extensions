@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dropstab",
+  "title": "DropsTab",
+  "description": "Get crypto coin data and navigate to official sites or X. Instantly view your wallets via blockchain explorers.",
+  "icon": "command-icon.png",
+  "author": "nikolayqwerty",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-crypto",
+      "title": "Search Crypto",
+      "description": "Search DropsTab for coins and price",
+      "mode": "view"
+    },
+    {
+      "name": "search-wallet",
+      "title": "Wallet and Transaction Explorer",
+      "description": "Wallet Explorer and Transaction Explorer",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "startAddressOrHash",
+          "description": "Wallet or Transaction Hash",
+          "placeholder": "Enter wallet or transaction hash",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "gas-tracker",
+      "title": "Ethereum Gas Tracker",
+      "description": "Get the latest gas prices for Ethereum",
+      "mode": "view"
+    },
+    {
+      "name": "macro-view",
+      "title": "Macro View",
+      "description": "Get the latest macroeconomic data",
+      "mode": "view"
+    },
+    {
+      "name": "gainers-and-losers",
+      "title": "Gainers & Losers",
+      "description": "Get the latest gainers and losers crypto data",
+      "mode": "view"
+    },
+    {
+      "name": "exchange-search",
+      "title": "CEX Pairs Search",
+      "description": "Search for pairs on CEX exchanges",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.0.0",
+    "node-localstorage": "^3.0.5",
+    "react": "^18.3.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "devDependencies": {
+    "@types/node-localstorage": "^1.3.3"
+  }
+}

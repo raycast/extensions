@@ -5,7 +5,7 @@ import { useDurationFormatter } from "../hooks/useDurationFormatter";
 import { useTask } from "../hooks/useTask";
 import { useActiveTask } from "../state/active-task";
 
-import { UUID } from "../types/tim";
+import { TimColor, UUID } from "../types/tim";
 
 import { GenealActions } from "./actions/GeneralActions";
 import { OpenInTimAction } from "./actions/OpenInTimAction";
@@ -26,7 +26,10 @@ const Task: React.FC<{ id: UUID }> = ({ id }) => {
     <List.Item
       title={task.title}
       id={id}
-      icon={activeTask === task.id ? Icon.CircleFilled : Icon.Circle}
+      icon={{
+        source: activeTask === task.id ? Icon.CircleFilled : Icon.Circle,
+        tintColor: TimColor[task.color] ?? task.color,
+      }}
       actions={
         <ActionPanel title={task.title}>
           <ActionPanel.Section>
@@ -56,7 +59,7 @@ const Task: React.FC<{ id: UUID }> = ({ id }) => {
               shortcut={{ modifiers: ["cmd"], key: "v" }}
             />
             <Action.CopyToClipboard
-              title="Copy Task ID"
+              title="Copy Task Id"
               shortcut={{ modifiers: ["cmd"], key: "i" }}
               content={task.id}
             />
@@ -75,13 +78,21 @@ const Task: React.FC<{ id: UUID }> = ({ id }) => {
                 title="Average time per day"
                 text={durationFormatter.format(averagePerDay)}
               />
-              <List.Item.Detail.Metadata.Label title="Rate" text={currencyFormatter.format(task.rate ?? 0)} />
-              <List.Item.Detail.Metadata.Label title="Value" text={currencyFormatter.format(value)} />
-              <List.Item.Detail.Metadata.TagList title="Tags">
-                {tags.map((tag) => (
-                  <List.Item.Detail.Metadata.TagList.Item key={tag.id} text={tag.title} color={tag.color} />
-                ))}
-              </List.Item.Detail.Metadata.TagList>
+
+              {task.rate && (
+                <>
+                  <List.Item.Detail.Metadata.Label title="Rate" text={currencyFormatter.format(task.rate ?? 0)} />
+                  <List.Item.Detail.Metadata.Label title="Value" text={currencyFormatter.format(value)} />
+                </>
+              )}
+
+              {tags && tags.length > 0 && (
+                <List.Item.Detail.Metadata.TagList title="Tags">
+                  {tags.map((tag) => (
+                    <List.Item.Detail.Metadata.TagList.Item key={tag.id} text={tag.title} color={tag.color} />
+                  ))}
+                </List.Item.Detail.Metadata.TagList>
+              )}
             </List.Item.Detail.Metadata>
           }
         />

@@ -5,6 +5,9 @@
   "description": "Manage your Jenkins directly from Raycast.",
   "icon": "icon.png",
   "author": "k8scat",
+  "contributors": [
+    "vkhitrin"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"

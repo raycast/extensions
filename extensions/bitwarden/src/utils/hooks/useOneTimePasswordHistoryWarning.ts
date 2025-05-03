@@ -2,7 +2,7 @@ import { confirmAlert, Icon, LocalStorage, popToRoot } from "@raycast/api";
 import { useEffect } from "react";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 
-const useOneTimePasswordHistoryWarning = async () => {
+const useOneTimePasswordHistoryWarning = () => {
   const handleDismissAction = () => popToRoot({ clearSearchBar: false });
 
   const handlePrimaryAction = () => LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_ONE_TIME_WARNING, true);
@@ -27,7 +27,7 @@ const useOneTimePasswordHistoryWarning = async () => {
   };
 
   useEffect(() => {
-    displayWarning();
+    void displayWarning();
   }, []);
 };
 

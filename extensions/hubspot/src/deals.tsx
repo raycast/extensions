@@ -1,8 +1,8 @@
 import { Action, ActionPanel, closeMainWindow, Icon, List, open, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
-import { useDeals } from "./hooks/useDeals";
-import { useAccountInfo } from "./hooks/useAccountInfo";
-import { Deal } from "./types/deal";
+import { useDeals } from "@/hooks/useDeals";
+import { useAccountInfo } from "@/hooks/useAccountInfo";
+import type { Deal } from "@/types/deal";
 
 const Detail = ({ deal, hubspotUrl }: { deal: Deal; hubspotUrl: string }) => {
   const dealname = deal?.properties?.dealname;

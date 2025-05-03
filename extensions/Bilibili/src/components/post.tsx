@@ -1,8 +1,9 @@
 import { formatUrl } from "../utils";
 
 import { Action, ActionPanel, Color, Image, List } from "@raycast/api";
+const { Metadata } = List.Item.Detail;
 
-function renderTypeText(type: string) {
+function renderTypeText(type: Bilibili.DynamicType) {
   switch (type) {
     case "DYNAMIC_TYPE_FORWARD":
       return "Forward";
@@ -13,8 +14,12 @@ function renderTypeText(type: string) {
       return "Music";
     case "DYNAMIC_TYPE_LIVE_RCMD":
       return "Live";
-    default:
-      return "Unknown";
+    case "DYNAMIC_TYPE_AV":
+      return "Video";
+    default: {
+      const _text: never = type;
+      return `Unknown ${_text}`;
+    }
   }
 }
 
@@ -24,24 +29,24 @@ export function Post(props: {
   cover?: string;
   pubdate: number;
   url: string;
-  uploader: Bilibili.uploader;
+  uploader: Bilibili.Uploader;
   stat: {
     comment: number;
     forward: number;
     like: number;
   };
-  type: string;
+  type: Bilibili.DynamicType;
 }) {
   return (
     <List.Item
       title={props.desc}
       detail={
         <List.Item.Detail
-          markdown={props.cover ? `![Cover](${props.cover})` : props.desc}
+          markdown={props.cover ? `<img src="${formatUrl(props.cover)}" center width="300" />` : props.desc}
           metadata={
-            <List.Item.Detail.Metadata>
-              {props.title && <List.Item.Detail.Metadata.Label title={props.title} />}
-              <List.Item.Detail.Metadata.Label
+            <Metadata>
+              {props.title && <Metadata.Label title={props.title} />}
+              <Metadata.Label
                 title="Uploader"
                 text={props.uploader.name}
                 icon={{
@@ -49,14 +54,14 @@ export function Post(props: {
                   mask: Image.Mask.Circle,
                 }}
               />
-              <List.Item.Detail.Metadata.Label title="Time" text={new Date(props.pubdate * 1000).toLocaleString()} />
-              <List.Item.Detail.Metadata.TagList title="Stat">
-                <List.Item.Detail.Metadata.TagList.Item text={renderTypeText(props.type)} color={"#FB7299"} />
-                <List.Item.Detail.Metadata.TagList.Item text={`Comment: ${props.stat.comment}`} color={Color.Blue} />
-                <List.Item.Detail.Metadata.TagList.Item text={`Forward: ${props.stat.forward}`} color={Color.Green} />
-                <List.Item.Detail.Metadata.TagList.Item text={`Like: ${props.stat.like}`} color={Color.Red} />
-              </List.Item.Detail.Metadata.TagList>
-            </List.Item.Detail.Metadata>
+              <Metadata.Label title="Time" text={new Date(props.pubdate * 1000).toLocaleString()} />
+              <Metadata.TagList title="Stat">
+                <Metadata.TagList.Item text={renderTypeText(props.type)} color={"#FB7299"} />
+                <Metadata.TagList.Item text={`Comment: ${props.stat.comment}`} color={Color.Blue} />
+                <Metadata.TagList.Item text={`Forward: ${props.stat.forward}`} color={Color.Green} />
+                <Metadata.TagList.Item text={`Like: ${props.stat.like}`} color={Color.Red} />
+              </Metadata.TagList>
+            </Metadata>
           }
         />
       }

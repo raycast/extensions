@@ -15,7 +15,7 @@ function getFavicon(
     fallback?: Image.Fallback;
     size?: boolean;
     mask?: Image.Mask;
-  }
+  },
 ): Image.ImageLike;
 ```
 

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-lighting-node-search",
+  "title": "Search Lightning Nodes",
+  "description": "A Raycast extension for searching Lightning Nodes",
+  "icon": "command-icon.png",
+  "author": "bufo24",
+  "contributors": [
+    "Djo1e"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-node",
+      "title": "Search Node",
+      "description": "Search for a Lightning Node",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "alias",
+          "placeholder": "Alias",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1",
+    "axios": "^1.8.4",
+    "node-fetch": "2.6.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "4.28.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

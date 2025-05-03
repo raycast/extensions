@@ -7,7 +7,17 @@
   "contributors": [
     "mathieudutour",
     "mike182uk",
-    "FezVrasta"
+    "FezVrasta",
+    "rcruzper",
+    "thomas",
+    "arthur_fontaine",
+    "pernielsentikaer",
+    "taschaub"
+  ],
+  "keywords": [
+    "sound",
+    "manager",
+    "bluetooth"
   ],
   "license": "MIT",
   "commands": [
@@ -30,14 +40,16 @@
       "title": "Set Output Device to Favourite",
       "subtitle": "Audio Device",
       "description": "Sets the active audio output device to the favourite specified in the preferences",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-favourites",
       "title": "Toggle Favourites",
       "subtitle": "Audio Device",
       "description": "Toggle the active audio output device between the favourites specified in the preferences",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -47,6 +59,15 @@
       "title": "Enable AirPlay Support",
       "description": "Enable AirPlay speakers detection on the output devices list.",
       "label": "Include AirPlay devices",
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "systemOutput",
+      "required": false,
+      "title": "Play sound effects through current output",
+      "description": "Play system sounds through current output.",
+      "label": "Update system sounds output",
       "type": "checkbox",
       "default": false
     },
@@ -68,24 +89,32 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.46.0",
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.12.0",
+    "@spotxyz/macos-audio-devices": "1.5.0",
     "execa": "^6.0.0",
-    "macos-audio-devices": "^1.4.0",
-    "react-use": "^17.3.2",
+    "prettier": "^3.2.5",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
-    "copy-binary": "cp node_modules/macos-audio-devices/audio-devices assets/audio-devices",
+    "copy-binary": "cp node_modules/@spotxyz/macos-audio-devices/audio-devices assets/audio-devices",
     "build": "npm run copy-binary && ray build -e dist",
-    "dev": "npm run copy-binary && ray develop"
-  }
+    "dev": "npm run copy-binary && ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

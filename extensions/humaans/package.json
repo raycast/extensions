@@ -5,6 +5,11 @@
   "description": "Interact with the Humaans platform",
   "icon": "humaans.png",
   "author": "farisaziz12",
+  "owner": "humaans",
+  "access": "public",
+  "contributors": [
+    "tom_humaans"
+  ],
   "categories": [
     "Productivity",
     "Web",
@@ -39,6 +44,20 @@
       "subtitle": "Humaans",
       "description": "Manage upcoming time away and remaining days",
       "mode": "no-view"
+    },
+    {
+      "name": "clock-in",
+      "title": "Clock In",
+      "subtitle": "Humaans",
+      "description": "Create a new timesheet entry with the current time",
+      "mode": "no-view"
+    },
+    {
+      "name": "clock-out",
+      "title": "Clock Out",
+      "subtitle": "Humaans",
+      "description": "End the timesheet entry that was clocked in earlier",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -47,13 +66,14 @@
       "type": "password",
       "required": true,
       "title": "Humaans API Key",
-      "description": "Humaans API Key with following scopes: public:read",
+      "description": "Humaans API Key with following scopes: public:read, private:write (for clock in/out)",
       "placeholder": "Enter your Humaans API Key"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.18",
+    "cross-fetch": "^4.0.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {

@@ -1,4 +1,6 @@
 {
   "language": "eng",
-  "refformat": "{name} ({version})\n\n{content}"
+  "refformat": "{name} ({version})\n\n{content}",
+  "versenumbers": false,
+  "linebreaks": true
 }

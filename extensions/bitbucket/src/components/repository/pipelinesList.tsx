@@ -28,7 +28,9 @@ export function PipelinesList(props: { repo: Repository; pageNumber: number }): 
           name: (pipeline.name as string) || "",
           uuid: pipeline.uuid as string,
           buildNumber: pipeline.build_number.toString() as string,
-          state: (pipeline.state?.result?.name || pipeline.state?.stage?.name || "") as string,
+          state: (pipeline.state?.name == "IN_PROGRESS"
+            ? "IN_PROGRESS"
+            : null || pipeline.state?.result?.name || pipeline.state?.stage?.name || "") as string,
           avatarCreatorUrl: (pipeline.creator?.links?.avatar?.href as string) || "",
           triggerName: (pipeline.trigger?.name as string) || "",
           commitMessage: (pipeline.target?.commit?.message).split("\n")[0] || "",
@@ -88,20 +90,20 @@ function SearchListItem({
     pipeline.state == "SUCCESSFUL"
       ? pipeIcon.success
       : pipeline.state == "HALTED" || pipeline.state == "PAUSED"
-      ? pipeIcon.paused
-      : pipeline.state == "IN_PROGRESS"
-      ? pipeIcon.progress
-      : pipeline.state == "STOPPED"
-      ? pipeIcon.stopped
-      : pipeline.state == "FAILED"
-      ? pipeIcon.failed
-      : "";
+        ? pipeIcon.paused
+        : pipeline.state == "IN_PROGRESS"
+          ? pipeIcon.progress
+          : pipeline.state == "STOPPED"
+            ? pipeIcon.stopped
+            : pipeline.state == "FAILED"
+              ? pipeIcon.failed
+              : "";
 
   const pipelineImg = pipeline.avatarCreatorUrl
     ? pipeline.avatarCreatorUrl
     : pipeline.triggerName == "SCHEDULE"
-    ? icon.calendar
-    : icon.user;
+      ? icon.calendar
+      : icon.user;
 
   return (
     <List.Item

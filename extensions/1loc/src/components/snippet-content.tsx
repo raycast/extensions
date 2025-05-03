@@ -1,67 +1,32 @@
-import { useState, useEffect, useRef } from "react"
 import { getPreferenceValues, List } from "@raycast/api"
-import { usePersistentState } from "raycast-toolkit"
 import matter from "gray-matter"
 import { Buffer } from "buffer"
-import axios, { AxiosError, AxiosResponse, CancelTokenSource } from "axios"
+import { useFetch } from "@raycast/utils"
 
 interface ISnippet {
   content: string
   encoding: string
 }
 
-const { personalAccessToken } = getPreferenceValues<{ personalAccessToken?: string }>()
+const { personalAccessToken } = getPreferenceValues<Preferences>()
 
-const useSnippet = (categoryName: string, name: string): [ISnippet | null, boolean, AxiosResponse | null] => {
-  const [snippet, setSnippet] = usePersistentState<ISnippet | null>(`snippet-${categoryName}-${name}`, null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [response, setResponse] = useState<AxiosResponse | null>(null)
-  const cancelRef = useRef<CancelTokenSource | null>(null)
-  const isMounted = useRef(true)
-
-  useEffect(() => {
-    const fetchSnippet = async () => {
-      cancelRef.current?.cancel()
-      cancelRef.current = axios.CancelToken.source()
-      const url = `https://api.github.com/repositories/251039251/contents/snippets/${categoryName}/${name}`
-      const config = {
-        cancelToken: cancelRef.current?.token,
-        headers: personalAccessToken ? { Authorization: `token ${personalAccessToken}` } : undefined,
-      }
-      try {
-        const { data } = await axios.get(url, config)
-        if (isMounted.current) {
-          setSnippet(data)
-          setIsLoading(false)
-        }
-      } catch (e) {
-        if (isMounted.current) {
-          setIsLoading(false)
-        }
-        if (axios.isCancel(e)) {
-          return
-        }
-        if (isMounted.current) {
-          setResponse((e as AxiosError).response ?? null)
-        }
-      }
-    }
-
-    fetchSnippet()
-
-    return () => {
-      cancelRef.current?.cancel()
-      isMounted.current = false
-    }
-  }, [])
-  return [snippet, isLoading, response]
-}
-
-const SnippetContent = ({ categoryName, name }: { categoryName: string; name: string }) => {
-  const [snippet, isLoading, response] = useSnippet(categoryName, name)
+const SnippetContent = ({ name }: { name: string }) => {
+  const {
+    isLoading,
+    data: snippet,
+    error,
+  } = useFetch<ISnippet>(`https://api.github.com/repositories/251039251/contents/contents/${name}`, {
+    headers: { Authorization: `token ${personalAccessToken}` },
+    async parseResponse(response) {
+      if (!response.ok) throw new Error(`${response.status} Error`)
+      const result = await response.json()
+      return result
+    },
+    keepPreviousData: true,
+  })
 
   const getMarkdown = () => {
-    if (response?.status === 403 && !snippet) {
+    if (error?.message.includes("403") && !snippet) {
       return `
 # GitHub API rate limit exceeded
 

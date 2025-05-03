@@ -1,7 +1,8 @@
 # Auto Quit App
 
-Automatically quit the application after all windows are closed(auto run every 10 minutes).
+Automatically quit the application after all windows are closed.
 
-You can set whether to automatically quit the following applications in the command's preferences.
+**Note**
 
-Includes: Notes, Preview, TextEdit, Messages, Terminal, Shortcuts, TV, QuickTime Player, Mail.
+- This extension can only detect whether the application on the current desktop has a window. 
+- If the application has a window on another desktop and the current desktop has no window, it will still be quit.

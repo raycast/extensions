@@ -6,7 +6,9 @@
   "icon": "hide-icon.png",
   "author": "peduarte",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "andrewsardone",
+    "hayden_barnes"
   ],
   "categories": [
     "System"
@@ -32,16 +34,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.43.0",
+    "@raycast/api": "^1.53.3",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
@@ -51,5 +51,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

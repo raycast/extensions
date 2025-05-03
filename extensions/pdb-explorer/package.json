@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pdb-explorer",
+  "title": "PDB Explorer",
+  "description": "Search and explore protein structures from the Protein Data Bank (PDB). View detailed information about proteins, chains, and ligands.",
+  "icon": "command-icon.png",
+  "author": "matthias_grass",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-title",
+      "title": "Find Protein",
+      "description": "Show the details of a protein structure",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "id",
+          "placeholder": "PDB ID (e.g., 1AKE)",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.6.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

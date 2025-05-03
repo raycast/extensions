@@ -1,198 +1,111 @@
-import { environment, getPreferenceValues, open, showInFinder, showToast, Toast } from "@raycast/api";
-import fse from "fs-extra";
+import { environment, open, showInFinder, showToast, Toast } from "@raycast/api";
+import fse, { existsSync } from "fs-extra";
 import { runAppleScript } from "run-applescript";
 import { homedir } from "os";
-import { Preferences } from "../types/preferences";
+import { downloadDirectory } from "../types/preferences";
 import { BingImage, DownloadedBingImage } from "../types/types";
 import fetch from "node-fetch";
 import { buildBingImageURL, getPictureName } from "./bing-wallpaper-utils";
 import { wallpaperImageExtension } from "./constants";
 import { parse } from "path";
+import { scriptSetWallpaper } from "./script-utils";
+
+export const cachePath = environment.supportPath;
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
+export const buildCachePath = (title: string) => {
+  const normalizedCachePath = cachePath.endsWith("/") ? cachePath : `${cachePath}/`;
+  return `${normalizedCachePath}${title}.png`;
+};
+
+async function cachePicture(title: string, url: string) {
+  const actualPath = buildCachePath(title);
+  if (existsSync(actualPath)) {
+    return actualPath;
+  }
+  const res = await fetch(url).catch(async (e) => {
+    await showToast(Toast.Style.Failure, String(e));
+  });
+  if (res) {
+    const buffer = await res.arrayBuffer();
+    fse.writeFile(buildCachePath(title), Buffer.from(buffer), async (error: NodeJS.ErrnoException | null) => {
+      if (error) {
+        await showToast(Toast.Style.Failure, String(error));
+      }
+    });
+  }
+  return actualPath;
+}
+
+export const setOnlineWallpaper = async (title: string, url: string, isShowToast: boolean = true) => {
+  const toast = isShowToast ? await showToast(Toast.Style.Animated, "Downloading wallpaper...") : undefined;
+  await fse.emptydir(cachePath);
+  try {
+    const actualPath = await cachePicture(title, url);
+    if (toast) {
+      toast.title = "Setting wallpaper...";
+    }
+    const result = await runAppleScript(scriptSetWallpaper(actualPath));
+    if (result !== "ok") {
+      if (isShowToast && toast) {
+        toast.style = Toast.Style.Failure;
+        toast.title = result;
+      }
+    } else {
+      if (toast) {
+        toast.style = Toast.Style.Success;
+        toast.title = "Set wallpaper successfully!";
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    if (toast) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Something went wrong.";
+      toast.message = "Try with another image or check your internet connection.";
+    }
+  }
+};
+
+export const setLocalWallpaper = async (path: string, isShowToast: boolean = true) => {
+  const toast = isShowToast ? await showToast(Toast.Style.Animated, "Setting wallpaper...") : undefined;
+  try {
+    const result = await runAppleScript(scriptSetWallpaper(path));
+
+    if (result !== "ok") {
+      if (isShowToast && toast) {
+        toast.style = Toast.Style.Failure;
+        toast.title = result;
+      }
+    } else {
+      if (toast) {
+        toast.style = Toast.Style.Success;
+        toast.title = "Set wallpaper successfully!";
+      }
+    }
+  } catch (err) {
+    console.error(err);
+
+    if (toast) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Something went wrong.";
+      toast.message = "Try with another image.";
+    }
+  }
+};
+
 export const getPicturesDirectory = () => {
-  const directoryPreference = getPreferenceValues<Preferences>().downloadDirectory;
-  let actualDirectory = directoryPreference;
-  if (directoryPreference.startsWith("~")) {
-    actualDirectory = directoryPreference.replace("~", `${homedir()}`);
+  let actualDirectory = downloadDirectory;
+  if (downloadDirectory.startsWith("~")) {
+    actualDirectory = downloadDirectory.replace("~", `${homedir()}`);
   }
   if (isEmpty(actualDirectory) || !fse.pathExistsSync(actualDirectory)) {
     return homedir() + "/Downloads";
   }
   return actualDirectory.endsWith("/") ? actualDirectory.substring(0, -1) : actualDirectory;
-};
-
-export const setWallpaper = async (title: string, url: string) => {
-  const toast = await showToast(Toast.Style.Animated, "Downloading and setting wallpaper...");
-
-  const { applyTo } = getPreferenceValues<Preferences>();
-  const selectedPath = environment.supportPath;
-  const fixedPathName = selectedPath.endsWith("/") ? `${selectedPath}${title}.png` : `${selectedPath}/${title}.png`;
-
-  try {
-    const actualPath = fixedPathName;
-
-    const command = !fse.existsSync(actualPath)
-      ? `set cmd to "curl -o " & q_temp_folder & " " & "${url}"
-        do shell script cmd`
-      : "";
-
-    const result = await runAppleScript(`
-      set temp_folder to (POSIX path of "${actualPath}")
-      set q_temp_folder to quoted form of temp_folder
-
-      ${command}
-
-      set x to alias (POSIX file temp_folder)
-
-      try
-        tell application "System Events"
-          tell ${applyTo} desktop
-            set picture to (x as text)
-            return "ok"
-          end tell
-        end tell
-      on error
-        set dialogTitle to "Error Setting Wallpaper"
-        set dialogText to "Please make sure you have given Raycast the required permission. To make sure, click the button below and grant Raycast the 'System Events' permission."
-
-        display alert dialogTitle message dialogText buttons {"Cancel", "Open Preferences"} default button 2 as informational
-          if button returned of result is "Open Preferences" then
-            do shell script "open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Automation'"
-          end if
-
-        return "error"
-      end try
-    `);
-
-    if (result !== "ok") throw new Error("Error setting wallpaper.");
-    else if (toast) {
-      toast.style = Toast.Style.Success;
-      toast.title = "Set wallpaper successfully!";
-    }
-    fse.removeSync(actualPath);
-  } catch (err) {
-    console.error(err);
-
-    if (toast) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Something went wrong.";
-      toast.message = "Try with another image or check your internet connection.";
-    }
-  }
-};
-
-export const setWallpaperWithoutToast = async (title: string, url: string) => {
-  const { applyTo } = getPreferenceValues<Preferences>();
-  const selectedPath = environment.supportPath;
-  const fixedPathName = selectedPath.endsWith("/") ? `${selectedPath}${title}.png` : `${selectedPath}/${title}.png`;
-
-  try {
-    const actualPath = fixedPathName;
-
-    const command = !fse.existsSync(actualPath)
-      ? `set cmd to "curl -o " & q_temp_folder & " " & "${url}"
-        do shell script cmd`
-      : "";
-
-    const result = await runAppleScript(`
-      set temp_folder to (POSIX path of "${actualPath}")
-      set q_temp_folder to quoted form of temp_folder
-
-      ${command}
-
-      set x to alias (POSIX file temp_folder)
-
-      try
-        tell application "System Events"
-          tell ${applyTo} desktop
-            set picture to (x as text)
-            return "ok"
-          end tell
-        end tell
-      on error
-        set dialogTitle to "Error Setting Wallpaper"
-        set dialogText to "Please make sure you have given Raycast the required permission. To make sure, click the button below and grant Raycast the 'System Events' permission."
-
-        display alert dialogTitle message dialogText buttons {"Cancel", "Open Preferences"} default button 2 as informational
-          if button returned of result is "Open Preferences" then
-            do shell script "open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Automation'"
-          end if
-
-        return "error"
-      end try
-    `);
-
-    if (result !== "ok") throw new Error("Error setting wallpaper.");
-    fse.removeSync(actualPath);
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-const setDownloadedWallpaperAction = async (path: string) => {
-  const { applyTo } = getPreferenceValues<Preferences>();
-  return await runAppleScript(`
-      set temp_folder to (POSIX path of "${path}")
-      set q_temp_folder to quoted form of temp_folder
- 
-
-      set x to alias (POSIX file temp_folder)
-
-      try
-        tell application "System Events"
-          tell ${applyTo} desktop
-            set picture to (x as text)
-            return "ok"
-          end tell
-        end tell
-      on error
-        set dialogTitle to "Error Setting Wallpaper"
-        set dialogText to "Please make sure you have given Raycast the required permission. To make sure, click the button below and grant Raycast the 'System Events' permission."
-
-        display alert dialogTitle message dialogText buttons {"Cancel", "Open Preferences"} default button 2 as informational
-          if button returned of result is "Open Preferences" then
-            do shell script "open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Automation'"
-          end if
-
-        return "error"
-      end try
-    `);
-};
-
-export const setDownloadedWallpaper = async (path: string) => {
-  const toast = await showToast(Toast.Style.Animated, "Setting wallpaper...");
-
-  try {
-    const result = await setDownloadedWallpaperAction(path);
-
-    if (result !== "ok") throw new Error("Error setting wallpaper.");
-    else if (toast) {
-      toast.style = Toast.Style.Success;
-      toast.title = "Set wallpaper successfully!";
-    }
-  } catch (err) {
-    console.error(err);
-
-    if (toast) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Something went wrong.";
-      toast.message = "Try with another image or check your internet connection.";
-    }
-  }
-};
-
-export const setDownloadedWallpaperWithoutToast = async (path: string) => {
-  try {
-    const result = await setDownloadedWallpaperAction(path);
-
-    if (result !== "ok") throw new Error("Error setting wallpaper.");
-  } catch (err) {
-    console.error(err);
-  }
 };
 
 export async function downloadPicture(downSize: string, bingImage: BingImage) {
@@ -203,8 +116,8 @@ export async function downloadPicture(downSize: string, bingImage: BingImage) {
     })
     .then(function (buffer) {
       const picturePath = `${getPicturesDirectory()}/${getPictureName(bingImage.url)}-${bingImage.startdate}.png`;
-      fse.writeFile(picturePath, Buffer.from(buffer), async (error) => {
-        if (error != null) {
+      fse.writeFile(picturePath, Buffer.from(buffer), async (error: NodeJS.ErrnoException | null) => {
+        if (error) {
           await showToast(Toast.Style.Failure, String(error));
         } else {
           const options: Toast.Options = {
@@ -241,8 +154,8 @@ export async function autoDownloadPictures(downSize: string, bingImages: BingIma
           return res.arrayBuffer();
         })
         .then(function (buffer) {
-          fse.writeFile(picturePath, Buffer.from(buffer), async (error) => {
-            if (error != null) {
+          fse.writeFile(picturePath, Buffer.from(buffer), async (error: NodeJS.ErrnoException | null) => {
+            if (error) {
               console.error(String(error));
             }
           });
@@ -252,13 +165,18 @@ export async function autoDownloadPictures(downSize: string, bingImages: BingIma
 }
 
 export function getDownloadedBingWallpapers() {
-  const imageFolderPath = getPicturesDirectory();
-  const files = fse.readdirSync(imageFolderPath);
   const downloadedWallpapers: DownloadedBingImage[] = [];
-  files.forEach((value) => {
-    if (wallpaperImageExtension.includes(parse(value).ext) && !value.startsWith(".")) {
-      downloadedWallpapers.push({ name: parse(value).name, path: imageFolderPath + "/" + value });
-    }
-  });
-  return downloadedWallpapers;
+  try {
+    const imageFolderPath = getPicturesDirectory();
+    const files = fse.readdirSync(imageFolderPath);
+    files.forEach((value) => {
+      if (wallpaperImageExtension.includes(parse(value).ext) && !value.startsWith(".")) {
+        downloadedWallpapers.push({ name: parse(value).name, path: imageFolderPath + "/" + value });
+      }
+    });
+    return downloadedWallpapers;
+  } catch (e) {
+    console.error(e);
+    return downloadedWallpapers;
+  }
 }

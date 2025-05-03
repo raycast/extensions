@@ -17,7 +17,7 @@ export function getIcon(contentType?: string) {
       icon = Icon.Video;
       break;
     case "text":
-      icon = Icon.TextDocument;
+      icon = Icon.BlankDocument;
       break;
     case "application":
       icon = Icon.Document;

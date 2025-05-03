@@ -161,7 +161,7 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
       } else {
         return await refreshTweet(data);
       }
-    }
+    },
   );
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });

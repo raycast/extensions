@@ -9,13 +9,17 @@ export function BookmarkListItem(props: { bookmark: Bookmark }) {
       id={bookmark.id}
       title={bookmark.title}
       icon="list-icon.png"
-      accessoryTitle={bookmark.tags}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={bookmark.url} />
           <Action.CopyToClipboard title="Copy URL" content={bookmark.url} />
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: bookmark.tags,
+        },
+      ]}
     />
   );
 }

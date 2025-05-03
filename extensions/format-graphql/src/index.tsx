@@ -1,58 +1,70 @@
 import { Icon, Form, ActionPanel, Action, showToast, Clipboard, Toast, showHUD, popToRoot } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
 import prettier from "prettier";
 
 interface CommandForm {
   input: string;
   indent: string;
+  copy: boolean;
 }
 
 export default function Command() {
-  function handleSubmit(values: CommandForm) {
-    const { input, indent } = values;
+  const { itemProps, handleSubmit, setValue } = useForm<CommandForm>({
+    async onSubmit(values) {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Formatting" });
+      const { input, indent } = values;
 
-    if (input.length === 0) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Empty input",
-      });
-      return;
-    }
+      const useTabs = indent === "tab";
+      const tabWidth = indent !== "tab" ? parseInt(indent) : 2;
 
-    const useTabs = indent === "tab";
-    const tabWidth = indent !== "tab" ? parseInt(indent) : 2;
+      const options = {
+        parser: "graphql",
+        useTabs,
+        tabWidth,
+      };
 
-    const options = {
-      parser: "graphql",
-      useTabs,
-      tabWidth,
-    };
+      let output;
+      try {
+        output = prettier.format(input, options);
 
-    let output;
-    try {
-      output = prettier.format(input, options);
-    } catch (e) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid GraphQL",
-      });
-      return;
-    }
-
-    Clipboard.copy(output);
-    showHUD("Copied to clipboard");
-    popToRoot();
-  }
+        toast.style = Toast.Style.Success;
+        toast.title = "Formatted GraphQL";
+        setValue("input", output);
+      } catch (e) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Invalid GraphQL";
+        return;
+      }
+      if (values.copy) {
+        await Clipboard.copy(output);
+        await showHUD("Copied to clipboard");
+        await popToRoot();
+      }
+    },
+    validation: {
+      input: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Checkmark} title="Format and Copy" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            icon={Icon.Clipboard}
+            title="Format and Copy"
+            onSubmit={(values: CommandForm) => handleSubmit({ ...values, copy: true })}
+          />
+          <Action.SubmitForm
+            icon={Icon.Checkmark}
+            title="Only Format"
+            onSubmit={(values: CommandForm) => handleSubmit({ ...values, copy: false })}
+          />
         </ActionPanel>
       }
     >
-      <Form.TextArea id="input" title="Input" placeholder="Paste GraphQL here…" />
-      <Form.Dropdown id="indent" title="Indentation" storeValue>
+      <Form.TextArea title="Input" placeholder="Paste GraphQL here…" {...itemProps.input} />
+      <Form.Dropdown title="Indentation" storeValue {...itemProps.indent}>
         <Form.Dropdown.Item value="tab" title="Tabs" />
         <Form.Dropdown.Item value="2" title="Spaces: 2" />
         <Form.Dropdown.Item value="4" title="Spaces: 4" />

@@ -6,17 +6,26 @@
   "icon": "tailwind-icon.png",
   "author": "vimtor",
   "contributors": [
-    "cy-98"
+    "cy-98",
+    "emilsharier",
+    "pernielsentikaer",
+    "erich2s",
+    "ridemountainpig",
+    "jor",
+    "garrill",
+    "olafvanmidden"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-documentation",
       "title": "Search Documentation",
       "subtitle": "Tailwind CSS",
-      "keywords": [
-        "css"
-      ],
+      "keywords": ["css"],
       "description": "Search documentation and open it in the browser",
       "mode": "view"
     },
@@ -24,12 +33,28 @@
       "name": "search-classes",
       "title": "Search Classes",
       "subtitle": "Tailwind CSS",
-      "keywords": [
-        "css"
-      ],
+      "keywords": ["css"],
       "description": "Search Tailwind CSS utility classes",
       "mode": "view",
       "preferences": [
+        {
+          "name": "measuringUnit",
+          "title": "Measuring Unit",
+          "description": "Measuring unit to use for spacing-related properties",
+          "type": "dropdown",
+          "required": true,
+          "default": "rem",
+          "data": [
+            {
+              "title": "REM",
+              "value": "rem"
+            },
+            {
+              "title": "Pixels",
+              "value": "px"
+            }
+          ]
+        },
         {
           "name": "defaultAction",
           "title": "Default Action",
@@ -58,9 +83,7 @@
       "name": "search-colors",
       "title": "Search Colors",
       "subtitle": "Tailwind CSS",
-      "keywords": [
-        "css"
-      ],
+      "keywords": ["css"],
       "description": "Search Tailwind CSS default color palette",
       "mode": "view"
     },
@@ -68,23 +91,18 @@
       "name": "search-components",
       "title": "Search Components",
       "subtitle": "Tailwind UI",
-      "keywords": [
-        "css"
-      ],
+      "keywords": ["css"],
       "description": "Search Tailwind UI components",
       "mode": "view"
     }
   ],
-  "categories": [
-    "Documentation",
-    "Developer Tools"
-  ],
+  "categories": ["Documentation", "Developer Tools"],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.57.2",
     "color-convert": "^2.0.1",
     "css": "^3.0.0",
     "lodash": "^4.17.21",
-    "tailwindcss": "^3.2.4"
+    "tailwindcss": "^3.3.3"
   },
   "devDependencies": {
     "@types/color-convert": "^2.0.0",
@@ -96,7 +114,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
+    "prettier": "^3.0.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

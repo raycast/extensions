@@ -1,14 +1,14 @@
-import { Action, ActionPanel, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Image, List, showToast, Toast, Icon, open, showInFinder } from "@raycast/api";
 import { getFavicon, MutatePromise } from "@raycast/utils";
 import {
   CopyLinkActionSection,
+  CreateQuickLinkActionSection,
   EditTabActionSection,
   OpenLinkActionSections,
   OpenSpaceAction,
-  CreateQuickLinkActionSection,
 } from "./actions";
-import { HistoryEntry, Space, Suggestion, Tab } from "./types";
-import { getDomain, getLastVisitedAt, getSpaceTitle } from "./utils";
+import { HistoryEntry, Space, Download, Suggestion, Tab } from "./types";
+import { getDomain, getLastVisitedAt, getDownloadedAt, getSpaceTitle } from "./utils";
 
 export function HistoryEntryListItem(props: { entry: HistoryEntry; searchText: string }) {
   return (
@@ -19,10 +19,10 @@ export function HistoryEntryListItem(props: { entry: HistoryEntry; searchText: s
         value: getDomain(props.entry.url),
         tooltip: props.entry.url,
       }}
-      accessories={[getLastVisitedAt(props.entry)]}
+      accessories={[getLastVisitedAt(props.entry), { tag: props.entry.profileName }]}
       actions={
         <ActionPanel>
-          <OpenLinkActionSections url={props.entry.url} searchText={props.searchText} />
+          <OpenLinkActionSections tabOrUrl={props.entry.url} searchText={props.searchText} />
           <CopyLinkActionSection url={props.entry.url} title={props.entry.title} />
         </ActionPanel>
       }
@@ -50,6 +50,57 @@ export function SpaceListItem(props: { space: Space }) {
   );
 }
 
+export function DownloadListItem(props: { download: Download }) {
+  return (
+    <List.Item
+      icon={Icon.Document}
+      title={props.download.current_path.substring(props.download.current_path.lastIndexOf("/") + 1)}
+      subtitle={{
+        value: getDomain(props.download.tab_url),
+        tooltip: props.download.tab_url,
+      }}
+      accessories={[getDownloadedAt(props.download)]}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Open File"
+            onAction={async () => {
+              try {
+                await open(props.download.current_path);
+              } catch (error) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Could't open the file. The file may have been removed or moved.",
+                });
+              }
+            }}
+            icon={Icon.Folder}
+          />
+          <Action
+            title="Show in Finder"
+            onAction={async () => {
+              try {
+                await showInFinder(props.download.current_path);
+              } catch (error) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Could't open the file in Finder. The file may have been removed or moved.",
+                });
+              }
+            }}
+            icon={Icon.Finder}
+          />
+          <Action.OpenInBrowser
+            title="Open Download Tab in Browser"
+            url={props.download.tab_url}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 export function SuggestionListItem(props: { suggestion: Suggestion; searchText: string }) {
   return (
     <List.Item
@@ -57,7 +108,7 @@ export function SuggestionListItem(props: { suggestion: Suggestion; searchText: 
       title={props.suggestion.query}
       actions={
         <ActionPanel>
-          <OpenLinkActionSections url={props.suggestion.url} searchText={props.searchText} />
+          <OpenLinkActionSections tabOrUrl={props.suggestion.url} searchText={props.searchText} />
           <CopyLinkActionSection url={props.suggestion.url} />
         </ActionPanel>
       }
@@ -74,9 +125,10 @@ export function TabListItem(props: { tab: Tab; searchText: string; mutate: Mutat
         value: getDomain(props.tab.url),
         tooltip: props.tab.url,
       }}
+      keywords={[props.tab.url]} // Add this line to include URL in searchable content
       actions={
         <ActionPanel>
-          <OpenLinkActionSections url={props.tab.url} searchText={props.searchText} />
+          <OpenLinkActionSections tabOrUrl={props.tab} searchText={props.searchText} />
           <CopyLinkActionSection url={props.tab.url} title={props.tab.title} />
           <CreateQuickLinkActionSection url={props.tab.url} title={props.tab.title} />
           <EditTabActionSection tab={props.tab} mutate={props.mutate} />

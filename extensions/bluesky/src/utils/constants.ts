@@ -1,14 +1,16 @@
 export const ATPSessionStorageKey = "ATPSession";
 export const ATPCredentialsHashKey = "ATPCredentialsHashKey";
-export const ShowPeopleViewAsGridCacheKey = "show-people-view-as-grid";
+export const ShowAccountsViewAsGridCacheKey = "show-accounts-view-as-grid";
 export const ShowPostDetailsCacheKey = "show-post-details";
 export const DefaultPostCacheKey = "draft-post";
 export const TimelineCacheKey = "timeline";
 export const NotificationCacheKey = "notification";
 export const NotificationTextCacheKey = "notification-text";
+export const MenuBarNotificationCacheKey = "menu-bar-notification";
 
 export const BlueskyUrl = "https://staging.bsky.app";
 export const BlueskyProfileUrlBase = `${BlueskyUrl}/profile`;
+export const BlueskySearchUrlBase = `https://search.bsky.social/search/posts?q=`;
 export const MenuBarIconUrl = `extension-icon.png`;
 
 export const BlueskyFeedType = "app.bsky.feed.post";
@@ -19,8 +21,30 @@ export const BlueskyRepostType = "app.bsky.feed.defs#reasonRepost";
 
 export const ErrorInvalidHandle = "Unable to resolve handle: ";
 
+export const PrivacyNavigationTitle = "Privacy and Safety";
+export const PrivacySectionTitle = "Control Who Can Reach You";
+export const ViewBlockList = "Blocked Accounts";
+export const ViewMuteList = "Muted Accounts";
+export const ViewList = "View List";
+export const UnblockAccount = "Unblock Account";
+export const UnblockAccountSuccess = (handle: string) => `${handle} has been unblocked.`;
+export const UnblockAccountConfirm = (handle: string) => `Are you sure you want to unblock ${handle}?`;
+export const BlockAccountConfirm = (handle: string) => `Are you sure you want to block ${handle}?`;
+
+export const BlockListDetails =
+  "Blocked accounts cannot reply in your threads, mention you, or otherwise interact with you.\n\nYou will not see their content and they will be prevented from seeing yours.";
+export const MuteListDetails = "Muted accounts have their posts removed from your feed and from your notifications.";
+export const ContactBlueskyTitle = "Report to Bluesky";
+export const EmailBlueskySupport = "Email Bluesky Support";
+export const EmailBlueskyDetails = "Send an email to support@bsky.app.";
+export const SendEmailAction = "Send Email";
+
+export const MentionBlueskySupport = "Post to Bluesky Support";
+export const MentionBlueskyDetails = "Post to @support.bsky.team with your issues.";
+
 export const ViewTimelineNavigationTitle = "Timeline";
 export const ViewTimelineSearchBarPlaceholder = "Search timeline...";
+export const ShowingSearchResults = "Search Results";
 export const EmptySearchText = "Enter your search query.";
 
 export const ViewRecentPostsNavigationTitle = "Recent Posts";
@@ -30,9 +54,9 @@ export const UpdatingMessage = "Updating...";
 export const NotificationInMenuBarHUD = "Showing Notification Count in Menu Bar";
 export const ViewNotificationsNavigationTitle = "Notifications";
 export const ViewNotificationsSearchBarPlaceholder = "Search notifications...";
-export const MarkNotificationsAsRead = "Mark All Notifications As Read";
+export const MarkNotificationsAsRead = "Mark All Notifications as Read";
 export const NotificationsReadToast = "All Notifications have been marked as read.";
-export const ViewInBrowser = "View In Browser";
+export const ViewInBrowser = "View in Browser";
 export const LoadingNotificationContent = "Loading Notification Content.";
 export const ViewingNotification = "Viewing Notification Content.";
 export const ErrorLoadingNotification = "Error: Could not load notification content.";
@@ -54,8 +78,9 @@ export const NewPostTextAreaTitle = "New Post";
 
 export const SearchTitle = "Search";
 export const SearchPeopleSearchBarPlaceholder = "Search People and entities...";
-export const OpenUserProfile = "Open User Profile";
-export const OpenUserLikes = "Open Liked Posts from User";
+export const FilterAccounts = "Filter accounts";
+export const OpenProfile = "Open Profile";
+export const OpenAccountLikes = "Open Liked Posts from Account";
 export const Follow = "Follow";
 export const FollowToastMessage = "You are now following";
 export const Unfollow = "Unfollow";
@@ -64,23 +89,27 @@ export const Mute = "Mute";
 export const MuteToastMessage = "You have muted";
 export const Unmute = "Unmute";
 export const UnmuteToastMessage = "You have unmuted";
-export const ViewAsList = "View As List";
-export const ViewAsGrid = "View As Grid";
+export const Block = "Block";
+export const Unblock = "Unblock";
+export const BlockToastMessage = "You have blocked";
+export const ViewAsList = "View as List";
+export const ViewAsGrid = "View as Grid";
 
-export const SwitchToHomeAction = "Switch to home view";
+export const SwitchToHomeAction = "Switch to Home View";
 
 export const LikePost = "Like";
 export const UnlikePost = "Unlike";
 export const Repost = "Repost";
 export const ReplyPost = "Reply to Post";
-export const InReplyToTag = "In reply To";
+export const InReplyToTag = "In Reply To";
 export const QuotedByTag = "Quoted By";
 export const QuotePost = "Quote Post";
 export const RepliesTooltip = "Replies";
 export const RepostsTooltip = "Reposts";
+export const LikesTooltip = "Likes";
 export const RepostedByTag = "Reposted by";
-export const OpenPostInBrowser = "Open Post In browser";
-export const OpenProfileInBrowser = "Open Profile In browser";
+export const OpenPostInBrowser = "Open Post in Browser";
+export const OpenProfileInBrowser = "Open Profile in Browser";
 export const HideDetails = "Hide Details";
 export const ShowDetails = "Show Details";
 export const LoadMore = "Load More...";
@@ -139,21 +168,22 @@ _by Dharam Kapila_
 #### 🔒 Privacy
 - No user data is collected. No analytics are collected.
 - Your credentials are stored securely in Raycast's encrypted database.
-- Recent posts/notifications are cached. Signing out or uninstalling the extension will clear the cache.
+- Recent posts and notifications are cached. Uninstalling the extension will clear the cache.
 ---
 
 Thank you for using this extension. And to the special work being done by [Bluesky](https://blueskyweb.xyz/) and [Raycast](https://www.raycast.com) (*´∀人)
 `;
 
 export const ErrorMessageBody = `
-Please try updating your account details in the extension preferences. 
-If the issue persists, create an issue on Github, or reach out to me on Bluesky [@dharam.bsky.social](${BlueskyProfileUrlBase}/dharam.bsky.social).
+- Please check if the username and password is correct.
+- Please ensure that you are using an [App Password](https://staging.bsky.app/settings/app-passwords) and not your account password.
+- If the issue persists, reach out to me on Bluesky [@dharam.bsky.social](${BlueskyProfileUrlBase}/dharam.bsky.social).
 `;
 
 export const OnboardingTitleMd = `
 ## Welcome to Bluesky for Raycast (beta)
 
-Here are a 3 things to get you started.
+Here are 3 things to get you started.
 
 Press enter to continue...
 `;
@@ -165,6 +195,6 @@ export const OnboardingImageMd = `
 export const OnboardingTips = [
   "Press `⌘ + K` to like, reply or repost.",
   "Press `⌘ + P` to switch to another view.",
-  "Press `⌘ + W` to close Bluesky for Raycast.",
+  "Run the `Menu Bar Notifications` Raycast command to add Bluesky on your Mac menubar.",
   "Start using Bluesky for Raycast 🦋",
 ];

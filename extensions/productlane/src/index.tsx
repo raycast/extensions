@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Clipboard, getPreferenceValues, Toast, open } from "@raycast/api";
 import { authorize } from "./oauth";
 import View from "./view";
-import { submitInsight } from "./productlane.api";
+import { CreateInsightInput, submitInsight } from "./productlane.api";
 import { useForm, FormValidation } from "@raycast/utils";
 
 type Preferences = {
@@ -26,8 +26,8 @@ function SubmitInsight() {
         title: "Submitting insight",
       });
 
-      const insight = await submitInsight(values);
-      const feedbackUrl = `https://productlane.io/feedback/${insight.result.id}`;
+      const insight = await submitInsight(values as CreateInsightInput);
+      const feedbackUrl = `https://productlane.com/feedback/${insight.id}`;
       Clipboard.copy(feedbackUrl);
 
       reset({ text: "", email: preferences.email, painLevel: "UNKNOWN", state: "NEW" });

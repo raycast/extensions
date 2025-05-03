@@ -73,7 +73,7 @@ export async function playWordAudio(word: string, fromLanguage: string, useSayCo
 }
 
 /**
-  Use shell say to play text sound, if text is too long that can't be stoped, so truncate it.
+  Use shell say to play text sound, if text is too long that can't be stopped, so truncate it.
   */
 export function sayTruncateCommand(text: string, youdaoLanguageId: string) {
   const truncateText = trimTextLength(text, 40);

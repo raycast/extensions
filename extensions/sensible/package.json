@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sensible",
+  "title": "Sensible - Document Data Extraction",
+  "description": "Extract structured data from documents using Sensible.so",
+  "icon": "command-icon.png",
+  "author": "michaelschultz",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Run Extraction",
+      "subtitle": "Sensible",
+      "description": "Extract structured data from documents using Sensible.so",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sensible_api_key",
+      "title": "Sensible API Key",
+      "description": "Located at app.sensible.so/account",
+      "type": "password",
+      "default": "",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.61.2",
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.2.9",
+    "sensible-api": "^0.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.15",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

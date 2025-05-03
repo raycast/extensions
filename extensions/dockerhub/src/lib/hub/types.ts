@@ -1,3 +1,5 @@
+import { Icon } from "@raycast/api";
+
 export interface Repository {
   name: string;
   namespace: string;
@@ -95,7 +97,28 @@ export interface ListTagsResponse {
   results: Tag[];
 }
 
-export interface Summary {
+interface RatePlanRepository {
+  name: string;
+  namespace: string;
+  description: string;
+  type: SearchTypeEnum;
+  pull_count: string;
+  is_automated: boolean;
+  is_official: boolean;
+  is_trusted: boolean;
+  last_pushed_at: string;
+  last_pulled_at: string;
+  archived: boolean;
+}
+
+interface RatePlan {
+  id: string;
+  repositories: RatePlanRepository[];
+  operating_systems: OperatingSystem[];
+  architectures: Architecture[];
+}
+
+export interface ImageSearchResult {
   id: string;
   name: string;
   slug: string;
@@ -105,17 +128,11 @@ export interface Summary {
   updated_at: string;
   short_description: string;
   source: SourceType;
-  popularity: number;
-  categories: unknown;
-  operating_systems: OperatingSystem[];
-  architectures: Architecture[];
+  categories: Record<string, string>[];
+  rate_plans: RatePlan[];
   logo_url: LogoUrl;
-  certification_status: string;
   star_count: number;
-  pull_count: string;
-  filter_type: FilterType;
   url?: string;
-  from?: string;
 }
 
 export interface Publisher {
@@ -147,6 +164,7 @@ export enum SourceType {
   STORE = "store",
   VERIFIED_PUBLISHER = "verified_publisher",
   COMMUNITY = "community",
+  OPEN_SOURCE = "open_source",
 }
 
 export enum FilterType {
@@ -157,12 +175,8 @@ export enum FilterType {
 }
 
 export interface SearchResponse {
-  count: number;
-  summaries: Summary[] | null;
-  page: number;
-  page_size: number;
-  next: string;
-  previous: string;
+  total: number;
+  results: ImageSearchResult[] | null;
 }
 
 export enum FilterTypes {
@@ -185,8 +199,8 @@ export enum ImageFilterEnum {
 export interface SearchParams {
   image_filter?: string;
   operating_system?: string;
-  page_size: number;
-  q?: string;
+  size: number;
+  query?: string;
   type?: SearchTypeEnum;
 }
 
@@ -240,4 +254,10 @@ export interface ListAccessTokensResponse {
   next: string | null;
   previous: string | null;
   results: AccessToken[];
+}
+
+export interface ItemAccessory {
+  icon: Icon;
+  text?: string;
+  tooltip?: string;
 }

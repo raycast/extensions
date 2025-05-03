@@ -2,7 +2,7 @@ import { LocalStorage, OAuth, getPreferenceValues } from "@raycast/api";
 import fetch, { type RequestInit } from "node-fetch";
 import { client, doAuth } from "@/oauth";
 
-const { accessKey } = getPreferenceValues<UnsplashPreferences>();
+const { accessKey } = getPreferenceValues<Preferences>();
 
 export const apiRequest = async <T>(path: string, options?: RequestInit) => {
   const tokens = await client.getTokens();
@@ -32,8 +32,8 @@ export const apiRequest = async <T>(path: string, options?: RequestInit) => {
 async function refreshTokens(refreshToken: string) {
   const params = new URLSearchParams();
 
-  params.append("client_id", accessKey);
-  params.append("refresh_token", refreshToken);
+  params.append("client_id", accessKey.trim());
+  params.append("refresh_token", refreshToken.trim());
   params.append("grant_type", "refresh_token");
 
   const response = await fetch("https://unsplash.com/oauth/token", { method: "POST", body: params });

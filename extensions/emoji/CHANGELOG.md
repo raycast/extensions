@@ -1,5 +1,13 @@
 # Emoji Changelog
 
+## [Update] - 2024-06-25
+
+- Updates the default Unicode version to Unicode 15.1.
+
+## [Update] - 2023-05-19
+
+- Updates the default Unicode version to Unicode 15.0.
+
 ## [Fixes] - 2022-12-20
 
 Vendor [Generate Emoji List](https://github.com/leodr/generate-emoji-list) and emoji data to not rely on unicode.org, as [it is currently down](https://home.unicode.org/technical-alert-unicode-technical-website-down/).

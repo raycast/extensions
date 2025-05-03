@@ -2,12 +2,12 @@ import { Action, ActionPanel, Clipboard, List, Toast, showToast } from '@raycast
 import type { Secret } from '@scaleway/sdk'
 import { Errors } from '@scaleway/sdk'
 import { toByteArray } from 'base64-js'
-import { useAPI } from 'src/providers'
+import { useAPI } from '../../../helpers/useAPI'
 import { useSecretVersionsQuery } from '../queries'
 import { getVersionStatusIcon } from '../status'
 
 type SecretVersionsProps = {
-  secret: Secret.v1alpha1.Secret
+  secret: Secret.v1beta1.Secret
 }
 
 export const SecretVersions = ({ secret }: SecretVersionsProps) => {
@@ -23,7 +23,7 @@ export const SecretVersions = ({ secret }: SecretVersionsProps) => {
   const { secretManager } = useAPI()
   const isListLoading = isLoading && !versions
 
-  const copyVersionValue = async (version: Secret.v1alpha1.SecretVersion) => {
+  const copyVersionValue = async (version: Secret.v1beta1.SecretVersion) => {
     try {
       const value = await secretManager.accessSecretVersion({
         revision: String(version.revision),

@@ -44,6 +44,13 @@ export interface Remote<T> {
   fetch?: Promise<T[]>;
 }
 
+// Wait around until user has had chance to click the Toast action.
+// Note this only works for "no view" commands (actions still break when popping a view based command).
+// See: https://raycastapp.slack.com/archives/C01E6LWGXJ8/p1642676284027700
+export async function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // Top-level object keys which should be parsed from the raw JSON objects.
 const valid_keys = [
   "name",
@@ -94,7 +101,7 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
 
   async function fetchURL(): Promise<void> {
     const response = await fetch(remote.url);
-    if (!response.ok) {
+    if (!response.ok || !response.body) {
       throw new Error(`Invalid response ${response.statusText}`);
     }
     await streamPipeline(response.body, fs.createWriteStream(remote.cachePath));
@@ -130,7 +137,9 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
         streamArray(),
       ]);
       pipeline.on("data", (data) => {
-        value?.push(data.value);
+        if (data && typeof data === "object" && "value" in data) {
+          value.push(data.value);
+        }
       });
       pipeline.on("end", () => {
         resolve(value);

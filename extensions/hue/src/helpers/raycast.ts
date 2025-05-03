@@ -1,19 +1,30 @@
 import { CssColor, HasId, Id } from "../lib/types";
 import React from "react";
 import { getPreferenceValues, Icon, Image } from "@raycast/api";
+import { DEFAULT_TRANSITION_TIME_MS } from "./constants";
 
 export function getIconForColor(color: CssColor): Image {
   return { source: Icon.CircleFilled, tintColor: { light: color.value, dark: color.value, adjustContrast: false } };
 }
 
+// This code can be simplified if/once the default value is read when a Raycast preference field is cleared. As of
+//   writing this, clearing a preference field counts as setting it with an empty string, which results in NaN when
+//   trying to parse as an integer.
 export function getTransitionTimeInMs(): number {
-  return Math.round(parseInt(getPreferenceValues().transitionTime));
+  const { transitionTime: transitionTimePreference } = getPreferenceValues<Preferences>();
+  const transitionTime = parseInt(transitionTimePreference);
+
+  if (isNaN(transitionTime)) {
+    return DEFAULT_TRANSITION_TIME_MS;
+  }
+
+  return Math.round(transitionTime);
 }
 
 export function optimisticUpdate<T extends HasId>(
   stateItem: T,
   changes: Partial<T>,
-  setState: React.Dispatch<React.SetStateAction<T[]>>
+  setState: React.Dispatch<React.SetStateAction<T[]>>,
 ): () => void {
   let undoState: T[];
 
@@ -29,7 +40,7 @@ export function optimisticUpdate<T extends HasId>(
 
 export function optimisticUpdates<T extends HasId>(
   changes: Map<Id, Partial<T>>,
-  setState: React.Dispatch<React.SetStateAction<T[]>>
+  setState: React.Dispatch<React.SetStateAction<T[]>>,
 ): () => void {
   let undoState: T[];
 

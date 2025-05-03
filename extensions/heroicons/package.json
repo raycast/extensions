@@ -4,7 +4,12 @@
   "title": "Heroicons",
   "description": "Search and preview Heroicons",
   "icon": "command-icon.png",
-  "author": "haack",
+  "author": "johndoe123789",
+  "contributors": [
+    "mil3na",
+    "j3lte",
+    "Cybrarist"
+  ],
   "categories": [
     "Developer Tools",
     "Documentation",
@@ -42,12 +47,28 @@
           "value": "pasteSVG"
         },
         {
+          "title": "Paste React import",
+          "value": "pasteReactImport"
+        },
+        {
+          "title": "Paste Vue import",
+          "value": "pasteVueImport"
+        },
+        {
           "title": "Copy JSX",
           "value": "copyJSX"
         },
         {
           "title": "Copy SVG",
           "value": "copySVG"
+        },
+        {
+          "title": "Copy React import",
+          "value": "copyReactImport"
+        },
+        {
+          "title": "Copy Vue import",
+          "value": "copyVueImport"
         },
         {
           "title": "Copy Name",
@@ -72,6 +93,14 @@
           "value": "pasteJSX"
         },
         {
+          "title": "Paste React import",
+          "value": "pasteReactImport"
+        },
+        {
+          "title": "Paste Vue import",
+          "value": "pasteVueImport"
+        },
+        {
           "title": "Copy JSX",
           "value": "copyJSX"
         },
@@ -80,27 +109,41 @@
           "value": "copySVG"
         },
         {
+          "title": "Copy React import",
+          "value": "copyReactImport"
+        },
+        {
+          "title": "Copy Vue import",
+          "value": "copyVueImport"
+        },
+        {
           "title": "Copy Name",
           "value": "copyName"
         }
       ]
+    },
+    {
+      "name": "importTemplate",
+      "description": "Set the template for import declaration",
+      "type": "textfield",
+      "required": true,
+      "title": "Import declaration template",
+      "default": "import { %icon_name% } from '@heroicons/%library%/%icon_path%'"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
-    "got": "^12.3.1",
+    "@raycast/api": "^1.70.3",
+    "node-fetch": "^3.3.2",
     "title": "^3.5.3"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/title": "^3.4.1",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.12.6",
+    "@types/react": "^18.2.75",
+    "@types/title": "^3.4.3",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.4"
   },
   "scripts": {
     "build": "ray build -e dist",

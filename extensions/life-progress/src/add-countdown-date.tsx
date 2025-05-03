@@ -85,7 +85,7 @@ export default function AddCountdownDate(props: {
               });
               await LocalStorage.setItem(
                 LocalStorageKey.COUNTDOWN_DATE_KEY,
-                JSON.stringify([...futureDate, ...lastDate])
+                JSON.stringify([...futureDate, ...lastDate]),
               );
               setRefresh(now.getTime());
               pop();

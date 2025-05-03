@@ -1,4 +1,3 @@
-export const API_RATE_LIMIT = 5;
 export const API_URL = "https://hidemail.app/api/v1";
 
 export const getHeaders = (token: string) => {
@@ -7,5 +6,6 @@ export const getHeaders = (token: string) => {
     "Content-Type": "application/json",
     Accept: "application/json",
     "X-Custom-Agent": "Raycast",
+    "X-Custom-Agent-Version": "1.0.1",
   };
 };

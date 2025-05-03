@@ -2,6 +2,7 @@ import {
   Application,
   environment,
   getDefaultApplication,
+  getPreferenceValues,
   showToast,
   Toast,
 } from '@raycast/api';
@@ -16,7 +17,6 @@ const execp = promisify(exec);
 import parseGitConfig = require('parse-git-config');
 import parseGithubURL = require('parse-github-url');
 
-import { getPreferences } from './helpers';
 import { Directory, Remote } from './interfaces';
 
 const CACHE_FILE = path.join(
@@ -239,7 +239,7 @@ export function useDiskCache(query: string | undefined): {
       setError(undefined);
 
       try {
-        const preferences = getPreferences();
+        const preferences = getPreferenceValues<Preferences.FindLocalSites>();
         if (!preferences.scanPath) {
           setError('Path to scan has not been defined in settings');
           return;

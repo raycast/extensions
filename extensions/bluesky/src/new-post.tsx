@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, closeMainWindow, showHUD, useNavigation } from "@raycast/api";
 import {
   DefaultPostCacheKey,
   NewPostTextAreaTitle,
@@ -8,7 +8,7 @@ import {
   PostYourReply as ReplyingTo,
   ShareYourNext,
 } from "./utils/constants";
-import { NewPost, PostReference } from "./types/types";
+import { type NewPost, PostReference } from "./types/types";
 import { buildTitle, showSuccessToast } from "./utils/common";
 
 import Error from "./components/error/Error";
@@ -19,23 +19,34 @@ import { createPost } from "./libs/atp";
 import { inspiringWords } from "./config/inspiringWords";
 import { useCachedState } from "@raycast/utils";
 import useStartATSession from "./hooks/useStartATSession";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface NewPostProps {
   previousViewTitle?: string;
+  initialPostText?: string;
   postReference?: PostReference;
 }
 
-export default function NewPost({ postReference, previousViewTitle = "" }: NewPostProps) {
-  const randomInspiringWord = inspiringWords[Math.floor(Math.random() * inspiringWords.length)];
+const getRandomInspiringWord = () => {
+  return inspiringWords[Math.floor(Math.random() * inspiringWords.length)];
+};
+
+export default function NewPost({ postReference, previousViewTitle = "", initialPostText }: NewPostProps) {
+  const randomInspiringWord = getRandomInspiringWord();
   const [postText, setPostText] = useCachedState<string>(DefaultPostCacheKey, "");
-  const [randomWord] = useState(randomInspiringWord);
   const { pop } = useNavigation();
-  const [nameError, setNameError] = useState<string | undefined>();
+  const [nameError, setNameError] = useState<string | null>();
   const { push } = useNavigation();
   const [, sessionStartFailed, errorMessage] = useStartATSession(() => push(<Onboard />));
+  let placeHolderText = `${ShareYourNext} ${randomInspiringWord}`;
 
-  let placeHolderText = `${ShareYourNext} ${randomWord}`;
+  useEffect(() => {
+    if (initialPostText) {
+      setTimeout(() => {
+        setPostText(initialPostText);
+      }, 100);
+    }
+  }, [initialPostText]);
 
   if (postReference && postReference.reason === "reply") {
     placeHolderText = `${ReplyingTo} ${postReference.replyToAuthor}: ${postReference.replyToText}`;
@@ -48,13 +59,17 @@ export default function NewPost({ postReference, previousViewTitle = "" }: NewPo
   const onSubmit = async (values: NewPost) => {
     if (values.postText && values.postText.length > 0) {
       await createPost(values.postText, postReference);
-      showSuccessToast(PostSuccessToastMessage);
+      setPostText("");
 
       if (postReference) {
+        showSuccessToast(PostSuccessToastMessage);
         pop();
+
+        return;
       }
 
-      setPostText("");
+      showHUD(PostSuccessToastMessage);
+      await closeMainWindow({ clearRootSearch: true });
     }
   };
 
@@ -62,7 +77,7 @@ export default function NewPost({ postReference, previousViewTitle = "" }: NewPo
     setPostText(text);
 
     if (text.length < 300) {
-      setNameError(undefined);
+      setNameError(null);
     } else {
       setNameError(`${ExtensionConfig.maxPostCharacterSize} characters exceeded`);
     }
@@ -86,7 +101,7 @@ export default function NewPost({ postReference, previousViewTitle = "" }: NewPo
       <Form.TextArea
         placeholder={placeHolderText}
         id="postText"
-        error={nameError}
+        error={nameError ?? undefined}
         title={NewPostTextAreaTitle}
         value={postText}
         onBlur={(event) => {

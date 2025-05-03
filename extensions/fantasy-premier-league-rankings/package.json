@@ -5,6 +5,9 @@
   "description": "See where you rank amongst in your league rivals in Fantasy Premier League within Raycast.",
   "icon": "icon.png",
   "author": "hwb",
+  "contributors": [
+    "niall-maloney"
+  ],
   "categories": [
     "Fun"
   ],
@@ -29,15 +32,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2",
+    "@raycast/api": "^1.68.0",
     "axios": "^0.27.2"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.48.1",
-    "@typescript-eslint/parser": "^5.48.1",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.6.0",
     "prettier": "^2.8.2",
+    "react": "^18.2.0",
     "typescript": "^4.9.4"
   },
   "scripts": {

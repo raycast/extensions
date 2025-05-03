@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bark",
+  "title": "Bark",
+  "description": "Send messages to Bark via Raycast",
+  "icon": "extension-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Applications",
+    "Communication",
+    "Productivity"
+  ],
+  "keywords": [
+    "bark",
+    "message",
+    "notification",
+    "send",
+    "send message",
+    "send notification"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "send-message-to-bark",
+      "title": "Send Message with Details",
+      "subtitle": "Bark",
+      "description": "Send messages with details to Bark via Raycast",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autoGetMessage",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "description": "Automatically get the selected text as a message.",
+          "label": "Auto Get Message"
+        },
+        {
+          "name": "autoCloseWindow",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "description": "Automatically close the main window after sending a message.",
+          "label": "Auto Close Window"
+        }
+      ]
+    },
+    {
+      "name": "quick-send-message-to-bark",
+      "title": "Send Message",
+      "subtitle": "Bark",
+      "description": "Quickly send the text to Bark via Raycast",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "message",
+          "type": "text",
+          "required": false,
+          "placeholder": "Message"
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "required": false,
+          "placeholder": "Title"
+        },
+        {
+          "name": "subTitle",
+          "type": "text",
+          "required": false,
+          "placeholder": "SubTitle"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "autoGetMessage",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "description": "Automatically get the selected text as a message.",
+          "label": "Auto Get Message"
+        },
+        {
+          "name": "autoCloseWindow",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "description": "Automatically close the main window after sending a message.",
+          "label": "Auto Close Window"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "deviceToken",
+      "type": "password",
+      "required": true,
+      "title": "Device Token",
+      "description": "Bark device token."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.14.6",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

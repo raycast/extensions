@@ -1,10 +1,8 @@
 import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import {
-  BlueskyImageEmbedType,
   ErrorLoadingNotification,
   LoadingNotificationContent,
   MarkNotificationsAsRead,
-  MarkNotificationsAsReadAlert,
   NewNotification,
   NewNotifications,
   NoNewNotifications,
@@ -18,7 +16,7 @@ import {
   ViewNotificationsSearchBarPlaceholder,
   ViewingNotification,
 } from "./utils/constants";
-import { buildTitle, showLoadingToast, showSuccessToast } from "./utils/common";
+import { buildTitle, getAccountName, showLoadingToast, showSuccessToast } from "./utils/common";
 import { getFormattedDateTime, getRelativeDateTime } from "./utils/date";
 import { getNotifications, getPostThread, getUnreadNotificationCount, markNotificationsAsRead } from "./libs/atp";
 import { getPostMarkdownView, parseNotifications } from "./utils/parser";
@@ -31,11 +29,12 @@ import HomeAction from "./components/actions/HomeAction";
 import NavigationDropdown from "./components/nav/NavigationDropdown";
 import { Notification } from "./types/types";
 import Onboard from "./components/onboarding/Onboard";
-import { PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
+import { isThreadViewPost } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { ViewImage } from "@atproto/api/dist/client/types/app/bsky/embed/images";
 import { showDangerToast } from "./utils/common";
 import { useCachedState } from "@raycast/utils";
 import useStartATSession from "./hooks/useStartATSession";
+import { AppBskyEmbedImages } from "@atproto/api";
 
 interface ViewNotificationProps {
   previousViewTitle?: string;
@@ -58,6 +57,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
       const data = await getNotifications(notificationCursor, ExtensionConfig.notificationRequestLimit);
 
       if (!data) {
+        setNotificationsLoaded(false);
         return;
       }
 
@@ -77,7 +77,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
         return [...state, ...newNotifications];
       });
     },
-    [cursor]
+    [cursor],
   );
 
   useEffect(() => {
@@ -85,7 +85,15 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
       if (sessionStarted) {
         fetchNotifications(true);
 
-        const notificationCount = await getUnreadNotificationCount();
+        let notificationCount = 0;
+        try {
+          notificationCount = await getUnreadNotificationCount();
+        } catch (error) {
+          // This try...catch is to account for following case:
+          // When user runs extension and session is expiring or expired, ERROR on next line is thrown
+          // `initialRes.body?.cancel is not a function`
+          // We swallow the exception as it is not helpful to the user
+        }
         let notificationMessage = "";
         if (notificationCount > 1) {
           notificationMessage = `${notificationCount} ${NewNotifications}`;
@@ -139,15 +147,15 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
 
       try {
         const responseData = await getPostThread(uri);
-        if (!responseData || !responseData.thread || !responseData.thread.post) {
+        if (!responseData || !responseData.thread || !isThreadViewPost(responseData.thread)) {
           return;
         }
 
         let imageEmbeds: string[] = [];
-        const post = responseData.thread.post as PostView;
+        const post = responseData.thread.post;
 
-        if (post.embed?.$type === BlueskyImageEmbedType) {
-          imageEmbeds = (post.embed.images as ViewImage[]).map((item: ViewImage) => item.thumb);
+        if (AppBskyEmbedImages.isView(post.embed)) {
+          imageEmbeds = post.embed.images.map((item: ViewImage) => item.thumb);
         }
 
         setDetailsText(await getPostMarkdownView(post, imageEmbeds));
@@ -166,7 +174,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
         showNavDropdown={false}
         previousViewTitle={buildTitle(previousViewTitle, ViewNotificationsNavigationTitle)}
         authorHandle={notification.author.handle}
-      />
+      />,
     );
   };
 
@@ -175,10 +183,10 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
       <List.Item
         key={notification.id}
         id={notification.id}
-        icon={{ source: notification.author.avatarUrl }}
+        icon={{ source: notification.author.avatarUrl ? notification.author.avatarUrl : Icon.ChessPiece }}
         detail={<List.Item.Detail markdown={detailsText} />}
         accessories={getNotificationAccessory(notification)}
-        title={`${notification.author.displayName} ${notification.text}`}
+        title={`${getAccountName(notification.author)} ${notification.text}`}
         actions={
           <ActionPanel>
             <Action

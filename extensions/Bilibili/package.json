@@ -15,12 +15,16 @@
       "name": "dynamicFeed",
       "title": "Show Dynamic Feed",
       "description": "Show all dynamic feed",
-      "mode": "view"
-    },
-    {
-      "name": "popularVideos",
-      "title": "Popular Videos",
-      "description": "Show popular videos",
+      "preferences": [
+        {
+          "label": "Just show the dynamic videos",
+          "name": "justShowVideos",
+          "required": false,
+          "description": "Just show the dynamic videos",
+          "type": "checkbox",
+          "default": false
+        }
+      ],
       "mode": "view"
     },
     {
@@ -30,10 +34,34 @@
       "mode": "view"
     },
     {
-      "name": "popularSeries",
-      "title": "Weekly Popular Series",
-      "description": "Show weekly popular series",
+      "name": "searchVideos",
+      "title": "Search Videos",
+      "description": "Search videos",
       "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "description": "Delivering the news for you from your dynamic feed",
+      "preferences": [
+        {
+          "label": "Just notify the new videos",
+          "name": "justNotifyVideos",
+          "required": false,
+          "description": "Just notify the new videos",
+          "type": "checkbox",
+          "default": false
+        },
+        {
+          "title": "Path of terminal-notifier",
+          "name": "terminalNotifierPath",
+          "required": false,
+          "description": "If you have already installed terminal-notifier, you can find its path by running `which terminal-notifier` in the terminal.",
+          "type": "textfield"
+        }
+      ],
+      "mode": "no-view",
+      "interval": "1m"
     },
     {
       "name": "login",
@@ -43,7 +71,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3"
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.10.1",
+    "crypto-js": "^4.2.0",
+    "run-applescript": "^6.1.0"
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.0",
@@ -62,5 +93,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

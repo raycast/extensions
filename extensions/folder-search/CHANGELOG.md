@@ -1,5 +1,30 @@
 # Folder Search Changelog
 
+## [Fixes] - 2025-04-12
+- **fixed** Search results flickering when using fallback command by adding 150ms debounce to search updates
+- **improved** Search text handling by removing fixDoubleConcat workaround and relying on debouncing to handle rapid text changes
+
+## [New Features] - 2025-03-13
+
+- **added** 'Move' action for selected finder items
+
+## [New Features] - 2024-08-20
+
+- **added** Pins can now be ordered by `Move Pin Up` and `Move Pin Down` actions
+
+## [Command rename] - 2023-06-16
+- attempt #2 at fixing the fall back command with duplicated query.
+- added Throttle to search to improve experience
+
+## [Command rename] - 2023-06-13
+Fixing Three Issues / Two bugs
+- Extension only worked in English. Fixed up code to be language agnostic
+- Sometimes the fallback invocation resulted in the search query being duplicated so "Query" would appear "QueryQuery". This is not consistent, but I added some code to deal with this issue.
+
+## [Command rename] - 2023-05-17
+
+- Rename the command to conform to the standards
+
 ## [New Features] - 2022-12-15
 
 - **added** Can take selected Finder item(s) and allow you to move them to a selected folder via a new Action menu entry

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import fetch from "node-fetch";
+import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
-import { DriverStanding } from "../types";
+import { DriverStanding, DriverStandingResponse } from "../types";
+import { BASE_API_URL } from "../constants";
 
 type State = {
   driverStandings: DriverStanding[];
@@ -22,17 +23,20 @@ const useDriverStandings = (season: string | null): [DriverStanding[], boolean] 
       cancelRef.current = new AbortController();
       setState((previous) => ({ ...previous, isLoading: true }));
       try {
-        const res = await fetch(`https://ergast.com/api/f1/${season}/driverStandings.json`, {
+        const res = await fetch(`${BASE_API_URL}/f1/${season}/driverStandings.json`, {
           method: "get",
           signal: cancelRef.current.signal,
         });
-        const data = (await res.json()) as any;
+        const data = (await res.json()) as DriverStandingResponse;
         setState((previous) => ({
           ...previous,
           isLoading: false,
-          driverStandings: data.MRData.StandingsTable.StandingsLists[0].DriverStandings,
+          driverStandings: data.MRData.StandingsTable.StandingsLists[0]?.DriverStandings ?? [],
         }));
       } catch (error) {
+        if (error instanceof AbortError) {
+          return;
+        }
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",

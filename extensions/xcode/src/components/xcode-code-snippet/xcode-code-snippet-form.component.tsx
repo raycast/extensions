@@ -20,7 +20,7 @@ export function XcodeCodeSnippetForm(props: {
   draftValues?: XcodeCodeSnippetFormValues;
   codeSnippet?: XcodeCodeSnippet;
   onSubmit?: () => void;
-}): JSX.Element {
+}) {
   const navigation = useNavigation();
   const [title, setTitle] = useState(
     props.draftValues?.title ?? props.codeSnippet?.IDECodeSnippetTitle ?? "My Code Snippet"

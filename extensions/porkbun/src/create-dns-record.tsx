@@ -1,11 +1,11 @@
-import { ActionPanel, Action, Icon, Form, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
-import { DNSRecordType } from "./utils/types";
-import { createRecord } from "./utils/api";
-import { DNS_RECORD_TYPES } from "./utils/constants";
-import { FormValidation, useForm } from "@raycast/utils";
+import { ActionPanel, Action, Icon, Form, showToast, Toast, LaunchProps } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { DNSRecordType, Domain } from "./utils/types";
+import { createRecord, retrieveAllDomains } from "./utils/api";
+import { API_DOCS_URL, DNS_RECORD_TYPES, MINIMUM_TTL } from "./utils/constants";
+import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
 
-export default function CreateDNSRecord() {
+export default function CreateDNSRecord(props: LaunchProps<{ launchContext: { domain: string } }>) {
   interface FormValues {
     domain: string;
     name: string;
@@ -16,6 +16,24 @@ export default function CreateDNSRecord() {
   }
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const [domains, setDomains] = useCachedState<Domain[]>("domains");
+  async function getDomainsFromApi() {
+    setIsLoading(true);
+    const response = await retrieveAllDomains();
+    if (response.status === "SUCCESS") {
+      setDomains(response.domains);
+      showToast({
+        style: Toast.Style.Success,
+        title: "SUCCESS",
+        message: `Fetched ${response.domains.length} domains`,
+      });
+    }
+    setIsLoading(false);
+  }
+  useEffect(() => {
+    if (!domains) getDomainsFromApi();
+  }, []);
 
   const navigationTitle = "Create DNS Record";
   const { handleSubmit, itemProps } = useForm<FormValues>({
@@ -46,7 +64,7 @@ export default function CreateDNSRecord() {
       ttl: (value) => {
         if (value) {
           if (Number(value)) {
-            if (Number(value) < 600) return "Minimum TTL is 600";
+            if (Number(value) < MINIMUM_TTL) return `Minimum TTL is ${MINIMUM_TTL}`;
           } else {
             return "TTL must be a number";
           }
@@ -56,15 +74,15 @@ export default function CreateDNSRecord() {
       },
       prio: (value) => {
         if (value && DNS_RECORD_TYPES.some((record) => record.type === itemProps.type.value && record.hasPriority)) {
-          if (!Number(value)) {
+          if (!Number(value) && value !== "0") {
             return "The item must be a number";
           }
         }
       },
     },
     initialValues: {
-      domain: "",
-      ttl: "600",
+      domain: props.launchContext?.domain,
+      ttl: MINIMUM_TTL.toString(),
     },
   });
 
@@ -75,20 +93,31 @@ export default function CreateDNSRecord() {
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Check} title="Submit" onSubmit={handleSubmit} />
-          <Action.OpenInBrowser
-            icon={Icon.Globe}
-            title="Go to API Reference"
-            url="https://porkbun.com/api/json/v3/documentation#DNS%20Create%20Record"
-          />
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              icon={Icon.Globe}
+              title="Go to API Reference"
+              url={`${API_DOCS_URL}DNS%20Create%20Record`}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
-      <Form.TextField title="Domain" placeholder="Enter domain" {...itemProps.domain} />
+      <Form.Dropdown title="Domain" {...itemProps.domain}>
+        {domains?.map((item) => (
+          <Form.Dropdown.Item
+            key={item.domain}
+            title={item.domain}
+            value={item.domain}
+            icon={getFavicon(`https://${item.domain}`)}
+          />
+        ))}
+      </Form.Dropdown>
       <Form.Separator />
       <Form.Dropdown
         title="Type"
         info={`The type of record being created. Valid types are: ${DNS_RECORD_TYPES.map((record) => record.type).join(
-          ", "
+          ", ",
         )}`}
         {...itemProps.type}
       >

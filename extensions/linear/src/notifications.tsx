@@ -1,22 +1,19 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType, Keyboard } from "@raycast/api";
 import { format } from "date-fns";
 
+import { deleteNotification as linearDeleteNotification } from "./api/deleteNotification";
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
-import { deleteNotification as linearDeleteNotification } from "./api/deleteNotification";
-
+import IssueDetail from "./components/IssueDetail";
+import OpenInLinear from "./components/OpenInLinear";
+import View from "./components/View";
+import { getBotIcon } from "./helpers/bots";
+import { getErrorMessage } from "./helpers/errors";
+import { getNotificationIcon, getNotificationTitle, getNotificationURL } from "./helpers/notifications";
+import { getUserIcon } from "./helpers/users";
+import useMe from "./hooks/useMe";
 import useNotifications from "./hooks/useNotifications";
 import usePriorities from "./hooks/usePriorities";
-import useMe from "./hooks/useMe";
-import useUsers from "./hooks/useUsers";
-
-import { getErrorMessage } from "./helpers/errors";
-import { getNotificationIcon, getNotificationTitle } from "./helpers/notifications";
-import { getUserIcon } from "./helpers/users";
-import { isLinearInstalled } from "./helpers/isLinearInstalled";
-
-import View from "./components/View";
-import IssueDetail from "./components/IssueDetail";
 
 function Notifications() {
   const {
@@ -30,7 +27,6 @@ function Notifications() {
 
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
-  const { users, isLoadingUsers } = useUsers();
 
   const inboxUrl = `https://linear.app/${urlKey}/inbox`;
 
@@ -59,7 +55,7 @@ function Notifications() {
           return {
             ...data,
             notifications: data?.notifications?.map((x) =>
-              x.id === notification.id ? { ...x, readAt: new Date() } : x
+              x.id === notification.id ? { ...x, readAt: new Date() } : x,
             ),
           };
         },
@@ -70,7 +66,7 @@ function Notifications() {
           return {
             ...data,
             notifications: data?.notifications?.map((x) =>
-              x.id === notification.id ? { ...x, readAt: notification.readAt } : x
+              x.id === notification.id ? { ...x, readAt: notification.readAt } : x,
             ),
           };
         },
@@ -100,7 +96,7 @@ function Notifications() {
           return {
             ...data,
             notifications: data?.notifications?.map((x) =>
-              x.id === notification.id ? { ...x, readAt: undefined } : x
+              x.id === notification.id ? { ...x, readAt: undefined } : x,
             ),
           };
         },
@@ -111,7 +107,7 @@ function Notifications() {
           return {
             ...data,
             notifications: data?.notifications?.map((x) =>
-              x.id === notification.id ? { ...x, readAt: notification.readAt } : x
+              x.id === notification.id ? { ...x, readAt: notification.readAt } : x,
             ),
           };
         },
@@ -165,7 +161,7 @@ function Notifications() {
   }
 
   return (
-    <List isLoading={isLoadingNotifications || isLoadingPriorities || isLoadingMe || isLoadingUsers}>
+    <List isLoading={isLoadingNotifications || isLoadingPriorities || isLoadingMe}>
       <List.EmptyView title="Inbox" description="You don't have any notifications." />
 
       {sections.map(({ title, notifications }) => {
@@ -177,16 +173,37 @@ function Notifications() {
             {notifications.map((notification) => {
               const createdAt = new Date(notification.createdAt);
 
+              const displayName = notification.actor
+                ? notification.actor.displayName
+                : notification.botActor
+                  ? notification.botActor.name
+                  : "Linear";
+
+              const keywords = [displayName || "Linear"];
+
+              if (notification.issue) {
+                keywords.push(...notification.issue.identifier.split("-"));
+                keywords.push(notification.issue.title);
+              }
+
+              const url = getNotificationURL(notification);
+
               return (
                 <List.Item
-                  title={`${getNotificationTitle(notification)} by ${
-                    notification.actor ? notification.actor.displayName : "Linear"
-                  }`}
+                  title={`${getNotificationTitle(notification)} by ${displayName}`}
                   key={notification.id}
-                  icon={notification.actor ? getUserIcon(notification.actor) : "linear.png"}
+                  keywords={keywords}
+                  icon={
+                    notification.actor
+                      ? getUserIcon(notification.actor)
+                      : notification.botActor
+                        ? getBotIcon(notification.botActor)
+                        : "linear-app-icon.png"
+                  }
                   {...(notification.issue
                     ? { subtitle: `${notification.issue?.identifier} ${notification.issue?.title}` }
                     : {})}
+                  {...(notification.project ? { subtitle: `${notification.project.name}` } : {})}
                   accessories={[
                     {
                       date: createdAt,
@@ -199,71 +216,41 @@ function Notifications() {
                   actions={
                     <ActionPanel>
                       {notification.readAt ? (
-                        <Action
-                          title="Mark as Unread"
-                          icon={Icon.Checkmark}
-                          onAction={() => markAsUnread(notification)}
-                        />
+                        <Action title="Mark as Unread" icon={Icon.Dot} onAction={() => markAsUnread(notification)} />
                       ) : (
                         <Action title="Mark as Read" icon={Icon.Checkmark} onAction={() => markAsRead(notification)} />
                       )}
-
-                      {urlKey ? (
-                        isLinearInstalled ? (
-                          <Action.Open
-                            title="Open Inbox in Linear"
-                            icon="linear.png"
-                            target={inboxUrl}
-                            application="Linear"
-                          />
-                        ) : (
-                          <Action.OpenInBrowser title="Open Inbox in Browser" url={inboxUrl} />
-                        )
-                      ) : null}
-
+                      {url ? <OpenInLinear url={url} /> : null}
                       <ActionPanel.Section>
                         {notification.issue ? (
-                          <>
-                            <Action.Push
-                              title="Open Issue in Raycast"
-                              target={
-                                <IssueDetail issue={notification.issue} priorities={priorities} users={users} me={me} />
-                              }
-                              icon={Icon.Sidebar}
-                              shortcut={{ modifiers: ["cmd"], key: "o" }}
-                            />
+                          <Action.Push
+                            title="Open Issue in Raycast"
+                            target={<IssueDetail issue={notification.issue} priorities={priorities} me={me} />}
+                            icon={Icon.RaycastLogoNeg}
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                          />
+                        ) : null}
 
-                            <Action.OpenInBrowser
-                              title="Open Issue in Browser"
-                              url={notification.issue.url}
-                              shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                            />
-                          </>
+                        {urlKey ? (
+                          <OpenInLinear title="Open Inbox" url={inboxUrl} shortcut={{ modifiers: ["cmd"], key: "o" }} />
                         ) : null}
 
                         <Action
                           title="Delete Notification"
                           icon={Icon.Trash}
                           style={Action.Style.Destructive}
-                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
                           onAction={() => deleteNotification(notification)}
                         />
                       </ActionPanel.Section>
 
-                      {notification.issue ? (
+                      {url ? (
                         <ActionPanel.Section>
                           <Action.CopyToClipboard
                             icon={Icon.Clipboard}
-                            content={notification.issue.url}
-                            title="Copy Issue URL"
+                            content={url}
+                            title="Copy URL"
                             shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-                          />
-
-                          <Action.CopyToClipboard
-                            icon={Icon.Clipboard}
-                            content={notification.issue.title}
-                            title="Copy Issue Title"
-                            shortcut={{ modifiers: ["cmd", "shift"], key: "'" }}
                           />
                         </ActionPanel.Section>
                       ) : null}

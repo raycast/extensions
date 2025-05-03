@@ -13,7 +13,7 @@
 
 ## Easydict（易词典）
 
-`Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 [Linguee](https://www.linguee.com/) 和[有道词典](https://www.youdao.com/)查询，支持 OpenAI ChatGPT, 🍎**苹果系统翻译**，[DeepL](https://www.deepl.com/translator)，[谷歌](https://translate.google.com)，[Bing](https://www.bing.com/translator), [百度](https://fanyi.baidu.com/)，[腾讯](https://fanyi.qq.com/)，[火山](https://translate.volcengine.com/translate)，[有道](https://fanyi.youdao.com/)和[彩云翻译](https://fanyi.caiyunapp.com/#/)。
+`Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 [Linguee](https://www.linguee.com/) 和[有道词典](https://www.youdao.com/)查询，支持 OpenAI, 🍎**苹果系统翻译**，[DeepL](https://www.deepl.com/translator)，[谷歌](https://translate.google.com)，[Bing](https://www.bing.com/translator), [百度](https://fanyi.baidu.com/)，[腾讯](https://fanyi.qq.com/)，[火山](https://translate.volcengine.com/translate)，[有道](https://fanyi.youdao.com/)和[彩云翻译](https://fanyi.caiyunapp.com/#/)。
 
 ![easydict-1-1671806758](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1671806758.png)
 
@@ -25,6 +25,7 @@
 - [x] 自动识别输入语言，自动查询目标偏好语言。
 - [x] 提供丰富的单词查询信息，包括基本翻译，包含该单词的考试类型，发音，多种词性和释义，形式和时态，网络翻译和网络短语。
 - [x] 支持划词查询，默认启用。配合快捷键食用效果更佳。
+- [x] 支持 OCR 截图翻译。
 - [x] 支持打开 [欧路词典](https://www.eudic.net/v4/en/app/eudic) 快速查词（若电脑上有安装）。
 - [x] 支持自动播放单词发音。使用 `Cmd + S` 手动播放单词发音。
 - [x] 支持有道文本合成语音（TTS）。
@@ -34,7 +35,7 @@
 - [x] 支持系统代理。
 - [x] 支持 Linguee 和有道词典查询。
 - [x] 支持 macOS 系统翻译。详情请看 [如何在 Easydict 中使用 🍎 macOS 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
-- [x] 支持 OpenAI ChatGPT, DeepL，Google，Bing，百度，腾讯，火山，有道和彩云翻译。
+- [x] 支持 OpenAI, DeepL，Google，Bing，百度，腾讯，火山，有道和彩云翻译。
 - [x] 支持 48+ 种语言。
 
 **如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)**
@@ -65,7 +66,7 @@
 
 ![hello-1666060655](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/hello-1666060655.png)
 
-### 有道-现代汉语词典
+### 有道 - 现代汉语词典
 
 ![xiaxi-1665674049](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/xiaxi-1665674049.png)
 
@@ -131,7 +132,7 @@ npm install && npm run dev
 
 ## 进阶
 
-实际上，你不需要做任何额外设置它就能工作得很好。 以下是进阶文档，面向那些希望更好地使用 `Easydict` 或想了解该扩展工作原理的用户。
+实际上，你不需要做任何额外设置它就能工作得很好。以下是进阶文档，面向那些希望更好地使用 `Easydict` 或想了解该扩展工作原理的用户。
 
 ![setting](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/setting-1660917402.png)
 
@@ -141,7 +142,7 @@ npm install && npm run dev
 
 #### 语言识别
 
-目前支持百度，腾讯，火山，苹果和 Bing， 总计 5 家语种识别 API。其中苹果语种识别为 macOS 系统功能，但需要安装一个快捷指令才能使用。参考 [如何在 Easydict 中使用 🍎 macOS 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
+目前支持百度，腾讯，火山，苹果和 Bing，总计 5 家语种识别 API。其中苹果语种识别为 macOS 系统功能，但需要安装一个快捷指令才能使用。参考 [如何在 Easydict 中使用 🍎 macOS 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
 
 为保护用户隐私，默认只启用了 Bing 语种识别（不需要 App Key，也不会记录任何用户个人数据！），而其他语种识别 API 仅在对应的翻译功能开启时才启用。但注意，通常来说开启的语种识别 API 种类越多，识别文本的准确度会越高，响应速度也会越快。
 
@@ -320,7 +321,7 @@ Linguee 默认支持系统代理。
 <details> <summary> 查询单词后自动播放单词发音，默认开启。 </summary>
 
 <p>
-注意，当该选项开始时，仅当查询的内容被判定为 `is_Word` 且为英语时才会自动播放语音，例如 `good`, `look for` 等。 其他查询内容，可通过快捷键 `Cmd + S` 播放语音。
+注意，当该选项开始时，仅当查询的内容被判定为 `is_Word` 且为英语时才会自动播放语音，例如 `good`, `look for` 等。其他查询内容，可通过快捷键 `Cmd + S` 播放语音。
 播放语音的内容：英语单词优先采用在线的有道词典发音，其他则使用有道翻译的 TTS 服务（若有有道 App Key）。长文本播放使用 say 命令。
 </p>
 
@@ -363,9 +364,9 @@ Linguee 默认支持系统代理。
 
 ### 支持系统代理
 
-开启该功能后，`Easydict` 会尝试获取 Mac 系统代理，若成功，则后续的网络请求都会通过系统代理发送。默认关闭。 此功能是为了对抗 IP 封锁（某些服务如 Linguee 对 IP 有频率限制），**但开启后会使请求响应速度变慢，因此请仅在有需要时启用。**
+开启该功能后，`Easydict` 会尝试获取 Mac 系统代理，若成功，则后续的网络请求都会通过系统代理发送。默认关闭。此功能是为了对抗 IP 封锁（某些服务如 Linguee 对 IP 有频率限制），**但开启后会使请求响应速度变慢，因此请仅在有需要时启用。**
 
-> 注意 ⚠️：请不要在使用抓包工具 MitM 的情况下开启 `Use System Proxy`，否则部分服务请求会报证书错误，例如 https://github.com/tisfeng/Raycast-Easydict/issues/18 。
+> 注意 ⚠️：请不要在使用抓包工具 MitM 的情况下开启 `Use System Proxy`，否则部分服务请求会报证书错误，例如 https://github.com/tisfeng/Raycast-Easydict/issues/18。
 
 ### PopClip 调用
 
@@ -381,7 +382,7 @@ Linguee 默认支持系统代理。
   key combo: command E
 ```
 
-> 参考: https://github.com/pilotmoon/PopClip-Extensions#extension-snippets-examples
+> 参考：https://github.com/pilotmoon/PopClip-Extensions#extension-snippets-examples
 
 ### 翻译服务
 
@@ -389,7 +390,7 @@ Linguee 默认支持系统代理。
 
 别担心，这些翻译服务有免费配额。一般来说个人使用足够了。
 
-下列申请教程来自 [`Bob`](https://bobtranslate.com/guide/advance/service.html)， 跟随教程应该很快就能完成申请。
+下列申请教程来自 [`Bob`](https://bobtranslate.com/guide/advance/service.html)，跟随教程应该很快就能完成申请。
 
 - [有道翻译](https://bobtranslate.com/service/translate/youdao.html)：服务需勾选 `文本翻译` 和 `语音合成`。（注：有道向每个账户赠送 50 元体验金，目测可免费使用 1 年以上～）
 
@@ -405,8 +406,7 @@ Linguee 默认支持系统代理。
 
 ![A2ECFJ-1664270926](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/A2ECFJ-1664270926.png)
 
-## 感谢
+## 致谢
 
-这个项目的灵感来自 [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) 和 [Bob](https://github.com/ripperhe/Bob)，且初始版本是以 [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) 为基础而开发的。`Easydict` 改进了许多 UI 显示，添加了更实用的功能，删除了一些复杂或不适当的操作，并对原始项目进行了大量优化和改进。
-
-最后，欢迎所有对这个项目感兴趣的人来提 issue 和 PR，该项目目前还处在快速发展阶段，任何实用的建议或是有趣的想法都是可以的，不保证一定会接受，但一定会考虑。另外，如果是提交 PR 的话，建议可以先开一个 issue 简单描述一下工作内容，避免 PR 与我目前正在开发的特性冲突，感谢。
+- 这个项目的灵感来自 [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) 和 [Bob](https://github.com/ripperhe/Bob)，且初始版本是以 [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) 为基础而开发的。`Easydict` 改进了许多 UI 显示，添加了更实用的功能，删除了一些复杂或不适当的操作，并对原始项目进行了大量优化和改进。
+- OCR 截图翻译功能参考了 [ScreenOCR](https://github.com/raycast/extensions/tree/d0cb79de95d41891d8ca0568a60db67aefa5806b/extensions/screenocr/)，感谢 [aidevjoe](https://github.com/aidevjoe) 的 PR [feat: add OCR recognition](https://github.com/tisfeng/Raycast-Easydict/pull/41)。

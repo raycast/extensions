@@ -1,11 +1,10 @@
-import { LaunchProps, getSelectedText, showToast, Toast } from "@raycast/api";
-import fetch from "cross-fetch";
+import type { LaunchProps } from "@raycast/api";
+import { getSelectedText, showToast, Toast } from "@raycast/api";
+import { savePage, urlRegex } from "./lib";
 
 type WaybackArguments = {
   url: string;
 };
-
-const urlRegex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
 
 export default async function main(props: LaunchProps<{ arguments: WaybackArguments }>) {
   if (props.arguments.url && urlRegex.test(props.arguments.url)) {
@@ -24,26 +23,5 @@ export default async function main(props: LaunchProps<{ arguments: WaybackArgume
     await savePage(selectedText);
   } catch (error) {
     console.error(error);
-  }
-}
-
-async function savePage(webpageUrl: string) {
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Saving to Wayback Machine" });
-
-  try {
-    const res = await fetch(`https://web.archive.org/save/${webpageUrl}`);
-
-    if (res.status >= 400) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to save to Wayback Machine";
-      return;
-    }
-
-    toast.style = Toast.Style.Success;
-    toast.title = "Saved to Wayback Machine";
-  } catch (err) {
-    console.log(err);
-    toast.style = Toast.Style.Failure;
-    toast.title = "Failed to save to Wayback Machine";
   }
 }

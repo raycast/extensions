@@ -1,3 +1,4 @@
+import { Account, Post } from "../../types/types";
 import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import {
   BlueskyProfileUrlBase,
@@ -14,9 +15,14 @@ import {
   TotalPosts,
   UnfollowToastMessage,
 } from "../../utils/constants";
-import { Post, User } from "../../types/types";
-import { buildTitle, getAuthorDetailsMarkdown, showDangerToast, showSuccessToast } from "../../utils/common";
-import { deleteFollow, follow, getProfile, getUserPosts } from "../../libs/atp";
+import {
+  buildTitle,
+  getAccountName,
+  getAuthorDetailsMarkdown,
+  showDangerToast,
+  showSuccessToast,
+} from "../../utils/common";
+import { deleteFollow, follow, getAccountPosts, getProfile } from "../../libs/atp";
 import { useEffect, useState } from "react";
 
 import CustomAction from "../actions/CustomAction";
@@ -37,9 +43,11 @@ interface AuthorFeedProps {
 
 export default function AuthorFeed({ showNavDropdown, authorHandle, previousViewTitle = "" }: AuthorFeedProps) {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [isLoadingAuthor, setIsLoadingAuthor] = useState(true);
   const [cursor, setCursor] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState("");
   const [isShowingDetails, setIsShowingDetails] = useCachedState(ShowDetails, false);
   const [author, setAuthor] = useState<ProfileViewDetailed | null>(null);
   const [firstFetch, setFirstFetch] = useState(true);
@@ -49,11 +57,14 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
   const fetchPosts = async () => {
     setIsLoadingPosts(true);
 
-    const fetchLimit = firstFetch ? ExtensionConfig.userFeedFirstFetchLimit : ExtensionConfig.userFeedRequestLimit;
+    const fetchLimit = firstFetch
+      ? ExtensionConfig.accountFeedFirstFetchLimit
+      : ExtensionConfig.accountFeedRequestLimit;
 
-    const data = await getUserPosts(authorHandle, cursor, fetchLimit);
+    const data = await getAccountPosts(authorHandle, cursor, fetchLimit);
 
     if (!data) {
+      setIsLoadingPosts(false);
       return;
     }
 
@@ -132,27 +143,28 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
     return accessory;
   };
 
-  const followUser = async (user: User) => {
-    await follow(user.did);
-    showSuccessToast(`${FollowToastMessage} ${user.handle}`);
+  const followAccount = async (account: Account) => {
+    await follow(account.did);
+    showSuccessToast(`${FollowToastMessage} ${account.handle}`);
 
     fetchAuthor();
   };
 
-  const unfollowUser = async (user: User) => {
-    const profile = await getProfile(user.handle);
+  const unfollowAccount = async (account: Account) => {
+    const profile = await getProfile(account.handle);
     if (profile && profile.viewer && profile.viewer.following) {
       await deleteFollow(profile.viewer.following);
-      showDangerToast(`${UnfollowToastMessage} ${user.handle}`);
+      showDangerToast(`${UnfollowToastMessage} ${account.handle}`);
     }
 
     fetchAuthor();
   };
 
-  const getUser = (author: ProfileViewDetailed): User => {
+  const getAccount = (author: ProfileViewDetailed): Account => {
     return {
       did: author.did,
       handle: author.handle,
+      blockedUri: author.viewer && author.viewer.blocking ? author.viewer.blocking : "",
       displayName: author.displayName ? author.displayName : "",
       avatarUrl: author.avatar ? author.avatar : "",
     };
@@ -164,9 +176,22 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
     }
   }, [firstFetch]);
 
+  useEffect(() => {
+    const filteredPosts = posts.filter((post) => {
+      if (searchText.length > 0) {
+        return `${post.createdByUser.handle} ${post.text.toLowerCase()}`.includes(searchText.toLowerCase());
+      } else {
+        return true;
+      }
+    });
+    setFilteredPosts(filteredPosts);
+  }, [searchText, posts]);
+
   return (
     <List
       isLoading={isLoadingPosts || isLoadingAuthor}
+      filtering={false}
+      onSearchTextChange={setSearchText}
       isShowingDetail={isShowingDetails}
       onSelectionChange={(index) => onSelectionChange(index)}
       navigationTitle={buildTitle(previousViewTitle, `@${authorHandle}`)}
@@ -179,10 +204,10 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
       }
     >
       {posts.length > 0 && author && (
-        <List.Section title={`Profile`}>
+        <List.Section title={`Profile`} subtitle={`(${author.handle})`}>
           <List.Item
             id={`profile`}
-            title={author?.displayName ? author.displayName : authorHandle}
+            title={getAccountName(author)}
             subtitle={author?.description ? author.description : ""}
             icon={{ source: author?.avatar ? author.avatar : Icon.ChessPiece }}
             actions={
@@ -199,21 +224,21 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
                   url={`${BlueskyProfileUrlBase}/${authorHandle}`}
                 />
                 <CustomAction
-                  actionKey="openUserLikes"
+                  actionKey="openAccountLikes"
                   onClick={() =>
                     push(
                       <LikeFeed
                         showNavDropdown={false}
                         previousViewTitle={previousViewTitle}
                         authorHandle={authorHandle}
-                      />
+                      />,
                     )
                   }
                 />
                 {author.viewer && author.viewer.following ? (
-                  <CustomAction actionKey="unfollow" onClick={() => unfollowUser(getUser(author))} />
+                  <CustomAction actionKey="unfollow" onClick={() => unfollowAccount(getAccount(author))} />
                 ) : (
-                  <CustomAction actionKey="follow" onClick={() => followUser(getUser(author))} />
+                  <CustomAction actionKey="follow" onClick={() => followAccount(getAccount(author))} />
                 )}
               </ActionPanel>
             }
@@ -246,7 +271,7 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
         </List.Section>
       )}
       <List.Section title={`Timeline`}>
-        {posts.map((post) => (
+        {filteredPosts.map((post) => (
           <PostItem
             previousViewTitle={buildTitle(previousViewTitle, `@${authorHandle}`)}
             isSelected={selectionIndex === post.uri}
@@ -257,7 +282,7 @@ export default function AuthorFeed({ showNavDropdown, authorHandle, previousView
             toggleShowDetails={() => setIsShowingDetails((state) => !state)}
           />
         ))}
-        {cursor && (
+        {cursor && searchText.length === 0 && (
           <List.Item
             id={LoadMoreKey}
             key={LoadMoreKey}

@@ -1,17 +1,19 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { MutatePromise, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { ApiProduct } from "../../api/product";
-import useVatRates from "../../hooks/useVatRates";
-import { ProductObject, UpdateProductFormValues, UpdateProductPayload } from "../../types/product";
-import { ApiPaginatedResponse } from "../../types/utils";
+
+import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
+import { MutatePromise, useForm } from "@raycast/utils";
+
+import { ApiProduct } from "@/api/product";
+import { useVatRates } from "@/hooks/useVatRates";
+import { ProductObject, UpdateProductFormValues, UpdateProductPayload } from "@/types/product";
+import { ApiPaginatedResponse } from "@/types/utils";
 
 type Props = {
   product: ProductObject;
   mutateProducts: MutatePromise<ApiPaginatedResponse<ProductObject[]> | undefined>;
 };
 
-export default function UpdateProduct({ product, mutateProducts }: Props) {
+export function UpdateProduct({ product, mutateProducts }: Props) {
   const { pop } = useNavigation();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -136,9 +138,7 @@ export default function UpdateProduct({ product, mutateProducts }: Props) {
       <Form.TextField title="Quantity" placeholder="Enter the quantity of product" {...itemProps.quantity} />
 
       <Form.Dropdown title="Tax Symbol" {...itemProps.tax_symbol}>
-        {vatRatesData?.map((vat) => (
-          <Form.Dropdown.Item key={vat.id} value={vat.symbol} title={vat.name} />
-        ))}
+        {vatRatesData?.map((vat) => <Form.Dropdown.Item key={vat.id} value={vat.symbol} title={vat.name} />)}
       </Form.Dropdown>
 
       <Form.TextField title="Net Price" placeholder="Enter the net price of product" {...itemProps.net_price} />

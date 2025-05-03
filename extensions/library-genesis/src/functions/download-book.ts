@@ -1,7 +1,9 @@
-import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
-import { BookEntry, LibgenPreferences } from "../types";
-import { getUrlFromDownloadPage } from "../utils/libgen-api";
-import { downloadBookToDefaultDirectory, downloadBookToLocation } from "../utils/common-utils";
+import { Toast, getPreferenceValues, showHUD, showToast } from "@raycast/api";
+
+import type { BookEntry, LibgenPreferences } from "@/types";
+import { getUrlFromDownloadPage } from "@/utils/api";
+import { downloadBookToDefaultDirectory, downloadBookToLocation } from "@/utils/books";
+
 import Style = Toast.Style;
 
 export const downloadBook = async (book: BookEntry) => {

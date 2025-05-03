@@ -1,100 +1,95 @@
-import { List, ActionPanel, showToast, Action, Toast, environment } from "@raycast/api";
-import { execSync } from "child_process";
-import { convertPDF, convertSVG, getSelectedImages } from "./utils";
+/**
+ * @file convert.tsx
+ *
+ * @summary Raycast command to convert selected images between various formats.
+ * @author Stephen Kaplan <skaplanofficial@gmail.com>
+ *
+ * Created at     : 2023-07-06 14:53:25
+ * Last modified  : 2024-06-26 21:37:46
+ */
 
-const FORMATS = [
-  "ASTC",
-  "BMP",
-  "DDS",
-  "EXR",
-  "GIF",
-  "HEIC",
-  "HEICS",
-  "ICNS",
-  "ICO",
-  "JPEG",
-  "JP2",
-  "KTX",
-  "PBM",
-  "PDF",
-  "PNG",
-  "PSD",
-  "PVR",
-  "TGA",
-  "TIFF",
-  "WEBP",
-  "SVG",
-];
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  LaunchProps,
+  List,
+  openCommandPreferences,
+} from "@raycast/api";
+import { useEffect } from "react";
 
-export default function Command() {
-  const convert = async (desiredType: string) => {
-    const selectedImages = await getSelectedImages();
+import SettingsActionPanelSection from "./components/SettingsActionPanelSection";
+import convert, { imageFormats } from "./operations/convertOperation";
+import runOperation from "./operations/runOperation";
+import { getSelectedImages } from "./utilities/utils";
 
-    if (selectedImages.length === 0 || (selectedImages.length === 1 && selectedImages[0] === "")) {
-      await showToast({ title: "No images selected", style: Toast.Style.Failure });
-      return;
+export default function Command(props: LaunchProps) {
+  const preferences = getPreferenceValues<Preferences.Convert>();
+  const enabledFormats = imageFormats.filter((format) => preferences[`show${format}`]);
+
+  useEffect(() => {
+    if (props.launchContext && "convertTo" in props.launchContext) {
+      const { convertTo } = props.launchContext;
+      if (convertTo) {
+        Promise.resolve(getSelectedImages()).then(async (selectedImages) => {
+          await runOperation({
+            operation: () => convert(selectedImages, convertTo),
+            selectedImages,
+            inProgressMessage: "Conversion in progress...",
+            successMessage: "Converted",
+            failureMessage: "Failed to convert",
+          });
+        });
+      }
     }
-
-    const toast = await showToast({ title: "Conversion in progress...", style: Toast.Style.Animated });
-
-    const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
-    try {
-      selectedImages.forEach((item) => {
-        const pathComponents = item.split(".");
-        const newPath = pathComponents.slice(0, -1).join("") + "." + desiredType.toLowerCase();
-
-        if (desiredType === "WEBP") {
-          execSync(`chmod +x ${environment.assetsPath}/webp/cwebp`);
-          execSync(`${environment.assetsPath}/webp/cwebp "${item}" -o "${newPath}"`);
-        } else if (pathComponents.at(-1)?.toLowerCase() == "svg") {
-          convertSVG(desiredType, item, newPath);
-        } else if (desiredType == "SVG") {
-          const bmpPath = `${environment.supportPath}/tmp.bmp`;
-          execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
-          if (pathComponents.at(-1)?.toLowerCase() == "webp") {
-            const pngPath = `${environment.supportPath}/tmp.png`;
-            execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
-            execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${pngPath}"`);
-            execSync(
-              `sips --setProperty format "bmp" "${pngPath}" --out "${bmpPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${bmpPath}"; rm "${bmpPath}"; rm "${pngPath}"`
-            );
-          } else {
-            execSync(
-              `sips --setProperty format "bmp" "${item}" --out "${bmpPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${bmpPath}"; rm "${bmpPath}"`
-            );
-          }
-        } else if (pathComponents.at(-1)?.toLowerCase() == "webp") {
-          execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
-          execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${newPath}"`);
-        } else if (pathComponents.at(-1)?.toLowerCase() == "pdf") {
-          const itemName = item.split("/").at(-1);
-          const folderName = `${itemName?.substring(0, itemName.lastIndexOf("."))} ${desiredType}`;
-          const folderPath = `${item.split("/").slice(0, -1).join("/") + "/" + folderName}`;
-          execSync(`mkdir "${folderPath}"`);
-          convertPDF(desiredType, item, folderPath);
-        } else {
-          execSync(`sips --setProperty format ${desiredType.toLowerCase()} "${item}" --out "${newPath}"`);
-        }
-      });
-      toast.title = `Converted ${selectedImages.length.toString()} ${pluralized} to ${desiredType}`;
-      toast.style = Toast.Style.Success;
-    } catch (error) {
-      console.log(error);
-      toast.title = `Failed to convert ${selectedImages.length.toString()} ${pluralized} to ${desiredType}`;
-      toast.style = Toast.Style.Failure;
-    }
-  };
+  }, [props.launchContext]);
 
   return (
     <List searchBarPlaceholder="Search image transformations...">
-      {FORMATS.map((format) => {
+      <List.EmptyView
+        title="No Formats Enabled"
+        description="Enable formats in the command preferences (⌘⇧,)"
+        icon={Icon.Image}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Open Command Preferences"
+              onAction={async () => await openCommandPreferences()}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+            />
+          </ActionPanel>
+        }
+      />
+      {enabledFormats.map((format) => {
         return (
           <List.Item
             title={format}
             key={format}
             actions={
               <ActionPanel>
-                <Action title={`Convert to ${format}`} onAction={async () => await convert(format)} />
+                <Action
+                  title={`Convert to ${format}`}
+                  icon={Icon.Switch}
+                  onAction={async () => {
+                    const selectedImages = await getSelectedImages();
+                    await runOperation({
+                      operation: () => convert(selectedImages, format),
+                      selectedImages,
+                      inProgressMessage: "Conversion in progress...",
+                      successMessage: "Converted",
+                      failureMessage: "Failed to convert",
+                    });
+                  }}
+                />
+                <Action.CreateQuicklink
+                  title="Create Quicklink"
+                  quicklink={{
+                    name: `Convert to ${format}`,
+                    link: `raycast://extensions/HelloImSteven/sips/convert?context=${encodeURIComponent(JSON.stringify({ convertTo: format }))}`,
+                  }}
+                />
+                <SettingsActionPanelSection />
               </ActionPanel>
             }
           />

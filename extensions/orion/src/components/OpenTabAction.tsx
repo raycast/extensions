@@ -8,8 +8,8 @@ const activateTab = async (tab: Tab) =>
     const orion = Application("${getOrionAppIdentifier()}");
     const window = orion.windows.byId(${tab.window_id});
     const tab = window.tabs().find(tab => tab.url() === String.raw\`${tab.url}\` && tab.name() === String.raw\`${
-    tab.title
-  }\`);
+      tab.title
+    }\`);
     if (tab) {
       window.index = 1;
       window.currentTab = tab;

@@ -5,6 +5,9 @@
   "description": "Jump to websites, folders, or files",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
+  "contributors": [
+    "j3lte"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -44,19 +47,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.46.0",
-    "@raycast/utils": "^1.4.16",
-    "run-applescript": "^6.1.0"
+    "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.10.4",
+    "@types/react": "18.2.45",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -64,5 +65,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

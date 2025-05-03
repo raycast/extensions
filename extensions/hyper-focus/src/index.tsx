@@ -6,14 +6,26 @@ import { ActionPanel, List, Action, popToRoot, showHUD, Icon, showToast, Toast }
 import { useFetch } from "@raycast/utils";
 
 export interface FocusStatus {
-  pause: FocusSchedule;
-  override: FocusSchedule;
-  schedule: FocusSchedule;
+  pause: FocusScheduleStatus;
+  override: FocusScheduleStatus;
+  schedule: FocusScheduleStatus;
 }
 
-export interface FocusSchedule {
+export interface FocusScheduleStatus {
   name?: string;
   until?: number;
+}
+
+export interface Schedule {
+  start?: number;
+  end?: number;
+  name: string;
+  schedule_only?: boolean;
+  block_hosts: string[];
+  block_urls: string[];
+  block_apps: string[];
+  start_script?: string;
+  description?: string;
 }
 
 const SERVER_PORT = 9029;
@@ -87,24 +99,30 @@ function SetOverride(props: { [name: string]: string }) {
 }
 
 function ChooseOverride() {
-  const { data, isLoading } = useFetch(`${baseURL()}/configurations`);
+  const { data, isLoading } = useFetch<Schedule[]>(`${baseURL()}/schedules`);
 
-  const configurationItems = (configurationNames: string[]) =>
-    configurationNames.map((name) => {
-      return (
-        <List.Item
-          key={name}
-          title={name}
-          actions={
-            <ActionPanel>
-              <Action.Push title="Set Override" target={<SetOverride name={name} />} />
-            </ActionPanel>
-          }
-        />
-      );
-    });
+  const configurationItems = (schedules: Schedule[] | undefined) => {
+    assert(schedules !== undefined);
 
-  return <List isLoading={isLoading}>{!isLoading && configurationItems(data as string[])}</List>;
+    return schedules
+      .filter((schedule) => schedule.schedule_only !== true)
+      .map((schedule) => {
+        return (
+          <List.Item
+            key={schedule.name}
+            title={schedule.name}
+            subtitle={schedule.description}
+            actions={
+              <ActionPanel>
+                <Action.Push title="Set Override" target={<SetOverride name={schedule.name} />} />
+              </ActionPanel>
+            }
+          />
+        );
+      });
+  };
+
+  return <List isLoading={isLoading}>{!isLoading && configurationItems(data)}</List>;
 }
 
 function Pause() {
@@ -247,6 +265,7 @@ Press ↵ to open the Hyper Focus website"
       {!isLoading && !error && (
         <>
           {renderActions()}
+          {/* TODO override should really go above pause */}
           <List.Item
             icon={Icon.Pencil}
             title="Override"

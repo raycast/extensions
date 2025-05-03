@@ -13,7 +13,7 @@ export function ActionAddCountdownDate(props: {
   return (
     <Action.Push
       icon={Icon.Clock}
-      title={"Add CountDown Date"}
+      title={"Add Countdown Date"}
       shortcut={{ modifiers: ["cmd"], key: "d" }}
       target={<AddCountdownDate countdownDates={countdownDates} setRefresh={setRefresh} />}
     />
@@ -30,7 +30,7 @@ export function ActionRemoveCountdownDate(props: {
   return (
     <Action
       icon={Icon.Trash}
-      title={"Remove CountDown Date"}
+      title={"Remove Countdown Date"}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
       onAction={async () => {
         await alertDialog(
@@ -43,7 +43,7 @@ export function ActionRemoveCountdownDate(props: {
             _cd.splice(countdownDates.length - lifeProgressesLength + index, 1);
             LocalStorage.setItem(LocalStorageKey.COUNTDOWN_DATE_KEY, JSON.stringify(_cd));
             setRefresh(Date.now());
-          }
+          },
         );
       }}
     />

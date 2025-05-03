@@ -5,6 +5,7 @@ export const createFakeServer = (count = 1): IServer[] => {
   const fakeServer = (): IServer => ({
     id: faker.datatype.number(),
     api_token_key: faker.datatype.string(),
+    ssh_user: faker.internet.userName(),
     credential_id: faker.datatype.string(),
     name: faker.company.name(),
     type: faker.datatype.string(),

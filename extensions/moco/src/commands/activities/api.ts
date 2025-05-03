@@ -45,17 +45,17 @@ const activitySchema = z.array(
       firstname: z.string(),
       lastname: z.string(),
     }),
-    hourly_rate: z.number(),
+    hourly_rate: z.number().optional(),
     timer_started_at: z.nullable(z.string()),
     created_at: z.string(),
     updated_at: z.string(),
-  })
+  }),
 );
 
 export const fetchActivities = async (
   projectID: number | null,
   lookbackDays: number,
-  userID?: number
+  userID?: number,
 ): Promise<Activity[]> => {
   const today = new Date().toISOString().split("T")[0];
 
@@ -100,7 +100,7 @@ export const fetchActivities = async (
         timer_started_at: activity.timer_started_at as string,
         created_at: activity.created_at as string,
         updated_at: activity.updated_at as string,
-      })
+      }),
     )
     .sort((a, b) => (a.created_at > b.created_at || a.updated_at > b.updated_at ? -1 : 1));
 };
@@ -131,7 +131,7 @@ export const startActivity = async (values: any): Promise<boolean | void> => {
           "Content-Type": "application/json",
           Authorization: `Token token=${preferences.apikey}`,
         },
-      }
+      },
     )
     .then((response) => {
       if (response.status == 200) {
@@ -172,7 +172,7 @@ export const toggleActivity = async (activityID: number, startActivity: boolean)
           "Content-Type": "application/json",
           Authorization: `Token token=${preferences.apikey}`,
         },
-      }
+      },
     )
     .then((response) => {
       if (response.status == 200) {
@@ -217,7 +217,7 @@ export const editActivity = async (values: any, activityID: number): Promise<boo
           "Content-Type": "application/json",
           Authorization: `Token token=${preferences.apikey}`,
         },
-      }
+      },
     )
     .then((response) => {
       if (response.status == 200) {

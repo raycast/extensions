@@ -5,6 +5,9 @@
   "description": "Switch outbound mode, change proxy tunnel and other Surge settings from Raycast.",
   "icon": "AppIcon.png",
   "author": "ysj151215",
+  "contributors": [
+    "Hopsken"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -29,6 +32,24 @@
       "description": "Port is required to access the main function.",
       "placeholder": "6171",
       "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "host",
+      "title": "Host",
+      "description": "The IP address of the machine running Surge.",
+      "placeholder": "127.0.0.1",
+      "type": "textfield",
+      "default": "127.0.0.1",
+      "required": true
+    },
+    {
+      "name": "tls_enabled",
+      "title": "Is TLS enabled?",
+      "description": "Is using http over tls?",
+      "label": "Enabled",
+      "type": "checkbox",
+      "default": true,
       "required": true
     }
   ],

@@ -1,9 +1,11 @@
-import { Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
 import { Issue } from "../api/issues";
+import { getUserAvatar } from "../helpers/avatars";
 import { getStatusColor } from "../helpers/issues";
+import { useEpicIssues } from "../hooks/useIssues";
 
 import IssueActions from "./IssueActions";
 
@@ -15,7 +17,9 @@ type IssueListItemProps = {
 export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
   const updatedAt = new Date(issue.fields.updated);
   const assignee = issue.fields.assignee;
-
+  const { issues: epicIssues } = useEpicIssues(issue?.id ?? "");
+  const hasChildIssues =
+    (issue.fields.subtasks && issue.fields.subtasks.length > 0) || (epicIssues && epicIssues.length > 0);
   const keywords = [issue.key, issue.fields.status.name, issue.fields.issuetype.name];
 
   if (issue.fields.priority) {
@@ -30,11 +34,13 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
     {
       text: {
         value: issue.fields.status.name,
-        color: getStatusColor(issue.fields.status.statusCategory.colorName),
+        color: issue.fields.status.statusCategory
+          ? getStatusColor(issue.fields.status.statusCategory.colorName)
+          : undefined,
       },
     },
     {
-      icon: assignee ? assignee.avatarUrls["32x32"] : Icon.Person,
+      icon: getUserAvatar(assignee),
       tooltip: `Assignee: ${assignee ? assignee.displayName : "Unassigned"}`,
     },
     { date: updatedAt, tooltip: format(updatedAt, "EEEE d MMMM yyyy 'at' HH:mm") },
@@ -49,10 +55,12 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
       key={issue.id}
       keywords={keywords}
       icon={{ value: issue.fields.issuetype.iconUrl, tooltip: `Issue Type: ${issue.fields.issuetype.name}` }}
-      title={issue.fields.summary}
+      title={issue.fields.summary || "Unknown issue title"}
       subtitle={issue.key}
       accessories={accessories}
-      actions={<IssueActions issue={issue} mutate={mutate} showDetailsAction={true} />}
+      actions={
+        <IssueActions issue={issue} showChildIssuesAction={hasChildIssues} mutate={mutate} showDetailsAction={true} />
+      }
     />
   );
 }

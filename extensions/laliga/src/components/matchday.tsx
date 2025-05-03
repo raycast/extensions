@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
-import { format } from "date-fns";
+import { formatDate } from "date-fns";
 import { Match } from "../types";
+import MatchComments from "./comment";
+import MatchLineups from "./lineup";
 
 interface PropsType {
   name: string;
@@ -33,22 +35,43 @@ export default function Matchday(props: PropsType) {
           },
         ];
 
-        const title = match.time ? format(new Date(match.date), props.format || "eee dd.MM.yyyy HH:mm") : "TBC";
+        const title = match.date ? formatDate(match.date, props.format || "eee dd.MM.yyyy HH:mm") : "TBC";
+
+        const matchName =
+          match.status === "PreMatch" || match.status === "Canceled"
+            ? `${match.home_team.nickname} - ${match.away_team.nickname}`
+            : `${match.home_team.nickname} ${match.home_score} - ${match.away_score} ${match.away_team.nickname}`;
 
         return (
           <List.Item
             key={match.id}
             title={title}
-            subtitle={
-              match.status === "PreMatch"
-                ? `${match.home_team.nickname} - ${match.away_team.nickname}`
-                : `${match.home_team.nickname} ${match.home_score} - ${match.away_score} ${match.away_team.nickname}`
-            }
+            subtitle={matchName}
             icon={icon}
             accessories={accessories}
+            keywords={[
+              match.home_team.name,
+              match.home_team.shortname,
+              match.home_team.nickname,
+              match.away_team.name,
+              match.away_team.shortname,
+              match.away_team.nickname,
+            ]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={`https://www.laliga.com/en-GB/match/${match.slug}`} />
+                <ActionPanel.Section title="Match Information">
+                  <Action.Push
+                    title="Comments"
+                    icon={Icon.Message}
+                    target={<MatchComments slug={match.slug} name={matchName} />}
+                  />
+                  <Action.Push
+                    title="Lineups"
+                    icon={Icon.TwoPeople}
+                    target={<MatchLineups slug={match.slug} name={matchName} />}
+                  />
+                  <Action.OpenInBrowser url={`https://www.laliga.com/en-GB/match/${match.slug}`} />
+                </ActionPanel.Section>
                 {props.action}
               </ActionPanel>
             }

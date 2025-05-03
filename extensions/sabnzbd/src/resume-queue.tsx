@@ -1,14 +1,16 @@
-import { showToast, ToastStyle, preferences } from "@raycast/api";
-import { Client, Results } from "sabnzbd-api";
+import { showToast, Toast } from "@raycast/api";
+import { client } from "./sabnzbd";
 
 export default async () => {
-  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
-
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Resuming Queue" });
   try {
-    const results = (await client.queueResume()) as Results;
-    showToast(ToastStyle.Success, "Resumed queue");
+    await client.queueResume().then((result) => {
+      if (!result.status || result.error) throw new Error();
+    });
+    toast.style = Toast.Style.Success;
+    toast.title = "Resumed Queue";
   } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not resume queue");
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not resume Queue";
   }
 };

@@ -18,7 +18,7 @@ import { homedir } from "os";
 import { FormValues } from "../types/shifts";
 
 export function GenerateCommandForm(): JSX.Element {
-  const [shiftCode, setShiftCode] = useState<string>("10");
+  const [shiftCode, setShiftCode] = useState<string>("11");
   const [projectPath, setProjectPath] = useState<string>("${PWD}");
   const [shiftCommand, setShiftCommand] = useState<string>("");
   const preferences = getPreferenceValues<Preferences>();

@@ -8,7 +8,7 @@
     Twitter
   </h1>
 
-Raycast extension to search or send tweets on [twitter.com](https://twitter.com)
+Raycast extension Send Tweets on [twitter.com](https://twitter.com)
 
   <p>
     <a href="https://www.raycast.com/tonka3000/twitter">
@@ -43,26 +43,30 @@ Raycast extension to search or send tweets on [twitter.com](https://twitter.com)
   </p>
 </div>
 
-## Features
+## State of this Extension
 
-- Login via OAuth (default)
-- Login with access tokens (optional)
-- Search Recent Tweets from your timeline
-- Search your own Tweets
-- Send Tweets (Thread)
-- Reply to Tweets
-- Retweet Tweets
-- Display Tweet content directly in Raycast
-- Search Twitter users
-- Tweet Metadata view like impressions (only with OAuth mode)
+Many features of the X API are not available since the rebranding of Twitter to X. This affect some commands of this extension.
+For most features, you need a paid account. Check out the X Developers guide for information about the pricing.
 
-## Login
+I, the original author of this extension (Michael Aigner), do not have such a subscription, and therefore, I cannot really maintain features which require the paid API anymore. Some features maybe will not be restored because they don't exist in the X API yet.
+If you have an OAuth key, the commands which requires it should still work in theory.
+Maybe somebody with an working OAuth key can fix bugs in the existing command which require a paid subscription.
 
-The login works with `Login with Twitter`. `Login with Twitter` is activate as long as no access tokens are set in the extension preferences.
-When access tokens are set, the keys will be used for authentication and authorization instead of `Login with Twitter`. Also the API keys approach use `v1` of the Twitter API.
-`Login with Twitter` use v2.
+The affected commands are
 
-### How to get the access token for the Twitter API (optional)
+- My Recent Tweets
+- Recent Tweets
+
+## Web Version
+
+The following commands redirect to the web-site (including the entered content) when no OAuth key is set.
+This will keep at least some productivity 😁.
+
+- Send Tweet
+- Search User
+
+
+### How to get the access token for the X API (optional)
 
 This step is optional and is not required for normal usage.
 
@@ -89,7 +93,7 @@ After all these steps you should have all required 4 tokens.
 
 Store them in a secure box, twitter want display that again for you.
 
-You also need to activate `OAuth 1.0a` for at least `v1` API, otherwise you will get an `403` error. Activate `v2` is recommended, but right no not required.
+You also need to activate `OAuth 1.0a` for at least `v1` API, otherwise you will get an `403` error. Activate `v2` is recommended, but right now not required.
 
 - Click on your Twitter app on https://apps.twitter.com 
 - Navigate to `User authentication settings`
@@ -99,16 +103,6 @@ You also need to activate `OAuth 1.0a` for at least `v1` API, otherwise you will
   - Set `https://raycast.com/redirect` as `Callback URI` 
   - Set `https://raycast.com` as Website URL
   - Press on `Save`
-
-## v1 vs v2 API
-Twitter has 2 APIs - `v1` and `v2`. Your Twitter app needs to have enabled `v1` access when you use access tokens, otherwise you will get a `403` error.
-The `v2` API of Twitter is still in progress and not all features are available.
-
-### Actual impl. differences between v1 and v2 mode in this extension
-
--  `v2` use 2 actions for `Like` and `Unlike` (v1 use one action which change it's state based on if the tweet is liked or not), because there is no way in v2 if the current user liked a given tweet or not
-- Retweet works as in `v1`, but un-retweet action needs to be done on the retweet itself. In `v1` it was done on the original one.
-- Search User command open twitter.com in the browser instead of show the result because there is no API for that in `v2`
 
 ## Showcases
 

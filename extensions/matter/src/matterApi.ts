@@ -1,9 +1,9 @@
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
-import { Items, Preferences } from "./types";
+import { ErrorResponse, Items, Library } from "./types";
 
-async function getQueue() {
-  const url = "https://web.getmatter.com/api/library_items/queue_feed?page=1";
+async function getQueue(page: number) {
+  const url = `https://web.getmatter.com/api/library_items/queue_feed?page=${page}`;
   const token = getPreferenceValues<Preferences>().matterToken;
   const options = {
     method: "GET",
@@ -13,16 +13,12 @@ async function getQueue() {
     },
   };
 
-  try {
-    const response = await fetch(url, options);
-    return (await response.json()) as Items;
-  } catch (error) {
-    console.error(error);
-  }
+  const response = await fetch(url, options);
+  return (await response.json()) as Items | ErrorResponse;
 }
 
-async function getFavorites() {
-  const url = "https://web.getmatter.com/api/library_items/favorites_feed?page=1";
+async function getFavorites(page: number) {
+  const url = `https://web.getmatter.com/api/library_items/favorites_feed?page=${page}`;
   const token = getPreferenceValues<Preferences>().matterToken;
   const options = {
     method: "GET",
@@ -32,12 +28,8 @@ async function getFavorites() {
     },
   };
 
-  try {
-    const response = await fetch(url, options);
-    return await response.json();
-  } catch (error) {
-    console.error(error);
-  }
+  const response = await fetch(url, options);
+  return (await response.json()) as Items | ErrorResponse;
 }
 
 async function setFavorite(contentId: string, isFavorited: boolean) {
@@ -57,12 +49,8 @@ async function setFavorite(contentId: string, isFavorited: boolean) {
     body: JSON.stringify(data),
   };
 
-  try {
-    const response = await fetch(url, options);
-    return await response.json();
-  } catch (error) {
-    console.error(error);
-  }
+  const response = await fetch(url, options);
+  return (await response.json()) as Library | ErrorResponse;
 }
 
 export { getQueue, getFavorites, setFavorite };

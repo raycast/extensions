@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sync-folders",
+  "title": "Sync Folders",
+  "description": "Sync two folders",
+  "icon": "extension-icon.png",
+  "author": "Undolog",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Sync Folders Menu Bar",
+      "subtitle": "Sync Folders",
+      "description": "Sync your preset Folders from Mac Menu Bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "my-sync-folders",
+      "title": "My Sync Folders",
+      "subtitle": "Sync Folders",
+      "description": "My Sync Folders",
+      "mode": "view"
+    },
+    {
+      "name": "create-sync-folders",
+      "title": "Create Sync Folders",
+      "subtitle": "Sync Folders",
+      "description": "Create Sync folders preset",
+      "mode": "view"
+    },
+    {
+      "name": "sync-folders",
+      "title": "Sync Folders",
+      "subtitle": "Sync Folders",
+      "description": "Sync the selected folders by selection a source and destination folder",
+      "mode": "view"
+    },
+    {
+      "name": "sync-finder-selected-folders",
+      "title": "Sync Finder Selected Folders",
+      "subtitle": "Sync Folders",
+      "description": "Sync the Finder selected folders",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "sync_finder_selected_folders_delete_files",
+          "title": "Delete files in destination if not in source folder",
+          "type": "checkbox",
+          "label": "Delete files",
+          "required": false,
+          "description": "If checked, files in the destination folder that are not in the source folder will be deleted"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.10",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

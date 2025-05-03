@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-04-25 23:49
+ * @lastEditTime: 2023-05-17 22:34
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -26,9 +26,9 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.8.2";
-  buildNumber = 25;
-  versionDate = "2023-04-25";
+  version = "2.10.1";
+  buildNumber = 30;
+  versionDate = "2025-01-12";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
@@ -37,24 +37,16 @@ export class Easydict {
 
 ### 🐞 修复
 
-- 修复了 OpenAI 翻译可能丢失首字符的问题。
-- 修复了 OpenAI 默认未启用代理的问题。
-
-#### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
-
-## 推荐
-
-我另一个项目，[Easydict](https://github.com/tisfeng/Easydict) ，一个简洁优雅的翻译词典 macOS App。开箱即用，支持离线 OCR 识别，支持有道词典，🍎苹果系统翻译，DeepL，谷歌，百度和火山翻译。
-
-![iShot_2023-03-17_18.01.22_11zon-1679050206](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679050206.jpg)
+- 更新有道翻译 API，修复翻译失败的问题。
+- 限制 Bing 重试次数为 3，避免过多重试。
 
 ---
 
-### 🐞 Fixes
-- Fixed the issue that OpenAI translation may lose the first character.
-- Fixed the issue that OpenAI does not enable proxy by default.
-`;
+### 🐞 Fixed
 
+- Update Youdao translation API, fixed the problem that the translation failed. https://github.com/tisfeng/Raycast-Easydict/pull/65
+- Limit Bing retry count to 3, avoid too many retries. https://github.com/raycast/extensions/issues/16307
+`;
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;
   }

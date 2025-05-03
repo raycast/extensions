@@ -1,7 +1,7 @@
 import { environment, showToast, Toast } from "@raycast/api";
 import { Component, ErrorInfo, ReactNode } from "react";
 import TroubleshootingGuide from "~/components/TroubleshootingGuide";
-import { ERRORS } from "~/constants/general";
+import { ManuallyThrownError } from "~/utils/errors";
 
 type Props = {
   children?: ReactNode;
@@ -22,10 +22,10 @@ export default class RootErrorBoundary extends Component<Props, State> {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    if (error.name in ERRORS) {
+  async componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    if (error instanceof ManuallyThrownError) {
       this.setState((state) => ({ ...state, hasError: true, error: error.message }));
-      showToast(Toast.Style.Failure, error.message);
+      await showToast(Toast.Style.Failure, error.message);
     } else {
       if (environment.isDevelopment) {
         this.setState((state) => ({ ...state, hasError: true, error: error.message }));
@@ -36,17 +36,10 @@ export default class RootErrorBoundary extends Component<Props, State> {
 
   render() {
     try {
-      if (this.state.hasError) return <TroubleshootingGuide errorInfo={this.state.error} />;
+      if (this.state.hasError) return <TroubleshootingGuide error={this.state.error} />;
       return this.props.children;
     } catch {
       return <TroubleshootingGuide />;
     }
-  }
-}
-
-export class CLINotFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = ERRORS.CLINotFound;
   }
 }

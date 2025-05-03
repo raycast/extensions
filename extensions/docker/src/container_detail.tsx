@@ -1,9 +1,8 @@
-import { Action, ActionPanel, Color, Detail, Icon, useNavigation } from '@raycast/api';
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard, useNavigation } from '@raycast/api';
 import { DockerState } from './docker';
 import { containerName, formatContainerDetailMarkdown } from './docker/container';
 import { formatContainerError } from './docker/error';
 import { withToast } from './ui/toast';
-
 export default function ContainerDetail({ docker, containerId }: { docker: DockerState; containerId: string }) {
   const { isLoading, containerInfo, startContainer, restartContainer, stopContainer, removeContainer } =
     docker.useContainerInfo(containerId);
@@ -13,6 +12,7 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
     <Detail
       isLoading={isLoading}
       markdown={formatContainerDetailMarkdown(containerInfo)}
+      key={containerId}
       metadata={
         containerInfo && (
           <Detail.Metadata>
@@ -28,8 +28,19 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
             </Detail.Metadata.TagList>
             {containerInfo.Config.ExposedPorts && (
               <Detail.Metadata.TagList title="Ports">
-                {Object.keys(containerInfo.Config.ExposedPorts).map((p) => (
-                  <Detail.Metadata.TagList.Item text={p} color={Color.PrimaryText} />
+                {Object.keys(containerInfo.Config.ExposedPorts).map((p, idx) => (
+                  <Detail.Metadata.TagList.Item text={p} color={Color.PrimaryText} key={idx} />
+                ))}
+              </Detail.Metadata.TagList>
+            )}
+            {containerInfo.NetworkSettings.Ports && (
+              <Detail.Metadata.TagList title="Host Ports">
+                {Object.keys(containerInfo.NetworkSettings.Ports).map((p, idx) => (
+                  <Detail.Metadata.TagList.Item
+                    text={containerInfo.NetworkSettings.Ports[p]?.map((p) => p.HostPort).join(', ') || 'None'}
+                    color={Color.PrimaryText}
+                    key={idx}
+                  />
                 ))}
               </Detail.Metadata.TagList>
             )}
@@ -80,8 +91,9 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
           {containerInfo !== undefined && (
             <Action
               title="Remove Container"
-              icon={{ source: Icon.Trash, tintColor: Color.Red }}
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'x' }}
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={withToast({
                 action: async () => {
                   await removeContainer(containerInfo);

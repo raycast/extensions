@@ -1,23 +1,29 @@
 import { clearSearchBar, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import say from "say";
 import { v4 as uuidv4 } from "uuid";
-import { Chat, ChatHook, CreateChatCompletionDeltaResponse, Model } from "../type";
-import { chatTransfomer } from "../utils";
+import { Chat, ChatHook, Model } from "../type";
+import { buildUserMessage, chatTransformer } from "../utils";
 import { useAutoTTS } from "./useAutoTTS";
-import { useChatGPT } from "./useChatGPT";
+import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useHistory } from "./useHistory";
 import { useProxy } from "./useProxy";
+import { ChatCompletion, ChatCompletionChunk } from "openai/resources/chat/completions";
+import { Stream } from "openai/streaming";
 
 export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isLoading, setLoading] = useState<boolean>(false);
+  const [isAborted, setIsAborted] = useState<boolean>(false);
   const [useStream] = useState<boolean>(() => {
     return getPreferenceValues<{
       useStream: boolean;
     }>().useStream;
   });
+  const [streamData, setStreamData] = useState<Chat | undefined>();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const [isHistoryPaused] = useState<boolean>(() => {
     return getPreferenceValues<{
@@ -30,7 +36,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   const proxy = useProxy();
   const chatGPT = useChatGPT();
 
-  async function ask(question: string, model: Model) {
+  async function ask(question: string, files: string[], model: Model) {
     clearSearchBar();
 
     setLoading(true);
@@ -38,10 +44,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       title: "Getting your answer...",
       style: Toast.Style.Animated,
     });
-
     let chat: Chat = {
       id: uuidv4(),
       question,
+      files,
       answer: "",
       created_at: new Date().toISOString(),
     };
@@ -54,105 +60,116 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       setSelectedChatId(chat.id);
     }, 50);
 
-    await chatGPT
-      .createChatCompletion(
+    const getHeaders = function () {
+      const config = getConfiguration();
+      if (!config.useAzure) {
+        return { apiKey: {}, params: {} };
+      }
+      return {
+        apiKey: { "api-key": config.apiKey },
+        params: { "api-version": "2023-06-01-preview" },
+      };
+    };
+
+    abortControllerRef.current = new AbortController();
+    const { signal: abortSignal } = abortControllerRef.current;
+
+    await chatGPT.chat.completions
+      .create(
         {
           model: model.option,
           temperature: Number(model.temperature),
-          messages: [...chatTransfomer(data.reverse(), model.prompt), { role: "user", content: question }],
+          messages: [
+            ...chatTransformer(data.reverse(), model.prompt),
+            { role: "user", content: buildUserMessage(question, files) },
+          ],
           stream: useStream,
         },
         {
-          responseType: useStream ? "stream" : undefined,
-          proxy,
-        }
+          httpAgent: proxy,
+          // https://github.com/openai/openai-node/blob/master/examples/azure.ts
+          // Azure OpenAI requires a custom baseURL, api-version query param, and api-key header.
+          query: { ...getHeaders().params },
+          headers: { ...getHeaders().apiKey },
+          signal: abortSignal,
+        },
       )
       .then(async (res) => {
         if (useStream) {
-          (res.data as any).on("data", (data: CreateChatCompletionDeltaResponse) => {
-            const lines = data
-              .toString()
-              .split("\n")
-              .filter((line: string) => line.trim() !== "");
+          const stream = res as Stream<ChatCompletionChunk>;
 
-            for (const line of lines) {
-              const message = line.replace(/^data: /, "");
-              if (message === "[DONE]") {
-                setLoading(false);
+          for await (const chunk of stream) {
+            try {
+              const content = chunk.choices[0]?.delta?.content;
 
-                toast.title = "Got your answer!";
-                toast.style = Toast.Style.Success;
-
-                if (!isHistoryPaused) {
-                  history.add(chat);
-                }
-                return;
+              if (content) {
+                chat.answer += chunk.choices[0].delta.content;
+                setStreamData({ ...chat, answer: chat.answer });
               }
-              try {
-                const response: CreateChatCompletionDeltaResponse = JSON.parse(message);
-
-                const content = response.choices[0].delta?.content;
-
-                if (content) chat.answer += response.choices[0].delta.content;
-
-                setTimeout(async () => {
-                  setData((prev) => {
-                    return prev.map((a) => {
-                      if (a.id === chat.id) {
-                        return chat;
-                      }
-                      return a;
-                    });
-                  });
-                }, 5);
-              } catch (error) {
+            } catch (error) {
+              if (abortSignal.aborted) {
+                toast.title = "Request canceled";
+                toast.message = undefined;
+                setIsAborted(true);
+              } else {
+                const message = `Couldn't stream message: ${error}`;
                 toast.title = "Error";
-                toast.message = `Couldn't stream message`;
-                toast.style = Toast.Style.Failure;
-                setLoading(false);
+                toast.message = message;
+                setErrorMsg(message);
               }
-            }
-          });
-        } else {
-          chat = { ...chat, answer: res.data.choices.map((x) => x.message)[0]?.content ?? "" };
-
-          if (typeof chat.answer === "string") {
-            setLoading(false);
-
-            toast.title = "Got your answer!";
-            toast.style = Toast.Style.Success;
-
-            if (isAutoTTS) {
-              say.stop();
-              say.speak(chat.answer);
-            }
-
-            setData((prev) => {
-              return prev.map((a) => {
-                if (a.id === chat.id) {
-                  return chat;
-                }
-                return a;
-              });
-            });
-
-            if (!isHistoryPaused) {
-              history.add(chat);
+              toast.style = Toast.Style.Failure;
+              setLoading(false);
             }
           }
+
+          setTimeout(async () => {
+            setStreamData(undefined);
+          }, 5);
+        } else {
+          const completion = res as ChatCompletion;
+          chat = { ...chat, answer: completion.choices.map((x) => x.message)[0]?.content ?? "" };
+        }
+        if (isAutoTTS) {
+          say.stop();
+          say.speak(chat.answer);
+        }
+        setLoading(false);
+        if (abortSignal.aborted) {
+          toast.title = "Request canceled";
+          toast.style = Toast.Style.Failure;
+          setIsAborted(true);
+        } else {
+          toast.title = "Got your answer!";
+          toast.style = Toast.Style.Success;
+        }
+
+        setData((prev) => {
+          return prev.map((a) => {
+            if (a.id === chat.id) {
+              return chat;
+            }
+            return a;
+          });
+        });
+        if (!isHistoryPaused) {
+          await history.add(chat);
         }
       })
       .catch((err) => {
-        toast.title = "Error";
-        if (err) {
-          if (err?.response?.data?.error?.message) {
-            if (err.response.data.error.status === 429 || err.response.data.error.message.includes("429")) {
-              toast.message = "Please upgrade your account to pay-as-you-go";
-            } else {
-              toast.message = err.response.data.error.message;
-            }
+        if (abortSignal.aborted) {
+          toast.title = "Request canceled";
+          toast.message = undefined;
+          setIsAborted(true);
+        } else if (err?.message) {
+          if (err.message.includes("429")) {
+            const message = "Rate limit reached for requests";
+            toast.title = "Error";
+            toast.message = message;
+            setErrorMsg(message);
           } else {
+            toast.title = "Error";
             toast.message = err.message;
+            setErrorMsg(err.message);
           }
         }
         toast.style = Toast.Style.Failure;
@@ -160,12 +177,46 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       });
   }
 
+  const abort = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  }, []);
+
   const clear = useCallback(async () => {
     setData([]);
   }, [setData]);
 
   return useMemo(
-    () => ({ data, setData, isLoading, setLoading, selectedChatId, setSelectedChatId, ask, clear }),
-    [data, setData, isLoading, setLoading, selectedChatId, setSelectedChatId, ask, clear]
+    () => ({
+      data,
+      errorMsg,
+      setData,
+      isLoading,
+      setLoading,
+      isAborted,
+      setIsAborted,
+      selectedChatId,
+      setSelectedChatId,
+      ask,
+      clear,
+      streamData,
+      abort,
+    }),
+    [
+      data,
+      errorMsg,
+      setData,
+      isLoading,
+      setLoading,
+      isAborted,
+      setIsAborted,
+      selectedChatId,
+      setSelectedChatId,
+      ask,
+      clear,
+      streamData,
+      abort,
+    ],
   );
 }

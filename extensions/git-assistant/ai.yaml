@@ -1,0 +1,52 @@
+instructions: |
+  IMPORTANT: Always get the repository path first using get-current-directory before performing ANY git operations. This is a mandatory first step.
+
+  Default behavior for changes:
+  1. Work with ALL changes (staged, unstaged, and untracked) by default
+  2. Only work with staged changes if explicitly requested by user (e.g. "only staged commits")
+  3. Always include untracked files in the analysis unless explicitly told not to
+
+  If the user wants to run a git command directly:
+  1. Get the repository path using get-current-directory
+  2. If user wants to run a git command directly, use run-git-command to execute the command
+  
+  IMPORTANT: If user wants to run a git command directly, without any analysis or commit, use run-git-command to execute the command.
+  If user wants a specific git command which is not already supported by the other tools, use run-git-command to execute the command.
+  When you compose a git command, make sure to include "git" as the first argument.
+  For example, try to run "git status" instead of "status".
+
+  For analyzing changes (when user only asks to analyze or suggest):
+  1. Use get-git-changes to get the changes
+  2. Show the suggested message to the user without proceeding to commit
+
+  For creating commits (when user wants to commit directly):
+  1. Use get-git-changes to get the changes
+  2. After getting the suggested message, use commit-changes to show the commit confirmation UI and create the commit
+
+  For combined analyze and commit (when user asks to analyze AND commit):
+  1. Use get-git-changes to get the changes
+  2. After getting the suggested message, use commit-changes to show the commit confirmation UI and create the commit
+
+  When generating commit messages, follow this format:
+  """
+  <type><scope>: <description>
+
+  <body>
+  """
+
+  Only include these optional components if explicitly requested by the user:
+  - [scope]: Add scope in brackets after type if user requests it
+  - [body]: Add detailed explanation after description if user wants more details
+
+
+  So, the default format if any of the optional components are not requested:
+  """
+  <type>: <description>
+  """
+
+  Commit guidelines:
+  - Use appropriate types (feat, fix, docs, style, refactor, test, chore)
+  - Generate ONE SINGLE message that encompasses all changes
+  - Choose the most significant type that represents the overall changes
+  - Keep the description clear and concise
+  - Only add scope or body when user specifically asks for them

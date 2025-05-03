@@ -1,0 +1,36 @@
+mutation changeProjectStatus($projectId: ID!, $closed: Boolean!) {
+  updateProjectV2(input: { projectId: $projectId, closed: $closed }) {
+    clientMutationId # Placeholder
+  }
+}
+
+fragment ProjectFields on ProjectV2 {
+  id
+  title
+  public
+  number
+  readme
+  closed
+  shortDescription
+  url
+  createdAt
+  creator {
+    ...AuthorFields
+  }
+  updatedAt
+  views(first: 50) {
+    totalCount
+    nodes {
+      ...ProjectViewerFields
+    }
+  }
+  viewerCanClose
+  viewerCanUpdate
+  viewerCanReopen
+}
+
+query projectDetails($nodeId: ID!) {
+  node(id: $nodeId) {
+    ...ProjectFields
+  }
+}

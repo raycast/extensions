@@ -42,6 +42,7 @@ export function LabelList(props: {
   throttle?: boolean | undefined;
   navigationTitle?: string;
 }): JSX.Element {
+  const labels = props.labels.filter((l) => l && l.id);
   return (
     <List
       searchBarPlaceholder="Search labels by name"
@@ -51,7 +52,7 @@ export function LabelList(props: {
       navigationTitle={props.navigationTitle}
     >
       <List.Section title={props.title}>
-        {props.labels.map((l) => (
+        {labels.map((l) => (
           <LabelListItem key={l.id.toString()} label={l} />
         ))}
       </List.Section>

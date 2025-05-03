@@ -1,0 +1,512 @@
+fragment PullRequestFields on PullRequest {
+  id
+  title
+  permalink
+  merged
+  number
+  isDraft
+  body
+  closed
+  updatedAt
+  mergeable
+  milestone {
+    id
+    title
+  }
+  reviewDecision
+  repository {
+    ...ShortRepositoryFields
+  }
+  headRefName
+  headRef {
+    name
+  }
+  author {
+    ... on Bot {
+      id
+      login
+      avatarUrl(size: 64)
+    }
+    ... on User {
+      ...UserFields
+    }
+    ... on Mannequin {
+      id
+      login
+      avatarUrl(size: 64)
+    }
+    ... on Organization {
+      id
+      login
+      name
+      avatarUrl(size: 64)
+    }
+    ... on EnterpriseUserAccount {
+      id
+      login
+      name
+      avatarUrl(size: 64)
+    }
+  }
+  comments(first: 0) {
+    totalCount
+  }
+  reviewThreads(first: 100) {
+    totalCount
+    nodes {
+      comments(first: 0) {
+        totalCount
+      }
+    }
+  }
+  reviews(first: 100) {
+    totalCount
+    nodes {
+      bodyText
+    }
+  }
+  commits(last: 1) {
+    nodes {
+      commit {
+        statusCheckRollup {
+          state
+        }
+      }
+    }
+  }
+  assignees(first: 50) {
+    totalCount
+    nodes {
+      ... on User {
+        ...UserFields
+      }
+    }
+  }
+}
+
+query myPullRequests(
+  $createdOpenQuery: String!
+  $createdClosedQuery: String!
+  $assignedOpenQuery: String!
+  $assignedClosedQuery: String!
+  $mentionedOpenQuery: String!
+  $mentionedClosedQuery: String!
+  $reviewRequestsOpenQuery: String!
+  $reviewRequestsClosedQuery: String!
+  $reviewedByOpenQuery: String!
+  $reviewedByClosedQuery: String!
+  $numberOfOpenItems: Int!
+  $numberOfClosedItems: Int!
+) {
+  createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
+    pullRequests: edges {
+      pullRequest: node {
+        ...PullRequestFields
+      }
+    }
+  }
+  createdClosed: search(query: $createdClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
+    pullRequests: edges {
+      pullRequest: node {
+        ...PullRequestFields
+      }
+    }
+  }
+  assignedOpen: search(query: $assignedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
+    pullRequests: edges {
+      pullRequest: node {
+        ...PullRequestFields
+      }
+    }
+  }
+  assignedClosed: search(query: $assignedClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
+    pullRequests: edges {
+      pullRequest: node {
+        ...PullRequestFields
+      }
+    }
+  }
+  mentionedOpen: search(query: $mentionedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
+    pullRequests: edges {
+      pullRequest: node {
+        ...PullRequestFields
+      }
+    }
+  }
+  mentionedClosed: search(query: $mentionedClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
+    pullRequests: edges {
+      pullRequest: node {
+        ...PullRequestFields
+      }
+    }
+  }
+  reviewRequestsOpen: search(query: $reviewRequestsOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
+    pullRequests: edges {
+      pullRequest: node {
+        ...PullRequestFields
+      }
+    }
+  }
+  reviewRequestsClosed: search(query: $reviewRequestsClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
+    pullRequests: edges {
+      pullRequest: node {
+        ...PullRequestFields
+      }
+    }
+  }
+  reviewedByOpen: search(query: $reviewedByOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
+    pullRequests: edges {
+      pullRequest: node {
+        ...PullRequestFields
+      }
+    }
+  }
+  reviewedByClosed: search(query: $reviewedByClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
+    pullRequests: edges {
+      pullRequest: node {
+        ...PullRequestFields
+      }
+    }
+  }
+}
+
+query searchPullRequests($query: String!, $numberOfItems: Int!) {
+  search(query: $query, type: ISSUE, first: $numberOfItems) {
+    edges {
+      node {
+        ...PullRequestFields
+      }
+    }
+  }
+}
+
+fragment PullRequestDetailsFields on PullRequest {
+  id
+  title
+  body
+  permalink
+  merged
+  number
+  isDraft
+  closed
+  createdAt
+  updatedAt
+  additions
+  deletions
+  mergeable
+  milestone {
+    id
+    title
+  }
+  repository {
+    ...ShortRepositoryFields
+  }
+  baseRefName
+  baseRef {
+    name
+  }
+  headRefName
+  headRef {
+    name
+  }
+  labels(first: 50, orderBy: { field: NAME, direction: ASC }) {
+    totalCount
+    nodes {
+      id
+      name
+      color
+    }
+  }
+  author {
+    ... on Bot {
+      id
+      login
+      avatarUrl(size: 64)
+    }
+    ... on User {
+      ...UserFields
+    }
+    ... on Mannequin {
+      id
+      login
+      avatarUrl(size: 64)
+    }
+    ... on Organization {
+      id
+      login
+      name
+      avatarUrl(size: 64)
+    }
+    ... on EnterpriseUserAccount {
+      id
+      login
+      name
+      avatarUrl(size: 64)
+    }
+  }
+  comments(first: 0) {
+    totalCount
+  }
+  reviewRequests(first: 50) {
+    totalCount
+    nodes {
+      requestedReviewer {
+        ... on Team {
+          id
+          teamName: name
+          teamAvatarURL: avatarUrl(size: 64)
+        }
+        ... on User {
+          id
+          githubUsername: login
+          userName: name
+          userAvatarURL: avatarUrl(size: 64)
+        }
+        ... on Mannequin {
+          id
+          githubUsername: login
+          userAvatarURL: avatarUrl(size: 64)
+        }
+      }
+    }
+  }
+  reviews(first: 10, states: [PENDING, APPROVED, CHANGES_REQUESTED]) {
+    totalCount
+    nodes {
+      state
+      author {
+        ... on Bot {
+          id
+          login
+          avatarUrl(size: 64)
+        }
+        ... on User {
+          id
+          login
+          name
+          avatarUrl(size: 64)
+        }
+        ... on Mannequin {
+          id
+          login
+          avatarUrl(size: 64)
+        }
+        ... on Organization {
+          id
+          login
+          name
+          avatarUrl(size: 64)
+        }
+        ... on EnterpriseUserAccount {
+          id
+          login
+          name
+          avatarUrl(size: 64)
+        }
+      }
+    }
+  }
+  assignees(first: 50) {
+    totalCount
+    nodes {
+      ... on User {
+        ...UserFields
+      }
+    }
+  }
+  projectsV2(first: 20) {
+    totalCount
+    nodes {
+      id
+      title
+    }
+  }
+}
+
+query pullRequestDetails($nodeId: ID!) {
+  node(id: $nodeId) {
+    ...PullRequestDetailsFields
+  }
+}
+
+query repositoryCollaboratorsForPullRequests($owner: String!, $name: String!, $pullRequestNumber: Int!) {
+  repository(owner: $owner, name: $name) {
+    collaborators(first: 25) {
+      totalCount
+      nodes {
+        ... on User {
+          ...UserFields
+        }
+      }
+    }
+    pullRequest(number: $pullRequestNumber) {
+      assignees(first: 25) {
+        totalCount
+        nodes {
+          id
+        }
+      }
+    }
+  }
+}
+
+query repositoryProjectsForPullRequests($owner: String!, $name: String!, $pullRequestNumber: Int!) {
+  repository(owner: $owner, name: $name) {
+    projectsV2(first: 50, orderBy: { field: TITLE, direction: ASC }) {
+      totalCount
+      nodes {
+        id
+        title
+        number
+      }
+    }
+    pullRequest(number: $pullRequestNumber) {
+      projectsV2(first: 50) {
+        totalCount
+        nodes {
+          id
+        }
+      }
+    }
+  }
+}
+
+fragment PullRequestCommitFields on PullRequest {
+  commits(last: 100) {
+    totalCount
+    nodes {
+      commit {
+        id
+        authoredDate
+        message
+        oid
+        abbreviatedOid
+        author {
+          avatarUrl(size: 64)
+          name
+        }
+        statusCheckRollup {
+          state
+        }
+        url
+        treeUrl
+      }
+    }
+  }
+}
+
+query pullRequestCommits($nodeId: ID!) {
+  node(id: $nodeId) {
+    ...PullRequestCommitFields
+  }
+}
+
+fragment CommitFields on Commit {
+  authoredDate
+  oid
+  message
+}
+
+mutation closePullRequest($nodeId: ID!) {
+  closePullRequest(input: { pullRequestId: $nodeId }) {
+    pullRequest {
+      id
+    }
+  }
+}
+
+mutation reopenPullRequest($nodeId: ID!) {
+  reopenPullRequest(input: { pullRequestId: $nodeId }) {
+    pullRequest {
+      id
+    }
+  }
+}
+
+mutation addPullRequestReview($nodeId: ID!, $event: PullRequestReviewEvent, $body: String) {
+  addPullRequestReview(input: { pullRequestId: $nodeId, event: $event, body: $body }) {
+    pullRequestReview {
+      id
+    }
+  }
+}
+
+mutation changePullRequestAssignees($pullRequestId: ID!, $assigneeIds: [ID!]) {
+  updatePullRequest(input: { pullRequestId: $pullRequestId, assigneeIds: $assigneeIds }) {
+    clientMutationId # Placeholder
+  }
+}
+
+mutation changePullRequestMilestone($pullRequestId: ID!, $milestoneId: ID) {
+  updatePullRequest(input: { pullRequestId: $pullRequestId, milestoneId: $milestoneId }) {
+    clientMutationId # Placeholder
+  }
+}
+
+mutation addPullRequestToProject($pullRequestId: ID!, $projectId: ID!) {
+  addProjectV2ItemById(input: { projectId: $projectId, contentId: $pullRequestId }) {
+    clientMutationId # Placeholder
+  }
+}
+
+mutation requestReview($pullRequestId: ID!, $collaboratorId: ID!) {
+  requestReviews(input: { pullRequestId: $pullRequestId, userIds: [$collaboratorId], union: true }) {
+    clientMutationId # Placeholder
+  }
+}
+
+mutation mergePullRequest($nodeId: ID!, $method: PullRequestMergeMethod!) {
+  mergePullRequest(input: { pullRequestId: $nodeId, mergeMethod: $method }) {
+    pullRequest {
+      nodeId: id
+    }
+  }
+}
+
+mutation createPullRequest(
+  $repositoryId: ID!
+  $into: String!
+  $from: String!
+  $title: String!
+  $body: String!
+  $isDraft: Boolean!
+) {
+  createPullRequest(
+    input: {
+      repositoryId: $repositoryId
+      baseRefName: $into
+      headRefName: $from
+      title: $title
+      body: $body
+      draft: $isDraft
+    }
+  ) {
+    pullRequest {
+      id
+    }
+  }
+}
+
+mutation initPullRequest(
+  $pullRequestId: ID!
+  $reviewersIds: [ID!]!
+  $assigneeIds: [ID!]!
+  $labelsIds: [ID!]!
+  $milestoneId: ID
+) {
+  requestReviews(input: { pullRequestId: $pullRequestId, userIds: $reviewersIds }) {
+    pullRequest {
+      id
+      reviewRequests {
+        totalCount
+      }
+    }
+  }
+  updatePullRequest(
+    input: { pullRequestId: $pullRequestId, assigneeIds: $assigneeIds, labelIds: $labelsIds, milestoneId: $milestoneId }
+  ) {
+    pullRequest {
+      ...PullRequestFields
+    }
+  }
+}

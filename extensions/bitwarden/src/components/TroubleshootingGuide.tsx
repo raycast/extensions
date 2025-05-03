@@ -1,36 +1,83 @@
-import { ActionPanel, Action, Detail } from "@raycast/api";
+import { ActionPanel, Action, Detail, getPreferenceValues, environment } from "@raycast/api";
+import { BugReportCollectDataAction, BugReportOpenAction } from "~/components/actions";
+import { BUG_REPORT_URL } from "~/components/actions/BugReportOpenAction";
+import { EnsureCliBinError, InstalledCLINotFoundError, getErrorString } from "~/utils/errors";
 
-const CODE_BACKTICKS = "```";
-const BW_CLI_INSTALLATION_DOCS_URL = "https://bitwarden.com/help/cli/#download-and-install";
-const BW_CLI_HOMEBREW_DOCS_URL = "https://formulae.brew.sh/formula/bitwarden-cli";
-const GITHUB_CREATE_ISSUE_URL =
-  "https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2Cbug&template=extension_bug_report.yml&title=%5BBitwarden%5D+...";
+const LINE_BREAK = "\n\n";
+const CLI_INSTALLATION_HELP_URL = "https://bitwarden.com/help/cli/#download-and-install";
 
-const getContent = (errorInfo?: string) => `# 🚨 Something went wrong
-${errorInfo ? `${CODE_BACKTICKS}\n${errorInfo}\n${CODE_BACKTICKS}` : "\n"}
-## Troubleshooting Guide:
+const getCodeBlock = (content: string) => `\`\`\`\n${content}\n\`\`\``;
 
-1. The [Bitwarden CLI](${BW_CLI_INSTALLATION_DOCS_URL}) is correctly installed
-2. If you did not install the Bitwarden CLI [using Homebrew](${BW_CLI_HOMEBREW_DOCS_URL}), please check that the path of the installation matches the \`Bitwarden CLI Installation Path\` extension setting. 
-    - 💡 Run the \`which bw\` command to check the CLI installation path.
-
-If you are still experiencing issues, please [open an issue on GitHub](${GITHUB_CREATE_ISSUE_URL}).
-`;
+type Messages = string | number | false | 0 | "" | null | undefined;
 
 export type TroubleshootingGuideProps = {
-  errorInfo?: string;
+  error?: any;
 };
 
-const TroubleshootingGuide = (props: TroubleshootingGuideProps) => (
-  <Detail
-    markdown={getContent(props.errorInfo)}
-    actions={
-      <ActionPanel>
-        <Action.CopyToClipboard title="Copy Homebrew Installation Command" content="brew install bitwarden-cli" />
-        <Action.OpenInBrowser title="Open Installation Guide" url={BW_CLI_INSTALLATION_DOCS_URL} />
-      </ActionPanel>
-    }
-  />
-);
+const TroubleshootingGuide = ({ error }: TroubleshootingGuideProps) => {
+  const errorString = getErrorString(error);
+  const localCliPath = getPreferenceValues<Preferences>().cliPath;
+  const isCliDownloadError = error instanceof EnsureCliBinError;
+  const needsToInstallCli = localCliPath || error instanceof InstalledCLINotFoundError;
+
+  const messages: Messages[] = [];
+
+  if (needsToInstallCli && !isCliDownloadError) {
+    messages.push("# ⚠️ Bitwarden CLI not found");
+  } else {
+    messages.push("# 💥 Whoops! Something went wrong");
+  }
+
+  if (isCliDownloadError) {
+    messages.push(
+      `We couldn't download the [Bitwarden CLI](${CLI_INSTALLATION_HELP_URL}), you can always install it on your machine.`
+    );
+  } else if (needsToInstallCli) {
+    const cliPathString = localCliPath ? ` (${localCliPath})` : "";
+    messages.push(
+      `We couldn't find the [Bitwarden CLI](${CLI_INSTALLATION_HELP_URL}) installed on your machine${cliPathString}.`
+    );
+  } else {
+    messages.push(`The \`${environment.commandName}\` command crashed when we were not expecting it to.`);
+  }
+
+  messages.push(
+    "> Please read the `Setup` section in the [extension's description](https://www.raycast.com/jomifepe/bitwarden) to ensure that everything is properly configured."
+  );
+
+  messages.push(
+    `**Try restarting the command. If the issue persists, consider [reporting a bug on GitHub](${BUG_REPORT_URL}) to help us fix it.**`
+  );
+
+  if (errorString) {
+    const isArchError = /incompatible architecture/gi.test(errorString);
+    messages.push(
+      ">## Technical details 🤓",
+      isArchError &&
+        "⚠️ We suspect that your Bitwarden CLI was installed using a version of NodeJS that's incompatible with your system architecture (e.g. x64 NodeJS on a M1/Apple Silicon Mac). Please make sure your have the correct versions of your software installed (Homebrew → NodeJS → Bitwarden CLI).",
+      getCodeBlock(errorString)
+    );
+  }
+
+  return (
+    <Detail
+      markdown={messages.filter(Boolean).join(LINE_BREAK)}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title="Bug Report">
+            <BugReportOpenAction />
+            <BugReportCollectDataAction />
+          </ActionPanel.Section>
+          {needsToInstallCli && (
+            <>
+              <Action.CopyToClipboard title="Copy Homebrew Installation Command" content="brew install bitwarden-cli" />
+              <Action.OpenInBrowser title="Open Installation Guide" url={CLI_INSTALLATION_HELP_URL} />
+            </>
+          )}
+        </ActionPanel>
+      }
+    />
+  );
+};
 
 export default TroubleshootingGuide;

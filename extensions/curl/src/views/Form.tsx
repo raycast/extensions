@@ -6,6 +6,7 @@ import axios from "axios";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const curlString = require("curl-string");
+
 interface Identifiable {
   [key: string]: string | number;
 }
@@ -20,6 +21,7 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
   const [method, setMethod] = useState<string>("GET");
   const [url, setUrl] = useState<string>("https://jsonplaceholder.typicode.com/todos/1");
   const [headers, setHeaders] = useState<Header[]>([{ key: "Content-Type", value: "application/json" }]);
+  const [headerSearchTexts, setHeaderSearchTexts] = useState<(string | undefined)[]>([]);
   const [body, setBody] = useState<string>("");
 
   async function handleSubmit() {
@@ -57,10 +59,12 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
         const curl = curlString(url, curlOptions);
 
         await LocalStorage.setItem(
-          `${method}-${url}`,
-          JSON.stringify({ ...payload, meta: { title: "", description: "" } })
+          method != "GET" && method != "DELETE"
+            ? `${method}-${url}-${body.replace("```\n\b\b", "")}`
+            : `${method}-${url}`,
+          JSON.stringify({ ...payload, meta: { title: "", description: "", jsonPathQuery: "" } }),
         );
-        push(<ResultView result={result as never} curl={curl} />);
+        push(<ResultView result={result as never} curl={curl} jsonPathResult={""} />);
       })
       .catch((err) => {
         showToast({
@@ -88,12 +92,25 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
     setHeaders(newHeaders);
   }
 
+  function handleSearchTextChange(index: number, payload: string) {
+    handleHeaderState("key", index, "");
+    const newHeaderSearchTexts = [...headerSearchTexts];
+    payload = payload.trim();
+    newHeaderSearchTexts[index] = payload === "" ? undefined : payload;
+    setHeaderSearchTexts(newHeaderSearchTexts);
+  }
+
+  function filterHeaderOptions(index: number, option: string) {
+    const search = headerSearchTexts[index];
+    return search === undefined || option.toLowerCase().includes(search);
+  }
+
   return (
     <Form
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Make request" icon={Icon.Rocket} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Make Request" icon={Icon.Rocket} onSubmit={handleSubmit} />
           <Action
             title="Add Headers"
             icon={Icon.Plus}
@@ -142,10 +159,20 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
                 title="Key"
                 onChange={(key) => handleHeaderState("key", index, key)}
                 value={headers[index].key}
+                onSearchTextChange={(text) => handleSearchTextChange(index, text)}
               >
-                {headerKeys.map((key, idx) => (
-                  <Form.Dropdown.Item key={`header-${idx}-key`} value={key} title={key} />
-                ))}
+                {headerSearchTexts[index] !== undefined && (
+                  <Form.Dropdown.Item
+                    key={`header-${-1}-key`}
+                    value={headerSearchTexts[index]!}
+                    title={headerSearchTexts[index]!}
+                  />
+                )}
+                {headerKeys
+                  .filter((option) => filterHeaderOptions(index, option))
+                  .map((key, idx) => (
+                    <Form.Dropdown.Item key={`header-${idx}-key`} value={key} title={key} />
+                  ))}
               </Form.Dropdown>
               <Form.TextField
                 id={`header-value-${index}`}

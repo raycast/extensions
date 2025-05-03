@@ -2,9 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "urban-dictionary",
   "title": "Urban Dictionary Search",
-  "description": "Search on urban dictionary",
+  "description": "Search on Urban Dictionary",
   "icon": "urban.png",
-  "author": "Sheraff",
+  "author": "pernielsentikaer",
+  "contributors": [
+    "zhenpewu",
+    "xilopaint"
+  ],
   "categories": [
     "Web",
     "Fun"
@@ -21,29 +25,28 @@
           "name": "query",
           "type": "text",
           "required": false,
-          "placeholder": "search"
+          "placeholder": "Query"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "@types/node-fetch": "^2.6.2",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.81.0",
+    "@raycast/utils": "^1.16.4"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -1,7 +1,8 @@
-import { closeMainWindow, open } from "@raycast/api";
+import { LaunchProps, closeMainWindow, open } from "@raycast/api";
 
-export default async () => {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.CapturePreviousArea }>) {
   const url = "cleanshot://capture-previous-area";
-  open(url);
   await closeMainWindow();
-};
+  if (props.arguments?.action) open(url + "?action=" + props.arguments.action);
+  else open(url);
+}

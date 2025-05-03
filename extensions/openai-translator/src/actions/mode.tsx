@@ -1,8 +1,6 @@
-import { Action, ActionPanel, Clipboard, getSelectedText, Icon, showToast, Toast } from "@raycast/api";
-import { QueryHook } from "../hooks/useQuery";
-import { Record } from "../hooks/useHistory";
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import capitalize from "capitalize";
-import { TranslateMode } from "../providers/openai/translate";
+import { TranslateMode } from "../providers/types";
 
 const table: [TranslateMode, Icon][] = [
   ["translate", Icon.Book],
@@ -11,7 +9,7 @@ const table: [TranslateMode, Icon][] = [
   ["what", Icon.QuestionMark],
 ];
 
-export const getModeActionSection = (callback: (arg0: TranslateMode) => void) => (
+export const getModeActionSection = (callback: (_arg0: TranslateMode) => void) => (
   <ActionPanel.Submenu title="Mode" icon={Icon.Paragraph} shortcut={{ modifiers: ["cmd"], key: "m" }}>
     {table.map((m) => (
       <Action

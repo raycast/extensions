@@ -1,8 +1,7 @@
 import { ActionPanel, Action, List, Image, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { URLSearchParams } from "node:url";
-import { useEffect, useState } from "react";
-import { createGlobalState } from "react-hooks-global-state";
+import { useState } from "react";
 
 type SearchResult = {
   companies: Company[];
@@ -123,35 +122,35 @@ function getSearchParams(searchText: string, batch: string | null, page: number)
   return params;
 }
 
-const initialState = { page: 0, batch: null };
-const { useGlobalState } = createGlobalState(initialState);
-
 export default function Command(props: { fallbackText?: string }) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
-  const [page, setPage] = useGlobalState("page");
   const [batch, setBatch] = useState<string | null>(null);
-  const { data, isLoading } = useFetch<SearchResult>(
-    "https://api.ycombinator.com/v0.1/companies?" + getSearchParams(searchText, batch, page).toString(),
-    { keepPreviousData: true, execute: !!batch }
+  const { data, isLoading, pagination } = useFetch(
+    ({ page }) =>
+      "https://api.ycombinator.com/v0.1/companies?" +
+      getSearchParams(searchText, batch, searchText === "" ? page + 1 : page).toString(),
+    {
+      mapResult: (result: SearchResult) => {
+        return { data: result.companies, hasMore: typeof result.nextPage !== "undefined" };
+      },
+      keepPreviousData: true,
+      execute: !!batch,
+    }
   );
-
-  useEffect(() => {
-    setPage(0);
-  }, [batch, searchText]);
 
   return (
     <List
       isLoading={isLoading}
+      pagination={pagination}
       searchBarPlaceholder="Search companies..."
-      selectedItemId={data?.companies[0]?.id.toString()}
+      selectedItemId={data?.[0]?.id.toString()}
       searchBarAccessory={<BatchDropdown onChange={setBatch} />}
       onSearchTextChange={setSearchText}
       isShowingDetail
       throttle
     >
       {/* Need to check batch, otherwise List flickers because cache gets returned */}
-      {batch && <ResultsListSection searchResult={data} batch={batch} />}
-      {batch && batch !== "all" && <NavigationListSection searchResult={data} />}
+      {batch && <ResultsListSection companies={data} batch={batch} />}
     </List>
   );
 }
@@ -171,10 +170,10 @@ function BatchDropdown({ onChange }: { onChange: (value: string | null) => void 
   );
 }
 
-function ResultsListSection({ searchResult, batch }: { searchResult?: SearchResult; batch: string | null }) {
+function ResultsListSection({ companies }: { companies?: Company[]; batch: string | null }) {
   return (
     <List.Section title="Results">
-      {searchResult?.companies.map((company) => (
+      {companies?.map((company) => (
         <List.Item
           id={company.id.toString()}
           key={company.id}
@@ -239,124 +238,10 @@ function ResultsListSection({ searchResult, batch }: { searchResult?: SearchResu
                   shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
                 />
               </ActionPanel.Section>
-              {batch && batch !== "all" && <NavigationActionSection searchResult={searchResult} />}
             </ActionPanel>
           }
         />
       ))}
     </List.Section>
-  );
-}
-
-function NavigationListSection(props: { searchResult?: SearchResult }) {
-  return (
-    <List.Section title="Navigation">
-      {props.searchResult && props.searchResult.page > 0 && (
-        <List.Item
-          icon={{ source: Icon.ArrowLeftCircle, tintColor: Color.PrimaryText }}
-          title="Previous Results"
-          accessories={[
-            { icon: Icon.Info, tooltip: `Use "⌘ + [" to load previous page or "⌘ + ⇧ + [" to go to first page` },
-          ]}
-          actions={
-            <ActionPanel>
-              <NavigationActionSection searchResult={props.searchResult} firstAction="previous-page" />
-            </ActionPanel>
-          }
-        />
-      )}
-      {props.searchResult && props.searchResult.page < props.searchResult.totalPages - 1 && (
-        <List.Item
-          icon={{ source: Icon.ArrowRightCircle, tintColor: Color.PrimaryText }}
-          title="Next Results"
-          accessories={[
-            { icon: Icon.Info, tooltip: `Use "⌘ + ]" to load next page or "⌘ + ⇧ + ]" to go to last page` },
-          ]}
-          actions={
-            <ActionPanel>
-              <NavigationActionSection searchResult={props.searchResult} firstAction="next-page" />
-            </ActionPanel>
-          }
-        />
-      )}
-    </List.Section>
-  );
-}
-
-function NavigationActionSection({
-  searchResult,
-  firstAction,
-}: {
-  searchResult?: SearchResult;
-  firstAction?: "next-page" | "previous-page";
-}) {
-  if (!searchResult) {
-    return null;
-  }
-
-  return (
-    <ActionPanel.Section title="Navigation">
-      {firstAction === "next-page" ? (
-        <>
-          {searchResult.nextPage && <GoToNextPageAction />}
-          {searchResult.page > 0 && <GoToPreviousPageAction />}
-        </>
-      ) : (
-        <>
-          {searchResult.page > 0 && <GoToPreviousPageAction />}
-          {searchResult.nextPage && <GoToNextPageAction />}
-        </>
-      )}
-      {searchResult.page < searchResult.totalPages - 1 && <GoToLastPageAction totalPages={searchResult.totalPages} />}
-      {searchResult.page !== 0 && <GoToFirstPageAction />}
-    </ActionPanel.Section>
-  );
-}
-
-function GoToPreviousPageAction() {
-  const [page, setPage] = useGlobalState("page");
-  return (
-    <Action
-      icon={Icon.ArrowLeftCircle}
-      title="Go to Previous Page"
-      shortcut={{ modifiers: ["cmd"], key: "[" }}
-      onAction={() => setPage(Math.max(page - 1, 0))}
-    />
-  );
-}
-
-function GoToNextPageAction() {
-  const [page, setPage] = useGlobalState("page");
-  return (
-    <Action
-      icon={Icon.ArrowRightCircle}
-      title="Go to Next Page"
-      shortcut={{ modifiers: ["cmd"], key: "]" }}
-      onAction={() => setPage(page + 1)}
-    />
-  );
-}
-
-function GoToFirstPageAction() {
-  const [, setPage] = useGlobalState("page");
-  return (
-    <Action
-      icon={Icon.ArrowLeftCircleFilled}
-      title="Go to First Page"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "[" }}
-      onAction={() => setPage(0)}
-    />
-  );
-}
-
-function GoToLastPageAction({ totalPages }: { totalPages: number }) {
-  const [, setPage] = useGlobalState("page");
-  return (
-    <Action
-      icon={Icon.ArrowRightCircleFilled}
-      title="Go to Last Page"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "]" }}
-      onAction={() => setPage(totalPages)}
-    />
   );
 }

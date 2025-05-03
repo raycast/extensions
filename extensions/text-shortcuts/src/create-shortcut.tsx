@@ -1,5 +1,9 @@
-import React, { useEffect, useState } from "react";
 import { Action, ActionPanel, Color, Form, Icon, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
+import React, { useEffect, useState } from "react";
+import { ActionOnTactions } from "./components/action-on-tactions";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { variables } from "./types/types";
+import { shortcutTips } from "./util/constants";
 import {
   cases,
   checkAffix,
@@ -15,10 +19,6 @@ import {
   tags,
   transforms,
 } from "./util/shortcut";
-import { variables } from "./types/types";
-import { shortcutTips } from "./util/constants";
-import { ActionOnTactions } from "./components/action-on-tactions";
-import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function CreateShortcut(props: {
   shortcut: Shortcut | undefined;
@@ -32,6 +32,7 @@ export default function CreateShortcut(props: {
         }
       : props.setRefresh;
   const editShortcut = typeof _editShortcut == "undefined" ? new Shortcut() : _editShortcut;
+  const isEdit = typeof _editShortcut != "undefined";
   const [localShortcuts, setLocalShortcuts] = useState<Shortcut[]>([]);
   const [info, setInfo] = useState<ShortcutInfo>(editShortcut.info);
   const [tactions, setTactions] = useState<Taction[]>([]);
@@ -51,9 +52,10 @@ export default function CreateShortcut(props: {
 
   return (
     <Form
-      navigationTitle={"Create Text Shortcut"}
+      navigationTitle={isEdit ? "Edit Text Shortcut" : "Create Text Shortcut"}
       actions={
         <CreateShortcutActions
+          isEdit={isEdit}
           info={info}
           tactions={tactions}
           localShortcuts={localShortcuts}
@@ -109,7 +111,7 @@ export default function CreateShortcut(props: {
               key={value[0]}
               title={value[0]}
               icon={{ source: Icon.CircleFilled, tintColor: value[1] as Color }}
-              value={value[1]}
+              value={value[1] + ""}
             />
           );
         })}
@@ -127,7 +129,7 @@ export default function CreateShortcut(props: {
         }}
       >
         {tags.map((value) => {
-          return <Form.TagPicker.Item key={value} title={value} icon={Icon.Pin} value={value} />;
+          return <Form.TagPicker.Item key={value} title={value} icon={Icon.Hashtag} value={value} />;
         })}
       </Form.TagPicker>
 
@@ -300,19 +302,20 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
 }
 
 function CreateShortcutActions(props: {
+  isEdit: boolean;
   info: ShortcutInfo;
   tactions: Taction[];
   setTactions: React.Dispatch<React.SetStateAction<Taction[]>>;
   localShortcuts: Shortcut[];
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const { info, tactions, setTactions, localShortcuts, setRefresh } = props;
+  const { isEdit, info, tactions, setTactions, localShortcuts, setRefresh } = props;
   const { pop } = useNavigation();
   return (
     <ActionPanel>
       <Action
-        title="Create Shortcut"
-        icon={Icon.PlusCircle}
+        title={isEdit ? "Update Shortcut" : "Create Shortcut"}
+        icon={isEdit ? Icon.RotateClockwise : Icon.PlusCircle}
         onAction={async () => {
           const _checkInfo = checkInfo(info.name, tactions);
           const _checkAffix = checkAffix(tactions);
@@ -324,13 +327,13 @@ function CreateShortcutActions(props: {
             await showToast(
               Toast.Style.Failure,
               `Shortcut has empty actions.`,
-              `Check action${_checkInfo.tactionContentValid.actionIndex}.`
+              `Check action${_checkInfo.tactionContentValid.actionIndex}.`,
             );
           } else if (!_checkAffix.valid) {
             await showToast(
               Toast.Style.Failure,
               `Affix has more than one "Input" variable.`,
-              `Check action${_checkAffix.affixIndex}.`
+              `Check action${_checkAffix.affixIndex}.`,
             );
           } else {
             await createShortcut(info, tactions, localShortcuts);
@@ -352,7 +355,7 @@ function updateTactionContent(
   index: number,
   taction: Taction[],
   setTactions: React.Dispatch<React.SetStateAction<Taction[]>>,
-  contentIndex = 0
+  contentIndex = 0,
 ) {
   taction[index].content[contentIndex] = content;
   setTactions(taction);

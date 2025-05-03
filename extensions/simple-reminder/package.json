@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simple-reminder",
+  "title": "Simple Reminder",
+  "description": "Set your reminders in natural language without the need to have any application installed.",
+  "icon": "logo.png",
+  "author": "comoser",
+  "contributors": [
+    "pernielsentikaer",
+    "miguel-felix1"
+  ],
+  "keywords": [
+    "remind",
+    "reminder",
+    "simple"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Add Reminder",
+      "description": "Add a new reminder or check existing ones. You will be notified when the reminder time is reached.",
+      "mode": "view"
+    },
+    {
+      "name": "reminderNotifications",
+      "title": "Reminder System Notifications",
+      "description": "Background service to notify the user through a system notification when a reminder date is right up",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "reminderMenuBar",
+      "title": "Reminder Menu Bar",
+      "subtitle": "Simple Reminder",
+      "description": "See your simple reminders in your macOS menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mobileNotificationNtfy",
+      "description": "With this option turned on, you will receive notifications (through ntfy) in your mobile phone when a reminder time is up",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Mobile notifications with ntfy"
+    },
+    {
+      "name": "mobileNotificationNtfyTopic",
+      "description": "Specify the topic you want to receive notifications in. Can be used for the default ntfy server or a self-hosted one",
+      "type": "textfield",
+      "default": "",
+      "required": false,
+      "title": "ntfy topic"
+    },
+    {
+      "name": "mobileNotificationNtfyServerUrl",
+      "description": "When ntfy mobile notifications are on, if this url is set (from a self-hosted ntfy server), it will be used to send the notification",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "Only use this if you're using a self-hosted ntfy server",
+      "required": false,
+      "title": "ntfy server url"
+    },
+    {
+      "name": "mobileNotificationNtfyServerAccessToken",
+      "description": "When ntfy mobile notifications are on and a self-hosted ntfy url is being used, this is the authentication access token to use to authenticate against the server",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "Only use this if you're using a self-hosted ntfy server",
+      "required": false,
+      "title": "ntfy server access token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.73.3",
+    "@raycast/utils": "^1.15.0",
+    "chrono-node": "^2.6.3",
+    "date-fns": "^3.6.0",
+    "natural": "^6.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "^18.2.66",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o ./dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

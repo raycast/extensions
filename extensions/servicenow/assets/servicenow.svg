@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="logosandtypes_com" data-name="logosandtypes com" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #62d84e;
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <g id="Layer_3" data-name="Layer 3">
+    <g id="Layer_3-2" data-name="Layer 3">
+      <g id="Layer_2" data-name="Layer 2">
+        <path id="Layer_3-3" data-name="Layer 3" class="cls-1" d="M0,0H150V150H0V0Z"/>
+      </g>
+    </g>
+  </g>
+  <path class="cls-2" d="M76.01,13.9c-36.61-.21-66.89,29.74-67.2,66.49-.16,19.45,7.94,37.02,20.98,49.36,4.75,4.49,12.08,4.92,17.23,.91,7.6-5.94,17.37-9.47,28.6-9.47s20.99,3.54,28.6,9.47c5.19,4.05,12.55,3.53,17.33-1.01,12.86-12.22,20.89-29.53,20.89-48.7,0-36.9-29.71-66.85-66.42-67.06m-.39,100.59c-19.83,0-33.4-14.93-33.4-33.4s13.57-33.66,33.4-33.66,33.4,15.18,33.4,33.66-13.56,33.4-33.4,33.4"/>
+</svg>

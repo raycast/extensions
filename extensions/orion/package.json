@@ -5,6 +5,9 @@
   "description": "Manage your Orion Bookmarks, History, Tabs, and Reading list",
   "icon": "orion-icon.png",
   "author": "plonq",
+  "contributors": [
+    "erics118"
+  ],
   "categories": [
     "Web"
   ],
@@ -34,6 +37,13 @@
       "subtitle": "Orion",
       "description": "Browse your open tabs",
       "mode": "view"
+    },
+    {
+      "name": "profiles",
+      "title": "Search Profiles",
+      "subtitle": "Orion",
+      "description": "Browse your profiles",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -48,18 +58,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.7",
-    "bplist-parser": "^0.3.2",
-    "osascript-tag": "^0.1.2"
+    "@raycast/api": "^1.58.0",
+    "@raycast/utils": "^1.9.1",
+    "bplist-parser": "^0.3.2"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@typescript-eslint/eslint-plugin": "^6.6.0",
+    "@typescript-eslint/parser": "^6.6.0",
+    "eslint": "^8.49.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -67,5 +76,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

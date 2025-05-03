@@ -1,8 +1,9 @@
 import * as fs from "fs";
 import { useSQL } from "@raycast/utils";
-import { HistoryEntry, SearchResult } from "../interfaces";
-import { getHistoryDbPath } from "../util";
-import { NotInstalledError } from "../components";
+import { HistoryEntry, SearchResult } from "../types/interfaces";
+import { getHistoryDbPath } from "../utils/pathUtils";
+import { useIsAppInstalled } from "./useIsAppInstalled";
+import { NoHistoryError } from "../components/error/NoHistoryError";
 
 const whereClauses = (tableTitle: string, terms: string[]) => {
   return terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ");
@@ -21,13 +22,18 @@ const getHistoryQuery = (table: string, date_field: string, terms: string[]) =>
      WHERE ${whereClauses(table, terms)}
      ORDER BY ${date_field} DESC LIMIT 30;`;
 
-const searchHistory = (profile: string, query?: string): SearchResult<HistoryEntry> => {
+export function useHistorySearch(profile: string, query?: string): SearchResult<HistoryEntry> {
   const terms = query ? query.trim().split(" ") : [""];
   const queries = getHistoryQuery("urls", "last_visit_time", terms);
   const dbPath = getHistoryDbPath(profile);
+  const { errorView } = useIsAppInstalled();
+
+  if (errorView) {
+    return { isLoading: false, data: [], errorView };
+  }
 
   if (!fs.existsSync(dbPath)) {
-    return { isLoading: false, data: [], errorView: <NotInstalledError /> };
+    return { isLoading: false, data: [], errorView: <NoHistoryError /> };
   }
 
   const { data, isLoading, permissionView, revalidate } = useSQL<HistoryEntry>(dbPath, queries);
@@ -37,8 +43,4 @@ const searchHistory = (profile: string, query?: string): SearchResult<HistoryEnt
     errorView: permissionView,
     revalidate,
   };
-};
-
-export function useHistorySearch(profile: string, query?: string): SearchResult<HistoryEntry> {
-  return searchHistory(profile, query);
 }

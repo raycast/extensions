@@ -1,15 +1,13 @@
 <p align="center">
-  <img src="assets/icon.png" height="128">
+  <img src="assets/icon.png" width="64" alt="">
   <h1 align="center">IMDb Search</h1>
 </p>
 
-A [Raycast](https://raycast.com/) extenstion that lets you easily open your favorite film or tv series on [IMDb](https://imdb.com/).
+A [Raycast](https://raycast.com/) extension that lets you easily open your favorite film or tv series on [IMDb](https://imdb.com/).
 
 This extension is made by [Ryan Voevodin](https://twitter.com/RyanVoevodin) and uses [The Open Movie Database API](https://www.omdbapi.com/) (OMDb) by Brian Fritz.
 
-![Example of IMDb Search Extension on Raycast](https://ryan-exe.s3.ap-southeast-2.amazonaws.com/imdb-raycast/showcase.png)
-
-## Getting your API Token
+## Getting Your API Token
 
 1. Visit the [OMDb website](https://www.omdbapi.com/apikey.aspx).
 2. Sign up to the `Free (1000 Daily Limit)` option with your email address.
@@ -17,8 +15,6 @@ This extension is made by [Ryan Voevodin](https://twitter.com/RyanVoevodin) and 
    > Note: You may need to change the activation link to `https://`
 4. Copy your key e.g. `ab12c345` onto the IMDb Search preference pane on Raycast (see image below).
 5. You're all ready to go, start searching.
-
-![Enter your API on Preference Pane](https://ryan-exe.s3.ap-southeast-2.amazonaws.com/imdb-raycast/enterAPI.png)
 
 ## Troubleshooting
 
@@ -37,6 +33,10 @@ The API key you've provided either hasn't been activated or is incorrect.
 ### Other Issues
 
 If any other issues persist, feel free to [contact me](https://twitter.com/RyanVoevodin).
+
+### Credits
+
+- Director icon by [www.wishforge.games](https://www.iconfinder.com/bitfreak86)
 
 ## Notes
 

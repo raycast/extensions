@@ -1,16 +1,16 @@
 import { Secret } from '@scaleway/sdk'
 import { useDataLoader } from '@scaleway/use-dataloader'
-import { useAPI } from 'providers'
+import { useAPI } from '../../../helpers/useAPI'
 
 type DataLoaderOptions<T> = Parameters<typeof useDataLoader<T>>[2]
 
 export const useSecretVersionsQuery = (
-  params: Secret.v1alpha1.ListSecretVersionsRequest,
-  dataloaderOptions: DataLoaderOptions<Secret.v1alpha1.ListSecretVersionsResponse['versions']> = {}
+  params: Secret.v1beta1.ListSecretVersionsRequest,
+  dataloaderOptions: DataLoaderOptions<Secret.v1beta1.ListSecretVersionsResponse['versions']> = {}
 ) => {
   const { secretManager } = useAPI()
 
-  const regions = params.region ? [params.region] : Secret.v1alpha1.API.LOCALITIES
+  const regions = params.region ? [params.region] : Secret.v1beta1.API.LOCALITIES
 
   const key = ['SecretManager', 'secrets', 'versions', regions, Object.entries(params).sort()].flat(
     3

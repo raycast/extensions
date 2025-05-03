@@ -1,15 +1,10 @@
 import { Action, ActionPanel, Form, Icon, LocalStorage, useNavigation } from "@raycast/api";
-import { Dispatch, SetStateAction } from "react";
 import { Timezone } from "./types/types";
 import { isEmpty } from "./utils/common-utils";
 import { icons, localStorageKey } from "./utils/costants";
 
-export default function EditTimeZone(props: {
-  index: number;
-  starTimezones: Timezone[];
-  setRefresh: Dispatch<SetStateAction<number>>;
-}) {
-  const { index, starTimezones, setRefresh } = props;
+export default function EditTimeZone(props: { index: number; starTimezones: Timezone[] }) {
+  const { index, starTimezones } = props;
   const timezone = starTimezones[index];
   const { pop } = useNavigation();
 
@@ -19,11 +14,10 @@ export default function EditTimeZone(props: {
       actions={
         <ActionPanel>
           <Action
-            icon={Icon.Download}
+            icon={Icon.SaveDocument}
             title={"Save Timezone"}
             onAction={async () => {
               await LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(starTimezones));
-              setRefresh(Date.now());
               pop();
             }}
           />
@@ -39,6 +33,19 @@ export default function EditTimeZone(props: {
           starTimezones[index].alias = newValue.trim();
         }}
       />
+      <Form.FilePicker
+        id={"Avatar"}
+        title="Avatar"
+        canChooseDirectories={false}
+        defaultValue={timezone.avatar ? timezone.avatar : []}
+        onChange={(newValue) => {
+          if (newValue.length > 0) {
+            starTimezones[index].avatar = newValue;
+          } else {
+            starTimezones[index].avatar = [];
+          }
+        }}
+      />
       <Form.Dropdown
         id={"Memo Icon"}
         title={"Memo Icon"}
@@ -48,11 +55,19 @@ export default function EditTimeZone(props: {
         }}
       >
         {icons.map((value) => {
-          return <Form.Dropdown.Item key={value} title={" "} icon={value} value={value} />;
+          return (
+            <Form.Dropdown.Item
+              key={value}
+              keywords={[value.replaceAll("-16", "").replaceAll("-", "")]}
+              title={" "}
+              icon={value}
+              value={value}
+            />
+          );
         })}
       </Form.Dropdown>
 
-      <Form.TextField
+      <Form.TextArea
         id={"Memo"}
         title="Memo"
         defaultValue={isEmpty(timezone.memo) ? "" : timezone.memo}

@@ -1,15 +1,18 @@
 import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import useLists from "../hooks/useLists";
-import { ListObject } from "../types/list";
-import { getTintColorFromHue, ListColors, ListTypes } from "../utils/list";
-import ActionsList from "./ActionsList";
+
+import ActionsList from "@/components/ActionsList";
+import useLists from "@/hooks/useLists";
+import useWorkspace from "@/hooks/useWorkspace";
+import { ListObject } from "@/types/list";
+import { getTintColorFromHue, ListColors, ListTypes } from "@/utils/list";
 
 export default function SearchLists() {
   const [searchText, setSearchText] = useState<string>("");
   const [listType, setListType] = useState("all");
   const [filteredList, filterList] = useState<ListObject[]>([]);
 
+  const { workspaceData, workspaceIsLoading } = useWorkspace();
   const { listsData, listsIsLoading, listsMutate } = useLists();
 
   useEffect(() => {
@@ -20,8 +23,8 @@ export default function SearchLists() {
         (item) =>
           item?.type === listType &&
           item?.archivedAt === null &&
-          item?.name?.toLowerCase().includes(searchText?.toLowerCase())
-      ) ?? []
+          item?.name?.toLowerCase().includes(searchText?.toLowerCase()),
+      ) ?? [],
     );
   }, [searchText, listsData, listType]);
 
@@ -31,7 +34,7 @@ export default function SearchLists() {
 
   return (
     <List
-      isLoading={listsIsLoading}
+      isLoading={listsIsLoading || workspaceIsLoading}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Lists"
       searchBarPlaceholder="Search your favorite list"
@@ -59,7 +62,7 @@ export default function SearchLists() {
             }}
             title={list.name}
             subtitle={list.description}
-            actions={<ActionsList list={list} mutateList={listsMutate} />}
+            actions={<ActionsList list={list} mutateList={listsMutate} workspace={workspaceData} />}
           />
         ))}
       </List.Section>
@@ -73,7 +76,7 @@ export default function SearchLists() {
             }}
             title={list.name}
             subtitle={list.description}
-            actions={<ActionsList list={list} mutateList={listsMutate} />}
+            actions={<ActionsList list={list} mutateList={listsMutate} workspace={workspaceData} />}
           />
         ))}
       </List.Section>

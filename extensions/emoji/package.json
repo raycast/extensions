@@ -6,8 +6,10 @@
   "icon": "command-icon.png",
   "author": "FezVrasta",
   "contributors": [
-    "kidonng",
-    "sxn"
+    "sxn",
+    "maxdavid",
+    "sinasab",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "categories": [
@@ -46,9 +48,17 @@
       "type": "dropdown",
       "required": false,
       "title": "Unicode Version",
-      "description": "Unicode version to use (default: 14.0)",
-      "default": "14.0",
+      "description": "Unicode version to use (default: 15.1)",
+      "default": "15.1",
       "data": [
+        {
+          "title": "15.1",
+          "value": "15.1"
+        },
+        {
+          "title": "15.0",
+          "value": "15.0"
+        },
         {
           "title": "14.0",
           "value": "14.0"
@@ -94,18 +104,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.1",
+    "@raycast/api": "^1.77.0",
     "cross-fetch": "^3.1.5",
-    "emojilib": "^3.0.6",
+    "emojilib": "^3.0.12",
     "fuse.js": "^6.5.3",
     "raycast-toolkit": "^1.0.3"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "react": "^18.2.0",
     "typescript": "^4.6.2"
   },
   "scripts": {

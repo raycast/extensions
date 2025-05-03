@@ -1,13 +1,17 @@
 # Drafts
 
 This extension integrates Raycast with [Drafts](https://getdrafts.com).  
-Created by [@FlohGro](https://twitter.com/FlohGro) ([Website](https://flohgro.com/)).
+Created by [@FlohGro](https://social.lol/@flohgro) ([Website](https://flohgro.com/)).
 
 It supports the following features as commands:
 
-## Create Draft
+## Create Draft in Background / Create and Open Draft
 
-create drafts in a Raycast form with tags.
+Create drafts in a Raycast form with tags (either with opening it afterwards or in the background).
+
+## Capture Draft
+
+Quickly capture content from command argument into a new draft in the background.
 
 ## Append/Prepend to Draft
 
@@ -56,11 +60,18 @@ This is a helper command to easily create additional Raycast Quicklinks to perfo
 - capture text with Drafts capture window
 - open the dictation window
 
+## Create Open Draft Quicklink
+
+Create a Raycast Quicklink to open a Draft by passing a title and the UUID of the Draft.
+
+Tip: Use it together with the corresponding [Drafts Action](https://directory.getdrafts.com/a/2RC) to easily create Quicklinks for currently open Drafts.
+
 ## Support Development
 
 If this eXtension is valuable for and you'd like to thank me you can support me on
 
-- [buymeacoffee](https://www.buymeacoffee.com/flohgro)
-- [patreon](https://www.patreon.com/flohgro)
+- [buymeacoffee](https://buymeacoffee.com/flohgro)
+- [patreon](https://patreon.com/flohgro)
+- [ko-fi](https://ko-fi.com/flohgro)
 
-If you find any issues or have additional requests you can reach out to me on [Twitter](https://twitter.com/FlohGro) or via [e-mail](mailto:hi@flohgro.com)
+If you find any issues or have additional requests you can create an issue in raycasts repository or reach out to me on [Mastodon](https://social.lol/@flohgro) or via [e-mail](mailto:hi@flohgro.com).

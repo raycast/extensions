@@ -4,6 +4,10 @@
   "title": "Lark Documents",
   "version": "0.0.8",
   "description": "Quickly search documents from Feishu/Lark.",
+  "keywords": [
+    "feishu",
+    "lark"
+  ],
   "icon": "logo.png",
   "author": "tmk",
   "license": "MIT",
@@ -18,6 +22,20 @@
         "feishu",
         "docs",
         "document"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "search-minutes",
+      "title": "Search Minutes",
+      "subtitle": "Lark",
+      "description": "Search and open minutes in browser",
+      "icon": "minutes/logo.png",
+      "keywords": [
+        "lark",
+        "feishu",
+        "minutes",
+        "miaoji"
       ],
       "mode": "view"
     }
@@ -37,8 +55,20 @@
         {
           "title": "Lark",
           "value": "lark"
+        },
+        {
+          "title": "Self-hosted",
+          "value": "self-hosted"
         }
       ]
+    },
+    {
+      "name": "selfHostedDomain",
+      "type": "textfield",
+      "required": false,
+      "title": "Self-hosted domain",
+      "description": "The self-hosted domain of your enterprise. For example: mycompany.com",
+      "placeholder": "Only needed if you opt for self-hosted"
     },
     {
       "name": "recentListCount",
@@ -56,24 +86,28 @@
     "dev": "ray develop"
   },
   "dependencies": {
-    "@raycast/api": "^1.35.2",
-    "dayjs": "^1.11.2",
-    "got": "^12.1.0",
-    "qrcode": "^1.5.0",
+    "@raycast/api": "^1.66.2",
+    "@raycast/utils": "^1.12.2",
+    "@tanstack/react-query": "^5.18.1",
+    "dayjs": "^1.11.10",
+    "got": "^12.6.0",
+    "jotai": "^2.6.4",
+    "qrcode": "^1.5.3",
     "string": "^3.3.3",
-    "tough-cookie": "^4.0.0"
+    "tough-cookie": "^4.1.3"
   },
   "devDependencies": {
-    "@types/node": "~17.0.35",
-    "@types/qrcode": "^1.4.2",
-    "@types/react": "^18.0.9",
-    "@types/string": "^0.0.31",
-    "@types/tough-cookie": "^4.0.2",
+    "@types/node": "^20.8.10",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.2.27",
+    "@types/string": "^0.0.34",
+    "@types/tough-cookie": "^4.0.5",
     "@typescript-eslint/eslint-plugin": "^5.26.0",
     "@typescript-eslint/parser": "^5.26.0",
     "eslint": "^8.16.0",
     "eslint-config-prettier": "^8.5.0",
+    "prettier": "^3.0.0",
     "react-devtools": "^4.24.6",
-    "typescript": "^4.7.2"
+    "typescript": "^5.0.4"
   }
 }

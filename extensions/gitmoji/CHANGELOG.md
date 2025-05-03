@@ -1,5 +1,9 @@
 # Gitmoji Changelog
 
+## [Upgrade gitmoji] - 2023-08-19
+
+- Fix raycast reserved modifier keys
+
 ## [Upgrade gitmoji] - 2023-04-10
 
 - Use Raycast useFetch hook for fetching gitmojis

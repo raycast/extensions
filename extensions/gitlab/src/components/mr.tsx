@@ -351,6 +351,15 @@ export function MRList({
   );
 }
 
+export function MRListEmptyView(): JSX.Element {
+  return (
+    <List.EmptyView
+      title="No Merge Requests"
+      icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
+    />
+  );
+}
+
 export function MRListItem(props: {
   mr: MergeRequest;
   refreshData: () => void;
@@ -448,11 +457,40 @@ export function MRListItem(props: {
   );
 }
 
-function getIssueQuery(query: string | undefined) {
-  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee", "draft", "target-branch", "reviewer"]);
+export function getMRQuery(query: string | undefined) {
+  return tokenizeQueryText(query, [
+    "label",
+    "author",
+    "milestone",
+    "assignee",
+    "draft",
+    "target-branch",
+    "reviewer",
+    "state",
+  ]);
 }
 
-function injectQueryNamedParameters(
+function isValidMRState(texts: string[] | undefined) {
+  if (!texts) {
+    return false;
+  }
+  for (const v of texts) {
+    if (
+      ![
+        MRState.closed.valueOf(),
+        MRState.opened.valueOf(),
+        MRState.locked.valueOf,
+        MRState.merged.valueOf,
+        MRState.all.valueOf(),
+      ].includes(v)
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function injectMRQueryNamedParameters(
   requestParams: Record<string, any>,
   query: Query,
   scope: MRScope,
@@ -505,6 +543,13 @@ function injectQueryNamedParameters(
             requestParams[prefixed("reviewer_username")] = extraParamVal.join(",");
           }
           break;
+        case "state":
+          {
+            if (isValidMRState(extraParamVal)) {
+              requestParams[prefixed("state")] = extraParamVal.join(",");
+            }
+          }
+          break;
       }
     }
   }
@@ -545,7 +590,7 @@ export function useSearch(
       setError(undefined);
 
       try {
-        const qd = getIssueQuery(query);
+        const qd = getMRQuery(query);
         query = qd.query;
         const params: Record<string, any> = {
           state: state,
@@ -553,8 +598,8 @@ export function useSearch(
           search: query || "",
           in: "title",
         };
-        injectQueryNamedParameters(params, qd, scope, false);
-        injectQueryNamedParameters(params, qd, scope, true);
+        injectMRQueryNamedParameters(params, qd, scope, false);
+        injectMRQueryNamedParameters(params, qd, scope, true);
         if (group) {
           const glMRs = await gitlab.getGroupMergeRequests(params, group);
           if (!didUnmount) {

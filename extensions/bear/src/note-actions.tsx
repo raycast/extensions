@@ -23,19 +23,25 @@ function renderMarkdown(noteText: string): string {
   }
 }
 
+export function createBasicNote(title: string) {
+  return open(`bear://x-callback-url/create?title=${encodeURIComponent(title)}&show_window=yes&edit=yes`, {
+    background: false,
+  });
+}
+
 function NotePreviewAction({ note }: { note: Note }) {
   return (
     <Action.Push
       title="Show Note Preview"
       target={<PreviewNote note={note} />}
       icon={Icon.Text}
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
     />
   );
 }
 
 export default function NoteActions({ isNotePreview, note }: { isNotePreview: boolean; note: Note }) {
-  const { focusCursorAtEnd } = getPreferenceValues();
+  const { focusCursorAtEnd } = getPreferenceValues<Preferences>();
   const edit = focusCursorAtEnd ? "yes" : "no";
   return (
     <ActionPanel>

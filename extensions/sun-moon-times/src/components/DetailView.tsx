@@ -2,18 +2,19 @@ import { List } from "@raycast/api"
 import sunCalc from "suncalc"
 import { getSunrise, getSunset } from "sunrise-sunset-js"
 import { CityItem } from "../../types/CityItem"
-import { convertDateToString } from "../common/convertDateToString"
-import { getDayDuration } from "../common/getDayDuration"
-import { resolveCoords } from "../common/resolveCoords"
 import { countryList } from "../ressources/countryList"
+import { convertDateToString } from "../utils/convertDateToString"
+import { getDayDuration } from "../utils/getDayDuration"
+import { resolveCoords } from "../utils/resolveCoords"
 
 interface DetailViewProps extends Omit<CityItem, "geonameId"> {
     currentDate: Date
 }
 
 export const DetailView = ({ name, countryCode, timezone, coordinates, currentDate }: DetailViewProps) => {
-    const sunrise = getSunrise(coordinates.lat, coordinates.lon, currentDate)
-    const sunset = getSunset(coordinates.lat, coordinates.lon, currentDate)
+    const currentDateTimezoneAdjusted = new Date(currentDate.getTime() - new Date().getTimezoneOffset() * 60 * 1000)
+    const sunrise = getSunrise(coordinates.lat, coordinates.lon, currentDateTimezoneAdjusted)
+    const sunset = getSunset(coordinates.lat, coordinates.lon, currentDateTimezoneAdjusted)
     const dayDuration = getDayDuration(sunrise, sunset)
     const sunriseString = convertDateToString(sunrise, timezone)
     const sunsetString = convertDateToString(sunset, timezone)

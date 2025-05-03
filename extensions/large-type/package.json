@@ -7,21 +7,65 @@
   "icon": "command-icon.png",
   "author": "gbarba",
   "contributors": [
-    "FezVrasta"
+    "FezVrasta",
+    "garrill"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Show Large Type",
-      "description": "Large Type allows you to show text in large characters across your screen",
+      "title": "Enter Text",
+      "description": "Enter text to show in large type",
       "mode": "view"
+    },
+    {
+      "name": "show-clipboard",
+      "title": "Show Clipboard",
+      "description": "Show the current clipboard in large type",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "data": [
+        {
+          "title": "Sans Serif Font",
+          "value": "sans-serif"
+        },
+        {
+          "title": "Monospaced Font",
+          "value": "monospace"
+        }
+      ],
+      "description": "Select the type of font you want the clipboard displayed in",
+      "name": "fontStyle",
+      "required": false,
+      "title": "Font Style",
+      "type": "dropdown"
+    },
+    {
+      "name": "indexedType",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Display settings",
+      "label": "Split by letter and index",
+      "description": "Break up text with an index below each character"
+    },
+    {
+      "name": "colorCode",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Color code numbers and symbols",
+      "description": "Help differenciate similiar characters by color coding numbers and symbols"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.31.0",
     "@types/react-dom": "^17.0.14",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "graphemer": "^1.4.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -35,6 +79,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

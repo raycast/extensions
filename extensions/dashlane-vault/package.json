@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dashlane-vault",
+  "title": "Dashlane Vault",
+  "description": "Access Dashlane Vault. Requires installing the Dashlane CLI.",
+  "icon": "dashlane-512.png",
+  "author": "tm.wrnr",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "passwords",
+      "title": "Search Passwords",
+      "subtitle": "Dashlane",
+      "description": "Search all passwords in the Dashlane vault",
+      "mode": "view"
+    },
+    {
+      "name": "notes",
+      "title": "Search Notes",
+      "subtitle": "Dashlane",
+      "description": "Search all notes in the Dashlane vault",
+      "mode": "view"
+    },
+    {
+      "name": "devices",
+      "title": "Manage Devices",
+      "subtitle": "Dashlane",
+      "description": "List devices connected to your accunt",
+      "mode": "view"
+    },
+    {
+      "name": "sync",
+      "title": "Sync Vault",
+      "subtitle": "Dashlane",
+      "description": "Sync your Dashlane vault",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Enter the CLI binary path. You can find the path by running `which dcli` in your terminal.",
+      "name": "cliPath",
+      "placeholder": "e.g.: /usr/local/bin/dcli",
+      "required": true,
+      "title": "Dashlane CLI path",
+      "type": "textfield"
+    },
+    {
+      "name": "masterPassword",
+      "title": "Master Password",
+      "description": "If you don't have saved your master password in the Dashlane CLI, you can enter it here. It will be stored securely in the macOS Keychain.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "biometrics",
+      "title": "Biometrics",
+      "description": "Should be enabled, if you configured the Dashlane CLI to use biometrics.",
+      "type": "checkbox",
+      "label": "Use biometrics to unlock the vault",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.18.1",
+    "execa": "^9.5.2",
+    "p-queue": "^8.1.0",
+    "valibot": "~0.42.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@total-typescript/ts-reset": "^0.6.1",
+    "@types/node": "^20.11.30",
+    "@types/react": "18.3.12",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    "typescript": "^5.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

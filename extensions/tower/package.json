@@ -5,6 +5,10 @@
   "description": "Navigate and open your repositories in Tower.",
   "icon": "icon.png",
   "author": "tdwesten",
+  "contributors": [
+    "sebduggan",
+    "dnlfrst"
+  ],
   "version": "1.1.2",
   "license": "MIT",
   "commands": [
@@ -32,22 +36,37 @@
       "default": "/usr/local/bin/gittower",
       "value": "/usr/local/bin/gittower",
       "required": true
+    },
+    {
+      "name": "defaultTerminal",
+      "title": "Terminal Application",
+      "description": "Open the repository in your default terminal",
+      "type": "appPicker",
+      "default": "Terminal",
+      "required": true,
+      "value": "Terminal"
+    },
+    {
+      "name": "defaultEditor",
+      "title": "Editor Application",
+      "description": "Open the repository in your default editor",
+      "type": "appPicker",
+      "default": "Visual Studio Code",
+      "required": true,
+      "value": "Visual Studio Code"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.58.0",
+    "@raycast/utils": "^1.10.1",
     "node-git-current-branch": "^2.0.1",
-    "plist": "^3.0.4",
-    "tildify": "^3.0.0"
+    "plist": "^3.0.4"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
     "@types/plist": "^3.0.2",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.12.0",
-    "@typescript-eslint/parser": "^5.12.0",
     "eslint": "^8.9.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "react-devtools": "^4.23.0",
     "typescript": "^4.5.5"

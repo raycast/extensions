@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { ReactElement, useState } from "react";
 import { UserV1 } from "twitter-api-v2";
 import { UserListItem } from "./user";
@@ -22,18 +22,16 @@ export function UserList() {
     }
   }, [query]);
   if (error) {
-    showToast(ToastStyle.Failure, "Error", error);
+    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
   }
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search User by name of handle (e.g. @tonka_2000 or Michael Aigner)..."
+      searchBarPlaceholder="Search User by Name of Handle (e.g. @tonka_2000 or Michael Aigner)..."
       onSearchTextChange={setQuery}
       throttle={true}
     >
-      {data?.map((u) => (
-        <UserListItem key={u.screen_name} user={u} />
-      ))}
+      {data?.map((u) => <UserListItem key={u.screen_name} user={u} />)}
     </List>
   );
 }

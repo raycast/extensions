@@ -1,18 +1,20 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { MutatePromise, useForm } from "@raycast/utils";
 import { useState } from "react";
-import { ApiInvoice } from "../../api/invoice";
-import useClient from "../../hooks/useClient";
-import { InvoiceObject, SendViaMailPayload } from "../../types/invoice";
-import { ApiPaginatedResponse } from "../../types/utils";
-import { locales, printTypes } from "../../utils";
+
+import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
+import { MutatePromise, useForm } from "@raycast/utils";
+
+import { ApiInvoice } from "@/api/invoice";
+import { useClient } from "@/hooks/useClient";
+import { InvoiceObject, SendViaMailPayload } from "@/types/invoice";
+import { ApiPaginatedResponse } from "@/types/utils";
+import { locales, printTypes } from "@/utils";
 
 type Props = {
   invoice: InvoiceObject;
   mutateInvoices: MutatePromise<ApiPaginatedResponse<InvoiceObject[]> | undefined>;
 };
 
-export default function MailInvoice({ invoice, mutateInvoices }: Props) {
+export function MailInvoice({ invoice, mutateInvoices }: Props) {
   const { pop } = useNavigation();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -55,7 +57,7 @@ export default function MailInvoice({ invoice, mutateInvoices }: Props) {
       print_type: "original",
       locale: "pl",
       recipient: clientData?.email ?? "",
-      send_copy: false,
+      send_copy: true,
     },
     validation: {
       print_type: (value) => {
@@ -92,9 +94,7 @@ export default function MailInvoice({ invoice, mutateInvoices }: Props) {
       </Form.Dropdown>
 
       <Form.Dropdown title="Locale" {...itemProps.locale}>
-        {locales?.map((locale) => (
-          <Form.Dropdown.Item key={locale.value} value={locale.value} title={locale.name} />
-        ))}
+        {locales?.map((locale) => <Form.Dropdown.Item key={locale.value} value={locale.value} title={locale.name} />)}
       </Form.Dropdown>
 
       <Form.TextField autoFocus title="Recipient" {...itemProps.recipient} />

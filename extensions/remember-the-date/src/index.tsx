@@ -1,17 +1,23 @@
-import { Form, ActionPanel, Action, showToast, Icon, Color, Toast, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Icon, Color, popToRoot } from "@raycast/api";
 import { Item } from "./types";
 import { getItems, saveItems } from "./storage";
 import { nanoid } from "nanoid";
-import { validateItem } from "./utils";
+import { refreshCommands, validateItem } from "./utils";
+import { useCachedPromise } from "@raycast/utils";
+import { getFormattedList } from "./list";
 
 export default function Command() {
+  const { mutate } = useCachedPromise(getFormattedList, []);
+
   async function handleSubmit(item: Item) {
     if (validateItem(item)) {
       const existingItems = await getItems();
       existingItems.push({ ...item, id: nanoid() });
 
       popToRoot();
-      saveItems(existingItems);
+      await saveItems(existingItems);
+      await mutate(getFormattedList());
+      await refreshCommands();
       showToast({ title: "Success", message: "Successfully added item" });
     }
   }
@@ -35,7 +41,7 @@ export default function Command() {
       <Form.Dropdown id="color" title="Color" defaultValue="">
         <Form.Dropdown.Item value="" title="No Color" />
         {Object.entries(Color).map(([k, v]) => (
-          <Form.Dropdown.Item value={v} key={k} title={k} icon={{ source: Icon.Dot, tintColor: v }} />
+          <Form.Dropdown.Item value={`${v}`} key={k} title={k} icon={{ source: Icon.Dot, tintColor: v }} />
         ))}
       </Form.Dropdown>
     </Form>

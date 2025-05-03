@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "recent-excel",
+  "title": "Recent Excel - Show Recent Excel Files",
+  "description": "Shows recent excel files",
+  "icon": "command-icon.png",
+  "author": "aradbm",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-recent-excel-sheets",
+      "title": "Search Recent Excel Sheets",
+      "description": "Shows recent excel files",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "folderPath",
+          "placeholder": "Folder path",
+          "description": "Specify the folder path to search for Excel files",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Directories",
+      "name": "directories",
+      "description": "Comma-separated list of directories to search for Excel files",
+      "type": "textfield",
+      "required": true,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

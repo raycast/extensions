@@ -39,7 +39,8 @@ export default function Command() {
 
         items.each((index, item) => {
           const category = $(item).find("h3 span:first")?.text()?.trim() || "";
-          const url = $(item).find("div.content a")?.prop("href")?.trim() || "";
+          const sourceUrl = $(item).find("div.content a")?.prop("href")?.trim() || "";
+          const url = new URL(sourceUrl).searchParams.get("url") || "";
           const title = $(item).find("div.title a")?.text()?.trim() || "";
           const rating = $(item).find("span.rating_nums")?.text()?.trim() || "";
           const subjectEl = $(item).find("span.subject-cast")?.text()?.split("/");
@@ -115,6 +116,11 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                   icon={Icon.AppWindowList}
                   onAction={() => setShowingDetail(!showingDetail)}
+                />
+                <Action.CopyToClipboard
+                  title="Copy as Markdown"
+                  content={`[${book.title}](${book.url})`}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
               </ActionPanel>
             }

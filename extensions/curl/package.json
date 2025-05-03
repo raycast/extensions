@@ -6,7 +6,9 @@
   "icon": "app-icon.png",
   "author": "jonathangiardino",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "bkeys818",
+    "ridemountainpig"
   ],
   "categories": [
     "Productivity",
@@ -29,19 +31,108 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "make-http-request",
+      "title": "Make HTTP Request",
+      "description": "Make curl HTTP Request"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@curl fetch https://www.raycast.com/api",
+        "mocks": {
+          "make-http-request": {
+            "stdout": "{}"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "command": [
+                  {
+                    "includes": "https://www.raycast.com/api"
+                  },
+                  {
+                    "includes": "curl"
+                  },
+                  {
+                    "includes": "--verbose"
+                  },
+                  {
+                    "not": {
+                      "includes": "post"
+                    }
+                  }
+                ]
+              },
+              "name": "make-http-request"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@curl make post request to localhost:3000/api/sign_in with json user=test and password=123123123",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "make-http-request",
+              "arguments": {
+                "command": [
+                  {
+                    "includes": "POST"
+                  },
+                  {
+                    "includes": "http://localhost:3000/api/sign_in"
+                  },
+                  {
+                    "includes": "Content-Type: application/json"
+                  },
+                  {
+                    "or": [
+                      {
+                        "includes": "-d "
+                      },
+                      {
+                        "includes": "--data "
+                      }
+                    ]
+                  },
+                  {
+                    "includes": "\"user\":\"test\""
+                  },
+                  {
+                    "includes": "\"password\":\"123123123\""
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "make-http-request": {
+            "stdout": "{}"
+          }
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.42.0",
-    "@raycast/utils": "^1.1.0",
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.9.0",
     "axios": "^0.27.2",
-    "curl-string": "^1.1.1"
+    "curl-string": "^1.1.1",
+    "jsonpath-plus": "^10.3.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.9",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.6"
   },
   "scripts": {
     "build": "ray build -e dist",

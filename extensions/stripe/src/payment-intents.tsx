@@ -1,22 +1,10 @@
-import React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import snakeCase from "lodash/snakeCase";
+import type Stripe from "stripe";
 import { useStripeApi, useStripeDashboard } from "./hooks";
 import { convertAmount, convertTimestampToDate, titleCase } from "./utils";
 import { STRIPE_ENDPOINTS } from "./enums";
 import { ListContainer, withEnvContext } from "./components";
-
-type PaymentIntentResp = {
-  id: string;
-  amount: number;
-  amount_capturable: number;
-  amount_received: number;
-  created: number;
-  cancelled_at: number | null;
-  currency: string;
-  status: string;
-  metadata: any;
-};
 
 type PaymentIntent = {
   id: string;
@@ -27,36 +15,28 @@ type PaymentIntent = {
   cancelled_at: string;
   currency: string;
   status: string;
-  metadata: any;
+  metadata: Stripe.Metadata;
 };
 
-const resolvedMetadata = (metadata: any) =>
+const resolvedMetadata = (metadata: Stripe.Metadata) =>
   Object.keys(metadata).reduce((acc, key) => {
     const value = metadata[key];
     return { ...acc, [`metadata_${snakeCase(key)}`]: value };
   }, {});
 
-const resolvePaymentIntent = ({
-  amount = 0,
-  amount_capturable = 0,
-  amount_received = 0,
-  currency = "",
-  created,
-  cancelled_at,
-  metadata = {},
-  ...rest
-}: PaymentIntentResp): PaymentIntent => {
-  const uppercaseCurrency = currency.toUpperCase();
-  return {
-    ...rest,
-    ...(resolvedMetadata(metadata) as any),
-    created_at: convertTimestampToDate(created),
-    cancelled_at: convertTimestampToDate(cancelled_at),
-    amount_capturable: convertAmount(amount_capturable),
-    amount_received: convertAmount(amount_received),
-    amount: convertAmount(amount),
-    currency: uppercaseCurrency,
+const resolvePaymentIntent = (paymentIntent: Stripe.PaymentIntent): PaymentIntent => {
+  const resolvedPaymentIntent: PaymentIntent = {
+    ...paymentIntent,
+    ...resolvedMetadata(paymentIntent.metadata),
+    created_at: convertTimestampToDate(paymentIntent.created),
+    cancelled_at: convertTimestampToDate(paymentIntent.canceled_at),
+    amount_capturable: convertAmount(paymentIntent.amount_capturable),
+    amount_received: convertAmount(paymentIntent.amount_received),
+    amount: convertAmount(paymentIntent.amount),
+    currency: paymentIntent.currency.toUpperCase(),
   };
+
+  return resolvedPaymentIntent;
 };
 
 const resolveMetadataValue = (value: any) => {

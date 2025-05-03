@@ -1,7 +1,7 @@
-import { ActionPanel, Form, showHUD, useNavigation, Action } from "@raycast/api";
+import { Action, ActionPanel, Form, showHUD, useNavigation } from "@raycast/api";
 import { nanoid } from "nanoid";
-import { ISSHConnection } from "./types";
 import { getConnections, saveConnections } from "./storage.api";
+import { ISSHConnection } from "./types";
 
 export default function Main() {
   const { pop } = useNavigation();
@@ -11,7 +11,7 @@ export default function Main() {
     existingConnections.push({ ...connection, id: nanoid() });
 
     await saveConnections(existingConnections);
-    await showHUD("Saved connection ✅");
+    await showHUD(`✅ Connection [${connection.name}] saved!`);
 
     pop();
   }
@@ -26,12 +26,17 @@ export default function Main() {
     >
       <Form.TextField id="name" title="Connection Name" />
       <Form.TextField id="address" title="Server Address" placeholder={"A resolvable DNS name or IP"} />
-      <Form.TextField id="user" title="Username" placeholder={"A username to authenticate with"} />
+      <Form.TextField id="user" title="Username (optional)" placeholder={"A username to authenticate with"} />
       <Form.TextField id="port" title="Port (optional)" placeholder={"An optional custom port (other than 22)"} />
       <Form.TextField
         id="sshKey"
         title="SSH Key Location (optional)"
         placeholder={"An optional key path to authenticate with"}
+      />
+      <Form.TextField
+        id="command"
+        title="Command to Execute (optional)"
+        placeholder={"An optional command to execute on the remote server after connecting"}
       />
     </Form>
   );

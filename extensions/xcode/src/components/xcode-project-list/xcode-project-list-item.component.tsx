@@ -4,6 +4,7 @@ import tildify from "tildify";
 import { XcodeProjectIcon } from "../../shared/xcode-project-icon";
 import { XcodeProjectTypeName } from "../../shared/xcode-project-type-name";
 import { XcodeService } from "../../services/xcode.service";
+import { JSX } from "react";
 
 /**
  * Xcode Project List Item
@@ -13,7 +14,7 @@ export function XcodeProjectListItem(props: {
   isFavorite: boolean;
   actions?: [JSX.Element];
   onToggleFavoriteAction: () => void;
-}): JSX.Element {
+}) {
   const navigation = useNavigation();
   return (
     <List.Item

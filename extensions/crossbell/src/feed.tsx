@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, List, openExtensionPreferences } from "@raycast/api";
 import { useCharacterByHandle, useFeed } from "./apis";
 import NoteListItem from "./components/NoteListItem";
 import { getPreference } from "./utils/preference";
@@ -29,7 +29,7 @@ export default function Command() {
   return (
     <List isLoading={isLoadingCharacter || isLoadingFeed}>
       {feeds?.list.map(
-        (feed) => feed.note && <NoteListItem key={`${feed.transactionHash}-${feed.logIndex}`} note={feed.note} />
+        (feed) => feed.note && <NoteListItem key={`${feed.transactionHash}-${feed.logIndex}`} note={feed.note} />,
       )}
     </List>
   );

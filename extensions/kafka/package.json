@@ -54,7 +54,7 @@
       "subtitle": "Kafka menu bar - consumers",
       "description": "Overview of kafka consumers lag by environment with refresh",
       "mode": "menu-bar",
-      "interval": "5m",
+      "interval": "10m",
       "preferences": [
         {
           "name": "hideWithoutLag",
@@ -62,6 +62,25 @@
           "label": "Hide consumers without lag",
           "description": "Hide consumers without lag to avoid long lists",
           "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "sendNotification",
+          "title": "Send notification",
+          "label": "Send notification if consumer has lag",
+          "description": "Send macos notification if at least one consumer has lag",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "notificationThreshold",
+          "title": "Notification threshold",
+          "label": "Notification threshold (number to not exceed)",
+          "description": "Notification threshold to not exceed to send macos notification",
+          "type": "textfield",
+          "default": "1000",
           "required": false
         }
       ]
@@ -75,52 +94,25 @@
       "type": "directory",
       "default": "~/.kafka/",
       "required": true
-    },
-    {
-      "name": "extractRegex",
-      "title": "Extract regex",
-      "description": "Regex to extract information from topic name",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "extractTitleGroup",
-      "title": "Extract title group",
-      "description": "Group to get from regex to display title",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "extractSubTitleGroup",
-      "title": "Extract sub title group",
-      "description": "Group to get from regex to display sub title",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "extractMetadataNameAndGroup",
-      "title": "Extract metadata name and group",
-      "description": "Extract metadata from regex. Ex: (Owner=2,Application=4)",
-      "type": "textfield",
-      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.48.5",
-    "@raycast/utils": "1.5.0",
+    "@raycast/api": "1.51.1",
+    "@raycast/utils": "1.6.1",
     "kafkajs": "2.2.4",
-    "moment": "2.29.4"
+    "moment": "2.29.4",
+    "run-applescript": "6.1.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
     "@types/kafkajs": "1.9.0",
     "@types/node": "18.14.2",
     "@types/react": "18.0.28",
     "@typescript-eslint/eslint-plugin": "5.53.0",
     "@typescript-eslint/parser": "5.54.0",
     "eslint": "8.35.0",
-    "eslint-config-prettier": "8.6.0",
     "eslint-plugin-react-hooks": "4.6.0",
-    "prettier": "2.8.4",
+    "prettier": "2.8.8",
     "typescript": "4.9.5"
   },
   "scripts": {
@@ -129,5 +121,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

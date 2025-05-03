@@ -1,13 +1,28 @@
-import { Application, getApplications, getPreferenceValues, PreferenceValues, showToast, Toast } from "@raycast/api";
-import { lstat, readFile, stat } from "fs/promises";
+import {
+  Application,
+  captureException,
+  environment,
+  getApplications,
+  getPreferenceValues,
+  Image,
+  Keyboard,
+  PreferenceValues,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { lstat, readFile, stat, writeFile } from "fs/promises";
 import fg from "fast-glob";
 import { basename, dirname, resolve } from "path";
 import { parseStringPromise } from "xml2js";
 import { homedir } from "os";
-import History from "./.history.json";
-import Settings from "./.settings.json";
+import JetBrainsToolboxSettings from "./.settings.json";
 import which from "which";
 import { Options } from "fast-glob/out/settings";
+import Channel, { ChannelDetail, Extension, Tool } from "./.channel.json";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+export const execPromise = promisify(exec);
 
 export const JetBrainsIcon = "jb.png";
 
@@ -15,35 +30,33 @@ interface prefs {
   bin: PreferenceValues;
   toolsInstall: PreferenceValues;
   fallback: PreferenceValues;
-  historic: PreferenceValues;
+  frecencySorting: PreferenceValues;
 }
 
 const preferences = getPreferenceValues<prefs>();
+const removePathRegex = /.*\/(.+-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}).*/;
 
 export const bin = String(preferences["bin"]).replace("~", homedir());
 export const toolsInstall = String(preferences["toolsInstall"]).replace("~", homedir());
+export const toolsSupportDir = "~/Library/Application Support/JetBrains/Toolbox".replace("~", homedir());
 export const useUrl = Boolean(preferences["fallback"]);
-export const historicProjects = Boolean(preferences["historic"]);
-const ICON_GLOB = resolve(homedir(), "Applications/JetBrains Toolbox/*/Contents/Resources/icon.icns");
-const HISTORY_GLOB = resolve(toolsInstall, "apps/**/.history.json");
-const APP_GLOB = resolve(toolsInstall, "apps/**/*.app");
-const SETTINGS_GLOB = resolve(toolsInstall, ".settings.json");
+export const frecencySorting = Boolean(preferences["frecencySorting"]);
 
-const getAppFromPath = (path: string, apps: file[]): file | undefined => {
-  return apps.find((app) => dirname(app.path).startsWith(dirname(path)));
-};
+const CHANNEL_GLOB = resolve(toolsSupportDir, "channels/*.json");
+const SETTINGS_GLOB = resolve(toolsSupportDir, ".settings.json");
 
 export interface file {
   title: string;
-  icon: string;
+  icon: Image.ImageLike;
   path: string;
   isDir: boolean;
   lastModifiedAt: Date;
 }
 
 export interface recentEntry {
+  id: string;
   title: string;
-  icon: string;
+  icon: Image.ImageLike;
   path: string;
   dirname: string;
   parts: string;
@@ -51,37 +64,48 @@ export interface recentEntry {
   appName: string;
   exists?: boolean;
   filter?: number;
+  app: AppHistory;
+  xmlFile: file;
 }
 
 export interface AppHistory {
   title: string;
+  name: string;
+  id: string;
+  version: string;
   url: string | false;
   tool: string | false;
   toolName: string | false;
-  app: file | undefined;
-  icon: string;
+  app: file | undefined | Application;
+  build: string;
+  icon: Image.ImageLike;
   xmlFiles: file[];
   entries?: recentEntry[];
+  channelId: string;
 }
 
-export function getFiles(dir: string | string[], options?: Options): Promise<Array<file>> {
-  return fg(dir, options).then(
-    async (result) =>
-      await Promise.all(
-        result.map((path) =>
-          lstat(path).then((stat) => ({
-            title: path.split("/").reverse()[0],
-            path: path,
-            isDir: stat.isDirectory(),
-            icon: stat.isDirectory() ? "dir" : "file",
-            lastModifiedAt: stat.mtime,
-          }))
-        )
-      )
-  );
+export interface ToolboxApp extends Application {
+  version: string;
+  isV2: boolean;
 }
 
-export const createUniqueArray = <T>(s: string, values: Array<T>): Array<T> => {
+async function getFile(path: string) {
+  const stats = await lstat(path);
+  return {
+    title: path.split("/").reverse()[0],
+    path: path,
+    isDir: stats.isDirectory(),
+    icon: stats.isDirectory() ? "dir" : "file",
+    lastModifiedAt: stats.mtime,
+  };
+}
+
+async function getFiles(dir: string | string[], options?: Options): Promise<Array<file>> {
+  const glob = await fg(dir, options);
+  return Promise.all(glob.map(getFile));
+}
+
+const createUniqueArray = <T>(s: string, values: Array<T>): Array<T> => {
   if (values.length == 0) {
     return values;
   }
@@ -111,10 +135,10 @@ interface xmlJson {
 
 export async function getRecentEntries(xmlFile: file, app: AppHistory): Promise<Array<recentEntry>> {
   return readFile(xmlFile.path)
-    .then((xmlFile) =>
-      parseStringPromise(xmlFile, { attrkey: "_attr" }).then((result) => {
+    .then((file) =>
+      parseStringPromise(file, { attrkey: "_attr" }).then((result) => {
         return (
-          (result.application.component[0].option[0].map[0].entry ?? [])
+          ((result.application?.component[0].option[0].map ?? [])[0]?.entry ?? [])
             .map(
               // convert xmlJson object to array of recentEntries
               (recentEntry: xmlJson): recentEntry => {
@@ -127,9 +151,12 @@ export async function getRecentEntries(xmlFile: file, app: AppHistory): Promise<
                   icon: app.icon ?? JetBrainsIcon,
                   path: path,
                   dirname: dirname(path).replace(homedir(), "~").replace("/Volumes", ""),
-                  opened: Number(projectOpenTimestamp?._attr.value ?? 0),
+                  opened: Number(projectOpenTimestamp?._attr.value) ?? 0,
                   parts: path.substr(1).split("/").reverse().slice(1).join(" ← "),
                   appName: app.title,
+                  app,
+                  id: `${path}.${app.title}`,
+                  xmlFile,
                 };
               }
             )
@@ -146,6 +173,7 @@ export async function getRecentEntries(xmlFile: file, app: AppHistory): Promise<
       })
     )
     .catch((err) => {
+      captureException(err);
       showToast(Toast.Style.Failure, `Recent project lookup for "${app.title}" failed with error: \n\n ${err}`);
       return [];
     })
@@ -153,22 +181,29 @@ export async function getRecentEntries(xmlFile: file, app: AppHistory): Promise<
 }
 
 export const loadAppEntries = async (apps: AppHistory[]): Promise<AppHistory[]> => {
-  return await Promise.all(
-    apps.map(async (app) => {
-      const xmlFiles = app.xmlFiles ?? [];
-      for (const res of historicProjects ? xmlFiles : xmlFiles.slice(0, 1)) {
-        const entries = await getRecentEntries(res, app);
-        // sort before unique so we get the newest versions
-        app.entries = createUniqueArray<recentEntry>("path", [...(app.entries ?? []), ...entries]).sort(
-          (a, b) => b.opened - a.opened
-        );
-      }
-      return app;
-    })
-  );
+  return (
+    await Promise.all(
+      apps.map(async (app) => {
+        const xmlFiles = app.xmlFiles ?? [];
+        for (const res of xmlFiles) {
+          const entries = await getRecentEntries(res, app);
+          // sort before unique so we get the newest versions
+          app.entries = [...(app.entries ?? []), ...entries];
+        }
+        return app;
+      })
+    )
+  ).map((app) => ({
+    ...app,
+    entries: createUniqueArray<recentEntry>(
+      "path",
+      (app.entries ?? []).sort((a, b) => b.opened - a.opened)
+    ),
+    // entries: app.entries
+  }));
 };
 
-export const getRecent = async (path: string | string[], icon: string): Promise<file[]> => {
+export const getRecent = async (path: string | string[], icon: Image.ImageLike): Promise<file[]> => {
   return (await getFiles(path))
     .map((file) => ({
       ...file,
@@ -178,80 +213,285 @@ export const getRecent = async (path: string | string[], icon: string): Promise<
     .sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
 };
 
-export const getJetBrainsToolboxApp = async (): Promise<Application | undefined> => {
-  return (await getApplications()).find((app) => app.name.match("JetBrains Toolbox"));
+export const getJetBrainsToolboxApp = async (): Promise<ToolboxApp | undefined> => {
+  const jb = (await getApplications()).find((app) => app.bundleId === "com.jetbrains.toolbox");
+  if (jb === undefined) {
+    return jb;
+  }
+  const version = await execPromise(`defaults read "${jb.path}/Contents/Info.plist" CFBundleShortVersionString`).then(
+    ({ stdout }) => stdout.trim()
+  );
+  return {
+    ...jb,
+    version,
+    isV2: Boolean(version.match(/^2\./)),
+  };
 };
 
-const globFromHistory = (history: History) => {
-  if (history.item.intellij_platform === undefined) {
+const globFromChannel = async (tool: Tool, channel: ChannelDetail) => {
+  if (tool.toolName === undefined) {
     return [];
   }
-  const root = dirname(
-    history.item.intellij_platform.default_config_directories["idea.config.path"].replace("$HOME", homedir())
-  );
-  return history.item.intellij_platform.config.map(
-    (config) => `${root}/${config.directory}/options/${config.recent_projects_filename}`
-  );
+  const build = channel.history?.toolBuilds?.[0] ?? {};
+  const directoryPatterns = build?.tool?.intelliJProperties?.directoryPatterns ?? [];
+  const recentProjectsFilenames = build?.tool?.intelliJProperties?.recentProjectsFilenames ?? [];
+  if (directoryPatterns.length === 0 || recentProjectsFilenames.length === 0) {
+    const defaults = (tool?.extensions ?? []).find(
+      (extension: Extension) => extension?.defaultConfigDirectories ?? false
+    );
+    if (defaults?.defaultConfigDirectories === undefined) {
+      return ["Space Desktop", "Fleet", "dotTrace"].includes(tool.toolName)
+        ? [`${environment.assetsPath}/unsupported.xml`]
+        : [`${environment.assetsPath}/missing.xml`];
+    }
+    const appPath = defaults.defaultConfigDirectories["idea.config.path"].replace("$HOME", homedir());
+    return [`${appPath}/options/recent(Projects|Solutions).xml`];
+  }
+  return directoryPatterns
+    .filter((pattern) => pattern.match("Application Support"))
+    .reduce<string[]>((previousValue, currentValue: string) => {
+      return [
+        ...previousValue,
+        ...recentProjectsFilenames.map((filename) => `${currentValue.replace("$HOME", homedir())}/*/${filename}`),
+      ];
+    }, [] as string[]);
 };
 
-const getReadHistoryFile = async (filePath: string) => {
+const shellFromChannel = (tool: Tool) => {
+  if (tool.toolName === undefined) {
+    return undefined;
+  }
+  const defaults = (tool.extensions ?? []).find((extension: Extension) => extension?.type === "shell");
+  return defaults?.name;
+};
+
+const getReadFile = async (filePath: string) => {
   try {
-    return JSON.parse(String(await readFile(filePath)));
+    return String(await readFile(filePath));
+  } catch (err) {
+    showToast(Toast.Style.Failure, `Read file for ${filePath} failed with error \n\n ${err}`).catch(() =>
+      captureException(err)
+    );
+    return null;
+  }
+};
+
+const getReadJsonFile = async (filePath: string) => {
+  try {
+    return JSON.parse((await getReadFile(filePath)) ?? "{}");
   } catch (err) {
     showToast(Toast.Style.Failure, `History lookup for ${filePath} failed with error \n\n ${err}`).catch(() =>
-      console.log(err)
+      captureException(err)
     );
     return {};
   }
 };
 
-export const getSettings = async (): Promise<Settings | undefined> => {
+const doWriteFile = async (filePath: string, contents: string) => {
+  try {
+    if (contents.length !== 0) {
+      await writeFile(filePath, contents, {
+        flag: "w",
+      });
+    }
+  } catch (err) {
+    showToast(Toast.Style.Failure, `Write to ${filePath} failed with error \n\n ${err}`).catch(() =>
+      captureException(err)
+    );
+  }
+};
+export const replaceInFile = async (filePath: string, regex: RegExp, replace: string) => {
+  await doWriteFile(filePath, ((await getReadFile(filePath)) ?? "").replace(regex, replace));
+};
+
+const writeSettingsFile = async (filePath: string, settings: JetBrainsToolboxSettings) => {
+  try {
+    await doWriteFile(filePath, JSON.stringify(settings));
+  } catch (err) {
+    showToast(Toast.Style.Failure, `Write ${filePath} failed with error \n\n ${err}`).catch(() =>
+      captureException(err)
+    );
+  }
+};
+
+export const getSettings = async (): Promise<JetBrainsToolboxSettings | undefined> => {
   const settingsFile = (await getFiles(SETTINGS_GLOB)).find((file) => file.path);
   if (settingsFile?.path === undefined) {
     return undefined;
   }
-  return (await getReadHistoryFile(settingsFile.path)) as Settings;
+  return (await getReadJsonFile(settingsFile.path)) as JetBrainsToolboxSettings;
+};
+
+export const getChannels = async (): Promise<(Channel | undefined)[]> =>
+  Promise.all(
+    (await getFiles(CHANNEL_GLOB)).map(async (file) =>
+      file?.path === undefined
+        ? undefined
+        : {
+            ...((await getReadJsonFile(file.path)) as Channel),
+            channelId: file.path.replace(removePathRegex, "$1"),
+          }
+    )
+  );
+
+export const addFav = async (path: string, appId: string): Promise<void> => {
+  const settingsFile = (await getFiles(SETTINGS_GLOB)).find((file) => file.path);
+  if (settingsFile?.path === undefined) {
+    return undefined;
+  }
+  const contents = (await getReadJsonFile(settingsFile.path)) as JetBrainsToolboxSettings;
+  const project = contents.projects?.[path] ?? {};
+  project.favorite = true;
+  project.launchMethod = appId;
+  await writeSettingsFile(settingsFile.path, {
+    ...contents,
+    projects: {
+      ...contents.projects,
+      [path]: project,
+    },
+  });
+};
+
+export const hideProject = async (path: string): Promise<void> => {
+  const settingsFile = (await getFiles(SETTINGS_GLOB)).find((file) => file.path);
+  if (settingsFile?.path === undefined) {
+    return undefined;
+  }
+  const contents = (await getReadJsonFile(settingsFile.path)) as JetBrainsToolboxSettings;
+  const project = contents.projects?.[path] ?? {};
+  project.hidden = new Date().toISOString();
+  await writeSettingsFile(settingsFile.path, {
+    ...contents,
+    projects: {
+      ...contents.projects,
+      [path]: project,
+    },
+  });
+};
+
+export const rmFav = async (path: string): Promise<void> => {
+  const settingsFile = (await getFiles(SETTINGS_GLOB)).find((file) => file.path);
+  if (settingsFile?.path === undefined) {
+    return undefined;
+  }
+  const contents = (await getReadJsonFile(settingsFile.path)) as JetBrainsToolboxSettings;
+  const projects = contents.projects;
+  const project = projects?.[path];
+  if (projects && project !== undefined) {
+    project["favorite"] && delete project["favorite"];
+    project["launchMethod"] && delete project["launchMethod"];
+    if (Object.keys(project).length === 0) {
+      delete projects[path];
+    }
+  }
+  await writeSettingsFile(settingsFile.path, {
+    ...contents,
+    projects,
+  });
+};
+
+export const setSort = async (sortOrder: string[]): Promise<void> => {
+  if (sortOrder.length === 0) {
+    return;
+  }
+  const settingsFile = (await getFiles(SETTINGS_GLOB)).find((file) => file.path);
+  if (settingsFile?.path === undefined) {
+    return undefined;
+  }
+  const contents = (await getReadJsonFile(settingsFile.path)) as JetBrainsToolboxSettings;
+  await writeSettingsFile(settingsFile.path, {
+    ...contents,
+    ordering: {
+      installed: sortOrder,
+    },
+  });
 };
 
 export const getHistory = async (): Promise<AppHistory[]> => {
-  const icons = await getIcons();
-  const apps = await getFiles(APP_GLOB, { deep: 5, onlyDirectories: true });
-  const scriptDir = (await getSettings())?.shell_scripts.location ?? bin;
+  const scriptDir = (await getSettings())?.shell_scripts.location.replace("~", homedir()) ?? bin;
   return (
     await Promise.all(
       (
-        await getFiles(HISTORY_GLOB)
-      ).map(async (file) => {
-        const historyFile = await getReadHistoryFile(file.path);
-        if (!historyFile.history?.length) {
+        await getChannels()
+      ).map(async (channelContent) => {
+        const { channel, tool: tool, channelId } = channelContent ?? {};
+        if (channel === undefined || tool === undefined) {
           return null;
         }
-
-        const history: History = historyFile.history.pop() as History;
-        const icon = icons.find((icon) => icon.title.startsWith(history.item.name))?.path ?? JetBrainsIcon;
-        const tool = history.item.intellij_platform?.shell_script_name ?? false;
-        const activation = history.item.activation?.hosts[0] ?? false;
-        // console.log({ tool: tool ? await which(tool, { path: scriptDir }).catch(() => false) : false });
+        const icon = { fileIcon: channel.installationDirectory };
+        const shell = shellFromChannel(tool);
+        const whichTool = shell ? await which(shell, { path: scriptDir }).catch(() => false) : false;
         return {
-          title: history.item.name,
-          url: useUrl && activation ? `jetbrains://${activation}/navigate/reference?project=` : false,
-          tool: tool ? await which(tool, { path: scriptDir }).catch(() => false) : false,
-          toolName: tool ? tool : false,
-          app: getAppFromPath(file.path, apps),
+          title: `${tool.toolName} ${tool.versionName}`,
+          name: tool.toolName,
+          id: tool.toolId,
+          version: tool.versionName,
+          build: tool.buildNumber,
+          url: useUrl && shell ? `jetbrains://${shell}/navigate/reference?project=` : false,
+          tool: whichTool ? whichTool : false,
+          toolName: shell ? shell : false,
+          app: await getFile(channel.installationDirectory),
           icon,
-          xmlFiles: await getRecent(globFromHistory(history), icon),
+          xmlFiles: (await getRecent(await globFromChannel(tool, channel), icon)).sort(
+            (a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime()
+          ),
+          channelId,
         } as AppHistory;
       })
     )
   ).filter((entry): entry is AppHistory => Boolean(entry));
 };
 
-export const getIcons = async (): Promise<file[]> => {
-  return (await getFiles(ICON_GLOB)).map((icon) => {
-    return {
-      ...icon,
-      title: icon.path.split("/").find((path) => path.match(/.+\.app/)) || icon.title,
-      icon: icon.path,
-    };
-  });
-};
+export function nameFromId(id: string): string {
+  return id.substring(0, id.length - 37);
+}
+
+export function symbolFromMod(mod: Keyboard.KeyModifier) {
+  switch (mod) {
+    case "cmd":
+      return "⌘";
+    case "opt":
+      return "⌥";
+    case "ctrl":
+      return "⌃";
+    case "shift":
+      return "⇧";
+  }
+}
+
+export function symbolFromChar(char: Keyboard.KeyEquivalent) {
+  switch (char) {
+    case "delete":
+      return "⌫";
+    case "backspace":
+      return "⌫";
+    case "return":
+      return "⏎";
+    case "enter":
+      return "↩︎";
+    case "deleteForward":
+      return "⌦";
+    case "arrowUp":
+      return "↑";
+    case "arrowDown":
+      return "↓";
+    case "arrowLeft":
+      return "←";
+    case "arrowRight":
+      return "→";
+    case "pageUp":
+      return "⇞";
+    case "pageDown":
+      return "⇟";
+    case "home":
+      return "↖︎";
+    case "end":
+      return "↘︎";
+    case "escape":
+      return "⎋";
+    case "space":
+      return "␣";
+    default:
+      return char;
+  }
+}

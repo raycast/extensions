@@ -1,50 +1,47 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, LocalStorage } from "@raycast/api";
-import { TimeInfo, Timezone } from "../types/types";
-import { Dispatch, SetStateAction } from "react";
-import { localStorageKey } from "../utils/costants";
+import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
+import { CurrentTime, Timezone } from "../types/types";
 import { ActionToggleDetails } from "./action-toggle-details";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
 import { ActionTimeInfo } from "./action-time-info";
-import { Preferences } from "../types/preferences";
+import { itemLayout } from "../types/preferences";
+import { addTimeZones, getTimeZoneInfo } from "../utils/common-utils";
+import { MutatePromise } from "@raycast/utils";
+import { TIME_SECOND_TO_HOUR } from "../utils/costants";
 
 export function ActionOnTimezone(props: {
-  timeInfo: TimeInfo;
+  currentTime: CurrentTime | undefined;
   starTimezones: Timezone[];
   timezone: string;
-  setRefresh: Dispatch<SetStateAction<number>>;
+  mutate: () => Promise<void>;
   showDetail: boolean;
-  setRefreshDetail: Dispatch<SetStateAction<number>>;
+  showDetailMutate: MutatePromise<boolean | undefined, boolean | undefined> | undefined;
 }) {
-  const { timeInfo, starTimezones, timezone, setRefresh, showDetail, setRefreshDetail } = props;
+  const { currentTime, starTimezones, timezone, mutate, showDetail, showDetailMutate } = props;
   return (
     <ActionPanel>
-      <ActionTimeInfo timeInfo={timeInfo} />
-      <Action
-        icon={Icon.Star}
-        title={"Star Timezone"}
-        shortcut={{ modifiers: ["cmd"], key: "s" }}
-        onAction={async () => {
-          if (!starTimezones.some((value) => value.timezone === timezone)) {
-            const _starTimezones = [...starTimezones];
-            _starTimezones.push({
-              timezone: timezone,
-              utc_offset: timeInfo.utc_offset,
-              date_time: "",
-              unixtime: 0,
-            });
-            _starTimezones.forEach((value) => {
-              value.date_time = "";
-              value.unixtime = 0;
-            });
-            await LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(_starTimezones)).then(() => {
-              setRefresh(Date.now());
-            });
-          }
-        }}
-      />
-      {getPreferenceValues<Preferences>().itemLayout === "List" && (
-        <ActionToggleDetails showDetail={showDetail} setRefresh={setRefreshDetail} />
+      {currentTime && currentTime.timeZone === timezone && <ActionTimeInfo currentTime={currentTime} />}
+      {currentTime && currentTime.timeZone === timezone && (
+        <Action
+          icon={Icon.Star}
+          title={"Star Timezone"}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          onAction={async () => {
+            const timezoneInfo = await getTimeZoneInfo(timezone);
+            if (timezoneInfo) {
+              await addTimeZones(starTimezones, {
+                timezone: timezone,
+                utc_offset: String(timezoneInfo.currentUtcOffset.seconds / TIME_SECOND_TO_HOUR),
+                date_time: "",
+                unixtime: 0,
+              });
+            } else {
+              await showToast(Toast.Style.Failure, "Error", "Failed to get timezone information");
+            }
+            await mutate();
+          }}
+        />
       )}
+      {itemLayout === "List" && <ActionToggleDetails showDetail={showDetail} showDetailMutate={showDetailMutate} />}
       <ActionOpenCommandPreferences command={true} extension={true} />
     </ActionPanel>
   );

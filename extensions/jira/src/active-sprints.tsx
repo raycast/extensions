@@ -2,47 +2,59 @@ import { List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
-import { getIssues } from "./api/issues";
-import { getProjects } from "./api/projects";
+import { Project, getProjects } from "./api/projects";
 import StatusIssueList from "./components/StatusIssueList";
+import { getProjectAvatar } from "./helpers/avatars";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import useIssues from "./hooks/useIssues";
 
 export function ActiveSprints() {
+  const [cachedProject, setCachedProject] = useCachedState<Project>("active-sprint-project");
   const [projectQuery, setProjectQuery] = useState("");
   const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
-  const [projectKey, setProjectKey] = useCachedState("active-sprint-project", "");
-  const jql = `sprint in openSprints() AND project = ${projectKey} ORDER BY updated DESC`;
+  const jql = `sprint in openSprints() AND project = '${cachedProject?.key}' ORDER BY updated DESC`;
 
-  const {
-    data: issues,
-    isLoading: isLoadingIssues,
-    mutate,
-  } = useCachedPromise((jql) => getIssues({ jql }), [jql], { execute: projectKey !== "" });
+  const { issues, isLoading: isLoadingIssues, mutate } = useIssues(jql, { execute: cachedProject?.key !== "" });
+
+  const isSearching = projectQuery !== "";
 
   const searchBarAccessory = projects ? (
     <List.Dropdown
       tooltip="Filter issues by project"
-      onChange={setProjectKey}
-      value={projectKey}
+      onChange={(key) => {
+        setProjectQuery("");
+        setCachedProject(projects?.find((p) => p.key === key));
+      }}
+      value={cachedProject?.key ?? ""}
       throttle
       isLoading={isLoadingProjects}
       onSearchTextChange={setProjectQuery}
     >
-      {projects.map((project) => {
-        return (
-          <List.Dropdown.Item
-            key={project.id}
-            title={`${project.name} (${project.key})`}
-            value={project.key}
-            icon={project.avatarUrls["32x32"]}
-          />
-        );
-      })}
+      {cachedProject && !isSearching ? (
+        <List.Dropdown.Item
+          key={cachedProject.key}
+          title={`${cachedProject.name} (${cachedProject.key})`}
+          value={cachedProject.key}
+          icon={getProjectAvatar(cachedProject)}
+        />
+      ) : null}
+      {projects
+        .filter((project) => (cachedProject && !isSearching ? project.id !== cachedProject?.id : true))
+        .map((project) => {
+          return (
+            <List.Dropdown.Item
+              key={project.id}
+              title={`${project.name} (${project.key})`}
+              value={project.key}
+              icon={getProjectAvatar(project)}
+            />
+          );
+        })}
     </List.Dropdown>
   ) : null;
 
@@ -56,6 +68,4 @@ export function ActiveSprints() {
   );
 }
 
-export default function Command() {
-  return withJiraCredentials(<ActiveSprints />);
-}
+export default withJiraCredentials(ActiveSprints);

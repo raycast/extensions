@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-latex",
+  "title": "LaTeX to Image",
+  "description": "Converts LaTeX text to image. Copy the image to the Clipboard.",
+  "icon": "bird.png",
+  "author": "Noamko",
+  "contributors": [
+    "FariaF22"
+  ],
+  "categories": [
+    "Design Tools",
+    "Web",
+    "Data",
+    "Productivity",
+    "Finance",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-latex",
+      "title": "Quick LaTeX",
+      "subtitle": "Quick LaTeX",
+      "description": "Quickly convert LaTeX to image and copy the image to the Clipboard.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "background",
+          "title": "Background Color",
+          "description": "Background Color of the image.",
+          "type": "textfield",
+          "default": "transparent",
+          "required": true
+        },
+        {
+          "name": "svgWidth",
+          "title": "SVG Width",
+          "description": "Width of the SVG image.",
+          "type": "textfield",
+          "default": "500",
+          "required": false
+        },
+        {
+          "name": "svgHeight",
+          "title": "SVG Height",
+          "description": "Height of the SVG image.",
+          "type": "textfield",
+          "default": "500",
+          "required": false
+        }, 
+        {
+          "name": "svgViewbox",
+          "title": "SVG Viewbox",
+          "description": "Viewbox of the SVG image.",
+          "type": "textfield",
+          "default": "0 0 50 50",
+          "required": false
+        }
+          
+      ],
+      "arguments": [
+        {
+          "name": "latex",
+          "type": "text",
+          "required": false,
+          "placeholder": "LaTeX"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.2",
+    "node-fetch": "^3.3.2",
+    "svgson": "^5.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.65",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -6,7 +6,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { useTodos } from "./todo/utils";
 import { MyProjectsDropdown } from "./project";
 import { useState } from "react";
-import { capitalizeFirstLetter, showErrorToast } from "../utils";
+import { capitalizeFirstLetter, getErrorMessage, showErrorToast } from "../utils";
 import { CacheActionPanelSection } from "./cache_actions";
 
 function userToIcon(user?: User): Image.ImageLike {
@@ -63,6 +63,19 @@ export function getTodoIcon(todo: Todo, overrideTintColor?: Color.ColorLike | nu
   };
 }
 
+function TodoListEmptyView(props: { searchMode: boolean }): JSX.Element {
+  if (props.searchMode) {
+    return <List.EmptyView title="No Todos" icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }} />;
+  }
+  return (
+    <List.EmptyView
+      icon="✨"
+      title="Isn't an empty Todo list beautiful?"
+      description="Are you looking for things to do? Take a look at open issues or contribute to a Merge Request."
+    />
+  );
+}
+
 export function TodoList(): JSX.Element {
   const [project, setProject] = useState<Project>();
   const { todos, error, isLoading, performRefetch: refresh } = useTodos(undefined, project);
@@ -75,21 +88,28 @@ export function TodoList(): JSX.Element {
     return <List isLoading={true} searchBarPlaceholder="" />;
   }
 
-  const refreshAll = () => {
+  const refreshAll = async () => {
     refresh();
-    launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
+    try {
+      await launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
+    } catch (error) {
+      showErrorToast(getErrorMessage(error), "Could not open Todos Menu Command");
+    }
   };
 
   return (
     <List
-      searchBarPlaceholder="Filter Todos by name..."
+      searchBarPlaceholder="Filter Todos by Name..."
       isLoading={isLoading}
       throttle={true}
       searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
     >
-      {todos?.map((todo) => (
-        <TodoListItem key={todo.id} todo={todo} refreshData={refreshAll} />
-      ))}
+      <List.Section title="Todos" subtitle={`${todos?.length}`}>
+        {todos?.map((todo) => (
+          <TodoListItem key={todo.id} todo={todo} refreshData={refreshAll} />
+        ))}
+      </List.Section>
+      <TodoListEmptyView searchMode={todos && todos.length > 0} />
     </List>
   );
 }
@@ -105,7 +125,7 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
   return (
     <List.Item
       id={todo.id.toString()}
-      title={todo.title}
+      title={todo.title ? todo.title : "?"}
       subtitle={subtitle}
       accessories={[
         { tag: getPrettyTodoActionName(todo), tooltip: `Reason: ${getPrettyTodoActionName(todo)}` },

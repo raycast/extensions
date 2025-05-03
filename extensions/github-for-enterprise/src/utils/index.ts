@@ -1,13 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 import { GraphQLClient } from "graphql-request";
-import { RequestInit } from "graphql-request/dist/types.dom";
-import https from "https";
+import { RequestConfig } from "graphql-request/build/esm/types";
 
-export async function fetcher({ document, variables = {}, headers = {} }: any) {
+export async function fetcher({ document, variables = {}, headers = {} }: any): Promise<any> {
   const { graphqlEndpoint, username, token, unsafeHttps } = getPreferenceValues();
 
-  const agent = new https.Agent({ rejectUnauthorized: !unsafeHttps });
-  const client = new GraphQLClient(graphqlEndpoint, { agent } as RequestInit);
+  const client = new GraphQLClient(graphqlEndpoint, { rejectUnauthorized: !unsafeHttps } as RequestConfig);
   return client.request(
     document,
     {
@@ -17,16 +15,19 @@ export async function fetcher({ document, variables = {}, headers = {} }: any) {
     {
       Authorization: `Bearer ${token}`,
       ...headers,
-    }
+    },
   );
 }
 
 export const groupBy = <T, K extends keyof T>(arr: T[], key: K) => {
-  return arr.reduce((r, a) => {
-    const v = a[key];
-    (r as any)[v] = [...((r as any)[v] || []), a];
-    return r;
-  }, {} as Record<string, T[]>);
+  return arr.reduce(
+    (r, a) => {
+      const v = a[key];
+      (r as any)[v] = [...((r as any)[v] || []), a];
+      return r;
+    },
+    {} as Record<string, T[]>,
+  );
 };
 
 export const partition = <T>(arr: T[], predicate: (item: T) => boolean) => {

@@ -1,28 +1,11 @@
-import {
-  openExtensionPreferences,
-  showToast,
-  Detail,
-  Toast,
-  ActionPanel,
-  Action,
-  Form,
-  LaunchProps,
-  popToRoot,
-  Icon,
-} from "@raycast/api";
+import { showToast, Toast, ActionPanel, Action, Form, LaunchProps, Icon, popToRoot } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { useEffect, useState } from "react";
-import { createUser, getDomains } from "./utils/api";
-import { CreateUserRequest, Domain, Response } from "./utils/types";
+import { useState } from "react";
+import { createUser } from "./utils/api";
+import { CreateUserRequest } from "./utils/types";
 import { getFavicon } from "@raycast/utils";
-
-interface State {
-  domains?: Domain[];
-  error?: string;
-  forwardingEmail?: string;
-  domainError?: string;
-  isLoading: boolean;
-}
+import ErrorComponent from "./components/ErrorComponent";
+import { useDomains } from "./utils/hooks";
 
 interface DomainArgs {
   domain: string;
@@ -30,45 +13,13 @@ interface DomainArgs {
 
 export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>) {
   const propDomain = props.arguments.domain;
+  const { isLoading: isLoadingDomains, data: domains, error } = useDomains({ includeShared: true });
 
-  const [state, setState] = useState<State>({
-    domains: undefined,
-    error: "",
-    forwardingEmail: "",
-    domainError: "",
-    isLoading: false,
-  });
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    async function getFromApi() {
-      const response: Response = await getDomains(true);
-
-      switch (response.type) {
-        case "error":
-          setState((prevState) => {
-            return { ...prevState, error: response.message, isLoading: false };
-          });
-          break;
-
-        case "success":
-          setState((prevState) => {
-            return { ...prevState, error: "", domains: response.result.domains };
-          });
-          break;
-
-        default:
-          break;
-      }
-    }
-
-    getFromApi();
-  }, []);
-
-  const { handleSubmit, itemProps } = useForm<CreateUserRequest>({
+  const { handleSubmit, itemProps } = useForm<CreateUserRequest & { confirmPassword: string }>({
     async onSubmit(values) {
-      setState((prevState: State) => {
-        return { ...prevState, isLoading: true };
-      });
+      setIsLoading(true);
 
       const filledFields = Object.entries(values).filter(([, val]) => val !== "");
       const mapped = Object.fromEntries(filledFields);
@@ -82,35 +33,24 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
       };
 
       const response = await createUser(formData);
-      switch (response.type) {
-        case "error":
-          await showToast(Toast.Style.Failure, "Purelymail Error", response.message);
-          setState((prevState) => {
-            return { ...prevState, isLoading: false };
-          });
-          break;
-
-        case "success":
-          setState((prevState) => {
-            return { ...prevState, isLoading: false };
-          });
-          await showToast(Toast.Style.Success, "User Created", `USER: ${userName}@${domainName}`);
-          await popToRoot({
-            clearSearchBar: true,
-          });
-          break;
-
-        default:
-          setState((prevState) => {
-            return { ...prevState, isLoading: false };
-          });
-          break;
+      if (response.type === "success") {
+        await showToast(Toast.Style.Success, "User Created", `USER: ${userName}@${domainName}`);
+        popToRoot();
       }
+      setIsLoading(false);
     },
     validation: {
       userName: FormValidation.Required,
       domainName: FormValidation.Required,
-      password: FormValidation.Required,
+      password(value) {
+        if (!value) return "The item is required";
+        if (itemProps.confirmPassword.value && itemProps.confirmPassword.value !== value)
+          return "Passwords do not match";
+      },
+      confirmPassword(value) {
+        if (!value) return "The item is required";
+        if (itemProps.password.value !== value) return "Passwords do not match";
+      },
     },
     initialValues: {
       domainName: propDomain || undefined,
@@ -120,26 +60,11 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
     },
   });
 
-  const showError = async () => {
-    if (state.error) {
-      await showToast(Toast.Style.Failure, "Purelymail Error", state.error);
-    }
-  };
-
-  showError();
-
-  return state.error ? (
-    <Detail
-      markdown={"⚠️" + state.error}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
+  return error ? (
+    <ErrorComponent error={error.message} />
   ) : (
     <Form
-      isLoading={state.domains === undefined || state.isLoading}
+      isLoading={isLoading || isLoadingDomains}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create User" onSubmit={handleSubmit} icon={Icon.AddPerson} />
@@ -147,7 +72,7 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
       }
     >
       <Form.Dropdown title="Domain" placeholder="Select a domain" {...itemProps.domainName}>
-        {state.domains?.map((domain) => (
+        {domains?.map((domain) => (
           <Form.Dropdown.Item
             key={domain.name}
             value={domain.name}
@@ -158,8 +83,10 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
       </Form.Dropdown>
 
       <Form.TextField title="Username" placeholder="Enter a username" {...itemProps.userName} />
+      <Form.Description text={`${itemProps.userName.value || "<USER>"}@${itemProps.domainName.value}`} />
 
       <Form.PasswordField title="Password" placeholder="Enter password" {...itemProps.password} />
+      <Form.PasswordField title="Confirm Password" placeholder="Confirm password" {...itemProps.confirmPassword} />
 
       <Form.Separator />
       <Form.TextField title="Recovery Email" placeholder="Enter Recovery Email" {...itemProps.recoveryEmail} />

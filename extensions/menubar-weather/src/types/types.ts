@@ -32,6 +32,7 @@ export interface Daily {
   weathercode: number[];
   windspeed_10m_max: number[];
   winddirection_10m_dominant: number[];
+  uv_index_max: number[];
 }
 
 export interface DailyUnits {
@@ -91,4 +92,18 @@ export interface GeoLocation {
   country: string;
   admin1?: string;
   admin2?: string;
+}
+
+export interface KLocation {
+  latitude: number;
+  longitude: number;
+  thoroughfare?: string;
+  subThoroughfare?: string;
+  locality?: string;
+  subLocality?: string;
+  administrativeArea?: string;
+  subAdministrativeArea?: string;
+  postalCode?: string;
+  country?: string;
+  countryCode?: string;
 }

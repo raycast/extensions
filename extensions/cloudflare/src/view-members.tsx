@@ -1,38 +1,38 @@
 import { List } from '@raycast/api';
-import { useEffect, useState } from 'react';
 
-import Service, { Account, Member } from './service';
+import Service, { Member } from './service';
 import { getMemberStatusIcon, getToken, handleNetworkError } from './utils';
+import { useCachedPromise } from '@raycast/utils';
 
 const service = new Service(getToken());
 
 function Command() {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [members, setMembers] = useState<Record<string, Member[]>>({});
-  const [isLoading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchMembers() {
-      try {
-        const accounts = await service.listAccounts();
-        setAccounts(accounts);
-
-        const members: Record<string, Member[]> = {};
-        for (let i = 0; i < accounts.length; i++) {
-          const account = accounts[i];
-          const accountMembers = await service.listMembers(account.id);
-          members[account.id] = accountMembers;
-        }
-        setMembers(members);
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-        handleNetworkError(e);
+  const {
+    isLoading,
+    data: { accounts, members },
+  } = useCachedPromise(
+    async () => {
+      const accounts = await service.listAccounts();
+      const members: Record<string, Member[]> = {};
+      for (let i = 0; i < accounts.length; i++) {
+        const account = accounts[i];
+        const accountMembers = await service.listMembers(account.id);
+        members[account.id] = accountMembers;
       }
-    }
-
-    fetchMembers();
-  }, []);
+      return {
+        accounts,
+        members,
+      };
+    },
+    [],
+    {
+      initialData: {
+        accounts: [],
+        members: [],
+      },
+      onError: handleNetworkError,
+    },
+  );
 
   return (
     <List isLoading={isLoading}>
@@ -43,7 +43,7 @@ function Command() {
           const account = accounts.find((account) => account.id === accountId);
           const name = account?.name || '';
           return (
-            <List.Section title={name}>
+            <List.Section title={name} key={accountId}>
               {accountMembers.map((member) => (
                 <List.Item
                   key={member.email}

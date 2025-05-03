@@ -1,7 +1,8 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { Hub } from "../lib/hub/hub";
 import { Tag } from "../lib/hub/types";
+import { pullImage } from "../lib/hub/docker";
 
 export default function SearchTags(props: { repo: string; hub?: Hub }) {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -53,6 +54,12 @@ export default function SearchTags(props: { repo: string; hub?: Hub }) {
                 <Action.CopyToClipboard title="Copy Name with Tag" content={`${props.repo}:${tag.name}`} />
                 <Action.OpenInBrowser url={imageTag.url ?? ""} />
                 <Action.CopyToClipboard title="Copy URL" content={imageTag.url ?? ""} />
+                <Action
+                  title="Pull Image"
+                  onAction={() => pullImage(`${props.repo}:${tag.name}`)}
+                  icon={Icon.Download}
+                  shortcut={{ modifiers: ["cmd"], key: "p" }}
+                />
               </ActionPanel>
             }
             accessories={[
@@ -61,7 +68,7 @@ export default function SearchTags(props: { repo: string; hub?: Hub }) {
               },
             ]}
           />
-        ))
+        )),
       )}
     </List>
   );

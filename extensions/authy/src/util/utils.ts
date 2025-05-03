@@ -1,68 +1,40 @@
+import { AuthenticatorToken, AppEntry } from "../client/dto";
 import { encode } from "hi-base32";
-import forge from "node-forge";
-import { generateTOTP } from "./totp";
+import { decryptSeed } from "./totp";
+import { getPreferenceValues } from "@raycast/api";
+import { Service } from "../component/login/login-helper";
 
-export function genTOTP(seed: string): string[] {
-  const secret = encode(Buffer.from(seed, "hex"));
-  const timestamp = new Date();
-  return [
-    generateTOTP(secret, { digits: 7, period: 10, timestamp: timestamp.getTime() }),
-    generateTOTP(secret, { digits: 7, period: 10, timestamp: timestamp.getTime() + 10 * 1000 }),
-    generateTOTP(secret, { digits: 7, period: 10, timestamp: timestamp.getTime() + 10 * 2 * 1000 }),
-  ];
-}
+export function mapOtpServices(authenticatorTokens: AuthenticatorToken[], authyApps: AppEntry[]): Service[] {
+  const { authyPassword, preferCustomName } = getPreferenceValues<{
+    authyPassword: string;
+    preferCustomName: boolean;
+  }>();
 
-export function decryptSeed(encryptedSeed: string, salt: string, password: string) {
-  let decrypted = decryptAES(salt, password, encryptedSeed, false);
-  if (decrypted === null || !isBase32(decrypted)) {
-    decrypted = decryptAES(salt, password, encryptedSeed, true);
-  }
-  return decrypted;
-}
-
-function isBase32(value: string): boolean {
-  return value.replace(/-|\s/g, "").match(/^[a-zA-Z2-7]+=*$/) !== null;
-}
-
-interface GeneratePBKDF2KeyOptions {
-  iterations: number;
-  keySize: number;
-  decodeSalt: boolean;
-  withoutEncoding: boolean;
-}
-
-function generatePBKDF2Key(password: string, salt: string, options: GeneratePBKDF2KeyOptions) {
-  if (options.decodeSalt) {
-    salt = forge.util.hexToBytes(salt);
-  }
-
-  if (options.withoutEncoding) {
-    return forge.pkcs5.pbkdf2(password, salt, options.iterations, options.keySize);
-  }
-
-  return forge.pkcs5.pbkdf2(unescape(encodeURIComponent(password)), salt, options.iterations, options.keySize);
-}
-
-function decryptAESWithKey(key: string, value: string) {
-  const ivBuffer = forge.util.createBuffer(
-    forge.util.decodeUtf8("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
-  );
-  const keyBuffer = forge.util.createBuffer(key);
-  const valueBuffer = forge.util.createBuffer(forge.util.decode64(value));
-
-  const decipher = forge.cipher.createDecipher("AES-CBC", keyBuffer);
-  decipher.start({ iv: ivBuffer });
-  decipher.update(valueBuffer);
-  return decipher.finish() ? decipher.output.data : null;
-}
-
-function decryptAES(salt: string, password: string, value: string, withoutEncoding: boolean) {
-  const pbkdf2Key = generatePBKDF2Key(password, salt, {
-    iterations: 1000,
-    keySize: 32, // Originally it was denoted in bits, changed to bytes
-    decodeSalt: false,
-    withoutEncoding,
+  const apps: Service[] = authyApps.map((i) => {
+    return {
+      id: i._id,
+      name: i.name,
+      digits: 7,
+      period: 10,
+      seed: encode(Buffer.from(i.secret_seed, "hex")),
+      type: "authy",
+    };
   });
 
-  return decryptAESWithKey(pbkdf2Key, value);
+  const services: Service[] = authenticatorTokens.map((i) => {
+    const seed = decryptSeed(i.encrypted_seed, i.salt, authyPassword, i.key_derivation_iterations || 1000);
+    return {
+      id: i.unique_id,
+      name: preferCustomName ? i.name || i.original_name : i.original_name || i.name,
+      digits: 6,
+      period: 30,
+      seed: seed,
+      accountType: i.account_type,
+      issuer: i.issuer,
+      logo: i.logo,
+      type: "service",
+    };
+  });
+
+  return [...apps, ...services];
 }

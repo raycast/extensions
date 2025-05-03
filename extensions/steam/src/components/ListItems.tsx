@@ -8,23 +8,27 @@ import { useEffect, useState } from "react";
 
 export const DynamicGameListItem = ({
   game,
+  context,
   ready,
   myGames = [],
+  fromAI,
 }: {
   game: GameSimple;
+  context: "recs" | "recent" | "recently-viewed" | "random" | "Search";
   ready: boolean;
   myGames?: GameDataSimple[];
+  fromAI?: boolean; // todo: couldn't pull the ItemAccessory in
 }) => {
   const [gameData, setGameData] = useState<GameData>();
   const [notFound, setNotFound] = useState(false);
   const [iconColor, setIconColor] = useState<Color.ColorLike>();
-  const { data, isError: error } = useGameData({ appid: game.appid, ready });
+  const { data, isError: error } = useGameData({ appid: game.appid, execute: ready });
   const [ownedData, setOwnedData] = useState<GameDataSimple>();
 
   useEffect(() => {
     if (!data) return;
-    setIconColor(Color.Green);
-    setGameData(data);
+    setIconColor(Color.SecondaryText);
+    setGameData(data as GameData);
   }, [data]);
 
   useEffect(() => {
@@ -43,19 +47,21 @@ export const DynamicGameListItem = ({
   return (
     <List.Item
       title={game?.name ?? ""}
-      subtitle={gameData?.type === "game" ? undefined : gameData?.type}
-      id={game?.appid ? game.appid.toString() : ""}
+      subtitle={(fromAI ? "ai recommended " : undefined) ?? (gameData?.type === "game" ? undefined : gameData?.type)}
+      id={context + (game?.appid ? game.appid.toString() : "")}
       icon={{
         source: ownedData?.img_icon_url
           ? `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${game.appid}/${ownedData.img_icon_url}.jpg`
-          : Icon.Circle,
+          : gameData?.type === "game"
+            ? Icon.GameController
+            : Icon.Circle,
         tintColor: ownedData?.img_icon_url ?? iconColor,
       }}
       accessories={[{ text: notFound ? "Game not found" : gameData?.release_date?.date }]}
       actions={
         <ActionPanel>
           <Action.Push icon={Icon.Sidebar} title="View Game Details" target={<GameDetails game={game} />} />
-          <LaunchActions appid={game?.appid} />
+          <LaunchActions name={game.name} appid={game?.appid} />
           <DefaultActions />
         </ActionPanel>
       }
@@ -74,7 +80,7 @@ export const MyGamesListType = ({ game }: { game: GameDataSimple }) => (
     actions={
       <ActionPanel>
         <Action.Push icon={Icon.Sidebar} title="View Game Details" target={<GameDetails game={game} />} />
-        <LaunchActions appid={game?.appid} />
+        <LaunchActions name={game.name} appid={game?.appid} />
         <DefaultActions />
       </ActionPanel>
     }

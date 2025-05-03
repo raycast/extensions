@@ -1,6 +1,22 @@
-import { Form, ActionPanel, Action, showToast, Detail, useNavigation, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Detail,
+  Form,
+  getPreferenceValues,
+  Keyboard,
+  List,
+  openCommandPreferences,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
+import History from "./components/History";
 import findAndProcessMatches from "./utils/find-and-process-matches";
+import { HISTORY_KEY, MAX_HISTORY_SIZE, RegexHistoryItem, selectedRegex, setSelectedRegex } from "./utils/history";
 
 type Values = {
   pattern: string;
@@ -18,13 +34,33 @@ const flagOptions = [
 ];
 
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences.CreateAndTestRegex>();
   const { push } = useNavigation();
+  const {
+    value: historyItems,
+    setValue: setHistoryItems,
+    isLoading: isHistoryLoading,
+  } = useLocalStorage<RegexHistoryItem[]>(HISTORY_KEY, []);
+
   const [pattern, setPattern] = useState("([A-Z])\\w+");
   const [flags, setFlags] = useState<string[]>([flagOptions[0].value]);
   const [text, setText] = useState("");
   const [result, setResult] = useState("");
   const [error, setError] = useState(false);
-  const toastRef = useRef<Toast>();
+  const toastRef = useRef<Toast>(null);
+
+  const firstMount = useRef(true);
+  useEffect(() => {
+    if (!preferences["use-last-used-pattern"]) {
+      return;
+    }
+
+    if (historyItems && historyItems.length > 0 && firstMount.current) {
+      setPattern(historyItems[0].pattern);
+      setFlags(historyItems[0].flags);
+      firstMount.current = false;
+    }
+  }, [historyItems]);
 
   useEffect(() => {
     try {
@@ -42,7 +78,26 @@ export default function Command() {
     }
   }, [pattern, flags, text]);
 
-  const handleSubmit = (values: Values) => {
+  const addToHistory = async (pattern: string, flags: string[]) => {
+    if (isHistoryLoading || historyItems === undefined) {
+      console.log("History is loading or not loaded");
+      return;
+    }
+
+    const newItem = { pattern, flags, timestamp: Date.now(), isPinned: false };
+    const filteredHistory = historyItems.filter(
+      (item) => item.pattern !== pattern || item.flags.join("") !== flags.join("")
+    );
+
+    filteredHistory.unshift(newItem);
+    while (filteredHistory.length > MAX_HISTORY_SIZE) {
+      filteredHistory.pop();
+    }
+
+    setHistoryItems(filteredHistory);
+  };
+
+  const validateThenShowDetails = async (values: Values) => {
     let submitAction: (() => void) | undefined;
     if (error) {
       submitAction = undefined;
@@ -52,17 +107,60 @@ export default function Command() {
     } else if (!text) {
       submitAction = () => showToast({ title: "Empty field", message: "Missing text", style: Toast.Style.Failure });
     } else {
-      submitAction = () => push(<Details {...values} />);
+      submitAction = () => {
+        addToHistory(pattern, flags);
+        push(<Details {...values} />);
+      };
     }
     submitAction?.();
   };
 
+  const updateRegexFromHistoryIfSelected = () => {
+    if (selectedRegex) {
+      setPattern(selectedRegex.pattern);
+      setFlags(selectedRegex.flags);
+    }
+
+    setSelectedRegex(undefined);
+  };
+
   return (
     <Form
+      isLoading={isHistoryLoading}
       actions={
-        !error &&
-        text &&
-        pattern && <ActionPanel>{<Action.SubmitForm onSubmit={handleSubmit} title="Show Details" />}</ActionPanel>
+        <ActionPanel>
+          <Action.Push target={<QuickReference />} title="Show Quick Reference" />
+          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+          <Action.Push
+            target={<History />}
+            title="Show History"
+            shortcut={{ modifiers: ["cmd"], key: "y" }}
+            onPop={updateRegexFromHistoryIfSelected}
+          />
+          <Action
+            title="Save to History"
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            onAction={() => {
+              addToHistory(pattern, flags);
+              showToast({
+                title: "Saved to History",
+                style: Toast.Style.Success,
+              });
+            }}
+          />
+          <Action
+            title="Clear History"
+            shortcut={Keyboard.Shortcut.Common.RemoveAll}
+            onAction={() => {
+              setHistoryItems([]);
+              showToast({
+                title: "History Cleared",
+                style: Toast.Style.Success,
+              });
+            }}
+          />
+          {!error && text && pattern && <Action.SubmitForm onSubmit={validateThenShowDetails} title="Show Details" />}
+        </ActionPanel>
       }
     >
       <Form.TextField id="pattern" title="Expression" placeholder="Enter RegEx" value={pattern} onChange={setPattern} />
@@ -109,7 +207,7 @@ const Details: React.FC<Values> = ({ text, pattern, flags }) => {
       navigationTitle="Result Details"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Go Back" onSubmit={pop} />
+          <Action title="Go Back" onAction={pop} />
         </ActionPanel>
       }
       metadata={
@@ -126,5 +224,168 @@ const Details: React.FC<Values> = ({ text, pattern, flags }) => {
         </Detail.Metadata>
       }
     />
+  );
+};
+
+const QuickReference = () => {
+  const { pop } = useNavigation();
+  const references = [
+    {
+      regex: "[abc]",
+      description: "A single character of: a, b, or c",
+      keywords: ["character"],
+    },
+    {
+      regex: "[^abc]",
+      description: "Any single character except: a, b, or c",
+      keywords: ["character", "except", "not", "exclud"],
+    },
+    {
+      regex: "[a-z]",
+      description: "Any single character in the range a-z",
+      keywords: ["character", "range", "between"],
+    },
+    {
+      regex: "[a-zA-Z]",
+      description: "Any single character in the range a-z or A-Z",
+      keywords: ["character", "range", "between"],
+    },
+    {
+      regex: "^",
+      description: "Start of line",
+      keywords: ["start", "line", "beginning"],
+    },
+    {
+      regex: "$",
+      description: "End of line",
+      keywords: ["end", "line"],
+    },
+    {
+      regex: "\\A",
+      description: "Start of string",
+      keywords: ["start", "string"],
+    },
+    {
+      regex: "\\z",
+      description: "End of string",
+      keywords: ["end", "string"],
+    },
+
+    {
+      regex: ".",
+      description: "Any single character",
+      keywords: ["any", "character", "everything"],
+    },
+    {
+      regex: "\\s",
+      description: "Any whitespace character",
+      keywords: ["any", "whitespace", "character"],
+    },
+    {
+      regex: "\\S",
+      description: "Any non-whitespace character",
+      keywords: ["any", "whitespace", "character"],
+    },
+    {
+      regex: "\\d",
+      description: "Any digit",
+      keywords: ["any", "digit", "number"],
+    },
+    {
+      regex: "\\D",
+      description: "Any non-digit",
+      keywords: ["any", "digit", "number"],
+    },
+    {
+      regex: "\\w",
+      description: "Any word character (letter, number, underscore)",
+      keywords: ["word", "any"],
+    },
+    {
+      regex: "\\W",
+      description: "Any non-word character",
+      keywords: ["word", "any"],
+    },
+    {
+      regex: "\\b",
+      description: "	Any word boundary",
+      keywords: ["any", "word", "boundary"],
+    },
+    {
+      regex: "(...)",
+      description: "Capture everything enclosed",
+      keywords: ["capture", "everything", "enclosed"],
+    },
+    {
+      regex: "(a|b)",
+      description: "a or b",
+      keywords: ["or"],
+    },
+    {
+      regex: "a?",
+      description: "Zero or one of a",
+      keywords: ["zero", "one", "0"],
+    },
+    {
+      regex: "a*",
+      description: "Zero or more of a",
+      keywords: ["zero", "more", "0", "any"],
+    },
+    {
+      regex: "a+",
+      description: "One or more of a",
+      keywords: ["one", "more", "least"],
+    },
+    {
+      regex: "a{3}",
+      description: "Exactly 3 of a",
+      keywords: ["exactly", "times"],
+    },
+    {
+      regex: "a{3,}",
+      description: "3 or more of a",
+      keywords: ["or", "more", "times", "least"],
+    },
+    {
+      regex: "a{3,6}",
+      description: "Between 3 and 6 of a",
+      keywords: ["between"],
+    },
+  ];
+
+  return (
+    <List navigationTitle="Quick reference">
+      {references.map((reference) => {
+        return (
+          <List.Item
+            key={reference.regex}
+            title={reference.regex}
+            subtitle={reference.description}
+            keywords={reference.keywords}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Copy to Clipboard"
+                  onAction={async () => {
+                    try {
+                      await Clipboard.copy(reference.regex);
+                      await showToast({
+                        title: "Copied to clipboard",
+                      });
+                      pop();
+                    } catch {
+                      showToast({
+                        title: "Failed to copy",
+                        style: Toast.Style.Failure,
+                      });
+                    }
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
+    </List>
   );
 };

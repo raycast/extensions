@@ -1,6 +1,6 @@
 # Netlify
 
-This extension allows to search your [Netlify](https://www.netlify.com) sites, deploys, domains, team members, audit log, official documentation, and more.
+This extension allows to search your [Netlify](https://www.netlify.com) sites, deploys, environment variables, domains, team members, audit log, official documentation, and more.
 
 ## Getting started
 
@@ -46,9 +46,11 @@ This command searches the 100 most recent entries in your team's audit log. Pres
 
 Read more about the [audit log in the docs](https://docs.netlify.com/accounts-and-billing/team-management/team-audit-log/).
 
-### Search Domains
+### Search Domains and Manage DNS Records
 
 This command searches for domain names registered to your team. Each result will show if the domain is set to auto-renew, if it is expiring soon, if it has already expired, or if it has been registered externally.
+
+For domains on Netlify DNS, you can view, create and delete DNS records all from the extension.
 
 You can also search to query if a given domain name is available to register. If your team has a credit card on file, you can purchase a domain with this command. A confirmation dialog will prompt you to confirm your transaction before any payment is processed.
 

@@ -6,31 +6,36 @@ import {
   BlueskyQuoteType,
   FirstSignInSuccessToast,
 } from "../utils/constants";
-import { ATSessionResponse, CredentialsHashStore, PostReference } from "../types/types";
+import { ATSessionResponse, Account, CredentialsHashStore, Notification, PostReference } from "../types/types";
 import {
   AppBskyActorSearchActors,
   AppBskyFeedGetAuthorFeed,
   AppBskyFeedGetTimeline,
   AppBskyFeedLike,
   AppBskyFeedPost,
+  AppBskyGraphGetBlocks,
+  AppBskyGraphGetMutes,
   AppBskyNotificationListNotifications,
   AtpSessionData,
-  BskyAgent,
+  AtpAgent,
+  ComAtprotoRepoDeleteRecord,
   ComAtprotoRepoListRecords,
   RichText,
 } from "@atproto/api";
 import { clearLocalStore, getItemFromLocalStore } from "../utils/localStore";
 import { createHashKey, showSuccessToast } from "../utils/common";
 
+import { AppPasswordRegex } from "../config/config";
 import { AtUri } from "@atproto/uri";
 import { LocalStorage } from "@raycast/api";
 import { clearCache } from "../utils/cacheStore";
-import fetch from "cross-fetch";
+import "cross-fetch/polyfill";
 import { getPreferences } from "../utils/preference";
+import FormData from "cross-fetch";
+//@ts-expect-error Incompatible FormData Types
+global.FormData = FormData; // we do this to make atproto client happy
 
-global.fetch = fetch;
-
-const agent = new BskyAgent({
+const agent = new AtpAgent({
   service: getPreferences().service,
   persistSession: (sessionEvent, session) => {
     switch (sessionEvent) {
@@ -47,7 +52,7 @@ const agent = new BskyAgent({
   },
 });
 
-export const getSignedInUserHandle = async () => {
+export const getSignedInAccountHandle = async () => {
   const session = await getExistingSession();
   return session?.handle;
 };
@@ -65,6 +70,19 @@ export const resolveHandle = async (handle: string): Promise<boolean> => {
   }
 };
 
+export const getSearchPosts = async (searchTerm: string) => {
+  const response = await agent.app.bsky.feed.searchPosts({ q: searchTerm, sort: "latest" });
+  if (response.data) {
+    const postResponse = response.data.posts.map((item) => ({
+      post: item,
+    }));
+    return {
+      feed: postResponse,
+    };
+  }
+  return null;
+};
+
 export const getTimelinePosts = async (cursor: string | null, limit = 10) => {
   const requestObject: AppBskyFeedGetTimeline.QueryParams = {
     limit,
@@ -77,9 +95,9 @@ export const getTimelinePosts = async (cursor: string | null, limit = 10) => {
 
   if (response.data) {
     return response.data;
-  } else {
-    return null;
   }
+
+  return null;
 };
 
 export const getLikePosts = async (handle: string, cursor: string | null, limit = 10) => {
@@ -111,7 +129,7 @@ export const getLikePosts = async (handle: string, cursor: string | null, limit 
           return null;
         }
       })
-      .filter((thread) => thread !== null)
+      .filter((thread) => thread !== null),
   );
 
   return {
@@ -120,7 +138,7 @@ export const getLikePosts = async (handle: string, cursor: string | null, limit 
   };
 };
 
-export const getUserPosts = async (handle: string, cursor: string | null, limit = 10) => {
+export const getAccountPosts = async (handle: string, cursor: string | null, limit = 10) => {
   const requestObject: AppBskyFeedGetAuthorFeed.QueryParams = {
     actor: handle,
     limit,
@@ -129,11 +147,14 @@ export const getUserPosts = async (handle: string, cursor: string | null, limit 
     requestObject.cursor = cursor;
   }
 
-  const response = await agent.getAuthorFeed(requestObject);
+  try {
+    const response = await agent.getAuthorFeed(requestObject);
+    if (response.data) {
+      return response.data;
+    }
 
-  if (response.data) {
-    return response.data;
-  } else {
+    return null;
+  } catch {
     return null;
   }
 };
@@ -151,9 +172,9 @@ export const getNotifications = async (cursor: string | null, limit = 10) => {
 
   if (response.data) {
     return response.data;
-  } else {
-    return null;
   }
+
+  return null;
 };
 
 export const getRKey = (uri: string) => {
@@ -165,7 +186,7 @@ export const createPost = async (postText: string, postReference?: PostReference
   await rt.detectFacets(agent);
 
   const postRecord: Partial<AppBskyFeedPost.Record> & Omit<AppBskyFeedPost.Record, "createdAt"> = {
-    $type: { BskyFeedType: BlueskyFeedType },
+    $type: BlueskyFeedType,
     text: rt.text,
     facets: rt.facets,
     createdAt: new Date().toISOString(),
@@ -222,9 +243,34 @@ export const getProfile = async (handle: string) => {
   return null;
 };
 
+export const resolveATUri = async (notification: Notification): Promise<string> => {
+  if (["reply", "quote", "mention"].includes(notification.reason)) {
+    const atUri = new AtUri(notification.uri);
+    return `${BlueskyProfileUrlBase}/${notification.author.handle}/post/${atUri.rkey}`;
+  }
+
+  if ((notification.reason === "like" || notification.reason === "repost") && notification.targetPostUri) {
+    const accountHandle = await getSignedInAccountHandle();
+    const atUri = new AtUri(notification.targetPostUri);
+    return `${BlueskyProfileUrlBase}/${accountHandle}/post/${atUri.rkey}`;
+  }
+
+  return `${BlueskyProfileUrlBase}/${notification.author.handle}`;
+};
+
 export const createNewSession = async (): Promise<ATSessionResponse> => {
   try {
     const { accountId, password, service } = getPreferences();
+
+    if (!AppPasswordRegex.test(password)) {
+      const response: ATSessionResponse = {
+        status: "session-creation-failed",
+        message: "Please use an app password instead of your account password.",
+      };
+
+      return response;
+    }
+
     const identifier = accountId.startsWith("@") ? accountId.slice(1) : accountId;
 
     await agent.login({ identifier, password });
@@ -285,7 +331,73 @@ export const getMarkdownText = async (text: string) => {
   return markdown;
 };
 
-export const getUsers = async (searchTerm: string, cursor: string | null) => {
+export const getMutedAccounts = async (cursor: string | null) => {
+  const requestObject: AppBskyGraphGetMutes.QueryParams = {
+    limit: 100,
+  };
+
+  if (cursor) {
+    requestObject.cursor = cursor;
+  }
+
+  const response = await agent.app.bsky.graph.getMutes(requestObject);
+
+  if (response.data) {
+    return response.data;
+  }
+
+  return null;
+};
+
+export const block = async (account: Account) => {
+  if (agent.session === undefined) {
+    return;
+  }
+
+  await agent.app.bsky.graph.block.create(
+    { repo: agent.session.did },
+    {
+      createdAt: new Date().toISOString(),
+      subject: account.did,
+    },
+  );
+};
+
+export const unblock = async (account: Account) => {
+  if (!account.blockedUri || agent.session === undefined) {
+    return;
+  }
+
+  const aturi = new AtUri(account.blockedUri);
+
+  const requestObject: ComAtprotoRepoDeleteRecord.InputSchema = {
+    rkey: aturi.rkey,
+    repo: agent.session.did,
+    collection: "app.bsky.graph.block",
+  };
+
+  await agent.com.atproto.repo.deleteRecord(requestObject);
+};
+
+export const getBlockedAccounts = async (cursor: string | null) => {
+  const requestObject: AppBskyGraphGetBlocks.QueryParams = {
+    limit: 100,
+  };
+
+  if (cursor) {
+    requestObject.cursor = cursor;
+  }
+
+  const response = await agent.app.bsky.graph.getBlocks(requestObject);
+
+  if (response.data) {
+    return response.data;
+  }
+
+  return null;
+};
+
+export const getAccounts = async (searchTerm: string, cursor: string | null) => {
   const requestObject: AppBskyActorSearchActors.QueryParams = {
     limit: 100,
     term: searchTerm,
@@ -312,7 +424,7 @@ export const getExistingCredentialsHash = async () => {
 
   return credentialsHash.key;
 };
-export const credentialsUpdatedByUser = async () => {
+export const credentialsUpdatedByAccount = async () => {
   const { accountId, password, service } = getPreferences();
   const credentialsHashKey = createHashKey(`${accountId}:${password}:${service}`);
 
@@ -331,7 +443,7 @@ export const startNewSession = async (): Promise<ATSessionResponse> => {
 };
 
 export const startATSession = async (): Promise<ATSessionResponse> => {
-  if (await credentialsUpdatedByUser()) {
+  if (await credentialsUpdatedByAccount()) {
     return startNewSession();
   }
 

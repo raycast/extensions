@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 

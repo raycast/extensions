@@ -1,69 +1,85 @@
-import { ActionPanel, Action, List, showToast, Toast, openCommandPreferences, Icon } from "@raycast/api";
-import { CalEventType, useCurrentUser, useEventTypes } from "./services/cal.com";
-import { URL } from "url";
+import { Action, ActionPanel, Color, Icon, List, openCommandPreferences } from "@raycast/api";
+import { formatCurrency, useCurrentUser, useEventTypes } from "@api/cal.com";
 
 export default function Command() {
-  const { data: user, error: userError } = useCurrentUser();
-  const { data: items, isLoading, error } = useEventTypes();
-
-  if (error) {
-    showToast({
-      title: "Unable to load your events",
-      message: "Check your API key",
-      style: Toast.Style.Failure,
-      primaryAction: { onAction: openCommandPreferences, title: "Open Preferences" },
-    });
-  }
-  if (userError) {
-    showToast({
-      title: "Unable to load your username",
-      message: "Check your API key",
-      style: Toast.Style.Failure,
-      primaryAction: { onAction: openCommandPreferences, title: "Open Preferences" },
-    });
-  }
+  const { data: user, error: userError, isLoading: isLoadingUser } = useCurrentUser();
+  const { data: items, isLoading: isLoadingEvents, error: eventsError } = useEventTypes();
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoadingUser || isLoadingEvents} searchBarPlaceholder={"Search by duration"}>
+      {(eventsError || userError) && (
+        <List.EmptyView
+          title={eventsError ? "Unable to load your events" : "Unable to load your username"}
+          description={"Check your API key"}
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          actions={
+            <ActionPanel>
+              <Action title="Open Preferences" onAction={openCommandPreferences} icon={Icon.Gear} />
+            </ActionPanel>
+          }
+        />
+      )}
       {items?.map((item) => (
         <List.Item
           key={item.id}
           title={item.title}
-          accessories={getAccessories(item)}
-          subtitle={item.description}
+          accessories={[
+            ...(item.price
+              ? [
+                  {
+                    icon: { source: Icon.CreditCard, tintColor: Color.Green },
+                    text: formatCurrency(item.price, item.currency),
+                  },
+                ]
+              : []),
+            ...(item.hidden
+              ? [{ icon: { source: Icon.EyeDisabled, tintColor: Color.Orange }, tooltip: "Hidden" }]
+              : []),
+            ...(item.recurringEvent
+              ? [
+                  {
+                    icon: { source: Icon.Repeat, tintColor: Color.Purple },
+                    text: String(item.recurringEvent.count),
+                    tooltip: `Repeats up to ${item.recurringEvent.count} times`,
+                  },
+                ]
+              : []),
+            ...(item.requiresConfirmation
+              ? [
+                  {
+                    icon: { source: Icon.QuestionMarkCircle, tintColor: Color.Yellow },
+                    tooltip: "Requires confirmation",
+                  },
+                ]
+              : []),
+            { icon: { source: Icon.Clock, tintColor: Color.Blue }, text: `${item.length} min` },
+          ]}
+          keywords={item.length ? [item.length.toString()] : []}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard
-                content={new URL(`${user?.username}/${item.slug}`, "https://cal.com").toString()}
-                icon={Icon.Link}
-              />
-              <Action.OpenInBrowser
-                url={new URL(`${user?.username}/${item.slug}`, "https://cal.com").toString()}
-                title="Preview URL"
-              />
+              <Action.CopyToClipboard content={item.link} icon={Icon.Link} />
+              <Action.OpenInBrowser url={item.link} title="Preview URL" />
+              <ActionPanel.Section title="Quick Links">
+                <Action.OpenInBrowser
+                  title="Open Dashboard"
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  url="https://app.cal.com"
+                />
+                <Action.OpenInBrowser
+                  title="Open Availability Troubleshooter"
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
+                  url={`https://app.cal.com/availability/troubleshoot?eventType=${item.slug}`}
+                />
+                <Action.CopyToClipboard
+                  title="Copy My Link"
+                  shortcut={{ modifiers: ["cmd"], key: "m" }}
+                  content={`https://cal.com/${user?.username}`}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
       ))}
     </List>
   );
-}
-
-function getAccessories(item: CalEventType): List.Item.Accessory[] {
-  const accessories: List.Item.Accessory[] = [];
-  if (item.hidden) {
-    accessories.push({ icon: Icon.EyeDisabled, text: "Hidden" });
-  }
-
-  if (item.recurringEvent) {
-    accessories.push({ icon: Icon.Repeat, text: `Repeats up to ${item.recurringEvent.count} times` });
-  }
-
-  if (item.requiresConfirmation) {
-    accessories.push({ icon: Icon.QuestionMarkCircle, text: "Requires confirmation" });
-  }
-
-  accessories.push({ icon: Icon.Clock, text: `${item.length} min` });
-
-  return accessories;
 }

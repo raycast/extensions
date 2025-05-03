@@ -6,7 +6,8 @@
   "icon": "pipe-icon.png",
   "author": "pomdtr",
   "contributors": [
-    "gasolin"
+    "gasolin",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "categories": [
@@ -15,10 +16,17 @@
   ],
   "commands": [
     {
+      "name": "pipe-clipboard-to-command",
+      "title": "Pipe Clipboard to Command",
+      "subtitle": "Pipe Commands",
+      "description": "Apply a script to clipboard contents.",
+      "mode": "view"
+    },
+    {
       "name": "pipe-text-to-command",
       "title": "Pipe Text to Command",
       "subtitle": "Pipe Commands",
-      "description": "Apply a script on your selection or clipboard.",
+      "description": "Apply a script to selected text.",
       "mode": "view"
     },
     {
@@ -64,11 +72,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.46.0",
-    "globby": "^13.1.1",
-    "jsonschema": "^1.4.0",
-    "run-applescript": "^6.1.0",
-    "untildify": "^4.0.0"
+    "@raycast/api": "^1.69.3",
+    "globby": "^14.0.1",
+    "jsonschema": "^1.4.1",
+    "run-applescript": "^7.0.0",
+    "untildify": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^18.8.3",
@@ -77,14 +85,17 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "react-devtools": "^4.28.4",
     "typescript": "^4.4.3",
-    "typescript-json-schema": "^0.53.0"
+    "typescript-json-schema": "^0.62.0"
   },
   "scripts": {
     "schema": "typescript-json-schema src/types.ts ScriptMetadatas --required > assets/schema.json",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

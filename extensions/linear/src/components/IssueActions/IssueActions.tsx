@@ -1,37 +1,52 @@
-import { Action, Icon, ActionPanel, showToast, Toast, confirmAlert, Color, useNavigation } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 import { IssueUpdateInput } from "@linear/sdk/dist/_generated_documents";
+import {
+  Action,
+  Icon,
+  ActionPanel,
+  showToast,
+  Toast,
+  confirmAlert,
+  Color,
+  useNavigation,
+  Keyboard,
+} from "@raycast/api";
+import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
+import { useState } from "react";
 
-import { IssueResult, IssueDetailResult } from "../../api/getIssues";
-
-import { getLinearClient } from "../../helpers/withLinearClient";
-import { isLinearInstalled } from "../../helpers/isLinearInstalled";
-
-import { getEstimateScale } from "../../helpers/estimates";
+import { IssueResult, IssueDetailResult, Attachment } from "../../api/getIssues";
+import { getLinearClient } from "../../api/linearClient";
 import { getErrorMessage } from "../../helpers/errors";
+import { getEstimateScale } from "../../helpers/estimates";
 import { priorityIcons } from "../../helpers/priorities";
 import { getUserIcon } from "../../helpers/users";
-
+import useUsers from "../../hooks/useUsers";
+import CreateSubIssues from "../CreateSubIssues";
+import EditIssueForm from "../EditIssueForm";
+import IssueAttachments from "../IssueAttachments";
+import { IssueAttachmentsForm } from "../IssueAttachmentsForm";
+import IssueCommentForm from "../IssueCommentForm";
+import IssueComments from "../IssueComments";
+import OpenInLinear from "../OpenInLinear";
 import SubIssues from "../SubIssues";
+
 import CopyToClipboardSection from "./CopyToClipboardSection";
-import ProjectSubmenu from "./ProjectSubmenu";
 import CycleSubmenu from "./CycleSubmenu";
 import LabelSubmenu from "./LabelSubmenu";
+import MilestoneSubmenu from "./MilestoneSubmenu";
 import ParentIssueSubmenu from "./ParentIssueSubmenu";
+import ProjectSubmenu from "./ProjectSubmenu";
 import StateSubmenu from "./StateSubmenu";
-import EditIssueForm from "../EditIssueForm";
-import IssueComments from "../IssueComments";
-import IssueCommentForm from "../IssueCommentForm";
 
 type IssueActionsProps = {
   issue: IssueResult;
   mutateList?: MutatePromise<IssueResult[] | undefined>;
   mutateDetail?: MutatePromise<IssueDetailResult>;
   mutateSubIssues?: MutatePromise<IssueResult[] | undefined>;
+  showAttachmentsAction?: boolean;
+  attachments?: Attachment[];
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
 };
 
@@ -50,8 +65,9 @@ export default function IssueActions({
   mutateList,
   mutateSubIssues,
   mutateDetail,
+  showAttachmentsAction,
+  attachments,
   priorities,
-  users,
   me,
 }: IssueActionsProps) {
   const { pop } = useNavigation();
@@ -353,13 +369,12 @@ export default function IssueActions({
     }
   }
 
+  const [userQuery, setUserQuery] = useState<string>("");
+  const { users, supportsUserTypeahead, isLoadingUsers } = useUsers(userQuery);
+
   return (
     <>
-      {isLinearInstalled ? (
-        <Action.Open title="Open Issue in Linear" icon="linear.png" target={issue.url} application="Linear" />
-      ) : (
-        <Action.OpenInBrowser url={issue.url} title="Open Issue in Browser" />
-      )}
+      <OpenInLinear title="Open Issue" url={issue.url} />
 
       <ActionPanel.Section>
         <Action.Push
@@ -369,7 +384,6 @@ export default function IssueActions({
           target={
             <EditIssueForm
               priorities={priorities}
-              users={users}
               me={me}
               issue={issue}
               mutateList={mutateList}
@@ -398,27 +412,30 @@ export default function IssueActions({
           </ActionPanel.Submenu>
         ) : null}
 
-        {users && users.length > 0 ? (
-          <ActionPanel.Submenu
-            icon={Icon.AddPerson}
-            title="Assign To"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-          >
-            {users.map((user) => (
-              <Action
-                key={user.id}
-                autoFocus={user.id === issue.assignee?.id}
-                title={`${user.displayName} (${user.email})`}
-                icon={getUserIcon(user)}
-                onAction={() => setAssignee(user)}
-              />
-            ))}
-          </ActionPanel.Submenu>
-        ) : null}
+        <ActionPanel.Submenu
+          icon={Icon.AddPerson}
+          title="Assign to"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          {...(supportsUserTypeahead && {
+            onSearchTextChange: setUserQuery,
+            isLoading: isLoadingUsers,
+            throttle: true,
+          })}
+        >
+          {users?.map((user) => (
+            <Action
+              key={user.id}
+              autoFocus={user.id === issue.assignee?.id}
+              title={`${user.displayName} (${user.email})`}
+              icon={getUserIcon(user)}
+              onAction={() => setAssignee(user)}
+            />
+          ))}
+        </ActionPanel.Submenu>
 
         {me ? (
           <Action
-            title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
+            title={isAssignedToMe ? "Un-Assign from Me" : "Assign to Me"}
             icon={getUserIcon(me)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={() => setToMe(isAssignedToMe ? null : me)}
@@ -462,11 +479,13 @@ export default function IssueActions({
 
         <ProjectSubmenu issue={issue} updateIssue={updateIssue} />
 
+        <MilestoneSubmenu issue={issue} updateIssue={updateIssue} />
+
         <ParentIssueSubmenu issue={issue} updateIssue={updateIssue} />
 
         <Action
           title="Delete Issue"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           onAction={() => deleteIssue()}
@@ -479,6 +498,29 @@ export default function IssueActions({
           icon={Icon.List}
           target={<SubIssues issue={issue} mutateList={mutateList} />}
           shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+        />
+
+        <Action.Push
+          title="Break Issues into Sub-Issues"
+          icon={Icon.Stars}
+          target={<CreateSubIssues issue={issue} />}
+          shortcut={{ modifiers: ["opt", "shift"], key: "m" }}
+        />
+
+        {showAttachmentsAction ? (
+          <Action.Push
+            title="Show Issue Links"
+            icon={Icon.Link}
+            target={<IssueAttachments attachments={attachments ?? []} issue={issue} />}
+            shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "l" }}
+          />
+        ) : null}
+
+        <Action.Push
+          title="Add Attachments and Links"
+          icon={Icon.NewDocument}
+          target={<IssueAttachmentsForm issue={issue} />}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "a" }}
         />
 
         <Action.Push

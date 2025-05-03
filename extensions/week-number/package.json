@@ -1,0 +1,133 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "week-number",
+  "title": "Week Number",
+  "description": "Show the current week of the year.",
+  "icon": "week-number-icon.png",
+  "author": "koinzhang",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "week-number",
+      "title": "Week Number Menu Bar",
+      "description": "The current week number in your menu bar.",
+      "mode": "menu-bar",
+      "interval": "1h",
+      "preferences": [
+        {
+          "title": "Icon",
+          "name": "icon",
+          "type": "dropdown",
+          "description": "Show different icons of menu bar Week Number.",
+          "required": false,
+          "default": "progress",
+          "data": [
+            {
+              "title": "None",
+              "value": ""
+            },
+            {
+              "title": "Progress",
+              "value": "progress"
+            },
+            {
+              "title": "Number",
+              "value": "number-16"
+            },
+            {
+              "title": "Calendar",
+              "value": "calendar-16"
+            },
+            {
+              "title": "Clock",
+              "value": "clock-16"
+            },
+            {
+              "title": "Square",
+              "value": "app-window-grid-3x3-16"
+            },
+            {
+              "title": "Circle",
+              "value": "cd-16"
+            }
+          ]
+        },
+        {
+          "title": "Prefix",
+          "name": "prefix",
+          "type": "textfield",
+          "description": "Show different prefix text of menu bar Week Number.",
+          "required": false,
+          "default": "Week "
+        },
+        {
+          "title": "Week Number",
+          "name": "weekNumberText",
+          "label": "Show week number",
+          "type": "checkbox",
+          "description": "Show week number in menu bar",
+          "required": false,
+          "default": true
+        },
+        {
+          "title": "Suffix",
+          "name": "suffix",
+          "type": "textfield",
+          "description": "Show different suffix text of menu bar Week Number.",
+          "required": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "find-week-number",
+      "title": "Find Week Number",
+      "description": "Find week number for a specific date.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Week Start",
+      "name": "weekStart",
+      "type": "dropdown",
+      "description": "The start of a new week",
+      "required": false,
+      "defaultValue": "Monday",
+      "data": [
+        {
+          "title": "Monday",
+          "value": "Monday"
+        },
+        {
+          "title": "Sunday",
+          "value": "Sunday"
+        },
+        {
+          "title": "Saturday",
+          "value": "Saturday"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "weeknumber": "^1.2.1",
+    "@raycast/utils": "^1.16.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.1",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

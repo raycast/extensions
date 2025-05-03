@@ -1,9 +1,13 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "harvest",
   "title": "Harvest",
   "description": "Access Harvest Time Entries",
   "icon": "harvest-logo-icon.png",
   "author": "eluce2",
+  "contributors": [
+    "bchopson"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -65,6 +69,43 @@
       "subtitle": "Harvest",
       "description": "Stop your running timer",
       "mode": "no-view"
+    },
+    {
+      "name": "toggleTimer",
+      "icon": "toggle.png",
+      "title": "Toggle Timer",
+      "subtitle": "Harvest",
+      "description": "Toggles the most recently used Harvest Timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Running Timer",
+      "subtitle": "Harvest",
+      "description": "See your active Harvest timer at a glance",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "showTimerInMenuBar",
+          "label": "Show Timer in Menu Bar",
+          "title": "Options",
+          "description": "Show your running timer in the menu bar",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "statusFolder",
+          "title": "Status Folder",
+          "type": "directory",
+          "description": "Folder to write status files to. See README for more info.",
+          "required": false,
+          "label": "Status Folder",
+          "placeholder": "Select a directory"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -90,24 +131,50 @@
       "required": false,
       "label": "Show Client Name above selected project",
       "type": "checkbox"
+    },
+    {
+      "name": "timeFormat",
+      "title": "Time Format",
+      "required": false,
+      "description": "Time Format",
+      "type": "dropdown",
+      "default": "company",
+      "data": [
+        {
+          "title": "Company Default",
+          "value": "company"
+        },
+        {
+          "title": "Hours/Minutes",
+          "value": "hours_minutes"
+        },
+        {
+          "title": "Decimal",
+          "value": "decimal"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
+    "@raycast/api": "^1.68.0",
     "@raycast/utils": "^1.3.1",
     "axios": "^0.23.0",
-    "dayjs": "^1.10.7",
+    "dayjs": "^1.11.11",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
     "@types/lodash": "^4.14.175",
-    "@types/node": "^18.8.3",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
+    "prettier": "^2.8.7",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

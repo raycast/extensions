@@ -7,8 +7,10 @@ function UpdateListItem({ update }: { update: Update }) {
       icon={update.icon}
       title={update.name}
       subtitle={update.description}
-      accessoryTitle={update.version}
-      accessoryIcon={update.major ? { source: Icon.Star } : undefined}
+      accessories={[
+        { text: update.version },
+        { icon: update.major ? { source: Icon.Star } : undefined, tooltip: "MAJOR" },
+      ]}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={update.link} />

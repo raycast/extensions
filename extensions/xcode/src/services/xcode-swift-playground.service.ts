@@ -127,9 +127,9 @@ export class XcodeSwiftPlaygroundService {
 
   /**
    * Make a Swift Playground path for a given location and file name
-   * @param location: location in which we want to save the playground file.
-   * @param filename: filename of the created or opened playground file.
-   * @param forceCreate: define if we want to force create or not.
+   * @param location location in which we want to save the playground file.
+   * @param filename filename of the created or opened playground file.
+   * @param forceCreate define if we want to force create or not.
    */
   private static async makeSwiftPlaygroundPath(
     location: string,
@@ -140,7 +140,7 @@ export class XcodeSwiftPlaygroundService {
     let iteration = null;
     const targetLocation = untildify(location);
     do {
-      const dateString = new Date().toLocaleDateString("en-CA");
+      const dateString = new Date().toLocaleDateString().replaceAll("/", "-").replaceAll(".", "-");
       const name =
         iteration == null
           ? `${filename}-${dateString}.playground`

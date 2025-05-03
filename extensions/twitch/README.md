@@ -1,25 +1,12 @@
 # Twitch Extension
 
-## Setup Guide
-
-### Client-Id and Bearer Token
-
-To use the "Following Channels" Feature you need the "user:read:follows" scope.
-
-With this Link you don't have to care about scopes and just get started:
-https://twitchtokengenerator.com/quick/DvKMUdT92X
-
-After the authentication process copy the Client-Id and the Access Token(Bearer) into the Input fields.
-
-#
 ## FAQ
 
-### Error: Invalid OAuth Token 
-This means that you have specified an incorrect OAuth token, or that this OAuth token was not created in conjunction with the specified client ID.
-
-### Error: Missing Scope: user:read:follows
-This error means that you did not specify the required scope to query your followed channels.
-
 ### I've got a blank page when I open the command.
+When the search query is empty, this is likely normal:
+- for the "Search Games" command, this empty screen will become populated with your recent searches.
+- for the "Search Streams" command, this empty screen will become populated with your recent searches.
+- for the "Following Channels" command, this empty screen will become populated when you follow a channel on Twitch.
 
-This is intentional, a search parameter must be specified first. (This might change in the future)
+### Why does it say "deprecated" on the "Client ID" and "Authorization Token" preferences?
+This extension used to require you to provide your own Client ID and Authorization Token obtained from a 3rd party application (twitchtokengenerator.com/quick/DvKMUdT92X or twitchapps.com/tokengen). This is no longer the case and we now use Raycast to manage the authentification process. This new process is much more secure and easier to use, but we've kept the old fields for retro-compatibility.

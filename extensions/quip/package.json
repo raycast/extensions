@@ -5,6 +5,9 @@
   "description": "Search and View Quip Documents",
   "icon": "quip.png",
   "author": "justin0u0",
+  "contributors": [
+    "liznear"
+  ],
   "categories": [
     "Web"
   ],
@@ -35,6 +38,14 @@
       "required": true,
       "title": "Personal Access Token",
       "description": "Quip Personal Access Token. You can get it from https://quip.com/dev/token."
+    },
+    {
+      "name": "endpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "Quip endpoint",
+      "default": "https://platform.quip.com",
+      "description": "Quip endpoint. Default value is https://platform.quip.com."
     }
   ],
   "dependencies": {

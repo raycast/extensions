@@ -26,7 +26,7 @@ export function assertObjectProp<Prop extends string>(item: unknown, prop: Prop)
 
 export function assertArrayProp<Prop extends string>(
   item: unknown,
-  prop: Prop
+  prop: Prop,
 ): asserts item is Record<Prop, unknown[]> {
   if (!item || !Array.isArray((item as any)[prop])) {
     throw new Error(`no ${prop} found`);

@@ -88,10 +88,7 @@ export async function ejectVolume(volume: Volume): Promise<void> {
       throw new Error("Unsupported environment");
   }
 
-  try {
-    const { stdout, stderr } = await exec(exePath, options);
-  } catch (e: any) {
-    console.log(e.message);
-    showToast(ToastStyle.Failure, "Error ejecting volume", e.message);
-  }
+  // NOTE: This could potentially let an error go through, however the calling function
+  // should handle it, and show toasts appropriately
+  await exec(exePath, options);
 }

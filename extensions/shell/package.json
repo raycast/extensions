@@ -5,8 +5,22 @@
   "description": "Run shell commands from Raycast",
   "icon": "bash-icon.png",
   "author": "asubbotin",
-  "categories": ["Developer Tools"],
+  "contributors": [
+    "emiara",
+    "kevin_manca",
+    "mohamedk1",
+    "anirudh_gupta",
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
+  "keywords": [
+    "command line",
+    "commandline",
+    "terminal"
+  ],
   "commands": [
     {
       "name": "index",
@@ -23,6 +37,101 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "execute-shell-command",
+      "title": "Execute Shell Command",
+      "description": "Execute Shell Command"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@shell how many files do I have in downloads folder?",
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "command": [
+                  {
+                    "includes": "ls"
+                  },
+                  {
+                    "includes": "~/Downloads"
+                  },
+                  {
+                    "includes": "wc"
+                  }
+                ]
+              },
+              "name": "execute-shell-command"
+            }
+          }
+        ],
+        "mocks": {
+          "execute-shell-command": {
+            "stdout": "34",
+            "stderr": ""
+          }
+        }
+      },
+      {
+        "input": "@shell show the latest commit message in ~/projects/raycast",
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "command": [
+                  {
+                    "includes": "~/projects/raycast"
+                  },
+                  {
+                    "includes": "git"
+                  },
+                  {
+                    "includes": "log"
+                  }
+                ]
+              },
+              "name": "execute-shell-command"
+            }
+          }
+        ],
+        "mocks": {
+          "execute-shell-command": {
+            "stdout": "Initial Commit",
+            "stderr": ""
+          }
+        }
+      },
+      {
+        "input": "@shell toggle system appearance using apple script",
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "command": [
+                  {
+                    "includes": "osascript"
+                  },
+                  {
+                    "includes": "\"System Events\""
+                  },
+                  {
+                    "includes": "appearance preferences to set dark mode"
+                  }
+                ]
+              },
+              "name": "execute-shell-command"
+            }
+          }
+        ],
+        "mocks": {
+          "execute-shell-command": {}
+        }
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "arguments_terminal",
@@ -38,33 +147,42 @@
       "type": "dropdown",
       "required": false,
       "title": "Decide which Terminal Application you want to use",
-      "description": "If iTerm or Warp is available, you can use them instead of Terminal.",
-      "data": [{
-        "title": "Terminal",
-        "value": "Terminal"
-      },
+      "description": "If iTerm, Warp or kitty is available, you can use them instead of Terminal.",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        },
         {
           "title": "iTerm",
           "value": "iTerm"
         },
         {
+          "title": "kitty",
+          "value": "kitty"
+        },
+        {
           "title": "Warp",
           "value": "Warp"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
         }
       ],
       "default": "Terminal"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
-    "raycast-toolkit": "^1.0.4",
+    "@raycast/api": "^1.89.1",
+    "raycast-toolkit": "^1.0.6",
     "run-applescript": "^6.0.0",
     "shell-env": "^4.0.1",
     "shell-history": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^18.2.46",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -77,5 +195,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

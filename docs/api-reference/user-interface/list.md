@@ -13,7 +13,7 @@ Our `List` component provides great user experience out of the box:
 - Show loading indicator for longer operations.
 - Use the search query for typeahead experiences, optionally throttled.
 
-![](../../.gitbook/assets/list.png)
+![](../../.gitbook/assets/list.webp)
 
 ## Search Bar
 
@@ -104,6 +104,156 @@ export default function Command() {
 Some extensions may benefit from giving users a second filtering dimension. A todo extension may allow users to use different groups, a newspaper-reading extension may want to allow quickly switching categories, etc.
 
 This is where the `searchBarAccessory` [prop](#props) is useful. Pass it a [List.Dropdown](#list.dropdown) component, and it will be displayed on the right-side of the search bar. Invoke it either by using the global shortcut `⌘` `P` or by clicking on it.
+
+### Pagination
+
+{% hint style="info" %}
+Pagination requires version 1.69.0 or higher of the `@raycast/api` package.
+{% endhint %}
+
+`List`s have built-in support for pagination. To opt in to pagination, you need to pass it a `pagination` prop, which is an object providing 3 pieces of information:
+
+- `onLoadMore` - will be called by Raycast when the user reaches the end of the list, either using the keyboard or the mouse. When it gets called, the extension is expected to perform an async operation which eventually can result in items being appended to the end of the list.
+- `hasMore` - indicates to Raycast whether it _should_ call `onLoadMore` when the user reaches the end of the list.
+- `pageSize` - indicates how many placeholder items Raycast should add to the end of the list when it calls `onLoadMore`. Once `onLoadMore` finishes executing, the placeholder items will be replaced by the newly-added list items.
+
+Note that extensions have access to a limited amount of memory. As your extension paginates, its memory usage will increase. Paginating extensively could lead to the extension eventually running out of memory and crashing. To protect against the extension crashing due to memory exhaustion, Raycast monitors the extension's memory usage and employs heuristics to determine whether it's safe to paginate further. If it's deemed unsafe to continue paginating, `onLoadMore` will not be triggered when the user scrolls to the bottom, regardless of the `hasMore` value. Additionally, during development, a warning will be printed in the terminal.
+
+For convenience, most of the [hooks](../../utils-reference/getting-started.md) that we provide have built-in pagination support. Here's an example of how to add pagination support to a simple command using [usePromise](../../utils-reference/react-hooks/usePromise.md), and one "from scratch".
+
+{% tabs %}
+
+{% tab title="ListWithUsePromisePagination.tsx" %}
+
+```typescript
+import { setTimeout } from "node:timers/promises";
+import { useState } from "react";
+import { List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+
+  const { isLoading, data, pagination } = usePromise(
+    (searchText: string) => async (options: { page: number }) => {
+      await setTimeout(200);
+      const newData = Array.from({ length: 25 }, (_v, index) => ({
+        index,
+        page: options.page,
+        text: searchText,
+      }));
+      return { data: newData, hasMore: options.page < 10 };
+    },
+    [searchText]
+  );
+
+  return (
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} pagination={pagination}>
+      {data?.map((item) => (
+        <List.Item
+          key={`${item.page} ${item.index} ${item.text}`}
+          title={`Page ${item.page} Item ${item.index}`}
+          subtitle={item.text}
+        />
+      ))}
+    </List>
+  );
+}
+```
+
+{% endtab %}
+{% tab title="ListWithPagination.tsx" %}
+
+```typescript
+import { setTimeout } from "node:timers/promises";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { List } from "@raycast/api";
+
+type State = {
+  searchText: string;
+  isLoading: boolean;
+  hasMore: boolean;
+  data: {
+    index: number;
+    page: number;
+    text: string;
+  }[];
+  nextPage: number;
+};
+const pageSize = 20;
+export default function Command() {
+  const [state, setState] = useState<State>({ searchText: "", isLoading: true, hasMore: true, data: [], nextPage: 0 });
+  const cancelRef = useRef<AbortController | null>(null);
+
+  const loadNextPage = useCallback(async (searchText: string, nextPage: number, signal?: AbortSignal) => {
+    setState((previous) => ({ ...previous, isLoading: true }));
+    await setTimeout(500);
+    const newData = Array.from({ length: pageSize }, (_v, index) => ({
+      index,
+      page: nextPage,
+      text: searchText,
+    }));
+    if (signal?.aborted) {
+      return;
+    }
+    setState((previous) => ({
+      ...previous,
+      data: [...previous.data, ...newData],
+      isLoading: false,
+      hasMore: nextPage < 10,
+    }));
+  }, []);
+
+  const onLoadMore = useCallback(() => {
+    setState((previous) => ({ ...previous, nextPage: previous.nextPage + 1 }));
+  }, []);
+
+  const onSearchTextChange = useCallback(
+    (searchText: string) => {
+      if (searchText === state.searchText) return;
+      setState((previous) => ({
+        ...previous,
+        data: [],
+        nextPage: 0,
+        searchText,
+      }));
+    },
+    [state.searchText]
+  );
+
+  useEffect(() => {
+    cancelRef.current?.abort();
+    cancelRef.current = new AbortController();
+    loadNextPage(state.searchText, state.nextPage, cancelRef.current?.signal);
+    return () => {
+      cancelRef.current?.abort();
+    };
+  }, [loadNextPage, state.searchText, state.nextPage]);
+
+  return (
+    <List
+      isLoading={state.isLoading}
+      onSearchTextChange={onSearchTextChange}
+      pagination={{ onLoadMore, hasMore: state.hasMore, pageSize }}
+    >
+      {state.data.map((item) => (
+        <List.Item
+          key={`${item.page} ${item.index} ${item.text}`}
+          title={`Page ${item.page} Item ${item.index}`}
+          subtitle={item.text}
+        />
+      ))}
+    </List>
+  );
+}
+```
+
+{% endtab %}
+{% endtabs %}
+
+{% hint style="warning" %}
+Pagination might not work properly if all list items are rendered and visible at once, as `onLoadMore` won't be triggered. This typically happens when an API returns 10 results by default, all fitting within the Raycast window. To fix this, try displaying more items, like 20.
+{% endhint %}
 
 ## Examples
 
@@ -443,7 +593,7 @@ empty view alongside the other `List.Item`s.
 
 Note that the `EmptyView` is _never_ displayed if the `List`'s `isLoading` property is true and the search bar is empty.
 
-![List EmptyView illustration](../../.gitbook/assets/list-empty-view.png)
+![List EmptyView illustration](../../.gitbook/assets/list-empty-view.webp)
 
 #### Example
 
@@ -506,7 +656,7 @@ A Detail view that will be shown in the right-hand-side of the `List`.
 
 When shown, it is recommended not to show any accessories on the `List.Item` and instead bring those additional information in the `List.Item.Detail` view.
 
-![List-detail illustration](../../.gitbook/assets/list-detail.png)
+![List-detail illustration](../../.gitbook/assets/list-detail.webp)
 
 #### Example
 
@@ -544,7 +694,7 @@ Use it to display additional structured data about the content of the `List.Item
 
 {% tab title="Metadata + Markdown" %}
 
-![List Detail-metadata illustration](../../.gitbook/assets/list-detail-metadata-split.png)
+![List Detail-metadata illustration](../../.gitbook/assets/list-detail-metadata-split.webp)
 
 ```typescript
 import { List } from "@raycast/api";
@@ -592,7 +742,7 @@ There is a plant seed on its back right from the day this Pokémon is born. The 
 
 {% tab title="Metadata Standalone" %}
 
-![List Detail-metadata illustration](../../.gitbook/assets/list-detail-metadata-standalone.png)
+![List Detail-metadata illustration](../../.gitbook/assets/list-detail-metadata-standalone.webp)
 
 ```typescript
 import { List } from "@raycast/api";
@@ -643,7 +793,7 @@ export default function Metadata() {
 
 A title with, optionally, an icon and/or text to its right.
 
-![List Detail-metadata-label illustration](../../.gitbook/assets/list-detail-metadata-label.png)
+![List Detail-metadata-label illustration](../../.gitbook/assets/list-detail-metadata-label.webp)
 
 #### Example
 
@@ -678,7 +828,7 @@ export default function Metadata() {
 
 An item to display a link.
 
-![List Detail-metadata-link illustration](../../.gitbook/assets/list-detail-metadata-link.png)
+![List Detail-metadata-link illustration](../../.gitbook/assets/list-detail-metadata-link.webp)
 
 #### Example
 
@@ -717,7 +867,7 @@ export default function Metadata() {
 
 A list of [`Tags`](list.md#list.item.detail.metadata.taglist.item) displayed in a row.
 
-![List Detail-metadata-tag-list illustration](../../.gitbook/assets/list-detail-metadata-tag-list.png)
+![List Detail-metadata-tag-list illustration](../../.gitbook/assets/list-detail-metadata-tag-list.webp)
 
 #### Example
 
@@ -762,7 +912,7 @@ A Tag in a `List.Item.Detail.Metadata.TagList`.
 
 A metadata item that shows a separator line. Use it for grouping and visually separating metadata items.
 
-![List Detail-metadata-separator illustration](../../.gitbook/assets/list-detail-metadata-separator.png)
+![List Detail-metadata-separator illustration](../../.gitbook/assets/list-detail-metadata-separator.webp)
 
 #### Example
 
@@ -827,7 +977,7 @@ export default function Command() {
 
 An interface describing an accessory view in a `List.Item`.
 
-![List.Item accessories illustration](../../.gitbook/assets/list-item-accessories.png)
+![List.Item accessories illustration](../../.gitbook/assets/list-item-accessories.webp)
 
 #### Properties
 

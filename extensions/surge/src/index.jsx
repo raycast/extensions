@@ -21,6 +21,7 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true)
   const [isError, setIsError] = useState(false)
 
+  const [isMacOSVersion, setIsMacOSVersion] = useState(false)
   const [currentOutboundMode, setCurrentOutboundMode] = useState("")
   const [currentProfile, setCurrentProfile] = useState("")
   const [isSystemProxyEnabled, setSystemProxyStatus] = useState(false)
@@ -35,6 +36,8 @@ export default function Command() {
 
   async function fetchData() {
     try {
+      const isMacOSVersion = await api(xKey, port).isMacOSVersion()
+
       const [
         currentOutboundMode,
         currentSystemProxyStatus,
@@ -47,16 +50,16 @@ export default function Command() {
         currentProfile,
         allProfiles
       ] = await Promise.all([
-        await api(xKey, port).getOutboundMode(),
-        await api(xKey, port).getSystemProxyStatus(),
-        await api(xKey, port).getEnhancedMode(),
-        await api(xKey, port).getHttpCaptureStatus(),
-        await api(xKey, port).getMitmStatus(),
-        await api(xKey, port).getRewriteStatus(),
-        await api(xKey, port).getScriptingStatus(),
-        await api(xKey, port).getPolicyGroups(),
-        await api(xKey, port).getProfile(),
-        await api(xKey, port).getProfiles()
+        api(xKey, port).getOutboundMode(),
+        isMacOSVersion ? api(xKey, port).getSystemProxyStatus() : Promise.resolve({ data: { enabled: false } }),
+        isMacOSVersion ? api(xKey, port).getEnhancedMode() : Promise.resolve({ data: { enabled: false } }),
+        api(xKey, port).getHttpCaptureStatus(),
+        api(xKey, port).getMitmStatus(),
+        api(xKey, port).getRewriteStatus(),
+        api(xKey, port).getScriptingStatus(),
+        api(xKey, port).getPolicyGroups(),
+        api(xKey, port).getProfile(),
+        isMacOSVersion ? api(xKey, port).getProfiles() : Promise.resolve({ data: { profiles: [] } })
         // ...
       ])
 
@@ -67,6 +70,7 @@ export default function Command() {
         })
       )
 
+      setIsMacOSVersion(isMacOSVersion)
       setCurrentOutboundMode(currentOutboundMode.data.mode)
       setCurrentProfile(currentProfile.data.name)
       setSystemProxyStatus(currentSystemProxyStatus.data.enabled)
@@ -91,7 +95,9 @@ export default function Command() {
     }
   }
 
-  useEffect(() => fetchData(), [])
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   if (isLoading) {
     return <List isLoading />
@@ -111,9 +117,9 @@ export default function Command() {
           />
         ) : null}
 
-        <SetAsSystemProxy xKey={xKey} port={port} isSystemProxyEnabled={isSystemProxyEnabled} />
+        {isMacOSVersion && <SetAsSystemProxy xKey={xKey} port={port} isSystemProxyEnabled={isSystemProxyEnabled} />}
 
-        <EnhancedMode xKey={xKey} port={port} isEnhancedModeEnabled={isEnhancedModeEnabled} />
+        {isMacOSVersion && <EnhancedMode xKey={xKey} port={port} isEnhancedModeEnabled={isEnhancedModeEnabled} />}
 
         <CapabilitiesActions
           xKey={xKey}

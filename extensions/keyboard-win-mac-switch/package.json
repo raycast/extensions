@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keyboard-win-mac-switch",
+  "title": "Keyboard Win Mac Switch",
+  "description": "This extension allow you to switch alt and window keys",
+  "icon": "keyboard-icon.png",
+  "author": "fab_uleuh",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-mac-keyboard",
+      "title": "Switch Mac Keyboard",
+      "description": "Switch alt and window keys",
+      "mode": "no-view"    },
+    {
+      "name": "switch-window-keyboard",
+      "title": "Switch Window Keyboard",
+      "description": "Switch window and alt keys",
+      "mode": "no-view"    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,12 +1,21 @@
-## Description
+# Open Link in Browser Raycast Extension
 
-This extension is for users who switch frequently between browsers, mailbox clients or others.
+Open link or search text in specific browsers.
+This extension is for users who switch frequently between browsers.
 
-**Main features:**
+## Features and Usage Tips
 
-1. Specify a browser to open a **_URL_** or **_Text_** that is selected or on the clipboard.
-2. Specify the mailbox application to edit email with **_Email addresses_** or **_mailto:_** link (in the form of "mailto:hello@raycast.com") that is selected or on the clipboard.
-3. Recommend setting shortcut for this extension. For example, "Opt+l".
+- `Open selected text in default browser`
+  For most links you can use cmd + click to open in default browser, but for some links, you can't. For example:
+  - `www.google.com`
+  - `google.com`
+  - `ray.so/presets`
+  - `slack://channel?team=xxx&id=xxx`
+  - and more...
+  
+  The best practice is to set a shortcut for this command and use it after you select the text.
+
+## Information
 
 Want more **Productivity** extensions? Try those. [©koinzhang](https://www.raycast.com/koinzhang)
 

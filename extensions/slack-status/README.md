@@ -1,8 +1,14 @@
 # Slack Set Status
 
-Extension for quickly changing your Slack status. Set up presets for common statuses or set a custom one. Make sure to explore available actions in the action panel (⌘ + K).
+Extension for quickly changing your Slack status. Set up presets for common statuses or set a custom one. Make sure to explore available actions in the action panel (`⌘ + K`). And if you want to spice it up, use Raycast AI to set your status. Simply type what you are doing and hit return to let AI pick an emoji, title, and duration of your status.
 
-## How to Get Access Token
+## Automatic Setup
+
+Simply open the extension and authenticate with OAuth to your workspace. Afterwards use the extension to quickly set your Slack status right from Raycast.
+
+## Manual Setup
+
+The extension supports OAuth, which makes it easy to connect to your Slack workspace. If you prefer a manual setup, follow those steps to create your own Slack app and use it's access token to access your Slack workspace.
 
 1. Open https://api.slack.com/apps
 2. Click "Create New App" button
@@ -24,7 +30,9 @@ Extension for quickly changing your Slack status. Set up presets for common stat
             "user": [
                 "emoji:read",
                 "users.profile:write",
-                "users.profile:read"
+                "users.profile:read",
+                "dnd:write",
+                "dnd:read"
             ]
         }
     },
@@ -41,4 +49,4 @@ Extension for quickly changing your Slack status. Set up presets for common stat
 8. Press "Install to Workspace" button in "OAuth Tokens for Your Workspace" section
 9. Once installed, you'll be able to copy your access token. It starts with "xoxp-"
 
-_Note: If this instruction wasn't clear, please let me know in [Slack Community](https://raycast.com/community) or feel free to create a PR with improved steps._
+_Note: If this instruction wasn't clear, please reach out in our [Slack Community](https://raycast.com/community) or even better, create a PR to improve the steps._

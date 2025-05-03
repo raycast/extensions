@@ -1,159 +1,436 @@
 {
-    "$schema": "https://www.raycast.com/schemas/extension.json",
-    "name": "cleanshotx",
-    "title": "CleanShot X",
-    "description": "Capture and record your screen!",
-    "icon": "command-icon.png",
-    "author": "Aayush9029",
-    "contributors": [
-        "thomaslombart",
-        "lukaszmtw"
-    ],
-    "license": "MIT",
-    "commands": [
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cleanshotx",
+  "title": "CleanShot X",
+  "description": "Capture and record your screen!",
+  "icon": "command-icon.png",
+  "author": "Aayush9029",
+  "contributors": [
+    "thomaslombart",
+    "lukaszmtw",
+    "erics118",
+    "mlnchk",
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-history",
+      "title": "Open History",
+      "subtitle": "CleanShot X",
+      "description": "Show Screenshots History",
+      "icon": "open-history.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "CleanShot X",
+      "description": "Open Settings",
+      "icon": "open-settings.png",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
         {
-            "name": "open-history",
-            "title": "Open History",
-            "subtitle": "CleanShot X",
-            "description": "Show Screenshots History",
-            "icon": "open-history.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "all-in-one",
-            "title": "All in One",
-            "subtitle": "CleanShot X",
-            "description": "Capture Record Crop All in One",
-            "icon": "all-in-one.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "capture-fullscreen",
-            "title": "Capture Fullscreen",
-            "subtitle": "CleanShot X",
-            "description": "Fullscreen Screenshot",
-            "icon": "capture-fullscreen.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "capture-area",
-            "title": "Capture Area",
-            "subtitle": "CleanShot X",
-            "description": "Selection Tool Capture",
-            "icon": "capture-area.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "capture-previous-area",
-            "title": "Capture Previous Area",
-            "subtitle": "CleanShot X",
-            "description": "Previously Selected Area",
-            "icon": "capture-previous-area.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "capture-window",
-            "title": "Capture Window",
-            "subtitle": "CleanShot X",
-            "description": "Window Capture",
-            "icon": "capture-window.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "self-timer",
-            "title": "Self Timer",
-            "subtitle": "CleanShot X",
-            "description": "Timer Based Screen Capture",
-            "icon": "self-timer.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "scrolling-capture",
-            "title": "Scrolling Capture",
-            "subtitle": "CleanShot X",
-            "description": "Scrolling Capture Mode",
-            "icon": "scrolling-capture.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "record-screen",
-            "title": "Record Screen",
-            "subtitle": "CleanShot X",
-            "description": "Record Entire Screen",
-            "icon": "record-screen.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "capture-text",
-            "title": "Capture Text (OCR)",
-            "subtitle": "CleanShot X",
-            "description": "Capture text using OCR",
-            "icon": "capture-text.png",
-            "mode": "no-view",
-            "keywords": ["text recognition"]
-        },
-        {
-            "name": "annotate",
-            "title": "Annotate",
-            "subtitle": "CleanShot X",
-            "description": "Annotate Mode",
-            "icon": "annotate.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "open-from-clipboard",
-            "title": "Open From Clipboard",
-            "subtitle": "CleanShot X",
-            "description": "Open Image From Clipboard",
-            "icon": "clipboard.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "toggle-desktop-icons",
-            "title": "Toggle Desktop Icons",
-            "subtitle": "CleanShot X",
-            "description": "Toggle Desktop Icons Visibility",
-            "icon": "toggle-desktop-icons.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "restore-recently-closed",
-            "title": "Restore Recently Closed",
-            "subtitle": "CleanShot X",
-            "description": "Restore Recently Closed Overlay",
-            "icon": "capture-previous-area.png",
-            "mode": "no-view"
-        },
-        {
-            "name": "pin",
-            "title": "Pin Screenshot",
-            "subtitle": "CleanShot X",
-            "description": "Pin Screenshot to the Screen.",
-            "icon": "pin.png",
-            "mode": "no-view"
+          "name": "tab",
+          "type": "dropdown",
+          "placeholder": "Tab",
+          "required": false,
+          "data": [
+            {
+              "title": "General",
+              "value": "general"
+            },
+            {
+              "title": "Wallpaper",
+              "value": "wallpaper"
+            },
+            {
+              "title": "Shortcuts",
+              "value": "shortcuts"
+            },
+            {
+              "title": "Quick Access",
+              "value": "quickaccess"
+            },
+            {
+              "title": "Recording",
+              "value": "recording"
+            },
+            {
+              "title": "Screenshots",
+              "value": "screenshots"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Cloud",
+              "value": "cloud"
+            },
+            {
+              "title": "Advanced",
+              "value": "advanced"
+            },
+            {
+              "title": "About",
+              "value": "about"
+            }
+          ]
         }
-    ],
-    "categories": [
-        "Applications"
-    ],
-    "dependencies": {
-        "@raycast/api": "^1.39.2"
+      ]
     },
-    "devDependencies": {
-        "@types/node": "~16.10.0",
-        "@types/react": "^17.0.28",
-        "@typescript-eslint/eslint-plugin": "^5.0.0",
-        "@typescript-eslint/parser": "^5.0.0",
-        "eslint": "^7.32.0",
-        "eslint-config-prettier": "^8.3.0",
-        "react-devtools": "^4.19.2",
-        "typescript": "^4.4.3"
+    {
+      "name": "view-uploads",
+      "title": "View Uploads",
+      "subtitle": "CleanShot X",
+      "description": "View Uploads in Cleanshot Cloud",
+      "icon": "view-uploads.png",
+      "mode": "no-view",
+      "disabledByDefault": true
     },
-    "scripts": {
-        "build": "ray build -e dist",
-        "dev": "ray develop",
-        "lint": "ray lint"
+    {
+      "name": "all-in-one",
+      "title": "All in One",
+      "subtitle": "CleanShot X",
+      "description": "Capture Record Crop All in One",
+      "icon": "all-in-one.png",
+      "mode": "no-view"
     },
-    "version": "1.0.0",
-    "main": "index.js"
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Fullscreen",
+      "subtitle": "CleanShot X",
+      "description": "Fullscreen Screenshot",
+      "icon": "capture-fullscreen.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Save",
+              "value": "save"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Upload",
+              "value": "upload"
+            },
+            {
+              "title": "Pin",
+              "value": "pin"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "CleanShot X",
+      "description": "Selection Tool Capture",
+      "icon": "capture-area.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Save",
+              "value": "save"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Upload",
+              "value": "upload"
+            },
+            {
+              "title": "Pin",
+              "value": "pin"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "capture-previous-area",
+      "title": "Capture Previous Area",
+      "subtitle": "CleanShot X",
+      "description": "Previously Selected Area",
+      "icon": "capture-previous-area.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Save",
+              "value": "save"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Upload",
+              "value": "upload"
+            },
+            {
+              "title": "Pin",
+              "value": "pin"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "subtitle": "CleanShot X",
+      "description": "Window Capture",
+      "icon": "capture-window.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Save",
+              "value": "save"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Upload",
+              "value": "upload"
+            },
+            {
+              "title": "Pin",
+              "value": "pin"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "self-timer",
+      "title": "Self Timer",
+      "subtitle": "CleanShot X",
+      "description": "Timer Based Screen Capture",
+      "icon": "self-timer.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Save",
+              "value": "save"
+            },
+            {
+              "title": "Annotate",
+              "value": "annotate"
+            },
+            {
+              "title": "Upload",
+              "value": "upload"
+            },
+            {
+              "title": "Pin",
+              "value": "pin"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "scrolling-capture",
+      "title": "Scrolling Capture",
+      "subtitle": "CleanShot X",
+      "description": "Scrolling Capture Mode",
+      "icon": "scrolling-capture.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-screen",
+      "title": "Record Screen",
+      "subtitle": "CleanShot X",
+      "description": "Record Entire Screen",
+      "icon": "record-screen.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-text",
+      "title": "Capture Text (OCR)",
+      "subtitle": "CleanShot X",
+      "description": "Capture text using OCR",
+      "icon": "capture-text.png",
+      "mode": "no-view",
+      "keywords": [
+        "text recognition"
+      ]
+    },
+    {
+      "name": "annotate",
+      "title": "Annotate",
+      "subtitle": "CleanShot X",
+      "description": "Annotate Mode",
+      "icon": "annotate.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "filepath",
+          "placeholder": "File Path",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-from-clipboard",
+      "title": "Open from Clipboard",
+      "subtitle": "CleanShot X",
+      "description": "Open Image From Clipboard",
+      "icon": "clipboard.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-desktop-icons",
+      "title": "Toggle Desktop Icons",
+      "subtitle": "CleanShot X",
+      "description": "Toggle Desktop Icons Visibility",
+      "icon": "toggle-desktop-icons.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "hide-desktop-icons",
+      "title": "Hide Desktop Icons",
+      "subtitle": "CleanShot X",
+      "description": "Hide Desktop Icons Visibility",
+      "icon": "hide-desktop-icons.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-desktop-icons",
+      "title": "Show Desktop Icons",
+      "subtitle": "CleanShot X",
+      "description": "Show Desktop Icons Visibility",
+      "icon": "show-desktop-icons.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "restore-recently-closed",
+      "title": "Restore Recently Closed",
+      "subtitle": "CleanShot X",
+      "description": "Restore Recently Closed Overlay",
+      "icon": "restore.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-quick-access-overlay",
+      "title": "Add Quick Access Overlay",
+      "subtitle": "CleanShot X",
+      "description": "Add Quick Access Overlay",
+      "icon": "add-quick-access-overlay.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "filepath",
+          "placeholder": "File Path",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "pin",
+      "title": "Pin Screenshot",
+      "subtitle": "CleanShot X",
+      "description": "Pin Screenshot to the Screen.",
+      "icon": "pin.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "filepath",
+          "placeholder": "File Path",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "capture-area-raycast-aichat",
+      "title": "Send Captured Area to AI Chat",
+      "description": "Capture an area of the screen and send it to Raycast's AI Chat",
+      "icon": "capture-area-ai-chat.png",
+      "mode": "no-view",
+      "subtitle": "CleanShot X"
+    }
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.73.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.12.12",
+    "@types/react": "18.3.2",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
 }

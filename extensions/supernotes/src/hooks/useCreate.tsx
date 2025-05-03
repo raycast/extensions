@@ -1,52 +1,34 @@
+import { showToast, Toast } from "@raycast/api";
+import { superfetch } from "api/superfetch";
 import React from "react";
 
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import fetch from "node-fetch";
-
-import { SUPERNOTES_API_URL } from "utils/defines";
-import { ICard, ValidationError, WrappedCardResponses } from "utils/types";
-
-export interface SimpleCardData {
-  name: string;
-  markup: string;
-}
+import { getSupernotesPrefs } from "~/utils/helpers";
+import type { ICard, ISimpleCard } from "~/utils/types";
 
 const useCreate = (successCallback: (card: ICard) => void) => {
-  const { apiKey } = getPreferenceValues();
+  const { apiKey } = getSupernotesPrefs();
 
   const [loading, setLoading] = React.useState(false);
 
-  const create = async (data: SimpleCardData) => {
+  const create = async (data: ISimpleCard) => {
     setLoading(true);
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Creating",
-      message: "Sending card to Supernotes",
+    await showToast(Toast.Style.Animated, "Creating", "Sending card to Supernotes");
+    const fetched = await superfetch("/v1/cards/simple", "post", {
+      body: { name: data.name, markup: data.markup },
+      apiKey,
     });
-    try {
-      if (!apiKey) throw new Error("No API key found");
-      const res = await fetch(`${SUPERNOTES_API_URL}/cards/simple`, {
-        method: "POST",
-        body: JSON.stringify({ name: data.name, markup: data.markup }),
-        headers: { "Api-Key": apiKey, "Content-Type": "application/json" },
-      });
-      const jsonData = (await res.json()) as WrappedCardResponses | ValidationError;
-      if ("errors" in jsonData) throw new Error(jsonData.errors.body);
-      const wrapped_card = jsonData[0];
-      // error checking
-      if (!wrapped_card.success) throw new Error(wrapped_card.payload);
-      // success
-      toast.style = Toast.Style.Success;
-      toast.title = "Success";
-      toast.message = "Card created";
-      successCallback(wrapped_card.payload);
-    } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Card Creation Failed";
-      toast.message = String(err);
+    if (!fetched.ok) {
+      showToast(Toast.Style.Failure, "Card Creation Failed", fetched.body.detail);
+      return;
     }
+    const wrappedCard = fetched.body[0];
+    if (!wrappedCard.success) {
+      showToast(Toast.Style.Failure, "Card Creation Failed", wrappedCard.payload);
+      return;
+    }
+    await showToast(Toast.Style.Success, "Success", "Card created");
+    successCallback(wrappedCard.payload);
     setLoading(false);
-    setTimeout(() => toast.hide(), 3000);
   };
 
   return { create, loading };

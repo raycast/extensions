@@ -11,6 +11,7 @@ export default function Command() {
   useEffect(() => {
     async function fetchChains() {
       const chains = await service.getChains();
+      console.log(chains[0]);
       setChains(chains);
       setLoading(false);
     }
@@ -24,12 +25,16 @@ export default function Command() {
         <List.Item
           key={chain.chainId}
           title={chain.name}
-          keywords={[chain.chain, chain.network, chain.chainId.toString()]}
-          accessoryTitle={chain.chainId.toString()}
+          keywords={[
+            chain.chain,
+            chain.network,
+            chain.chainId.toString(),
+          ].filter((item) => !!item)}
+          accessories={[{ text: chain.chainId.toString() }]}
           actions={
             <ActionPanel>
               <Action.Push
-                icon={Icon.TextDocument}
+                icon={Icon.BlankDocument}
                 title="Show Details"
                 target={<ChainView chain={chain} />}
               />
@@ -79,7 +84,11 @@ function ChainView(props: ChainProps) {
   ## Homepage
 
   [${chain.infoURL}](${chain.infoURL})
-  `;
+  
+  ## RPC URLs
+
+  ${chain.rpc.map((url) => `- ${url}`).join('\n')}
+`;
 
   return (
     <Detail

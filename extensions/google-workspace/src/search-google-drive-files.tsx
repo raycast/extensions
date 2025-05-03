@@ -1,27 +1,26 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useFetch, useCachedState } from "@raycast/utils";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
-import { QueryTypes, getFilesURL, File, ScopeTypes } from "./api/getFiles";
+import { QueryTypes, getFiles, ScopeTypes } from "./api/getFiles";
 import FileListItem from "./components/FileListItem";
 
-import { withGoogleAuth, getOAuthToken } from "./components/withGoogleAuth";
+import { withGoogleAuth } from "./components/withGoogleAuth";
+import { getUserEmail } from "./api/googleAuth";
 
 function SearchGoogleDriveFiles() {
   const [query, setQuery] = useState("");
   const [queryType, setQueryType] = useCachedState<QueryTypes>("query type", QueryTypes.fileName);
   const [scopeType, setScopeType] = useCachedState<ScopeTypes>("scope type", ScopeTypes.allDrives);
 
-  const { data, isLoading, mutate } = useFetch<{ files: File[] }>(getFilesURL(queryType, scopeType, query), {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getOAuthToken()}`,
-    },
-    onError(error) {
-      console.error(error);
-      showToast({ style: Toast.Style.Failure, title: "Failed to retrieve files" });
-    },
-  });
+  const email = getUserEmail();
+
+  const { data, isLoading } = useCachedPromise(
+    async (queryType: QueryTypes, scopeType: ScopeTypes, query: string) =>
+      await getFiles({ queryType, queryText: query, scope: scopeType }),
+    [queryType, scopeType, query],
+    { failureToastOptions: { title: "Failed to retrieve files" } },
+  );
 
   return (
     <List
@@ -68,15 +67,11 @@ function SearchGoogleDriveFiles() {
 
       {data?.files && data.files.length > 0 ? (
         <List.Section title="Recent Files" subtitle={`${data.files.length}`}>
-          {data.files?.map((file) => (
-            <FileListItem file={file} key={file.id} mutate={mutate} />
-          ))}
+          {data.files?.map((file) => <FileListItem file={file} key={file.id} email={email} />)}
         </List.Section>
       ) : null}
     </List>
   );
 }
 
-export default function Command() {
-  return withGoogleAuth(<SearchGoogleDriveFiles />);
-}
+export default withGoogleAuth(SearchGoogleDriveFiles);

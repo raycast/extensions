@@ -1,250 +1,156 @@
-import {
-  openExtensionPreferences,
-  showToast,
-  Detail,
-  Toast,
-  ActionPanel,
-  Action,
-  Form,
-  popToRoot,
-  Icon,
-} from "@raycast/api";
-import { useEffect, useState } from "react";
-import { createRoutingRule, getDomains } from "./utils/api";
-import { CreateRoutingRequest, Domain, Response } from "./utils/types";
-import { getFavicon } from "@raycast/utils";
-
-interface State {
-  domains?: Domain[];
-  error?: string;
-  isLoading: boolean;
-  domainName: string;
-  prefix: boolean;
-  matchUser: string;
-  targetAddresses: string;
-  domainNameError?: string;
-  prefixError?: string;
-  matchUserError?: string;
-  targetAddressesError?: string;
-}
+import { ActionPanel, Action, Form, popToRoot, Icon } from "@raycast/api";
+import { useState } from "react";
+import { createRoutingRule } from "./utils/api";
+import { CreateRoutingRequest } from "./utils/types";
+import { FormValidation, getFavicon, useForm } from "@raycast/utils";
+import ErrorComponent from "./components/ErrorComponent";
+import { EMAIL_REGEX } from "./utils/constants";
+import { useDomains } from "./utils/hooks";
 
 export default function CreateRoutingRule() {
-  const [state, setState] = useState<State>({
-    domains: undefined,
-    error: "",
-    isLoading: false,
-    domainName: "",
-    prefix: true,
-    matchUser: "",
-    targetAddresses: "",
-    domainNameError: "",
-    prefixError: "",
-    matchUserError: "",
-    targetAddressesError: "",
-  });
-
-  useEffect(() => {
-    async function getFromApi() {
-      const response: Response = await getDomains(true);
-
-      switch (response.type) {
-        case "error":
-          setState((prevState) => {
-            return { ...prevState, error: response.message, isLoading: false };
-          });
-          break;
-
-        case "success":
-          setState((prevState) => {
-            return { ...prevState, error: "", domains: response.result.domains };
-          });
-          break;
-
-        default:
-          break;
-      }
-    }
-    getFromApi();
-  }, []);
-
-  const showError = async () => {
-    if (state.error) {
-      await showToast(Toast.Style.Failure, "Purelymail Error", state.error);
-    }
-  };
-
-  const onDomainNameChange = (val: string) => {
-    const error = val ? "" : state.domainNameError;
-    setState((prevState: State) => {
-      return { ...prevState, domainName: val, domainNameError: error };
-    });
-  };
-  const onPrefixChange = (val: boolean) => {
-    const error = val ? "" : state.prefixError;
-    setState((prevState: State) => {
-      return { ...prevState, prefix: val, prefixError: error };
-    });
-  };
-  const onMatchUserChange = (val: string) => {
-    const error = val ? "" : state.matchUserError;
-    setState((prevState: State) => {
-      return { ...prevState, matchUser: val, matchUserError: error };
-    });
-  };
-  const onTargetAddressesChange = (val: string) => {
-    const error = val ? "" : state.targetAddressesError;
-    setState((prevState: State) => {
-      return { ...prevState, targetAddresses: val, targetAddressesError: error };
-    });
-  };
-
-  type Values = {
-    domainName: string;
-    prefix: boolean;
-    matchUser: string;
-    targetAddresses: string;
-  };
-  const handleSubmit = async (values: Values) => {
-    const { domainName, prefix, matchUser, targetAddresses } = values;
-    const domainError = !domainName ? "Domain is required" : "";
-    const prefixError = prefix !== true && prefix !== false ? "Prefix is required" : "";
-    const matchUserError = !matchUser ? "Match User is required" : "";
-    const targetAddressesError = !targetAddresses ? "Target Addresses are required" : "";
-
-    if (domainError || prefixError || matchUserError || targetAddressesError) {
-      setState((prevState) => {
-        return { ...prevState, domainError, prefixError, matchUserError, targetAddressesError };
-      });
-      showToast(Toast.Style.Failure, "Invalid input", "Please fill out all required fields");
-      return;
-    }
-
-    setState((prevState: State) => {
-      return { ...prevState, isLoading: true };
-    });
-
-    const formData: CreateRoutingRequest = {
-      domainName,
-      prefix,
-      matchUser,
-      targetAddresses: targetAddresses.split(","),
-    };
-    const response = await createRoutingRule(formData);
-    switch (response.type) {
-      case "error":
-        setState((prevState) => {
-          return { ...prevState, error: response.message, isLoading: false };
-        });
-        break;
-
-      case "success":
-        setState((prevState) => {
-          return { ...prevState, error: "", isLoading: false };
-        });
-        await showToast(Toast.Style.Success, "Rule Created");
-        await popToRoot({
-          clearSearchBar: true,
-        });
-        break;
-
-      default:
-        setState((prevState) => {
-          return { ...prevState, error: "", isLoading: false };
-        });
-        break;
-    }
-  };
-
-  showError();
+  const [isLoading, setIsLoading] = useState(true);
+  const { isLoading: isLoadingDomains, data: domains, error } = useDomains({ includeShared: true });
 
   const description = () => {
-    let from = "FROM: ";
-    const { domainName, prefix, matchUser, targetAddresses } = state;
-    const targets = targetAddresses.toString().replaceAll(" ", "").replaceAll(",", " AND ");
+    const { domainName, matchUser, targetAddresses, type } = itemProps;
+    const targets = targetAddresses.value && targetAddresses.value.replaceAll(" ", "").replaceAll(",", " AND ");
 
-    if (!prefix && matchUser) {
-      from += `EXACT ADDRESS '${matchUser}@${domainName}'`;
-    } else if (prefix && !matchUser) {
-      from += `ANY ADDRESS i.e. '*@${domainName}'`;
-    } else if (prefix && matchUser) {
-      from += `ANY ADDRESS STARTING WITH '${matchUser}' i.e. '${matchUser}*@${domainName}'`;
+    let from = "FROM: ";
+    if (type.value === "any") {
+      from += `ANY ADDRESS i.e. '*@${domainName.value}'`;
+    } else if (type.value === "exact") {
+      from += `EXACT ADDRESS '${matchUser.value || "<MATCH>"}@${domainName.value}'`;
+    } else if (type.value === "prefix") {
+      from += `ANY ADDRESS STARTING WITH '${matchUser.value || "<MATCH>"}' i.e. '${matchUser.value || "<MATCH>"}*@${
+        domainName.value
+      }'`;
+    } else {
+      from += `ANY ADDRESS EXCEPT VALID ADDRESS i.e. <any>@${domainName.value}`;
     }
+
     const to = `
 
-TO: '${targets}'`;
+TO: '${targets || "<TARGETS>"}'`;
     return from + to;
   };
 
-  return state.error ? (
-    <Detail
-      markdown={"⚠️" + state.error}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
+  type CreateRoutingFormValues = {
+    domainName: string;
+    type: string;
+    matchUser: string;
+    targetAddresses: string;
+  };
+  const { handleSubmit, itemProps } = useForm<CreateRoutingFormValues>({
+    async onSubmit(values) {
+      setIsLoading(true);
+
+      let prefix: boolean;
+      let catchall: boolean;
+      let matchUser: string;
+
+      if (values.type === "catchall") {
+        prefix = true;
+        catchall = true;
+        matchUser = "";
+      } else if (values.type === "any") {
+        prefix = true;
+        catchall = false;
+        matchUser = "";
+      } else if (values.type === "exact") {
+        prefix = false;
+        catchall = false;
+        matchUser = values.matchUser;
+      } else {
+        prefix = true;
+        catchall = false;
+        matchUser = values.matchUser;
       }
-    />
+
+      const formData: CreateRoutingRequest = {
+        domainName: values.domainName,
+        prefix,
+        matchUser,
+        targetAddresses: values.targetAddresses.replaceAll(" ", "").split(","),
+        catchall,
+      };
+      const response = await createRoutingRule(formData);
+
+      if (response.type === "success") {
+        await popToRoot({
+          clearSearchBar: true,
+        });
+      }
+      setIsLoading(false);
+    },
+    validation: {
+      domainName: FormValidation.Required,
+      matchUser(value) {
+        if (itemProps.type.value === "prefix" || itemProps.type.value === "exact")
+          if (!value) return "The item is required";
+      },
+      targetAddresses(value) {
+        if (!value) return "The item is required";
+        else if (
+          value
+            .replaceAll(" ", "")
+            .split(",")
+            .some((email) => {
+              if (!EMAIL_REGEX.test(email)) return true;
+            })
+        )
+          return "The item is invalid";
+      },
+    },
+  });
+
+  return error ? (
+    <ErrorComponent error={error.message} />
   ) : (
     <Form
-      isLoading={state.domains === undefined || state.isLoading}
+      isLoading={isLoading || isLoadingDomains}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Routing Rule"
-            icon={Icon.Check}
-            onSubmit={(values: Values) => handleSubmit(values)}
-          />
+          <Action.SubmitForm title="Create Routing Rule" icon={Icon.Check} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="domainName"
-        title="Domain"
-        placeholder="Select a domain"
-        error={state.domainNameError}
-        value={state.domainName}
-        onChange={onDomainNameChange}
-      >
-        {state.domains?.map((domain) => (
-          <Form.Dropdown.Item
-            key={domain.name}
-            value={domain.name}
-            title={domain.name}
-            icon={getFavicon(`https://${domain.name}`)}
-          />
-        ))}
+      <Form.Dropdown title="Domain" {...itemProps.domainName}>
+        {domains
+          ?.filter((domain) => !domain.isShared)
+          .map((domain) => (
+            <Form.Dropdown.Item
+              key={domain.name}
+              value={domain.name}
+              title={domain.name}
+              icon={getFavicon(`https://${domain.name}`)}
+            />
+          ))}
       </Form.Dropdown>
 
-      <Form.Checkbox
-        id="prefix"
-        key="prefix"
-        label="Prefix"
-        info="Leave this unchecked for 'EXACT ADDRESS' matching"
-        error={state.prefixError}
-        value={state.prefix}
-        onChange={onPrefixChange}
-      />
+      <Form.Dropdown title="Type" {...itemProps.type}>
+        <Form.Dropdown.Item title="Any address" value="any" />
+        <Form.Dropdown.Item title="Any address except valid user addresses (catchall)" value="catchall" />
+        <Form.Dropdown.Item title="Any address starting with" value="prefix" />
+        <Form.Dropdown.Item title="The exact address" value="exact" />
+      </Form.Dropdown>
+
+      {(itemProps.type.value === "prefix" || itemProps.type.value === "exact") && (
+        <>
+          <Form.TextField
+            title="Match User"
+            placeholder="hi"
+            info={`The local part of the user address to be matched, i.e. "user" in "user@domain.org"`}
+            {...itemProps.matchUser}
+          />
+          <Form.Description text={`${itemProps.matchUser.value || "<MATCH>"}@${itemProps.domainName.value}`} />
+        </>
+      )}
 
       <Form.TextField
-        id="matchUser"
-        key="matchUser"
-        title="Match User"
-        placeholder="hi"
-        info={`The local part of the user address to be matched, i.e. "user" in "user@domain.org"`}
-        error={state.matchUserError}
-        value={state.matchUser}
-        onChange={onMatchUserChange}
-      />
-
-      <Form.TextField
-        id="targetAddresses"
-        key="targetAddresses"
         title="Target Addresses"
         placeholder="hi@example.local, webmaster@example.local"
-        info={`List of full email addresses that this mail will be rerouted to`}
-        error={state.targetAddressesError}
-        value={state.targetAddresses}
-        onChange={onTargetAddressesChange}
+        info="List of full email addresses that this mail will be rerouted to"
+        {...itemProps.targetAddresses}
       />
 
       <Form.Description text={description()} />

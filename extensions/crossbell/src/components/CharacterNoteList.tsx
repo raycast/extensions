@@ -7,9 +7,7 @@ export default function CharacterNoteList({ characterId }: { characterId: number
 
   return (
     <List isLoading={isLoading}>
-      {data?.list.map((note) => (
-        <NoteListItem key={`${note.characterId}-${note.noteId}`} note={note} />
-      ))}
+      {data?.list.map((note) => <NoteListItem key={`${note.characterId}-${note.noteId}`} note={note} />)}
     </List>
   );
 }

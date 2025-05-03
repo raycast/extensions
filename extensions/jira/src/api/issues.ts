@@ -8,7 +8,7 @@ import { IssueFormValues } from "../components/CreateIssueForm";
 import { CustomFieldSchema, getCustomFieldValue } from "../helpers/issues";
 
 import { Project } from "./projects";
-import { autocomplete, request } from "./request";
+import { autocomplete, getAuthenticatedUri, request } from "./request";
 import { User } from "./users";
 
 export type IssueType = {
@@ -31,6 +31,7 @@ type CreateIssueParams = {
 type CreateIssueResponse = {
   id: string;
   key: string;
+  self: string;
 };
 
 export async function createIssue(values: IssueFormValues, { customFields }: CreateIssueParams) {
@@ -115,12 +116,16 @@ export enum StatusCategoryKey {
 type IssueStatus = {
   id: string;
   name: string;
-  statusCategory: {
+  statusCategory?: {
     id: string;
     key: StatusCategoryKey;
     name: string;
     colorName: string;
   };
+};
+
+type IssueWatches = {
+  isWatching: boolean;
 };
 
 export type Issue = {
@@ -134,7 +139,17 @@ export type Issue = {
     project: Project | null;
     updated: string;
     status: IssueStatus;
+    watches: IssueWatches;
+    subtasks?: Issue[];
+    parent?: Issue;
   };
+};
+
+export const resolveIssueTypeIconUris = async (issuetype: IssueType) => {
+  const resolvedIconUri = await getAuthenticatedUri(issuetype.iconUrl, "image/jpeg");
+  issuetype.iconUrl = resolvedIconUri;
+
+  return issuetype;
 };
 
 type GetIssuesResponse = {
@@ -143,7 +158,7 @@ type GetIssuesResponse = {
 
 export async function getIssues({ jql } = { jql: "" }) {
   const params = {
-    fields: "summary,updated,issuetype,status,priority,assignee,project",
+    fields: "summary,updated,issuetype,status,priority,assignee,project,watches,subtasks,parent",
     startAt: "0",
     maxResults: "200",
     validateQuery: "warn",
@@ -151,7 +166,33 @@ export async function getIssues({ jql } = { jql: "" }) {
   };
 
   const result = await request<GetIssuesResponse>("/search", { params });
-  return result?.issues;
+
+  if (!result?.issues) {
+    return result?.issues;
+  }
+
+  const resolvedIssues = await Promise.all(
+    result.issues.map(async (issue) => {
+      issue.fields.issuetype.iconUrl = await getAuthenticatedUri(issue.fields.issuetype.iconUrl, "image/jpeg");
+      return issue;
+    }),
+  );
+
+  return resolvedIssues;
+}
+
+export async function getIssuesForAI({ jql } = { jql: "" }) {
+  const params = {
+    fields: "summary,updated,issuetype,status,priority,assignee,project,parent",
+    startAt: "0",
+    maxResults: "50",
+    validateQuery: "warn",
+    jql,
+  };
+
+  const result = await request<GetIssuesResponse>("/search", { params });
+
+  return result?.issues ?? [];
 }
 
 export type Schema = {
@@ -179,12 +220,42 @@ type GetCreateIssueMetadataResponse = {
   projects: { issuetypes: IssueTypeWithCustomFields[] }[];
 };
 
-export async function getCreateIssueMetadata(projectId: string) {
-  const params = { expand: "projects.issuetypes.fields,style", projectIds: projectId };
+export async function getCreateIssueMetadataSummary(projectId: string) {
+  const params = { projectIds: projectId };
 
+  return getCreateIssueMetadataWithParams(params);
+}
+
+export async function getCreateIssueMetadata(projectId: string, issueTypeId: string) {
+  const params = { expand: "projects.issuetypes.fields", projectIds: projectId, issuetypeIds: issueTypeId };
+
+  return getCreateIssueMetadataWithParams(params);
+}
+
+async function getCreateIssueMetadataWithParams(params: {
+  projectIds: string;
+  expand?: string;
+  issuetypeIds?: string;
+}) {
   const result = await request<GetCreateIssueMetadataResponse>(`/issue/createmeta`, { params });
 
-  return result?.projects;
+  if (!result?.projects) {
+    return result?.projects;
+  }
+
+  const resolvedProjects = await Promise.all(
+    result.projects.map(async (project) => {
+      const resolvedIssueTypes = await Promise.all(
+        project.issuetypes.map(async (issueType) => {
+          issueType.iconUrl = await getAuthenticatedUri(issueType.iconUrl, "image/jpeg");
+          return issueType;
+        }),
+      );
+      return { ...project, issuetypes: resolvedIssueTypes };
+    }),
+  );
+
+  return resolvedProjects;
 }
 
 export async function updateIssue(issueIdOrKey: string, body: Record<string, unknown>) {
@@ -219,6 +290,19 @@ export async function updateIssueAssignee(issueIdOrKey: string, accountId: strin
   });
 }
 
+export async function startWatchingIssue(issueIdOrKey: string) {
+  return request(`/issue/${issueIdOrKey}/watchers`, {
+    method: "POST",
+  });
+}
+
+export async function stopWatchingIssue(issueIdOrKey: string, accountId: string) {
+  return request(`/issue/${issueIdOrKey}/watchers`, {
+    method: "DELETE",
+    params: { accountId: accountId },
+  });
+}
+
 export function getIssueEditMetadata(issueIdOrKey: string) {
   return request<{ fields: { assignee: { autoCompleteUrl: string } } }>(`/issue/${issueIdOrKey}/editmeta`);
 }
@@ -233,7 +317,7 @@ export type Attachment = {
   id: string;
   filename: string;
   mimeType: string;
-  size: string;
+  size: number;
   content: string;
   thumbnail?: string;
   created: string;
@@ -257,10 +341,24 @@ export type IssueDetail = Issue & {
   renderedFields: Record<string, string | null | undefined>;
 };
 
-export function getIssue(issueIdOrKey: string) {
+export async function getIssue(issueIdOrKey: string) {
   const params = { expand: "transitions,names,schema,renderedFields" };
 
-  return request<IssueDetail>(`/issue/${issueIdOrKey}`, { params });
+  const issue = await request<IssueDetail>(`/issue/${issueIdOrKey}`, { params });
+
+  if (!issue) {
+    return issue;
+  }
+
+  issue.fields.issuetype.iconUrl = await getAuthenticatedUri(issue.fields.issuetype.iconUrl, "image/jpeg");
+  if (issue.fields.parent) {
+    issue.fields.parent.fields.issuetype.iconUrl = await getAuthenticatedUri(
+      issue.fields.parent.fields.issuetype.iconUrl,
+      "image/jpeg",
+    );
+  }
+
+  return issue;
 }
 
 type AutocompleteIssueLinksResult = {

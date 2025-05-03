@@ -51,7 +51,11 @@ function extractBookmarks(isV3: boolean, obj: GitfoxRepositories | GitfoxReposit
   }
 }
 
-function extractBookmarksV2(obj: GitfoxRepositoryV2[], parents?: string): Bookmark[] {
+function extractBookmarksV2(
+  obj: GitfoxRepositoryV2[],
+  parents?: string,
+  visited = new Set<GitfoxRepositoryV2>(),
+): Bookmark[] {
   const bookmarks: Bookmark[] = [];
 
   if (!obj || obj.length === 0) {
@@ -59,12 +63,14 @@ function extractBookmarksV2(obj: GitfoxRepositoryV2[], parents?: string): Bookma
   }
 
   obj.forEach((bookmark: GitfoxRepositoryV2) => {
+    if (visited.has(bookmark)) return; // Prevent cyclic references
+    visited.add(bookmark);
+
     const name = parents ? `${parents} / ${bookmark.title}` : bookmark.title;
 
     if (bookmark.children && bookmark.children.length > 0) {
-      const childBookmarks = extractBookmarksV2(bookmark.children, name);
-
-      childBookmarks.forEach((bookmark) => bookmarks.push(bookmark));
+      const childBookmarks = extractBookmarksV2(bookmark.children, name, visited);
+      bookmarks.push(...childBookmarks);
     }
 
     const item = new Bookmark(bookmark.url?.relative, name, bookmark.uniqueIdentifier);
@@ -77,7 +83,11 @@ function extractBookmarksV2(obj: GitfoxRepositoryV2[], parents?: string): Bookma
   return bookmarks;
 }
 
-function extractBookmarksV3(obj: GitfoxRepositoryV3[], parents?: string): Bookmark[] {
+function extractBookmarksV3(
+  obj: GitfoxRepositoryV3[],
+  parents?: string,
+  visited = new Set<GitfoxRepositoryV3>(),
+): Bookmark[] {
   const bookmarks: Bookmark[] = [];
 
   if (!obj || obj.length === 0) {
@@ -85,16 +95,17 @@ function extractBookmarksV3(obj: GitfoxRepositoryV3[], parents?: string): Bookma
   }
 
   obj.forEach((bookmark: GitfoxRepositoryV3) => {
+    if (visited.has(bookmark)) return; // Prevent cyclic references
+    visited.add(bookmark);
+
     const name = parents ? `${parents} / ${bookmark.title}` : bookmark.title;
 
     if (bookmark.children && bookmark.children.length > 0) {
-      const childBookmarks = extractBookmarksV3(bookmark.children, name);
-
-      childBookmarks.forEach((bookmark) => bookmarks.push(bookmark));
+      const childBookmarks = extractBookmarksV3(bookmark.children, name, visited);
+      bookmarks.push(...childBookmarks);
     }
 
     const item = new Bookmark(bookmark.kind?.repository?.url.relative, name, bookmark.id);
-    console.log(item.folder);
 
     if (fs.existsSync(item.getPath)) {
       bookmarks.push(item);
@@ -115,8 +126,6 @@ export async function fetchBookmarks(): Promise<Bookmark[]> {
     const migratedToV3 = obj.didMigrateOldRepositoryManagerTreeNodes2;
     const itemsKey = migratedToV3 ? "repositoryManagerOutlineItems" : "repositoryManagerRepositoriesRootNode";
     const repos = (await bplist.parseFile(obj[itemsKey]))[0];
-
-    console.log(repos);
 
     const bookmarks = extractBookmarks(migratedToV3, repos);
 

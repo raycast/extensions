@@ -1,5 +1,5 @@
-import { BatteryList } from "./components/batteries";
+import { BatteryList } from "@components/battery/list";
 
-export default function main(): JSX.Element {
+export default function main() {
   return <BatteryList />;
 }

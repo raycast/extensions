@@ -6,7 +6,14 @@
   "description": "Weather forecast via wttr.in",
   "icon": "weather.png",
   "author": "tonka3000",
+  "contributors": [
+    "xilopaint"
+  ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "index",
@@ -68,22 +75,41 @@
       "required": false,
       "default": "",
       "description": "Default query when search bar is empty. Same content as in the search bar."
+    },
+    {
+      "name": "clockformat",
+      "description": "Clock Format",
+      "type": "dropdown",
+      "title": "Clock Format",
+      "default": "12h",
+      "required": false,
+      "data": [
+        {
+          "title": "12 Hours",
+          "value": "12h"
+        },
+        {
+          "title": "24 Hours",
+          "value": "24h"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.0",
-    "moment": "^2.29.1",
-    "node-fetch": "^2.6.5",
-    "raycast": "^1.0.8"
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.9.1",
+    "cross-fetch": "^4.0.0",
+    "javascript-time-ago": "^2.5.9",
+    "moment": "^2.29.1"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
     "@types/moment": "^2.13.0",
-    "@types/node": "^18.8.3",
-    "@types/node-fetch": "^2.5.12",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.0.3",
+    "react": "^18.2.0",
     "typescript": "^4.3.5"
   },
   "scripts": {

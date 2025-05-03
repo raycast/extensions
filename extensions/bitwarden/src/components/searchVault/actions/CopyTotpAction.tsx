@@ -1,27 +1,33 @@
-import { Clipboard, closeMainWindow, Icon, showToast, Toast } from "@raycast/api";
+import { Clipboard, Icon, showToast, Toast } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useBitwarden } from "~/context/bitwarden";
-import { useSession } from "~/context/session";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { getTransientCopyPreference } from "~/utils/preferences";
+import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
+import { captureException } from "~/utils/development";
+import { showCopySuccessMessage } from "~/utils/clipboard";
 
 function CopyTotpAction() {
-  const { id, name, login } = useSelectedVaultItem();
   const bitwarden = useBitwarden();
-  const session = useSession();
-  const code = login?.totp;
+  const selectedItem = useSelectedVaultItem();
+  const getUpdatedVaultItem = useGetUpdatedVaultItem();
 
-  if (!code) return null;
+  if (!selectedItem.login?.totp) return null;
 
   const copyTotp = async () => {
-    if (session.token) {
-      const toast = await showToast(Toast.Style.Success, "Copying TOTP Code...");
-      const totp = await bitwarden.getTotp(id, session.token);
+    const toast = await showToast(Toast.Style.Animated, "Getting TOTP code...");
+    try {
+      const id = await getUpdatedVaultItem(selectedItem, (item) => item.id);
+      const { error, result: totp } = await bitwarden.getTotp(id);
+      if (error) throw error;
+
+      await toast?.hide();
       await Clipboard.copy(totp, { transient: getTransientCopyPreference("other") });
-      await toast.hide();
-      await closeMainWindow({ clearRootSearch: true });
-    } else {
-      showToast(Toast.Style.Failure, "Failed to fetch TOTP.");
+      await showCopySuccessMessage("Copied code to clipboard");
+    } catch (error) {
+      toast.message = "Failed to get TOTP";
+      toast.style = Toast.Style.Failure;
+      captureException("Failed to copy TOTP", error);
     }
   };
 
@@ -31,7 +37,7 @@ function CopyTotpAction() {
       icon={Icon.Clipboard}
       onAction={copyTotp}
       shortcut={{ modifiers: ["cmd"], key: "t" }}
-      repromptDescription={`Copying the TOTP of <${name}>`}
+      repromptDescription={`Copying the TOTP of <${selectedItem.name}>`}
     />
   );
 }

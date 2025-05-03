@@ -31,7 +31,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
     if (bookmark.highlights.length) {
       md += `## Highlights\n`;
       bookmark.highlights.map((hl) => {
-        md += `> ${hl.text}${hl.note ? ` (Note: ${hl.note})` : ""}`;
+        md += `> ${hl.text}${hl.note ? ` (Note: ${hl.note})` : ""}\n\n`;
       });
       md += "\n\n";
     }
@@ -61,7 +61,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
                 revalidate();
                 return res.json();
               } else {
-                throw new Error("Error deleting link");
+                throw new Error(res.statusText);
               }
             });
           } catch (error) {
@@ -80,11 +80,67 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
   const lastUpdatedDate = new Date(bookmark.lastUpdate);
   const createdDate = new Date(bookmark.created);
 
+  function subtitle() {
+    switch (preferences.additionalItemToDisplayInList) {
+      case "link":
+        return bookmark.link;
+      case "domain":
+        return bookmark.domain;
+      case "excerpt":
+        return bookmark.excerpt;
+      case "note":
+        return bookmark.note;
+    }
+  }
+
   function accessories() {
     const accessories = [];
 
-    bookmark.tags.forEach((tag) => accessories.push({ tag: `#${tag}` }));
-    accessories.push({ date: lastUpdatedDate, tooltip: lastUpdatedDate.toLocaleString() });
+    switch (preferences.displayDate) {
+      case "lastUpdated":
+        accessories.push({ date: lastUpdatedDate, tooltip: lastUpdatedDate.toLocaleString() });
+        break;
+      case "created":
+        accessories.push({ date: createdDate, tooltip: createdDate.toLocaleString() });
+        break;
+    }
+
+    if (preferences.tagsDisplay !== "none") {
+      if (preferences.tagsDisplay === "all") {
+        bookmark.tags.forEach((tag) => accessories.push({ tag: `#${tag}` }));
+      } else {
+        const tagsNumber = bookmark.tags.length - 1;
+        const tagsDisplayNumber = parseInt(preferences.tagsDisplay, 10);
+        const displayedTags = bookmark.tags.slice(0, tagsDisplayNumber).map((tag) => `#${tag}`);
+        accessories.push(...displayedTags.map((tag) => ({ tag })));
+
+        if (tagsNumber > tagsDisplayNumber) {
+          accessories.push({ tag: `+${tagsNumber}`, tooltip: bookmark.tags.join("\n") });
+        }
+      }
+    }
+
+    switch (bookmark.type) {
+      case "link":
+        accessories.push({ icon: Icon.Link });
+        break;
+      case "article":
+        accessories.push({ icon: Icon.FountainTip });
+        break;
+      case "image":
+        accessories.push({ icon: Icon.Image });
+        break;
+      case "video":
+        accessories.push({ icon: Icon.Video });
+        break;
+      case "audio":
+        accessories.push({ icon: Icon.Music });
+        break;
+      case "document":
+        accessories.push({ icon: Icon.Document });
+        break;
+    }
+
     return accessories;
   }
 
@@ -93,7 +149,8 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
       id={String(bookmark._id)}
       icon={getFavicon(bookmark.link, { fallback: "raindrop-icon.png" })}
       key={bookmark._id}
-      title={bookmark.title}
+      title={{ value: bookmark.title, tooltip: bookmark.link }}
+      subtitle={subtitle()}
       accessories={accessories()}
       actions={
         <ActionPanel>
@@ -119,14 +176,8 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
                 }
                 metadata={
                   <Detail.Metadata>
-                    <Detail.Metadata.Label
-                      title="Created"
-                      text={createdDate.toLocaleDateString()}
-                    />
-                    <Detail.Metadata.Label
-                      title="Last Updated"
-                      text={lastUpdatedDate.toLocaleDateString()}
-                    />
+                    <Detail.Metadata.Label title="Created" text={createdDate.toLocaleDateString()} />
+                    <Detail.Metadata.Label title="Last Updated" text={lastUpdatedDate.toLocaleDateString()} />
                     <Detail.Metadata.Label title="Domain" text={bookmark.domain} />
 
                     {bookmark.tags && (

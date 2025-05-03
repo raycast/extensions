@@ -1,4 +1,5 @@
 import { Image } from "@raycast/api";
+import { SourceType } from "./types";
 
 export const generateRepoURL = (namespace: string, name: string): string => {
   return `https://hub.docker.com/repository/docker/${namespace}/${name}`;
@@ -48,20 +49,20 @@ export const formatSize = (size: number): string => {
   return `${(size / (1024 * 1024 * 1024)).toFixed(2)}GB`;
 };
 
-export function mapFromToIcon(from: string | undefined):
+export function mapFromToIcon(from: SourceType):
   | Image.ImageLike
   | {
       value: Image.ImageLike;
       tooltip: string;
     } {
   switch (from) {
-    case "OFFICIAL":
+    case SourceType.STORE:
       return { value: { source: "official.png" }, tooltip: "Official" };
-    case "VERIFIED PUBLISHER":
+    case SourceType.VERIFIED_PUBLISHER:
       return { value: { source: "verified.png" }, tooltip: "Verified Publisher" };
-    case "OPEN SOURCE":
+    case SourceType.OPEN_SOURCE:
       return { value: { source: "oss.png" }, tooltip: "Open Source Program" };
-    case "COMMUNITY":
+    case SourceType.COMMUNITY:
       return { value: { source: "docker-icon.png" }, tooltip: "Community" };
     default:
       return { source: "docker-icon.png" };

@@ -1,6 +1,6 @@
 # Detail
 
-![](../../.gitbook/assets/detail.png)
+![](../../.gitbook/assets/detail.webp)
 
 ## API Reference
 
@@ -42,13 +42,27 @@ export default function Command() {
 
 <PropsTableFromJSDoc component="Detail" />
 
+{% hint style="info" %}
+You can specify custom image dimensions by adding a `raycast-width` and `raycast-height` query string to the markdown image. For example: `![Image Title](example.png?raycast-width=250&raycast-height=250)`
+
+You can also specify a tint color to apply to an markdown image by adding a `raycast-tint-color` query string. For example: `![Image Title](example.png?raycast-tintColor=blue)`
+{% endhint %}
+
+{% hint style="info" %}
+You can now render [LaTeX](https://www.latex-project.org) in the markdown. We support the following delimiters:
+
+- Inline math: `\(...\)` and `\begin{math}...\end{math}`
+- Display math: `\[...\]`, `$$...$$` and `\begin{equation}...\end{equation}`
+
+{% endhint %}
+
 ### Detail.Metadata
 
 A Metadata view that will be shown in the right-hand-side of the `Detail`.
 
 Use it to display additional structured data about the main content shown in the `Detail` view.
 
-![Detail-metadata illustration](../../.gitbook/assets/detail-metadata.png)
+![Detail-metadata illustration](../../.gitbook/assets/detail-metadata.webp)
 
 #### Example
 
@@ -93,7 +107,7 @@ export default function Main() {
 
 A single value with an optional icon.
 
-![Detail-metadata-label illustration](../../.gitbook/assets/detail-metadata-label.png)
+![Detail-metadata-label illustration](../../.gitbook/assets/detail-metadata-label.webp)
 
 #### Example
 
@@ -132,7 +146,7 @@ export default function Main() {
 
 An item to display a link.
 
-![Detail-metadata-link illustration](../../.gitbook/assets/detail-metadata-link.png)
+![Detail-metadata-link illustration](../../.gitbook/assets/detail-metadata-link.webp)
 
 #### Example
 
@@ -171,7 +185,7 @@ export default function Main() {
 
 A list of [`Tags`](detail.md#detail.metadata.taglist.item) displayed in a row.
 
-![Detail-metadata-taglist illustration](../../.gitbook/assets/detail-metadata-taglist.png)
+![Detail-metadata-taglist illustration](../../.gitbook/assets/detail-metadata-taglist.webp)
 
 #### Example
 
@@ -220,7 +234,7 @@ A Tag in a `Detail.Metadata.TagList`.
 
 A metadata item that shows a separator line. Use it for grouping and visually separating metadata items.
 
-![](../../.gitbook/assets/detail-metadata-separator.png)
+![](../../.gitbook/assets/detail-metadata-separator.webp)
 
 ```typescript
 import { Detail } from "@raycast/api";

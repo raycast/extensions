@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-transistorfm",
+  "title": "TransistorFM",
+  "description": "Get TransistorFM stats directly from your command bar",
+  "icon": "icon.png",
+  "author": "madebyankur",
+  "categories": [
+    "Media",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu",
+      "title": "Menu Bar Podcast",
+      "subtitle": "TransistorFM",
+      "description": "TransistorFM Menu Bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "shows",
+      "title": "Podcast Shows",
+      "subtitle": "TransistorFM",
+      "description": "Get TransistorFM Shows",
+      "mode": "view"
+    },
+    {
+      "name": "episodes",
+      "title": "Podcast Episodes",
+      "subtitle": "TransistorFM",
+      "description": "Get TransistorFM Shows",
+      "mode": "view"
+    },
+    {
+      "name": "defaultShow",
+      "title": "Set Default Show",
+      "subtitle": "TransistorFM",
+      "description": "Get TransistorFM Shows",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "label": "TransistorFM API Key",
+      "description": "Enter your TransistorFM API Key.",
+      "type": "password",
+      "title": "API Key",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

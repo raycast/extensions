@@ -245,3 +245,8 @@ export const currencies = [
     value: "INR",
   },
 ];
+
+export type FormItemRef = {
+  focus: () => void;
+  reset: () => void;
+};

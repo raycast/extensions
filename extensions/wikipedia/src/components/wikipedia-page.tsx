@@ -1,62 +1,52 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, popToRoot, showToast, Toast } from "@raycast/api";
-import { getPageContent, getPageData, getPageLinks, getPageMetadata } from "../utils/api";
-import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
-import { Fragment } from "react";
-import { processMetadata, renderContent, replaceLinks, toSentenceCase, toTitleCase } from "../utils/formatting";
-import { ChangeLanguageSubmenu } from "./change-language-submenu";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import dedent from "dedent";
+import { Fragment, useEffect } from "react";
+
+import {
+  formatMetadataValue,
+  processMetadata,
+  renderContent,
+  replaceLinks,
+  toSentenceCase,
+  toTitleCase,
+} from "../utils/formatting";
 import { useLanguage } from "../utils/language";
-import Style = Toast.Style;
+import { useRecentArticles } from "../utils/recents";
+
+import { ChangeLanguageSubmenu } from "./change-language-submenu";
+
+import { usePageData } from "@/hooks/usePageData";
 
 const preferences = getPreferenceValues();
 
 const openInBrowser = preferences.openIn === "browser";
 
-function formatMetadataValue(label: string, value?: Date | null | string) {
-  if (value instanceof Date) {
-    return value.toLocaleDateString();
-  }
-  if (!value) {
-    return "N/A";
-  }
-
-  if (label === "coordinates") {
-    return value.toString().split("|").slice(0, 2).join(", ");
-  }
-
-  return value.toString();
-}
-
 export default function WikipediaPage({ title }: { title: string }) {
   const [language] = useLanguage();
+  const { addToReadArticles } = useRecentArticles();
   const [showMetadata, setShowMetadata] = useCachedState("showMetadata", false);
-  const { data: content, isLoading: isLoadingContent } = usePromise(getPageContent, [title, language]);
-  const { data: metadata, isLoading: isLoadingMetadata } = usePromise(getPageMetadata, [title, language]);
-  const { data: links, isLoading: isLoadingLinks } = usePromise(getPageLinks, [title, language]);
-  const { data: page, isLoading: isLoadingPage } = useCachedPromise(getPageData, [title, language], {
-    onError: () => {
-      showToast({
-        title: "Page not found",
-        message: title,
-        style: Style.Failure,
-      });
-      popToRoot();
-    },
-  });
 
-  const body = content ? renderContent(content, 2, links, language) : "";
+  const { page, content, metadata, links, isLoading } = usePageData(title, language);
+
+  useEffect(() => {
+    addToReadArticles(title);
+  }, [title]);
+
+  const body = content ? renderContent(content, 2, links, language, openInBrowser) : "";
 
   const markdown = page
-    ? `
+    ? dedent`
   # ${page.title}
-  
+
   ${page.description ? `>${toSentenceCase(page.description)}\n\n` : ""}
-  
-  ${replaceLinks(page.extract, language, links)}
+
+  ${replaceLinks(page.extract, language, links, openInBrowser)}
 
   ${page.thumbnail?.source ? `![](${page.thumbnail?.source})` : ""}
-  
+
   ${body ? "---" : ""}
-  
+
   ${body}`
     : "";
 
@@ -67,7 +57,7 @@ export default function WikipediaPage({ title }: { title: string }) {
   return (
     <Detail
       navigationTitle={title}
-      isLoading={isLoadingPage || isLoadingContent || isLoadingMetadata || isLoadingLinks}
+      isLoading={isLoading}
       markdown={markdown}
       metadata={
         showMetadata ? (
@@ -97,8 +87,8 @@ export default function WikipediaPage({ title }: { title: string }) {
 
                 return (
                   <Detail.Metadata.TagList key={key} title={title}>
-                    {value.map((item) => (
-                      <Detail.Metadata.TagList.Item key={item} text={formatMetadataValue(key, item)} />
+                    {value.map((item, index) => (
+                      <Detail.Metadata.TagList.Item key={`${item}-${index}`} text={formatMetadataValue(key, item)} />
                     ))}
                   </Detail.Metadata.TagList>
                 );
@@ -142,7 +132,11 @@ export default function WikipediaPage({ title }: { title: string }) {
               title="Copy URL"
               content={page.content_urls.desktop.page}
             />
-            <Action.CopyToClipboard shortcut={{ modifiers: ["cmd"], key: "," }} title="Copy Title" content={title} />
+            <Action.CopyToClipboard
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              title="Copy Title"
+              content={title}
+            />
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               title="Copy Subtitle"
@@ -164,7 +158,7 @@ export default function WikipediaPage({ title }: { title: string }) {
               shortcut={{ modifiers: ["cmd"], key: "o" }}
               title="Open Link"
               icon={Icon.Window}
-              isLoading={isLoadingLinks}
+              isLoading={isLoading}
             >
               {links?.map((link: string) => {
                 if (openInBrowser) {
@@ -172,7 +166,7 @@ export default function WikipediaPage({ title }: { title: string }) {
                     <Action.OpenInBrowser
                       key={link}
                       title={link}
-                      url={`https://${language}.wikipedia.org/wiki/${link}`}
+                      url={`https://${language.split("-").at(0)}.wikipedia.org/wiki/${link}`}
                     />
                   );
                 }

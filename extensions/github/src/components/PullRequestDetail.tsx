@@ -2,16 +2,12 @@ import { Detail } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 
-import {
-  MyPullRequestsQuery,
-  PullRequestDetailsFieldsFragment,
-  PullRequestFieldsFragment,
-  UserFieldsFragment,
-} from "../generated/graphql";
+import { getGitHubClient } from "../api/githubClient";
+import { PullRequestDetailsFieldsFragment, PullRequestFieldsFragment, UserFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
 import { getPullRequestAuthor, getPullRequestReviewers, getPullRequestStatus } from "../helpers/pull-request";
 import { getGitHubUser } from "../helpers/users";
-import { getGitHubClient } from "../helpers/withGithubClient";
+import { useMyPullRequests } from "../hooks/useMyPullRequests";
 import { useViewer } from "../hooks/useViewer";
 
 import PullRequestActions from "./PullRequestActions";
@@ -19,7 +15,7 @@ import PullRequestActions from "./PullRequestActions";
 type PullRequestDetailProps = {
   initialPullRequest: PullRequestFieldsFragment;
   viewer?: UserFieldsFragment;
-  mutateList?: MutatePromise<MyPullRequestsQuery | undefined> | MutatePromise<PullRequestFieldsFragment[] | undefined>;
+  mutateList?: MutatePromise<PullRequestFieldsFragment[] | undefined> | ReturnType<typeof useMyPullRequests>["mutate"];
 };
 
 export default function PullRequestDetail({ initialPullRequest, mutateList }: PullRequestDetailProps) {
@@ -37,7 +33,7 @@ export default function PullRequestDetail({ initialPullRequest, mutateList }: Pu
       return pullRequestDetail.node as PullRequestDetailsFieldsFragment;
     },
     [initialPullRequest.id],
-    { initialData: initialPullRequest }
+    { initialData: initialPullRequest },
   );
 
   let markdown = `# ${pullRequest.title}`;

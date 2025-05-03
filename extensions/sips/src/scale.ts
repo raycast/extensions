@@ -1,58 +1,37 @@
+/**
+ * @file scale.ts
+ *
+ * @summary Raycast command to scale selected images by a given factor.
+ * @author Stephen Kaplan <skaplanofficial@gmail.com>
+ *
+ * Created at     : 2023-07-06 14:56:29
+ * Last modified  : 2023-07-18 18:48:52
+ */
+
 import { showToast, Toast } from "@raycast/api";
-import { execSync } from "child_process";
-import { execSIPSCommandOnSVG, execSIPSCommandOnWebP, getSelectedImages } from "./utils";
+
+import runOperation from "./operations/runOperation";
+import scale from "./operations/scaleOperation";
+import { getSelectedImages } from "./utilities/utils";
 
 export default async function Command(props: { arguments: { scaleFactor: string } }) {
   const { scaleFactor } = props.arguments;
 
   const scaleNumber = parseFloat(scaleFactor);
   if (isNaN(scaleNumber)) {
-    await showToast({ title: "Scale factor must be a number", style: Toast.Style.Failure });
+    await showToast({
+      title: "Scale factor must be a number",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 
   const selectedImages = await getSelectedImages();
-
-  if (selectedImages.length === 0 || (selectedImages.length === 1 && selectedImages[0] === "")) {
-    await showToast({ title: "No images selected", style: Toast.Style.Failure });
-    return;
-  }
-
-  const toast = await showToast({ title: "Scaling in progress...", style: Toast.Style.Animated });
-
-  if (selectedImages) {
-    const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
-    try {
-      for (const imagePath of selectedImages) {
-        const resultArr = execSync(`sips -g pixelWidth -g pixelHeight "${imagePath}"`)
-          .toString()
-          .split(/(: |\n)/g);
-        const oldWidth = parseInt(resultArr[4]);
-        const oldHeight = parseInt(resultArr[8]);
-
-        if (imagePath.toLowerCase().endsWith("webp")) {
-          // Convert to PNG, scale, the restore to WebP
-          execSIPSCommandOnWebP(
-            `sips --resampleHeightWidth ${oldHeight * scaleNumber} ${oldWidth * scaleNumber}`,
-            imagePath
-          );
-        } else if (imagePath.toLowerCase().endsWith("svg")) {
-          // Convert to PNG, scale, and restore to SVG
-          execSIPSCommandOnSVG(
-            `sips --resampleHeightWidth ${oldHeight * scaleNumber} ${oldWidth * scaleNumber}`,
-            imagePath
-          );
-        } else {
-          execSync(`sips --resampleHeightWidth ${oldHeight * scaleNumber} ${oldWidth * scaleNumber} "${imagePath}"`);
-        }
-      }
-
-      toast.title = `Scaled ${selectedImages.length.toString()} ${pluralized}`;
-      toast.style = Toast.Style.Success;
-    } catch (error) {
-      console.log(error);
-      toast.title = `Failed to scale ${selectedImages.length.toString()} ${pluralized}`;
-      toast.style = Toast.Style.Failure;
-    }
-  }
+  await runOperation({
+    operation: () => scale(selectedImages, scaleNumber),
+    selectedImages,
+    inProgressMessage: "Scaling in progress...",
+    successMessage: "Scaled",
+    failureMessage: "Failed to scale",
+  });
 }

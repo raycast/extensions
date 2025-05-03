@@ -26,18 +26,26 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "bttSharedSecret",
+      "description": "The shared secret used for external scripting in BTT",
+      "type": "password",
+      "required": false,
+      "title": "Shared Secret (only required if set in BTT)"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.18"
+    "@raycast/api": "^1.72.0",
+    "@raycast/utils": "^1.14.1"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -46,5 +54,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -14,7 +14,7 @@ function useCachedState<T>(
   initialState?: T,
   config?: {
     cacheNamespace?: string;
-  }
+  },
 ): [T, (newState: T | ((prevState: T) => T)) => void];
 ```
 

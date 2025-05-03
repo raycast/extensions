@@ -108,7 +108,7 @@ export async function searchIssues(query: string): Promise<ResultItem[]> {
   const result = await jiraFetchObject<Issues>(
     "/rest/api/2/search",
     { jql, fields },
-    { 400: ErrorText("Invalid Query", "Unknown project or issue type") }
+    { 400: ErrorText("Invalid Query", "Unknown project or issue type") },
   );
   const mapResult = async (issue: Issue): Promise<ResultItem> => ({
     id: issue.id,

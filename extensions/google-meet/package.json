@@ -6,7 +6,8 @@
   "icon": "google-meet-icon.png",
   "author": "vitoorgomes",
   "contributors": [
-    "hughlaw"
+    "hughlaw",
+    "iwex"
   ],
   "license": "MIT",
   "commands": [
@@ -19,32 +20,44 @@
     },
     {
       "name": "manual-profile",
-      "title": "Create Meet With Specified Profile",
-      "subtitle": "Google Meet with specified profile",
+      "title": "Create Meet with Specified Profile",
+      "subtitle": "Google Meet",
       "description": "Creates a new meeting room with your default browser and copy the link to your clipboard.",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "title": "Set preferred browser",
+      "description": "This allows to override the configuration from the default browser to a specific one when creating the meet. Remember, you have to choose a valid browser",
+      "name": "preferredBrowser",
+      "type": "appPicker",
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
-    "@raycast/utils": "^1.4.9",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.56.1",
+    "@raycast/utils": "^1.9.0",
+    "run-applescript": "^6.1.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@types/node": "~18.8.5",
+    "@types/react": "^18.2.17",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.8",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,6 +1,24 @@
 # Font Awesome Changelog
 
+## [Added primary action preference] - 2024-10-23
+
+- Added a primary action preference to configure the main action for the icon.
+
+## [Fixed the issue with the copied icon SVG] - 2024-06-26
+
+- Fixed issue with icon "Copy as SVG" copies [object Object] onto the clipboard instead of the SVG.
+
+## [Added fuzzy search and icon style and family selection] - 2024-06-02
+
+- Search command now uses Font Awesome's official graphql APIs to support fuzzy search. It is now faster, more accurate and shows similar icons to your query.
+- Added support for switching between different icon families and styles.
+
+## [Added action] - 2023-06-26
+
+- Added "Copy FA Class" action which copies Font Awesome classes, e.g. "fa-brands fa-chrome".
+
 ## [Added action] - 2023-02-28
+
 - Added "Copy FA Glyph" action which copies the unicode font-awesome glyph to clipboard for use with font-awesome font files
 
 ## [Removed HTTP Proxy] - 2023-02-28

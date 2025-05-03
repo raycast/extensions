@@ -2,12 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hubspot",
   "title": "HubSpot",
-  "description": "Search Hubspot Contacts and Deals",
+  "description": "Search Hubspot Contacts, Companies and Deals",
   "icon": "extension_icon.png",
   "author": "harisvsulaiman",
   "contributors": [
     "pernielsentikaer",
-    "6farer"
+    "6farer",
+    "patricklenz",
+    "yuanming",
+    "j3lte",
+    "dort"
   ],
   "license": "MIT",
   "categories": [
@@ -27,6 +31,22 @@
       "description": "Hubspot AccessToken",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "customCompanyProperties",
+      "title": "Custom Company Properties",
+      "description": "Comma-separated list of additional HubSpot company properties to display (e.g. annual_revenue,number_of_employees)",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "propertyFormatting",
+      "title": "Property Formatting Rules",
+      "description": "JSON object defining how to format specific properties. Example: {\"monthly_tpv\": \"currency\", \"createdate\": \"date\"}",
+      "type": "textfield",
+      "required": false,
+      "default": "{\"monthly_tpv\": \"currency\"}"
     }
   ],
   "commands": [
@@ -35,6 +55,13 @@
       "title": "Search Contacts",
       "subtitle": "HubSpot",
       "description": "Search HubSpot Contacts",
+      "mode": "view"
+    },
+    {
+      "name": "companies",
+      "title": "Search Companies",
+      "subtitle": "HubSpot",
+      "description": "Search HubSpot Companies",
       "mode": "view"
     },
     {
@@ -60,26 +87,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.11",
-    "@types/lodash": "^4.14.191",
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.2",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.17.7",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
   }
 }

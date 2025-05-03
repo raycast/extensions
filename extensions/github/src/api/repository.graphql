@@ -15,6 +15,7 @@ fragment ShortRepositoryFields on Repository {
   mergeCommitAllowed
   squashMergeAllowed
   rebaseMergeAllowed
+  autoMergeAllowed
 }
 
 fragment ExtendedRepositoryFields on Repository {
@@ -30,7 +31,11 @@ fragment ExtendedRepositoryFields on Repository {
   squashMergeAllowed
   rebaseMergeAllowed
   updatedAt
+  pushedAt
   stargazerCount
+  isArchived
+  isFork
+  isPrivate
   viewerHasStarred
   primaryLanguage {
     id
@@ -54,6 +59,20 @@ query searchRepositories($query: String!, $numberOfItems: Int!) {
   }
 }
 
+query myLatestRepositories(
+  $numberOfItems: Int!
+  $orderByField: RepositoryOrderField!
+  $orderByDirection: OrderDirection!
+) {
+  viewer {
+    repositories(first: $numberOfItems, orderBy: { field: $orderByField, direction: $orderByDirection }) {
+      nodes {
+        ...ExtendedRepositoryFields
+      }
+    }
+  }
+}
+
 query milestonesForRepository($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
     milestones(first: 25, orderBy: { field: DUE_DATE, direction: ASC }) {
@@ -62,6 +81,21 @@ query milestonesForRepository($owner: String!, $name: String!) {
         id
         title
         number
+      }
+    }
+  }
+}
+
+query commentsForPullRequest($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      comments(first: 100) {
+        nodes {
+          author {
+            login
+          }
+          body
+        }
       }
     }
   }
@@ -115,23 +149,28 @@ query dataForRepository($owner: String!, $name: String!) {
         title
       }
     }
-    pullRequestTemplateLowercase: object(expression: "main:.github/pull_request_template.md") {
-      ... on Blob {
-        isTruncated
-        text
-      }
-    }
-    pullRequestTemplateUppercase: object(expression: "main:.github/PULL_REQUEST_TEMPLATE.md") {
-      ... on Blob {
-        isTruncated
-        text
-      }
+    pullRequestTemplates {
+      body
     }
     issueTemplates {
       name
       about
       title
       body
+    }
+  }
+}
+
+query searchRepositoryBranches($owner: String!, $name: String!, $query: String!) {
+  repository(owner: $owner, name: $name) {
+    refs(refPrefix: "refs/heads/", direction: ASC, first: 50, query: $query) {
+      nodes {
+        id
+        name
+        target {
+          ...CommitFields
+        }
+      }
     }
   }
 }

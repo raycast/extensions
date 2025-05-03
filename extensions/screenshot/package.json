@@ -5,6 +5,9 @@
   "description": "Capture your screen with macOS native tools",
   "icon": "command-icon.png",
   "author": "Aayush9029",
+  "contributors": [
+    "nirtamir2"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -29,6 +32,14 @@
       "subtitle": "Screenshot",
       "description": "Capture App Window",
       "icon": "capture-window.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-window-to-clipboard",
+      "title": "Capture Window To Clipboard",
+      "subtitle": "Screenshot",
+      "description": "Capture App Window To Clipboard",
+      "icon": "capture-window-to-clipboard.png",
       "mode": "no-view"
     },
     {

@@ -7,7 +7,8 @@
   "author": "thomas",
   "contributors": [
     "ron-myers",
-    "Kimcha"
+    "Kimcha",
+    "ridemountainpig"
   ],
   "categories": [
     "Productivity",
@@ -19,7 +20,41 @@
       "name": "manage-downloads",
       "title": "Manage Downloads",
       "description": "Search and organize your downloaded files",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "checkbox",
+          "name": "showHiddenFiles",
+          "label": "Show Hidden Files",
+          "title": "Show Hidden Files",
+          "description": "Show hidden files in the folder",
+          "required": false,
+          "default": false
+        },
+        {
+          "type": "dropdown",
+          "name": "fileOrder",
+          "label": "File Order",
+          "title": "File Order",
+          "description": "The order of the files in the folder",
+          "required": false,
+          "default": "modifiedTime",
+          "data": [
+            {
+              "title": "Modified Time",
+              "value": "modifiedTime"
+            },
+            {
+              "title": "Add Time",
+              "value": "addTime"
+            },
+            {
+              "title": "Create Time",
+              "value": "createTime"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "open-latest-download",
@@ -48,19 +83,44 @@
       "description": "The folder where your downloads are stored",
       "default": "~/Downloads",
       "required": true
+    },
+    {
+      "type": "dropdown",
+      "name": "lastestDownloadOrder",
+      "label": "Lastest Download Order",
+      "title": "Lastest Download Order",
+      "description": "The order of the lastest download",
+      "required": false,
+      "default": "modifiedTime",
+      "data": [
+        {
+          "title": "Modified Time",
+          "value": "modifiedTime"
+        },
+        {
+          "title": "Add Time",
+          "value": "addTime"
+        },
+        {
+          "title": "Create Time",
+          "value": "createTime"
+        },
+        {
+          "title": "Birth Time",
+          "value": "birthTime"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.46.0",
+    "@raycast/api": "^1.53.3",
     "untildify": "^4.0.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
     "@types/node": "^18.8.3",
     "@types/react": "^18.0.17",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },

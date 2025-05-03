@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-path",
   "title": "Open Path",
-  "description": "Open path from selection or clipboard.\nSupport directory, URL, IP address, URL scheme, mailto, email address.",
+  "description": "Open path and link from selection or clipboard in Finder, browsers, terminal, etc.",
   "icon": "open-path.png",
   "author": "koinzhang",
   "categories": [
@@ -14,9 +14,24 @@
   "commands": [
     {
       "name": "open-path",
-      "title": "Open Path",
-      "description": "Open path from selection or clipboard.\nSupport directory, URL, IP address, URL scheme, mailto, email address.",
-      "mode": "no-view"
+      "title": "Open in",
+      "subtitle": "Finder | Browser",
+      "description": "Open path and link from selection or clipboard in Finder, browsers, terminal, etc.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "openIn",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Finder | Browser",
+          "data": [
+            {
+              "title": "Terminal",
+              "value": "Terminal"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
@@ -38,10 +53,17 @@
       "label": "Show HUD"
     },
     {
-      "name": "fileOperation",
+      "name": "preferredTerminal",
+      "type": "appPicker",
+      "required": false,
+      "title": "Perferred Terminal",
+      "description": "Select which terminal to open the path in."
+    },
+    {
+      "name": "fileAction",
       "type": "dropdown",
       "required": false,
-      "title": "File Operation",
+      "title": "File Action",
       "description": "When the path is a file, should the file be opened or shown in Finder.",
       "default": "showInFinder",
       "data": [
@@ -52,6 +74,42 @@
         {
           "title": "Open File",
           "value": "openFile"
+        }
+      ]
+    },
+    {
+      "name": "folderAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Folder Action",
+      "description": "When the path is a folder, should the folder be opened or shown in Finder.",
+      "default": "openFile",
+      "data": [
+        {
+          "title": "Show in Finder",
+          "value": "showInFinder"
+        },
+        {
+          "title": "Open Folder",
+          "value": "openFile"
+        }
+      ]
+    },
+    {
+      "name": "urlAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "URL Action",
+      "description": "When the path is a url, how should this URL be opened.",
+      "default": "default",
+      "data": [
+        {
+          "title": "Show in Default Browser",
+          "value": "default"
+        },
+        {
+          "title": "Peek in Safari",
+          "value": "peek"
         }
       ]
     },
@@ -105,24 +163,29 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.0",
-    "fs-extra": "^10.1.0"
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.18.1",
+    "fs-extra": "^11.3.0",
+    "validator": "^13.12.0"
   },
   "devDependencies": {
-    "@types/fs-extra": "^9.0.13",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/fs-extra": "^11.0.4",
+    "@types/validator": "^13.12.2",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/calendar": "^0.1.4",
+    "@types/node": "22.10.7",
+    "@types/react": "18.3.18",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

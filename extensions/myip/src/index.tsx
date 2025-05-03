@@ -1,61 +1,51 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useFetch } from "@raycast/utils";
+import { networkInterfaces } from "os";
+import { useState, useEffect } from "react";
+
 import LookUp from "./lookup";
 import Torrent from "./torrent";
-import { address } from "ip";
+import { headers } from "./util";
 
-export type LoadingStatus = "loading" | "success" | "failure";
+function getLocalIPs() {
+  const nets = networkInterfaces();
+  const results = [];
 
-export default function Command() {
-  const [status, setStatus] = useState<LoadingStatus>("loading");
-  const [ip, setIp] = useState("");
-  const { pop } = useNavigation();
-  const [localIp] = useState(() => address("public", "ipv4").toString());
-
-  useEffect(() => {
-    async function getIp() {
-      try {
-        const { data } = await axios.get("https://api64.ipify.org");
-        setIp(data);
-        setStatus("success");
-      } catch (error) {
-        setIp("Failure");
-        setStatus("failure");
+  for (const name of Object.keys(nets)) {
+    const net = nets[name];
+    if (net) {
+      for (const netInfo of net) {
+        if (netInfo.family === "IPv4" && !netInfo.internal) {
+          results.push(netInfo.address);
+        }
       }
     }
-    getIp();
+  }
+
+  return results;
+}
+
+export default function Command() {
+  const { pop } = useNavigation();
+  const [localIps, setLocalIps] = useState<string[]>([]);
+
+  useEffect(() => {
+    setLocalIps(getLocalIPs());
   }, []);
 
+  const { isLoading, data, error, revalidate } = useFetch<string>("https://api64.ipify.org", {
+    headers,
+    keepPreviousData: true,
+  });
+
   return (
-    <List isLoading={status === "loading"}>
-      <List.Item
-        icon={Icon.Desktop}
-        title={localIp}
-        actions={
-          !!localIp && (
-            <ActionPanel>
-              <Action.CopyToClipboard
-                content={localIp}
-                onCopy={() => {
-                  pop();
-                }}
-              />
-            </ActionPanel>
-          )
-        }
-        accessories={[
-          {
-            text: "Local IP address",
-          },
-        ]}
-      />
-      <List.Item
-        subtitle={ip === "" ? "Loading..." : ""}
-        icon={Icon.Globe}
-        title={ip}
-        actions={
-          status === "success" && (
+    <List isLoading={isLoading}>
+      {localIps.map((ip, index) => (
+        <List.Item
+          key={index}
+          icon={Icon.Desktop}
+          title={ip}
+          actions={
             <ActionPanel>
               <Action.CopyToClipboard
                 content={ip}
@@ -63,8 +53,42 @@ export default function Command() {
                   pop();
                 }}
               />
+              <Action
+                title="Refresh"
+                onAction={() => revalidate()}
+                icon={Icon.Repeat}
+                shortcut={{ key: "r", modifiers: ["cmd"] }}
+              />
             </ActionPanel>
-          )
+          }
+          accessories={[
+            {
+              text: `Local IP address ${index + 1}`,
+            },
+          ]}
+        />
+      ))}
+      <List.Item
+        subtitle={!data && isLoading ? "Loading..." : error ? "Failed to load" : undefined}
+        icon={Icon.Globe}
+        title={data || "Loading..."}
+        actions={
+          !isLoading && !!data ? (
+            <ActionPanel>
+              <Action.CopyToClipboard
+                content={data}
+                onCopy={() => {
+                  pop();
+                }}
+              />
+              <Action
+                title="Refresh"
+                onAction={() => revalidate()}
+                icon={Icon.Repeat}
+                shortcut={{ key: "r", modifiers: ["cmd"] }}
+              />
+            </ActionPanel>
+          ) : null
         }
         accessories={[
           {
@@ -72,15 +96,15 @@ export default function Command() {
           },
         ]}
       />
-      {status === "success" && (
+      {!isLoading && !error && !!data ? (
         <>
           <List.Item
-            icon={ip === "" ? "" : Icon.Eye}
+            icon={data === "" ? "" : Icon.Eye}
             title=""
             subtitle="IP Lookup"
             actions={
               <ActionPanel>
-                <Action.Push title="IP Lookup" target={<LookUp ip={ip} />} icon={Icon.Eye} />
+                <Action.Push title="IP Lookup" target={<LookUp ip={data} />} icon={Icon.Eye} />
               </ActionPanel>
             }
             accessories={[
@@ -90,12 +114,12 @@ export default function Command() {
             ]}
           />
           <List.Item
-            icon={ip === "" ? "" : Icon.Download}
+            icon={data === "" ? "" : Icon.Download}
             title=""
             subtitle="Torrent History"
             actions={
               <ActionPanel>
-                <Action.Push title="Torrent History" target={<Torrent ip={ip} />} icon={Icon.Download} />
+                <Action.Push title="Torrent History" target={<Torrent ip={data} />} icon={Icon.Download} />
               </ActionPanel>
             }
             accessories={[
@@ -105,7 +129,7 @@ export default function Command() {
             ]}
           />
         </>
-      )}
+      ) : null}
     </List>
   );
 }

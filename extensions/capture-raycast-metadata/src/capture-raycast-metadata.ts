@@ -6,8 +6,8 @@ export default async () => {
   const _raycastLocation = await getRaycastLocation();
   const _raycastSize = await getRaycastSize();
   const optionsAlert: Alert.Options = {
-    icon: Icon.ExclamationMark,
-    title: "Capture Failure!",
+    icon: Icon.RaycastLogoPos,
+    title: "Captured Failed",
     message: "",
   };
 
@@ -22,13 +22,9 @@ export default async () => {
     } else {
       const captureResult = await captureRaycastMetadata(
         { x: _raycastLocation[0], y: _raycastLocation[1] },
-        { w: _raycastSize[0], h: _raycastSize[1] }
+        { w: _raycastSize[0], h: _raycastSize[1] },
       );
-      const currentTime = new Date().getTime();
-      while (new Date().getTime() - currentTime < 300) {
-        //To prevent capture success toast from overwriting the toast the user wants to show
-        // wait for 0.3 second
-      }
+      await new Promise((r) => setTimeout(r, 300));
       await captureResultToast(captureResult);
     }
   }

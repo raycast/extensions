@@ -1,9 +1,15 @@
 import { getPreferenceValues } from "@raycast/api";
 
-import { Items } from "./v7/components/Items";
-import { AccountForm } from "./v8/components/AccountForm";
-import { Preferences } from "./v8/utils";
+import { Items as ItemsV7 } from "./v7/components/Items";
+import { AuthProvider } from "./v8/components/AuthContext";
+import { Items as ItemsV8 } from "./v8/components/Items";
 
 export default function Command() {
-  return getPreferenceValues<Preferences>().version == "v8" ? <AccountForm /> : <Items />;
+  return getPreferenceValues<ExtensionPreferences>().version == "v8" ? (
+    <AuthProvider>
+      <ItemsV8 />
+    </AuthProvider>
+  ) : (
+    <ItemsV7 />
+  );
 }

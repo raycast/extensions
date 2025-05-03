@@ -7,7 +7,9 @@
   "author": "krzysztofzuraw",
   "contributors": [
     "OBQun",
-    "k8scat"
+    "k8scat",
+    "j3lte",
+    "stelo"
   ],
   "categories": [
     "Productivity",
@@ -16,37 +18,65 @@
     "Documentation"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "index",
       "title": "Search Web Docs",
       "subtitle": "MDN",
       "description": "Search MDN Web Docs",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "dropdown",
+          "title": "Preferred Action",
+          "data": [
+            {
+              "title": "Read Document",
+              "value": "read"
+            },
+            {
+              "title": "Open in Browser",
+              "value": "open"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ],
+          "required": false,
+          "default": "read",
+          "name": "preferredAction",
+          "description": "Choose what you want to do with the result first"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.1",
-    "@raycast/utils": "^1.4.8",
-    "axios": "^0.23.0",
-    "url-join": "4.0.1"
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.16.0",
+    "gray-matter": "^4.0.3",
+    "node-fetch": "^3.3.2",
+    "url-join": "^5.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/url-join": "4.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.6",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "^20.14.2",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gumroad",
+  "title": "Gumroad Sales",
+  "description": "View your sales and products from Gumroad",
+  "icon": "icon.png",
+  "author": "eddiesigner",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-sales",
+      "title": "View Sales",
+      "subtitle": "Gumroad",
+      "description": "View your sales from Gumroad",
+      "mode": "view"
+    },
+    {
+      "name": "view-products",
+      "title": "View Products",
+      "subtitle": "Gumroad",
+      "description": "View your products from Gumroad",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": false,
+      "title": "Gumroad Token",
+      "description": "Provide an access token instead of using OAuth to interact with the API.",
+      "placeholder": "OPTIONAL"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.17.0",
+    "node-html-markdown": "^1.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react-devtools": "^5.2.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "1.0.0"
+}

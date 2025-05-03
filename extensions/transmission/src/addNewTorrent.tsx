@@ -10,8 +10,6 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState, useCallback, useMemo } from "react";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import expandTidle from "expand-tilde";
 import { createClient } from "./modules/client";
 import { useAsync } from "react-use";
@@ -21,11 +19,14 @@ import path from "path";
 const preferences = getPreferenceValues();
 
 export default function AddNewTorrent() {
-  const [downloadDir, setDownloadDir] = useState("");
+  const [downloadDir, setDownloadDir] = useState(preferences.defaultDownloadDir);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const transmission = useMemo(() => createClient(), []);
 
   const handleSubmit = useCallback(async (values: { input: string; downloadDir: string }) => {
+    setIsLoading(true);
+
     const resolvedDownloadDir = expandTidle(path.resolve(values.downloadDir));
     try {
       if (values.input.startsWith("magnet:")) {
@@ -38,13 +39,14 @@ export default function AddNewTorrent() {
         });
       }
 
+      setIsLoading(false);
       showToast(Toast.Style.Success, `Torrent added to your list`);
-
       popToRoot({ clearSearchBar: true });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       showToast(Toast.Style.Failure, `The torrent couldn't be added: ${error.toString().slice("Error: ".length)}`);
+      setIsLoading(false);
     }
   }, []);
 
@@ -58,7 +60,7 @@ export default function AddNewTorrent() {
 
   return (
     <Form
-      isLoading={textFromClipboard.loading}
+      isLoading={textFromClipboard.loading || isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Plus} title="Add Torrent" onSubmit={handleSubmit} />
@@ -68,7 +70,7 @@ export default function AddNewTorrent() {
             prompt="Please select a .torrent file"
             type="torrent"
             shortcut={{ key: "o", modifiers: ["cmd"] }}
-            onSelect={setInput}
+            onSelect={(file) => file && setInput(file)}
           />
           <ActionPanel.Submenu icon={Icon.Text} title="Insert Quick Path" shortcut={{ key: "q", modifiers: ["cmd"] }}>
             {preferences.quickPaths
@@ -84,17 +86,20 @@ export default function AddNewTorrent() {
       <Form.TextField
         title="Magnet Link or Torrent File"
         id="input"
-        placeholder="magnet: (or ⌘ O to select from Finder)"
+        placeholder="magnet:..."
         value={input}
         onChange={(value) => setInput(value)}
       />
+      <Form.Description text="⌘ O to select from Finder" />
       <Form.TextField
         title="Download Directory"
         id="downloadDir"
-        placeholder="~/Downloads (⌘ Q to insert from quick paths)"
+        placeholder="~/Downloads"
         value={downloadDir}
         onChange={setDownloadDir}
+        storeValue={true}
       />
+      <Form.Description text="⌘ Q to insert from quick paths" />
     </Form>
   );
 }

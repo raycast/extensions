@@ -1,42 +1,35 @@
-export interface LaLigaClub {
-  team: Team;
-}
-
-export interface LaLigaClubs {
-  total: number;
-  teams: Team[];
-}
-
-export interface LaLigaStanding {
-  total: number;
-  standings: Standing[];
-}
-
-export interface LaLigaMatch {
-  matches: Match[];
-}
-
-export interface LaLigaClubSquad {
-  total: number;
-  squads: Squad[];
-}
-
 export interface Match {
   id: number;
   name: string;
   slug: string;
-  date: Date;
+  date?: Date;
   time: Date;
   home_score: number;
   away_score: number;
-  status: Status;
+  status: string;
+  attempt: number;
+  attempt_official: boolean;
   home_team: Team;
   away_team: Team;
+  match_winner_team: Team;
+  home_formation: string;
+  away_formation: string;
+  gameweek: Gameweek;
   venue: Venue;
   persons_role: PersonsRole[];
+  season: unknown;
   subscription: Subscription;
   temperature: Temperature;
   ball: Ball;
+  competitions?: Competition[];
+  is_brand_day: boolean;
+  opta_id: string;
+  lde_id: number;
+}
+
+export interface MatchPreviousNext {
+  previous_matches: Match[];
+  next_matches: Match[];
 }
 
 export interface Standing {
@@ -52,6 +45,13 @@ export interface Standing {
   previous_position: number;
   difference_position: number;
   team: Team;
+  qualify?: Qualify;
+}
+
+export interface Qualify {
+  name: string;
+  shortname: string;
+  color: string;
 }
 
 export interface Team {
@@ -74,32 +74,14 @@ export interface Team {
   phone: string;
   fax?: string;
   sprite_status: string;
-  club: Club;
+  club: Team;
   venue: Venue;
   shield: Shield;
   competitions: Competition[];
   last_main_competition: Competition;
   opta_id: string;
   lde_id: number;
-}
-
-export interface Club {
-  id: number;
-  slug: string;
-  name: string;
-  nickname: string;
-  boundname: string;
-  shortname: string;
   selector_name: string;
-  address: string;
-  foundation?: Date;
-  web: string;
-  twitter: string;
-  facebook: string;
-  instagram: string;
-  mail: string;
-  phone: string;
-  fax?: string;
   president?: string;
 }
 
@@ -148,46 +130,20 @@ export interface Country {
 
 export interface Ball {
   id: number;
-  name: BallName;
+  name: string;
   image: string;
-}
-
-export enum BallName {
-  Accelerate = "ACCELERATE",
-  Adrenalina = "ADRENALINA",
-}
-
-export enum Status {
-  FullTime = "FullTime",
-  PreMatch = "PreMatch",
 }
 
 export interface PersonsRole {
   person: Person;
   role: Role;
-}
-
-export interface Person {
-  name: string;
-  nickname: string;
-  firstname: string;
-  lastname: string;
+  opta_id: string;
+  lde_id: number;
 }
 
 export interface Role {
   id: number;
-  name: RoleName;
-}
-
-export enum RoleName {
-  Avar = "AVAR",
-  Var = "VAR",
-  ÁrbitroPrincipal = "Árbitro Principal",
-}
-
-export interface Temperature {
-  enabled_historical: boolean;
-  enabled_forecast: boolean;
+  name: string;
 }
 
 export interface Squad {
@@ -200,7 +156,7 @@ export interface Squad {
   team: Team;
   person: Person;
   role: Role;
-  photos: { [key: string]: Photo };
+  photos: Record<string, Record<string, string>>;
   opta_id: string;
   lde_id?: number;
 }
@@ -211,7 +167,7 @@ export interface Person {
   nickname: string;
   firstname: string;
   lastname: string;
-  gender: Gender;
+  gender: string;
   date_of_birth: Date;
   place_of_birth?: string;
   weight?: number;
@@ -223,25 +179,6 @@ export interface Person {
 
 export interface Country {
   id: string;
-}
-
-export enum Gender {
-  Male = "male",
-}
-
-export interface Photo {
-  "1024x1113"?: string;
-  "128x139"?: string;
-  "2048x2225"?: string;
-  "256x278"?: string;
-  "512x556"?: string;
-  "64x70"?: string;
-  "1024x1024"?: string;
-  "128x128"?: string;
-  "2048x2048"?: string;
-  "256x256"?: string;
-  "512x512"?: string;
-  "64x64"?: string;
 }
 
 export interface Position {
@@ -260,15 +197,6 @@ export interface Role {
   slug: string;
 }
 
-export interface LaLigaSubscription {
-  subscription: Subscription;
-}
-
-export interface LaLigaSubscriptionRounds {
-  total: number;
-  rounds: Round[];
-}
-
 export interface Subscription {
   id: number;
   name: string;
@@ -278,8 +206,8 @@ export interface Subscription {
   year: number;
   teams: Team[];
   rounds: Round[];
-  current_gameweek: CurrentGameweek;
-  current_gameweek_standing: CurrentGameweek;
+  current_gameweek: Gameweek;
+  current_gameweek_standing: Gameweek;
   competition: Competition;
 }
 
@@ -291,16 +219,48 @@ export interface Round {
   has_groups: boolean;
   type: string;
   status: string;
-  gameweeks: CurrentGameweek[];
-  groups: any[];
+  gameweeks: Gameweek[];
+  groups: unknown;
   num_gameweeks?: number;
 }
 
-export interface CurrentGameweek {
+export interface Gameweek {
   id: number;
   week: number;
   name: string;
   shortname: string;
   date: Date;
   round?: Round;
+}
+
+export interface MatchCommentary {
+  id: number;
+  content: string;
+  time: number;
+  minute: number;
+  second: number;
+  period: string;
+  match_comment_kind: MatchCommentKind;
+  match: Match;
+  lineup?: MatchLineup;
+  lineup_ref_second?: MatchLineup;
+}
+
+export interface MatchCommentKind {
+  id: number;
+  name: string;
+}
+
+export interface MatchLineup {
+  id: number;
+  position: number;
+  captain: boolean;
+  team: Team;
+  person: Person;
+  photos: Record<string, Record<string, string>>;
+  opta_id: string;
+  lde_id?: number;
+  shirt_number?: number;
+  status?: string;
+  formation_place?: number;
 }

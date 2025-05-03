@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "klack",
+  "title": "Klack",
+  "description": "Control Klack for macOS with Raycast",
+  "icon": "klack.png",
+  "author": "henrikruscon",
+  "contributors": [],
+  "categories": [
+    "Applications",
+    "Media",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggleKlack",
+      "title": "Toggle Klack",
+      "subtitle": "Klack",
+      "description": "Toggles Klack",
+      "mode": "no-view"
+    },
+    {
+      "name": "setSwitchSet",
+      "title": "Set Switch Set",
+      "subtitle": "Klack",
+      "description": "Sets Switch Set",
+      "mode": "view"
+    },
+    {
+      "name": "setSoftVolume",
+      "title": "Set Volume to Soft",
+      "subtitle": "Klack",
+      "description": "Sets Volume to Soft (30%)",
+      "mode": "no-view"
+    },
+    {
+      "name": "setBalancedVolume",
+      "title": "Set Volume to Balanced",
+      "subtitle": "Klack",
+      "description": "Sets Volume to Balanced (60%)",
+      "mode": "no-view"
+    },
+    {
+      "name": "setLoudVolume",
+      "title": "Set Volume to Loud",
+      "subtitle": "Klack",
+      "description": "Sets Volume to Loud (90%)",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.73.2",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,8 +1,16 @@
 import { useState } from "react";
-import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import classes from "./classes.json";
 
-const preferences = getPreferenceValues<{ defaultAction: "selector" | "css" | "class" }>();
+const preferences = getPreferenceValues();
+
+function formatClasses(css: string): string {
+  if (preferences.measuringUnit === "px") {
+    return css.replace(/(\d+\.?\d*)r?em/g, (_, rem) => `${Math.floor(parseFloat(rem) * 16)}px`);
+  } else {
+    return css;
+  }
+}
 
 export default function SearchClasses() {
   const [query, setQuery] = useState("");
@@ -16,8 +24,8 @@ export default function SearchClasses() {
         <List.Item
           key={selector}
           title={selector}
-          accessories={[{ text: classes }]}
-          actions={<ClassesAction selector={selector} classes={classes} />}
+          accessories={[{ text: formatClasses(classes) }]}
+          actions={<ClassesAction selector={selector} classes={formatClasses(classes)} />}
         />
       ))}
     </List>
@@ -59,4 +67,5 @@ function ClassesAction({ selector, classes }: { selector: string; classes: strin
         </ActionPanel>
       );
   }
+  return null;
 }

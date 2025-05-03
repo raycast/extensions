@@ -1,6 +1,10 @@
-import SearchLists from "./components/SearchLists";
-import { withHeightAuth } from "./components/withHeightAuth";
+import SearchLists from "@/components/SearchLists";
+import View from "@/components/View";
 
 export default function Command() {
-  return withHeightAuth(<SearchLists />);
+  return (
+    <View>
+      <SearchLists />
+    </View>
+  );
 }

@@ -2,7 +2,7 @@ import { load } from "cheerio";
 import crypto from "crypto";
 import fetch from "node-fetch";
 import showdown from "showdown";
-import { Link } from "../types";
+import { Link } from "@/types";
 
 const docsUrl = "https://developers.raycast.com";
 const linksUrl = "https://raw.githubusercontent.com/raycast/extensions/gh-pages/SUMMARY.md";

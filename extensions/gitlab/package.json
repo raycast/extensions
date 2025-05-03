@@ -72,10 +72,17 @@
       "mode": "view"
     },
     {
-      "name": "project_search",
-      "title": "Search Project",
+      "name": "group_search",
+      "title": "Search Groups",
       "subtitle": "GitLab",
-      "description": "Search GitLab Project",
+      "description": "Search GitLab Groups",
+      "mode": "view"
+    },
+    {
+      "name": "project_search",
+      "title": "Search Projects",
+      "subtitle": "GitLab",
+      "description": "Search GitLab Projects",
       "mode": "view"
     },
     {
@@ -97,7 +104,17 @@
       "title": "My Groups",
       "subtitle": "GitLab",
       "description": "GitLab Groups",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "flatlist",
+          "description": "Show Groups as Flat List at once",
+          "type": "checkbox",
+          "required": false,
+          "label": "Flat List View",
+          "default": false
+        }
+      ]
     },
     {
       "name": "epics",
@@ -115,7 +132,7 @@
     },
     {
       "name": "event_my",
-      "title": "My Recent Activities",
+      "title": "Recent Activities",
       "subtitle": "GitLab",
       "description": "Recent GitLab Activities",
       "mode": "view"
@@ -173,6 +190,58 @@
           "required": false,
           "label": "Grayscale Icon",
           "default": false
+        }
+      ]
+    },
+    {
+      "name": "mrmenu",
+      "title": "Merge Requests Menu Bar",
+      "description": "Display Merge Request directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "maxitems",
+          "description": "Maximum Merge Requests shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Merge Requests",
+          "placeholder": "10"
+        },
+        {
+          "name": "showtext",
+          "description": "Show Merge Requests Count",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Merge Requests Count",
+          "title": "Appearance",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "issuemenu",
+      "title": "Issues Menu Bar",
+      "description": "Display Issues directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "maxitems",
+          "description": "Maximum Issues shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Issues",
+          "placeholder": "10"
+        },
+        {
+          "name": "showtext",
+          "description": "Show Issues Count",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Issues Count",
+          "title": "Appearance",
+          "default": true
         }
       ]
     }
@@ -240,6 +309,14 @@
       "description": "Show details in merge request lists via a metadata view"
     },
     {
+      "name": "includeEpicAncestor",
+      "type": "checkbox",
+      "label": "Include Group Ancestors for Epics",
+      "required": false,
+      "default": false,
+      "description": "Include Group Ancestors for Epics when a higher group is not getable from with the top-level flag"
+    },
+    {
       "name": "ignorecerts",
       "type": "checkbox",
       "label": "Ignore Certificate Errors (not recommended)",
@@ -282,30 +359,40 @@
     "duboiss",
     "metakirby5",
     "macbookandrew",
-    "shaoye"
+    "shaoye",
+    "charlej",
+    "emlez",
+    "hendrikbunnick",
+    "stelo",
+    "romanschmid",
+    "jessedobbelaere",
+    "heavyrisem"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
-    "@raycast/api": "^1.48.8",
+    "@raycast/api": "^1.60.0",
     "@raycast/utils": "^1.0.6",
     "apollo-link-context": "^1.0.20",
+    "cross-fetch": "^4.0.0",
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.1",
     "javascript-time-ago": "^2.3.10",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "2.5",
     "open": "^8.2.1",
     "url-join": "^4.0.1",
     "use-interval": "^1.4.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^18.8.3",
+    "@types/node": "^18.8.4",
     "@types/node-emoji": "^1.8.1",
     "@types/node-fetch": "^2.5.12",
     "@types/open": "^6.2.1",
+    "@types/react": "^18.2.27",
     "@types/url-join": "^4.0.1",
     "eslint": "^7.31.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.3.5"
   },
   "scripts": {

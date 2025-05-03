@@ -42,6 +42,10 @@ const GET_ISSUE_DETAIL = gql`
   }
 `;
 
+export function IssueListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Issues" icon={{ source: "issues.svg", tintColor: Color.PrimaryText }} />;
+}
+
 export function IssueDetailFetch(props: { project: Project; issueId: number }): JSX.Element {
   const { issue, isLoading, error } = useIssue(props.project.id, props.issueId);
   if (error) {
@@ -262,7 +266,8 @@ export function IssueList({
   searchBarAccessory = undefined,
 }: IssueListProps): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
-  const { issues, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
+  const [searchState, setSearchState] = useState<IssueState>(state);
+  const { issues, error, isLoading, refresh } = useSearch(searchText, scope, searchState, project, group);
 
   if (error) {
     showErrorToast(error, "Cannot search Issue");
@@ -272,11 +277,28 @@ export function IssueList({
 
   return (
     <List
-      searchBarPlaceholder="Search issues by name..."
+      searchBarPlaceholder="Search Issues by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
-      searchBarAccessory={searchBarAccessory}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="State"
+          onChange={(newValue) => {
+            for (const value of Object.values(IssueState)) {
+              if (value === newValue) {
+                setSearchState(IssueState[newValue]);
+                refresh();
+                return;
+              }
+            }
+          }}
+        >
+          <List.Dropdown.Item title="Opened" value={IssueState.opened} />
+          <List.Dropdown.Item title="Closed" value={IssueState.closed} />
+          <List.Dropdown.Item title="All" value={IssueState.all} />
+        </List.Dropdown>
+      }
       navigationTitle={navTitle(project, group)}
     >
       <List.Section title={title} subtitle={issues?.length.toString() || ""}>
@@ -284,15 +306,28 @@ export function IssueList({
           <IssueListItem key={issue.id} issue={issue} refreshData={refresh} />
         ))}
       </List.Section>
+      <IssueListEmptyView />
     </List>
   );
 }
 
-function getIssueQuery(query: string | undefined) {
-  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee"]);
+export function getIssueQuery(query: string | undefined) {
+  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee", "state"]);
 }
 
-function injectQueryNamedParameters(
+function isValidIssueState(texts: string[] | undefined) {
+  if (!texts) {
+    return false;
+  }
+  for (const v of texts) {
+    if (![IssueState.closed.valueOf(), IssueState.opened.valueOf(), IssueState.all.valueOf()].includes(v)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function injectQueryNamedParameters(
   requestParams: Record<string, any>,
   query: Query,
   scope: IssueScope,
@@ -330,6 +365,12 @@ function injectQueryNamedParameters(
             }
           }
           break;
+        case "state": {
+          console.log(extraParamVal);
+          if (isValidIssueState(extraParamVal)) {
+            requestParams[prefixed("state")] = extraParamVal.join(",");
+          }
+        }
       }
     }
   }

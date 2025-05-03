@@ -5,7 +5,6 @@ import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
 
 import { Playlist } from "./util/models";
-import { SFSymbols } from "./util/models";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
@@ -49,9 +48,9 @@ export default function AddToPlaylist() {
           (data) => {
             setPlaylists(data);
             setIsLoading(false);
-          }
-        )
-      )
+          },
+        ),
+      ),
     )();
   }, []);
 
@@ -98,10 +97,7 @@ function Actions({ playlist: { name }, pop }: ActionsProps) {
       name,
       music.currentTrack.addToPlaylist,
       TE.map(() => closeMainWindow()),
-      handleTaskEitherError(
-        SFSymbols.WARNING + " Could not add current track to this playlist",
-        `${SFSymbols.ADD_TO_LIBRARY} Track added to playlist "${name}"`
-      )
+      handleTaskEitherError("Could not add current track to this playlist", `Track added to playlist "${name}"`),
     )();
 
     pop();

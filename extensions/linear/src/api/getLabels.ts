@@ -1,5 +1,6 @@
 import { IssueLabel } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+
+import { getLinearClient } from "../api/linearClient";
 
 export type LabelResult = Pick<IssueLabel, "id" | "name" | "color">;
 
@@ -28,7 +29,7 @@ export async function getLabels(teamId?: string) {
         }
       }
     `,
-    { teamId }
+    { teamId },
   );
 
   return data?.team.labels.nodes;

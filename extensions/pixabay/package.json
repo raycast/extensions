@@ -5,6 +5,10 @@
   "description": "Search Images and Videos on pixabay.com",
   "icon": "pixabay.png",
   "author": "tonka3000",
+  "contributors": [
+    "mjherich",
+    "j3lte"
+  ],
   "categories": [
     "Design Tools"
   ],
@@ -26,28 +30,27 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.2",
-    "@raycast/utils": "^1.4.10",
-    "cross-fetch": "^3.1.5",
-    "node-fetch": "^3.2.10",
+    "@raycast/api": "^1.71.4",
+    "@raycast/utils": "^1.14.0",
+    "cross-fetch": "^4.0.0",
+    "node-fetch": "^3.3.2",
     "url-join": "^5.0.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   },
   "preferences": [
     {
@@ -59,12 +62,38 @@
       "placeholder": "API key from pixabay.com"
     },
     {
+      "name": "downloadFolder",
+      "title": "Download Folder",
+      "description": "Folder to download images/videos to",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads",
+      "label": "Download Folder"
+    },
+    {
       "name": "showinfinder",
       "description": "Show In Finder after Download",
       "type": "checkbox",
-      "required": true,
+      "required": false,
       "default": true,
       "label": "Show In Finder after Download"
+    },
+    {
+      "name": "safeSearch",
+      "description": "Enable this so only images/videos suitable for all ages should be returned",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable Safe Search"
+    },
+    {
+      "name": "resultsPerPage",
+      "title": "Results per Page",
+      "description": "Number of results per page (3 - 200)",
+      "type": "textfield",
+      "required": false,
+      "default": "50",
+      "label": "Results per Page"
     }
   ]
 }

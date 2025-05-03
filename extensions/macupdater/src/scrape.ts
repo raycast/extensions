@@ -10,8 +10,8 @@ export interface Update {
   major: boolean;
 }
 
-function scrapeMacUpdater(url: string, columnOffset = 0): Promise<Update[]> {
-  return scrape(url, {
+async function scrapeMacUpdater(url: string, columnOffset = 0): Promise<Update[]> {
+  const { data } = await scrape<{ updates: Update[] }>(url, {
     updates: {
       listItem: "tr.t_content",
       data: {
@@ -44,7 +44,8 @@ function scrapeMacUpdater(url: string, columnOffset = 0): Promise<Update[]> {
         },
       },
     },
-  }).then(({ data }: { data: any }) => data.updates);
+  });
+  return data.updates;
 }
 
 export { scrapeMacUpdater };

@@ -1,52 +1,84 @@
-import { runAppleScript } from "run-applescript";
-import { App } from "../types/type";
-import { appsWithBundle } from "./common-utils";
+import { Application, getFrontmostApplication } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 
-export async function getAllBundleProcess() {
-  const script = `tell application "System Events"
-	get the bundle identifier of processes
+export async function scriptQuitAppsWithoutWindow(apps: Application[]) {
+  for (let i = 0; i < apps.length; i++) {
+    try {
+      const appName = apps[i].name;
+      if (
+        (await scriptIsRunning(appName)) &&
+        !(await isFrontmostApp(appName)) &&
+        !(await scriptGetAppWindow(appName))
+      ) {
+        const script = `
+tell application "${appName}"
+   quit
 end tell`;
-
-  try {
-    const allProcess = await runAppleScript(script);
-    return allProcess.split(", ");
-  } catch (e) {
-    return appsWithBundle;
+        await runAppleScript(script);
+      }
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
 
-export async function appCanQuit(appWindowCount: App, allProcess: string[]) {
-  try {
-    const isRunning = allProcess.includes(appWindowCount.bundleProcessName);
-    if (!isRunning) return false;
-
-    const script = `tell application "${appWindowCount.name}"
-   count windows 
+export async function scriptQuitApps(apps: Application[]) {
+  for (let i = 0; i < apps.length; i++) {
+    try {
+      const appName = apps[i].name;
+      const isRunning = await scriptIsRunning(appName);
+      if (isRunning) {
+        const script = `tell application "${appName}"
+   quit
 end tell`;
-    const hasWindows = await runAppleScript(script);
-    return hasWindows == appWindowCount.windows;
+        await runAppleScript(script);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+}
+
+async function isFrontmostApp(applicationName: string | undefined) {
+  try {
+    const app = await getFrontmostApplication();
+    return app?.name == applicationName;
   } catch (e) {
+    console.error(e);
     return false;
   }
 }
 
-export async function quitApp(appWindowCount: App, allProcess: string[]) {
-  const canQuit = await appCanQuit(appWindowCount, allProcess);
-  if (!canQuit) return;
-  const script = `tell application "${appWindowCount.name}"
-   quit
-end tell`;
-
+async function scriptIsRunning(appName: string | undefined) {
+  const script = `if application "${appName}" is running then
+	return true
+else
+	return false
+end if`;
   try {
-    await runAppleScript(script);
+    const isRunning = await runAppleScript(script);
+    return isRunning == "true";
   } catch (e) {
     console.error(e);
+    return false;
   }
 }
 
-export async function quitApps(apps: App[]) {
-  const allProcess = await getAllBundleProcess();
-  for (let i = 0; i < apps.length; i++) {
-    await quitApp(apps[i], allProcess);
+async function scriptGetAppWindow(appName: string | undefined) {
+  const script = `set appName to "${appName}"
+if application appName is running then
+  tell application "System Events" to tell process appName
+    set windowCount to count of (get every window)
+    return windowCount > 0
+  end tell
+  return false
+end if
+`;
+  try {
+    const hasWindow = await runAppleScript(script);
+    return hasWindow == "true";
+  } catch (e) {
+    console.error(e);
+    return false;
   }
 }

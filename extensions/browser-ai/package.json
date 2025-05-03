@@ -1,0 +1,171 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "browser-ai",
+  "title": "Browser AI Companion",
+  "description": "Use the best models with Raycast Browser Extension to extend your browsing experience.",
+  "icon": "icon.png",
+  "author": "lin",
+  "contributors": [],
+  "categories": [
+    "Productivity",
+    "Web",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "content",
+      "title": "Get Browser Content",
+      "description": "Get only the browser content",
+      "mode": "no-view"
+    },
+    {
+      "name": "ask",
+      "title": "Ask Website",
+      "description": "Ask Website.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": true,
+          "placeholder": "What is it?"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model_ask",
+          "description": "Override the global preferred model for this command.",
+          "type": "textfield",
+          "required": false,
+          "title": "Model Override",
+          "default": "global"
+        }
+      ]
+    },
+    {
+      "name": "inspect",
+      "title": "Inspect Website",
+      "description": "Inspect Website.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_inspect",
+          "title": "Prompt",
+          "description": "Enter instructions for summarizing text.",
+          "type": "textfield",
+          "default": "Consider every element of a tech stack, from frameworks to APIs through tools (analytics, monitoring, etc.). Include which fonts are used. Don't make any guesses on what’s used if there’s no evidence. Describe me the tech stack used based on the following HTML document:",
+          "required": false
+        },
+        {
+          "name": "model_inspect",
+          "description": "Override the global preferred model for this command.",
+          "type": "textfield",
+          "required": false,
+          "title": "Model Override",
+          "default": "global"
+        }
+      ]
+    },
+    {
+      "name": "youtube",
+      "title": "Summarize YouTube Video",
+      "description": "Summarize YouTube Video.",
+      "mode": "view",
+      "disabledByDefault": false,
+      "preferences": [
+        {
+          "name": "prompt_youtube",
+          "title": "Prompt",
+          "description": "Enter instructions for rewriting the text in a casual tone.",
+          "type": "textfield",
+          "default": "Create a summary of a YouTube video using its transcript. You will use the following template:  \" ## Summary {Multiple sentences summarising the YouTube video}  ## Notes {Bullet points that summarize the key points or important moments from the video’s transcript with explanations}  ## Quotes {Extract the best sentences from the transcript in a list} \" Transcript:",
+          "required": false
+        },
+        {
+          "name": "model_youtube",
+          "description": "Override the global preferred model for this command.",
+          "type": "textfield",
+          "required": false,
+          "title": "Model Override",
+          "default": "global"
+        }
+      ]
+    },
+    {
+      "name": "custom",
+      "title": "Custom Action",
+      "description": "Custom action based on selected text.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_custom",
+          "title": "Prompt",
+          "description": "Enter instructions for performing a custom action with the text.",
+          "type": "textfield",
+          "default": "Write a custom prompt here.",
+          "required": false
+        },
+        {
+          "name": "model_custom",
+          "description": "Override the global preferred model for this command.",
+          "type": "textfield",
+          "required": false,
+          "title": "Model Override",
+          "default": "global"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "description": "AI API Key",
+      "name": "apikey",
+      "required": true,
+      "title": "Perplexity/OpenRouter/Groq API Key.",
+      "type": "password",
+      "placeholder": "pplx-XXX or sk-or-v1 or gsk_"
+    },
+    {
+      "name": "model",
+      "title": "Global Model",
+      "description": "LLM model to use for all your commands.",
+      "type": "textfield",
+      "required": true,
+      "default": "meta-llama/llama-3-8b-instruct:free"
+    },
+    {
+      "name": "enableStreaming",
+      "title": "Response Streaming",
+      "label": "Enabled",
+      "description": "This will allow you to see the response as it's being generated. If disabled, the response will be shown once it's fully generated.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@nem035/gpt-3-encoder": "^1.1.7",
+    "@raycast/api": "^1.74.1",
+    "@raycast/utils": "^1.15.0",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.47.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "pull": "ray pull-contributions"
+  }
+}

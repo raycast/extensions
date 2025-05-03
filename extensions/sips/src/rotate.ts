@@ -1,52 +1,43 @@
-import { showToast, Toast } from "@raycast/api";
-import { execSync } from "child_process";
-import { execSIPSCommandOnSVG, execSIPSCommandOnWebP, getSelectedImages, rotatePDF } from "./utils";
+/**
+ * @file rotate.ts
+ *
+ * @summary Raycast command to rotate selected images by a specified number of degrees.
+ * @author Stephen Kaplan <skaplanofficial@gmail.com>
+ *
+ * Created at     : 2023-07-06 14:56:15
+ * Last modified  : 2023-07-18 18:48:47
+ */
 
-export default async function Command(props: { arguments: { degrees: string } }) {
-  const { degrees } = props.arguments;
-  const selectedImages = await getSelectedImages();
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { parser } from "mathjs";
 
-  if (selectedImages.length === 0 || (selectedImages.length === 1 && selectedImages[0] === "")) {
-    await showToast({ title: "No images selected", style: Toast.Style.Failure });
+import rotate from "./operations/rotateOperation";
+import runOperation from "./operations/runOperation";
+import { getSelectedImages } from "./utilities/utils";
+
+export default async function Command(props: { arguments: { angle: string } }) {
+  const { angle } = props.arguments;
+  const preferences = getPreferenceValues<Preferences.Rotate>();
+
+  let angleNumber = parseFloat(parser().evaluate(angle).toString());
+  if (isNaN(angleNumber)) {
+    await showToast({
+      title: "Angle must be a number",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 
-  const toast = await showToast({ title: "Rotation in progress...", style: Toast.Style.Animated });
-
-  if (selectedImages) {
-    const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
-    try {
-      const pathStrings = '"' + selectedImages.join('" "') + '"';
-      if (
-        pathStrings.toLowerCase().includes("webp") ||
-        pathStrings.toLowerCase().includes("svg") ||
-        pathStrings.toLowerCase().includes("pdf")
-      ) {
-        // Handle each image individually
-        selectedImages.forEach((imgPath) => {
-          if (imgPath.toLowerCase().endsWith("webp")) {
-            // Convert to PNG, flip and restore to WebP
-            execSIPSCommandOnWebP(`sips --rotate ${degrees}`, imgPath);
-          } else if (imgPath.toLowerCase().endsWith("svg")) {
-            // Convert to PNG, rotate, and restore to SVG
-            execSIPSCommandOnSVG(`sips --rotate ${degrees}`, imgPath);
-          } else if (imgPath.toLowerCase().endsWith("pdf")) {
-            // Rotate each page of a PDF
-            rotatePDF(imgPath, parseInt(degrees));
-          } else {
-            // Run command as normal
-            execSync(`sips --rotate ${degrees} "${imgPath}"`);
-          }
-        });
-      } else {
-        // Flip all images at once
-        execSync(`sips --rotate ${degrees} ${pathStrings}`);
-      }
-      toast.title = `Rotated ${selectedImages.length.toString()} ${pluralized} by ${degrees} degrees`;
-      toast.style = Toast.Style.Success;
-    } catch {
-      toast.title = `Failed to rotate ${selectedImages.length.toString()} ${pluralized}`;
-      toast.style = Toast.Style.Failure;
-    }
+  if (preferences.rotationUnit === "radians") {
+    angleNumber = angleNumber * (180 / Math.PI);
   }
+
+  const selectedImages = await getSelectedImages();
+  await runOperation({
+    operation: () => rotate(selectedImages, angleNumber),
+    selectedImages,
+    inProgressMessage: "Rotation in progress...",
+    successMessage: "Rotated",
+    failureMessage: "Failed to rotate",
+  });
 }

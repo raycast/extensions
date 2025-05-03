@@ -23,7 +23,7 @@ export default function PackageList() {
       throttle
     >
       {results?.length
-        ? results.map((result) => {
+        ? results.map(result => {
             return <PackageListItem key={result.package.name} result={result} />
           })
         : null}

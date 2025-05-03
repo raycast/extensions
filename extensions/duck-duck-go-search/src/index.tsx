@@ -1,17 +1,23 @@
-import { Action, ActionPanel, Alert, Icon, List, closeMainWindow, confirmAlert, open } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Action, Icon, List, Alert, confirmAlert, open } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useSearch } from "./utils/useSearch";
 
 export default function Command() {
   const { isLoading, results, search, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch();
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search DuckDuckGo...">
+    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search DuckDuckGo or enter a URL...">
       <List.Section title="Results" subtitle={results.length + ""}>
         {results.map((item) => (
           <List.Item
             key={item.id}
             title={item.query}
-            icon={item.isHistory ? Icon.Clock : Icon.MagnifyingGlass}
+            subtitle={item.description}
+            icon={
+              item.url.split("/")[2] === "duckduckgo.com"
+                ? { source: Icon.MagnifyingGlass }
+                : getFavicon("https://" + item.url.split("/")[2])
+            }
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Result">

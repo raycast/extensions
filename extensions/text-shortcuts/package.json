@@ -5,6 +5,10 @@
   "description": "Use Text Shortcuts to handle text from the selection or clipboard",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "snptrs",
+    "Undolog"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -16,7 +20,7 @@
       "icon": "run-icon-now.png",
       "title": "Run Shortcut Now",
       "subtitle": "Text Shortcuts",
-      "description": "Create text shortcut.",
+      "description": "Run text shortcut.",
       "mode": "view",
       "preferences": [
         {
@@ -255,9 +259,9 @@
     {
       "name": "shortcut-library-menu-bar",
       "icon": "shortcuts-library-menu-bar.png",
-      "title": "Shortcut Library",
+      "title": "Shortcut Library Menu Bar",
       "subtitle": "Text Shortcuts",
-      "description": "Search and run text shortcut.",
+      "description": "Run text shortcut from the menu bar.",
       "mode": "menu-bar",
       "preferences": [
         {
@@ -363,26 +367,28 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.41.1",
+    "@raycast/api": "^1.84.10",
+    "@raycast/utils": "^1.17.0",
     "title": "^3.5.3",
     "ts-md5": "^1.3.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/title": "^3.4.1",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/title": "^3.4.3",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

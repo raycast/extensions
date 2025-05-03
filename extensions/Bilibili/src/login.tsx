@@ -1,9 +1,23 @@
-import { logout } from "./utils";
+import { logout } from "./apis";
 import { useLogin } from "./hooks";
 
-import { Action, ActionPanel, Color, Detail, Icon, List, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  List,
+  LocalStorage,
+  popToRoot,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 
 async function doLogout() {
+  // reset localstorage
+  await LocalStorage.setItem("notifications", "[]");
   return await logout();
 }
 

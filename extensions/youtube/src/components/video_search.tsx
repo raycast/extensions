@@ -1,18 +1,21 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useCachedState } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { Preferences } from "../lib/types";
 import { getErrorMessage } from "../lib/utils";
-import { searchVideos, getVideos, useRefresher, Video } from "../lib/youtubeapi";
-import { VideoItem } from "./video";
+import { getVideos, searchVideos, useRefresher, Video } from "../lib/youtubeapi";
+import { FilterDropdown } from "./dropdown";
 import { ListOrGrid, ListOrGridEmptyView, ListOrGridSection } from "./listgrid";
 import { getPinnedVideos, getRecentVideos } from "./recent_videos";
-import { Preferences } from "../lib/types";
+import { VideoItem } from "./video";
 
 export function SearchVideoList({ channelId, searchQuery }: { channelId?: string; searchQuery?: string | undefined }) {
   const { griditemsize, showRecentVideos } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>(searchQuery || "");
+  const [order, setOrder] = useCachedState<string>("search-video-order", "relevance");
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(
-    async () => (searchText ? await searchVideos(searchText, channelId) : undefined),
-    [searchText]
+    async () => (searchText ? await searchVideos(searchText, channelId, { order: order }) : undefined),
+    [searchText, order],
   );
   if (error) {
     showToast(Toast.Style.Failure, "Could Not Search Videos", getErrorMessage(error));
@@ -25,9 +28,9 @@ export function SearchVideoList({ channelId, searchQuery }: { channelId?: string
 
   useEffect(() => {
     (async () => {
-      const pinnedVideos = await getVideos(getPinnedVideos());
+      const pinnedVideos = await getVideos(await getPinnedVideos());
       setPinnedVideos(pinnedVideos.filter((v) => !channelId || v.channelId === channelId));
-      const recentVideos = await getVideos(getRecentVideos());
+      const recentVideos = await getVideos(await getRecentVideos());
       setRecentVideos(recentVideos.filter((v) => !channelId || v.channelId === channelId));
       setLoading(false);
     })();
@@ -37,6 +40,7 @@ export function SearchVideoList({ channelId, searchQuery }: { channelId?: string
     <ListOrGrid
       isLoading={isLoading}
       columns={griditemsize}
+      searchBarAccessory={<FilterDropdown onChange={setOrder} defaultValue={order} />}
       aspectRatio={"4/3"}
       onSearchTextChange={setSearchText}
       throttle={true}

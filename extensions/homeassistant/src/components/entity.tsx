@@ -1,14 +1,15 @@
-import { Icon, Color, Action, ActionPanel } from "@raycast/api";
+import { ha } from "@lib/common";
+import { State } from "@lib/haapi";
+import { Action, ActionPanel, Color, Icon } from "@raycast/api";
 import React from "react";
-import { ha } from "../common";
-import { State } from "../haapi";
+import { HAOpenUrlInAction } from "./actions";
 import { EntityAttributesList } from "./attributes";
 
-export function OpenEntityHistoryAction(props: { state: State }): JSX.Element {
-  const historyUrl = ha.urlJoin(`history?entity_id=${props.state.entity_id}`);
+export function OpenEntityHistoryAction({ state }: { state: State }) {
+  const historyUrl = ha.navigateUrl(`history?entity_id=${state.entity_id}`);
   return (
-    <Action.OpenInBrowser
-      title="Open History in Browser"
+    <HAOpenUrlInAction
+      action="Open History In"
       icon={{ source: Icon.Text, tintColor: Color.PrimaryText }}
       url={historyUrl}
       shortcut={{ modifiers: ["cmd"], key: "h" }}
@@ -16,11 +17,11 @@ export function OpenEntityHistoryAction(props: { state: State }): JSX.Element {
   );
 }
 
-export function OpenEntityLogbookAction(props: { state: State }): JSX.Element {
-  const historyUrl = ha.urlJoin(`logbook?entity_id=${props.state.entity_id}`);
+export function OpenEntityLogbookAction({ state }: { state: State }) {
+  const historyUrl = ha.navigateUrl(`logbook?entity_id=${state.entity_id}`);
   return (
-    <Action.OpenInBrowser
-      title="Open Logbook in Browser"
+    <HAOpenUrlInAction
+      action="Open Logbook In"
       icon={{ source: Icon.Text, tintColor: Color.PrimaryText }}
       url={historyUrl}
       shortcut={{ modifiers: ["cmd", "opt"], key: "l" }}
@@ -28,12 +29,12 @@ export function OpenEntityLogbookAction(props: { state: State }): JSX.Element {
   );
 }
 
-export function ShowAttributesAction(props: { state: State }): JSX.Element | null {
-  if (props.state.attributes) {
+export function ShowAttributesAction({ state }: { state: State }) {
+  if (state.attributes) {
     return (
       <Action.Push
         title="Show Attributes"
-        target={<EntityAttributesList state={props.state} />}
+        target={<EntityAttributesList state={state} />}
         shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
         icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
       />
@@ -43,32 +44,31 @@ export function ShowAttributesAction(props: { state: State }): JSX.Element | nul
   }
 }
 
-export function CopyStateValueAction(props: { state: State }): JSX.Element {
+export function CopyStateValueAction({ state }: { state: State }) {
   return (
     <Action.CopyToClipboard
       title="Copy State Value"
-      content={props.state.state}
+      content={state.state}
       shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
     />
   );
 }
 
-export function CopyEntityIDAction(props: { state: State }): JSX.Element {
+export function CopyEntityIDAction({ state }: { state: State }) {
   return (
     <Action.CopyToClipboard
       title="Copy Entity ID"
-      content={props.state.entity_id}
+      content={state.entity_id}
       shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
     />
   );
 }
 
-export function EntityStandardActionSections(props: { state: State }): JSX.Element {
-  const s = props.state;
+export function EntityStandardActionSections({ state: s }: { state: State }) {
   return (
     <React.Fragment>
       <ActionPanel.Section title="Attributes">
-        <ShowAttributesAction state={props.state} />
+        <ShowAttributesAction state={s} />
       </ActionPanel.Section>
       <ActionPanel.Section title="Values">
         <CopyEntityIDAction state={s} />

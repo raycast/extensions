@@ -1,21 +1,21 @@
-import axios from 'axios';
+import axios from "axios";
 
 const jsdelivrClient = axios.create({
-  baseURL: 'https://cdn.jsdelivr.net/gh/iconify/icon-sets',
+  baseURL: "https://cdn.jsdelivr.net/gh/iconify/icon-sets",
 });
 
 const iconifyClient = axios.create({
-  baseURL: 'https://api.iconify.design',
+  baseURL: "https://api.iconify.design",
 });
 
 type SetCategory =
-  | 'General'
-  | 'Emoji'
-  | 'Brands / Social'
-  | 'Maps / Flags'
-  | 'Thematic'
-  | 'Archive / Unmaintained'
-  | '';
+  | "General"
+  | "Emoji"
+  | "Brands / Social"
+  | "Maps / Flags"
+  | "Thematic"
+  | "Archive / Unmaintained"
+  | "";
 
 interface SetResponse {
   name: string;
@@ -71,9 +71,7 @@ interface QueryResponse {
 
 class Service {
   async listSets(): Promise<Set[]> {
-    const response = await jsdelivrClient.get<Record<string, SetResponse>>(
-      '/collections.json',
-    );
+    const response = await jsdelivrClient.get<Record<string, SetResponse>>("/collections.json");
     const ids = Object.keys(response.data);
     return ids
       .map((id) => {
@@ -91,9 +89,7 @@ class Service {
   }
 
   async listIcons(setId: string, setTitle: string): Promise<Icon[]> {
-    const response = await jsdelivrClient.get<IconResponse>(
-      `/json/${setId}.json`,
-    );
+    const response = await jsdelivrClient.get<IconResponse>(`/json/${setId}.json`);
     const ids = Object.keys(response.data.icons);
     return ids.map((id) => {
       const icon = response.data.icons[id];
@@ -110,14 +106,10 @@ class Service {
     });
   }
 
-  async getIcons(
-    setId: string,
-    setTitle: string,
-    ids: string[],
-  ): Promise<Icon[]> {
+  async getIcons(setId: string, setTitle: string, ids: string[]): Promise<Icon[]> {
     const response = await iconifyClient.get<IconResponse>(`${setId}.json`, {
       params: {
-        icons: ids.join(','),
+        icons: ids.join(","),
       },
     });
     return ids
@@ -151,7 +143,7 @@ class Service {
     // group by set
     const setMap: Record<string, string[]> = {};
     for (const icon of response.data.icons) {
-      const [setId, id] = icon.split(':');
+      const [setId, id] = icon.split(":");
       if (!setMap[setId]) {
         setMap[setId] = [];
       }

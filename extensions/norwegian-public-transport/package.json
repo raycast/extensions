@@ -1,0 +1,85 @@
+{
+  "version": "3.2.1",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-norwegian-public-transport",
+  "title": "Norwegian Public Transport",
+  "keywords": [
+    "departures",
+    "avganger",
+    "norway",
+    "norge",
+    "public transport",
+    "kollektivtransport",
+    "travel",
+    "reise",
+    "entur",
+    "journey planner",
+    "real-time",
+    "sanntid"
+  ],
+  "description": "Real-time departures for Norwegian public transport. Data made available by Entur.",
+  "icon": "command-icon.png",
+  "author": "rosvik",
+  "categories": [
+    "Web",
+    "Data",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Departures",
+      "description": "Search for public transport departures from any stop place in Norway",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "dropdown",
+      "name": "web-planner",
+      "title": "Travel Planner for Quick Access",
+      "description": "Choose your preferred web travel planner to use for quick access.",
+      "data": [
+        {
+          "title": "Reis Nordland",
+          "value": "reis"
+        },
+        {
+          "title": "FRAM",
+          "value": "fram"
+        },
+        {
+          "title": "Svipper",
+          "value": "svipper"
+        },
+        {
+          "title": "AtB (Beta)",
+          "value": "atb"
+        }
+      ],
+      "default": "reis",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.7",
+    "@raycast/utils": "^1.18.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "22.8.4",
+    "@types/react": "18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

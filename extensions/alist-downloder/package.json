@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alist-downloder",
+  "title": "AList Downloder",
+  "description": "Mini AList downloader in Raycast",
+  "icon": "logo.png",
+  "author": "SGGb0nd",
+  "categories": ["Web", "Applications", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "AList",
+      "description": "Fetch and display items from AList",
+      "mode": "view",
+      "arguments": [],
+      "preferences": [
+        {
+          "name": "host",
+          "description": "Host to fetch items from",
+          "type": "textfield",
+          "title": "Host",
+          "default": "",
+          "required": true
+        },
+        {
+          "name": "path",
+          "description": "Path to fetch items from",
+          "type": "textfield",
+          "title": "Path",
+          "default": "/",
+          "required": true
+        },
+        {
+          "name": "username",
+          "description": "Username to authenticate with",
+          "type": "textfield",
+          "title": "Username",
+          "default": "",
+          "required": true
+        },
+        {
+          "name": "password",
+          "description": "Password to authenticate with",
+          "type": "password",
+          "title": "Password",
+          "default": "",
+          "required": true
+        },
+        {
+          "name": "downloadCommand",
+          "description": "Command to download the file, use {url} and {filename} as placeholders",
+          "type": "textfield",
+          "title": "Download Command",
+          "default": "curl -L -X GET {url} -o {filename}",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.1",
+    "axios": "^1.8.4",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

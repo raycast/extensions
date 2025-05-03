@@ -5,6 +5,9 @@
   "description": "Toggle the system's appearance while updating the wallpaper for each appearance mode.",
   "icon": "PM_Ext.png",
   "author": "marlonr",
+  "contributors": [
+    "andrewmonty"
+  ],
   "categories": [
     "System"
   ],
@@ -65,5 +68,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

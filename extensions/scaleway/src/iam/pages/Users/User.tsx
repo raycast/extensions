@@ -28,10 +28,7 @@ export const User = ({ user }: UserProps) => (
     metadata={
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Email" text={user.email} />
-        <List.Item.Detail.Metadata.Label
-          title="2FA Enabled"
-          text={user.twoFactorEnabled ? 'Yes' : 'No'}
-        />
+        <List.Item.Detail.Metadata.Label title="2FA Enabled" text={user.mfa ? 'Yes' : 'No'} />
 
         <List.Item.Detail.Metadata.Separator />
 

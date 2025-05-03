@@ -1,4 +1,4 @@
-import fetch from "cross-fetch";
+import client from "./client";
 
 interface QuoteResult {
   quoteResponse: QuoteResponse;
@@ -37,8 +37,9 @@ export interface Quote {
 }
 
 export async function quote(symbols: string[], abortSignal: AbortSignal): Promise<QuoteResponse> {
-  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols.join(",")}`;
-  return ((await (await fetch(url, { signal: abortSignal })).json()) as QuoteResult).quoteResponse;
+  console.log("yahoo-finance: fetching quote(s) for", symbols.join(","));
+  return (await client.get<QuoteResult>("/v7/finance/quote", { symbols: symbols.join(",") }, abortSignal))
+    .quoteResponse;
 }
 
 export interface PriceInfo {

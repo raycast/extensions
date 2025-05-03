@@ -6,14 +6,21 @@ import {
   Cache,
   getPreferenceValues,
   Icon as RaycastIcon,
-} from '@raycast/api';
-import { useEffect, useState } from 'react';
-import { createGlobalState } from 'react-hooks-global-state';
-import Service, { Icon, Set } from './service';
-import { toDataURI, toSvg, toURL } from './utils';
+  showToast,
+  Toast,
+  Clipboard,
+} from "@raycast/api";
+import { useEffect, useState } from "react";
+import { createGlobalState } from "react-hooks-global-state";
+import Service, { Icon, Set } from "./service";
+import { copyToClipboard, toDataURI, toSvg, toURL } from "./utils";
+import { iconColorEnum, primaryActionEnum } from "./types/perferenceValues";
 
-const { primaryAction } =
-  getPreferenceValues<{ primaryAction: 'paste' | 'copy' }>();
+const { primaryAction } = getPreferenceValues<{
+  primaryAction: primaryActionEnum;
+}>();
+
+const { iconColor, customColor } = getPreferenceValues<{ iconColor: iconColorEnum; customColor?: string }>();
 
 const service = new Service();
 const cache = new Cache({
@@ -32,7 +39,7 @@ const useSets = () => {
   });
   useEffect(() => {
     setState((p) => ({ ...p, isLoading: true }));
-    const cacheId = 'sets';
+    const cacheId = "sets";
     async function fetchSets() {
       const sets = await service.listSets();
       cache.set(cacheId, JSON.stringify({ time: Date.now(), data: sets }));
@@ -46,7 +53,7 @@ const useSets = () => {
     }
     try {
       const { time, data }: { time: number; data: Set[] } = JSON.parse(cached);
-      if (isExpired(time) || !('total' in data)) {
+      if (isExpired(time) || !("total" in data)) {
         fetchSets();
         return;
       }
@@ -103,17 +110,15 @@ const useIcons = (set?: Set) => {
 };
 
 function Command() {
-  const [page, setPage] = useGlobalState('page');
-  const [itemsPerPage] = useGlobalState('itemsPerPage');
+  const [page, setPage] = useGlobalState("page");
+  const [itemsPerPage] = useGlobalState("itemsPerPage");
   const [activeSetId, setActiveSetId] = useState<string>();
   const { sets, isLoading: isSetsLoading } = useSets();
-  const { icons, isLoading: isIconsLoading } = useIcons(
-    sets.find((set) => set.id == activeSetId),
-  );
+  const { icons, isLoading: isIconsLoading } = useIcons(sets.find((set) => set.id == activeSetId));
 
   const isLoading = isSetsLoading || isIconsLoading || icons.length === 0;
 
-  const [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState("");
 
   return (
     <Grid
@@ -141,8 +146,7 @@ function Command() {
     >
       <Grid.Section
         title={`Page ${page + 1} of ${Math.ceil(
-          icons.filter((icon) => icon.id.includes(filter)).length /
-            itemsPerPage,
+          icons.filter((icon) => icon.id.includes(filter)).length / itemsPerPage,
         )}`}
       >
         {icons
@@ -150,18 +154,58 @@ function Command() {
           .slice(itemsPerPage * page, itemsPerPage * (page + 1))
           .map((icon) => {
             const { id, body, width, height } = icon;
-            const svgIcon = toSvg(body, width, height);
+            const svgIcon = toSvg(
+              body,
+              width,
+              height,
+              iconColor === iconColorEnum.customColor &&
+                customColor &&
+                /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(customColor)
+                ? customColor
+                : iconColor,
+            );
             const dataURIIcon = toDataURI(svgIcon);
 
-            const paste = <Action.Paste title="Paste SVG" content={svgIcon} />;
-            const copy = (
-              <Action.CopyToClipboard title="Copy SVG" content={svgIcon} />
+            const paste = <Action.Paste title="Paste Svg String" content={svgIcon} />;
+            const copy = <Action.CopyToClipboard title="Copy Svg String" content={svgIcon} />;
+            const pasteFile = (
+              <Action
+                title="Paste Svg File"
+                icon={RaycastIcon.Clipboard}
+                onAction={async () => {
+                  await copyToClipboard(svgIcon, id);
+                  const { file } = await Clipboard.read();
+                  if (file) {
+                    Clipboard.paste({ file: file.replace("file://", "") });
+                  }
+                }}
+              />
             );
+            const copyFile = (
+              <Action
+                title="Copy Svg File"
+                icon={RaycastIcon.Clipboard}
+                onAction={async () => {
+                  await copyToClipboard(svgIcon, id);
+                  await showToast({
+                    title: "Copied to clipboard",
+                    message: "The SVG file has been copied to the clipboard.",
+                    style: Toast.Style.Success,
+                  });
+                }}
+              />
+            );
+            const pasteName = activeSetId && <Action.Paste title="Paste Name" content={`${activeSetId}:${id}`} />;
+            const copyName = activeSetId && (
+              <Action.CopyToClipboard title="Copy Name" content={`${activeSetId}:${id}`} />
+            );
+            const copyURL = activeSetId && <Action.CopyToClipboard title="Copy URL" content={toURL(activeSetId, id)} />;
+            const copyDataURI = <Action.CopyToClipboard title="Copy Data Uri" content={dataURIIcon} />;
             return (
               <Grid.Item
                 content={{
                   source: dataURIIcon,
-                  tintColor: body.includes('currentColor')
+                  tintColor: body.includes("currentColor")
                     ? Color.PrimaryText // Monochrome icon
                     : null,
                 }}
@@ -169,33 +213,103 @@ function Command() {
                 title={id}
                 actions={
                   <ActionPanel>
-                    {primaryAction === 'paste' ? (
+                    {primaryAction === primaryActionEnum.paste && (
                       <>
                         {paste}
                         {copy}
+                        {pasteFile}
+                        {copyFile}
+                        {pasteName}
+                        {copyName}
+                        {copyURL}
+                        {copyDataURI}
                       </>
-                    ) : (
+                    )}
+                    {primaryAction === primaryActionEnum.copy && (
                       <>
                         {copy}
                         {paste}
+                        {pasteFile}
+                        {copyFile}
+                        {pasteName}
+                        {copyName}
+                        {copyURL}
+                        {copyDataURI}
                       </>
                     )}
-                    {activeSetId && (
+                    {primaryAction === primaryActionEnum.pasteName && (
                       <>
-                        <Action.CopyToClipboard
-                          title="Copy Name"
-                          content={`${activeSetId}:${id}`}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy URL"
-                          content={toURL(activeSetId, id)}
-                        />
+                        {pasteName}
+                        {paste}
+                        {copy}
+                        {pasteFile}
+                        {copyFile}
+                        {copyName}
+                        {copyURL}
+                        {copyDataURI}
                       </>
                     )}
-                    <NavigationActionSection
-                      icons={icons}
-                      firstAction="next-page"
-                    />
+                    {primaryAction === primaryActionEnum.pasteFile && (
+                      <>
+                        {pasteFile}
+                        {paste}
+                        {copy}
+                        {copyFile}
+                        {pasteName}
+                        {copyName}
+                        {copyURL}
+                        {copyDataURI}
+                      </>
+                    )}
+                    {primaryAction === primaryActionEnum.copyFile && (
+                      <>
+                        {copyFile}
+                        {paste}
+                        {copy}
+                        {pasteFile}
+                        {pasteName}
+                        {copyName}
+                        {copyURL}
+                        {copyDataURI}
+                      </>
+                    )}
+                    {primaryAction === primaryActionEnum.copyName && (
+                      <>
+                        {copyName}
+                        {paste}
+                        {copy}
+                        {pasteFile}
+                        {copyFile}
+                        {pasteName}
+                        {copyURL}
+                        {copyDataURI}
+                      </>
+                    )}
+                    {primaryAction === primaryActionEnum.copyURL && (
+                      <>
+                        {copyURL}
+                        {paste}
+                        {copy}
+                        {pasteFile}
+                        {copyFile}
+                        {pasteName}
+                        {copyName}
+                        {copyDataURI}
+                      </>
+                    )}
+                    {primaryAction === primaryActionEnum.copyDataURI && (
+                      <>
+                        {copyDataURI}
+                        {paste}
+                        {copy}
+                        {pasteFile}
+                        {copyFile}
+                        {pasteName}
+                        {copyName}
+                        {copyURL}
+                      </>
+                    )}
+                    <NavigationActionSection icons={icons} firstAction="next-page" />
                   </ActionPanel>
                 }
               />
@@ -213,10 +327,10 @@ function NavigationActionSection({
   firstAction,
 }: {
   icons: Icon[];
-  firstAction?: 'next-page' | 'previous-page';
+  firstAction?: "next-page" | "previous-page";
 }) {
-  const [page] = useGlobalState('page');
-  const [itemsPerPage] = useGlobalState('itemsPerPage');
+  const [page] = useGlobalState("page");
+  const [itemsPerPage] = useGlobalState("itemsPerPage");
   if (icons.length <= itemsPerPage * page) {
     return null;
   }
@@ -227,7 +341,7 @@ function NavigationActionSection({
 
   return (
     <ActionPanel.Section title="Navigation">
-      {firstAction === 'next-page' ? (
+      {firstAction === "next-page" ? (
         <>
           {hasNextPage && <GoToNextPageAction totalPages={totalPages} />}
           {hasPreviousPage && <GoToPreviousPageAction />}
@@ -245,48 +359,48 @@ function NavigationActionSection({
 }
 
 function GoToPreviousPageAction() {
-  const [, setPage] = useGlobalState('page');
+  const [, setPage] = useGlobalState("page");
   return (
     <Action
       icon={RaycastIcon.ArrowLeftCircle}
       title="Go to Previous Page"
-      shortcut={{ modifiers: ['cmd'], key: '[' }}
+      shortcut={{ modifiers: ["cmd"], key: "[" }}
       onAction={() => setPage((p) => Math.max(0, p - 1))}
     />
   );
 }
 
 function GoToNextPageAction({ totalPages }: { totalPages: number }) {
-  const [, setPage] = useGlobalState('page');
+  const [, setPage] = useGlobalState("page");
   return (
     <Action
       icon={RaycastIcon.ArrowRightCircle}
       title="Go to Next Page"
-      shortcut={{ modifiers: ['cmd'], key: ']' }}
+      shortcut={{ modifiers: ["cmd"], key: "]" }}
       onAction={() => setPage((p) => Math.min(totalPages, p + 1))}
     />
   );
 }
 
 function GoToFirstPageAction() {
-  const [, setPage] = useGlobalState('page');
+  const [, setPage] = useGlobalState("page");
   return (
     <Action
       icon={RaycastIcon.ArrowLeftCircleFilled}
       title="Go to First Page"
-      shortcut={{ modifiers: ['cmd', 'shift'], key: '[' }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "[" }}
       onAction={() => setPage(0)}
     />
   );
 }
 
 function GoToLastPageAction({ totalPages }: { totalPages: number }) {
-  const [, setPage] = useGlobalState('page');
+  const [, setPage] = useGlobalState("page");
   return (
     <Action
       icon={RaycastIcon.ArrowRightCircleFilled}
       title="Go to Last Page"
-      shortcut={{ modifiers: ['cmd', 'shift'], key: ']' }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "]" }}
       onAction={() => setPage(totalPages)}
     />
   );

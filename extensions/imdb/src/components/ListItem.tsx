@@ -1,39 +1,126 @@
+import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
+import { useFetch } from '@raycast/utils';
 import {
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
-} from "@raycast/api";
-import type { EnrichedTitle } from "../types";
+  DetailedItem,
+  getDetailsEndpoint,
+  parseDetailsResponse,
+} from '../data/fetchDetails';
+import { BaseItem } from '../data/fetchList';
+import { usePreferences } from '../hooks/usePreferences';
+import { mapTypeToTitle, processSeasons } from '../utils';
+import ActionOpenInBrowserIMDb from './actions/ActionOpenInBrowserIMDb';
+import ActionOpenParentalGuide from './actions/ActionOpenParentalGuide';
+import ActionViewDetails from './actions/ActionViewDetails';
 
-export const ListItem = (props: { title: EnrichedTitle }) => {
-  const title = props.title;
+interface ListItemProps {
+  item: BaseItem;
+  showType?: boolean;
+}
+export const ListItem = ({ item: { imdbID }, showType }: ListItemProps) => {
+  const { token, openIn } = usePreferences();
+  const { data } = useFetch(getDetailsEndpoint(imdbID, token), {
+    parseResponse: parseDetailsResponse,
+  });
 
-  // nicely space each row's plot content
-  const takenSpace = title.Title.length + title.Year.length + 4;
+  if (!data) {
+    return null;
+  }
+
+  const { Poster, Title, Year } = data;
 
   return (
     <List.Item
-      title={title.Title}
-      subtitle={`(${title.Year})  ${title.Plot.slice(0, 92 - takenSpace)}...`}
-      icon={title.Poster}
-      accessoryTitle={title.imdbRating}
+      title={Title}
+      subtitle={`(${Year})`}
+      icon={{ source: Poster }}
+      accessories={getAccessories(data, showType)}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
-            url={`https://www.imdb.com/title/${title.imdbID}/`}
+          {openIn == 'raycast' ? (
+            <>
+              <ActionViewDetails item={data} />
+              <ActionOpenInBrowserIMDb imdbID={imdbID} />
+              <ActionOpenParentalGuide imdbID={imdbID} />
+            </>
+          ) : (
+            <>
+              <ActionOpenInBrowserIMDb imdbID={imdbID} />
+              <ActionOpenParentalGuide imdbID={imdbID} />
+              <ActionViewDetails item={data} />
+            </>
+          )}
+          <Action.OpenInBrowser
+            title="YouTube Trailer"
+            url={`https://www.youtube.com/results?search_query=${Title.replace(
+              /\s/g,
+              '+',
+            )}+trailer`}
+            icon={Icon.Play}
+            shortcut={{ modifiers: ['shift', 'cmd'], key: 'y' }}
           />
-          <CopyToClipboardAction
-            title="Copy URL"
-            content={`https://www.imdb.com/title/${title.imdbID}/`}
-          />
-          <CopyToClipboardAction
-            title="Copy ID"
-            shortcut={{ modifiers: ["opt", "cmd"], key: "return" }}
-            content={`${title.imdbID}`}
+          <Action.CopyToClipboard
+            title="Copy IMDb URL"
+            content={`https://www.imdb.com/title/${imdbID}/`}
+            shortcut={{ modifiers: ['shift', 'cmd'], key: 'c' }}
           />
         </ActionPanel>
       }
     />
   );
 };
+
+type ItemAccessory = Exclude<
+  React.ComponentProps<typeof List.Item>['accessories'],
+  null | undefined
+>[number];
+function getAccessories(
+  item: DetailedItem,
+  showType?: boolean,
+): ItemAccessory[] {
+  const accessories = [];
+
+  if (showType) {
+    accessories.push({
+      tag: mapTypeToTitle(item.Type),
+    });
+  }
+
+  const typeSpecificAccessory = getTypeSpecificAccessory(item);
+  if (typeSpecificAccessory !== undefined) {
+    accessories.push(typeSpecificAccessory);
+  }
+
+  accessories.push({
+    text: { value: item.imdbRating ?? 'N/A' },
+    icon: { source: Icon.Star },
+    tooltip: 'IMDb Rating',
+  });
+
+  return accessories;
+}
+
+function getTypeSpecificAccessory(
+  item: DetailedItem,
+): ItemAccessory | undefined {
+  if (item.Type === 'movie') {
+    return {
+      text: item.Director ?? 'N/A',
+      icon: {
+        source: 'director.png',
+        tintColor: Color.SecondaryText,
+      },
+      tooltip: 'Director',
+    };
+  }
+
+  if (item.Type === 'series') {
+    return {
+      text: processSeasons(item.totalSeasons ?? 'N/A'),
+      icon: {
+        source: Icon.Hashtag,
+        tintColor: Color.SecondaryText,
+      },
+      tooltip: 'Total Seasons',
+    };
+  }
+}

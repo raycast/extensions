@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "notion_researcher",
+  "title": "Notion Researcher",
+  "description": "An extension to supercharge your research workflow with Notion",
+  "icon": "command_icon.png",
+  "author": "raz_gaon",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "preferences": [
+    {
+      "name": "notionApiKey",
+      "title": "Notion Token",
+      "placeholder": "Your Notion api token...",
+      "description": "Notion token to allow access to the database",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI Key",
+      "placeholder": "Your OpenAI API Key...",
+      "description": "[Optional]: Used to generate helpful explanations to understand the paper",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "readerApiKey",
+      "title": "Readwise Reader Key",
+      "placeholder": "Your Readwise Reader Key...",
+      "description": "[Optional]: Used to add the pdfs to Readwise Reader",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "addPaper",
+      "icon": "command_icon.png",
+      "title": "Add Research Papers",
+      "description": "Add a research paper from Arxiv to a Notion database with metadata, references, and explanations.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "databaseKey",
+          "title": "Notion Database Key",
+          "placeholder": "Your Database Key...",
+          "description": "Notion database identifier",
+          "type": "textfield",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "createDatabase",
+      "icon": "command_icon.png",
+      "title": "Create Research Database",
+      "description": "Create the database to hold the research papers.",
+      "mode": "view"
+    },
+    {
+      "name": "addConcept",
+      "icon": "command_icon.png",
+      "title": "Add Concept to Database",
+      "description": "Add a concept explanation to Database",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "conceptDatabaseKey",
+          "title": "Notion Concepts Database Key",
+          "placeholder": "Your Database Key...",
+          "description": "Notion database identifier",
+          "type": "textfield",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@notionhq/client": "^2.2.13",
+    "@raycast/api": "^1.58.1",
+    "@raycast/utils": "^1.10.0",
+    "@tryfabric/martian": "^1.2.4",
+    "arxivjs": "^0.0.11",
+    "got": "^11.8.2",
+    "notion-types": "^6.16.0",
+    "openai": "^4.8.0",
+    "use-debounce": "^9.0.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "dotenv": "^16.3.1",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

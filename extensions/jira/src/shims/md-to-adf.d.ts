@@ -1,3 +1,3 @@
 declare module "md-to-adf" {
-  export default function markdownToAdf(markdown: string): any;
+  export default function markdownToAdf(markdown: string): object;
 }

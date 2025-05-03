@@ -3,7 +3,7 @@ export class Constants {
   public static readonly CW_CW_APP_PREFIX_FOR_LINK: string = "#!rid";
   public static readonly CW_LOGO_NAME: string = "cw-icon.png";
   public static readonly CW_OAUTH_SCOPE: string =
-    "rooms.messages:read rooms.info:read users.tasks.me:read users.profile.me:read users.all:read users.status.me:read";
+    "rooms.messages:read rooms.info:read users.tasks.me:read users.profile.me:read users.all:read users.status.me:read contacts.all:read";
   public static readonly CW_OAUTH_CL_ID: string = "y0PzMLQonNX7r";
   public static readonly CW_OAUTH_PROVIDER_NAME: string = "Chatwork";
   public static readonly CW_OAUTH_DESCRIPTION: string = "Connect your Chatwork account";
@@ -18,7 +18,18 @@ export class Constants {
    * @param chatId
    * @returns URL linked to specified chat
    */
-  public static getCWAppLinkUrl(roomId: number, chatId: string): string {
+  public static getCWAppLinkUrlForChat(roomId: number, chatId: string): string {
     return `${this.CW_CW_APP_URL}${this.CW_CW_APP_PREFIX_FOR_LINK}${roomId}-${chatId}`;
+  }
+
+  /**
+   * resolving URL linked to specified rooom
+   *
+   * @param roomId
+   * @param chatId
+   * @returns URL linked to specified rooom
+   */
+  public static getCWAppLinkUrlForRoom(roomId: number): string {
+    return `${this.CW_CW_APP_URL}${this.CW_CW_APP_PREFIX_FOR_LINK}${roomId}`;
   }
 }

@@ -1,5 +1,11 @@
 # Laravel Forge Changelog
 
+## [Fix] - 2023-05-12
+- Fixes bug in displaying the ssh:// protocol string
+## [Fix] - 2023-05-04
+
+- Fixes a bug in the launch command invocation.
+
 ## [Complete Rewrite] - 2023-04-17
 - Rewrite from scratch using modern Raycast features
 - Better caching with predictive pre-fetching

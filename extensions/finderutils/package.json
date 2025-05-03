@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "finderutils",
+  "title": "Finder Utilities",
+  "description": "Utilities for finder",
+  "icon": "command-icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "author": "edrf",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "extensions",
+      "title": "Auto Open",
+      "description": "File extensions that automatically open after creation",
+      "type": "textfield",
+      "placeholder": "txt, sh, js",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "createFile",
+      "title": "Create File",
+      "subtitle": "Finder Utilities",
+      "description": "Create a file in the active Finder window",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "filename",
+          "placeholder": "Something.txt",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "openSomething",
+      "title": "Open Element",
+      "subtitle": "Finder Utilities",
+      "description": "Open element (file/folder) in the default or specified app",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "thing",
+          "placeholder": "~/Something.txt",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "application",
+          "placeholder": "TextEdit",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.5"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

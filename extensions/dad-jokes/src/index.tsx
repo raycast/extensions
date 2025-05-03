@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 type Joke = {
@@ -22,7 +22,8 @@ export default function Command() {
       markdown={`# ${joke.replaceAll(/\n/g, "\n# ")}`}
       actions={
         <ActionPanel>
-          <Action title="New Joke" onAction={revalidate} />
+          <Action icon={Icon.Redo} title="New Joke" onAction={revalidate} />
+          {!isLoading && <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy Joke" content={joke} />}
         </ActionPanel>
       }
     />

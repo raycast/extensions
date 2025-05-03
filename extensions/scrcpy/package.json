@@ -5,6 +5,11 @@
   "description": "Mirror android device screen with scrcpy",
   "icon": "icon.png",
   "author": "zcfan",
+  "contributors": [
+  ],
+  "pastContributors": [
+    "Lemon"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -18,20 +23,20 @@
       "mode": "view",
       "preferences": [
         {
+          "description": "Set adb installation directory path. Default is '$HOME/Library/Android/sdk/platform-tools'.",
           "name": "adbDir",
-          "type": "textfield",
+          "placeholder": "ADB Installation Path",
           "required": false,
           "title": "adb command directory",
-          "description": "Set directory path where adb command included. Default is `$HOME/Library/Android/sdk/platform-tools`.",
-          "placeholder": "/dir/sdk/platform-tools"
+          "type": "textfield"
         },
         {
+          "description": "Set scrcpy installation directory path. Default is '/usr/local/bin' for Intel and '/opt/homebrew/bin' for Apple Silicon.",
           "name": "scrcpyDir",
-          "type": "textfield",
+          "placeholder": "Scrcpy Installation Path",
           "required": false,
           "title": "scrcpy command directory",
-          "description": "Set directory path where scrcpy command included. Default is `/usr/local/bin`.",
-          "placeholder": "/dir"
+          "type": "textfield"
         }
       ]
     }
@@ -46,7 +51,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
+    "prettier": "^3.0.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

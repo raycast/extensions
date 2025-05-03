@@ -1,13 +1,86 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "nba-viewer",
-  "title": "NBA Viewer",
-  "description": "View upcoming NBA games and NBA team standings",
+  "name": "nba-game-viewer",
+  "title": "NBA & WNBA Viewer",
+  "description": "View upcoming NBA or WNBA games and team standings.",
   "icon": "command-icon.png",
   "author": "AbhinavPalacharla",
   "contributors": [
     "djpowers",
-    "michaelli"
+    "michaelli",
+    "degouville",
+    "stelo",
+    "jamtur01",
+    "gohadar"
+  ],
+  "preferences": [
+    {
+      "name": "conference",
+      "description": "Choose default conference for dropdown(s) in commands.",
+      "type": "dropdown",
+      "title": "Default Conference",
+      "data": [
+        {
+          "title": "Eastern Conference",
+          "value": "eastern"
+        },
+        {
+          "title": "Western Conference",
+          "value": "western"
+        },
+        {
+          "title": "League",
+          "value": "league"
+        }
+      ],
+      "required": false,
+      "default": "eastern"
+    },
+    {
+      "name": "league",
+      "description": "Choose default league for dropdown(s) in commands.",
+      "type": "dropdown",
+      "title": "Default League",
+      "data": [
+        {
+          "title": "NBA",
+          "value": "nba"
+        },
+        {
+          "title": "WNBA",
+          "value": "wnba"
+        }
+      ],
+      "required": false,
+      "default": "nba"
+    },
+    {
+      "name": "useLastValue",
+      "title": "View Options",
+      "description": "Show last value selected in dropdown(s) instead of defaulting to values selected in preferences everytime.",
+      "type": "checkbox",
+      "label": "Use last selected value for commands",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "numDaysScores",
+      "title": "Number of days of scores",
+      "description": "Number of days of scores to show in commands.",
+      "type": "textfield",
+      "label": "Number of days of scores",
+      "required": false,
+      "default": "7"
+    },
+    {
+      "name": "showDetails",
+      "title": "Show Details",
+      "description": "Show details of the games in the Raycast window.",
+      "type": "checkbox",
+      "label": "Show details of the games in the Raycast window",
+      "required": false,
+      "default": false
+    }
   ],
   "categories": [
     "Fun"
@@ -17,39 +90,47 @@
     {
       "name": "upcoming-games",
       "title": "View Upcoming Games",
-      "subtitle": "NBA",
-      "description": "Fetches upcoming NBA games",
+      "subtitle": "NBA & WNBA",
+      "description": "Fetches upcoming NBA or WNBA games",
       "mode": "view"
     },
     {
       "name": "standings",
       "title": "View Standings",
-      "subtitle": "NBA",
-      "description": "Fetches NBA standings",
+      "subtitle": "NBA & WNBA",
+      "description": "Fetches NBA or WNBA standings",
       "mode": "view"
     },
     {
       "name": "headlines",
       "title": "View Headlines",
-      "subtitle": "NBA",
-      "description": "Fetches NBA league headlines from ESPN",
+      "subtitle": "NBA & WNBA",
+      "description": "Fetches NBA or WNBA league headlines from ESPN",
+      "mode": "view"
+    },
+    {
+      "name": "scores",
+      "title": "View Scores",
+      "subtitle": "NBA & WNBA",
+      "description": "Fetches NBA or WNBA scores",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.0",
-    "@raycast/utils": "^1.1.0",
-    "axios": "^0.27.2"
+    "@raycast/api": "^1.81.0",
+    "@raycast/utils": "^1.16.4",
+    "axios": "^1.8.4",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.15",
+    "@types/node": "^22.3.0",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react-devtools": "^5.2.0",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",

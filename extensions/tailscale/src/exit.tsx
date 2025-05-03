@@ -1,124 +1,115 @@
-import { ActionPanel, List, Action, showToast, popToRoot, closeMainWindow, Toast, Image } from "@raycast/api";
+import { ActionPanel, List, Action, popToRoot, closeMainWindow, Image, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { execSync } from "child_process";
-import { LooseObject, loadDevices } from "./shared";
+import {
+  StatusResponse,
+  getStatus,
+  getDevices,
+  tailscale,
+  sortDevices,
+  ErrorDetails,
+  getErrorDetails,
+  Device,
+} from "./shared";
 
-function loadExitNodes(self: LooseObject, data: LooseObject) {
-  const devices = loadDevices(self, data);
-
+function loadExitNodes(status: StatusResponse) {
+  const devices = getDevices(status);
   return devices.filter((element) => {
     return element.exitnodeoption;
   });
 }
 
-function isExitNodeActive(devices: any) {
-  for (const device of devices) {
-    if (device.exitnode) {
-      return true;
-    }
-  }
-
-  return false;
+function isExitNodeActive(devices: Device[]) {
+  return devices.some((d) => d.exitnode);
 }
 
-function setExitNode(host: string, allowLAN: boolean) {
-  if (host === "Turn off exit node") {
-    host = "";
-  }
-
-  const command = `/Applications/Tailscale.app/Contents/MacOS/Tailscale set --exit-node "${host}"`;
-  console.log(command);
+function setExitNode(dnsName: string, allowLAN: boolean) {
   popToRoot();
   closeMainWindow();
-  execSync(command).toString().trim();
+  tailscale(`set --exit-node "${dnsName}"`);
 
   if (allowLAN) {
-    execSync("/Applications/Tailscale.app/Contents/MacOS/Tailscale set --exit-node-allow-lan-access").toString().trim();
+    tailscale(`set --exit-node-allow-lan-access`);
   }
 }
 
-function ExitNodeList() {
-  const [exitNodes, setExitNodes] = useState<any>();
+export default function ExitNodeList() {
+  const [isActive, setIsActive] = useState<boolean>(false);
+  const [error, setError] = useState<ErrorDetails>();
+  const [exitNodes, setExitNodes] = useState<Device[]>([]);
   useEffect(() => {
     async function fetch() {
       try {
-        const ret = execSync("/Applications/Tailscale.app/Contents/MacOS/Tailscale status --json").toString().trim();
-        const data: LooseObject = JSON.parse(ret);
-
-        if (!data.Self.Online) {
-          throw "Tailscale not connected";
-        }
-
-        const _list = loadExitNodes(data.Self, data.Peer);
-
-        if (isExitNodeActive(_list)) {
-          const disable = {
-            self: false,
-            userid: "",
-            dns: "",
-            key: 9001,
-            name: "Turn off exit node",
-            ipv4: "",
-            ipv6: "",
-            os: "",
-            online: true,
-            lastseen: new Date(),
-            exitnode: true,
-            exitnodeoption: false,
-          };
-
-          _list.unshift(disable);
-        }
-
+        const status = getStatus();
+        const _list = loadExitNodes(status);
         setExitNodes(_list);
+        sortDevices(_list);
+        if (isExitNodeActive(_list)) {
+          setIsActive(true);
+        }
       } catch (error) {
-        showToast(Toast.Style.Failure, "Couldn't load exitNodes. Make sure Tailscale is connected.");
+        setError(getErrorDetails(error, "Couldn’t load exit nodes."));
       }
     }
     fetch();
   }, []);
 
   return (
-    <List isLoading={exitNodes === undefined}>
-      {exitNodes?.map((exitNode: any) => (
-        <List.Item
-          title={exitNode.name}
-          subtitle={exitNode.ipv4 + "    " + exitNode.os}
-          key={exitNode.key}
-          icon={
-            exitNode.online
-              ? {
-                  source: {
-                    light: "connected_light.png",
-                    dark: "connected_dark.png",
-                  },
-                  mask: Image.Mask.Circle,
-                }
-              : {
-                  source: {
-                    light: "lastseen_light.png",
-                    dark: "lastseen_dark.png",
-                  },
-                  mask: Image.Mask.Circle,
-                }
-          }
-          accessories={[
-            {
-              text: exitNode.exitnode ? `        Connected` : "",
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action title="Use as Exit Node" onAction={() => setExitNode(exitNode.name, false)} />
-              <Action title="Use as Exit Node and Allow LAN Access" onAction={() => setExitNode(exitNode.name, true)} />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List isLoading={!exitNodes && !error}>
+      {error ? (
+        <List.EmptyView icon={Icon.Warning} title={error.title} description={error.description} />
+      ) : (
+        <>
+          {isActive && (
+            <List.Item
+              key="_disable"
+              title="Turn off exit node"
+              actions={
+                <ActionPanel>
+                  <Action title="Turn Off Exit Node" onAction={() => setExitNode("", false)} />
+                </ActionPanel>
+              }
+            />
+          )}
+          {exitNodes?.map((exitNode) => (
+            <List.Item
+              title={exitNode.name}
+              subtitle={exitNode.ipv4 + "    " + exitNode.os}
+              key={exitNode.key}
+              icon={
+                exitNode.online
+                  ? {
+                      source: {
+                        light: "connected_light.png",
+                        dark: "connected_dark.png",
+                      },
+                      mask: Image.Mask.Circle,
+                    }
+                  : {
+                      source: {
+                        light: "lastseen_light.png",
+                        dark: "lastseen_dark.png",
+                      },
+                      mask: Image.Mask.Circle,
+                    }
+              }
+              accessories={[
+                {
+                  tag: exitNode.exitnode ? `Connected` : "",
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action title="Use as Exit Node" onAction={() => setExitNode(exitNode.dns, false)} />
+                  <Action
+                    title="Use as Exit Node and Allow LAN Access"
+                    onAction={() => setExitNode(exitNode.dns, true)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </>
+      )}
     </List>
   );
-}
-
-export default function Command() {
-  return <ExitNodeList />;
 }

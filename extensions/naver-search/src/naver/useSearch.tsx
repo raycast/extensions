@@ -3,8 +3,9 @@ import { AbortError } from "node-fetch";
 import { useState, useRef, useEffect } from "react";
 import { getAutoSearchResults, getSearchHistory, getStaticResult } from "./handleResults";
 import { SearchResult, HISTORY_KEY, Preferences } from "./types";
+import { SearchTypeDict } from "./types";
 
-export function useSearch() {
+export function useSearch(searchType = "GENERAL") {
   const { rememberSearchHistory } = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(true);
   const [history, setHistory] = useState<SearchResult[]>([]);
@@ -14,6 +15,7 @@ export function useSearch() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searchText, setSearchText] = useState("");
   const cancelRef = useRef<AbortController | null>(null);
+  const isDict = SearchTypeDict[searchType].isDict;
 
   useEffect(() => {
     getHistory();
@@ -25,7 +27,7 @@ export function useSearch() {
 
   // Static result and filter history
   useEffect(() => {
-    setStaticResults(getStaticResult(searchText));
+    setStaticResults(getStaticResult(searchText, searchType));
   }, [searchText]);
 
   // Static result and filter history
@@ -44,7 +46,7 @@ export function useSearch() {
         setIsLoading(true);
 
         if (searchText) {
-          const autoSearchResult = await getAutoSearchResults(searchText, cancelRef.current.signal);
+          const autoSearchResult = await getAutoSearchResults(searchText, searchType, cancelRef.current.signal);
           setAutoResults(autoSearchResult);
         } else {
           setAutoResults([]);
@@ -66,11 +68,14 @@ export function useSearch() {
 
   // Combine all results
   useEffect(() => {
-    const combinedResults = [...staticResults, ...historyResults, ...autoResults].filter(
+    const combinedResults = isDict
+      ? [...autoResults, ...staticResults, ...historyResults]
+      : [...staticResults, ...historyResults, ...autoResults];
+    const filteredResults = combinedResults.filter(
       (value, index, self) => index === self.findIndex((t) => t.id === value.id)
     );
 
-    setResults(combinedResults);
+    setResults(filteredResults);
   }, [staticResults, historyResults, autoResults]);
 
   async function getHistory() {

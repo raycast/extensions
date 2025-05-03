@@ -6,7 +6,7 @@ import { XcodeCodeSnippetListItem } from "./xcode-code-snippet-list-item.compone
 /**
  * Xcode Code Snippet List
  */
-export function XcodeCodeSnippetList(): JSX.Element {
+export function XcodeCodeSnippetList() {
   const codeSnippets = useCachedPromise(XcodeCodeSnippetService.codeSnippets);
   return (
     <List isLoading={codeSnippets.isLoading} isShowingDetail={!!codeSnippets.data?.length}>

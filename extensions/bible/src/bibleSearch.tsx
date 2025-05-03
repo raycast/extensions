@@ -1,17 +1,46 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  getSelectedText,
+  Icon,
+  LaunchProps,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import * as React from "react";
 import { versions as bibleVersions } from "../assets/bible-versions.json";
 import { ReferenceSearchResult, search } from "./bibleGatewayApi";
 
-const DEFAULT_BIBLE_VERSION_ABBR = "NLT";
+type Preferences = Preferences.BibleSearch;
 
-type Preferences = { enterToSearch: boolean; oneVersePerLine: boolean; includeVerseNumbers: boolean };
-const prefs = getPreferenceValues<Preferences>();
-
-export default function Command() {
-  const [query, setQuery] = React.useState({ search: "", version: DEFAULT_BIBLE_VERSION_ABBR });
+export default function Command(props: LaunchProps<{ arguments: Arguments.BibleSearch }>) {
+  const prefs = getPreferenceValues<Preferences>();
+  const { ref = "", version = prefs.defaultBibleVersion } = props.arguments;
+  const [query, setQuery] = React.useState({ search: ref, version: version.trim().toUpperCase() });
   const [isLoading, setIsLoading] = React.useState(false);
   const [searchResult, setSearchResult] = React.useState<ReferenceSearchResult | undefined>(undefined);
+
+  React.useEffect(() => {
+    async function setSelectedTextAsQuery() {
+      try {
+        const selectedText = await getSelectedText();
+        if (selectedText) {
+          const { ref, version } = parseReference(selectedText);
+          setQuery((old) => ({ ...old, search: ref, version: version || old.version }));
+        }
+      } catch (error) {
+        /* empty */
+      }
+    }
+
+    const isArgsEmpty =
+      Object.keys(props.arguments).length === 0 || (props.arguments.ref === "" && props.arguments.version === "");
+    if (isArgsEmpty) {
+      setSelectedTextAsQuery();
+    }
+  }, []);
 
   const performSearch = React.useCallback(async () => {
     if (query.search === "") {
@@ -30,19 +59,19 @@ export default function Command() {
     } finally {
       setIsLoading(false);
     }
-  }, [query.search, query.version]);
+  }, [prefs.includeVerseNumbers, query.search, query.version]);
 
   React.useEffect(() => {
     // Don't search when query changes if the user only wants to search when they press enter.
     if (!prefs.enterToSearch) {
       performSearch();
     }
-  }, [performSearch]);
+  }, [performSearch, prefs.enterToSearch]);
 
   const detailContent = React.useMemo(() => {
     if (!searchResult?.passages.length) return null;
-    return { markdown: createMarkdown(searchResult), clipboardText: createClipboardText(searchResult) };
-  }, [searchResult]);
+    return { markdown: createMarkdown(prefs, searchResult), clipboardText: createClipboardText(prefs, searchResult) };
+  }, [prefs, searchResult]);
 
   function getEmptyViewText() {
     if (isLoading) {
@@ -67,11 +96,11 @@ export default function Command() {
         <List.Dropdown
           tooltip="Select Bible Version"
           onChange={(version) => setQuery((old) => ({ ...old, version }))}
-          storeValue
-          defaultValue={query.version}
+          value={query.version || undefined}
+          defaultValue={prefs.defaultBibleVersion}
         >
-          {bibleVersions.map((v) => (
-            <List.Dropdown.Item title={v[0]} value={v[1]} key={v[1]} />
+          {bibleVersions.map(([name, abbreviation]) => (
+            <List.Dropdown.Item title={name} value={abbreviation} key={abbreviation} />
           ))}
         </List.Dropdown>
       }
@@ -108,27 +137,35 @@ export default function Command() {
   );
 }
 
-function createMarkdown(searchResult: ReferenceSearchResult) {
+function createMarkdown(prefs: Preferences, searchResult: ReferenceSearchResult) {
+  const copyright = prefs.includeCopyright ? `\n\n---\n\n*${searchResult.copyright}*` : "";
+
   return (
     searchResult.passages
       .map((p) => {
         const passageText = p.verses.join(prefs.oneVersePerLine ? "  \n" : " ");
         const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-        return `${passageText}  \n${p.reference} (${versionAbbr})`;
+        const reference = prefs.includeReferences ? `  \n${p.reference} (${versionAbbr})` : "";
+
+        return passageText + reference;
       })
-      .join("\n\n") + `\n\n---\n\n*${searchResult.copyright}*`
+      .join("\n\n") + copyright
   );
 }
 
-function createClipboardText(searchResult: ReferenceSearchResult) {
+function createClipboardText(prefs: Preferences, searchResult: ReferenceSearchResult) {
+  const copyright = prefs.includeCopyright ? `\n\n${searchResult.copyright}` : "";
+
   return (
     searchResult.passages
       .map((p) => {
         const passageText = p.verses.join(prefs.oneVersePerLine ? "\n" : " ");
         const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-        return `${passageText}\n${p.reference} (${versionAbbr})`;
+        const reference = prefs.includeReferences ? `\n${p.reference} (${versionAbbr})` : "";
+
+        return passageText + reference;
       })
-      .join("\n\n") + `\n\n${searchResult.copyright}`
+      .join("\n\n") + copyright
   );
 }
 
@@ -152,4 +189,28 @@ function getContentsOfLastParenthesis(version: string): string {
     return version; // no parentheses found, return the whole string
   }
   return version.slice(lastOpenParenIndex + 1, lastCloseParenIndex);
+}
+
+/**
+ * Simple parser for bible references.
+ *
+ * Parses "John 3:16 NIV" into { ref: "John 3:16", version: "NIV" }
+ * Parses "John3:16 (NIV)" into { ref: "John 3:16", version: "NIV" }
+ * Parses "John 3:16" into { ref: "John 3:16", version: undefined }
+ * Parses "John3:16 (ZZZZ)" into { ref: "John 3:16 (ZZZZ)", version: undefined }
+ */
+function parseReference(reference: string): { ref: string; version: string | undefined } {
+  const trimmedReference = reference.trim();
+  const lastWord = trimmedReference.split(" ").pop();
+  const version = lastWord ? parseVersionAbbreviation(lastWord, bibleVersions) : undefined;
+  const refWithoutVersion = lastWord && version ? trimmedReference.slice(0, -lastWord.length).trim() : trimmedReference;
+  return { ref: refWithoutVersion, version };
+}
+
+function parseVersionAbbreviation(maybeVersionAbbrev: string, validVersions: typeof bibleVersions): string | undefined {
+  maybeVersionAbbrev = maybeVersionAbbrev
+    .replace(/[()[\]]/gi, "") // remove brackets and parentheses
+    .toUpperCase();
+  const isVersion = validVersions.some(([, abbreviation]) => abbreviation === maybeVersionAbbrev);
+  return isVersion ? maybeVersionAbbrev : undefined;
 }

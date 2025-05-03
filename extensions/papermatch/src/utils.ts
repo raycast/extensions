@@ -22,7 +22,7 @@ export async function runAppleScriptSilently(appleScript: string) {
 export function wallpaperPathsAreValid(dark: string, light: string) {
   type File = [];
   const isValidFile = (file: string) => {
-    return fs.lstatSync(file).isFile() && file.match(/\.(|jpe?g|png)$/i);
+    return fs.lstatSync(file).isFile() && file.match(/\.(|jpe?g|png|heic)$/i);
   };
 
   if (!isValidFile(dark) || !isValidFile(light)) {
@@ -36,7 +36,7 @@ export async function showBadPathsFailureToast() {
   const options: Toast.Options = {
     style: Toast.Style.Failure,
     title: "Wrong filetype",
-    message: "Use .png or .jpg images",
+    message: "Use .png, .jpg, or .heic images",
     primaryAction: {
       title: "Open PaperMatch Preferences",
       onAction: (toast) => {

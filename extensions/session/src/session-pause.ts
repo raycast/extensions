@@ -7,6 +7,6 @@ export default async () => {
     const url = "session:///pause";
     open(url);
     await closeMainWindow();
-    await showHUD("Session paused ⏲️");
+    await showHUD("Session paused/resumed ⏲️");
   }
 };

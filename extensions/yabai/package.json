@@ -1,0 +1,276 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yabai",
+  "title": "Yabai",
+  "description": "Control Yabai using Raycast. Requires yabai to be installed.",
+  "icon": "yabai-icon-512px.png",
+  "author": "krzysztoff1",
+  "contributors": [
+    "rubentsirunyan",
+    "webdesus",
+    "d34dh0r53",
+    "lhy-a"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "custom-yabai-command",
+      "title": "Run Custom Yabai Command",
+      "description": "Run custom Yabai command",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "command",
+          "placeholder": "Command",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "screens-menu-bar",
+      "title": "Show Current Screen",
+      "description": "Update the status information about the currently selected screen.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "windows-list-current-space",
+      "title": "Windows List by Current Space",
+      "description": "Show the application of the current space.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Yabai",
+      "description": "This command will start Yabai using `yabai --start-service` or stop it using `yabai --stop-service`.",
+      "mode": "no-view"
+    },
+    {
+      "name": "rotate",
+      "title": "Rotate",
+      "description": "Rotate the tree 90 degrees clockwise.",
+      "mode": "no-view"
+    },
+    {
+      "name": "mirror-x",
+      "title": "Mirror X",
+      "description": "Mirror the tree on the X axis.",
+      "mode": "no-view"
+    },
+    {
+      "name": "mirror-y",
+      "title": "Mirror Y",
+      "description": "Mirror the tree on the Y axis.",
+      "mode": "no-view"
+    },
+    {
+      "name": "balance",
+      "title": "Balance",
+      "description": "Balance the windows.",
+      "mode": "no-view"
+    },
+    {
+      "name": "restart",
+      "title": "Restart",
+      "description": "Restart yabai service.",
+      "mode": "no-view"
+    },
+    {
+      "name": "start",
+      "title": "Start",
+      "description": "Start yabai service.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop",
+      "description": "Stop yabai service.",
+      "mode": "no-view"
+    },
+    {
+      "name": "layout-bsp",
+      "title": "Layout BSP",
+      "description": "Switch to BSP layout for the current space.",
+      "mode": "no-view"
+    },
+    {
+      "name": "layout-stack",
+      "title": "Layout Stack",
+      "description": "Switch to stack layout for the current space.",
+      "mode": "no-view"
+    },
+    {
+      "name": "layout-float",
+      "title": "Layout Float",
+      "description": "Switch to float layout for the current space.",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-space-and-focus",
+      "title": "Create & Focus New Space",
+      "subtitle": "Yabai",
+      "description": "Creates a new workspace and focuses it.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-space",
+      "title": "Focus Space",
+      "subtitle": "Yabai",
+      "description": "Focuses the specified space.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "placeholder": "Space Number",
+          "required": true,
+          "name": "spaceIndex"
+        }
+      ]
+    },
+    {
+      "name": "destroy-space",
+      "title": "Destroy Current Space",
+      "subtitle": "Yabai",
+      "description": "Destroys the currently focused space.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-window-north",
+      "title": "Focus Active Window North",
+      "subtitle": "Yabai",
+      "description": "Focus the window to the north of the currently focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-window-south",
+      "title": "Focus Active Window South",
+      "subtitle": "Yabai",
+      "description": "Focus the window to the south of the currently focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-window-east",
+      "title": "Focus Active Window East",
+      "subtitle": "Yabai",
+      "description": "Focus the window to the east of the currently focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-window-west",
+      "title": "Focus Active Window West",
+      "subtitle": "Yabai",
+      "description": "Focus the window to the west of the currently focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "swap-window-north",
+      "title": "Swap Active Window North",
+      "subtitle": "Yabai",
+      "description": "Swap window position and size with window to the north of the active window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "swap-window-south",
+      "title": "Swap Active Window South",
+      "subtitle": "Yabai",
+      "description": "Swap window position and size with window to the south of the active window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "swap-window-east",
+      "title": "Swap Active Window East",
+      "subtitle": "Yabai",
+      "description": "Swap window position and size with window to the east of the active window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "swap-window-west",
+      "title": "Swap Active Window West",
+      "subtitle": "Yabai",
+      "description": "Swap window position and size with window to the west of the active window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "warp-window-north",
+      "title": "Warp Active Window North",
+      "subtitle": "Yabai",
+      "description": "Warp at window to the north of the focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "warp-window-south",
+      "title": "Warp Active Window South",
+      "subtitle": "Yabai",
+      "description": "Warp at window to the south of the focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "warp-window-east",
+      "title": "Warp Active Window East",
+      "subtitle": "Yabai",
+      "description": "Warp at window to the east of the focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "warp-window-west",
+      "title": "Warp Active Window West",
+      "subtitle": "Yabai",
+      "description": "Warp at window to the west of the focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-windows",
+      "title": "Search Windows",
+      "subtitle": "Yabai",
+      "description": "Search and focus Yabai managed windows",
+      "mode": "view",
+      "keywords": [
+        "s",
+        "window",
+        "search"
+      ]
+    },
+    {
+      "name": "focus-next-same-app",
+      "title": "Focus Next Window of Same App",
+      "subtitle": "Yabai",
+      "description": "Focus the next window of the current application",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "yabaiPath",
+      "title": "Yabai installation path",
+      "required": false,
+      "type": "textfield",
+      "description": "Location to the Yabai installation (Defaults to `/opt/homebrew/bin/yabai` on M1 Macs, and `/usr/local/bin/yabai` otherwise)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1",
+    "execa": "^8.0.1",
+    "ray": "^0.0.1",
+    "tiny-pinyin": "^1.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.10.5",
+    "@types/react": "18.2.45",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -12,7 +12,7 @@ function getAvatarIcon(
   options?: {
     background?: string;
     gradient?: boolean;
-  }
+  },
 ): Image.Asset;
 ```
 

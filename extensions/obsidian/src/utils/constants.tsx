@@ -2,6 +2,8 @@
 // All important constants for all commands should be defined here.
 //--------------------------------------------------------------------------------
 
+import { Image } from "@raycast/api";
+
 export const MAX_RENDERED_NOTES = 1000;
 export const BYTES_PER_KILOBYTE = 1024;
 export const BYTES_PER_MEGABYTE = BYTES_PER_KILOBYTE ** 2;
@@ -11,17 +13,17 @@ export enum NoteAction {
   Edit,
   Delete,
   Append,
-  Star,
-  Unstar,
+  Bookmark,
+  UnBookmark,
 }
 
 export enum PrimaryAction {
   QuickLook = "quicklook",
   OpenInObsidian = "obsidian",
   OpenInObsidianNewPane = "newpane",
+  OpenInDefaultApp = "defaultapp",
 }
 
-export const CURRENT_EXTENSION_VERSION = "1.7.0";
 export const APPLICATION_UUID = "49acc9ee-69a0-4419-9aad-5c2689ff0119";
 
 export const INLINE_TAGS_REGEX = /(#[a-zA-Z_0-9/-]+)/g;
@@ -125,10 +127,7 @@ export const IMAGE_SIZE_MAPPING: Map<string, number> = new Map([
   ["medium", 5],
 ]);
 
-export const ObsidianIconWhiteBold = { source: "obsidian-icon-white-bold.svg" };
-export const ObsidianIconBlackBold = { source: "obsidian-icon-black-bold.svg" };
-export const ObsidianIconBlackBolder = { source: "obsidian-icon-black-bolder.svg" };
-export const ObsidianIconWhiteBolder = { source: "obsidian-icon-white-bolder.svg" };
-export const ObsidianIconDynamicBold = {
-  source: { light: "obsidian-icon-black-bolder.svg", dark: "obsidian-icon-white-bolder.svg" },
+export const ObsidianIcon: Image = {
+  source: "obsidian_icon.svg",
+  tintColor: { dark: "#E6E6E6", light: "#262626", adjustContrast: false },
 };

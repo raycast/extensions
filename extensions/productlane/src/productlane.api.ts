@@ -6,11 +6,18 @@ export async function getToken() {
   const token = await authorize();
   const preferences = getPreferenceValues<{ apiKey: string }>();
 
-  const laneKey = preferences.apiKey;
+  const { apiKey } = preferences;
+
+  // With the new api, we can use the api key directly. (https://docs.productlane.com)
+  if (apiKey.startsWith("pl_"))
+    return {
+      token: apiKey,
+      isDeprecated: false,
+    };
 
   const params = {
     params: {
-      key: laneKey,
+      key: apiKey,
       linearToken: token,
     },
   };
@@ -23,38 +30,56 @@ export async function getToken() {
 
   const bearerToken = tokenData.data.result;
 
-  return bearerToken;
+  return {
+    token: bearerToken as string,
+    isDeprecated: true,
+  };
 }
 
-export async function submitInsight({
-  text,
-  painLevel,
-  state,
-  email,
-}: {
+type PainLevel = "UNKNOWN" | "LOW" | "MEDIUM" | "HIGH";
+type InsightState = "NEW" | "PROCESSED" | "COMPLETED";
+export interface CreateInsightInput {
   text: string;
-  painLevel: string;
-  state: string;
+  painLevel: PainLevel;
+  state: InsightState;
   email: string;
-}) {
-  const bearerToken = await getToken();
-  const urlCreate = `https://productlane.io/api/rpc/createFeedback`;
+}
+
+export async function submitInsight({ text, painLevel, state, email }: CreateInsightInput) {
+  const tokenDetails = await getToken();
+
+  const urlCreate = tokenDetails.isDeprecated
+    ? `https://productlane.com/api/rpc/createFeedback`
+    : "https://productlane.com/api/v1/insights";
 
   const paramsCreate = {
-    params: {
-      text: text,
-      painLevel: painLevel,
-      state: state,
-      email: email,
-    },
+    ...(tokenDetails.isDeprecated
+      ? {
+          params: {
+            text: text,
+            painLevel: painLevel,
+            state: state,
+            email: email,
+          },
+        }
+      : {
+          text: text,
+          painLevel: painLevel,
+          state: state,
+          contactEmail: email,
+          origin: "API_KEY_USER", // Will mark the insight as created by the user who created the API key initially.
+          notify: {
+            email: false,
+          },
+        }),
   };
 
   const insight = await axios.post(urlCreate, paramsCreate, {
     headers: {
-      Authorization: `Bearer ${bearerToken}`,
+      Authorization: `Bearer ${tokenDetails.token}`,
       "Content-Type": "application/json",
     },
   });
 
-  return insight.data;
+  return tokenDetails.isDeprecated ? insight.data.result : insight.data;
 }

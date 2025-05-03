@@ -19,6 +19,7 @@ tsconfig.tsbuildinfo
 # misc
 .DS_Store
 *.pem
+.env
 
 # debug
 npm-debug.log*
@@ -27,3 +28,4 @@ yarn-error.log*
 
 # vercel
 .vercel
+raycast-env.d.ts

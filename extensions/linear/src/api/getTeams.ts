@@ -1,5 +1,7 @@
-import { Cycle, Organization, Project, Team } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { Cycle, Organization, Team } from "@linear/sdk";
+import { sortBy } from "lodash";
+
+import { getLinearClient } from "./linearClient";
 
 export type TeamResult = Pick<
   Team,
@@ -12,33 +14,41 @@ export type TeamResult = Pick<
   | "issueEstimationAllowZero"
   | "issueEstimationExtended"
 > & {
-  organization: Pick<Organization, "logoUrl">;
-} & {
   activeCycle?: Pick<Cycle, "id" | "number">;
 } & {
-  projects: { nodes: Project["id"][] };
+  membership?: {
+    sortOrder: number;
+  };
 };
 
-export async function getTeams() {
-  const { graphQLClient } = getLinearClient();
-  const { data } = await graphQLClient.rawRequest<{ teams: { nodes: TeamResult[] } }, Record<string, unknown>>(
+export type OrganizationResult = Pick<Organization, "logoUrl">;
+
+export type TeamsAndOrgResult = {
+  teams: { nodes: TeamResult[]; pageInfo: { hasNextPage: boolean } };
+  organization: OrganizationResult;
+};
+
+export async function getTeams(query: string = "") {
+  const { graphQLClient, linearClient } = getLinearClient();
+
+  const me = await linearClient.viewer;
+
+  const { data } = await graphQLClient.rawRequest<TeamsAndOrgResult, Record<string, unknown>>(
     `
-      query {
-        teams {
+      query($userId: String!, $query: String!) {
+        organization {
+          logoUrl
+        }
+        teams(filter: {name: {containsIgnoreCase: $query}}) {
           nodes {
             id
             name
             icon
             color
-            projects {
-              nodes {
-                id
-              }
-            }
-            organization {
-              logoUrl
-            }
             key
+            membership(userId: $userId) {
+              sortOrder
+            }
             issueEstimationType
             issueEstimationAllowZero
             issueEstimationExtended
@@ -47,10 +57,17 @@ export async function getTeams() {
               number
             }
           }
+          pageInfo {
+            hasNextPage
+          }
         }
       }
-    `
+    `,
+    { userId: me.id, query },
   );
 
-  return data?.teams.nodes;
+  const teams = sortBy(data?.teams.nodes ?? [], (team) => team.membership?.sortOrder ?? Infinity);
+  const organization = data?.organization;
+  const hasMoreTeams = !!data?.teams.pageInfo.hasNextPage;
+  return { teams, organization, hasMoreTeams };
 }

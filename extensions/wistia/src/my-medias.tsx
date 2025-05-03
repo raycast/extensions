@@ -1,48 +1,55 @@
-import { showToast, popToRoot, List, ToastStyle } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { AccountInfo, WistiaApiError, WistiaMedia } from "./types";
+import { showToast, popToRoot, List, Toast, ActionPanel, Action, Icon } from "@raycast/api";
+import { AccountInfo } from "./types";
 import { WistiaMediaListItem } from "./wistia-media-list-item";
 import { fetchAccountInfo, fetchMedias } from "./api";
-
-interface State {
-  medias?: WistiaMedia[];
-  error?: unknown;
-}
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
-  const [accountInfo, setAccountInfo] = useState<AccountInfo>();
+  const [accountInfo, setAccountInfo] = useCachedState<AccountInfo>("account-info");
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [accountInfo, medias] = await Promise.all([fetchAccountInfo(), fetchMedias()]);
-
-        setAccountInfo(accountInfo);
-        setState({ medias: medias });
-      } catch (error: unknown) {
-        if ((error as WistiaApiError)?.code === "unauthorized_credentials") {
-          showToast(ToastStyle.Failure, "Invalid Credentials", "Check your API token and try again.");
+  const { isLoading, data: medias } = useCachedPromise(
+    async () => {
+      const [accountInfo, medias] = await Promise.all([fetchAccountInfo(), fetchMedias()]);
+      setAccountInfo(accountInfo);
+      return medias;
+    },
+    [],
+    {
+      initialData: [],
+      async onError(error) {
+        if (error.message === "unauthorized_credentials") {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid Credentials",
+            message: "Check your API token and try again.",
+          });
           popToRoot({ clearSearchBar: true });
         } else {
-          showToast(ToastStyle.Failure, "Failed to load medias");
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to load projects",
+          });
         }
-      }
-    }
-
-    fetchData();
-  }, []);
+      },
+    },
+  );
 
   return (
-    <>
-      <List
-        isLoading={state.medias?.length === 0 || !state.medias}
-        searchBarPlaceholder="Filter by name or hashed id..."
-      >
-        {state.medias?.map(
-          (media) => accountInfo && <WistiaMediaListItem key={media.id} media={media} accountInfo={accountInfo} />
-        )}
-      </List>
-    </>
+    <List isLoading={isLoading} searchBarPlaceholder="Filter by name or hashed id">
+      {!isLoading && !medias.length && (
+        <List.EmptyView
+          icon="content-library.svg"
+          title="0 Media"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser icon={Icon.Plus} title="Add Media" url={`${accountInfo?.url}/content/media`} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {medias.map(
+        (media) => accountInfo && <WistiaMediaListItem key={media.id} media={media} accountInfo={accountInfo} />,
+      )}
+    </List>
   );
 }

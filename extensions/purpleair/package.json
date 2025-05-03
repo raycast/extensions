@@ -18,18 +18,46 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "show_nearest",
+          "title": "Show Nearest Sensor",
+          "description": "Show the nearest sensor to your location",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show Nearest"
+        },
+        {
           "name": "sensor_index",
-          "title": "Purple Sensor Index",
-          "description": "You can learn how to access a Sensor Index at https://community.purpleair.com/t/making-api-calls-with-the-purpleair-api/180#the-sensor-index-3",
+          "title": "Purple Sensor Indices",
+          "description": "Comma-separated list of sensor indices. You can learn how to access a Sensor Index at https://community.purpleair.com/t/making-api-calls-with-the-purpleair-api/180#the-sensor-index-3",
           "type": "textfield",
-          "required": true
+          "required": true,
+          "label": "Sensor IDs"
         },
         {
           "name": "api_key",
-          "title": "Tempest API Key",
+          "title": "PurpleAir API Key",
           "description": "API Key is used to authenticate with PurpleAir APIs",
           "type": "password",
-          "required": true
+          "required": true,
+          "label": "API Key"
+        },
+        {
+          "name": "read_keys",
+          "title": "Read Keys for Private Sensors",
+          "description": "Comma-separated list of read keys for private sensors. Order must match the private sensor indices in the list above.",
+          "type": "password",
+          "required": false,
+          "label": "Read Keys"
+        },
+        {
+          "name": "use_celsius",
+          "title": "Use Celsius for Temperature",
+          "description": "Display temperature in Celsius instead of Fahrenheit",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Use Celsius"
         }
       ]
     }
@@ -37,15 +65,15 @@
   "dependencies": {
     "@raycast/api": "^1.44.0",
     "@raycast/utils": "^1.4.11",
-    "cross-fetch": "^3.1.5",
+    "node-fetch": "^3.3.2",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@types/node": "^18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
+    "@types/node": "^22.14.1",
+    "@types/react": "19.1.2",
+    "@typescript-eslint/eslint-plugin": "^8.31.0",
+    "@typescript-eslint/parser": "^8.31.0",
+    "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"

@@ -1,7 +1,11 @@
-import CreateTask from "./components/CreateTask";
-import { withHeightAuth } from "./components/withHeightAuth";
-import { CreateTaskFormValues } from "./types/task";
+import CreateTask from "@/components/CreateTask";
+import View from "@/components/View";
+import { CreateTaskFormValues } from "@/types/task";
 
 export default function Command({ draftValues }: { draftValues?: CreateTaskFormValues }) {
-  return withHeightAuth(<CreateTask draftValues={draftValues} />);
+  return (
+    <View>
+      <CreateTask draftValues={draftValues} />
+    </View>
+  );
 }

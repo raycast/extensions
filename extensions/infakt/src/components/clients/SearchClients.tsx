@@ -1,9 +1,11 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import useClients from "../../hooks/useClients";
-import { ClientObject } from "../../types/client";
 
-export default function SearchClients() {
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+
+import { useClients } from "@/hooks/useClients";
+import { ClientObject } from "@/types/client";
+
+export function SearchClients() {
   const [searchText, setSearchText] = useState("");
   const [filteredClients, filterClients] = useState<ClientObject[]>([]);
 
@@ -17,8 +19,8 @@ export default function SearchClients() {
         (client) =>
           client?.company_name?.toLowerCase().includes(searchText?.toLowerCase()) ||
           client?.first_name?.toLowerCase().includes(searchText?.toLowerCase()) ||
-          client?.last_name?.toLowerCase().includes(searchText?.toLowerCase())
-      ) ?? []
+          client?.last_name?.toLowerCase().includes(searchText?.toLowerCase()),
+      ) ?? [],
     );
   }, [clientsData, searchText]);
 
@@ -29,9 +31,7 @@ export default function SearchClients() {
       throttle
       searchBarPlaceholder="Search clients..."
     >
-      {filteredClients?.map((client) => (
-        <ClientListItem key={client.id} client={client} />
-      ))}
+      {filteredClients?.map((client) => <ClientListItem key={client.id} client={client} />)}
     </List>
   );
 }

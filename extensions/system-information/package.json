@@ -1,0 +1,245 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "system-information",
+  "title": "System Information",
+  "description": "Quick access to your system information so you never have to open System Settings",
+  "icon": "command-icon.png",
+  "author": "Visual-Studio-Coder",
+  "contributors": [
+    "nagauta"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "system",
+    "information",
+    "macOS",
+    "tools",
+    "productivity",
+    "storage",
+    "network",
+    "processes",
+    "system information",
+    "system info"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "View System Information",
+      "description": "View your system information",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "check-storage",
+      "title": "Check Storage",
+      "description": "See storage information"
+    },
+    {
+      "name": "check-system-info",
+      "title": "Check System Info",
+      "description": "Get basic system information including hostname, chip, memory, macOS version, and serial number"
+    },
+    {
+      "name": "check-network",
+      "title": "Check Network",
+      "description": "Get network devices and their IP addresses"
+    },
+    {
+      "name": "list-processes",
+      "title": "List Processes",
+      "description": "List all running processes with their details"
+    },
+    {
+      "name": "kill-process",
+      "title": "Kill Process",
+      "description": "Kill a specific process by its PID"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.96.1",
+    "macos-release": "^3.2.0",
+    "macos-version": "^6.0.0",
+    "systeminformation": "^5.20.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^6.1.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "ai": {
+    "tools": [
+      {
+        "name": "check-system-info",
+        "description": "Get basic system information including hostname, chip, memory, macOS version, and serial number",
+        "parameters": {}
+      },
+      {
+        "name": "check-storage",
+        "description": "Get storage information including total, used, and free space",
+        "parameters": {}
+      },
+      {
+        "name": "check-network",
+        "description": "Get network devices and their IP addresses",
+        "parameters": {}
+      },
+      {
+        "name": "list-processes",
+        "description": "List all running processes with their details",
+        "parameters": {}
+      },
+      {
+        "name": "kill-process",
+        "description": "Kill a specific process by its PID",
+        "parameters": {
+          "type": "object",
+          "required": [
+            "pid"
+          ],
+          "properties": {
+            "pid": {
+              "type": "number",
+              "description": "The Process ID (PID) of the process to kill"
+            }
+          }
+        }
+      }
+    ],
+    "evals": [
+      {
+        "input": "@system-information What's the storage available on my Mac?",
+        "expected": [
+          {
+            "callsTool": "check-storage"
+          }
+        ],
+        "mocks": {
+          "check-storage": {
+            "output": {
+              "total": "500.00 GB",
+              "used": "250.00 GB",
+              "free": "250.00 GB",
+              "percentUsed": "50.00%",
+              "summary": "250.00 GB used of 500.00 GB (250.00 GB available)"
+            }
+          }
+        }
+      },
+      {
+        "input": "@system-information Show me information about my system",
+        "expected": [
+          {
+            "callsTool": "check-system-info"
+          }
+        ],
+        "mocks": {
+          "check-system-info": {
+            "output": {
+              "hostname": "MacBook-Pro",
+              "chip": "Apple M1 Pro",
+              "memory": "16.00 GB",
+              "macOS": "macOS Sonoma (14.2.1)",
+              "kernel": "23.2.0",
+              "serialNumber": "C02XG0FDJGH7"
+            }
+          }
+        }
+      },
+      {
+        "input": "@system-information What network devices are connected?",
+        "expected": [
+          {
+            "callsTool": "check-network"
+          }
+        ],
+        "mocks": {
+          "check-network": {
+            "output": {
+              "devices": [
+                {
+                  "name": "en0",
+                  "ip": "192.168.1.10"
+                },
+                {
+                  "name": "en1",
+                  "ip": "192.168.1.11"
+                }
+              ],
+              "count": 2
+            }
+          }
+        }
+      },
+      {
+        "input": "@system-information Show me all running processes",
+        "expected": [
+          {
+            "callsTool": "list-processes"
+          }
+        ],
+        "mocks": {
+          "list-processes": {
+            "output": {
+              "processes": [
+                {
+                  "pid": 1234,
+                  "name": "Finder",
+                  "cpu": 0.5,
+                  "mem": 1.2
+                },
+                {
+                  "pid": 5678,
+                  "name": "Safari",
+                  "cpu": 3.2,
+                  "mem": 5.7
+                },
+                {
+                  "pid": 9012,
+                  "name": "Terminal",
+                  "cpu": 0.1,
+                  "mem": 0.8
+                }
+              ],
+              "count": 3
+            }
+          }
+        }
+      },
+      {
+        "input": "@system-information Kill process with PID 1234",
+        "expected": [
+          {
+            "callsTool": "kill-process"
+          }
+        ],
+        "mocks": {
+          "kill-process": {
+            "input": {
+              "pid": "1234"
+            },
+            "output": {
+              "success": true,
+              "message": "Process with PID 1234 has been terminated successfully."
+            }
+          }
+        }
+      }
+    ]
+  }
+}

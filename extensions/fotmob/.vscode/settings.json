@@ -1,0 +1,16 @@
+{
+    "editor.indentSize": 2,
+    "editor.tabSize": 2,
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "always",
+        "source.fixAll": "always"
+    },
+    "eslint.enable": true,
+    "eslint.validate": [
+        "typescript",
+        "typescriptreact"
+    ],
+    "prettier.enable": true
+}

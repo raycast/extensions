@@ -1,23 +1,23 @@
 import {
+  Action,
   ActionPanel,
   Color,
   Detail,
+  Grid,
   Icon,
   Image,
   List,
-  Grid,
-  Action,
-  showToast,
   Toast,
   getPreferenceValues,
+  showToast,
 } from "@raycast/api";
+import he from "he";
 import React from "react";
+import { Preferences, PrimaryAction, ViewLayout } from "../lib/types";
 import { compactNumberFormat, formatDate, getErrorMessage } from "../lib/utils";
 import { Channel, getChannel, useRefresher } from "../lib/youtubeapi";
 import { OpenChannelInBrowser, SearchChannelVideosAction, ShowRecentPlaylistVideosAction } from "./actions";
-import { addRecentChannel, PinChannel, PinnedChannelActions, RecentChannelActions } from "./recent_channels";
-import he from "he";
-import { ViewLayout, PrimaryAction, Preferences } from "../lib/types";
+import { PinChannel, PinnedChannelActions, RecentChannelActions, addRecentChannel } from "./recent_channels";
 
 export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean | undefined }): JSX.Element {
   const channel = props.channel;
@@ -101,7 +101,7 @@ export function ChannelItem(props: ChannelItemProps): JSX.Element {
   if (channel.statistics) {
     parts = [
       `${compactNumberFormat(parseInt(channel.statistics.subscriberCount))} subs · ${compactNumberFormat(
-        parseInt(channel.statistics.viewCount)
+        parseInt(channel.statistics.viewCount),
       )} views`,
     ];
   }
@@ -145,11 +145,12 @@ export function ChannelItem(props: ChannelItemProps): JSX.Element {
           />
         </ActionPanel.Section>
         {props.recent && <RecentChannelActions channelId={channel.id} refresh={refresh} />}
-        {props.pinned ? (
-          <PinnedChannelActions channelId={channel.id} refresh={refresh} />
-        ) : (
-          <PinChannel channelId={channel.id} refresh={refresh} />
-        )}
+        {!props.recent &&
+          (props.pinned ? (
+            <PinnedChannelActions channelId={channel.id} refresh={refresh} />
+          ) : (
+            <PinChannel channelId={channel.id} refresh={refresh} />
+          ))}
       </ActionPanel>
     );
   };
@@ -157,7 +158,7 @@ export function ChannelItem(props: ChannelItemProps): JSX.Element {
   return view === ViewLayout.List ? (
     <List.Item
       key={channelId}
-      title={title}
+      title={{ value: title, tooltip: title }}
       icon={{ source: thumbnail, mask: Image.Mask.Circle }}
       accessories={[{ text: parts.join(" ") }]}
       actions={<Actions />}
@@ -166,7 +167,7 @@ export function ChannelItem(props: ChannelItemProps): JSX.Element {
     <Grid.Item
       key={channelId}
       title={title}
-      content={{ source: thumbnail, mask: Image.Mask.Circle }}
+      content={{ value: thumbnail, tooltip: title }}
       subtitle={parts.join(" ")}
       actions={<Actions />}
     />

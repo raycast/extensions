@@ -1,11 +1,14 @@
 import fetch, { Headers } from "node-fetch";
-import { authorize } from "./oauth";
 import { CWMessage } from "../model/CWMessage";
 import { CWChatParserV1 } from "../model/CWChatParserV1";
 import { CWRoom } from "../model/CWRoom";
 import { CMRoomOwner } from "../model/CMRoomOwner";
 import { CWMessageMgr } from "../model/CWMessageMgr";
 import { Constants } from "../utils/constants";
+import { getPreferenceValues } from "@raycast/api";
+import { getAccessToken } from "@raycast/utils";
+
+const preferences = getPreferenceValues<Preferences>();
 
 let headers = new Headers({
   accept: "application/json",
@@ -15,12 +18,17 @@ let headers = new Headers({
  * authorize CW API
  *
  * @param _headers
- * @returns headr with the token
+ * @returns header with the token
  */
-async function authorizeApi(_headers: Headers) {
-  const token = await authorize();
-  _headers.append("authorization", `Bearer ${token}`);
-  return _headers;
+function authorizeApi(_headers: Headers) {
+  const { token } = getAccessToken();
+  if (preferences.useChatworkApiKey) {
+    _headers.append("x-chatworktoken", token);
+    return _headers;
+  } else {
+    _headers.append("authorization", `Bearer ${token}`);
+    return _headers;
+  }
 }
 
 /**
@@ -30,7 +38,7 @@ async function authorizeApi(_headers: Headers) {
  */
 export async function getRooms(): Promise<CWRoom[]> {
   try {
-    headers = await authorizeApi(headers);
+    headers = authorizeApi(headers);
     const response = await fetch(`${Constants.CW_API_URL}rooms`, {
       method: "get",
       headers: headers,
@@ -40,11 +48,8 @@ export async function getRooms(): Promise<CWRoom[]> {
       throw new Error(`fetch is failed. ${response.status}: ${response.statusText}`);
     }
 
-    const rooms: any = await response.json();
-    const rooms_obj: CWRoom[] = [];
-    rooms.forEach((room: any) => {
-      rooms_obj.push(room as CWRoom);
-    });
+    const rooms = (await response.json()) as CWRoom[];
+    const rooms_obj = rooms;
     return rooms_obj;
   } catch (error) {
     throw new Error(error as string);
@@ -60,7 +65,7 @@ export async function getRooms(): Promise<CWRoom[]> {
  */
 export async function getMessages(roomId: string, isForce = true): Promise<CWMessage[]> {
   try {
-    await authorizeApi(headers);
+    authorizeApi(headers);
     const url = `${Constants.CW_API_URL}rooms/${roomId}/messages?force=${isForce == true ? "1" : "0"}`;
     const response = await fetch(url, {
       method: "get",
@@ -76,10 +81,10 @@ export async function getMessages(roomId: string, isForce = true): Promise<CWMes
       return messages_obj;
     }
 
-    const messages: any = await response.json();
-    messages.forEach((message: any) => {
+    const messages = (await response.json()) as CWMessage[];
+    messages.forEach((message) => {
       const cwmsg: CWMessage = new CWMessage(new CWChatParserV1());
-      cwmsg.copyValueFromJson(message as CWMessage);
+      cwmsg.copyValueFromJson(message);
       if (cwmsg.body !== "") {
         messages_obj.push(cwmsg);
       }
@@ -99,7 +104,7 @@ export async function getMessages(roomId: string, isForce = true): Promise<CWMes
  */
 export async function getMessagesOfAllRooms(CWRooms: CWRoom[]): Promise<CWMessageMgr> {
   try {
-    await authorizeApi(headers);
+    authorizeApi(headers);
     const rooms: CMRoomOwner[] = [];
     for (let i = 0; i < CWRooms.length; i++) {
       const ret = await getMessages(String(CWRooms[i].room_id));
@@ -111,4 +116,37 @@ export async function getMessagesOfAllRooms(CWRooms: CWRoom[]): Promise<CWMessag
   } catch (error) {
     throw new Error(error as string);
   }
+}
+
+/**
+ *  get all the contacts the user has
+ *
+ * @returns all the contacts the user has
+ */
+export async function getContacts() {
+  type Contact = {
+    account_id: number;
+    room_id: number;
+    name: string;
+    chatwork_id: string;
+    organization_id: number;
+    organization_name: string;
+    department: string;
+    avatar_image_url: string;
+  };
+
+  headers = authorizeApi(headers);
+  const response = await fetch(`${Constants.CW_API_URL}contacts`, {
+    method: "get",
+    headers: headers,
+  });
+
+  if (!response.ok) {
+    const result = (await response.json()) as { errors: string[] };
+    throw new Error(result.errors[0]);
+  }
+  if (response.status === 204) return [];
+
+  const contacts = (await response.json()) as Contact[];
+  return contacts;
 }

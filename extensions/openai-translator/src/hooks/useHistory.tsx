@@ -1,7 +1,7 @@
 import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { TranslateMode, TranslateResult } from "../providers/openai/translate";
 import { promises as fs } from "fs";
+import { TranslateMode, TranslateResult } from "../providers/types";
 
 export interface Record {
   id: string;
@@ -9,6 +9,7 @@ export interface Record {
   mode: TranslateMode;
   result: TranslateResult;
   ocrImg: string | undefined;
+  provider: string | undefined;
 }
 
 export interface HistoryHook {
@@ -56,16 +57,17 @@ export function useHistory(): HistoryHook {
     async (record: Record) => {
       const data = countRef.current;
       if (data) {
-        const max = parseInt(maxHistorySize) || 30;
-        const slice = data.length > max ? data.slice(data.length - max, data.length) : data;
-        const remove = data.length > max ? data.slice(0, data.length - max) : [];
+        const max = (parseInt(maxHistorySize) || 30) - 1;
+        const slice = data.length > max ? data.slice(0, max) : data;
+        const remove = data.length > max ? data.slice(max, data.length) : [];
         for (const r of remove) {
           await unlink(r);
         }
-        setData([...slice, record]);
+
+        setData([record, ...slice]);
       }
     },
-    [setData, data]
+    [setData, data],
   );
 
   const remove = useCallback(
@@ -83,7 +85,7 @@ export function useHistory(): HistoryHook {
         toast.style = Toast.Style.Success;
       }
     },
-    [setData, data]
+    [setData, data],
   );
 
   const clear = useCallback(async () => {

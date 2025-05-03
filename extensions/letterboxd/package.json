@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "letterboxd",
+  "title": "Letterboxd",
+  "description": "Search for movies on Letterboxd",
+  "icon": "icon.png",
+  "author": "rafael_garcia",
+  "contributors": [
+    "ridemountainpig"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-movies-page",
+      "title": "Search Movies",
+      "subtitle": "Letterboxd",
+      "description": "Search Letterboxd movies by title",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.1",
+    "@raycast/utils": "^1.11.1",
+    "cheerio": "^1.0.0-rc.12",
+    "got": "^12.6.0",
+    "node-html-markdown": "^1.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "3.2.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

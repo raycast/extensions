@@ -1,50 +1,80 @@
-import { ActionPanel, Form, open, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
-import { homedir } from "os";
+import { Action, ActionPanel, Form, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import QRCode from "qrcode";
+import { useState } from "react";
+import { generateQRCode, getQRCodePath, QRCodeView } from "./utils";
+import { FormValidation, useForm } from "@raycast/utils";
 
-interface CommandForm {
+interface FormValues {
   url: string;
-  open: boolean;
+  inline: boolean;
 }
 
-const getQRCodePath = (qrcodeUrl: string) => {
-  // `https://www.example.com/foo?bar=foo` -> `www.example.com`
-  const filename = String(qrcodeUrl.match(/^(?:https?:\/\/)?(?:[^@/\n]+@)?(?:www\.)?([^:/\n]+)/gm)).replace(
-    /^(?:https?:\/\/)?/gm,
-    ""
-  );
-
-  return `${homedir()}/Downloads/qrcode-${filename}.png`;
-};
-
 export default function Command() {
-  function handleSubmit({ url }: CommandForm) {
-    if (url.length === 0) {
-      showToast(ToastStyle.Failure, "Please enter a URL");
-      return;
-    }
+  const [qrData, setQrData] = useState<string>();
+  const { primaryAction } = getPreferenceValues<Preferences.Index>();
 
-    const path = getQRCodePath(url);
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    async onSubmit(values) {
+      console.log({ values });
+      if (values.inline) {
+        const qrData = await generateQRCode(values.url);
+        setQrData(qrData);
+      } else {
+        const path = getQRCodePath(values.url);
+        QRCode.toFile(path, values.url)
+          .then(() => {
+            showToast(Toast.Style.Success, "QRCode saved", `You can find it here: ${path}`);
+            open(path);
+          })
+          .catch((error: Error) => {
+            showToast(Toast.Style.Failure, "Error generating QR code", error.message);
+          });
+      }
+    },
+    validation: {
+      url: FormValidation.Required,
+    },
+  });
 
-    QRCode.toFile(path, url)
-      .then(() => {
-        showToast(ToastStyle.Success, "QRCode saved", `You can find it here: ${path}`);
-        open(path);
-      })
-      .catch((error: Error) => {
-        showToast(ToastStyle.Failure, "Error generating QR code", error.message);
-      });
+  const renderActions = () => {
+    const saveAction = (
+      <Action.SubmitForm
+        title="Generate and Save"
+        onSubmit={(values) => {
+          handleSubmit({ ...values, inline: false } as FormValues);
+        }}
+      />
+    );
+
+    const showAction = (
+      <Action.SubmitForm
+        title="Generate and Show"
+        onSubmit={(values) => {
+          handleSubmit({ ...values, inline: true } as FormValues);
+        }}
+      />
+    );
+
+    return primaryAction === "save" ? (
+      <>
+        {saveAction}
+        {showAction}
+      </>
+    ) : (
+      <>
+        {showAction}
+        {saveAction}
+      </>
+    );
+  };
+
+  if (qrData) {
+    return <QRCodeView qrData={qrData || ""} />;
   }
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <SubmitFormAction onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="url" title="URL" placeholder="https://google.com" />
+    <Form actions={<ActionPanel>{renderActions()}</ActionPanel>}>
+      <Form.TextField title="URL or Content" placeholder="https://google.com" {...itemProps.url} />
     </Form>
   );
 }

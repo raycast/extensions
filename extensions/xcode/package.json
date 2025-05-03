@@ -2,14 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "2.2.1",
+  "version": "2.5.0",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
   "contributors": [
     "qeude",
     "oliep",
-    "kiliankoe"
+    "kiliankoe",
+    "3llomi",
+    "ridemountainpig"
   ],
   "categories": [
     "Developer Tools",
@@ -153,6 +155,20 @@
       "mode": "view"
     },
     {
+      "name": "list-apple-devices.command",
+      "title": "List Apple Devices",
+      "subtitle": "Xcode",
+      "description": "List Apple devices with their product name and device code name.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-runtimes.command",
+      "title": "Manage Runtimes",
+      "subtitle": "Xcode",
+      "description": "Manage your Xcode Runtimes.",
+      "mode": "view"
+    },
+    {
       "name": "manage-simulators.command",
       "title": "Manage Simulators",
       "subtitle": "Xcode",
@@ -179,13 +195,6 @@
       "subtitle": "Xcode",
       "description": "Open Apple Developer Documentation.",
       "mode": "no-view"
-    },
-    {
-      "name": "search-swift-package-index.command",
-      "title": "Search Swift Package Index",
-      "subtitle": "Xcode",
-      "description": "Search Swift Package Index.",
-      "mode": "view"
     },
     {
       "name": "add-swift-package.command",
@@ -234,13 +243,6 @@
       "mode": "view"
     },
     {
-      "name": "clear-derived-data.command",
-      "title": "Clear Derived Data",
-      "subtitle": "Xcode",
-      "description": "Removes the ~/Library/Developer/Xcode/DerivedData directory.",
-      "mode": "no-view"
-    },
-    {
       "name": "open-url-in-simulator.command",
       "title": "Open URL in Simulator",
       "subtitle": "Xcode",
@@ -256,10 +258,24 @@
       ]
     },
     {
+      "name": "clear-derived-data.command",
+      "title": "Clear Derived Data",
+      "subtitle": "Xcode",
+      "description": "Removes the ~/Library/Developer/Xcode/DerivedData directory.",
+      "mode": "no-view"
+    },
+    {
       "name": "clear-swift-package-manager-cache.command",
       "title": "Clear Swift Package Manager Cache",
       "subtitle": "Xcode",
-      "description": "Removes the ~/Library/Caches/org.swift.swiftpm/repositories directory.",
+      "description": "Removes the ~/Library/Caches/org.swift.swiftpm directory.",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear-swift-ui-previews-cache.command",
+      "title": "Clear SwiftUI Previews Cache",
+      "subtitle": "Xcode",
+      "description": "Removes the ~/Library/Developer/Xcode/UserData/Previews directory.",
       "mode": "no-view"
     },
     {
@@ -268,11 +284,18 @@
       "subtitle": "Xcode",
       "description": "Deletes devices that are not supported by the current Xcode SDK.",
       "mode": "no-view"
+    },
+    {
+      "name": "delete-unsupported-runtimes.command",
+      "title": "Delete Unsupported Runtimes",
+      "subtitle": "Xcode",
+      "description": "Deletes runtimes that are not supported by the current Xcode SDK.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.4",
-    "@raycast/utils": "^1.4.18",
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1",
     "dedent": "^0.7.0",
     "node-fetch": "^3.2.10",
     "plist": "^3.0.6",

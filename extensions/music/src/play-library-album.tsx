@@ -6,15 +6,17 @@ import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
 
-import { Album } from "./util/models";
-import { SFSymbols } from "./util/models";
+import { Album, Track } from "./util/models";
 import { fromEmptyOrNullable } from "./util/option";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
+const EMPTY_TEXT = " "; // Visually empty but non-empty to prevent jumping around
+
 export default function PlayLibraryAlbum() {
   const [albums, setAlbums] = useState<readonly Album[] | null>(null);
+  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const { pop } = useNavigation();
 
   const loadAll = pipe(
@@ -27,13 +29,17 @@ export default function PlayLibraryAlbum() {
       },
       flow(
         fromEmptyOrNullable,
-        O.matchW(() => setAlbums([]), setAlbums)
-      )
-    )
+        O.matchW(() => setAlbums([]), setAlbums),
+      ),
+    ),
   );
 
   useEffect(() => {
     loadAll();
+  }, []);
+
+  useEffect(() => {
+    pipe(music.currentTrack.getCurrentTrack(), TE.map(setCurrentTrack))();
   }, []);
 
   const onSearch = async (next: string) => {
@@ -58,30 +64,40 @@ export default function PlayLibraryAlbum() {
           pipe(
             tracks,
             fromEmptyOrNullable,
-            O.matchW(() => [] as ReadonlyArray<Album>, parseResult<Album>())
-          )
+            O.matchW(() => [] as ReadonlyArray<Album>, parseResult<Album>()),
+          ),
       ),
-      T.map(setAlbums)
+      T.map(setAlbums),
     )();
   };
 
+  const albumList = albums ?? [];
+
   return (
     <List
-      isLoading={albums === null}
+      isLoading={albums === null || currentTrack === null}
       searchBarPlaceholder="Search A Song By Album Or Artist"
       onSearchTextChange={onSearch}
       throttle
     >
-      {(albums || [])?.map(({ id, name, artist, count }) => (
-        <List.Item
-          key={id}
-          title={name ?? "--"}
-          subtitle={SFSymbols.ARTIST + ` ${artist}` ?? "--"}
-          accessoryTitle={count ? SFSymbols.PLAYLIST + ` ${count}` : ""}
-          icon={{ source: "../assets/icon.png" }}
-          actions={<Actions name={name} pop={pop} />}
+      {albumList.length > 0 ? (
+        albumList.map(({ id, name, artist, count }) => (
+          <List.Item
+            key={id}
+            title={name ?? "--"}
+            subtitle={artist ?? "--"}
+            accessories={[{ text: count ? `${count}` : "" }]}
+            icon={{ source: "../assets/icon.png" }}
+            actions={<Actions name={name} pop={pop} />}
+          />
+        ))
+      ) : (
+        <List.EmptyView
+          title={`${currentTrack?.name ?? EMPTY_TEXT}`}
+          description={`${currentTrack?.album ?? EMPTY_TEXT}\n${currentTrack?.artist ?? EMPTY_TEXT}`}
+          icon={Icon.Music}
         />
-      ))}
+      )}
     </List>
   );
 }
@@ -94,7 +110,7 @@ function Actions({ name, pop }: { name: string; pop: () => void }) {
       name,
       music.albums.play(shuffle),
       TE.map(() => closeMainWindow()),
-      handleTaskEitherError("Operation failed.")
+      handleTaskEitherError("Operation failed."),
     )();
 
     pop();

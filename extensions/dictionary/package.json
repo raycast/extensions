@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dictionary",
+  "title": "Web Dictionaries",
+  "description": "Search any word with multiple online dictionaries or translation engines in one place—lightweight, zero dependencies.",
+  "icon": "icon.png",
+  "author": "DrChai",
+  "categories": [
+    "Productivity",
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "fromCmd",
+      "title": "Search in Dictionaries",
+      "description": "Search any word with multiple online dictionaries.",
+      "mode": "view"
+
+    },
+    {
+      "name": "fromSelected",
+      "title": "Search From Cursor Selection",
+      "description": "Search your current cursor-selected words.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "googlapiKey",
+      "type": "password",
+      "required": false,
+      "description": "The API key to use the Google Translation API",
+      "title": "Google API key"
+    },
+    {
+      "name": "youdaoapiKey",
+      "type": "password",
+      "required": false,
+      "description": "The client secret to use the Youdao API",
+      "title": "Youdao Secret Key"
+    },
+    {
+      "name": "youdaoapiClientId",
+      "type": "textfield",
+      "required": false,
+      "description": "The client ID to use the Youdao API",
+      "title": "Youdao Client ID"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/parser": "^5.57.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
