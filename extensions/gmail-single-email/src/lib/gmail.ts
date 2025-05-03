@@ -6,8 +6,6 @@ import * as fs from "fs/promises"; // Use promises version
 import * as os from "os";
 import * as path from "path";
 
-let profile: GaxiosResponse<gmail_v1.Schema$Profile>;
-
 export async function getAuthorizedGmailClient() {
   await authorize();
   const t = await client.getTokens();
@@ -30,10 +28,8 @@ export interface GMailMessage {
 }
 
 export async function getGMailCurrentProfile(gmail: gmail_v1.Gmail) {
-  if (!profile) {
-    profile = await gmail.users.getProfile({ userId: "me" });
-  }
-  return profile.data;
+  const profileResponse = await gmail.users.getProfile({ userId: "me" });
+  return profileResponse.data;
 }
 
 export async function getGMailMessageIds(
@@ -151,6 +147,12 @@ export async function downloadAndOpenAttachment(
   filename: string,
 ): Promise<void> {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading", message: filename });
+  // Create a unique temporary file path
+  const tempDir = os.tmpdir();
+  // Ensure filename is safe for the filesystem
+  const safeFilename = filename.replace(/[/?%*:|"<>]/g, "-");
+  const tempFilePath = path.join(tempDir, safeFilename);
+
   try {
     const response = await gmail.users.messages.attachments.get({
       userId: "me",
@@ -164,12 +166,6 @@ export async function downloadAndOpenAttachment(
 
     // Decode base64 data
     const fileBuffer = Buffer.from(response.data.data, "base64");
-
-    // Create a unique temporary file path
-    const tempDir = os.tmpdir();
-    // Ensure filename is safe for the filesystem
-    const safeFilename = filename.replace(/[/?%*:|"<>]/g, "-");
-    const tempFilePath = path.join(tempDir, safeFilename);
 
     // Write the file
     await fs.writeFile(tempFilePath, fileBuffer);
@@ -185,5 +181,13 @@ export async function downloadAndOpenAttachment(
     toast.style = Toast.Style.Failure;
     toast.title = "Download Failed";
     toast.message = error instanceof Error ? error.message : "Could not download or open attachment";
+  } finally {
+    // Attempt to clean up the temporary file regardless of success or failure
+    try {
+      await fs.unlink(tempFilePath);
+    } catch (cleanupError) {
+      // Log cleanup error, but don't throw, as the primary operation might have succeeded
+      console.error(`Failed to clean up temporary file: ${tempFilePath}`, cleanupError);
+    }
   }
 }

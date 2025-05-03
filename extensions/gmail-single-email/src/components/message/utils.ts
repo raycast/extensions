@@ -1,35 +1,33 @@
 import { gmail_v1 } from "@googleapis/gmail";
 
-export function getAddressParts(text: string | undefined | null):
-  | {
-      name: string | undefined;
-      email: string | undefined;
-    }
-  | undefined {
+// Regex to extract name and email from a typical 'Name <email@example.com>' string
+// It handles optional quotes around the name and variations in spacing.
+const emailAddressRegex = /^\s*(?:"?([^"<>]+)"?\s*)?<(.+@[^>]+)>\s*$/;
+// Basic regex to check if a string looks like an email address
+const basicEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function getAddressParts(text: string | undefined | null): {
+  name: string | undefined;
+  email: string | undefined;
+} | undefined {
   if (!text) {
     return undefined;
   }
-  const mailStart = text.indexOf("<");
-  const mailEnd = text.lastIndexOf(">");
-  if (mailStart >= 0 && mailEnd >= 0 && mailEnd > mailStart) {
-    let name = text
-      .substring(0, mailStart - 1)
-      .trim()
-      .replaceAll('"', "");
-    const email = text
-      .substring(mailStart + 1, mailEnd)
-      .trim()
-      .replaceAll('"', "");
-    if (!name || name.length <= 0) {
-      name = email;
-    }
-    return { name, email };
+  text = text.trim();
+
+  const match = text.match(emailAddressRegex);
+  if (match) {
+    // Format: "Name" <email@example.com> or Name <email@example.com>
+    const name = match[1]?.trim() || undefined; // Extracted name
+    const email = match[2].trim(); // Extracted email
+    return { name: name || email, email }; // Use email as name if name part is empty
+  } else if (basicEmailRegex.test(text)) {
+    // Format: email@example.com
+    return { name: text, email: text }; // Use email as name
   } else {
-    if (text.includes("@")) {
-      return { name: undefined, email: text.trim() };
-    } else {
-      return { name: text.trim(), email: undefined };
-    }
+    // Treat the whole string as a name if it doesn't match email patterns
+    // This handles cases where only a name is provided, or the format is unexpected.
+    return { name: text, email: undefined };
   }
 }
 
