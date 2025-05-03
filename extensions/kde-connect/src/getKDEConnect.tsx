@@ -5,7 +5,7 @@ export default function GetKDEConnect() {
 
 ![KDE Connect](${environment.assetsPath}/sc-apps-kdeconnect.png)
 
-### Get it from the [KDE Binary Factory](https://binary-factory.kde.org/view/MacOS/job/kdeconnect-kde_Nightly_macos/)
+### Get the [KDE Connect For macOS nightly version](https://kdeconnect.kde.org/download.html)
 
 And make sure it's installed to \`/Applications\`.
     `;

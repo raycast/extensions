@@ -18,8 +18,7 @@
     },
     {
       "name": "send",
-      "title": "Send",
-      "subtitle": "to KDE Connect",
+      "title": "Send to KDE Connect",
       "description": "Send string, path or URL to KDE Connect device",
       "mode": "no-view",
       "arguments": [

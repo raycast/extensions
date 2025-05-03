@@ -24,7 +24,7 @@ export class KDEConnect {
       if (command === null) {
         throw "Command exection error: command is null";
       }
-      exec(`${appPath} ${command} 2> /tmp/kde-connect-raycast.log`, (err, stdout) => {
+      exec(`'${appPath}' ${command} 2> /tmp/kde-connect-raycast.log`, (err, stdout) => {
         if (err) {
           resolve(stdout);
           console.log(err);

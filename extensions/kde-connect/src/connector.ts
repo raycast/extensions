@@ -1,9 +1,9 @@
 import { existsSync } from "fs";
 import { KDEDevice } from "./device";
 import { exec, execSync } from "child_process";
-import { showHUD, showToast } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 
-export const mainApp = "/Applications/kdeconnect-indicator.app";
+export const mainApp = "/Applications/KDE Connect.app";
 export const appPath = mainApp + "/Contents/MacOS/kdeconnect-cli";
 
 export enum SendType {
