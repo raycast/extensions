@@ -87,13 +87,15 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
       ? existing.map((s) => (s.url === initialValues.url ? newSite : s))
       : [...existing, newSite];
 
-    // Ask user if they want to add another
-    const again = await confirmAlert({
-      title: "Add another site?",
-      message: "Would you like to add one more site?",
-      primaryAction: { title: "Yes" },
-      dismissAction: { title: "No" },
-    });
+    // Ask user if they want to add another (only in add mode)
+    const again =
+      !initialValues &&
+      (await confirmAlert({
+        title: "Add another site?",
+        message: "Would you like to add one more site?",
+        primaryAction: { title: "Yes" },
+        dismissAction: { title: "No" },
+      }));
 
     await saveSites(updated);
     await showToast(Toast.Style.Success, initialValues ? "Site updated" : "Site added");
