@@ -124,26 +124,19 @@ export class KDEConnect {
     });
   }
 
-  sendFiles(paths: string[], toast?: Toast): Promise<void> {
+  async sendFiles(paths: string[], toast?: Toast) {
     if (!this.deviceID) {
-      return Promise.reject("No deviceID set");
+      throw new Error("No deviceID set");
     }
-    return new Promise((resolve, reject) => {
-      try {
-        for (const path of paths) {
-          toast && (toast.message = `Sending ${path}`);
-          await this.executeCommand(KDECFunctions.share({ deviceID: this.deviceID, args: [path] }));
-        }
-        if (toast) {
-          toast.title = "Files Sent";
-          toast.message = undefined;
-          toast.style = Toast.Style.Success;
-        }
-        resolve();
-      } catch (err) {
-        reject(err);
-      }
-    });
+    for (const path of paths) {
+      toast && (toast.message = `Sending ${path}`);
+      await this.executeCommand(KDECFunctions.share({ deviceID: this.deviceID, args: [path] }));
+    }
+    if (toast) {
+      toast.title = "Files Sent";
+      toast.message = undefined;
+      toast.style = Toast.Style.Success;
+    }
   }
 
   sendSMS(destination: string, str: string): Promise<void> {

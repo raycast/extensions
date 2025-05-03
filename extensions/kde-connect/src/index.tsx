@@ -1,5 +1,5 @@
-import { ActionPanel, Action, Icon, List, LocalStorage, Form, useNavigation } from "@raycast/api";
-import React, { useEffect, useState } from "react";
+import { ActionPanel, Action, Icon, List, LocalStorage, Form, useNavigation, showToast, Toast } from "@raycast/api";
+import React, { useEffect, useRef, useState } from "react";
 import { KDEConnect, KDEDevice } from "./device";
 import { SendType, SendTypeAllCases, appExists, startApp } from "./connector";
 import { StorageKey } from "./storage";
@@ -9,7 +9,7 @@ const connect = new KDEConnect();
 
 export default function Command() {
   const [loading, setLoading] = useState<boolean>(true);
-  const [appOk, setAppOk] = useState<boolean | undefined>();
+  const appOk = useRef(appExists()).current;
   const [devices, setDevices] = useState<KDEDevice[]>([]);
   const [favouriteDevice, setFavouriteDevice] = useState<string | undefined>();
 
@@ -23,13 +23,6 @@ export default function Command() {
     setDevices(discoveredDevices);
     setLoading(false);
   };
-
-  useEffect(() => {
-    setAppOk(appExists());
-    if (!appOk) {
-      return;
-    }
-  }, []);
 
   useEffect(() => {
     if (appOk) {
@@ -210,7 +203,11 @@ function DeviceActions(props: { device: KDEDevice; connect: KDEConnect }) {
       }
       pop();
     } catch (error) {
-      showFailureToast(error, { title: "Failed to send content" });
+      showToast({
+        title: "Failed to send content",
+        style: Toast.Style.Failure,
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   };
 

@@ -142,11 +142,4 @@ export const KDECFunctions: { [key: string]: KDECFunction } = {
       .join(" ");
     return `-d ${params.deviceID} --destination "${params.args[0]}" --send-sms "${params.args[1]}" --attachments ${attachments}`;
   },
-  // args: [path]
-  getPhoto: (params) => {
-    if (!params.deviceID || !params.args) {
-      return null;
-    }
-    return `-d ${params.deviceID} --photo "${params.args[0]}"`;
-  },
 };
