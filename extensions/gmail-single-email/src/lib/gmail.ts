@@ -137,7 +137,7 @@ export async function moveMessageToTrash(message: gmail_v1.Schema$Message) {
     return;
   }
   const gmail = await getAuthorizedGmailClient();
-  await gmail.users.messages.trash({ userId: "me", id: message.id || "" });
+  await gmail.users.messages.trash({ userId: "me", id: message.id });
 }
 
 export async function downloadAndOpenAttachment(
