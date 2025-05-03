@@ -35,7 +35,7 @@ export function getSVGText(text: string): string | undefined {
   </svg>
     `.replaceAll("\n", "");
 
-  return `data:image/svg+xml,${svg}`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
 export function getTextIcon(text: string): Image.ImageLike | undefined {
