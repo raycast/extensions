@@ -1,5 +1,10 @@
 # Model Context Protocol Changelog
 
+## [Use login shell for envs] - 2025 - {PR_MERGE_DATE}
+
+* Use login shell for fetching env info
+* Fix error when running with bash or fish (-L is invalid)
+
 ## [Fix instruction] - 2025-04-22
 
 * Improve instructions and evals examples
