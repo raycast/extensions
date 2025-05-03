@@ -1,6 +1,6 @@
 import { useExec } from "@raycast/utils";
 
-export const useZoxide = (command: string, options?: object): ReturnType<typeof useExec> => {
+export const useZoxide = (command: string, options?: object) => {
   options = {
     shell: true,
     env: {

@@ -2,7 +2,7 @@ import { useExec } from "@raycast/utils";
 import { makeUnfriendly } from "@utils/path-helpers";
 import { base64ShellSanitize } from "@utils/misc";
 
-export const useSpotlight = (query: string, options?: object): ReturnType<typeof useExec> => {
+export const useSpotlight = (query: string, options?: object) => {
   options = {
     shell: true,
     env: {
