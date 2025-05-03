@@ -5,8 +5,9 @@
 1. You'll need a Google Places API key to use the full functionality of this extension. To obtain one:
    - Go to the [Google Cloud Console](https://console.cloud.google.com/)
    - Create a new project or select an existing one
-   - Navigate to APIs & Services > Library
-   - Enable the Places API and Maps JavaScript API
+   - Navigate to APIs & Services > [Library](https://console.cloud.google.com/apis/library)
+   - Enable the [**Places API**](https://console.cloud.google.com/apis/library/places-backend.googleapis.com), [**Maps JavaScript API**](https://console.cloud.google.com/apis/library/maps-backend.googleapis.com), [**Maps Static API**](https://console.cloud.google.com/apis/library/static-maps-backend.googleapis.com), [**Geocoding API**](https://console.cloud.google.com/apis/library/geocoding-backend.googleapis.com)
+   - Navigate to APIs & Services > [Credentials](https://console.cloud.google.com/apis/credentials)
    - Create an API key under APIs & Services > Credentials
    - Enter this API key in the Raycast extension preferences
 2. Enter your home address in the Raycast preferences. It will be used to quickly pull up directions to your home.
