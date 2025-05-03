@@ -2,11 +2,11 @@
 
 Turn subscription chaos into financial harmony. Subwatch helps you track, alert, and optimize your subscriptions effortlessly.
 
-> Subwatch on Raycast required a paid plan on Subwatch.
+> Subwatch on Raycast requires a paid plan on Subwatch.
 
 ## Getting started
 
-To get started head over to the Subwatch extension or app settings and copy the raycast key. Insert it in the Raycast `Subwatch - Raycast Key` configuration.
+To get started head over to the Subwatch extension or app settings and copy the raycast key from it's section. Insert it in the Raycast `Subwatch - Raycast Key` configuration.
 
 ## License
 

@@ -24,6 +24,6 @@ export type NewSubscription = {
   domain: string;
   price: string;
   interval: string;
-  startDate: Date;
-  endDate: Date;
+  start_date: Date;
+  end_date: Date;
 };
