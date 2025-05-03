@@ -88,7 +88,7 @@ function getMacOSCommands(osCommandSet: CommandSet): { command: string; shell: S
     }
 
     if (!matched) {
-      const confirmed = confirmAlert({
+      const confirmed = await confirmAlert({
         title: `⚠️ OS Version ${osVersion} Not Tested`,
         message: "Attempt to flush DNS cache anyway?",
         primaryAction: { title: "Flush DNS" },
