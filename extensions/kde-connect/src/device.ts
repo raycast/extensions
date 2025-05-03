@@ -34,19 +34,13 @@ export class KDEConnect {
     });
   }
 
-  isAvailable(): Promise<boolean> {
+  async isAvailable(): Promise<boolean> {
     if (!this.deviceID) {
-      return Promise.reject("No deviceID set");
+      throw new Error("No deviceID set");
     }
-    return new Promise((resolve, reject) => {
-      this.listDevices()
-        .then((devices) => {
-          resolve(devices.some((device) => device.id === this.deviceID));
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+    const devices = await this.listDevices();
+
+    return devices.some((device) => device.id === this.deviceID);
   }
 
   listDevices(): Promise<KDEDevice[]> {
