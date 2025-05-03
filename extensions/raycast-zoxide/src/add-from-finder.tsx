@@ -3,6 +3,7 @@ import { runAppleScript } from "@raycast/utils";
 import { makeFriendly } from "@utils/path-helpers";
 import { promisify } from "util";
 import { exec } from "child_process";
+import { base64ShellSanitize } from "@utils/misc";
 const asyncExec = promisify(exec);
 
 export default async function Command() {
@@ -39,8 +40,7 @@ export default async function Command() {
     if (!finderPath || !finderPath.length) throw new Error("No open finder window");
     finderPath = finderPath.endsWith("/") ? finderPath.slice(0, -1) : finderPath;
 
-    const { stderr } = await asyncExec(`zoxide add "${finderPath}"`, {
-      timeout: 250,
+    const { stderr } = await asyncExec(`zoxide add "${base64ShellSanitize(finderPath)}"`, {
       env: {
         PATH: "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/opt/homebrew/sbin",
       },
