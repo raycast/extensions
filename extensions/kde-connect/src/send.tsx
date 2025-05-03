@@ -51,6 +51,10 @@ export default async function Command(props: LaunchProps<{ arguments: ShareArgum
       try {
         sendContent = await getSelectedText();
       } catch {
+        showToast({
+          title: "No content selected",
+          style: Toast.Style.Failure,
+        });
         return;
       }
     }
