@@ -119,13 +119,6 @@ export default function Command() {
                     }}
                   />
                   <Action
-                    title="Get Photo"
-                    icon={Icon.Image}
-                    onAction={() => {
-                      connect.getPhoto(item.id);
-                    }}
-                  />
-                  <Action
                     title="Unpair"
                     icon={Icon.Trash}
                     onAction={() => {
@@ -173,7 +166,7 @@ export default function Command() {
   );
 }
 
-// TODO: imple all types
+// TODO: implement all types
 function DeviceActions(props: { device: KDEDevice; connect: KDEConnect }) {
   const { pop } = useNavigation();
   const [sendType, setSendType] = useState<SendType>(SendType.Text);

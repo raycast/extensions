@@ -177,20 +177,4 @@ export class KDEConnect {
         });
     });
   }
-
-  getPhoto(deviceID: string): Promise<void> {
-    const targetDeviceID = deviceID || this.deviceID;
-    if (!targetDeviceID) {
-      return Promise.reject("No deviceID set");
-    }
-    return new Promise((resolve, reject) => {
-      this.executeCommand(KDECFunctions.getPhoto({ deviceID: targetDeviceID, args: [this.preference.photoPath] }))
-        .then(() => {
-          resolve();
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
-  }
 }
