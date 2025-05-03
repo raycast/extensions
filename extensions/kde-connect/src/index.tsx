@@ -153,8 +153,8 @@ export default function Command() {
                       setLoading(true);
                       connect.pairDevice(item.id).then(() => {
                         setLoading(false);
+                        refreshDevices();
                       });
-                      refreshDevices();
                     }}
                   />
                 </ActionPanel>
