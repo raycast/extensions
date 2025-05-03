@@ -1,4 +1,12 @@
-import { LaunchProps, LocalStorage, Toast, getSelectedFinderItems, getSelectedText, showToast } from "@raycast/api";
+import {
+  LaunchProps,
+  LocalStorage,
+  Toast,
+  getSelectedFinderItems,
+  getSelectedText,
+  showToast,
+  popToRoot,
+} from "@raycast/api";
 import { KDEConnect } from "./device";
 import { StorageKey } from "./storage";
 import { existsSync } from "fs";
@@ -102,4 +110,6 @@ export default async function Command(props: LaunchProps<{ arguments: ShareArgum
     shownToast.message = "Please check if the device is online and paired";
     shownToast.style = Toast.Style.Failure;
   }
+
+  await popToRoot();
 }

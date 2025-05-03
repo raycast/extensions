@@ -53,17 +53,18 @@ export class KDEConnect {
     return new Promise((resolve, reject) => {
       const promise = this.executeCommand(KDECFunctions.listDevices({}));
 
-      promise.then((result) => {
-        const devices = result
-          .split("\n")
-          .filter((line) => line.startsWith("- "))
-          .map(parseDeviceInfo)
-          .filter((device) => device !== undefined) as KDEDevice[];
+      promise
+        .then((result) => {
+          const devices = result
+            .split("\n")
+            .filter((line) => line.startsWith("- "))
+            .map(parseDeviceInfo)
+            .filter((device) => device !== undefined) as KDEDevice[];
 
-        LocalStorage.setItem(StorageKey.pairedDevices, JSON.stringify(devices.filter((device) => device.paired)));
-        resolve(devices);
-      })
-      .catch(reject);
+          LocalStorage.setItem(StorageKey.pairedDevices, JSON.stringify(devices.filter((device) => device.paired)));
+          resolve(devices);
+        })
+        .catch(reject);
     });
   }
 

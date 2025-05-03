@@ -1,15 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  List,
-  LocalStorage,
-  Form,
-  useNavigation,
-  showToast,
-  Toast,
-  Keyboard,
-} from "@raycast/api";
+import { ActionPanel, Action, Icon, List, LocalStorage, Form, useNavigation, showToast, Toast } from "@raycast/api";
 import React, { useEffect, useRef, useState } from "react";
 import { KDEConnect, KDEDevice } from "./device";
 import { SendType, SendTypeAllCases, appExists, startApp } from "./connector";
