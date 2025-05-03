@@ -52,7 +52,6 @@ export default async function (input: Input) {
   const { data: standingsData } = (await standingsResponse.json()) as TournamentStagesResponse;
 
   return {
-    split: standingsData.standings?.[0].split,
     rankings: standingsData?.standings?.[0].stages[0].sections[0].rankings.flatMap(({ teams, ordinal }) => {
       return teams.map((team) => ({
         position: ordinal,
