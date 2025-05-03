@@ -90,27 +90,33 @@ export default async function Command(props: LaunchProps<{ arguments: ShareArgum
   if (availibility) {
     switch (sendType) {
       case SendType.Text:
-        connect.sendText(sendContent as string).then(() => {
-          shownToast.title = "Sent";
-          shownToast.message = undefined;
-          shownToast.style = Toast.Style.Success;
-        }).catch((error) => {
-          shownToast.title = "Failed to send text";
-          shownToast.message = error.message;
-          shownToast.style = Toast.Style.Failure;
-        });
+        connect
+          .sendText(sendContent as string)
+          .then(() => {
+            shownToast.title = "Sent";
+            shownToast.message = undefined;
+            shownToast.style = Toast.Style.Success;
+          })
+          .catch((error) => {
+            shownToast.title = "Failed to send text";
+            shownToast.message = error.message;
+            shownToast.style = Toast.Style.Failure;
+          });
         break;
 
       case SendType.URL:
-        connect.share(sendContent as string).then(() => {
-          shownToast.title = "Sent";
-          shownToast.message = undefined;
-          shownToast.style = Toast.Style.Success;
-        }).catch((error) => {
-          shownToast.title = "Failed to share";
-          shownToast.message = error.message;
-          shownToast.style = Toast.Style.Failure;
-        });
+        connect
+          .share(sendContent as string)
+          .then(() => {
+            shownToast.title = "Sent";
+            shownToast.message = undefined;
+            shownToast.style = Toast.Style.Success;
+          })
+          .catch((error) => {
+            shownToast.title = "Failed to share";
+            shownToast.message = error.message;
+            shownToast.style = Toast.Style.Failure;
+          });
         break;
 
       case SendType.Files:
