@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import type { LeaguesResponse } from "../lib/hooks/use-leagues";
 
 export default async function () {

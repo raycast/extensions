@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import type { ScheduleResponse } from "../lib/hooks/use-schedule";
 
 type Input = {
