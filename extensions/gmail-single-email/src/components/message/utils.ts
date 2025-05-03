@@ -123,8 +123,8 @@ export function getMessageAttachments(
 }
 
 export function canMessageBeArchived(message: gmail_v1.Schema$Message) {
-  if (!message.id) {
+  if (!message.id || !message.labelIds) {
     return false;
   }
-  return message?.labelIds ? message.labelIds.includes("INBOX") : false;
+  return message.labelIds.includes("INBOX");
 }
