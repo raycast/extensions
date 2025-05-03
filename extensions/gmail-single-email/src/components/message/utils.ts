@@ -43,7 +43,7 @@ export function extractPlainTextBody(payload: gmail_v1.Schema$MessagePart | unde
       try {
         return Buffer.from(part.body.data, "base64").toString("utf8");
       } catch (e) {
-        console.error("Failed to decode base64 body:", e);
+        showFailureToast(e, { title: "Failed to decode email body" });
         return undefined;
       }
     }
