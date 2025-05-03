@@ -30,7 +30,15 @@ export default async function Command(props: LaunchProps<{ arguments: ShareArgum
   let sendContent: string | undefined;
   let selectedFiles: string[] = [];
 
-  await startApp();
+  try {
+    await startApp();
+  } catch (error) {
+    showToast({
+      title: "Error Starting KDE Connect",
+      message: error instanceof Error ? error.message : "Unknown error",
+      style: Toast.Style.Failure,
+    });
+  }
 
   if (props.arguments.string) {
     if (testURL(props.arguments.string) || existsSync(props.arguments.string)) {
