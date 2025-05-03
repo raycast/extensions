@@ -1,5 +1,8 @@
 # Migadu Changelog
 
+## Make Identities searchable by their name - {PR_MERGE_DATE}
+- Identities are now listed by theiry name and address, meaning that both can be used to search for them
+
 ## [Add Anonymous Identity Command] - 2024-10-16
 - Create new command to create anonymous identities (made to imitate Apple's Hide My Email)
 
