@@ -50,7 +50,7 @@ export class KDEConnect {
   }
 
   listDevices(): Promise<KDEDevice[]> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const promise = this.executeCommand(KDECFunctions.listDevices({}));
 
       promise.then((result) => {
@@ -62,7 +62,8 @@ export class KDEConnect {
 
         LocalStorage.setItem(StorageKey.pairedDevices, JSON.stringify(devices.filter((device) => device.paired)));
         resolve(devices);
-      });
+      })
+      .catch(reject);
     });
   }
 
