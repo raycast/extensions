@@ -39,13 +39,8 @@ export function extractPlainTextBody(payload: gmail_v1.Schema$MessagePart | unde
 
   // Recursive helper function
   function findPlainTextPart(part: gmail_v1.Schema$MessagePart): string | undefined {
-    if (part.mimeType === "text/plain" && part.body?.data) {
-      try {
-        return Buffer.from(part.body.data, "base64").toString("utf8");
-      } catch (e) {
-        showFailureToast(e, { title: "Failed to decode email body" });
-        return undefined;
-      }
+    import { gmail_v1 } from "@googleapis/gmail";
+import { showFailureToast } from "@raycast/utils";
     }
 
     // If it's a multipart message, search its parts
