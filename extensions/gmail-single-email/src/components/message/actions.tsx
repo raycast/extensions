@@ -9,7 +9,7 @@ import {
   moveMessageToTrash as apiMoveMessageToTrash,
   downloadAndOpenAttachment,
 } from "../../lib/gmail";
-import { getErrorMessage, sleep, toastifiedPromiseCall } from "../../lib/utils";
+import { sleep, toastifiedPromiseCall } from "../../lib/utils";
 import { canMessageBeArchived, isMailDraft, isMailUnread } from "./utils";
 import { useCurrentProfile } from "./hooks";
 import { getGMailClient } from "../../lib/withGmailClient";
