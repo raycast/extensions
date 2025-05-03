@@ -98,7 +98,6 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
       }));
 
     await saveSites(updated);
-    await showToast(Toast.Style.Success, initialValues ? "Site updated" : "Site added");
 
     if (again) {
       // reset form fields
@@ -109,6 +108,8 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
       setShowErrors(false);
       return;
     }
+
+    await showToast(Toast.Style.Success, initialValues ? "Site updated" : "Site added");
 
     // not adding another → navigate back
     onDone();
@@ -172,13 +173,19 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
   );
 }
 
-// Wrapper so Raycast always passes onDone
+// Direct‐launch command wrapper
 export default function AddSiteCommand() {
   return (
     <AddSitesForm
       onDone={async () => {
         // runs when Add Site is invoked directly
-        await popToRoot();
+        try {
+          // navigate back to root
+          await popToRoot();
+        } catch (error) {
+          console.error("popToRoot failed:", error);
+          await showToast(Toast.Style.Failure, "Navigation failed");
+        }
       }}
     />
   );

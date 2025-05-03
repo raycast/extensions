@@ -50,5 +50,18 @@ export function ImportSitesForm({ onDone }: { onDone: () => void }) {
 
 // Direct‐launch command wrapper
 export default function ImportSitesCommand() {
-  return <ImportSitesForm onDone={async () => await popToRoot()} />;
+  return (
+    <ImportSitesForm
+      onDone={async () => {
+        // runs when Import Sites is invoked directly
+        try {
+          // navigate back to root
+          await popToRoot();
+        } catch (error) {
+          console.error("popToRoot failed:", error);
+          await showToast(Toast.Style.Failure, "Navigation failed");
+        }
+      }}
+    />
+  );
 }

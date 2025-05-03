@@ -55,5 +55,18 @@ export function ExportSitesForm({ onDone }: { onDone: () => void }) {
 
 // Direct‐launch command wrapper
 export default function ExportSitesCommand() {
-  return <ExportSitesForm onDone={async () => await popToRoot()} />;
+  return (
+    <ExportSitesForm
+      onDone={async () => {
+        // runs when Export Sites is invoked directly
+        try {
+          // navigate back to root
+          await popToRoot();
+        } catch (error) {
+          console.error("popToRoot failed:", error);
+          await showToast(Toast.Style.Failure, "Navigation failed");
+        }
+      }}
+    />
+  );
 }
