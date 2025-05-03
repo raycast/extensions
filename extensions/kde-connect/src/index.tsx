@@ -194,18 +194,23 @@ function DeviceActions(props: { device: KDEDevice; connect: KDEConnect }) {
     }
   };
 
-  const submitAction = (values: SendData) => {
-    switch (sendType) {
-      case SendType.SMS:
-        props.connect.sendSMS(values.destination as string, values.content).then(pop);
-        break;
+  const submitAction = async (values: SendData) => {
+    try {
+      switch (sendType) {
+        case SendType.SMS:
+          await props.connect.sendSMS(values.destination as string, values.content);
+          break;
 
-      case SendType.URL:
-        props.connect.share(values.content).then(pop);
-        break;
+        case SendType.URL:
+          await props.connect.share(values.content);
+          break;
 
-      default:
-        props.connect.sendText(values.content).then(pop);
+        default:
+          await props.connect.sendText(values.content);
+      }
+      pop();
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to send content" });
     }
   };
 
