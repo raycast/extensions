@@ -21,7 +21,7 @@ export async function loadContacts() {
 
   console.log("[ContactLoader] WeChat environment is ready, starting to load contact data...");
 
-  const contacts = await contactService.searchContacts("", new AbortController().signal);
+  const contacts = await contactService.searchContacts("", undefined);
   if (!contacts || contacts.length === 0) {
     throw new Error("The address book is empty. Please check the WeChat service or login status.");
   }
