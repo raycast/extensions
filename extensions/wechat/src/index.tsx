@@ -347,24 +347,15 @@ export default function Command() {
     <List
       isLoading={state.isLoading || aiProcessing}
       onSearchTextChange={(text) => {
-        // Check if this is a natural language query
-        if (
-          text.toLowerCase().includes("search") ||
-          text.toLowerCase().includes("find") ||
-          text.toLowerCase().includes("look for") ||
-          text.toLowerCase().includes("surname") ||
-          text.toLowerCase().includes("name") ||
-          text.toLowerCase().includes("characters") ||
-          text.toLowerCase().includes("搜索") ||
-          text.toLowerCase().includes("查找") ||
-          text.toLowerCase().includes("找") ||
-          text.toLowerCase().includes("姓") ||
-          text.toLowerCase().includes("名字") ||
-          text.toLowerCase().includes("几个字") ||
-          text.toLowerCase().includes("几位") ||
-          /^[0-9]+个字/.test(text) ||
-          /^[0-9]+位/.test(text)
-        ) {
+        const AI_SEARCH_TRIGGERS = [
+          'search', 'find', 'look for', 'surname', 'name', 'characters',
+          '搜索', '查找', '找', '姓', '名字', '几个字', '几位'
+        ];
+        const hasAiTrigger = AI_SEARCH_TRIGGERS.some(trigger => 
+          text.toLowerCase().includes(trigger)
+        ) || /^[0-9]+[个位]字?/.test(text);
+
+        if (hasAiTrigger) {
           // If it's an AI query, set the aiQuery state
           setAiQuery(text);
         } else {
