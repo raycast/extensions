@@ -3,7 +3,7 @@
   "name": "search-domain",
   "title": "Search Domain",
   "description": "Search domain names quickly with instant availability check",
-  "icon": "main-extension-icon.png",
+  "icon": "extension-icon.png",
   "author": "hasanakay",
   "categories": [
     "Productivity"
