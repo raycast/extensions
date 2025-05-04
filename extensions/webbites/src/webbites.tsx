@@ -378,14 +378,14 @@ export default function Command() {
 
         <ActionPanel.Section>
           <Action
-            icon={{ source: Icon.Logout }}
-            title="Logout"
-            onAction={handleLogout}
-          />
-          <Action
             icon={{ source: Icon.Gear }}
             title="Open Extension Preferences"
             onAction={openExtensionPreferences}
+          />
+          <Action
+            icon={{ source: Icon.Logout }}
+            title="Logout"
+            onAction={handleLogout}
           />
         </ActionPanel.Section>
       </ActionPanel>
