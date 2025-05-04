@@ -66,7 +66,8 @@ export default async function tool(input: Input) {
         filteredContacts = allContacts.filter((contact) => {
           // Remove non-Chinese characters and calculate length
           const chineseName = contact.title.replace(/[^\u4e00-\u9fa5]/g, "");
-          return chineseName.length === parseInt(searchIntent.value);
+          const length = Number(searchIntent.value);
+          return !isNaN(length) && chineseName.length === length;
         });
         searchDescription = `contacts with ${searchIntent.value} Chinese characters in name`;
         break;
