@@ -78,7 +78,7 @@ export function useWindowRestore() {
         savedState.size.height,
         posX,
         posY,
-        savedState.position !== undefined, // 使用 preservePosition 参数，仅当有保存的位置时
+        savedState.position !== undefined,
       );
 
       // Show feedback based on actual dimensions
