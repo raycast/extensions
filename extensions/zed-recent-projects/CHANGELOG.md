@@ -1,5 +1,9 @@
 #  Zed Recent Projects Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Added a new command to open a project from a custom folder.
+
 ## [Fixes] - 2025-04-03
 
 - Show Git branch label based on extension preferences
