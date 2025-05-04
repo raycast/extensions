@@ -50,11 +50,7 @@ export default function GenerateMessageForm({ contactName, contactId }: Generate
       await closeMainWindow({ clearRootSearch: true });
     } catch (error) {
       console.error("Failed to generate message or start chat:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to generate message or start chat",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Failed to generate message or start chat" });
     }
   };
 
