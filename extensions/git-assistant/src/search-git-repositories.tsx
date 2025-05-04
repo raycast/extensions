@@ -50,9 +50,13 @@ export default function Command() {
               repo={repo}
               isFavorite
               onToggleFavorite={async () => {
-                await RepoService.toggleFavorite(repo.fullPath);
-                reloadFav();
-                revalidate();
+                try {
+                  await RepoService.toggleFavorite(repo.fullPath);
+                  reloadFav();
+                  revalidate();
+                } catch (error) {
+                  showFailureToast(error, { title: "Could not toggle favorite" });
+                }
               }}
             />
           ))}
