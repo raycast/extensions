@@ -1,4 +1,14 @@
-import { List, Action, Application, getPreferenceValues, getApplications, Detail, ActionPanel } from "@raycast/api";
+import {
+  List,
+  Action,
+  Application,
+  getPreferenceValues,
+  getApplications,
+  Detail,
+  ActionPanel,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getZedBundleId } from "./lib/zed";
 import { readdirSync } from "fs";
@@ -37,25 +47,33 @@ export function Command() {
   const { zed } = useContext(ZedContext);
   const zedIcon = zed ? { fileIcon: zed?.path } : undefined;
   return (
-    <List>
+    <List isLoading={false}>
       {readdirSync(dir, { withFileTypes: true }).map(function (item) {
-        return item.name.charAt(0) != "." && item.name.charAt(0) != ".." && item.isDirectory() ? (
-          <List.Item
-            key={item.name}
-            icon={{ fileIcon: `${item.parentPath}/${item.name}` }}
-            title={item.name}
-            actions={
-              <ActionPanel>
-                <Action.Open
-                  title="Open in Zed"
-                  target={`${item.parentPath}/${item.name}`}
-                  application={zed}
-                  icon={zedIcon}
-                />
-              </ActionPanel>
-            }
-          />
-        ) : null;
+        try {
+          return item.name.charAt(0) !== "." && item.name.charAt(0) !== ".." && item.isDirectory() ? (
+            <List.Item
+              key={item.name}
+              icon={{ fileIcon: `${item.parentPath}/${item.name}` }}
+              title={item.name}
+              actions={
+                <ActionPanel>
+                  <Action.Open
+                    title="Open in Zed"
+                    target={`${item.parentPath}/${item.name}`}
+                    application={zed}
+                    icon={zedIcon}
+                  />
+                </ActionPanel>
+              }
+            />
+          ) : null;
+        } catch (error) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Error While Listing Directories",
+            message: `${error instanceof Error ? error.message : String(error)}`,
+          });
+        }
       })}
     </List>
   );

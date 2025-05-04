@@ -29,7 +29,7 @@
       "name": "open-from-projects-folder",
       "title": "Open from Projects Folder",
       "subtitle": "Zed",
-      "description": "Search project your custom Project folder and open it",
+      "description": "Search projects in your custom Project folder and open it",
       "mode": "view",
       "preferences": [
         {
