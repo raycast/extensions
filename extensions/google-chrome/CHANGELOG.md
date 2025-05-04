@@ -1,5 +1,8 @@
 # Google Chrome Changelog
 
+## [Add Copy Title action for Search Tab] - 2025-04-22
+- Add the ability to create new incognito window.
+
 ## [Add Copy Title action for Search Tab] - 2025-02-11
 - Add Copy Title action for Search Tab command.
 
