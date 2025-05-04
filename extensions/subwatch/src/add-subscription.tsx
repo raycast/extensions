@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  getPreferenceValues,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
 import { fetchSubscriptions } from "./state";
 import { NewSubscription } from "./types";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
@@ -46,20 +38,17 @@ export default function Command() {
       });
 
       await mutate(
-        fetch(
-          "https://nzyzephaenhlxoohrphc.supabase.co/rest/v1/rpc/raycast_update_data",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              apikey: supabaseApiKey,
-            },
-            body: JSON.stringify({
-              raycast_uuid: subwatchApiKey,
-              newdata: data?.[0].data,
-            }),
+        fetch("https://nzyzephaenhlxoohrphc.supabase.co/rest/v1/rpc/raycast_update_data", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: supabaseApiKey,
           },
-        ),
+          body: JSON.stringify({
+            raycast_uuid: subwatchApiKey,
+            newdata: data?.[0].data,
+          }),
+        }),
       );
       revalidate();
 
@@ -76,9 +65,7 @@ export default function Command() {
 
   const { handleSubmit, itemProps } = useForm<NewSubscription>({
     async onSubmit(values) {
-      const cleanedDomain = values.domain
-        .replace(/https?:\/\//gm, "")
-        .replace(/www\./gm, "");
+      const cleanedDomain = values.domain.replace(/https?:\/\//gm, "").replace(/www\./gm, "");
       handleCreate({ ...values, domain: cleanedDomain });
       pop();
     },
@@ -105,25 +92,14 @@ export default function Command() {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Copy">
-            <Action.SubmitForm
-              title="Create New Subscription"
-              onSubmit={handleSubmit}
-            />
+            <Action.SubmitForm title="Create New Subscription" onSubmit={handleSubmit} />
           </ActionPanel.Section>
         </ActionPanel>
       }
     >
       <Form.Description text="Track, alert, and optimize a new subscription" />
-      <Form.TextField
-        title="Service"
-        placeholder="apple"
-        {...itemProps.service}
-      />
-      <Form.TextField
-        title="Domain"
-        placeholder="apple.com"
-        {...itemProps.domain}
-      />
+      <Form.TextField title="Service" placeholder="apple" {...itemProps.service} />
+      <Form.TextField title="Domain" placeholder="apple.com" {...itemProps.domain} />
 
       <Form.TextField title="Price" placeholder="$8" {...itemProps.price} />
 
