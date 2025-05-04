@@ -348,12 +348,22 @@ export default function Command() {
       isLoading={state.isLoading || aiProcessing}
       onSearchTextChange={(text) => {
         const AI_SEARCH_TRIGGERS = [
-          'search', 'find', 'look for', 'surname', 'name', 'characters',
-          '搜索', '查找', '找', '姓', '名字', '几个字', '几位'
+          "search",
+          "find",
+          "look for",
+          "surname",
+          "name",
+          "characters",
+          "搜索",
+          "查找",
+          "找",
+          "姓",
+          "名字",
+          "几个字",
+          "几位",
         ];
-        const hasAiTrigger = AI_SEARCH_TRIGGERS.some(trigger => 
-          text.toLowerCase().includes(trigger)
-        ) || /^[0-9]+[个位]字?/.test(text);
+        const hasAiTrigger =
+          AI_SEARCH_TRIGGERS.some((trigger) => text.toLowerCase().includes(trigger)) || /^[0-9]+[个位]字?/.test(text);
 
         if (hasAiTrigger) {
           // If it's an AI query, set the aiQuery state

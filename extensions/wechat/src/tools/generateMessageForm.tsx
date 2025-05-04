@@ -1,4 +1,5 @@
 import { AI, Action, ActionPanel, Clipboard, Form, Icon, Toast, closeMainWindow, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { wechatService } from "../services/wechatService";
 import { GenerateMessageFormProps } from "../types";

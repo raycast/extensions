@@ -22,14 +22,20 @@ export interface SearchListItemProps {
   onGenerateAiMessage: () => Promise<void>;
 }
 
-export interface StateType {
-  isLoading: boolean;
+export interface InstallationState {
   isWeChatInstalled: boolean;
-  isWeChatRunning: boolean;
   isWeChatTweakInstalled: boolean;
   isHomebrewInstalled: boolean;
-  isWeChatServiceRunning: boolean;
   error: string | null;
+}
+
+export interface RuntimeState {
+  isWeChatRunning: boolean;
+  isWeChatServiceRunning: boolean;
+}
+
+export interface StateType extends InstallationState, RuntimeState {
+  isLoading: boolean;
 }
 
 export interface GenerateMessageFormProps {
