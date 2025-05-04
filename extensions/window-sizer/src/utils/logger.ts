@@ -4,6 +4,8 @@ const ENABLE_LOGS = true;
 
 // Store recent log messages to avoid duplicates
 const recentLogs = new Set<string>();
+// Store recent error messages separately
+const recentErrorLogs = new Set<string>();
 const LOG_EXPIRY_MS = 1000; // Clear logs after 1 second
 
 /**
@@ -20,6 +22,7 @@ function getLogKey(message: unknown, params: unknown[]): string {
 /**
  * Log a message to the console if logging is enabled
  * Prevents duplicate logs within a short time window
+ * Uses the 'recentLogs' Set.
  * @param message Log message or data
  * @param optionalParams Additional parameters to log
  */
@@ -43,7 +46,8 @@ export function log(message: unknown, ...optionalParams: unknown[]): void {
 
 /**
  * Log an error to the console if logging is enabled
- * Prevents duplicate errors within a short time window
+ * Prevents duplicate errors within a short time window.
+ * Uses the 'recentErrorLogs' Set.
  * @param message Error message or data
  * @param optionalParams Additional parameters to log
  */
@@ -53,12 +57,12 @@ export function error(message: unknown, ...optionalParams: unknown[]): void {
   const logKey = getLogKey(message, optionalParams);
 
   // Skip if this exact error was recently output
-  if (recentLogs.has(logKey)) return;
+  if (recentErrorLogs.has(logKey)) return; // Use recentErrorLogs
 
-  // Add to recent logs and schedule cleanup
-  recentLogs.add(logKey);
+  // Add to recent error logs and schedule cleanup
+  recentErrorLogs.add(logKey); // Use recentErrorLogs
   setTimeout(() => {
-    recentLogs.delete(logKey);
+    recentErrorLogs.delete(logKey); // Use recentErrorLogs
   }, LOG_EXPIRY_MS);
 
   // Output the error

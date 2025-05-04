@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
 import { Resolution } from "../types";
 
 interface ResolutionListProps {
@@ -35,14 +35,34 @@ export function ResolutionList({
             <ActionPanel>
               <Action
                 title={`Resize to ${resolution.title}`}
-                onAction={() => onResizeWindow(resolution.width, resolution.height)}
+                onAction={async () => {
+                  try {
+                    await onResizeWindow(resolution.width, resolution.height);
+                  } catch (error) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to resize window",
+                      message: error instanceof Error ? error.message : String(error),
+                    });
+                  }
+                }}
               />
               {showDeleteAction && resolution.isCustom && onDeleteResolution && (
                 <Action
                   title="Delete Custom Size"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  onAction={() => onDeleteResolution(resolution)}
+                  onAction={async () => {
+                    try {
+                      await onDeleteResolution(resolution);
+                    } catch (error) {
+                      await showToast({
+                        style: Toast.Style.Failure,
+                        title: "Failed to delete size",
+                        message: error instanceof Error ? error.message : String(error),
+                      });
+                    }
+                  }}
                 />
               )}
             </ActionPanel>

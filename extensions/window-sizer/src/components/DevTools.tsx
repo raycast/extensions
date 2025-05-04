@@ -38,11 +38,19 @@ export function DevTools() {
               title="Clear Screen Information Cache"
               icon={Icon.Trash}
               onAction={async () => {
-                await clearCache();
-                await showToast({
-                  style: Toast.Style.Success,
-                  title: "Cache cleared",
-                });
+                try {
+                  await clearCache();
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: "Cache cleared",
+                  });
+                } catch (error) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Failed to clear cache",
+                    message: error instanceof Error ? error.message : String(error),
+                  });
+                }
               }}
             />
           </ActionPanel>

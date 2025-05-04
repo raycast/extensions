@@ -9,9 +9,6 @@ import { log, error as logError } from "../utils/logger";
 const SCREENS_INFO_CACHE_KEY = "screens-info-cache";
 const CACHE_DURATION = HOUR_IN_MS * 24; // 24 hours cache duration
 
-// Store in-memory cache
-let cachedScreens: CachedItem<string[]> | null = null;
-
 // Track initialization status to prevent duplicate calls and logs
 let isInitialized = false;
 
@@ -23,6 +20,7 @@ export function useScreenInfo() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [isDevMode, setIsDevMode] = useState(false);
+  const [cachedScreens, setCachedScreens] = useState<CachedItem<string[]> | null>(null);
 
   /**
    * Load cache from persistent storage
@@ -33,7 +31,7 @@ export function useScreenInfo() {
       const storedScreens = await LocalStorage.getItem<string>(SCREENS_INFO_CACHE_KEY);
       if (storedScreens) {
         const parsedCache = JSON.parse(storedScreens) as CachedItem<string[]>;
-        cachedScreens = parsedCache;
+        setCachedScreens(parsedCache);
         setScreens(parsedCache.value);
       }
     } catch (err) {
@@ -47,7 +45,7 @@ export function useScreenInfo() {
   const clearCache = useCallback(async () => {
     try {
       await LocalStorage.removeItem(SCREENS_INFO_CACHE_KEY);
-      cachedScreens = null;
+      setCachedScreens(null);
       log("All caches cleared");
       return true;
     } catch (err) {
@@ -75,8 +73,9 @@ export function useScreenInfo() {
       setScreens(screenInfoList);
 
       // Update cache
-      cachedScreens = createCacheItem(screenInfoList);
-      await LocalStorage.setItem(SCREENS_INFO_CACHE_KEY, JSON.stringify(cachedScreens));
+      const newCache = createCacheItem(screenInfoList);
+      setCachedScreens(newCache);
+      await LocalStorage.setItem(SCREENS_INFO_CACHE_KEY, JSON.stringify(newCache));
 
       return screenInfoList;
     } catch (err) {
@@ -91,7 +90,7 @@ export function useScreenInfo() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [cachedScreens]);
 
   /**
    * Get the screen information and dimensions of the currently active window
@@ -201,16 +200,25 @@ export function useScreenInfo() {
       loadCacheFromStorage();
       detectDevMode();
 
-      // Only preload screen info in dev mode
+      // Only preload screen info in dev mode, with cleanup
       if (process.env.NODE_ENV === "development") {
+        let mounted = true;
         getAllScreensInfo().then(() => {
-          isInitialized = true;
-          log("Screen information initialized, cache valid for 24 hours");
+          if (mounted) {
+            isInitialized = true;
+            log("Screen information initialized, cache valid for 24 hours");
+          }
         });
+        // Cleanup function to set mounted flag to false on unmount
+        return () => {
+          mounted = false;
+        };
       } else {
+        // In non-dev environments, mark as initialized immediately
         isInitialized = true;
       }
     }
+    // No return needed for the 'else' case or if already initialized
   }, [getAllScreensInfo, loadCacheFromStorage, detectDevMode]);
 
   return {

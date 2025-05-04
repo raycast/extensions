@@ -6,6 +6,7 @@
 - Enhanced Maximize Window to support all connected screens
 - Improved screen edge detection to ensure precise window resizing
 - Various performance and UX improvements
+- Update Extension Icon
 
 ## [Update] - 2025-04-28
 

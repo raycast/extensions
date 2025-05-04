@@ -15,7 +15,8 @@ export interface CachedItem<T> {
  * @returns Whether the cache is still valid
  */
 export function isCacheValid<T>(cachedItem: CachedItem<T> | null, cacheDuration: number): boolean {
-  if (!cachedItem) return false;
+  // Return false if no item or if cache duration is not positive
+  if (!cachedItem || cacheDuration <= 0) return false;
 
   const now = Date.now();
   return now - cachedItem.timestamp < cacheDuration;

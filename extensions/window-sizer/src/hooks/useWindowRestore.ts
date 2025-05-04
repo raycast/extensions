@@ -38,7 +38,7 @@ export function useWindowRestore() {
       if (currentWidth === savedState.size.width && currentHeight === savedState.size.height) {
         await showToast({
           style: Toast.Style.Success,
-          title: `No previous size`,
+          title: `Already at previous size`,
         });
         return;
       }

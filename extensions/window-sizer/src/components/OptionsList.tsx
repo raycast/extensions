@@ -4,7 +4,7 @@ import { DevTools } from "./DevTools";
 interface OptionsListProps {
   onRestorePreviousSize: () => Promise<void>;
   onGetCurrentWindowSize: () => Promise<void>;
-  onAddCustomResolution: () => void;
+  onAddCustomResolution: () => Promise<void>;
   onMaximizeWindow: () => Promise<void>;
 }
 
@@ -56,7 +56,6 @@ export function OptionsList({
         }
       />
 
-      {/* Add DevTools component (only visible in development mode) */}
       <DevTools />
     </List.Section>
   );

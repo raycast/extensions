@@ -8,7 +8,7 @@ interface DefaultResolutionsListProps {
   onResizeWindow: (width: number, height: number) => Promise<void>;
   onRestorePreviousSize: () => Promise<void>;
   onGetCurrentWindowSize: () => Promise<void>;
-  onAddCustomResolution: () => void;
+  onAddCustomResolution: () => Promise<void>;
   onMaximizeWindow: () => Promise<void>;
 }
 

@@ -10,7 +10,7 @@ interface CustomResolutionsListProps {
   onResizeWindow: (width: number, height: number) => Promise<void>;
   onRestorePreviousSize: () => Promise<void>;
   onGetCurrentWindowSize: () => Promise<void>;
-  onAddCustomResolution: () => void;
+  onAddCustomResolution: () => Promise<void>;
   onMaximizeWindow: () => Promise<void>;
 }
 
@@ -28,7 +28,7 @@ export function CustomResolutionsList({
   onMaximizeWindow,
 }: CustomResolutionsListProps) {
   return (
-    <List searchBarPlaceholder="Search for sizes and commands..." navigationTitle="Window Sizer">
+    <List isLoading={false} searchBarPlaceholder="Search for sizes and commands..." navigationTitle="Window Sizer">
       <ResolutionList
         resolutions={customResolutions}
         onResizeWindow={onResizeWindow}

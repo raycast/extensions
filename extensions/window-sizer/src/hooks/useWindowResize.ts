@@ -69,9 +69,12 @@ export function useWindowResize() {
 
       // Handle different error types with specific messages
       const errorStr = String(err);
-      if (errorStr.includes("frontmost") || errorStr.includes("window") || errorStr.includes("process")) {
-        await showHUD("🛑 No focused window");
-      } else if (errorStr.includes("Failed to get screen information")) {
+      if (
+        errorStr.includes("frontmost") ||
+        errorStr.includes("window") ||
+        errorStr.includes("process") ||
+        errorStr.includes("Failed to get screen information")
+      ) {
         await showHUD("🛑 No focused window");
       } else {
         await showHUD("🛑 Resize failed");

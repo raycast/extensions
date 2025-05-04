@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useScreenInfo } from "../hooks/useScreenInfo";
-import { getActiveWindowScreenInfo } from "../swift-app";
+import { getActiveWindowScreenInfo, getActiveWindowInfo } from "../swift-app";
 import { log as logger, error as logError } from "../utils/logger";
 
 interface ScreenInfo {
@@ -36,38 +36,45 @@ export function ScreenInfoDetails() {
         // Get active window info
         let activeWindowInfo = null;
         try {
-          const rawWindowInfo = await getActiveWindowScreenInfo();
-          logger("Active window info:", rawWindowInfo);
+          const windowDetails = await getActiveWindowInfo();
+          logger("Window details:", windowDetails);
 
-          // Parse the output
-          const parts = rawWindowInfo.split(":");
-          if (parts.length === 3) {
-            const screenIndex = parseInt(parts[0]);
-            const screenDimensions = parts[1].split(",");
-            const windowDimensions = parts[2].split(",");
-
-            if (screenDimensions.length === 4 && windowDimensions.length === 4) {
-              const [screenX, screenY] = screenDimensions;
-              const [windowX, windowY, windowWidth, windowHeight] = windowDimensions;
-
-              activeWindowInfo = {
-                screenIndex,
-                screenPosition: {
-                  x: parseInt(screenX),
-                  y: parseInt(screenY),
-                },
-                windowPosition: {
-                  x: parseInt(windowX),
-                  y: parseInt(windowY),
-                },
-                windowSize: {
-                  width: parseInt(windowWidth),
-                  height: parseInt(windowHeight),
-                },
-              };
-            }
+          if (windowDetails.error) {
+            logger("No active window detected");
           } else {
-            throw new Error(`Failed to parse active window info: ${rawWindowInfo}`);
+            const rawWindowInfo = await getActiveWindowScreenInfo();
+            logger("Active window info:", rawWindowInfo);
+
+            // Parse the output
+            const parts = rawWindowInfo.split(":");
+            if (parts.length === 3) {
+              const screenIndex = parseInt(parts[0]);
+              const screenDimensions = parts[1].split(",");
+              const windowDimensions = parts[2].split(",");
+
+              if (screenDimensions.length === 4 && windowDimensions.length === 4) {
+                const [screenX, screenY] = screenDimensions;
+                const [windowX, windowY, windowWidth, windowHeight] = windowDimensions;
+
+                activeWindowInfo = {
+                  screenIndex,
+                  screenPosition: {
+                    x: parseInt(screenX),
+                    y: parseInt(screenY),
+                  },
+                  windowPosition: {
+                    x: parseInt(windowX),
+                    y: parseInt(windowY),
+                  },
+                  windowSize: {
+                    width: parseInt(windowWidth),
+                    height: parseInt(windowHeight),
+                  },
+                };
+              }
+            } else {
+              throw new Error(`Failed to parse active window info: ${rawWindowInfo}`);
+            }
           }
         } catch (windowErr) {
           logError("Failed to get active window info:", windowErr);

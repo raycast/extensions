@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { log, error as logError } from "../utils/logger";
 import { WindowDetailsObject, WindowState } from "../types";
 import { getActiveWindowInfo } from "../swift-app";
@@ -11,8 +11,8 @@ const WINDOW_STATES_STORAGE_KEY = "window-states";
 const CACHE_EXPIRATION_TIME_MS = HOUR_IN_MS;
 
 export function useWindowStateManager() {
-  // Window states cache
-  let windowStatesCache: CachedItem<Record<string, WindowState>> | null = null;
+  // Window states cache using useState
+  const [windowStatesCache, setWindowStatesCache] = useState<CachedItem<Record<string, WindowState>> | null>(null);
 
   // Load all saved window states from storage
   const loadAllWindowStates = useCallback(async (): Promise<Record<string, WindowState>> => {
@@ -25,9 +25,8 @@ export function useWindowStateManager() {
       const data = await LocalStorage.getItem<string>(WINDOW_STATES_STORAGE_KEY);
       if (data) {
         const parsedData = JSON.parse(data) as Record<string, WindowState>;
-
-        // Update cache
-        windowStatesCache = createCacheItem(parsedData);
+        // Update cache using the state setter
+        setWindowStatesCache(createCacheItem(parsedData));
         return parsedData;
       }
     } catch (err) {
@@ -35,45 +34,43 @@ export function useWindowStateManager() {
     }
 
     // Initialize empty cache
-    windowStatesCache = createCacheItem({});
-    return windowStatesCache.value;
-  }, []);
+    const initialCache = createCacheItem({});
+    setWindowStatesCache(initialCache);
+    return initialCache.value;
+  }, [windowStatesCache]); // Add windowStatesCache to dependencies
 
   // Save all window states
   const saveAllWindowStates = useCallback(async (states: Record<string, WindowState>): Promise<void> => {
     try {
-      // Update cache
-      windowStatesCache = createCacheItem(states);
-
+      // Update cache using the state setter
+      setWindowStatesCache(createCacheItem(states));
       // Persist to storage
       await LocalStorage.setItem(WINDOW_STATES_STORAGE_KEY, JSON.stringify(states));
     } catch (err) {
       logError("Error saving window states:", err);
     }
-  }, []);
+  }, []); // No dependency on windowStatesCache needed here as we are setting it
 
   // Update a single window state
   const updateSingleWindowState = useCallback(
     async (key: string, state: WindowState): Promise<void> => {
       try {
-        // Make sure cache is loaded
-        if (!windowStatesCache) {
-          await loadAllWindowStates();
-        }
+        // Read current cache value. If null, load it first.
+        const currentCacheValue = windowStatesCache?.value ?? (await loadAllWindowStates());
 
-        if (windowStatesCache) {
-          // Only update the specific entry
-          const updatedStates = { ...windowStatesCache.value, [key]: state };
-          windowStatesCache = createCacheItem(updatedStates);
+        // Update the specific entry
+        const updatedStates = { ...currentCacheValue, [key]: state };
+        const newCache = createCacheItem(updatedStates);
+        setWindowStatesCache(newCache);
 
-          // Persist to storage
-          await LocalStorage.setItem(WINDOW_STATES_STORAGE_KEY, JSON.stringify(updatedStates));
-        }
+        // Persist to storage
+        await LocalStorage.setItem(WINDOW_STATES_STORAGE_KEY, JSON.stringify(updatedStates));
       } catch (err) {
         logError(`Error updating window state for ${key}:`, err);
       }
     },
-    [loadAllWindowStates],
+    // Depends on the current cache and the load function
+    [windowStatesCache, loadAllWindowStates],
   );
 
   // Get current window info using Swift API
@@ -88,7 +85,8 @@ export function useWindowStateManager() {
 
       // Extract window information
       const processId = String(windowDetails.app.processID);
-      const windowId = `${windowDetails.app.name}.${processId}`;
+      // Use encodeURIComponent to handle special characters in app name and underscore as separator
+      const windowId = `${encodeURIComponent(windowDetails.app.name)}_${processId}`;
       const size = windowDetails.window.size;
       const position = windowDetails.window.position;
 
