@@ -1,4 +1,4 @@
-import { BrowserExtension, environment, LocalStorage, WindowManagement } from "@raycast/api";
+import { BrowserExtension, environment, getFrontmostApplication, LocalStorage } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import Values = LocalStorage.Values;
 
@@ -13,7 +13,7 @@ interface AccountUsage {
 
 type UsageData = Map<string, AccountUsage>;
 
-export interface WindowDetails {
+export interface AppDetails {
   name: string;
   tabHostnames: string[];
 }
@@ -46,41 +46,39 @@ export function getUsageData(usages: number) {
   return usageData;
 }
 
-export function getActiveWindow() {
-  const [windowDetails, setWindowDetails] = useState<WindowDetails>();
+export function getActiveApp() {
+  const [appDetails, setAppDetails] = useState<AppDetails>();
 
-  async function fetchActiveWindow() {
+  async function fetchActiveApp() {
     try {
-      const activeWindow = await WindowManagement.getActiveWindow();
-      const activeWindowDetails: WindowDetails = {
+      const activeApp = await getFrontmostApplication();
+      const activeAppDetails: AppDetails = {
         name: "",
         tabHostnames: [],
       };
 
-      if (activeWindow.application) {
-        activeWindowDetails.name = activeWindow.application.name;
+      activeAppDetails.name = activeApp.name;
 
-        if (environment.canAccess(BrowserExtension) && supportedBrowser.includes(activeWindow.application.name)) {
-          const tabs = await BrowserExtension.getTabs();
-          activeWindowDetails.tabHostnames = tabs.filter((t) => t.active).map((t) => new URL(t.url).hostname);
-        }
-
-        setWindowDetails(activeWindowDetails);
+      if (environment.canAccess(BrowserExtension) && supportedBrowser.includes(activeApp.name)) {
+        const tabs = await BrowserExtension.getTabs();
+        activeAppDetails.tabHostnames = tabs.filter((t) => t.active).map((t) => new URL(t.url).hostname);
       }
+
+      setAppDetails(activeAppDetails);
     } catch (error) {
-      console.error("Failed loading active window: ", error);
+      console.error("Failed loading active app: ", error);
     }
   }
 
   useEffect(() => {
-    fetchActiveWindow();
+    fetchActiveApp();
   }, []);
 
-  return windowDetails;
+  return appDetails;
 }
 
-export async function updateUsage(accountKey: string, activeWindow: WindowDetails | undefined) {
-  if (!activeWindow) {
+export async function updateUsage(accountKey: string, activeApp: AppDetails | undefined) {
+  if (!activeApp) {
     return;
   }
 
@@ -101,9 +99,9 @@ export async function updateUsage(accountKey: string, activeWindow: WindowDetail
     };
   }
 
-  accountUsage.appUsage.set(activeWindow.name, (accountUsage.appUsage.get(activeWindow.name) ?? 0) + 1);
+  accountUsage.appUsage.set(activeApp.name, (accountUsage.appUsage.get(activeApp.name) ?? 0) + 1);
 
-  activeWindow.tabHostnames.forEach((tabName) => {
+  activeApp.tabHostnames.forEach((tabName) => {
     accountUsage.tabUsage.set(tabName, (accountUsage.tabUsage.get(tabName) ?? 0) + 1);
   });
 
@@ -119,7 +117,7 @@ export async function updateUsage(accountKey: string, activeWindow: WindowDetail
 
 export function makeUsageSorter(
   usageData: Map<string, AccountUsage> | undefined,
-  activeWindow: WindowDetails | undefined
+  activeApp: AppDetails | undefined
 ): (a: React.JSX.Element, b: React.JSX.Element) => number {
   return (a: React.JSX.Element, b: React.JSX.Element): number => {
     const keyA = a.key || "";
@@ -133,7 +131,7 @@ export function makeUsageSorter(
       return results.reverse().reduce((prev, curr) => prev || curr, 0);
     };
 
-    if (usageData && activeWindow) {
+    if (usageData && activeApp) {
       const usageDataA = usageData.get(usageKey + keyA);
       const usageDataB = usageData.get(usageKey + keyB);
 
@@ -153,7 +151,7 @@ export function makeUsageSorter(
       sortStack.push(compareValues(totalUsageA, totalUsageB));
 
       // attempt to sort by usage of the active app
-      const appName = activeWindow.name;
+      const appName = activeApp.name;
       const appUsageA = usageDataA.appUsage.get(appName);
       const appUsageB = usageDataB.appUsage.get(appName);
 
@@ -170,12 +168,12 @@ export function makeUsageSorter(
       sortStack.push(compareValues(appUsageA, appUsageB));
 
       // exit if there is no tab data to sort by
-      if (!activeWindow.tabHostnames.length) {
+      if (!activeApp.tabHostnames.length) {
         return walkSortStack(sortStack);
       }
 
       const getMostUsedTab = (tabUsage: Map<string, number>) =>
-        activeWindow.tabHostnames
+        activeApp.tabHostnames
           .map((tabName) => tabUsage.get(tabName) || 0)
           .reduce((max, current) => Math.max(max, current), 0);
 

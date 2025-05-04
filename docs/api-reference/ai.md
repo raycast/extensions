@@ -154,10 +154,15 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 
 | Model                             | Description                                                                                                                                                                                                                  |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OpenAI_GPT4.1                     | GPT-4.1 is OpenAI's flagship model for complex tasks. It is well suited for problem solving across domains.                                                                                                                  |
+| OpenAI_GPT4.1-mini                | GPT-4.1 mini provides a balance between intelligence, speed, and cost that makes it an attractive model for many use cases.                                                                                                  |
+| OpenAI_GPT4.1-nano                | GPT-4.1 nano is OpenAI's fastest, most cost-effective GPT-4.1 model.                                                                                                                                                         |
 | OpenAI_GPT4                       | GPT-4 is the model with broad general knowledge, allowing it to follow complex instructions and solve difficult problems. This model is the previous generation, use GPT-4o for better results.                              |
 | OpenAI_GPT4-turbo                 | GPT-4 Turbo is an evolution of the GPT-4 model with a larger context. This model is the previous generation, use GPT-4o for better results.                                                                                  |
 | OpenAI_GPT4o                      | GPT-4o is the most advanced and fastest model from OpenAI, making it a great choice for complex everyday problems and deeper conversations.                                                                                  |
 | OpenAI_GPT4o-mini                 | GPT-4o mini is a highly intelligent and fast model that is ideal for a variety of everyday tasks.                                                                                                                            |
+| OpenAI_o3                         | OpenAI o3 is a well-rounded and powerful model across domains. It sets a new standard for math, science, coding, and visual reasoning tasks.                                                                                 |
+| OpenAI_o4-mini                    | o4-mini is OpenAI's latest small o-series model. It's optimized for fast, effective reasoning with exceptionally efficient performance in coding and visual tasks.                                                           |
 | OpenAI_o1-preview                 | OpenAI o1-preview is an advanced reasoning model designed to tackle complex problems in science, coding, mathematics, and similar fields.                                                                                    |
 | OpenAI_o1-mini                    | OpenAI o1-mini is a faster, more cost-effective reasoning model particularly effective at coding tasks.                                                                                                                      |
 | OpenAI_o1                         | OpenAI o1 is an advanced reasoning model designed to tackle complex problems in science, coding, mathematics, and similar fields.                                                                                            |
@@ -180,8 +185,8 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 | Mistral_Small                     | Mistral Small is Mistral's latest enterprise-grade small model that delivers significant improvements in human alignment, reasoning capabilities, and code. Currently points to mistral-small-2503                           |
 | Mistral_Codestral                 | Codestral is Mistral's cutting-edge language model that specializes in low-latency, high-frequency tasks such as fill-in-the-middle (FIM), code correction and test generation. Currently points to codestral-2501           |
 | DeepSeek_R1_Distill_Llama_3.3_70B | DeepSeek R1 Distill Llama 3.3 70B is a fine-tuned version of Llama 3.3 70B, leveraging DeepSeek-R1's advanced capabilities for enhanced reasoning and precision.                                                             |
-| Qwen_2.5_32B                      | Qwen-2.5-32B is Alibaba's flagship model, delivering near-instant responses with GPT-4 level capabilities across a wide range of tasks.                                                                                      |
 | Google_Gemini_2.5_Pro             | Gemini 2.5 is a thinking model, designed to tackle increasingly complex problems.                                                                                                                                            |
+| Google_Gemini_2.5_Flash           | Google's Gemini 2.5 Flash is a thinking model that offers great, well-rounded capabilities                                                                                                                                   |
 | Google_Gemini_2.0_Flash           | Google's powerful workhorse model with low latency and enhanced performance, built to power agentic experiences                                                                                                              |
 | Google_Gemini_2.0_Flash_Thinking  | Gemini 2.0 Flash Thinking is an experimental model that generates its internal reasoning process, enabling stronger analytical capabilities                                                                                  |
 | DeepSeek_R1                       | Fully open-source model with performance on par with OpenAI-o1                                                                                                                                                               |
@@ -201,7 +206,7 @@ If a model isn't available to the user, Raycast will fallback to a similar one:
 - `AI.Model.DeepSeek_R1` -> `AI.Model["DeepSeek_R1_Distill_Llama_3.3_70B"]`
 - `AI.Model.xAI_Grok_2` -> `AI.Model["OpenAI_GPT4o-mini"]`
 - `AI.Model.xAI_Grok_3` -> `AI.Model.xAI_Grok_3_Mini`
-- `AI.Model["Google_Gemini_2.5_Pro"]` -> `AI.Model["Google_Gemini_2.0_Flash"]`
+- `AI.Model["Google_Gemini_2.5_Pro"]` -> `AI.Model["Google_Gemini_2.5_Flash"]`
 
 ### AI.AskOptions
 

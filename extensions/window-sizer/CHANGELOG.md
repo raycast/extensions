@@ -13,6 +13,10 @@
 
 ## [Update] - 2025-04-28
 
+- Fix: Screenshots and README
+
+## [Update] - 2025-04-28
+
 - Feature: Maximize Window
 - Feature: Get Current Size
 - Fix: Position of the window when restoring previous size
