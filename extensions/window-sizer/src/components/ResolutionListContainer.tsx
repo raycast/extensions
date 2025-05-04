@@ -29,7 +29,7 @@ export function ResolutionListContainer({
 }: ResolutionListContainerProps) {
   const { push } = useNavigation();
 
-  const handleAddCustomResolution = () => {
+  const handleAddCustomResolution = async () => {
     push(
       <ResolutionForm
         onResizeWindow={onResizeWindow}
