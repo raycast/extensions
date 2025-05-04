@@ -423,18 +423,32 @@ private func getActiveWindowRef() -> AXUIElement? {
 }
 
 // Maximize the active window on its current screen
-@raycast func maximizeActiveWindow() {
+@raycast func maximizeActiveWindow() -> String {
   // Parse window and screen info
   guard let info = parseWindowScreenInfo(),
     let windowRef = getActiveWindowRef()
   else {
-    return
+    return "Error: No active window"
+  }
+
+  // Check if window is already maximized
+  let windowWidth = CGFloat(info.windowWidth)
+  let windowHeight = CGFloat(info.windowHeight)
+  let screenWidth = info.screenFrame.width
+  let screenHeight = info.screenFrame.height
+
+  // Add small tolerance for comparison
+  let tolerance: CGFloat = 5.0
+  if abs(windowWidth - screenWidth) <= tolerance && abs(windowHeight - screenHeight) <= tolerance {
+    return "Already maximized"
   }
 
   // Set window position (top-left corner of the screen) and size (screen dimensions)
   let newPosition = CGPoint(x: info.screenFrame.origin.x, y: info.screenFrame.origin.y)
   let newSize = CGSize(width: info.screenFrame.width, height: info.screenFrame.height)
   setWindowPositionAndSize(windowRef: windowRef, position: newPosition, size: newSize)
+
+  return "Success"
 }
 
 // Resize window to target size, intelligently repositioning if needed to keep it within screen bounds

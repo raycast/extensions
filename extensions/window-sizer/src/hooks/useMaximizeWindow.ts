@@ -8,24 +8,44 @@ export function useMaximizeWindow() {
   // Function to maximize the active window
   async function maximizeWindow() {
     try {
-      // Save the current window state with unique identifier
+      // First, save the current window state
       const windowId = await saveWindowState();
 
       if (!windowId) {
         throw new Error("Failed to save window state");
       }
 
-      // Close main window first to avoid showing loading state
-      await closeMainWindow();
+      // Then check if the window is already maximized
+      const result = await maximizeActiveWindow();
 
-      // Call the Swift function
-      await maximizeActiveWindow();
+      // If window is already maximized, just show toast and return
+      if (result === "Already maximized") {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Already maximized",
+        });
+        return;
+      }
 
-      // Display success message with window ID
-      await showHUD(`🔲 Window maximized`);
+      // If there was an error checking window state
+      if (result.startsWith("Error:")) {
+        throw new Error(result);
+      }
 
-      // Return to root after execution
-      await popToRoot();
+      // Only if the window was successfully maximized (not already maximized)
+      if (result === "Success") {
+        // Close main window to avoid showing loading state
+        await closeMainWindow();
+
+        // Display success message
+        await showHUD(`🔲 Window maximized`);
+
+        // Return to root after execution
+        await popToRoot();
+      } else {
+        // Handle unexpected response
+        throw new Error("Unexpected response from maximization function");
+      }
     } catch (error) {
       console.error("Error maximizing window:", error);
 
@@ -35,7 +55,8 @@ export function useMaximizeWindow() {
         errorStr.includes("frontmost") ||
         errorStr.includes("window") ||
         errorStr.includes("process") ||
-        errorStr.includes("Failed to get screen information")
+        errorStr.includes("Failed to get screen information") ||
+        errorStr.includes("No active window")
       ) {
         await showToast({
           style: Toast.Style.Failure,
