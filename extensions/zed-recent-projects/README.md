@@ -7,3 +7,4 @@ A Raycast extension that allows you to quickly access and open your recent proje
 - View your recently opened projects in Zed
 - Quickly open projects directly from Raycast
 - Seamless integration with Zed editor
+- Open any project from a preferred folder

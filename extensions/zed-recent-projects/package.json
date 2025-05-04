@@ -10,7 +10,8 @@
     "jylamont",
     "pernielsentikaer",
     "tm.wrnr",
-    "true-real-michael"
+    "true-real-michael",
+    "mathieubellon"
   ],
   "categories": [
     "Developer Tools"
@@ -23,6 +24,23 @@
       "subtitle": "Zed",
       "description": "Opens the currently selected Finder item with Zed",
       "mode": "no-view"
+    },
+    {
+      "name": "open-from-projects-folder",
+      "title": "Open From Project Folder",
+      "subtitle": "Zed",
+      "description": "Search projects in Project folder and opens it",
+      "mode": "view",
+      "preferences": [
+        {
+          "required": false,
+          "name": "projectsdir",
+          "title": "Project Directory",
+          "type": "directory",
+          "description": "Sets project directory",
+          "default": "~/"
+        }
+      ]
     },
     {
       "name": "search",
