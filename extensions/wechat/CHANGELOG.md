@@ -1,6 +1,6 @@
 # WeChat Changelog
 
-## [New Feature] - 2025-05-04
+## [New Feature] - {PR_MERGE_DATE}
 
 - Add Raycast AI
 
