@@ -29,9 +29,9 @@ export type DomainDetails = Domain & {
 export type DNSRecord = {
     id: number;
     domainName: string;
-    host: string;
+    host?: string;
     fqdn: string;
-    type: "A"| "AAAA"| "ANAME"| "CNAME"| "MX"| "NS"| "SRV"|  "TXT";
+    type: "A"| "AAAA"| "ANAME"| "CNAME"| "MX"| "NS"| "SRV" | "TXT";
     answer: string;
     ttl: number;
     priority?: number;

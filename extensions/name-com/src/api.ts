@@ -14,7 +14,11 @@ export const headers = {
 export const parseResponse = async (response: Response) => {
     const text = await response.text();
     const json = await JSON.parse(text);
-    if (!response.ok) throw new Error((json as { message: string }).message);
+    // if (!response.ok) throw new Error((json as { message: string; details?: string }).message);
+    if (!response.ok) {
+        const error = json as { message: string; details?: string };
+        throw new Error(error.message, { cause: error.details });
+    }
     // if (text==="{}") return undefined;
     return json;
 }
