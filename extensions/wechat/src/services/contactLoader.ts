@@ -2,6 +2,7 @@ import { WeChatManager } from "../utils/wechatManager";
 import { contactService } from "./contactService";
 
 export async function loadContacts() {
+  try {
   console.log("[ContactLoader] Checking WeChat Environment...");
 
   if (!WeChatManager.isWeChatInstalled()) {
