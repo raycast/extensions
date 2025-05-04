@@ -1,5 +1,6 @@
 import { Fragment, useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, LocalStorage, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { headerKeys, methods, makeObject } from "../../utils";
 import ResultView from "./Result";
 import axios from "axios";
@@ -69,10 +70,8 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
       .catch((err) => {
         const data = err.response?.data;
         const errorMessage = typeof data === "string" ? data : data?.message || data?.error || data?.detail;
-        showToast({
-          title: "Error",
-          message: `${err.message}${errorMessage ? `\n${errorMessage.toString()}` : ""}`,
-          style: Toast.Style.Failure,
+        showFailureToast(`${err.message}${errorMessage ? `\n${errorMessage.toString()}` : ""}`, {
+          title: "Request Failed",
         });
       })
       .finally(() => setIsLoading(false));
