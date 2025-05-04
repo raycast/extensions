@@ -35,7 +35,7 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 
 `Command + Shift + x` Clear Search History / 清除好友搜索记录
 
-`Command + Shift + a` Generate Al Message / 生成AI消息
+`Command + Shift + a` Generate AI Message / 生成AI消息
 
 ## How to Use
 
