@@ -40,6 +40,46 @@
       "description": "Runs a git command directly without any analysis or commit. Use when user wants to run a git command directly."
     }
   ],
+  "preferences": [
+    {
+      "name": "scanDirectories",
+      "title": "Scan Directories",
+      "description": "Enter directories to scan, separated by a colon (:)",
+      "type": "textfield",
+      "required": true,
+      "multiple": true
+    },
+    {
+      "name": "maxDepth",
+      "title": "Max Directory Depth",
+      "description": "Maximum depth to search in directory tree for Git repositories",
+      "type": "dropdown",
+      "required": false,
+      "default": "3",
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        }
+      ]
+    }
+  ],
   "ai": {
     "evals": [
       {
