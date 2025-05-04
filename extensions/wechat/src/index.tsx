@@ -20,7 +20,7 @@ import { WeChatManager } from "./utils/wechatManager";
 export default function Command() {
   const [isInitializing, setIsInitializing] = useState(true);
   const [environmentReady, setEnvironmentReady] = useState(false);
-  const { state, search, clearRecentContacts } = useSearch();
+  const { state, search, clearRecentContacts, setSearchResults } = useSearch();
   const [pinnedContacts, setPinnedContacts] = useState<SearchResult[]>([]);
   const [aiProcessing, setAiProcessing] = useState(false);
   const [aiQuery, setAiQuery] = useState("");
@@ -138,7 +138,6 @@ export default function Command() {
 
   // Search for names of a specific length
   const performLengthSearch = (length: number) => {
-    // This feature is not supported by the original search, so we need special handling
     // Get all contacts
     const allContacts = state.items;
 
@@ -149,9 +148,17 @@ export default function Command() {
       return chineseName.length === length;
     });
 
-    // If matching contacts are found, display the first one as the search keyword
+    // If matching contacts are found, use setSearchResults to display all of them
     if (filteredContacts.length > 0) {
-      search(filteredContacts[0].title);
+      // Use the new setSearchResults function to directly set the filtered results
+      setSearchResults(`${length} character names`, filteredContacts);
+
+      // Show a success toast with the number of matching contacts
+      showToast({
+        style: Toast.Style.Success,
+        title: "Search Results",
+        message: `Found ${filteredContacts.length} contacts with ${length} Chinese characters in name`,
+      });
     } else {
       // If no matches are found, display a notification
       showToast({
