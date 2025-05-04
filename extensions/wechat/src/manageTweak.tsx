@@ -384,7 +384,7 @@ function ManageTweak() {
           title="Report a WeChat Raycast Extension Issue"
           actions={
             <ActionPanel>
-              <Action title="Open Issue Page" onAction={() => open("https://github.com/RaffeYang/wechat/issues")} />
+              <Action title="Open Issue Page" onAction={() => open("https://github.com/raycast/extensions/issues")} />
             </ActionPanel>
           }
         />
