@@ -1,7 +1,6 @@
-import { getClients } from "./context7Config";
+import { getClients } from "./Context7config";
 import os from "os";
 import { execSync } from "child_process";
-import { environment } from "@raycast/api";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
@@ -39,7 +38,7 @@ export default async function (clientName?: string) {
 
   process.env.PATH = getUserShellPath();
 
-  const clients = getClients(environment.supportPath);
+  const clients = getClients();
 
   const createdClients: {
     name: string;
