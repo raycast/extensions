@@ -26,6 +26,10 @@ export default function Command() {
       title: `Adding ${subscription.service}`,
     });
     try {
+      if (!data?.[0]?.data) {
+        throw new Error("No data available");
+      }
+
       data?.[0].data.push({
         name: subscription.service,
         domain: subscription.domain,

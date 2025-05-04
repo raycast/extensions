@@ -28,7 +28,6 @@ export default function Command() {
     });
 
     try {
-      data?.[0].data.splice(index, 1);
       await mutate(
         fetch(
           "https://nzyzephaenhlxoohrphc.supabase.co/rest/v1/rpc/raycast_update_data",
@@ -45,6 +44,7 @@ export default function Command() {
           },
         ),
       );
+      data?.[0].data.splice(index, 1);
       showToast({
         style: Toast.Style.Success,
         title: "Done!",
@@ -103,22 +103,22 @@ export default function Command() {
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Interval"
-                    text={item.billing[0].interval}
+                    text={item.billing[0]?.interval}
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Pricing"
-                    text={String(item.billing[0].price)}
+                    text={String(item.billing[0]?.price)}
                   />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Start date"
-                    text={item.billing[0].start_date}
+                    text={item.billing[0]?.start_date}
                   />
                   <List.Item.Detail.Metadata.Label
                     title="End date"
                     text={
                       item.billing[0].end_date &&
-                      item.billing[0].end_date != "null"
+                      item.billing[0].end_date !== "null"
                         ? item.billing[0].end_date
                         : ""
                     }

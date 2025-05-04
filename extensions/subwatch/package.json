@@ -11,26 +11,13 @@
     "Data"
   ],
   "license": "MIT",
-  "env": {
-    "API_KEY": {
-      "type": "password",
-      "required": true
-    },
-    "API_URL": {
-      "type": "text",
-      "required": false
-    }
-  },
   "commands": [
     {
       "name": "manage-subscriptions",
       "title": "Manage Subscriptions on Subwatch",
       "subtitle": "Manage Subwatch subscriptions",
       "description": "List and delete subscriptions",
-      "mode": "view",
-      "context": {
-        "apiKey": "123"
-      }
+      "mode": "view"
     },
     {
       "name": "add-subscription",
@@ -50,11 +37,10 @@
     },
     {
       "name": "supabaseApiKey",
-      "title": "Supabase API Key",
-      "description": "The supabase public API key for the service",
+      "title": "Public API Key",
+      "description": "The public API key for the Subwatch service",
       "type": "password",
-      "required": false,
-      "default": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56eXplcGhhZW5obHhvb2hycGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTQzMjgsImV4cCI6MjA1OTc3MDMyOH0.6AboCGgJGqJMTgqUH3LsYmhoWQ8sfEWqdv0cY-1EXIg"
+      "required": true
     }
   ],
   "dependencies": {
