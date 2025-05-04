@@ -13,7 +13,9 @@ export class EnvironmentDetector {
    */
   static isAppleSilicon(): boolean {
     try {
-      return os.cpus()[0].model.includes("Apple");
+      const cpus = os.cpus();
+      if (cpus.length === 0) throw new Error("No CPU information available");
+      return cpus[0].model.includes("Apple");
     } catch (error) {
       console.error("Error detecting CPU architecture:", error);
       // If the test fails, try another method
