@@ -27,6 +27,10 @@ export default function Command() {
       title: `Deleting ${subscriptionToDelete?.name}`,
     });
 
+    const newData = data?.[0]?.data.filter(
+      (e) => e.domain != subscriptionToDelete?.domain,
+    );
+
     try {
       await mutate(
         fetch(
@@ -39,12 +43,11 @@ export default function Command() {
             },
             body: JSON.stringify({
               raycast_uuid: subwatchApiKey,
-              newdata: data?.[0].data,
+              newdata: newData,
             }),
           },
         ),
       );
-      data?.[0].data.splice(index, 1);
       showToast({
         style: Toast.Style.Success,
         title: "Done!",
@@ -107,7 +110,7 @@ export default function Command() {
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Pricing"
-                    text={String(item.billing[0]?.price)}
+                    text={`$${String(item.billing[0]?.price)}`}
                   />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
