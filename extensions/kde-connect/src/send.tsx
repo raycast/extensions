@@ -11,6 +11,7 @@ import { KDEConnect } from "./device";
 import { StorageKey } from "./storage";
 import { existsSync } from "fs";
 import { SendType, startApp } from "./connector";
+import { showFailureToast } from "@raycast/utils";
 
 interface ShareArguments {
   string?: string;
@@ -33,11 +34,7 @@ export default async function Command(props: LaunchProps<{ arguments: ShareArgum
   try {
     await startApp();
   } catch (error) {
-    showToast({
-      title: "Error Starting KDE Connect",
-      message: error instanceof Error ? error.message : "Unknown error",
-      style: Toast.Style.Failure,
-    });
+    showFailureToast(error, { title: "Error Starting KDE Connect" });
   }
 
   if (props.arguments.string) {

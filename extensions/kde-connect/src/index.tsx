@@ -1,4 +1,5 @@
-import { ActionPanel, Action, Icon, List, LocalStorage, Form, useNavigation, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, LocalStorage, Form, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import React, { useEffect, useRef, useState } from "react";
 import { KDEConnect, KDEDevice } from "./device";
 import { SendType, SendTypeAllCases, appExists, startApp } from "./connector";
@@ -17,7 +18,11 @@ export default function Command() {
 
   const refreshDevices = async () => {
     setLoading(true);
-    await startApp();
+    try {
+      await startApp();
+    } catch (error) {
+      showFailureToast(error, { title: "Error Starting KDE Connect" });
+    }
     const discoveredDevices = await connect.listDevices();
     setDevices(discoveredDevices);
     setLoading(false);
@@ -62,11 +67,7 @@ export default function Command() {
     try {
       await command();
     } catch (error) {
-      showToast({
-        title: "Failed to send content",
-        style: Toast.Style.Failure,
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      showFailureToast(error);
     }
   };
 
@@ -242,11 +243,7 @@ function DeviceActions(props: { device: KDEDevice; connect: KDEConnect }) {
       }
       pop();
     } catch (error) {
-      showToast({
-        title: "Failed to send content",
-        style: Toast.Style.Failure,
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      showFailureToast(error, { title: "Failed to send content" });
     }
   };
 
