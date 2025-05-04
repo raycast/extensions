@@ -5,6 +5,5 @@
 	],
 	"rules": {
 		"@raycast/prefer-title-case": "off"
-		// ...其他规则
 	}
 }
