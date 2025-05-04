@@ -139,8 +139,11 @@ New title:
     await updateAction({ 'add-tags': tag }, { title: 'Added tag' });
   }
 
-  async function setDeadline(date: Date) {
-    await updateAction({ deadline: date.toISOString() }, { title: 'Set deadline' });
+  async function setDeadline(date: string | null) {
+    const title = date === null ? 'Removed deadline' : 'Set deadline';
+    const deadline = date === null ? '' : date;
+
+    await updateAction({ deadline }, { title });
   }
 
   async function deleteToDo() {
@@ -159,6 +162,24 @@ New title:
       });
       refreshTodos();
     }
+  }
+
+  function formatDateTime(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const datePart = `${year}-${month}-${day}`;
+
+    // If the user picked a full day, we avoid providing the time, as
+    // Things leverages the time part to understand whether a reminder
+    // should be set.
+    if (Action.PickDate.isFullDay(date)) {
+      return datePart;
+    }
+
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${datePart}@${hours}:${minutes}`;
   }
 
   return (
@@ -210,26 +231,10 @@ New title:
             min={new Date()}
             onChange={(date) => {
               if (!date) {
-                schedule('anytime');
-                return;
+                return schedule('anytime');
               }
 
-              const year = date.getFullYear();
-              const month = String(date.getMonth() + 1).padStart(2, '0');
-              const day = String(date.getDate()).padStart(2, '0');
-              const datePart = `${year}-${month}-${day}`;
-
-              // If the user picked a full day, we avoid providing the time, as
-              // Things leverages the time part to understand whether a reminder
-              // should be set.
-              if (Action.PickDate.isFullDay(date)) {
-                schedule(datePart);
-                return;
-              }
-
-              const hours = String(date.getHours()).padStart(2, '0');
-              const minutes = String(date.getMinutes()).padStart(2, '0');
-              schedule(`${datePart}@${hours}:${minutes}`);
+              return schedule(formatDateTime(date));
             }}
             type={Action.PickDate.Type.DateTime}
           />
@@ -269,9 +274,7 @@ New title:
           shortcut={{ modifiers: ['cmd', 'shift'], key: 'd' }}
           min={new Date()}
           onChange={(date) => {
-            if (date) {
-              return setDeadline(date);
-            }
+            return setDeadline(date ? formatDateTime(date) : null);
           }}
           type={Action.PickDate.Type.Date}
         />
