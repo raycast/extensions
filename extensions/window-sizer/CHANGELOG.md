@@ -1,5 +1,12 @@
 # Window Sizer Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Fully rewrote the extension in Swift for better maintainability and performance
+- Enhanced Maximize Window to support all connected screens
+- Improved screen edge detection to ensure precise window resizing
+- Various performance and UX improvements
+
 ## [Update] - 2025-04-28
 
 - Fix: Screenshots and README
