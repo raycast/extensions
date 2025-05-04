@@ -28,6 +28,13 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "wechatAI",
+      "title": "WeChat AI",
+      "description": "Search and chat with WeChat contacts using natural language.\nGenerate AI chat content."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.19.1",
