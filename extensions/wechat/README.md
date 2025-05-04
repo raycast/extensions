@@ -23,7 +23,7 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 - [x] Recent Contacts / 最近联系人
 - [x] Support fuzzy Query / 微信通讯录模糊查询
 - [x] Manage WeChatTweak / 管理WeChatTweak
-- [x] Generate Al Message / 生成AI消息
+- [x] Generate AI Message / 生成AI消息
 - [x] Add Raycast AI @wechat / 添加Raycast AI @wechat
 
 ## Shortcuts
