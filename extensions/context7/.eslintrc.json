@@ -1,0 +1,7 @@
+{
+  "extends": "@raycast/eslint-config",
+  "rules": {
+    "no-unused-vars": "warn",
+    "import/no-anonymous-default-export": "off"
+  }
+}
