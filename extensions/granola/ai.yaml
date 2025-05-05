@@ -12,6 +12,9 @@ instructions: |
        - ALWAYS set "includeTranscript" to true when words like "transcript", "conversation", "dialog", or "what was said" appear in the query
        - When asked to summarize a transcript, you MUST set includeTranscript to true
        - NEVER set includeTranscript to false when specifically asked about transcripts
+    2a. Default `includeTranscript`:
+       - The `includeTranscript` parameter MUST ALWAYS be included in the tool call.
+       - If the conditions in rule #2 (Transcript Requests) are NOT met, you MUST explicitly set `includeTranscript` to `false`.
 
     3. For content and title searches:
        - Use "title" parameter when searching for notes with specific words in the title
