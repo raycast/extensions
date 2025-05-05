@@ -42,7 +42,8 @@ export default async function main() {
     case "darwin":
       const macResult = getMacOSCommands(osCommandSet);
       if (!macResult) return;
-      ({ command, shell } = macResult);
+      command = macResult.command
+      shell = macResult.shell
       break;
 
     case "win32":
