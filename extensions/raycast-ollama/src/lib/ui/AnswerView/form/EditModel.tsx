@@ -45,7 +45,7 @@ export function EditModel(props: props): JSX.Element {
             return false;
           return true;
         });
-        if (models?.filter((model) => model.name === props.model)) setValue("model", props.model);
+        if (models?.some((model) => model.name === props.model)) setValue("model", props.model);
       }
     },
   });
