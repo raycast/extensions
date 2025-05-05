@@ -238,7 +238,7 @@ export function ChatView(): JSX.Element {
         {props.message.tools && (
           <Detail.Metadata.TagList title="Tools">
             {props.message.tools.map((tool) => (
-              <Detail.Metadata.TagList.Item text={`${tool.server} - ${tool.function}()`} />
+              <Detail.Metadata.TagList.Item key={`${tool.server}-${tool.function}`} text={`${tool.server} - ${tool.function}()`} />
             ))}
           </Detail.Metadata.TagList>
         )}
