@@ -86,7 +86,7 @@
 /extensions/apply-inline-code                                       @aforian
 /extensions/arabic-keyboard                                         @mSarheed
 /extensions/arc                                                     @thomaspaulmann @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @rgrunberg @tleo19 @loris @bdsqqq @xilopaint @jayeshbhole @hinzed1127 @omar-salama @underscoregeb @ridemountainpig @nebbles @alanxmay @gdsmith @josephlou5
-/extensions/archiver                                                @404J
+/extensions/archiver                                                @404J @3llomi
 /extensions/array-this                                              @matheus-depaula
 /extensions/ars-technica                                            @edwin-dd-ong
 /extensions/arxiv                                                   @koayon @pernielsentikaer
@@ -596,7 +596,7 @@
 /extensions/focus-anchor                                            @ashleyhindle
 /extensions/focustask                                               @vojto @pernielsentikaer
 /extensions/folder-cleaner                                          @StereoPT
-/extensions/folder-search                                           @GastroGeek @omarshahine @fengtianze @ridemountainpig
+/extensions/folder-search                                           @omarshahine @GastroGeek @fengtianze @ridemountainpig
 /extensions/font-search                                             @Tnixc
 /extensions/fontawesome                                             @dutzi @GLaDO8 @DanielFerguson @ridemountainpig
 /extensions/footy-report                                            @thuoe
@@ -1425,7 +1425,7 @@
 /extensions/rails-routes                                            @renzo4web
 /extensions/railway                                                 @coffee-cup @nagauta @xmok @danieldeichfuss
 /extensions/rain-radars                                             @danieldbird @koinzhang
-/extensions/raindrop-io                                             @lardissone @ShubhamVerma1811 @pernielsentikaer @sh-cho @tdkn @j3lte @rien7 @teziovsky @pewpeo
+/extensions/raindrop-io                                             @lardissone @ShubhamVerma1811 @pernielsentikaer @sh-cho @tdkn @j3lte @rien7 @teziovsky @pewpeo @jpesce
 /extensions/ramda-documentation                                     @jbroomer
 /extensions/random-color                                            @srcrip
 /extensions/random-data-generator                                   @loris @Calvein @pernielsentikaer @vimtor @j3lte @stefanmatar
