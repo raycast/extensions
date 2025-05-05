@@ -1,4 +1,5 @@
 # Raycast DOGE Extension
+Thanks to @Osprey for the original extension!
 
 View information about the work done by the Department of Government Efficiency. Essentially everything on the https://doge.gov website will be updated here (including, contracts, grants, leases, and payments). Let's MAKE RAYCAST GREAT AGAIN!
 
