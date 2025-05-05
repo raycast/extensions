@@ -1,5 +1,5 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import RepoService, { abbreviateHome } from "./utils";
 import { openExtensionPreferences } from "@raycast/api";
