@@ -2,7 +2,7 @@ import { OllamaApiTool } from "../ollama/types";
 import { McpServerTool } from "./types";
 
 /**
- * Convert Mcp Server Tools format info Ollama Tools.
+ * Convert Mcp Server Tools format into Ollama Tools.
  * @param tools - Mcp Server Tools.
  */
 export function ConvertMcpToolsToOllamaTools(tools: McpServerTool[]): OllamaApiTool[] {
