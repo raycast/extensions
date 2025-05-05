@@ -14,7 +14,7 @@
       "name": "summarize-channel",
       "title": "Summarize Slack Channel",
       "subtitle": "Slack",
-      "description": "Summarize a Slack channel threads",
+      "description": "Summarize a Slack channel's threads",
       "mode": "view",
       "arguments": [],
       "preferences": [
