@@ -20,7 +20,7 @@ export function useCurrentWindowSize() {
 
       await showToast({
         style: Toast.Style.Success,
-        title: `Current window size: ${displaySize}`,
+        title: `Current size: ${displaySize}`,
       });
     } catch (error) {
       console.error("Error getting window size:", error);
@@ -35,7 +35,7 @@ export function useCurrentWindowSize() {
       } else {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Failed to get window size",
+          title: "Failed to get size",
         });
       }
     }
