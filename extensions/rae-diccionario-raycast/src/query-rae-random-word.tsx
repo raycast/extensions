@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { List, showToast, Toast, Icon, ActionPanel, Action } from "@raycast/api";
-import { getRandomWord } from "./api/rae";
+import { List, Icon, ActionPanel, Action } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { getRandomWord, WordEntry } from "./api/rae";
 import { WordEntryFC } from "./components/WordEntry";
-import { WordEntry } from "./api/rae";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
@@ -18,11 +18,7 @@ export default function Command() {
       setWordEntry(entry);
     } catch (e) {
       setError(String(e));
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: String(e),
-      });
+      showFailureToast(e, { title: "Error" });
     } finally {
       setIsLoading(false);
     }

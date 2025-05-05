@@ -15,19 +15,22 @@
   "commands": [
     {
       "name": "query-rae-word",
-      "title": "Query Rae Word",
+      "title": "Consultar Palabra En La Rae",
+      "subtitle": "Diccionario de la Rae",
       "description": "Consulta una palabra al diccionario de la rae",
       "mode": "view"
     },
     {
       "name": "query-rae-daily-word",
-      "title": "Query Rae Word of the Day",
+      "title": "Consultar La Palabra Del Día En La Rae",
+      "subtitle": "Diccionario de la Rae",
       "description": "Consulta la palabra del día según la Rae",
       "mode": "view"
     },
     {
       "name": "query-rae-random-word",
-      "title": "Query Rae Random Word",
+      "title": "Consultar Una Palabra Aleatoria En La Rae",
+      "subtitle": "Diccionario de la Rae",
       "description": "Consulta una palabra aleatoria del diccionario de la Rae",
       "mode": "no-view"
     }

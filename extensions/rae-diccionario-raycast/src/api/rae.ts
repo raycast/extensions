@@ -2,20 +2,100 @@ import fetch from "node-fetch";
 
 const API_BASE_URL = "https://rae-api.com";
 
-export interface WordMeaning {
+// Definition of a word (senses)
+export interface Definition {
+  raw: string;
   meaning_number: number;
   category: string;
+  verb_category?: string;
+  gender?: string;
+  article?: Article;
+  usage: string;
   description: string;
+  synonyms: string[];
+  antonyms: string[];
+}
+
+export interface Article {
+  category: string;
+  gender: string;
+}
+
+export interface Origin {
+  raw: string;
+  type: string;
+  voice: string;
+  text: string;
+}
+
+export interface Conjugation {
+  singular_first_person: string;
+  singular_second_person: string;
+  singular_formal_second_person: string;
+  singular_third_person: string;
+  plural_first_person: string;
+  plural_second_person: string;
+  plural_formal_second_person: string;
+  plural_third_person: string;
+}
+
+export interface ConjugationNonPersonal {
+  infinitive: string;
+  participle: string;
+  gerund: string;
+  compound_infinitive: string;
+  compound_gerund: string;
+}
+
+export interface ConjugationIndicative {
+  present: Conjugation;
+  present_perfect: Conjugation;
+  imperfect: Conjugation;
+  past_perfect: Conjugation;
+  preterite: Conjugation;
+  past_anterior: Conjugation;
+  future: Conjugation;
+  future_perfect: Conjugation;
+  conditional: Conjugation;
+  conditional_perfect: Conjugation;
+}
+
+export interface ConjugationSubjunctive {
+  present: Conjugation;
+  present_perfect: Conjugation;
+  imperfect: Conjugation;
+  past_perfect: Conjugation;
+  future: Conjugation;
+  future_perfect: Conjugation;
+}
+
+export interface ConjugationImperative {
+  singular_second_person: string;
+  singular_formal_second_person: string;
+  plural_second_person: string;
+  plural_formal_second_person: string;
+}
+
+export interface Conjugations {
+  non_personal: ConjugationNonPersonal;
+  indicative: ConjugationIndicative;
+  subjunctive: ConjugationSubjunctive;
+  imperative: ConjugationImperative;
+}
+
+export interface Meaning {
+  origin?: Origin;
+  senses: Definition[];
+  conjugations?: Conjugations;
+}
+
+export interface WordEntry {
+  word: string;
+  meanings: Meaning[];
 }
 
 export interface Word {
   word: string;
-}
-
-export interface WordEntry extends Word {
-  meanings: {
-    senses: WordMeaning[];
-  }[];
 }
 
 export interface ApiResponse<T = unknown> {
@@ -25,7 +105,6 @@ export interface ApiResponse<T = unknown> {
 }
 
 export type WordOnlyResponse = ApiResponse<Word>;
-
 export type WordEntryResponse = ApiResponse<WordEntry>;
 
 // Helper function to make API requests and handle errors
@@ -39,7 +118,6 @@ async function makeApiRequest<T>(url: string): Promise<T> {
   const res = (await response.json()) as ApiResponse<T>;
 
   if (!res.ok) {
-    // Handle the common error structure: {"error":"NOT_FOUND","ok":false}
     const errorMsg = res.error === "NOT_FOUND" ? "Palabra no encontrada" : res.error;
     throw new Error(`Error en la respuesta de la API: ${errorMsg}`);
   }

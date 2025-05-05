@@ -5,8 +5,8 @@ const config: Config = {
   roots: ['<rootDir>/src'],
   // Only match .test.ts or .spec.ts files, not .tsx
   testMatch: [
-    '**/__tests__/**/*.+(ts|js)',
-    '**/?(*.)+(spec|test).+(ts|js)'
+    '**/__tests__/**/*.+(ts)',
+    '**/?(*.)+(spec|test).+(ts)'
   ],
   transform: {
     '^.+\\.(ts)$': ['babel-jest', {}],
