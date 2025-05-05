@@ -1,5 +1,9 @@
 # Stripe Changelog
 
+## [Open in Stripe Dashboard] - {PR_MERGE_DATE}
+
+Fixed the `Open in Stripe Dashboard` action to stop adding an extra leading slash to the URL pathname.
+
 ## [Fill Checkout] - 2024-12-04
 
 Added the `Fill Checkout` command that uses Stripe's test cards to automatically fill in a checkout form.
