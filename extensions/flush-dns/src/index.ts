@@ -39,16 +39,20 @@ export default async function main() {
   let shell: ShellType;
 
   switch (osPlatform) {
-    case "darwin":
+    case "darwin": {
       const macResult = getMacOSCommands(osCommandSet);
       if (!macResult) return;
+
       command = macResult.command
       shell = macResult.shell
+    }
       break;
 
-    case "win32":
+    case "win32": {
       command = osCommandSet.commands.ipconfig;
       shell = osCommandSet.shell;
+    }
+      
       break;
 
     default:
