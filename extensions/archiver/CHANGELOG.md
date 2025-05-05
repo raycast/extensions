@@ -1,6 +1,6 @@
 # Archiver Changelog
 
-## [Added Preview ZIP Command] - {PR_MERGE_DATE}
+## [Added Preview ZIP Command] - 2025-05-05
 
 - Added a new command to preview the contents of a ZIP file before extracting it. This command allows users to view the files and directories within the ZIP archive without extracting them.
 - Fixed ESLint errors.
