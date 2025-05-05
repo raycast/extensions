@@ -253,7 +253,7 @@ export function FormModel(props: props): JSX.Element {
                   server_name: values.serverTools,
                   server: OllamaServer.get(values.serverTools) as OllamaServer,
                   tag: values.modelTools,
-                  keep_alive: CheckboxToolsAdvanced ? values.keepAliveVision : undefined,
+                  keep_alive: CheckboxToolsAdvanced ? values.keepAliveTools : undefined,
                 }
               : undefined,
           embedding:
