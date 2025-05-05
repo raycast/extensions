@@ -67,19 +67,11 @@ export default async function Command() {
 
         // If any valid codes remain retrieve the "best"
         // The "best" is sort of subjective but most OTP's are 6-8 digits but could be
-        // 4-10 in length. This filters any OTP > 10 and selects the longest.
+        // 4-10 in length. This selects any OTP of length [4, 10] and finds the longest.
         if (validCodes.length > 0) {
           phoneFilteredOTP = validCodes
-            .filter(function (value: string) {
-              return value.length <= 10;
-            })
-            .reduceRight(function (prev: string, curr: string) {
-              if (prev.length >= curr.length) {
-                return prev;
-              } else {
-                return curr;
-              }
-            });
+            .filter(str => str.length <= 10 && str.length >= 4)
+            .reduceRight((prev, curr) => prev.length >= curr.length ? prev : curr);
         }
       }
 
