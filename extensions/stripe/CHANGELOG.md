@@ -1,6 +1,6 @@
 # Stripe Changelog
 
-## [Open in Stripe Dashboard] - {PR_MERGE_DATE}
+## [Open in Stripe Dashboard] - 2025-05-05
 
 Fixed the `Open in Stripe Dashboard` action to stop adding an extra leading slash to the URL pathname.
 
