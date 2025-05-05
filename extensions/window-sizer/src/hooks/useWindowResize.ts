@@ -53,11 +53,11 @@ export function useWindowResize() {
           Math.abs(actualWidth - requestedWidth) > sizeTolerance ||
           Math.abs(actualHeight - requestedHeight) > sizeTolerance;
 
-        // Append limitation info if size was constrained
-        const appLimitInfo = sizeWasRestricted ? " (Restricted)" : "";
+        // Append restriction info if size was constrained
+        const appRestrictionInfo = sizeWasRestricted ? " (Restricted)" : "";
 
         // Display unified message format for all cases
-        await showHUD(`🔲 Resized to ${actualWidth}×${actualHeight}${appLimitInfo}`);
+        await showHUD(`🔲 Resized to ${actualWidth}×${actualHeight}${appRestrictionInfo}`);
 
         await popToRoot();
       } catch (error) {
