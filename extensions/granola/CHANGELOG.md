@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [1.2] - {PR_MERGE_DATE}
+## [1.2] - 2025-05-05
 
 ### 🐞 Bug Fixes
 - Fixed issue where certain queries were not working as expected
