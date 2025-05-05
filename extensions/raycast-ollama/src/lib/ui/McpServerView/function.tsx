@@ -11,7 +11,7 @@ export async function DeleteMcpServer(
   value: McpServerConfig,
   setValue: (value: McpServerConfig) => Promise<void>
 ): Promise<void> {
-  const oldConfig: McpServerConfig = JSON.parse(JSON.stringify(value));
+  const oldConfig: McpServerConfig = structuredClone(value);
   delete oldConfig.mcpServers[name];
   await setValue(oldConfig);
 }
