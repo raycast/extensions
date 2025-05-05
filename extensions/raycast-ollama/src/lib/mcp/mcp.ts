@@ -30,7 +30,7 @@ export class McpClientMultiServer {
     /* Initialize a client for each Mcp Server. */
     serverNames.forEach((server) => {
       this._client.set(server, new McpClient(config.mcpServers[server], initEnvsPath));
-      if (!initEnvsPath) initEnvsPath = false;
+      if (initEnvsPath) initEnvsPath = false;
     });
   }
 
