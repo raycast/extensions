@@ -4,6 +4,7 @@ import { homedir } from "os";
 import path from "path";
 import { promisify } from "util";
 import child_process from "child_process";
+import { showFailureToast } from "@raycast/utils";
 
 const execAsync = promisify(child_process.exec);
 const FAVORITES_KEY = "repo-favorites";
@@ -57,11 +58,7 @@ export default class RepoService {
           repos.push({ name: path.basename(repoPath), fullPath: repoPath });
         }
       } catch (e: unknown) {
-        let message = "An unknown error occurred";
-        if (e instanceof Error) {
-          message = e.message;
-        }
-        showToast(Toast.Style.Failure, "Scan error", message);
+        showFailureToast(e, { title: "Scan error" });
       }
     }
     repos.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));

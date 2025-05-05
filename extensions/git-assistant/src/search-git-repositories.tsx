@@ -51,8 +51,8 @@ export default function Command() {
 
   const otherRepos = searchText
     ? repos.filter(
-      (r: Repo) => !favorites.includes(r.fullPath) && r.name.toLowerCase().includes(searchText.toLowerCase()),
-    )
+        (r: Repo) => !favorites.includes(r.fullPath) && r.name.toLowerCase().includes(searchText.toLowerCase()),
+      )
     : repos.filter((r: Repo) => !favorites.includes(r.fullPath));
 
   return (
