@@ -1,3 +1,3 @@
-# Slack Summaries Changelog
+# Slack Summarizer Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
