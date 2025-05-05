@@ -65,7 +65,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.42.0",
-    "@raycast/utils": "^1.5.2",
+    "@raycast/utils": "^1.19.1",
     "gitmojis": "^3.13.0",
     "node-fetch": "^3.3.0"
   },
