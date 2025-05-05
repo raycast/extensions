@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2025-05-05
+
+- Add Edit Bookmark action ([#18855](https://github.com/raycast/extensions/issues/18855))
+
 ## [Enhancements] - 2025-04-22
 
 - Add option to fetch all results, i.e. perform multiple API requests for each result page
