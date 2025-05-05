@@ -9,7 +9,7 @@ interface CommandSet {
   shell: ShellType;
 }
 
-const OS_COMMANDS: Record<string, CommandSet> = {
+const OS_COMMANDS = {
   darwin: {
     commands: {
       dscacheutil: "/usr/bin/dscacheutil -flushcache",
@@ -24,7 +24,7 @@ const OS_COMMANDS: Record<string, CommandSet> = {
     },
     shell: undefined, // Uses cmd.exe by default
   },
-};
+} as const satisfies Record<string, CommandSet>;
 
 export default async function main() {
   const osPlatform = platform();
