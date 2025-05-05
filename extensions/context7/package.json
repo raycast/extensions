@@ -18,7 +18,7 @@
       "title": "About Context7",
       "description": "Get information about Context7.",
       "mode": "view",
-      "path": "about-context7.js"
+      "path": "about-context7.tsx"
     }
   ],
   "tools": [

@@ -1,4 +1,4 @@
-# ✨ Context7 Documentation Extension ✨
+# ✨ Context7 Mcp ✨
 
 This Raycast extension is designed to seamlessly integrate the power of the **Context7 Model Context Protocol** into your workflow, allowing you to **research documentation directly within Raycast AI**.
 

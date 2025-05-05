@@ -2,7 +2,7 @@
 node_modules/
 
 # Build
-dist/
+# dist/  # Commented out because Raycast extensions need the dist/ folder
 
 # Environment
 .env
