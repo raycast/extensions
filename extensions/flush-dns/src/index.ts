@@ -112,7 +112,7 @@ async function getMacOSCommands(osCommandSet: CommandSet): Promise<{ command: st
     };
   } catch (e) {
     console.error("❌ Error determining macOS version:", e);
-    showHUD("Failed to determine macOS version");
+    await showHUD("Failed to determine macOS version");
     return null;
   }
 }
