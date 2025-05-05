@@ -1,5 +1,10 @@
 # Granola Changelog
 
+## [1.3] - {PR_MERGE_DATE}
+
+### 🐞 Bug Fixes
+- Fixed issue where `includeTranscript` was not being set correctly in some cases
+
 ## [1.2] - 2025-05-05
 
 ### 🐞 Bug Fixes
