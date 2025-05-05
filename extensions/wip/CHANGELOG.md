@@ -1,6 +1,6 @@
 # WIP Changelog
 
-## [Fixed typo] - {PR_MERGE_DATE}
+## [Fixed typo] - 2025-05-05
 
 - Fix typo in subtitle
 
