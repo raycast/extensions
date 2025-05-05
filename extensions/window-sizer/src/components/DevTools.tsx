@@ -20,7 +20,7 @@ export function DevTools() {
         actions={
           <ActionPanel>
             <Action
-              title="Check Screen Info"
+              title="Get Screen Info"
               onAction={() => {
                 push(<ScreenInfoDetails />);
               }}
@@ -35,7 +35,7 @@ export function DevTools() {
         actions={
           <ActionPanel>
             <Action
-              title="Clear Screen Information Cache"
+              title="Clear Screen Cache"
               icon={Icon.Trash}
               onAction={async () => {
                 try {
