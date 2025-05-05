@@ -1,6 +1,6 @@
 # Folder Search Changelog
 
-## [Fixes & Improvements] - {PR_MERGE_DATE}
+## [Fixes & Improvements] - 2025-05-05
 - **improved** Error handling by replacing showToast with showFailureToast for better error reporting
 - **fixed** Type issues with selectedItemId in List components
 - **improved** Code organization and type safety in useFolderSearch hook
