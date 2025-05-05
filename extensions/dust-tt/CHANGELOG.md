@@ -1,6 +1,6 @@
 # Dust.tt Changelog
 
-## [fixes] - 2025-05-04
+## [fixes] - {PR_MERGE_DATE}
 
 - Fix again the listing of agents.
 
