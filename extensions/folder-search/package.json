@@ -8,9 +8,9 @@
     "folders",
     "search"
   ],
-  "author": "GastroGeek",
+  "author": "omarshahine",
   "contributors": [
-    "omarshahine",
+    "GastroGeek",
     "fengtianze",
     "ridemountainpig"
   ],
@@ -44,6 +44,15 @@
       "type": "textfield"
     },
     {
+      "default": true,
+      "description": "Filter out non-user visible folders in ~/Library. This does not affect cloud storage folders (iCloud Drive, Dropbox, OneDrive, Google Drive) which will always be shown.",
+      "label": "Filter Library Folders",
+      "name": "filterLibraryFolders",
+      "required": false,
+      "title": "Filter System Library Folders",
+      "type": "checkbox"
+    },
+    {
       "default": false,
       "description": "Enables support for custom 'AppleScript' plugins in Folder Search. See README",
       "label": "Enabled",
@@ -62,30 +71,32 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.3.3",
+    "@raycast/api": "^1.96.3",
+    "@raycast/utils": "^1.19.1",
     "binary-split": "^1.0.5",
-    "fs-extra": "^11.1.0",
-    "run-applescript": "^6.0.0",
-    "through2-map": "^3.0.0",
-    "yup": "^0.32.11"
+    "fs-extra": "^11.3.0",
+    "run-applescript": "^7.0.0",
+    "through2-map": "^4.0.0",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/fs-extra": "^9.0.13",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.1.2",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "react": "^19.1.0",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "update-npm": "npm install -g npm-check-updates",
+    "update-package.json": "ncu -u"
   },
   "platforms": [
     "macOS"
