@@ -71,8 +71,8 @@ export default async function Command() {
         // 4-10 in length. This selects any OTP of length [4, 10] and finds the longest.
         if (validCodes.length > 0) {
           phoneFilteredOTP = validCodes
-            .filter(str => str.length <= 10 && str.length >= 4)
-            .reduceRight((prev, curr) => prev.length >= curr.length ? prev : curr);
+            .filter((str) => str.length <= 10 && str.length >= 4)
+            .reduceRight((prev, curr) => (prev.length >= curr.length ? prev : curr));
         }
       }
 
