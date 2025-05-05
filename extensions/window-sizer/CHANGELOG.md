@@ -1,6 +1,6 @@
 # Window Sizer Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-05-05
 
 - Fully rewrote the extension in Swift for better maintainability and performance
 - Enhanced Maximize Window to support all connected screens
