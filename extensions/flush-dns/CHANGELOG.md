@@ -1,5 +1,9 @@
 # Flush DNS Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows support.
+
 ## [macOS Sequoia Support] - 2025-03-02
 
 - Added macOS Sequoia support.
