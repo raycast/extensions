@@ -54,7 +54,7 @@ export function useWindowResize() {
           Math.abs(actualHeight - requestedHeight) > sizeTolerance;
 
         // Append limitation info if size was constrained
-        const appLimitInfo = sizeWasLimited ? " (Limited)" : "";
+        const appLimitInfo = sizeWasLimited ? " (Restricted)" : "";
 
         // Display unified message format for all cases
         await showHUD(`🔲 Resized to ${actualWidth}×${actualHeight}${appLimitInfo}`);
