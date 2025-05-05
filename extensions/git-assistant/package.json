@@ -46,8 +46,7 @@
       "title": "Scan Directories",
       "description": "Enter directories to scan, separated by a colon (:)",
       "type": "textfield",
-      "required": true,
-      "multiple": true
+      "required": true
     },
     {
       "name": "maxDepth",
