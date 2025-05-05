@@ -18,7 +18,6 @@ export interface Repo {
   fullPath: string;
 }
 
-// Service for managing Git repositories and preferences
 export default class RepoService {
   static getPreferences(): Preferences {
     return getPreferenceValues<Preferences>();
