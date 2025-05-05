@@ -35,6 +35,7 @@
     "lineville",
     "tsibog",
     "viethung0823",
+    "eyal_levy",
     "jonasengelmann"
   ],
   "pastContributors": [
@@ -503,6 +504,11 @@
       "name": "add-track-to-playlist",
       "title": "Add Track to Playlist",
       "description": "Adds a track to a playlist"
+    },
+    {
+      "name": "queue",
+      "title": "Queue",
+      "description": "Add tracks to queue and get the current queue state"
     }
   ],
   "dependencies": {

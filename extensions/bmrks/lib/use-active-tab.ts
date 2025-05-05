@@ -1,40 +1,67 @@
 import React from "react";
-import { BrowserExtension, Toast, showToast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 
 type ActiveTab = {
   url: string;
   title: string;
 };
 
-/**
- * Hook to get the active browser tab using Raycast's Browser Extension API
- * @returns The active tab's URL and title, or null if not available
- */
 export function useActiveTab() {
   const [activeTab, setActiveTab] = React.useState<ActiveTab | null>(null);
 
   React.useEffect(() => {
     (async () => {
-      try {
-        // Get all tabs from the browser extension
-        const tabs = await BrowserExtension.getTabs();
-        
-        // Find the active tab
-        const activeTab = tabs.find(tab => tab.active);
-        
-        if (!activeTab || !activeTab.url) {
-          return;
-        }
-        
-        setActiveTab({
-          url: activeTab.url,
-          title: activeTab.title || "",
-        });
-      } catch {
-        await showToast({ style: Toast.Style.Failure, title: "Error retrieving active tab" });
+      const activeWindow = await getActiveWindow();
+
+      if (!supportedBrowsers.some((browser) => browser === activeWindow)) {
+        return;
       }
+
+      const activeTab = await getActiveTabByBrowser[activeWindow as Browser]();
+
+      if (!activeTab) {
+        return;
+      }
+
+      const { url, title } = extractUrlAndTitle(activeTab);
+
+      setActiveTab({
+        url,
+        title,
+      });
     })();
   }, []);
 
   return activeTab;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+type Browser = "Google Chrome" | "Safari" | "firefox" | "Brave Browser" | "Arc";
+
+function getActiveWindow() {
+  return runAppleScript(`tell application "System Events" to get name of (processes whose frontmost is true) as text`);
+}
+
+const getActiveTabByBrowser = {
+  "Google Chrome": () =>
+    runAppleScript(`tell application "Google Chrome" to return {URL, title} of active tab of front window`),
+  Arc: () => runAppleScript(`tell application "Arc" to return {URL, title} of active tab of front window`),
+  Safari: () => runAppleScript(`tell application "Safari" to return {URL of front document, name of front document}`),
+  firefox: () => {},
+  "Brave Browser": () =>
+    runAppleScript(`tell application "Brave Browser" to return {URL, title} of active tab of front window`),
+} as const;
+
+const supportedBrowsers = Object.keys(getActiveTabByBrowser);
+
+function extractUrlAndTitle(string: string) {
+  const commaIndex = string.indexOf(",");
+  const url = string.slice(0, commaIndex).trim();
+  const title = string.slice(commaIndex + 1).trim();
+
+  return {
+    url,
+    title: title.trim(),
+  };
 }
