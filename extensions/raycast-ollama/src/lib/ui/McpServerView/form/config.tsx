@@ -50,7 +50,7 @@ export function McpServerFormConfig(props: props): React.JSX.Element {
     // Exception on undefined value.
     if (!value) return "Empty Config.";
 
-    // Exception on unvalid JSON Mcp Server Config.
+    // Exception on invalid JSON Mcp Server Config.
     let config: McpServerConfig;
     try {
       config = JSON.parse(value);
