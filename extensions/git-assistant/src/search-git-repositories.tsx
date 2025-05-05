@@ -51,8 +51,8 @@ export default function Command() {
 
   const otherRepos = searchText
     ? repos.filter(
-        (r: Repo) => !favorites.includes(r.fullPath) && r.name.toLowerCase().includes(searchText.toLowerCase()),
-      )
+      (r: Repo) => !favorites.includes(r.fullPath) && r.name.toLowerCase().includes(searchText.toLowerCase()),
+    )
     : repos.filter((r: Repo) => !favorites.includes(r.fullPath));
 
   return (
@@ -121,7 +121,12 @@ function RepoListItem(props: { repo: Repo; isFavorite: boolean; onToggleFavorite
         <ActionPanel>
           <ActionPanel.Section>
             <Action.Open title="Open in Finder" target={repo.fullPath} />
-            <Action.OpenWith title="Open in Other Apps" path={repo.fullPath} icon={Icon.AppWindow} />
+            <Action.OpenWith
+              title="Open in Other Apps"
+              path={repo.fullPath}
+              icon={Icon.AppWindow}
+              shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            />
             <Action.CopyToClipboard
               title="Copy Path"
               content={repo.fullPath}
