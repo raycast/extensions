@@ -1,3 +1,3 @@
-# DOGE Tracker Changelog
+# DOGE Changelog
 
-## [Initial Release] - 2025-02-28
+## [Initial Version] - {PR_MERGE_DATE}
