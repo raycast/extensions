@@ -19,7 +19,7 @@ A Raycast extension to **list and switch between your macOS Network Locations** 
 
 | Overview                                                 | List of Locations/Switch Confirmation                      |
 |----------------------------------------------------------|------------------------------------------------------------|
-| ![List of Locations](metadata/mac-network-location-changer-1.png) | ![Switch Confirmation](metadata/mac-network-location-changer-2.png) |
+| ![List of Locations](screenshots/mac-network-location-changer-1.png) | ![Switch Confirmation](screenshots/mac-network-location-changer-2.png) |
 
 ---
 
