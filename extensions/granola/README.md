@@ -25,3 +25,7 @@ This extension does not collect any data. It only reads data from your local Gra
 
 ## Support
 This plugin is an independent project and is not affiliated with, endorsed by, or in any way officially connected to Granola Inc. All trademarks and copyrights related to Granola and Granola AI are the property of their respective owners.
+
+## Known Issues
+
+- **Claude 3.7 Sonnet Fails to Call Tool:** A fix is being worked on, feel free to open an issue or PR if you have any suggestions. In the meantime, use other models for best results. 
