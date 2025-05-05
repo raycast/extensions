@@ -1,4 +1,4 @@
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { setTimeout } from "timers/promises";
 import { showFailureToast } from "@raycast/utils";
 
