@@ -49,10 +49,10 @@ export const docList: DocType[] = [
         {
           title: "Blocks",
           url: "https://shopify.dev/docs/storefronts/themes/architecture/blocks",
-          keyword: ["blocks"],
+          keyword: ["blocks", "theme blocks"],
           category: "Basics",
           subcategory: "Blocks",
-          description: `Blocks let developers create flexible layouts by breaking down sections into smaller, reusable pieces of Liquid. Each block has it’s own set of settings, and can be added, removed, and reordered within a section. \n\n There are three types of blocks: \n\n - Theme blocks: Created as their own Liquid files in the /blocks folder, and re-usable across multiple sections with the theme. \n\n - Section blocks: Created within a section’s Liquid file and are limited to use within that section. \n\n - App blocks: Provided by apps installed on a merchant’s shop.`,
+          description: `Blocks let developers create flexible layouts by breaking down sections into smaller, reusable pieces of Liquid. Each block has it's own set of settings, and can be added, removed, and reordered within a section. \n\n There are three types of blocks: \n\n - Theme blocks: Created as their own Liquid files in the /blocks folder, and re-usable across multiple sections with the theme. \n\n - Section blocks: Created within a section's Liquid file and are limited to use within that section. \n\n - App blocks: Provided by apps installed on a merchant's shop.`,
         },
         {
           title: "Settings",
@@ -61,6 +61,19 @@ export const docList: DocType[] = [
           category: "Basics",
           subcategory: "Settings",
           description: `To make it easier for merchants to customize your theme, you can use JSON to create settings that merchants can access through the theme editor. \n\n You can provide settings at the theme, section, or block level. Settings can be fixed (such as informational elements) or interactive (such as a drop-down menu). Setting values can be static, or use dynamic sources to render contextually appropriate values. \n\n Exposing settings makes your theme more customizable so it can better express a merchant's brand. It also can make your theme more flexible so that you can address various use cases for merchants.`,
+        },
+        {
+          title: "Conditional Settings",
+          url: "https://shopify.dev/docs/storefronts/themes/architecture/settings#conditional-settings",
+          keyword: ["conditional settings", "visible_if"],
+          category: "Basics",
+          subcategory: "Settings",
+          description: `Settings can be displayed conditionally by passing a boolean expression to the \`visible_if\` attribute. Not all settings can be conditionally set. The following settings support conditional settings:\n\n- All basic input settings\n- All sidebar settings\n- These specialized input settings:\n  - color\n  - color_background\n  - color_scheme\n  - font_picker\n  - html\n  - image_picker\n  - inline_richtext\n  - link_list\n  - liquid\n  - richtext\n  - text_alignment\n  - url\n  - video\n\n`,
+          example: `
+          {
+            "visible_if": "{{ block.settings.layout_style == 'flex' }}"
+          }
+          `,
         },
         {
           title: "Config",
@@ -93,12 +106,12 @@ export const docList: DocType[] = [
           subcategory: "Basic Input Settings",
           description: `A setting of type \`checkbox\` outputs a checkbox field. This setting type can be used for toggling features on and off, such as whether to show an announcement bar. \n\n When accessing the value of a \`checkbox\` type setting, data is returned as a boolean. \n\n If \`default\` is unspecified, then the value is \`false\` by default.`,
           example: `
-{
-  "type": "checkbox",
-  "id": "show_announcement",
-  "label": "Show announcement",
-  "default": true
-}
+            {
+              "type": "checkbox",
+              "id": "show_announcement",
+              "label": "Show announcement",
+              "default": true
+            }
           `,
         },
         {
@@ -107,16 +120,14 @@ export const docList: DocType[] = [
           keyword: ["settings", "input"],
           category: "Settings",
           subcategory: "Basic Input Settings",
-          description: `A setting of type \`number\` outputs a single number field. You can use this setting type to capture a varying numerical value, such as the number of products to show per page on a collection page. \n\n Additional attributes: \n\n - \`placeholder\`: A placeholder value for the input (optional) \n\n When accessing the value of a \`number\` type setting, data is returned as either: \n\n - A number \n\n - nil, if nothing has been entered \n\n ## ⚠️ Caution \n\n The \`default\` attribute is optional. However, the value must be a number and not a string.
-          
-\`\`\`json      
-{
-  "type": "number",
-  "id": "products_per_page",
-  "label": "Products per page",
-  "default": 20
-}
-\`\`\`
+          description: `A setting of type \`number\` outputs a single number field. You can use this setting type to capture a varying numerical value, such as the number of products to show per page on a collection page. \n\n Additional attributes: \n\n - \`placeholder\`: A placeholder value for the input (optional) \n\n When accessing the value of a \`number\` type setting, data is returned as either: \n\n - A number \n\n - nil, if nothing has been entered \n\n ## ⚠️ Caution \n\n The \`default\` attribute is optional. However, the value must be a number and not a string.`,
+          example: `
+            {
+              "type": "number",
+              "id": "products_per_page",
+              "label": "Products per page",
+              "default": 20
+            }
           `,
         },
         {
@@ -127,22 +138,22 @@ export const docList: DocType[] = [
           subcategory: "Basic Input Settings",
           description: `A setting of type \`radio\` outputs a radio option field. \n\n Additional required attributes: \n\n - \`options\`: An array of \`value\` and \`label\` definitions \n\n When accessing the value of a \`radio\` type setting, data is returned as a string. \n\n If \`default\` is unspecified, then the first option is selected by default.`,
           example: `
-{
-  "type": "radio",
-  "id": "logo_aligment",
-  "label": "Logo alignment",
-  "options": [
-    {
-      "value": "left",
-      "label": "Left"
-    },
-    {
-      "value": "centered",
-      "label": "Centered"
-    }
-  ],
-  "default": "left"
-}
+            {
+              "type": "radio",
+              "id": "logo_aligment",
+              "label": "Logo alignment",
+              "options": [
+                {
+                  "value": "left",
+                  "label": "Left"
+                },
+                {
+                  "value": "centered",
+                  "label": "Centered"
+                }
+              ],
+              "default": "left"
+            }
           `,
         },
         {
@@ -153,16 +164,16 @@ export const docList: DocType[] = [
           subcategory: "Basic Input Settings",
           description: `A setting of type \`range\` outputs a range slider field with an input field. \n\n Additional attributes: \n\n - \`min\`: The minimum value (required) \n\n - \`max\`: The maximum value (required) \n\n - \`step\`: The increment size between steps (optional, defaults to 1) \n\n - \`unit\`: The unit for the input (optional) \n\n When accessing the value of a \`range\` type setting, data is returned as a number. \n\n ## ⚠️ Caution \n\n The \`default\` attribute is required. The \`min\`, \`max\`, \`step\`, and \`default\` attributes can't be string values.`,
           example: `
-{
-  "type": "range",
-  "id": "font_size",
-  "min": 12,
-  "max": 24,
-  "step": 1,
-  "unit": "px",
-  "label": "Font size",
-  "default": 16
-}
+            {
+              "type": "range",
+              "id": "font_size",
+              "min": 12,
+              "max": 24,
+              "step": 1,
+              "unit": "px",
+              "label": "Font size",
+              "default": 16
+            }
             `,
         },
         {
@@ -173,26 +184,26 @@ export const docList: DocType[] = [
           subcategory: "Basic Input Settings",
           description: `A setting of type \`select\` outputs different selector fields. \n\n Additional attributes: \n\n - \`options\`: An array of value/label definitions (required) \n\n - \`group\`: Optional grouping for options \n\n Renders as either: \n\n - DropDown: When using groups, >5 options, or long options \n\n - SegmentedControl: 2-5 options that fit container \n\n When accessing the value of a \`select\` type setting, data is returned as a string. \n\n If \`default\` is unspecified, then the first option is selected by default.`,
           example: `
-{
-  "type": "select",
-  "id": "vertical_alignment",
-  "label": "Vertical alignment",
-  "options": [
-    {
-      "value": "top",
-      "label": "Top"
-    },
-    {
-      "value": "middle",
-      "label": "Middle"
-    },
-    {
-      "value": "bottom",
-      "label": "Bottom"
-    }
-  ],
-  "default": "middle"
-}
+            {
+              "type": "select",
+              "id": "vertical_alignment",
+              "label": "Vertical alignment",
+              "options": [
+                {
+                  "value": "top",
+                  "label": "Top"
+                },
+                {
+                  "value": "middle",
+                  "label": "Middle"
+                },
+                {
+                  "value": "bottom",
+                  "label": "Bottom"
+                }
+              ],
+              "default": "middle"
+            }
           `,
         },
         {
@@ -203,12 +214,12 @@ export const docList: DocType[] = [
           subcategory: "Basic Input Settings",
           description: `A setting of type \`text\` outputs a single-line text field. \n\n Additional attributes: \n\n - \`placeholder\`: A placeholder value for the input (optional) \n\n When accessing the value of a \`text\` type setting, data is returned as either: \n\n - A string \n\n - An empty object, if nothing has been entered \n\n ## Note \n\n Settings of type \`text\` are not updated when switching presets.`,
           example: `
-{
-  "type": "text",
-  "id": "footer_linklist_title",
-  "label": "Heading",
-  "default": "Quick links"
-}
+            {
+              "type": "text",
+              "id": "footer_linklist_title",
+              "label": "Heading",
+              "default": "Quick links"
+            }
           `,
         },
         {
@@ -219,12 +230,12 @@ export const docList: DocType[] = [
           subcategory: "Basic Input Settings",
           description: `A setting of type \`textarea\` outputs a multi-line text field. \n\n Additional attributes: \n\n - \`placeholder\`: A placeholder value for the input (optional) \n\n When accessing the value of a \`textarea\` type setting, data is returned as either: \n\n - A string \n\n - An empty object, if nothing has been entered`,
           example: `
-{
-  "type": "textarea",
-  "id": "home_welcome_message",
-  "label": "Welcome message",
-  "default": "Welcome to my shop!"
-}
+            {
+              "type": "textarea",
+              "id": "home_welcome_message",
+              "label": "Welcome message",
+              "default": "Welcome to my shop!"
+            }
           `,
         },
         {
@@ -235,11 +246,11 @@ export const docList: DocType[] = [
           subcategory: "Specialized Input Settings",
           description: `A setting of type \`article\` outputs an article picker field. \n\n When accessing the value of an \`article\` type setting, data is returned as either: \n\n - An [article object](https://shopify.dev/docs/api/liquid/objects/article) \n\n - nil, if no article is selected`,
           example: `
-{
-  "type": "article",
-  "id": "article",
-  "label": "Article"
-}
+            {
+              "type": "article",
+              "id": "article",
+              "label": "Article"
+            }
           `,
         },
         {
@@ -251,11 +262,11 @@ export const docList: DocType[] = [
           description: `A setting of type \`blog\` outputs a blog picker field. \n\n When accessing the value of a \`blog\` type setting, data is returned as either: \n\n - A [blog object](https://shopify.dev/docs/api/liquid/objects/blog) \n\n - nil, if no blog is selected
           `,
           example: `
-{
-  "type": "blog",
-  "id": "blog",
-  "label": "Blog"
-}
+            {
+              "type": "blog",
+              "id": "blog",
+              "label": "Blog"
+            }
           `,
         },
         {
@@ -267,11 +278,11 @@ export const docList: DocType[] = [
           description: `A setting of type \`collection\` outputs a collection picker field. \n\n When accessing the value of a \`collection\` type setting, data is returned as either: \n\n - A [collection object](https://shopify.dev/docs/api/liquid/objects/collection) \n\n - nil, if no collection is selected
           `,
           example: `
-{
-  "type": "collection",
-  "id": "collection",
-  "label": "Collection"
-}
+            {
+              "type": "collection",
+              "id": "collection",
+              "label": "Collection"
+            }
           `,
         },
         {
@@ -283,12 +294,12 @@ export const docList: DocType[] = [
           description: `A setting of type \`collection_list\` outputs a collection list picker field. \n\n When accessing the value of a \`collection_list\` type setting, data is returned as either: \n\n - An array of [collection objects](https://shopify.dev/docs/api/liquid/objects/collection) \n\n - An empty array, if no collections are selected
           `,
           example: `
-{
-  "type": "collection_list",
-  "id": "collection_list",
-  "label": "Collections",
-  "limit": 8
-}
+            {
+              "type": "collection_list",
+              "id": "collection_list",
+              "label": "Collections",
+              "limit": 8
+            }
           `,
         },
         {
@@ -300,12 +311,12 @@ export const docList: DocType[] = [
           description: `A setting of type \`color\` outputs a color picker field. \n\n Additional attributes: \n\n - \`opacity\`: Whether the color picker should include opacity control (optional) \n\n When accessing the value of a \`color\` type setting, data is returned as either: \n\n - A CSS color value \n\n - nil, if no color is selected \n\n ## Note \n\n The \`default\` attribute is required and must be a valid CSS color value.
           `,
           example: `
-{
-  "type": "color",
-  "id": "body_text",
-  "label": "Body text",
-  "default": "#000000"
-}
+            {
+              "type": "color",
+              "id": "body_text",
+              "label": "Body text",
+              "default": "#000000"
+            }
           `,
         },
         {
@@ -317,12 +328,12 @@ export const docList: DocType[] = [
           description: `A setting of type \`color_background\` outputs a color picker field optimized for background colors. \n\n Additional attributes: \n\n - \`opacity\`: Whether the color picker should include opacity control (optional) \n\n When accessing the value of a \`color_background\` type setting, data is returned as either: \n\n - A CSS color value \n\n - nil, if no color is selected \n\n ## Note \n\n The \`default\` attribute is required and must be a valid CSS color value.
           `,
           example: `
-{
-  "type": "color_background",
-  "id": "background",
-  "label": "Background",
-  "default": "linear-gradient(#ffffff, #000000)"
-}
+            {
+              "type": "color_background",
+              "id": "background",
+              "label": "Background",
+              "default": "linear-gradient(#ffffff, #000000)"
+            }
           `,
         },
         {
@@ -334,12 +345,12 @@ export const docList: DocType[] = [
           description: `A setting of type \`color_scheme\` outputs a color scheme picker field. \n\n When accessing the value of a \`color_scheme\` type setting, data is returned as a [color scheme object](https://shopify.dev/themes/architecture/settings/color-schemes#color-scheme-object).
           `,
           example: `
-{
-    "type": "color_scheme",
-    "id": "color_scheme",
-    "default": "scheme_1",
-    "label": "Color scheme"
-}
+            {
+                "type": "color_scheme",
+                "id": "color_scheme",
+                "default": "scheme_1",
+                "label": "Color scheme"
+            }
           `,
         },
         {
@@ -351,69 +362,69 @@ export const docList: DocType[] = [
           description: `A setting of type \`color_scheme_group\` outputs a color scheme group picker field. \n\n When accessing the value of a \`color_scheme_group\` type setting, data is returned as a [color scheme group object](https://shopify.dev/themes/architecture/settings/color-schemes#color-scheme-group-object).
           `,
           example: `
-{
-  "type": "color_scheme_group",
-  "id": "color_schemes",
-  "definition": [
-    {
-      "type": "color",
-      "id": "background",
-      "label": "t:settings_schema.colors.settings.background.label",
-      "default": "#FFFFFF"
-    },
-    {
-      "type": "color_background",
-      "id": "background_gradient",
-      "label": "t:settings_schema.colors.settings.background_gradient.label",
-      "info": "t:settings_schema.colors.settings.background_gradient.info"
-    },
-    {
-      "type": "color",
-      "id": "text",
-      "label": "t:settings_schema.colors.settings.text.label",
-      "default": "#121212"
-    },
-    {
-      "type": "color",
-      "id": "button",
-      "label": "t:settings_schema.colors.settings.button_background.label",
-      "default": "#121212"
-    },
-    {
-      "type": "color",
-      "id": "button_label",
-      "label": "t:settings_schema.colors.settings.button_label.label",
-      "default": "#FFFFFF"
-    },
-    {
-      "type": "color",
-      "id": "secondary_button_label",
-      "label": "t:settings_schema.colors.settings.secondary_button_label.label",
-      "default": "#121212"
-    },
-    {
-      "type": "color",
-      "id": "shadow",
-      "label": "t:settings_schema.colors.settings.shadow.label",
-      "default": "#121212"
-    }
-  ],
-  "role": {
-    "text": "text",
-    "background": {
-      "solid": "background",
-      "gradient": "background_gradient"
-    },
-    "links": "secondary_button_label",
-    "icons": "text",
-    "primary_button": "button",
-    "on_primary_button": "button_label",
-    "primary_button_border": "button",
-    "secondary_button": "background",
-    "on_secondary_button": "secondary_button_label",
-    "secondary_button_border": "secondary_button_label"
-  }
-}
+            {
+              "type": "color_scheme_group",
+              "id": "color_schemes",
+              "definition": [
+                {
+                  "type": "color",
+                  "id": "background",
+                  "label": "t:settings_schema.colors.settings.background.label",
+                  "default": "#FFFFFF"
+                },
+                {
+                  "type": "color_background",
+                  "id": "background_gradient",
+                  "label": "t:settings_schema.colors.settings.background_gradient.label",
+                  "info": "t:settings_schema.colors.settings.background_gradient.info"
+                },
+                {
+                  "type": "color",
+                  "id": "text",
+                  "label": "t:settings_schema.colors.settings.text.label",
+                  "default": "#121212"
+                },
+                {
+                  "type": "color",
+                  "id": "button",
+                  "label": "t:settings_schema.colors.settings.button_background.label",
+                  "default": "#121212"
+                },
+                {
+                  "type": "color",
+                  "id": "button_label",
+                  "label": "t:settings_schema.colors.settings.button_label.label",
+                  "default": "#FFFFFF"
+                },
+                {
+                  "type": "color",
+                  "id": "secondary_button_label",
+                  "label": "t:settings_schema.colors.settings.secondary_button_label.label",
+                  "default": "#121212"
+                },
+                {
+                  "type": "color",
+                  "id": "shadow",
+                  "label": "t:settings_schema.colors.settings.shadow.label",
+                  "default": "#121212"
+                }
+              ],
+              "role": {
+                "text": "text",
+                "background": {
+                  "solid": "background",
+                  "gradient": "background_gradient"
+                },
+                "links": "secondary_button_label",
+                "icons": "text",
+                "primary_button": "button",
+                "on_primary_button": "button_label",
+                "primary_button_border": "button",
+                "secondary_button": "background",
+                "on_secondary_button": "secondary_button_label",
+                "secondary_button_border": "secondary_button_label"
+              }
+            }
           `,
         },
         {
@@ -424,12 +435,12 @@ export const docList: DocType[] = [
           subcategory: "Specialized Input Settings",
           description: `A setting of type \`font_picker\` outputs a font picker field. \n\n Additional attributes: \n\n - \`default\`: A string in the format \`{font_family}_{weight}\` (required) \n\n When accessing the value of a \`font_picker\` type setting, data is returned as a [font object](https://shopify.dev/themes/architecture/settings/fonts#font-object).`,
           example: `
-{
-  "type": "font_picker",
-  "id": "heading_font",
-  "label": "Heading font",
-  "default": "helvetica_n4"
-}
+            {
+              "type": "font_picker",
+              "id": "heading_font",
+              "label": "Heading font",
+              "default": "helvetica_n4"
+            }
           `,
         },
         {
@@ -441,11 +452,11 @@ export const docList: DocType[] = [
           description: `A setting of type \`html\` outputs a multi-line text field that accepts HTML. \n\n Additional attributes: \n\n - \`placeholder\`: A placeholder value for the input (optional) \n\n When accessing the value of an \`html\` type setting, data is returned as either: \n\n - A string \n\n - An empty object, if nothing has been entered
           `,
           example: `
-{
-  "type": "html",
-  "id": "video_embed",
-  "label": "Video embed"
-}
+            {
+              "type": "html",
+              "id": "video_embed",
+              "label": "Video embed"
+            }
           `,
         },
         {
@@ -457,11 +468,11 @@ export const docList: DocType[] = [
           description: `A setting of type \`image_picker\` outputs an image picker field. \n\n When accessing the value of an \`image_picker\` type setting, data is returned as either: \n\n - An [image object](https://shopify.dev/docs/api/liquid/objects/image) \n\n - nil, if no image is selected \n\n ## Image focal points \n\n Images selected using an \`image_picker\` setting support focal points. A focal point is a position in an image that the merchant wants to remain in view as the image is cropped and adjusted by the theme.
           `,
           example: `
-{
-  "type": "image_picker",
-  "id": "image_with_text_image",
-  "label": "Image"
-}
+            {
+              "type": "image_picker",
+              "id": "image_with_text_image",
+              "label": "Image"
+            }
           `,
         },
         {
@@ -473,12 +484,12 @@ export const docList: DocType[] = [
           description: `A setting of type \`inline_richtext\` outputs a single-line rich text editor field. \n\n When accessing the value of an \`inline_richtext\` type setting, data is returned as either: \n\n - A string containing HTML \n\n - An empty object, if nothing has been entered
           `,
           example: `
-{
-  "type": "inline_richtext",
-  "id": "inline",
-  "default": "my <i>inline</i> <b>text</b>",
-  "label": "Inline rich text"
-}
+            {
+              "type": "inline_richtext",
+              "id": "inline",
+              "default": "my <i>inline</i> <b>text</b>",
+              "label": "Inline rich text"
+            }
           `,
         },
         {
@@ -490,11 +501,11 @@ export const docList: DocType[] = [
           description: `A setting of type \`link_list\` outputs a menu picker field. \n\n When accessing the value of a \`link_list\` type setting, data is returned as either: \n\n - A [linklist object](https://shopify.dev/docs/api/liquid/objects/linklist) \n\n - nil, if no menu is selected
           `,
           example: `
-{
-  "type": "link_list",
-  "id": "menu",
-  "label": "Menu"
-}
+            {
+              "type": "link_list",
+              "id": "menu",
+              "label": "Menu"
+            }
           `,
         },
         {
@@ -506,12 +517,12 @@ export const docList: DocType[] = [
           description: `A setting of type \`liquid\` outputs a multi-line text field that accepts Liquid code. \n\n Additional attributes: \n\n - \`placeholder\`: A placeholder value for the input (optional) \n\n When accessing the value of a \`liquid\` type setting, data is returned as either: \n\n - A string \n\n - An empty object, if nothing has been entered. \n\n  ## Limitations \n\n Settings of type liquid don't have access to the following liquid objects/tags: \n\n - layout \n\n - content_for_header \n\n - content_for_layout \n\n - content_for_index \n\n - section \n\n - javascript \n\n - stylesheet \n\n - schema \n\n - settings
           `,
           example: `
-{
-  "type": "liquid",
-  "id": "battery_message",
-  "label": "Battery message",
-  "default": "{% if product.tags contains 'battery' %}This product can only be shipped by ground.{% else %}This product can be shipped by ground or air.{% endif %}"
-}
+            {
+              "type": "liquid",
+              "id": "battery_message",
+              "label": "Battery message",
+              "default": "{% if product.tags contains 'battery' %}This product can only be shipped by ground.{% else %}This product can be shipped by ground or air.{% endif %}"
+            }
           `,
         },
         {
@@ -523,12 +534,12 @@ export const docList: DocType[] = [
           description: `A setting of type \`metaobject\` outputs a metaobject picker field. \n\n Additional required attributes: \n\n - \`type\`: The type of metaobject to select \n\n When accessing the value of a \`metaobject\` type setting, data is returned as either: \n\n - A [metaobject](https://shopify.dev/docs/api/liquid/objects/metaobject) \n\n - nil, if no metaobject is selected
           `,
           example: `
-{
-  "type": "metaobject",
-  "id": "my_material_setting",
-  "label": "Material",
-  "metaobject_type": "shopify--material"
-}
+            {
+              "type": "metaobject",
+              "id": "my_material_setting",
+              "label": "Material",
+              "metaobject_type": "shopify--material"
+            }
           `,
         },
         {
@@ -540,13 +551,13 @@ export const docList: DocType[] = [
           description: `A setting of type \`metaobject_list\` outputs a metaobject list picker field. \n\n Additional required attributes: \n\n - \`type\`: The type of metaobjects to select \n\n When accessing the value of a \`metaobject_list\` type setting, data is returned as either: \n\n - An array of [metaobjects](https://shopify.dev/docs/api/liquid/objects/metaobject) \n\n - An empty array, if no metaobjects are selected
           `,
           example: `
-{
-  "type": "metaobject_list",
-  "id": "my_material_list_setting",
-  "label": "Materials",
-  "metaobject_type": "shopify--material",
-  "limit": 12
-}
+            {
+              "type": "metaobject_list",
+              "id": "my_material_list_setting",
+              "label": "Materials",
+              "metaobject_type": "shopify--material",
+              "limit": 12
+            }
           `,
         },
         {
@@ -558,11 +569,11 @@ export const docList: DocType[] = [
           description: `A setting of type \`page\` outputs a page picker field. \n\n When accessing the value of a \`page\` type setting, data is returned as either: \n\n - A [page object](https://shopify.dev/docs/api/liquid/objects/page) \n\n - nil, if no page is selected
           `,
           example: `
-{
-  "type": "page",
-  "id": "page",
-  "label": "Page"
-}
+            {
+              "type": "page",
+              "id": "page",
+              "label": "Page"
+            }
           `,
         },
         {
@@ -574,11 +585,11 @@ export const docList: DocType[] = [
           description: `A setting of type \`product\` outputs a product picker field. \n\n When accessing the value of a \`product\` type setting, data is returned as either: \n\n - A [product object](https://shopify.dev/docs/api/liquid/objects/product) \n\n - nil, if no product is selected
           `,
           example: `
-{
-  "type": "product",
-  "id": "product",
-  "label": "Product"
-}
+            {
+              "type": "product",
+              "id": "product",
+              "label": "Product"
+            }
           `,
         },
         {
@@ -590,12 +601,12 @@ export const docList: DocType[] = [
           description: `A setting of type \`product_list\` outputs a product list picker field. \n\n When accessing the value of a \`product_list\` type setting, data is returned as either: \n\n - An array of [product objects](https://shopify.dev/docs/api/liquid/objects/product) \n\n - An empty array, if no products are selected
           `,
           example: `
-{
-  "type": "product_list",
-  "id": "product_list",
-  "label": "Products",
-  "limit": 12
-}
+            {
+              "type": "product_list",
+              "id": "product_list",
+              "label": "Products",
+              "limit": 12
+            }
           `,
         },
         {
@@ -607,11 +618,11 @@ export const docList: DocType[] = [
           description: `A setting of type \`richtext\` outputs a rich text editor field. \n\n When accessing the value of a \`richtext\` type setting, data is returned as either: \n\n - A string containing HTML \n\n - An empty object, if nothing has been entered \n\n ## default \n\n The default attribute isn't required. However, if it's used, then only \`<p>\` or \`<ul>\` tags are supported as top-level elements. \n\n The following HTML tags are also supported inside the parent \`<p>\` tag: \n\n - \`<p>\` \n\n - \`<br>\` \n\n - \`<strong>\` \n\n - \`<b>\` \n\n - \`<em>\` \n\n - \`<i>\` \n\n - \`<u>\` \n\n - \`<span>\` \n\n - \`<a>\` \n\n  ## ⚠️ Caution \n\n Failing to wrap the default content in \`<p>\` or \`<ul>\` tags will result in an error.
           `,
           example: `
-{
-  "type": "richtext",
-  "id": "paragraph",
-  "label": "Paragraph"
-}
+            {
+              "type": "richtext",
+              "id": "paragraph",
+              "label": "Paragraph"
+            }
           `,
         },
         {
@@ -623,12 +634,12 @@ export const docList: DocType[] = [
           description: `A setting of type \`text_alignment\` outputs a text alignment control. \n\n When accessing the value of a \`text_alignment\` type setting, data is returned as a string with one of the following values: \n\n - \`left\` \n\n - \`center\` \n\n - \`right\` \n\n If \`default\` is unspecified, then \`left\` is selected by default.
           `,
           example: `
-{
-   "type": "text_alignment",
-   "id": "alignment",
-   "label": "Text alignment",
-   "default": "center"
-}
+            {
+              "type": "text_alignment",
+              "id": "alignment",
+              "label": "Text alignment",
+              "default": "center"
+            }
           `,
         },
         {
@@ -640,11 +651,11 @@ export const docList: DocType[] = [
           description: `A setting of type \`url\` outputs a URL picker field. \n\n When accessing the value of a \`url\` type setting, data is returned as either: \n\n - A string \n\n - nil, if no URL is entered \n\n ## url \n\n A setting of type \`url\` outputs a URL entry field where you can manually enter external URLs and relative paths. It also has a picker that's automatically populated with the following available resources for the shop: \n\n - Articles \n\n - Blogs \n\n - Collections \n\n - Pages \n\n - Products \n\n You can use this setting type to capture a URL selection, such as the URL to use for a slideshow button link.
           `,
           example: `
-{
-  "type": "url",
-  "id": "button_link",
-  "label": "Button link"
-}
+            {
+              "type": "url",
+              "id": "button_link",
+              "label": "Button link"
+            }
           `,
         },
         {
@@ -656,11 +667,11 @@ export const docList: DocType[] = [
           description: `A setting of type \`video\` outputs a video picker field. \n\n When accessing the value of a \`video\` type setting, data is returned as either: \n\n - A [video object](https://shopify.dev/docs/api/liquid/objects/video) \n\n - nil, if no video is selected \n\n ## Note \n\n Only videos uploaded through the Shopify admin are supported.
           `,
           example: `
-{
-  "type": "video",
-  "id": "video",
-  "label": "A Shopify-hosted video"
-}
+            {
+              "type": "video",
+              "id": "video",
+              "label": "A Shopify-hosted video"
+            }
           `,
         },
         {
@@ -672,16 +683,68 @@ export const docList: DocType[] = [
           description: `A setting of type \`video_url\` outputs a video URL field. \n\n When accessing the value of a \`video_url\` type setting, data is returned as either: \n\n - A string \n\n - nil, if no URL is entered \n\n ## Note \n\n Only YouTube and Vimeo URLs are supported.
           `,
           example: `
-{
-  "type": "video_url",
-  "id": "product_description_video",
-  "label": "Product description video",
-  "accept": [
-    "youtube",
-    "vimeo"
-  ]
-}
+            {
+              "type": "video_url",
+              "id": "product_description_video",
+              "label": "Product description video",
+              "accept": [
+                "youtube",
+                "vimeo"
+              ]
+            }
           `,
+        },
+      ],
+    },
+  },
+  {
+    section: {
+      sectionTitle: "Developer Tools",
+      items: [
+        {
+          title: "CLI",
+          url: "https://shopify.dev/docs/storefronts/themes/tools/cli",
+          keyword: ["cli", "theme cli"],
+          category: "Developer Tools",
+          subcategory: "CLI",
+          description:
+            "Shopify CLI is a command-line interface tool that helps you build Shopify apps and themes. It quickly generates Shopify apps, themes, and custom storefronts. You can also use it to automate many common development tasks.",
+        },
+        {
+          title: "Github Integration",
+          url: "https://shopify.dev/docs/storefronts/themes/tools/github",
+          keyword: ["github", "integration", "git"],
+          category: "Developer Tools",
+          subcategory: "Git",
+          description:
+            "The Shopify GitHub app lets you connect your GitHub and Shopify accounts. This lets you sync theme code to and from GitHub repositories and collaborate with other developers on your themes.",
+        },
+        {
+          title: "Liquid VS Code Extension",
+          url: "https://shopify.dev/docs/storefronts/themes/tools/shopify-liquid-vscode",
+          keyword: ["vs code", "liquid", "extension"],
+          category: "Developer Tools",
+          subcategory: "VS Code",
+          description:
+            "Install the Shopify Liquid extension in VS Code for the Web to enable intelligent code completion, syntax highlighting, and other features for working with themes directly in your browser.",
+        },
+        {
+          title: "LiquidDoc",
+          url: "https://shopify.dev/docs/storefronts/themes/tools/liquid-doc",
+          keyword: ["liquidoc", "liquid", "documentation", "snippet"],
+          category: "Developer Tools",
+          subcategory: "Liquid",
+          description:
+            "LiquidDoc gives you a way to create a structured interface for Liquid snippets, allowing you to specify input parameters, add descriptions, and provide usage examples. These details are exposed through theme checks, code completions, and hover information, making development faster and more reliable. LiquidDoc uses a JSDoc-inspired syntax to document snippets.",
+          example: `{% render 'loading-spinner', produt: product, show_vendor: true %}`,
+        },
+        {
+          title: "Theme Check",
+          url: "https://shopify.dev/docs/storefronts/themes/tools/theme-check",
+          keyword: ["theme", "check", "review", "qa"],
+          category: "Developer Tools",
+          subcategory: "Liquid",
+          description: `Theme Check is a linter for the Liquid and JSON inside your theme and theme app extensions. It detects errors and enforces Liquid best practices.\n\nTheme Check can identify several issues in your theme code. For example, it can identify the following:\n\n- Syntax errors\n- Missing templates\n- Unused variables and snippets\n- Unknown and deprecated tags\n- Performance issues\n\nProgramming and style errors display directly in your console or code editor. Each error includes a link to the failed check's documentation, allowing you to debug issues quickly.\n\nYou can use Theme Check in the following ways:\n\n- Through Shopify CLI - Run checks against your theme on demand, in CI or with our Language Server.\n- Via the Shopify Liquid Visual Studio Code extension - Theme Check is included in the extension.\n\n`,
         },
       ],
     },
