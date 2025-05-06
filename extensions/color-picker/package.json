@@ -232,5 +232,8 @@
     "lint": "ray lint",
     "pull": "ray pull-contributions",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
