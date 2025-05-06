@@ -26,7 +26,6 @@ export default function CreatePromptForm() {
     const fetchSelectedText = async () => {
       setIsLoading(true);
       try {
-        await getSelectedText();
         const selectedText = await getSelectedText();
         if (selectedText) {
           setInitialContent(selectedText);
