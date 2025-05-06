@@ -7,7 +7,7 @@ Made with 💚 for the Nuxt community
 
 ---
 
-<a title="Install Nuxt Raycast Extension" href="https://www.raycast.com/HugoRCD/nuxt-ui"><img src="https://www.raycast.com/HugoRCD/nuxt-ui/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install Nuxt Raycast Extension" href="https://www.raycast.com/HugoRCD/nuxt"><img src="https://www.raycast.com/HugoRCD/nuxt/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 
 </div>
 
@@ -81,13 +81,26 @@ This is just the beginning. Here's what's coming:
 
 Got ideas to make this even better? Issues and PRs are welcome!
 
-<!-- automd:contributors license=Apache github=HugoRCD/nuxt-ui-raycast-extension" -->
+<!-- automd:fetch url="gh:hugorcd/markdown/main/src/sponsors.md" -->
 
-Published under the [APACHE](https://github.com/HugoRCD/nuxt-ui-raycast-extension"/blob/main/LICENSE) license.
-Made by [community](https://github.com/HugoRCD/nuxt-ui-raycast-extension"/graphs/contributors) 💛
+## Sponsors
+
+<p align="center">
+  <a href="https://github.com/sponsors/HugoRCD">
+    <img src='https://cdn.jsdelivr.net/gh/hugorcd/static/sponsors.svg' alt="HugoRCD sponsors" />
+  </a>
+</p>
+
+<!-- /automd -->
+
+## Contributors
+
+<!-- automd:contributors github="HugoRCD/nuxt-raycast-extension" -->
+
+Made by [community](https://github.com/HugoRCD/nuxt-raycast-extension/graphs/contributors) 💛
 <br><br>
-<a href="https://github.com/HugoRCD/nuxt-ui-raycast-extension"/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=HugoRCD/nuxt-ui-raycast-extension"" />
+<a href="https://github.com/HugoRCD/nuxt-raycast-extension/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=HugoRCD/nuxt-raycast-extension" />
 </a>
 
 <!-- /automd -->
@@ -96,6 +109,6 @@ Made by [community](https://github.com/HugoRCD/nuxt-ui-raycast-extension"/graphs
 
 ---
 
-_🤖 auto updated with [automd](https://automd.unjs.io) (last updated: Wed Mar 06 2024)_
+_🤖 auto updated with [automd](https://automd.unjs.io) (last updated: Tue May 06 2025)_
 
 <!-- /automd -->

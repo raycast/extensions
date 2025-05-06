@@ -55,6 +55,11 @@ export const proComponents = [
   "banner",
   "blogPost",
   "blogPosts",
+  "chatMessage",
+  "chatMessages",
+  "chatPalette",
+  "chatPrompt",
+  "chatPromptSubmit",
   "colorModeAvatar",
   "colorModeButton",
   "colorModeImage",
@@ -100,6 +105,7 @@ export const proComponents = [
   "pageSection",
   "pricingPlan",
   "pricingPlans",
+  "pricingTable",
   "user",
 ];
 
