@@ -56,18 +56,25 @@ export default async function generateMermaidImageTool(input: MermaidToolInput):
   let outputImagePath: string | null = null;
 
   try {
-    await showToast({ style: Toast.Style.Animated, title: "AI is generating diagram..." });
+    // Create a single toast that we'll update throughout the process
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Generating diagram...",
+    });
 
     // Generate the diagram
     outputImagePath = await generateMermaidDiagram(mermaidSyntax, tempFileRef);
 
-    await showToast({ style: Toast.Style.Success, title: "Diagram generated successfully" });
-    await showToast({ style: Toast.Style.Animated, title: "Copying image to clipboard..." });
+    // Update toast to show progress
+    toast.title = "Copying image to clipboard...";
 
     // Copy to clipboard
     await copyImageToClipboard(outputImagePath, preferences.outputFormat);
 
-    await showToast({ style: Toast.Style.Success, title: "Image copied to clipboard" });
+    // Update toast to show success
+    toast.style = Toast.Style.Success;
+    toast.title = "Diagram copied to clipboard";
+
     return "The Mermaid diagram was successfully generated and copied to your clipboard.";
   } catch (error) {
     console.error("AI tool execution failed:", error);
