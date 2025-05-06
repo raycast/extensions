@@ -1,19 +1,19 @@
 import { getPreferenceValues, Icon } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
-import { Member, SortProperty, SpaceObject, Type } from "../models";
+import { Member, Property, SortProperty, SpaceObject, Type } from "../models";
 import { getDateLabel, getShortDateLabel } from "../utils";
 
 export function processObject(
   object: SpaceObject,
   isPinned: boolean,
-  mutateObjects: MutatePromise<SpaceObject[] | Type[] | Member[]>,
-  mutatePinnedObjects?: MutatePromise<SpaceObject[] | Type[] | Member[]>,
+  mutateObjects: MutatePromise<SpaceObject[] | Type[] | Property[] | Member[]>,
+  mutatePinnedObjects?: MutatePromise<SpaceObject[] | Type[] | Property[] | Member[]>,
 ) {
   const { sort } = getPreferenceValues();
   // If sort is 'Name', fall back to using 'LastModifiedDate' for date details
   const sortForDate = sort === SortProperty.Name ? SortProperty.LastModifiedDate : sort;
-  const dateProperty = object.properties.find((property) => property.id === sortForDate);
+  const dateProperty = object.properties.find((property) => property.key === sortForDate);
   const date = dateProperty && dateProperty.date ? dateProperty.date : undefined;
   const hasValidDate = date && new Date(date).getTime() !== 0;
 
@@ -40,8 +40,10 @@ export function processObject(
         text: hasValidDate ? undefined : "—",
       },
     ],
-    mutate: [mutateObjects, mutatePinnedObjects].filter(Boolean) as MutatePromise<SpaceObject[] | Type[] | Member[]>[],
-    member: undefined,
+    mutate: [mutateObjects, mutatePinnedObjects].filter(Boolean) as MutatePromise<
+      SpaceObject[] | Type[] | Property[] | Member[]
+    >[],
+    object: object,
     layout: object.layout,
     isPinned,
   };

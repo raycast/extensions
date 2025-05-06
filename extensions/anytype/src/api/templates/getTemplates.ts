@@ -1,5 +1,5 @@
-import { mapTemplates } from "../../mappers/templates";
-import { PaginatedResponse, Pagination, RawTemplate, Template } from "../../models";
+import { mapObjects } from "../../mappers/objects";
+import { PaginatedResponse, Pagination, RawSpaceObject, SpaceObject } from "../../models";
 import { apiEndpoints, apiFetch } from "../../utils";
 
 export async function getTemplates(
@@ -10,14 +10,14 @@ export async function getTemplates(
     limit: number;
   },
 ): Promise<{
-  templates: Template[];
+  templates: SpaceObject[];
   pagination: Pagination;
 }> {
   const { url, method } = apiEndpoints.getTemplates(spaceId, typeId, options);
-  const response = await apiFetch<PaginatedResponse<RawTemplate>>(url, { method: method });
+  const response = await apiFetch<PaginatedResponse<RawSpaceObject>>(url, { method: method });
 
   return {
-    templates: response.payload.data ? await mapTemplates(response.payload.data) : [],
+    templates: response.payload.data ? await mapObjects(response.payload.data) : [],
     pagination: response.payload.pagination,
   };
 }
