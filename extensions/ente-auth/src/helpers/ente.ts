@@ -30,7 +30,7 @@ export const exportEnteAuthSecrets = (): boolean => {
   if (!fse.existsSync(EXPORT_FILE_PATH)) {
     console.log("ente_auth.txt not found. Exporting...");
     try {
-      execSync("ente export");
+      execSync(`${DEFAULT_CLI_PATH} export`);
     } catch (error) {
       throw new Error("Export failed. Please check if the command is correct.");
     }
