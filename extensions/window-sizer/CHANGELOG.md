@@ -1,5 +1,6 @@
 # Window Sizer Changelog
 
+
 ## Update Extension Icon - {PR_MERGE_DATE}
 
 - Update extension icon and screenshots
@@ -9,7 +10,7 @@
 - Fix toast text when restoring a window with restricted size
 - Unify toast text style
 
-## Completely refactored with Swift - 2025-05-05
+## Refactored entirely in Swift - 2025-05-05
 
 - Fully rewrote the extension in Swift for better maintainability and performance
 - Enhanced Maximize Window to support all connected screens
