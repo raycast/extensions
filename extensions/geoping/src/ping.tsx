@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { exec } from "child_process";
-import { Icon, List, Color, Image, Action, ActionPanel } from "@raycast/api";
+import { Icon, List, Color, Image, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
 import type { Server, PingResult, Row } from "./types";
 import { regions, flags, Country } from "./servers";
 import { showFailureToast } from "@raycast/utils";
@@ -79,6 +79,7 @@ export default function Command() {
   const [pingResults, setPingResults] = useState([] as Row[]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const preferences = getPreferenceValues<Preferences>();
 
   const refresh = async () => {
     setIsLoading(true);
@@ -132,24 +133,57 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {pingResults.map((result, index) => (
-        <List.Item
-          key={index}
-          icon={generateIcon(result)}
-          title={`${flags[result.region.country as Country] || ""}  ${result.region.name}`}
-          subtitle={`${result.region.country} (${result.region.code.toUpperCase()})`}
-          accessories={[
-            {
-              text: `${result.unreachable ? "Unreachable" : result.latency.toFixed() + "ms"}`,
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action title="Refresh" onAction={refresh} icon={Icon.ArrowClockwise} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {pingResults.map((result, index) => {
+        const latency = `${result.unreachable ? "Unreachable" : result.latency.toFixed() + "ms"}`;
+        const resultText = `Server: ${result.region.name} (${result.region.code.toUpperCase()}) - Latency: ${latency}`;
+
+        const actions = [
+          <Action
+            title="Refresh"
+            onAction={refresh}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            icon={Icon.ArrowClockwise}
+          />,
+          <Action.CopyToClipboard
+            title="Copy Result"
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+            content={resultText}
+          />,
+          <Action.Paste
+            title="Paste Result"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            content={resultText}
+          />,
+        ];
+
+        // Reorder actions based on preference
+        const primaryActionIndex = actions.findIndex((action) => {
+          if (preferences.primaryAction === "refresh") return action.props.title === "Refresh";
+          if (preferences.primaryAction === "copy") return action.props.title === "Copy Result";
+          if (preferences.primaryAction === "paste") return action.props.title === "Paste Result";
+          return false;
+        });
+
+        if (primaryActionIndex !== -1) {
+          const [primaryAction] = actions.splice(primaryActionIndex, 1);
+          actions.unshift(primaryAction);
+        }
+
+        return (
+          <List.Item
+            key={index}
+            icon={generateIcon(result)}
+            title={`${flags[result.region.country as Country] || ""}  ${result.region.name}`}
+            subtitle={`${result.region.country} (${result.region.code.toUpperCase()})`}
+            accessories={[
+              {
+                text: latency,
+              },
+            ]}
+            actions={<ActionPanel>{actions}</ActionPanel>}
+          />
+        );
+      })}
     </List>
   );
 }
