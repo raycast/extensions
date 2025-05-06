@@ -15,7 +15,7 @@
       "name": "ping",
       "title": "Ping",
       "subtitle": "Ping servers around the globe",
-      "description": "See how long it takes to reach servers around the globe",
+      "description": "Compare latency and availability of servers around the globe",
       "mode": "view"
     }
   ],

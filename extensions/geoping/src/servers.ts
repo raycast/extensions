@@ -758,7 +758,7 @@ export const regions: Region[] = [
   },
 ];
 
-export const flags: { [key: string]: string } = {
+export const flags = {
   "United States": "🇺🇸",
   "United Kingdom": "🇬🇧",
   "Hong Kong": "🇭🇰",
@@ -776,4 +776,6 @@ export const flags: { [key: string]: string } = {
   Japan: "🇯🇵",
   India: "🇮🇳",
   Brazil: "🇧🇷",
-};
+} as const;
+
+export type Country = keyof typeof flags;

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { exec } from "child_process";
-import { Icon, List, Detail, Color, Image, Action, ActionPanel } from "@raycast/api";
+import { Icon, List, Color, Image, Action, ActionPanel } from "@raycast/api";
 import type { Server, PingResult, Row } from "./types";
-import { regions, flags } from "./servers";
+import { regions, flags, Country } from "./servers";
+import { showFailureToast } from "@raycast/utils";
 
 function generateIcon(result: Row): Image.ImageLike {
   if (result.unreachable) {
@@ -32,24 +33,31 @@ function generateIcon(result: Row): Image.ImageLike {
 }
 
 async function ping(server: Server): Promise<PingResult> {
-  console.log(`Pinging ${server.hostName}...`);
-  return new Promise((resolve) => {
-    exec(`/sbin/ping -c 1 ${server.ipv4}`, (error, stdout) => {
-      if (error) {
-        resolve({ latency: 99999, error: error.toString() });
-      } else {
-        const time = stdout.match(/time=(\d+\.\d+)/);
-        resolve({
-          latency: time ? parseInt(time[1]) : 9999,
-          error: null,
-        });
-      }
+  try {
+    return new Promise((resolve) => {
+      exec(`/sbin/ping -c 1 ${server.ipv4}`, (error, stdout) => {
+        if (error) {
+          resolve({ latency: 99999, error: error.toString() });
+        } else {
+          const time = stdout.match(/time=(\d+\.\d+)/);
+
+          resolve({
+            latency: time ? parseInt(time[1]) : 9999,
+            error: null,
+          });
+        }
+      });
     });
-  });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    showFailureToast(error, { title: `Pinging server at ${server.name} failed` });
+    return new Promise((resolve) => {
+      resolve({ latency: 99999, error: errorMessage });
+    });
+  }
 }
 
 async function getPingResults(updatePingResults: (result: Row) => void): Promise<void> {
-  console.log(`Pinging ${regions.length} servers...`);
   const pingPromises = regions.map(async (region) => {
     const randomServer = region.servers[Math.floor(Math.random() * region.servers.length)];
     const result = await ping(randomServer);
@@ -90,8 +98,8 @@ export default function Command() {
         });
       });
     } catch (err) {
-      setError("Failed to fetch ping results");
-      console.error(err);
+      setError("Failed to ping servers");
+      showFailureToast(err, { title: "Failed to ping servers" });
     } finally {
       setIsLoading(false);
     }
@@ -104,50 +112,44 @@ export default function Command() {
   if (error) {
     return (
       <List
+        isLoading={false}
         actions={
           <ActionPanel>
             <Action title="Refresh" onAction={refresh} icon={Icon.ArrowClockwise} />
           </ActionPanel>
         }
       >
-        <List.Item title="Error" subtitle={error} />
+        <List.Item
+          title={error}
+          icon={{
+            source: Icon.Warning,
+            tintColor: Color.Red,
+          }}
+        />
       </List>
     );
   }
 
   return (
-    <>
-      {!isLoading && pingResults.every((result) => result.unreachable !== null) ? (
-        <Detail
-          markdown={`**All servers are offline!**`}
+    <List isLoading={isLoading}>
+      {pingResults.map((result, index) => (
+        <List.Item
+          key={index}
+          icon={generateIcon(result)}
+          title={`${flags[result.region.country as Country] || ""}  ${result.region.name}`}
+          subtitle={`${result.region.country} (${result.region.code.toUpperCase()})`}
+          accessories={[
+            {
+              text: `${result.unreachable ? "Unreachable" : result.latency.toFixed() + "ms"}`,
+            },
+          ]}
           actions={
             <ActionPanel>
               <Action title="Refresh" onAction={refresh} icon={Icon.ArrowClockwise} />
             </ActionPanel>
           }
         />
-      ) : (
-        <List isLoading={isLoading}>
-          {pingResults.map((result, index) => (
-            <List.Item
-              key={index}
-              icon={generateIcon(result)}
-              title={`${flags[result.region.country] || ""}  ${result.region.name}`}
-              subtitle={`${result.region.country} (${result.region.code.toUpperCase()})`}
-              accessories={[
-                {
-                  text: `${result.unreachable ? "(?)" : result.latency.toFixed()}ms`,
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action title="Refresh" onAction={refresh} icon={Icon.ArrowClockwise} />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List>
-      )}
-    </>
+      ))}
+    </List>
   );
 }
