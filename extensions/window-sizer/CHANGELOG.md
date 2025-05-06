@@ -1,6 +1,6 @@
 # Window Sizer Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-05-06
 
 - Fix toast text when restoring a window with restricted size
 - Unify toast text style
