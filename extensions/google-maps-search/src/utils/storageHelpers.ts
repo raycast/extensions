@@ -178,8 +178,26 @@ export async function getStorageItem<T>(
  */
 export async function setStorageItem(key: string, value: StorageValue): Promise<boolean> {
   try {
-    const valueToStore = typeof value === "object" ? JSON.stringify(value) : value;
-    await LocalStorage.setItem(key, valueToStore);
+    // Handle null values - store as string "null"
+    if (value === null) {
+      await LocalStorage.setItem(key, "null");
+      return true;
+    }
+
+    // Handle objects - need to stringify
+    if (typeof value === "object") {
+      try {
+        const stringifiedValue = JSON.stringify(value);
+        await LocalStorage.setItem(key, stringifiedValue);
+        return true;
+      } catch (stringifyError) {
+        console.error(`Failed to stringify object for key "${key}": possible circular reference`, stringifyError);
+        return false;
+      }
+    }
+
+    // Handle primitive values
+    await LocalStorage.setItem(key, value as string | number | boolean);
     return true;
   } catch (error) {
     console.error(`Failed to save item to storage: ${key}`, error);
@@ -231,13 +249,49 @@ export async function batchSetStorageItems(items: Record<string, StorageValue>):
   success: boolean;
   failedItems: { key: string; error: unknown }[];
 }> {
-  const operations = Object.entries(items).map(([key, value]) => {
-    const valueToStore = typeof value === "object" ? JSON.stringify(value) : value;
-    return {
-      key,
-      promise: LocalStorage.setItem(key, valueToStore),
-    };
-  });
+  const operations: { key: string; promise: Promise<void>; error?: unknown }[] = [];
+
+  // Process each item individually to handle potential JSON.stringify errors
+  for (const [key, value] of Object.entries(items)) {
+    try {
+      let valueToStore: string | number | boolean;
+
+      // Handle null values
+      if (value === null) {
+        valueToStore = "null";
+      }
+      // Handle objects - need to stringify
+      else if (typeof value === "object") {
+        try {
+          valueToStore = JSON.stringify(value);
+        } catch (stringifyError) {
+          console.error(`Failed to stringify object for key "${key}": possible circular reference`, stringifyError);
+          operations.push({
+            key,
+            promise: Promise.reject(stringifyError),
+            error: stringifyError,
+          });
+          continue; // Skip to next item
+        }
+      }
+      // Handle primitive values
+      else {
+        valueToStore = value as string | number | boolean;
+      }
+
+      operations.push({
+        key,
+        promise: LocalStorage.setItem(key, valueToStore),
+      });
+    } catch (error) {
+      // Catch any other unexpected errors
+      operations.push({
+        key,
+        promise: Promise.reject(error),
+        error,
+      });
+    }
+  }
 
   try {
     // Use Promise.allSettled to continue even if some operations fail

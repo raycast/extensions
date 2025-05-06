@@ -111,6 +111,7 @@ export async function generateStaticMapUrl(options: RenderMapOptions): Promise<{
     console.log("Generating map for places:", options.places);
 
     // Track which places were successfully added to the map
+    // Using 'let' because successfulPlaces may be reassigned if URL length exceeds limits
     let successfulPlaces: Array<{ name: string; coords: { lat: number; lng: number } }> = [];
     const failedPlaces: string[] = [];
 

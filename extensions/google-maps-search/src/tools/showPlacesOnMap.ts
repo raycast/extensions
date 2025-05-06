@@ -1,12 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { Preferences } from "../types";
+import { renderMap } from "../utils/mapRenderer";
 
 // Maximum allowed map dimensions for the API
 const MAX_MAP_WIDTH = 640;
 const MAX_MAP_HEIGHT = 640;
 const DEFAULT_MAP_SIZE = `${MAX_MAP_WIDTH}x${MAX_MAP_HEIGHT}`;
-import { Preferences } from "../types";
-import { renderMap } from "../utils/mapRenderer";
 
 /**
  * Input type for the showPlacesOnMap tool

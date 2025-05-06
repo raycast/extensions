@@ -33,13 +33,15 @@ export type SortOrder = "none" | "distance" | "rating" | "price" | "price-desc";
  * Corresponds to the preferences defined in package.json.
  */
 export interface Preferences {
-  apiKey: string;
+  /**
+   * Google Places API key used for all API calls
+   */
+  googlePlacesApiKey: string;
   homeAddress: string;
   preferredMode: TransportType;
   preferredOrigin: OriginOption;
   useSelected: boolean;
   saveSearchHistory: boolean;
-  googlePlacesApiKey: string;
   showMapInSidebar: boolean;
   unitSystem: "metric" | "imperial";
   defaultSortOrder: SortOrder;

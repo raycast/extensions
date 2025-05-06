@@ -78,6 +78,15 @@ export function NearbyPlacesSearchForm() {
 
       const radiusValue = parseFloat(values.radius);
 
+      // Validate origin before proceeding
+      if (!values.origin || !(Object.values(OriginOption) as string[]).includes(values.origin)) {
+        await showFailureToast({
+          title: "Invalid Origin",
+          message: "Please select a valid origin option before searching.",
+        });
+        return;
+      }
+
       const places = await searchNearbyPlaces(
         values.placeType,
         values.origin as OriginOption,
@@ -87,7 +96,7 @@ export function NearbyPlacesSearchForm() {
       );
 
       if (places && places.length > 0) {
-        const placeNavigation = createPlaceNavigation(push, pop, places, NearbyPlacesSearchForm, values.placeType);
+        const placeNavigation = createPlaceNavigation(push, pop, places, values.placeType);
         placeNavigation.navigateToResults(isLoading);
       } else {
         await showFailureToast({

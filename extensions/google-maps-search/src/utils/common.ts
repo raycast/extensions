@@ -82,9 +82,17 @@ export function getUnitSystem(): "metric" | "imperial" {
 
 /**
  * Renders star rating as text (e.g., "★★★★☆" for 4.0)
+ * @param rating Rating value (0-5)
+ * @returns Formatted star rating as string
  */
 export function renderStarRating(rating: number | undefined): string {
   if (rating === undefined) return "No Rating";
+
+  // Validate that rating is between 0-5
+  if (rating < 0 || rating > 5) {
+    console.warn(`Invalid rating value: ${rating}. Expected value between 0-5.`);
+    return "Rating not available";
+  }
 
   const fullStars = Math.floor(rating);
   const halfStar = rating % 1 >= 0.5;

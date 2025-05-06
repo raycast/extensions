@@ -1,8 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
-import { getNearbyPlaces, geocodeAddress } from "../utils/googlePlacesApi";
+import { getNearbyPlaces, geocodeAddress, getApiKey } from "../utils/googlePlacesApi";
 import { makeSearchURL } from "../utils/url";
 import { formatDistance, calculateDistance } from "../utils/common";
-import { Preferences } from "../types";
 import { showFailureToast } from "@raycast/utils";
 
 /**
@@ -40,9 +38,11 @@ type FindNearbyPlacesInput = {
  */
 export default async function (input: FindNearbyPlacesInput): Promise<string> {
   try {
-    const preferences = getPreferenceValues<Preferences>();
-    if (!preferences.apiKey) {
-      return "Please set your Google Maps API key in preferences.";
+    // Use the getApiKey function instead of directly accessing preferences.apiKey
+    // This ensures consistent API key handling across the application
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      return "Please set your Google Places API key in preferences.";
     }
     const radius = input.radius || 1000;
     const limit = input.limit || 5;
@@ -90,7 +90,7 @@ export default async function (input: FindNearbyPlacesInput): Promise<string> {
 
     return response;
   } catch (error) {
-    showFailureToast(error, { title: "Error Searching Nearby Places", message: String(error) });
+    showFailureToast(error, { title: "Error Searching Nearby Places" });
     return `Sorry, I encountered an error while searching for ${input.type} places near "${input.location}". Please check your API key and try again.`;
   }
 }

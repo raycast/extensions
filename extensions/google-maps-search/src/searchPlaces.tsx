@@ -40,8 +40,12 @@ function SearchPlacesCommand({ initialSearchText }: { initialSearchText?: string
   // Save search to recent searches
   const saveSearch = useCallback(
     (search: string) => {
-      if (search.length >= MIN_SEARCH_LENGTH && !recentSearches.includes(search.trim()) && saveSearchHistory) {
-        const updatedSearches = [search, ...recentSearches.filter((s) => s !== search)].slice(0, 10);
+      // Trim the search text first for consistent comparison
+      const trimmedSearch = search.trim();
+
+      if (trimmedSearch.length >= MIN_SEARCH_LENGTH && !recentSearches.includes(trimmedSearch) && saveSearchHistory) {
+        // Use the trimmed search for storage to maintain consistency
+        const updatedSearches = [trimmedSearch, ...recentSearches.filter((s) => s !== trimmedSearch)].slice(0, 10);
         setRecentSearches(updatedSearches);
       }
     },
@@ -60,8 +64,11 @@ function SearchPlacesCommand({ initialSearchText }: { initialSearchText?: string
       setSearchText(text);
 
       // Only attempt to save if it meets our criteria
-      if (text.length >= MIN_SEARCH_LENGTH && !recentSearches.includes(text.trim()) && saveSearchHistory) {
-        // Use our debounced save function
+      // Trim the search text first for consistent comparison
+      const trimmedText = text.trim();
+      if (trimmedText.length >= MIN_SEARCH_LENGTH && !recentSearches.includes(trimmedText) && saveSearchHistory) {
+        // Use our debounced save function with the original text
+        // (the saveSearch function will handle trimming consistently)
         debouncedSaveSearch(text);
       }
     },

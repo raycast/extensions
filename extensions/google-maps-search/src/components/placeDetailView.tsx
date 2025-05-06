@@ -40,6 +40,8 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
   useEffect(() => {
     if (!placeDetails) return;
 
+    let isMounted = true;
+
     const googleMapsUrl = makeSearchURL(encodeURIComponent(`${placeDetails.name} ${placeDetails.address}`));
 
     // Use the new map renderer utility instead of directly calling getStaticMapUrl
@@ -77,16 +79,25 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
 
     mapPromise
       .then((mapMarkdown) => {
-        if (mapMarkdown) {
+        if (isMounted && mapMarkdown) {
           setMarkdown((prevMarkdown) => {
+            // Only update if component is still mounted (prevents race conditions)
+            if (!isMounted) return prevMarkdown;
+
             // Replace the [MAP_PLACEHOLDER] with the actual map
             return prevMarkdown.replace("[MAP_PLACEHOLDER]", mapMarkdown);
           });
         }
       })
       .catch((error) => {
-        showFailureToast("Failed to render map", { message: error.message });
+        if (isMounted) {
+          showFailureToast("Failed to render map", { message: error.message });
+        }
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, [placeDetails, preferences.showMapInSidebar]);
 
   return (
@@ -119,8 +130,8 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
             )}
             {placeDetails.openingHours?.weekdayText && placeDetails.openingHours.weekdayText.length > 0 && (
               <Detail.Metadata.TagList title="Opening Hours">
-                {placeDetails.openingHours.weekdayText.map((day, index) => (
-                  <Detail.Metadata.TagList.Item key={index} text={day} color={Color.PrimaryText} />
+                {placeDetails.openingHours.weekdayText.map((day) => (
+                  <Detail.Metadata.TagList.Item key={day} text={day} color={Color.PrimaryText} />
                 ))}
               </Detail.Metadata.TagList>
             )}

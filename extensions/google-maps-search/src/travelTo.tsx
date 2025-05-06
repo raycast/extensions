@@ -15,7 +15,7 @@ export default function Command() {
     preferences.preferredOrigin === OriginOption.Home ? preferences.homeAddress : ""
   ); // Stores the origin address
   const [destination, setDestination] = useState<string>(""); // Stores the destination address
-  const [mode, setMode] = useState<string>(preferences.preferredMode); // Stores the selected transport mode
+  const [mode, setMode] = useState<TransportType>(preferences.preferredMode); // Stores the selected transport mode
   const [isLoading, setIsLoading] = useState<boolean>(preferences.useSelected); // Controls loading state
 
   // Handle changes to the origin dropdown
@@ -28,11 +28,12 @@ export default function Command() {
         return;
       }
 
-      const newOrigin = value as OriginOption;
-      setOrigin(newOrigin);
-      if (newOrigin === OriginOption.Home) {
+      // Since we've already validated that value is a valid OriginOption, we can use it directly
+      const originOption = value as OriginOption;
+      setOrigin(originOption);
+      if (originOption === OriginOption.Home) {
         setOriginAddress(preferences.homeAddress);
-      } else if (newOrigin === OriginOption.Custom) {
+      } else if (originOption === OriginOption.Custom) {
         setOriginAddress("");
       }
     },
@@ -104,7 +105,12 @@ export default function Command() {
         />
       )}
       {/* Transport mode selection dropdown */}
-      <Form.Dropdown id="transportType" title="Transport Preference" value={mode} onChange={setMode}>
+      <Form.Dropdown
+        id="transportType"
+        title="Transport Preference"
+        value={mode}
+        onChange={(newValue: string) => setMode(newValue as TransportType)}
+      >
         <Form.Dropdown.Item value={TransportType.Driving} title="Driving" icon={Icon.Car} />
         <Form.Dropdown.Item value={TransportType.Transit} title="Transit" icon={Icon.Train} />
         <Form.Dropdown.Item value={TransportType.Walking} title="Walking" icon={Icon.Footprints} />

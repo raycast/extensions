@@ -27,7 +27,7 @@ export interface GoogleMapsDirectionsParams {
   key: string;
   units: UnitSystem;
   alternatives?: boolean;
-  avoid?: "tolls" | "highways" | "ferries";
+  avoid?: "tolls" | "highways" | "ferries" | "indoor";
   language?: string;
   region?: string;
   traffic_model?: "best_guess" | "pessimistic" | "optimistic";

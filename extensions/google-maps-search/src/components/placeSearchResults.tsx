@@ -16,15 +16,19 @@ export function PlaceSearchResults({ places, isLoading, onSelectPlace, onBack, p
 
   // Format place types for display
   const formatPlaceTypes = (types: string[]): string => {
+    if (!types || !Array.isArray(types)) return "";
+
     return types
       .slice(0, 3)
+      .filter((type): type is string => typeof type === "string") // Filter out non-string values
       .map((type) => type.replace(/_/g, " "))
       .join(", ");
   };
 
   // Format place type for display in title
-  const formatPlaceTypeTitle = (type?: string): string => {
-    if (!type) return "Places";
+  const formatPlaceTypeTitle = (type?: string | null): string => {
+    // Return default value if type is not a valid string
+    if (!type || typeof type !== "string") return "Places";
 
     // Find the place type in the predefined list and use its plural form
     const placeTypeOption = PLACE_TYPES.find((option) => option.value === type);
@@ -32,23 +36,28 @@ export function PlaceSearchResults({ places, isLoading, onSelectPlace, onBack, p
       return placeTypeOption.plural;
     }
 
-    // Fallback for custom types not in the predefined list
-    // Convert from camelCase or snake_case and capitalize first letter of each word
-    const formatted = type
-      .replace(/_/g, " ")
-      .replace(/([A-Z])/g, " $1")
-      .trim()
-      .toLowerCase()
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+    try {
+      // Fallback for custom types not in the predefined list
+      // Convert from camelCase or snake_case and capitalize first letter of each word
+      const formatted = type
+        .replace(/_/g, " ")
+        .replace(/([A-Z])/g, " $1")
+        .trim()
+        .toLowerCase()
+        .replace(/\b\w/g, (c) => c.toUpperCase());
 
-    // Simple pluralization for fallback
-    if (formatted.endsWith("y")) {
-      return formatted.slice(0, -1) + "ies";
-    } else if (!formatted.endsWith("s")) {
-      return formatted + "s";
+      // Simple pluralization for fallback
+      if (formatted.endsWith("y")) {
+        return formatted.slice(0, -1) + "ies";
+      } else if (!formatted.endsWith("s")) {
+        return formatted + "s";
+      }
+
+      return formatted;
+    } catch (error) {
+      console.error(`Error formatting place type: ${type}`, error);
+      return "Places";
     }
-
-    return formatted;
   };
 
   const sectionTitle = formatPlaceTypeTitle(placeType);

@@ -128,7 +128,22 @@ export function useGeocoding() {
         return await geocodePlace(preferences.homeAddress, { ...options, source: "home" });
       }
     } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
+      // If it's already an Error instance, use it directly
+      if (err instanceof Error) {
+        setError(err);
+        return null;
+      }
+
+      // Define an interface for our extended error type
+      interface ExtendedError extends Error {
+        originalError: unknown;
+      }
+
+      // Create a new Error with the string representation
+      const error = new Error(String(err)) as ExtendedError;
+      // Add original error as a property for debugging
+      error.originalError = err;
+
       setError(error);
       return null;
     } finally {

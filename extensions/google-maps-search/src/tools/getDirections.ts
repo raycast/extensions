@@ -74,7 +74,7 @@ export async function getDirections(input: GetDirectionsInput): Promise<string> 
 
     return response;
   } catch (error) {
-    showFailureToast(error, { title: "Error Getting Directions", message: String(error) });
+    showFailureToast(error, { title: "Error Getting Directions" });
     return `Sorry, I encountered an error while getting directions to "${input.destination}". Please check your API key and try again.`;
   }
 }

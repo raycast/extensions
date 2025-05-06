@@ -34,7 +34,8 @@
       "subtitle": "Google Maps",
       "description": "Find places near your home or current location.",
       "mode": "view"
-    },{
+    },
+    {
       "name": "travelHome",
       "title": "Get Me Home",
       "subtitle": "Google Maps",
@@ -76,7 +77,8 @@
       "required": true,
       "placeholder": "Your Google Places API Key",
       "information": "Get your API key from the Google Cloud Console: https://console.cloud.google.com/"
-    },{
+    },
+    {
       "name": "homeAddress",
       "title": "Home Address",
       "description": "Enter your home address.",
@@ -253,6 +255,7 @@
     "evals": "npx ray evals"
   },
   "ai": {
+    "instructions": "When asked about a place's details, first search for the place using searchPlaces and then get detailed information using getPlaceDetails. When asked about distance to a place, first search for the place using searchPlaces and then calculate the distance using getDistance.",
     "evals": [
       {
         "input": "@google-maps-search find restaurants in San Francisco",
@@ -266,40 +269,47 @@
         ]
       },
       {
-        "input" : "@google-maps-search show me a nearby coffee shop on a map",
-        "mocks" : {
-          "searchPlaces" : "Here is a place matching \"coffee shop\":\n\n- **Damask Rose**\n  Address: 6606 Shattuck Ave., Oakland, CA 94609, United States\n  Rating: 4.9/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/?api=1&query=Damask%2520Rose%206606%2520Shattuck%2520Ave.%252C%2520Oakland%252C%2520CA%252094609%252C%2520United%2520States)",
-          "showPlacesOnMap" : "# Place on Map\n\n[![Map of place](https://maps.googleapis.com/maps/api/staticmap?size=600x400&format=png32&scale=2&maptype=roadmap&markers=color:red%7Clabel:A%7C37.811722,-122.267222&visible=37.811722,-122.267222&key=)](https://www.google.com/maps?q=37.8117223,-122.2672224)\n\n## Place Shown\n\n1. Damask Rose\n"
+        "input": "@google-maps-search show me a nearby coffee shop on a map",
+        "mocks": {
+          "searchPlaces": "Here is a place matching \"coffee shop\":\n\n- **Damask Rose**\n  Address: 6606 Shattuck Ave., Oakland, CA 94609, United States\n  Rating: 4.9/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/?api=1&query=Damask%2520Rose%25206606%2520Shattuck%2520Ave.%252C%2520Oakland%252C%2520CA%252094609%252C%2520United%2520States)",
+          "showPlacesOnMap": "# Place on Map\n\n[![Map of place](https://maps.googleapis.com/maps/api/staticmap?size=600x400&format=png32&scale=2&maptype=roadmap&markers=color:red%7Clabel:A%7C37.811722,-122.267222&visible=37.811722,-122.267222&key=)](https://www.google.com/maps?q=37.8117223,-122.2672224)\n\n## Place Shown\n\n1. Damask Rose\n"
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-                "limit" : 5,
-                "query" : "coffee shop"
-              },
-              "name" : "searchPlaces"
-            }
+            "callsTool": "searchPlaces"
           },
           {
-            "callsTool" : {
-              "arguments" : {
-                "places" : "Damask Rose",
-                "useColoredMarkers" : true
-              },
-              "name" : "showPlacesOnMap"
-            }
+            "callsTool": "showPlacesOnMap"
           }
         ]
       },
       {
         "input": "@google-maps-search tell me about the Ferry Building in San Francisco",
         "mocks": {
+          "searchPlaces": "Here is a place matching \"Ferry Building in San Francisco\":\n\n- **Ferry Building**\n  Address: Ferry Building, San Francisco, CA 94111, USA\n  Rating: 4.7/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/?api=1&query=Ferry%2520Building%2520Ferry%2520Building%252C%2520San%2520Francisco%252C%2520CA%252094111%252C%2520USA)",
           "getPlaceDetails": "# Ferry Building\n\n**Address**: Ferry Building, San Francisco, CA 94111, USA\n**Phone**: +1 415-983-8000\n**Website**: [https://www.ferrybuildingmarketplace.com/](https://www.ferrybuildingmarketplace.com/)\n**Rating**: ★★★★★ (4.7) based on 25,413 reviews\n**Price Level**: $$\n\n**Status**: Open Now\n\n**Opening Hours**:\n- Monday: 7:00 AM – 10:00 PM\n- Tuesday: 7:00 AM – 10:00 PM\n- Wednesday: 7:00 AM – 10:00 PM\n- Thursday: 7:00 AM – 10:00 PM\n- Friday: 7:00 AM – 10:00 PM\n- Saturday: 8:00 AM – 10:00 PM\n- Sunday: 8:00 AM – 10:00 PM\n\n**Categories**: tourist_attraction, food, point_of_interest, establishment\n\n**Links**:\n- [View on Google Maps](https://www.google.com/maps/search/Ferry+Building+Ferry+Building%2C+San+Francisco%2C+CA+94111%2C+USA)\n- [Get Directions](https://www.google.com/maps/dir/?api=1&destination=Ferry+Building%2C+San+Francisco%2C+CA+94111%2C+USA&travelmode=driving)"
         },
         "expected": [
           {
+            "callsTool": "searchPlaces"
+          },
+          {
             "callsTool": "getPlaceDetails"
+          }
+        ]
+      },
+      {
+        "input": "@google-maps-search how far is ashes & diamonds from my home?",
+        "mocks": {
+          "searchPlaces": "Here is a place matching \"ashes & diamonds\":\n\n- **Ashes & Diamonds**\n  Address: 4130 Howard Ln, Napa, CA 94558, United States\n  Rating: 4.4/5\n  Status: Open Now\n  [View on Google Maps](https://www.google.com/maps/search/?api=1&query=Ashes%2520%26%2520Diamonds%25204130%2520Howard%2520Ln%252C%2520Napa%252C%2520CA%252094558%252C%2520United%2520States)",
+          "getDistance": "## Distance to Ashes & Diamonds\n\nFrom: Home Address\nTo: Ashes & Diamonds\nMode: Driving\n\nStraight-line distance: 45.3 km (28.1 miles)\n\n[Open Directions in Google Maps](https://www.google.com/maps/dir/?api=1&origin=Home+Address&destination=Ashes+%26+Diamonds&travelmode=driving)\n\nYou can view turn-by-turn directions, traffic information, and estimated travel time by opening the link in Google Maps."
+        },
+        "expected": [
+          {
+            "callsTool": "searchPlaces"
+          },
+          {
+            "callsTool": "getDistance"
           }
         ]
       },

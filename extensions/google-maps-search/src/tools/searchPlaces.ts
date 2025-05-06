@@ -48,9 +48,7 @@ export async function searchPlaces(input: SearchPlacesInput): Promise<string> {
       response += `  Address: ${place.address}\n`;
       if (place.rating) response += `  Rating: ${place.rating}/5\n`;
       if (place.openNow !== undefined) response += `  Status: ${place.openNow ? "Open Now" : "Closed"}\n`;
-      response += `  [View on Google Maps](${makeSearchURL(
-        encodeURIComponent(place.name) + " " + encodeURIComponent(place.address)
-      )})\n\n`;
+      response += `  [View on Google Maps](${makeSearchURL(encodeURIComponent(`${place.name} ${place.address}`))})\n\n`;
     }
 
     if (results.length > limit) {
@@ -59,7 +57,7 @@ export async function searchPlaces(input: SearchPlacesInput): Promise<string> {
 
     return response;
   } catch (error) {
-    showFailureToast(error, { title: "Error Searching Places", message: String(error) });
+    showFailureToast(error, { title: "Error Searching Places" });
     return `Sorry, I encountered an error while searching for "${input.query}". Please check your API key and try again.`;
   }
 }

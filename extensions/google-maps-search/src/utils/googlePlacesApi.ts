@@ -39,10 +39,9 @@ export function getClient(): Client {
  */
 export function getApiKey(): string {
   const preferences = getPreferenceValues<Preferences>();
-
-  // Add validation and logging to help diagnose API key issues
   const apiKey = preferences.googlePlacesApiKey;
 
+  // Add validation and logging to help diagnose API key issues
   if (!apiKey || apiKey.trim() === "") {
     console.error("Google Places API key is missing or empty in preferences");
   } else if (apiKey.length < 20) {

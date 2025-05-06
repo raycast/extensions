@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { Preferences, PlaceSearchResult, OriginOption } from "../types";
 import { getNearbyPlaces } from "../utils/googlePlacesApi";
@@ -13,6 +13,12 @@ export function useNearbyPlaces() {
   // Define location type for reuse
   type Location = { lat: number; lng: number };
 
+  // Cache for geocoded home address
+  const cachedHomeAddressRef = useRef<{
+    address: string;
+    location: Location | null;
+  }>({ address: "", location: null });
+
   const searchNearbyPlaces = useCallback(
     async (placeType: string, origin: OriginOption, customAddress: string, radius: number, openNow = false) => {
       setIsLoading(true);
@@ -20,6 +26,8 @@ export function useNearbyPlaces() {
       try {
         // Verify API key
         if (!preferences.googlePlacesApiKey) {
+          // Clear any previous results
+          setPlaces([]);
           showFailureToast({
             title: "API Key Missing",
             message: "Please set your Google Places API key in preferences",
@@ -34,6 +42,8 @@ export function useNearbyPlaces() {
         // Get search location based on origin type
         const searchLocation = await getSearchLocation(origin, customAddress);
         if (!searchLocation) {
+          // Clear any previous results
+          setPlaces([]);
           showFailureToast({
             title: "Search failed",
             message: "Failed to get search location",
@@ -48,11 +58,15 @@ export function useNearbyPlaces() {
 
           return results;
         } catch (error) {
+          // Clear any previous results
+          setPlaces([]);
           handleSearchError(error);
           return null;
         }
       } catch (error) {
         console.error("Unexpected error in searchNearbyPlaces:", error);
+        // Clear any previous results
+        setPlaces([]);
         handleSearchError(error);
         return null;
       } finally {
@@ -62,21 +76,72 @@ export function useNearbyPlaces() {
     [preferences.googlePlacesApiKey, preferences.homeAddress]
   );
 
+  // Update cached home address when preferences change
+  useEffect(() => {
+    // Reset cache when home address changes
+    if (preferences.homeAddress !== cachedHomeAddressRef.current.address) {
+      cachedHomeAddressRef.current = { address: preferences.homeAddress, location: null };
+    }
+  }, [preferences.homeAddress]);
+
   // Helper function to get search location based on origin type
   const getSearchLocation = async (origin: OriginOption, customAddress: string): Promise<Location | null> => {
     // For home address
     if (origin === OriginOption.Home) {
-      return geocodePlace(preferences.homeAddress, { source: "home" });
+      // Validate home address is not empty
+      if (!preferences.homeAddress?.trim()) {
+        showFailureToast({
+          title: "Home Address Missing",
+          message: "Please set your home address in preferences",
+          primaryAction: {
+            title: "Open Preferences",
+            onAction: () => openExtensionPreferences(),
+          },
+        });
+        return null;
+      }
+
+      // Check if we have a cached result for the current home address
+      if (cachedHomeAddressRef.current.address === preferences.homeAddress && cachedHomeAddressRef.current.location) {
+        return cachedHomeAddressRef.current.location;
+      }
+
+      // Otherwise geocode and cache the result
+      const location = await geocodePlace(preferences.homeAddress, { source: "home" });
+      if (location) {
+        cachedHomeAddressRef.current = {
+          address: preferences.homeAddress,
+          location: location,
+        };
+      }
+      return location;
     }
 
     // For custom address
     if (origin === OriginOption.Custom) {
+      // Validate custom address is not empty
+      if (!customAddress?.trim()) {
+        showFailureToast({
+          title: "Custom Address Missing",
+          message: "Please enter a custom address",
+        });
+        return null;
+      }
       return geocodePlace(customAddress, { source: "custom" });
     }
 
-    // Fallback for any other cases (shouldn't happen with current enum values)
-    console.warn(`Unexpected origin option: ${origin}, using home address as fallback`);
-    return geocodePlace(preferences.homeAddress, { source: "home" });
+    // This should never happen with TypeScript's enum type checking
+    // Throwing an error is better than silently falling back
+    const errorMessage = `Invalid origin option: ${origin}`;
+    console.error(errorMessage);
+
+    showFailureToast({
+      title: "Application Error",
+      message: "An unexpected error occurred with the origin selection.",
+    });
+
+    // Throw error for easier debugging
+    throw new Error(errorMessage);
   };
 
   // Helper function to handle search errors
