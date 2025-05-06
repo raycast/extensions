@@ -1,13 +1,13 @@
 # Unix Timestamp Converter
 
 A Raycast extension to convert between Unix timestamps and human-readable date and time formats.
-Supports multiple time zones and display formats, including Japan, USA, Korea, and Thailand.
+Supports multiple time zones and display formats, including Japan, United States, Korea, and Thailand.
 
 ## Features
 
 - Convert Unix timestamps to local date and time for various countries
 - Generate Unix timestamps from human-readable date and time
-- Time zone support: Japan, USA (New York/Los Angeles), Korea, Thailand
+- Time zone support: Japan, United States (New York/Los Angeles), Korea, Thailand
 - Multiple display formats: Japanese, Korean, Thai, ISO, US
 - One-click copy to clipboard for conversion results
 
