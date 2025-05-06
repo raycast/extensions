@@ -5,8 +5,78 @@
   "description": "Convert Mermaid diagrams to images",
   "icon": "extension-icon.png",
   "author": "chihkang",
+  "ai": {
+    "name": "Mermaid Diagram Generator",
+    "description": "Can generate Mermaid diagrams (like flowcharts, sequence diagrams, class diagrams) from descriptions and copy the resulting image.",
+    "examples": [
+      "Create a flowchart for user login and copy it",
+      "Generate a sequence diagram showing API request/response and copy image",
+      "Draw a class diagram for Animal, Duck, Fish and copy it"
+    ],
+    "instructions": "Your main task is to help users create mermaid diagrams and copy their images to the clipboard: when the user asks to draw/generate/create a diagram and copy it, first generate a complete and valid mermaid syntax yourself, then immediately call generateMermaidImageTool and pass the syntax as the mermaidSyntax parameter to the tool, don't just reply with the syntax.",
+    "creativity": 0.6,
+    "evals": [
+      {
+        "input": "@mermaid-to-image Draw a simple flowchart A -> B and copy the image.",
+        "mocks": [
+          {
+            "name": "generateMermaidImageTool",
+            "arguments": "{\"mermaidSyntax\":\"graph TD\\n    A --> B\"}",
+            "result": "Successfully generated the Mermaid diagram and copied the image to your clipboard."
+          }
+        ],
+        "expected": [
+          "Successfully generated the Mermaid diagram and copied the image to your clipboard."
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@mermaid-to-image Generate a sequence diagram: Alice says Hi to Bob. Then copy it.",
+        "mocks": [
+          {
+            "name": "generateMermaidImageTool",
+            "arguments": "{\"mermaidSyntax\":\"sequenceDiagram\\n    Alice->>Bob: Hi Bob!\"}",
+            "result": "Successfully generated the Mermaid diagram and copied the image to your clipboard."
+          }
+        ],
+        "expected": [
+          "Successfully generated the Mermaid diagram and copied the image to your clipboard."
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@mermaid-to-image Create a class diagram for Vehicle and Car (Car inherits from Vehicle) and copy the resulting image.",
+        "mocks": [
+          {
+            "name": "generateMermaidImageTool",
+            "arguments": "{\"mermaidSyntax\":\"classDiagram\\n    class Vehicle\\n    Vehicle <|-- Car\"}",
+            "result": "Successfully generated the Mermaid diagram and copied the image to your clipboard."
+          }
+        ],
+        "expected": [
+          "Successfully generated the Mermaid diagram and copied the image to your clipboard."
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@mermaid-to-image Try to generate an image for this invalid syntax 'graph TD\\nA -> -> B' and copy.",
+        "mocks": [
+          {
+            "name": "generateMermaidImageTool",
+            "arguments": "{\"mermaidSyntax\":\"graph TD\\nA -> -> B\"}",
+            "result": "Diagram generation failed. Error: Mermaid syntax error. Please check your diagram code for mistakes."
+          }
+        ],
+        "expected": [
+          "Diagram generation failed. Error: Mermaid syntax error. Please check your diagram code for mistakes."
+        ],
+        "usedAsExample": false
+      }
+    ]
+  },
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Developer Tools"
   ],
   "license": "MIT",
   "commands": [
@@ -16,6 +86,13 @@
       "description": "Convert Mermaid diagrams to images",
       "mode": "view",
       "subtitle": "Generate Diagram Images from Mermaid Markup"
+    }
+  ],
+  "tools": [
+    {
+      "name": "generate-mermaid-diagram-with-ai",
+      "title": "Generate Mermaid Diagram with AI",
+      "description": "Ask AI to generate a Mermaid diagram and copy the image"
     }
   ],
   "dependencies": {
