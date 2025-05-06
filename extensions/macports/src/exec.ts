@@ -1,6 +1,6 @@
 import { exec, execSync } from "node:child_process";
 import type { PortDetails, Maintainer } from "./types";
-import { extractPortDetails, sanitizePortName } from "./util";
+import { extractInstalledPorts, extractPortDetails, sanitizePortName } from "./util";
 import { showFailureToast } from "@raycast/utils";
 
 const env = Object.assign({}, process.env, {
@@ -61,14 +61,7 @@ export async function listInstalledPorts(): Promise<string[]> {
           resolve([]);
           return;
         }
-        resolve(
-          stdout
-            .toString()
-            .split("\n")
-            .map((line) => line.trim())
-            .filter((line) => line)
-            .map((line) => line.split(" ")[0]),
-        );
+        resolve(extractInstalledPorts(stdout.toString()));
       });
     });
   } catch (error) {

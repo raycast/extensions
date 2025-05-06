@@ -54,3 +54,22 @@ export function sanitizePortName(name: string): string {
   }
   return name;
 }
+
+export function extractInstalledPorts(input: string): string[] {
+  if (!input) return [];
+
+  const lines = input.split("\n");
+  for (const line of lines) {
+    const lower = line.toLowerCase();
+    if (
+      lower.includes("no") &&
+      lower.includes("ports") &&
+      lower.includes("installed")
+    ) return [];
+  }
+
+  return lines
+    .map((line) => line.trim())
+    .filter((line) => line)
+    .map((line) => line.split(" ")[0]);
+}
