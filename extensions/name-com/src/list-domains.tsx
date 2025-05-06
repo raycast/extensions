@@ -87,10 +87,10 @@ function DomainDetails({ domainName }: { domainName: string }) {
         data && (
           <Detail.Metadata>
             <Detail.Metadata.Label title="Locked" icon={data.locked ? Icon.Check : Icon.Xmark} />
-            <Detail.Metadata.Label title="Autorenew" icon={data.locked ? Icon.Check : Icon.Xmark} />
+            <Detail.Metadata.Label title="Autorenew" icon={data.autorenewEnabled ? Icon.Check : Icon.Xmark} />
             <Detail.Metadata.Label title="Renewal Price" text={data.renewalPrice.toString()} />
-            <Detail.Metadata.Label title="Create Data" text={data.createDate} />
-            <Detail.Metadata.Label title="Expire Data" text={data.expireDate} />
+            <Detail.Metadata.Label title="Create Date" text={data.createDate} />
+            <Detail.Metadata.Label title="Expiry Date" text={data.expireDate} />
           </Detail.Metadata>
         )
       }
@@ -224,7 +224,7 @@ function CreateDNSRecord({ domainName, mutate }: { domainName: string; mutate: M
       priority(value) {
         if (values.type === "MX" || values.type === "SRV") {
           if (!value) return "The item is required";
-          if (!Number.isFinite(value)) return "The item must be a number";
+          if (!Number(value)) return "The item must be a number";
         }
       },
     },

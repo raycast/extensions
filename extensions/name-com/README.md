@@ -12,7 +12,7 @@ This is a Raycast extension for [Name.com](https://name.com/). With this extensi
 
 2. **Get your API Key**: The first time you use the extension, you'll need to enter your 'Name.com' API Key:
 
-    a. `Follow` instructions at https://www.name.com/support/articles/360007597874-signing-up-for-api-access
+    a. `Follow` [instructions](https://www.name.com/support/articles/360007597874-signing-up-for-api-access)
 
     b. `Enter` credentials in Preferences OR at first prompt
 

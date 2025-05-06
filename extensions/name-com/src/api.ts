@@ -8,7 +8,7 @@ export const API_URL = use_prod ? "https://api.name.com/v4/" : "https://api.dev.
 export const headers = {
   Accept: "application/json",
   "Content-Type": "application/json",
-  Authorization: `Basic ${btoa(`${USER}:${PASS}`)}`,
+  Authorization: `Basic ${Buffer.from(`${USER}:${PASS}`).toString("base64")}`,
 };
 
 export const parseResponse = async (response: Response) => {

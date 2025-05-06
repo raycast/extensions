@@ -47,12 +47,14 @@
     {
       "name": "check-account-balance",
       "title": "Check Account Balance",
+      "subtitle": "Name.com",
       "description": "Check Account Balance in your Account",
       "mode": "no-view"
     },
     {
       "name": "list-domains",
       "title": "List Domains",
+      "subtitle": "Name.com",
       "description": "List Domains and Manage DNS Records",
       "mode": "view"
     }
