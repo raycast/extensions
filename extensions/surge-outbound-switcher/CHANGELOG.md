@@ -1,5 +1,9 @@
 # Surge Outbound Mode Switcher Changelog
 
+## Better Toast Indicators - {PR_MERGE_DATE}
+
+- Add colored emojis to distinguish successful switch toasts
+
 ## Store Screenshots - 2025-04-17
 
 - Add store screenshots
