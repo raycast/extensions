@@ -1,4 +1,5 @@
 import { AI, Tool } from "@raycast/api";
+import { loadContacts } from "../services/contactLoader";
 import { contactService } from "../services/contactService";
 
 type Input = {
@@ -47,8 +48,14 @@ export default async function tool(input: Input) {
       const controller = new AbortController();
 
       try {
-        // Get all contacts with proper signal handling
-        const allContacts = await contactService.searchContacts("", controller.signal);
+        // Try to use loadContacts first, but fall back to contactService if it fails
+        let allContacts = [];
+        try {
+          allContacts = await loadContacts();
+        } catch (loadError) {
+          console.error("Error using loadContacts, falling back to contactService:", loadError);
+          allContacts = await contactService.searchContacts("", controller.signal);
+        }
 
         // Ensure allContacts is an array
         if (!Array.isArray(allContacts)) {
@@ -86,19 +93,20 @@ export default async function tool(input: Input) {
             searchDescription = `contacts with names containing "${searchIntent.value}"`;
             break;
 
-          case "length":
+          case "length": {
             // Search for names of a specific length
+            const lengthValue = Number(searchIntent.value);
             filteredContacts = allContacts.filter((contact) => {
               // Ensure contact and title exist
               if (!contact || !contact.title || typeof contact.title !== "string") return false;
 
               // Remove non-Chinese characters and calculate length
               const chineseName = contact.title.replace(/[^\u4e00-\u9fa5]/g, "");
-              const length = Number(searchIntent.value);
-              return !isNaN(length) && chineseName.length === length;
+              return !isNaN(lengthValue) && chineseName.length === lengthValue;
             });
             searchDescription = `contacts with ${searchIntent.value} Chinese characters in name`;
             break;
+          }
 
           case "unknown":
             // Unrecognized search intent
