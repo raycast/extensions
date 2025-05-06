@@ -83,7 +83,17 @@ open $deeplink
 
 Get it from https://github.com/LitoMore/mac-say.
 
-It's the macOS built-in `say` interface for JavaScript. You can use this if want some advanced API usage.
+It's the macOS built-in `say` interface for JavaScript. You can use this if you want some advanced API usage.
+
+## FAQ
+
+### 1. How to stop a speaking agent?
+
+You could type a space or any other new contents to the `Type to Say` command to abort current speaking agent.
+
+### 2. Some voices can be found in the System Settings but not listed in the Configure Say command
+
+Yes. Not all voices are listed in the Configure Say command, because it's limited by the OS. But You can choose those voices from System Settings.
 
 ## License
 

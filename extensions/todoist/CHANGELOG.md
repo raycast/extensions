@@ -1,5 +1,32 @@
 # Todoist Changelog
 
+## [AI Fix] - 2025-04-15
+
+- Fixed AI not being able to get tasks
+
+## [New API] - 2025-04-14
+
+- Used new Todoist API
+- Renamed `Home` to `My Tasks`
+- Improved error handling
+- Improved app detection
+- Upgraded dependencies
+- Fixed a few bugs
+
+## [Add Default Sorting in Menu Bar] - 2025-03-31
+
+Added same sorting order as Todoist home and web app.
+
+## [Support Commas in Filters] - 2025-03-28
+
+Add support for commas in filter strings.
+
+## [Added Inbox View in Menu Bar] - 2025-03-25
+
+Added a new option for Inbox in View under Menu Bar Tasks.
+
+## [Added contributors] - 2025-03-15
+
 ## [Removal of Deadline Feature for Non-Premium Users] - 2025-02-28
 
 The deadline field has been removed from the task creation process for users without a premium subscription.

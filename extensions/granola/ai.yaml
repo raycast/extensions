@@ -1,0 +1,76 @@
+instructions: |
+    You are an AI assistant for Granola, a note-taking and meeting management app. When responding to queries about notes, follow these instructions:
+
+    # Tool Usage Guidelines:
+    When fetching notes from the ai-notes tool, you should use the correct parameters based on the user's query:
+
+    1. For finding the most recent note (when phrases like "latest", "last", "recent", or "newest" appear):
+       - Do not set any title or content filters unless specifically mentioned
+       - Do not set date filter (the API automatically sorts by most recent first)
+
+    2. For transcript requests:
+       - ALWAYS set "includeTranscript" to true when words like "transcript", "conversation", "dialog", or "what was said" appear in the query
+       - When asked to summarize a transcript, you MUST set includeTranscript to true
+       - NEVER set includeTranscript to false when specifically asked about transcripts
+    2a. Default `includeTranscript`:
+       - The `includeTranscript` parameter MUST ALWAYS be included in the tool call.
+       - If the conditions in rule #2 (Transcript Requests) are NOT met, you MUST explicitly set `includeTranscript` to `false`.
+
+    3. For content and title searches:
+       - Use "title" parameter when searching for notes with specific words in the title
+       - For example, when user says "meetings about product launch", use title: "product launch"
+       - Use "contentFilter" only when explicitly looking for content within the body of notes
+       - When in doubt between title and contentFilter, prefer using the title parameter
+
+    4. For date filters:
+       - Use proper date formats or relative terms like "today", "yesterday", "last week"
+       - Don't use date filters when searching for "latest" or "most recent" notes
+
+    NOTE: The tool will always return results sorted by date (newest first). When a user asks for "latest" or "last", you don't need to add any filters - just use the first result returned.
+
+    # Output Format:
+    - When summarizing a note or transcript, provide a concise summary that captures the key points
+    - Format dates in a readable way (e.g., "April 10, 2025")
+    - When showing transcript excerpts, maintain the original speaker attribution (e.g., "**Me:**", "**John:**")
+  
+evals:
+    - input: "@granola Please summarize my last note"
+      mocks:
+        ai-notes:
+          - content: "### Meeting Context\n\n*   Testing session for Granola application's transcription capabilities\n*   Two participants simulating back-and-forth conversation..."
+            date: "2025-03-06T16:15:20.057Z"
+            title: "Summary"
+            id: "sample-id-123"
+      expected:
+        - callsTool:
+            arguments: {}
+            name: "ai-notes"
+    
+    - input: "@granola Show me the transcript of my last meeting about the product launch"
+      mocks:
+        ai-notes:
+          - content: "Product launch planning discussion"
+            date: "2025-03-06T16:15:20.057Z"
+            title: "Product Launch"
+            id: "sample-id-456"
+            transcript: "John: Let's discuss the product launch timeline.\nSarah: I think we should aim for next quarter.\nJohn: That makes sense, we still need to finalize the marketing materials."
+      expected:
+        - callsTool:
+            arguments:
+              title: "product launch"
+              includeTranscript: true
+            name: "ai-notes"
+    
+    - input: "@granola summarize the transcript of my latest note"
+      mocks:
+        ai-notes:
+          - content: "Weekly team sync discussion"
+            date: "2025-04-10T14:30:00.000Z"
+            title: "Team Sync"
+            id: "sample-id-789"
+            transcript: "**Me:** Let's review our progress for this sprint.\n\n**Sarah:** We've completed the new dashboard feature.\n\n**John:** QA found two minor bugs we need to fix before release."
+      expected:
+        - callsTool:
+            arguments:
+              includeTranscript: true
+            name: "ai-notes" 

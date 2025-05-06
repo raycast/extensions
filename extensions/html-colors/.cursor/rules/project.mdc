@@ -1,7 +1,7 @@
 ---
 description: Describes what kind of project html-colors is and what technology it uses
 globs: *.ts, *.tsx, *.md
-alwaysApply: false
+alwaysApply: true
 ---
 # HTML Colors
 

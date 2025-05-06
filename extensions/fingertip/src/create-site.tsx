@@ -54,7 +54,7 @@ export default function Command() {
     setIsLoading(true);
 
     try {
-      const response = await client.api.v1.sites.create({
+      const response = await client.v1.sites.create({
         name: values.name,
         description: values.description || null,
         slug: values.slug,

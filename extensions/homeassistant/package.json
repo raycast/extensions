@@ -9,7 +9,8 @@
     "rspeicher",
     "amuelli",
     "xilopaint",
-    "krsntn"
+    "krsntn",
+    "mikikiv"
   ],
   "license": "MIT",
   "description": "Manage your smart home with Raycast",
@@ -108,7 +109,17 @@
       "title": "Dashboard",
       "subtitle": "Home Assistant",
       "description": "Open Home Assistant dashboard",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "title": "Dashboard path",
+          "name": "dashboardpath",
+          "required": false,
+          "type": "textfield",
+          "description": "Path to page to open",
+          "placeholder": "/my-dashboard"
+        }
+      ]
     },
     {
       "name": "climate",
@@ -561,7 +572,12 @@
     {
       "name": "get-entities",
       "title": "Get Entities",
-      "description": "Get entities from Home Assistant"
+      "description": "Get a list of all entity IDs and their friendly names from Home Assistant"
+    },
+    {
+      "name": "get-attributes",
+      "title": "Get Entity Attributes",
+      "description": "Get the full state and attributes for specific Home Assistant entities"
     },
     {
       "name": "run-service",
@@ -569,107 +585,6 @@
       "description": "Run a Home Assistant service"
     }
   ],
-  "ai": {
-    "instructions": "Communication Style:\nUse a friendly and approachable tone with emojis to make interactions more engaging.\n\nTo control Home Assistant devices:\n1. First, use get-entities to find the correct entity IDs for the devices the user wants to control.\n2. EXCLUDE from the operation the entities that are already in the desired state, and inform the user that the device will not be controlled (e.g., 'the kitchen light is already on').\n3. If an entity is unique to its type (e.g., a single air conditioner switched on, a single light switched off, etc.), INCLUDE it in the operation without asking for user consent.\n4. If there are multiple entities of the same type (e.g., two lights to turn off or three air conditioners to toggle), ask the user to specify which device they want to control by providing a list of available entities with their current states (e.g., the user tells 'turn on the light' but there are multiple lights switched off).\n5. DO NOT control multiple entities at once without asking for consent, unless the user explicitly indicates that they want to control all entities of the same type (e.g., 'turn off the lights' or 'turn on all lights').\n6. Once you have the user's confirmation, use run-service to execute the operation.",
-    "evals": [
-      {
-        "input": "@homeassistant set the bedroom light to a romantic color and brightness",
-        "mocks": {
-          "run-service": {},
-          "get-entities": {
-            "entities": [
-              {
-                "friendly_name": "Philips Hue",
-                "state": "off",
-                "entity_id": "light.philips_hue",
-                "attributes": {
-                  "min_mireds": 153,
-                  "rgb_color": null,
-                  "color_mode": null,
-                  "min_color_temp_kelvin": 2000,
-                  "hs_color": null,
-                  "max_mireds": 500,
-                  "max_color_temp_kelvin": 6500,
-                  "xy_color": null,
-                  "color_temp": null,
-                  "friendly_name": "Philips Hue",
-                  "supported_features": 0,
-                  "color_temp_kelvin": null,
-                  "brightness": null,
-                  "supported_color_modes": [
-                    "color_temp",
-                    "hs"
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "get-entities",
-              "arguments": {}
-            }
-          },
-          {
-            "callsTool": {
-              "name": "run-service",
-              "arguments": {
-                "service": "turn_on",
-                "data.entity_id.0": "light.philips_hue"
-              }
-            }
-          },
-          {
-            "meetsCriteria": "Tells that the light has been set to a romantic color and brightness"
-          }
-        ]
-      },
-      {
-        "input": "@homeassistant how's the temperature and humidity in the living room?",
-        "mocks": {
-          "get-entities": {
-            "entities": [
-              {
-                "friendly_name": "Living Room Climate Sensor Humidity",
-                "state": "70.8",
-                "entity_id": "sensor.living_room_climate_sensor_humidity",
-                "attributes": {
-                  "state_class": "measurement",
-                  "unit_of_measurement": "%",
-                  "device_class": "humidity",
-                  "friendly_name": "Living Room Climate Sensor Humidity"
-                }
-              },
-              {
-                "friendly_name": "Living Room Climate Sensor Temperature",
-                "state": "28.6",
-                "entity_id": "sensor.living_room_climate_sensor_temperature",
-                "attributes": {
-                  "state_class": "measurement",
-                  "unit_of_measurement": "°C",
-                  "device_class": "temperature",
-                  "friendly_name": "Living Room Climate Sensor Temperature"
-                }
-              }
-            ]
-          }
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "get-entities",
-              "arguments": {}
-            }
-          },
-          {
-            "meetsCriteria": "Returns the temperature and humidity in the living room"
-          }
-        ]
-      }
-    ]
-  },
   "preferences": [
     {
       "name": "instance",
@@ -762,8 +677,8 @@
   ],
   "dependencies": {
     "@raycast-community/ui": "^0.1.1",
-    "@raycast/api": "^1.91.1",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.96.1",
+    "@raycast/utils": "^1.19.1",
     "home-assistant-js-websocket": "^8.2.0",
     "javascript-time-ago": "^2.5.11",
     "lodash-es": "^4.17.21",
@@ -777,20 +692,20 @@
     "yaml": "^2.5.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/lodash-es": "^4.17.12",
     "@types/multicast-dns": "^7.2.4",
-    "@types/node": "^20.16.5",
+    "@types/node": "^22.13.14",
     "@types/node-fetch": "^2.6.11",
     "@types/ping": "^0.4.4",
     "@types/plist": "^3.0.5",
-    "@types/react": "^18.3.5",
+    "@types/react": "^19.0.12",
     "@types/url-join": "^4.0.3",
     "@types/ws": "^8.5.12",
-    "eslint": "^7.32.0",
-    "prettier": "^3.3.3",
-    "react": "^18.2.0",
-    "typescript": "^4.9.5"
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "react": "^19.1.0",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "dev": "ray develop",

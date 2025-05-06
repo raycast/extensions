@@ -1,10 +1,39 @@
-import { ActionPanel, Form, Action, showToast, Toast, popToRoot, closeMainWindow } from "@raycast/api";
+import {
+  ActionPanel,
+  Form,
+  Action,
+  showToast,
+  Toast,
+  popToRoot,
+  closeMainWindow,
+  getSelectedFinderItems,
+} from "@raycast/api";
 import fs from "fs";
+import { useEffect, useState } from "react";
 import { resetFolderIcon } from "./utils/resetFolderIcon";
 
 export default function Command() {
+  const [selectedFolder, setSelectedFolder] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  useEffect(() => {
+    async function getSelectedFolder() {
+      try {
+        const items = await getSelectedFinderItems();
+        if (items.length === 1 && items[0].path && fs.lstatSync(items[0].path).isDirectory()) {
+          setSelectedFolder(items[0].path);
+        }
+      } catch (error) {
+        return;
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    getSelectedFolder();
+  }, []);
+
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -41,6 +70,8 @@ export default function Command() {
       <Form.FilePicker
         id="folder"
         title="Select a Folder"
+        value={selectedFolder ? [selectedFolder] : []}
+        onChange={(values) => setSelectedFolder(values[0] || "")}
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}

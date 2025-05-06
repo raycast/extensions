@@ -18,6 +18,10 @@
       "mode": "view"
     }
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "dependencies": {
     "@raycast/api": "1.83.1",
     "@raycast/utils": "^1.17.0"

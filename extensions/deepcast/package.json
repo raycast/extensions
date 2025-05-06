@@ -17,7 +17,8 @@
     "Yamen",
     "EvanZhouDev",
     "erics118",
-    "riadhrebei"
+    "riadhrebei",
+    "islam_hassan"
   ],
   "license": "MIT",
   "commands": [
@@ -525,6 +526,10 @@
       "description": "Choose a default target language.",
       "required": true,
       "data": [
+        {
+          "title": "Arabic",
+          "value": "AR"
+        },
         {
           "title": "Bulgarian",
           "value": "BG"

@@ -79,6 +79,7 @@ export const NODES = {
         lastName
         email
         website
+        phone
         currency {
             ${OBJECTS.Currency}
         }
