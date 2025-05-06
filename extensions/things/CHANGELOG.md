@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [✨ Reminders] - {PR_MERGE_DATE}
+## [✨ Reminders] - 2025-05-06
 
 - Update the "Today" and "Upcoming" lists to allow updating todo's reminders.
 - Fixed issue with the Deadline action to correctly remove a deadline from a todo.
