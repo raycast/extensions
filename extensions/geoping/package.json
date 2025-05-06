@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "ping",
-      "title": "Ping",
-      "subtitle": "Ping servers around the globe",
+      "title": "Show Ping Latency and Availability",
+      "subtitle": "Geoping",
       "description": "Compare latency and availability of servers around the globe",
       "mode": "view"
     }
