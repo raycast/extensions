@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "speechocr",
+  "title": "SpeechOCR",
+  "description": "Select any on-screen text and have your Mac read it aloud using the built-in voice system. Fast OCR, natural speech, playback controls included.",
+  "icon": "extension-icon.png",
+  "author": "dan_schumacher",
+  "keywords": [
+    "OCR",
+    "text to speech",
+    "screen reader",
+    "visionkit",
+    "say",
+    "accessibility",
+    "macOS",
+    "speech",
+    "tts",
+    "read aloud",
+    "quicktime"
+  ],
+  "assets": [
+    "ocr.swift"
+  ],
+  "permissions": [
+    "screenCapture"
+  ],
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "speechocr",
+      "title": "Speech OCR",
+      "subtitle": "Select text to be spoken using ocr",
+      "description": "Select any on-screen text and have your Mac read it aloud using the built-in voice system. Fast OCR, natural speech, playback controls included.",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-speed",
+      "title": "Set OCR Speech Speed",
+      "description": "Set the default speech speed for OCR playback",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.97.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "19.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
