@@ -2,15 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kagi-search",
   "title": "Kagi Search",
-  "description": "Searches the Closed Beta of Kagi Search, using the autosuggestions url.",
+  "description": "Searches the Closed Beta of Kagi Search, with autosuggestions and quick access to FastGPT",
   "icon": "command-icon.png",
   "author": "fearoffish",
+  "contributors": [
+    "goto10"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Search Kagi",
-      "description": "Search Kagi with autosuggestions",
+      "description": "Kagi search with autosuggestions",
       "mode": "view"
     }
   ],
@@ -18,13 +21,39 @@
     {
       "name": "token",
       "type": "password",
-      "title": "Kagi Token",
-      "description": "Please enter your Kagi token, which can be found at https://kagi.com/settings?p=user_details in your Session Link",
+      "title": "Kagi Session Link",
+      "description": "Please enter your Kagi session link, which can be found at https://kagi.com/settings?p=user_details in your Session Link",
       "required": true
+    },
+    {
+      "name": "apiKey",
+      "title": "Kagi API Key",
+      "description": "Your Kagi API key from https://kagi.com/settings?p=api. Required for search results and FastGPT.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "label": "Use API for Search",
+      "name": "useApiForSearch",
+      "title": "Use API for Search",
+      "description": "Should Kagi results be displayed in Raycast? If no, responses will be opened in browser",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "label": "Enable FastGPT Shortcut",
+      "name": "fastGptShortcut",
+      "title": "Enable FastGPT Shortcut",
+      "description": "Enables in-Raycast answers from FastGPT by ending query with '?'",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.94.0",
     "node-fetch": "^3.1.0",
     "open": "^8.4.0"
   },
@@ -35,12 +64,13 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "prettier": "^3.5.3",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

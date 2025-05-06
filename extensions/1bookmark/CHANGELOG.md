@@ -1,5 +1,38 @@
 # 1bookmark Changelog
 
+## [Index Ranking System] - 2025-04-25
+
+- 0.10.0
+- 📱 Index ranking is now available. It boosts bookmarks that are more relevant to the search keyword.
+
+## [Per-Device Enable/Disable Spaces] - 2025-04-08
+
+- 0.9.0
+- 📱 Space enable/disable feature is now available. This feature allows you to access only the spaces you are interested in on a per-device basis.
+- 📱 Add a feature to leave a space. You may leave a space at any time, except in the following cases:
+    - You can't leave a private space
+    - When there is only one space owner, the owner cannot leave the team.
+- 💻 Fix and refactor many codes to be more readable, stable.
+
+## [Pattern Search by Space, Creator, Tag] - 2025-04-01
+
+- 0.8.0
+- 📱 Space, creator, tag filter pattern is now supported.
+    - `!space` - Filter by space name. Example: `!raycast api` searches for "api" in the "raycast" space
+    - `@user` - Filter by bookmark creator name or email. Example: `@john documentation` searches for "documentation" created by "john"
+    - `#tag#` - Filter by tag. Example: `#dev#tools` searches for "tools" with the "dev" tag
+
+## [Improve Performance] - 2025-03-28
+
+- 0.7.1
+- 💻 Remove `jotai` which causes unnecessary re-renders in raycast environment.
+- 💻 Fix some infinite re-render issue.
+
+## [Improve Search UX] - 2025-03-19
+
+- 0.7.0
+- 💻 Replace search library from `minisearch` to `fuzzysort`. So fuzzy search is now more accurate.
+
 ## [New Command: Import Bookmarks] - 2025-03-14
 
 - 0.6.0

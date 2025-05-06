@@ -16,6 +16,10 @@
     "Developer Tools",
     "Documentation"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "index",

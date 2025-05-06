@@ -104,6 +104,7 @@ export const fetchContributionData = async (username: string): Promise<Contribut
 
   if (!preferences.githubToken) {
     // If no token provided, return mock data
+    showFailureToast("⚠️ Showing MOCK data without token");
     return generateMockContributionData();
   }
 

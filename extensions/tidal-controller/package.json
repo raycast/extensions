@@ -5,6 +5,9 @@
   "description": "Control your local Tidal client with your keyboard.\nNote: You **must** enable Accessibility permissions for Raycast in order for this extension to work.",
   "icon": "extension-icon.png",
   "author": "broc-dev",
+  "contributors": [
+    "srcurran"
+  ],
   "categories": [
     "Media"
   ],
@@ -44,6 +47,18 @@
       "name": "shuffle",
       "title": "Toggle Shuffle",
       "description": "Toggles on shuffle mode in Tidal.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-up",
+      "title": "Volume Up",
+      "description": "Turns up the volume in Tidal.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-down",
+      "title": "Volume Down",
+      "description": "Turns down the volume in Tidal.",
       "mode": "no-view"
     }
   ],
@@ -154,5 +169,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

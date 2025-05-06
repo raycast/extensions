@@ -1,21 +1,15 @@
-import { ActionPanel, Action, List, Icon, Cache } from "@raycast/api";
-import { useAtom } from "jotai";
-import { sessionTokenAtom } from "./states/session-token.state";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
 import { LoginView } from "./views/LoginView";
 import useAvailableBrowsers from "./browser-bookmark-hooks/useAvailableBrowsers";
 import { BROWSERS_BUNDLE_ID } from "./browser-bookmark-hooks/useAvailableBrowsers";
 import { BookmarksImportFromBrowserView } from "./views/BookmarksToImportFromBrowserView";
-import { useState } from "react";
-import { useEffect } from "react";
-import { useMe } from "./hooks/use-me.hook";
-
-const cache = new Cache();
+import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
+import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
 
 function Body() {
-  const [sessionToken] = useAtom(sessionTokenAtom);
   const { data: availableBrowsers, isLoading } = useAvailableBrowsers();
-  const me = useMe(sessionToken);
+  const { enabledSpaces } = useEnabledSpaces();
 
   // Get browser icon from bundle ID
   const getBrowserIcon = (bundleId: string): string => {
@@ -63,26 +57,13 @@ function Body() {
     }
   };
 
-  const [after1Sec, setAfter1Sec] = useState(false);
-  useEffect(() => {
-    // If this is not here, LoginView will briefly appear.
-    setTimeout(() => setAfter1Sec(true), 1000);
-  }, []);
-
-  const loggedOutStatus = !sessionToken && after1Sec;
-  useEffect(() => {
-    // Clear data when logged out.
-    if (loggedOutStatus) {
-      cache.remove("me");
-      cache.remove("bookmarks");
-    }
-  }, [loggedOutStatus]);
+  const { loggedOutStatus } = useLoggedOutStatus();
 
   if (loggedOutStatus) {
     return <LoginView />;
   }
 
-  if (!me.data) {
+  if (!enabledSpaces) {
     return <List isLoading={true} />;
   }
 
@@ -103,7 +84,7 @@ function Body() {
                 <ActionPanel title={`Import Bookmarks from ${browser.name}`}>
                   <ActionPanel.Submenu title="Add Label">
                     <ActionPanel.Section title="Which Space to Import Bookmarks">
-                      {me.data.associatedSpaces.map((s) => {
+                      {enabledSpaces.map((s) => {
                         return (
                           <Action.Push
                             key={s.id}

@@ -1,5 +1,10 @@
 # Markdown Navigator Changelog
 
+## [1.0.1] - 2025-03-17
+
+### Fixed
+- System tag's color display issue
+
 ## [1.0.0] - 2025-03-16
 
 ### Added

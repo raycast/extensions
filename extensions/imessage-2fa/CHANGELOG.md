@@ -1,5 +1,16 @@
 # Messages 2FA Changelog
 
+## [Update] - 2025-04-29
+- Resolves issue with code extraction for iMessage
+
+## [Update] - 2025-04-28
+
+- Add the functionality for directly opening verification/ sign-in links that were received via Email (Apple Mail / Gmail)
+
+## [Update] - 2025-02-17
+
+- Add ability to type the 2FA code instead of pasting it
+
 ## [Update] - 2025-02-13
 
 - Add support for Email 2FA codes alongside iMessage
@@ -8,7 +19,7 @@
 
 ## [Update] - 2024-09-25
 
-- Add support for Portuguese auth/code references 
+- Add support for Portuguese auth/code references
 
 ## [Update] - 2024-05-28
 

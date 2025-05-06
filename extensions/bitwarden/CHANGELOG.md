@@ -1,5 +1,24 @@
 # Bitwarden Changelog
 
+## [New Preference] - 2025-04-09
+
+- Add primary action preference for authenticator command
+
+## [New Command] - 2025-04-08
+
+- Add Authenticator command
+- Correct README typos
+
+## [Improvement] - 2025-03-24
+
+- Correct setup API key instructions
+- Remove local CLI mention from extension description
+- Mention local CLI option in README
+
+## [Fix] - 2025-03-17
+
+- Fix CLI binary download hash mismatch error
+
 ## [Feature] - 2025-03-15
 
 - Re-enable CLI binary download for arm64 devices

@@ -9,7 +9,8 @@
     "jrnxf",
     "3llomi",
     "sxn",
-    "yvysunu"
+    "yvysunu",
+    "ridemountainpig"
   ],
   "categories": [
     "System",
@@ -21,7 +22,27 @@
       "name": "index",
       "title": "Quit Applications",
       "description": "Quit applications directly from Raycast",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showQuitAllApplications",
+          "title": "Show Quit All Applications Option",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show Quit All Applications Option",
+          "description": "Show the option to quit all applications"
+        },
+        {
+          "name": "excludeApplications",
+          "title": "Exclude applications from Quit All Applications",
+          "type": "textfield",
+          "required": false,
+          "default": "",
+          "label": "Exclude Applications",
+          "description": "Comma-separated list of applications to exclude from the list. For example: \"Safari,Finder\""
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -42,5 +63,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

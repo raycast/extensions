@@ -1,7 +1,5 @@
 # System Information
 
-## Made with 💖 & 😁 by [@aaronhma](https://github.com/aaronhma), [@Visual-Studio-Coder](https://github.com/Visual-Studio-Coder), and [@nagauta](https://github.com/nagauta).
-
 > [!NOTE]
 > **A Mac with Apple Silicon running macOS Monterey or later is required.**
 

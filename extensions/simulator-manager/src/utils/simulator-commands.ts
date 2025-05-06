@@ -1,5 +1,4 @@
-// utils/simulator-commands.ts
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { exec, spawn } from "child_process";
 import { promisify } from "util";
@@ -7,7 +6,8 @@ import { Device, DeviceType, SimulatorDevice } from "../types";
 import { homedir } from "os";
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
-import { getDeviceType } from "../utils";
+import { getAndroidVersionFromApiLevel, getDeviceType } from "../utils";
+import { TOAST_MESSAGES } from "../constants";
 
 // Get user preferences
 interface Preferences {
@@ -17,7 +17,7 @@ interface Preferences {
 export const execAsync = promisify(exec);
 
 // Fetch iOS simulators
-export async function fetchIOSDevices(): Promise<Device[]> {
+export async function fetchIOSDevices() {
   try {
     const { stdout: simulatorsOutput } = await execAsync("xcrun simctl list devices --json");
     const simulatorsData = JSON.parse(simulatorsOutput);
@@ -29,6 +29,14 @@ export async function fetchIOSDevices(): Promise<Device[]> {
       // Type assertion to help TypeScript understand the structure
       const devices = deviceList as SimulatorDevice[];
 
+      const runtimeWithoutPrefix = runtime.replace("com.apple.CoreSimulator.SimRuntime.", "");
+
+      const formattedRuntime = runtimeWithoutPrefix
+        .replace("iOS-", "iOS ")
+        .replace(/-/g, ".")
+        .replace("tvOS-", "tvOS ")
+        .replace("watchOS-", "watchOS ");
+
       devices.forEach((device) => {
         const deviceType = getDeviceType(device.name);
         iosDevices.push({
@@ -36,7 +44,7 @@ export async function fetchIOSDevices(): Promise<Device[]> {
           name: device.name,
           status: device.state,
           type: device.deviceTypeIdentifier || "",
-          runtime: runtime.replace("com.apple.CoreSimulator.SimRuntime.", ""),
+          runtime: formattedRuntime,
           category: "ios",
           deviceType,
         });
@@ -51,7 +59,7 @@ export async function fetchIOSDevices(): Promise<Device[]> {
 }
 
 // Find Android SDK tools
-export function findAndroidSdkTool(toolName: string): string | null {
+export function findAndroidSdkTool(toolName: string) {
   // Get the custom SDK path from preferences
   const preferences = getPreferenceValues<Preferences>();
   const customSdkPath = preferences.androidSdkPath?.trim();
@@ -98,7 +106,7 @@ export function findAndroidSdkTool(toolName: string): string | null {
 }
 
 // Fetch Android emulators
-export async function fetchAndroidDevices(): Promise<Device[]> {
+export async function fetchAndroidDevices() {
   try {
     // Find emulator and adb executables
     const emulatorPath = findAndroidSdkTool("emulator");
@@ -235,13 +243,13 @@ export async function fetchAndroidDevices(): Promise<Device[]> {
         const androidVersionMatch = configContent.match(/image\.sysdir\.1\s*=\s*.*android-(\d+)/);
         if (androidVersionMatch && androidVersionMatch[1]) {
           const apiLevel = parseInt(androidVersionMatch[1]);
-          androidVersion = `Android ${getAndroidVersionFromApiLevel(apiLevel)}`;
+          androidVersion = getAndroidVersionFromApiLevel(apiLevel);
         } else {
           // Fallback to target property if image.sysdir.1 is not found
           const apiLevelMatch = configContent.match(/target\s*=\s*([0-9]+)/);
           if (apiLevelMatch && apiLevelMatch[1]) {
             const apiLevel = parseInt(apiLevelMatch[1]);
-            androidVersion = `Android ${getAndroidVersionFromApiLevel(apiLevel)}`;
+            androidVersion = getAndroidVersionFromApiLevel(apiLevel);
           }
         }
 
@@ -250,7 +258,7 @@ export async function fetchAndroidDevices(): Promise<Device[]> {
           const apiLevelInName = avdName.match(/API_(\d+)/i) || avdName.match(/Android_(\d+)/i);
           if (apiLevelInName && apiLevelInName[1]) {
             const apiLevel = parseInt(apiLevelInName[1]);
-            androidVersion = `Android ${getAndroidVersionFromApiLevel(apiLevel)}`;
+            androidVersion = getAndroidVersionFromApiLevel(apiLevel);
           }
         }
       }
@@ -277,60 +285,30 @@ export async function fetchAndroidDevices(): Promise<Device[]> {
   }
 }
 
-// Helper function to convert API level to Android version
-function getAndroidVersionFromApiLevel(apiLevel: number): string {
-  const versionMap: Record<number, string> = {
-    35: "15.0", // Android U
-    34: "14.0", // Android Upside Down Cake
-    33: "13.0", // Android Tiramisu
-    32: "12.1", // Android 12L
-    31: "12.0", // Android Snow Cone
-    30: "11.0", // Android Red Velvet Cake
-    29: "10.0", // Android Quince Tart
-    28: "9.0", // Android Pie
-    27: "8.1", // Android Oreo
-    26: "8.0", // Android Oreo
-    25: "7.1", // Android Nougat
-    24: "7.0", // Android Nougat
-    23: "6.0", // Android Marshmallow
-    22: "5.1", // Android Lollipop
-    21: "5.0", // Android Lollipop
-    // Add more mappings as needed
-  };
-
-  return versionMap[apiLevel] || `API ${apiLevel}`;
-}
-
-// Execute a simulator command
-export async function executeSimulatorCommand(
-  command: string,
-  deviceId: string,
-  successMessage: string,
-): Promise<void> {
+export async function bootAndOpenSimulator(deviceId: string) {
   try {
-    await execAsync(`xcrun simctl ${command} ${deviceId}`);
-    showToast({
-      style: Toast.Style.Success,
-      title: successMessage,
-    });
+    await execAsync(`xcrun simctl boot ${deviceId}`);
+    await execAsync(`open -a Simulator --args -CurrentDeviceUDID ${deviceId}`);
+
+    showToast(TOAST_MESSAGES.SUCCESS.SIMULATOR_STARTED);
   } catch (error) {
-    showFailureToast(error, { title: `Failed to ${command} simulator` });
+    showFailureToast(error, TOAST_MESSAGES.FAILURE.SIMULATOR_START_FAILED);
     throw error;
   }
 }
 
-// Open a simulator
-export function openSimulator(deviceId: string): void {
+export async function shutdownSimulator(deviceId: string) {
   try {
-    exec(`open -a Simulator --args -CurrentDeviceUDID ${deviceId}`);
-    showToast({ style: Toast.Style.Success, title: "Opening simulator" });
+    await execAsync(`xcrun simctl shutdown ${deviceId}`);
+
+    showToast(TOAST_MESSAGES.SUCCESS.SIMULATOR_SHUTDOWN);
   } catch (error) {
-    showFailureToast(error, { title: "Failed to open simulator" });
+    showFailureToast(error, TOAST_MESSAGES.FAILURE.SIMULATOR_SHUTDOWN_FAILED);
     throw error;
   }
 }
 
-export async function startAndroidEmulator(avdName: string): Promise<void> {
+export async function startAndroidEmulator(avdName: string) {
   try {
     const emulatorPath = findAndroidSdkTool("emulator");
     if (!emulatorPath) {
@@ -346,18 +324,14 @@ export async function startAndroidEmulator(avdName: string): Promise<void> {
     // Unref the process to allow the parent to exit independently
     process.unref();
 
-    showToast({
-      style: Toast.Style.Success,
-      title: "Starting Android emulator",
-      message: `${avdName} is starting in the background`,
-    });
+    showToast(TOAST_MESSAGES.SUCCESS.ANDROID_EMULATOR_STARTING);
   } catch (error) {
-    showFailureToast(error, { title: "Failed to start Android emulator" });
+    showFailureToast(error, TOAST_MESSAGES.FAILURE.ANDROID_EMULATOR_START_FAILED);
     throw error;
   }
 }
 
-export async function stopAndroidEmulator(avdName: string): Promise<void> {
+export async function stopAndroidEmulator(avdName: string) {
   try {
     const adbPath = findAndroidSdkTool("adb");
     if (!adbPath) {
@@ -542,40 +516,10 @@ export async function stopAndroidEmulator(avdName: string): Promise<void> {
     // Stop the target emulator
     await execAsync(`${adbPath} -s ${targetEmulatorId} emu kill`);
 
-    showToast({
-      style: Toast.Style.Success,
-      title: "Android emulator stopped",
-      message: `${avdName} has been shut down`,
-    });
+    showToast(TOAST_MESSAGES.SUCCESS.ANDROID_EMULATOR_STOPPED);
   } catch (error) {
     console.error("Error stopping Android emulator:", error);
-    showFailureToast(error, { title: "Failed to stop Android emulator" });
+    showFailureToast(error, TOAST_MESSAGES.FAILURE.ANDROID_EMULATOR_STOP_FAILED);
     throw error;
-  }
-}
-
-export function openAndroidEmulator(avdName: string): void {
-  try {
-    const emulatorPath = findAndroidSdkTool("emulator");
-    if (!emulatorPath) {
-      throw new Error("Android emulator executable not found");
-    }
-
-    // Start the emulator using spawn instead of exec
-    const process = spawn(emulatorPath, ["-avd", avdName], {
-      detached: true,
-      stdio: "ignore",
-    });
-
-    // Unref the process to allow the parent to exit independently
-    process.unref();
-
-    showToast({
-      style: Toast.Style.Success,
-      title: "Opening Android emulator",
-      message: avdName,
-    });
-  } catch (error) {
-    showFailureToast(error, { title: "Failed to open Android emulator" });
   }
 }

@@ -1,7 +1,7 @@
 import { ActionPanel, List } from "@raycast/api";
 import { useMemo } from "react";
 import { Device } from "../types";
-import { getDeviceTypeIcon, getStatusIcon, getStatusLabel, getStatusColor, formatDeviceVersion } from "../utils";
+import { getDeviceTypeIcon, getStatusIcon, getStatusLabel, getStatusColor } from "../utils";
 import { IOSDeviceActions, AndroidDeviceActions, CommonDeviceActions } from "./DeviceActions";
 
 interface DeviceListItemProps {
@@ -19,16 +19,11 @@ function getDeviceActionComponent(category: string, device: Device, onRefresh: (
 }
 
 export function DeviceListItem({ device, onRefresh }: DeviceListItemProps) {
-  const formattedVersion = useMemo(
-    () => formatDeviceVersion(device.runtime, device.category),
-    [device.runtime, device.category],
-  );
-
   const accessories = useMemo(
     () => [
       {
-        text: formattedVersion,
-        tooltip: `Version: ${formattedVersion}`,
+        text: device.runtime,
+        tooltip: `Version: ${device.runtime}`,
       },
       {
         icon: { source: getStatusIcon(device.status), tintColor: getStatusColor(device.status) },
@@ -36,14 +31,13 @@ export function DeviceListItem({ device, onRefresh }: DeviceListItemProps) {
         tooltip: `Status: ${device.status}`,
       },
     ],
-    [formattedVersion, device.status],
+    [device.status, device.runtime],
   );
 
   const categorySpecificActions = getDeviceActionComponent(device.category, device, onRefresh);
 
   return (
     <List.Item
-      key={device.id}
       icon={getDeviceTypeIcon(device.deviceType)}
       title={device.name}
       subtitle={device.deviceType}

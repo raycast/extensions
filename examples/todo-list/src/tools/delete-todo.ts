@@ -1,4 +1,4 @@
-import { Action, LocalStorage, Tool } from "@raycast/api";
+import { Action, LocalStorage } from "@raycast/api";
 import { Todo } from "../types";
 
 type Input = {

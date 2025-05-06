@@ -1,5 +1,19 @@
 # GitHub Changelog
 
+## [Filter recently closed PRs by last update date] - 2025-04-16
+
+- Fixed a bug where active pull requests could be hidden: the `updated` filter is now only applied to closed PRs, so all active PRs are always shown in `My Pull Requests`.
+
+## [Add support for merge queues and auto-merge] - 2025-04-15
+
+- Adds PR actions for repositories that use merge queues
+- Adds the ability to enable auto-merge
+- Fix codegen lint hook
+
+## [Add the ability to search for collaborators in the pull request actions] - 2025-03-19
+
+- Add the ability to search for collaborators in the pull request actions, instead of just showing the first 25.
+
 ## [Add repository filtering for menu bar commands] - 2025-03-11
 
 - Add the ability to include or exclude specific repositories from the results for the `My Pull Requests` and `Unread Notifications` Menu Bar commands.

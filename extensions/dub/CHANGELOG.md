@@ -1,5 +1,17 @@
 # Dub Link Shortener Changelog
 
+## [Analytics] - 2025-04-12
+
+- Added an action to open the analytics page for a link
+
+## [A.I Extension support] - 2025-04-05
+
+- Added tools to work with Raycast Pro's new A.I extensions feature.
+
+## [Chore] - 2025-04-04
+
+- Bump dub sdk to v0.61.5
+
 ## [Improvements] - 2025-03-12
 
 - Add a toggle to show/hide details in the search links command

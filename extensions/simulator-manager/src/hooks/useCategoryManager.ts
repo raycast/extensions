@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
+import { DeviceDisplayCategory } from "../types";
 
-export function useCategoryManager(deviceTypesToDisplay: string) {
-  const [selectedCategory, setSelectedCategory] = useState<string>(
+export function useCategoryManager(deviceTypesToDisplayPref?: DeviceDisplayCategory) {
+  const deviceTypesToDisplay = deviceTypesToDisplayPref || "all";
+
+  const [selectedCategory, setSelectedCategory] = useState<DeviceDisplayCategory>(
     deviceTypesToDisplay !== "all" ? deviceTypesToDisplay : "all",
   );
 
-  const handleCategoryChange = (newCategory: string) => {
+  const handleCategoryChange = (newCategory: DeviceDisplayCategory) => {
     if (deviceTypesToDisplay === "all") {
       setSelectedCategory(newCategory);
     }
@@ -21,6 +24,7 @@ export function useCategoryManager(deviceTypesToDisplay: string) {
 
   return {
     selectedCategory,
+    deviceTypesToDisplay,
     handleCategoryChange,
     showDropdown,
   };

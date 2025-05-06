@@ -1,5 +1,6 @@
-import { Color, Icon } from "@raycast/api";
+import { closeMainWindow, Color, Icon } from "@raycast/api";
 import { Device, DeviceType } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 export function getDeviceTypeIcon(deviceType: string) {
   switch (deviceType) {
@@ -51,7 +52,7 @@ export function getDeviceType(name: string): DeviceType {
   return "Other";
 }
 
-export function getStatusLabel(status: string): string {
+export function getStatusLabel(status: string) {
   switch (status) {
     case "Booted":
       return "Running";
@@ -73,7 +74,7 @@ export function getStatusIcon(status: string) {
   }
 }
 
-export function getStatusColor(status: string): Color | undefined {
+export function getStatusColor(status: string) {
   switch (status) {
     case "Booted":
       return Color.Green;
@@ -82,24 +83,22 @@ export function getStatusColor(status: string): Color | undefined {
   }
 }
 
-export function formatDeviceVersion(runtime: string, category: string): string {
-  if (category === "ios") {
-    return runtime.replace("iOS-", "iOS ").replace(/-/g, ".").replace("tvOS-", "tvOS ").replace("watchOS-", "watchOS ");
+export function filterDevices(devices: Device[], searchText: string, selectedCategory: string) {
+  const lowerSearchText = searchText.toLowerCase();
+  const lowerSelectedCategory = selectedCategory.toLowerCase();
+  const isAllCategory = lowerSelectedCategory === "all";
+
+  if (isAllCategory) {
+    return devices.filter((device) => device.name.toLowerCase().includes(lowerSearchText));
   }
 
-  return runtime;
+  return devices.filter(
+    (device) =>
+      device.name.toLowerCase().includes(lowerSearchText) && device.category.toLowerCase() === lowerSelectedCategory,
+  );
 }
 
-export function filterDevices(devices: Device[], searchText: string, selectedCategory: string): Device[] {
-  return devices.filter((device) => {
-    const matchesSearch = device.name.toLowerCase().includes(searchText.toLowerCase());
-    const matchesCategory =
-      selectedCategory.toLowerCase() === "all" || device.category.toLowerCase() === selectedCategory.toLowerCase();
-    return matchesSearch && matchesCategory;
-  });
-}
-
-export function groupDevicesByType(devices: Device[]): Record<string, Device[]> {
+export function groupDevicesByType(devices: Device[]) {
   return devices.reduce(
     (acc, device) => {
       if (!acc[device.deviceType]) {
@@ -110,4 +109,37 @@ export function groupDevicesByType(devices: Device[]): Record<string, Device[]> 
     },
     {} as Record<string, Device[]>,
   );
+}
+
+export async function executeWithErrorHandling(action: () => Promise<void>, onSuccess?: () => void) {
+  try {
+    await action();
+    if (onSuccess) onSuccess();
+  } catch (error) {
+    showFailureToast(error);
+  } finally {
+    closeMainWindow();
+  }
+}
+
+export function getAndroidVersionFromApiLevel(apiLevel: number) {
+  const versionMap: Record<number, string> = {
+    35: "15.0", // Android U
+    34: "14.0", // Android Upside Down Cake
+    33: "13.0", // Android Tiramisu
+    32: "12.1", // Android 12L
+    31: "12.0", // Android Snow Cone
+    30: "11.0", // Android Red Velvet Cake
+    29: "10.0", // Android Quince Tart
+    28: "9.0", // Android Pie
+    27: "8.1", // Android Oreo
+    26: "8.0", // Android Oreo
+    25: "7.1", // Android Nougat
+    24: "7.0", // Android Nougat
+    23: "6.0", // Android Marshmallow
+    22: "5.1", // Android Lollipop
+    21: "5.0", // Android Lollipop
+  };
+
+  return `Android ${versionMap[apiLevel] ?? `API ${apiLevel}`}`;
 }

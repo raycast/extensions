@@ -7,9 +7,35 @@ const WARM_TEMPERATURE = 344; // 2900k
 const COLD_TEMPERATURE = 143; // 7000k
 const TEMPERATURE_STEP = (WARM_TEMPERATURE - COLD_TEMPERATURE) / 20; // 5%
 
-interface Preferences {
-  keyLights_count: string;
+export function convertFormTemperatureToActual(formTemp: number) {
+  return Math.round(COLD_TEMPERATURE + (formTemp / 100) * (WARM_TEMPERATURE - COLD_TEMPERATURE));
 }
+
+export function convertActualTemperatureToForm(actualTemp: number) {
+  return Math.round(((actualTemp - COLD_TEMPERATURE) / (WARM_TEMPERATURE - COLD_TEMPERATURE)) * 100);
+}
+
+export type KeyLightSettings = {
+  /**
+   * The brightness of the key light.
+   * @default 20
+   * @min 0
+   * @max 100
+   */
+  brightness?: number;
+  /**
+   * The temperature of the key light.
+   * @default 200
+   * @min 143
+   * @max 344
+   */
+  temperature?: number;
+  /**
+   * Whether the key light is on.
+   * @default true
+   */
+  on?: boolean;
+};
 
 export class KeyLight {
   static keyLights: Array<KeyLight>;
@@ -18,7 +44,7 @@ export class KeyLight {
     const bonjour = Bonjour();
     this.keyLights = [];
 
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences: ExtensionPreferences = getPreferenceValues();
     const count: number = parseInt(preferences.keyLights_count, 10);
 
     const find = new Promise<KeyLight>((resolve) => {
@@ -42,19 +68,57 @@ export class KeyLight {
     this.service = service;
   }
 
+  async getSettings() {
+    const statuses = new Array<KeyLightSettings>();
+
+    for (let x = 0; x < KeyLight.keyLights.length; x++) {
+      const service = KeyLight.keyLights[x].service;
+      const keyLight = await this.getKeyLight(service);
+      statuses.push({
+        on: keyLight.on,
+        brightness: keyLight.brightness,
+        temperature: keyLight.temperature,
+      });
+    }
+
+    return statuses;
+  }
+
   async toggle() {
     let newState;
     for (let x = 0; x < KeyLight.keyLights.length; x++) {
       try {
-        const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
+        const service = KeyLight.keyLights[x].service;
+        const keyLight = await this.getKeyLight(service);
         newState = !keyLight.on;
-        await this.updateKeyLight(KeyLight.keyLights[x].service, { on: newState });
+        await this.updateKeyLight(service, { on: newState });
       } catch (e) {
         throw new Error("Failed toggling Key Light");
       }
     }
 
     return newState;
+  }
+
+  async turnOn() {
+    for (let x = 0; x < KeyLight.keyLights.length; x++) {
+      const service = KeyLight.keyLights[x].service;
+      await this.updateKeyLight(service, { on: true });
+    }
+  }
+
+  async turnOff() {
+    for (let x = 0; x < KeyLight.keyLights.length; x++) {
+      const service = KeyLight.keyLights[x].service;
+      await this.updateKeyLight(service, { on: false });
+    }
+  }
+
+  async update(options: { brightness?: number; temperature?: number; on?: boolean }) {
+    for (let x = 0; x < KeyLight.keyLights.length; x++) {
+      const service = KeyLight.keyLights[x].service;
+      await this.updateKeyLight(service, options);
+    }
   }
 
   async increaseBrightness() {

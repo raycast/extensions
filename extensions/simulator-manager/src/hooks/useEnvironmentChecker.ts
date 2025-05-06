@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { findAndroidSdkTool, execAsync } from "../utils/simulator-commands";
 
 export function useEnvironmentChecker() {
@@ -6,29 +6,37 @@ export function useEnvironmentChecker() {
   const [xcodeFound, setXcodeFound] = useState<boolean | null>(null);
   const [isChecking, setIsChecking] = useState(true);
 
-  useEffect(() => {
-    async function checkSDKs() {
-      setIsChecking(true);
+  const checkSDKs = useCallback(async () => {
+    setIsChecking(true);
 
+    const checkXcode = async () => {
       try {
         await execAsync("xcrun --version");
-        setXcodeFound(true);
-      } catch (error) {
-        setXcodeFound(false);
+        return true;
+      } catch {
+        return false;
       }
+    };
 
+    const checkAndroidSDK = () => {
       const emulatorPath = findAndroidSdkTool("emulator");
-      setAndroidSdkFound(emulatorPath !== null);
+      return emulatorPath !== null;
+    };
 
-      setIsChecking(false);
-    }
+    const [xcodeResult, androidResult] = await Promise.all([checkXcode(), checkAndroidSDK()]);
 
-    checkSDKs();
+    setXcodeFound(xcodeResult);
+    setAndroidSdkFound(androidResult);
+    setIsChecking(false);
   }, []);
 
+  useEffect(() => {
+    checkSDKs();
+  }, [checkSDKs]);
+
   return {
-    androidSdkFound: androidSdkFound === null ? false : androidSdkFound,
-    xcodeFound: xcodeFound === null ? false : xcodeFound,
+    androidSdkFound: androidSdkFound ?? false,
+    xcodeFound: xcodeFound ?? false,
     isChecking,
   };
 }

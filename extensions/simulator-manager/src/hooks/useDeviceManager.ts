@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { showFailureToast } from "@raycast/utils";
-import { Device } from "../types";
+import { Device, DeviceDisplayCategory } from "../types";
 import { filterDevices } from "../utils";
 import { fetchIOSDevices, fetchAndroidDevices } from "../utils/simulator-commands";
 import { REFRESH_INTERVAL } from "../constants";
 
 interface UseDeviceManagerProps {
   androidSdkFound: boolean;
-  deviceTypesToDisplay: string;
+  deviceTypesToDisplay: DeviceDisplayCategory;
   searchText: string;
-  selectedCategory: string;
+  selectedCategory: DeviceDisplayCategory;
   xcodeFound: boolean;
 }
 
@@ -19,20 +19,17 @@ export function useDeviceManager(props: UseDeviceManagerProps) {
   const [devices, setDevices] = useState<Device[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchDevices = async () => {
+  const fetchDevices = useCallback(async () => {
     try {
       setIsLoading(true);
 
-      let iosDevices: Device[] = [];
-      let androidDevices: Device[] = [];
+      const shouldFetchIOS = ["all", "ios"].includes(deviceTypesToDisplay) && xcodeFound;
+      const shouldFetchAndroid = ["all", "android"].includes(deviceTypesToDisplay) && androidSdkFound;
 
-      if ((deviceTypesToDisplay === "all" || deviceTypesToDisplay === "ios") && xcodeFound) {
-        iosDevices = await fetchIOSDevices();
-      }
-
-      if ((deviceTypesToDisplay === "all" || deviceTypesToDisplay === "android") && androidSdkFound) {
-        androidDevices = await fetchAndroidDevices();
-      }
+      const [iosDevices, androidDevices] = await Promise.all([
+        shouldFetchIOS ? fetchIOSDevices() : Promise.resolve([]),
+        shouldFetchAndroid ? fetchAndroidDevices() : Promise.resolve([]),
+      ]);
 
       setDevices([...iosDevices, ...androidDevices]);
     } catch (error) {
@@ -41,13 +38,13 @@ export function useDeviceManager(props: UseDeviceManagerProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [deviceTypesToDisplay, androidSdkFound, xcodeFound]);
 
   useEffect(() => {
     fetchDevices();
     const intervalId = setInterval(fetchDevices, REFRESH_INTERVAL);
     return () => clearInterval(intervalId);
-  }, [deviceTypesToDisplay, androidSdkFound, xcodeFound]);
+  }, [fetchDevices]);
 
   const filteredDevices = filterDevices(devices, searchText, selectedCategory);
 

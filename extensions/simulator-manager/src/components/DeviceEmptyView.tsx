@@ -53,7 +53,12 @@ export function DeviceEmptyView({
       <List.EmptyView
         icon="⚠️"
         title="No iOS Simulators Found"
-        description="Please verify that Xcode is installed and properly configured."
+        description="Please verify that Xcode is installed and properly configured. You can adjust Xcode settings in the extension preferences."
+        actions={
+          <ActionPanel>
+            <Action title="Open Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
       />
     );
   }
