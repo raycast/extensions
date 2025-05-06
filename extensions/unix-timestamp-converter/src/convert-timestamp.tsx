@@ -27,7 +27,7 @@ export default function Command() {
     },
   });
 
-  // 結果のプレビュー
+  // Preview of the result
   const resultText = (() => {
     const country = countries.find((c) => c.id === values.country);
     const format = formats.find((f) => f.id === values.format);

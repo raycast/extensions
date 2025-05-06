@@ -1,12 +1,12 @@
 import { Country } from "../types";
 
 /**
- * 指定した国・ロケール・オプションで日付をフォーマットし、国名・タイムゾーン名付きで返す
- * @param date 日付オブジェクト
- * @param country 国情報
- * @param locale ロケール（例: "ja-JP"）
+ * Formats the date with the specified country, locale, and options, and returns it with country name and timezone
+ * @param date Date object
+ * @param country Country information
+ * @param locale Locale (e.g., "ja-JP")
  * @param options Intl.DateTimeFormatOptions
- * @returns 例: "Japan Time (JST): 2025/05/03(土) 22:02:33"
+ * @returns Example: "Japan Time (JST): 2025/05/03(土) 22:02:33"
  */
 export const formatDateTimeWithCountry = (
   date: Date,
@@ -21,15 +21,15 @@ export const formatDateTimeWithCountry = (
 };
 
 /**
- * 指定した国のローカルタイムとしてDateを生成し、UNIXタイムスタンプを返す
- * @param year 年
- * @param month 月
- * @param day 日
- * @param hour 時
- * @param minute 分
- * @param second 秒
- * @param country 国情報
- * @returns UNIXタイムスタンプ（秒）
+ * Generates a Date as the local time of the specified country and returns the UNIX timestamp
+ * @param year Year
+ * @param month Month
+ * @param day Day
+ * @param hour Hour
+ * @param minute Minute
+ * @param second Second
+ * @param country Country information
+ * @returns UNIX timestamp (seconds)
  */
 export const getUnixTimeFromLocalDate = (
   year: number,
@@ -45,18 +45,18 @@ export const getUnixTimeFromLocalDate = (
 };
 
 /**
- * UNIXタイムスタンプからDateを生成
- * @param unixTime UNIXタイムスタンプ（秒）
- * @returns Dateオブジェクト
+ * Generates a Date from a UNIX timestamp
+ * @param unixTime UNIX timestamp (seconds)
+ * @returns Date object
  */
 export const getDateFromUnixTime = (unixTime: number): Date => {
   return new Date(unixTime * 1000);
 };
 
 /**
- * 数値バリデーション
- * @param v 入力値
- * @returns エラーメッセージまたはundefined
+ * Number validation
+ * @param v Input value
+ * @returns Error message or undefined
  */
 export const validateNumber = (v: string | undefined): string | undefined =>
   !v ? "Required" : isNaN(Number(v)) ? "Number only" : undefined;

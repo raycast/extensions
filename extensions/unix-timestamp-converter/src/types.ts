@@ -1,28 +1,28 @@
 /**
- * 国情報
+ * Country information
  */
 export type Country = {
   id: string;
   name: string;
-  timezoneOffset: number; // UTCからのオフセット（例: 9）
+  timezoneOffset: number; // UTC offset (e.g.: 9)
   timezoneName: string;
   ianaTimeZone: string;
 };
 
 /**
- * 日時フォーマット
+ * Date format
  */
 export type Format = {
   id: string;
   name: string;
   /**
-   * 日付と国情報から表示用文字列を生成する関数
+   * Function to generate a display string from date and country information
    */
   format: (date: Date, country: Country) => string;
 };
 
 /**
- * convert-timestampコマンド用フォーム値
+ * Form values for convert-timestamp command
  */
 export type ConvertTimestampFormValues = {
   unixTime: string;
@@ -31,7 +31,7 @@ export type ConvertTimestampFormValues = {
 };
 
 /**
- * generate-timestampコマンド用フォーム値
+ * Form values for generate-timestamp command
  */
 export type GenerateTimestampFormValues = {
   country: string;

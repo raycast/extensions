@@ -2,7 +2,7 @@ import { Country, Format } from "./types";
 import { formatDateTimeWithCountry } from "./utils/datetime";
 
 /**
- * サポートする国一覧
+ * List of supported countries
  */
 export const countries: Country[] = [
   { id: "japan", name: "Japan", timezoneOffset: 9, timezoneName: "JST", ianaTimeZone: "Asia/Tokyo" },
@@ -19,17 +19,17 @@ export const countries: Country[] = [
 ];
 
 /**
- * サポートするフォーマット一覧
+ * List of supported formats
  */
 export const formats: Format[] = [
   {
     id: "japanese_format",
     name: "Japanese Format",
     /**
-     * 日本語ロケール・日本時間で日付をフォーマットします。
-     * @param date 日付オブジェクト
-     * @param country 国情報
-     * @returns フォーマット済み文字列
+     * Formats the date in Japanese locale and Japan time.
+     * @param date Date object
+     * @param country Country information
+     * @returns Formatted string
      */
     format: (date, country) =>
       formatDateTimeWithCountry(date, country, "ja-JP", {
@@ -47,10 +47,10 @@ export const formats: Format[] = [
     id: "korean_format",
     name: "Korean Format",
     /**
-     * 韓国語ロケール・韓国時間で日付をフォーマットします。
-     * @param date 日付オブジェクト
-     * @param country 国情報
-     * @returns フォーマット済み文字列
+     * Formats the date in Korean locale and Korea time.
+     * @param date Date object
+     * @param country Country information
+     * @returns Formatted string
      */
     format: (date, country) =>
       formatDateTimeWithCountry(date, country, "ko-KR", {
@@ -68,10 +68,10 @@ export const formats: Format[] = [
     id: "thai_format",
     name: "Thai Format",
     /**
-     * タイ語ロケール・タイ時間で日付をフォーマットします。
-     * @param date 日付オブジェクト
-     * @param country 国情報
-     * @returns フォーマット済み文字列
+     * Formats the date in Thai locale and Thailand time.
+     * @param date Date object
+     * @param country Country information
+     * @returns Formatted string
      */
     format: (date, country) =>
       formatDateTimeWithCountry(date, country, "th-TH", {
@@ -89,10 +89,10 @@ export const formats: Format[] = [
     id: "iso_format",
     name: "ISO Format",
     /**
-     * ISO 8601形式（UTC）で日付をフォーマットします。
-     * @param date 日付オブジェクト
-     * @param country 国情報
-     * @returns フォーマット済み文字列
+     * Formats the date in ISO 8601 format (UTC).
+     * @param date Date object
+     * @param country Country information
+     * @returns Formatted string
      */
     format: (date, country) => {
       return `${country.name} Time (${country.timezoneName}): ${date.toISOString()}`;
@@ -102,10 +102,10 @@ export const formats: Format[] = [
     id: "us_format",
     name: "US Format",
     /**
-     * 英語ロケール・アメリカ時間で日付をフォーマットします。
-     * @param date 日付オブジェクト
-     * @param country 国情報
-     * @returns フォーマット済み文字列
+     * Formats the date in English locale and US time.
+     * @param date Date object
+     * @param country Country information
+     * @returns Formatted string
      */
     format: (date, country) => {
       const options: Intl.DateTimeFormatOptions = {
