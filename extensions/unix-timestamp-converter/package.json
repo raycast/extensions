@@ -17,7 +17,7 @@
     {
       "name": "generate-timestamp",
       "title": "Generate Timestamp",
-      "subtitle": "Unix Time Converter",
+      "subtitle": "Unix Time Generator",
       "description": "Create Unix timestamps from human-readable dates and times. Enter a date in your preferred format to convert it to Unix time.",
       "mode": "view"
     }
