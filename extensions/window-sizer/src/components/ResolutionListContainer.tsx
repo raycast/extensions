@@ -43,6 +43,7 @@ export function ResolutionListContainer({
   if (isLoading || customResolutions.length === 0) {
     return (
       <DefaultResolutionsList
+        isLoading={isLoading}
         predefinedResolutions={predefinedResolutions}
         onResizeWindow={onResizeWindow}
         onRestorePreviousSize={onRestorePreviousSize}
@@ -56,6 +57,7 @@ export function ResolutionListContainer({
   // Have custom resolutions, show custom list
   return (
     <CustomResolutionsList
+      isLoading={isLoading}
       customResolutions={customResolutions}
       predefinedResolutions={predefinedResolutions}
       onDeleteCustomResolution={onDeleteCustomResolution}
