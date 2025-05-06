@@ -1,4 +1,4 @@
-import { List, Detail } from "@raycast/api";
+import { List, Detail, Icon } from "@raycast/api";
 import { showFailureToast, useFetch, usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { URLSearchParams } from "node:url";
@@ -49,7 +49,9 @@ export default function Command(props: SearchPortsProps) {
       throttle
       searchText={searchText}
     >
-      {data?.length === 0 && <List.EmptyView title="No Results" description="Try a different search term" />}
+      {data?.length === 0 && (
+        <List.EmptyView icon={Icon.Info} title="No Results" description="Try a different search term" />
+      )}
       {data && data.length > 0 && (
         <List.Section title="Results" subtitle={`${data.length}`}>
           {data.map((searchResult) => (

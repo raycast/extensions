@@ -70,10 +70,8 @@ describe("extractPortDetails", () => {
   }
 });
 
-
 describe("extractInstalledPorts", () => {
   it("should return an empty array if no installed ports are found", () => {
-
     const cases = [
       {
         input: "No installed ports found",

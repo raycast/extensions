@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { listInstalledPorts, isMacPortsInstalled } from "./exec";
 import InstalledListItem from "./components/InstalledListItem";
@@ -11,7 +11,7 @@ export default function Command() {
   if (isCheckingInstallation) {
     return (
       <List isLoading={true}>
-        <List.Item title="Checking MacPorts installation..." />
+        <List.EmptyView title="Checking MacPorts installation..." />
       </List>
     );
   }
@@ -22,18 +22,18 @@ export default function Command() {
 
   return (
     <List isLoading={isLoadingInstalled} searchBarPlaceholder="Filter installed ports...">
-      <List.Section
-        title="Installed"
-        subtitle={isLoadingInstalled ? undefined : `${installedPortsResult?.length ?? 0}`}
-      >
-        {isLoadingInstalled ? (
-          <List.Item title="Loading installed ports..." />
-        ) : installedPortsResult && installedPortsResult.length > 0 ? (
-          installedPortsResult.map((port) => <InstalledListItem key={port} port={port} />)
-        ) : (
-          <List.Item title="No installed ports found" />
-        )}
-      </List.Section>
+      {installedPortsResult && installedPortsResult.length > 0 ? (
+        <List.Section
+          title="Installed"
+          subtitle={isLoadingInstalled ? undefined : `${installedPortsResult?.length ?? 0}`}
+        >
+          {installedPortsResult.map((port) => (
+            <InstalledListItem key={port} port={port} />
+          ))}
+        </List.Section>
+      ) : (
+        <List.EmptyView icon={Icon.Info} title="No installed ports yet" />
+      )}
     </List>
   );
 }
