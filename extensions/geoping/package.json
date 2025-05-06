@@ -5,16 +5,43 @@
   "description": "Pings servers around the globe",
   "icon": "extension_icon.png",
   "author": "chiroyce",
+  "contributor": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools",
     "System"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Action",
+      "description": "Select the primary action",
+      "default": "refresh",
+      "data": [
+        {
+          "title": "Refresh",
+          "value": "refresh"
+        },
+        {
+          "title": "Copy Result",
+          "value": "copy"
+        },
+        {
+          "title": "Paste Result",
+          "value": "paste"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "ping",
-      "title": "Show Ping Latency and Availability",
-      "subtitle": "Geoping",
+      "title": "Ping",
+      "subtitle": "Ping servers around the globe",
       "description": "Compare latency and availability of servers around the globe",
       "mode": "view"
     }
