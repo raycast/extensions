@@ -1,9 +1,11 @@
-import { Icon, Image, List, showToast, Toast } from "@raycast/api";
+import { Icon, Image, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { EmptyViewObject, EnsureAuthenticated, ObjectListItem, ViewType } from "./components";
 import { useGlobalSearch, usePinnedObjects, useSpaces } from "./hooks";
 import { SpaceObject } from "./models";
 import {
+  bundledTypeKeys,
   defaultTintColor,
   fetchTypeKeysForLists,
   fetchTypeKeysForPages,
@@ -89,18 +91,16 @@ function Search() {
       [ViewType.pages]: typeKeysForPages,
       [ViewType.tasks]: typeKeysForTasks,
       [ViewType.lists]: typeKeysForLists,
-      [ViewType.bookmarks]: ["ot-bookmark"],
+      [ViewType.bookmarks]: [bundledTypeKeys.bookmark],
     };
     setTypes(viewToType[currentView] ?? []);
   }, [currentView, typeKeysForPages, typeKeysForTasks]);
 
   useEffect(() => {
     if (objectsError || spacesError || pinnedObjectsError) {
-      showToast(
-        Toast.Style.Failure,
-        "Failed to fetch latest data",
-        objectsError?.message || spacesError?.message || pinnedObjectsError?.message,
-      );
+      showFailureToast(objectsError || spacesError || pinnedObjectsError, {
+        title: "Failed to fetch latest data",
+      });
     }
   }, [objectsError, spacesError, pinnedObjectsError]);
 
@@ -138,7 +138,6 @@ function Search() {
   // Process pinned objects and filter by search term
   const processedPinnedObjects = pinnedObjects?.length
     ? pinnedObjects
-        // TODO: decide on wanted behavior for pinned objects
         .filter((object) => types.length === 0 || types.includes(object.type.key))
         .filter((object) => filterObjectsBySearchTerm([object], searchText).length > 0)
         .map((object) => processObjectWithSpaceIcon(object, true))
@@ -209,11 +208,13 @@ function Search() {
               subtitle={object.subtitle}
               accessories={object.accessories}
               mutate={[mutateObjects, mutatePinnedObjects]}
+              object={object.object}
               layout={object.layout}
               viewType={currentView}
               isGlobalSearch={true}
               isNoPinView={false}
               isPinned={object.isPinned}
+              searchText={searchText}
             />
           ))}
         </List.Section>
@@ -233,11 +234,13 @@ function Search() {
               subtitle={object.subtitle}
               accessories={object.accessories}
               mutate={[mutateObjects, mutatePinnedObjects]}
+              object={object.object}
               layout={object.layout}
               viewType={currentView}
               isGlobalSearch={true}
               isNoPinView={false}
               isPinned={object.isPinned}
+              searchText={searchText}
             />
           ))}
         </List.Section>

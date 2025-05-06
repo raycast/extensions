@@ -1,14 +1,33 @@
 import { Image } from "@raycast/api";
-import { ObjectIcon, RawType, Type } from ".";
+import {
+  ObjectIcon,
+  ObjectLayout,
+  PropertyLinkWithValue,
+  PropertyWithValue,
+  RawProperty,
+  RawPropertyWithValue,
+  RawType,
+  Type,
+} from ".";
+
+export enum BodyFormat {
+  Markdown = "md",
+  JSON = "json",
+}
 
 export interface CreateObjectRequest {
   name: string;
   icon: ObjectIcon;
-  description: string;
   body: string;
-  source: string;
   template_id: string;
   type_key: string;
+  properties: PropertyLinkWithValue[];
+}
+
+export interface UpdateObjectRequest {
+  name?: string;
+  icon?: ObjectIcon;
+  properties?: PropertyLinkWithValue[];
 }
 
 export interface RawSpaceObject {
@@ -18,24 +37,26 @@ export interface RawSpaceObject {
   icon: ObjectIcon;
   type: RawType;
   snippet: string;
-  layout: string;
+  layout: ObjectLayout;
   space_id: string;
   archived: boolean;
-  properties: Property[];
+  properties: RawPropertyWithValue[];
 }
 
-export interface RawSpaceObjectWithBlocks extends RawSpaceObject {
-  blocks: Block[];
+export interface RawSpaceObjectWithBody extends RawSpaceObject {
+  markdown: string;
 }
 
-export interface SpaceObject extends Omit<RawSpaceObject, "icon" | "type"> {
+export interface SpaceObject extends Omit<RawSpaceObject, "icon" | "type" | "properties"> {
+  icon: Image.ImageLike;
+  type: Type;
+  properties: PropertyWithValue[];
+}
+
+export interface SpaceObjectWithBody extends Omit<RawSpaceObjectWithBody, "icon" | "type" | "properties"> {
   type: Type;
   icon: Image.ImageLike;
-}
-
-export interface SpaceObjectWithBlocks extends Omit<RawSpaceObjectWithBlocks, "icon" | "type"> {
-  type: Type;
-  icon: Image.ImageLike;
+  properties: PropertyWithValue[];
 }
 
 export interface Block {
@@ -46,7 +67,7 @@ export interface Block {
   vertical_align: string;
   text: Text;
   file: File;
-  property: Property;
+  property: RawProperty;
 }
 
 export interface Text {
@@ -67,27 +88,4 @@ export interface File {
   target_object_id: string;
   state: string;
   style: string;
-}
-
-export interface Property {
-  id: string;
-  name: string;
-  format: string;
-  text?: string;
-  number?: number;
-  select?: Tag;
-  multi_select?: Tag[];
-  date?: string;
-  file?: SpaceObject[];
-  checkbox?: boolean;
-  url?: string;
-  email?: string;
-  phone?: string;
-  object?: SpaceObject[];
-}
-
-export interface Tag {
-  id: string;
-  name: string;
-  color: string;
 }

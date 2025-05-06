@@ -24,7 +24,7 @@ export async function mapSpace(space: RawSpace): Promise<Space> {
 
   return {
     ...space,
-    name: space.name || "Untitled",
+    name: space.name?.trim() || "Untitled",
     icon,
   };
 }
