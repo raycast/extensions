@@ -7,7 +7,7 @@ const DEFAULT_CLI_PATH = getPreferenceValues().cliPath || "/usr/local/bin/ente";
 
 export const createEntePath = (path: string): string => {
   if (!fse.existsSync(path)) {
-    fse.mkdirSync(path);
+    fse.mkdirSync(path, { recursive: true });
     console.log("Ente folder created at", path);
   } else {
     console.log("Ente folder already exists at", path);
