@@ -26,14 +26,21 @@ const OS_COMMANDS = {
   },
 } as const satisfies Record<string, CommandSet>;
 
+type SupportedPlatform = "darwin" | "win32";
+
+interface Win32Commands {
+  ipconfig: string;
+}
+
 export default async function main() {
   const osPlatform = platform();
-  const osCommandSet = OS_COMMANDS[osPlatform];
 
-  if (!osCommandSet) {
+  if (!["darwin", "win32"].includes(osPlatform)) {
     await showHUD("🚫 Unsupported operating system");
     return;
   }
+
+  const osCommandSet = OS_COMMANDS[osPlatform as SupportedPlatform];
 
   let command: string;
   let shell: ShellType;
@@ -49,7 +56,8 @@ export default async function main() {
     }
 
     case "win32": {
-      command = osCommandSet.commands.ipconfig;
+      const { ipconfig } = osCommandSet.commands as Win32Commands;
+      command = ipconfig;
       shell = osCommandSet.shell;
       break;
     }
