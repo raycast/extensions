@@ -3,7 +3,7 @@
   "name": "open-gem-documentation",
   "title": "Rubygem Documentation Browser",
   "description": "Search and open Rubygem Documentations in your Browser.",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "remo_fritzsche",
   "categories": [
     "Productivity",
