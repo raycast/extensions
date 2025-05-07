@@ -60,6 +60,56 @@ export type StatusResponse = {
   >;
 };
 
+/**
+ * NetcheckResponse are the fields returned by `tailscale netcheck --format json`.
+ * These are mentioned to not be stable and may change in the future. Doubtful, but possible.
+ */
+export type NetcheckResponse = {
+  UDP: boolean;
+  IPv4: boolean;
+  GlobalV4: string;
+  IPv6: boolean;
+  GlobalV6: string;
+  MappingVariesByDestIP: boolean;
+  UPnP: boolean;
+  PMP: boolean;
+  PCP: boolean;
+  PreferredDERP: number;
+  RegionLatency: Record<string, number>;
+  RegionV4Latency: Record<string, number>;
+  RegionV6Latency: Record<string, number>;
+};
+
+export type DerpRegion = {
+  RegionId: number;
+  RegionCode: string;
+  RegionName: string;
+  Latitude: number;
+  Longitude: number;
+  Nodes: DerpNode[];
+};
+
+type DerpNode = {
+  Name: string;
+  RegionID: number;
+  HostName: string;
+  IPv4: string;
+  IPv6: string;
+  CanPort80: boolean;
+};
+
+export type Derp = {
+  id: string;
+  code: string;
+  name: string;
+  latency: string | undefined;
+  latencies: {
+    v4: string | undefined;
+    v6: string | undefined;
+  };
+  nodes: DerpNode[];
+};
+
 export function getStatus(peers = true) {
   const resp = tailscale(`status --json --peers=${peers}`);
   const data = JSON.parse(resp) as StatusResponse;
@@ -67,6 +117,19 @@ export function getStatus(peers = true) {
     throw new NotConnectedError();
   }
   return data;
+}
+
+export function getNetcheck() {
+  const resp = tailscale("netcheck --format json");
+  return JSON.parse(resp);
+}
+
+/**
+ * This funtion relies on a debug command, so it may not be stable on the returned value.
+ */
+export function getDerpMap() {
+  const resp = tailscale("debug netmap");
+  return JSON.parse(resp).DERPMap.Regions as DerpRegion[];
 }
 
 export function getDevices(status: StatusResponse) {

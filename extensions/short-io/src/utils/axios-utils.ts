@@ -1,8 +1,8 @@
 import axios from "axios";
 import { SHORTEN_LINK_API } from "./constants";
-import { apiKey } from "../hooks/hooks";
 import { ShortLink } from "../types/types";
 import { isEmpty } from "./common-utils";
+import { apiKey } from "../types/preferences";
 
 export const shortenLinkWithSlug = async (domain: string, originalURL: string, slug: string, title: string) => {
   try {
@@ -104,6 +104,7 @@ export const UpdateShortLink = async (linkId: string, originalURL: string, slug:
 };
 
 export const deleteShortLink = async (linkId: string) => {
+  console.log("deleteShortLink " + linkId);
   try {
     //shorten link
     return await axios({
@@ -111,13 +112,14 @@ export const deleteShortLink = async (linkId: string) => {
       url: "https://api.short.io/links/" + linkId,
       headers: {
         authorization: apiKey,
-        "Content-Type": "application/json; charset=utf-8",
       },
     })
       .then(function (response) {
+        console.log(response);
         return { success: response.data, message: response.data ? "" : response.data.error };
       })
       .catch(function (response) {
+        console.error(response);
         return { success: false, message: String(response) };
       });
   } catch (e) {

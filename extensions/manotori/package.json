@@ -26,11 +26,18 @@
       "subtitle": "Manotori",
       "description": "View Domains",
       "mode": "view"
+    },
+    {
+      "name": "view-nameserver-sets",
+      "title": "View Nameserver Sets",
+      "subtitle": "Manotori",
+      "description": "View Nameserver Sets",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.87.5",
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

@@ -6,12 +6,17 @@
   "icon": "extension-icon.png",
   "author": "peduarte",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "ridemountainpig"
   ],
   "categories": [
     "Fun"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "generate-fancy-text",

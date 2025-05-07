@@ -23,71 +23,9 @@ We ask that all users read our [legal disclaimer](https://github.com/simple-icon
 
 ## API
 
-This extensions follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link].
+This extension follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link].
 
-You can use `launchCommand` to use this extension search result.
-
-### Launch Context Options
-
-#### `launchFromExtensionTitle`
-
-Type: `string`\
-Default: `undefined`
-
-You can specify the `navigationTitle` when launching this extension.
-
-#### `showCopyActions`
-
-Type: `boolean`\
-Default: `false`
-
-Copy actions are disabled by default. Set it to `true` to enable copy actions.
-
-#### `callbackLaunchOptions`
-
-Type: `LaunchOptions`\
-Default: `undefined`
-
-Use this option to let this extension know what kind of callback needs to be performed when `launchCommand`.
-
-### Callback Context Options
-
-#### `icon`
-
-Type: `IconData`
-
-It returns the icon data.
-
-### Launch Example
-
-```jsx
-import { crossLaunchCommand } from "raycast-cross-extension";
-
-crossLaunchCommand({
-  name: "index",
-  type: LaunchType.UserInitiated,
-  extensionName: "simple-icons",
-  ownerOrAuthorName: "litomore",
-  context: {
-    launchFromExtensionTitle: "Badges - shields.io",
-  },
-});
-```
-
-### Receive Callback Example
-
-```typescript
-import { LaunchProps } from "@raycast/api";
-
-type LaunchContext = {
-  icon: IconData;
-};
-
-export default function Command({ launchContext = {} }: LaunchProps<{ launchContext?: LaunchContext }>) {
-  const { icon } = launchContext;
-  // ...
-}
-```
+See [API.md](https://github.com/raycast/extensions/blob/main/extensions/simple-icons/API.md) to learn how to use its ability.
 
 ## Links
 
@@ -96,8 +34,9 @@ export default function Command({ launchContext = {} }: LaunchProps<{ launchCont
 
 ## Related
 
-- [Simple Icons](https://simpleicons.org)
+- [Simple Icons](https://github.com/simple-icons/simple-icons)
 - [Simple Icons CDN](https://github.com/LitoMore/simple-icons-cdn)
+- [Simple Icons Font](https://github.com/simple-icons/simple-ions-font)
 - [Third-party extensions](https://github.com/simple-icons/simple-icons#third-party-extensions)
 
 ## License

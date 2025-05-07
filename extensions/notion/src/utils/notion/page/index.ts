@@ -61,14 +61,14 @@ export async function patchPage(pageId: string, properties: UpdatePageParameters
   }
 }
 
-export async function search(query?: string, nextCursor?: string) {
+export async function search(query?: string, nextCursor?: string, pageSize: number = 25) {
   const notion = getNotionClient();
   const database = await notion.search({
     sort: {
       direction: "descending",
       timestamp: "last_edited_time",
     },
-    page_size: 25,
+    page_size: pageSize,
     query,
     ...(nextCursor && { start_cursor: nextCursor }),
   });

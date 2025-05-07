@@ -34,7 +34,7 @@ export function Items() {
                 icon={{
                   value: {
                     source: getV7CategoryIcon(
-                      item.categorySingularName.replaceAll(" ", "_").toUpperCase() as CategoryName
+                      item.categorySingularName.replaceAll(" ", "_").toUpperCase() as CategoryName,
                     ),
                     tintColor: Color.Blue,
                   },
@@ -49,7 +49,7 @@ export function Items() {
                     {item.categoryUUID === "001" && item.websiteURLs?.length && (
                       <Action.Open
                         icon={Icon.Globe}
-                        title="Open In Browser"
+                        title="Open in Browser"
                         target={`onepassword7://open_and_fill/${item.vaultUUID}/${item.uuid}/${crypto
                           .createHash("sha256")
                           .update(item.websiteURLs[0] as string)
@@ -58,12 +58,14 @@ export function Items() {
                       />
                     )}
                     <Action.Open
-                      title="Open In 1Password"
+                      // eslint-disable-next-line @raycast/prefer-title-case
+                      title="Open in 1Password"
                       target={`onepassword7://view/${item.vaultUUID}/${item.uuid}`}
                       application="com.agilebits.onepassword7"
                     />
                     <Action.Open
-                      title="Edit In 1Password"
+                      // eslint-disable-next-line @raycast/prefer-title-case
+                      title="Edit in 1Password"
                       target={`onepassword7://edit/${item.vaultUUID}/${item.uuid}`}
                       application="com.agilebits.onepassword7"
                       shortcut={{ modifiers: ["cmd"], key: "e" }}

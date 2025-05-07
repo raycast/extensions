@@ -1,15 +1,15 @@
 import {
-  List,
-  ActionPanel,
   Action,
+  ActionPanel,
   Clipboard,
-  Icon,
   Color,
   getPreferenceValues,
+  Icon,
+  List,
   openCommandPreferences,
 } from "@raycast/api";
-import React, { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
+import React, { useState } from "react";
 
 import advancedFormat from "dayjs/plugin/advancedFormat";
 dayjs.extend(advancedFormat);
@@ -94,7 +94,9 @@ export default function main() {
 
     return Object.entries(dateTimeFormats)
       .filter(([key]) => preferences[key])
-      .map(([_, value]) => dTime.format(value).toString());
+      .map(([key, value]) =>
+        key === "utcIsoFormat" ? dTime.utc().format(value).toString() : dTime.format(value).toString()
+      );
   }
 
   type ActionItem = {

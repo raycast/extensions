@@ -42,7 +42,7 @@ export default function ResultDetail({ result, fields }: { result: Record; field
                   <Detail.Metadata.Label
                     key={field.name}
                     title={field.label}
-                    text={fieldData ? format(new Date(fieldData.display), "dd MMM yyyy") : ""}
+                    text={fieldData ? format(new Date(fieldData.value + " UTC"), "dd MMM yyyy") : ""}
                   />
                 );
 
@@ -51,7 +51,7 @@ export default function ResultDetail({ result, fields }: { result: Record; field
                   <Detail.Metadata.Label
                     key={field.name}
                     title={field.label}
-                    text={fieldData ? format(new Date(fieldData.display), "dd MMM yyyy HH:mm") : ""}
+                    text={fieldData ? format(new Date(fieldData.value + " UTC"), "dd MMM yyyy HH:mm") : ""}
                   />
                 );
 

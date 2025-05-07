@@ -1,5 +1,13 @@
 # Envato Changelog
 
+## [Search Items + Purchases Enhancements] - 2024-12-02
+
+- Tweak title and description of extension
+- New "Search Items" command lets you conveniently search across one or all Envato sites
+- Show more Item Details
+- Open download link for Purchases
+- `EmptyView` when no purchases
+
 ## [List Purchases] - 2024-11-06
 
 - View your purchases

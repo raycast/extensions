@@ -8,6 +8,12 @@ import { useEffect } from "react";
 
 import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
+import {
+  ACCEPTABLE_CLONE_PROTOCOLS,
+  AcceptableCloneProtocol,
+  CLONE_PROTOCOLS_TO_LABELS,
+  buildCloneCommand,
+} from "../helpers/repository";
 
 type CloneRepositoryFormProps = {
   repository: ExtendedRepositoryFieldsFragment;
@@ -15,7 +21,7 @@ type CloneRepositoryFormProps = {
 
 export default function CloneRepositoryForm({ repository }: CloneRepositoryFormProps) {
   const { octokit } = getGitHubClient();
-  const { application } = getPreferenceValues<Preferences.SearchRepositories>();
+  const { application, repositoryCloneProtocol } = getPreferenceValues<Preferences.SearchRepositories>();
 
   const { data: branches, isLoading } = useCachedPromise(
     async (repo) => {
@@ -32,8 +38,11 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
   const { itemProps, handleSubmit, setValue } = useForm<{
     clonePath: string[];
     branch: string;
-    ssh: boolean;
+    cloneProtocol: AcceptableCloneProtocol;
   }>({
+    initialValues: {
+      cloneProtocol: repositoryCloneProtocol,
+    },
     async onSubmit(values) {
       const repoName = repository.name;
 
@@ -44,12 +53,11 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
         style: Toast.Style.Animated,
       });
 
-      const cloneUrl = values.ssh
-        ? `git@github.com:${repository.nameWithOwner}.git`
-        : `https://github.com/${repository.nameWithOwner}`;
-
-      const branchOption = values.branch ? `-b ${values.branch}` : "";
-      const cloneCommand = `git clone ${branchOption} ${cloneUrl} ${targetDir}`;
+      const branchOption = values.branch ? ["-b", values.branch] : [];
+      const cloneCommand = buildCloneCommand(repository.nameWithOwner, values.cloneProtocol, {
+        gitFlags: branchOption,
+        targetDir: targetDir,
+      });
 
       const execAsync = promisify(exec);
 
@@ -120,7 +128,12 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
       <Form.Dropdown {...itemProps.branch} title="Branch Name">
         {branches?.map((b) => <Form.Dropdown.Item key={b} value={b} title={b} />)}
       </Form.Dropdown>
-      <Form.Checkbox {...itemProps.ssh} label="Use SSH instead of HTTPS" storeValue />
+      {/* @ts-expect-error value always satisfies AcceptableCloneProtocol but TypeScript doesn't know that */}
+      <Form.Dropdown {...itemProps.cloneProtocol} title="Repository Clone Protocol" storeValue>
+        {ACCEPTABLE_CLONE_PROTOCOLS.map((protocol) => (
+          <Form.Dropdown.Item key={protocol} value={protocol} title={CLONE_PROTOCOLS_TO_LABELS[protocol]} />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 }

@@ -1,5 +1,10 @@
 # Amazon Search Changelog
 
+## [Enhancements] - 2024-12-20
+
+- Added the ability for the user-entered term to always appear as the first suggestion, regardless of API results.
+- Changed the empty state message.
+
 ## [Enhancements] - 2024-03-19
 
 - Improved behavior of the Recent Searches list.

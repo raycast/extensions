@@ -13,6 +13,7 @@ import {
   popToRoot,
   confirmAlert,
   Color,
+  environment,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getProgressIcon } from '@raycast/utils';
@@ -24,6 +25,7 @@ import { extractAccountsFromMigrationUrl } from './google-authenticator';
 
 type Preferences = {
   passwordVisibility?: boolean;
+  primaryAction?: 'copy' | 'paste';
 };
 
 export default () => {
@@ -34,6 +36,8 @@ export default () => {
   const [timer, setTimer] = useState(0);
   const [accounts, setAccounts] = useState<store.Account[]>([]);
   const [qrCodeScanType, setQRCodeScanType] = useState<ScanType>(null);
+
+  const { theme } = environment;
 
   async function loadAccounts() {
     if (accounts.length === 0) setLoading(true);
@@ -93,23 +97,31 @@ export default () => {
   async function scanQRCode(type: ScanType) {
     if (qrCodeScanType) return;
 
-    setQRCodeScanType(type);
-    const response = await readDataFromQRCodeOnScreen(type);
-    setQRCodeScanType(null);
+    try {
+      setQRCodeScanType(type);
+      const response = await readDataFromQRCodeOnScreen(type);
+      setQRCodeScanType(null);
 
-    if (!response?.data) {
+      if (!response?.data) {
+        throw new Error('Unable to read QR code');
+      }
+
+      if (response.isGoogleAuthenticatorMigration) {
+        await handleGoogleAuthenticatorMigration(response.data);
+        await loadAccounts();
+      } else {
+        navigation.push(<SetupKey onSubmit={handleFormSubmit} secret={response.data} />);
+      }
+    } catch (err: unknown) {
+      let message = 'Unknown error';
+      if (err instanceof Error) {
+        message = err.message;
+      }
       showToast({
         style: Toast.Style.Failure,
         title: 'QR code detection failed',
+        message,
       });
-      return;
-    }
-
-    if (response.isGoogleAuthenticatorMigration) {
-      await handleGoogleAuthenticatorMigration(response.data);
-      await loadAccounts();
-    } else {
-      navigation.push(<SetupKey onSubmit={handleFormSubmit} secret={response.data} />);
     }
   }
 
@@ -189,7 +201,9 @@ export default () => {
           <List.Item
             key={account.id}
             icon={{
-              source: `https://cdn.simpleicons.org/${account.issuer?.toLowerCase() || account.name?.toLowerCase()}`,
+              source: `https://cdn.simpleicons.org/${account.issuer?.toLowerCase() || account.name?.toLowerCase()}/${
+                theme === 'dark' ? 'white' : 'black'
+              }`,
               fallback: Icon.Key,
             }}
             title={account.name}
@@ -204,8 +218,10 @@ export default () => {
             ]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={getCopyToClipboardContent(account.secret)} />
-                <Action.Paste content={getCopyToClipboardContent(account.secret)} />
+                {...[
+                  <Action.CopyToClipboard content={getCopyToClipboardContent(account.secret)} />,
+                  <Action.Paste content={getCopyToClipboardContent(account.secret)} />,
+                ][preferences.primaryAction === 'paste' ? 'reverse' : 'slice']()}
                 {index > 0 && (
                   <Action
                     title="Move up"

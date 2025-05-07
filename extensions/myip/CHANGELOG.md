@@ -1,5 +1,13 @@
 # MyIP Changelog
 
+## [Update] - 2025-02-21
+
+- Redesigned the icon to be more consistent with the Raycast style and better looking
+
+## [Update] - 2024-12-06
+
+- Updated metadata images
+
 ## [Update] - 2024-11-25
 
 - Add display multiple local IPs with index in accessories

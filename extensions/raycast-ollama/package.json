@@ -5,7 +5,9 @@
   "description": "Perform Local Inference with Ollama",
   "icon": "icon.png",
   "author": "massimiliano_pasquini",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -184,6 +186,13 @@
       "mode": "view"
     },
     {
+      "name": "ollama-ps",
+      "title": "Loaded Models",
+      "subtitle": "Ollama",
+      "description": "Show models loaded on ram",
+      "mode": "view"
+    },
+    {
       "name": "ollama-custom-create",
       "title": "Create Custom Command",
       "subtitle": "Ollama",
@@ -216,10 +225,18 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "ollama-mcp-server",
+      "title": "Manage Mcp Server",
+      "subtitle": "Ollama",
+      "description": "Manage configured Mcp Server",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@langchain/community": "^0.2.0",
+    "@modelcontextprotocol/sdk": "^1.8.0",
     "@raycast/api": "^1.55.2",
     "@raycast/utils": "^1.9.0",
     "file-type": "^19.0.0",

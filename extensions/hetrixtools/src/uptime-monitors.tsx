@@ -1,19 +1,16 @@
 import { Action, ActionPanel, Color, Icon, Image, Keyboard, List } from "@raycast/api";
-import { Monitor } from "./types";
+import { UptimeMonitor } from "./types";
 import useHetrixTools from "./use-hetrix-tools";
 import { getFavicon, useCachedState } from "@raycast/utils";
+import { parseNumAsDate } from "./utils";
 
 export default function UptimeMonitors() {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-details", false);
-  const { isLoading, data: monitors, pagination } = useHetrixTools<Monitor>("uptime-monitors");
+  const { isLoading, data: monitors, pagination } = useHetrixTools<UptimeMonitor>("uptime-monitors");
 
   function getUptimeColor(uptime: number) {
     if (uptime == 100) return Color.Green;
     return undefined;
-  }
-
-  function parseNumAsDate(num: number) {
-    return new Date(num * 1000);
   }
 
   return (
@@ -85,6 +82,13 @@ ${Object.entries(monitor.locations)
                       </List.Item.Detail.Metadata.TagList>
                     ) : (
                       <List.Item.Detail.Metadata.Label title="Keyword" icon={Icon.Minus} />
+                    )}
+                    {monitor.category ? (
+                      <List.Item.Detail.Metadata.TagList title="Category">
+                        <List.Item.Detail.Metadata.TagList.Item text={monitor.category} />
+                      </List.Item.Detail.Metadata.TagList>
+                    ) : (
+                      <List.Item.Detail.Metadata.Label title="Category" icon={Icon.Minus} />
                     )}
                     <List.Item.Detail.Metadata.Label title="Timeout" text={`${monitor.timeout} seconds`} />
                     <List.Item.Detail.Metadata.Label

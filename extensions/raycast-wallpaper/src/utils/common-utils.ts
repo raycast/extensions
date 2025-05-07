@@ -47,6 +47,8 @@ export async function downloadPicture(wallpaper: { title: string; url: string })
   await showToast(Toast.Style.Animated, "Downloading...");
 
   const picturePath = `${getSavedDirectory()}/${wallpaper.title}.${getFileType(wallpaper.url)}`;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   fse.writeFile(picturePath, Buffer.from(await axiosGetImageArrayBuffer(wallpaper.url)), async (error) => {
     if (error != null) {
       await showToast(Toast.Style.Failure, String(error));
@@ -100,4 +102,9 @@ export function deleteCache() {
       fse.removeSync(curPath);
     });
   }
+}
+
+export function capitalizeFirstLetter(word: string): string {
+  if (!word) return "";
+  return word.charAt(0).toUpperCase() + word.slice(1);
 }

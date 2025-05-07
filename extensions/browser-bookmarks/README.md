@@ -15,3 +15,4 @@ If you have multiple profiles, you can select the one you want from the enabled 
 - Arc: `⌘` + `⇧` + `A`
 - Vivaldi: `⌘` + `⇧` + `V`
 - Prisma Access: `⌘` + `⇧` + `P`
+- Whale: `⌘` + `⇧` + `W`

@@ -1,6 +1,6 @@
+import { getPreferenceValues } from "@raycast/api";
 import fs from "fs";
 import path from "path";
-import { getPreferenceValues } from "@raycast/api";
 
 const userDataDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -15,15 +15,56 @@ const getProfileName = (userDirectoryPath: string) => {
   const preferences = getPreferenceValues<Preferences>();
 
   const customProfile = profiles.filter((profile) => profile.endsWith(preferences.profileDirectorySuffix))[0];
-  const alphaProfile = profiles.filter((profile) => profile.endsWith(".Default (alpha)"))[0];
+  if (customProfile) return customProfile;
 
-  if (customProfile) {
-    return customProfile;
-  } else if (alphaProfile) {
-    return alphaProfile;
-  } else {
-    return "";
-  }
+  const releaseProfile = profiles.filter((profile) => profile.endsWith(".Default (release)"))[0];
+  if (releaseProfile) return releaseProfile;
+
+  const betaProfile = profiles.filter((profile) => profile.endsWith(".Default (beta)"))[0];
+  if (betaProfile) return betaProfile;
+
+  const alphaProfile = profiles.filter((profile) => profile.endsWith(".Default (alpha)"))[0];
+  if (alphaProfile) return alphaProfile;
+
+  const anyDefaultProfile = profiles.filter((profile) => profile.includes(".Default ("))[0];
+  if (anyDefaultProfile) return anyDefaultProfile;
+
+  return "";
+};
+
+export const getNewTabShortcut = () => {
+  const preferences = getPreferenceValues<Preferences>();
+  const key = preferences.newTabShortcut
+    .trim()
+    .charAt(preferences.newTabShortcut.length - 1)
+    .toLowerCase();
+  const finalShortcutString = `keystroke "${key}" using `;
+  const finalCommandsString = getCommands(preferences.newTabShortcut);
+
+  return finalShortcutString + finalCommandsString; // Converting the commands to an apple script string for the shortcut
+};
+
+const getCommands = (newTabShortcut: string): string => {
+  if (!newTabShortcut) return "{command down}";
+  if (newTabShortcut.includes("hyper")) return "{command down, option down, control down, shift down}";
+
+  const commandMap: Record<string, string> = {
+    cmd: "command",
+    command: "command",
+    ctrl: "control",
+    control: "control",
+    opt: "option",
+    option: "option",
+    shift: "shift",
+    alt: "option",
+    super: "command",
+  };
+
+  const finalCommands = Object.entries(commandMap)
+    .filter(([key]) => newTabShortcut.includes(key))
+    .map(([, value]) => `${value} down`);
+
+  return "{" + finalCommands.join(", ") + "}";
 };
 
 export const getHistoryDbPath = (): string => {

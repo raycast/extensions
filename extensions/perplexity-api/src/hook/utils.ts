@@ -2,12 +2,10 @@ import { encode } from "gpt-tokenizer";
 
 export const allModels = [
   { name: "Follow global model", id: "global" },
-  { name: "Sonar Small 8B 132k", id: "llama-3.1-sonar-small-128k-chat" },
-  { name: "Sonar Large 70B 132k", id: "llama-3.1-sonar-large-128k-chat" },
-  { name: "Sonar Small 8B Online", id: "llama-3.1-sonar-small-128k-online" },
-  { name: "Sonar Large 70B Online", id: "llama-3.1-sonar-large-128k-online" },
-  { name: "Llama3.1 8B 132k", id: "llama-3.1-8b-instruct" },
-  { name: "Llama3.1 70B 132k", id: "llama-3.1-70b-instruct" },
+  { name: "Sonar 128k", id: "sonar" },
+  { name: "Sonar Pro 200k", id: "sonar-pro" },
+  { name: "Sonar Reasoning 128k", id: "sonar-reasoning" },
+  { name: "Sonar Reasoning Pro 128k", id: "sonar-reasoning-pro" },
 ];
 
 // format: Wednesday, April 24, 2024 at 5:14:26 PM GMT+2.
@@ -28,19 +26,17 @@ export function countToken(content: string) {
 export function estimatePrice(prompt_token: number, output_token: number, model: string) {
   let price = 0;
   switch (model) {
-    case "llama-3.1-sonar-small-128k-chat":
-    case "llama-3.1-8b-instruct":
-      price = ((prompt_token * 0.2) / 1_000_000 + (output_token * 0.2) / 1_000_000) * 100;
-      break;
-    case "llama-3.1-sonar-large-128k-chat":
-    case "llama-3.1-70b-instruct":
-      price = ((prompt_token * 1) / 1_000_000 + (output_token * 1) / 1_000_000) * 100;
-      break;
-    case "llama-3.1-sonar-small-128k-online":
-      price = (5 / 1000 + (prompt_token * 0.2) / 1_000_000 + (output_token * 0.2) / 1_000_000) * 100;
-      break;
-    case "llama-3.1-sonar-large-128k-online":
+    case "sonar":
       price = (5 / 1000 + (prompt_token * 1) / 1_000_000 + (output_token * 1) / 1_000_000) * 100;
+      break;
+    case "sonar-reasoning":
+      price = (5 / 1000 + (prompt_token * 1) / 1_000_000 + (output_token * 5) / 1_000_000) * 100;
+      break;
+    case "sonar-reasoning-pro":
+      price = (5 / 1000 + (prompt_token * 2) / 1_000_000 + (output_token * 8) / 1_000_000) * 100;
+      break;
+    case "sonar-pro":
+      price = (5 / 1000 + (prompt_token * 3) / 1_000_000 + (output_token * 15) / 1_000_000) * 100;
       break;
   }
   return naiveRound(price, 5);

@@ -53,10 +53,16 @@
       "title": "View Projects",
       "description": "View Projects, Environments and Resources",
       "mode": "view"
+    },
+    {
+      "name": "private-keys",
+      "title": "View Private Keys",
+      "description": "View Private Keys",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.3",
+    "@raycast/api": "^1.91.0",
     "@raycast/utils": "^1.18.0"
   },
   "devDependencies": {

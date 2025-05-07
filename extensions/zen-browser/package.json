@@ -6,7 +6,12 @@
   "icon": "zen-logo.png",
   "author": "Keyruu",
   "contributors": [
-    "theherk"
+    "theherk",
+    "walker-tx",
+    "jimmy-b36",
+    "sdaza",
+    "ellioth",
+    "ridemountainpig"
   ],
   "categories": [
     "Applications",
@@ -27,9 +32,13 @@
           "type": "dropdown",
           "required": false,
           "title": "Search Engine",
-          "description": "Search Engine for query (default: Google).",
-          "default": "Google",
+          "description": "Search Engine for query (default: Browser Default).",
+          "default": "Default",
           "data": [
+            {
+              "title": "Browser Default",
+              "value": "Default"
+            },
             {
               "title": "Google",
               "value": "Google"
@@ -80,6 +89,14 @@
       "default": "Default (alpha)",
       "description": "The Zen profile directory suffix, check it with `ls ~/Library/Application Support/zen/Profiles`",
       "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "newTabShortcut",
+      "title": "New Tab Shortcut",
+      "default": "command t",
+      "type": "textfield",
+      "description": "The shortcut to use for opening a new tab. e.g command option t",
       "required": false
     },
     {

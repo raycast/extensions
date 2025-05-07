@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "delivery-tracker",
+  "title": "Delivery Tracker",
+  "description": "Tracks deliveries, packages, and parcels.",
+  "icon": "extension-icon.png",
+  "author": "halprin",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "delivery",
+    "deliveries",
+    "package",
+    "packages",
+    "parcel",
+    "parcels",
+    "USPS",
+    "UPS",
+    "FedEx"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "track-deliveries",
+      "title": "Track Deliveries",
+      "subtitle": "Delivery Tracker",
+      "description": "View the deliveries you're tracking.",
+      "mode": "view"
+    },
+    {
+      "name": "track-new-delivery",
+      "title": "Track New Delivery",
+      "subtitle": "Delivery Tracker",
+      "description": "Starts tracking a new delivery.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "upsClientId",
+      "title": "UPS Client ID",
+      "description": "The client ID for your app in the UPS developer portal",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "upsClientSecret",
+      "title": "UPS Client Secret",
+      "description": "The client secret for your app in the UPS developer portal",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "fedexApiKey",
+      "title": "FedEx API Key",
+      "description": "The API key for your project in the FedEx developer portal",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "fedexSecretKey",
+      "title": "FedEx Secret Key",
+      "description": "The secret key for your project in the FedEx developer portal",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "20.17.27",
+    "@types/react": "19.0.12",
+    "eslint": "9.23.0",
+    "prettier": "3.5.3",
+    "typescript": "5.8.2",
+    "node-fetch": "3.3.2",
+    "@raycast/migration": "1.94.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "build-dist": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions",
+    "migrate": "npx @raycast/migration ."
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

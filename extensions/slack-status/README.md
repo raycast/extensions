@@ -30,7 +30,9 @@ The extension supports OAuth, which makes it easy to connect to your Slack works
             "user": [
                 "emoji:read",
                 "users.profile:write",
-                "users.profile:read"
+                "users.profile:read",
+                "dnd:write",
+                "dnd:read"
             ]
         }
     },

@@ -1,5 +1,12 @@
 # Text Shortcuts Changelog
 
+## [Fixes & Improvements] - 2024-12-13
+
+- ✨ Added MD5 Hash action
+- ✨ Added Decode URL component action
+- ✨ Added Encode URL component action
+- 🧽 Format the source code
+
 ## [Fix command descriptions] - 2024-08-20
 
 - Fix descriptions in extension preferences to match their actions.

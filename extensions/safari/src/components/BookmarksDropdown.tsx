@@ -9,7 +9,7 @@ export default function BookmarksDropdown(props: { folderNames: string[]; onSele
         props.onSelection(newValue);
       }}
     >
-      <List.Dropdown.Section title="Alcoholic Beverages">
+      <List.Dropdown.Section title="Folders">
         {props.folderNames.map((folder) => {
           const folderName = folder || "Top Level Bookmarks";
           return <List.Dropdown.Item key={folderName} title={folderName} value={folderName} />;

@@ -1,0 +1,32 @@
+[
+  {
+    "Name": "Mewtwo Packs",
+    "Expansion": "Genetic Apex",
+    "Img": "mewtwo-pack.png",
+    "Icon": "mewtwo.png"
+  },
+  {
+    "Name": "Pikachu Packs",
+    "Expansion": "Genetic Apex",
+    "Img": "pikachu-pack.png",
+    "Icon": "pikachu.png"
+  },
+  {
+    "Name": "Charizard Packs",
+    "Expansion": "Genetic Apex",
+    "Img": "charizard-pack.png",
+    "Icon": "charizard.png"
+  },
+  {
+    "Name": "Promo Pack A Series Vol. 1",
+    "Expansion": "",
+    "Img": "promoA1-pack.png",
+    "Icon": "promoA1.png"
+  },
+  {
+    "Name": "Promo Pack A Series Vol. 2",
+    "Expansion": "",
+    "Img": "promoA2-pack.png",
+    "Icon": "promoA1.png"
+  }
+]

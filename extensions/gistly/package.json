@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gistly",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "title": "Gistly",
   "description": "YouTube AI Summaries & Transcripts",
   "icon": "command-icon.png",

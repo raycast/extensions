@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Fragment } from "react";
 
 import {
@@ -16,12 +17,10 @@ import {
   moveTask as apiMoveTask,
   updateTask as apiUpdateTask,
   closeTask,
-  handleError,
 } from "../api";
 import CreateTask from "../create-task";
 import { getCollaboratorIcon, getProjectCollaborators } from "../helpers/collaborators";
 import { getAPIDate } from "../helpers/dates";
-import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 import { getRemainingLabels, getTaskLabels } from "../helpers/labels";
 import { refreshMenuBarCommand } from "../helpers/menu-bar";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
@@ -33,6 +32,7 @@ import { useFocusedTask } from "../hooks/useFocusedTask";
 import { ViewProps } from "../hooks/useViewTasks";
 
 import CreateViewActions from "./CreateViewActions";
+import OpenInTodoist from "./OpenInTodoist";
 import Project from "./Project";
 import RefreshAction from "./RefreshAction";
 import SubTasks from "./SubTasks";
@@ -58,7 +58,7 @@ export default function TaskActions({
   data,
   setData,
   quickLinkView,
-}: TaskActionsProps): JSX.Element {
+}: TaskActionsProps) {
   const { pop } = useNavigation();
 
   const { focusedTask, focusTask, unfocusTask } = useFocusedTask();
@@ -84,7 +84,7 @@ export default function TaskActions({
         pop();
       }
     } catch (error) {
-      handleError({ error, title: "Unable to complete task" });
+      await showFailureToast(error, { title: "Unable to complete task" });
     }
   }
 
@@ -96,7 +96,7 @@ export default function TaskActions({
       await showToast({ style: Toast.Style.Success, title: "Task updated" });
       await refreshMenuBarCommand();
     } catch (error) {
-      handleError({ error, title: "Unable to update task" });
+      await showFailureToast(error, { title: "Unable to update task" });
     }
   }
 
@@ -107,7 +107,7 @@ export default function TaskActions({
       await apiAddReminder(payload, { data, setData });
       await showToast({ style: Toast.Style.Success, title: "Added reminder" });
     } catch (error) {
-      handleError({ error, title: "Unable to add reminder" });
+      await showFailureToast(error, { title: "Unable to add reminder" });
     }
   }
 
@@ -118,7 +118,7 @@ export default function TaskActions({
       await apiDeleteReminder(reminder.id, { data, setData });
       await showToast({ style: Toast.Style.Success, title: "Reminder deleted" });
     } catch (error) {
-      handleError({ error, title: "Unable to delete reminder" });
+      await showFailureToast(error, { title: "Unable to delete reminder" });
     }
   }
 
@@ -130,7 +130,7 @@ export default function TaskActions({
       await showToast({ style: Toast.Style.Success, title: "Moved task" });
       await refreshMenuBarCommand();
     } catch (error) {
-      handleError({ error, title: `Unable to move task` });
+      await showFailureToast(error, { title: "Unable to move task" });
     }
   }
 
@@ -155,7 +155,7 @@ export default function TaskActions({
       await showToast({ style: Toast.Style.Success, title: "Duplicated task", message: task.content });
       await refreshMenuBarCommand();
     } catch (error) {
-      handleError({ error, title: `Unable to duplicate task` });
+      await showFailureToast(error, { title: "Unable to duplicate task" });
     }
   }
 
@@ -178,7 +178,7 @@ export default function TaskActions({
           pop();
         }
       } catch (error) {
-        handleError({ error, title: "Unable to delete task" });
+        await showFailureToast(error, { title: "Unable to delete task" });
       }
     }
   }
@@ -200,21 +200,8 @@ export default function TaskActions({
 
   return (
     <>
-      {isTodoistInstalled ? (
-        <Action.Open
-          title="Open Task in Todoist"
-          target={getTaskAppUrl(task.id)}
-          icon="todoist.png"
-          application="Todoist"
-        />
-      ) : (
-        <Action.OpenInBrowser
-          title="Open Task in Browser"
-          url={getTaskUrl(task.id)}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
-        />
-      )}
-
+      <Action title="Complete Task" icon={Icon.Checkmark} onAction={() => completeTask(task)} />
+      <OpenInTodoist appUrl={getTaskAppUrl(task.id)} webUrl={getTaskUrl(task.id)} />
       <ActionPanel.Section>
         {focusedTask.id !== task.id ? (
           <Action
@@ -245,13 +232,6 @@ export default function TaskActions({
           target={<TaskEdit task={task} />}
         />
 
-        <Action
-          title="Complete Task"
-          icon={Icon.Checkmark}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-          onAction={() => completeTask(task)}
-        />
-
         <Action.PickDate
           title="Schedule Task"
           type={Action.PickDate.Type.DateTime}
@@ -261,10 +241,25 @@ export default function TaskActions({
               id: task.id,
               due: date
                 ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
-                : { string: "no due date" },
+                : { string: "no date" },
             })
           }
         />
+
+        {data?.user?.premium_status !== "not_premium" ? (
+          <Action.PickDate
+            icon={Icon.BullsEye}
+            title="Schedule Task Deadline"
+            type={Action.PickDate.Type.Date}
+            shortcut={{ modifiers: ["opt", "shift"], key: "d" }}
+            onChange={(date) =>
+              updateTask({
+                id: task.id,
+                deadline: date ? { date: date.toISOString() } : { string: "no date" },
+              })
+            }
+          />
+        ) : null}
 
         <ActionPanel.Submenu
           icon={Icon.LevelMeter}
@@ -360,13 +355,16 @@ export default function TaskActions({
                 icon={Icon.Minus}
                 shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
               >
-                {reminders.map((reminder) => (
-                  <Action
-                    key={reminder.id}
-                    title={displayReminderName(reminder)}
-                    onAction={() => deleteReminder(reminder)}
-                  />
-                ))}
+                {reminders.map((reminder) => {
+                  const use12HourFormat = data?.user?.time_format === 1;
+                  return (
+                    <Action
+                      key={reminder.id}
+                      title={displayReminderName(reminder, use12HourFormat)}
+                      onAction={() => deleteReminder(reminder)}
+                    />
+                  );
+                })}
               </ActionPanel.Submenu>
             ) : null}
           </>
@@ -473,7 +471,7 @@ export default function TaskActions({
           <ActionPanel.Submenu
             icon={Icon.AddPerson}
             shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-            title="Assign To"
+            title="Assign to"
           >
             {collaborators.map((collaborator) => {
               return (
@@ -551,7 +549,7 @@ export default function TaskActions({
         <ActionPanel.Section>
           {viewProps.groupBy ? (
             <ActionPanel.Submenu
-              title="Group Tasks By"
+              title="Group Tasks by"
               icon={Icon.AppWindowGrid3x3}
               shortcut={{ modifiers: ["opt", "shift"], key: "g" }}
             >
@@ -570,7 +568,7 @@ export default function TaskActions({
           ) : null}
 
           <ActionPanel.Submenu
-            title="Sort Tasks By"
+            title="Sort Tasks by"
             icon={Icon.BulletPoints}
             shortcut={{ modifiers: ["opt", "shift"], key: "s" }}
           >
@@ -589,7 +587,7 @@ export default function TaskActions({
 
           {viewProps.orderBy ? (
             <ActionPanel.Submenu
-              title="Order Tasks By"
+              title="Order Tasks by"
               icon={viewProps.orderBy.value === "desc" ? Icon.ArrowUp : Icon.ArrowDown}
               shortcut={{ modifiers: ["opt", "shift"], key: "o" }}
             >

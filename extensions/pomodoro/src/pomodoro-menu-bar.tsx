@@ -1,6 +1,6 @@
 import { MenuBarExtra, Icon, Image, Color } from "@raycast/api";
 import { useState } from "react";
-import { FocusText, LongBreakText, ShortBreakText } from "../lib/constants";
+import { FocusText, LongBreakText, ShortBreakText, TimeStoppedPlaceholder } from "./lib/constants";
 import {
   createInterval,
   getCurrentInterval,
@@ -13,10 +13,10 @@ import {
   preferences,
   progress,
   endOfInterval,
-} from "../lib/intervals";
-import { secondsToTime } from "../lib/secondsToTime";
-import { Interval, IntervalType } from "../lib/types";
-import { checkDNDExtensionInstall } from "../lib/doNotDisturb";
+} from "./lib/intervals";
+import { secondsToTime } from "./lib/secondsToTime";
+import { Interval, IntervalType } from "./lib/types";
+import { checkDNDExtensionInstall, setDND } from "./lib/doNotDisturb";
 
 const IconTint: Color.Dynamic = {
   light: "#000000",
@@ -47,6 +47,7 @@ export default function TogglePomodoroTimer() {
   function onReset() {
     resetInterval();
     setCurrentInterval(undefined);
+    setDND(false);
   }
 
   function onRestart() {
@@ -61,14 +62,12 @@ export default function TogglePomodoroTimer() {
     icon = { source: `tomato-${progressInTenth}.png`, tintColor: IconTint };
   }
 
-  const title = preferences.enableTimeOnMenuBar
-    ? currentInterval
-      ? secondsToTime(currentInterval.length - duration(currentInterval))
-      : "--:--"
-    : undefined;
+  const stopedPlaceholder = preferences.hideTimeWhenStopped ? undefined : TimeStoppedPlaceholder;
+  const title = currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : stopedPlaceholder;
 
   return (
-    <MenuBarExtra icon={icon} title={title} tooltip={"Pomodoro"}>
+    <MenuBarExtra icon={icon} title={preferences.enableTimeOnMenuBar ? title : undefined} tooltip={"Pomodoro"}>
+      {preferences.enableTimeOnMenuBar ? null : <MenuBarExtra.Item icon="⏰" title={TimeStoppedPlaceholder} />}
       {currentInterval ? (
         <>
           {isPaused(currentInterval) ? (

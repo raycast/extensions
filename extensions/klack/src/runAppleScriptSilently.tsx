@@ -25,7 +25,7 @@ export async function runAppleScriptSilently(appleScript: string, inView: boolea
     } catch (_) {
         await showToast({
             style: Toast.Style.Failure,
-            title: 'Klack v1.6.0 is required.'
+            title: 'Klack v1.7.0 is required.'
         })
     }
 }

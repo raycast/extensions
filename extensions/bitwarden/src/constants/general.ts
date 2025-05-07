@@ -86,4 +86,5 @@ export const ITEM_TYPE_TO_ICON_MAP: Record<ItemType, Icon> = {
   [ItemType.CARD]: Icon.CreditCard,
   [ItemType.IDENTITY]: Icon.Person,
   [ItemType.NOTE]: Icon.Document,
+  [ItemType.SSH_KEY]: Icon.Key,
 };

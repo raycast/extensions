@@ -31,6 +31,7 @@ type CreateIssueParams = {
 type CreateIssueResponse = {
   id: string;
   key: string;
+  self: string;
 };
 
 export async function createIssue(values: IssueFormValues, { customFields }: CreateIssueParams) {
@@ -140,6 +141,7 @@ export type Issue = {
     status: IssueStatus;
     watches: IssueWatches;
     subtasks?: Issue[];
+    parent?: Issue;
   };
 };
 
@@ -156,7 +158,7 @@ type GetIssuesResponse = {
 
 export async function getIssues({ jql } = { jql: "" }) {
   const params = {
-    fields: "summary,updated,issuetype,status,priority,assignee,project,watches,subtasks",
+    fields: "summary,updated,issuetype,status,priority,assignee,project,watches,subtasks,parent",
     startAt: "0",
     maxResults: "200",
     validateQuery: "warn",
@@ -177,6 +179,20 @@ export async function getIssues({ jql } = { jql: "" }) {
   );
 
   return resolvedIssues;
+}
+
+export async function getIssuesForAI({ jql } = { jql: "" }) {
+  const params = {
+    fields: "summary,updated,issuetype,status,priority,assignee,project,parent",
+    startAt: "0",
+    maxResults: "50",
+    validateQuery: "warn",
+    jql,
+  };
+
+  const result = await request<GetIssuesResponse>("/search", { params });
+
+  return result?.issues ?? [];
 }
 
 export type Schema = {

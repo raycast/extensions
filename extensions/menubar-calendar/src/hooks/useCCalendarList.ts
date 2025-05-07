@@ -49,7 +49,12 @@ async function getConfigureCalendarList(): Promise<CCalendarList[]> {
   const rawCalendarList = (await getCalendarList()) as Calendar[];
   const rawReminderList = (await getReminderList()) as ReminderList[];
   if (calendarListItemsStr) {
-    const ccListItem = JSON.parse(calendarListItemsStr) as CCalendarList[];
+    let ccListItem: CCalendarList[] = [];
+    try {
+      ccListItem = JSON.parse(calendarListItemsStr) as CCalendarList[];
+    } catch (error) {
+      console.error("JSON parsing error:", error);
+    }
 
     // calendar
     cCalendarList = filterCCalendarItem(rawCalendarList, ccListItem[0].list).sort((a, b) =>
@@ -76,6 +81,11 @@ async function getConfigureCalendarList(): Promise<CCalendarList[]> {
 
 export function useCCalendarList() {
   return useCachedPromise(() => {
-    return getConfigureCalendarList() as Promise<CCalendarList[]>;
+    try {
+      return getConfigureCalendarList() as Promise<CCalendarList[]>;
+    } catch (e) {
+      console.error("Failed to fetch calendar events:", e);
+      return Promise.resolve([] as CCalendarList[]);
+    }
   });
 }

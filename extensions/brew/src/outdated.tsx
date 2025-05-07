@@ -1,7 +1,7 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { OutdatedResults, OutdatedCask, OutdatedFormula, brewFetchOutdated } from "./brew";
+import { OutdatedCask, OutdatedFormula, OutdatedResults, brewFetchOutdated } from "./brew";
 import { OutdatedActionPanel } from "./components/actionPanels";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { preferences } from "./preferences";
@@ -30,7 +30,7 @@ function OutdatedCaskListItem(props: { outdated: OutdatedCask; onAction: () => v
       id={outdated.name}
       title={outdated.name}
       accessories={[{ text: version }]}
-      icon={{ source: Icon.Checkmark, tintColor: Color.Red }}
+      icon={{ source: Icon.CheckCircle, tintColor: Color.Red }}
       actions={<OutdatedActionPanel outdated={outdated} onAction={props.onAction} />}
     />
   );
@@ -49,7 +49,7 @@ function OutdatedFormulaeListItem(props: { outdated: OutdatedFormula; onAction: 
       title={outdated.name}
       subtitle={outdated.pinned ? "Pinned" : ""}
       accessories={[{ text: version }]}
-      icon={{ source: Icon.Checkmark, tintColor: Color.Red }}
+      icon={{ source: Icon.CheckCircle, tintColor: Color.Red }}
       actions={<OutdatedActionPanel outdated={outdated} onAction={props.onAction} />}
     />
   );

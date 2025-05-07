@@ -25,7 +25,7 @@ function MyIssuesMenu() {
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", ISSUE_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-my-issue-menu",
   });
-  const { showtext, showCreated, showAssigned, showMentioned, showRecentlyClosed } =
+  const { showtext, showCreated, showAssigned, showMentioned, showRecentlyClosed, useUnreadIndicator } =
     getPreferenceValues<Preferences.MyIssuesMenu>();
   const { data: sections, isLoading } = useMyIssues({
     repository: null,
@@ -41,7 +41,10 @@ function MyIssuesMenu() {
   return (
     <MenuBarRoot
       title={showtext ? `${issuesCount}` : undefined}
-      icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
+      icon={{
+        source: `issue-open${useUnreadIndicator && issuesCount > 0 ? "-unread" : ""}.svg`,
+        tintColor: Color.PrimaryText,
+      }}
       isLoading={isLoading}
     >
       {sections?.map((section) => {

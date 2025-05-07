@@ -25,7 +25,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Get TOTP",
+      "title": "Get Totp",
       "description": "Search for an Ente Auth account and copy the TOTP code to the clipboard",
       "mode": "view"
     },

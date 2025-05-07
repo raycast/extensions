@@ -5,14 +5,11 @@ import { NoPathProvided } from "./components/Notifications/NoPathProvided";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { vaultsWithoutAdvancedURIToast } from "./components/Toasts";
 import { appendTaskPreferences } from "./utils/preferences";
-import {
-  applyTemplates,
-  getObsidianTarget,
-  ObsidianTargetType,
-  useObsidianVaults,
-  vaultPluginCheck,
-} from "./utils/utils";
-import { clearCache } from "./utils/data/cache";
+import { getObsidianTarget, ObsidianTargetType } from "./utils/utils";
+import { useObsidianVaults } from "./utils/hooks";
+import { vaultPluginCheck } from "./api/vault/plugins/plugins.service";
+import { clearCache } from "./api/cache/cache.service";
+import { applyTemplates } from "./api/templating/templating.service";
 
 interface appendTaskArgs {
   text: string;
@@ -25,7 +22,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
   const { dueDate } = props.arguments;
   const dateContent = dueDate ? " 📅 " + dueDate : "";
 
-  const { appendTemplate, heading, notePath, noteTag, vaultName, silent } =
+  const { appendTemplate, heading, notePath, noteTag, vaultName, silent, creationDate } =
     getPreferenceValues<appendTaskPreferences>();
   const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
   const [content, setContent] = useState<string | null>(null);
@@ -69,6 +66,9 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
 
   const tag = noteTag ? noteTag + " " : "";
 
+  // en-CA uses the same format as the iso string without the time ex: 2025-09-25
+  const creationDateString = creationDate ? " ➕ " + new Date().toLocaleDateString("en-CA") : "";
+
   const selectedVault = vaultName && vaults.find((vault) => vault.name === vaultName);
   // If there's a configured vault or only one vault, use that
   if (selectedVault || vaultsWithPlugin.length === 1) {
@@ -79,7 +79,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
         type: ObsidianTargetType.AppendTask,
         path: notePathExpanded,
         vault: vaultToUse,
-        text: "- [ ] " + tag + content + dateContent,
+        text: "- [ ] " + tag + content + dateContent + creationDateString,
         heading: heading,
         silent: silent,
       });
@@ -113,7 +113,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
                   type: ObsidianTargetType.AppendTask,
                   path: notePath,
                   vault: vault,
-                  text: "- [ ] #task " + content + dateContent,
+                  text: "- [ ] #task " + content + dateContent + creationDateString,
                   heading: heading,
                 })}
               />

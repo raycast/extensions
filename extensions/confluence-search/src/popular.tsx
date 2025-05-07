@@ -1,4 +1,4 @@
-import "./util/fetchPolyfill";
+import "cross-fetch/polyfill";
 
 import { Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";

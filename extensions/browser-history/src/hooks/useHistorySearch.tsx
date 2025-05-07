@@ -5,11 +5,12 @@ import { getHistoryDateColumn, getHistoryDbPath, getHistoryTable } from "../util
 import { NotInstalledError } from "../components";
 
 const whereClauses = (tableTitle: string, terms: string[], tableUrl?: string) => {
+  const urlTable = tableUrl || tableTitle;
   return (
     "(" +
     terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ") +
     ") OR (" +
-    terms.map((t) => `${tableTitle}.url LIKE '%${t}%'`).join(" AND ") +
+    terms.map((t) => `${urlTable}.url LIKE '%${t}%'`).join(" AND ") +
     ")"
   );
 };
@@ -56,7 +57,7 @@ const searchHistory = (
   table: string,
   date_field: string,
   queryBuilder: (table: string, date_field: string, terms: string[]) => string,
-  query?: string
+  query?: string,
 ): SearchResult => {
   const terms = query ? query.trim().split(" ") : [""];
   const queries = queryBuilder(table, date_field, terms);
@@ -86,6 +87,6 @@ export function useHistorySearch(browser: SupportedBrowsers, query: string | und
     getHistoryTable(browser),
     getHistoryDateColumn(browser),
     getHistoryQuery(browser),
-    query
+    query,
   );
 }

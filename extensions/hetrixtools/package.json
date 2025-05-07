@@ -27,11 +27,23 @@
       "title": "Uptime Monitors",
       "description": "Get Uptime Monitors and their details",
       "mode": "view"
+    },
+    {
+      "name": "blacklist-monitors",
+      "title": "Blacklist Monitors",
+      "description": "Get Blacklist Monitors and their details",
+      "mode": "view"
+    },
+    {
+      "name": "contact-lists",
+      "title": "Contact Lists",
+      "description": "Get Contact Lists and their details",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.16.2"
+    "@raycast/api": "^1.87.4",
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

@@ -11,8 +11,8 @@ import { CapabilitiesEnum } from "@pieces.app/pieces-os-client";
  * - is pieces running
  * - is pieces at least updated to the minimum required version
  * - does the application need to be updated to represent the users's preferences
- * - this will prompt the user to install pieces os if it's not installed, return false if they reject the installation
- * - this will automatically update pieces os if it is not at least the minimum required version
+ * - this will prompt the user to install PiecesOs if it's not installed, return false if they reject the installation
+ * - this will automatically update PiecesOs if it is not at least the minimum required version
  * @returns a boolean on whether or not the health check succeeded
  */
 export default async function piecesHealthCheck(): Promise<boolean> {

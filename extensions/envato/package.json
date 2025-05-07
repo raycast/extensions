@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "envato",
-  "title": "Envato Sales",
+  "title": "Envato Sales, Purchases and Search",
   "version": "1.1.0",
-  "description": "Tracking New Sales For Envato Author",
+  "description": "Tracking New Sales For Envato Author, View Purchases and Search Catalog",
   "icon": "icon.png",
   "author": "astroon",
   "contributors": [
@@ -47,8 +47,15 @@
       "subtitle": "Envato",
       "description": "List Purchases",
       "mode": "view"
+    },
+    {
+      "name": "search-items",
+      "title": "Search Items",
+      "subtitle": "Envato",
+      "description": "Search Items in Envato Market Catalog",
+      "mode": "view"
     }
-  ],
+      ],
   "preferences": [
     {
       "name": "token",

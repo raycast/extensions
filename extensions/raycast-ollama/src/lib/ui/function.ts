@@ -22,6 +22,53 @@ import fs from "fs";
 import fetch from "node-fetch";
 import { fileTypeFromBuffer } from "file-type";
 import { OllamaApiTagsResponseModel } from "../ollama/types";
+import { UiModelDetails } from "./types";
+
+/**
+ * Get Ollama Server Array.
+ * @returns Servers Names Array.
+ */
+export async function GetServerArray(): Promise<string[]> {
+  const s = await GetOllamaServers();
+  const a = [...s.keys()].sort();
+  const al = a.filter((v) => v === "Local");
+  const ao = a.filter((v) => v !== "Local");
+  if (a.length > 1) return ["All", ...al, ...ao];
+  return [...al, ...ao];
+}
+
+/**
+ * Format "expires_at" value returnet by Ollama PS.
+ * @param expires_at
+ * @returns "expires_at" formatted as "0h0m0s".
+ */
+export function FormatOllamaPsModelExpireAtFormat(expires_at: string): string {
+  const now = new Date();
+  const expire = new Date(expires_at);
+
+  let timeoutS = "";
+  let timeout = Math.floor((expire.getTime() - now.getTime()) * 0.001);
+  ["s", "m", "h"].every((v) => {
+    const timeoutT = timeout / 60;
+    if (v === "h") {
+      if (timeout > 1000) {
+        timeoutS = "♾️";
+      } else {
+        timeoutS = `${Math.floor(timeout)}${v}` + timeoutS;
+      }
+      return false;
+    }
+    if (timeoutT < 1) {
+      timeoutS = `${Math.floor(timeout)}${v}` + timeoutS;
+      return false;
+    }
+    timeoutS = `${Math.round((timeoutT % 1) * 60)}${v}` + timeoutS;
+    timeout = Math.floor(timeoutT);
+    return true;
+  });
+
+  return timeoutS;
+}
 
 /**
  * Get Ollama Server Class.
@@ -38,19 +85,30 @@ export async function GetServerClass(): Promise<Map<string, Ollama>> {
  * Get Ollama Available Models.
  * @returns Map with All Available Model.
  */
-export async function GetModelsName(): Promise<Map<string, string[]>> {
-  const o = new Map();
+export async function GetModels(): Promise<Map<string, UiModelDetails[]>> {
+  const o = new Map<string, UiModelDetails[]>();
   const s = await GetServerClass();
   await Promise.all(
     [...s.entries()].map(async (s): Promise<void> => {
-      const tag = await s[1].OllamaApiTags().catch(async (e: Error) => {
+      const tags = await s[1].OllamaApiTags().catch(async (e: Error) => {
         await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
         return undefined;
       });
-      if (tag)
+      if (tags)
         o.set(
           s[0],
-          tag.models.map((t) => t.name)
+          await Promise.all(
+            tags.models.map(async (tag): Promise<UiModelDetails> => {
+              const show = await s[1].OllamaApiShow(tag.name).catch(async (e: Error) => {
+                await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+                return undefined;
+              });
+              return {
+                name: tag.name,
+                capabilities: show && show.capabilities,
+              };
+            })
+          )
         );
     })
   );

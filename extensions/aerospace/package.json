@@ -7,7 +7,8 @@
   "author": "limonkufu",
   "contributors": [
     "AmmarCodes",
-    "thewinger"
+    "thewinger",
+    "LightQuantum"
   ],
   "categories": [
     "Productivity",
@@ -92,7 +93,8 @@
   "dependencies": {
     "@iarna/toml": "^3.0.0",
     "@raycast/api": "^1.69.2",
-    "@raycast/utils": "^1.15.0"
+    "@raycast/utils": "^1.15.0",
+    "shell-env": "^4.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

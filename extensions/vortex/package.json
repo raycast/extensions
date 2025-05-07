@@ -68,21 +68,6 @@
       ]
     },
     {
-      "name": "balance",
-      "title": "View Balance",
-      "keywords": [
-        "balance",
-        "wallet",
-        "lightning",
-        "vortex",
-        "bitcoin"
-      ],
-      "description": "Display your current wallet balance",
-      "icon": "vortex.png",
-      "mode": "view",
-      "script": "src/ShowBalance.tsx"
-    },
-    {
       "name": "createinvoice",
       "title": "Receive",
       "keywords": [
@@ -94,7 +79,15 @@
       "description": "Create a new lightning invoice",
       "icon": "receive.png",
       "mode": "view",
-      "script": "src/CreateInvoice.tsx"
+      "script": "src/CreateInvoice.tsx",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "amount",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "listtransactions",
@@ -109,12 +102,39 @@
       "icon": "vortex.png",
       "mode": "view",
       "script": "src/ListTransactions.tsx"
+    },
+    {
+      "name": "redeem",
+      "title": "Redeem Sats",
+      "keywords": [
+        "redeem",
+        "lnurl",
+        "voucher",
+        "cashu",
+        "ecash",
+        "token"
+      ],
+      "description": "Redeem sats from lnurl voucher or cashu token",
+      "icon": "withdraw.png",
+      "mode": "view",
+      "script": "src/Redeem.tsx",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "lnurl or cashu token",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
+    "@cashu/cashu-ts": "^2.1.0",
     "@getalby/lightning-tools": "^5.0.3",
     "@getalby/sdk": "^3.5.1",
     "@raycast/api": "^1.74.1",
+    "@raycast/utils": "^1.18.1",
+    "bech32": "^2.0.0",
     "cross-fetch": "^4.0.0",
     "qrcode": "^1.5.3",
     "websocket-polyfill": "^0.0.3"

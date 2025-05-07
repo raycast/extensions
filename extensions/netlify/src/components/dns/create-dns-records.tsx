@@ -86,7 +86,7 @@ export default function CreateDNSRecordComponent({
       hostname(value) {
         if (!value) return 'The item is required';
         else if (values.type === 'CNAME' && value === '@')
-          return 'Differenet hostname is required';
+          return 'Different hostname is required';
       },
       flag(value) {
         if (values.type === 'CAA') {

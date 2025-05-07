@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 import { useCachedState } from "@raycast/utils";
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 
 import fetch from "node-fetch";
 
@@ -47,29 +47,53 @@ export default function useInstances() {
   }
 
   useEffect(() => {
+    if (!selectedInstance) {
+      return;
+    }
+
     const fetchUserId = async () => {
-      if (!selectedInstance) {
-        return "";
-      }
-
       const { name: instanceName = "", username = "", password = "" } = selectedInstance;
-      const response = await fetch(
-        `https://${instanceName}.service-now.com/api/now/table/sys_user?sysparm_query=user_name=${username}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-          },
-        },
-      );
-      if (!response.ok) {
-        return "";
-      }
 
-      const jsonData = (await response.json()) as { result: { sys_id: string }[] };
-      return jsonData.result[0].sys_id;
+      try {
+        const response = await fetch(
+          `https://${instanceName}.service-now.com/api/now/table/sys_user?sysparm_query=user_name=${username}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+            },
+          },
+        );
+
+        const jsonData = (await response.json()) as {
+          result?: { sys_id: string }[];
+          error?: { message: string };
+        };
+
+        if (!jsonData.result) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: `Could not connect to ${instanceName}`,
+            message: jsonData.error?.message,
+          });
+
+          return "";
+        }
+
+        return jsonData.result[0].sys_id;
+      } catch (error) {
+        console.error(error);
+
+        showToast({
+          style: Toast.Style.Failure,
+          title: `Could not connect to ${instanceName}`,
+          message: error instanceof Error ? error.message : "",
+        });
+      }
     };
-    fetchUserId().then((userId) => setUserId(userId));
+    fetchUserId().then((userId) => {
+      if (userId) setUserId(userId);
+    });
   }, [selectedInstance]);
 
   return {

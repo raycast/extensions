@@ -13,7 +13,8 @@
     "itsmingjie",
     "erics118",
     "brandenw",
-    "j3lte"
+    "j3lte",
+    "itsmatteomanf"
   ],
   "categories": [
     "Developer Tools",
@@ -90,6 +91,20 @@
       "subtitle": "Tailscale",
       "description": "Tailscale down",
       "mode": "no-view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Connection",
+      "subtitle": "Tailscale",
+      "description": "Toggle Tailscale connection on/off",
+      "mode": "no-view"
+    },
+    {
+      "name": "netcheck",
+      "title": "Netcheck",
+      "subtitle": "Tailscale",
+      "description": "Tailscale netcheck",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -109,7 +124,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.3"
+    "@raycast/api": "^1.77.3",
+    "@raycast/utils": "^1.9.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

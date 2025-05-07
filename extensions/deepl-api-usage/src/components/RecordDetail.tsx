@@ -19,7 +19,7 @@ export default function RecordDetail({ record }: { record: Record }) {
     <Detail
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy API Key" content={record.apiKey} />
+          <Action.CopyToClipboard title="Copy Api Key" content={record.apiKey} />
           <Action.CopyToClipboard title="Copy Description" content={record.description} />
         </ActionPanel>
       }

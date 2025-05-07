@@ -132,7 +132,7 @@ export async function connectionStatus() {
     const { status, deviceName, protocol } = respJson;
 
     if (status === "ok") {
-      return `✅  ${deviceName} is using NextDNS via ${protocol}`;
+      return `✅  ${deviceName ? deviceName : "This device"} is using NextDNS via ${protocol}`;
     } else {
       return "❌  This device is not using NextDNS";
     }

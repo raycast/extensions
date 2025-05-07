@@ -17,6 +17,7 @@ import {
   showToast,
   Toast,
   updateCommandMetadata,
+  getPreferenceValues,
 } from "@raycast/api";
 import {
   copyUrlContent,
@@ -48,6 +49,7 @@ const copyFinerFilesPath = async (fileSystemItems: FileSystemItem[]) => {
 };
 
 export const copyFinderPath = async () => {
+  const { useTildeForHome } = await getPreferenceValues();
   // get finder path
   try {
     const fileSystemItems = await getSelectedFinderItems();
@@ -56,6 +58,10 @@ export const copyFinderPath = async () => {
       copyPathResult = await copyFinderCurWindowPath();
     } else {
       copyPathResult = await copyFinerFilesPath(fileSystemItems);
+    }
+    if (useTildeForHome) {
+      copyPathResult.path = copyPathResult.path.replace(os.homedir(), "~");
+      copyPathResult.hud = copyPathResult.hud.replace(os.homedir(), "~");
     }
     await Clipboard.copy(copyPathResult.path);
     await showSuccessHUD(copyPathResult.hud);

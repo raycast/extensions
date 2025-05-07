@@ -6,8 +6,8 @@ import { UpdatingStatusEnum } from "@pieces.app/pieces-os-client";
 import { pollForConnection } from "./piecesHealthCheck";
 import sleep from "../../utils/sleep";
 
-const MIN_VERSION = "10.0.0";
-const MAX_VERSION = "11.0.0";
+const MIN_VERSION = "11.0.0";
+const MAX_VERSION = "12.0.0";
 
 /**
  * Checks if the Pieces version is up to date and handles necessary updates.
@@ -38,7 +38,7 @@ export default async function piecesUpToDateCheck(): Promise<boolean> {
 
   if (!canAutoUpdate) {
     await Notifications.getInstance().errorToast(
-      "Please update your Pieces OS version to at least " + MIN_VERSION,
+      "Please update your PiecesOS version to at least " + MIN_VERSION,
     );
     return false;
   } else {
@@ -47,14 +47,14 @@ export default async function piecesUpToDateCheck(): Promise<boolean> {
 }
 
 /**
- * Asynchronously checks for Pieces OS updates and handles the update process.
+ * Asynchronously checks for PiecesOS updates and handles the update process.
  * Displays a toast notification during the update check and handles different update statuses.
  *
  * @returns {Promise<boolean>} A promise that resolves to a boolean indicating whether the update was successful.
  */
 async function updatePieces(): Promise<boolean> {
   const toast = await showToast({
-    title: "Checking for Pieces OS Update",
+    title: "Checking for PiecesOS Update",
     style: Toast.Style.Animated,
   });
 
@@ -112,11 +112,11 @@ function getStatusText(status: UpdatingStatusEnum | undefined) {
     case UpdatingStatusEnum.ReadyToRestart:
       return "Restarting to apply the update...";
     case UpdatingStatusEnum.ReinstallRequired:
-      return "You need to reinstall Pieces OS for this feature to work!";
+      return "You need to reinstall PiecesOS for this feature to work!";
     case UpdatingStatusEnum.Unknown:
       return "Unknown status";
     case UpdatingStatusEnum.UpToDate:
-      return "Pieces OS is up to date.";
+      return "PiecesOS is up to date.";
     case undefined:
       return "Failed to get update status, please contact support at https://docs.pieces.app/support";
   }

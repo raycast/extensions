@@ -131,7 +131,7 @@ export function ChatView(): JSX.Element {
             <Action.CopyToClipboard
               title="Copy Answer"
               content={props.message.messages[1].content as string}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
           )}
           {props.message && <Action.CopyToClipboard title="Copy Conversation" content={ClipboardConversation(Chat)} />}
@@ -235,6 +235,16 @@ export function ChatView(): JSX.Element {
       <Detail.Metadata>
         <Detail.Metadata.Label title="Model" text={props.message.model} />
         <Detail.Metadata.Separator />
+        {props.message.tools && (
+          <Detail.Metadata.TagList title="Tools">
+            {props.message.tools.map((tool) => (
+              <Detail.Metadata.TagList.Item
+                key={`${tool.server}-${tool.function}`}
+                text={`${tool.server} - ${tool.function}()`}
+              />
+            ))}
+          </Detail.Metadata.TagList>
+        )}
         {props.message.files && props.message.files.length > 0 && (
           <Detail.Metadata.TagList title="Sources">
             {props.message.files.map((source) => (

@@ -1,5 +1,69 @@
 # Changelog
 
+## 1.94.0 - 2025-03-19
+
+### ✨ New
+
+- The extensions now run on Nodejs 22 and react 19. Among other benefits, this makes `fetch` globally available. There shouldn’t be any breaking change - but if you find some, please let us know!
+  Additionally, new extensions will be bootstrapped with ESLint 9
+- **Tools**: Tools can now specify some preferences, the same way Commands can
+
+### 💎 Improvements
+
+- **CLI**: When a tool or a command (when running in the background) times out, an error message will be printed in the terminal
+- **CLI**: When publishing an extension, the PR to the extensions repository will be created as draft so you can fill the description up before submitting it
+
+## 1.93.0 - 2025-02-26
+
+### ✨ New
+
+- **Tools**: We are introducing a new type of entry points for extensions: Tools. They turn a regular extension into an AI Extension. As opposed to a command, they don’t show up in the root search and the user can’t directly interact with them. Instead, they are functionalities that the AI can use to interact with an extension.
+
+## 1.91.0 - 2025-02-05
+
+### ✨ New
+
+- **AI**: The models added in [Raycast 1.90.0](https://www.raycast.com/changelog/1-90-0) are now also part of the API
+  - DeepSeek R1² reasoning model (powered by Together AI) and its distilled version¹ (powered by Groq)
+  - OpenAI o1-mini² and o1-preview² reasoning models
+  - OpenAI o3-mini¹
+  - Google Gemini 1.5 Flash¹ and Gemini 1.5 Pro², Gemini 2.0 Flash¹ and Gemini 2.0 Flash Thinking¹ models
+  - xAI Grok-2² model
+  - Perplexity Sonar¹, Sonar Pro² and Sonar Reasoning¹ models
+
+¹ available with Raycast Pro
+² available with Raycast Pro + Advanced AI
+
+### 🐞 Fixes
+
+- **Window Management**: Added missing types for `getActiveWindow`.
+
+## 1.89.0 - 2025-01-15
+
+### 💎 Improvements
+
+- **Cache**: Clearing the cache will now delete all the files in the cache folder instead of the entire folder.
+
+## 1.88.0 - 2024-12-16
+
+### 🐞 Fixes
+
+- **Markdown**: Fixed a crash when trying to print invalid surrogate code points
+- **Types**: Fixed an issue when generating the TypeScript definition for the preferences when one of their descriptions contained `*/`
+
+## 1.87.0 - 2024-12-04
+
+### ✨ New
+
+- **Docs**: You can now find a few txt files containing all the docs that you can feed to LLMs:
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt) → All the docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt) → The API docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt) → The utils docs
+
+### 🐞 Fixes
+
+- **CLI**: Fix a couple of issues when trying to publish an extension or pull contributions
+
 ## 1.86.0 - 2024-11-20
 
 ### 💎 Improvements

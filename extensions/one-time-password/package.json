@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "lachero",
   "contributors": [
-    "soulevans07"
+    "soulevans07",
+    "BalliAsghar",
+    "midskyey"
   ],
   "categories": [
     "Security",
@@ -40,6 +42,24 @@
       "type": "checkbox",
       "required": true,
       "default": true
+    },
+    {
+      "name": "primaryAction",
+      "description": "The primary action to perform on an item.",
+      "title": "Primary Action",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
+      ]
     }
   ],
   "dependencies": {

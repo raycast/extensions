@@ -1,9 +1,10 @@
-import { Clipboard, closeMainWindow, getPreferenceValues, LaunchProps, open, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, popToRoot, getPreferenceValues, LaunchProps, open, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
-import { quickAddTask, handleError, updateTask } from "./api";
-import { isTodoistInstalled, checkTodoistApp } from "./helpers/isTodoistInstalled";
+import { quickAddTask } from "./api";
 import { getTaskAppUrl, getTaskUrl } from "./helpers/tasks";
 import { withTodoistApi } from "./helpers/withTodoistApi";
+import { isTodoistInstalled } from "./hooks/useIsTodoistInstalled";
 
 type QuickAddTaskProps = { arguments: Arguments.QuickAddTask } & LaunchProps;
 
@@ -16,24 +17,26 @@ async function QuickAddTask(props: QuickAddTaskProps) {
 
     if (preferences.shouldCloseMainWindow) {
       await closeMainWindow();
+      popToRoot({ clearSearchBar: true });
     }
 
-    const { id } = await quickAddTask({
-      text: props.arguments.text ?? props.fallbackText,
-    });
+    let text = props.arguments.text ?? props.fallbackText;
+    if (props.arguments.description) {
+      text = `${text} // ${props.arguments.description}`;
+    }
 
-    await updateTask({ id, description: props.arguments.description });
+    const { id } = await quickAddTask({ text });
 
     toast.style = Toast.Style.Success;
     toast.title = "Task created";
 
-    await checkTodoistApp();
+    const isInstalled = await isTodoistInstalled();
 
     toast.primaryAction = {
-      title: `Open Task ${isTodoistInstalled ? "in Todoist" : "in Browser"}`,
+      title: `Open Task`,
       shortcut: { modifiers: ["cmd", "shift"], key: "o" },
       onAction: async () => {
-        open(isTodoistInstalled ? getTaskAppUrl(id) : getTaskUrl(id));
+        open(isInstalled ? getTaskAppUrl(id) : getTaskUrl(id));
       },
     };
 
@@ -43,7 +46,7 @@ async function QuickAddTask(props: QuickAddTaskProps) {
       onAction: () => Clipboard.copy(getTaskUrl(id)),
     };
   } catch (error) {
-    handleError({ error, title: "Unable to create task" });
+    await showFailureToast(error, { title: "Unable to create task" });
   }
 }
 

@@ -3,22 +3,47 @@
   "name": "zerion",
   "title": "Zerion",
   "description": "Browse Zerion from Raycast",
-  "icon": "icon.png",
+  "icon": "zerion_icon.png",
   "author": "qdqd",
+  "contributors": [
+    "zerts"
+  ],
   "categories": [
     "Web",
     "Productivity",
     "Data",
+    "Finance",
     "Other"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "overview",
-      "title": "View Overview",
+      "name": "my-wallets",
+      "title": "My Wallets",
+      "subtitle": "Zerion",
+      "description": "View your wallets overview",
+      "mode": "view",
+      "keywords": [
+        "wallet",
+        "address",
+        "portfolio"
+      ],
+      "icon": "zerion_icon.png"
+    },
+    {
+      "name": "address-info",
+      "title": "Overview",
       "subtitle": "Zerion",
       "description": "Overview a portofolio using an address or an ENS name",
-      "mode": "no-view",
+      "mode": "view",
+      "keywords": [
+        "address",
+        "crypto",
+        "0x",
+        "eth",
+        "lens"
+      ],
+      "icon": "zerion_icon.png",
       "arguments": [
         {
           "name": "account",
@@ -27,6 +52,37 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "find-token-or-address",
+      "title": "Search Web3",
+      "subtitle": "Zerion",
+      "description": "Search any token, address or domain",
+      "mode": "view",
+      "keywords": [
+        "address",
+        "wallet",
+        "crypto",
+        "asset",
+        "token"
+      ],
+      "icon": "zerion_icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menu-bar-wallet",
+      "title": "Menu Bar Wallet",
+      "subtitle": "Zerion",
+      "description": "View your wallet's value in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
     },
     {
       "name": "collection",
@@ -73,12 +129,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.65.1"
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.18.1",
+    "bignumber.js": "^9.1.2",
+    "dayjs": "^1.11.13",
+    "lodash": "^4.17.21",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.14.202",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
+    "@types/uuid": "^9.0.7",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"

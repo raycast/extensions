@@ -2,11 +2,12 @@ import { ActionPanel, List, Action, Icon, Color } from "@raycast/api";
 import { Feature } from "./lib/types/feature";
 import { FeatureSingle } from "./lib/components/FeatureSingle";
 import { featureSupportedIn } from "./lib/util/featureSupportedIn";
-import { getVersions } from "./lib/util/versions";
+import { getPreferredVersions } from "./lib/util/versions";
 import { useFetch } from "@raycast/utils";
 import { Accessory } from "./lib/types/accessory";
+import { featureSupportedInAny } from "./lib/util/featureSupportedInAny";
 
-const versions = getVersions();
+const versions = getPreferredVersions();
 
 function getAccessories(feature: Feature) {
   const accessories: Accessory[] = [];
@@ -24,25 +25,28 @@ function getAccessories(feature: Feature) {
 
 export default function Command() {
   const { isLoading, data } = useFetch("https://caniphp.com/features.json");
+
   return (
     <List isLoading={isLoading}>
       {Array.isArray(data) &&
-        data.map((phpFeature, index) => (
-          <List.Item
-            key={index}
-            title={phpFeature.name}
-            accessories={getAccessories(phpFeature)}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Open Details"
-                  icon={Icon.Binoculars}
-                  target={<FeatureSingle feature={phpFeature} />}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+        data
+          .filter((phpFeature) => featureSupportedInAny(phpFeature, versions))
+          .map((phpFeature, index) => (
+            <List.Item
+              key={index}
+              title={phpFeature.name}
+              accessories={getAccessories(phpFeature)}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="Open Details"
+                    icon={Icon.Binoculars}
+                    target={<FeatureSingle feature={phpFeature} />}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
     </List>
   );
 }

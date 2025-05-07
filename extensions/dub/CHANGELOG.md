@@ -1,5 +1,27 @@
 # Dub Link Shortener Changelog
 
+## [Analytics] - 2025-04-12
+
+- Added an action to open the analytics page for a link
+
+## [A.I Extension support] - 2025-04-05
+
+- Added tools to work with Raycast Pro's new A.I extensions feature.
+
+## [Chore] - 2025-04-04
+
+- Bump dub sdk to v0.61.5
+
+## [Improvements] - 2025-03-12
+
+- Add a toggle to show/hide details in the search links command
+- Keep previous data when fetching short links
+
+## [Typeahead Support] - 2024-12-04
+
+- Add typeahead support for short links to load more that 100 links [#14198](https://github.com/raycast/extensions/issues/14198)
+- Bump dependencies to resolve critical vulnerabilities
+
 ## [Chore] - 2024-10-23
 
 - Bump dub sdk to v0.43.9

@@ -2,9 +2,9 @@ import { Detail, launchCommand, LaunchType, closeMainWindow, popToRoot, List, Ic
 import { ActionPanel, Action } from "@raycast/api";
 import { OAuthService, getAccessToken, useFetch, withAccessToken } from "@raycast/utils";
 import { exec } from "child_process";
-import { getCurrentInterval, isPaused, preferences } from "../lib/intervals";
-import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
-import { GiphyResponse, Interval } from "../lib/types";
+import { getCurrentInterval, isPaused, preferences } from "./lib/intervals";
+import { FocusText, ShortBreakText, LongBreakText } from "./lib/constants";
+import { GiphyResponse, Interval } from "./lib/types";
 import {
   getNextSlackIntervalExecutor,
   slackContinueInterval,
@@ -12,7 +12,7 @@ import {
   slackPauseInterval,
   slackResetInterval,
   slackRestartInterval,
-} from "../lib/slack/slackIntervals";
+} from "./lib/slack/slackIntervals";
 
 const createAction = (action: () => Promise<void> | Promise<Interval | undefined>) => async () => {
   await action();

@@ -1,5 +1,10 @@
 # Brand.dev Changelog
 
+## [Open Multiple Logos] - 2025-01-26
+
+- In `Detail` view the proper Address item title is shown e.g. "Country Code" instead of "country_code"
+- You can now open more than the first logo in browser e.g. if a Brand has multiple logos, you can open the 2nd logo instead of first
+
 ## [Choose Preferred Secondary Action] - 2024-11-24
 
 - You can choose in Preferences whether to keep the secondary acton as "Delete" or "New". The other action will be moved to its own Section with a keyboard shortcut.

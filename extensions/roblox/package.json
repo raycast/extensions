@@ -104,7 +104,7 @@
     {
       "name": "playing-game",
       "title": "Get Playing Game",
-      "description": "Get Currently Playing Roblox Game!",    
+      "description": "Get Currently Playing Roblox Game!",
       "mode": "view"
     },
     {
@@ -123,12 +123,27 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "show-image",
+      "title": "Show Image",
+      "description": "Show a Roblox Image!",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "id",
+          "placeholder": "Image ID",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [],
   "dependencies": {
     "@raycast/api": "^1.85.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "cross-fetch": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

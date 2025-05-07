@@ -1,5 +1,29 @@
 # Search npm Changelog
 
+## [Fixes] - 2025-02-05
+
+- Fix URL parsing issue
+
+## [Added a shortcut] - 2025-01-22
+
+- Added a shortcut to copy the package version
+
+## [Chore & Fixes] - 2025-01-13
+
+- Hide toast when `historyCount` is zero
+- Suppress errors when search term is empty
+- Use Raycast's auto-generated type definitions
+- Bump all dependencies to the latest
+
+## [Update] - 2024-12-14
+
+- Fixed another issue with git url parsing
+- Added more detail to the history view. If there's a package there, it will be displayed like in the package list which means it is much quicker to access the package you previously searched for.
+
+## [Update] - 2024-12-13
+
+- Added a Git URL parser for the repository URL in the open repository action
+
 ## [Updates] - 2024-10-07
 
 - Hide history list when `historyCount` is zero
