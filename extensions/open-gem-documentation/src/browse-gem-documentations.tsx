@@ -56,5 +56,9 @@ function urlFor(gemName: string): string {
     pattern = preferences.publicGemDocUrlPattern;
   }
 
-  return pattern!.replaceAll("%gem%", gemName);
+  if (!pattern) {
+    throw new Error("No URL pattern configured");
+  }
+
+  return pattern.replaceAll("%gem%", gemName);
 }
