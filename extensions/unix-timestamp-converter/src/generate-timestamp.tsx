@@ -4,10 +4,13 @@ import { countries } from "./constants";
 import { getUnixTimeFromLocalDate, validateNumber } from "./utils/datetime";
 import { copyToClipboardWithToast } from "./utils/clipboard";
 import { GenerateTimestampFormValues } from "./types";
+import { pad2 } from "./utils/pad";
+import { useState } from "react";
 
 export default function Command() {
+  const [resultText, setResultText] = useState<string>("Enter date, time, and country, then press Convert.");
   const now = new Date();
-  const { handleSubmit, itemProps, values } = useForm<GenerateTimestampFormValues>({
+  const { handleSubmit, itemProps } = useForm<GenerateTimestampFormValues>({
     initialValues: {
       country: countries[0].id,
       year: now.getFullYear().toString(),
@@ -42,6 +45,9 @@ export default function Command() {
         countryObj,
       );
       copyToClipboardWithToast(unix.toString(), "UNIX timestamp copied!");
+      setResultText(
+        `${countryObj.name} ${values.year}/${pad2(values.month)}/${pad2(values.day)} ${pad2(values.hour)}:${pad2(values.minute)}:${pad2(values.second)} → ${unix}`,
+      );
     },
   });
 
@@ -53,30 +59,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description
-        title="Result"
-        text={(() => {
-          const countryObj = countries.find((c) => c.id === values.country);
-          if (!countryObj) return "Enter date, time, and country, then press Convert.";
-          if (
-            [values.year, values.month, values.day, values.hour, values.minute, values.second].some(
-              (v) => !v || isNaN(Number(v)),
-            )
-          ) {
-            return "Enter date, time, and country, then press Convert.";
-          }
-          const unix = getUnixTimeFromLocalDate(
-            Number(values.year),
-            Number(values.month),
-            Number(values.day),
-            Number(values.hour),
-            Number(values.minute),
-            Number(values.second),
-            countryObj,
-          );
-          return `${countryObj.name} ${values.year}/${values.month}/${values.day} ${values.hour}:${values.minute}:${values.second} → ${unix}`;
-        })()}
-      />
+      <Form.Description title="Result" text={resultText} />
       <Form.Separator />
       <Form.Dropdown title="Country / Timezone" {...itemProps.country}>
         {countries.map((country) => (
