@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Add Omnibox-like search behavior for New Tab] - {PR_MERGE_DATE}
+## [Add Omnibox-like search behavior for New Tab] - 2025-05-07
 - Add support for entering URLs or search terms in a single input field, mimicking Chrome’s Omnibox behavior.
 
 ## [Add Copy Title action for Search Tab] - 2025-04-22
