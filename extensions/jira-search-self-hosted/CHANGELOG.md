@@ -1,6 +1,6 @@
 # Jira Search Self Hosted Changelog
 
-## [Update] - 2025-05-03
+## [Update] - {PR_MERGE_DATE}
 
 - Fixed a bug where the search command would not work if the query started or ended with a space. Also improve state management of the query.
 
