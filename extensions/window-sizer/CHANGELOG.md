@@ -1,6 +1,6 @@
 # Window Sizer Changelog
 
-## Update Extension Icon] - {PR_MERGE_DATE}
+## Update Extension Icon] - 2025-05-07
 
 - Update extension icon and screenshots
 
