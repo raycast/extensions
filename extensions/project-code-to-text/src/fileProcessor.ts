@@ -1,7 +1,7 @@
 // src/fileProcessor.ts
 import fs from "fs/promises";
 import path from "path";
-import { default as ignore, Ignore as IgnoreInstance } from "ignore";
+import ignore from "ignore";
 import mime from "mime-types";
 import {
   ALWAYS_TEXT_EXTENSIONS,
@@ -14,6 +14,7 @@ import {
   AI_ANALYSIS_GUIDE_CONTENT,
 } from "./constants";
 import type { ProjectEntry, ProcessDirectoryOptions, FileProcessorConfig } from "./types";
+import { Stats } from "fs";
 
 /**
  * Parses the .gitignore file from the project root and combines its rules
@@ -21,7 +22,7 @@ import type { ProjectEntry, ProcessDirectoryOptions, FileProcessorConfig } from 
  * @param projectRoot The absolute path to the project root directory.
  * @returns An object containing the `ignore` instance and a boolean indicating if .gitignore was used.
  */
-async function loadIgnoreFilter(projectRoot: string): Promise<{ filter: IgnoreInstance; gitignoreUsed: boolean }> {
+async function loadIgnoreFilter(projectRoot: string): Promise<{ filter: ReturnType<typeof ignore>; gitignoreUsed: boolean }> {
   // Start with hardcoded base ignore patterns
   const ig = ignore().add(HARDCODED_BASE_IGNORE_PATTERNS as string[]);
 
@@ -75,7 +76,7 @@ function getFileLanguage(filePath: string): string {
  * @param maxFileSizeBytes The maximum size in bytes for including file content.
  * @returns The file content as a string, or a message indicating why it's not included.
  */
-async function readFileContent(filePath: string, stats: fs.Stats, maxFileSizeBytes: number): Promise<string> {
+async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes: number): Promise<string> {
   const fileSizeKB = (stats.size / 1024).toFixed(1);
   const maxAllowedSizeMB = (maxFileSizeBytes / 1024 / 1024).toFixed(2);
 
