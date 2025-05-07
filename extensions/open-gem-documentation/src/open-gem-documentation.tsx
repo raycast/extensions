@@ -42,7 +42,7 @@ export default function Command() {
 function urlFor(gemName: string): string {
   const preferences = getPreferenceValues<Preferences>();
 
-  const privateGems = (preferences.privateGems ?? "").split(",").map(name => name.trim());
+  const privateGems = (preferences.privateGems ?? "").split(",").map((name) => name.trim());
 
   let pattern = null;
 
