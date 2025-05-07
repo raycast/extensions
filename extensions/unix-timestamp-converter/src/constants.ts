@@ -117,7 +117,7 @@ export const formats: Format[] = [
         minute: "2-digit",
         second: "2-digit",
         timeZoneName: "short",
-        hour12: false,
+        hour12: true,
         timeZone: country.ianaTimeZone,
       };
       return `${country.name} Time (${country.timezoneName}): ${date.toLocaleString("en-US", options)}`;
