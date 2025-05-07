@@ -19,7 +19,7 @@ import { useApps } from "./util/hooks";
 
 export default function AppsView() {
   const { apps, updateApps } = useApps();
-  const { defaultAction } = getPreferenceValues();
+  const { defaultAction } = getPreferenceValues<Preferences>();
 
   const updateLastTimeUsed = async (a: App) => {
     const item = await LocalStorage.getItem(a.name);
@@ -39,7 +39,7 @@ export default function AppsView() {
           />
           <Action.Push
             icon={Icon.Link}
-            title="Add App By URL"
+            title="Add App by URL"
             target={<AddAppByUrlForm />}
             shortcut={{ modifiers: ["cmd"], key: "u" }}
           />
@@ -58,12 +58,12 @@ export default function AppsView() {
                   +a.percent > 75
                     ? Icon.CircleProgress100
                     : +a.percent > 50
-                    ? Icon.CircleProgress75
-                    : +a.percent > 25
-                    ? Icon.CircleProgress50
-                    : +a.time > 0
-                    ? Icon.CircleProgress25
-                    : Icon.Circle,
+                      ? Icon.CircleProgress75
+                      : +a.percent > 25
+                        ? Icon.CircleProgress50
+                        : +a.time > 0
+                          ? Icon.CircleProgress25
+                          : Icon.Circle,
               },
               tooltip: a.time,
             },
@@ -92,7 +92,7 @@ export default function AppsView() {
                 />
                 <Action.Push
                   icon={Icon.Link}
-                  title="Add App By URL"
+                  title="Add App by URL"
                   target={<AddAppByUrlForm />}
                   shortcut={{ modifiers: ["cmd"], key: "u" }}
                 />
@@ -118,6 +118,7 @@ export default function AppsView() {
                     key: "return",
                   }}
                 />
+                <Action.Push icon={Icon.Pencil} title="Edit App" target={<EditForm app={a} />} />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -166,7 +167,7 @@ function AddForm() {
 
     await LocalStorage.setItem(
       values.name,
-      JSON.stringify({ secret: values.secret, options: options, lastTimeUsed: new Date().getTime() })
+      JSON.stringify({ secret: values.secret, options: options, lastTimeUsed: new Date().getTime() }),
     );
 
     push(<AppsView />);
@@ -229,7 +230,7 @@ function AddAppByUrlForm() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={onSubmit} />
+          <Action.SubmitForm icon={Icon.Plus} title="Submit" onSubmit={onSubmit} />
         </ActionPanel>
       }
     >
@@ -240,4 +241,13 @@ function AddAppByUrlForm() {
       />
     </Form>
   );
+}
+
+function EditForm({app}: {app: App}) {
+
+  return <Form actions={<ActionPanel>
+    <Action.SubmitForm icon={Icon.Pencil} title="Submit" onSubmit={onSubmit} />
+  </ActionPanel>}>
+    <Form.TextField id="name" title="App Name" placeholder="e.g. GitHub" defaultValue={app.name} />
+  </Form>
 }
