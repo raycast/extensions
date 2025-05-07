@@ -8,4 +8,5 @@ export default async () => {
     await showHUD(`✅ ${utcTime} copied to clipboard`);
   } catch (error) {
     await showFailureToast(error, { title: "Failed to copy UTC time" });
-  }};
+  }
+};
