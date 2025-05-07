@@ -137,10 +137,9 @@ async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes:
       console.error(
         `Failed to read file ${filePath} with both UTF-8 and Latin-1. Error: ${(eLatin1 as Error).message}`
       );
-      return `[File content omitted: Could not read file content (tried UTF-8 and Latin-1). Size: ${fileSizeKB} KB. Error: ${(eLatin1 as Error).message.substring(
-        0,
-        100
-      )}]`;
+      return `[File content omitted: Could not read file content (tried UTF-8 and Latin-1). Size: ${fileSizeKB} KB. Error: ${(
+        eLatin1 as Error
+      ).message.substring(0, 100)}]`;
     }
   }
 }
