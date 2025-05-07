@@ -12,7 +12,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "browse-gem-documentations",
+      "name": "open-gem-documentation",
       "subtitle": "Type a Gem name to open documentation",
       "title": "Open Gem Documentation",
       "description": "Open documentation for a specific Ruby Gem",
