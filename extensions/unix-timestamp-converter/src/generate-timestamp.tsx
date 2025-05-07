@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm, FormValidation, showFailureToast } from "@raycast/utils";
 import { countries } from "./constants";
 import { getUnixTimeFromLocalDate, validateNumber } from "./utils/datetime";
 import { copyToClipboardWithToast } from "./utils/clipboard";
@@ -28,7 +28,10 @@ export default function Command() {
     },
     onSubmit(values) {
       const countryObj = countries.find((c) => c.id === values.country);
-      if (!countryObj) return;
+      if (!countryObj) {
+        showFailureToast("Country not found");
+        return;
+      }
       const unix = getUnixTimeFromLocalDate(
         Number(values.year),
         Number(values.month),
