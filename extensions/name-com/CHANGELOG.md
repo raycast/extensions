@@ -1,6 +1,6 @@
 # Name.com Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-05-07
 
 - View Account Balance
 - View Domains
