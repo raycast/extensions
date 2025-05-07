@@ -274,6 +274,7 @@
 /extensions/cnpj-lookup                                             @xilopaint
 /extensions/cobalt                                                  @aelew
 /extensions/cocktail-db                                             @xmok
+/extensions/cocoa-core-data-timestamp-converter                     @3llomi
 /extensions/coda-bookmarks-search                                   @allienx
 /extensions/code-execution                                          @EvanZhouDev
 /extensions/code-quarkus                                            @lmagnette
