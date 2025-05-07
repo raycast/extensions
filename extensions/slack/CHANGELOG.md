@@ -1,5 +1,11 @@
 # Slack Changelog
 
+## [New AI Tools for Message Retrieval] - 2025-05-07
+
+- Add `Get Message` AI tool to retrieve a specific Slack message by channel ID and timestamp
+- Add `Get Thread Messages` AI tool to retrieve all messages in a Slack thread
+- Update required API scopes to include `conversations.history` and `conversations.replies`
+
 ## [AI-Powered Emoji Search] - 2025-04-24
 
 - Enhanced the `Search Emojis` command with AI-powered search: If you can't find an emoji by name, describe what you're looking for and AI will suggest the most relevant Slack emojis.
