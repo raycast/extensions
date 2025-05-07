@@ -4,7 +4,7 @@ import { Favorite } from "../types";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import FavoriteForm from "./FavoriteForm";
 import Actions from "./Actions";
-import { extractParamFromURL } from "../utils/extractParamFromURL";
+import { extractPathAndParam } from "../utils/extractPathAndParam";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function FavoriteItem(props: {
@@ -35,7 +35,7 @@ export default function FavoriteItem(props: {
   }
 
   const url = buildServiceNowUrl(instanceName, path);
-  const table = favorite.table ? favorite.table : extractParamFromURL(url).path;
+  const table = favorite.table ? favorite.table : extractPathAndParam(path).path;
   const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 
   const icon: Action.Props["icon"] = {
@@ -66,7 +66,7 @@ export default function FavoriteItem(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section title={favorite.title}>
-            <Action.OpenInBrowser title="Open in Servicenow" url={url} icon={{ source: "servicenow.svg" }} />
+            <Action.OpenInBrowser title="Open in ServiceNow" url={url} icon={{ source: "servicenow.svg" }} />
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
           </ActionPanel.Section>
           {full == "true" && (

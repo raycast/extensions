@@ -35,7 +35,7 @@ export function buildServiceNowUrl(instanceName: string, relativeUrl: string): s
   }
 
   // If openMode === "sow"
-  const [path, queryString] = cleanUrl.split("?");
+  const [path, queryString = ""] = cleanUrl.split("?");
   const queryParams = new URLSearchParams(queryString);
 
   if (path.endsWith("_list.do")) {

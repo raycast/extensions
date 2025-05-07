@@ -15,7 +15,7 @@ import useFavorites from "../hooks/useFavorites";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function ({ searchTerm }: { searchTerm: string }) {
-  const { isUrlInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
+  const { isInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
   const { addInstance, mutate: mutateInstances, selectedInstance } = useInstances();
   const { commandName } = environment;
   const command = commandName == "search" ? "Search" : "Quickly Search";
@@ -120,7 +120,7 @@ export default function ({ searchTerm }: { searchTerm: string }) {
                     label={result.label}
                     fields={result.fields}
                     revalidateSearchResults={revalidate}
-                    favoriteId={isUrlInFavorites(`${instanceUrl}${record.record_url}`)}
+                    favoriteId={isInFavorites(record.record_url)}
                     addUrlToFavorites={addUrlToFavorites}
                     removeFromFavorites={removeFromFavorites}
                     revalidateFavorites={revalidateFavorites}
@@ -139,7 +139,7 @@ export default function ({ searchTerm }: { searchTerm: string }) {
                         title={`View all ${result.name == "u_documate_page" ? "Documate Page" : result.label} matches`}
                       >
                         <Action.OpenInBrowser
-                          title="Open in Servicenow"
+                          title="Open in ServiceNow"
                           url={allResultsUrl}
                           icon={{ source: "servicenow.svg" }}
                         />

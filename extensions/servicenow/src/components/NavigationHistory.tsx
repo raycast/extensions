@@ -13,7 +13,6 @@ import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import { groupBy } from "lodash";
 import useFavorites from "../hooks/useFavorites";
 import { getSectionTitle } from "../utils/getSectionTitle";
-import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function NavigationHistory() {
   const {
@@ -24,7 +23,7 @@ export default function NavigationHistory() {
     selectedInstance,
     setSelectedInstance,
   } = useInstances();
-  const { isUrlInFavorites, revalidateFavorites } = useFavorites();
+  const { isInFavorites, revalidateFavorites } = useFavorites();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -121,7 +120,7 @@ export default function NavigationHistory() {
             >
               {sections[section].map((historyEntry) => {
                 const path = historyEntry.url.startsWith("/") ? historyEntry.url : `/${historyEntry.url}`;
-                const url = buildServiceNowUrl(instanceName, path);
+                const url = `${instanceUrl}${path}`;
                 const table = historyEntry.url.split(".do")[0];
                 const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 
@@ -140,7 +139,7 @@ export default function NavigationHistory() {
                   },
                 ];
 
-                const favoriteId = isUrlInFavorites(url);
+                const favoriteId = isInFavorites(path);
                 if (favoriteId) {
                   accessories.unshift({
                     icon: { source: Icon.Star, tintColor: Color.Yellow },
@@ -162,7 +161,7 @@ export default function NavigationHistory() {
                       <ActionPanel>
                         <ActionPanel.Section title={historyEntry.title + (description ? ": " + description : "")}>
                           <Action.OpenInBrowser
-                            title="Open in Servicenow"
+                            title="Open in ServiceNow"
                             url={url}
                             icon={{ source: "servicenow.svg" }}
                           />

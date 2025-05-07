@@ -135,10 +135,7 @@ class ServiceNowClient {
     if (!this.sessionData) throw new Error("Not authenticated");
     const url = `https://${this.instance.name}.service-now.com/sys.scripts.do`;
 
-    const body = {
-      script: script,
-      runscript: "Run script",
-    };
+    const body = { script: script, runscript: "Run script" };
 
     try {
       const response = await fetch(url, {

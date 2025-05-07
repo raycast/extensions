@@ -1,4 +1,4 @@
-# Search Documate Changelog
+# ServiceNow Extension Changelog
 
 ## [New Commands and Extension Preferences] - {PR_MERGE_DATE}
 
@@ -13,7 +13,7 @@
   - **Login to Instance**
 - Replaced browser-based commands with AppleScripts so that the Raycast Browser extension is no longer required.
 
-## [Fixed - Faster search] - 2025-04-27
+## [Fixed - Faster search] - {PR_MERGE_DATE}
 
 - Fixed an issue with displaying favorites, improving overall system stability and responsiveness.
 

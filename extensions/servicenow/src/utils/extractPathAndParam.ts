@@ -1,8 +1,7 @@
-export function extractParamFromURL(urlString: string) {
-  const url = new URL(urlString);
+export function extractPathAndParam(pathAndParam: string) {
   let extractedParam = "";
-  const queryParams = new URLSearchParams(url.search);
-  const pathName = url.pathname;
+  const pathName: string = pathAndParam.split("?")[0];
+  const queryParams = new URLSearchParams(pathAndParam.split("?")[1]);
 
   const paramSources = [
     { path: "_list.do", param: "sysparm_query" },
@@ -18,9 +17,9 @@ export function extractParamFromURL(urlString: string) {
     },
   ];
 
-  for (const { path: pathToMatch, param: getParam } of paramSources) {
-    if (pathName.includes(pathToMatch)) {
-      extractedParam = typeof getParam === "function" ? getParam(queryParams) : queryParams.get(getParam) || "";
+  for (const { path, param } of paramSources) {
+    if (pathName.includes(path)) {
+      extractedParam = typeof param === "function" ? param(queryParams) : queryParams.get(param) || "";
       break;
     }
   }
