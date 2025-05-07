@@ -1,5 +1,6 @@
 import { LaunchProps, LocalStorage, open, showToast, Toast } from "@raycast/api";
 import { Instance } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 export default async (props: LaunchProps) => {
   const { instanceName } = props.arguments;
