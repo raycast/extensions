@@ -13,6 +13,7 @@
   "commands": [
     {
       "name": "browse-gem-documentations",
+      "subtitle": "Type a Gem name to open documentation",
       "title": "Open Gem Documentation",
       "description": "Open documentation for a specific Ruby Gem",
       "mode": "view",
