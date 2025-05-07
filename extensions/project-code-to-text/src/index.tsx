@@ -58,7 +58,7 @@ const sanitizeFileName = (name: string): string => {
   return name
     .trim()
     .replace(/\s+/g, "_")
-    .replace(/[<>:"/\\|?*]/g, "_")
+    .replace(/[<>:"\/\\|?*]/g, "_")
     .replace(/[^a-zA-Z0-9._-]/g, "");
 };
 
@@ -291,7 +291,8 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
         title: "Copy Path to Clipboard",
         shortcut: { modifiers: ["cmd", "shift"], key: "c" },
         onAction: async (toastInstance) => {
-          await Action.CopyToClipboard(outputFilePath)(toastInstance);
+          const copyAction = new Action.CopyToClipboard({ content: outputFilePath });
+          await copyAction.perform();
           await showToast(Toast.Style.Success, "Path Copied!");
         },
       };
