@@ -390,7 +390,8 @@
     "stelo",
     "romanschmid",
     "jessedobbelaere",
-    "heavyrisem"
+    "heavyrisem",
+    "constantins2001"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",

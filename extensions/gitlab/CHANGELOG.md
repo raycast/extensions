@@ -1,5 +1,10 @@
 # GitLab Changelog
 
+## [Merge Requests Menu Bar] - {PR_MERGE_DATE}
+
+- Added "My Merge Requests" view
+- Added the ability to filter for labels
+
 ## [Fix] - 2024-12-17
 
 - Fix "Ignore SSL Errors" setting not working on some features
