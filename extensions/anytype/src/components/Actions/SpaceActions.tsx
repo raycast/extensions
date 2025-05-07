@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
-import { ObjectList } from ".";
-import { Space } from "../models";
+import { MutatePromise, showFailureToast } from "@raycast/utils";
+import { CreateSpaceForm, ObjectList, UpdateSpaceForm } from "..";
+import { Space } from "../../models";
 import {
   addPinned,
   anytypeSpaceDeeplink,
@@ -9,15 +9,16 @@ import {
   moveDownInPinned,
   moveUpInPinned,
   removePinned,
-} from "../utils";
+} from "../../utils";
 
 type SpaceActionsProps = {
   space: Space;
   mutate: MutatePromise<Space[]>[];
   isPinned: boolean;
+  searchText: string;
 };
 
-export function SpaceActions({ space, mutate, isPinned }: SpaceActionsProps) {
+export function SpaceActions({ space, mutate, isPinned, searchText }: SpaceActionsProps) {
   const spaceDeeplink = anytypeSpaceDeeplink(space.id);
   const pinSuffix = localStorageKeys.suffixForSpaces;
 
@@ -64,11 +65,7 @@ export function SpaceActions({ space, mutate, isPinned }: SpaceActionsProps) {
         await Promise.all(mutate.map((mutateFunc) => mutateFunc()));
         await showToast({ style: Toast.Style.Success, title: "Spaces refreshed" });
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to refresh spaces",
-          message: error instanceof Error ? error.message : "An unknown error occurred.",
-        });
+        await showFailureToast(error, { title: "Failed to refresh spaces" });
       }
     }
   }
@@ -83,6 +80,13 @@ export function SpaceActions({ space, mutate, isPinned }: SpaceActionsProps) {
           url={spaceDeeplink}
         />
       </ActionPanel.Section>
+
+      <Action.Push
+        icon={Icon.Pencil}
+        title="Edit Space"
+        shortcut={Keyboard.Shortcut.Common.Edit}
+        target={<UpdateSpaceForm space={space} mutateSpaces={mutate} />}
+      />
 
       <Action
         icon={Icon.Link}
@@ -115,6 +119,12 @@ export function SpaceActions({ space, mutate, isPinned }: SpaceActionsProps) {
       )}
 
       <ActionPanel.Section>
+        <Action.Push
+          icon={Icon.Plus}
+          title="Create Space"
+          shortcut={Keyboard.Shortcut.Common.New}
+          target={<CreateSpaceForm draftValues={{ name: searchText }} />}
+        />
         <Action
           icon={Icon.RotateClockwise}
           title="Refresh Spaces"

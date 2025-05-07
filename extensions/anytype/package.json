@@ -33,6 +33,13 @@
       "subtitle": "Anytype",
       "description": "Search objects globally in all spaces.",
       "mode": "view"
+    },
+    {
+      "name": "add-to-list",
+      "title": "Add to List",
+      "subtitle": "Anytype",
+      "description": "Add an existing object to a list.",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -114,8 +121,8 @@
               "object": "type",
               "name": "Task",
               "id": "bafyreigs5crqbryk2sq45ig4p6uqkcbmntuyosc1djvdeqoydj23b6d1mm",
-              "type_key": "ot-task",
-              "recommended_layout": "todo"
+              "type_key": "task",
+              "layout": "action"
             }
           ],
           "search-space": [
@@ -173,15 +180,15 @@
                 "types": {
                   "or": [
                     {
-                      "includes": "ot-task"
+                      "includes": "task"
                     },
                     {
                       "includes": "bafyreigs5crqbryk2sq45ig4p6uqkcbmntuyosc1djvdeqoydj23b6d1mm"
                     },
                     {
                       "includes": [
-                        "ot-collection",
-                        "ot-set"
+                        "collection",
+                        "set"
                       ]
                     }
                   ]
@@ -225,8 +232,8 @@
               "object": "type",
               "name": "Page",
               "id": "bafyreigs5crqbryk2sq45ig4p6uqkcbmntuyosc1djvdeqoydj23b6d1pp",
-              "type_key": "ot-page",
-              "recommended_layout": "basic"
+              "type_key": "page",
+              "layout": "basic"
             }
           ],
           "create-object": [
@@ -238,7 +245,7 @@
               "type": {
                 "id": "bafyreigs5crqbryk2sq45ig4p6uqkcbmntuyosc1djvdeqoydj23b6d1mm",
                 "name": "Page",
-                "type_key": "ot-page"
+                "type_key": "page"
               },
               "snippet": "This is the snippet of the object."
             }
@@ -264,7 +271,7 @@
               "name": "create-object",
               "arguments": {
                 "spaceId": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d",
-                "type_key": "ot-page",
+                "type_key": "page",
                 "name": {
                   "includes": "Privacy"
                 }
@@ -481,8 +488,8 @@
               "object": "type",
               "name": "Page",
               "id": "bafyreigs5crqbryk2sq45ig4p6uqkcbmntuyosc1djvdeqoydj23b6d1pp",
-              "type_key": "ot-page",
-              "recommended_layout": "basic"
+              "type_key": "page",
+              "layout": "basic"
             }
           ]
         },
@@ -640,7 +647,7 @@
               "arguments": {
                 "spaceId": "bafyreihliylimyqct7vbyc2jqsoanibku656jj4uwwhulx4tctb4qw346q.2lcu0r85yg10d",
                 "query": "",
-                "sort.property": "last_modified_date",
+                "sort.propertyKey": "last_modified_date",
                 "sort.direction": "desc"
               }
             }
@@ -684,7 +691,7 @@
       "type": "dropdown",
       "data": [
         {
-          "title": "Created Date",
+          "title": "Creation Date",
           "value": "created_date"
         },
         {
@@ -710,19 +717,19 @@
       "type": "dropdown",
       "data": [
         {
-          "title": "25",
-          "value": "25"
-        },
-        {
           "title": "50",
           "value": "50"
         },
         {
           "title": "100",
           "value": "100"
+        },
+        {
+          "title": "200",
+          "value": "200"
         }
       ],
-      "default": "50",
+      "default": "100",
       "required": false
     },
     {
@@ -748,6 +755,7 @@
     "@raycast/api": "^1.93.1",
     "@raycast/utils": "^1.17.0",
     "date-fns": "^4.1.0",
+    "emoji-regex": "^10.4.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { CreateSpaceForm, CreateSpaceFormValues } from ".";
+import { CreateSpaceForm, CreateSpaceFormValues } from "..";
 
 type EmptyViewSpaceProps = {
   title: string;

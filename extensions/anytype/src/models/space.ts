@@ -6,6 +6,11 @@ export interface CreateSpaceRequest {
   description: string;
 }
 
+export interface UpdateSpaceRequest {
+  name?: string;
+  description?: string;
+}
+
 export interface RawSpace {
   object: string;
   id: string;

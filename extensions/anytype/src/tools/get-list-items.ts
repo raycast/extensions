@@ -10,7 +10,7 @@ type Input = {
 
   /**
    * The unique identifier of the list to get items from.
-   * This value can be obtained from the `search-space`or `search-anytype` tool and specifying types as  'ot-collection'.
+   * This value can be obtained from the `search-space`or `search-anytype` tool and specifying types as 'collection'.
    */
   listId: string;
 };

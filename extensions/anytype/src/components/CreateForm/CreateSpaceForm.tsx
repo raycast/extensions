@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
-import { useForm } from "@raycast/utils";
-import { createSpace } from "../api";
+import { showFailureToast, useForm } from "@raycast/utils";
+import { createSpace } from "../../api";
 
 export interface CreateSpaceFormValues {
   name?: string;
@@ -25,11 +25,7 @@ export function CreateSpaceForm({ draftValues }: CreateSpaceFormProps) {
         showToast(Toast.Style.Success, "Space created successfully");
         popToRoot();
       } catch (error) {
-        if (error instanceof Error) {
-          showToast(Toast.Style.Failure, "Failed to create space", error.message);
-        } else {
-          showToast(Toast.Style.Failure, "Failed to create space", "Unknown error");
-        }
+        await showFailureToast(error, { title: "Failed to create space" });
       }
     },
     validation: {

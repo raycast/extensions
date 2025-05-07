@@ -1,11 +1,12 @@
-import { Icon, List, showToast, Toast } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { EmptyViewObject, ObjectListItem, ViewType } from ".";
-import { useObjectsInList } from "../hooks";
-import { useListViews } from "../hooks/useListViews";
-import { Space, ViewLayout } from "../models";
-import { pluralize, processObject } from "../utils";
-import { defaultTintColor } from "../utils/constant";
+import { EmptyViewObject, ObjectListItem, ViewType } from "..";
+import { useObjectsInList } from "../../hooks";
+import { useListViews } from "../../hooks/useListViews";
+import { Space, ViewLayout } from "../../models";
+import { isEmoji, pluralize, processObject } from "../../utils";
+import { defaultTintColor } from "../../utils/constant";
 
 type CollectionListProps = {
   space: Space;
@@ -25,7 +26,7 @@ export function CollectionList({ space, listId, listName }: CollectionListProps)
 
   useEffect(() => {
     if (viewsError || objectsError) {
-      showToast(Toast.Style.Failure, "Failed to fetch objects", viewsError?.message || objectsError?.message);
+      showFailureToast(viewsError || objectsError, { title: "Failed to fetch latest data" });
     }
   }, [viewsError, objectsError]);
 
@@ -35,8 +36,8 @@ export function CollectionList({ space, listId, listName }: CollectionListProps)
       return processObject(object, false, mutateObjects);
     });
 
-  const resolveLayoutIcon = (layout: string) => {
-    switch (layout.toLowerCase()) {
+  const resolveLayoutIcon = (layout: ViewLayout) => {
+    switch (layout) {
       case ViewLayout.Grid:
         return { source: "icons/dataview/grid.svg" };
       case ViewLayout.List:
@@ -65,7 +66,12 @@ export function CollectionList({ space, listId, listName }: CollectionListProps)
       searchBarAccessory={
         <List.Dropdown tooltip="Change view" onChange={(newValue) => setViewId(newValue)}>
           {views.map((view) => (
-            <List.Dropdown.Item key={view.id} value={view.id} title={view.name} icon={resolveLayoutIcon(view.layout)} />
+            <List.Dropdown.Item
+              key={view.id}
+              value={view.id}
+              title={view.name}
+              icon={!isEmoji(view.name.split(" ")[0]) ? resolveLayoutIcon(view.layout) : undefined}
+            />
           ))}
         </List.Dropdown>
       }
@@ -85,12 +91,14 @@ export function CollectionList({ space, listId, listName }: CollectionListProps)
               subtitle={object.subtitle}
               accessories={object.accessories}
               mutate={object.mutate}
+              object={object.object}
               mutateViews={mutateViews}
               layout={object.layout}
               viewType={ViewType.objects}
               isGlobalSearch={false}
               isNoPinView={true}
               isPinned={object.isPinned}
+              searchText={searchText}
             />
           ))}
         </List.Section>
@@ -98,8 +106,8 @@ export function CollectionList({ space, listId, listName }: CollectionListProps)
         <EmptyViewObject
           title="No objects found"
           contextValues={{
-            space: space.id,
-            list: listId,
+            spaceId: space.id,
+            listId: listId,
             name: searchText,
           }}
         />

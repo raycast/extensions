@@ -1,9 +1,10 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { EmptyViewObject, ObjectActions, ObjectListItem, ViewType } from ".";
-import { useSearch, useTemplates } from "../hooks";
-import { Space, Template } from "../models";
-import { pluralize, processObject } from "../utils";
+import { EmptyViewObject, ObjectActions, ObjectListItem, ViewType } from "..";
+import { useSearch, useTemplates } from "../../hooks";
+import { Space, SpaceObject } from "../../models";
+import { pluralize, processObject } from "../../utils";
 
 type TemplatesListProps = {
   space: Space;
@@ -26,17 +27,17 @@ export function TemplateList({ space, typeId, isGlobalSearch, isPinned }: Templa
 
   useEffect(() => {
     if (templatesError) {
-      showToast(Toast.Style.Failure, "Failed to fetch templates", templatesError.message);
+      showFailureToast(templatesError, { title: "Failed to fetch templates" });
     }
   }, [templatesError]);
 
   useEffect(() => {
     if (objectsError) {
-      showToast(Toast.Style.Failure, "Failed to fetch objects", objectsError.message);
+      showFailureToast(objectsError, { title: "Failed to fetch objects" });
     }
   }, [objectsError]);
 
-  const filteredTemplates = templates?.filter((template: Template) =>
+  const filteredTemplates = templates?.filter((template: SpaceObject) =>
     template.name.toLowerCase().includes(searchText.toLowerCase()),
   );
 
@@ -60,7 +61,7 @@ export function TemplateList({ space, typeId, isGlobalSearch, isPinned }: Templa
           title={searchText ? "Search Results" : "Templates"}
           subtitle={`${pluralize(filteredTemplates.length, "template", { withNumber: true })}`}
         >
-          {filteredTemplates.map((template: Template) => (
+          {filteredTemplates.map((template: SpaceObject) => (
             <List.Item
               key={template.id}
               title={template.name}
@@ -71,11 +72,12 @@ export function TemplateList({ space, typeId, isGlobalSearch, isPinned }: Templa
                   objectId={template.id}
                   title={template.name}
                   mutateTemplates={mutateTemplates}
-                  layout={"basic"} // TODO: refactor to use correct layout
+                  layout={template.layout}
                   viewType={ViewType.templates}
                   isGlobalSearch={isGlobalSearch}
                   isNoPinView={true}
                   isPinned={isPinned}
+                  searchText={searchText}
                 />
               }
             />
@@ -98,11 +100,13 @@ export function TemplateList({ space, typeId, isGlobalSearch, isPinned }: Templa
               subtitle={object.subtitle}
               accessories={object.accessories}
               mutate={object.mutate}
+              object={object.object}
               layout={object.layout}
               viewType={ViewType.objects}
               isGlobalSearch={isGlobalSearch}
               isNoPinView={true}
               isPinned={object.isPinned}
+              searchText={searchText}
             />
           ))}
         </List.Section>
@@ -112,8 +116,8 @@ export function TemplateList({ space, typeId, isGlobalSearch, isPinned }: Templa
         <EmptyViewObject
           title="No templates or objects found"
           contextValues={{
-            space: space.id,
-            type: typeId,
+            spaceId: space.id,
+            typeId: typeId,
             name: searchText,
           }}
         />

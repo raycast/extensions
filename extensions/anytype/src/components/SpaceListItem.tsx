@@ -14,9 +14,10 @@ type SpaceListItemProps = {
   }[];
   mutate: MutatePromise<Space[]>[];
   isPinned: boolean;
+  searchText: string;
 };
 
-export function SpaceListItem({ space, icon, accessories, mutate, isPinned }: SpaceListItemProps) {
+export function SpaceListItem({ space, icon, accessories, mutate, isPinned, searchText }: SpaceListItemProps) {
   return (
     <List.Item
       key={space.id}
@@ -41,7 +42,7 @@ export function SpaceListItem({ space, icon, accessories, mutate, isPinned }: Sp
         }) || []),
       ]}
       icon={icon}
-      actions={<SpaceActions space={space} mutate={mutate} isPinned={isPinned} />}
+      actions={<SpaceActions space={space} mutate={mutate} isPinned={isPinned} searchText={searchText} />}
     />
   );
 }
