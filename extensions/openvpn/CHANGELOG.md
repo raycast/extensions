@@ -7,7 +7,7 @@
 ### ✨ New
 
 - The extension can now handle multiple profiles!
-- A couple of new command make it easy to connect/disconnect from one of your profile, or connect/disconnect from the last used profile
+- A couple of new command make it easy to connect/disconnect from one of your profiles, or connect/disconnect from the last used profile
 
 ### 💎 Improvements
 
