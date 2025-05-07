@@ -1,6 +1,6 @@
 # PromptStash Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-05-07
 
 - Added a preference to automatically insert the selected prompt into the text field when creating a new prompt.
 
