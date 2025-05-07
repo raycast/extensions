@@ -58,7 +58,7 @@ const sanitizeFileName = (name: string): string => {
   return name
     .trim()
     .replace(/\s+/g, "_")
-    .replace(/[<>:"\/\\|?*]/g, "_") // Исправлено: заменено на .replace(/[<>:"\\/?*|]/g, "_")
+    .replace(/[<>:"\\/?*|]/g, "_")
     .replace(/[^a-zA-Z0-9._-]/g, "");
 };
 
