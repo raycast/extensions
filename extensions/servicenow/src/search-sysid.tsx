@@ -47,7 +47,7 @@ export default async (props: LaunchProps) => {
 
   const callBack = (response: string) => {
     const answer = response.match(/###(.*)###/);
-    if (response.length == 0) showToast(Toast.Style.Failure, "Could not search for sys_id. (are you an Admin?)");
+    if (response.length === 0) showToast(Toast.Style.Failure, "Could not search for sys_id. (are you an Admin?)");
     else if (answer != null && answer[1]) {
       const table = answer[1].split("^")[0];
       const path = table + ".do?sys_id=" + sys_id;
