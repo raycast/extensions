@@ -35,6 +35,7 @@ export function getPreferences(): Preferences {
       scanDepth: isNaN(parsed) || parsed < 0 ? 10 : parsed,
       excludeDirectories: parseDirectoriesPreference(raycastPrefs.excludeDirectories),
     };
+    console.log("preferences", preferences);
 
     return preferences;
   } catch (error) {
@@ -52,11 +53,23 @@ export function getPreferences(): Preferences {
       scanDepth: 10,
       excludeDirectories: [
         resolveHomePath("~/Library"),
-        resolveHomePath("~/node_modules"),
-        resolveHomePath("~/.git"),
+        "node_modules",
+        ".git",
         resolveHomePath("~/Applications"),
         resolveHomePath("~/.npm"),
         resolveHomePath("~/.vscode"),
+        ".next", // Next.js build output
+        "dist", // Common build output directory
+        "build", // Common build output directory
+        ".cache", // Various build/cache directories
+        ".DS_Store", // macOS system files
+        "__pycache__", // Python cache
+        "target", // Rust/Maven build directory
+        "vendor", // Dependencies in many languages
+        "coverage", // Test coverage reports
+        "tmp", // Temporary files
+        ".tmp", // Another common temp directory
+        ".sass-cache", // SASS compilation cache
       ],
     };
   }

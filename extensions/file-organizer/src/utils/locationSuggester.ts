@@ -65,7 +65,7 @@ async function scanDirectory(
   if (
     excludeDirs.some((excludeDir) => {
       const resolvedExcludeDir = excludeDir.startsWith("~") ? excludeDir.replace("~", homedir()) : excludeDir;
-      return directory.startsWith(resolvedExcludeDir);
+      return directory.startsWith(resolvedExcludeDir) || path.basename(directory) === excludeDir; // Check if directory name matches exclude pattern
     })
   ) {
     return suggestions;
@@ -90,7 +90,8 @@ async function scanDirectory(
       fileInfo,
     );
 
-    if (score > INCLUSION_THRESHOLD) {
+    // Only add the current directory if we're at the starting level (depth 1 or higher)
+    if (score > INCLUSION_THRESHOLD && maxDepth > 0) {
       suggestions.push({
         path: directory,
         confidence: score,
@@ -98,8 +99,11 @@ async function scanDirectory(
       });
     }
 
-    // Recursively scan subdirectories (limited by depth)
-    if (currentDepth < maxDepth) {
+    // Only scan subdirectories if we haven't reached max depth
+    // maxDepth = 0: no scanning
+    // maxDepth = 1: only starting directories
+    // maxDepth = 2: starting directories + one level down
+    if (currentDepth < maxDepth - 1) {
       for (const subDir of subDirs) {
         // Pass the current directory's score as the parent score for subdirectories
         const subDirSuggestions = await scanDirectory(subDir, fileInfo, maxDepth, excludeDirs, currentDepth + 1, score);

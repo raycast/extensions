@@ -39,7 +39,7 @@
       "title": "Exclude Directories (comma-separated)",
       "description": "Directories to exclude from scanning (comma-separated)",
       "type": "textfield",
-      "default": "~/Library,~/node_modules,~/.git,~/Applications,~/.npm,~/.vscode",
+      "default": "node_modules,.git,.vscode,.next,dist,build,.cache,.idea,.DS_Store,__pycache__,target,vendor,coverage,.env,tmp,.tmp,.sass-cache",
       "required": true
     }
   ],
