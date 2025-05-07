@@ -61,11 +61,7 @@ export function extractInstalledPorts(input: string): string[] {
   const lines = input.split("\n");
   for (const line of lines) {
     const lower = line.toLowerCase();
-    if (
-      lower.includes("no") &&
-      lower.includes("ports") &&
-      lower.includes("installed")
-    ) return [];
+    if (lower.includes("no") && lower.includes("ports") && lower.includes("installed")) return [];
   }
 
   return lines
