@@ -14,11 +14,13 @@ export const formatDateTimeWithCountry = (
   locale: string,
   options: Intl.DateTimeFormatOptions,
 ): { name: string; value: string } => {
-  return {name : `${country.name} Time (${country.timezoneName})`, value: `${date.toLocaleString(locale, {
-    ...options,
-    timeZone: country.ianaTimeZone,
-  })}` }
-
+  return {
+    name: `${country.name} Time (${country.timezoneName})`,
+    value: `${date.toLocaleString(locale, {
+      ...options,
+      timeZone: country.ianaTimeZone,
+    })}`,
+  };
 };
 
 /**
