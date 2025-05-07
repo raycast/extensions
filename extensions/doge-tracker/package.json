@@ -47,15 +47,14 @@
       "title": "View Leases",
       "description": "Get lease savings",
       "mode": "view"
-    }
-  ,
+    },
     {
       "name": "view-payments",
       "title": "View Payments",
       "description": "Get payment line items.",
       "mode": "view"
     }
-      ],
+  ],
   "dependencies": {
     "@raycast/api": "^1.94.3",
     "@raycast/utils": "^1.17.0"
