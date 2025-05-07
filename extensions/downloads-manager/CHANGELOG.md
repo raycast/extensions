@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Add reload action] - {PR_MERGE_DATE}
+## [Add reload action] - 2025-05-07
 
 - Added a reload action to fetch the latest downloads in the `Manage Downloads` command.
 
