@@ -2,7 +2,7 @@
 
 ## [Add repository filtering] - {PR_MERGE_DATE}
 
-- my-issues, my-pull-request and menu counterparts can now specify repositories to include / exclude
+- my-issues, my-pull-requests and menu counterparts can now specify repositories to include / exclude
 
 ## [Filter recently closed PRs by last update date] - 2025-04-16
 
