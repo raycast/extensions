@@ -56,5 +56,5 @@ function urlFor(gemName: string): string {
     pattern = preferences.publicGemDocUrlPattern;
   }
 
-  return pattern.replaceAll("%gem%", gemName);
+  return pattern!.replaceAll("%gem%", gemName);
 }
