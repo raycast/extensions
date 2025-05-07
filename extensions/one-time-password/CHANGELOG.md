@@ -1,6 +1,6 @@
 # One Time Password Changelog
 
-## {PR_MERGE_DATE}
+## 2025-05-07
 
 - Added Primary Action switch between Copy to Clipboard and Paste to Active App.
 
