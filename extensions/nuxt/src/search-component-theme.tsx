@@ -1,7 +1,7 @@
-import { LaunchProps, getSelectedText } from "@raycast/api";
+import { LaunchProps, Toast, getSelectedText, showToast } from "@raycast/api";
 import { openDocumentation } from "./utils/component";
 import { sanitizeComponentName, getComponentInfo } from "./utils/components";
-import { getExtensionPreferences, showFailureToast, handleCommandError } from "./utils/commands";
+import { getExtensionPreferences, handleCommandError } from "./utils/commands";
 
 /**
  * Main function to handle component theme search
@@ -13,7 +13,7 @@ export default async function SearchComponentTheme(props: LaunchProps<{ argument
     const name = props.arguments?.componentName ?? (await getSelectedText());
 
     if (!name) {
-      await showFailureToast("Please select a component name");
+      await showToast(Toast.Style.Failure, "Please select a component name");
       return;
     }
 
@@ -23,7 +23,7 @@ export default async function SearchComponentTheme(props: LaunchProps<{ argument
     const componentInfo = getComponentInfo(sanitizedName);
 
     if (!componentInfo.exists) {
-      await showFailureToast("Component not found");
+      await showToast(Toast.Style.Failure, "Component not found");
       return;
     }
 
