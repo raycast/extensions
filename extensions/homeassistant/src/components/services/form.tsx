@@ -1,10 +1,10 @@
-import { Form } from "@raycast/api";
-import { getNameOfHAServiceField, HAServiceField, HAServiceTargetArea, HAServiceTargetEntity } from "./utils";
-import { State } from "@lib/haapi";
-import { getFriendlyName } from "@lib/utils";
-import { parse } from "yaml";
 import { HAArea } from "@components/area/utils";
 import { HADevice } from "@components/device/utils";
+import { State } from "@lib/haapi";
+import { getFriendlyName } from "@lib/utils";
+import { Form } from "@raycast/api";
+import { parse } from "yaml";
+import { getNameOfHAServiceField, HAServiceField, HAServiceTargetArea, HAServiceTargetEntity } from "./utils";
 
 export interface ServiceFormFieldEntitiesTagPickerProps extends Form.TagPicker.Props {
   field: HAServiceField;
@@ -77,7 +77,10 @@ export function ServiceFormFieldObject({ id, field, value, ...restProps }: Servi
       if (value) {
         parse(value);
       }
-    } catch (error) {
+    } catch (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      error
+    ) {
       return "Invalid yaml";
     }
   };

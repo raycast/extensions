@@ -70,7 +70,7 @@ export function QueryWorldListLayout() {
                 index={index}
                 currentTime={currentTime}
                 timezone={value}
-                detailLoading={detailLoading}
+                detailLoading={false}
                 starTimezones={starTimezones}
                 mutate={mutate}
                 showDetailMutate={showDetailMutate}

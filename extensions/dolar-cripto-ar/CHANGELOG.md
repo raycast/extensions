@@ -1,5 +1,11 @@
 # argy-usd Changelog
 
+## [1.0.4] - 2025-04-30
+
+### Changed
+
+- **Official dollar exchange added**: The official dollar exchange of Argentina was added.
+
 ## [1.0.3] - 2024-10-24
 
 ### Changed

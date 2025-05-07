@@ -1,13 +1,12 @@
 import { Action, ActionPanel, Detail, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useAuth } from "../../lib/use-auth";
 import { User } from "@supabase/supabase-js";
-import React from "react";
 
 export default function AuthenticatedView({
   component: Component,
 }: {
   component: React.ComponentType<{ user: User }>;
-}): React.ReactElement | null {
+}) {
   const { data: user, isLoading, error } = useAuth();
 
   const errorMessage = error?.message.includes("Invalid login credentials")
@@ -38,6 +37,4 @@ export default function AuthenticatedView({
       </List>
     );
   }
-
-  return null;
 }
