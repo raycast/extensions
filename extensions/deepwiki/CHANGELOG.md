@@ -1,6 +1,6 @@
 # Deepwiki Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-05-07
 
 - Initial release with three commands:
   - **Crawl DeepWiki Docs**: This command crawls all documentation pages for a specified DeepWiki repository (e.g., `microsoft/vscode`) and copies the combined content to the clipboard in a Markdown format suitable for LLMs.
