@@ -4,9 +4,11 @@ import { countries, formats } from "./constants";
 import { getDateFromUnixTime, validateNumber } from "./utils/datetime";
 import { copyToClipboardWithToast } from "./utils/clipboard";
 import { ConvertTimestampFormValues } from "./types";
+import { useState } from "react";
 
 export default function Command() {
-  const { handleSubmit, itemProps, values } = useForm<ConvertTimestampFormValues>({
+  const [resultText, setResultText] = useState<string>("Please enter a UNIX timestamp and press the convert button");
+  const { handleSubmit, itemProps } = useForm<ConvertTimestampFormValues>({
     initialValues: {
       unixTime: "",
       country: countries[0].id,
@@ -26,20 +28,10 @@ export default function Command() {
       }
       const date = getDateFromUnixTime(Number(values.unixTime));
       const result = format.format(date, country);
-      copyToClipboardWithToast(result.split(": ")[1] ?? "", "Datetime copied!");
+      copyToClipboardWithToast(result.value, "Datetime copied!");
+      setResultText(result.name + ": " + result.value);
     },
   });
-
-  // Preview of the result
-  const resultText = (() => {
-    const country = countries.find((c) => c.id === values.country);
-    const format = formats.find((f) => f.id === values.format);
-    if (!country || !format || !values.unixTime || isNaN(Number(values.unixTime))) {
-      return "Please enter a UNIX timestamp and press the convert button";
-    }
-    const date = getDateFromUnixTime(Number(values.unixTime));
-    return format.format(date, country);
-  })();
 
   return (
     <Form

@@ -18,7 +18,7 @@ export type Format = {
   /**
    * Function to generate a display string from date and country information
    */
-  format: (date: Date, country: Country) => string;
+  format: (date: Date, country: Country) => { name: string; value: string };
 };
 
 /**

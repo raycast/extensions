@@ -95,7 +95,7 @@ export const formats: Format[] = [
      * @returns Formatted string
      */
     format: (date, country) => {
-      return `${country.name} Time (${country.timezoneName}): ${date.toISOString()}`;
+      return { name: `${country.name} Time (${country.timezoneName})`, value: date.toISOString() };
     },
   },
   {
@@ -107,20 +107,16 @@ export const formats: Format[] = [
      * @param country Country information
      * @returns Formatted string
      */
-    format: (date, country) => {
-      const options: Intl.DateTimeFormatOptions = {
+    format: (date, country) =>
+      formatDateTimeWithCountry(date, country, "en-US", {
         year: "numeric",
-        month: "long",
-        day: "numeric",
-        weekday: "long",
+        month: "2-digit",
+        day: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
-        timeZoneName: "short",
+        weekday: "short",
         hour12: true,
-        timeZone: country.ianaTimeZone,
-      };
-      return `${country.name} Time (${country.timezoneName}): ${date.toLocaleString("en-US", options)}`;
-    },
+      }),
   },
 ];

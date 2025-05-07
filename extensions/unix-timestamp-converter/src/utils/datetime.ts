@@ -13,11 +13,12 @@ export const formatDateTimeWithCountry = (
   country: Country,
   locale: string,
   options: Intl.DateTimeFormatOptions,
-): string => {
-  return `${country.name} Time (${country.timezoneName}): ${date.toLocaleString(locale, {
+): { name: string; value: string } => {
+  return {name : `${country.name} Time (${country.timezoneName})`, value: `${date.toLocaleString(locale, {
     ...options,
     timeZone: country.ianaTimeZone,
-  })}`;
+  })}` }
+
 };
 
 /**
