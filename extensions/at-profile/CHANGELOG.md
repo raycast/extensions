@@ -1,6 +1,6 @@
 # @ Profile Changelog
 
-## [Add Social Platforms & Sort List] - {PR_MERGE_DATE}
+## [Add Social Platforms & Sort List] - 2025-05-07
 
 - Add new social platforms: Behance, CodePen, Dev.to, Dribbble, Medium, Product Hunt, Spotify
 - Reorder all platforms alphabetically for better UX and consistency
