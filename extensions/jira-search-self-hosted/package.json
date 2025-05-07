@@ -27,7 +27,7 @@
       "name": "open-issues",
       "title": "Open Issues",
       "subtitle": "Jira Search (Self-hosted)",
-      "description": "Search Jira issues assinged to current user by text, type and project",
+      "description": "Search Jira issues assigned to current user by text, type and project",
       "mode": "view"
     },
     {
