@@ -1,6 +1,6 @@
 # Nuxt Extension Changelog
 
-## [Nuxt Modules Features] - {PR_MERGE_DATE}
+## [Nuxt Modules Features] - 2025-05-07
 
 - Renamed from "Nuxt UI for Raycast" to "Nuxt for Raycast" to reflect broader scope
 - Added new module-related features:
