@@ -1,6 +1,6 @@
 # raycast-ollama Changelog
 
-## [Improvement and Fix] - {PR_MERGE_DATE}
+## [Improvement and Fix] - 2025-05-07
 
 - [Improvement] Implemented support for Mcp Server. README.md for more information on how to use it.
 - [Improvement] On Command "Manage Models" and "Loaded Models" opening last selected server is the default choice.
