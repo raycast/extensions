@@ -291,7 +291,7 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
         title: "Copy Path to Clipboard",
         shortcut: { modifiers: ["cmd", "shift"], key: "c" },
         onAction: async () => {
-          await Action.CopyToClipboard(outputFilePath);
+          await Action.CopyToClipboard({ content: outputFilePath });
           await showToast(Toast.Style.Success, "Path Copied!");
         },
       };
