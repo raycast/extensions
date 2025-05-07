@@ -27,7 +27,14 @@ export default async (props: LaunchProps) => {
     );
   } else {
     const selectedInstance = await LocalStorage.getItem<string>("selected-instance");
-    if (selectedInstance) instance = JSON.parse(selectedInstance) as Instance;
+    if (selectedInstance) {
+      try {
+        instance = JSON.parse(selectedInstance) as Instance;
+      } catch (error) {
+        showFailureToast(error, { title: "Could not parse selected instance" });
+        return;
+      }
+    }
   }
 
   if (!instance) {
