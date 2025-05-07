@@ -1,15 +1,15 @@
-import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, launchCommand, LaunchType, open } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import {
+  getBoundedPreferenceNumber,
   MenuBarItem,
   MenuBarItemConfigureCommand,
   MenuBarRoot,
   MenuBarSection,
-  getBoundedPreferenceNumber,
 } from "./components/Menu";
 import { SortMenuBarAction } from "./components/SortAction";
-import { ISSUE_DEFAULT_SORT_QUERY, ISSUE_SORT_TYPES_TO_QUERIES, getIssueStatus } from "./helpers/issue";
+import { getIssueStatus, ISSUE_DEFAULT_SORT_QUERY, ISSUE_SORT_TYPES_TO_QUERIES } from "./helpers/issue";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyIssues } from "./hooks/useMyIssues";
 
@@ -43,7 +43,7 @@ function MyIssuesMenu() {
     showMentioned,
     showRecentlyClosed,
     filterMode: repositoryFilterMode,
-    repositoryList: repositoryList?.split(",") || [],
+    repositoryList: repositoryList?.split(",").map((r) => r.trim()) || [],
   });
 
   const issuesCount = sections?.reduce((acc, section) => acc + (section.issues ?? []).length, 0);

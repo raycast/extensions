@@ -31,7 +31,7 @@ function MyIssues() {
     showMentioned,
     showRecentlyClosed,
     filterMode: repositoryFilterMode,
-    repositoryList: repositoryList?.split(",") || [],
+    repositoryList: repositoryList?.split(",").map((r) => r.trim()) || [],
   });
 
   return (
