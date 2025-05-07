@@ -1,9 +1,5 @@
 import { showToast, Toast, Clipboard, getPreferenceValues } from "@raycast/api";
-
-interface Preferences {
-  prefix: string;
-  version: string;
-}
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * Get the preferences for the extension
@@ -17,13 +13,6 @@ export function getExtensionPreferences(): Preferences {
  */
 export async function showSuccessToast(message: string): Promise<void> {
   await showToast(Toast.Style.Success, message);
-}
-
-/**
- * Show a failure toast with a message
- */
-export async function showFailureToast(message: string): Promise<void> {
-  await showToast(Toast.Style.Failure, message);
 }
 
 /**
@@ -41,7 +30,7 @@ export async function copyToClipboard(text: string, successMessage: string = "Co
     await Clipboard.copy(text);
     await showSuccessToast(successMessage);
   } catch (error) {
-    await showFailureToast("Failed to copy to clipboard");
+    await showFailureToast(error, { title: "Failed to copy to clipboard" });
   }
 }
 

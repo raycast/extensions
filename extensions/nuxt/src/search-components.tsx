@@ -8,7 +8,7 @@ import {
   openDocumentation,
 } from "./utils/component";
 import { getAllComponents, filterComponents, sortComponentsByName } from "./utils/search";
-import { showFailureToast } from "./utils/commands";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -57,7 +57,7 @@ export default function Command() {
                     try {
                       await openDocumentation(component, false);
                     } catch (error) {
-                      await showFailureToast("Failed to open documentation");
+                      await showFailureToast(error, { title: "Failed to open documentation" });
                     }
                   }}
                 />
@@ -68,7 +68,7 @@ export default function Command() {
                     try {
                       await openDocumentation(component, true);
                     } catch (error) {
-                      await showFailureToast("Failed to open documentation");
+                      await showFailureToast(error, { title: "Failed to open documentation" });
                     }
                   }}
                 />
