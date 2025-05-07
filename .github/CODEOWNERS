@@ -402,6 +402,7 @@
 /extensions/deepcast                                                @mooxl @peter-gy @Popalay @MonsterDeveloper @YamenSharaf @EvanZhouDev @erics118 @riadhrebei @ishassan
 /extensions/deepl-api-usage                                         @DophinL @pernielsentikaer
 /extensions/deepseeker                                              @ViGeng @degouville
+/extensions/deepwiki                                                @viveknair
 /extensions/defbro                                                  @jfernandogt
 /extensions/defichain-dobby                                         @adrian-schnell
 /extensions/defichain-lottery                                       @adrian-schnell @pernielsentikaer
@@ -1220,7 +1221,7 @@
 /extensions/omnivore                                                @KarolusD
 /extensions/one-tab-group                                           @xiaoluoboding
 /extensions/one-thing                                               @pernielsentikaer @mathieudutour @thomaslombart @KELiON
-/extensions/one-time-password                                       @lacherogwu @SoulEvans07 @BalliAsghar
+/extensions/one-time-password                                       @lacherogwu @SoulEvans07 @BalliAsghar @midskyey
 /extensions/one-time-secret                                         @LarsaSolidor
 /extensions/onelook-thesaurus                                       @FelipeCortez
 /extensions/onenote                                                 @alewandows
