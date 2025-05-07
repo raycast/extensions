@@ -28,5 +28,5 @@ export default async function Command() {
 
   if (getPreferenceValues().deleteExport == true) {
     deleteEnteExport();
-  };
+  }
 }
