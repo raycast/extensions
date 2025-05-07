@@ -4,6 +4,7 @@ import { useFetch } from "@raycast/utils";
 interface Preferences {
   gemNamesUrl: string;
   publicGemDocUrlPattern?: string;
+  privateGemDocUrlPattern?: string;
   privateGemPrefix?: string;
   privateGems?: string;
 }
@@ -43,13 +44,17 @@ function urlFor(gemName: string): string {
 
   const privateGems = (preferences.privateGems ?? "").split(",");
 
+  let pattern = null;
+
   if (
-    preferences.publicGemDocUrlPattern &&
+    preferences.privateGemDocUrlPattern &&
     ((preferences.privateGemPrefix && gemName.startsWith(preferences.privateGemPrefix)) ||
       privateGems.includes(gemName))
   ) {
-    return preferences.privateGemDocUrlPattern.replaceAll("%gem%", gemName);
+    pattern = preferences.privateGemDocUrlPattern;
   } else {
-    return `https://gem.wtf/${gemName}`;
+    pattern = preferences.publicGemDocUrlPattern;
   }
+
+  return pattern.replaceAll("%gem%", gemName);
 }
