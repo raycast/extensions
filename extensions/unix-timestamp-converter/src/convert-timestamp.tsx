@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm, FormValidation, showFailureToast } from "@raycast/utils";
 import { countries, formats } from "./constants";
 import { getDateFromUnixTime, validateNumber } from "./utils/datetime";
 import { copyToClipboardWithToast } from "./utils/clipboard";
@@ -20,7 +20,10 @@ export default function Command() {
     onSubmit(values) {
       const country = countries.find((c) => c.id === values.country);
       const format = formats.find((f) => f.id === values.format);
-      if (!country || !format) return;
+      if (!country || !format) {
+        showFailureToast(new Error("Invalid country or format selected"));
+        return;
+      }
       const date = getDateFromUnixTime(Number(values.unixTime));
       const result = format.format(date, country);
       copyToClipboardWithToast(result.split(": ")[1] ?? "", "Datetime copied!");
