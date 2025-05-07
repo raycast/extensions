@@ -16,7 +16,7 @@ export default function Command() {
     keepPreviousData: true,
     parseResponse: async (response): Promise<string[]> => {
       return response.text().then((text) => {
-        return text.split("\n").filter((name) => name != "---");
+        return text.split("\n").filter((name) => name !== "---");
       });
     },
   });
@@ -42,7 +42,7 @@ export default function Command() {
 function urlFor(gemName: string): string {
   const preferences = getPreferenceValues<Preferences>();
 
-  const privateGems = (preferences.privateGems ?? "").split(",");
+  const privateGems = (preferences.privateGems ?? "").split(",").map(name => name.trim());
 
   let pattern = null;
 
