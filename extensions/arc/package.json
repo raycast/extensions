@@ -39,7 +39,9 @@
     "geb",
     "ridemountainpig",
     "nebbles",
-    "alanxmay"
+    "alanxmay",
+    "gdsmith",
+    "josephlou"
   ],
   "pastContributors": [
     "pomdtr",
@@ -456,7 +458,7 @@
     }
   ],
   "ai": {
-    "instructions": "Arc is a web browser. It contains spaces, which group tabs together. Most likely, the user assumes asking questinos about the active space if they don't specify otherwise",
+    "instructions": "Arc is a web browser. It contains spaces, which group tabs together. Most likely, the user assumes asking questions about the active space if they don't specify otherwise",
     "evals": [
       {
         "input": "@arc open a new window",
@@ -1129,5 +1131,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

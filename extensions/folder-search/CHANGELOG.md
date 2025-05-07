@@ -1,5 +1,22 @@
 # Folder Search Changelog
 
+## [Fixes & Improvements] - 2025-05-05
+- **improved** Error handling by replacing showToast with showFailureToast for better error reporting
+- **fixed** Type issues with selectedItemId in List components
+- **improved** Code organization and type safety in useFolderSearch hook
+- **updated** Dependencies to latest versions (@raycast/api@1.81.2, @raycast/utils@1.19.1)
+- **added** Filter option for Library folders
+- **improved** Date handling and formatting
+- **refactored** useFolderSearch hook to simplify state management
+- **removed** Unnecessary debounce logic and state variables
+- **streamlined** Preference saving mechanism
+- **enhanced** User navigation in folder search actions
+- **improved** Search execution conditions and performance
+
+## [Fixes] - 2025-04-12
+- **fixed** Search results flickering when using fallback command by adding 150ms debounce to search updates
+- **improved** Search text handling by removing fixDoubleConcat workaround and relying on debouncing to handle rapid text changes
+
 ## [New Features] - 2025-03-13
 
 - **added** 'Move' action for selected finder items

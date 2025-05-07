@@ -15,7 +15,8 @@
     "StevenRCE0",
     "ridemountainpig",
     "ViGeng",
-    "dante"
+    "dante",
+    "5z99tsb75z"
   ],
   "categories": [
     "Applications",
@@ -79,6 +80,15 @@
       "title": "Check for New Mail",
       "description": "Check for new mail for all accounts.",
       "mode": "no-view"
+    },
+    {
+      "name": "paste-latest-otp-code",
+      "title": "Paste Latest OTP Code",
+      "description": "Paste the latest OTP code from your emails.",
+      "mode": "no-view",
+      "keywords": [
+        "2fa"
+      ]
     },
     {
       "name": "compose-new-message",
@@ -197,5 +207,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

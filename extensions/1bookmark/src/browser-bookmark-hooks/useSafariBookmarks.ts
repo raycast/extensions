@@ -5,6 +5,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { readFile } from "simple-plist";
 
 import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
+import { useMemo } from "react";
 
 const PLIST_PATH = `${homedir()}/Library/Safari/Bookmarks.plist`;
 
@@ -107,16 +108,24 @@ export default function useSafariBookmarks(enabled: boolean) {
     },
     [enabled],
   );
-  const bookmarks = data ? getBookmarks(data) : [];
-  const folders = data ? getFolders(data) : [];
+  const bookmarks = useMemo(() => (data ? getBookmarks(data) : []), [data]);
+  const folders = useMemo(() => (data ? getFolders(data) : []), [data]);
 
   return {
-    bookmarks: bookmarks.map((bookmark) => {
-      return { ...bookmark, browser: BROWSERS_BUNDLE_ID.safari };
-    }),
-    folders: folders.map((folder) => {
-      return { ...folder, browser: BROWSERS_BUNDLE_ID.safari };
-    }),
+    bookmarks: useMemo(
+      () =>
+        bookmarks.map((bookmark) => {
+          return { ...bookmark, browser: BROWSERS_BUNDLE_ID.safari };
+        }),
+      [bookmarks],
+    ),
+    folders: useMemo(
+      () =>
+        folders.map((folder) => {
+          return { ...folder, browser: BROWSERS_BUNDLE_ID.safari };
+        }),
+      [folders],
+    ),
     isLoading,
     mutate,
     error,

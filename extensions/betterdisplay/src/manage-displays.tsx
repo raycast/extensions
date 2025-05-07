@@ -12,8 +12,12 @@ import {
   popToRoot,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { fetchDisplays, fetchDisplayStatus, fetchDisplayResolution, fetchMainDisplay, Display } from "./utils";
 import {
+  fetchDisplays,
+  fetchDisplayStatus,
+  fetchDisplayResolution,
+  fetchMainDisplay,
+  Display,
   toggleDisplay,
   togglePIP,
   increaseBrightness,
@@ -22,7 +26,7 @@ import {
   decreaseContrast,
   availabilityBrightness,
   availabilityContrast,
-} from "./actions";
+} from "./commands";
 import ResolutionList from "./list-resolutions";
 import events from "./events";
 

@@ -10,7 +10,8 @@
     "otatoPotato",
     "shelken",
     "emiara",
-    "ViGeng"
+    "ViGeng",
+    "alschetinin"
   ],
   "license": "MIT",
   "preferences": [
@@ -58,6 +59,10 @@
         {
           "title": "Hyper",
           "value": "Hyper"
+        },
+        {
+          "title": "Ghostty",
+          "value": "Ghostty"
         }
       ],
       "default": "Terminal"
@@ -125,5 +130,8 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
