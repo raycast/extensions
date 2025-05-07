@@ -13,7 +13,13 @@ export default async (props: LaunchProps) => {
 
   let instance;
   if (instanceName) {
-    const instanceProfiles = JSON.parse(item) as Instance[];
+    let instanceProfiles;
+    try {
+      instanceProfiles = JSON.parse(item) as Instance[];
+    } catch (error) {
+      showFailureToast(error, { title: "Could not parse saved instances" });
+      return;
+    }
     instance = instanceProfiles.find(
       (i: Instance) =>
         i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
