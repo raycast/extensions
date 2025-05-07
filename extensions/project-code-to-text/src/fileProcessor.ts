@@ -22,7 +22,9 @@ import { Stats } from "fs";
  * @param projectRoot The absolute path to the project root directory.
  * @returns An object containing the `ignore` instance and a boolean indicating if .gitignore was used.
  */
-async function loadIgnoreFilter(projectRoot: string): Promise<{ filter: ReturnType<typeof ignore>; gitignoreUsed: boolean }> {
+async function loadIgnoreFilter(
+  projectRoot: string
+): Promise<{ filter: ReturnType<typeof ignore>; gitignoreUsed: boolean }> {
   // Start with hardcoded base ignore patterns
   const ig = ignore().add(HARDCODED_BASE_IGNORE_PATTERNS as string[]);
 
@@ -133,9 +135,12 @@ async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes:
       return content;
     } catch (eLatin1) {
       console.error(
-        `Failed to read file ${filePath} with both UTF-8 and Latin-1. Error: ${(eLatin1 as Error).message}`,
+        `Failed to read file ${filePath} with both UTF-8 and Latin-1. Error: ${(eLatin1 as Error).message}`
       );
-      return `[File content omitted: Could not read file content (tried UTF-8 and Latin-1). Size: ${fileSizeKB} KB. Error: ${(eLatin1 as Error).message.substring(0, 100)}]`;
+      return `[File content omitted: Could not read file content (tried UTF-8 and Latin-1). Size: ${fileSizeKB} KB. Error: ${(eLatin1 as Error).message.substring(
+        0,
+        100
+      )}]`;
     }
   }
 }
@@ -225,7 +230,7 @@ async function processDirectoryRecursive(options: ProcessDirectoryOptions): Prom
  */
 export async function generateProjectCodeString(
   config: FileProcessorConfig,
-  onProgress?: (progress: { message: string; details?: string }) => void,
+  onProgress?: (progress: { message: string; details?: string }) => void
 ): Promise<string> {
   const { projectDirectory, maxFileSizeBytes, includeAiInstructions } = config;
   const projectRoot = path.resolve(projectDirectory);
