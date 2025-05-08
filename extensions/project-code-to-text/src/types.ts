@@ -21,16 +21,23 @@ export interface ProjectEntry {
 }
 
 /**
+ * Information about the progress of file processing.
+ */
+export interface ProgressInfo {
+  scannedPath: string;
+  filesCollected: number;
+}
+
+/**
  * Options for processing a directory recursively.
  * @internal
  */
 export interface ProcessDirectoryOptions {
   projectRoot: string;
   currentPath: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- External library type
-  ignoreFilter: any; // Instance of 'ignore' class from the 'ignore' library
+  ignoreFilter: ReturnType<typeof ignore>;
   maxFileSizeBytes: number;
-  onProgress?: (progress: ProgressInfo) => void;
+  onProgress?: (info: ProgressInfo) => void;
 }
 
 /**
