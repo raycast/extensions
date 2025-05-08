@@ -410,6 +410,14 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       },
     },
   },
+  {
+    name: "nuxt",
+    title: "Nuxt",
+    description:
+      "Official Nuxt MCP server enabling module search and NuxtUI integration",
+    icon: "nuxt.svg",
+    homepage: "https://mcp.nuxt.com/",
+  }
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
@@ -599,5 +607,5 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         MONDAY_WORKSPACE_NAME: "your-monday-workspace-name",
       },
     },
-  },
+  }
 ];
