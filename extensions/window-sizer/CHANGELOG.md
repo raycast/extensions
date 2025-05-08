@@ -1,6 +1,5 @@
 # Window Sizer Changelog
 
-
 ## [Fixes] - {PR_MERGE_DATE}
 
 - Fix the delete icon tooltip text on custom size list items
