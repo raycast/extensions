@@ -1,6 +1,10 @@
 # Window Sizer Changelog
 
-## Update Extension Icon] - 2025-05-07
+## [Fixes] - 2025-05-08
+
+- Fix the delete icon tooltip text on custom size list items
+
+## [Update Extension Icon] - 2025-05-07
 
 - Update extension icon and screenshots
 
