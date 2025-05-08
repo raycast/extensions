@@ -288,7 +288,7 @@ const Command: FC = () => {
               <ActionPanel>
                 <Action
                   title="Open Preferences"
-                  onAction={() => push(<PreferencesView />)}
+                  onAction={() => push(<PreferencesView key={Date.now()} />)}
                   icon={Icon.Gear}
                 />
               </ActionPanel>
