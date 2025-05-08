@@ -12,6 +12,40 @@ export interface NodeModulesItem {
   size: number;
 }
 
+async function calculateDirectorySize(directoryPath: string): Promise<number> {
+  let totalSize = 0;
+  let entries;
+  try {
+    entries = await fs.readdir(directoryPath, { withFileTypes: true });
+  } catch (e) {
+    // Log error if directory cannot be read, e.g. permission denied
+    console.warn(`NodeModuleService: Could not read directory ${directoryPath} for size calculation:`, e);
+    return 0; // Return 0 as size cannot be determined for this path
+  }
+
+  for (const entry of entries) {
+    const fullPath = path.join(directoryPath, entry.name);
+
+    // Skip symbolic links to avoid potential issues like double counting or infinite loops
+    if (entry.isSymbolicLink()) {
+      continue;
+    }
+
+    if (entry.isFile()) {
+      try {
+        const stats = await fs.stat(fullPath);
+        totalSize += stats.size;
+      } catch (e) {
+        // Log error if file cannot be stated, but continue with other files
+        console.warn(`NodeModuleService: Could not stat file ${fullPath} during size calculation:`, e);
+      }
+    } else if (entry.isDirectory()) {
+      totalSize += await calculateDirectorySize(fullPath); // Recursive call for subdirectories
+    }
+  }
+  return totalSize;
+}
+
 function validateRootFolder(selectedRoot: string): boolean {
   if (!selectedRoot) return false;
   try {
@@ -69,21 +103,38 @@ export class NodeModuleService {
     const validPaths: Entry[] = modulePaths.filter((entry) => !isDangerous(entry.path));
     console.debug("NodeModuleService: fast-glob found " + validPaths.length + " non-dangerous node_modules paths.");
 
-    const successfullyProcessedItems: NodeModulesItem[] = validPaths
-      .map((entry) => {
-        const stats = entry.stats;
-        if (!stats) {
-          console.warn("NodeModuleService: Entry missing stats:", entry.path);
-          return null;
-        }
+    const modulePromises = validPaths.map(async (entry) => {
+      const stats = entry.stats;
+      if (!stats) {
+        console.warn("NodeModuleService: Entry missing stats:", entry.path);
+        return null;
+      }
+
+      const { data: calculatedSize, error: sizeError } = await tryCatch(calculateDirectorySize(entry.path));
+
+      if (sizeError) {
+        console.error(`NodeModuleService: Failed to calculate size for ${entry.path}:`, sizeError);
+        // Use 0 for size if calculation failed
         return {
           id: entry.path,
           title: entry.path,
           lastModified: stats.mtime,
-          size: stats.size,
+          size: 0,
         };
-      })
-      .filter((item) => item !== null) as NodeModulesItem[];
+      }
+
+      return {
+        id: entry.path,
+        title: entry.path,
+        lastModified: stats.mtime,
+        size: calculatedSize ?? 0,
+      };
+    });
+
+    const processedItemsResults = await Promise.all(modulePromises);
+    const successfullyProcessedItems: NodeModulesItem[] = processedItemsResults.filter(
+      (item): item is NodeModulesItem => item !== null,
+    );
 
     successfullyProcessedItems.sort((a, b) => b.size - a.size);
     console.debug("NodeModuleService: Found " + successfullyProcessedItems.length + " modules.");
