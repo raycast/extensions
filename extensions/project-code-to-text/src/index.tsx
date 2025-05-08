@@ -28,7 +28,7 @@ import type { FileProcessorConfig } from "./types";
  * Currently not using any specific launch context properties here directly,
  * but good to have for potential future use.
  */
-type CommandLaunchProps = LaunchProps<{ arguments: LaunchType.View }>;
+type CommandLaunchProps = LaunchProps;
 
 /**
  * Represents the overall state of the command's UI and logic.
