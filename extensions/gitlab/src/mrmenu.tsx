@@ -32,7 +32,11 @@ async function launchAssignedMergeRequests(): Promise<void> {
 
 async function launchCreatedMergeRequests(): Promise<void> {
   try {
-    return launchCommand({ name: "mr_my", type: LaunchType.UserInitiated, arguments: { scope: MRScope.created_by_me } });
+    return launchCommand({
+      name: "mr_my",
+      type: LaunchType.UserInitiated,
+      arguments: { scope: MRScope.created_by_me },
+    });
   } catch (error) {
     showErrorToast(getErrorMessage(error), "Could not open My Merge Requests Command");
   }
@@ -49,8 +53,11 @@ function getShowItemsCountPreference(): boolean {
 
 function getLabelFilterPreference(preferenceName: string): string[] {
   const prefs = getPreferenceValues();
-  const labelsString = prefs[preferenceName] as string || "";
-  return labelsString.split(",").map((label) => label.trim()).filter((label) => label.length > 0);
+  const labelsString = (prefs[preferenceName] as string) || "";
+  return labelsString
+    .split(",")
+    .map((label) => label.trim())
+    .filter((label) => label.length > 0);
 }
 
 function getAssignedLabelsPreference(): string[] {
@@ -66,15 +73,15 @@ function getReviewLabelsPreference(): string[] {
 }
 
 export default function MenuCommand(): JSX.Element {
-  const { 
-    mrsAssigned, 
-    mrsReview, 
-    mrsCreated, 
-    isLoading, 
+  const {
+    mrsAssigned,
+    mrsReview,
+    mrsCreated,
+    isLoading,
     error,
     assignedLabelsFilter,
     createdLabelsFilter,
-    reviewLabelsFilter
+    reviewLabelsFilter,
   } = useMenuMergeRequests();
   const assignedCount = mrsAssigned?.length || 0;
   const reviewCount = mrsReview?.length || 0;
@@ -95,7 +102,7 @@ export default function MenuCommand(): JSX.Element {
     >
       <MenuBarExtra.Section title="Merge Requests">
         <MenuBarSubmenu
-          title={`${createdFilterActive ? ` [Filtered] ` : ``}My Merge Requests`}
+          title={`${createdFilterActive ? `[Filtered] ` : ``}My Merge Requests`}
           subtitle={`(${createdCount})`}
           icon={Icon.Terminal}
         >
@@ -133,8 +140,8 @@ export default function MenuCommand(): JSX.Element {
             ))}
           </MenuBarSection>
         </MenuBarSubmenu>
-        <MenuBarSubmenu 
-          title={`${assignedFilterActive ? ` [Filtered] ` : ``}Assigned`}
+        <MenuBarSubmenu
+          title={`${assignedFilterActive ? `[Filtered] ` : ``}Assigned`}
           subtitle={`(${assignedCount})`}
           icon={Icon.Person}
         >
@@ -172,8 +179,8 @@ export default function MenuCommand(): JSX.Element {
             ))}
           </MenuBarSection>
         </MenuBarSubmenu>
-        <MenuBarSubmenu 
-          title={`${reviewFilterActive ? ` [Filtered] ` : ``}Reviews`}
+        <MenuBarSubmenu
+          title={`${reviewFilterActive ? `[Filtered] ` : ``}Reviews`}
           subtitle={`(${reviewCount})`}
           icon={Icon.Checkmark}
         >
@@ -225,9 +232,9 @@ function useMenuMergeRequests(): {
   mrsAssigned?: MergeRequest[];
   mrsReview?: MergeRequest[];
   mrsCreated?: MergeRequest[];
-  assignedLabelsFilter: string[],
-  createdLabelsFilter: string[],
-  reviewLabelsFilter: string[]
+  assignedLabelsFilter: string[];
+  createdLabelsFilter: string[];
+  reviewLabelsFilter: string[];
 } {
   const assignedLabelsFilter = getAssignedLabelsPreference();
   const reviewLabelsFilter = getReviewLabelsPreference();

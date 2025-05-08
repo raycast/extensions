@@ -90,7 +90,7 @@ export function useMyMergeRequests(
   scope: MRScope,
   state: MRState,
   project: Project | undefined,
-  labels: string[] | undefined = undefined,
+  labels: string[] | undefined = undefined
 ): {
   mrs: MergeRequest[] | undefined;
   isLoading: boolean;
@@ -103,12 +103,12 @@ export function useMyMergeRequests(
     error,
     performRefetch,
   } = useCache<MergeRequest[] | undefined>(
-    `mymrs_${scope}_${state}_${labels ? labels.join(",") : "[]"}}`,
+    `mymrs_${scope}_${state}_${labels ? labels.join(",") : "[]"}`,
     async (): Promise<MergeRequest[] | undefined> => {
       return await gitlab.getMergeRequests({ state, scope, ...(labels && { labels }) });
     },
     {
-      deps: [project, scope, state],
+      deps: [project, scope, state, labels],
       secondsToRefetch: 10,
       secondsToInvalid: daysInSeconds(7),
     }

@@ -48,7 +48,10 @@ export function ReviewList(): JSX.Element {
   );
 }
 
-export function useMyReviews(project?: Project | undefined, labels: string[] | undefined = undefined): {
+export function useMyReviews(
+  project?: Project | undefined,
+  labels: string[] | undefined = undefined
+): {
   mrs: MergeRequest[] | undefined;
   isLoading: boolean;
   error: string | undefined;
@@ -68,7 +71,7 @@ export function useMyReviews(project?: Project | undefined, labels: string[] | u
       });
     },
     {
-      deps: [],
+      deps: [labels],
       secondsToRefetch: 1,
       secondsToInvalid: daysInSeconds(7),
     }
