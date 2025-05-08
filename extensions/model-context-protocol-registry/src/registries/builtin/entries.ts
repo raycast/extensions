@@ -175,6 +175,17 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "linear",
+    title: "Linear",
+    description: "The Linear MCP server can be used to find, create, and update issues, projects, and comments.",
+    icon: "linear.svg",
+    homepage: "https://linear.app/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@latest", "https://mcp.linear.app/sse", "--transport", "sse-first"],
+    },
+  },
+  {
     name: "filesystem",
     title: "Filesystem",
     description:
