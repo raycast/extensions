@@ -273,8 +273,9 @@ export async function generateProjectCodeString(
   output += "</project_structure>\n\n";
 
   output += "<file_contents>";
-  output += formatFileContents(projectStructure);
-  if (projectStructure.length > 0 && formatFileContents(projectStructure).trim() !== "") {
+  const fileContents = formatFileContents(projectStructure);
+  output += fileContents;
+  if (projectStructure.length > 0 && fileContents.trim() !== "") {
     output += "\n"; // Ensure a newline after the last </file> if content exists
   }
   output += "</file_contents>\n";
