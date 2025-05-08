@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { showFailureToast, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { checkApiTokenValidity, displayCode, getToken } from "../api";
 import { apiAppName, downloadUrl, localStorageKeys } from "../utils";
@@ -31,8 +31,7 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
   const { handleSubmit, itemProps } = useForm<{ userCode: string }>({
     onSubmit: async (values) => {
       if (!challengeId) {
-        showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "Pairing not started",
           message: "Start the pairing before submitting the code.",
         });
@@ -47,11 +46,7 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
         setHasToken(true);
         setTokenIsValid(true);
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to pair",
-          message: String(error),
-        });
+        await showFailureToast(error, { title: "Failed to pair" });
       } finally {
         setIsLoading(false);
       }

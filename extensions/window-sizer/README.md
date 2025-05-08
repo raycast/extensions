@@ -9,11 +9,12 @@ Resize application windows to pixel-perfect presets.
 
 ## Features
 
-This extension uses AppleScript to interact with windows, providing the following features:
+This extension uses Swift to interact with windows, providing the following features:
 
 - Quickly resize windows to predefined sizes
 - Create and save custom window sizes
 - Apply common window sizes with a single click
+- Maximize window
 - Restore previous window size
 - Get current window size
 
@@ -38,6 +39,5 @@ The application comes with several common screen sizes:
 
 ## Notes
 
-- Make sure to authorize Raycast to control application windows using AppleScript
-- Maximization operations only work correctly on the main screen
+- To resize windows, please allow Raycast to control your Mac under System Settings → Privacy & Security → Accessibility
 - Some applications may restrict window resizing

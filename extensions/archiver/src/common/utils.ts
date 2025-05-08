@@ -11,7 +11,7 @@ import {
   EXTRACT_FORMAT_METADATA,
   EXTRACT_HANDLES,
 } from "./const";
-import { ICompressPreferences, IExtractPreferences } from "./types";
+import { ICompressPreferences, IExtractPreferences, ZipFile } from "./types";
 import { execa, execaSync } from "execa";
 
 const _7zaBinaryAsset = path.join(environment.assetsPath, `${process.arch}_7za`);
@@ -66,7 +66,7 @@ export async function compressBy7za(items: string[], format: CompressFormat, pas
 async function getCompressSaveLocationAndName(
   isSingle: boolean,
   filePath: string,
-  format: CompressFormat
+  format: CompressFormat,
 ): Promise<{ location: string; name: string }> {
   const preferences: ICompressPreferences = getPreferenceValues();
   let saveLoc = preferences.locationSaveCompressed || path.dirname(filePath);
@@ -98,7 +98,9 @@ export async function extract(file: string, format: ExtractFormat, password?: st
   }
   const resLoc = await extractHandle(file, format, password);
   const preferences: IExtractPreferences = getPreferenceValues();
-  preferences.deleteAfterExtraction && deleteFile(file);
+  if (preferences.deleteAfterExtraction) {
+    deleteFile(file);
+  }
   return resLoc;
 }
 
@@ -142,7 +144,7 @@ async function folderExists(folder: string): Promise<boolean> {
     } else {
       return false;
     }
-  } catch (error) {
+  } catch {
     const tempFolder = path.parse(folder).dir;
     const status = await folderExists(tempFolder);
     if (status) {
@@ -156,7 +158,7 @@ async function mkdir(folder: string): Promise<boolean> {
   try {
     await fsSync.mkdir(folder);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -212,4 +214,129 @@ export function processingAlert() {
 export function getFileSize(file: string): number {
   const state = fs.statSync(file);
   return state.size / 1000 / 1000;
+}
+
+export function formatFileSize(bytes: number): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
+export function getBreadcrumb(zipFile: ZipFile | undefined | null): string {
+  if (!zipFile) return "";
+
+  if (!zipFile.currentDir) return zipFile.fileName;
+
+  const parts = zipFile.currentDir.split("/").filter((p) => p !== "");
+  return `${zipFile.fileName} > ${parts.join(" > ")}`;
+}
+
+export function getParentDirectory(zipFile: ZipFile): string {
+  if (!zipFile || !zipFile.currentDir) return "";
+
+  const parts = zipFile.currentDir.split("/").filter((p) => p !== "");
+  parts.pop();
+  return parts.length > 0 ? `${parts.join("/")}/` : "";
+}
+
+// Get icon based on file extension
+export function getFileIcon(fileName: string): Icon {
+  if (!fileName) return Icon.Document;
+
+  const ext = path.extname(fileName).toLowerCase();
+
+  switch (ext) {
+    // Images
+    case ".jpg":
+    case ".jpeg":
+    case ".png":
+    case ".gif":
+    case ".bmp":
+    case ".tiff":
+    case ".webp":
+    case ".svg":
+      return Icon.Image;
+
+    // Documents
+    case ".pdf":
+      return Icon.Document;
+    case ".doc":
+    case ".docx":
+      return Icon.BlankDocument;
+    case ".xls":
+    case ".xlsx":
+    case ".csv":
+      return Icon.List;
+    case ".ppt":
+    case ".pptx":
+      return Icon.Window;
+
+    // Code/Text
+    case ".txt":
+    case ".md":
+      return Icon.Text;
+    case ".json":
+    case ".xml":
+    case ".yaml":
+    case ".yml":
+      return Icon.Terminal;
+    case ".html":
+    case ".htm":
+      return Icon.Globe;
+    case ".css":
+      return Icon.LightBulb;
+    case ".js":
+    case ".ts":
+    case ".jsx":
+    case ".tsx":
+    case ".py":
+    case ".java":
+    case ".c":
+    case ".cpp":
+    case ".go":
+    case ".rb":
+    case ".php":
+    case ".swift":
+    case ".kt":
+      return Icon.Code;
+
+    // Archives
+    case ".zip":
+    case ".rar":
+    case ".7z":
+    case ".tar":
+    case ".gz":
+    case ".bz2":
+      return Icon.Box;
+
+    // Executables
+    case ".exe":
+    case ".app":
+    case ".dmg":
+    case ".pkg":
+      return Icon.Gear;
+
+    // Audio
+    case ".mp3":
+    case ".wav":
+    case ".ogg":
+    case ".flac":
+    case ".aac":
+      return Icon.Music;
+
+    // Video
+    case ".mp4":
+    case ".avi":
+    case ".mov":
+    case ".wmv":
+    case ".mkv":
+    case ".flv":
+    case ".webm":
+      return Icon.Video;
+
+    default:
+      return Icon.Document;
+  }
 }
