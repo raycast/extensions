@@ -1,4 +1,5 @@
 // src/types.ts
+import ignore from "ignore";
 
 /**
  * Represents a file or directory within the project structure.
