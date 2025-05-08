@@ -1,5 +1,8 @@
 # Ente Auth Changelog
 
+## [Bug fix] - {PR_MERGE_DATE}
+- fix variable for assigning user preferred values
+
 ## [Enhancements & Fixes] - 2025-05-08
 
 - Import command now performs all necessary setup actions automatically
