@@ -30,7 +30,7 @@ export interface ProcessDirectoryOptions {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- External library type
   ignoreFilter: any; // Instance of 'ignore' class from the 'ignore' library
   maxFileSizeBytes: number;
-  onProgress?: (progress: { scannedPath: string; filesCollected: number }) => void;
+  onProgress?: (progress: ProgressInfo) => void;
 }
 
 /**
