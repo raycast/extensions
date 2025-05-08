@@ -166,7 +166,7 @@ export default function Command() {
 
   const handleGoToFolder = useCallback(async (nodePath: string) => {
     const parentPath = path.dirname(nodePath);
-    const openPromise = execPromise('open "' + parentPath + '"');
+    const openPromise = execPromise(`open "${path.join(parentPath)}"`);
     const { error } = await tryCatch(openPromise);
 
     if (error) {
