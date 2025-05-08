@@ -18,6 +18,10 @@
     "my ip"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "query-ip-geolocation",

@@ -1,5 +1,9 @@
 # Quick Event Changelog
 
+## [Update] - 2025-04-22
+
+- Add location parsing for event creation
+
 ## [Update] - 2024-08-19
 
 - Add new timePatterns

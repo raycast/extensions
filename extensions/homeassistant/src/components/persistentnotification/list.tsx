@@ -2,9 +2,10 @@ import { getHAWSConnection, ha } from "@lib/common";
 import { ensureShort, getErrorMessage } from "@lib/utils";
 import { Icon, MenuBarExtra, Toast, open, showToast } from "@raycast/api";
 import { callService } from "home-assistant-js-websocket";
+import React from "react";
 import { HAPersistentNotification } from "./utils";
 
-export function PersistentNotificationMenuItem(props: { notification: HAPersistentNotification }): JSX.Element {
+export function PersistentNotificationMenuItem(props: { notification: HAPersistentNotification }): React.ReactElement {
   const s = props.notification;
   const dismiss = async () => {
     try {
