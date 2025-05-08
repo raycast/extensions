@@ -6,7 +6,7 @@
   "icon": "extension.png",
   "author": "thomas",
   "owner": "raycast",
-  "access": "private",
+  "access": "public",
   "license": "MIT",
   "commands": [
     {
