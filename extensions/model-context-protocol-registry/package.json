@@ -30,7 +30,6 @@
     "@raycast/api": "^1.98.0",
     "@raycast/utils": "^1.19.1",
     "@types/json-schema": "^7.0.15",
-    "execa": "^9.5.2",
     "numeral": "^2.0.6"
   },
   "devDependencies": {
