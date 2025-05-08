@@ -115,13 +115,15 @@ function BrandView({ domain, bfApiKey }: { domain: string; bfApiKey: string }) {
   }
 
   useEffect(() => {
-    handleSubmit(domain.replaceAll(/http|https|:\/\//g, ""));
+    handleSubmit(domain.replaceAll(/http:|https:|\/\//g, ""));
   }, [domain]);
 
   async function saveToDownloads(imageUrl: string, extName: string) {
     const filePath = join(DOWNLOADS_DIR, randomUUID() + "." + extName);
     try {
-      const { data } = await axios.get(imageUrl, { responseType: "arraybuffer" });
+      const { data } = await axios.get(imageUrl, {
+        responseType: "arraybuffer",
+      });
 
       await writeFile(filePath, data);
       await Clipboard.copy(filePath);
@@ -136,11 +138,12 @@ function BrandView({ domain, bfApiKey }: { domain: string; bfApiKey: string }) {
   }
 
   return (
-    <Grid columns={5} isLoading={isLoading}>
+    <Grid columns={5} isLoading={isLoading} actions={<ActionPanel></ActionPanel>}>
       {(data as RetrieveBrandResponse)?.logos?.flatMap((image, idx) =>
         image.formats.map((format, index) => (
           <Grid.Item
             key={`${idx}-${index}`}
+            title={format.format}
             content={{ tooltip: format.format, source: format.src }}
             actions={
               <ActionPanel>
@@ -151,6 +154,11 @@ function BrandView({ domain, bfApiKey }: { domain: string; bfApiKey: string }) {
                 />
                 <Action.OpenInBrowser url={format.src} />
                 <Action.CopyToClipboard content={format.src} />
+                <Action.CopyToClipboard
+                  title="Copy Description"
+                  content={data?.description || "description empty"}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
               </ActionPanel>
             }
           />
