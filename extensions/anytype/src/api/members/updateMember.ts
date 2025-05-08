@@ -7,9 +7,7 @@ export async function updateMember(
   spaceId: string,
   memberId: string,
   data: UpdateMemberRequest,
-): Promise<{
-  member: Member | null;
-}> {
+): Promise<{ member: Member }> {
   const { url, method } = apiEndpoints.updateMember(spaceId, memberId);
 
   const response = await apiFetch<{ member: RawMember }>(url, {
@@ -17,7 +15,5 @@ export async function updateMember(
     body: JSON.stringify(data),
   });
 
-  return {
-    member: response ? await mapMember(response.payload.member) : null,
-  };
+  return { member: await mapMember(response.payload.member) };
 }

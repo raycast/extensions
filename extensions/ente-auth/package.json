@@ -33,6 +33,7 @@
       "name": "export",
       "title": "Export Secrets",
       "description": "Export Ente Auth secrets to a JSON file",
+      "disabledByDefault": true,
       "mode": "view"
     },
     {
@@ -45,6 +46,7 @@
       "name": "delete",
       "title": "Delete Export",
       "description": "Delete Ente Auth Exported file",
+      "disabledByDefault": true,
       "mode": "no-view"
     }
   ],
@@ -66,7 +68,7 @@
       "placeholder": "Export Path"
     },
     {
-      "name": "action",
+      "name": "primaryAction",
       "type": "dropdown",
       "title": "Primary Action",
       "description": "Choose whether the primary action should copy or paste the output.",
@@ -82,15 +84,32 @@
       ],
       "default": "paste",
       "required": false
+    },
+    {
+      "name": "overwriteAction",
+      "type": "checkbox",
+      "title": "Options",
+      "label": "Overwrite Current Export",
+      "description": "Choose whether the export should overwrite on runs.",
+      "required": false
+    },
+    {
+      "name": "deleteExport",
+      "type": "checkbox",
+      "label": "Delete Export File After Import",
+      "description": "Choose whether the export should be deleted after import.",
+      "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.3",
+    "axios": "^1.7.8",
     "commander": "^9.0.0",
     "figlet": "^1.7.0",
     "fs-extra": "^11.2.0",
     "otpauth": "^9.3.2",
+    "simple-icons": "^13.18.0",
     "ts-node": "^10.0.0",
     "typescript": "^4.0.0",
     "url-parse": "^1.5.10"
