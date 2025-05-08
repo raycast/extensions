@@ -192,7 +192,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Paddle Billing is the developer-first merchant of record. We take care of payments, tax, subscriptions, and metrics with one unified API that does it all. This is a Model Context Protocol (MCP) server that provides tools for interacting with the Paddle API.",
     icon: "paddle.svg",
-    homepage: "https://github.com/PaddleHQ/paddle-mcp-server   ",
+    homepage: "https://github.com/PaddleHQ/paddle-mcp-server",
     configuration: {
       command: "npx",
       args: ["-y", "@paddle/paddle-mcp", "--api-key=PADDLE_API_KEY", "--environment=(sandbox|production)"],
