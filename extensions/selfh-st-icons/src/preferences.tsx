@@ -107,19 +107,13 @@ export default function PreferencesView() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        title="Default Theme"
-        {...itemProps.theme}
-      >
+      <Form.Dropdown title="Default Theme" {...itemProps.theme}>
         <Form.Dropdown.Item value="system" title="System" />
         <Form.Dropdown.Item value="light" title="Light" />
         <Form.Dropdown.Item value="dark" title="Dark" />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        title="Default File Type"
-        {...itemProps.defaultFormat}
-      >
+      <Form.Dropdown title="Default File Type" {...itemProps.defaultFormat}>
         <Form.Dropdown.Item value="png" title="PNG" />
         <Form.Dropdown.Item value="webp" title="WebP" />
         <Form.Dropdown.Item value="svg" title="SVG" />
