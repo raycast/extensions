@@ -1,6 +1,6 @@
 # Kill Node Modules Changelog
 
-## [Overhauled Extension for Performance and Configurability] - 2024-05-09
+## [Overhauled Extension for Performance and Configurability] - {PR_MERGE_DATE}
 
 This major update addresses key performance issues, introduces essential configuration options, and significantly refactors the codebase for better readability and modularity.
 
