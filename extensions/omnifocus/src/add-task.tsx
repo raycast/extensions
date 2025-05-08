@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, LaunchProps, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, LaunchProps, popToRoot, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import { addTask } from "./lib/api/add-task";
 import { getProjects } from "./lib/api/list-projects";
@@ -37,6 +37,7 @@ export default function Command(props: LaunchProps<{ draftValues: FormValues }>)
           style: Toast.Style.Success,
           title: "Task added!",
         });
+        await popToRoot();
       } catch {
         await showToast({
           style: Toast.Style.Failure,
