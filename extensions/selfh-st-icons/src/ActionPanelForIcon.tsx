@@ -26,8 +26,8 @@ interface Props {
       | "light"
       | "dark"
       | ((
-          current: "default" | "light" | "dark"
-        ) => "default" | "light" | "dark")
+          current: "default" | "light" | "dark",
+        ) => "default" | "light" | "dark"),
   ) => void;
 }
 
@@ -232,7 +232,7 @@ export const ActionPanelForIcon: FC<Props> = ({
               await downloadIconFile(
                 defaultUrl,
                 defaultFilename,
-                downloadLocation
+                downloadLocation,
               );
               showToast({
                 style: Toast.Style.Success,
