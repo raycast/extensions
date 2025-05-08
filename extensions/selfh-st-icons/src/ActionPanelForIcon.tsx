@@ -5,7 +5,6 @@ import {
   Clipboard,
   showToast,
   Toast,
-  useNavigation,
 } from "@raycast/api";
 import { FC, useState, useEffect } from "react";
 import { getIconCdnUrl, IconIndexEntry, downloadIconFile } from "./utils/icons";
@@ -27,8 +26,8 @@ interface Props {
       | "light"
       | "dark"
       | ((
-          current: "default" | "light" | "dark",
-        ) => "default" | "light" | "dark"),
+          current: "default" | "light" | "dark"
+        ) => "default" | "light" | "dark")
   ) => void;
 }
 
@@ -88,7 +87,6 @@ export const ActionPanelForIcon: FC<Props> = ({
   currentVariant,
   onVariantChange,
 }) => {
-  const { pop } = useNavigation();
   const [format, setFormat] = useState<"png" | "webp" | "svg">("png");
   const [downloadLocation, setDownloadLocation] =
     useState<string>("~/Downloads");
@@ -204,8 +202,6 @@ export const ActionPanelForIcon: FC<Props> = ({
         onAction={handleCopyUrl}
         shortcut={KEYBOARD_SHORTCUTS.COPY_URL}
       />
-      <Action icon={Icon.ChevronLeft} title="Go Back" onAction={pop} />
-
       <ActionPanel.Section>
         <Action
           icon={Icon.Switch}
@@ -236,7 +232,7 @@ export const ActionPanelForIcon: FC<Props> = ({
               await downloadIconFile(
                 defaultUrl,
                 defaultFilename,
-                downloadLocation,
+                downloadLocation
               );
               showToast({
                 style: Toast.Style.Success,
