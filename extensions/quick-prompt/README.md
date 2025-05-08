@@ -1,71 +1,52 @@
 # Quick Prompt
 
-[English](./README_en.md) | 中文
+An efficient prompt management and quick input extension for **Raycast**, integrating comprehensive features such as quick input, creation, editing, deletion, enabling/disabling, and supporting local file and remote URL data synchronization, making prompt management and input more convenient and efficient.
 
-<p align="center">
-  <img src="./assets/extension-icon.png" alt="Quick Prompt Logo" width="128" style="background: transparent;">
-</p>
+> Due to certain usage limitations of the [Quick Prompt browser extension](https://github.com/wenyuanw/quick-prompt), I developed this Raycast extension to enable quick insertion of prompts in any AI application and web page. Adhering to the concept of "manage once, use everywhere", it perfectly maintains compatibility with the browser plugin's data format, supporting seamless data migration through the same JSON structure.
 
-一款为 **Raycast** 打造的高效提示词（Prompt）管理与快捷输入扩展，集成快捷输入、创建、编辑、删除、启用/禁用等全方位功能，并且支持本地文件与远程 URL 数据同步，让提示词管理及输入更加便捷高效。
+## Features
 
-> 由于[浏览器插件版 Quick Prompt](https://github.com/wenyuanw/quick-prompt) 存在一定使用限制，所以我开发了这款 Raycast 扩展，实现在任意 AI 应用和网页中的提示词快速插入。秉承"一处管理，处处可用"的理念，完美兼容浏览器插件数据格式，支持通过相同 JSON 结构进行无缝数据迁移。
+- 🚀 **Quick Prompt Insertion**: Insert or copy the content of enabled prompts in any application with one click.
+- 🗂️ **Prompt Management**: Support creating, editing, deleting, enabling/disabling prompts, and filtering and searching by tags and keywords.
+- ✍️ **Quick Save Selected Text as Prompt**: Save currently selected text content in any application as a new prompt, facilitating knowledge accumulation and reuse.
+- 📤 **Import/Export Functionality**: Support exporting prompts as JSON files and importing prompt data from local files or remote URLs, convenient for synchronization and backup across multiple devices.
 
-## 功能特性
+## Installation
 
-- 🚀 **快速插入 Prompt**：在任意应用中一键插入或复制已启用的 Prompt 内容。
-- 🗂️ **Prompt 管理**：支持创建、编辑、删除、启用/禁用 Prompt，并可通过标签和关键词进行筛选与搜索。
-- ✍️ **快捷保存选中文本为 Prompt**：在任意应用中将当前选中的文本内容保存为新的 Prompt，便于知识沉淀和复用。
-- 📤 **导入/导出功能**：支持将 Prompt 导出为 JSON 文件，也可从本地文件或远程 URL 导入 Prompt 数据，方便在多设备间同步和备份。
+1. Search for `Quick Prompt` in the Raycast Store and install, or build from source.
+2. Import the build product in Raycast via `Extensions` -> `Import Extension`.
 
-## 安装方法
+## Usage Instructions
 
-1. 在 Raycast Store 搜索 `Quick Prompt` 并安装，或从源码构建：
-   ```bash
-   git clone https://github.com/wenyuanw/quick-prompt-raycast.git
-   cd quick-prompt-raycast
-   npm install
-   npm run build
-   ```
-2. 在 Raycast 中通过 `Extensions` -> `Import Extension` 导入构建产物。
+### 1. Quick Prompt Insertion
 
-## 使用说明
+- Trigger command: `Apply Prompt`
+- Function: Displays all enabled prompts, supports searching, pasting, copying, toggling activation status, deleting, etc.
 
-### 1. 快速插入 Prompt
+### 2. Prompt Management
 
-- 触发命令：`Apply Prompt`
-- 功能：显示所有已启用的 Prompt，支持搜索、粘贴、复制、切换启用状态、删除等操作。
+- Trigger command: `Manage Prompt`
+- Function: Manage all prompts (including disabled ones), supports creation, editing, deletion, toggling activation status, importing, exporting, etc.
 
-### 2. 管理 Prompt
+### 3. Save Selected Text as Prompt
 
-- 触发命令：`Manage Prompt`
-- 功能：管理所有 Prompt（包括已禁用的），支持创建、编辑、删除、切换启用状态、导入、导出等。
+- Trigger command: `Save Selected Text`
+- Function: Automatically captures the currently selected text in the application and quickly saves it as a new prompt.
 
-### 3. 保存选中文本为 Prompt
+### 4. Create/Edit Prompt
 
-- 触发命令：`Save Selected Text`
-- 功能：自动获取当前应用中选中的文本，快速保存为新的 Prompt。
+- Fields include: title, content, tags (comma-separated), enablement status.
+- Supports form validation and convenient interaction.
 
-### 4. 创建/编辑 Prompt
+### 5. Import/Export Prompts
 
-- 字段包括：标题、内容、标签（逗号分隔）、启用状态。
-- 支持表单校验与便捷交互。
+- **Export function**: Export all current prompts as a JSON file saved to the desktop and automatically copied to the clipboard.
+- **Import function**: Support importing prompt data from local JSON files or remote URLs, automatically merging duplicates.
 
-### 5. 导入/导出 Prompt
-
-- **导出功能**：将当前所有 Prompt 导出为 JSON 文件保存到桌面，并自动复制到剪贴板。
-- **导入功能**：支持从本地 JSON 文件或远程 URL 导入 Prompt 数据，自动合并重复项。
-
-## 开发与构建
-
-- 开发命令：
-  - `npm run dev`：开发模式
-  - `npm run build`：构建扩展
-  - `npm run lint`：代码检查
-
-## 许可协议
+## License
 
 MIT License
 
-## 贡献
+## Contribution
 
-欢迎提交 Issue 和 PR，完善功能与体验！
+Issues and PRs are welcome to improve functionality and experience!
