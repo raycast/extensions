@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Arg } from "./datasource";
-import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation, Clipboard, Image } from "@raycast/api";
 import { getArguments, getNewArguments, replaceArgumentPlaceholders } from "./utils";
 
 export interface ActionDataItem {
@@ -81,7 +81,12 @@ export function CommandForm(props: { onCreate: (todo: ActionDataItem) => void; c
   );
 }
 
-export function ArgumentForm(props: { cmd: ActionDataItem; onPaste: (cmd: ActionDataItem) => void }) {
+export function ArgumentForm(props: {
+  cmd: ActionDataItem;
+  onPaste: (cmd: ActionDataItem) => void;
+  pasteTitle: string;
+  pasteIcon: Image.ImageLike;
+}) {
   const [args, setArgs] = useState<Arg[]>(props.cmd.args || []);
   const { pop } = useNavigation();
   const data = props.cmd.data;
@@ -96,7 +101,14 @@ export function ArgumentForm(props: { cmd: ActionDataItem; onPaste: (cmd: Action
     <Form
       actions={
         <ActionPanel>
-          <Action.Paste title="Paste" content={finalData} icon={Icon.Clipboard} onPaste={handlePaste} />
+          <Action
+            title={props.pasteTitle}
+            icon={props.pasteIcon}
+            onAction={async () => {
+              await Clipboard.paste(finalData);
+              handlePaste();
+            }}
+          />
         </ActionPanel>
       }
     >

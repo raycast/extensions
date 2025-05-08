@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Add reload action] - 2025-05-07
+
+- Added a reload action to fetch the latest downloads in the `Manage Downloads` command.
+
 ## [Enhancement] - 2025-02-25
 
 - Updated the `Show Latest Download` command to display the most recent download file.

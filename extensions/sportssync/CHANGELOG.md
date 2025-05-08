@@ -1,5 +1,27 @@
 # Sportssync Changelog
 
+## [New Commands, Views, and Small Features] - 2025-04-22
+
+- Created a Live Scores Menubar Command - View live scores, final scores, and games. Clicking on games will set them as the menubar title. (Must set a favorite sport and league for it to work)
+- Created a Favorite Team Dashboard Command - View scheduled games, live scores, completed games, articles, injuries, transactions, standings and team info directly from one command. (Must set a favorite sport, league, and team for it to work)
+- Created a Tracker Command - View articles, injuries, and transactions from one command for most leagues
+- Added a "category" tooltip to tags in the article views
+- Updated the news view to now show the last 50 articles (except for soccer which will show 20)
+- Fixed an issue causing f1 races to show as complete when qualifying laps have been set, but races haven't been completed
+- Added a "Race #" tooltip to the f1 races and schedule command
+- Added country icons for every track in the f1 results and schedule command
+- Combined basketball scores and schedule with college basketball scores and schedule. Also added NCAA M and W articles to the basketball tracker command.
+- Renamed College Basketball Dropdowns to NCAA M and NCAA W instead of MNCAA and WNCAA for clarity
+- Added Dropdown Saving - Commands will now save the last dropdown you accessed (on a per command basis).
+- Globally added a new refresh action - Using the keyboard shortcut "CMD" + "R" you can refresh any command and view
+- Updated action titles in every command to now be context aware (ex: it will say view Toronto Maple Leaf details instead of Team Details)
+- Added a new empty view that will display when no data is found
+- Added fallbacks to every api related element in every command, including links and images (should reduce the occurrence of errors)
+- Refreshed the icon with some new colors
+- Updated Search Bar Placeholders to be accurate for each command. They will also update when different views are selected
+- Rewrote the entire code base to now be modular, easier to understand, and expand on. (Also reduced a significant amount of code)
+- Added a new copy link action to the article views
+
 ## [Implemented past and future scores] - 2025-03-12
 
 - Updated the NHL Standings command to use divisions instead of conferences

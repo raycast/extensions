@@ -18,7 +18,7 @@ export enum ExtractFormat {
 }
 
 export const COMPRESS_FORMAT_METADATA = new Map<CompressFormat, FormatMetadata>([
-  [CompressFormat["7Z"], { ext: ".7z", color: Color.Brown }],
+  [CompressFormat["7Z"], { ext: ".7z", color: Color.Orange }],
   [CompressFormat.ZIP, { ext: ".zip", color: Color.Red }],
   [CompressFormat.TAR, { ext: ".tar", color: Color.Yellow }],
   [CompressFormat.GZIP, { ext: ".tar.gz", color: Color.Green }],
@@ -35,7 +35,7 @@ export const COMPRESS_HANDLES = new Map<
 ]);
 
 export const EXTRACT_FORMAT_METADATA = new Map<ExtractFormat, FormatMetadata>([
-  [ExtractFormat["7Z"], { ext: ".7z", color: Color.Brown }],
+  [ExtractFormat["7Z"], { ext: ".7z", color: Color.Orange }],
   [ExtractFormat.ZIP, { ext: ".zip", color: Color.Red }],
   [ExtractFormat.TAR, { ext: ".tar", color: Color.Yellow }],
   [ExtractFormat.GZIP, { ext: ".gz", color: Color.Green }],

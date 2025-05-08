@@ -19,7 +19,7 @@
     {
       "name": "set-outbound-mode",
       "title": "Set Outbound Mode",
-      "subtitle": "Surge",
+      "subtitle": "Surge Outbound Switcher",
       "description": "Set Surge's outbound mode",
       "mode": "view",
       "icon": "extension-icon.png"
@@ -27,7 +27,7 @@
     {
       "name": "set-to-direct",
       "title": "Set to Direct",
-      "subtitle": "Surge",
+      "subtitle": "Surge Outbound Switcher",
       "description": "Set Surge's outbound mode to Direct",
       "mode": "no-view",
       "icon": "extension-icon-d.png"
@@ -35,7 +35,7 @@
     {
       "name": "set-to-global",
       "title": "Set to Global",
-      "subtitle": "Surge",
+      "subtitle": "Surge Outbound Switcher",
       "description": "Set Surge's outbound mode to Global",
       "mode": "no-view",
       "icon": "extension-icon-g.png"
@@ -43,7 +43,7 @@
     {
       "name": "set-to-rule-based",
       "title": "Set to Rule-based",
-      "subtitle": "Surge",
+      "subtitle": "Surge Outbound Switcher",
       "description": "Set Surge's outbound mode to Rule-based",
       "mode": "no-view",
       "icon": "extension-icon-r.png"
@@ -68,5 +68,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
