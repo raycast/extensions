@@ -93,6 +93,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -181,6 +185,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -261,6 +269,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -341,6 +353,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -412,6 +428,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -483,6 +503,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -554,6 +578,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -625,6 +653,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -696,6 +728,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -767,6 +803,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -838,6 +878,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -909,6 +953,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -980,6 +1028,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -1059,6 +1111,10 @@
             {
               "title": "Gemini 2.5 Pro Experimental",
               "value": "gemini-2.5-pro-exp-03-25"
+            },
+            {
+              "title": "Gemini 2.5 Pro Preview",
+              "value": "gemini-2.5-pro-preview-05-06"
             }
           ]
         },
@@ -1143,6 +1199,10 @@
         },
         {
           "title": "Gemini 2.5 Pro Experimental",
+          "value": "gemini-2.5-pro-exp-03-25"
+        },
+        {
+          "title": "Gemini 2.5 Pro Preview",
           "value": "gemini-2.5-pro-exp-03-25"
         }
       ]
