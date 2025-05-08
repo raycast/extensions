@@ -1,5 +1,12 @@
 # Zen Changelog
 
+## [✨ AI Enhancements] - {PR_MERGE_DATE}
+
+AI Tools to:
+
+- Open New Tab
+- Search History
+
 ## [Update brew install command] - 2025-04-24
 
 - Update the brew install command from Firefox to Zen Browser.
