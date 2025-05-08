@@ -31,6 +31,7 @@ export default function RestoreData() {
 
       showToast(Toast.Style.Success, `Restored ${restoredCount} app${restoredCount > 1 ? "s" : ""}`);
       push(<AppsView />);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to restore backup");
     }

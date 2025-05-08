@@ -12,6 +12,7 @@ import {
   Toast,
   confirmAlert,
   Alert,
+  Keyboard,
 } from "@raycast/api";
 import { decode } from "hi-base32";
 import { Algorithm, Digits, Options, parse, parseOtpUrl } from "./util/totp";
@@ -118,7 +119,12 @@ export default function AppsView() {
                     key: "return",
                   }}
                 />
-                <Action.Push icon={Icon.Pencil} title="Edit App" target={<EditForm app={a} />} />
+                <Action.Push
+                  icon={Icon.Pencil}
+                  title="Edit App"
+                  target={<EditForm app={a} />}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -243,11 +249,37 @@ function AddAppByUrlForm() {
   );
 }
 
-function EditForm({app}: {app: App}) {
+function EditForm({ app }: { app: App }) {
+  const { pop } = useNavigation();
+  const onSubmit = async (e: { name?: string }) => {
+    const { name } = e;
 
-  return <Form actions={<ActionPanel>
-    <Action.SubmitForm icon={Icon.Pencil} title="Submit" onSubmit={onSubmit} />
-  </ActionPanel>}>
-    <Form.TextField id="name" title="App Name" placeholder="e.g. GitHub" defaultValue={app.name} />
-  </Form>
+    if (!name) {
+      showToast(Toast.Style.Failure, "Please provide name");
+      return;
+    }
+
+    if (await LocalStorage.getItem(name)) {
+      showToast(Toast.Style.Failure, "This app name is already taken");
+      return;
+    }
+
+    const _app = await LocalStorage.getItem(app.name);
+    await LocalStorage.removeItem(app.name);
+    await LocalStorage.setItem(name, _app as LocalStorage.Value);
+    pop();
+  };
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Pencil} title="Submit" onSubmit={onSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" title="App Name" placeholder={app.name} defaultValue={app.name} />
+      <Form.Description title="⚠️" text="To prevent loss of data, please Backup your codes first" />
+    </Form>
+  );
 }

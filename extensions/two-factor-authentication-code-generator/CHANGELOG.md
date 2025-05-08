@@ -1,5 +1,12 @@
 # Changelog
 
+## [Add README + Rename Codes] - {PR_MERGE_DATE}
+
+- Add a README
+- Add metadata images
+- Modernize extension to use latest Raycast API
+- Rename saved codes (ref: [Issue #18671](https://github.com/raycast/extensions/issues/18671))
+
 ## [Update] - 2024-11-12
 
 ### Added
