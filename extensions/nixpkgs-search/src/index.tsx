@@ -1,11 +1,20 @@
 import { ActionPanel, Action, Color, getPreferenceValues, List, Icon } from "@raycast/api";
 import { useState } from "react";
 import { URL } from "node:url";
-import { useFetch } from "@raycast/utils";
+import { useFetch, showFailureToast } from "@raycast/utils";
 
 export default function Command() {
+  const { searchSize, branchName } = getPreferenceValues<Preferences>();
+
+  const [url, setUrl] = useState<string | undefined>(undefined);
+  if (!url) {
+    getSearchUrl({ branchName })
+      .then(setUrl)
+      .catch((error) => showFailureToast(error, { title: "Could not get search URL" }));
+  }
+
   const [searchText, setSearchText] = useState("");
-  const state = useSearch(searchText);
+  const state = useSearch({ url, searchText, searchSize: Math.trunc(+searchSize) });
 
   return (
     <List
@@ -106,8 +115,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   );
 }
 
-function useSearch(searchText: string) {
-  const { searchSize, branchName } = getPreferenceValues<Preferences>();
+function useSearch({ url, searchText, searchSize }: { url?: string; searchText: string; searchSize: number }) {
   const queryFields = [
     "package_attr_name^9",
     "package_attr_name.edge^9",
@@ -137,7 +145,7 @@ function useSearch(searchText: string) {
   const reversedSearchText = [...searchText].reverse().join("");
 
   const query = {
-    size: Math.trunc(+searchSize),
+    size: searchSize,
     sort: [{ _score: "desc" }, { package_attr_name: "desc" }, { package_pversion: "desc" }],
     query: {
       bool: {
@@ -179,7 +187,7 @@ function useSearch(searchText: string) {
   };
 
   const { isLoading, data } = useFetch(
-    `https://nixos-search-7-1733963800.us-east-1.bonsaisearch.net/latest-42-nixos-${branchName}/_search`,
+    url!,
     {
       method: "POST",
       headers: {
@@ -252,13 +260,20 @@ function useSearch(searchText: string) {
         });
       },
       initialData: [],
-      execute: searchText.length > 0,
+      execute: Boolean(url) && searchText.length > 0,
       failureToastOptions: {
         title: "Could not perform search",
       },
     }
   );
   return { isLoading, results: !searchText.length ? [] : data };
+}
+
+async function getSearchUrl({ branchName }: { branchName: string }) {
+  const resp = await fetch("https://raw.githubusercontent.com/NixOS/nixos-search/main/VERSION");
+  if (!resp.ok) throw new Error("Cannot access GitHub");
+  const version = (await resp.text()).trim();
+  return `https://search.nixos.org/backend/latest-${version}-nixos-${branchName}/_search`;
 }
 
 interface SearchResult {
