@@ -2,6 +2,36 @@
 import type { ProjectEntry } from "./types";
 
 /**
+ * Converts bytes to kilobytes.
+ * @param bytes Size in bytes.
+ * @param defaultValue Default value if bytes is undefined.
+ * @returns Size in kilobytes.
+ */
+export function bytesToKB(bytes: number | undefined, defaultValue = 0): number {
+  return bytes !== undefined ? bytes / 1024 : defaultValue;
+}
+
+/**
+ * Converts bytes to megabytes.
+ * @param bytes Size in bytes.
+ * @param defaultValue Default value if bytes is undefined.
+ * @returns Size in megabytes.
+ */
+export function bytesToMB(bytes: number | undefined, defaultValue = 0): number {
+  return bytes !== undefined ? bytes / (1024 * 1024) : defaultValue;
+}
+
+/**
+ * Formats a file size in kilobytes with fixed precision.
+ * @param bytes Size in bytes.
+ * @param precision Number of decimal places (default: 1).
+ * @returns Formatted string with KB unit.
+ */
+export function formatFileSizeKB(bytes: number | undefined, precision = 1): string {
+  return `${bytesToKB(bytes).toFixed(precision)} KB`;
+}
+
+/**
  * Default maximum file size in bytes for including content.
  * Files larger than this will have their content omitted.
  * (1 MB by default)
@@ -497,7 +527,7 @@ export function generateOutputHeader(projectRoot: string, maxFileSizeBytes: numb
     `<metadata>\n` +
     `  Date created: ${new Date().toISOString()}\n` +
     `  Project root: ${projectRoot}\n` +
-    `  Max file size for content: ${(maxFileSizeBytes / 1024 / 1024).toFixed(2)} MB\n` +
+    `  Max file size for content: ${bytesToMB(maxFileSizeBytes).toFixed(2)} MB\n` +
     `  .gitignore used: ${gitignoreUsed ? "Yes" : "No"}\n` +
     `</metadata>\n\n`
   );
@@ -522,8 +552,7 @@ export function formatProjectStructure(entries: readonly ProjectEntry[], level =
   for (const entry of entries) {
     const prefix = "  ".repeat(level);
     const icon = entry.type === "directory" ? "📁" : "📄";
-    const sizeKb = entry.size !== undefined ? entry.size / 1024 : 0;
-    const sizeInfo = entry.type === "file" && entry.size !== undefined ? ` (${sizeKb.toFixed(1)} KB)` : "";
+    const sizeInfo = entry.type === "file" && entry.size !== undefined ? ` (${formatFileSizeKB(entry.size)})` : "";
     structure += `${prefix}${icon} ${entry.name}${sizeInfo}\n`;
     if (entry.type === "directory" && entry.children && entry.children.length > 0) {
       structure += formatProjectStructure(entry.children, level + 1);
@@ -541,8 +570,7 @@ export function formatFileContents(entries: readonly ProjectEntry[]): string {
   let contents = "";
   for (const entry of entries) {
     if (entry.type === "file") {
-      const sizeKb = entry.size !== undefined ? entry.size / 1024 : 0;
-      contents += `\n<file path="${entry.path}" size="${sizeKb.toFixed(1)} KB"`;
+      contents += `\n<file path="${entry.path}" size="${formatFileSizeKB(entry.size)}"`;
       if (entry.language) {
         contents += ` language="${entry.language}"`;
       }
