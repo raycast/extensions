@@ -1,6 +1,6 @@
 # Ente Auth Changelog
 
-## [Enhancements & Fixes] - {PR_MERGE_DATE}
+## [Enhancements & Fixes] - 2025-05-08
 
 - Import command now performs all necessary setup actions automatically
 - Added a new "overwrite preference" action for finer control over import behavior
