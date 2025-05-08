@@ -58,8 +58,8 @@ function validateRootFolder(selectedRoot: string): boolean {
 
 function isDangerous(filePath: string): boolean {
   const normalizedPath = filePath.replace(/\\/g, "/");
-  const hiddenFilePattern = new RegExp("(^|\\/)\\.[^\\/.]", "g");
-  const macAppsPattern = new RegExp("/Applications/[^/]+\\.app\\/", "g");
+  const hiddenFilePattern = new RegExp("(^|\\/)\\.[^\\/.]");
+  const macAppsPattern = new RegExp("/Applications/[^/]+\\.app\\/");
   return hiddenFilePattern.test(normalizedPath) || macAppsPattern.test(normalizedPath);
 }
 
