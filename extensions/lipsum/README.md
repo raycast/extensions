@@ -14,7 +14,7 @@ Easily generate text with a specified character count and copy it to your clipbo
 
 ## Screencast
 
-https://github.com/user-attachments/assets/44d32225-05a9-4084-905c-04456b2d8ded
+https://github.com/user-attachments/assets/c37bc4ad-02c0-4509-a75d-a8137551a003
 
 ## Development
 
@@ -39,12 +39,14 @@ npm run publish
 3. Select the language and character count for the text you want to generate
 4. The generated text will be automatically copied to your clipboard
 
+If language is not selected, the default language of the Extension settings will be selected.
+
 ## Options
 
 | Option | Description |
 |--------|-------------|
-| Language | Select Japanese or English |
-| Character Count | Specify the number of characters to generate |
+| Number of characters | Specify the number of characters to generate |
+| Select Language | Select Japanese or English |
 
 ## License
 
