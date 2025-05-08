@@ -13,8 +13,8 @@ const markdownLink = (item: ResultItem) => `[${item.linkText ?? item.title}](${i
 const htmlLink = (item: ResultItem) => `<a href="${item.url}">${item.linkText ?? item.title}</a>`;
 
 export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: string) {
-  const [query, setQuery] = useCachedState<string>("query", "");
-  const [items, setItems] = useCachedState<ResultItem[]>("items", []);
+  const [query, setQuery] = useCachedState<string>("jira-search-query-query", "");
+  const [items, setItems] = useCachedState<ResultItem[]>("jira-search-query-items", []);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ErrorText>();
   useEffect(() => {
