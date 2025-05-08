@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 
 type Input = {
   /**
-   * The title of the todo to create.
+   * The title of the prompt to create.
    */
   title: string;
   /**

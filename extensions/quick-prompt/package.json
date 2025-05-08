@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "wenyuanw",
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Developer Tools"
   ],
   "license": "MIT",
   "commands": [

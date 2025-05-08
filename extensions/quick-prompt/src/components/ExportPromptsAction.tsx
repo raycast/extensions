@@ -3,6 +3,7 @@ import { Prompt } from "../types";
 import * as fs from "fs/promises";
 import { homedir } from "os";
 import path from "path";
+import { showFailureToast } from "@raycast/utils";
 
 interface ExportPromptsActionProps {
   prompts: Prompt[];
@@ -35,11 +36,7 @@ export function ExportPromptsAction({ prompts }: ExportPromptsActionProps) {
       // 使用 HUD 提示但不关闭窗口
       await showHUD("JSON data copied to clipboard and saved to desktop");
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Export Failed",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Export Failed" });
     }
   };
 

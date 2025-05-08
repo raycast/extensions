@@ -1,15 +1,21 @@
 # Quick Prompt
 
-一个用于 Raycast 的高效提示词（Prompt）管理与快速输入扩展，支持创建、编辑、删除、启用/禁用和快速插入自定义 Prompt，极大提升日常文本输入和自动化效率。
+[English](./README_en.md) | 中文
+
+<p align="center">
+  <img src="./assets/extension-icon.png" alt="Quick Prompt Logo" width="128" style="background: transparent;">
+</p>
+
+一款为 **Raycast** 打造的高效提示词（Prompt）管理与快捷输入扩展，集成快捷输入、创建、编辑、删除、启用/禁用等全方位功能，并且支持本地文件与远程 URL 数据同步，让提示词管理及输入更加便捷高效。
+
+> 由于[浏览器插件版 Quick Prompt](https://github.com/wenyuanw/quick-prompt) 存在一定使用限制，所以我开发了这款 Raycast 扩展，实现在任意 AI 应用和网页中的提示词快速插入。秉承"一处管理，处处可用"的理念，完美兼容浏览器插件数据格式，支持通过相同 JSON 结构进行无缝数据迁移。
 
 ## 功能特性
 
-- 🚀 **快速插入 Prompt**：在任意应用中一键粘贴或复制已启用的 Prompt 内容。
+- 🚀 **快速插入 Prompt**：在任意应用中一键插入或复制已启用的 Prompt 内容。
 - 🗂️ **Prompt 管理**：支持创建、编辑、删除、启用/禁用 Prompt，并可通过标签和关键词进行筛选与搜索。
-- ✍️ **保存选中文本为 Prompt**：直接将当前选中的文本内容保存为新的 Prompt，便于知识沉淀和复用。
-- 🏷️ **标签管理**：为每个 Prompt 添加标签，便于分类和检索。
-- 🌗 **启用/禁用切换**：可随时切换 Prompt 的启用状态，灵活管理常用与临时 Prompt。
-- 📝 **空视图友好引导**：无数据或无匹配结果时，界面会引导用户快速创建新 Prompt。
+- ✍️ **快捷保存选中文本为 Prompt**：在任意应用中将当前选中的文本内容保存为新的 Prompt，便于知识沉淀和复用。
+- 📤 **导入/导出功能**：支持将 Prompt 导出为 JSON 文件，也可从本地文件或远程 URL 导入 Prompt 数据，方便在多设备间同步和备份。
 
 ## 安装方法
 
@@ -32,7 +38,7 @@
 ### 2. 管理 Prompt
 
 - 触发命令：`Manage Prompt`
-- 功能：管理所有 Prompt（包括已禁用的），支持创建、编辑、删除、切换启用状态、标签筛选等。
+- 功能：管理所有 Prompt（包括已禁用的），支持创建、编辑、删除、切换启用状态、导入、导出等。
 
 ### 3. 保存选中文本为 Prompt
 
@@ -44,19 +50,13 @@
 - 字段包括：标题、内容、标签（逗号分隔）、启用状态。
 - 支持表单校验与便捷交互。
 
-## 数据结构
+### 5. 导入/导出 Prompt
 
-每个 Prompt 包含如下字段：
-
-- `id`：唯一标识
-- `title`：标题
-- `content`：内容
-- `tags`：标签数组
-- `enabled`：是否启用
+- **导出功能**：将当前所有 Prompt 导出为 JSON 文件保存到桌面，并自动复制到剪贴板。
+- **导入功能**：支持从本地 JSON 文件或远程 URL 导入 Prompt 数据，自动合并重复项。
 
 ## 开发与构建
 
-- 依赖：[@raycast/api](https://www.npmjs.com/package/@raycast/api)、[@raycast/utils](https://www.npmjs.com/package/@raycast/utils)、[nanoid](https://www.npmjs.com/package/nanoid)
 - 开发命令：
   - `npm run dev`：开发模式
   - `npm run build`：构建扩展

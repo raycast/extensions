@@ -3,7 +3,7 @@ import { showToast, Toast } from "@raycast/api";
 import { CreatePromptForm } from "./components";
 import { getSelectedTextContent } from "./utils";
 import { nanoid } from "nanoid";
-import { useLocalStorage } from "@raycast/utils";
+import { useLocalStorage, showFailureToast } from "@raycast/utils";
 import { Prompt } from "./types";
 
 export default function Command() {
@@ -38,11 +38,7 @@ export default function Command() {
         setSelectedContent("");
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No text selected",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "No text selected" });
     }
   };
 

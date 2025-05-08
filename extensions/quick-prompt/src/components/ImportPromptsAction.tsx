@@ -4,6 +4,7 @@ import * as fs from "fs/promises";
 import { useState } from "react";
 import fetch from "node-fetch";
 import { nanoid } from "nanoid";
+import { showFailureToast } from "@raycast/utils";
 
 interface ImportPromptsActionProps {
   onImport: (prompts: Prompt[]) => void;
@@ -90,11 +91,7 @@ function ImportForm({ onImport, currentPrompts = [] }: ImportPromptsActionProps)
 
     // 验证输入
     if (importMethod === "file" && (!filePath || filePath.length === 0)) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Import Failed",
-        message: "Please select a file",
-      });
+      showFailureToast("Please select a file", { title: "Import Failed" });
       return;
     }
 
@@ -162,11 +159,7 @@ function ImportForm({ onImport, currentPrompts = [] }: ImportPromptsActionProps)
         message: `Imported ${validPrompts.length} prompts (Added: ${stats.added}, Updated: ${stats.updated})`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Import Failed",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Import Failed" });
     } finally {
       setIsImporting(false);
     }
