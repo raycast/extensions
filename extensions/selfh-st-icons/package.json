@@ -23,7 +23,6 @@
   "commands": [
     {
       "name": "icons",
-      "subtitle": "Selfh.st",
       "title": "Find Selfh.st Icons",
       "description": "Search and browse through self-hosted icons from selfh.st",
       "mode": "view"
