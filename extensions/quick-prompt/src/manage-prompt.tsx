@@ -92,6 +92,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchText={state.searchText}
+      searchBarPlaceholder="Search prompts"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Prompt List"

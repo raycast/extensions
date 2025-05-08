@@ -53,6 +53,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchText={state.searchText}
+      searchBarPlaceholder="Search prompts"
       filtering={false}
       onSearchTextChange={(newValue) => {
         setState((previous) => ({ ...previous, searchText: newValue }));
