@@ -1,17 +1,18 @@
 import { useEffect, useRef } from "react";
 import { Form, Action, ActionPanel, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
+import { PromptFormValues } from "../types";
 
 export function CreatePromptForm(props: {
   defaultTitle?: string;
-  onCreate: (values: { title: string; content: string; tags: string; enabled: boolean }) => void;
+  onCreate: (values: PromptFormValues) => void;
   selectedText?: string;
   isLoading?: boolean;
 }) {
   const { onCreate, defaultTitle = "", selectedText, isLoading = false } = props;
   const { pop } = useNavigation();
   const { handleSubmit, setValue, itemProps } = useForm({
-    onSubmit: (values: { title: string; content: string; tags: string; enabled: boolean }) => {
+    onSubmit: (values: PromptFormValues) => {
       onCreate(values);
       pop();
     },

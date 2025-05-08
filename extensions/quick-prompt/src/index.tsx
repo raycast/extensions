@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { nanoid } from "nanoid";
 import { ActionPanel, Icon, List, Action } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
-import { Prompt } from "./types";
+import { Prompt, PromptFormValues } from "./types";
 import { CreatePromptAction, EmptyView } from "./components";
 
 type State = {
@@ -15,7 +15,7 @@ export default function Command() {
   });
   const { value: prompts, setValue: setPrompts, isLoading } = useLocalStorage<Prompt[]>("prompts");
 
-  const handleCreate = (values: { title: string; content: string; tags: string; enabled: boolean }) => {
+  const handleCreate = (values: PromptFormValues) => {
     setPrompts([
       {
         id: nanoid(),

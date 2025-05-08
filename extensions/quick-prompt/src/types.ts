@@ -15,3 +15,10 @@ export interface Prompt {
    */
   enabled: boolean;
 }
+
+export type PromptFormValues = {
+  title: string;
+  content: string;
+  tags: string;
+  enabled: boolean;
+};

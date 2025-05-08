@@ -1,5 +1,5 @@
 import { Form, Action, ActionPanel, useNavigation } from "@raycast/api";
-import { Prompt } from "../types";
+import { Prompt, PromptFormValues } from "../types";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 
@@ -7,7 +7,7 @@ export function EditPromptForm(props: { prompt: Prompt; onEdit: (prompt: Prompt)
   const { prompt, onEdit } = props;
   const { pop } = useNavigation();
   const { handleSubmit, itemProps, setValue } = useForm({
-    onSubmit: (values: { title: string; content: string; tags: string; enabled: boolean }) => {
+    onSubmit: (values: PromptFormValues) => {
       onEdit({
         ...prompt,
         title: values.title,

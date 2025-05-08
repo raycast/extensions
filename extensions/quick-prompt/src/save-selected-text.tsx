@@ -4,20 +4,20 @@ import { CreatePromptForm } from "./components";
 import { getSelectedTextContent } from "./utils";
 import { nanoid } from "nanoid";
 import { useLocalStorage, showFailureToast } from "@raycast/utils";
-import { Prompt } from "./types";
+import { Prompt, PromptFormValues } from "./types";
 
 export default function Command() {
   const [selectedContent, setSelectedContent] = useState("");
   const { value: prompts, setValue: setPrompts, isLoading } = useLocalStorage<Prompt[]>("prompts");
 
-  const handleCreate = (values: { title: string; content: string; tags: string; enabled: boolean }) => {
+  const handleCreate = (values: PromptFormValues) => {
     setPrompts([
       ...(prompts ?? []),
       {
         id: nanoid(),
         title: values.title,
         content: values.content,
-        tags: values.tags.split(","),
+        tags: values.tags.split(",").filter((tag) => tag.trim() !== ""),
         enabled: values.enabled,
       },
     ]);

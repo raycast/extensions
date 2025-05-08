@@ -1,5 +1,5 @@
 import { ActionPanel, List } from "@raycast/api";
-import { Filter, Prompt } from "../types";
+import { Filter, Prompt, PromptFormValues } from "../types";
 import { CreatePromptAction } from "./CreatePromptAction";
 import { ImportPromptsAction } from "./ImportPromptsAction";
 
@@ -7,7 +7,7 @@ export function EmptyView(props: {
   prompts: Prompt[];
   filter?: Filter;
   searchText: string;
-  onCreate: (values: { title: string; content: string; tags: string; enabled: boolean }) => void;
+  onCreate: (values: PromptFormValues) => void;
   onImport?: (prompts: Prompt[]) => void;
   currentPrompts?: Prompt[];
 }) {
