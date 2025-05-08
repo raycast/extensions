@@ -12,7 +12,6 @@ import {
   formatFileContents,
   AI_INSTRUCTION_CONTENT,
   AI_ANALYSIS_GUIDE_CONTENT,
-  bytesToKB,
   bytesToMB,
   formatFileSizeKB,
 } from "./constants";
