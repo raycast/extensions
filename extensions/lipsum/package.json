@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lipsum",
-  "title": "Lorem Ipsum Generator",
-  "description": "Generate English / Japanese dummy text",
+  "title": "Japanese Lorem Ipsum Generator",
+  "description": "Generate Japanese / English dummy text",
   "icon": "extension-icon.png",
   "author": "seita1996",
   "categories": [
@@ -52,7 +52,7 @@
       "description": "Default language for dummy text generation",
       "type": "dropdown",
       "required": false,
-      "default": "en",
+      "default": "ja",
       "data": [
         { "title": "Japanese", "value": "ja" },
         { "title": "English", "value": "en" }
