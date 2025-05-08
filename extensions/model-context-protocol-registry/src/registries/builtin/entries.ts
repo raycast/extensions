@@ -522,7 +522,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
   {
     name: "firebase",
     title: "Firebase",
-    description: "Firebase MCP enables AI assistants to work directly with Firebase services, including:",
+    description: "Firebase MCP enables AI assistants to work directly with Firebase services.",
     icon: "https://svgl.app/library/firebase.svg",
     homepage: "https://github.com/gannonh/firebase-mcp",
     configuration: {

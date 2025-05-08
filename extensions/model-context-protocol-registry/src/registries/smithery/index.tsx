@@ -162,7 +162,7 @@ function InstallServerAction(props: { server: Server }) {
     return (
       <Action.Push
         icon={Icon.ArrowDownCircle}
-        title="Configure MCP Server"
+        title="Configure Mcp Server"
         target={<ConfigureServerForm connection={firstConnection} server={props.server} />}
       />
     );

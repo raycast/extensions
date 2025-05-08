@@ -27,21 +27,21 @@ export function InstallServerToClientAction(props: { registryEntry: RegistryEntr
       if (application) {
         await restartApplication(application);
       }
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Installed server",
+        primaryAction: {
+          title: "Open AI Chat",
+          shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+          onAction: async () => {
+            await addTextToAIChat("");
+          },
+        },
+      });
     } catch (e) {
       await showFailureToast(e, { title: "Failed installing server" });
     }
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Installed server",
-      primaryAction: {
-        title: "Open AI Chat",
-        shortcut: { modifiers: ["cmd", "shift"], key: "o" },
-        onAction: async () => {
-          await addTextToAIChat("");
-        },
-      },
-    });
   }
 
   return (

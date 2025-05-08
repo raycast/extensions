@@ -55,7 +55,7 @@ export function writeMCPConfig(client: MCPClient, additionalConfig: MCPConfig) {
     mkdirSync(configDir, { recursive: true });
   }
 
-  let existingConfig: Record<string, unknown> = {
+  let existingConfig: MCPConfig = {
     mcpServers: {},
   };
 
