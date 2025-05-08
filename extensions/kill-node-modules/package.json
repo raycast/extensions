@@ -36,7 +36,7 @@
       "name": "scanDepth",
       "title": "Scan Depth",
       "type": "dropdown",
-      "description": "This is the depth of the scan. Leave blank to search the entire system.",
+      "description": "This is the depth of the scan.",
       "placeholder": "Scan Depth",
       "required": true,
       "default": "3",
