@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jira-search-self-hosted",
-  "title": "Jira Search (self-hosted)",
+  "title": "Jira Search (Self-Hosted)",
   "description": "Search for Jira issues (more tolerant and powerful than built-in), projects, and boards on Jira Server instances.",
   "icon": "command-icon.png",
   "author": "emanguy",
@@ -19,28 +19,28 @@
     {
       "name": "issue",
       "title": "Search Issues",
-      "subtitle": "Jira Search (Self-hosted)",
+      "subtitle": "Jira Search (Self-Hosted)",
       "description": "Search Jira issues by text, type and project",
       "mode": "view"
     },
     {
       "name": "open-issues",
       "title": "Open Issues",
-      "subtitle": "Jira Search (Self-hosted)",
+      "subtitle": "Jira Search (Self-Hosted)",
       "description": "Search Jira issues assigned to current user by text, type and project",
       "mode": "view"
     },
     {
       "name": "board",
       "title": "Search Boards",
-      "subtitle": "Jira Search (Self-hosted)",
+      "subtitle": "Jira Search (Self-Hosted)",
       "description": "Search Jira boards by title",
       "mode": "view"
     },
     {
       "name": "project",
       "title": "Search Projects",
-      "subtitle": "Jira Search (Self-hosted)",
+      "subtitle": "Jira Search (Self-Hosted)",
       "description": "Search Jira projects by title",
       "mode": "view"
     }
