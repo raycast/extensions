@@ -42,8 +42,7 @@ export default function BackupData() {
                 try {
                   fs.writeFileSync(target + "/" + filename, content);
                   showToast(Toast.Style.Success, `Backed up ${count} app${count > 1 ? "s" : ""}`);
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                } catch (e) {
+                } catch {
                   showToast(Toast.Style.Failure, "Unable to create backup");
                 }
               }

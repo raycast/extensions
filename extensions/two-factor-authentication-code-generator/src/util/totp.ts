@@ -63,8 +63,7 @@ export function generateTOTP(key: string, options: Options): number {
 export function parse(value: string): { secret: string; options: Options; lastTimeUsed?: number } {
   try {
     return JSON.parse(value);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e) {
+  } catch {
     return { secret: value, options: DEFAULT_OPTIONS, lastTimeUsed: new Date().getTime() };
   }
 }
@@ -118,8 +117,7 @@ export function parseOtpUrl(url: string): ParseOtpUrlResult {
 
     const options: Options = { digits, period, algorithm };
     return { success: true, data: { name, data: { secret, options } } };
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e) {
+  } catch {
     return { success: false, data: "Unable to parse URL" };
   }
 }
