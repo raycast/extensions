@@ -31,9 +31,7 @@
     "@raycast/utils": "^1.19.1",
     "@types/json-schema": "^7.0.15",
     "execa": "^9.5.2",
-    "npm-run-path": "^6.0.0",
-    "numeral": "^2.0.6",
-    "zod": "^3.24.2"
+    "numeral": "^2.0.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
