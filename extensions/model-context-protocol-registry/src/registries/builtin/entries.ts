@@ -378,7 +378,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://github.com/pydantic/logfire-mcp",
     configuration: {
       command: "uvx",
-      args: ["logfire-mcp", "--read-token=YOUR_TOKEN_HERE "],
+      args: ["logfire-mcp", "--read-token=YOUR_TOKEN_HERE"],
     },
   },
   {
