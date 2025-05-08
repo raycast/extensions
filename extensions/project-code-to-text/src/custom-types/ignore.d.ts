@@ -5,7 +5,7 @@ declare module "ignore" {
     filter(paths: string[]): string[];
     ignores(pathname: string): boolean;
     createFilter(): (pathname: string) => boolean;
-    // Добавьте другие методы, которые вы используете, если они есть
+    // Add other methods that you use, if any
   }
   interface IgnoreFactory {
     (): Ignore;
