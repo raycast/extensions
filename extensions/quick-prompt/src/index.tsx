@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { nanoid } from "nanoid";
 import { ActionPanel, Icon, List, Action } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
@@ -33,10 +33,10 @@ export default function Command() {
   };
 
   // 只展示启用的 prompt
-  const enabledPrompts = prompts?.filter((prompt) => prompt.enabled) ?? [];
+  const enabledPrompts = useMemo(() => prompts?.filter((prompt) => prompt.enabled) ?? [], [prompts]);
 
   // 自定义过滤逻辑，匹配 title、content 和 tags
-  const filteredPrompts = (() => {
+  const filteredPrompts = useMemo(() => {
     if (!state.searchText) return enabledPrompts;
 
     const searchText = state.searchText.toLowerCase();
@@ -47,14 +47,13 @@ export default function Command() {
 
       return titleMatch || contentMatch || tagsMatch;
     });
-  })();
+  }, [enabledPrompts, state.searchText]);
 
   return (
     <List
       isLoading={isLoading}
       searchText={state.searchText}
       searchBarPlaceholder="Search prompts"
-      filtering={false}
       onSearchTextChange={(newValue) => {
         setState((previous) => ({ ...previous, searchText: newValue }));
       }}

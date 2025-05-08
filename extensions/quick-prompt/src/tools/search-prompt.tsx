@@ -12,5 +12,9 @@ export default async function tool(input: Input) {
   const data = await LocalStorage.getItem<string>("prompts");
   const prompts: Prompt[] = JSON.parse(data || "[]");
 
-  return prompts.filter((prompt) => prompt.title.includes(input.keyword) || prompt.content.includes(input.keyword));
+  return prompts.filter(
+    (prompt) =>
+      prompt.title.toLowerCase().includes(input.keyword.toLowerCase()) ||
+      prompt.content.toLowerCase().includes(input.keyword.toLowerCase()),
+  );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Form, Action, ActionPanel, useNavigation } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { FormValidation, useForm } from "@raycast/utils";
 
 export function CreatePromptForm(props: {
   defaultTitle?: string;
@@ -15,8 +15,13 @@ export function CreatePromptForm(props: {
       onCreate(values);
       pop();
     },
+    validation: {
+      title: FormValidation.Required,
+      content: FormValidation.Required,
+    },
   });
   const hasSetContent = useRef(false);
+  const hasSetTitle = useRef(false);
 
   useEffect(() => {
     if (selectedText && !hasSetContent.current) {
@@ -24,6 +29,15 @@ export function CreatePromptForm(props: {
       hasSetContent.current = true;
     }
   }, [selectedText]);
+
+  useEffect(() => {
+    if (hasSetTitle.current && !defaultTitle) {
+      return;
+    }
+
+    setValue("title", defaultTitle);
+    hasSetTitle.current = true;
+  }, [defaultTitle]);
 
   return (
     <Form
@@ -34,8 +48,14 @@ export function CreatePromptForm(props: {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" defaultValue={defaultTitle} title="Title" />
-      <Form.TextArea title="Content" {...itemProps.content} />
+      <Form.TextField
+        defaultValue={defaultTitle}
+        title="Title"
+        placeholder="Enter a title for the prompt"
+        {...itemProps.title}
+      />
+      <Form.TextArea title="Content" {...itemProps.content} placeholder="Enter the content of the prompt" />
+      <Form.TextField title="Tags" placeholder="split by comma, eg: tag1,tag2" {...itemProps.tags} />
       <Form.TextField id="tags" title="Tags" placeholder="split by comma, eg: tag1,tag2" />
       <Form.Checkbox id="enabled" defaultValue={true} title="Enabled" label="Enabled" />
     </Form>

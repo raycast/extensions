@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { nanoid } from "nanoid";
 import { ActionPanel, Icon, List, Action } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
@@ -63,7 +63,7 @@ export default function Command() {
   };
 
   // 根据过滤条件获取 prompts
-  const filterByCategory = () => {
+  const promptsFilteredByCategory = useMemo(() => {
     if (state.filter === Filter.Enabled) {
       return prompts?.filter((prompt) => prompt.enabled) ?? [];
     }
@@ -71,11 +71,10 @@ export default function Command() {
       return prompts?.filter((prompt) => !prompt.enabled) ?? [];
     }
     return prompts ?? [];
-  };
+  }, [prompts, state.filter]);
 
   // 根据搜索文本过滤
-  const filteredPrompts = (() => {
-    const promptsFilteredByCategory = filterByCategory();
+  const filteredPrompts = useMemo(() => {
     if (!state.searchText) return promptsFilteredByCategory;
 
     const searchText = state.searchText.toLowerCase();
@@ -86,7 +85,7 @@ export default function Command() {
 
       return titleMatch || contentMatch || tagsMatch;
     });
-  })();
+  }, [promptsFilteredByCategory, state.searchText]);
 
   return (
     <List
@@ -104,7 +103,6 @@ export default function Command() {
           <List.Dropdown.Item title="Disabled" value={Filter.Disabled} icon={Icon.EyeDisabled} />
         </List.Dropdown>
       }
-      filtering={false}
       onSearchTextChange={(newValue) => {
         setState((previous) => ({ ...previous, searchText: newValue }));
       }}

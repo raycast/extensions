@@ -14,18 +14,21 @@
     {
       "name": "index",
       "title": "Apply Prompt",
+      "subtitle": "Apply a prompt in the current application",
       "description": "Apply a prompt in the current application",
       "mode": "view"
     },
     {
       "name": "manage-prompt",
       "title": "Manage Prompt",
+      "subtitle": "Manage all prompts, including create, edit, delete",
       "description": "Manage all prompts, including create, edit, delete",
       "mode": "view"
     },
     {
       "name": "save-selected-text",
       "title": "Save Selected Text",
+      "subtitle": "Save selected text as a prompt",
       "description": "Save selected text as a prompt",
       "mode": "view"
     }
@@ -57,6 +60,73 @@
       "description": "Edits an existing prompt"
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input" : "@quick-prompt list all prompts",
+        "mocks" : {
+          "get-prompts" : [
+            {
+              "content" : "Test Prompt Content 2",
+              "enabled" : true,
+              "id" : "pEPdeXdzohxULUJl0ebI6",
+              "tags" : [
+                "tag1",
+                "tag2"
+              ],
+              "title" : "Test Prompt 2"
+            },
+            {
+              "content" : "Test prompt content 1",
+              "enabled" : true,
+              "id" : "dsIX1HNDPaPRBfYHuId2Y",
+              "tags" : [
+                "tag1"
+              ],
+              "title" : "Test prompt 1"
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "status" : "all"
+              },
+              "name" : "get-prompts"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@quick-prompt find a prompt about book",
+        "mocks" : {
+          "search-prompt" : [
+            {
+              "content" : "Randomly recommend a book for programming learning",
+              "enabled" : true,
+              "id" : "pEPdeXdzohxULUJl0ebI6",
+              "tags" : [
+                "tag1",
+                "tag2"
+              ],
+              "title" : "Book Recommendation"
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "keyword" : "book"
+              },
+              "name" : "search-prompt"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.97.0",
     "@raycast/utils": "^1.17.0",
