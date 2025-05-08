@@ -1,5 +1,9 @@
 # Clockify Changelog
 
+## [Autofocus description field] - {PR_MERGE_DATE}
+
+- Autofocus description field in "Start New Timer" view.
+
 ## [Fix description requirement] - 2025-04-11
 
 - Made description on new tasks optional.
