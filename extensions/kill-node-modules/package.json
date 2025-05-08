@@ -27,7 +27,7 @@
       "name": "rootFolder",
       "title": "Folder to scan",
       "type": "directory",
-      "description": "This is where we will search for node modules. Leave blank to search the entire system.",
+      "description": "This is where we will search for node modules.",
       "placeholder": "Folder to scan",
       "required": true,
       "default": ""
