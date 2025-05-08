@@ -3,7 +3,7 @@
   "name": "selfh-st-icons",
   "title": "Selfh.st Icons",
   "description": "Find and use self-hosted icons from selfh.st service",
-  "icon": "store/icon.png",
+  "icon": "icon.png",
   "author": "greirson",
   "categories": ["Design Tools", "Developer Tools"],
   "license": "MIT",
