@@ -2,7 +2,7 @@
 
 ![Project Code to Text Command Screenshot](./metadata/project-code-to-text-1.png) 
 
-Ever needed to quickly grab all the code from a project, neatly packaged into one text file? This Raycast extension does just that! It's perfect for feeding your codebase to AI tools, creating an archive, or just having everything sintomi for easy sharing and review.
+Ever needed to quickly grab all the code from a project, neatly packaged into one text file? This Raycast extension does just that! It's perfect for feeding your codebase to AI tools, creating an archive, or just having everything in one place for easy sharing and review.
 
 ## What It Does
 
