@@ -28,9 +28,7 @@ import type { FileProcessorConfig } from "./types";
  * Currently not using any specific launch context properties here directly,
  * but good to have for potential future use.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface CommandLaunchProps extends LaunchProps {} // Corrected: no-empty-object-type if LaunchProps is already an empty object, or add a comment if it's intentional.
-// If LaunchProps itself can be empty, this is fine. Raycast's LaunchProps is not empty.
+interface CommandLaunchProps extends LaunchProps<{ arguments: LaunchType.View }> {}
 
 /**
  * Represents the overall state of the command's UI and logic.
