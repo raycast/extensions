@@ -1077,6 +1077,7 @@
   "reckoning-dev/mldocs": "mldocs",
   "kawamataryo/mochi": "mochi",
   "eviscares/moco": "moco",
+  "raycast/model-context-protocol-registry": "model-context-protocol-registry",
   "isfeng/modify-hash": "modify-hash",
   "soradotwav/modrinth": "modrinth",
   "legenden/modrinth-search": "modrinth-search",
