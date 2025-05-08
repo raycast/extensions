@@ -12,6 +12,9 @@ import {
   formatFileContents,
   AI_INSTRUCTION_CONTENT,
   AI_ANALYSIS_GUIDE_CONTENT,
+  bytesToKB,
+  bytesToMB,
+  formatFileSizeKB,
 } from "./constants";
 import type { ProjectEntry, ProcessDirectoryOptions, FileProcessorConfig } from "./types";
 import { Stats } from "fs";
@@ -79,11 +82,11 @@ function getFileLanguage(filePath: string): string {
  * @returns The file content as a string, or a message indicating why it's not included.
  */
 async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes: number): Promise<string> {
-  const fileSizeKB = (stats.size / 1024).toFixed(1);
-  const maxAllowedSizeMB = (maxFileSizeBytes / 1024 / 1024).toFixed(2);
+  const fileSizeKB = formatFileSizeKB(stats.size);
+  const maxAllowedSizeMB = bytesToMB(maxFileSizeBytes).toFixed(2);
 
   if (stats.size > maxFileSizeBytes) {
-    return `[File content omitted: Size (${fileSizeKB} KB) exceeds maximum allowed (${maxAllowedSizeMB} MB)]`;
+    return `[File content omitted: Size (${fileSizeKB}) exceeds maximum allowed (${maxAllowedSizeMB} MB)]`;
   }
   if (stats.size === 0) {
     return "[File is empty]";
@@ -101,12 +104,12 @@ async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes:
       !ALWAYS_TEXT_EXTENSIONS.includes(fileExtension) &&
       !ALWAYS_TEXT_EXTENSIONS.includes(fileName)
     ) {
-      return `[File content omitted: Detected as non-text or binary (MIME: ${mimeType}). Size: ${fileSizeKB} KB]`;
+      return `[File content omitted: Detected as non-text or binary (MIME: ${mimeType}). Size: ${fileSizeKB}]`;
     }
   } else {
     // If MIME type is unknown, rely solely on ALWAYS_TEXT_EXTENSIONS
     if (!ALWAYS_TEXT_EXTENSIONS.includes(fileExtension) && !ALWAYS_TEXT_EXTENSIONS.includes(fileName)) {
-      return `[File content omitted: Unknown file type or potentially binary (extension: ${fileExtension}). Size: ${fileSizeKB} KB]`;
+      return `[File content omitted: Unknown file type or potentially binary (extension: ${fileExtension}). Size: ${fileSizeKB}]`;
     }
   }
 
@@ -122,7 +125,7 @@ async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes:
     }
     if (nullBytes > 10 && nullBytes / sampleLength > 0.05) {
       // Threshold: >10 NULLs and >5% of sample
-      return `[File content omitted: Potentially binary (detected excessive NULL bytes). Size: ${fileSizeKB} KB]`;
+      return `[File content omitted: Potentially binary (detected excessive NULL bytes). Size: ${fileSizeKB}]`;
     }
     // Normalize line endings to LF for consistency
     content = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
@@ -137,7 +140,7 @@ async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes:
       console.error(
         `Failed to read file ${filePath} with both UTF-8 and Latin-1. Error: ${(eLatin1 as Error).message}`,
       );
-      return `[File content omitted: Could not read file content (tried UTF-8 and Latin-1). Size: ${fileSizeKB} KB. Error: ${(
+      return `[File content omitted: Could not read file content (tried UTF-8 and Latin-1). Size: ${fileSizeKB}. Error: ${(
         eLatin1 as Error
       ).message.substring(0, 100)}]`;
     }
@@ -187,8 +190,11 @@ async function processDirectoryRecursive(options: ProcessDirectoryOptions): Prom
 
       if (dirent.isDirectory()) {
         const children = await processDirectoryRecursive({
-          ...options, // Pass down options
+          projectRoot,
           currentPath: entryPath,
+          ignoreFilter,
+          maxFileSizeBytes,
+          onProgress,
         });
         // Include directory if it has non-ignored children or if it's explicitly un-ignored by a '!' rule.
         if (children.length > 0 || !ignoreFilter.ignores(pathToCheck)) {
@@ -263,7 +269,7 @@ export async function generateProjectCodeString(
   output += "<metadata>\n";
   output += `  Date created: ${new Date().toISOString()}\n`;
   output += `  Project root: ${projectRoot}\n`;
-  output += `  Max file size for content: ${(maxFileSizeBytes / 1024 / 1024).toFixed(2)} MB\n`;
+  output += `  Max file size for content: ${bytesToMB(maxFileSizeBytes).toFixed(2)} MB\n`;
   output += `  .gitignore used: ${gitignoreUsed ? "Yes" : "No"}\n`;
   output += `  AI instructions included: ${includeAiInstructions ? "Yes" : "No"}\n`;
   output += "</metadata>\n\n";
