@@ -1,4 +1,4 @@
-# lipsum
+# Japanese Lorem Ipsum Generator
 
 ![extension-icon](./assets/extension-icon.png)
 
