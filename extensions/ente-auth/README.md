@@ -15,11 +15,9 @@ The workflow uses Ente CLI to export your secrets from Ente Auth and then stashe
 - Tag Support: Displays tags associated with each TOTP secret.
 - Clipboard Actions: Allows users to copy the current and next TOTP codes to the clipboard with a single click.
 
-## Usage
+## 🚀 Setup
 
 > The Ente Auth [CLI](https://github.com/ente-io/ente/tree/main/cli) is required.
-
-## 🚀 Setup
 
 ### Homebrew (Recommended)
 
@@ -31,7 +29,7 @@ brew install ente-cli
 
 Once installed, verify the installation:
 
-```
+```bash
 ente version
 ```
 
