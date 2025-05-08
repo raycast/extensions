@@ -9,7 +9,7 @@ declare module "ignore" {
   }
   interface IgnoreFactory {
     (): Ignore;
-    default?: IgnoreFactory; // Для поддержки import ignore from 'ignore'
+    default?: IgnoreFactory; // For supporting import ignore from 'ignore'
   }
   const ignore: IgnoreFactory;
   export default ignore;
