@@ -263,6 +263,7 @@ export const ActionPanelForIcon: FC<Props> = ({
                   key={`copy-${variantKey}`}
                   title={`Copy ${variantLabel} ${label} URL`}
                   content={url}
+                  icon={Icon.Clipboard}
                 />,
                 <Action
                   key={`download-${variantKey}`}
@@ -284,6 +285,7 @@ export const ActionPanelForIcon: FC<Props> = ({
                       });
                     }
                   }}
+                  icon={Icon.Download}
                 />,
               ];
             })}

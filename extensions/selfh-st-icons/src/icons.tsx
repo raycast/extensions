@@ -289,6 +289,7 @@ const Command: FC = () => {
                 <Action
                   title="Open Preferences"
                   onAction={() => push(<PreferencesView />)}
+                  icon={Icon.Gear}
                 />
               </ActionPanel>
             }
@@ -301,6 +302,7 @@ const Command: FC = () => {
                 <Action.OpenInBrowser
                   title="Open Selfh.st"
                   url="https://selfh.st/"
+                  icon={Icon.Globe}
                 />
               </ActionPanel>
             }
@@ -314,6 +316,7 @@ const Command: FC = () => {
                   title="Refresh Icon Index"
                   onAction={() => loadIcons(true)}
                   shortcut={KEYBOARD_SHORTCUTS.REFRESH_INDEX}
+                  icon={Icon.RotateClockwise}
                 />
               </ActionPanel>
             }
