@@ -6,6 +6,7 @@ import { moveFile } from "./utils/fileOperations";
 import { LocationSuggestion } from "./utils/types";
 import path from "path";
 import { runAppleScript } from "run-applescript";
+import { showFailureToast } from "@raycast/utils";
 
 // Status enum to provide more granular loading states
 enum LoadingStatus {
@@ -68,51 +69,14 @@ async function getFilePath(): Promise<string | null> {
       await showToast(Toast.Style.Success, "Using file selected in Finder");
       return finderSelection;
     }
+    await showFailureToast(
+      "No file selected in Finder. Check Raycasts permissions, select a file in Finder and try again",
+    );
 
-    // If no file is selected in Finder, inform user to select a file
-    await showToast(Toast.Style.Animated, "Select a file to organize");
-
-    // Use the file picker as fallback
-    const selectedFile = await selectFile();
-    if (selectedFile) {
-      return selectedFile.path;
-    }
-
-    // User cancelled file picker
     return null;
   } catch (error) {
     console.error("Error with file picker:", error);
     await showToast(Toast.Style.Failure, "Could not select file", "Please try again");
-    return null;
-  }
-}
-
-/**
- * Shows a file picker dialog to select a file
- */
-async function selectFile(): Promise<{ path: string } | null> {
-  try {
-    // Using AppleScript to show a native file picker dialog
-    const result = await runAppleScript(`
-      set theFile to choose file with prompt "Select a file to organize"
-      return POSIX path of theFile
-    `);
-    const filePath = result.trim();
-    if (filePath) {
-      return { path: filePath };
-    }
-    return null;
-  } catch (error) {
-    // Check if this is a permissions error
-    const errorMessage = String(error);
-    if (errorMessage.includes("Not authorized") || errorMessage.includes("permission")) {
-      await showToast(
-        Toast.Style.Failure,
-        "Permission Required",
-        "This extension needs permission to run AppleScript. Check System Settings → Privacy & Security → Automation",
-      );
-    }
-
     return null;
   }
 }
@@ -174,7 +138,7 @@ export default function Command() {
 
         if (!filePath) {
           setStatus(LoadingStatus.ERROR);
-          setErrorMessage("No file selected");
+          setErrorMessage("No file selected. Check Raycasts permissions, select a file in Finder and try again");
           return;
         }
 
@@ -189,14 +153,14 @@ export default function Command() {
 
         // Update status to finding locations
         setStatus(LoadingStatus.FINDING_LOCATIONS);
-        await showToast(Toast.Style.Success, "Finding suitable locations...");
+        await showToast(Toast.Style.Success, `Finding suitable locations for ${path.basename(filePath)}...`);
 
         // Get location suggestions
         const suggestions = await Promise.race([
           suggestLocations(fileInfo),
           // add timeout to prevent running a long time on slow machines with big files systems
           new Promise<LocationSuggestion[]>((_, reject) =>
-            setTimeout(() => reject(new Error("Location suggestion timed out after 10 seconds")), 10000),
+            setTimeout(() => reject(new Error("Location suggestion timed out after 20 seconds")), 20000),
           ),
         ]);
 
