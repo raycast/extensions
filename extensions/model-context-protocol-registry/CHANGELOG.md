@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Chore: Fixed broken MCP links] - {PR_MERGE_DATE}
+## [Chore: Fixed broken MCP links] - 2025-05-09
 
 ## [Initial Version] - 2025-05-09
 
