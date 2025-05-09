@@ -18,6 +18,12 @@
       "title": "View MLB Scores",
       "description": "Get scores of today's MLB games.",
       "mode": "view"
+    },
+    {
+      "name": "searchPlayers",
+      "title": "Search MLB Players",
+      "description": "Search for MLB players by name",
+      "mode": "view"
     }
   ],
   "dependencies": {
