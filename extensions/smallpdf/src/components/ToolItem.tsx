@@ -6,6 +6,11 @@ export function ToolItem({ tool }: { tool: Tool }) {
     <List.Item
       title={tool.name}
       icon={{ source: tool.icon }}
+      accessories={[
+        {
+          text: tool.description,
+        },
+      ]}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={tool.url} title={`Open ${tool.name}`} />
