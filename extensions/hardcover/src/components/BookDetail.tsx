@@ -1,14 +1,5 @@
-import { Action, ActionPanel, Color, Detail, showToast, Toast, confirmAlert } from "@raycast/api";
-import {
-  addBookToList,
-  removeBookFromList,
-  removeBookStatus,
-  SearchBook,
-  TransformedListBook,
-  updateBookRating,
-  updateBookStatus,
-  UserBookStatusMapping,
-} from "../api/books";
+import { Action, ActionPanel, Color, Detail, showToast, Toast } from "@raycast/api";
+import { addBookToList, removeBookFromList, SearchBook, TransformedListBook, TransformedUserBook } from "../api/books";
 import {
   formatAuthors,
   formatSeriesPosition,
@@ -20,15 +11,19 @@ import {
 import useLists from "../hooks/useLists";
 import useGetUserBook from "../hooks/useGetUserBook";
 import { CurrentUser } from "../api/me";
-import { showFailureToast } from "@raycast/utils";
+import { MutatePromise } from "@raycast/utils";
+import BookStatusSubmenu from "./actions/BookStatusSubmenu";
+import BookRatingSubmenu from "./actions/BookRatingSubmenu";
+import DeleteBookAction from "./actions/DeleteBookAction";
 
 type BookDetailProps = {
   searchBook: SearchBook;
   me: CurrentUser | undefined;
   setListBooksState?: React.Dispatch<React.SetStateAction<TransformedListBook[]>>;
+  mutateUserBooks?: MutatePromise<TransformedUserBook[], undefined>;
 };
 
-export default function BookDetail({ searchBook, me, setListBooksState }: BookDetailProps) {
+export default function BookDetail({ searchBook, me, setListBooksState, mutateUserBooks }: BookDetailProps) {
   const { lists, isListLoading } = useLists();
   const { book, isBookLoading, mutateBook } = useGetUserBook(searchBook.id, me?.id || 0);
 
@@ -90,79 +85,23 @@ export default function BookDetail({ searchBook, me, setListBooksState }: BookDe
         <ActionPanel>
           <Action.OpenInBrowser title="View on Hardcover" url={`https://hardcover.app/books/${searchBook.slug}`} />
           <ActionPanel.Section>
-            <ActionPanel.Submenu title="Update Reading Status" isLoading={isBookLoading}>
-              {Object.entries(UserBookStatusMapping).map(([key, val]) => (
-                <Action
-                  key={key}
-                  title={val}
-                  onAction={async () => {
-                    try {
-                      showToast({
-                        style: Toast.Style.Animated,
-                        title: "Updating...",
-                      });
-                      await mutateBook(updateBookStatus(searchBook.id, Number(key)));
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Success",
-                        message: `Updated reading status to ${val}`,
-                      });
-                    } catch (error) {
-                      showFailureToast(error);
-                    }
-                  }}
-                />
-              ))}
-            </ActionPanel.Submenu>
-            <ActionPanel.Submenu title="Update Rating" isLoading={isBookLoading}>
-              {["Remove rating", 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5].map((rating) => (
-                <Action
-                  key={rating}
-                  title={String(rating)}
-                  onAction={async () => {
-                    try {
-                      showToast({
-                        style: Toast.Style.Animated,
-                        title: "Updating...",
-                      });
-                      const ratingValue = rating === "Remove rating" ? "" : rating;
-                      await mutateBook(updateBookRating(searchBook.id, ratingValue));
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Success",
-                        message: rating === "Remove rating" ? "Removed rating" : `Updated rating to ${rating} stars`,
-                      });
-                    } catch (error) {
-                      showFailureToast(error);
-                    }
-                  }}
-                />
-              ))}
-            </ActionPanel.Submenu>
+            <BookStatusSubmenu
+              isLoading={isBookLoading}
+              bookId={searchBook.id}
+              mutateBook={mutateBook}
+              mutateUserBooks={mutateUserBooks}
+            ></BookStatusSubmenu>
+            <BookRatingSubmenu
+              isLoading={isBookLoading}
+              bookId={searchBook.id}
+              mutateBook={mutateBook}
+            ></BookRatingSubmenu>
             {user_book_status && book ? (
-              <Action
-                title="Remove"
-                style={Action.Style.Destructive}
-                onAction={async () => {
-                  if (
-                    await confirmAlert({
-                      title: "Are you sure?",
-                      message: "This will remove your review, rating and status.",
-                    })
-                  ) {
-                    showToast({
-                      style: Toast.Style.Animated,
-                      title: "Removing...",
-                    });
-                    await mutateBook(removeBookStatus(book.user_books[0].id));
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: "Success",
-                      message: "Removed",
-                    });
-                  }
-                }}
-              />
+              <DeleteBookAction
+                userBookId={book.user_books[0].id}
+                mutateBook={mutateBook}
+                mutateUserBooks={mutateUserBooks}
+              ></DeleteBookAction>
             ) : null}
           </ActionPanel.Section>
 

@@ -19,6 +19,34 @@
       "mode": "view"
     },
     {
+      "name": "want-to-read-books",
+      "title": "Want to Read Books",
+      "subtitle": "Hardcover",
+      "description": "Get your books with want to read status and manage them",
+      "mode": "view"
+    },
+    {
+      "name": "currently-reading-books",
+      "title": "Currently Reading Books",
+      "subtitle": "Hardcover",
+      "description": "Get your books with currently reading status and manage them",
+      "mode": "view"
+    },
+    {
+      "name": "read-books",
+      "title": "Read Books",
+      "subtitle": "Hardcover",
+      "description": "Get your books with read status and manage them",
+      "mode": "view"
+    },
+    {
+      "name": "did-not-finish-books",
+      "title": "Did Not Finish Books",
+      "subtitle": "Hardcover",
+      "description": "Get your books with did not finish status and manage them",
+      "mode": "view"
+    },
+    {
       "name": "manage-lists",
       "title": "Manage Lists",
       "subtitle": "Hardcover",
