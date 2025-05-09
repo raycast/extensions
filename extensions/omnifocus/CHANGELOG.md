@@ -1,5 +1,12 @@
 # OmniFocus Changelog
 
+## [1.2.1] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Action name with double or single quotes no longer breaks the action creation
+- Defer dates and due dates are now properly assigned
+
 ## [1.2.0] - 2025-03-14
 
 ### Added
