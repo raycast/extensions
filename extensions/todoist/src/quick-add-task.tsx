@@ -1,7 +1,8 @@
 import { Clipboard, closeMainWindow, popToRoot, getPreferenceValues, LaunchProps, open, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-import { quickAddTask } from "./api";
+import { addLabel, quickAddTask } from "./api";
+import { extractLabels } from "./helpers/labels";
 import { getTaskAppUrl, getTaskUrl } from "./helpers/tasks";
 import { withTodoistApi } from "./helpers/withTodoistApi";
 import { isTodoistInstalled } from "./hooks/useIsTodoistInstalled";
@@ -18,6 +19,15 @@ async function QuickAddTask(props: QuickAddTaskProps) {
     if (preferences.shouldCloseMainWindow) {
       await closeMainWindow();
       popToRoot({ clearSearchBar: true });
+    }
+
+    if (preferences.autoCreateLabels && props.arguments.text) {
+      const labelsToCreate = extractLabels(props.arguments.text);
+      if (labelsToCreate.length > 0) {
+        await Promise.all(
+          labelsToCreate.map(async (label) => addLabel({ name: label }, { data: undefined, setData: () => {} })),
+        );
+      }
     }
 
     let text = props.arguments.text ?? props.fallbackText;

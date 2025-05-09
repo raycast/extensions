@@ -1,6 +1,40 @@
 # Anytype Changelog
 
-## [✨ AI Enhancements & Improvements] - 2025-03-XX
+## [Properties, Types & Tags] - 2025-05-07
+
+#### New Creation Options
+
+When browsing spaces, press `CMD+N` to create new objects, types, properties or tags.
+
+- Add ability to create new spaces
+- Add ability to create new types
+- Add ability to create new properties
+- Add ability to create new tags
+
+#### Edit Form Enhancements
+
+Use `CMD+E` to quickly edit the currently selected item - whether it's a space, object, type, property, or tag.
+
+- Add support for editing spaces
+- Add support for editing objects
+- Add support for editing types
+- Add support for editing properties
+- Add support for editing tags
+
+#### New Commands & Navigation
+
+- Add new command to add objects to lists
+- Pop back to list view when deleting object, with automatic refresh
+- List properties when browsing space
+- Browse tags for select/multi-select properties
+- Open bookmarks directly in browser
+
+#### Form Improvements
+
+- Allow custom properties (inherited from type) for object creation
+- Improve number and emoji validation logic in create form
+
+## [✨ AI Enhancements & Improvements] - 2025-04-22
 
 #### AI Extension
 

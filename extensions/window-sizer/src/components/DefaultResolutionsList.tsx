@@ -10,6 +10,7 @@ interface DefaultResolutionsListProps {
   onGetCurrentWindowSize: () => Promise<void>;
   onAddCustomResolution: () => Promise<void>;
   onMaximizeWindow: () => Promise<void>;
+  isLoading?: boolean;
 }
 
 /**
@@ -22,9 +23,10 @@ export function DefaultResolutionsList({
   onGetCurrentWindowSize,
   onAddCustomResolution,
   onMaximizeWindow,
+  isLoading = false,
 }: DefaultResolutionsListProps) {
   return (
-    <List searchBarPlaceholder="Search for sizes and commands..." navigationTitle="Window Sizer">
+    <List isLoading={isLoading} searchBarPlaceholder="Search for sizes and commands..." navigationTitle="Window Sizer">
       <ResolutionList
         resolutions={predefinedResolutions}
         onResizeWindow={onResizeWindow}
