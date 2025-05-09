@@ -31,7 +31,7 @@ export function SmitheryRegistry(props: RegistryProps) {
 function MissingAPIKey() {
   const markdown = `
   # Missing API Key
-  To use the Smithery MCP Regsitry, you need to add your pesonal API key to the command's preferences. 
+  To use the Smithery MCP Registry, you need to add your personal API key to the command's preferences.
 
   ![Missing API Key](smithery-missing-api-key.png)
   
