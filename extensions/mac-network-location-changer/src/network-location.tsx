@@ -52,14 +52,18 @@ export default function Command() {
   }, [fetchLocations]);
 
   const switchLocation = (name: string) => {
-    exec(`${SCSELECT} "${name}"`, (error) => {
-      if (error) {
-        showToast({ style: Toast.Style.Failure, title: "Failed to switch location" });
-      } else {
-        showToast({ style: Toast.Style.Success, title: `Switched to ${name}` });
-        fetchLocations();
-      }
-    });
+    try {
+      exec(`${SCSELECT} "${name}"`, (error) => {
+        if (error) {
+          showFailureToast(error, { title: "Failed to switch location" });
+        } else {
+          showToast({ style: Toast.Style.Success, title: `Switched to ${name}` });
+          fetchLocations();
+        }
+      });
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to switch location" });
+    }
   };
 
   if (error) {
