@@ -4,4 +4,4 @@ Remove invisible characters, weird spacing, and formatting quirks from ChatGPT o
 
 # Privacy
 
-We don't store any of the text you send through. We simply clean it and return it. We send stats back too on what we cleaned. We increment our stats counter in our storage which are just numbers.
+We don't store any of the text you send through. We simply clean it and return it. We will also return stats to you on what was cleaned. We increment global stats on our side, no user data or ids are read or stored.

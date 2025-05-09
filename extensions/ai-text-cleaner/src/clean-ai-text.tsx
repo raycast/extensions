@@ -10,7 +10,7 @@ import {
   Navigation,
   useNavigation,
 } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm, FormValidation, showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 
 interface CleaningStats {
@@ -122,11 +122,7 @@ export default function Command() {
           message: `Removed ${data.stats.totalRemoved} characters (${data.stats.percentReduction?.toFixed(2) || 0}%)`,
         });
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error Cleaning Text",
-          message: error instanceof Error ? error.message : String(error),
-        });
+        showFailureToast(error, { title: "Error Cleaning Text" });
       } finally {
         setIsLoading(false);
       }
