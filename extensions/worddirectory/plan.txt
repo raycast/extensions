@@ -1,0 +1,21 @@
+A. New Raycast Command:
+   - Create "Login to WordDirectory" command
+   - This will handle the OAuth flow with your web app
+
+B. Authentication Flow:
+   1. User triggers login command in Raycast
+   2. Opens system browser to WordDirectory login page
+   3. User logs in on the web app
+   4. Redirects back to Raycast with auth token
+   5. Store token securely in Raycast's local storage
+
+C. Required Components:
+   1. Web App Side:
+      - OAuth application configuration for Raycast client
+      - New OAuth redirect endpoint for Raycast
+      - Token generation/validation endpoints
+
+   2. Raycast Side:
+      - OAuth configuration (client ID, redirect URI)
+      - Token storage and management
+      - Session persistence
