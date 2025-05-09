@@ -1588,6 +1588,7 @@
 /extensions/search-blockchain                                       @gutenye
 /extensions/search-chatwork                                         @nagauta @xmok
 /extensions/search-composer-packagist                               @danyelkeddah @macbookandrew @xmok
+/extensions/search-domain                                           @hasanakay
 /extensions/search-hexpm                                            @jordelver
 /extensions/search-hookmark                                         @QIanGua
 /extensions/search-joplin-notes                                     @wisdom-plus
