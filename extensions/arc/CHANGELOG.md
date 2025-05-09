@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [New Features]
+
+- Added UnDuck search engine for the commands `Search Arc`, `Open New Little Arc Window` and `Open New Incognito Window`.
+
 ## [Improvements] - 2025-04-16
 
 - When opening a new incognito window, open a blank tab if no URL is given.
