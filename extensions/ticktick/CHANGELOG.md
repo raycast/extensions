@@ -1,5 +1,11 @@
 # TickTick Changelog
 
+## [Added] - 2025-05-03
+
+- Add AI natural language parsing for Quick Add Task command
+- Support automatic recognition of dates, priorities, and projects
+- Improve task creation success notifications with task titles
+
 ## [Improve] - 2024-11-21
 
 - `Add Task` command support selecting task priority.

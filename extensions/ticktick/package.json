@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ticktick",
   "title": "TickTick",
   "description": "Check and search tasks in TickTick via Raycast",
@@ -8,12 +9,42 @@
     "viduycheung",
     "Alireza",
     "yakitrak",
-    "ridemountainpig"
+    "ridemountainpig",
+    "zbqlovewxq"
   ],
   "license": "MIT",
   "categories": [
     "Productivity"
   ],
+  "ai": {
+    "instructions": "As a task parser, parse the natural language input into structured task data. Please follow these rules:\n- Keep task titles concise and clear\n- Don't add dates if not specified\n- Set as all-day task if no specific time is given\n- Priority: Use high priority when containing \"urgent\", \"important\" or exclamation mark\n- Project assignment: Support using # or @ symbol for projects, e.g. #work or @work\n- Time parsing:\n  - 'morning' defaults to '08:00'\n  - 'afternoon' defaults to '14:00'\n  - 'evening' defaults to '20:00'\n  - If specified time is earlier than current time and no date specified, assume tomorrow\n- Don't ask for optional information",
+    "evals": [
+      {
+        "input": "@ticktick meeting tomorrow at 3pm",
+        "expected": [
+          {
+            "meetsCriteria": "Task title is 'meeting', set for tomorrow at 3pm, not an all-day task"
+          }
+        ]
+      },
+      {
+        "input": "@ticktick #work prepare report due Friday!",
+        "expected": [
+          {
+            "meetsCriteria": "Task title is 'prepare report', added to work project, set high priority, due date is this Friday"
+          }
+        ]
+      },
+      {
+        "input": "@ticktick watch movie tonight at 8",
+        "expected": [
+          {
+            "meetsCriteria": "Task title is 'watch movie', set for tonight at 8pm, not an all-day task"
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "defaultTitle",
@@ -120,6 +151,24 @@
       "subtitle": "TickTick",
       "description": "Quick way to add task in TickTick.",
       "mode": "no-view",
+      "preferences": [
+        {
+          "name": "dontUseAI",
+          "type": "checkbox",
+          "label": "Don't use AI parsing",
+          "description": "When enabled, the input text will be directly used as the task title and added to the default list.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "label": "Close window after adding",
+          "description": "When enabled, the Raycast window will close immediately after the task is added.",
+          "default": true,
+          "required": false
+        }
+      ],
       "arguments": [
         {
           "name": "text",
@@ -130,7 +179,8 @@
         {
           "name": "description",
           "placeholder": "Description",
-          "type": "text"
+          "type": "text",
+          "required": false
         }
       ]
     }
@@ -138,6 +188,8 @@
   "dependencies": {
     "@raycast/api": "^1.36.0",
     "@raycast/utils": "^1.8.0",
+    "chrono-node": "^2.8.0",
+    "date-fns": "^3.6.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.44",

@@ -29,8 +29,9 @@ export const getSectionNameByDate = (date: Date) => {
 };
 
 export const formatToServerDate = (date: Date | moment.Moment | null | undefined) => {
-  if (date) return moment(date).utc().millisecond(0).format("YYYY-MM-DDTHH:mm:ss.SSSZZ");
-  return undefined;
+  if (!date) return undefined;
+  const localDate = moment(date);
+  return localDate.format("YYYY-MM-DDTHH:mm:ss.SSSZZ");
 };
 
 export const formatPrettyDateTime = (date: string, timezone: string, isFloating: boolean, isAllDay: boolean) => {
