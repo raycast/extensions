@@ -1,5 +1,9 @@
 # Dust.tt Changelog
 
+## [fixes] - 2025-05-05
+
+- Fix again the listing of agents.
+
 ## [fixes] - 2025-04-14
 
 - Upgrade dust-tt/client to fix the listing of agents.

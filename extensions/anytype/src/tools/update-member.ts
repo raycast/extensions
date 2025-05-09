@@ -55,11 +55,11 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     info: [
       {
         name: "Space",
-        value: s.space?.name,
+        value: s.space.name,
       },
       {
         name: "Name",
-        value: m.member?.name,
+        value: m.member.name,
       },
       {
         name: "New Role",

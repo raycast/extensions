@@ -11,16 +11,20 @@ export class ChromeActions {
   public static TabHistory = HistoryItemActions;
 }
 
-function NewTabActions({ query }: { query?: string }): ReactElement {
+function NewTabActions({ query, url }: { query?: string; url?: string }): ReactElement {
   const { openTabInProfile } = getPreferenceValues<Preferences>();
   const [profileCurrent] = useCachedState(CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID);
 
+  let actionTitle = "Open Empty Tab";
+  if (query) {
+    actionTitle = `Search "${query}"`;
+  } else if (url) {
+    actionTitle = `Open URL "${url}"`;
+  }
+
   return (
     <ActionPanel title="New Tab">
-      <Action
-        onAction={() => openNewTab({ query, profileCurrent, openTabInProfile })}
-        title={query ? `Search "${query}"` : "Open Empty Tab"}
-      />
+      <Action onAction={() => openNewTab({ url, query, profileCurrent, openTabInProfile })} title={actionTitle} />
     </ActionPanel>
   );
 }

@@ -1,13 +1,16 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "name": "lingo-rep-raycast",
   "title": "Lingorep - Translate, Repeat, Memorize",
   "description": "Translate, save and repeat translations to increase your vocabulary",
   "icon": "command-icon.png",
   "author": "oleksandr_oliynyk",
-  "categories": ["Web", "Productivity"],
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -27,7 +30,7 @@
   "dependencies": {
     "@raycast/api": "^1.92.1",
     "@raycast/utils": "^1.18.1",
-    "axios": "^1.8.4",
+    "axios": "1.7.9",
     "hono": "^4.4.2",
     "lodash": "^4.17.21",
     "zod": "3.23.8"
