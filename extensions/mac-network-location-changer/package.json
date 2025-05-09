@@ -16,7 +16,6 @@
     {
       "name": "network-location",
       "title": "Network Location",
-      "subtitle": "Change network location",
       "description": "Changes the network location",
       "mode": "view"
     }
