@@ -24,7 +24,15 @@ const getChatActions = (selectedChat: Chat, props: ChatViewProps) => {
   return (
     <ActionPanel>
       {question.length > 0 ? (
-        <PrimaryAction title="Get Grok's Answer" onAction={() => use.chats.ask(question, conversation.model)} />
+        <PrimaryAction
+          title="Get Grok's Answer"
+          onAction={() => {
+            const currentModel = models.find((m) => m.id === selectedModel);
+            if (currentModel) {
+              use.chats.ask(question, currentModel);
+            }
+          }}
+        />
       ) : showAnswerActions ? (
         <>
           <CopyActionSection answer={selectedChat.answer} question={selectedChat.question} />
@@ -40,7 +48,12 @@ const getChatActions = (selectedChat: Chat, props: ChatViewProps) => {
 
       <FormInputActionSection
         initialQuestion={question}
-        onSubmit={(question) => use.chats.ask(question, conversation.model)}
+        onSubmit={(question) => {
+          const currentModel = models.find((m) => m.id === selectedModel);
+          if (currentModel) {
+            use.chats.ask(question, currentModel);
+          }
+        }}
         models={models}
         selectedModel={selectedModel}
         onModelChange={onModelChange}

@@ -45,7 +45,7 @@ npm install
 npm run build
 
 # Install the extension
-npm run package
+npm run publish
 ```
 
 ## Configuration
