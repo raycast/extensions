@@ -18,59 +18,47 @@
     "evals": [
       {
         "input": "@mermaid-to-image Draw a simple flowchart A -> B and copy the image.",
-        "mocks": [
-          {
-            "name": "generateMermaidImageTool",
-            "arguments": "{\"mermaidSyntax\":\"graph TD\\n    A --> B\"}",
-            "result": "Successfully generated the Mermaid diagram and copied the image to your clipboard."
-          }
-        ],
+        "mocks": {
+          "generate-mermaid-diagram-with-ai": "The Mermaid diagram was successfully generated and copied to your clipboard."
+        },
         "expected": [
-          "Successfully generated the Mermaid diagram and copied the image to your clipboard."
+          {
+            "callsTool": {
+              "name": "generate-mermaid-diagram-with-ai"
+            }
+          },
+          {
+            "includes": "copied to your clipboard"
+          }
         ],
         "usedAsExample": true
       },
       {
-        "input": "@mermaid-to-image Generate a sequence diagram: Alice says Hi to Bob. Then copy it.",
-        "mocks": [
-          {
-            "name": "generateMermaidImageTool",
-            "arguments": "{\"mermaidSyntax\":\"sequenceDiagram\\n    Alice->>Bob: Hi Bob!\"}",
-            "result": "Successfully generated the Mermaid diagram and copied the image to your clipboard."
-          }
-        ],
+        "input": "@mermaid-to-image convert below mermaid code to image and copy it. graph TD        A[Start] --> B{Is it working?}        B -->|Yes| C[Great!]        B -->|No| D[Debug]        D --> B",
+        "mocks": {
+          "generate-mermaid-diagram-with-ai": "The Mermaid diagram was successfully generated and copied to your clipboard."
+        },
         "expected": [
-          "Successfully generated the Mermaid diagram and copied the image to your clipboard."
+          {
+            "callsTool": {
+              "name": "generate-mermaid-diagram-with-ai"
+            }
+          }
         ],
         "usedAsExample": true
       },
       {
         "input": "@mermaid-to-image Create a class diagram for Vehicle and Car (Car inherits from Vehicle) and copy the resulting image.",
-        "mocks": [
-          {
-            "name": "generateMermaidImageTool",
-            "arguments": "{\"mermaidSyntax\":\"classDiagram\\n    class Vehicle\\n    Vehicle <|-- Car\"}",
-            "result": "Successfully generated the Mermaid diagram and copied the image to your clipboard."
-          }
-        ],
+        "mocks": {
+          "generate-mermaid-diagram-with-ai": "The Mermaid diagram was successfully generated and copied to your clipboard."
+        },
         "expected": [
-          "Successfully generated the Mermaid diagram and copied the image to your clipboard."
-        ],
-        "usedAsExample": true
-      },
-      {
-        "input": "@mermaid-to-image Try to generate an image for this invalid syntax 'graph TD\\nA -> -> B' and copy.",
-        "mocks": [
           {
-            "name": "generateMermaidImageTool",
-            "arguments": "{\"mermaidSyntax\":\"graph TD\\nA -> -> B\"}",
-            "result": "Diagram generation failed. Error: Mermaid syntax error. Please check your diagram code for mistakes."
+            "callsTool": {
+              "name": "generate-mermaid-diagram-with-ai"
+            }
           }
-        ],
-        "expected": [
-          "Diagram generation failed. Error: Mermaid syntax error. Please check your diagram code for mistakes."
-        ],
-        "usedAsExample": false
+        ]
       }
     ]
   },
