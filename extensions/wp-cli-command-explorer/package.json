@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "wpcli",
-      "title": "Wordpress Wp-cli Commands",
+      "title": "WordPress WP-CLI Commands",
       "description": "Browse and search WP-CLI commands",
       "mode": "view"
     }
