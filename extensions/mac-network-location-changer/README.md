@@ -19,13 +19,13 @@ A Raycast extension to **list and switch between your macOS Network Locations** 
 
 | Overview                                                 | List of Locations/Switch Confirmation                      |
 |----------------------------------------------------------|------------------------------------------------------------|
-| ![List of Locations](screenshots/mac-network-location-changer-1.png) | ![Switch Confirmation](screenshots/mac-network-location-changer-2.png) |
+| ![List of Locations](metadata/mac-network-location-changer-1.png) | ![Switch Confirmation](metadata/mac-network-location-changer-2.png) |
 
 ---
 
 ## 🚀 How to Use
 
-1. Open Raycast and search for `Change Network Location`
+1. Open Raycast and search for `Network Location`
 2. Browse and select your desired network location
 3. Press `Enter` to switch
 4. Optionally, use the **Refresh** action to reload the list
@@ -47,7 +47,7 @@ A Raycast extension to **list and switch between your macOS Network Locations** 
 ### Manual (Development)
 
 ```bash
-git clone https://github.com/rfscouto/raycast-mac-network-location-changer.git
+git clone https://github.com/raycast/extensions.git
 cd raycast-mac-network-location-changer
 npm install
 raycast dev
