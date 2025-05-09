@@ -126,7 +126,7 @@ function CommandDetail({
   parentName: string;
   alwaysShowCopyAction?: boolean;
 }) {
-  const fullCommand = `${parentName} ${command.name}`.replace(/wp wp/, "wp");
+  const fullCommand = `${parentName} ${command.name}`.replace(/^wp wp/, "wp");
   let markdown = `# ${fullCommand}\n\n${command.description}`;
 
   // Prepare all examples (main + subcommands)
