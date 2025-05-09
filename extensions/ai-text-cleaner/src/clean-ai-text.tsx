@@ -112,9 +112,7 @@ export default function Command() {
 
         await Clipboard.copy(data.text);
 
-        push(
-          <CleaningResultDetail cleanedText={data.text} stats={data.stats} navigation={{ push, pop } as Navigation} />,
-        );
+        push(<CleaningResultDetail cleanedText={data.text} stats={data.stats} navigation={{ push, pop }} />);
 
         showToast({
           style: Toast.Style.Success,
