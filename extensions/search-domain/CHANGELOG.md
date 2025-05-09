@@ -1,6 +1,6 @@
 # Search Domain Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-05-09
 
 - Domain name search functionality with automatic TLD completion
 - Real-time domain availability check
