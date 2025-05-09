@@ -600,4 +600,16 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       },
     },
   },
+  {
+    name: "sushimcp",
+    title: "SushiMCP",
+    icon: "sushimcp.png",
+    description:
+      "SushiMCP assists developers with delivering context and up to date docs to their AI IDE's.",
+    homepage: "https://sushimcp.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@chriswhiterocks/sushimcp@latest"],
+    },
+  },
 ];
