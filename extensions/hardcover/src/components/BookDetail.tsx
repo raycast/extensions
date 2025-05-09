@@ -25,7 +25,7 @@ type BookDetailProps = {
 
 export default function BookDetail({ searchBook, me, setListBooksState, mutateUserBooks }: BookDetailProps) {
   const { lists, isListLoading } = useLists();
-  const { book, isBookLoading, mutateBook } = useGetUserBook(searchBook.id, me?.id || 0);
+  const { book, isBookLoading, mutateBook } = useGetUserBook(searchBook.id, me?.id ?? 0);
 
   const author_names = formatAuthors(searchBook.contributions || []);
   const series_position = formatSeriesPosition(searchBook.featured_series);
@@ -90,18 +90,14 @@ export default function BookDetail({ searchBook, me, setListBooksState, mutateUs
               bookId={searchBook.id}
               mutateBook={mutateBook}
               mutateUserBooks={mutateUserBooks}
-            ></BookStatusSubmenu>
-            <BookRatingSubmenu
-              isLoading={isBookLoading}
-              bookId={searchBook.id}
-              mutateBook={mutateBook}
-            ></BookRatingSubmenu>
+            />
+            <BookRatingSubmenu isLoading={isBookLoading} bookId={searchBook.id} mutateBook={mutateBook} />
             {user_book_status && book ? (
               <DeleteBookAction
                 userBookId={book.user_books[0].id}
                 mutateBook={mutateBook}
                 mutateUserBooks={mutateUserBooks}
-              ></DeleteBookAction>
+              />
             ) : null}
           </ActionPanel.Section>
 

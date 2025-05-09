@@ -22,28 +22,28 @@
       "name": "want-to-read-books",
       "title": "Want to Read Books",
       "subtitle": "Hardcover",
-      "description": "Get your books with want to read status and manage them",
+      "description": "View your books with want to read status",
       "mode": "view"
     },
     {
       "name": "currently-reading-books",
       "title": "Currently Reading Books",
       "subtitle": "Hardcover",
-      "description": "Get your books with currently reading status and manage them",
+      "description": "View your books with currently reading status",
       "mode": "view"
     },
     {
       "name": "read-books",
       "title": "Read Books",
       "subtitle": "Hardcover",
-      "description": "Get your books with read status and manage them",
+      "description": "View your books with read status",
       "mode": "view"
     },
     {
       "name": "did-not-finish-books",
       "title": "Did Not Finish Books",
       "subtitle": "Hardcover",
-      "description": "Get your books with did not finish status and manage them",
+      "description": "View your books with did not finish status",
       "mode": "view"
     },
     {

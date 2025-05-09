@@ -2,6 +2,8 @@ import { Action, ActionPanel, showToast, Toast } from "@raycast/api";
 import { MutatePromise, showFailureToast } from "@raycast/utils";
 import { Book, updateBookRating } from "../../api/books";
 
+const RATING_OPTIONS = ["Remove rating", 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+
 type UpdateBookRatingProps = {
   isLoading: boolean;
   bookId: number;
@@ -11,7 +13,7 @@ type UpdateBookRatingProps = {
 export default function BookRatingSubmenu({ isLoading, bookId, mutateBook }: UpdateBookRatingProps) {
   return (
     <ActionPanel.Submenu title="Update Rating" isLoading={isLoading}>
-      {["Remove rating", 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5].map((rating) => (
+      {RATING_OPTIONS.map((rating) => (
         <Action
           key={rating}
           title={String(rating)}

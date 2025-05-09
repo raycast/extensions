@@ -20,8 +20,8 @@ export default function UserBooks({ userBooks, me, isUserBooksLoading, mutateUse
   return (
     <List searchBarPlaceholder="Search books" isLoading={isUserBooksLoading}>
       {userBooks?.map((userBook) => {
-        const author_names = formatAuthors(userBook?.book?.contributions || []);
-        const series_position = formatSeriesPosition(userBook?.book?.featured_series);
+        const author_names = formatAuthors(userBook.book?.contributions || []);
+        const series_position = formatSeriesPosition(userBook.book?.featured_series);
 
         return (
           <List.Item
@@ -45,9 +45,9 @@ export default function UserBooks({ userBooks, me, isUserBooksLoading, mutateUse
                     isLoading={isUserBooksLoading}
                     bookId={userBook.book.id}
                     mutateUserBooks={mutateUserBooks}
-                  ></BookStatusSubmenu>
-                  <BookRatingSubmenu isLoading={isUserBooksLoading} bookId={userBook.book.id}></BookRatingSubmenu>
-                  <DeleteBookAction userBookId={userBook.id} mutateUserBooks={mutateUserBooks}></DeleteBookAction>
+                  />
+                  <BookRatingSubmenu isLoading={isUserBooksLoading} bookId={userBook.book.id} />
+                  <DeleteBookAction userBookId={userBook.id} mutateUserBooks={mutateUserBooks} />
                 </ActionPanel.Section>
               </ActionPanel>
             }

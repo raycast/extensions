@@ -1,5 +1,5 @@
 import { Action, confirmAlert, showToast, Toast } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
+import { MutatePromise, showFailureToast } from "@raycast/utils";
 import { Book, removeBookStatus, TransformedUserBook } from "../../api/books";
 
 type DeleteBookProps = {
@@ -14,28 +14,32 @@ export default function DeleteBookAction({ userBookId, mutateBook, mutateUserBoo
       title="Remove"
       style={Action.Style.Destructive}
       onAction={async () => {
-        if (
-          await confirmAlert({
-            title: "Are you sure?",
-            message: "This will remove your review, rating and status.",
-          })
-        ) {
-          showToast({
-            style: Toast.Style.Animated,
-            title: "Removing...",
-          });
-          await removeBookStatus(userBookId);
-          if (mutateBook) {
-            await mutateBook();
+        try {
+          if (
+            await confirmAlert({
+              title: "Are you sure?",
+              message: "This will remove your review, rating and status.",
+            })
+          ) {
+            showToast({
+              style: Toast.Style.Animated,
+              title: "Removing...",
+            });
+            await removeBookStatus(userBookId);
+            if (mutateBook) {
+              await mutateBook();
+            }
+            if (mutateUserBooks) {
+              await mutateUserBooks();
+            }
+            showToast({
+              style: Toast.Style.Success,
+              title: "Success",
+              message: "Removed",
+            });
           }
-          if (mutateUserBooks) {
-            await mutateUserBooks();
-          }
-          showToast({
-            style: Toast.Style.Success,
-            title: "Success",
-            message: "Removed",
-          });
+        } catch (error) {
+          showFailureToast(error);
         }
       }}
     ></Action>
