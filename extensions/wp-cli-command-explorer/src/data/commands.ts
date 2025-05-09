@@ -363,7 +363,7 @@ export const wpCommands: WPCommand[] = [
       { name: "create", description: "Creates a site in a multisite installation" },
       { name: "deactivate", description: "Deactivates one or more sites" },
       { name: "delete", description: "Deletes one or more sites" },
-      { name: "empty", description: "Empty a site of its content" },
+      { name: "empty", description: "Empties a site of its content" },
       { name: "list", description: "Lists all sites in a multisite installation" },
       { name: "mature", description: "Sets one or more sites as mature" },
       { name: "spam", description: "Marks one or more sites as spam" },
