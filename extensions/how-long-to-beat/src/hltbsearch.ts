@@ -9,8 +9,7 @@ import { LocalStorage } from "@raycast/api";
  */
 export class HltbSearch {
   public static BASE_URL = "https://howlongtobeat.com/";
-  public static DETAIL_URL = `${HltbSearch.BASE_URL}game?id=`;
-  public static SEARCH_URL = `${HltbSearch.BASE_URL}api/seek/`;
+  public static DETAIL_URL = `${HltbSearch.BASE_URL}game/`;
   public static IMAGE_URL = `${HltbSearch.BASE_URL}games/`;
 
   payload: SearchPayload = {
