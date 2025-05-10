@@ -130,7 +130,7 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
           return { ...prev, [key]: "1" };
         }
 
-        if (stringValue === "." || /^-?\d*\.?\d*$/.test(stringValue)) {
+        if (stringValue === "." || /^\d*.?\d*$/.test(stringValue)) {
           return { ...prev, [key]: stringValue };
         }
         return prev;

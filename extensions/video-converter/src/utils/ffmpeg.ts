@@ -33,10 +33,14 @@ const audioCodecs: Record<string, string> = {
   default: "aac",
 };
 const currentTasks: ConversionTask[] = [];
+const MAX_COMPLETED_TASKS = 10; // Keep only last 10 completed tasks
 const ffmpegPath = "/usr/local/bin/ffmpeg";
 const altPath = "/opt/homebrew/bin/ffmpeg";
 
 export async function convertVideo(values: FormValues, progress: (task: ConversionTask[]) => void) {
+  // Clean up old completed tasks
+  cleanupCompletedTasks();
+
   values.videoFiles.map((file: string, i: number) => {
     const task: ConversionTask = {
       id: i,
@@ -59,117 +63,156 @@ export async function convertVideo(values: FormValues, progress: (task: Conversi
   }
 }
 
+function cleanupCompletedTasks(): void {
+  // Remove old completed tasks
+  const completedTasks = currentTasks.filter(
+    (task) => task.status === "done" || task.status === "error" || task.status === "cancelled",
+  );
+
+  if (completedTasks.length > MAX_COMPLETED_TASKS) {
+    const tasksToRemove = completedTasks.slice(0, completedTasks.length - MAX_COMPLETED_TASKS);
+    tasksToRemove.forEach((task) => {
+      const index = currentTasks.findIndex((t) => t.id === task.id);
+      if (index !== -1) {
+        currentTasks.splice(index, 1);
+      }
+    });
+  }
+}
+
 async function convertFile(task: ConversionTask, params: FormValues, progress: (task: ConversionTask) => void) {
-  if (task.status === "done" || task.status === "error" || task.status === "cancelled") return progress(task);
+  if (task.status === "done" || task.status === "error" || task.status === "cancelled") {
+    progress(task);
+    return;
+  }
 
   task.status = "converting";
   task.progress = 0;
   task.started = new Date();
   let bitrate = 0;
-  const duration = await getVideoDuration(task.file);
 
-  if (params.compressionMode === "bitrate") {
-    bitrate = parseInt(params.bitrate);
-  } else if (params.compressionMode === "filesize") {
-    const size = parseFloat(params.maxSize);
-    const sizeKb = size * 1000 * 8;
-    bitrate = Math.floor((sizeKb - parseFloat(params.audioBitrate) * duration) / duration);
-    if (bitrate <= 0) {
-      throw new Error("Bitrate is too low for the selected file size");
+  try {
+    const duration = await getVideoDuration(task.file);
+
+    if (params.compressionMode === "bitrate") {
+      bitrate = parseInt(params.bitrate);
+    } else if (params.compressionMode === "filesize") {
+      const size = parseFloat(params.maxSize);
+      const sizeKb = size * 1000 * 8;
+      bitrate = Math.floor((sizeKb - parseFloat(params.audioBitrate) * duration) / duration);
+      if (bitrate <= 0) {
+        throw new Error("Bitrate is too low for the selected file size");
+      }
+    } else {
+      throw new Error("Invalid compression mode");
     }
-  } else {
-    throw new Error("Invalid compression mode");
-  }
 
-  const video = ffmpeg().input(task.file);
-  task.ffmpeg = video;
-  progress(task);
-  if (params.audioFiles.length) video.input(params.audioFiles[0]);
+    const video = ffmpeg().input(task.file);
+    task.ffmpeg = video;
+    progress(task);
+    if (params.audioFiles.length) video.input(params.audioFiles[0]);
 
-  const parsedPath = path.parse(task.file);
-  const originalName = parsedPath.name;
-  const originalExt = parsedPath.ext;
+    const parsedPath = path.parse(task.file);
+    const originalName = parsedPath.name;
+    const originalExt = parsedPath.ext;
 
-  const outputDir = path.join(params.outputFolder[0], params.subfolderName);
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
+    const outputDir = path.join(params.outputFolder[0], params.subfolderName);
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
 
-  let fileName: string;
+    let fileName: string;
 
-  if (params.rename && params.rename.trim() !== "") {
-    fileName = params.rename
-      .replace(/{name}/g, originalName)
-      .replace(/{ext}/g, originalExt.replace(".", ""))
-      .replace(/{format}/g, params.videoFormat)
-      .replace(/{codec}/g, params.videoCodec)
-      .replace(/{len}/g, `${duration.toFixed()}s`);
-  } else {
-    fileName = originalName;
-  }
+    if (params.rename && params.rename.trim() !== "") {
+      fileName = params.rename
+        .replace(/{name}/g, originalName)
+        .replace(/{ext}/g, originalExt.replace(".", ""))
+        .replace(/{format}/g, params.videoFormat)
+        .replace(/{codec}/g, params.videoCodec)
+        .replace(/{len}/g, `${duration.toFixed()}s`);
+    } else {
+      fileName = originalName;
+    }
 
-  const outputPath = getAvailableFilePath(outputDir, fileName, params.videoFormat);
+    const outputPath = getAvailableFilePath(outputDir, fileName, params.videoFormat);
 
-  const videoCodec =
-    (params.useHardwareAcceleration ? hwAcceleratedCodecs[params.videoCodec] : codecs[params.videoCodec]) ||
-    codecs[params.videoCodec];
-  const audioCodec = audioCodecs[params.videoFormat] || audioCodecs.default;
+    const videoCodec =
+      (params.useHardwareAcceleration ? hwAcceleratedCodecs[params.videoCodec] : codecs[params.videoCodec]) ||
+      codecs[params.videoCodec];
+    const audioCodec = audioCodecs[params.videoFormat] || audioCodecs.default;
 
-  const options = [
-    `-c:a ${audioCodec}`,
-    `-b:a ${params.audioBitrate}k`,
-    `-c:v ${videoCodec}`,
-    "-map 0:v:0",
-    `-b:v ${bitrate}k`,
-    `-minrate ${bitrate}k`,
-    `-maxrate ${bitrate}k`,
-    `-bufsize ${bitrate * 2}k`,
-    `-preset ${params.preset}`,
-    "-y",
-  ];
+    const options = [
+      `-c:a ${audioCodec}`,
+      `-b:a ${params.audioBitrate}k`,
+      `-c:v ${videoCodec}`,
+      "-map 0:v:0",
+      `-b:v ${bitrate}k`,
+      `-minrate ${bitrate}k`,
+      `-maxrate ${bitrate}k`,
+      `-bufsize ${bitrate * 2}k`,
+      `-preset ${params.preset}`,
+      "-y",
+    ];
 
-  options.push(params.audioFiles.length ? "-map 1:a:0" : "-map 0:a:0");
+    options.push(params.audioFiles.length ? "-map 1:a:0" : "-map 0:a:0");
 
-  if (params.videoCodec === "h265") {
-    options.push("-vtag hvc1");
-  }
+    if (params.videoCodec === "h265") {
+      options.push("-vtag hvc1");
+    }
 
-  video.outputOptions(options);
-  video.duration(duration);
-  return new Promise((res) => {
-    video.on("error", (err) => {
-      if (task.status !== "cancelled") task.status = "error";
-      progress(task);
-      console.log(`Error: ${err.message}`);
+    video.outputOptions(options);
+    video.duration(duration);
+    return new Promise((resolve, reject) => {
+      video.on("error", (err) => {
+        if (task.status !== "cancelled") task.status = "error";
+        progress(task);
+        console.log(`Error: ${err.message}`);
+        reject(err);
+      });
+      video.on("end", () => {
+        task.status = "done";
+        task.progress = 100;
+        task.elapsed = Math.floor((new Date().getTime() - task.started.getTime()) / 1000);
+        progress(task);
+        if (params.deleteOriginalFiles) deleteFile(task.file);
+        resolve(true);
+      });
+      video.on("progress", (p) => {
+        if (p.percent) task.progress = Math.round(p.percent);
+        if (p.frames) task.fps = p.currentFps;
+        progress(task);
+      });
 
-      res(false);
+      video.saveToFile(outputPath);
     });
-    video.on("end", () => {
-      task.status = "done";
-      task.progress = 100;
-      task.elapsed = Math.floor((new Date().getTime() - task.started.getTime()) / 1000);
-      progress(task);
-      if (params.deleteOriginalFiles) deleteFile(task.file);
-      res(true);
-    });
-    video.on("progress", (p) => {
-      if (p.percent) task.progress = Math.round(p.percent);
-      if (p.frames) task.fps = p.currentFps;
-      progress(task);
-    });
-
-    video.saveToFile(outputPath);
-  });
+  } catch (error) {
+    task.status = "error";
+    progress(task);
+    throw error;
+  }
 }
 
 export function cancelConversion(): void {
-  currentTasks.map((task) => {
-    if (["done", "error", "cancelled"].includes(task.status)) return task;
+  currentTasks.forEach((task) => {
+    if (["done", "error", "cancelled"].includes(task.status)) return;
+
     task.status = "cancelled";
     task.progress = 0;
     task.fps = 0;
-    task.ffmpeg?.kill("SIGTERM");
-    return task;
+
+    if (task.ffmpeg) {
+      try {
+        task.ffmpeg.kill("SIGTERM");
+        // Give it a moment to terminate gracefully
+        setTimeout(() => {
+          if (task.ffmpeg) {
+            task.ffmpeg.kill("SIGKILL");
+          }
+        }, 1000);
+      } catch (error) {
+        console.error("Error killing FFmpeg process:", error);
+      }
+    }
   });
 }
 
@@ -204,16 +247,14 @@ function getVideoDuration(filePath: string): Promise<number> {
 }
 
 function getAvailableFilePath(outputDir: string, fileName: string, extension: string): string {
-  const lastDotIndex = fileName.lastIndexOf(".");
-  const baseName = lastDotIndex !== -1 ? fileName.substring(0, lastDotIndex) : fileName;
   const ext = extension.startsWith(".") ? extension : `.${extension}`;
 
-  let finalName = `${baseName}${ext}`;
+  let finalName = `${fileName}${ext}`;
   let counter = 1;
   let fullPath = path.join(outputDir, finalName);
 
   while (fs.existsSync(fullPath)) {
-    finalName = `${baseName}_${counter}${ext}`;
+    finalName = `${fileName}_${counter}${ext}`;
     fullPath = path.join(outputDir, finalName);
     counter++;
   }
