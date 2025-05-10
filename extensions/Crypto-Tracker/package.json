@@ -1,0 +1,104 @@
+{
+  "name": "cryptotracker",
+  "title": "Cryptotracker",
+  "version": "2.0.3",
+  "description": "Track cryptocurrency prices and market data using CoinMarketCap API",
+  "icon": "extension-icon.png",
+  "author": "qusaismael",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-coins",
+      "title": "List Top Coins",
+      "subtitle": "CryptoTracker",
+      "description": "Shows top cryptocurrency prices and market data",
+      "mode": "view",
+      "icon": "list-icon.png",
+      "path": "src/list-coins.tsx"
+    },
+    {
+      "name": "btc",
+      "title": "Bitcoin Price",
+      "subtitle": "CryptoTracker",
+      "description": "Shows detailed information about Bitcoin (BTC)",
+      "mode": "view",
+      "icon": "btc-icon.png",
+      "path": "src/btc.tsx"
+    },
+    {
+      "name": "search-coin",
+      "title": "Search Coins",
+      "subtitle": "CryptoTracker",
+      "description": "Search for cryptocurrencies by name or symbol",
+      "mode": "view",
+      "icon": "search-icon.png",
+      "path": "src/search-coin.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "coinmarketcapApiKey",
+      "title": "CoinMarketCap API Key",
+      "description": "Your CoinMarketCap API key. Get yours at https://coinmarketcap.com/api/",
+      "type": "password",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "vsCurrency",
+      "title": "Currency",
+      "description": "The currency to display prices in",
+      "type": "dropdown",
+      "required": true,
+      "default": "usd",
+      "data": [
+        {
+          "title": "USD",
+          "value": "usd"
+        },
+        {
+          "title": "EUR",
+          "value": "eur"
+        },
+        {
+          "title": "GBP",
+          "value": "gbp"
+        },
+        {
+          "title": "JPY",
+          "value": "jpy"
+        }
+      ]
+    },
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval",
+      "description": "How often to refresh prices (in minutes)",
+      "type": "textfield",
+      "required": true,
+      "default": "1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.39.0",
+    "@raycast/utils": "^1.5.2",
+    "axios": "^1.4.0",
+    "dayjs": "^1.11.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.9",
+    "eslint": "^7.32.0",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
