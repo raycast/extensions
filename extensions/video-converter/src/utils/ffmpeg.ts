@@ -99,7 +99,7 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
     } else if (params.compressionMode === "filesize") {
       const size = parseFloat(params.maxSize);
       const sizeKb = size * 1000 * 8;
-      bitrate = Math.floor((sizeKb - parseFloat(params.audioBitrate) * duration) / duration);
+      bitrate = Math.floor((sizeKb - parseInt(params.audioBitrate) * duration) / duration);
       if (bitrate <= 0) {
         throw new Error("Bitrate is too low for the selected file size");
       }
@@ -212,8 +212,9 @@ export function cancelConversion(): void {
         task.ffmpeg.kill("SIGTERM");
         // Give it a moment to terminate gracefully
         setTimeout(() => {
-          if (task.ffmpeg) {
-            task.ffmpeg.kill("SIGKILL");
+          const ffmpegInstance = task.ffmpeg;
+          if (ffmpegInstance) {
+            ffmpegInstance.kill("SIGKILL");
           }
         }, 1000);
       } catch (error) {
@@ -256,6 +257,7 @@ function getVideoDuration(filePath: string): Promise<number> {
 
 function getAvailableFilePath(outputDir: string, fileName: string, extension: string): string {
   const ext = extension.startsWith(".") ? extension : `.${extension}`;
+  const MAX_ATTEMPTS = 100;
 
   let finalName = `${fileName}${ext}`;
   let counter = 1;
@@ -264,6 +266,11 @@ function getAvailableFilePath(outputDir: string, fileName: string, extension: st
   while (fs.existsSync(fullPath)) {
     finalName = `${fileName}_${counter}${ext}`;
     fullPath = path.join(outputDir, finalName);
+
+    if (counter >= MAX_ATTEMPTS) {
+      throw new Error("Could not find available filename after 100 attempts");
+    }
+
     counter++;
   }
 
