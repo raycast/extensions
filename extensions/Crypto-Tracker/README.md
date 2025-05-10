@@ -1,4 +1,4 @@
-# CryptoTracker
+# Cryptotracker
 
 A cryptocurrency tracker powered by the CoinMarketCap API.
 
