@@ -1,13 +1,4 @@
-import {
-  Detail,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-  LaunchType,
-} from "@raycast/api";
+import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
 import type { LaunchProps } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import {
@@ -28,12 +19,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useEffect, useRef } from "react";
 
 dayjs.extend(relativeTime);
-
-interface CoinDetailLaunchArguments {
-  arguments: {
-    coinId: string;
-  };
-}
 
 export default function CoinDetail(
   props: LaunchProps<{ arguments: { coinId: string } }>,
@@ -56,8 +41,14 @@ export default function CoinDetail(
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if ((detailError && !(detailError instanceof Error && detailError.message === "canceled")) || 
-        (chartError && !(chartError instanceof Error && chartError.message === "canceled"))) {
+    if (
+      (detailError &&
+        !(
+          detailError instanceof Error && detailError.message === "canceled"
+        )) ||
+      (chartError &&
+        !(chartError instanceof Error && chartError.message === "canceled"))
+    ) {
       const error = detailError || chartError;
       showFailureToast(error instanceof Error ? error.message : String(error), {
         title: "Error loading coin details",
@@ -90,7 +81,8 @@ export default function CoinDetail(
       }
     };
 
-    if (refreshTimerRef.current) { // Clear any old setInterval if it was used before
+    if (refreshTimerRef.current) {
+      // Clear any old setInterval if it was used before
       clearInterval(refreshTimerRef.current);
       refreshTimerRef.current = null;
     }
@@ -105,11 +97,15 @@ export default function CoinDetail(
   }, [coinId, refreshInterval, revalidateDetail, revalidateChart]);
 
   const isLoading = isLoadingDetail || isLoadingChart;
-  
+
   // Only consider real errors, not cancelation errors
-  const error = (detailError && !(detailError instanceof Error && detailError.message === "canceled")) || 
-                (chartError && !(chartError instanceof Error && chartError.message === "canceled")) ? 
-                detailError || chartError : null;
+  const error =
+    (detailError &&
+      !(detailError instanceof Error && detailError.message === "canceled")) ||
+    (chartError &&
+      !(chartError instanceof Error && chartError.message === "canceled"))
+      ? detailError || chartError
+      : null;
 
   if (!coinId) {
     return (
@@ -206,30 +202,32 @@ export default function CoinDetail(
       return `${date.getMonth() + 1}/${date.getDate()}`;
     };
 
-    // Calculate percentage change
-    const percentChange = ((endPrice - startPrice) / startPrice) * 100;
-    const changeFormatted = formatPercentage(percentChange);
-
     // Extract market cap and other data from coinDetail
     const currencyUpper = vsCurrency.toUpperCase();
-    const marketCap = coinDetailData.quote && coinDetailData.quote[currencyUpper]
-      ? coinDetailData.quote[currencyUpper].market_cap
-      : 0;
-    const currentPrice = coinDetailData.quote && coinDetailData.quote[currencyUpper]
-      ? coinDetailData.quote[currencyUpper].price
-      : 0;
-    const volume24h = coinDetailData.quote && coinDetailData.quote[currencyUpper]
-      ? coinDetailData.quote[currencyUpper].volume_24h
-      : 0;
-    const priceChange24h = coinDetailData.quote && coinDetailData.quote[currencyUpper]
-      ? coinDetailData.quote[currencyUpper].percent_change_24h
-      : 0;
-    const priceChange7d = coinDetailData.quote && coinDetailData.quote[currencyUpper]
-      ? coinDetailData.quote[currencyUpper].percent_change_7d
-      : 0;
-    const priceChange30d = coinDetailData.quote && coinDetailData.quote[currencyUpper]
-      ? coinDetailData.quote[currencyUpper].percent_change_30d
-      : 0;
+    const marketCap =
+      coinDetailData.quote && coinDetailData.quote[currencyUpper]
+        ? coinDetailData.quote[currencyUpper].market_cap
+        : 0;
+    const currentPrice =
+      coinDetailData.quote && coinDetailData.quote[currencyUpper]
+        ? coinDetailData.quote[currencyUpper].price
+        : 0;
+    const volume24h =
+      coinDetailData.quote && coinDetailData.quote[currencyUpper]
+        ? coinDetailData.quote[currencyUpper].volume_24h
+        : 0;
+    const priceChange24h =
+      coinDetailData.quote && coinDetailData.quote[currencyUpper]
+        ? coinDetailData.quote[currencyUpper].percent_change_24h
+        : 0;
+    const priceChange7d =
+      coinDetailData.quote && coinDetailData.quote[currencyUpper]
+        ? coinDetailData.quote[currencyUpper].percent_change_7d
+        : 0;
+    const priceChange30d =
+      coinDetailData.quote && coinDetailData.quote[currencyUpper]
+        ? coinDetailData.quote[currencyUpper].percent_change_30d
+        : 0;
 
     // Format the coin description
     const formattedDescription = coinDetailData.description
@@ -240,13 +238,15 @@ export default function CoinDetail(
             .substring(0, 500) +
           (coinDetailData.description.length > 500 ? "..." : "")
         : typeof coinDetailData.description === "object" &&
-          coinDetailData.description &&
-          "en" in (coinDetailData.description as { en: string })
+            coinDetailData.description &&
+            "en" in (coinDetailData.description as { en: string })
           ? (coinDetailData.description as { en: string }).en
               .replace(/<a\s+href="([^"]+)"[^>]*>([^<]+)<\/a>/g, "[$2]($1)")
               .replace(/<\/?\w+>/g, "")
               .substring(0, 500) +
-            ((coinDetailData.description as { en: string }).en.length > 500 ? "..." : "")
+            ((coinDetailData.description as { en: string }).en.length > 500
+              ? "..."
+              : "")
           : "No description available."
       : "No description available.";
 
@@ -254,10 +254,10 @@ export default function CoinDetail(
     let chart = "";
     // Title and basic info
     chart += `# ${coinDetailData.name} (${coinDetailData.symbol.toUpperCase()}) ${formatPercentage(priceChange24h)}\n\n`;
-    
+
     // Top section - price and change
     chart += `## ${formatCurrency(currentPrice, vsCurrency)} ${trendEmoji}\n\n`;
-    
+
     // Add price visualization
     chart += "### Price Chart (7 days)\n";
     chart += "```\n";
@@ -288,7 +288,7 @@ export default function CoinDetail(
     // Description section
     chart += `### About ${coinDetailData.name}\n`;
     chart += `${formattedDescription}\n\n`;
-    
+
     // Footer
     chart += "---\n";
     chart += `*Last updated: ${dayjs(coinDetailData.last_updated).fromNow()}*\n`;
@@ -313,16 +313,19 @@ export default function CoinDetail(
             }}
           />
           <Action.OpenInBrowser
-            title="View on CoinMarketCap"
+            title="View on Coinmarketcap"
             icon={{ source: Icon.Link }}
             url={`https://coinmarketcap.com/currencies/${coinDetailData.slug}`}
           />
           <Action.CopyToClipboard
             title="Copy Current Price"
-            content={formatCurrency(coinDetailData.quote?.[vsCurrency.toUpperCase()]?.price || 0, vsCurrency)}
+            content={formatCurrency(
+              coinDetailData.quote?.[vsCurrency.toUpperCase()]?.price || 0,
+              vsCurrency,
+            )}
           />
           <Action.OpenInBrowser
-            title="Get CoinMarketCap API Key"
+            title="Get Coinmarketcap Api Key"
             icon={{ source: Icon.Key }}
             url="https://coinmarketcap.com/api/"
           />
@@ -332,20 +335,37 @@ export default function CoinDetail(
         <Detail.Metadata>
           <Detail.Metadata.Label
             title="Price"
-            text={formatCurrency(coinDetailData.quote?.[vsCurrency.toUpperCase()]?.price || 0, vsCurrency)}
+            text={formatCurrency(
+              coinDetailData.quote?.[vsCurrency.toUpperCase()]?.price || 0,
+              vsCurrency,
+            )}
           />
           <Detail.Metadata.Label
             title="24h Change"
-            text={formatPercentage(coinDetailData.quote?.[vsCurrency.toUpperCase()]?.percent_change_24h || 0)}
+            text={formatPercentage(
+              coinDetailData.quote?.[vsCurrency.toUpperCase()]
+                ?.percent_change_24h || 0,
+            )}
             icon={{
-              source: (coinDetailData.quote?.[vsCurrency.toUpperCase()]?.percent_change_24h || 0) >= 0 ? Icon.ArrowUp : Icon.ArrowDown,
-              tintColor: getColorForValue(coinDetailData.quote?.[vsCurrency.toUpperCase()]?.percent_change_24h || 0),
+              source:
+                (coinDetailData.quote?.[vsCurrency.toUpperCase()]
+                  ?.percent_change_24h || 0) >= 0
+                  ? Icon.ArrowUp
+                  : Icon.ArrowDown,
+              tintColor: getColorForValue(
+                coinDetailData.quote?.[vsCurrency.toUpperCase()]
+                  ?.percent_change_24h || 0,
+              ),
             }}
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label
             title="Market Cap"
-            text={formatCurrency(coinDetailData.quote?.[vsCurrency.toUpperCase()]?.market_cap || 0, vsCurrency, true)}
+            text={formatCurrency(
+              coinDetailData.quote?.[vsCurrency.toUpperCase()]?.market_cap || 0,
+              vsCurrency,
+              true,
+            )}
           />
           <Detail.Metadata.Label
             title="Rank"
@@ -353,7 +373,11 @@ export default function CoinDetail(
           />
           <Detail.Metadata.Label
             title="Volume"
-            text={formatCurrency(coinDetailData.quote?.[vsCurrency.toUpperCase()]?.volume_24h || 0, vsCurrency, true)}
+            text={formatCurrency(
+              coinDetailData.quote?.[vsCurrency.toUpperCase()]?.volume_24h || 0,
+              vsCurrency,
+              true,
+            )}
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label

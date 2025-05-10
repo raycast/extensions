@@ -11,7 +11,6 @@ import {
 import { useSearchCoins, SearchResult } from "./coinmarketcap";
 import { getPreferences } from "./utils";
 import CoinDetail from "./coin-detail";
-import type { LaunchProps } from "@raycast/api";
 
 export default function SearchCoin() {
   const [searchText, setSearchText] = useState("");
@@ -27,7 +26,6 @@ export default function SearchCoin() {
 
   const [showDetails, setShowDetails] = useState(false);
   const [selectedCoinId, setSelectedCoinId] = useState<string>("");
-
 
   // Handle errors with toast
   useEffect(() => {
@@ -46,13 +44,17 @@ export default function SearchCoin() {
     }
   }, [error, revalidate]);
 
-
   // Setup interval refresh (only if search text has length >= 2)
   useEffect(() => {
     if (refreshTimerRef.current) {
       clearInterval(refreshTimerRef.current);
     }
-    if (refreshInterval && refreshInterval > 0 && searchText.length >= 2 && revalidate) {
+    if (
+      refreshInterval &&
+      refreshInterval > 0 &&
+      searchText.length >= 2 &&
+      revalidate
+    ) {
       const refreshMs = refreshInterval * 60 * 1000;
       refreshTimerRef.current = setInterval(() => {
         revalidate();
@@ -64,7 +66,6 @@ export default function SearchCoin() {
       }
     };
   }, [refreshInterval, revalidate, searchText]);
-
 
   const getCoinLogo = (coin: SearchResult) => {
     return `https://s2.coinmarketcap.com/static/img/coins/64x64/${coin.id}.png`;
@@ -79,7 +80,6 @@ export default function SearchCoin() {
     );
   }
 
-
   return (
     <List
       isLoading={isLoading}
@@ -89,9 +89,9 @@ export default function SearchCoin() {
       throttle
       actions={
         <ActionPanel>
-           {/* Removed direct API key check action here, relies on the error toast */}
+          {/* Removed direct API key check action here, relies on the error toast */}
           <Action.OpenInBrowser
-            title="Get CoinMarketCap API Key"
+            title="Get Coinmarketcap Api Key"
             icon={{ source: Icon.Key }}
             url="https://coinmarketcap.com/api/"
           />
@@ -116,7 +116,7 @@ export default function SearchCoin() {
                 onAction={revalidate}
               />
               <Action.OpenInBrowser
-                title="Get CoinMarketCap API Key"
+                title="Get Coinmarketcap Api Key"
                 icon={{ source: Icon.Key }}
                 url="https://coinmarketcap.com/api/"
               />
@@ -150,23 +150,23 @@ export default function SearchCoin() {
                   }}
                 />
                 <Action.CopyToClipboard
-                  title="Copy Coin ID"
+                  title="Copy Coin Id"
                   content={coin.id.toString()}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />
-                 <Action
+                <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                   onAction={revalidate}
                 />
                 <Action.OpenInBrowser
-                  title="View on CoinMarketCap"
+                  title="View on Coinmarketcap"
                   icon={{ source: Icon.Link }}
                   url={`https://coinmarketcap.com/currencies/${coin.slug}`}
                 />
                 <Action.OpenInBrowser
-                  title="Get CoinMarketCap API Key"
+                  title="Get Coinmarketcap Api Key"
                   icon={{ source: Icon.Key }}
                   url="https://coinmarketcap.com/api/"
                 />

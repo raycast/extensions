@@ -7,7 +7,6 @@ import {
   Color,
   showToast,
   Toast,
-  getPreferenceValues,
   LaunchType,
 } from "@raycast/api";
 import { useTopCoins, Coin } from "./coinmarketcap";
@@ -20,7 +19,6 @@ import {
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import CoinDetail from "./coin-detail";
-import type { LaunchProps } from "@raycast/api";
 
 dayjs.extend(relativeTime);
 
@@ -35,7 +33,6 @@ export default function ListCoins() {
 
   const [showDetails, setShowDetails] = useState(false);
   const [selectedCoinId, setSelectedCoinId] = useState<string>("");
-
 
   // Filter coins when data or search text changes
   useEffect(() => {
@@ -88,7 +85,6 @@ export default function ListCoins() {
     };
   }, [refreshInterval, revalidate]);
 
-
   const getCoinPrice = (coin: Coin) => {
     const currencyUpper = vsCurrency.toUpperCase();
     return coin.quote && coin.quote[currencyUpper]
@@ -132,11 +128,6 @@ export default function ListCoins() {
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             onAction={revalidate}
           />
-          <Action.OpenInBrowser
-            title="Get CoinMarketCap API Key"
-            icon={{ source: Icon.Key }}
-            url="https://coinmarketcap.com/api/"
-          />
         </ActionPanel>
       }
     >
@@ -151,11 +142,6 @@ export default function ListCoins() {
                 title="Try Again"
                 icon={Icon.ArrowClockwise}
                 onAction={revalidate}
-              />
-              <Action.OpenInBrowser
-                title="Get CoinMarketCap API Key"
-                icon={{ source: Icon.Key }}
-                url="https://coinmarketcap.com/api/"
               />
             </ActionPanel>
           }
@@ -197,21 +183,11 @@ export default function ListCoins() {
                     setShowDetails(true);
                   }}
                 />
-                 <Action
+                <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                   onAction={revalidate}
-                />
-                <Action.OpenInBrowser
-                  title="View on CoinMarketCap"
-                  icon={{ source: Icon.Link }}
-                  url={`https://coinmarketcap.com/currencies/${coin.slug}`}
-                />
-                <Action.OpenInBrowser
-                  title="Get CoinMarketCap API Key"
-                  icon={{ source: Icon.Key }}
-                  url="https://coinmarketcap.com/api/"
                 />
               </ActionPanel>
             }
