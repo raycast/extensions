@@ -10,7 +10,7 @@ export interface FoodleRecipe {
   imageUrl: string;
 }
 
-export interface JsonLdRecipe {
+export interface ParsedRecipe {
   name: string;
   author: string;
   prepTime: string;
@@ -19,12 +19,30 @@ export interface JsonLdRecipe {
   recipeYield: string;
   recipeCategory: string;
   description: string;
-  image: Image;
+  image: string | null;
   ingredients: string[] | string;
-  instructions: string[];
+  instructions: LdHowToStep[] | string[] | string;
 }
 
 export enum FoodleSearchtype {
   Title = "t",
   Ingredient = "i",
+}
+
+export interface LdHowToStep {
+  "@type": string;
+  name: string | null;
+  text: string | null;
+  image: Image | null;
+  url: string | null;
+}
+
+export interface LdPerson {
+  "@type": string;
+  name: string | null;
+}
+
+export interface LdImage {
+  "@type": string;
+  url: string | null;
 }

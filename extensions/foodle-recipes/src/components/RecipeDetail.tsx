@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
-import { FoodleRecipe, JsonLdRecipe } from "../utils/types";
+import { FoodleRecipe, ParsedRecipe, LdPerson, LdImage } from "../utils/types";
 import * as cheerio from "cheerio";
 import { showFailureToast, useFetch } from "@raycast/utils";
-import { useState } from "react";
-import Label = Detail.Metadata.Label;
+import { ReactNode, useState } from "react";
+import { Recipe } from "schema-dts";
 
 export default function RecipeDetail(recipe: FoodleRecipe) {
   const {
@@ -17,7 +17,7 @@ export default function RecipeDetail(recipe: FoodleRecipe) {
     keepPreviousData: true,
     initialData: "",
   });
-  const [jsonLdRecipe, setJsonLdRecipe] = useState(null as JsonLdRecipe | null);
+  const [jsonLdRecipe, setJsonLdRecipe] = useState(null as ParsedRecipe | null);
 
   if (error) {
     showFailureToast(error);
@@ -36,16 +36,27 @@ export default function RecipeDetail(recipe: FoodleRecipe) {
       if (jsonRaw) {
         const jsonParsed = JSON.parse(jsonRaw);
 
-        let jsonLdRecipe = mapToJsonLdRecipe(jsonParsed);
+        // check for single jsonLd which only contains a recipe
+        let jsonLdRecipe = mapToJsonLdRecipe(jsonParsed as Recipe);
+
         if (jsonLdRecipe != null) {
           setJsonLdRecipe(jsonLdRecipe);
         } else {
+          let ldEntries = [];
+
           if (Array.isArray(jsonParsed)) {
-            for (const entry of jsonParsed) {
-              jsonLdRecipe = mapToJsonLdRecipe(entry);
-              if (jsonLdRecipe != null) {
-                setJsonLdRecipe(jsonLdRecipe);
-              }
+            // jsonLd with an array of jsonLds
+            ldEntries = jsonParsed;
+          } else if (jsonParsed["@graph"] && Array.isArray(jsonParsed["@graph"])) {
+            // jsonLd-graph with an array of jsonLds
+            ldEntries = jsonParsed["@graph"];
+          }
+
+          for (const entry of ldEntries) {
+            // check for each entry if it is a recipe
+            jsonLdRecipe = mapToJsonLdRecipe(entry as Recipe);
+            if (jsonLdRecipe != null) {
+              setJsonLdRecipe(jsonLdRecipe);
             }
           }
         }
@@ -62,7 +73,7 @@ export default function RecipeDetail(recipe: FoodleRecipe) {
       markdown={markdown}
       metadata={
         <Detail.Metadata>
-          {metadata.map((item: Label) => {
+          {metadata.map((item) => {
             return item;
           })}
         </Detail.Metadata>
@@ -78,31 +89,30 @@ export default function RecipeDetail(recipe: FoodleRecipe) {
   );
 }
 
-function renderRecipe(recipe: FoodleRecipe, extracted: JsonLdRecipe | null): [string, Label[]] {
-  const imageUrl = extracted && extracted.image ? extracted.image : recipe.imageUrl;
+function renderRecipe(foodleRecipe: FoodleRecipe, parsedRecipe: ParsedRecipe | null): [string, ReactNode[]] {
+  const imageUrl = parsedRecipe && parsedRecipe.image ? parsedRecipe.image : foodleRecipe.imageUrl;
+  let markdown: string = "# " + foodleRecipe.name + "\n\n![" + foodleRecipe.name + "](" + imageUrl + ")";
 
-  let markdown: string = "# " + recipe.name + "\n\n![" + recipe.name + "](" + imageUrl + ")";
-
-  if (extracted == null) {
+  if (parsedRecipe == null) {
     markdown += "\n\nCould not extract recipe data from the page. Please open the recipe in your browser\n\n";
   } else {
-    if (extracted.description) {
-      markdown += "\n\n## Description\n" + extracted.description + "\n\n";
+    if (parsedRecipe.description) {
+      markdown += "\n\n## Description\n" + parsedRecipe.description + "\n\n";
     }
 
-    if (extracted.ingredients) {
+    if (parsedRecipe.ingredients) {
       markdown = markdown + "## Ingredients\n- ";
-      if (Array.isArray(extracted.ingredients)) {
-        markdown += extracted.ingredients.join("\n- ") + "\n\n";
+      if (Array.isArray(parsedRecipe.ingredients)) {
+        markdown += parsedRecipe.ingredients.join("\n- ") + "\n\n";
       } else {
-        markdown += extracted.ingredients + "\n\n";
+        markdown += parsedRecipe.ingredients + "\n\n";
       }
     }
 
-    if (extracted.instructions) {
+    if (parsedRecipe.instructions) {
       markdown = markdown + "## Instructions\n";
-      if (Array.isArray(extracted.instructions)) {
-        markdown += Object.entries(extracted.instructions)
+      if (Array.isArray(parsedRecipe.instructions)) {
+        markdown += Object.entries(parsedRecipe.instructions)
           .filter(([, howToStep]) => howToStep["@type"] === "HowToStep")
           .map(([, howToStep]) => `- ${howToStep.text}\n`)
           .join("");
@@ -111,34 +121,34 @@ function renderRecipe(recipe: FoodleRecipe, extracted: JsonLdRecipe | null): [st
   }
 
   const metadata = [];
-  if (extracted) {
-    if (extracted.author) {
-      metadata.push(<Detail.Metadata.Label key="author" title="Author" text={extracted.author} />);
-      metadata.push(<Detail.Metadata.Separator />);
+  if (parsedRecipe) {
+    if (parsedRecipe.author) {
+      metadata.push(<Detail.Metadata.Label key="author" title="Author" text={parsedRecipe.author} />);
+      metadata.push(<Detail.Metadata.Separator key="separator-author" />);
     }
 
     let hasTimeInfo = false;
-    if (extracted.prepTime) {
-      metadata.push(<Detail.Metadata.Label key="prepTime" title="Prep Time" text={extracted.prepTime} />);
+    if (parsedRecipe.prepTime) {
+      metadata.push(<Detail.Metadata.Label key="prepTime" title="Prep Time" text={parsedRecipe.prepTime} />);
       hasTimeInfo = true;
     }
-    if (extracted.cookTime) {
-      metadata.push(<Detail.Metadata.Label key="cookTime" title="Cook Time" text={extracted.cookTime} />);
+    if (parsedRecipe.cookTime) {
+      metadata.push(<Detail.Metadata.Label key="cookTime" title="Cook Time" text={parsedRecipe.cookTime} />);
       hasTimeInfo = true;
     }
-    if (extracted.totalTime) {
-      metadata.push(<Detail.Metadata.Label key="totalTime" title="Total Time" text={extracted.totalTime} />);
+    if (parsedRecipe.totalTime) {
+      metadata.push(<Detail.Metadata.Label key="totalTime" title="Total Time" text={parsedRecipe.totalTime} />);
       hasTimeInfo = true;
     }
     if (hasTimeInfo) {
-      metadata.push(<Detail.Metadata.Separator />);
+      metadata.push(<Detail.Metadata.Separator key="separator-timings" />);
     }
 
-    if (extracted.recipeYield) {
-      metadata.push(<Detail.Metadata.Label key="recipeYield" title="Yield" text={extracted.recipeYield} />);
+    if (parsedRecipe.recipeYield) {
+      metadata.push(<Detail.Metadata.Label key="recipeYield" title="Yield" text={parsedRecipe.recipeYield} />);
     }
-    if (extracted.recipeCategory) {
-      metadata.push(<Detail.Metadata.Label key="recipeCategory" title="Category" text={extracted.recipeCategory} />);
+    if (parsedRecipe.recipeCategory) {
+      metadata.push(<Detail.Metadata.Label key="recipeCategory" title="Category" text={parsedRecipe.recipeCategory} />);
     }
   }
 
@@ -170,30 +180,36 @@ function formatISODuration(isoDuration: string | null) {
   return parts.length > 0 ? parts.join(", ") : null;
 }
 
-function mapToJsonLdRecipe(jsonParsed: object): JsonLdRecipe | null {
-  if (
-    jsonParsed["@type"] == "Recipe" ||
-    (Array.isArray(jsonParsed["@type"]) && jsonParsed["@type"].includes("Recipe"))
-  ) {
+function mapToJsonLdRecipe(json: Recipe): ParsedRecipe | null {
+  if (json["@type"] == "Recipe") {
+    let imageUrl: string | null = null;
+
+    if (Array.isArray(json.image)) {
+      if (typeof json.image[0] == "object") {
+        const image = json.image[0] as LdImage;
+        if (image.url) {
+          imageUrl = image.url;
+        }
+      } else {
+        imageUrl = json.image[0];
+      }
+    } else if (typeof json.image == "string") {
+      imageUrl = json.image;
+    }
+
     return {
-      name: jsonParsed.name || "",
-      author: jsonParsed.author
-        ? typeof jsonParsed.author == "string"
-          ? jsonParsed.author
-          : jsonParsed.author.name
-        : null,
-      prepTime: formatISODuration(jsonParsed.prepTime) || jsonParsed.prepTime,
-      cookTime: formatISODuration(jsonParsed.cookTime) || jsonParsed.cookTime,
-      totalTime: formatISODuration(jsonParsed.totalTime) || jsonParsed.totalTime,
-      recipeYield: jsonParsed.recipeYield ? jsonParsed.recipeYield.toString() : "",
-      recipeCategory: Array.isArray(jsonParsed.recipeCategory)
-        ? jsonParsed.recipeCategory.join(", ")
-        : jsonParsed.recipeCategory || "",
-      description: jsonParsed.description || "",
-      image: typeof jsonParsed.image == "object" ? jsonParsed.image.url : jsonParsed.image,
-      ingredients: jsonParsed.recipeIngredient,
-      instructions: jsonParsed.recipeInstructions,
-    } as JsonLdRecipe;
+      name: json.name || "",
+      author: json.author ? (typeof json.author == "object" ? (json.author as LdPerson).name : json.author) : "",
+      prepTime: formatISODuration(json.prepTime as string) || json.prepTime,
+      cookTime: formatISODuration(json.cookTime as string) || json.cookTime,
+      totalTime: formatISODuration(json.totalTime as string) || json.totalTime,
+      recipeYield: json.recipeYield ? json.recipeYield.toString() : "",
+      recipeCategory: Array.isArray(json.recipeCategory) ? json.recipeCategory.join(", ") : json.recipeCategory || "",
+      description: json.description || "",
+      image: imageUrl,
+      ingredients: json.recipeIngredient,
+      instructions: json.recipeInstructions,
+    } as ParsedRecipe;
   }
 
   return null;

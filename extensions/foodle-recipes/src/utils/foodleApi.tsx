@@ -3,8 +3,8 @@ import * as cheerio from "cheerio";
 import { URLSearchParams } from "node:url";
 import { useFetch } from "@raycast/utils";
 
-export function fetchFoodleHtml(searchtype: FoodleSearchtype, searchText: string) {
-  return useFetch(baseUrl + "?" + new URLSearchParams({ f: searchtype, q: searchText }).toString(), {
+export function fetchFoodleHtml(searchType: FoodleSearchtype, searchText: string) {
+  return useFetch(baseUrl + "?" + new URLSearchParams({ f: searchType, q: searchText }).toString(), {
     parseResponse(response) {
       return response.text();
     },
