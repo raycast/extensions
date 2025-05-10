@@ -2,7 +2,7 @@ import React from "react";
 import { ActionPanel, Action, Form } from "@raycast/api";
 import errorInfo from "./components/ffmpegNotFound";
 import Conversion from "./components/conversion";
-import { useVideoConverter, isNaNValidate } from "./hooks/useVideoConverter";
+import { useVideoConverter, sanitizeNumericInput } from "./hooks/useVideoConverter";
 import {
   AVAILABLE_VIDEO_FORMATS,
   AVAILABLE_AUDIO_FORMATS,
@@ -118,7 +118,7 @@ export default function VideoConverter() {
           id="bitrate"
           title="Bitrate"
           value={formData.bitrate.toString()}
-          onChange={(v) => handleChange("bitrate", isNaNValidate(v))}
+          onChange={(v) => handleChange("bitrate", v)}
           info="Target bitrate in kbps (e.g., 10000 for 10 Mbps)"
         />
       ) : (
@@ -126,7 +126,7 @@ export default function VideoConverter() {
           id="maxSize"
           title="Max Size"
           value={formData.maxSize.toString()}
-          onChange={(v) => handleChange("maxSize", isNaNValidate(v))}
+          onChange={(v) => handleChange("maxSize", v)}
           info="Maximum file size in MB"
         />
       )}
@@ -147,7 +147,7 @@ export default function VideoConverter() {
         id="audioBitrate"
         title="Audio Bitrate"
         value={formData.audioBitrate.toString()}
-        onChange={(v) => handleChange("audioBitrate", isNaNValidate(v))}
+        onChange={(v) => handleChange("audioBitrate", sanitizeNumericInput(v))}
       >
         <Form.Dropdown.Item value="64" title="64 kbps (very low)" />
         <Form.Dropdown.Item value="96" title="96 kbps (low)" />
@@ -182,7 +182,7 @@ export default function VideoConverter() {
         title="Rename Pattern"
         value={formData.rename}
         onChange={(v) => handleChange("rename", v)}
-        info="Optional: Use {n} for file name, {ext} for file extension, {format} for format, {codec} for codec, {len} for duration"
+        info="Optional: Use {name} for file name, {ext} for file extension, {format} for format, {codec} for codec, {len} for duration"
       />
 
       <Form.Checkbox

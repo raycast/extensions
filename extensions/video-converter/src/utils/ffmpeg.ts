@@ -69,11 +69,11 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
   const duration = await getVideoDuration(task.file);
 
   if (params.compressionMode === "bitrate") {
-    bitrate = params.bitrate;
+    bitrate = parseInt(params.bitrate);
   } else if (params.compressionMode === "filesize") {
-    const size = params.maxSize;
+    const size = parseFloat(params.maxSize);
     const sizeKb = size * 1000 * 8;
-    bitrate = Math.floor((sizeKb - params.audioBitrate * duration) / duration);
+    bitrate = Math.floor((sizeKb - parseFloat(params.audioBitrate) * duration) / duration);
     if (bitrate <= 0) {
       throw new Error("Bitrate is too low for the selected file size");
     }
@@ -99,7 +99,7 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
 
   if (params.rename && params.rename.trim() !== "") {
     fileName = params.rename
-      .replace(/{n}/g, originalName)
+      .replace(/{name}/g, originalName)
       .replace(/{ext}/g, originalExt.replace(".", ""))
       .replace(/{format}/g, params.videoFormat)
       .replace(/{codec}/g, params.videoCodec)
@@ -109,7 +109,6 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
   }
 
   const outputPath = getAvailableFilePath(outputDir, fileName, params.videoFormat);
-  //const outputPath = path.join(outputDir, fileName);
 
   const videoCodec =
     (params.useHardwareAcceleration ? hwAcceleratedCodecs[params.videoCodec] : codecs[params.videoCodec]) ||

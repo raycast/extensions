@@ -13,18 +13,18 @@ export type Preset = "ultrafast" | "superfast" | "veryfast" | "faster" | "fast" 
 export interface FormValues {
   videoFormat: VideoFormat;
   videoCodec: VideoCodec;
+  compressionMode: CompressionMode;
+  preset: Preset;
+  bitrate: string;
+  maxSize: string;
+  audioBitrate: string;
+  outputFolder: string[];
+  rename: string;
+  subfolderName: string;
+  useHardwareAcceleration: boolean;
   deleteOriginalFiles: boolean;
   videoFiles: string[];
-  preset: Preset;
   audioFiles: string[];
-  outputFolder: string[];
-  subfolderName: string;
-  compressionMode: CompressionMode;
-  bitrate: number;
-  maxSize: number;
-  rename: string;
-  audioBitrate: number;
-  useHardwareAcceleration: boolean;
 }
 
 // Constants

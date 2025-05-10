@@ -2,31 +2,10 @@ import { useState, useEffect } from "react";
 import { getSelectedFinderItems, getFrontmostApplication, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import path from "path";
-import os from "os";
 import { loadSettings, saveSettings, defaultSettings } from "../utils/settings";
 import { isFFmpegInstalled, setFFmpegPath } from "../utils/ffmpeg";
 import type { FormValues } from "../types";
 import { AVAILABLE_VIDEO_FORMATS, AVAILABLE_AUDIO_FORMATS } from "../types";
-
-// ------------------------------------
-// Constants
-// ------------------------------------
-const DEFAULT_SETTINGS: FormValues = {
-  videoFormat: "mp4",
-  videoCodec: "h264",
-  compressionMode: "bitrate",
-  preset: "medium",
-  bitrate: 10000,
-  maxSize: 100,
-  audioBitrate: 128,
-  outputFolder: [path.join(os.homedir(), "Downloads")],
-  rename: "",
-  subfolderName: "",
-  useHardwareAcceleration: false,
-  deleteOriginalFiles: false,
-  videoFiles: [],
-  audioFiles: [],
-};
 
 // ------------------------------------
 // Helpers
@@ -34,12 +13,21 @@ const DEFAULT_SETTINGS: FormValues = {
 const filterByExtensions = (paths: string[], extensions: readonly string[]): string[] => {
   return paths.filter((p) => extensions.some((ext) => p.toLowerCase().endsWith(`.${ext}`)));
 };
-
-export const isNaNValidate = (value: string): number => {
-  const parsedValue = parseInt(value, 10);
+const isInteger = (value: string): boolean => /^\d+$/.test(value);
+const isNumber = (value: string): boolean => /^\d+(\.\d+)?$/.test(value);
+export const sanitizeNumericInput = (value: string): string => {
+  const parsedValue = parseFloat(value);
   const isNaN = Number.isNaN(parsedValue);
-  if (isNaN) return 1;
-  return Math.abs(parsedValue);
+  if (isNaN) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid Input",
+      message: "Please enter a valid number.",
+    });
+    return "1";
+  }
+
+  return Math.abs(parsedValue).toString();
 };
 
 // ------------------------------------
@@ -64,22 +52,26 @@ const validateForm = (data: FormValues): boolean => {
     return false;
   }
 
-  if (data.compressionMode === "bitrate" && isNaN(data.bitrate)) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid Bitrate",
-      message: "Bitrate must be a whole number.",
-    });
-    return false;
+  if (data.compressionMode === "bitrate") {
+    if (!isInteger(data.bitrate)) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid Bitrate",
+        message: "Bitrate must be a number.",
+      });
+      return false;
+    }
   }
 
-  if (data.compressionMode === "filesize" && isNaN(data.maxSize)) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid File Size",
-      message: "Max size must be a number.",
-    });
-    return false;
+  if (data.compressionMode === "filesize") {
+    if (!isNumber(data.maxSize)) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid File Size",
+        message: "Max size must be a number.",
+      });
+      return false;
+    }
   }
 
   return true;
@@ -95,7 +87,7 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
 
   useEffect(() => {
     const initializeForm = async () => {
-      const settings = isQuickConvert ? DEFAULT_SETTINGS : await loadSettings();
+      const settings = isQuickConvert ? defaultSettings : await loadSettings();
       setFormData(settings);
       setFFmpegPath();
       try {
@@ -129,11 +121,21 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
     setFormData((prev: FormValues | null) => {
       if (!prev) return null;
 
+      // Handle numeric inputs
+      if (key === "bitrate" || key === "maxSize" || key === "audioBitrate") {
+        const stringValue = value as string;
+        // Allow typing decimal numbers
+        if (stringValue === "" || stringValue === "." || /^-?\d*\.?\d*$/.test(stringValue)) {
+          return { ...prev, [key]: stringValue };
+        }
+        return prev;
+      }
+
       // If output folder is empty, revert to saved/default folder
       if (key === "outputFolder" && Array.isArray(value) && value.length === 0) {
         return {
           ...prev,
-          [key]: [path.join(os.homedir(), "Downloads")],
+          [key]: defaultSettings.outputFolder,
         };
       }
 
@@ -160,7 +162,7 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
     settingsToValidate.videoFiles = [];
     settingsToValidate.audioFiles = [];
 
-    if (settingsToValidate.compressionMode === "bitrate" && isNaN(settingsToValidate.bitrate)) {
+    if (settingsToValidate.compressionMode === "bitrate" && !isInteger(settingsToValidate.bitrate)) {
       showToast({
         style: Toast.Style.Failure,
         title: "Invalid Bitrate",
@@ -169,7 +171,7 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
       return;
     }
 
-    if (settingsToValidate.compressionMode === "filesize" && isNaN(settingsToValidate.maxSize)) {
+    if (settingsToValidate.compressionMode === "filesize" && !isNumber(settingsToValidate.maxSize)) {
       showToast({
         style: Toast.Style.Failure,
         title: "Invalid File Size",
