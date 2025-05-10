@@ -1,3 +1,3 @@
-# Video converter Changelog
+# Video Converter Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}

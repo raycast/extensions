@@ -35,7 +35,6 @@ const audioCodecs: Record<string, string> = {
 const currentTasks: ConversionTask[] = [];
 const ffmpegPath = "/usr/local/bin/ffmpeg";
 const altPath = "/opt/homebrew/bin/ffmpeg";
-setFFmpegPath();
 
 export async function convertVideo(values: FormValues, progress: (task: ConversionTask[]) => void) {
   values.videoFiles.map((file: string, i: number) => {
@@ -70,11 +69,14 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
   const duration = await getVideoDuration(task.file);
 
   if (params.compressionMode === "bitrate") {
-    bitrate = parseInt(params.bitrate);
+    bitrate = params.bitrate;
   } else if (params.compressionMode === "filesize") {
-    const size = parseInt(params.maxSize);
+    const size = params.maxSize;
     const sizeKb = size * 1000 * 8;
-    bitrate = Math.floor((sizeKb - parseInt(params.audioBitrate) * duration) / duration);
+    bitrate = Math.floor((sizeKb - params.audioBitrate * duration) / duration);
+    if (bitrate <= 0) {
+      throw new Error("Bitrate is too low for the selected file size");
+    }
   } else {
     throw new Error("Invalid compression mode");
   }
@@ -139,7 +141,6 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
     video.on("error", (err) => {
       if (task.status !== "cancelled") task.status = "error";
       progress(task);
-      //console.log(`Error converting ${task.file}`);
       console.log(`Error: ${err.message}`);
 
       res(false);
@@ -150,13 +151,11 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
       task.elapsed = Math.floor((new Date().getTime() - task.started.getTime()) / 1000);
       progress(task);
       if (params.deleteOriginalFiles) deleteFile(task.file);
-      //console.log(`Finished converting ${task.file}`);
       res(true);
     });
     video.on("progress", (p) => {
       if (p.percent) task.progress = Math.round(p.percent);
       if (p.frames) task.fps = p.currentFps;
-      //console.log(p);
       progress(task);
     });
 
@@ -199,7 +198,7 @@ function getVideoDuration(filePath: string): Promise<number> {
     ffmpeg.ffprobe(filePath, (err, metadata) => {
       if (err) return reject(err);
       const duration = metadata.format.duration;
-      if (duration === undefined) return resolve(60);
+      if (!duration) return reject(new Error("Duration not found"));
       resolve(duration);
     });
   });

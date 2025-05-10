@@ -6,14 +6,14 @@
   "icon": "extension-icon.png",
   "author": "grosst",
   "categories": [
-    "Media",
-    "Web"
+    "Media"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "convert-video",
       "title": "Convert Video",
+      "subtitle": "Advanced video converter",
       "description": "Advanced video & audio conversion with live progress, customizable settings, and smart presets",
       "icon": "extension-icon.png",
       "mode": "view"
@@ -21,6 +21,7 @@
     {
       "name": "quick-convert",
       "title": "Quick Convert",
+      "subtitle": "Quickly convert video files",
       "description": "One click video & audio conversion",
       "icon": "extension-icon.png",
       "mode": "view"

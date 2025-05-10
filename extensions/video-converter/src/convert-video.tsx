@@ -2,7 +2,7 @@ import React from "react";
 import { ActionPanel, Action, Form } from "@raycast/api";
 import errorInfo from "./components/ffmpegNotFound";
 import Conversion from "./components/conversion";
-import { useVideoConverter } from "./hooks/useVideoConverter";
+import { useVideoConverter, isNaNValidate } from "./hooks/useVideoConverter";
 import {
   AVAILABLE_VIDEO_FORMATS,
   AVAILABLE_AUDIO_FORMATS,
@@ -41,12 +41,12 @@ export default function VideoConverter() {
         <ActionPanel>
           <Action.SubmitForm title="Convert" onSubmit={handleSubmit} />
           <Action
-            title="Save as Defaults Settings"
+            title="Save as Default Settings"
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             onAction={handleSaveDefaults}
           />
           <Action
-            title="Reset Defaults Settings"
+            title="Reset Default Settings"
             shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
             onAction={handleResetDefaults}
           />
@@ -117,16 +117,16 @@ export default function VideoConverter() {
         <Form.TextField
           id="bitrate"
           title="Bitrate"
-          value={formData.bitrate}
-          onChange={(v) => handleChange("bitrate", v)}
+          value={formData.bitrate.toString()}
+          onChange={(v) => handleChange("bitrate", isNaNValidate(v))}
           info="Target bitrate in kbps (e.g., 10000 for 10 Mbps)"
         />
       ) : (
         <Form.TextField
           id="maxSize"
           title="Max Size"
-          value={formData.maxSize}
-          onChange={(v) => handleChange("maxSize", v)}
+          value={formData.maxSize.toString()}
+          onChange={(v) => handleChange("maxSize", isNaNValidate(v))}
           info="Maximum file size in MB"
         />
       )}
@@ -146,8 +146,8 @@ export default function VideoConverter() {
       <Form.Dropdown
         id="audioBitrate"
         title="Audio Bitrate"
-        value={formData.audioBitrate}
-        onChange={(v) => handleChange("audioBitrate", v)}
+        value={formData.audioBitrate.toString()}
+        onChange={(v) => handleChange("audioBitrate", isNaNValidate(v))}
       >
         <Form.Dropdown.Item value="64" title="64 kbps (very low)" />
         <Form.Dropdown.Item value="96" title="96 kbps (low)" />

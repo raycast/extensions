@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { getSelectedFinderItems, getFrontmostApplication, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import os from "os";
 import { loadSettings, saveSettings, defaultSettings } from "../utils/settings";
-import { isFFmpegInstalled } from "../utils/ffmpeg";
+import { isFFmpegInstalled, setFFmpegPath } from "../utils/ffmpeg";
 import type { FormValues } from "../types";
 import { AVAILABLE_VIDEO_FORMATS, AVAILABLE_AUDIO_FORMATS } from "../types";
 
@@ -15,9 +16,9 @@ const DEFAULT_SETTINGS: FormValues = {
   videoCodec: "h264",
   compressionMode: "bitrate",
   preset: "medium",
-  bitrate: "10000",
-  maxSize: "100",
-  audioBitrate: "128",
+  bitrate: 10000,
+  maxSize: 100,
+  audioBitrate: 128,
   outputFolder: [path.join(os.homedir(), "Downloads")],
   rename: "",
   subfolderName: "",
@@ -34,8 +35,12 @@ const filterByExtensions = (paths: string[], extensions: readonly string[]): str
   return paths.filter((p) => extensions.some((ext) => p.toLowerCase().endsWith(`.${ext}`)));
 };
 
-const isInteger = (value: string): boolean => /^\d+$/.test(value);
-const isNumber = (value: string): boolean => /^\d+(\.\d+)?$/.test(value);
+export const isNaNValidate = (value: string): number => {
+  const parsedValue = parseInt(value, 10);
+  const isNaN = Number.isNaN(parsedValue);
+  if (isNaN) return 1;
+  return Math.abs(parsedValue);
+};
 
 // ------------------------------------
 // Validation
@@ -59,7 +64,7 @@ const validateForm = (data: FormValues): boolean => {
     return false;
   }
 
-  if (data.compressionMode === "bitrate" && !isInteger(data.bitrate)) {
+  if (data.compressionMode === "bitrate" && isNaN(data.bitrate)) {
     showToast({
       style: Toast.Style.Failure,
       title: "Invalid Bitrate",
@@ -68,7 +73,7 @@ const validateForm = (data: FormValues): boolean => {
     return false;
   }
 
-  if (data.compressionMode === "filesize" && !isNumber(data.maxSize)) {
+  if (data.compressionMode === "filesize" && isNaN(data.maxSize)) {
     showToast({
       style: Toast.Style.Failure,
       title: "Invalid File Size",
@@ -92,23 +97,27 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
     const initializeForm = async () => {
       const settings = isQuickConvert ? DEFAULT_SETTINGS : await loadSettings();
       setFormData(settings);
+      setFFmpegPath();
+      try {
+        const app = await getFrontmostApplication();
+        if (app?.name === "Finder") {
+          const items = await getSelectedFinderItems();
+          const paths = items.filter((i) => !i.path.endsWith("/")).map((i) => i.path);
+          const videoFiles = filterByExtensions(paths, AVAILABLE_VIDEO_FORMATS);
 
-      const app = await getFrontmostApplication();
-      if (app?.name === "Finder") {
-        const items = await getSelectedFinderItems();
-        const paths = items.filter((i) => !i.path.endsWith("/")).map((i) => i.path);
-        const videoFiles = filterByExtensions(paths, AVAILABLE_VIDEO_FORMATS);
+          const parents = [...new Set(videoFiles.map((p) => path.dirname(p)))];
+          const isCommonFolder = parents.length === 1;
+          const outputFolder = isCommonFolder ? [parents[0]] : settings.outputFolder;
 
-        const parents = [...new Set(videoFiles.map((p) => path.dirname(p)))];
-        const isCommonFolder = parents.length === 1;
-        const outputFolder = isCommonFolder ? [parents[0]] : settings.outputFolder;
-
-        setFormData((prev: FormValues | null) => ({
-          ...(prev || settings),
-          videoFiles,
-          audioFiles: isQuickConvert ? [] : filterByExtensions(paths, AVAILABLE_AUDIO_FORMATS).slice(0, 1),
-          outputFolder,
-        }));
+          setFormData((prev: FormValues | null) => ({
+            ...(prev || settings),
+            videoFiles,
+            audioFiles: isQuickConvert ? [] : filterByExtensions(paths, AVAILABLE_AUDIO_FORMATS).slice(0, 1),
+            outputFolder,
+          }));
+        }
+      } catch (error) {
+        showFailureToast(error, { title: "Failed to get selected files" });
       }
     };
 
@@ -151,7 +160,7 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
     settingsToValidate.videoFiles = [];
     settingsToValidate.audioFiles = [];
 
-    if (settingsToValidate.compressionMode === "bitrate" && !isInteger(settingsToValidate.bitrate)) {
+    if (settingsToValidate.compressionMode === "bitrate" && isNaN(settingsToValidate.bitrate)) {
       showToast({
         style: Toast.Style.Failure,
         title: "Invalid Bitrate",
@@ -160,7 +169,7 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
       return;
     }
 
-    if (settingsToValidate.compressionMode === "filesize" && !isNumber(settingsToValidate.maxSize)) {
+    if (settingsToValidate.compressionMode === "filesize" && isNaN(settingsToValidate.maxSize)) {
       showToast({
         style: Toast.Style.Failure,
         title: "Invalid File Size",
@@ -175,8 +184,7 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
 
   const handleResetDefaults = async (): Promise<void> => {
     await saveSettings(defaultSettings);
-    const defaults = await loadSettings();
-    setFormData(defaults);
+    setFormData(defaultSettings);
     showToast({ style: Toast.Style.Success, title: "Defaults reset" });
   };
 

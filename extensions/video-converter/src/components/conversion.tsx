@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import path from "path";
 import { ActionPanel, Action, Toast, Icon, List, showInFinder, showToast } from "@raycast/api";
-import { getProgressIcon } from "@raycast/utils";
+import { getProgressIcon, showFailureToast } from "@raycast/utils";
 import { cancelConversion, ConversionTask, convertVideo } from "../utils/ffmpeg";
 import type { FormValues } from "../types";
 import { CONVERSION_STATUS, LOADING_MESSAGES, ERROR_MESSAGES } from "../constants";
@@ -26,13 +26,11 @@ export default function Conversion({ values }: { values: FormValues }) {
 
         await convertVideo(values, (t) => {
           setTasks(t.map((x) => ({ ...x })));
-          setIsLoading(false);
         });
+        setIsLoading(false);
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast(error, {
           title: ERROR_MESSAGES.CONVERSION_FAILED,
-          message: error instanceof Error ? error.message : "Unknown error occurred",
         });
       }
     };
@@ -100,14 +98,10 @@ export default function Conversion({ values }: { values: FormValues }) {
               title={path.basename(t.file)}
               subtitle={subtitle[t.status]}
               icon={icons[t.status]}
-              accessories={[{ text: percent }, { text: t.status === CONVERSION_STATUS.ERROR ? "Click to retry" : "" }]}
+              accessories={[{ text: percent }]}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Show in Finder"
-                    onAction={() => showInFinder(path.dirname(t.file))}
-                    icon={Icon.Finder}
-                  />
+                  <Action title="Show in Finder" onAction={() => showInFinder(t.file)} icon={Icon.Finder} />
                   {!completed && (
                     <Action
                       title="Cancel Conversion"

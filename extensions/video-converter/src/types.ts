@@ -20,10 +20,10 @@ export interface FormValues {
   outputFolder: string[];
   subfolderName: string;
   compressionMode: CompressionMode;
-  bitrate: string;
-  maxSize: string;
+  bitrate: number;
+  maxSize: number;
   rename: string;
-  audioBitrate: string;
+  audioBitrate: number;
   useHardwareAcceleration: boolean;
 }
 
