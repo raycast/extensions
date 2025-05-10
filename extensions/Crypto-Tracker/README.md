@@ -12,7 +12,7 @@ CryptoTracker uses the CoinMarketCap API to provide cryptocurrency data. To use 
 4. After signing up, you'll find your API key on your account dashboard
 5. Copy your API key and enter it in the CryptoTracker extension preferences:
    - Open Raycast
-   - Go to Extensions → CryptoTracker → Preferences
+   - Go to Extensions → Cryptotracker → Preferences
    - Paste your API key in the "CoinMarketCap API Key" field
 
 ## Features
