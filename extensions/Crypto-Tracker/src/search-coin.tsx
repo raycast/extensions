@@ -30,15 +30,11 @@ export default function SearchCoin() {
   // Handle errors with toast
   useEffect(() => {
     if (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, { 
         title: "Error searching coins",
-        message: error instanceof Error ? error.message : String(error),
         primaryAction: {
           title: "Try Again",
-          onAction: () => {
-            revalidate();
-          },
+          onAction: revalidate,
         },
       });
     }
