@@ -222,10 +222,5 @@ function getAvailableFilePath(outputDir: string, fileName: string, extension: st
 }
 
 function deleteFile(filePath: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    fs.unlink(filePath, (err) => {
-      if (err) return reject(err);
-      resolve();
-    });
-  });
+  return fs.promises.unlink(filePath);
 }

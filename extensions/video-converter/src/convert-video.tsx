@@ -118,7 +118,7 @@ export default function VideoConverter() {
           id="bitrate"
           title="Bitrate"
           value={formData.bitrate.toString()}
-          onChange={(v) => handleChange("bitrate", v)}
+          onChange={(v) => handleChange("bitrate", sanitizeNumericInput(v))}
           info="Target bitrate in kbps (e.g., 10000 for 10 Mbps)"
         />
       ) : (

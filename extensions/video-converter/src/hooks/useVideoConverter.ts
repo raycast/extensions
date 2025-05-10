@@ -16,13 +16,13 @@ const filterByExtensions = (paths: string[], extensions: readonly string[]): str
 const isInteger = (value: string): boolean => /^\d+$/.test(value);
 const isNumber = (value: string): boolean => /^\d+(\.\d+)?$/.test(value);
 export const sanitizeNumericInput = (value: string): string => {
-  const parsedValue = parseFloat(value);
+  const parsedValue = parseInt(value);
   const isNaN = Number.isNaN(parsedValue);
   if (isNaN) {
     showToast({
       style: Toast.Style.Failure,
       title: "Invalid Input",
-      message: "Please enter a valid number.",
+      message: "Please enter a whole number.",
     });
     return "1";
   }
@@ -57,7 +57,7 @@ const validateForm = (data: FormValues): boolean => {
       showToast({
         style: Toast.Style.Failure,
         title: "Invalid Bitrate",
-        message: "Bitrate must be a number.",
+        message: "Bitrate must be a whole number.",
       });
       return false;
     }
@@ -122,10 +122,15 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
       if (!prev) return null;
 
       // Handle numeric inputs
-      if (key === "bitrate" || key === "maxSize" || key === "audioBitrate") {
-        const stringValue = value as string;
+      if (key === "bitrate" || key === "maxSize") {
+        let stringValue = value as string;
         // Allow typing decimal numbers
-        if (stringValue === "" || stringValue === "." || /^-?\d*\.?\d*$/.test(stringValue)) {
+        if (stringValue.startsWith(".")) stringValue = "0" + stringValue;
+        if (stringValue === "") {
+          return { ...prev, [key]: "1" };
+        }
+
+        if (stringValue === "." || /^-?\d*\.?\d*$/.test(stringValue)) {
           return { ...prev, [key]: stringValue };
         }
         return prev;
