@@ -41,7 +41,7 @@ export async function convertVideo(values: FormValues, progress: (task: Conversi
   // Clean up old completed tasks
   cleanupCompletedTasks();
 
-  values.videoFiles.map((file: string, i: number) => {
+  values.videoFiles.forEach((file: string, i: number) => {
     const task: ConversionTask = {
       id: i,
       file,
@@ -117,8 +117,15 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
     const originalExt = parsedPath.ext;
 
     const outputDir = path.join(params.outputFolder[0], params.subfolderName);
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
+    try {
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to create output directory: ${error.message}`);
+      }
+      throw new Error("Failed to create output directory");
     }
 
     let fileName: string;
@@ -226,7 +233,7 @@ export function isFFmpegInstalled(): boolean {
   }
 }
 
-export async function setFFmpegPath(): Promise<void> {
+export function setFFmpegPath(): void {
   let path = "";
   if (fs.existsSync(ffmpegPath)) path = ffmpegPath;
   else if (fs.existsSync(altPath)) path = altPath;
