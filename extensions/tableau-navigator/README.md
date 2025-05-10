@@ -1,7 +1,5 @@
 # Tableau Navigator
 
-![Tableau Navigator](metadata/tableau-navigator-2.png)
-
 Tableau Navigator is a Raycast extension that allows you to quickly search and access your Tableau dashboards and visualizations from anywhere on your Mac.
 
 ## Features
