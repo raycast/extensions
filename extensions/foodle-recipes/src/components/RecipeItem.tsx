@@ -4,7 +4,7 @@ import RecipeDetail from "../components/RecipeDetail";
 import { getFavicon } from "@raycast/utils";
 
 export default function RecipeItem({ recipe }: { recipe: FoodleRecipe }) {
-  function accessories(recipe: FoodleRecipe) {
+  function accessories() {
     const accessories = [];
     if (recipe.time) {
       accessories.push({ text: recipe.time, icon: Icon.Clock });
@@ -19,7 +19,7 @@ export default function RecipeItem({ recipe }: { recipe: FoodleRecipe }) {
       title={recipe.name}
       subtitle={recipe.source}
       icon={getFavicon(recipe.url)}
-      accessories={accessories(recipe)}
+      accessories={accessories()}
       actions={
         <ActionPanel title={recipe.name}>
           <ActionPanel.Section>

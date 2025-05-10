@@ -13,15 +13,15 @@
     {
       "name": "recipe-for",
       "title": "Recipe For",
-      "subtitle": "Foodle",
-      "description": "Search recipes by name via recipe search engine foodle.recipe",
+      "subtitle": "Foodle Recipes",
+      "description": "Search recipes by name via recipe search engine foodle.recipes",
       "mode": "view"
     },
     {
       "name": "recipe-with",
       "title": "Recipe With",
-      "subtitle": "Foodle",
-      "description": "Search recipes by ingredients via recipe search engine foodle.recipe",
+      "subtitle": "Foodle Recipes",
+      "description": "Search recipes by ingredients via recipe search engine foodle.recipes",
       "mode": "view"
     }
   ],

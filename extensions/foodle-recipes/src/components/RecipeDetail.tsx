@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail } from "@raycast/api";
 import { FoodleRecipe, ParsedRecipe, LdPerson, LdImage } from "../utils/types";
 import * as cheerio from "cheerio";
 import { showFailureToast, useFetch } from "@raycast/utils";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Recipe } from "schema-dts";
 
 export default function RecipeDetail(recipe: FoodleRecipe) {
@@ -23,9 +23,11 @@ export default function RecipeDetail(recipe: FoodleRecipe) {
     showFailureToast(error);
   }
 
-  if (html !== "" && jsonLdRecipe == null) {
-    extractRecipeFromHtml(html);
-  }
+  useEffect(() => {
+    if (html !== "" && jsonLdRecipe == null) {
+      extractRecipeFromHtml(html);
+    }
+  }, [html, jsonLdRecipe]);
 
   function extractRecipeFromHtml(html: string) {
     const $ = cheerio.load(html);
@@ -34,31 +36,35 @@ export default function RecipeDetail(recipe: FoodleRecipe) {
     ldEntries.each((_, element) => {
       const jsonRaw = $(element).html();
       if (jsonRaw) {
-        const jsonParsed = JSON.parse(jsonRaw);
+        try {
+          const jsonParsed = JSON.parse(jsonRaw);
 
-        // check for single jsonLd which only contains a recipe
-        let jsonLdRecipe = mapToJsonLdRecipe(jsonParsed as Recipe);
+          // check for single jsonLd which only contains a recipe
+          let jsonLdRecipe = mapToJsonLdRecipe(jsonParsed as Recipe);
 
-        if (jsonLdRecipe != null) {
-          setJsonLdRecipe(jsonLdRecipe);
-        } else {
-          let ldEntries = [];
+          if (jsonLdRecipe != null) {
+            setJsonLdRecipe(jsonLdRecipe);
+          } else {
+            let ldEntries = [];
 
-          if (Array.isArray(jsonParsed)) {
-            // jsonLd with an array of jsonLds
-            ldEntries = jsonParsed;
-          } else if (jsonParsed["@graph"] && Array.isArray(jsonParsed["@graph"])) {
-            // jsonLd-graph with an array of jsonLds
-            ldEntries = jsonParsed["@graph"];
-          }
+            if (Array.isArray(jsonParsed)) {
+              // jsonLd with an array of jsonLds
+              ldEntries = jsonParsed;
+            } else if (jsonParsed["@graph"] && Array.isArray(jsonParsed["@graph"])) {
+              // jsonLd-graph with an array of jsonLds
+              ldEntries = jsonParsed["@graph"];
+            }
 
-          for (const entry of ldEntries) {
-            // check for each entry if it is a recipe
-            jsonLdRecipe = mapToJsonLdRecipe(entry as Recipe);
-            if (jsonLdRecipe != null) {
-              setJsonLdRecipe(jsonLdRecipe);
+            for (const entry of ldEntries) {
+              // check for each entry if it is a recipe
+              jsonLdRecipe = mapToJsonLdRecipe(entry as Recipe);
+              if (jsonLdRecipe != null) {
+                setJsonLdRecipe(jsonLdRecipe);
+              }
             }
           }
+        } catch (error) {
+          showFailureToast(error, { title: "Failed to parse recipe data" });
         }
       }
     });
