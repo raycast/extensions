@@ -1,0 +1,18 @@
+{
+  "selectedSources": {
+    "type": "textfield",
+    "default": "COINDESK,COINTELEGRAPH,CRYPTONEWS,BITCOINMAGAZINE",
+    "required": true,
+    "title": "News Sources",
+    "description": "Choose your preferred crypto news sources (comma-separated)",
+    "placeholder": "COINDESK,COINTELEGRAPH,CRYPTONEWS,BITCOINMAGAZINE"
+  },
+  "numberOfHeadlines": {
+    "type": "textfield",
+    "default": "20",
+    "required": true,
+    "placeholder": "Enter a number between 1 and 50",
+    "title": "Number of Headlines",
+    "description": "Number of headlines to display (maximum 50)"
+  }
+}
