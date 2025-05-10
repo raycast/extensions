@@ -5,16 +5,16 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "strict": false,
+    "strict": true,
     "skipLibCheck": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": false,
+    "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "types": ["@raycast/api", "node", "react"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "raycast-env.d.ts"],
   "exclude": ["node_modules", "dist"]
-} 
+}

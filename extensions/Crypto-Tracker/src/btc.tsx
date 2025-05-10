@@ -1,7 +1,8 @@
 import { LaunchProps } from "@raycast/api";
 import CoinDetail from "./coin-detail";
 
-// This is just a wrapper that forces the coinId parameter to be "1" (Bitcoin's ID in CoinMarketCap)
-export default function BTCDetail(props: LaunchProps) {
-  return <CoinDetail {...props} arguments={{ coinId: "1" }} />;
+const BITCOIN_CMC_ID = "1";
+
+export default function BTCDetail(props: LaunchProps<{ arguments: { coinId: string } }>) {
+  return <CoinDetail {...props} arguments={{ coinId: BITCOIN_CMC_ID }} />;
 }

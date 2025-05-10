@@ -8,7 +8,6 @@ import {
   showToast,
   Toast,
   getPreferenceValues,
-  launchCommand,
   LaunchType,
 } from "@raycast/api";
 import { useTopCoins, Coin } from "./coinmarketcap";
@@ -28,11 +27,15 @@ dayjs.extend(relativeTime);
 export default function ListCoins() {
   const { vsCurrency, refreshInterval } = getPreferences();
   const { data: coins, isLoading, error, revalidate } = useTopCoins(50);
+
   const [searchText, setSearchText] = useState("");
   const [filteredCoins, setFilteredCoins] = useState<Coin[]>([]);
+
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const [showDetails, setShowDetails] = useState(false);
   const [selectedCoinId, setSelectedCoinId] = useState<string>("");
+
 
   // Filter coins when data or search text changes
   useEffect(() => {
@@ -52,7 +55,7 @@ export default function ListCoins() {
 
   // Handle errors with toast notifications
   useEffect(() => {
-    if (error) {
+    if (error && !(error instanceof Error && error.message === "canceled")) {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load cryptocurrencies",
@@ -65,25 +68,19 @@ export default function ListCoins() {
         },
       });
     }
-  }, [error]);
+  }, [error, revalidate]);
 
-  // Setup auto-refresh based on refreshInterval preference
+  // Setup interval refresh
   useEffect(() => {
-    // Clear any existing timer
     if (refreshTimerRef.current) {
       clearInterval(refreshTimerRef.current);
     }
-
-    // Only set up refresh timer if the interval is valid and not too frequent
-    if (refreshInterval && refreshInterval > 0) {
-      // Convert minutes to milliseconds
+    if (refreshInterval && refreshInterval > 0 && revalidate) {
       const refreshMs = refreshInterval * 60 * 1000;
       refreshTimerRef.current = setInterval(() => {
         revalidate();
       }, refreshMs);
     }
-
-    // Cleanup the timer on component unmount
     return () => {
       if (refreshTimerRef.current) {
         clearInterval(refreshTimerRef.current);
@@ -91,7 +88,7 @@ export default function ListCoins() {
     };
   }, [refreshInterval, revalidate]);
 
-  // Function to get current price and percent change
+
   const getCoinPrice = (coin: Coin) => {
     const currencyUpper = vsCurrency.toUpperCase();
     return coin.quote && coin.quote[currencyUpper]
@@ -106,10 +103,7 @@ export default function ListCoins() {
       : 0;
   };
 
-  // Function to get logo URL
   const getCoinLogo = (coin: Coin) => {
-    // CoinMarketCap doesn't provide logo in the listings API
-    // Using a static URL pattern for CoinMarketCap logos
     return `https://s2.coinmarketcap.com/static/img/coins/64x64/${coin.id}.png`;
   };
 
@@ -131,6 +125,7 @@ export default function ListCoins() {
       throttle
       actions={
         <ActionPanel>
+          {/* Removed direct API key check action here, relies on the error toast */}
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
@@ -202,7 +197,7 @@ export default function ListCoins() {
                     setShowDetails(true);
                   }}
                 />
-                <Action
+                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}

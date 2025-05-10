@@ -6,7 +6,6 @@ import {
   Icon,
   showToast,
   Toast,
-  launchCommand,
   LaunchType,
 } from "@raycast/api";
 import { useSearchCoins, SearchResult } from "./coinmarketcap";
@@ -23,40 +22,42 @@ export default function SearchCoin() {
     revalidate,
   } = useSearchCoins(searchText);
   const { refreshInterval } = getPreferences();
+
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const [showDetails, setShowDetails] = useState(false);
   const [selectedCoinId, setSelectedCoinId] = useState<string>("");
 
+
   // Handle errors with toast
   useEffect(() => {
-    if (error) {
-      showFailureToast(error, { 
+    if (error && !(error instanceof Error && error.message === "canceled")) {
+      showToast({
+        style: Toast.Style.Failure,
         title: "Error searching coins",
+        message: error instanceof Error ? error.message : String(error),
         primaryAction: {
           title: "Try Again",
-          onAction: revalidate,
+          onAction: () => {
+            revalidate();
+          },
         },
       });
     }
-  }, [error]);
+  }, [error, revalidate]);
 
-  // Setup auto-refresh based on refreshInterval preference
+
+  // Setup interval refresh (only if search text has length >= 2)
   useEffect(() => {
-    // Clear any existing timer
     if (refreshTimerRef.current) {
       clearInterval(refreshTimerRef.current);
     }
-
-    // Only set up refresh timer if the interval is valid, not too frequent, and we have a search term
-    if (refreshInterval && refreshInterval > 0 && searchText.length >= 2) {
-      // Convert minutes to milliseconds
+    if (refreshInterval && refreshInterval > 0 && searchText.length >= 2 && revalidate) {
       const refreshMs = refreshInterval * 60 * 1000;
       refreshTimerRef.current = setInterval(() => {
         revalidate();
       }, refreshMs);
     }
-
-    // Cleanup the timer on component unmount
     return () => {
       if (refreshTimerRef.current) {
         clearInterval(refreshTimerRef.current);
@@ -64,7 +65,7 @@ export default function SearchCoin() {
     };
   }, [refreshInterval, revalidate, searchText]);
 
-  // Function to get logo URL for a coin
+
   const getCoinLogo = (coin: SearchResult) => {
     return `https://s2.coinmarketcap.com/static/img/coins/64x64/${coin.id}.png`;
   };
@@ -78,6 +79,7 @@ export default function SearchCoin() {
     );
   }
 
+
   return (
     <List
       isLoading={isLoading}
@@ -87,6 +89,7 @@ export default function SearchCoin() {
       throttle
       actions={
         <ActionPanel>
+           {/* Removed direct API key check action here, relies on the error toast */}
           <Action.OpenInBrowser
             title="Get CoinMarketCap API Key"
             icon={{ source: Icon.Key }}
@@ -151,7 +154,7 @@ export default function SearchCoin() {
                   content={coin.id.toString()}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />
-                <Action
+                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}

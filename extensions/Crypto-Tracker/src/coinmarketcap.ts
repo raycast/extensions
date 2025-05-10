@@ -1,12 +1,11 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { getPreferences } from "./utils";
 import React from "react";
 
 const BASE_URL = "https://pro-api.coinmarketcap.com/v1";
 
-// Define interfaces for API responses
 export interface Coin {
   id: number;
   name: string;
@@ -96,14 +95,33 @@ export interface SearchResult {
   logo: string;
 }
 
-// Preference utilities
+interface CoinMapEntry {
+  id: number;
+  name: string;
+  symbol: string;
+  slug: string;
+  rank: number;
+  // Add other fields if they exist and are used
+}
+
 export function getCoinMarketCapApiKey(): string {
   const preferences = getPreferenceValues();
   const apiKey = preferences.coinmarketcapApiKey as string;
   return apiKey;
 }
 
-// Create axios instance
+// Shared utility function for API key check
+function ensureApiKey(): boolean {
+  const apiKey = getCoinMarketCapApiKey();
+  if (!apiKey) {
+    showFailureToast("API Key Missing", {
+        message: "Please set your CoinMarketCap API key in preferences.",
+    });
+    return false;
+  }
+  return true;
+}
+
 const coinMarketCapAPI = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
@@ -113,11 +131,13 @@ const coinMarketCapAPI = axios.create({
   },
 });
 
-// Add request interceptor to add API key to all requests
 coinMarketCapAPI.interceptors.request.use(
   (config) => {
     const apiKey = getCoinMarketCapApiKey();
     if (!apiKey) {
+      // The ensureApiKey check in hooks will show the toast,
+      // but we still throw here to stop the request chain in case
+      // the check is missed elsewhere.
       throw new Error(
         "CoinMarketCap API key is not set. Please set it in preferences.",
       );
@@ -130,35 +150,49 @@ coinMarketCapAPI.interceptors.request.use(
   },
 );
 
-// Add response interceptor to handle API errors
 coinMarketCapAPI.interceptors.response.use(
   (response) => response,
   (error) => {
+    // If it's a cancellation, don't show a toast or transform the error
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+    
+    let customError = error; // Default to original error
     if (error.response) {
       const { status, data } = error.response;
+      let title = "CoinMarketCap API Error";
+      let message = `CoinMarketCap API Error: ${status}`;
+
       if (status === 401 || status === 403) {
-        return Promise.reject(
-          new Error(
-            "Invalid API key. Please check your CoinMarketCap API key in preferences.",
-          ),
-        );
+        title = "Invalid API Key";
+        message = "Invalid API key. Please check your CoinMarketCap API key in preferences.";
+        customError = new Error(message);
       } else if (status === 429) {
-        return Promise.reject(
-          new Error(
-            "CoinMarketCap API rate limit exceeded. Please try again later.",
-          ),
-        );
+        title = "Rate Limit Exceeded";
+        message = "CoinMarketCap API rate limit exceeded. Please try again later.";
+        customError = new Error(message);
       } else if (data && data.status && data.status.error_message) {
-        return Promise.reject(
-          new Error(`CoinMarketCap API error: ${data.status.error_message}`),
-        );
+        message = `CoinMarketCap API error: ${data.status.error_message}`;
+        customError = new Error(message);
       }
+      showFailureToast(customError.message, { title });
+    } else if (error.request) {
+      // The request was made but no response was received
+      const title = "Network Error";
+      const message = "Could not connect to CoinMarketCap API. Check your internet connection.";
+      customError = new Error(message);
+      showFailureToast(message, { title });
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      const title = "Request Setup Error";
+      customError = new Error(error.message || "An unexpected error occurred.");
+      showFailureToast(customError.message, { title });
     }
-    return Promise.reject(error);
+    return Promise.reject(customError);
   },
 );
 
-// API functions with optimized error handling
 export async function getTopCoins(
   vsCurrency: string,
   perPage = 50,
@@ -171,11 +205,9 @@ export async function getTopCoins(
         convert: vsCurrency.toUpperCase(),
       },
     };
-
     if (signal) {
       config.signal = signal;
     }
-
     const response = await coinMarketCapAPI.get(
       "/cryptocurrency/listings/latest",
       config,
@@ -183,7 +215,7 @@ export async function getTopCoins(
     return response.data.data;
   } catch (error) {
     if (axios.isCancel(error)) {
-      console.log("Request was canceled");
+      console.log("Request for top coins was canceled");
       return [];
     }
     console.error("Error fetching top coins:", error);
@@ -202,19 +234,16 @@ export async function getCoinDetails(
         id: coinId,
       },
     };
-
     const quotesConfig: AxiosRequestConfig = {
       params: {
         id: coinId,
         convert: vsCurrency.toUpperCase(),
       },
     };
-
     if (signal) {
       metadataConfig.signal = signal;
       quotesConfig.signal = signal;
     }
-
     const metadataResponse = await coinMarketCapAPI.get(
       "/cryptocurrency/info",
       metadataConfig,
@@ -233,16 +262,43 @@ export async function getCoinDetails(
     };
   } catch (error) {
     if (axios.isCancel(error)) {
-      console.log(`Request for coin ${coinId} was canceled`);
-      throw new Error("Request was canceled");
+      console.log("Request for coin details was canceled");
+      // Return an empty object with the required structure instead of throwing
+      return {
+        id: parseInt(coinId),
+        name: "",
+        symbol: "",
+        slug: "",
+        description: "",
+        logo: "",
+        urls: {
+          website: [],
+          technical_doc: [],
+          twitter: [],
+          reddit: [],
+          message_board: [],
+          announcement: [],
+          chat: [],
+          explorer: [],
+          source_code: [],
+        },
+        date_added: "",
+        tags: [],
+        platform: null,
+        category: "",
+        cmc_rank: 0,
+        circulating_supply: 0,
+        total_supply: 0,
+        max_supply: null,
+        last_updated: "",
+        quote: {}
+      };
     }
-    console.error(`Error fetching details for coin ${coinId}:`, error);
+    console.error("Error fetching details for coin", coinId, ":", error);
     throw error;
   }
 }
 
-// We need to generate market chart data using points over time
-// Since CoinMarketCap doesn't have a free endpoint for historical data, we'll simulate it
 export async function getMarketChart(
   coinId: string,
   days = 7,
@@ -250,13 +306,16 @@ export async function getMarketChart(
   signal?: AbortSignal,
 ): Promise<MarketChart> {
   try {
+    // Note: CoinMarketCap API v1 does not provide historical market chart data directly
+    // This function simulates a market chart based on current price and 7-day change.
+    // For real historical data, a different API (like CoinGecko) would be needed or potentially CMC's premium endpoints.
+
     const detailsConfig: AxiosRequestConfig = {
       params: {
         id: coinId,
         convert: vsCurrency.toUpperCase(),
       },
     };
-
     if (signal) {
       detailsConfig.signal = signal;
     }
@@ -265,113 +324,118 @@ export async function getMarketChart(
       "/cryptocurrency/quotes/latest",
       detailsConfig,
     );
+
     const coinData = response.data.data[coinId];
     const currentPrice = coinData.quote[vsCurrency.toUpperCase()].price;
     const percentChange7d =
       coinData.quote[vsCurrency.toUpperCase()].percent_change_7d;
-    const percentChange24h =
+     const percentChange24h =
       coinData.quote[vsCurrency.toUpperCase()].percent_change_24h;
+
 
     const now = Date.now();
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const startTime = now - days * millisecondsPerDay;
+    const startPrice = currentPrice / (1 + percentChange7d / 100); // Estimate start price
 
-    const startPrice = currentPrice / (1 + percentChange7d / 100);
-
-    const dataPoints = 50;
-    const interval = (now - startTime) / dataPoints;
+    // Simple spline interpolation parameters
+    const dataPoints = 50; // Number of points in the chart
+    const interval = (now - startTime) / dataPoints; // Time between points
 
     const prices: [number, number][] = [];
-    const marketCaps: [number, number][] = [];
-    const volumes: [number, number][] = [];
+    const marketCaps: [number, number][] = []; // Simulated market caps
+    const volumes: [number, number][] = []; // Simulated volumes
 
-    const volatility = Math.min(Math.abs(percentChange24h) / 15 + 0.3, 1.0);
-
-    const numControlPoints = 8;
+     // Use Catmull-Rom Spline to create a smoother line
+    // Control points for the spline
+    const volatility = Math.min(Math.abs(percentChange24h) / 15 + 0.3, 1.0); // Scale volatility
+    const numControlPoints = 8; // More control points for smoother curve
     const controlPoints: number[] = [];
 
-    controlPoints.push(startPrice);
+    controlPoints.push(startPrice); // Start at estimated past price
 
     for (let i = 1; i < numControlPoints - 1; i++) {
-      const progress = i / (numControlPoints - 1);
-      const basePrice = startPrice + (currentPrice - startPrice) * progress;
-      const maxDeviation = basePrice * 0.05 * volatility;
-      const deviation = (Math.random() * 2 - 1) * maxDeviation;
-      const edgeFactor = 1 - Math.pow(2 * progress - 1, 2);
-      const adjustedDeviation = deviation * edgeFactor;
-      controlPoints.push(basePrice + adjustedDeviation);
+        const progress = i / (numControlPoints - 1);
+        // Base price linearly interpolated between start and current
+        const basePrice = startPrice + (currentPrice - startPrice) * progress;
+        // Add some random deviation, larger near the ends
+         const maxDeviation = basePrice * 0.05 * volatility; // Deviation scales with price and volatility
+         const deviation = (Math.random() * 2 - 1) * maxDeviation;
+         // Apply a factor to make deviation smaller in the middle and larger at ends (like a bell curve inverted)
+         const edgeFactor = 1 - Math.pow(2 * progress - 1, 2); // Peaks at start/end, zero in middle
+         const adjustedDeviation = deviation * edgeFactor;
+
+        controlPoints.push(basePrice + adjustedDeviation);
     }
+    controlPoints.push(currentPrice); // End at current price
 
-    controlPoints.push(currentPrice);
-
+    // Generate spline points
     for (let i = 0; i <= dataPoints; i++) {
-      const timestamp = startTime + i * interval;
-      const progress = i / dataPoints;
-      const segment = Math.min(
-        Math.floor(progress * (numControlPoints - 1)),
-        numControlPoints - 2,
-      );
-      const segmentProgress = progress * (numControlPoints - 1) - segment;
+        const timestamp = startTime + i * interval;
+        const progress = i / dataPoints;
 
-      const p0 =
-        segment > 0 ? controlPoints[segment - 1] : controlPoints[segment];
-      const p1 = controlPoints[segment];
-      const p2 = controlPoints[segment + 1];
-      const p3 =
-        segment < numControlPoints - 2
-          ? controlPoints[segment + 2]
-          : controlPoints[segment + 1];
+        // Find the segment for the current progress
+        const segment = Math.min(Math.floor(progress * (numControlPoints - 1)), numControlPoints - 2);
+        const segmentProgress = progress * (numControlPoints - 1) - segment;
 
-      const t = segmentProgress;
-      const t2 = t * t;
-      const t3 = t2 * t;
+        // Get the 4 control points for the current segment
+        const p0 = segment > 0 ? controlPoints[segment - 1] : controlPoints[segment];
+        const p1 = controlPoints[segment];
+        const p2 = controlPoints[segment + 1];
+        const p3 = segment < numControlPoints - 2 ? controlPoints[segment + 2] : controlPoints[segment + 1];
 
-      const price =
-        0.5 *
-        (2 * p1 +
-          (-p0 + p2) * t +
-          (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
-          (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
+        // Catmull-Rom Spline interpolation
+        const t = segmentProgress;
+        const t2 = t * t;
+        const t3 = t2 * t;
 
-      prices.push([timestamp, price]);
+        const price = 0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
 
-      const marketCap = price * coinData.circulating_supply;
-      marketCaps.push([timestamp, marketCap]);
+        prices.push([timestamp, price]);
 
-      let volumeFactor = 0.7 + 0.6 * Math.random();
-      if (i > 0) {
-        const lastPrice = prices[i - 1][1];
-        const priceChange = Math.abs(price - lastPrice) / lastPrice;
-        if (priceChange > 0.01) {
-          volumeFactor *= 1 + priceChange * 10;
-        }
-      }
+        // Simulate market cap and volume proportionally to price with some noise
+        const marketCap = price * coinData.circulating_supply; // Simple proportionality
+        marketCaps.push([timestamp, marketCap]);
 
-      const volume =
-        coinData.quote[vsCurrency.toUpperCase()].volume_24h * volumeFactor;
-      volumes.push([timestamp, volume]);
+         // Simulate volume - higher volume on days with larger price swings
+         let volumeFactor = 0.7 + 0.6 * Math.random(); // Base randomness
+         if (i > 0) {
+             const lastPrice = prices[i-1][1];
+             const priceChange = Math.abs(price - lastPrice) / lastPrice;
+             if (priceChange > 0.01) { // Spike volume on significant price moves
+                 volumeFactor *= (1 + priceChange * 10); // Factor increases with price change
+             }
+         }
+        const volume = coinData.quote[vsCurrency.toUpperCase()].volume_24h * volumeFactor; // Scale based on current 24h volume
+        volumes.push([timestamp, volume]);
     }
 
-    // Ensure the last price is exactly the current price for consistency
-    if (prices.length > 0) {
-      prices[prices.length - 1] = [now, currentPrice];
-      marketCaps[marketCaps.length - 1] = [
-        now,
-        currentPrice * coinData.circulating_supply,
-      ];
+     // Ensure the last point is exactly the current price and time
+     if (prices.length > 0) {
+        prices[prices.length - 1] = [now, currentPrice];
+        marketCaps[marketCaps.length - 1] = [now, currentPrice * coinData.circulating_supply];
+        // Volume at the last point is less critical, use the simulated one or current 24h avg
+        // Keeping the simulated one for curve consistency or set to current 24h volume if preferred
+         volumes[volumes.length - 1] = [now, coinData.quote[vsCurrency.toUpperCase()].volume_24h];
     }
+
 
     return {
       prices,
       market_caps: marketCaps,
       total_volumes: volumes,
     };
+
   } catch (error) {
     if (axios.isCancel(error)) {
-      console.log(`Request for market chart ${coinId} was canceled`);
-      throw new Error("Request was canceled");
+      console.log("Request for market chart was canceled");
+      return { 
+        prices: [], 
+        market_caps: [], 
+        total_volumes: [] 
+      };
     }
-    console.error(`Error generating market chart for coin ${coinId}:`, error);
+    console.error("Error generating market chart for coin", coinId, ":", error);
     throw error;
   }
 }
@@ -381,41 +445,33 @@ export async function searchCoins(
   signal?: AbortSignal,
 ): Promise<SearchResult[]> {
   try {
-    // Since CoinMarketCap doesn't have a free search endpoint, we'll fetch all coins and filter
     const config: AxiosRequestConfig = {
       params: {
-        limit: 100, // Fetch top 100 coins
+        limit: 100, // Fetch a reasonable number of top coins to search within
         sort: "cmc_rank",
       },
     };
-
     if (signal) {
       config.signal = signal;
     }
 
     const response = await coinMarketCapAPI.get("/cryptocurrency/map", config);
-    const allCoins = response.data.data;
+    const allCoins: CoinMapEntry[] = response.data.data;
 
-    // Filter coins based on search query
     const lowercaseQuery = query.toLowerCase();
+
     const filteredCoins = allCoins.filter(
-      (coin: any) =>
+      (coin: CoinMapEntry) =>
         coin.name.toLowerCase().includes(lowercaseQuery) ||
         coin.symbol.toLowerCase().includes(lowercaseQuery),
     );
 
-    // Create a Map to handle duplicate IDs
-    const uniqueCoinsMap = new Map();
-
-    // Process coins to ensure unique keys
-    filteredCoins.forEach((coin: any) => {
-      // Create a unique key using both id and symbol
+    const uniqueCoinsMap = new Map<number, SearchResult>();
+    filteredCoins.forEach((coin: CoinMapEntry) => {
       const uniqueKey = coin.id;
-
-      // Only add if not already in the map or if it has a higher rank
       if (
         !uniqueCoinsMap.has(uniqueKey) ||
-        uniqueCoinsMap.get(uniqueKey).rank > coin.rank
+        (uniqueCoinsMap.get(uniqueKey)?.rank ?? Infinity) > coin.rank // Handle potential undefined rank
       ) {
         uniqueCoinsMap.set(uniqueKey, {
           id: coin.id,
@@ -423,62 +479,41 @@ export async function searchCoins(
           symbol: coin.symbol,
           slug: coin.slug,
           rank: coin.rank,
-          logo: "", // CoinMarketCap doesn't provide logo in map endpoint
+          logo: `https://s2.coinmarketcap.com/static/img/coins/64x64/${coin.id}.png`, // Populate logo here
         });
       }
     });
 
-    // Convert Map values to array
     return Array.from(uniqueCoinsMap.values());
+
   } catch (error) {
     if (axios.isCancel(error)) {
-      console.log(`Search request for ${query} was canceled`);
+      console.log("Request for searching coins was canceled");
       return [];
     }
-    console.error(`Error searching for coins with query ${query}:`, error);
+    console.error("Error searching for coins with query", query, ":", error);
     throw error;
   }
 }
 
 // React hooks for cached data
+
 export function useTopCoins(perPageArg = 50) {
   const { vsCurrency, refreshInterval } = getPreferences();
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
-  // Check if API key exists
-  const apiKey = getCoinMarketCapApiKey();
-  if (!apiKey) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "API Key Missing",
-      message: "Please set your CoinMarketCap API key in preferences.",
-    });
-  }
-
+  // API Key Check
   React.useEffect(() => {
-    // Set up refresh interval manually
-    if (refreshInterval) {
-      const intervalId = setInterval(
-        () => {
-          if (revalidate) revalidate();
-        },
-        refreshInterval * 60 * 1000,
-      );
-      return () => clearInterval(intervalId);
-    }
-  }, [refreshInterval]);
+    ensureApiKey();
+  }, []); // Check once on mount
 
-  // useCachedPromise expects the function itself, then its arguments as an array
+
   const { data, isLoading, error, revalidate } = useCachedPromise(
     (currency: string, count: number) => {
-      // Cancel previous request if it exists
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
-
-      // Create a new AbortController
       abortControllerRef.current = new AbortController();
-
       return getTopCoins(currency, count, abortControllerRef.current.signal);
     },
     [vsCurrency, perPageArg],
@@ -488,6 +523,18 @@ export function useTopCoins(perPageArg = 50) {
     },
   );
 
+  React.useEffect(() => {
+    if (refreshInterval && revalidate) {
+      const intervalId = setInterval(
+        () => {
+          revalidate();
+        },
+        refreshInterval * 60 * 1000,
+      );
+      return () => clearInterval(intervalId);
+    }
+  }, [refreshInterval, revalidate]); // Added revalidate
+
   return { data, isLoading, error, revalidate };
 }
 
@@ -495,28 +542,10 @@ export function useCoinDetails(id: string) {
   const { vsCurrency, refreshInterval } = getPreferences();
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
-  // Check if API key exists
-  const apiKey = getCoinMarketCapApiKey();
-  if (!apiKey) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "API Key Missing",
-      message: "Please set your CoinMarketCap API key in preferences.",
-    });
-  }
-
-  React.useEffect(() => {
-    // Set up refresh interval manually
-    if (refreshInterval) {
-      const intervalId = setInterval(
-        () => {
-          if (revalidate) revalidate();
-        },
-        refreshInterval * 60 * 1000,
-      );
-      return () => clearInterval(intervalId);
-    }
-  }, [refreshInterval]);
+   // API Key Check
+   React.useEffect(() => {
+    ensureApiKey();
+  }, []); // Check once on mount
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
     (coinId: string, currency: string) => {
@@ -536,6 +565,18 @@ export function useCoinDetails(id: string) {
     },
   );
 
+  React.useEffect(() => {
+    if (refreshInterval && revalidate) {
+      const intervalId = setInterval(
+        () => {
+          revalidate();
+        },
+        refreshInterval * 60 * 1000,
+      );
+      return () => clearInterval(intervalId);
+    }
+  }, [refreshInterval, revalidate]); // Added revalidate
+
   return { data, isLoading, error, revalidate };
 }
 
@@ -543,28 +584,11 @@ export function useMarketChart(id: string, daysArg = 7) {
   const { vsCurrency, refreshInterval } = getPreferences();
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
-  // Check if API key exists
-  const apiKey = getCoinMarketCapApiKey();
-  if (!apiKey) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "API Key Missing",
-      message: "Please set your CoinMarketCap API key in preferences.",
-    });
-  }
+   // API Key Check
+   React.useEffect(() => {
+    ensureApiKey();
+  }, []); // Check once on mount
 
-  React.useEffect(() => {
-    // Set up refresh interval manually
-    if (refreshInterval) {
-      const intervalId = setInterval(
-        () => {
-          if (revalidate) revalidate();
-        },
-        refreshInterval * 60 * 1000,
-      );
-      return () => clearInterval(intervalId);
-    }
-  }, [refreshInterval]);
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
     (coinId: string, days: number, currency: string) => {
@@ -585,21 +609,29 @@ export function useMarketChart(id: string, daysArg = 7) {
     },
   );
 
+   React.useEffect(() => {
+    if (refreshInterval && revalidate) {
+      const intervalId = setInterval(
+        () => {
+          revalidate();
+        },
+        refreshInterval * 60 * 1000,
+      );
+      return () => clearInterval(intervalId);
+    }
+  }, [refreshInterval, revalidate]); // Added revalidate
+
+
   return { data, isLoading, error, revalidate };
 }
 
 export function useSearchCoins(query: string) {
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
-  // Check if API key exists
-  const apiKey = getCoinMarketCapApiKey();
-  if (!apiKey) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "API Key Missing",
-      message: "Please set your CoinMarketCap API key in preferences.",
-    });
-  }
+   // API Key Check
+   React.useEffect(() => {
+    ensureApiKey();
+  }, []); // Check once on mount
 
   return useCachedPromise(
     (searchQuery: string) => {

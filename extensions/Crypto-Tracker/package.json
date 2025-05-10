@@ -1,6 +1,6 @@
 {
   "name": "cryptotracker",
-  "title": "CryptoTracker",
+  "title": "Cryptotracker",
   "version": "2.0.3",
   "description": "Track cryptocurrency prices and market data using CoinMarketCap API",
   "icon": "extension-icon.png",
