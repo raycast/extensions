@@ -11,8 +11,10 @@ import {
   useNavigation,
   LocalStorage,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useSolanaBalance, useSplTokenBalances } from "./helpers";
 import { useState, useEffect } from "react";
+import { BalancesViewProps, SendFormProps, WalletSetupFormProps } from "./types";
 
 const USER_WALLET_ADDRESS_KEY = "userSolanaWalletAddress";
 
@@ -20,18 +22,14 @@ function formatTokenBalance(balance: number, decimals: number): string {
   return balance.toFixed(Math.min(decimals, 6));
 }
 
-interface SendFormProps {
-  tokenSymbol: string;
-  tokenDecimals: number;
-  mintAddress?: string;
-  senderAddress: string;
-}
-
 function SendForm({ tokenSymbol, mintAddress, senderAddress, tokenDecimals }: SendFormProps) {
   const navigation = useNavigation();
   const [recipientAddress, setRecipientAddress] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
-  const [errors, setErrors] = useState<{ recipient?: string; amount?: string }>({});
+  const [errors, setErrors] = useState<{
+    recipient?: string;
+    amount?: string;
+  }>({});
 
   function validateField(fieldName: "recipient" | "amount"): boolean {
     let isValid = true;
@@ -84,10 +82,8 @@ function SendForm({ tokenSymbol, mintAddress, senderAddress, tokenDecimals }: Se
 
   async function handleSubmit() {
     if (!validateAllFields()) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error("Please check the form for errors."), {
         title: "Validation Error",
-        message: "Please check the form for errors.",
       });
       return;
     }
@@ -143,10 +139,6 @@ function SendForm({ tokenSymbol, mintAddress, senderAddress, tokenDecimals }: Se
       <Form.Description text={"Note: Ensure your Solana CLI is configured with the sender's keypair."} />
     </Form>
   );
-}
-
-interface WalletSetupFormProps {
-  onWalletSet: (address: string) => void;
 }
 
 function WalletSetupForm({ onWalletSet }: WalletSetupFormProps) {
@@ -206,11 +198,6 @@ function WalletSetupForm({ onWalletSet }: WalletSetupFormProps) {
   );
 }
 
-interface BalancesViewProps {
-  walletAddress: string;
-  onChangeWallet: () => Promise<void>;
-}
-
 function BalancesView({ walletAddress, onChangeWallet }: BalancesViewProps) {
   const { balance: solBalance, isLoading: isLoadingSol, error: errorSol } = useSolanaBalance(walletAddress);
   const { tokenBalances, isLoading: isLoadingTokens, error: errorTokens } = useSplTokenBalances(walletAddress);
@@ -231,7 +218,11 @@ function BalancesView({ walletAddress, onChangeWallet }: BalancesViewProps) {
           <List.Item
             title="SOL"
             subtitle="Solana"
-            accessories={[{ text: `${formatTokenBalance(solBalance, 9)} SOL` }]}
+            accessories={[
+              {
+                text: `${formatTokenBalance(solBalance, 9)} SOL`,
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy Balance" content={solBalance.toString()} />
@@ -245,7 +236,7 @@ function BalancesView({ walletAddress, onChangeWallet }: BalancesViewProps) {
                   title="Change Wallet Address"
                   icon={Icon.Switch}
                   onAction={onChangeWallet}
-                  shortcut={{ modifiers: ["cmd"], key: "w" }}
+                  shortcut={{ modifiers: ["opt"], key: "w" }}
                 />
               </ActionPanel>
             }
@@ -258,7 +249,11 @@ function BalancesView({ walletAddress, onChangeWallet }: BalancesViewProps) {
             key={token.mintAddress}
             title={token.symbol}
             subtitle={token.name}
-            accessories={[{ text: `${formatTokenBalance(token.uiAmount, token.decimals)} ${token.symbol}` }]}
+            accessories={[
+              {
+                text: `${formatTokenBalance(token.uiAmount, token.decimals)} ${token.symbol}`,
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title={`Copy ${token.symbol} Balance`} content={token.uiAmount.toString()} />
@@ -281,7 +276,7 @@ function BalancesView({ walletAddress, onChangeWallet }: BalancesViewProps) {
           />
         ))}
       </List.Section>
-      {!isLoading && solBalance === null && tokenBalances.length === 0 && !combinedError && (
+      {!isLoading && tokenBalances.length === 0 && solBalance === null && !combinedError && (
         <List.EmptyView
           title="No Balances Found"
           description={`No SOL or token balances found for ${walletAddress}. Ensure the address is correct and has activity.`}
@@ -304,11 +299,7 @@ export default function Command() {
         }
       } catch (e) {
         console.error("Failed to load wallet from local storage", e);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error Loading Wallet",
-          message: "Could not load saved wallet address.",
-        });
+        await showFailureToast(e, { title: "Error Loading Wallet" });
       } finally {
         setIsLoadingStoredWallet(false);
       }
@@ -316,14 +307,18 @@ export default function Command() {
     loadWallet();
   }, []);
 
-  async function handleSetWallet(address: string) {
+  function handleSetWallet(address: string) {
     setUserWalletAddress(address);
   }
 
   async function handleChangeWallet() {
     await LocalStorage.removeItem(USER_WALLET_ADDRESS_KEY);
     setUserWalletAddress(null);
-    await showToast({ title: "Wallet Address Cleared", message: "Please enter a new wallet address." });
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Wallet Address Cleared",
+      message: "Please enter a new wallet address.",
+    });
   }
 
   if (isLoadingStoredWallet) {

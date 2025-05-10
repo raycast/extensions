@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { AccountLayout, getMint } from "@solana/spl-token";
+import { SplTokenBalance, UseSolanaBalanceReturn } from "./types";
+import { UseSplTokenBalancesReturn } from "./types";
 
-interface UseSolanaBalanceReturn {
-  balance: number | null;
-  isLoading: boolean;
-  error: string | null;
-}
+// Solana network configuration
+const SOLANA_RPC_ENDPOINT = "https://api.mainnet-beta.solana.com";
 
 export function useSolanaBalance(walletAddress: string): UseSolanaBalanceReturn {
   const [balance, setBalance] = useState<number | null>(null);
@@ -25,7 +24,7 @@ export function useSolanaBalance(walletAddress: string): UseSolanaBalanceReturn 
       setIsLoading(true);
       setError(null);
       try {
-        const connection = new Connection("https://api.mainnet-beta.solana.com");
+        const connection = new Connection(SOLANA_RPC_ENDPOINT);
         const publicKey = new PublicKey(walletAddress);
 
         const lamports = await connection.getBalance(publicKey);
@@ -52,24 +51,18 @@ export function useSolanaBalance(walletAddress: string): UseSolanaBalanceReturn 
 // Predefined map for common token mints to symbols and names
 // Add more tokens here as needed
 const KNOWN_TOKENS_MAP: Record<string, { symbol: string; name: string; decimals?: number }> = {
-  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: { symbol: "USDC", name: "USD Coin", decimals: 6 },
-  J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn: { symbol: "JitoSOL", name: "Jito Staked SOL", decimals: 9 },
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: {
+    symbol: "USDC",
+    name: "USD Coin",
+    decimals: 6,
+  },
+  J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn: {
+    symbol: "JitoSOL",
+    name: "Jito Staked SOL",
+    decimals: 9,
+  },
   // Add other known tokens here, e.g., mSOL, BONK, etc.
 };
-
-export interface SplTokenBalance {
-  mintAddress: string;
-  uiAmount: number;
-  symbol: string;
-  name: string;
-  decimals: number;
-}
-
-interface UseSplTokenBalancesReturn {
-  tokenBalances: SplTokenBalance[];
-  isLoading: boolean;
-  error: string | null;
-}
 
 export function useSplTokenBalances(walletAddress: string): UseSplTokenBalancesReturn {
   const [tokenBalances, setTokenBalances] = useState<SplTokenBalance[]>([]);
@@ -87,7 +80,7 @@ export function useSplTokenBalances(walletAddress: string): UseSplTokenBalancesR
     async function fetchTokenBalances() {
       setIsLoading(true);
       setError(null);
-      const connection = new Connection("https://api.mainnet-beta.solana.com");
+      const connection = new Connection(SOLANA_RPC_ENDPOINT);
       const ownerPublicKey = new PublicKey(walletAddress);
 
       try {
@@ -112,6 +105,12 @@ export function useSplTokenBalances(walletAddress: string): UseSplTokenBalancesR
               console.warn(`Could not fetch decimals for mint ${mintAddress}:`, e);
               continue;
             }
+          }
+
+          // Skip tokens with undefined decimals to prevent Math.pow() errors
+          if (decimals === undefined) {
+            console.warn(`Skipping token with undefined decimals: ${mintAddress}`);
+            continue;
           }
 
           const uiAmount = accountInfo.amount ? Number(accountInfo.amount) / Math.pow(10, decimals) : 0;
