@@ -3,11 +3,66 @@ import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import PlayerDetailsResponse, { Person, Split } from "../interfaces/playerDetails";
 
-interface PlayerDetailProps {
-  playerId: number;
+// Utility function to convert HTML to Markdown
+function convertHtmlToMarkdown(html: string): string {
+  if (!html) return "";
+  
+  let markdown = html
+    // Replace paragraph tags
+    .replace(/<p>(.*?)<\/p>/g, "$1\n\n")
+    // Replace strong/bold tags
+    .replace(/<(strong|b)>(.*?)<\/(strong|b)>/g, "**$2**")
+    // Replace emphasis/italic tags
+    .replace(/<(em|i)>(.*?)<\/(em|i)>/g, "*$2*")
+    // Replace heading tags
+    .replace(/<h1>(.*?)<\/h1>/g, "# $1\n\n")
+    .replace(/<h2>(.*?)<\/h2>/g, "## $1\n\n")
+    .replace(/<h3>(.*?)<\/h3>/g, "### $1\n\n")
+    // Replace anchor tags
+    .replace(/<a href="(.*?)">(.*?)<\/a>/g, "[$2]($1)")
+    // Replace unordered list items
+    .replace(/<li>(.*?)<\/li>/g, "- $1\n")
+    // Replace ordered list items
+    .replace(/<ol>([\s\S]*?)<\/ol>/g, (match: string, content: string) => {
+      let counter = 1;
+      return content.replace(/<li>(.*?)<\/li>/g, (m: string, item: string) => `${counter++}. ${item}\n`);
+    })
+    // Remove list tags (after processing list items)
+    .replace(/<\/?ul>/g, "\n")
+    // Replace line breaks
+    .replace(/<br\s*\/?>/g, "\n")
+    // Replace div tags
+    .replace(/<div>(.*?)<\/div>/g, "$1\n")
+    // Replace span tags
+    .replace(/<span.*?>(.*?)<\/span>/g, "$1")
+    // Remove any remaining HTML tags
+    .replace(/<[^>]*>/g, "");
+  
+  // Replace HTML entities
+  markdown = markdown
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+  
+  return markdown;
 }
 
-export default function PlayerDetail({ playerId }: PlayerDetailProps) {
+interface Highlight {
+  contentText: string;
+  contentTitle: string;
+}
+
+interface PlayerDetailProps {
+  playerId: number;
+  biography?: string | null;
+  highlights?: Highlight[] | null;
+  prospectBio?: Highlight[] | null;
+}
+
+export default function PlayerDetail({ playerId, biography, highlights, prospectBio }: PlayerDetailProps) {
   const [selectedStat, setSelectedStat] = useState<string>("yearByYear");
   
   const { data, isLoading, error } = useFetch<PlayerDetailsResponse>(
@@ -63,7 +118,7 @@ export default function PlayerDetail({ playerId }: PlayerDetailProps) {
   };
 
   // Get career stats
-  const careerStats = getStatsByType("careerRegularSeason")?.splits[0]?.stat;
+  const careerStats = getStatsByType("career")?.splits[0]?.stat;
   
   // Get yearly stats
   const yearlyStats = getStatsByType(selectedStat)?.splits || [];
@@ -73,20 +128,12 @@ export default function PlayerDetail({ playerId }: PlayerDetailProps) {
 
   // Generate markdown for player details
   const markdown = `
-# ${player.fullName || ""} ${player.primaryNumber ? `#${player.primaryNumber}` : ""} ![Player](${getPlayerHeadshot(player.id, 300)})
+# <img src="${getPlayerHeadshot(player.id, 75)}" style="height:75px; width: 75px;" /> ${player.fullName || ""} ${player.primaryNumber ? `#${player.primaryNumber}` : ""}
 
-${player.currentTeam ? `## Current Team
-**${player.currentTeam.name || "Unknown"}** ${player.currentTeam.abbreviation ? `(${player.currentTeam.abbreviation})` : ""}` : `## Team
-**Retired/Not Active**`}
-
-## Personal Information
-- **Position:** ${player.primaryPosition ? `${player.primaryPosition.name || "Unknown"} (${player.primaryPosition.abbreviation || ""})` : "Unknown"}
-- **Born:** ${player.birthDate ? `${formatDate(player.birthDate)} (Age: ${player.currentAge || "Unknown"})` : "Unknown"}
-- **Birthplace:** ${player.birthCity || ""}, ${player.birthStateProvince || ""}, ${player.birthCountry || ""}
-- **Height/Weight:** ${player.height || "Unknown"} / ${player.weight ? `${player.weight} lbs` : "Unknown"}
-${player.draftYear ? `- **Draft Year:** ${player.draftYear}` : ""}
-${player.nickName ? `- **Nickname:** ${player.nickName}` : ""}
-`;
+${careerStats ? `
+| Games | AB | AVG | HR | RBI | OPS |
+| ----- | --- | --- | --- | --- | --- |
+| ${careerStats.gamesPlayed || '-'} | ${careerStats.atBats || '0'} | ${careerStats.avg || '.000'} | ${careerStats.homeRuns || '0'} | ${careerStats.rbi || '0'} | ${careerStats.ops || '.000'} |` : ""}`;
 
   // Generate stats table for the selected season
   const renderStatsTable = (split: Split) => {
@@ -151,6 +198,7 @@ ${player.nickName ? `- **Nickname:** ${player.nickName}` : ""}
                     text={player.active ? "Active" : "Inactive"}
                     icon={{ source: player.active ? Icon.CheckCircle : Icon.XMarkCircle, tintColor: player.active ? Color.Green : Color.Red }}
                   />
+                  <List.Item.Detail.Metadata.Label title="Draft Year" text={player.draftYear?.toString() || "N/A"} />
                   <List.Item.Detail.Metadata.Label title="Team" text={player.currentTeam ? player.currentTeam.name : "Retired/Not Active"} />
                   <List.Item.Detail.Metadata.Label title="Position" text={player.primaryPosition?.name || "Unknown"} />
                   <List.Item.Detail.Metadata.Separator />
@@ -176,6 +224,51 @@ ${player.nickName ? `- **Nickname:** ${player.nickName}` : ""}
             </ActionPanel>
           }
         />
+        {biography ? (
+          <List.Item
+            id="biography"
+            title="Biography"
+            detail={
+              <List.Item.Detail
+                markdown={convertHtmlToMarkdown(biography.replaceAll('...', '\n\n- '))}
+              />
+            }
+          />
+        ) : null}
+        {highlights ? (
+          <List.Item
+            id="highlights"
+            title="Highlights"
+            subtitle={highlights.length.toString()}
+            detail={
+              <List.Item.Detail
+                markdown={highlights.map((highlight) => {
+                  // Convert HTML to markdown
+                  const markdownText = convertHtmlToMarkdown(highlight.contentText);
+                  // Format bullet points
+                  return `\n${markdownText.replaceAll('...', '\n\n- ')}`;
+                }).join("")}
+              />
+            }
+          />
+        ) : null}
+        {prospectBio ? (
+          <List.Item
+            id="prospectBio"
+            title="Prospect Bio"
+            subtitle={prospectBio.length.toString()}
+            detail={
+              <List.Item.Detail
+                markdown={prospectBio.map((highlight) => {
+                  // Convert HTML to markdown
+                  const markdownText = convertHtmlToMarkdown(highlight.contentText);
+                  // Format bullet points
+                  return `\n${markdownText.replaceAll('...', '\n\n- ')}`;
+                }).join("")}
+              />
+            }
+          />
+        ) : null}
       </List.Section>
 
       <List.Section title="Season Stats" subtitle={`${selectedStat === "yearByYearAdvanced" ? "Advanced" : "Regular"}`}>
@@ -197,9 +290,7 @@ ${player.nickName ? `- **Nickname:** ${player.nickName}` : ""}
               ]}
               detail={
                 <List.Item.Detail
-                  markdown={`# ${split.season} Season - ${teamName}
-
-![Player](${getPlayerHeadshot(player.id, 200)})`}
+                  markdown={`# ${split.season} Season - ${teamName}`}
                   metadata={
                     <List.Item.Detail.Metadata>
                       {renderStatsTable(split)}

@@ -95,12 +95,6 @@ export default function SearchPlayers() {
           subtitle={getPlayerPosition(player)}
           accessories={[
             {
-              text: getPlayerTeam(player),
-            },
-            {
-              text: player.playerId ? `#${player.playerId}` : "",
-            },
-            {
               icon: player.lastUpdatedDate ? Icon.Clock : undefined,
               tooltip: player.lastUpdatedDate ? `Last updated: ${new Date(player.lastUpdatedDate).toLocaleDateString()}` : undefined,
               text: player.lastUpdatedDate ? new Date(player.lastUpdatedDate).toLocaleDateString() : "",
@@ -114,7 +108,14 @@ export default function SearchPlayers() {
             <ActionPanel>
               <Action.Push
                 title="View Player Details"
-                target={<PlayerDetail playerId={player.playerId} />}
+                target={
+                  <PlayerDetail
+                    playerId={player.playerId}
+                    biography={player.biography}
+                    highlights={player.highlight}
+                    prospectBio={player.prospectBio}
+                  />
+                }
                 icon={Icon.Person}
               />
               <Action.OpenInBrowser title="View Player Profile" url={player.url} />
