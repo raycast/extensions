@@ -82,8 +82,8 @@ export default function CoinDetail(
     };
 
     if (refreshTimerRef.current) {
-      // Clear any old setInterval if it was used before
-      clearInterval(refreshTimerRef.current);
+      // Clear any old timeout if it was used before
+      clearTimeout(refreshTimerRef.current);
       refreshTimerRef.current = null;
     }
 
@@ -113,7 +113,7 @@ export default function CoinDetail(
     );
   }
 
-  if (isLoading && !coinDetail) {
+  if (isLoading) {
     return <Detail isLoading={true} markdown="Loading coin details..." />;
   }
 

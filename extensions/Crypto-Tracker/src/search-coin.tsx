@@ -4,10 +4,9 @@ import {
   ActionPanel,
   Action,
   Icon,
-  showToast,
-  Toast,
   LaunchType,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useSearchCoins, SearchResult } from "./coinmarketcap";
 import { getPreferences } from "./utils";
 import CoinDetail from "./coin-detail";
@@ -30,17 +29,7 @@ export default function SearchCoin() {
   // Handle errors with toast
   useEffect(() => {
     if (error && !(error instanceof Error && error.message === "canceled")) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error searching coins",
-        message: error instanceof Error ? error.message : String(error),
-        primaryAction: {
-          title: "Try Again",
-          onAction: () => {
-            revalidate();
-          },
-        },
-      });
+      showFailureToast(error, { title: "Error searching coins" });
     }
   }, [error, revalidate]);
 

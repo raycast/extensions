@@ -44,7 +44,7 @@
       "title": "CoinMarketCap API Key",
       "description": "Your CoinMarketCap API key. Get yours at https://coinmarketcap.com/api/",
       "type": "password",
-      "required": false,
+      "required": true,
       "default": ""
     },
     {
@@ -77,7 +77,7 @@
       "name": "refreshInterval",
       "title": "Refresh Interval",
       "description": "How often to refresh prices (in minutes)",
-      "type": "textfield",
+      "type": "number",
       "required": true,
       "default": "1"
     }

@@ -26,6 +26,11 @@ export function getCurrencySymbol(currency: string) {
   }
 }
 
+// Constants for number formatting
+const BILLION = 1_000_000_000;
+const MILLION = 1_000_000;
+const THOUSAND = 1_000;
+
 // Format currency with proper symbol and decimals
 export function formatCurrency(
   value: number | undefined,
@@ -36,12 +41,12 @@ export function formatCurrency(
 
   const currencySymbol = getCurrencySymbol(vsCurrency);
 
-  if (compact && value >= 1_000_000_000) {
-    return `${currencySymbol}${(value / 1_000_000_000).toFixed(2)}B`;
-  } else if (compact && value >= 1_000_000) {
-    return `${currencySymbol}${(value / 1_000_000).toFixed(2)}M`;
-  } else if (compact && value >= 1_000) {
-    return `${currencySymbol}${(value / 1_000).toFixed(2)}K`;
+  if (compact && value >= BILLION) {
+    return `${currencySymbol}${(value / BILLION).toFixed(2)}B`;
+  } else if (compact && value >= MILLION) {
+    return `${currencySymbol}${(value / MILLION).toFixed(2)}M`;
+  } else if (compact && value >= THOUSAND) {
+    return `${currencySymbol}${(value / THOUSAND).toFixed(2)}K`;
   }
 
   return new Intl.NumberFormat("en-US", {

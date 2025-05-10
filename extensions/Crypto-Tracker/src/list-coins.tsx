@@ -9,6 +9,7 @@ import {
   Toast,
   LaunchType,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useTopCoins, Coin } from "./coinmarketcap";
 import {
   getPreferences,
@@ -53,17 +54,7 @@ export default function ListCoins() {
   // Handle errors with toast notifications
   useEffect(() => {
     if (error && !(error instanceof Error && error.message === "canceled")) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load cryptocurrencies",
-        message: error instanceof Error ? error.message : String(error),
-        primaryAction: {
-          title: "Try Again",
-          onAction: () => {
-            revalidate();
-          },
-        },
-      });
+      showFailureToast(error, { title: "Failed to load cryptocurrencies" });
     }
   }, [error, revalidate]);
 
