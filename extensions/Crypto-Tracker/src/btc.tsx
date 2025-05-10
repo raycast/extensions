@@ -6,5 +6,7 @@ const BITCOIN_CMC_ID = 1;
 export default function BTCDetail(
   props: LaunchProps<{ arguments: { coinId: string } }>,
 ) {
-  return <CoinDetail {...props} arguments={{ coinId: BITCOIN_CMC_ID.toString() }} />;
+  return (
+    <CoinDetail {...props} arguments={{ coinId: BITCOIN_CMC_ID.toString() }} />
+  );
 }

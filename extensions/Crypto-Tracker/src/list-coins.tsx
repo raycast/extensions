@@ -5,8 +5,6 @@ import {
   Action,
   Icon,
   Color,
-  showToast,
-  Toast,
   LaunchType,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";

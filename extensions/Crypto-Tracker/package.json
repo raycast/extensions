@@ -77,7 +77,7 @@
       "name": "refreshInterval",
       "title": "Refresh Interval",
       "description": "How often to refresh prices (in minutes)",
-      "type": "number",
+      "type": "textfield",
       "required": true,
       "default": "1"
     }

@@ -1,11 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  LaunchType,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, LaunchType } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useSearchCoins, SearchResult } from "./coinmarketcap";
 import { getPreferences } from "./utils";
