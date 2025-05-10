@@ -87,7 +87,7 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
   if (params.audioFiles.length) video.input(params.audioFiles[0]);
 
   const parsedPath = path.parse(task.file);
-  const originalName = parsedPath.name + parsedPath.ext;
+  const originalName = parsedPath.name;
   const originalExt = parsedPath.ext;
 
   const outputDir = path.join(params.outputFolder[0], params.subfolderName);

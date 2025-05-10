@@ -23,7 +23,15 @@ export const defaultSettings: FormValues = {
 
 export async function loadSettings(): Promise<FormValues> {
   const stored = await LocalStorage.getItem<string>(SETTINGS_KEY);
-  const parsed = stored ? JSON.parse(stored) : {};
+  const parsed = stored
+    ? (() => {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          return {};
+        }
+      })()
+    : {};
   return { ...defaultSettings, ...parsed };
 }
 
