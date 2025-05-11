@@ -126,7 +126,7 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
           setLastFetchedUrl(url);
         });
     }
-  }, [url, urlError, name, lastFetchedUrl]);
+  }, [url, urlError, lastFetchedUrl]);
 
   async function handleSubmit(values: { url: string; name: string; category: string; customCategory?: string }) {
     setShowErrors(true);
