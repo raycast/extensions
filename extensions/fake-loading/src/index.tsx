@@ -1,11 +1,11 @@
 import { ActionPanel, List, Action, showHUD, closeMainWindow, showToast, Toast } from "@raycast/api";
 import React from "react";
-import { homedir } from "os";
 import { join } from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { writeFileSync } from "fs";
 import { tmpdir } from "os";
+import { environment } from "@raycast/api";
 
 const execPromise = promisify(exec);
 
@@ -26,27 +26,27 @@ interface LoadingScreen {
   path: string;
 }
 
-// Sample loading screens
+// Sample loading screens with relative paths
 const loadingScreens: LoadingScreen[] = [
   {
     id: "windows",
     name: "Windows XP Loading",
-    path: join(homedir(), "Developer", "loading-windows-raycast", "assets", "loadings", "xp.gif"),
+    path: join(environment.assetsPath, "loadings", "xp.gif"),
   },
   {
     id: "blue-screen",
     name: "Windows Blue Screen",
-    path: join(homedir(), "Developer", "loading-windows-raycast", "assets", "loadings", "xp-blue-screen-1.gif"),
+    path: join(environment.assetsPath, "loadings", "xp-blue-screen-1.gif"),
   },
   {
     id: "blue-screen-alt",
     name: "Windows Blue Screen (Alt)",
-    path: join(homedir(), "Developer", "loading-windows-raycast", "assets", "loadings", "xp-blue-screen-2.gif"),
+    path: join(environment.assetsPath, "loadings", "xp-blue-screen-2.gif"),
   },
   {
     id: "my-computer",
     name: "My Computer",
-    path: join(homedir(), "Developer", "loading-windows-raycast", "assets", "loadings", "my-computer.gif"),
+    path: join(environment.assetsPath, "loadings", "my-computer.gif"),
   },
 ];
 

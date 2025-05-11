@@ -12,12 +12,35 @@ if (!fs.existsSync(path.join('dist', 'assets'))) {
   fs.mkdirSync(path.join('dist', 'assets'), { recursive: true });
 }
 
+// Create loadings directory in dist/assets if it doesn't exist
+if (!fs.existsSync(path.join('dist', 'assets', 'loadings'))) {
+  fs.mkdirSync(path.join('dist', 'assets', 'loadings'), { recursive: true });
+}
+
 // Copy assets
 console.log('Copying assets...');
 try {
-  execSync('cp -r assets/* dist/assets/');
+  // Copy the loadings directory specifically
+  if (fs.existsSync(path.join('assets', 'loadings'))) {
+    execSync('cp -r assets/loadings/* dist/assets/loadings/');
+  }
+  
+  // Copy other assets
+  const assetFiles = fs.readdirSync('assets').filter(file => 
+    !fs.statSync(path.join('assets', file)).isDirectory() || file !== 'loadings');
+  
+  for (const file of assetFiles) {
+    const sourcePath = path.join('assets', file);
+    const destPath = path.join('dist', 'assets', file);
+    
+    if (fs.statSync(sourcePath).isDirectory()) {
+      execSync(`cp -r "${sourcePath}" "${path.join('dist', 'assets')}"`);
+    } else {
+      fs.copyFileSync(sourcePath, destPath);
+    }
+  }
 } catch (error) {
-  console.log('No assets to copy or error copying assets');
+  console.log('Error copying assets:', error.message);
 }
 
 // Copy package.json and other config files

@@ -1,7 +1,7 @@
 "use strict";
 import { jsx as _jsx } from "react/jsx-runtime";
-import { List, ActionPanel, Action, showToast, Toast, closeMainWindow, showHUD } from "@raycast/api";
-import { homedir, tmpdir } from "os";
+import { List, ActionPanel, Action, showToast, Toast, closeMainWindow, showHUD, environment } from "@raycast/api";
+import { tmpdir } from "os";
 import { join } from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -19,27 +19,27 @@ async function showFailureToast(error, options) {
   return toast;
 }
 
-// Sample loading screens
+// Sample loading screens with relative paths
 const loadingScreens = [
   {
     id: "windows",
     name: "Windows XP Loading",
-    path: join(homedir(), "Developer", "loading-windows-raycast", "assets", "loadings", "xp.gif"),
+    path: join(environment.assetsPath, "loadings", "xp.gif"),
   },
   {
     id: "blue-screen",
     name: "Windows Blue Screen",
-    path: join(homedir(), "Developer", "loading-windows-raycast", "assets", "loadings", "xp-blue-screen-1.gif"),
+    path: join(environment.assetsPath, "loadings", "xp-blue-screen-1.gif"),
   },
   {
     id: "blue-screen-alt",
     name: "Windows Blue Screen (Alt)",
-    path: join(homedir(), "Developer", "loading-windows-raycast", "assets", "loadings", "xp-blue-screen-2.gif"),
+    path: join(environment.assetsPath, "loadings", "xp-blue-screen-2.gif"),
   },
   {
     id: "my-computer",
     name: "My Computer",
-    path: join(homedir(), "Developer", "loading-windows-raycast", "assets", "loadings", "my-computer.gif"),
+    path: join(environment.assetsPath, "loadings", "my-computer.gif"),
   },
 ];
 
