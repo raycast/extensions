@@ -1,0 +1,8 @@
+{
+  "root": true,
+  "extends": ["@raycast"],
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module"
+  }
+}
