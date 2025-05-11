@@ -1,7 +1,7 @@
 import { Package, packagesFromOfflineCarrier } from "../package";
 import { Delivery } from "../delivery";
 
-export async function ableToTrackUspsRemotely(): Promise<boolean> {
+export function ableToTrackUspsRemotely(): boolean {
   // doesn't support remote tracking yet.
   return false;
 }

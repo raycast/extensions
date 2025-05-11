@@ -1,6 +1,5 @@
 import { ActionPanel, List, showToast, Action, Toast, Icon } from "@raycast/api";
 import convert from "xml-js";
-import fetch from "node-fetch";
 import { useCachedPromise } from "@raycast/utils";
 import { InDepthData, MatchItem, RSS } from "./types";
 
@@ -9,7 +8,9 @@ export default function Command() {
     async () => {
       const toast = await showToast(Toast.Style.Animated, `Fetching latest scores`);
 
-      const XMLdata = await fetch("http://static.cricinfo.com/rss/livescores.xml").then((r) => r.text());
+      const r = await fetch("https://static.cricinfo.com/rss/livescores.xml");
+      if (!r.ok) throw new Error("Error fetching scores");
+      const XMLdata = await r.text();
       const JSONdata: RSS<MatchItem> = JSON.parse(convert.xml2json(XMLdata, { compact: true, spaces: 4 }));
       const matches = JSONdata.rss.channel.item.map((match) => ({
         title: match.title["_text"].replace(" *", "*"),
@@ -21,10 +22,13 @@ export default function Command() {
 
       toast.title = "Fetching score details";
       for (const matchIndex in matches) {
-        const indepthData = (await fetch(
-          `https://www.espncricinfo.com/matches/engine/match/${matches[matchIndex].id}.json`,
-        ).then((r) => r.json())) as InDepthData;
-
+        const res = await fetch(`https://www.espncricinfo.com/matches/engine/match/${matches[matchIndex].id}.json`);
+        if (!res.ok || res.headers.get("content-type")?.includes("text")) {
+          matches[matchIndex].summary = "N/A";
+          matches[matchIndex].icon = Icon.Globe;
+          continue;
+        }
+        const indepthData: InDepthData = await res.json();
         matches[matchIndex].summary =
           indepthData.match.current_summary == ""
             ? indepthData.live.status

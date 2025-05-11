@@ -7,7 +7,7 @@ const DEFAULT_CLI_PATH = getPreferenceValues().cliPath || "/usr/local/bin/ente";
 
 export const createEntePath = (path: string): string => {
   if (!fse.existsSync(path)) {
-    fse.mkdirSync(path);
+    fse.mkdirSync(path, { recursive: true });
     console.log("Ente folder created at", path);
   } else {
     console.log("Ente folder already exists at", path);
@@ -30,7 +30,7 @@ export const exportEnteAuthSecrets = (): boolean => {
   if (!fse.existsSync(EXPORT_FILE_PATH)) {
     console.log("ente_auth.txt not found. Exporting...");
     try {
-      execSync("ente export");
+      execSync(`${DEFAULT_CLI_PATH} export`);
     } catch (error) {
       throw new Error("Export failed. Please check if the command is correct.");
     }

@@ -6,8 +6,6 @@ Uses Raycast to search through Linking bookmarks.
 
 ![raycast-linkding-1.png](metadata/raycast-linkding-1.png)
 ![raycast-linkding-2.png](metadata/raycast-linkding-2.png)
-![raycast-linkding-3.png](metadata/raycast-linkding-3.png)
-![raycast-linkding-4.png](metadata/raycast-linkding-4.png)
 
 ## Features
 
@@ -23,7 +21,6 @@ The Linkding API key and server URL from your Linkding instance are needed to us
 ## Planned Features
 
 - Update bookmarks in extension
-
 
 ## Contributing
 

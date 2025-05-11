@@ -1,6 +1,7 @@
 import { LinearClient } from "@linear/sdk";
 import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast, showHUD } from "@raycast/api";
 import { getAccessToken, withAccessToken } from "@raycast/utils";
+
 import { linear } from "./api/linearClient";
 
 const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) => {

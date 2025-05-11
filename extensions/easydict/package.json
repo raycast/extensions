@@ -801,5 +801,8 @@
       "description": "Your Caiyun Token",
       "default": ""
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
