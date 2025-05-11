@@ -5,7 +5,7 @@ import { showFailureToast, useFetch } from "@raycast/utils";
 import { ReactNode, useEffect, useState } from "react";
 import { Recipe } from "schema-dts";
 
-export default function RecipeDetail(recipe: FoodleRecipe) {
+export default function RecipeDetail({ recipe }: { recipe: FoodleRecipe }) {
   const {
     isLoading,
     data: html,
@@ -207,8 +207,14 @@ function mapToJsonLdRecipe(json: Recipe): ParsedRecipe | null {
       recipeCategory: Array.isArray(json.recipeCategory) ? json.recipeCategory.join(", ") : json.recipeCategory || "",
       description: json.description || "",
       image: imageUrl,
-      ingredients: typeof json.recipeIngredient == "string" ? [json.recipeIngredient] : json.recipeIngredient,
-      instructions: typeof json.recipeInstructions == "string" ? [json.recipeInstructions] : json.recipeInstructions,
+      ingredients:
+        json.recipeIngredient && typeof json.recipeIngredient == "string"
+          ? [json.recipeIngredient]
+          : json.recipeIngredient,
+      instructions:
+        json.recipeInstructions && typeof json.recipeInstructions == "string"
+          ? [json.recipeInstructions]
+          : json.recipeInstructions,
     } as ParsedRecipe;
   }
 

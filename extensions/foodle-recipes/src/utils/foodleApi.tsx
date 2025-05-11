@@ -43,9 +43,8 @@ export function parseFoodleHtmlForRecipes(html: string): FoodleRecipe[] {
         const css = image.attr("style");
         if (css) {
           const match = css.match(/background-image:\s*url\(['"]?(.*?)['"]?\)/);
-
           if (match) {
-            recipe.imageUrl = baseUrl + match[1];
+            recipe.imageUrl = match[1].startsWith("http") ? match[1] : baseUrl + match[1];
           }
         }
       }

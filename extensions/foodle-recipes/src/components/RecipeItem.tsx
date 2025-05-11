@@ -15,7 +15,6 @@ export default function RecipeItem({ recipe }: { recipe: FoodleRecipe }) {
 
   return (
     <List.Item
-      key={recipe.url}
       title={recipe.name}
       subtitle={recipe.source}
       icon={getFavicon(recipe.url)}
@@ -23,7 +22,7 @@ export default function RecipeItem({ recipe }: { recipe: FoodleRecipe }) {
       actions={
         <ActionPanel title={recipe.name}>
           <ActionPanel.Section>
-            <Action.Push icon={Icon.Paragraph} title="Preview" target={<RecipeDetail {...recipe} />} />
+            <Action.Push icon={Icon.Paragraph} title="Preview" target={<RecipeDetail recipe={recipe} />} />
             <Action.OpenInBrowser url={recipe.url} />
             <Action.CopyToClipboard content={recipe.url} title="Copy Link" />
           </ActionPanel.Section>

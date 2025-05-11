@@ -7,7 +7,7 @@ import RecipeItem from "./components/RecipeItem";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [foodleRecipes, setFoodleRecipes] = useState<FoodleRecipe[]>([]);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export default function Command() {
     };
 
     if (searchText) {
-      fetchData().catch(console.error);
+      fetchData();
     }
   }, [searchText]);
 
