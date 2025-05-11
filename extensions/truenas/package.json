@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "truenas",
+  "title": "Truenas",
+  "label": "Truenas",
+  "description": "Manage Virtual Machines and Apps of your TrueNAS Scale",
+  "icon": "extension-icon.png",
+  "author": "zaktan475",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-vms",
+      "title": "Truenas Manage Vms",
+      "description": "Manage the Virtual Machines in TrueNAS Scale",
+      "mode": "view",
+      "entry": "manage-vms.tsx"
+    },
+    {
+      "name": "manage-apps",
+      "title": "Truenas Manage Apps",
+      "description": "Manage the Apps in TrueNAS Scale",
+      "mode": "view",
+      "entry": "manage-apps.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "description": "The URL of your TrueNAS API",
+      "type": "textfield",
+      "title": "TrueNAS API URL",
+      "placeholder": "e.g. http://192.168.1.100/api/v2.0",
+      "required": true
+    },
+    {
+      "name": "apiKey",
+      "description": "The API Key for your TrueNAS API",
+      "type": "password",
+      "title": "API Key",
+      "placeholder": "e.g. 1234567890abcdef1234567890abcdef",
+      "required": true
+    },
+    {
+      "name": "rejectUnauthorized",
+      "label": "rejectUnauthorized",
+      "description": "Whether to reject/ignore unauthorized SSL certificates",
+      "type": "checkbox",
+      "title": "Reject Unauthorized SSL Certificates",
+      "placeholder": "e.g. true",
+      "required": true,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@raycast/api": "^1.53.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

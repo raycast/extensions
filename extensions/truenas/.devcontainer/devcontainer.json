@@ -1,0 +1,4 @@
+{
+    "image": "dotnet-nodejs:8.x-22.x",
+    "forwardPorts": [3000]
+}
