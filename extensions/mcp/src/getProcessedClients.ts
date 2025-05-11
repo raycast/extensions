@@ -97,15 +97,15 @@ async function buildProcessEnv(): Promise<NodeJS.ProcessEnv> {
  * @returns - processing result (success or error)
  */
 async function processClient(
-  client: ClientInfo, 
-  env: NodeJS.ProcessEnv
+  client: ClientInfo,
+  env: NodeJS.ProcessEnv,
 ): Promise<{ ok: true; data: CreatedClient } | { ok: false; error: ClientError }> {
   console.log(`Processing client: ${JSON.stringify(client, null, 2)}`);
 
   try {
     const clientInstance = new Client(
       { name: "raycast-ai-client", version: "1.0.0" },
-      { capabilities: { prompts: {}, resources: {}, tools: {} } }
+      { capabilities: { prompts: {}, resources: {}, tools: {} } },
     );
 
     let transport: StdioClientTransport;
@@ -122,13 +122,13 @@ async function processClient(
         });
       } catch (nodeError) {
         console.error("Error with node client:", nodeError);
-        return { 
-          ok: false, 
-          error: { 
-            name: client.name, 
+        return {
+          ok: false,
+          error: {
+            name: client.name,
             error: `Failed to find Node executable: ${nodeError}`,
-            type: client.type 
-          } 
+            type: client.type,
+          },
         };
       }
     } else if (client.type === "command") {
@@ -140,13 +140,13 @@ async function processClient(
         stderr: "pipe",
       });
     } else {
-      return { 
-        ok: false, 
-        error: { 
-          name: client.name, 
+      return {
+        ok: false,
+        error: {
+          name: client.name,
           error: `Unsupported client type: ${client.type}`,
-          type: client.type 
-        } 
+          type: client.type,
+        },
       };
     }
 
@@ -155,23 +155,23 @@ async function processClient(
     const tools = await clientInstance.listTools();
     console.debug(`Tools retrieved: ${JSON.stringify(tools, null, 2)}`);
 
-    return { 
-      ok: true, 
+    return {
+      ok: true,
       data: {
         name: client.name,
         clientInstance,
-        tools
-      }
+        tools,
+      },
     };
   } catch (error) {
     console.error(`Connection failed for ${client.name}: ${error}`);
-    return { 
-      ok: false, 
-      error: { 
-        name: client.name, 
+    return {
+      ok: false,
+      error: {
+        name: client.name,
         error: String(error),
-        type: client.type 
-      } 
+        type: client.type,
+      },
     };
   }
 }
@@ -187,19 +187,17 @@ export default async function getProcessedClients(clientName?: string): Promise<
   console.log("=== Starting getProcessedClients ===");
 
   const processEnv = await buildProcessEnv();
-  
+
   const allClients = getClients(environment.supportPath);
   console.log(`Retrieved clients: ${JSON.stringify(allClients, null, 2)}`);
 
-  const filteredClients = allClients.filter(client => !clientName || client.name === clientName);
-  
-  const results = await Promise.all(
-    filteredClients.map(client => processClient(client, processEnv))
-  );
-  
+  const filteredClients = allClients.filter((client) => !clientName || client.name === clientName);
+
+  const results = await Promise.all(filteredClients.map((client) => processClient(client, processEnv)));
+
   const createdClients: CreatedClient[] = [];
   const failedClients: ClientError[] = [];
-  
+
   for (const result of results) {
     if (result.ok) {
       createdClients.push(result.data);
@@ -208,8 +206,8 @@ export default async function getProcessedClients(clientName?: string): Promise<
     }
   }
 
-  return { 
-    clients: createdClients, 
-    errors: failedClients 
+  return {
+    clients: createdClients,
+    errors: failedClients,
   };
 }
