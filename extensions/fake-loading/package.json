@@ -11,20 +11,21 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "fake-loading",
-      "title": "Fake Loading",
-      "description": "Display fake loading screens in fullscreen",
+      "name": "index",
+      "title": "Choose Loading Screen",
+      "description": "Choose from available loading screens",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "latest",
+    "@raycast/api": "^1.41.1",
+    "react": "^17.0.2",
     "title-case": "^3.0.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "^20.0.0",
-    "@types/react": "^18.2.48",
+    "@types/react": "^17.0.50",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.3.3"
