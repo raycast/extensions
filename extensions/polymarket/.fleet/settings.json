@@ -1,0 +1,5 @@
+{
+  "nodejs.typescript.rebuildOnChanges": true,
+  "editor.guides": [],
+  "prettier.mode": "Auto"
+}
