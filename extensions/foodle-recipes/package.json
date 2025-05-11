@@ -29,7 +29,6 @@
     "@raycast/api": "^1.96.1",
     "@raycast/utils": "^1.19.1",
     "cheerio": "^1.0.0",
-    "html-react-parser": "^5.2.3",
     "schema-dts": "^1.1.5"
   },
   "devDependencies": {
