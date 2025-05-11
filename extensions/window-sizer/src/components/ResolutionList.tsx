@@ -1,5 +1,6 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { Resolution } from "../types";
+import { showFailureToast } from "@raycast/utils";
 
 interface ResolutionListProps {
   resolutions: Resolution[];
@@ -39,9 +40,7 @@ export function ResolutionList({
                   try {
                     await onResizeWindow(resolution.width, resolution.height);
                   } catch (error) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to resize window",
+                    await showFailureToast("Failed to resize window", {
                       message: error instanceof Error ? error.message : String(error),
                     });
                   }
@@ -56,9 +55,7 @@ export function ResolutionList({
                     try {
                       await onDeleteResolution(resolution);
                     } catch (error) {
-                      await showToast({
-                        style: Toast.Style.Failure,
-                        title: "Failed to delete size",
+                      await showFailureToast("Failed to delete size", {
                         message: error instanceof Error ? error.message : String(error),
                       });
                     }

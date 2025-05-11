@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useScreenInfo } from "../hooks/useScreenInfo";
 import { ScreenInfoDetails } from "./ScreenInfoDetails";
+import { showFailureToast } from "@raycast/utils";
 
 export function DevTools() {
   const { clearCache, isDevMode } = useScreenInfo();
@@ -45,9 +46,7 @@ export function DevTools() {
                     title: "Cache cleared",
                   });
                 } catch (error) {
-                  await showToast({
-                    style: Toast.Style.Failure,
-                    title: "Failed to clear cache",
+                  await showFailureToast("Failed to clear cache", {
                     message: error instanceof Error ? error.message : String(error),
                   });
                 }

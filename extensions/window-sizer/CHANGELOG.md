@@ -1,5 +1,10 @@
 # Window Sizer Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Replaced some failure-style `showToast` with `showFailureToast`
+- Corrected extension icon and screenshots display
+
 ## [Fixes] - 2025-05-08
 
 - Fix the delete icon tooltip text on custom size list items
