@@ -74,11 +74,7 @@ export default function Command() {
         setCreatedQuickLinks([...createdQuickLinks, folder]);
       } catch (error) {
         console.error("Error creating quicklink:", error);
-        await showFailureToast({
-          title: `error`,
-          style: Toast.Style.Failure,
-          message: `Failed to prepare the VS Code quicklink for ${folder}`,
-        });
+        showFailureToast(error, { title: "Failed to prepare the VS Code quicklink" });
       }
     },
     [createdQuickLinks],
