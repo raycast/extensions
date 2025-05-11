@@ -33,7 +33,7 @@ function MarketListItem({ market, ticker }: { market: Market; ticker: Ticker }) 
 
   return (
     <List.Item
-      key={market.question}
+      key={market.slug}
       title={market.groupItemTitle || trimQuestion(market.question)}
       accessories={[{ text: formatPercentage(firstPrice) }, { text: `24h Vol: ${formatVolumeWithSuffix(volume)}` }]}
       actions={
