@@ -49,7 +49,7 @@ function WelcomeScreen({ errorMessage }: { errorMessage?: string }) {
               title="Open Extension Preferences"
               onAction={openExtensionPreferences}
               icon={Icon.Gear}
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
+              // shortcut={{ modifiers: ["cmd"], key: "," }}
             />
           </ActionPanel>
         }
@@ -83,7 +83,7 @@ export default function TableauSearchCommand() {
           setItems(results);
           setShowWelcome(false);
         }
-      } catch (err: Error | unknown) {
+      } catch (err: unknown) {
         if (!isCancelled) {
           console.error("Error caught in fetchItems:", err instanceof Error ? err.message : String(err));
           setError(err instanceof Error ? err : new Error(String(err)));

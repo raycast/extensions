@@ -53,15 +53,17 @@ export interface TableauWorkbook extends TableauItemBase {
   // project and owner are inherited from TableauItemBase
 }
 
+// Extract workbook reference into its own interface
+export interface TableauWorkbookReference {
+  id: string;
+  name?: string;
+  contentUrl?: string;
+}
+
 // Type for View with valid fields
 export interface TableauView extends TableauItemBase {
   itemType: "View";
-  workbook?: {
-    // Information about the workbook to which the view belongs
-    id: string;
-    name?: string;
-    contentUrl?: string;
-  };
+  workbook?: TableauWorkbookReference; // Use the extracted interface
   viewUrlName?: string; // "URL-friendly" name of the view, usually without workbook name. Useful for URLs.
   sheetType?: string; // Sheet type, for example, "Dashboard", "Worksheet", "Story"
   // project and owner are inherited from TableauItemBase
