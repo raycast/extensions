@@ -13,7 +13,7 @@ export function ImportSitesForm({ onDone }: { onDone: () => void }) {
     try {
       const xmlPath = values.file[0];
       const xml = await fs.promises.readFile(xmlPath, "utf-8");
-      const imported = parseSitesXml(xml);
+      const imported = await parseSitesXml(xml);
       const existing = await loadSites();
       const urls = new Set(existing.map((s) => s.url));
       const newSites = imported.filter((s) => !urls.has(s.url));
