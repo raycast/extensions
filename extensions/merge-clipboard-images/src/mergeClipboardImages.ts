@@ -147,7 +147,12 @@ export default async function main() {
 
   if (result.success) {
     await showToast({ style: Toast.Style.Success, title: 'Success', message: result.message });
-  } else if (result.message !== 'Cancelled') {
+    await Clipboard.clear();
+    await Clipboard.copy({ text: '' }, { concealed: true });
+  } else if (result.message === 'Cancelled') {
+    await Clipboard.clear();
+    await Clipboard.copy({ text: '' }, { concealed: true });
+  } else {
     await showToast({ style: Toast.Style.Failure, title: 'Failed', message: result.message });
   }
 }
