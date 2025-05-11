@@ -19,7 +19,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search Polymarket..." throttle>
-      <List.Section title="Results" subtitle={data?.length + ""}>
+      <List.Section title="Results" subtitle={data?.length.toString()}>
         {data?.map((ticker) => <EventListItem key={ticker.slug} ticker={ticker} />)}
       </List.Section>
     </List>

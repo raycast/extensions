@@ -23,6 +23,7 @@
     {
       "name": "search-for-market",
       "title": "Polymarket Search",
+      "subtitle": "Search Active Markets",
       "description": "Search Polymarket for specific market",
       "mode": "view"
     }
