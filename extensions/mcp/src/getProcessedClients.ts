@@ -1,25 +1,54 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport, getDefaultEnvironment } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { environment } from "@raycast/api";
-import { execSync } from "child_process";
+import { exec } from "child_process";
+import { promisify } from "util";
 import os from "os";
-import { getClients } from "./getClients";
+import { ClientInfo, getClients } from "./getClients";
+
+const execAsync = promisify(exec);
+
+/**
+ * Data structure for a successfully created client
+ */
+export type CreatedClient = {
+  name: string;
+  clientInstance: Client;
+  tools: object;
+};
+
+/**
+ * Data structure for a failed client
+ */
+export type ClientError = {
+  name: string;
+  error: string;
+  type: string;
+};
+
+/**
+ * Result of processing all clients
+ */
+export type ProcessedClientsResult = {
+  clients: CreatedClient[];
+  errors: ClientError[];
+};
 
 /**
  * Establishes a connection to a MCP Server using StdioClientTransport.
  * Also redirects the server's stderr to the console.
  *
- * @param raycastAiClientInstance - The client instance to connect to
+ * @param client - The client instance to connect to
  * @param transport - The transport to use for the connection
  */
-async function connectClient(raycastAiClientInstance: Client, transport: StdioClientTransport) {
+async function connectClient(client: Client, transport: StdioClientTransport): Promise<void> {
   console.log("Connecting to client...");
-  const connectPromise = raycastAiClientInstance.connect(transport);
+
   transport?.stderr?.on("data", (data) => {
     console.log(`MCP Server logs: ${data.toString()}`);
   });
 
-  await connectPromise;
+  await client.connect(transport);
   console.log("Connected to client successfully");
 }
 
@@ -29,34 +58,29 @@ async function connectClient(raycastAiClientInstance: Client, transport: StdioCl
  *
  * @returns The environment object with properly configured PATH and other variables
  */
-function buildProcessEnv() {
+async function buildProcessEnv(): Promise<NodeJS.ProcessEnv> {
   console.log("=== Building process environment ===");
 
-  // Get user's shell
-  const shell = os.userInfo().shell || "/bin/sh";
+  const shell = process.env.SHELL || "/bin/sh";
   console.debug(`User shell: ${shell}`);
 
-  // Get environment variables from shell
   try {
-    // Get PATH from shell
-    const pathCommand = `${shell} -l -i -c 'echo $PATH'`;
-    const userPath = execSync(pathCommand).toString().trim();
-    console.debug(`Retrieved PATH from shell: ${userPath}`);
+    const pathCommand = `${shell} -l -c 'echo $PATH'`;
+    const { stdout: userPath } = await execAsync(pathCommand);
+    const trimmedPath = userPath.trim();
+    console.debug(`Retrieved PATH from shell: ${trimmedPath}`);
 
-    // Get base environment
     const defaultEnv = getDefaultEnvironment();
 
-    // Create environment with critical paths added
     return {
       ...defaultEnv,
-      PATH: `/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:${userPath}`,
+      PATH: [trimmedPath, "/bin", "/usr/bin", "/opt/homebrew/bin"].join(":"),
       HOME: os.homedir(),
     };
   } catch (error) {
     console.error("Error retrieving shell environment:", error);
     console.log(`Falling back to basic environment`);
 
-    // Fallback to basic environment
     return {
       ...getDefaultEnvironment(),
       PATH: process.env.PATH || "/bin:/usr/bin:/usr/local/bin",
@@ -65,80 +89,127 @@ function buildProcessEnv() {
   }
 }
 
-export default async function (clientName?: string) {
+/**
+ * Processes a single client by attempting to connect and retrieve tools.
+ *
+ * @param client - client information
+ * @param env - environment variables
+ * @returns - processing result (success or error)
+ */
+async function processClient(
+  client: ClientInfo, 
+  env: NodeJS.ProcessEnv
+): Promise<{ ok: true; data: CreatedClient } | { ok: false; error: ClientError }> {
+  console.log(`Processing client: ${JSON.stringify(client, null, 2)}`);
+
+  try {
+    const clientInstance = new Client(
+      { name: "raycast-ai-client", version: "1.0.0" },
+      { capabilities: { prompts: {}, resources: {}, tools: {} } }
+    );
+
+    let transport: StdioClientTransport;
+
+    if (client.type === "node") {
+      console.log("Connecting to node-type client");
+      try {
+        const { stdout: nodePath } = await execAsync("which node");
+        transport = new StdioClientTransport({
+          command: nodePath.trim(),
+          args: [client.path ?? ""],
+          env: env as Record<string, string>,
+          stderr: "pipe",
+        });
+      } catch (nodeError) {
+        console.error("Error with node client:", nodeError);
+        return { 
+          ok: false, 
+          error: { 
+            name: client.name, 
+            error: `Failed to find Node executable: ${nodeError}`,
+            type: client.type 
+          } 
+        };
+      }
+    } else if (client.type === "command") {
+      console.log(`Connecting to command-type client: ${JSON.stringify(client.command)}`);
+      transport = new StdioClientTransport({
+        command: client?.command?.command ?? "",
+        args: client?.command?.args ?? [],
+        env: env as Record<string, string>,
+        stderr: "pipe",
+      });
+    } else {
+      return { 
+        ok: false, 
+        error: { 
+          name: client.name, 
+          error: `Unsupported client type: ${client.type}`,
+          type: client.type 
+        } 
+      };
+    }
+
+    await connectClient(clientInstance, transport);
+
+    const tools = await clientInstance.listTools();
+    console.debug(`Tools retrieved: ${JSON.stringify(tools, null, 2)}`);
+
+    return { 
+      ok: true, 
+      data: {
+        name: client.name,
+        clientInstance,
+        tools
+      }
+    };
+  } catch (error) {
+    console.error(`Connection failed for ${client.name}: ${error}`);
+    return { 
+      ok: false, 
+      error: { 
+        name: client.name, 
+        error: String(error),
+        type: client.type 
+      } 
+    };
+  }
+}
+
+/**
+ * Gets a list of all MCP clients, connects to them in parallel,
+ * and returns successfully connected clients and errors.
+ *
+ * @param clientName - (optional) name of a specific client to connect to
+ * @returns - Successfully connected clients and connection errors
+ */
+export default async function getProcessedClients(clientName?: string): Promise<ProcessedClientsResult> {
   console.log("=== Starting getProcessedClients ===");
 
-  const processEnv = buildProcessEnv();
-  const clients = getClients(environment.supportPath);
+  const processEnv = await buildProcessEnv();
+  
+  const allClients = getClients(environment.supportPath);
+  console.log(`Retrieved clients: ${JSON.stringify(allClients, null, 2)}`);
 
-  console.log(`Retrieved clients: ${JSON.stringify(clients, null, 2)}`);
-
-  const createdClients: { name: string; clientInstance: Client; tools: object }[] = [];
-
-  for (const client of clients) {
-    console.log(`Processing client: ${JSON.stringify(client, null, 2)}`);
-
-    if (!clientName || client.name == clientName) {
-      const raycastAiClientInstance = new Client(
-        {
-          name: "raycast-ai-client",
-          version: "1.0.0",
-        },
-        {
-          capabilities: {
-            prompts: {},
-            resources: {},
-            tools: {},
-          },
-        },
-      );
-
-      if (client.type == "node") {
-        console.log("Connecting to node-type client");
-        try {
-          const nodePath = execSync("which node").toString().trim();
-          await connectClient(
-            raycastAiClientInstance,
-            new StdioClientTransport({
-              command: nodePath,
-              args: [client.path ?? ""],
-              env: processEnv,
-              stderr: "pipe",
-            }),
-          );
-        } catch (nodeError) {
-          console.error("Error with node client:", nodeError);
-        }
-      }
-
-      if (client.type == "command") {
-        console.log(`Connecting to command-type client: ${JSON.stringify(client.command)}`);
-        try {
-          await connectClient(
-            raycastAiClientInstance,
-            new StdioClientTransport({
-              command: client?.command?.command ?? "",
-              args: client?.command?.args ?? [],
-              env: processEnv,
-              stderr: "pipe",
-            }),
-          );
-
-          const tools = await raycastAiClientInstance.listTools();
-          console.debug(`Tools retrieved: ${JSON.stringify(tools, null, 2)}`);
-
-          createdClients.push({
-            name: client.name,
-            clientInstance: raycastAiClientInstance,
-            tools: tools,
-          });
-        } catch (error) {
-          console.error(`Connection failed: ${error}`);
-          throw error;
-        }
-      }
+  const filteredClients = allClients.filter(client => !clientName || client.name === clientName);
+  
+  const results = await Promise.all(
+    filteredClients.map(client => processClient(client, processEnv))
+  );
+  
+  const createdClients: CreatedClient[] = [];
+  const failedClients: ClientError[] = [];
+  
+  for (const result of results) {
+    if (result.ok) {
+      createdClients.push(result.data);
+    } else {
+      failedClients.push(result.error);
     }
   }
 
-  return createdClients;
+  return { 
+    clients: createdClients, 
+    errors: failedClients 
+  };
 }

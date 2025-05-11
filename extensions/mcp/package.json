@@ -22,7 +22,7 @@
   "commands": [
     {
       "name": "manage-mcp-servers",
-      "title": "Manage Mcp Servers",
+      "title": "Manage MCP Servers",
       "description": "Add, remove, or edit your MCP servers.",
       "mode": "view"
     }
@@ -30,12 +30,12 @@
   "tools": [
     {
       "name": "get-mcp-clients",
-      "title": "Get Mcp Clients",
+      "title": "Get MCP Clients",
       "description": "Get data about loaded MCP clients"
     },
     {
       "name": "run-mcp-tool",
-      "title": "Run Mcp Tool",
+      "title": "Run MCP Tool",
       "description": "Runs an available MCP tool"
     }
   ],
@@ -61,10 +61,9 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
   },
