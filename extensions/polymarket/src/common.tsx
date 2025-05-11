@@ -20,7 +20,7 @@ function EventListItem({ ticker }: { ticker: Ticker }) {
         </ActionPanel>
       }
     />
-  )
+  );
 }
 
 function MarketListItem({ market, ticker }: { market: Market; ticker: Ticker }) {
