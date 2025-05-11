@@ -1,5 +1,3 @@
-import { Image } from "@raycast/api";
-
 export const baseUrl = "https://foodle.recipes/";
 
 export interface FoodleRecipe {
@@ -20,8 +18,8 @@ export interface ParsedRecipe {
   recipeCategory: string;
   description: string;
   image: string | null;
-  ingredients: string[] | string;
-  instructions: LdHowToStep[] | string[] | string;
+  ingredients: string[];
+  instructions: LdHowToStep[] | string[];
 }
 
 export enum FoodleSearchtype {
@@ -33,7 +31,6 @@ export interface LdHowToStep {
   "@type": string;
   name: string | null;
   text: string | null;
-  image: Image | null;
   url: string | null;
 }
 

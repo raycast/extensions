@@ -108,21 +108,15 @@ function renderRecipe(foodleRecipe: FoodleRecipe, parsedRecipe: ParsedRecipe | n
 
     if (parsedRecipe.ingredients) {
       markdown = markdown + "## Ingredients\n- ";
-      if (Array.isArray(parsedRecipe.ingredients)) {
-        markdown += parsedRecipe.ingredients.join("\n- ") + "\n\n";
-      } else {
-        markdown += parsedRecipe.ingredients + "\n\n";
-      }
+      markdown += parsedRecipe.ingredients.join("\n- ") + "\n\n";
     }
 
     if (parsedRecipe.instructions) {
       markdown = markdown + "## Instructions\n";
-      if (Array.isArray(parsedRecipe.instructions)) {
-        markdown += Object.entries(parsedRecipe.instructions)
-          .filter(([, howToStep]) => howToStep["@type"] === "HowToStep")
-          .map(([, howToStep]) => `- ${howToStep.text}\n`)
-          .join("");
-      }
+      markdown += Object.entries(parsedRecipe.instructions)
+        .filter(([, howToStep]) => howToStep["@type"] === "HowToStep")
+        .map(([, howToStep]) => `- ${howToStep.text}\n`)
+        .join("");
     }
   }
 
@@ -213,8 +207,8 @@ function mapToJsonLdRecipe(json: Recipe): ParsedRecipe | null {
       recipeCategory: Array.isArray(json.recipeCategory) ? json.recipeCategory.join(", ") : json.recipeCategory || "",
       description: json.description || "",
       image: imageUrl,
-      ingredients: json.recipeIngredient,
-      instructions: json.recipeInstructions,
+      ingredients: typeof json.recipeIngredient == "string" ? [json.recipeIngredient] : json.recipeIngredient,
+      instructions: typeof json.recipeInstructions == "string" ? [json.recipeInstructions] : json.recipeInstructions,
     } as ParsedRecipe;
   }
 

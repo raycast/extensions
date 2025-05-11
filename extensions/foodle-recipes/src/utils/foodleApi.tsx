@@ -1,16 +1,10 @@
 import { FoodleRecipe, baseUrl, FoodleSearchtype } from "./types";
 import * as cheerio from "cheerio";
 import { URLSearchParams } from "node:url";
-import { useFetch } from "@raycast/utils";
 
-export function fetchFoodleHtml(searchType: FoodleSearchtype, searchText: string) {
-  return useFetch(baseUrl + "?" + new URLSearchParams({ f: searchType, q: searchText }).toString(), {
-    parseResponse(response) {
-      return response.text();
-    },
-    keepPreviousData: true,
-    initialData: "",
-  });
+export async function fetchFoodleHtml(searchType: FoodleSearchtype, searchText: string) {
+  const response = await fetch(baseUrl + "?" + new URLSearchParams({ f: searchType, q: searchText }).toString());
+  return await response.text();
 }
 
 export function parseFoodleHtmlForRecipes(html: string): FoodleRecipe[] {
