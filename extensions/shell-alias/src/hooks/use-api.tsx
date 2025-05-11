@@ -14,7 +14,8 @@ export default function useApi() {
           return orig.apply(target, args);
         } catch (error) {
           if (error instanceof UnsupportedShellError) {
-            return setIsShellSupported(false);
+            setIsShellSupported(false);
+            return;
           }
           throw error;
         }

@@ -2,7 +2,7 @@ import { popToRoot, showToast, Toast } from "@raycast/api";
 import FormAlias from "./components/form-alias";
 import useApi from "./hooks/use-api";
 import { AliasConflictError } from "./api/shell/errors/alias-conflict";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 
 interface CreateAliasFormValues {
   name: string;
@@ -18,7 +18,7 @@ export default function Command() {
 
   const handleSubmit = async (values: CreateAliasFormValues) => {
     try {
-      api.shell().createAlias(values);
+      await api.shell().createAlias(values);
       showToast({
         style: Toast.Style.Success,
         title: "Yay!",
@@ -35,12 +35,7 @@ export default function Command() {
         return;
       }
 
-      console.error(error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Oops!",
-        message: "Something went wrong",
-      });
+      showFailureToast(error, { title: "Oops!", message: "Something went wrong" });
     }
   };
 

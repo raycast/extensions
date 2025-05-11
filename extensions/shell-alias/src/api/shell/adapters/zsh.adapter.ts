@@ -22,15 +22,19 @@ export class ZshAdapter extends AbstractAdapter {
   }
 
   async parseAliases(): Promise<Alias[]> {
-    const fileContent = await readFile(this.aliasesFilePath, "utf8");
-    const lines = fileContent.split("\n");
-    return lines.reduce<Alias[]>((acc, line) => {
-      const alias = this.aliasFromLine(line);
-      if (alias) {
-        acc.push(alias);
-      }
-      return acc;
-    }, []);
+    try {
+      const fileContent = await readFile(this.aliasesFilePath, "utf8");
+      const lines = fileContent.split("\n");
+      return lines.reduce<Alias[]>((acc, line) => {
+        const alias = this.aliasFromLine(line);
+        if (alias) {
+          acc.push(alias);
+        }
+        return acc;
+      }, []);
+    } catch {
+      return [];
+    }
   }
 
   async createAlias({ name, command }: Alias): Promise<void> {

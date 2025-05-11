@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import useApi from "./hooks/use-api";
 import CreateAlias from "./create-alias";
 import FormAlias, { CreateAliasFormValues } from "./components/form-alias";
@@ -29,12 +29,7 @@ export default function Command() {
         return;
       }
 
-      console.error(error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Oops!",
-        message: "Something went wrong",
-      });
+      showFailureToast(error, { title: "Oops!", message: "Something went wrong" });
     }
   };
 
@@ -64,9 +59,9 @@ export default function Command() {
           }
         />
       ) : (
-        data?.map((item, index) => (
+        data?.map((item) => (
           <List.Item
-            key={index}
+            key={item.name}
             title={item.command}
             accessories={[
               {

@@ -1,5 +1,5 @@
 export class AliasConflictError extends Error {
-  constructor(name: string) {
+  constructor(readonly name: string) {
     super(`An alias with the name ${name} already exists`);
   }
 }
