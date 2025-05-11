@@ -10,9 +10,9 @@ import {
   Color,
   showToast,
   Toast,
+  LocalStorage,
 } from "@raycast/api";
-import { useExec } from "@raycast/utils";
-import { LocalStorage } from "@raycast/api";
+import { useExec, showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const [selectedRepositoriesFolder, setSelectedRepositoriesFolder] = useState<string>("");
@@ -73,7 +73,8 @@ export default function Command() {
         });
         setCreatedQuickLinks([...createdQuickLinks, folder]);
       } catch (error) {
-        await showToast({
+        console.error("Error creating quicklink:", error);
+        await showFailureToast({
           title: `error`,
           style: Toast.Style.Failure,
           message: `Failed to prepare the VS Code quicklink for ${folder}`,
