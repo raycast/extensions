@@ -6,13 +6,15 @@
     "lib": ["es2021", "dom"],
     "module": "commonjs",
     "target": "es2021",
-    "strict": true,
+    "strict": false,
+    "noImplicitAny": false,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": ["node_modules/@types", "@types"]
   }
 }

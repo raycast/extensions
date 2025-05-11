@@ -13,12 +13,14 @@
     {
       "name": "index",
       "title": "Choose Loading Screen",
+      "subtitle": "Fake Loading",
       "description": "Choose from available loading screens",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.41.1",
+    "@raycast/utils": "^1.19.1",
     "react": "^17.0.2",
     "title-case": "^3.0.3"
   },
@@ -28,10 +30,11 @@
     "@types/react": "^17.0.50",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "node build.js",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

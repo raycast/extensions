@@ -1,33 +1,26 @@
-import { ActionPanel, List, Action, showHUD, closeMainWindow, showToast, Toast } from "@raycast/api";
-import React from "react";
-import { homedir } from "os";
+"use strict";
+import { jsx as _jsx } from "react/jsx-runtime";
+import { List, ActionPanel, Action, showToast, Toast, closeMainWindow, showHUD } from "@raycast/api";
+import { homedir, tmpdir } from "os";
 import { join } from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { writeFileSync } from "fs";
-import { tmpdir } from "os";
 
 const execPromise = promisify(exec);
 
 // Our own implementation of showFailureToast
-async function showFailureToast(error: unknown, options?: { title?: string }) {
+async function showFailureToast(error, options) {
   const toast = await showToast({
     style: Toast.Style.Failure,
     title: options?.title || "Something went wrong",
     message: error instanceof Error ? error.message : String(error),
   });
-
   return toast;
 }
 
-interface LoadingScreen {
-  id: string;
-  name: string;
-  path: string;
-}
-
 // Sample loading screens
-const loadingScreens: LoadingScreen[] = [
+const loadingScreens = [
   {
     id: "windows",
     name: "Windows XP Loading",
@@ -50,25 +43,26 @@ const loadingScreens: LoadingScreen[] = [
   },
 ];
 
-export default function Command() {
-  return (
-    <List>
-      {loadingScreens.map((screen) => (
-        <List.Item
-          key={screen.id}
-          title={screen.name}
-          actions={
-            <ActionPanel>
-              <Action title="Show Loading Screen" onAction={() => showLoading(screen.path)} />
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List>
-  );
+function Command() {
+  return _jsx(List, {
+    children: loadingScreens.map((screen) =>
+      _jsx(
+        List.Item,
+        {
+          title: screen.name,
+          actions: _jsx(ActionPanel, {
+            children: _jsx(Action, { title: "Show Loading Screen", onAction: () => showLoading(screen.path) }),
+          }),
+        },
+        screen.id
+      )
+    ),
+  });
 }
 
-async function showLoading(file: string) {
+export default Command;
+
+async function showLoading(file) {
   try {
     // Create a temporary HTML file that will display the GIF in true fullscreen
     const htmlFilePath = join(tmpdir(), "fullscreen-viewer.html");
@@ -143,9 +137,7 @@ async function showLoading(file: string) {
 </body>
 </html>
     `;
-
     writeFileSync(htmlFilePath, htmlContent);
-
     // Use AppleScript to open Chrome in true fullscreen mode
     const appleScript = `
 tell application "Google Chrome"
@@ -157,13 +149,10 @@ tell application "Google Chrome"
   end tell
 end tell
     `;
-
     const tempScriptPath = join(tmpdir(), "open-fullscreen.scpt");
     writeFileSync(tempScriptPath, appleScript);
-
     // Execute the AppleScript
     await execPromise(`osascript "${tempScriptPath}"`);
-
     closeMainWindow();
     await showHUD("Fake Loading Activated");
   } catch (error) {
