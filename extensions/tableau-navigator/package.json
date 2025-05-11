@@ -21,11 +21,10 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^18.18.0",
+    "@types/node": ">=22.14.0",
     "@types/react": "^18.2.27",
     "@typescript-eslint/eslint-plugin": "^8.32.0",
     "@typescript-eslint/parser": "^8.32.0",
-    "eslint": "^9.26.0",
     "prettier": "^3.5.3"
   },
   "scripts": {
@@ -72,7 +71,7 @@
       "description": "The 'contentUrl' of your site. Leave empty for Default site. Find it in your Tableau site URL (e.g., 'yoursitename' in .../site/yoursitename/...).",
       "type": "textfield",
       "required": true,
-      "placeholder": "e.g., sales_analysis (optional, for Default site leave empty)"
+      "placeholder": "e.g., company_name"
     }
   ]
 }

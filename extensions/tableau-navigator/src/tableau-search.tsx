@@ -20,6 +20,7 @@ import {
 } from "./utils";
 import { useState, useEffect } from "react";
 import { TableauView, TableauWorkbook } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 type TableauListItem = TableauView | TableauWorkbook;
 
@@ -48,7 +49,7 @@ function WelcomeScreen({ errorMessage }: { errorMessage?: string }) {
               title="Open Extension Preferences"
               onAction={openExtensionPreferences}
               icon={Icon.Gear}
-              shortcut={{ modifiers: ["cmd"], key: "," }}
+              shortcut={{ modifiers: ["cmd"], key: "p" }}
             />
           </ActionPanel>
         }
@@ -248,7 +249,7 @@ export default function TableauSearchCommand() {
                     const url = await getItemUrl(item);
                     open(url);
                   } catch (e) {
-                    await showToast(Toast.Style.Failure, "Could not open URL", (e as Error).message);
+                    await showFailureToast(e, { title: "Could not open URL" });
                   }
                 }}
               />
@@ -261,7 +262,7 @@ export default function TableauSearchCommand() {
                     await Clipboard.copy(url);
                     await showToast(Toast.Style.Success, "Link Copied!");
                   } catch (e) {
-                    await showToast(Toast.Style.Failure, "Could not copy link", (e as Error).message);
+                    await showFailureToast(e, { title: "Could not copy link" });
                   }
                 }}
               />

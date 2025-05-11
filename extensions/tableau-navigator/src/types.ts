@@ -67,14 +67,6 @@ export interface TableauView extends TableauItemBase {
   // project and owner are inherited from TableauItemBase
 }
 
-// Type for Tableau API error
-export interface ApiErrorDetail {
-  // This type is not used directly in the code, but is useful for understanding structure
-  code: string;
-  summary: string;
-  detail: string;
-}
-
 export interface ApiError {
   // Used in API responses
   code: string; // For example, "409004"
