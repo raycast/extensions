@@ -1,6 +1,6 @@
 # Daily Sites Changelog
 
-## [New Additions, Bug Fixes and Improvements] - {PR_MERGE_DATE}
+## [New Additions, Bug Fixes and Improvements] - 2025-05-12
 
 - Add the 'Open All Filtered Sites in Browser’ action.
 - Add autofill of Add Site's URL and Name fields using current browser tab if Raycast Browser Extension is installed, as a fallback if user types in URL the Name will be repopulated with the site name.
