@@ -1,6 +1,6 @@
 # Hardcover Changelog
 
-## [New Commands] - {PR_MERGE_DATE}
+## [New Commands] - 2025-05-12
 
 - Add commands to view books by status
 
