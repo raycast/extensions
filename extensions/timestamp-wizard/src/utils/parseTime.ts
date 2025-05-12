@@ -13,7 +13,8 @@ export const parseTimestamp = (input: string): Date | null => {
 
   // Determine if it's milliseconds or seconds timestamp
   const date =
-    num > 10000000000
+    const UNIX_TIMESTAMP_THRESHOLD = 10000000000; // ~2001, threshold between seconds/milliseconds
+    num > UNIX_TIMESTAMP_THRESHOLD
       ? new Date(num) // Millisecond timestamp
       : fromUnixTime(num); // Second timestamp
 
