@@ -14,15 +14,15 @@
   "commands": [
     {
       "name": "manage-subscriptions",
-      "title": "Manage Subscriptions on Subwatch",
-      "subtitle": "Manage Subwatch subscriptions",
+      "title": "Manage Subscriptions",
+      "subtitle": "Subwatch",
       "description": "List and delete subscriptions",
       "mode": "view"
     },
     {
       "name": "add-subscription",
       "title": "Add New Subscription",
-      "subtitle": "Add new subscription to Subwatch",
+      "subtitle": "Subwatch",
       "description": "Add a new subscription to your Subwatch calendar",
       "mode": "view"
     }
