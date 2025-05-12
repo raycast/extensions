@@ -41,7 +41,8 @@
     "nebbles",
     "alanxmay",
     "gdsmith",
-    "josephlou"
+    "josephlou",
+    "tama_harrison"
   ],
   "pastContributors": [
     "pomdtr",
@@ -132,6 +133,10 @@
             {
               "title": "Kagi",
               "value": "kagi"
+            },
+            {
+              "title": "UnDuck",
+              "value": "unduck"
             }
           ]
         }
@@ -212,6 +217,10 @@
             {
               "title": "Kagi",
               "value": "kagi"
+            },
+            {
+              "title": "UnDuck",
+              "value": "unduck"
             }
           ]
         }
@@ -306,6 +315,10 @@
             {
               "title": "Kagi",
               "value": "kagi"
+            },
+            {
+              "title": "UnDuck",
+              "value": "unduck"
             }
           ]
         },

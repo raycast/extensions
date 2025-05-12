@@ -1,5 +1,10 @@
 # Arc Changelog
 
+## [New Features] - 2025-05-12
+
+- Added UnDuck search engine for the commands `Search Arc`, `Open New Little Arc Window` and `Open New Incognito Window`.
+- Added ability to automatically prepend 'https://' when opening a URL
+
 ## [Improvements] - 2025-04-16
 
 - When opening a new incognito window, open a blank tab if no URL is given.
