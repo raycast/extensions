@@ -29,7 +29,7 @@ export function ResolutionList({
           icon={{
             source: resolution.isCustom ? "icons/custom-size.svg" : "icons/default-size.svg",
             fallback: Icon.AppWindow,
-            tintColor: Color.PrimaryText,
+            tintColor: Color.SecondaryText,
           }}
           accessories={
             showDeleteAction && resolution.isCustom

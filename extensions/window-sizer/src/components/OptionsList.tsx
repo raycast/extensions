@@ -20,7 +20,7 @@ export function OptionsList({
   return (
     <List.Section title="Options">
       <List.Item
-        icon={{ source: "icons/maximize.svg", fallback: Icon.Maximize, tintColor: Color.PrimaryText }}
+        icon={{ source: "icons/maximize.svg", fallback: Icon.Maximize, tintColor: Color.SecondaryText }}
         title="Maximize Window"
         actions={
           <ActionPanel>
@@ -33,7 +33,7 @@ export function OptionsList({
         }
       />
       <List.Item
-        icon={{ source: "icons/restore.svg", fallback: Icon.RotateAntiClockwise, tintColor: Color.PrimaryText }}
+        icon={{ source: "icons/restore.svg", fallback: Icon.RotateAntiClockwise, tintColor: Color.SecondaryText }}
         title="Restore Previous Size"
         actions={
           <ActionPanel>
@@ -46,7 +46,7 @@ export function OptionsList({
         }
       />
       <List.Item
-        icon={{ source: "icons/current-size.svg", fallback: Icon.Info, tintColor: Color.PrimaryText }}
+        icon={{ source: "icons/current-size.svg", fallback: Icon.Info, tintColor: Color.SecondaryText }}
         title="Get Current Size"
         actions={
           <ActionPanel>
@@ -59,7 +59,7 @@ export function OptionsList({
         }
       />
       <List.Item
-        icon={{ source: "icons/add-size.svg", fallback: Icon.PlusSquare, tintColor: Color.PrimaryText }}
+        icon={{ source: "icons/add-size.svg", fallback: Icon.PlusSquare, tintColor: Color.SecondaryText }}
         title="Add Custom Size"
         actions={
           <ActionPanel>

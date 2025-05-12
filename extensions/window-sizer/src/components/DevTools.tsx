@@ -16,7 +16,7 @@ export function DevTools() {
     <>
       <List.Item
         title="Get Screen Info"
-        icon={{ source: "icons/screen-info.svg", fallback: Icon.Desktop, tintColor: Color.PrimaryText }}
+        icon={{ source: "icons/screen-info.svg", fallback: Icon.Desktop, tintColor: Color.SecondaryText }}
         accessories={[{ text: "Dev" }]}
         actions={
           <ActionPanel>
@@ -32,7 +32,7 @@ export function DevTools() {
       />
       <List.Item
         title="Clear Screen Cache"
-        icon={{ source: "icons/clear.svg", fallback: Icon.Trash, tintColor: Color.PrimaryText }}
+        icon={{ source: "icons/clear.svg", fallback: Icon.Trash, tintColor: Color.SecondaryText }}
         accessories={[{ text: "Dev" }]}
         actions={
           <ActionPanel>
