@@ -1,6 +1,6 @@
 # Dovetail Changelog
 
-## [Search contacts and view data] - {PR_MERGE_DATE}
+## [Search contacts and view data] - 2025-05-12
 
 - Switch to new `/v1/data`, `/v1/insights`, and `/v1/contacts` endpoints for improved reliability
 - Add new contact search and display experience
