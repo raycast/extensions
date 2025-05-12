@@ -9,7 +9,7 @@ thock-cli is bundled automatically when you install Thock via Homebrew:
 The CLI will be available globally via:
 `thock-cli`
 
-If installed manually, make sure  `thock-cli` is executable and somewhere in your `$PATH`.
+If installed manually, make sure `thock-cli` is executable and somewhere in your `$PATH`.
 
 The error:
 `/bin/sh: /opt/homebrew/bin/thock-cli: No such file or directory` is because of the above.
