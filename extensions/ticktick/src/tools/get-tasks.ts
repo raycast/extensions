@@ -3,7 +3,7 @@ import { initGlobalProjectInfo } from "../service/project";
 import { Task } from "../service/task";
 
 type Input = {
-  smartProjectId: "today" | "next7days" | undefined;
+  smartProjectId: "today" | "next7Days" | undefined;
 };
 
 export default async function (input: Input) {
@@ -15,7 +15,7 @@ export default async function (input: Input) {
       switch (smartProjectId) {
         case "today":
           return await getToday();
-        case "next7days":
+        case "next7Days":
           return await getNext7Days();
         default:
           return [];
