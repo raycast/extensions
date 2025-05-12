@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation, Color } from "@raycast/api";
 import { useScreenInfo } from "../hooks/useScreenInfo";
 import { ScreenInfoDetails } from "./ScreenInfoDetails";
 import { showFailureToast } from "@raycast/utils";
@@ -16,12 +16,13 @@ export function DevTools() {
     <>
       <List.Item
         title="Get Screen Info"
-        icon={Icon.Desktop}
+        icon={{ source: "icons/screen-info.svg", fallback: Icon.Desktop, tintColor: Color.PrimaryText }}
         accessories={[{ text: "Dev" }]}
         actions={
           <ActionPanel>
             <Action
               title="Get Screen Info"
+              icon={{ source: "icons/screen-info.svg", fallback: Icon.Desktop, tintColor: Color.PrimaryText }}
               onAction={() => {
                 push(<ScreenInfoDetails />);
               }}
@@ -31,13 +32,13 @@ export function DevTools() {
       />
       <List.Item
         title="Clear Screen Cache"
-        icon={Icon.Trash}
+        icon={{ source: "icons/clear.svg", fallback: Icon.Trash, tintColor: Color.PrimaryText }}
         accessories={[{ text: "Dev" }]}
         actions={
           <ActionPanel>
             <Action
               title="Clear Screen Cache"
-              icon={Icon.Trash}
+              icon={{ source: "icons/clear.svg", fallback: Icon.Trash, tintColor: Color.PrimaryText }}
               onAction={async () => {
                 try {
                   await clearCache();

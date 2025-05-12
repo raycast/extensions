@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { Resolution } from "../types";
 import { showFailureToast } from "@raycast/utils";
 
@@ -26,16 +26,30 @@ export function ResolutionList({
         <List.Item
           key={`${resolution.isCustom ? "custom" : "default"}-${resolution.title}`}
           title={resolution.title}
-          icon={Icon.AppWindow}
+          icon={{
+            source: resolution.isCustom ? "icons/custom-size.svg" : "icons/default-size.svg",
+            fallback: Icon.AppWindow,
+            tintColor: Color.PrimaryText,
+          }}
           accessories={
             showDeleteAction && resolution.isCustom
-              ? [{ icon: { source: Icon.Trash, tintColor: "secondaryText" }, tooltip: "⌘ ⏎" }]
+              ? [
+                  {
+                    icon: { source: "icons/clear.svg", fallback: Icon.Trash, tintColor: Color.SecondaryText },
+                    tooltip: "⌘ ⏎",
+                  },
+                ]
               : []
           }
           actions={
             <ActionPanel>
               <Action
                 title={`Resize to ${resolution.title}`}
+                icon={{
+                  source: resolution.isCustom ? "icons/custom-size.svg" : "icons/default-size.svg",
+                  fallback: Icon.AppWindow,
+                  tintColor: Color.PrimaryText,
+                }}
                 onAction={async () => {
                   try {
                     await onResizeWindow(resolution.width, resolution.height);
@@ -49,7 +63,7 @@ export function ResolutionList({
               {showDeleteAction && resolution.isCustom && onDeleteResolution && (
                 <Action
                   title="Delete Custom Size"
-                  icon={Icon.Trash}
+                  icon={{ source: "icons/clear.svg", fallback: Icon.Trash, tintColor: Color.Red }}
                   style={Action.Style.Destructive}
                   onAction={async () => {
                     try {

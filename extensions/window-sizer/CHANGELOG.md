@@ -1,22 +1,21 @@
 # Window Sizer Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [New Action Icons] - {PR_MERGE_DATE}
 
-- Replaced some failure-style `showToast` with `showFailureToast`
-- Corrected extension icon and screenshots display
+- Added new action icons
 
 ## [Fixes] - 2025-05-08
 
-- Fix the delete icon tooltip text on custom size list items
+- Fixed the delete icon tooltip text on custom size list items
 
 ## [Update Extension Icon] - 2025-05-07
 
-- Update extension icon and screenshots
+- Updated extension icon and screenshots
 
 ## [Fixes] - 2025-05-06
 
-- Fix toast text when restoring a window with restricted size
-- Unify toast text style
+- Fixed toast text when restoring a window with restricted size
+- Unified toast text style
 
 ## [Refactored entirely in Swift] - 2025-05-05
 
@@ -28,8 +27,8 @@
 ## [New Features & Fixes] - 2025-04-28
 
 - Enabled maximizing the active window
-- Supported fetching and displaying the current window size
-- Resolved incorrect positioning when restoring a saved size
+- Added support for displaying the current window size
+- Fixed incorrect positioning when restoring a saved size
 - Improved toast behavior when the size exceeds the screen
 - Suppressed redundant toast when saving the same size again
 
