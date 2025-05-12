@@ -17,9 +17,8 @@ interface ProjectDetails {
   createTime?: string;
 }
 
-// Create a navigation cache instance
 const navigationCache = new Cache({ namespace: "navigation-state" });
-// Create a settings cache instance
+
 const settingsCache = new Cache({ namespace: "settings" });
 
 export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAccount }: CachedProjectViewProps) {
@@ -42,20 +41,16 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
         message: "Retrieving your last used project",
       });
 
-      // Get current cache limit
       const limit = CacheManager.getCacheLimit();
       setCacheLimit(limit);
 
-      // Ensure recently used projects list respects the cache limit
       CacheManager.syncRecentlyUsedProjectsWithCacheLimit();
 
-      // Get cached project
       const cached = CacheManager.getSelectedProject();
       setCachedProject(cached);
 
       if (cached) {
         try {
-          // Try to get project details using the helper method
           const details = await CacheManager.getProjectDetails(cached.projectId, gcloudPath);
           if (details) {
             setProjectDetails({
@@ -70,14 +65,10 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
         }
       }
 
-      // Get exactly the number of recently used projects that matches the cache limit
       const recentProjects = await CacheManager.getRecentlyUsedProjectsWithDetails(gcloudPath);
-      // console.log("Fetched recent projects:", recentProjects);
 
-      // Ensure we show exactly the number of projects configured in the cache limit
       setRecentlyUsedProjects(recentProjects.slice(0, limit));
 
-      // Get all projects to keep them cached for when user selects "Browse All Projects"
       try {
         const result = await executeGcloudCommand(gcloudPath, "projects list --format=json");
         if (Array.isArray(result) && result.length > 0) {
@@ -91,7 +82,7 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
         }
       } catch (error) {
         console.error("Error fetching all projects:", error);
-        // Show warning toast about Browse All Projects functionality being affected
+
         await showFailureToast({
           title: "Warning: Projects List Not Available",
           message: "Browse All Projects functionality may be limited. Please try again later.",
@@ -116,26 +107,22 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
     initialize();
   }, [gcloudPath]);
 
-  // Load settings from cache on component mount
   useEffect(() => {
-    // Load cache limit setting
     const cachedLimit = settingsCache.get("cache-limit");
     if (cachedLimit) {
       setCacheLimit(parseInt(cachedLimit, 10));
     }
 
-    // Load auth cache duration setting
     const cachedAuthDuration = settingsCache.get("auth-cache-duration");
     if (cachedAuthDuration) {
       setAuthCacheDuration(parseInt(cachedAuthDuration, 10));
     }
   }, []);
 
-  // Handle navigation with useEffect
   useEffect(() => {
     if (!shouldNavigate) return;
 
-    let isActive = true; // Track if the effect is still active
+    let isActive = true;
     let navigationTimeout: NodeJS.Timeout;
     let activeToast: Toast | null = null;
 
@@ -152,7 +139,6 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
             message: cachedProject.projectId,
           });
 
-          // Ensure the component is still mounted before navigating
           navigationTimeout = setTimeout(() => {
             if (isActive) {
               activeToast?.hide();
@@ -170,10 +156,8 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
             message: shouldNavigate.projectId,
           });
 
-          // console.log("Saving selected project:", shouldNavigate.projectId);
           CacheManager.saveSelectedProject(shouldNavigate.projectId);
 
-          // Ensure the component is still mounted before navigating
           navigationTimeout = setTimeout(() => {
             if (isActive) {
               activeToast?.hide();
@@ -187,7 +171,6 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
             message: "Preparing project selection view",
           });
 
-          // Ensure the component is still mounted before navigating
           navigationTimeout = setTimeout(() => {
             if (isActive) {
               activeToast?.hide();
@@ -232,7 +215,6 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
 
     performNavigation();
 
-    // Cleanup function to handle unmounting or new navigation
     return () => {
       isActive = false;
       if (navigationTimeout) {
@@ -242,9 +224,6 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
         activeToast.hide();
       }
     };
-
-    // Reset navigation state
-    setShouldNavigate(null);
   }, [shouldNavigate, cachedProject, gcloudPath, push, pop]);
 
   function continueWithCachedProject() {
@@ -269,11 +248,9 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
       return;
     }
 
-    // console.log("Selecting project:", projectId);
     setShouldNavigate({ action: "select", projectId });
   }
 
-  // Configuration update functions
   async function updateCacheLimit(limit: number) {
     try {
       const loadingToast = await showToast({
@@ -282,24 +259,18 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
         message: `Setting project cache limit to ${limit}`,
       });
 
-      // Update the state
       setCacheLimit(limit);
 
-      // Store the setting in the settings cache
       settingsCache.set("cache-limit", limit.toString());
 
-      // Get current recently used projects
       const recentlyUsedIds = CacheManager.getRecentlyUsedProjects();
 
-      // If currently selected project isn't in the list, add it (ensures active project is always cached)
       if (cachedProject && !recentlyUsedIds.includes(cachedProject.projectId)) {
         recentlyUsedIds.unshift(cachedProject.projectId);
       }
 
-      // Trim the list to the new limit
       const trimmedRecentlyUsed = recentlyUsedIds.slice(0, limit);
 
-      // Save updated list and refresh local state
       CacheManager.saveRecentlyUsedProjects(trimmedRecentlyUsed);
 
       loadingToast.hide();
@@ -310,7 +281,6 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
         message: `Project cache limit set to ${limit}`,
       });
 
-      // Refresh the view to ensure everything is in sync
       initialize();
     } catch (error) {
       await showFailureToast({
@@ -328,13 +298,10 @@ export default function CachedProjectView({ gcloudPath, onLoginWithDifferentAcco
         message: `Setting auth cache duration to ${hours} hours`,
       });
 
-      // Update the auth cache duration
       CacheManager.updateAuthCacheDuration(hours);
 
-      // Update local state
       setAuthCacheDuration(hours);
 
-      // Store the setting in the settings cache
       settingsCache.set("auth-cache-duration", hours.toString());
 
       loadingToast.hide();

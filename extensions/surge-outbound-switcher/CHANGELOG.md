@@ -1,28 +1,13 @@
 # Surge Outbound Mode Switcher Changelog
 
-## [Update] - 2025-04-07
+## [Update Extension Icons and Toast Indicators] - 2025-05-07
 
-- Optimize cache time for first search
+- Update extension icons to prevent confusion with Surge app
+- Add colored emojis to distinguish successful switch toasts
 
-## [Update] - 2025-04-07
+## [Store Screenshots] - 2025-04-17
 
-- Refactor code structure for better performance
-- Add error messages
-- Update screenshots
-
-## [Update] - 2025-04-07
-
-- Fix TypeScript error: Cannot find name 'showFailureToast'
-- Fix screenshot path and configuration
-- Fix global mode name
-
-## [Update] - 2025-04-07
-
-- Fix
-
-## [Update] - 2025-04-07
-
-- Updated extension icons and screenshot
+- Add store screenshots
 
 ## [Initial Version] - 2025-04-07
 

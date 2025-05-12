@@ -1,5 +1,18 @@
 # Things Changelog
 
+## [✨ Reminders] - 2025-05-06
+
+- Update the "Today" and "Upcoming" lists to allow updating todo's reminders.
+- Fixed issue with the Deadline action to correctly remove a deadline from a todo.
+
+## [✨ Fix Complete Menu Bar Action] - 2025-04-25
+
+- Fix `Complete` menu bar action to mark the first incomplete todo as complete, rather than completing the first item in the list, even if it is already marked as completed.
+
+## [✨ Menu Bar Todo] - 2025-04-25
+
+- Update the menu bar to display only incomplete todos from today’s list
+
 ## [Detect URL in Notes] - 2025-04-11
 
 - Detect a URL in todo notes and offer `Open URL From Notes` and `Copy URL From Notes` actions.
@@ -48,6 +61,7 @@
 Ever wanted to add a new to-do to Things with plain, natural text? Well, it's possible now with the new `Quick Add To-Do` command. Just type in your to-do text, maybe set some notes and checklist items and you're good to go.
 
 Under the hood, it'll analyze and process your text to extract these parameters:
+
 - The title
 - The start date
 - The project or area the to-do belongs to
@@ -57,6 +71,7 @@ Under the hood, it'll analyze and process your text to extract these parameters:
 - If it's completed or canceled
 
 Here are some examples:
+
 - Book flights today in my Trips list
 - Add milk to my groceries list for tomorrow with Errand tag
 - Respond to mails
@@ -73,6 +88,7 @@ A big update has been released for the Things extension. Here's what's new:
 ### New actions
 
 You now have additional actions for your to-dos:
+
 - Schedule
 - Move to a project/area
 - Edit the title or notes

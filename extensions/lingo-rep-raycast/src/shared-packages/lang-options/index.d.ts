@@ -104,6 +104,7 @@ export declare const sourceLangOptions: {
   yo: string;
   zu: string;
 };
+export declare const aiLangOptions: Partial<typeof sourceLangOptions>;
 export declare const sourceLangOptionsRaycast: {
   auto: string;
   en: string;

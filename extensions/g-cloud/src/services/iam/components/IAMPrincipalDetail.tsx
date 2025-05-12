@@ -11,7 +11,6 @@ interface IAMPrincipalDetailProps {
 }
 
 export default function IAMPrincipalDetail({ principal, iamService, onRoleRemoved, onBack }: IAMPrincipalDetailProps) {
-  // Format the principal type for display
   function formatPrincipalType(type: string): string {
     switch (type) {
       case "user":
@@ -27,7 +26,6 @@ export default function IAMPrincipalDetail({ principal, iamService, onRoleRemove
     }
   }
 
-  // Handle role removal
   async function handleRemoveRole(role: string) {
     const confirmed = await confirmAlert({
       title: "Remove Role",
@@ -59,7 +57,6 @@ export default function IAMPrincipalDetail({ principal, iamService, onRoleRemove
     }
   }
 
-  // Generate markdown content for the detail view
   const markdown = `
   # ${principal.displayName || principal.email || principal.id || "Unknown Principal"}
   

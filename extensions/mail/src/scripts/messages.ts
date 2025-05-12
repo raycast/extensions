@@ -250,6 +250,69 @@ export const getRecipients = async (message: Message, mailbox: Mailbox): Promise
   }
 };
 
+export const getRecentMessagesContent = async () => {
+  const script = `
+  tell application "Mail"
+    set currentDate to current date
+    set fifteenMinutesAgo to currentDate - (15 * minutes)
+    
+    set msgs to {}
+    set output to ""
+    
+    set allAccounts to every account
+    
+    repeat with i from 1 to count of allAccounts
+      set currentAccount to item i of allAccounts
+      
+      set inboxMailbox to mailbox "INBOX" of currentAccount
+      
+      set inboxMessages to (messages of inboxMailbox whose date received > fifteenMinutesAgo)
+      
+      set msgs to msgs & inboxMessages
+    end repeat
+    
+    set msgCount to count of msgs
+    
+    if msgCount is 0 then
+      return ""
+    else
+      repeat with i from 1 to msgCount
+        set messageContent to (date received of item i of msgs) & "|||DELIMITER|||" & content of item i of msgs
+        set output to output & messageContent & "$end"
+      end repeat
+      return output
+    end if
+  end tell
+  `;
+
+  let data: string;
+  try {
+    data = await runAppleScript(script, {
+      humanReadableOutput: true,
+      timeout: 60000,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("Command timed out")) {
+      console.error("AppleScript Timed Out");
+    } else {
+      console.error("Error Running AppleScript");
+    }
+    return undefined;
+  }
+
+  const messages = data.split("$end").filter(Boolean);
+
+  const sortedMessages = messages
+    .map((msg) => {
+      const [dateReceived, content] = msg.split("|||DELIMITER|||");
+      return { dateReceived: constructDate(dateReceived), content };
+    })
+    .toSorted((a, b) => b.dateReceived.getTime() - a.dateReceived.getTime()) // most recent first
+    .map((msg) => msg.content);
+
+  return sortedMessages;
+};
+
 export const getMessages = async (
   account: Account,
   mailbox: Mailbox,

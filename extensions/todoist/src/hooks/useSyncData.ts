@@ -6,12 +6,16 @@ import { SyncData, initialSync } from "../api";
 import useCachedData from "./useCachedData";
 
 export default function useSyncData(shouldSync = true) {
-  const { data: syncData, ...rest } = usePromise(async () => {
-    if (shouldSync) {
-      const data = await initialSync();
-      return data as SyncData;
-    }
-  });
+  const { data: syncData, ...rest } = usePromise(
+    async () => {
+      if (shouldSync) {
+        const data = await initialSync();
+        return data as SyncData;
+      }
+    },
+    [],
+    { failureToastOptions: { title: "Unable to get Todoist data" } },
+  );
 
   const [cachedData, setCachedData] = useCachedData();
 

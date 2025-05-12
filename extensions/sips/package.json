@@ -17,7 +17,7 @@
     "rotate",
     "sips"
   ],
-  "version": "1.10.1",
+  "version": "1.11.0",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
@@ -57,8 +57,16 @@
           "value": "HoudahSpot"
         },
         {
+          "title": "Selection in QSpace Pro",
+          "value": "QSpace Pro"
+        },
+        {
           "title": "Clipboard",
           "value": "Clipboard"
+        },
+         {
+          "title": "Selection in ForkLift (Experimental)",
+          "value": "ForkLift"
         }
       ],
       "default": "Finder",
@@ -1057,20 +1065,20 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.92.1",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.98.2",
+    "@raycast/utils": "^1.19.1",
     "mathjs": "^14.2.1",
     "svgo": "^3.3.2",
     "tar": "^7.4.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.12.12",
-    "@types/react": "^18.3.3",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
     "@types/tar": "^6.1.13",
-    "eslint": "^8.57.0",
-    "prettier": "3.3.3",
-    "typescript": "^5.4.5"
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
