@@ -1,5 +1,5 @@
 # Thock Changelog
 
-## [Chore: Updated the README] - {PR_MERGE_DATE}
+## [Chore: Updated the README] - 2025-05-12
 
 ## [Initial Version] - 2025-05-02
