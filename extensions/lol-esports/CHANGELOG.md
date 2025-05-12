@@ -1,6 +1,6 @@
 # LoL Esports Changelog
 
-## [AI Tools] - {PR_MERGE_DATE}
+## [AI Tools] - 2025-05-12
 
 - Add new AI tools to get leagues, schedules and standings
 - Fix `Show Schedule` command
