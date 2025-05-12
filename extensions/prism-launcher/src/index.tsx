@@ -38,12 +38,14 @@ export default function Command() {
         const instanceCfgStr = (await fs.readFile(path.join(instanceFolder, "instance.cfg"))).toString("utf-8");
         const instanceCfg = parser.parse(instanceCfgStr);
 
-        const iconPath = path.join(instanceFolder, "minecraft", "icon.png");
+        const iconPath = ["minecraft", ".minecraft"]
+          .map((subfolder) => path.join(instanceFolder, subfolder, "icon.png"))
+          .find((p) => fs.existsSync(p));
 
         return {
           name: instanceCfg.get("General", "name", instanceId),
           id: instanceId,
-          icon: (await fs.pathExists(iconPath)) ? iconPath : undefined,
+          icon: iconPath,
         };
       }),
     );
