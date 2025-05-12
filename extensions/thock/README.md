@@ -14,4 +14,4 @@ If installed manually, make sure  `thock-cli` is executable and somewhere in you
 The error:
 `/bin/sh: /opt/homebrew/bin/thock-cli: No such file or directory` is because of the above.
 
-To solve it, install Thock uisng homebrew.
+To solve it, install Thock using homebrew.
