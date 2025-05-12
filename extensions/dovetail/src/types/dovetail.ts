@@ -6,18 +6,20 @@ export interface Insight {
   published: boolean;
 }
 
-export interface Note {
+export interface Field {
   id: string;
-  title: string;
-  project_title: string;
-  created_at: string;
+  name: string;
+  label?: string;
+  value: string | string[];
 }
 
 export interface Contact {
   id: string;
-  name: string;
-  email?: string;
+  name: string | null;
+  email?: string | null;
   created_at?: string;
+  deleted?: boolean;
+  fields?: Field[];
 }
 
 export interface PageInfo {
@@ -31,4 +33,34 @@ export interface Data {
   title: string;
   created_at: string;
   deleted: boolean;
-} 
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  pageInfo?: PageInfo;
+}
+
+export interface DataExport {
+  id: string;
+  title: string;
+  created_at: string;
+  content_markdown?: string;
+}
+
+export interface Channel {
+  id: string;
+  name: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+}
+
+export interface ApiEndpoint {
+  path: string;
+  method: string;
+  schema: {
+    _type: unknown;
+  };
+}

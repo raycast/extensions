@@ -1,31 +1,12 @@
 import { Icon, List, ActionPanel, Action, Detail, useNavigation } from "@raycast/api";
-import { useDataSearch } from "./hooks/useDataSearch";
 import { Data } from "./types/dovetail";
-import { format, differenceInDays } from "date-fns";
+import { formatRelativeDate, formatFullDate, cleanMarkdown } from "./utils/formatting";
 import { useState, useEffect } from "react";
 import { useAuth } from "./hooks/useAuth";
-import { getDataExportHtml, getDataExportMarkdown } from "./api/client";
-
-function formatRelativeDate(dateString: string) {
-  const date = new Date(dateString);
-  const now = new Date();
-  const days = differenceInDays(now, date);
-  if (days < 1) return "1d";
-  if (days < 7) return `${days + 1}d`;
-  return format(date, "MMM d");
-}
-function formatFullDate(dateString: string) {
-  const date = new Date(dateString);
-  return `Created: ${format(date, "EEEE d MMMM yyyy 'at' HH:mm")}`;
-}
-
-function cleanMarkdown(md: string): string {
-  // Example: Remove leading/trailing whitespace, fix double newlines, etc.
-  return md
-    .replace(/\n{3,}/g, '\n\n') // No more than 2 newlines in a row
-    .replace(/^\s+|\s+$/g, '')   // Trim
-    .replace(/\n\s+\n/g, '\n\n'); // Remove whitespace-only lines
-}
+import { getDataExportMarkdown } from "./api/client";
+import { useSearch } from "./hooks/useSearch";
+import { getData } from "./api/client";
+import { format } from "date-fns";
 
 function DataDetail({ dataId }: { dataId: string }) {
   const { token } = useAuth();
@@ -40,11 +21,8 @@ function DataDetail({ dataId }: { dataId: string }) {
         const data = await getDataExportMarkdown(dataId, token);
         const created = format(new Date(data.created_at), "dd MMM yyyy");
         let content = cleanMarkdown(data.content_markdown || "");
-        // Remove the old AudioVideo line if present
         content = content.replace(/^\[?AudioVideo.*\n?/im, "");
-        setMarkdown(
-          `# ${data.title}\n\n**Created on ${created}**\n\n${content}`
-        );
+        setMarkdown(`# ${data.title}\n\n**Created on ${created}**\n\n${content}`);
       } catch (e) {
         setMarkdown("Failed to load data export.");
       }
@@ -68,8 +46,9 @@ function DataDetail({ dataId }: { dataId: string }) {
 }
 
 export default function SearchData() {
-  const { data, isLoading, onSearchTextChange, numberOfResults } = useDataSearch();
+  const { data, isLoading, onSearchTextChange, numberOfResults } = useSearch<Data>(getData);
   const { push } = useNavigation();
+
   return (
     <List
       isLoading={isLoading}
@@ -78,7 +57,7 @@ export default function SearchData() {
       searchBarPlaceholder="Search for data in any project..."
     >
       <List.Section title="Most relevant" subtitle={numberOfResults}>
-        {data.map((item: Data) => (
+        {data.map((item) => (
           <List.Item
             key={item.id}
             title={item.title || "Untitled"}
@@ -86,10 +65,7 @@ export default function SearchData() {
             accessories={[{ text: formatRelativeDate(item.created_at), tooltip: formatFullDate(item.created_at) }]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Show Details"
-                  onAction={() => push(<DataDetail dataId={item.id} />)}
-                />
+                <Action title="Show Details" onAction={() => push(<DataDetail dataId={item.id} />)} />
               </ActionPanel>
             }
           />
@@ -97,4 +73,4 @@ export default function SearchData() {
       </List.Section>
     </List>
   );
-} 
+}
