@@ -32,12 +32,20 @@ export default function Command(props: LaunchProps<{ draftValues: FormValues }>)
         taskDraft.tags.push(...tagsToCreate);
       }
       try {
-        await addTask(taskDraft);
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Task added!",
-        });
-        await popToRoot();
+        const { error } = await addTask(taskDraft);
+        if (!error) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Task added!",
+          });
+          await popToRoot();
+        } else {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "An error occurred",
+            message: `Cannot assigned ${error === "tag_assignment_failed" ? "tags" : "project"} to your task`,
+          });
+        }
       } catch {
         await showToast({
           style: Toast.Style.Failure,

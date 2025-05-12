@@ -3,10 +3,10 @@ import { createTag } from "./create-tags";
 
 async function assignTagToTask(taskId: string, tagName: string) {
   return await executeScript(`
-   const omnifocus = Application('OmniFocus');
+    const omnifocus = Application('OmniFocus');
     const doc = omnifocus.defaultDocument();
     const task = doc.tasks.byId('${taskId}');
-    const tags = doc.tags.whose({name: '${tagName}'});
+    const tags = doc.tags.whose({name: \`${tagName}\`});
     const tag = tags[0];
     omnifocus.add(tag, {to: task.tags})
 

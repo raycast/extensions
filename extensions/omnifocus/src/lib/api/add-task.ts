@@ -3,7 +3,16 @@ import { executeScript } from "../utils/executeScript";
 import { assignProjectToTask } from "./assign-project-to-task";
 import { assignTagsToTask } from "./assign-tags-to-task";
 
-export async function addTask(options: CreateOmniFocusTaskOptions): Promise<OmniFocusTask> {
+type OmniFocusAddTaskResponse =
+  | {
+      task: OmniFocusTask;
+      error?: never;
+    }
+  | {
+      task?: never;
+      error: "tag_assignment_failed" | "project_assignment_failed";
+    };
+export async function addTask(options: CreateOmniFocusTaskOptions): Promise<OmniFocusAddTaskResponse> {
   const { name, deferDate, flagged, note, dueDate } = options;
 
   let source = `
@@ -40,19 +49,21 @@ export async function addTask(options: CreateOmniFocusTaskOptions): Promise<Omni
     try {
       await assignTagsToTask(task.id, options.tags);
     } catch (error) {
-      console.error("Error assigning tags to task", error);
+      console.error("Error assigning tags to task:", (error as Error).message);
+      return { error: "tag_assignment_failed" };
     }
   }
 
+  // NOTE: give OmniFocus some time to process the task before assigning the project
   await new Promise((resolve) => setTimeout(resolve, 500));
 
   if (options.projectName) {
     try {
-      console.log("Assigning project to task", task.id, options.projectName);
       await assignProjectToTask(task.id, options.projectName);
     } catch (error) {
-      console.error("Error assigning project to task", error);
+      console.error("Error assigning project to task:", (error as Error).message);
+      return { error: "project_assignment_failed" };
     }
   }
-  return task;
+  return { task };
 }
