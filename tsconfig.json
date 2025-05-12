@@ -11,7 +11,7 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "outDir": "dist",
-    "noImplicitAny": false
+    "noImplicitAny": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "raycast-env.d.ts"]
 } 

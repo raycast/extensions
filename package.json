@@ -9,6 +9,7 @@
     {
       "name": "index",
       "title": "Crypto News",
+      "subtitle": "Crypto News",
       "description": "View latest cryptocurrency headlines from multiple sources",
       "mode": "view",
       "icon": "icon.png"
@@ -16,6 +17,7 @@
     {
       "name": "coindesk",
       "title": "Coindesk News",
+      "subtitle": "Crypto News",
       "description": "View the latest news from CoinDesk",
       "mode": "view",
       "icon": "coindesk.png"
@@ -23,6 +25,7 @@
     {
       "name": "cointelegraph",
       "title": "Cointelegraph News",
+      "subtitle": "Crypto News",
       "description": "View the latest news from CoinTelegraph",
       "mode": "view",
       "icon": "cointelegraph.png"
@@ -30,6 +33,7 @@
     {
       "name": "cryptonews",
       "title": "Bitcoin.com News",
+      "subtitle": "Crypto News",
       "description": "View the latest news from Bitcoin.com",
       "mode": "view",
       "icon": "bitcoin-com.png"
@@ -37,6 +41,7 @@
     {
       "name": "bitcoinmagazine",
       "title": "Bitcoin Magazine Articles",
+      "subtitle": "Crypto News",
       "description": "View the latest news from Bitcoin Magazine",
       "mode": "view",
       "icon": "bitcoinmagazine.png"
@@ -44,6 +49,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.98.2",
+    "@raycast/utils": "^1.19.1",
     "moment": "2.29.4",
     "rss-parser": "3.13.0"
   },

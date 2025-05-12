@@ -2,12 +2,11 @@ import {
   Action,
   ActionPanel,
   List,
-  showToast,
-  Toast,
   Icon,
   getPreferenceValues,
   LocalStorage,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import Parser from "rss-parser";
 import moment from "moment";
@@ -155,11 +154,7 @@ export default function CryptoNews({ defaultSource }: CryptoNewsProps) {
             read: readArticles.includes(item.guid || item.link || ""),
           }));
         } catch (error) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: `Failed to load ${source.name}`,
-            message: error instanceof Error ? error.message : "Unknown error",
-          });
+          showFailureToast(error, { title: `Failed to load ${source.name}` });
           return [];
         }
       });
@@ -210,11 +205,7 @@ export default function CryptoNews({ defaultSource }: CryptoNewsProps) {
         isLoading: false,
       });
 
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load news",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      showFailureToast(error, { title: "Failed to load news" });
     }
   }
 
@@ -233,11 +224,7 @@ export default function CryptoNews({ defaultSource }: CryptoNewsProps) {
   // Show error toast if there's an error
   useEffect(() => {
     if (state.error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load news",
-        message: state.error.message,
-      });
+      showFailureToast(state.error, { title: "Failed to load news" });
     }
   }, [state.error]);
 
@@ -329,31 +316,30 @@ export default function CryptoNews({ defaultSource }: CryptoNewsProps) {
     <List
       isLoading={state.isLoading}
       searchBarPlaceholder={`Search ${title} articles...`}
+      throttle
     >
       {filteredItems?.map((item, index) => (
         <List.Item
-          key={index}
-          icon={getSourceIconPath(item.sourceKey)}
-          title={item.title || "No title"}
-          subtitle={item.source}
+          key={item.guid || item.link || index}
+          icon={{ source: getSourceIconPath(item.sourceKey) }}
+          title={{
+            value: item.title || "No title",
+            tooltip: item.title,
+          }}
           accessories={[
             {
               text: formatDate(item.isoDate || item.pubDate),
-              tooltip: "Published",
+              icon: item.read ? { source: Icon.CheckCircle } : undefined,
             },
-            item.read
-              ? { icon: Icon.Check, tooltip: "Read" }
-              : { icon: Icon.Circle, tooltip: "Unread" },
           ]}
           actions={
             <ActionPanel>
-              {item.link && (
-                <Action.OpenInBrowser
+              <ActionPanel.Section>
+                <Action
                   title="Open Article"
-                  url={item.link}
-                  onOpen={() => handleOpenArticle(item)}
+                  onAction={() => handleOpenArticle(item)}
                 />
-              )}
+              </ActionPanel.Section>
               <Action
                 title={item.read ? "Mark as Unread" : "Mark as Read"}
                 icon={item.read ? Icon.Circle : Icon.Check}
