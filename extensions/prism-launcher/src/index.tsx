@@ -38,7 +38,7 @@ export default function Command() {
         const instanceCfgStr = (await fs.readFile(path.join(instanceFolder, "instance.cfg"))).toString("utf-8");
         const instanceCfg = parser.parse(instanceCfgStr);
 
-        const iconPath = path.join(instanceFolder, ".minecraft", "icon.png");
+        const iconPath = path.join(instanceFolder, "minecraft", "icon.png");
 
         return {
           name: instanceCfg.get("General", "name", instanceId),
