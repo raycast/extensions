@@ -1,5 +1,7 @@
 # Image Modification
 
+![Feature Overview](./assets/hero.png)
+
 Apply filters and transformations to various image formats, and convert between them. Create new images by specifying their dimensions, colors, and patterns. Operate on selected files or on images in the clipboard.
 
 ## Features
@@ -17,6 +19,7 @@ Apply filters and transformations to various image formats, and convert between 
   - PNG optimization supported by [PNGOUT](http://www.jonof.id.au/kenutils.html)
 - Perform realtime image manipulation on images in the clipboard
 - Strip EXIF data from images using [ExifTool](https://exiftool.org)
+- Operate on selected images in Finder, Path Finder, HoudahSpot, NeoFinder, QSpace Pro, ForkLift, and more to come
 
 ## Commands
 
