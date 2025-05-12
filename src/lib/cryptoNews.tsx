@@ -1,4 +1,13 @@
-import { Action, ActionPanel, List, showToast, Toast, Icon, getPreferenceValues, LocalStorage } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  showToast,
+  Toast,
+  Icon,
+  getPreferenceValues,
+  LocalStorage,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import Parser from "rss-parser";
 import moment from "moment";
@@ -67,7 +76,9 @@ interface CryptoNewsProps {
 export default function CryptoNews({ defaultSource }: CryptoNewsProps) {
   // Get user preferences
   const preferences = getPreferenceValues<Preferences>();
-  const selectedSourcesStr = preferences.selectedSources || "COINDESK,COINTELEGRAPH,CRYPTONEWS,BITCOINMAGAZINE";
+  const selectedSourcesStr =
+    preferences.selectedSources ||
+    "COINDESK,COINTELEGRAPH,CRYPTONEWS,BITCOINMAGAZINE";
   const selectedSources = selectedSourcesStr.split(",");
   const numberOfHeadlines = parseInt(preferences.numberOfHeadlines || "20", 10);
 
@@ -100,7 +111,9 @@ export default function CryptoNews({ defaultSource }: CryptoNewsProps) {
           let filteredItems = cachedData.items || [];
 
           if (defaultSource) {
-            filteredItems = filteredItems.filter((item) => item.sourceKey === defaultSource);
+            filteredItems = filteredItems.filter(
+              (item) => item.sourceKey === defaultSource,
+            );
           }
 
           setState({
@@ -119,7 +132,9 @@ export default function CryptoNews({ defaultSource }: CryptoNewsProps) {
 
       if (!sourcesToFetch || sourcesToFetch.length === 0) {
         setState({
-          error: new Error("No news sources selected. Please update your preferences."),
+          error: new Error(
+            "No news sources selected. Please update your preferences.",
+          ),
           isLoading: false,
         });
         return;
@@ -190,7 +205,8 @@ export default function CryptoNews({ defaultSource }: CryptoNewsProps) {
       setState({ items: limitedItems, isLoading: false });
     } catch (error) {
       setState({
-        error: error instanceof Error ? error : new Error("Something went wrong"),
+        error:
+          error instanceof Error ? error : new Error("Something went wrong"),
         isLoading: false,
       });
 
@@ -203,7 +219,10 @@ export default function CryptoNews({ defaultSource }: CryptoNewsProps) {
   }
 
   // Helper function to compare arrays
-  function arraysEqual(a: string[] | undefined, b: string[] | undefined): boolean {
+  function arraysEqual(
+    a: string[] | undefined,
+    b: string[] | undefined,
+  ): boolean {
     if (!a || !b) return false;
     if (a.length !== b.length) return false;
     const sortedA = [...a].sort();
@@ -307,7 +326,10 @@ export default function CryptoNews({ defaultSource }: CryptoNewsProps) {
     : "Crypto News";
 
   return (
-    <List isLoading={state.isLoading} searchBarPlaceholder={`Search ${title} articles...`}>
+    <List
+      isLoading={state.isLoading}
+      searchBarPlaceholder={`Search ${title} articles...`}
+    >
       {filteredItems?.map((item, index) => (
         <List.Item
           key={index}
@@ -315,13 +337,22 @@ export default function CryptoNews({ defaultSource }: CryptoNewsProps) {
           title={item.title || "No title"}
           subtitle={item.source}
           accessories={[
-            { text: formatDate(item.isoDate || item.pubDate), tooltip: "Published" },
-            item.read ? { icon: Icon.Check, tooltip: "Read" } : { icon: Icon.Circle, tooltip: "Unread" },
+            {
+              text: formatDate(item.isoDate || item.pubDate),
+              tooltip: "Published",
+            },
+            item.read
+              ? { icon: Icon.Check, tooltip: "Read" }
+              : { icon: Icon.Circle, tooltip: "Unread" },
           ]}
           actions={
             <ActionPanel>
               {item.link && (
-                <Action.OpenInBrowser title="Open Article" url={item.link} onOpen={() => handleOpenArticle(item)} />
+                <Action.OpenInBrowser
+                  title="Open Article"
+                  url={item.link}
+                  onOpen={() => handleOpenArticle(item)}
+                />
               )}
               <Action
                 title={item.read ? "Mark as Unread" : "Mark as Read"}
