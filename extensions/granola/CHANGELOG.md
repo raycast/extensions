@@ -1,5 +1,18 @@
 # Granola Changelog
 
+## [1.3] - 2025-05-05
+
+### 🐞 Bug Fixes
+- Fixed issue where `includeTranscript` was not being set correctly in some cases
+
+## [1.2] - 2025-05-05
+
+### 🐞 Bug Fixes
+- Fixed issue where certain queries were not working as expected
+
+### 🔄 Refactors and Improvements
+- Move AI instructions and evals from package.json to ai.yaml
+
 ## [1.1] - 2025-05-02
 
 ### ✨ New Features

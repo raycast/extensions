@@ -81,8 +81,17 @@ export function useWindowRestore() {
         savedState.position !== undefined,
       );
 
+      // Check if actual size differs from requested size (with small tolerance)
+      const sizeTolerance = 5; // 5 pixels tolerance
+      const sizeWasRestricted =
+        Math.abs(result.width - result.requestedWidth) > sizeTolerance ||
+        Math.abs(result.height - result.requestedHeight) > sizeTolerance;
+
+      // Append restriction info if size was constrained
+      const appRestrictionInfo = sizeWasRestricted ? " (Restricted)" : "";
+
       // Show feedback based on actual dimensions
-      await showHUD(`↺ Restored to ${result.width}×${result.height}`);
+      await showHUD(`↺ Restored to ${result.width}×${result.height}${appRestrictionInfo}`);
 
       // Return to root after execution
       await popToRoot();

@@ -1,13 +1,6 @@
 import { getTemplates, getTypes } from "../api";
-import { Space, Template, Type } from "../models";
-import { apiLimitMax } from "../utils";
-
-/**
- * Checks if a given `Type` is a list type.
- */
-export function typeIsList(layout: string): boolean {
-  return layout === "set" || layout === "collection";
-}
+import { ObjectLayout, Space, SpaceObject, Type } from "../models";
+import { apiKeyPrefixes, apiLimitMax, bundledTypeKeys } from "../utils";
 
 /**
  * Fetches all `Type`s from a single space, doing pagination if necessary.
@@ -46,8 +39,8 @@ export async function getAllTypesFromSpaces(spaces: Space[]): Promise<Type[]> {
 /**
  * Fetches all `Template`s from a single space and type, doing pagination if necessary.
  */
-export async function fetchAllTemplatesForSpace(spaceId: string, typeId: string): Promise<Template[]> {
-  const allTemplates: Template[] = [];
+export async function fetchAllTemplatesForSpace(spaceId: string, typeId: string): Promise<SpaceObject[]> {
+  const allTemplates: SpaceObject[] = [];
   let hasMore = true;
   let offset = 0;
 
@@ -66,52 +59,68 @@ export async function fetchAllTemplatesForSpace(spaceId: string, typeId: string)
  */
 export async function fetchTypeKeysForPages(
   spaces: Space[],
-  uniqueKeysForTasks: string[],
-  uniqueKeysForLists: string[],
+  typeKeysForTasks: string[],
+  typeKeysForLists: string[],
 ): Promise<string[]> {
   const excludedKeysForPages = new Set([
     // not shown anywhere
-    "ot-audio",
-    "ot-chat",
-    "ot-file",
-    "ot-image",
-    "ot-objectType",
-    "ot-tag",
-    "ot-template",
-    "ot-video",
+    bundledTypeKeys.audio,
+    bundledTypeKeys.chat,
+    bundledTypeKeys.file,
+    bundledTypeKeys.image,
+    bundledTypeKeys.object_type,
+    bundledTypeKeys.tag,
+    bundledTypeKeys.template,
+    bundledTypeKeys.video,
 
     // shown in other views
-    "ot-set",
-    "ot-collection",
-    "ot-bookmark",
-    "ot-participant",
-    ...uniqueKeysForTasks,
-    ...uniqueKeysForLists,
+    bundledTypeKeys.set,
+    bundledTypeKeys.collection,
+    bundledTypeKeys.bookmark,
+    bundledTypeKeys.participant,
+    ...typeKeysForTasks,
+    ...typeKeysForLists,
   ]);
 
   const allTypes = await getAllTypesFromSpaces(spaces);
-  const uniqueKeysSet = new Set(allTypes.map((type) => type.key).filter((key) => !excludedKeysForPages.has(key)));
-  return Array.from(uniqueKeysSet);
+  const pageTypeKeys = new Set(allTypes.map((type) => type.key).filter((key) => !excludedKeysForPages.has(key)));
+  return Array.from(pageTypeKeys);
 }
 
 /**
- * Fetches all unique type keys for task types.
+ * Fetches all type keys for task types.
  */
 export async function fetchTypesKeysForTasks(spaces: Space[]): Promise<string[]> {
   const tasksTypes = await getAllTypesFromSpaces(spaces);
-  const uniqueKeys = new Set(tasksTypes.filter((type) => type.recommended_layout === "todo").map((type) => type.key));
-  return Array.from(uniqueKeys);
+  const taskTypeKeys = new Set(
+    tasksTypes.filter((type) => type.layout === ObjectLayout.Action).map((type) => type.key),
+  );
+  return Array.from(taskTypeKeys);
 }
 
 /**
- * Fetches all unique type keys for list types.
+ * Fetches all type keys for list types.
  */
 export async function fetchTypeKeysForLists(spaces: Space[]): Promise<string[]> {
   const listsTypes = await getAllTypesFromSpaces(spaces);
-  const typeKeys = new Set(
+  const listTypeKeys = new Set(
     listsTypes
-      .filter((type) => type.recommended_layout === "set" || type.recommended_layout === "collection")
+      .filter((type) => type.layout === ObjectLayout.Set || type.layout === ObjectLayout.Collection)
       .map((type) => type.key),
   );
-  return Array.from(typeKeys);
+  return Array.from(listTypeKeys);
+}
+
+/**
+ * Checks if a type is custom user type or not (built-in system type).
+ */
+export function isUserType(key: string): boolean {
+  return apiKeyPrefixes.types.length + 24 === key.length && /\d/.test(key);
+}
+
+/**
+ * Checks if a property is custom user property or not (built-in system property).
+ */
+export function isUserProperty(key: string): boolean {
+  return apiKeyPrefixes.properties.length + 24 === key.length && /\d/.test(key);
 }

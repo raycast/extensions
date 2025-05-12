@@ -25,6 +25,7 @@ import { extractAccountsFromMigrationUrl } from './google-authenticator';
 
 type Preferences = {
   passwordVisibility?: boolean;
+  primaryAction?: 'copy' | 'paste';
 };
 
 export default () => {
@@ -217,8 +218,10 @@ export default () => {
             ]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={getCopyToClipboardContent(account.secret)} />
-                <Action.Paste content={getCopyToClipboardContent(account.secret)} />
+                {...[
+                  <Action.CopyToClipboard content={getCopyToClipboardContent(account.secret)} />,
+                  <Action.Paste content={getCopyToClipboardContent(account.secret)} />,
+                ][preferences.primaryAction === 'paste' ? 'reverse' : 'slice']()}
                 {index > 0 && (
                   <Action
                     title="Move up"
