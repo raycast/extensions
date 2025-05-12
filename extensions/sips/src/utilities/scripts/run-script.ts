@@ -53,7 +53,7 @@ export function runScript<T>(
 
   let data = "";
   let sendMessage: (msg: string) => void = (msg: string) => {
-    msg;
+    console.log(msg);
   };
 
   const proc = spawn(command, scriptArgs, { env });
@@ -108,7 +108,7 @@ export function runScript<T>(
         let result: T | string;
         try {
           result = JSON.parse(data) as T;
-        } catch (error) {
+        } catch {
           result = data.trim();
         }
         if (options?.logFinalOutput) console.log(`Script output: ${result}`);
