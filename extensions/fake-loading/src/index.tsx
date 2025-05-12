@@ -48,6 +48,11 @@ const loadingScreens: LoadingScreen[] = [
     name: "My Computer",
     path: join(environment.assetsPath, "loadings", "my-computer.gif"),
   },
+  {
+    id: "mac-update",
+    name: "Mac Update",
+    path: join(environment.assetsPath, "loadings", "mac-update.gif"),
+  },
 ];
 
 export default function Command() {
