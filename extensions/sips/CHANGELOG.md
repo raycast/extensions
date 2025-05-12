@@ -2,9 +2,9 @@
 
 ## [Improved Selection Detection] - {PR_MERGE_DATE}
 
-- Added full support for QSpace Pro.
-- Added experimental support for ForkLift.
-- Rewrote file selection detection scripts to improve performance.
+- Added full support for QSpace Pro
+- Added experimental support for ForkLift
+- Rewrote file selection detection scripts to improve performance
 
 ## [Remove Background] - 2025-02-24
 
