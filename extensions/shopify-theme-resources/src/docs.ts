@@ -736,7 +736,7 @@ export const docList: DocType[] = [
           subcategory: "Liquid",
           description:
             "LiquidDoc gives you a way to create a structured interface for Liquid snippets, allowing you to specify input parameters, add descriptions, and provide usage examples. These details are exposed through theme checks, code completions, and hover information, making development faster and more reliable. LiquidDoc uses a JSDoc-inspired syntax to document snippets.",
-          example: `{% render 'loading-spinner', produt: product, show_vendor: true %}`,
+          example: `{% render 'loading-spinner', product: product, show_vendor: true %}`,
         },
         {
           title: "Theme Check",
