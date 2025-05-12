@@ -1,6 +1,6 @@
 # Image Modification Changelog
 
-## [Improved Selection Detection] - {PR_MERGE_DATE}
+## [Improved Selection Detection] - 2025-05-12
 
 - Added full support for QSpace Pro
 - Added experimental support for ForkLift
