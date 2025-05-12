@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, getPreferenceValues, Icon } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { API } from "../constants/constants";
 import { Artist } from "../types/Artist";
@@ -15,7 +15,7 @@ enum SearchFilter {
 }
 
 function ArtistSetlists({ artist }: { artist: Artist }) {
-  const [searchFilter, SetSearchFilter] = useState<string>(SearchFilter.NONE);
+  const [searchFilter, setSearchFilter] = useState<string>(SearchFilter.NONE);
   const [searchText, setSearchText] = useState("");
   const abortable = useRef<AbortController | null>(null);
   const preferences = getPreferenceValues<{ apiKey: string }>();
@@ -65,12 +65,11 @@ function ArtistSetlists({ artist }: { artist: Artist }) {
       }
       if (response.status == 404) return { data: [], hasMore: false };
       if (!response.ok) {
-        throw new Error("Failed to fetch setlists");
+        showFailureToast(new Error("Failed to fetch setlists"), { title: "Could not fetch setlists" });
+        return { data: [], hasMore: false };
       }
       const json = (await response.json()) as SearchSetlistResponse;
-      const setlists = json.setlist.filter((setlist) => {
-        return setlist.sets.set.length > 0;
-      });
+      const setlists = json.setlist.filter((setlist) => setlist.sets.set.length);
       return { data: setlists, hasMore: json.total > page * json.itemsPerPage };
     },
     [searchText, artist],
@@ -87,7 +86,7 @@ function ArtistSetlists({ artist }: { artist: Artist }) {
       navigationTitle={artist.name}
       filtering={searchFilter == SearchFilter.NONE}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select filter" onChange={(newValue) => SetSearchFilter(newValue)}>
+        <List.Dropdown tooltip="Select filter" onChange={(newValue) => setSearchFilter(newValue)}>
           {allFilters.map((filter) => (
             <List.Dropdown.Item key={filter.filter} value={filter.filter} title={`${filter.title}`} />
           ))}
@@ -102,7 +101,7 @@ function ArtistSetlists({ artist }: { artist: Artist }) {
           accessories={setlist.tour?.name ? [{ text: setlist.tour.name }] : undefined}
           actions={
             <ActionPanel>
-              <Action.Push title={`View Setlist`} target={<SetListDetail setlist={setlist} />} />
+              <Action.Push title="View Setlist" target={<SetListDetail setlist={setlist} />} />
               <Action.OpenInBrowser title="View on Setlist.fm" url={setlist.url} icon={Icon.Rocket} />
             </ActionPanel>
           }

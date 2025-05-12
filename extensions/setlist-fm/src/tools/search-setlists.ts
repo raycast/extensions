@@ -66,7 +66,7 @@ export default async function searchSetlists(input: Input) {
     response = await fetch(url, requestOptions);
   }
   if (response.status == 404) {
-    showFailureToast("No artists found");
+    showFailureToast("No setlists found");
     return null;
   }
   const json = (await response.json()) as SearchSetlistResponse;

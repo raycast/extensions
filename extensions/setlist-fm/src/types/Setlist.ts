@@ -10,7 +10,7 @@ export interface Setlist {
   lastUpdated: string;
   artist: Artist;
   venue: Venue;
-  tour: Tour;
+  tour?: Tour;
   sets: Sets;
   url: string;
   info?: string;

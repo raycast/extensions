@@ -27,9 +27,7 @@ function SetListDetail({ setlist }: { setlist: Setlist }) {
   };
 
   const getSongTitle = (song: Song): string => {
-    let songName = song.name ? song.name : "Unknown";
-    if (song.tape) songName = `${songName}`;
-    return songName;
+    return song.name ? song.name : "Unknown";
   };
 
   const getEncodedSearchParameters = (song: Song): string => {
@@ -43,7 +41,7 @@ function SetListDetail({ setlist }: { setlist: Setlist }) {
     return encodedSearchParameters;
   };
 
-  const getYouTubeSeachURL = (song: Song): string => {
+  const getYouTubeSearchURL = (song: Song): string => {
     return `https://www.youtube.com/results?search_query=${getEncodedSearchParameters(song)}`;
   };
 
@@ -88,7 +86,7 @@ function SetListDetail({ setlist }: { setlist: Setlist }) {
                   />
                   <Action.OpenInBrowser
                     title={`Search Song on Youtube`}
-                    url={getYouTubeSeachURL(song)}
+                    url={getYouTubeSearchURL(song)}
                     icon={Icon.Video}
                   />
                   <Action.OpenInBrowser

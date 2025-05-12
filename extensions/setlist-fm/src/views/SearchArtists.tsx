@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, getPreferenceValues, Icon } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { API } from "../constants/constants";
 import { Artist } from "../types/Artist";
@@ -15,7 +15,7 @@ function SearchArtists() {
     (searchText: string) => async (options: { page: number }) => {
       if (!searchText) return { data: [], hasMore: false };
       const page = options.page + 1;
-      const url = `${API.BASE_URL}${API.ARTIST_SEARCH}?artistName=${searchText}&p=${page}&sort=relevance`;
+      const url = `${API.BASE_URL}${API.ARTIST_SEARCH}?artistName=${encodeURIComponent(searchText)}&p=${page}&sort=relevance`;
       const requestOptions = {
         headers: {
           "x-api-key": preferences.apiKey,
@@ -30,7 +30,8 @@ function SearchArtists() {
       }
       if (response.status == 404) return { data: [], hasMore: false };
       if (!response.ok) {
-        throw new Error("Failed to fetch artists");
+        showFailureToast(new Error("Failed to fetch artists"), { title: "Could not fetch artists" });
+        return { data: [], hasMore: false };
       }
       const json = (await response.json()) as SearchArtistsResponse;
       const artist = json.artist;
@@ -51,11 +52,11 @@ function SearchArtists() {
       {data?.map((item: Artist) => (
         <List.Item
           key={`${item.mbid}`}
-          title={`${item.name} `}
+          title={`${item.name}`}
           subtitle={item.disambiguation}
           actions={
             <ActionPanel>
-              <Action.Push title="View Setlists" target={<ArtistSetlists artist={item} />} icon="icon.png" />
+              <Action.Push title="View Setlists" target={<ArtistSetlists artist={item} />} icon="extension-icon.png" />
               <Action.OpenInBrowser title="View Artist on Setlist.fm" url={item.url} icon={Icon.Rocket} />
             </ActionPanel>
           }

@@ -12,7 +12,7 @@ type Input = {
 
 export default async function searchArtist(input: Input) {
   const preferences = getPreferenceValues<{ apiKey: string }>();
-  const url = `${API.BASE_URL}${API.ARTIST_SEARCH}?artistName=${input.artistName}&p=1&sort=relevance`;
+  const url = `${API.BASE_URL}${API.ARTIST_SEARCH}?artistName=${encodeURIComponent(input.artistName)}&p=1&sort=relevance`;
   const requestOptions = {
     headers: {
       "x-api-key": preferences.apiKey,
