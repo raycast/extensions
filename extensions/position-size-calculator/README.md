@@ -14,14 +14,14 @@ The Position Size Calculator is a Raycast extension designed to help traders qui
 
 ## Screenshots
 
-![position-size-calculator-1](metadata/position-size-calculator-1.png)
-![position-size-calculator-2](metadata/position-size-calculator-2.png)
-![position-size-calculator-3](metadata/position-size-calculator-3.png)
-![position-size-calculator-4](metadata/position-size-calculator-4.png)
-![position-size-calculator-5](metadata/position-size-calculator-5.png)
-![position-size-calculator-6](metadata/position-size-calculator-6.png)
-![position-size-calculator-7](metadata/position-size-calculator-7.png)
-![position-size-calculator-8](metadata/position-size-calculator-8.png)
+![position-size-calculator-1](./assets/screenshots/position-size-calculator-1.png)
+![position-size-calculator-2](./assets/screenshots/position-size-calculator-2.png)
+![position-size-calculator-3](./assets/screenshots/position-size-calculator-3.png)
+![position-size-calculator-4](./assets/screenshots/position-size-calculator-4.png)
+![position-size-calculator-5](./assets/screenshots/position-size-calculator-5.png)
+![position-size-calculator-6](./assets/screenshots/position-size-calculator-6.png)
+![position-size-calculator-7](./assets/screenshots/position-size-calculator-7.png)
+![position-size-calculator-8](./assets/screenshots/position-size-calculator-8.png)
 
 ## Installation
 
