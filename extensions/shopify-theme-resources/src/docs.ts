@@ -52,7 +52,7 @@ export const docList: DocType[] = [
           keyword: ["blocks", "theme blocks"],
           category: "Basics",
           subcategory: "Blocks",
-          description: `Blocks let developers create flexible layouts by breaking down sections into smaller, reusable pieces of Liquid. Each block has it's own set of settings, and can be added, removed, and reordered within a section. \n\n There are three types of blocks: \n\n - Theme blocks: Created as their own Liquid files in the /blocks folder, and re-usable across multiple sections with the theme. \n\n - Section blocks: Created within a section's Liquid file and are limited to use within that section. \n\n - App blocks: Provided by apps installed on a merchant's shop.`,
+          description: `Blocks let developers create flexible layouts by breaking down sections into smaller, reusable pieces of Liquid. Each block has its own set of settings, and can be added, removed, and reordered within a section. \n\n There are three types of blocks: \n\n - Theme blocks: Created as their own Liquid files in the /blocks folder, and re-usable across multiple sections with the theme. \n\n - Section blocks: Created within a section's Liquid file and are limited to use within that section. \n\n - App blocks: Provided by apps installed on a merchant's shop.`,
         },
         {
           title: "Settings",
