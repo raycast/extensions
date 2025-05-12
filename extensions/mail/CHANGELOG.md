@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-05-12
 
 - "Paste Latest OTP Code" now correctly gets the latest OTP code across multiple mail accounts.
 
