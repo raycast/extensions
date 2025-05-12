@@ -10,6 +10,7 @@ import {
   Alert,
   showToast,
   Toast,
+  open,
 } from "@raycast/api";
 import { getFavicon, showFailureToast } from "@raycast/utils";
 import type { Site, Preferences } from "./types";
@@ -152,10 +153,20 @@ export default function DailySites() {
             icon={getFavicon(site.url)}
             accessoryTitle={site.category !== "uncategorized" ? site.category : undefined}
             accessoryIcon={site.category !== "uncategorized" ? Icon.Tag : undefined}
-            keywords={[site.category]}
+            keywords={site.category ? [site.category] : []}
             actions={
               <ActionPanel>
                 <OpenInBrowserAction url={site.url} />
+                <Action
+                  title="Open All Filtered Sites in Browser"
+                  icon={Icon.Globe}
+                  onAction={async () => {
+                    for (const s of filtered) {
+                      await open(s.url);
+                    }
+                  }}
+                />
+
                 <Action.CopyToClipboard title="Copy URL" content={site.url} />
                 <Action.Push
                   title="Edit Site"

@@ -1,21 +1,49 @@
-// addsite.tsx
 import React, { useEffect, useState } from "react";
-import { ActionPanel, Form, Action, showToast, Toast, confirmAlert, popToRoot } from "@raycast/api";
+import {
+  ActionPanel,
+  Form,
+  Action,
+  showToast,
+  Toast,
+  confirmAlert,
+  popToRoot,
+  BrowserExtension,
+  environment,
+} from "@raycast/api";
 import type { Site } from "./types";
-import { loadSites, saveSites, getCategories } from "./utils";
+import { decodeHtmlEntities, loadSites, saveSites, getCategories } from "./utils";
 
 interface AddSitesFormProps {
   onDone: () => void;
   initialValues?: Site;
 }
 
-// Helper to validate URL syntax + protocol
+// Helper to ensure a well-formed http(s) URL, requiring at least one dot in the hostname
 function isValidHttpUrl(input: string): boolean {
+  const trimmed = input.trim();
+  // remove `www.` if present right after the protocol
+  const normalized = trimmed.replace(/^(https?:\/\/)www\./i, "$1");
+  const pattern = /^https?:\/\/[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+([/?].*)?$/;
+  return pattern.test(normalized);
+}
+
+// Fallback: derive a name from any host
+function deriveNameFromUrl(input: string): string {
   try {
-    const url = new URL(input.trim());
-    return url.protocol === "http:" || url.protocol === "https:";
+    const u = new URL(input.trim());
+    // strip “www.”
+    const host = u.hostname.replace(/^www\./i, "");
+    const base = host.split(".")[0] || "";
+    // remove trailing slash, split, grab first segment
+    const segment = u.pathname.replace(/\/+$/, "").split("/")[1] || "";
+
+    // decode any URL-encoded characters (e.g. %20)
+    const decodedSegment = decodeURIComponent(segment);
+
+    const cap = base.charAt(0).toUpperCase() + base.slice(1);
+    return segment ? `${cap} – ${decodedSegment}` : cap;
   } catch {
-    return false;
+    return "";
   }
 }
 
@@ -28,6 +56,27 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
   const [url, setUrl] = useState(initialValues?.url ?? "https://");
   const [category, setCategory] = useState(initialCat);
   const [customCategory, setCustomCategory] = useState("");
+  const [lastFetchedUrl, setLastFetchedUrl] = useState("");
+
+  // Try to prepopulate from the Raycast Browser Extension if available
+  useEffect(() => {
+    if (!initialValues && environment.canAccess(BrowserExtension)) {
+      BrowserExtension.getTabs()
+        .then((tabs) => {
+          const activeTab = tabs.find((t) => t.active);
+          if (activeTab?.url) {
+            setUrl(activeTab.url);
+            setLastFetchedUrl(activeTab.url);
+          }
+          if (activeTab?.title) {
+            setName(activeTab.title);
+          }
+        })
+        .catch(() => {
+          // user declined or extension not installed; fall back to manual entry
+        });
+    }
+  }, [initialValues]);
 
   useEffect(() => {
     let isActive = true;
@@ -43,15 +92,43 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
   }, [initialCat]);
 
   // validation rules
-  const nameError = name.trim() === "" ? "Name is required" : undefined;
   const urlError =
     url.trim() === ""
       ? "URL is required"
       : !isValidHttpUrl(url)
         ? "Must be a valid http:// or https:// URL"
         : undefined;
+  const nameError = name.trim() === "" ? "Name is required" : undefined;
 
-  async function handleSubmit(values: { name: string; url: string; category: string; customCategory?: string }) {
+  // Whenever the URL becomes valid (and hasn't been fetched yet),
+  // fetch its <title> and, if the name is still blank, populate it.
+  useEffect(() => {
+    if (urlError || url === lastFetchedUrl) {
+      return;
+    }
+    if (isValidHttpUrl(url)) {
+      fetch(url)
+        .then((res) => res.text())
+        .then((html) => {
+          const m = html.match(/<title>([\s\S]*?)<\/title>/i);
+          let title = m ? decodeHtmlEntities(m[1].trim()) : "";
+          // if it looks bogus, or empty, fallback:
+          if (!title || /just a moment/i.test(title)) {
+            title = deriveNameFromUrl(url);
+          }
+          setName(title);
+        })
+        .catch(() => {
+          // ALWAYS fallback on network errors
+          setName(deriveNameFromUrl(url));
+        })
+        .finally(() => {
+          setLastFetchedUrl(url);
+        });
+    }
+  }, [url, urlError, lastFetchedUrl]);
+
+  async function handleSubmit(values: { url: string; name: string; category: string; customCategory?: string }) {
     setShowErrors(true);
     if (nameError || urlError) {
       return;
@@ -61,8 +138,8 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
       values.category === "custom" ? values.customCategory?.trim() || "uncategorized" : values.category;
 
     const newSite: Site = {
-      name: values.name.trim(),
       url: values.url.trim(),
+      name: values.name.trim(),
       category: finalCategory,
     };
 
@@ -98,14 +175,17 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
       }));
 
     await saveSites(updated);
+    setCategories(getCategories(updated));
 
     if (again) {
       // reset form fields
-      setName("");
       setUrl("https://");
-      setCategory("uncategorized");
-      setCustomCategory("");
+      setName("");
+      setCategory(finalCategory);
+      setCustomCategory(finalCategory === "custom" ? customCategory.trim() : "");
       setShowErrors(false);
+      // reset fetch tracker so we can fetch new titles
+      setLastFetchedUrl("");
       return;
     }
 
@@ -125,17 +205,6 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
       }
     >
       <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="My Favorite Site"
-        value={name}
-        onChange={(v) => {
-          setName(v);
-          setShowErrors(false);
-        }}
-        error={showErrors ? nameError : undefined}
-      />
-      <Form.TextField
         id="url"
         title="URL"
         placeholder="https://"
@@ -145,6 +214,17 @@ export function AddSitesForm({ onDone, initialValues }: AddSitesFormProps) {
           setShowErrors(false);
         }}
         error={showErrors ? urlError : undefined}
+      />
+      <Form.TextField
+        id="name"
+        title="Name"
+        placeholder="Site title (auto‐fetched)"
+        value={name}
+        onChange={(v) => {
+          setName(v);
+          setShowErrors(false);
+        }}
+        error={showErrors ? nameError : undefined}
       />
       <Form.Dropdown id="category" title="Category" value={category} onChange={setCategory}>
         <Form.Dropdown.Section title="Default">

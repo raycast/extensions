@@ -1,29 +1,25 @@
 import { LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { parseStringPromise, Builder } from "xml2js";
 import type { Site } from "./types";
 
 const STORAGE_KEY = "sitesXml";
 
-/**
- * Escape XML special characters in a string.
- */
-function escapeXML(str: string): string {
-  return str.replace(/[<>&'"]/g, (c) => {
-    switch (c) {
-      case "<":
-        return "&lt;";
-      case ">":
-        return "&gt;";
-      case "&":
-        return "&amp;";
-      case "'":
-        return "&apos;";
-      case `"`:
-        return "&quot;";
-      default:
-        return c;
-    }
-  });
+const XML_PARSE_OPTIONS = {
+  explicitArray: false, // don’t wrap single items in arrays
+  trim: true, // trim whitespace
+};
+
+/** Decode common HTML entities (named & numeric) */
+export function decodeHtmlEntities(str: string): string {
+  return str
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/&#x([0-9A-Fa-f]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
 }
 
 /**
@@ -31,44 +27,61 @@ function escapeXML(str: string): string {
  * Omits <category> if the site is "uncategorized".
  */
 export function sitesToXml(sites: Site[]): string {
-  const body = sites
-    .map((s) => {
-      const lines = [`  <site>`, `    <name>${escapeXML(s.name)}</name>`, `    <url>${escapeXML(s.url)}</url>`];
+  // 1) build a plain JS structure that xml2js will turn into XML
+  const payload = {
+    site: sites.map((s) => {
+      // only emit <category> if not 'uncategorized'
+      const obj: Site = { name: s.name, url: s.url };
       if (s.category && s.category !== "uncategorized") {
-        lines.push(`    <category>${escapeXML(s.category)}</category>`);
+        obj.category = s.category;
       }
-      lines.push(`  </site>`);
-      return lines.join("\n");
-    })
-    .join("\n");
+      return obj;
+    }),
+  };
 
-  return `<?xml version="1.0"?>\n<sites>\n${body}\n</sites>`;
+  // 2) configure a Builder with a root element <sites> and an XML decl
+  const builder = new Builder({
+    rootName: "sites",
+    xmldec: { version: "1.0", encoding: "UTF-8" },
+    renderOpts: { pretty: true, indent: "  ", newline: "\n" },
+  });
+
+  // 3) serialize and return
+  return builder.buildObject(payload);
 }
 
 /**
  * Parse an XML string into an array of Site objects.
  * Blank or missing <category> yields "uncategorized".
  */
-export function parseSitesXml(xml: string): Site[] {
-  const siteBlocks = Array.from(xml.matchAll(/<site>([\s\S]*?)<\/site>/g));
-  return siteBlocks.map((m) => {
-    const block = m[1];
-    const nameMatch = block.match(/<name>(.*?)<\/name>/s);
-    const urlMatch = block.match(/<url>(.*?)<\/url>/s);
-    const catMatch = block.match(/<category>(.*?)<\/category>/s);
-    const name = nameMatch?.[1].trim() || "";
-    const url = urlMatch?.[1].trim() || "";
-    const categoryRaw = catMatch?.[1].trim() || "";
-    const category = categoryRaw || "uncategorized";
-    return { name, url, category };
-  });
+export async function parseSitesXml(xml: string): Promise<Site[]> {
+  // 1) parse into a JS object
+  const parsed = await parseStringPromise(xml, XML_PARSE_OPTIONS);
+
+  // 2) find the <site> nodes (could be one or many)
+  const raw = parsed.sites?.site;
+  if (!raw) {
+    return [];
+  }
+  const nodes = Array.isArray(raw) ? raw : [raw];
+
+  // 3) map into your Site type, defaulting missing/empty category
+  return nodes.map((node: Site) => ({
+    name: node.name ?? "",
+    url: node.url ?? "",
+    category: node.category?.trim() || "uncategorized",
+  }));
 }
 
 /**
  * Return a new array of sites sorted alphabetically by name.
  */
-export function sortSites(sites: Site[]): Site[] {
-  return sites.slice().sort((a, b) => a.name.localeCompare(b.name));
+function sortSites(input: unknown): Site[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+  // now we know it’s a Site[]
+  return (input as Site[]).slice().sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
@@ -76,31 +89,27 @@ export function sortSites(sites: Site[]): Site[] {
  * Excludes "uncategorized".
  */
 export function getCategories(sites: Site[]): string[] {
-  return Array.from(new Set(sites.map((s) => s.category).filter((c) => c && c !== "uncategorized"))).sort();
+  return Array.from(
+    new Set(sites.map((s) => s.category).filter((c): c is string => c !== undefined && c !== "uncategorized")),
+  ).sort();
 }
 
 /**
  * Load sites from LocalStorage, initializing to empty XML if needed.
  */
 export async function loadSites(): Promise<Site[]> {
-  // getItem<T>() returns Promise<T | null | undefined>, so coerce undefined → null
-  const raw = (await LocalStorage.getItem<string>(STORAGE_KEY)) ?? null;
-
-  if (!raw || !raw.trim().startsWith("<?xml")) {
-    const empty = `<?xml version="1.0"?><sites></sites>`;
-    await LocalStorage.setItem(STORAGE_KEY, empty).catch((error) =>
-      showFailureToast(error, { title: "Failed to initialize sites storage" }),
-    );
+  const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
+  if (!raw) {
     return [];
   }
 
   try {
-    const parsed = parseSitesXml(raw);
-    return sortSites(parsed);
-  } catch (e) {
-    console.error("loadSites: parse error", e);
-    const empty = `<?xml version="1.0"?><sites></sites>`;
-    await LocalStorage.setItem(STORAGE_KEY, empty).catch(() => {});
+    // parseSitesXml always returns Site[], but might throw
+    return await parseSitesXml(raw);
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to load sites" });
+    // reset storage to an empty list so next time it's clean
+    await LocalStorage.setItem(STORAGE_KEY, sitesToXml([]));
     return [];
   }
 }
