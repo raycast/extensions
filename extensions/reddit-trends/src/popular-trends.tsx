@@ -2,6 +2,7 @@
 /** @jsxFrag React.Fragment */
 import React, { useState, useEffect } from "react";
 import { ActionPanel, Action, List, showToast, Toast, Icon, LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 interface RedditPost {
   id: string;
@@ -127,7 +128,9 @@ export default function Command() {
       });
 
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        showFailureToast(new Error(`Error ${response.status}: ${response.statusText}`));
+        setIsLoading(false);
+        return;
       }
 
       interface RedditApiResponse {
@@ -149,7 +152,9 @@ export default function Command() {
       const data = (await response.json()) as RedditApiResponse;
 
       if (!data.data?.children?.length) {
-        throw new Error(`No posts found for r/${subredditName}`);
+        showFailureToast(new Error(`No posts found for r/${subredditName}`));
+        setIsLoading(false);
+        return;
       }
 
       const redditPosts = data.data.children.map((child) => {
@@ -306,7 +311,7 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action
-                    title="Load r/LandscapePhotography"
+                    title="Load R/landscapephotography"
                     onAction={() => fetchPosts("LandscapePhotography", timeRange)}
                   />
                 </ActionPanel>
@@ -319,7 +324,7 @@ export default function Command() {
               icon={subreddit === "popular" ? Icon.Checkmark : Icon.Circle}
               actions={
                 <ActionPanel>
-                  <Action title="Load r/Popular" onAction={() => fetchPosts("popular", timeRange)} />
+                  <Action title="Load R/popular" onAction={() => fetchPosts("popular", timeRange)} />
                 </ActionPanel>
               }
             />
@@ -338,8 +343,8 @@ export default function Command() {
                 ]}
                 actions={
                   <ActionPanel>
-                    <Action title={`Load r/${item}`} onAction={() => fetchPosts(item, timeRange)} />
-                    <Action title="Remove From History" icon={Icon.Trash} onAction={() => removeFromHistory(item)} />
+                    <Action title={`Load R/${item}`} onAction={() => fetchPosts(item, timeRange)} />
+                    <Action title="Remove from History" icon={Icon.Trash} onAction={() => removeFromHistory(item)} />
                   </ActionPanel>
                 }
               />
@@ -375,6 +380,7 @@ export default function Command() {
         <List.EmptyView
           title={error ? `Error loading r/${subreddit}` : `No posts found for r/${subreddit}`}
           description={error ? error.message : "Try changing the subreddit or time range"}
+          icon={error ? Icon.ExclamationMark : Icon.MagnifyingGlass}
         />
       )}
     </List>

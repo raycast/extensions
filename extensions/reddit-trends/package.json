@@ -13,6 +13,7 @@
     {
       "name": "popular-trends",
       "title": "Reddit Trends",
+      "subtitle": "Reddit",
       "description": "Browse trending posts from Reddit",
       "mode": "view"
     }
