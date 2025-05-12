@@ -34,6 +34,7 @@
     {
       "name": "vs-code-quicklinks",
       "title": "VS Code Quicklinks",
+      "subtitle": "Create",
       "description": "Create VS Code quicklinks for your projects.",
       "mode": "view"
     }
