@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [Improve] - {PR_MERGE_DATE}
+## [Improve] - 2025-05-12
 
 - support AI Extension
 
