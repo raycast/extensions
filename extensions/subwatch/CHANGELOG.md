@@ -1,6 +1,6 @@
 # Subwatch Changelog
 
-## ✨ [Initial Version] - {PR_MERGE_DATE}
+## ✨ [Initial Version] - 2025-05-12
 
 Initial version code. Existing features:
 
