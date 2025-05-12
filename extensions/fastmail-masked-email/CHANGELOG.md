@@ -1,6 +1,6 @@
 # Fastmail Masked Email Changelog
 
-## Add Domain Field - {PR_MERGE_DATE}
+## Add Domain Field - 2025-05-12
 
 - Added domain field to the create command to allow users to specify a domain
   when creating a new masked email.
