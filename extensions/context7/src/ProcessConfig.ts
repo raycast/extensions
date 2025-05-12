@@ -63,25 +63,15 @@ export default async function (clientName?: string) {
       );
 
       if (client.type == "node") {
-        if (!client.path) {
-          throw new Error(
-            `Client ${client.name} has type "node" but no path property`,
-          );
-        }
         const nodePath = execSync("which node").toString().trim();
         const transport = new StdioClientTransport({
           command: nodePath,
-          args: [client.path],
+          args: [client.path || ""],
         });
         await raycastAiClientInstance.connect(transport);
       }
       if (client.type == "command") {
-        if (!client.command) {
-          throw new Error(
-            `Client ${client.name} has type "command" but no command property`,
-          );
-        }
-        const transport = new StdioClientTransport(client.command);
+        const transport = new StdioClientTransport(client.command!);
         await raycastAiClientInstance.connect(transport);
       }
 

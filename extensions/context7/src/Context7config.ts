@@ -7,11 +7,7 @@ export type ClientInfo = {
   };
   name: string;
   ready: boolean;
-} & (
-  | { type: "command"; command: { command: string; args: string[] } }
-  | { type: "node"; path: string }
-  | { type: string }
-);
+};
 
 export function getClients(): ClientInfo[] {
   // Hardcoded configuration for the context7 MCP server

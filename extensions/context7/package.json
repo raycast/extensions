@@ -18,7 +18,7 @@
       "title": "About Context7",
       "description": "Get information about Context7.",
       "mode": "view",
-      "path": "about-context7.tsx"
+      "path": "about-context7.js"
     }
   ],
   "tools": [
@@ -81,7 +81,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.9.0",
-    "@raycast/api": "^1.90.0",
+    "@raycast/api": "^1.98.0",
     "@raycast/utils": "^1.17.0",
     "zod": "^3.24.1"
   },
