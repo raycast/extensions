@@ -1,6 +1,6 @@
 # Ente Auth Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2025-05-12
 
 - fix variable for assigning user preferred values
 - removed overwrite options as that is done by default now
