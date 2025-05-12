@@ -1,6 +1,6 @@
 # Window Sizer Changelog
 
-## [New Action Icons] - {PR_MERGE_DATE}
+## [New Action Icons] - 2025-05-12
 
 - Added new action icons
 
