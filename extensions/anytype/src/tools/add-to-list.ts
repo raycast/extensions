@@ -9,7 +9,7 @@ type Input = {
 
   /**
    * The unique identifier of the list to add the object to.
-   * This value can be obtained from the `search-anytype` or `search-space` tools by searching for type of `ot-collection`.
+   * This value can be obtained from the `search-anytype` or `search-space` tools by searching for type of 'collection'.
    */
   listId: string;
 

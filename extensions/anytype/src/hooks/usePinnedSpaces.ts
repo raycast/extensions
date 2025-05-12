@@ -1,6 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 import { getSpace } from "../api";
-import { ErrorWithStatus, getPinned, localStorageKeys, removePinned } from "../utils";
+import { errorConnectionMessage, ErrorWithStatus, getPinned, localStorageKeys, removePinned } from "../utils";
 
 export function usePinnedSpaces() {
   const { data, error, isLoading, mutate } = useCachedPromise(
@@ -14,7 +14,9 @@ export function usePinnedSpaces() {
             return response.space;
           } catch (error) {
             const typedError = error as ErrorWithStatus;
-            if (typedError.status === 404 || typedError.status === 410) {
+            if (typedError.message === errorConnectionMessage) {
+              throw error;
+            } else if (typedError.status === 404 || typedError.status === 410) {
               await removePinned(pinned.spaceId, pinned.objectId, key);
             }
             return null;

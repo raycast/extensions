@@ -28,7 +28,7 @@ export function ResolutionList({
           icon={Icon.AppWindow}
           accessories={
             showDeleteAction && resolution.isCustom
-              ? [{ icon: { source: Icon.Trash, tintColor: "secondaryText" }, tooltip: "Delete" }]
+              ? [{ icon: { source: Icon.Trash, tintColor: "secondaryText" }, tooltip: "⌘ ⏎" }]
               : []
           }
           actions={
