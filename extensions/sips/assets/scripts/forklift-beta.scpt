@@ -48,7 +48,7 @@ function requestAutomationPermissionForApplication_(applicationName) {
 	const alert = currentApplication.displayAlert('Permission Needed', { message: 'To use Image Modification on selected images in ' + applicationName + ', you must allow Raycast to control ' + applicationName + ' and System Events in System Settings > Privacy & Security > Automation.\n\nDue to limitations in ForkLift\'s scripting support, you must also allow Raycast to interface with your Mac\'s Accessibility subsystem by enabling it under System Settings > Privacy & Security > Accessibility.', buttons: ['Dismiss', 'Open Privacy Settings']});
 	const btn = alert.buttonReturned;
 	if (btn == 'Open Privacy Settings') {
-		currentApplication.openLocation('x-apple.systempreferences:com.apple.preference.security?Privacy_Automation');
+		currentApplication.openLocation('x-apple.systempreferences:com.apple.preference.security?Privacy');
 	}
 	return btn;
 }
@@ -56,7 +56,7 @@ function requestAutomationPermissionForApplication_(applicationName) {
 function imagePathsForItemsInSelection(selection) {
 	const imagePaths = [];
 	for (const filePath of selection) {
-		const fileExtension = filePath.slice((filePath.lastIndexOf('.') - 1 >>> 0) + 2).toLowerCase();
+		const fileExtension = filePath.slice(filePath.lastIndexOf('.') + 1).toLowerCase();
 		if (supportedTypes[fileExtension]) {
 			imagePaths.push(filePath);
 		}
@@ -152,10 +152,8 @@ function getWindowTarget() {
 /**
  * Gets the paths of all selected items in the frontmost window of ForkLift.
  */
-function getSelectedItems() {
-	const AXForkLift = AXGetElementForApplicationWithId('com.binarynights.ForkLift').deref;
-
-	const focusedElement = AXGetFocusedElementOfApplication(AXForkLift).deref;
+function getSelectedItemsInApplication(AXApplication) {
+	const focusedElement = AXGetFocusedElementOfApplication(AXApplication).deref;
 	const selectedChildren = AXGetSelectedChildrenOfElement(focusedElement).deref;
 
 	const containerURL = getWindowTarget();
@@ -170,8 +168,9 @@ function getSelectedItems() {
 
 function run() {
 	let imagePaths = [];
+	const AXForkLift = AXGetElementForApplicationWithId('com.binarynights.ForkLift').deref;
 	try {
-		let selection = getSelectedItems();
+		let selection = getSelectedItemsInApplication(AXForkLift);
 		if (selection.length > 0) {
 			imagePaths = imagePathsForItemsInSelection(selection)
 			if (imagePaths.length > 0) {
@@ -179,12 +178,11 @@ function run() {
 			}
 		}
 
-		const AXForkLift = AXGetElementForApplicationWithId('com.binarynights.ForkLift').deref;
 		const windows = AXGetWindowsOfApplication(AXForkLift).deref;
 		if (windows.count > 0) {
 			for (let i = 0; i < windows.count; i++) {
 				AXActivateWindowAtIndexInApplication(i, AXForkLift);
-				selection = getSelectedItems();
+				selection = getSelectedItemsInApplication(AXForkLift);
 				if (selection.length > 0) {
 					imagePaths = imagePathsForItemsInSelection(selection);
 					if (imagePaths.length > 0 ) {

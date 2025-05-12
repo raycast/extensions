@@ -53,7 +53,7 @@ function requestAutomationPermissionForApplication_(applicationName) {
 function imagePathsForItemsInSelection(selection) {
 	const imagePaths = [];
 	for (const filePath of selection) {
-		const fileExtension = filePath.slice((filePath.lastIndexOf('.') - 1 >>> 0) + 2).toLowerCase();
+		const fileExtension = filePath.slice(filePath.lastIndexOf('.') + 1).toLowerCase();
 		if (supportedTypes[fileExtension]) {
 			imagePaths.push(filePath);
 		}

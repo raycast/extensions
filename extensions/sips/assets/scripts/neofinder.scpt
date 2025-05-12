@@ -38,7 +38,7 @@ try
 	tell application "NeoFinder" to set selectedItems to finder path of selected items
 	my filterSelection:selectedItems
 on error message number -1743
-	set btn to button returned of (display alert "Permission Needed" message "To use Image Modification on selected images in NeoFinder, you must allow Raycast to control Finder in System Settings > Privacy & Security > Automation." buttons {"Dismiss", "Open Privacy Settings"})
+	set btn to button returned of (display alert "Permission Needed" message "To use Image Modification on selected images in NeoFinder, you must allow Raycast to control NeoFinder in System Settings > Privacy & Security > Automation." buttons {"Dismiss", "Open Privacy Settings"})
 	if btn is "Open Privacy Settings" then
 		open location "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation"
 	end if
