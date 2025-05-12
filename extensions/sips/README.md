@@ -1,6 +1,6 @@
 # Image Modification
 
-![Feature Overview](./assets/hero.png)
+![Feature Overview](./media/hero.png)
 
 Apply filters and transformations to various image formats, and convert between them. Create new images by specifying their dimensions, colors, and patterns. Operate on selected files or on images in the clipboard.
 
