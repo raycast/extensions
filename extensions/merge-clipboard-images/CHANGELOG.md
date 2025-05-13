@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 - Initial release.
 
+## [1.0.2] - 2025-05-13
+### Added
+- Added a preference to enable/disable clearing the clipboard after merge/cancellation.
+
 ## [1.0.1] - 2025-05-11
 ### Changed
 - Clears clipboard after successful image merge or user cancellation to prevent re-merging the same images.

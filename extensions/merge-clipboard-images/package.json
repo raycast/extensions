@@ -73,6 +73,14 @@
           "default": "30",
           "required": true,
           "placeholder": "e.g., 30 or 0"
+        },
+        {
+          "name": "clearClipboardAfterMerge",
+          "type": "checkbox",
+          "label": "Clear Clipboard After Merge",
+          "description": "If checked, the clipboard will be cleared after a successful merge or cancellation.",
+          "default": true,
+          "required": false
         }
       ]
     }
@@ -98,6 +106,6 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "about": "README.md"
 }
