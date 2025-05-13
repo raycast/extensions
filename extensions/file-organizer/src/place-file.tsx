@@ -239,16 +239,12 @@ export default function Command() {
     );
   }
 
-  // Show file name in the navigation title if available
-  const navTitle = selectedFile ? `Organize: ${path.basename(selectedFile)}` : "Organize File";
-
   // Set loading title based on current status
   const loadingTitle = status !== LoadingStatus.READY ? status.toString() : "";
 
   return (
     <List
       isLoading={status !== LoadingStatus.READY && status !== LoadingStatus.ERROR}
-      navigationTitle={navTitle}
       searchBarPlaceholder="Search locations..."
     >
       {status !== LoadingStatus.READY ? (
@@ -259,7 +255,7 @@ export default function Command() {
         />
       ) : (
         <List.Section
-          title="Suggested Locations"
+          title={`Suggested locations for file: ${path.basename(selectedFile ?? "")}`}
           subtitle={locations.length > 0 ? `${locations.length} options` : undefined}
         >
           {locations.map((location) => {
