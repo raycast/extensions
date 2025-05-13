@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Merge Requests Menu Bar] - {PR_MERGE_DATE}
+## [Merge Requests Menu Bar] - 2025-05-13
 
 - Added "My Merge Requests" view
 - Added the ability to filter for labels
