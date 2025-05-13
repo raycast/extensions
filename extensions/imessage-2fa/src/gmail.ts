@@ -263,9 +263,9 @@ export function processGmailContent(
     message_date: date.toISOString(),
     sender: from,
     // Use raw text (subject + best available body) for link detection
-    text: `${subject}\n${textForLinkDetection}`,
+    text: `${subject}\n${textForLinkDetection || ""}`,
     // Use display text (subject + preferred plain/cleaned body) for code detection and UI
-    displayText: `${subject}\n${textForDisplay}`,
+    displayText: `${subject}\n${textForDisplay || ""}`,
     source: "email" as const,
   };
 

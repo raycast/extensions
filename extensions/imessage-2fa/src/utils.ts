@@ -8,6 +8,12 @@ import { LookBackUnitType } from "./types";
  * @see https://github.com/squatto/alfred-imessage-2fa/blob/master/find-messages.php
  */
 export function extractCode(original: string): string | null {
+  // Check for undefined or null input
+  // This prevents 'replaceAll' errors when processing messages with missing displayText
+  if (!original) {
+    return null;
+  }
+
   // remove URLs
   const urlRegex = new RegExp(
     "\\b((https?|ftp|file):\\/\\/|www\\.)[-A-Z0-9+&@#\\/%?=~_|$!:,.;]*[A-Z0-9+&@#\\/%=~_|$]",
@@ -24,11 +30,32 @@ export function extractCode(original: string): string | null {
   if ((m = /^(\d{4,8})(\sis your.*code)/.exec(message)) !== null) {
     code = m[1];
   } else if (
-    (m = /(code\s*:|is\s*:|码|use code|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*(\w{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
-      message
-    )) !== null
+    // Look for the last occurrence of "code: DIGITS" pattern
+    // This helps with cases like "test code: test code: 883848" where we want the last match
+    (m =
+      /(code\s*:|is\s*:|码|use code|passcode\s*:|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
+        message
+      )) !== null
   ) {
-    code = m[2];
+    // Use the helper function to find the last match
+    code = findLastMatchingCode(
+      message,
+      m,
+      /(code\s*:|is\s*:|码|use code|passcode\s*:|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i
+    );
+  } else if (
+    // Modified to match alphanumeric codes
+    (m =
+      /(code\s*:|is\s*:|码|use code|passcode\s*:|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
+        message
+      )) !== null
+  ) {
+    // Use the helper function to find the last match
+    code = findLastMatchingCode(
+      message,
+      m,
+      /(code\s*:|is\s*:|码|use code|passcode\s*:|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i
+    );
   } else {
     // more generic, brute force patterns
     const phoneRegex = new RegExp(
@@ -373,4 +400,36 @@ export function calculateLookBackMinutes(lookBackUnit: LookBackUnitType, lookBac
  */
 export function formatDate(date: Date): string {
   return date.toLocaleString();
+}
+
+/**
+ * Helper function to find the last matching code in a message
+ * @param message - The message to search in
+ * @param initialMatch - The initial regex match
+ * @param pattern - The regex pattern to match
+ * @param digitValidator - Optional function to validate the match
+ * @returns The last matching code
+ */
+function findLastMatchingCode(
+  message: string,
+  initialMatch: RegExpExecArray,
+  pattern: RegExp,
+  digitValidator?: (match: string) => boolean
+): string {
+  let lastMatch = initialMatch;
+  // Get initial code from the match
+  let code = initialMatch[2];
+  let lastIndex = initialMatch.index + initialMatch[0].length; // Fix: Use full match length instead of just +1
+
+  let nextMatch: RegExpExecArray | null;
+  while (
+    (nextMatch = pattern.exec(message.substring(lastIndex))) !== null &&
+    (!digitValidator || digitValidator(nextMatch[2]))
+  ) {
+    lastMatch = nextMatch;
+    code = nextMatch[2]; // Update code with each new match
+    lastIndex += nextMatch.index + nextMatch[0].length; // Fix: Use full match length instead of just +1
+  }
+
+  return code; // Return the last found code
 }

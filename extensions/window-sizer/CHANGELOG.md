@@ -1,47 +1,38 @@
 # Window Sizer Changelog
 
-## [Update] - 2025-04-28
+## [New Action Icons] - 2025-05-12
 
-- Fix: Screenshots and README
+- Added new action icons
 
-## [Update] - 2025-04-28
+## [Fixes] - 2025-05-08
 
-- Feature: Maximize Window
-- Feature: Get Current Size
-- Fix: Position of the window when restoring previous size
-- Fix: Toasts when size exceeds the screen
-- Fix: Toast when adding a size identical to the current size
+- Fixed the delete icon tooltip text on custom size list items
 
-## [Update] - 2025-04-25
+## [Update Extension Icon] - 2025-05-07
 
-- Fixed handling of window size addition when no window is in focus
-- Improved toast notification for Restore Previous Size when no focused window
+- Updated extension icon and screenshots
 
-## [Update] - 2025-04-25
+## [Fixes] - 2025-05-06
 
-- Added loading state to prevent list flicker during data fetching
-- Improved error handling for AppleScript operations
-- Refactored window info retrieval into a shared utility function
-- Enhanced logging messages for better debugging
-- Fixed window size restoration logic
+- Fixed toast text when restoring a window with restricted size
+- Unified toast text style
 
-## [Update] - 2025-04-25
+## [Refactored entirely in Swift] - 2025-05-05
 
-- Improved window positioning logic during resize
-- Enhanced previous window size restoration
+- Fully rewrote the extension in Swift for better maintainability and performance
+- Enhanced Maximize Window to support all connected screens
+- Improved screen edge detection to ensure precise window resizing
+- Various performance and UX improvements
 
-## [Update] - 2025-04-25
+## [New Features & Fixes] - 2025-04-28
 
-- Remove the default size in the add page
-- Fix typo in the add page
-
-## [Update] - 2025-04-25
-
-- Fix toast emoji
+- Enabled maximizing the active window
+- Added support for displaying the current window size
+- Fixed incorrect positioning when restoring a saved size
+- Improved toast behavior when the size exceeds the screen
+- Suppressed redundant toast when saving the same size again
 
 ## [Initial Version] - 2025-04-25
-
-### Features
 
 - First release of Window Sizer
 - Support for quick window resizing to predefined sizes

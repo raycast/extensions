@@ -13,7 +13,7 @@ export default function ResultActions({ result, children }: { result: Record; ch
   return (
     <>
       <ActionPanel.Section title={result.metadata.title}>
-        <Action.OpenInBrowser title="Open in Servicenow" url={url} icon={{ source: "servicenow.svg" }} />
+        <Action.OpenInBrowser title="Open in ServiceNow" url={url} icon={{ source: "servicenow.svg" }} />
         {children}
       </ActionPanel.Section>
       <ActionPanel.Section>

@@ -123,7 +123,7 @@ export default function Tables() {
                   <ActionPanel>
                     <ActionPanel.Section title={table.label}>
                       <Action.OpenInBrowser
-                        title="Open in Servicenow"
+                        title="Open in ServiceNow"
                         url={listUrl}
                         icon={{ source: "servicenow.svg" }}
                       />

@@ -17,6 +17,6 @@ export interface SearchRequest {
 }
 
 export interface SortOptions {
-  property: SortProperty;
+  property_key: SortProperty;
   direction: SortDirection;
 }

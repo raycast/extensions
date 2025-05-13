@@ -452,6 +452,9 @@ export class GitLab {
       throw new Error(`unexpected response ${response.statusText}`);
     }
     logAPI(`write ${url} to ${params.localFilepath}`);
+    if (!response.body) {
+      throw new Error(`response body is null for ${url}`);
+    }
     await streamPipeline(response.body, fs.createWriteStream(params.localFilepath));
     return params.localFilepath;
   }

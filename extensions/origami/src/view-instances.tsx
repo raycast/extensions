@@ -141,7 +141,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { entity?: 
       isLoading={isLoading}
       isShowingDetail
       searchBarPlaceholder={
-        isUsingFieldFilter && selectedFilter ? `Filter by ${selectedFilter.fieldName}...` : "Filter instances..."
+        isUsingFieldFilter && selectedFilter ? `Filter by ${selectedFilter.fieldName}` : "Filter instance by name"
       }
       onSearchTextChange={setSearchText}
       pagination={modifiedPagination}
@@ -184,7 +184,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { entity?: 
             <List.Item
               key={instance.instance_data._id}
               title={{
-                value: instance.instance_data._id,
+                value: instance.instance_data.ui_data.name,
                 tooltip: `Created on ${new Date(instance.instance_data.insertTimestamp).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "short",

@@ -1,6 +1,6 @@
 import { Color, Icon, List } from "@raycast/api";
-import { folderName, enclosingFolderName } from "../utils";
-import { ReactNode } from "react";
+import { folderName, enclosingFolderName, formatDate } from "../utils";
+import { JSX } from "react";
 import { SpotlightSearchResult } from "../types";
 
 interface FolderListSectionProps {
@@ -8,7 +8,7 @@ interface FolderListSectionProps {
   results: SpotlightSearchResult[];
   isShowingDetail: boolean;
   resultIsPinned: (result: SpotlightSearchResult) => boolean;
-  renderActions: (result: SpotlightSearchResult, resultIndex: number) => ReactNode;
+  renderActions: (result: SpotlightSearchResult, resultIndex: number) => JSX.Element;
 }
 
 export function FolderListSection({
@@ -39,20 +39,14 @@ export function FolderListSection({
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="Type" text={result.kMDItemKind} />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Created"
-                    text={result.kMDItemFSCreationDate?.toLocaleString()}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Created" text={formatDate(result.kMDItemFSCreationDate)} />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Modified"
-                    text={result.kMDItemContentModificationDate?.toLocaleString()}
+                    text={formatDate(result.kMDItemContentModificationDate)}
                   />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Last used"
-                    text={result.kMDItemLastUsedDate?.toLocaleString() || "-"}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Last used" text={formatDate(result.kMDItemLastUsedDate)} />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Use count"

@@ -13,14 +13,16 @@ export function buildServiceNowUrl(instanceName: string, relativeUrl: string): s
 
   // Handle special cases
   if (cleanUrl.includes("$knowledge.do")) {
-    const queryString = cleanUrl.split("?")[1];
+    const parts = cleanUrl.split("?");
+    const queryString = parts.length > 1 ? parts[1] : "";
     const queryParams = new URLSearchParams(queryString);
     const query = queryParams.get("query") || "";
     cleanUrl = `kb_knowledge_list.do?sysparm_query=GOTO123TEXTQUERY321=${query}^workflow_state=published^active=true`;
   }
 
   if (cleanUrl.includes("catalog_find.do")) {
-    const queryString = cleanUrl.split("?")[1];
+    const parts = cleanUrl.split("?");
+    const queryString = parts.length > 1 ? parts[1] : "";
     const queryParams = new URLSearchParams(queryString);
     const query = queryParams.get("sysparm_search") || "";
     cleanUrl = `sc_cat_item_list.do?sysparm_query=GOTO123TEXTQUERY321=${query}^active=true`;
@@ -35,7 +37,7 @@ export function buildServiceNowUrl(instanceName: string, relativeUrl: string): s
   }
 
   // If openMode === "sow"
-  const [path, queryString] = cleanUrl.split("?");
+  const [path, queryString = ""] = cleanUrl.split("?");
   const queryParams = new URLSearchParams(queryString);
 
   if (path.endsWith("_list.do")) {
