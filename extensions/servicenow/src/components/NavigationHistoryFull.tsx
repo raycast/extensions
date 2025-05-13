@@ -25,7 +25,7 @@ export default function NavigationHistoryFull() {
     selectedInstance,
     setSelectedInstance,
   } = useInstances();
-  const { isUrlInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
+  const { isInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -148,7 +148,7 @@ export default function NavigationHistoryFull() {
                   },
                 ];
 
-                const favoriteId = isUrlInFavorites(url);
+                const favoriteId = isInFavorites(path);
                 if (favoriteId) {
                   accessories.unshift({
                     icon: { source: Icon.Star, tintColor: Color.Yellow },
@@ -170,7 +170,7 @@ export default function NavigationHistoryFull() {
                       <ActionPanel>
                         <ActionPanel.Section title={historyEntry.title + (description ? ": " + description : "")}>
                           <Action.OpenInBrowser
-                            title="Open in Servicenow"
+                            title="Open in ServiceNow"
                             url={url}
                             icon={{ source: "servicenow.svg" }}
                           />

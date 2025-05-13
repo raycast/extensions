@@ -1,5 +1,6 @@
 import { LaunchProps, LocalStorage, open, showToast, Toast } from "@raycast/api";
 import { Instance } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 export default async (props: LaunchProps) => {
   const { instanceName } = props.arguments;
@@ -13,7 +14,13 @@ export default async (props: LaunchProps) => {
 
   let instance;
   if (instanceName) {
-    const instanceProfiles = JSON.parse(item) as Instance[];
+    let instanceProfiles;
+    try {
+      instanceProfiles = JSON.parse(item) as Instance[];
+    } catch (error) {
+      showFailureToast(error, { title: "Could not parse saved instances" });
+      return;
+    }
     instance = instanceProfiles.find(
       (i: Instance) =>
         i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
@@ -21,7 +28,14 @@ export default async (props: LaunchProps) => {
     );
   } else {
     const selectedInstance = await LocalStorage.getItem<string>("selected-instance");
-    if (selectedInstance) instance = JSON.parse(selectedInstance) as Instance;
+    if (selectedInstance) {
+      try {
+        instance = JSON.parse(selectedInstance) as Instance;
+      } catch (error) {
+        showFailureToast(error, { title: "Could not parse selected instance" });
+        return;
+      }
+    }
   }
 
   if (!instance) {
