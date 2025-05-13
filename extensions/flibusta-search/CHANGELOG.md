@@ -1,6 +1,6 @@
 # Flibusta Search Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-05-13
 
 - Updated the icon to match the favorite icon
 
