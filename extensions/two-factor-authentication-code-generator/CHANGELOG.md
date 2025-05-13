@@ -1,6 +1,6 @@
 # Changelog
 
-## [Add README + Rename Codes] - {PR_MERGE_DATE}
+## [Add README + Rename Codes] - 2025-05-13
 
 - Add a README
 - Add metadata images
