@@ -1,9 +1,10 @@
 // fetchGlucoseData.tsx
-import { List, showToast, Toast, LocalStorage } from "@raycast/api";
+import { List, LocalStorage } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { usDexcomDataURL, dexcomDataURL } from "./constants";
 import { LoadingState } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 interface GlucoseData {
   WT: string;
@@ -29,11 +30,11 @@ export default function FetchGlucoseData() {
           setErrorMessage(
             "Session ID or region not found, please authenticate.",
           );
-          await showToast({
-            style: Toast.Style.Failure,
+          await showFailureToast({
             title: "Session ID or region not found",
             message: "Please authenticate.",
           });
+          setLoadingState(LoadingState.Error);
           return;
         }
 
@@ -57,8 +58,7 @@ export default function FetchGlucoseData() {
         setLoadingState(LoadingState.Success);
       } catch (error) {
         console.error("Failed to fetch glucose data:", error);
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "Error fetching glucose data",
           message: String(error),
         });

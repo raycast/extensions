@@ -7,7 +7,8 @@ import {
   dexcomAuthenticateURL,
   dexcomLoginURL,
 } from "./constants";
-import { showToast, Toast, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export async function authenticateWithDexcom(
   accountName: string,
@@ -40,8 +41,7 @@ export async function authenticateWithDexcom(
     return sessionId;
   } catch (error) {
     console.error("Authentication error:", error);
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast({
       title: "Authentication Failed",
       message: String(error),
     });
