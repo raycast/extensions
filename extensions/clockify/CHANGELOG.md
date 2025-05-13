@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Autofocus description field] - {PR_MERGE_DATE}
+## [Autofocus description field] - 2025-05-13
 
 - Autofocus description field in "Start New Timer" view.
 
