@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "windows-theme",
   "title": "Windows Theme",
-  "description": "Easily toggle your windows theme.",
+  "description": "Easily toggle your windows theme",
   "icon": "theme-icon.png",
   "author": "c0b41",
   "categories": [
@@ -17,12 +17,13 @@
     {
       "name": "toggle-window-theme",
       "title": "Toggle Windows Theme",
-      "description": "This command will toggle your current theme.",
+      "description": "This command will toggle your current theme",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.2"
+    "@raycast/api": "^1.35.2",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
