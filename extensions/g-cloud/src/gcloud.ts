@@ -47,13 +47,11 @@ export async function executeGcloudCommand(
 ) {
   // Validate inputs
   if (!gcloudPath || typeof gcloudPath !== "string") {
-    showFailureToast({
-      title: "Invalid Configuration",
-      message: "Invalid gcloud path: must be a non-empty string",
-    });
-    throw new Error("Invalid gcloud path: must be a non-empty string");
+    console.error("Invalid gcloud path, trying to use default 'gcloud' command");
+    gcloudPath = "gcloud";
   }
 
+  // Check if command is valid
   if (!command || typeof command !== "string") {
     showFailureToast({
       title: "Invalid Command",
@@ -74,7 +72,35 @@ export async function executeGcloudCommand(
       effectiveTimeout = 45000; // 45 seconds for VM operations
     }
 
-    const fullCommand = `${gcloudPath} ${command}${projectFlag} --format=json`;
+    // Try different paths for gcloud
+    const possiblePaths = [
+      gcloudPath,
+      "/usr/local/bin/gcloud",
+      "/opt/homebrew/bin/gcloud",
+      "/usr/bin/gcloud",
+      "gcloud",
+    ];
+
+    // Try to find first working gcloud path
+    let workingPath = "";
+    for (const path of possiblePaths) {
+      try {
+        // Just check if the command exists without executing anything significant
+        await execPromise(`${path} --version`);
+        workingPath = path;
+        console.log(`Found working gcloud at: ${workingPath}`);
+        break;
+      } catch (error) {
+        console.log(`Could not find gcloud at: ${path}`);
+        continue;
+      }
+    }
+
+    if (!workingPath) {
+      throw new Error("Could not find gcloud in any standard location. Please install it or set the correct path.");
+    }
+
+    const fullCommand = `${workingPath} ${command}${projectFlag} --format=json`;
     const cacheKey = fullCommand;
 
     const pendingRequest = pendingRequests.get(cacheKey);

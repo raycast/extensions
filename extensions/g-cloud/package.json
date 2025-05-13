@@ -62,6 +62,62 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "addRole",
+      "title": "Add IAM Role",
+      "description": "Add an IAM role to a user or service account",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "principal",
+          "type": "string",
+          "placeholder": "User or service account email",
+          "required": true
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "placeholder": "Role name or ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "removeRole",
+      "title": "Remove IAM Role",
+      "description": "Remove an IAM role from a user or service account",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "principal",
+          "type": "string",
+          "placeholder": "User or service account email",
+          "required": true
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "placeholder": "Role name or ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "listRoles",
+      "title": "List IAM Roles",
+      "description": "List all IAM roles for a user or service account",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "principal",
+          "type": "string",
+          "placeholder": "User or service account email",
+          "required": true
+        }
+      ]
+    }
+  ],
   "preferences": [
     {
       "name": "gcloudPath",
@@ -75,7 +131,9 @@
   "dependencies": {
     "@raycast/api": "^1.55.2",
     "@raycast/utils": "^1.9.0",
-    "dotenv": "^16.4.7"
+    "@raycast/ai": "^1.0.0",
+    "dotenv": "^16.4.7",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

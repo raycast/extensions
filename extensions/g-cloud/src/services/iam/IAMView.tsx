@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { IAMService, IAMPrincipal, IAMRole } from "./IAMService";
+import { IAMAIService } from "./IAMAIService";
 import { showFailureToast } from "@raycast/utils";
 import { predefinedRoles } from "../../utils/iamRoles";
 import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
@@ -34,6 +35,7 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
   const { push, pop } = useNavigation();
 
   const iamService = useMemo(() => new IAMService(gcloudPath, projectId), [gcloudPath, projectId]);
+  const iamAIService = useMemo(() => new IAMAIService(iamService, projectId), [iamService, projectId]);
 
   const rolesByService = useMemo(() => {
     const services: Record<string, { title: string; roles: { value: string; title: string }[] }> = {};
@@ -426,9 +428,73 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
     }
   }
 
+  async function showAIExplanation(role: IAMRole) {
+    const loadingToast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Getting role explanation...",
+    });
+
+    try {
+      const explanation = await iamAIService.explainRoleAccess(role.role);
+      loadingToast.hide();
+
+      push(
+        <Detail
+          navigationTitle={`Role Explanation: ${role.title}`}
+          markdown={`# ${role.title}\n\n${explanation}`}
+          actions={
+            <ActionPanel>
+              <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
+            </ActionPanel>
+          }
+        />,
+      );
+    } catch (error) {
+      loadingToast.hide();
+      showFailureToast(error);
+    }
+  }
+
+  async function showRoleSuggestions(principal: IAMPrincipal) {
+    const loadingToast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Getting role suggestions...",
+    });
+
+    try {
+      const suggestedRoles = await iamAIService.suggestRoles(principal);
+      loadingToast.hide();
+
+      const suggestions = suggestedRoles.map((roleId) => ({
+        roleId,
+        info: predefinedRoles[roleId] || { title: roleId, description: "", service: "Unknown" },
+      }));
+
+      push(
+        <Detail
+          navigationTitle={`Suggested Roles for ${principal.id}`}
+          markdown={`# Suggested Roles for ${principal.id}\n\n${suggestions
+            .map(
+              (s) =>
+                `## ${s.info.title}\n\n**Role ID:** \`${s.roleId}\`\n\n${s.info.description || "No description available."}\n\n`,
+            )
+            .join("")}`}
+          actions={
+            <ActionPanel>
+              <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
+              <Action title="Add Role" icon={Icon.Plus} onAction={() => showAddRoleForm(principal)} />
+            </ActionPanel>
+          }
+        />,
+      );
+    } catch (error) {
+      loadingToast.hide();
+      showFailureToast(error);
+    }
+  }
+
   function showPrincipalDetails(principal: IAMPrincipal) {
     let markdown = `# ${principal.displayName}: ${principal.id}\n\n`;
-
     markdown += `## Roles\n\n`;
 
     principal.roles.forEach((role) => {
@@ -472,7 +538,29 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
         actions={
           <ActionPanel>
             <Action title="Add Role" icon={Icon.Plus} onAction={() => showAddRoleForm(principal)} />
+            <Action
+              title="Get Role Suggestions"
+              icon={Icon.LightBulb}
+              onAction={() => showRoleSuggestions(principal)}
+            />
             <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchIAMPolicy} />
+            <ActionPanel.Submenu title="Role Actions" icon={Icon.Gear}>
+              {principal.roles.map((role) => (
+                <ActionPanel.Section key={role.role} title={role.title}>
+                  <Action
+                    title="Explain Role Access"
+                    icon={Icon.QuestionMark}
+                    onAction={() => showAIExplanation(role)}
+                  />
+                  <Action
+                    title="Remove Role"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() => removeMember(principal, role)}
+                  />
+                </ActionPanel.Section>
+              ))}
+            </ActionPanel.Submenu>
           </ActionPanel>
         }
       />,

@@ -12,7 +12,8 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { push } = useNavigation();
-  const GCLOUD_PATH = getPreferenceValues<ExtensionPreferences>().gcloudPath;
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const GCLOUD_PATH = preferences.gcloudPath || "gcloud";
 
   useEffect(() => {
     loadLastUsedProject();
