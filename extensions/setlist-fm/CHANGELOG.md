@@ -1,6 +1,6 @@
 # setlist.fm Changelog
 
-## [🎂 Initial Version] - {PR_MERGE_DATE}
+## [🎂 Initial Version] - 2025-05-13
 
 - Search for artists
 - View setlists
