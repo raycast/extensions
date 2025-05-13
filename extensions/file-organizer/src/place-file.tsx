@@ -5,8 +5,7 @@ import { suggestLocations } from "./utils/locationSuggester";
 import { moveFile } from "./utils/fileOperations";
 import { LocationSuggestion } from "./utils/types";
 import path from "path";
-import { runAppleScript } from "run-applescript";
-import { showFailureToast } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 // Status enum to provide more granular loading states
 enum LoadingStatus {
