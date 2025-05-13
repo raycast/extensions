@@ -5,6 +5,9 @@
   "description": "Manage your Obsidian Tasks through Raycast",
   "icon": "command-icon.png",
   "author": "ozencb",
+  "contributors": [
+    "elfitaflores"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity"
@@ -92,6 +95,15 @@
       "default": false,
       "required": false,
       "label": "Sort by priority"
+    },
+    {
+      "name": "getOnlyCurrent",
+      "title": "Get Only Current Tasks",
+      "description": "Include only tasks with due or scheduled date before tomorrow",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Get only current tasks"
     },
     {
       "name": "maxMenubarDescriptionLength",
