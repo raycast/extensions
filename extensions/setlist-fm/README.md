@@ -1,4 +1,4 @@
-# Setlist.fm
+# setlist.fm
 
 Lookup setlists on setlist.fm
 
