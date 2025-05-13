@@ -413,9 +413,9 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "apify",
     title: "Apify",
-    description: "A Model Context Protocol server for Apify, enabling AI assistants to interact with Apify's web scraping and automation platform. This server provides tools to manage actors, runs, and datasets through Large Language Models.",
-    icon: "https://svgl.app/library/apify.svg",
-    homepage: "https://github.com/apify/apify-mcp-server",
+    description: "A Model Context Protocol (MCP) server for Apify enabling AI agents to use 5,000+ ready-made Actors for use cases such as extracting data from websites, social media, search engines, online maps, and more.",
+    icon: "http://apify.com/ext/apify-symbol-512px.svg",
+    homepage: "https://mcp.apify.com",
     configuration: {
       command: "npx",
       args: ["-y", "@Apify/mcp-server"],
