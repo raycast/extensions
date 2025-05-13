@@ -1,6 +1,6 @@
 # ServiceNow Extension Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-05-13
 
 - Added a new command for admins to **Search by Sys_ID**, allowing to search for a Sys_ID in the selected instance, or in any matching instance from the profiles if no instance is provided.
 - Added a new Open Mode preference to control how ServiceNow content is opened when using the extension.
