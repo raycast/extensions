@@ -5,7 +5,7 @@ import { exec } from "child_process";
 const SCSELECT = "/usr/sbin/scselect";
 
 function parseLocations(output: string): { name: string; active: boolean }[] {
-  const lines = output.split("\n").filter(line => line.trim().length > 0);
+  const lines = output.split("\n").filter((line) => line.trim().length > 0);
   const locations: { name: string; active: boolean }[] = [];
   for (const line of lines) {
     const match = line.match(/(\*?)\s*[A-Fa-f0-9-]+\s+\((.+?)\)/);
@@ -67,7 +67,11 @@ export default function Command() {
   };
 
   if (error) {
-    return <List isLoading={false}><List.EmptyView title="Error" description={error} /></List>;
+    return (
+      <List isLoading={false}>
+        <List.EmptyView title="Error" description={error} />
+      </List>
+    );
   }
 
   return (
@@ -83,9 +87,7 @@ export default function Command() {
           accessories={[{ text: loc.active ? "Active" : "" }]}
           actions={
             <ActionPanel>
-              {!loc.active && (
-                <Action title={`Switch to ${loc.name}`} onAction={() => switchLocation(loc.name)} />
-              )}
+              {!loc.active && <Action title={`Switch to ${loc.name}`} onAction={() => switchLocation(loc.name)} />}
               <Action title="Refresh" onAction={fetchLocations} />
             </ActionPanel>
           }
