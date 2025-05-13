@@ -1,7 +1,17 @@
 import { getPreferenceValues } from "@raycast/api";
-import { getObjectWithoutMappedDetails } from "../api";
-import { Property, RawSpaceObject, SortProperty, SpaceObject } from "../models";
-import { colorMap, getIconWithFallback } from "../utils";
+import { getObjectWithoutMappedProperties } from "../api";
+import {
+  BodyFormat,
+  PropertyFormat,
+  PropertyWithValue,
+  RawSpaceObject,
+  RawSpaceObjectWithBody,
+  SortProperty,
+  SpaceObject,
+  SpaceObjectWithBody,
+} from "../models";
+import { bundledPropKeys, getIconWithFallback } from "../utils";
+import { mapTag } from "./properties";
 import { mapType } from "./types";
 
 /**
@@ -18,13 +28,15 @@ export async function mapObjects(objects: RawSpaceObject[]): Promise<SpaceObject
         icon: await getIconWithFallback(object.icon, object.layout, object.type),
         name: object.name || `${object.snippet.split("\n")[0]}...` || "Untitled",
         type: await mapType(object.type),
-        properties: object.properties?.filter((property) => {
-          if (sort === SortProperty.Name) {
-            // When sorting by name, keep the 'LastModifiedDate' property for tooltip purposes
-            return property.id === SortProperty.LastModifiedDate;
-          }
-          return property.id === sort;
-        }),
+        properties: await Promise.all(
+          (object.properties?.filter((property) => {
+            if (sort === SortProperty.Name) {
+              // When sorting by name, keep the 'LastModifiedDate' property for tooltip purposes
+              return property.key === SortProperty.LastModifiedDate;
+            }
+            return property.key === sort || property.key === bundledPropKeys.source; // keep source to open bookmarks in browser
+          }) || []) as PropertyWithValue[],
+        ),
       };
     }),
   );
@@ -33,102 +45,97 @@ export async function mapObjects(objects: RawSpaceObject[]): Promise<SpaceObject
 /**
  * Map raw `SpaceObject` item into display-ready data, including details, icons, etc.
  */
-export async function mapObject(object: RawSpaceObject): Promise<SpaceObject> {
+export async function mapObject(
+  object: RawSpaceObject | RawSpaceObjectWithBody,
+): Promise<SpaceObject | SpaceObjectWithBody> {
   const icon = await getIconWithFallback(object.icon, object.layout, object.type);
 
   const mappedProperties = await Promise.all(
     (object.properties || []).map(async (property) => {
-      let mappedProperty: Property = {
+      let mappedProperty: PropertyWithValue = {
         id: property.id,
-        name: property.name,
+        key: property.key,
+        name: property.name || "Untitled",
         format: property.format,
       };
 
       switch (property.format) {
-        case "text":
+        case PropertyFormat.Text:
           mappedProperty = {
             ...mappedProperty,
             text: typeof property.text === "string" ? property.text.trim() : "",
           };
           break;
-        case "number":
+        case PropertyFormat.Number:
           mappedProperty = {
             ...mappedProperty,
             number: property.number !== undefined && property.number !== null ? property.number : 0,
           };
           break;
-        case "select":
+        case PropertyFormat.Select:
           if (property.select) {
             mappedProperty = {
               ...mappedProperty,
-              select: {
-                id: property.select.id || "",
-                name: property.select.name || "",
-                color: colorMap[property.select.color] || property.select.color,
-              },
+              select: mapTag(property.select),
             };
           }
           break;
-        case "multi_select":
+        case PropertyFormat.MultiSelect:
           if (property.multi_select) {
             mappedProperty = {
               ...mappedProperty,
-              multi_select: property.multi_select.map((tag) => ({
-                id: tag.id || "",
-                name: tag.name || "",
-                color: colorMap[tag.color] || tag.color,
-              })),
+              multi_select: property.multi_select.map((tag) => mapTag(tag)),
             };
           }
           break;
-        case "date":
+        case PropertyFormat.Date:
           mappedProperty = {
             ...mappedProperty,
             date: property.date ? new Date(property.date).toISOString() : "",
           };
           break;
-        case "file":
-          if (property.file) {
+        case PropertyFormat.Files:
+          if (property.files) {
             mappedProperty = {
               ...mappedProperty,
-              file: await mapObjectWithoutDetails(object.space_id, property.file),
+              files: await mapObjectWithoutProperties(object.space_id, property.files),
             };
           }
           break;
-        case "checkbox":
+        case PropertyFormat.Checkbox:
           mappedProperty = {
             ...mappedProperty,
             checkbox: property.checkbox || false,
           };
           break;
-        case "url":
+        case PropertyFormat.Url:
           mappedProperty = {
             ...mappedProperty,
             url: typeof property.url === "string" ? property.url.trim() : "",
           };
           break;
-        case "email":
+        case PropertyFormat.Email:
           mappedProperty = {
             ...mappedProperty,
             email: typeof property.email === "string" ? property.email.trim() : "",
           };
           break;
-        case "phone":
+        case PropertyFormat.Phone:
           mappedProperty = {
             ...mappedProperty,
             phone: typeof property.phone === "string" ? property.phone.trim() : "",
           };
           break;
-        case "object":
-          if (property.object) {
+        case PropertyFormat.Objects:
+          if (property.objects) {
             mappedProperty = {
               ...mappedProperty,
-              object: await mapObjectWithoutDetails(object.space_id, property.object),
+              objects: await mapObjectWithoutProperties(object.space_id, property.objects),
             };
           }
           break;
         default:
-          console.warn(`Unknown property format: ${property.format}`);
+          console.warn(`Unknown property format: '${property.format}' for property '${property.key}'`);
       }
 
       return mappedProperty;
@@ -138,22 +145,18 @@ export async function mapObject(object: RawSpaceObject): Promise<SpaceObject> {
   return {
     ...object,
     icon,
-    name: object.name || `${object.snippet.split("\n")[0]}...` || "Untitled",
+    name: object.name?.trim() || `${object.snippet.split("\n")[0]}...` || "Untitled",
     type: await mapType(object.type),
     properties: mappedProperties,
   };
 }
 
-export async function mapObjectWithoutDetails(spaceId: string, object: SpaceObject[]): Promise<SpaceObject[]> {
+export async function mapObjectWithoutProperties(spaceId: string, object: string[]): Promise<SpaceObject[]> {
   const rawItems = Array.isArray(object) ? object : [object];
   return await Promise.all(
     rawItems.map(async (item) => {
       if (typeof item === "string") {
-        const fetched = await getObjectWithoutMappedDetails(spaceId, item);
-        if (!fetched) {
-          throw new Error(`getRawObject returned null for item ${item}`);
-        }
-        return fetched;
+        return await getObjectWithoutMappedProperties(spaceId, item, BodyFormat.Markdown);
       } else {
         return item;
       }

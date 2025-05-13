@@ -56,7 +56,7 @@ export default function Command() {
   const data =
     messageSource === "imessage"
       ? preferences.enabledSources !== "email"
-        ? messageData?.map((m) => ({ ...m, source: "imessage" as const })) || []
+        ? messageData?.map((m) => ({ ...m, source: "imessage" as const, displayText: m.text })) || []
         : []
       : messageSource === "email"
       ? preferences.enabledSources !== "imessage"
@@ -65,7 +65,7 @@ export default function Command() {
       : [
           // When showing all sources, combine and sort by date
           ...(preferences.enabledSources !== "email"
-            ? messageData?.map((m) => ({ ...m, source: "imessage" as const })) || []
+            ? messageData?.map((m) => ({ ...m, source: "imessage" as const, displayText: m.text })) || []
             : []),
           ...(preferences.enabledSources !== "imessage"
             ? emailData?.map((m) => ({ ...m, source: "email" as const })) || []
@@ -131,7 +131,10 @@ export default function Command() {
     let mostRecentCodeTime = 0;
 
     if (data.length > 0) {
-      mostRecentWithCode = data.find((message) => extractCode(message.displayText));
+      // Filter out messages without displayText before checking for codes
+      mostRecentWithCode = data
+        .filter((message) => message.displayText)
+        .find((message) => extractCode(message.displayText));
       if (mostRecentWithCode) {
         mostRecentCodeTime = new Date(mostRecentWithCode.message_date).getTime();
       }
@@ -189,7 +192,7 @@ export default function Command() {
 
   // When rendering the UI, check if verification links are enabled
   const hasCodesOrLinks =
-    data.some((msg) => extractCode(msg.displayText)) ||
+    data.filter((msg) => msg.displayText).some((msg) => extractCode(msg.displayText)) ||
     (verificationLinks.length > 0 && preferences.enableVerificationLinks !== false);
 
   return (
@@ -218,18 +221,20 @@ export default function Command() {
             </List.Section>
           )}
 
-          {data.some((msg) => extractCode(msg.displayText)) && (
+          {data.filter((msg) => msg.displayText).some((msg) => extractCode(msg.displayText)) && (
             <List.Section title="Authentication Codes">
-              {data.map((message) => {
-                const code = extractCode(message.displayText);
-                if (!code) {
-                  // Remove debug logging that was causing excessive console output
-                  return null;
-                }
+              {data
+                .filter((msg) => msg.displayText)
+                .map((message) => {
+                  const code = extractCode(message.displayText);
+                  if (!code) {
+                    // Remove debug logging that was causing excessive console output
+                    return null;
+                  }
 
-                const itemId = `${message.source}-${message.guid}`;
-                return <MessageItem key={itemId} id={itemId} message={message} code={code} />;
-              })}
+                  const itemId = `${message.source}-${message.guid}`;
+                  return <MessageItem key={itemId} id={itemId} message={message} code={code} />;
+                })}
             </List.Section>
           )}
         </>

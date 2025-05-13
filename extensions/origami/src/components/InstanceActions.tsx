@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, launchCommand, LaunchType, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  launchCommand,
+  LaunchType,
+  Toast,
+} from "@raycast/api";
 import { toggleInstanceArchive } from "../services/archiveService";
 import { deleteInstance } from "../services/deleteService";
 import { Field, FieldGroup, Instance } from "../types";
@@ -112,6 +122,12 @@ export function InstanceActions({
           icon={Icon.Plus}
           onAction={() => launchCommand({ name: "create-instance", type: LaunchType.UserInitiated })}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
+        />
+        <Action.OpenInBrowser
+          title="Edit Instance in Browser"
+          icon={Icon.Pencil}
+          url={`https://${getPreferenceValues<Preferences>().organization}.origami.ms/${instanceData?.ui_data.url}`}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
         />
         <Action
           title={instanceData?.archived ? "Unarchive Instance" : "Archive Instance"}

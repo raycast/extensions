@@ -1,5 +1,13 @@
 # Mail Changelog
 
+## [Fix] - 2025-05-12
+
+- "Paste Latest OTP Code" now correctly gets the latest OTP code across multiple mail accounts.
+
+## [New Feature] - 2025-04-30
+
+- Add "Paste Latest OTP Code" command
+
 ## [New Feature] - 2025-04-07
 
 - Add russian aliases for folders

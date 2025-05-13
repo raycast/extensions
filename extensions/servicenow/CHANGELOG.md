@@ -11,6 +11,23 @@
 - Replaced browser-based commands with AppleScripts so that the Raycast Browser extension is no longer required.
 - Fixed an issue with displaying favorites, improving overall system stability and responsiveness.
 
+## [New Commands and Extension Preferences] - 2025-04-27
+
+- Added a new command for admins to **Search by Sys_ID**, allowing to search for a Sys_ID in the selected instance, or in any matching instance from the profiles if no instance is provided.
+- Added a new Open Mode preference to control how ServiceNow content is opened when using the extension.
+
+## [Changed - Commands improvements] - 2025-04-27
+
+- Simplified the command structure by making the instance input optional, defaulting to the selected instance if none is provided, and eliminating the need for multiple commands for:
+  - **Quick Search**
+  - **Open Instance**
+  - **Login to Instance**
+- Replaced browser-based commands with AppleScripts so that the Raycast Browser extension is no longer required.
+
+## [Fixed - Faster search] - 2025-04-27
+
+- Fixed an issue with displaying favorites, improving overall system stability and responsiveness.
+
 ## [Navigation History Command Fix] - 2024-12-02
 
 - Fixed an issue with the Explore Navigation History command that was failing when the instance had a different date format from the Out-of-the-Box (OOTB) format.

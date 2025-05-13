@@ -5,6 +5,7 @@
   "description": "Query T3 Chat directly from Raycast",
   "icon": "raycast-t3-chat.png",
   "author": "Lermatroid",
+  "contributors": ["Sclafus"],
   "categories": [
     "Productivity",
     "Applications",
@@ -34,22 +35,6 @@
           "required": true,
           "data": [
             {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "GPT-4o Mini",
-              "value": "gpt-4o-mini"
-            },
-            {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-o3 Mini",
-              "value": "gpt-o3-mini"
-            },
-            {
               "title": "Claude 3.5",
               "value": "claude-3.5"
             },
@@ -62,32 +47,108 @@
               "value": "claude-3.7-reasoning"
             },
             {
-              "title": "Llama 3.3 70B (Groq)",
-              "value": "llama-3.3-70b-groq"
-            },
-            {
-              "title": "Gemini 2.0 Flash Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
-            },
-            {
-              "title": "DeepSeek v3 (Fireworks)",
-              "value": "deepseek-v3-fireworks"
+              "title": "DeepSeek R1 (Llama Distilled)",
+              "value": "deepseek-r1-groq"
             },
             {
               "title": "DeepSeek R1 (OpenRouter)",
               "value": "deepseek-r1-openrouter"
             },
             {
-              "title": "DeepSeek R1 (Groq)",
-              "value": "deepseek-r1-groq"
-            },
-            {
-              "title": "DeepSeek R1 Distill Qwen 32B (Groq)",
+              "title": "DeepSeek R1 (Qwen Distilled)",
               "value": "deepseek-r1-distill-qwen-32b-groq"
             },
             {
-              "title": "Qwen 2.5 32B (Groq)",
-              "value": "qwen-2.5-32b-groq"
+              "title": "DeepSeek v3 (0324)",
+              "value": "deepseek-v3-0324"
+            },
+            {
+              "title": "DeepSeek v3 (Fireworks)",
+              "value": "deepseek-v3-fireworks"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Lite Preview",
+              "value": "gemini-2.0-flash-lite-preview-02-05"
+            },
+            {
+              "title": "Gemini 2.5 Flash",
+              "value": "gemini-2.5-flash"
+            },
+            {
+              "title": "Gemini 2.5 Flash (Thinking)",
+              "value": "gemini-2.5-flash-thinking"
+            },
+            {
+              "title": "Gemini 2.5 Pro",
+              "value": "gemini-2.5-pro"
+            },
+            {
+              "title": "GPT ImageGen",
+              "value": "gpt-image-1"
+            },
+            {
+              "title": "GPT-4.1",
+              "value": "gpt-4.1"
+            },
+            {
+              "title": "GPT-4.1 Mini",
+              "value": "gpt-4.1-mini"
+            },
+            {
+              "title": "GPT-4.1 Nano",
+              "value": "gpt-4.1-nano"
+            },
+            {
+              "title": "GPT-4.5",
+              "value": "gpt-4.5"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o Mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-o3 Mini",
+              "value": "gpt-o3-mini"
+            },
+            {
+              "title": "GPT-o4 Mini",
+              "value": "gpt-o4-mini"
+            },
+            {
+              "title": "Grok 3",
+              "value": "grok-v3"
+            },
+            {
+              "title": "Grok 3 Mini",
+              "value": "grok-v3-mini"
+            },
+            {
+              "title": "Llama 3.3 70B",
+              "value": "llama-3.3-70b-groq"
+            },
+            {
+              "title": "Llama 4 Maverick",
+              "value": "llama-4-maverick"
+            },
+            {
+              "title": "Llama 4 Scout",
+              "value": "llama-4-scout"
+            },
+            {
+              "title": "Qwen 2.5 32B",
+              "value": "qwen-2.5-32b"
+            },
+            {
+              "title": "Qwen qwq 32B",
+              "value": "qwq-32b"
             }
           ]
         }
