@@ -1,6 +1,6 @@
 # OmniFocus Changelog
 
-## [1.2.1] - {PR_MERGE_DATE}
+## [1.2.1] - 2025-05-13
 
 ### Fixed
 
