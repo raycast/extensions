@@ -43,7 +43,7 @@ export default function Command(props: LaunchProps<{ draftValues: FormValues }>)
           await showToast({
             style: Toast.Style.Failure,
             title: "An error occurred",
-            message: `Cannot assigned ${error === "tag_assignment_failed" ? "tags" : "project"} to your task`,
+            message: `Cannot assign ${error === "tag_assignment_failed" ? "tags" : "project"} to your task`,
           });
         }
       } catch {
