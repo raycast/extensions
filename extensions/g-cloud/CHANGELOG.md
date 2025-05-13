@@ -1,6 +1,9 @@
 # G-Cloud Changelog
 
 ## [0.1.31] - {MERGE_DATE}
+- feature: Raycast AI for IAM Services
+
+## [0.1.31] - {2025-03-14}
 - feature: Commands for each service.
 - feature: QuickSwitcher, quick switch between projects inside same service.
 - fix: Storage Service now retrieves folders and sub-folders.
