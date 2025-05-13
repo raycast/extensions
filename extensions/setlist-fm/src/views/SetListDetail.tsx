@@ -74,7 +74,7 @@ function SetListDetail({ setlist }: { setlist: Setlist }) {
             <List.Item
               key={`${index}_${songIndex}_${song.name || "unknown"}`}
               title={getSongTitle(song)}
-              subtitle={`${song.name ? "" : "Song title not known"}`}
+              subtitle={song.name ? "" : "Song title not known"}
               accessories={getSongAccessories(song)}
               actions={
                 <ActionPanel>
@@ -85,17 +85,17 @@ function SetListDetail({ setlist }: { setlist: Setlist }) {
                     icon={Icon.CopyClipboard}
                   />
                   <Action.OpenInBrowser
-                    title={`Search Song on Youtube`}
+                    title="Search Song on Youtube"
                     url={getYouTubeSearchURL(song)}
                     icon={Icon.Video}
                   />
                   <Action.OpenInBrowser
-                    title={`Search Song on Apple Music`}
+                    title="Search Song on Apple Music"
                     url={getAppleMusicSearchURL(song)}
                     icon={Icon.Music}
                   />
                   <Action.OpenInBrowser
-                    title={`Search Song on Spotify`}
+                    title="Search Song on Spotify"
                     url={getSpotifySearchURL(song)}
                     icon={Icon.Music}
                   />

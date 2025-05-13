@@ -13,7 +13,7 @@
     {
       "name": "search-by-artist",
       "title": "Search Artist Setlists",
-      "subtitle": "Search for setlists by artist name",
+      "subtitle": "Look up setlists by artist name",
       "description": "Enter an artist and find setlists from their concerts.",
       "mode": "view"
     }

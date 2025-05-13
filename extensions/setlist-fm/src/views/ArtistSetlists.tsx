@@ -101,7 +101,11 @@ function ArtistSetlists({ artist }: { artist: Artist }) {
           accessories={setlist.tour?.name ? [{ text: setlist.tour.name }] : undefined}
           actions={
             <ActionPanel>
-              <Action.Push title="View Setlist" target={<SetListDetail setlist={setlist} />} />
+              <Action.Push
+                title="View Setlist"
+                target={<SetListDetail setlist={setlist} />}
+                icon="extension-icon.png"
+              />
               <Action.OpenInBrowser title="View on Setlist.fm" url={setlist.url} icon={Icon.Rocket} />
             </ActionPanel>
           }
