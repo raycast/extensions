@@ -1,4 +1,4 @@
-# Search Documate Changelog
+# ServiceNow Extension Changelog
 
 ## [Fix] - 2025-05-13
 
