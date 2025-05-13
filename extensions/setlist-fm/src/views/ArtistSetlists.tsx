@@ -106,7 +106,7 @@ function ArtistSetlists({ artist }: { artist: Artist }) {
                 target={<SetListDetail setlist={setlist} />}
                 icon="extension-icon.png"
               />
-              <Action.OpenInBrowser title="View on Setlist.fm" url={setlist.url} icon={Icon.Rocket} />
+              <Action.OpenInBrowser title="View on setlist.fm" url={setlist.url} icon={Icon.Rocket} />
             </ActionPanel>
           }
         />
