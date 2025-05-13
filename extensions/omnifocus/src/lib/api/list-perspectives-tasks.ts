@@ -11,7 +11,7 @@ const omnifocus = Application("OmniFocus");
 const document = omnifocus.defaultDocument();
 const window = document.documentWindows[0];
 
-window.perspectiveName = "${perspectiveName}";
+window.perspectiveName = \`${perspectiveName}\`;
 
 function safeString(value) {
   return value !== undefined ? value.toString() : null;
