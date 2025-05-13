@@ -216,6 +216,30 @@
           "label": "Show Merge Requests Count",
           "title": "Appearance",
           "default": true
+        },
+        {
+          "name": "assignedLabels",
+          "description": "Only show Assigned MRs with these labels (comma-separated)",
+          "type": "textfield",
+          "required": false,
+          "title": "Assigned MRs Labels",
+          "placeholder": "e.g. bug,feature,urgent"
+        },
+        {
+          "name": "createdLabels",
+          "description": "Only show My MRs with these labels (comma-separated)",
+          "type": "textfield",
+          "required": false,
+          "title": "My MRs Labels",
+          "placeholder": "e.g. Action Required,WIP"
+        },
+        {
+          "name": "reviewLabels",
+          "description": "Only show Reviews with these labels (comma-separated)",
+          "type": "textfield",
+          "required": false,
+          "title": "Reviews Labels",
+          "placeholder": "e.g. Human Review Required,Ready for Review"
         }
       ]
     },
@@ -366,7 +390,8 @@
     "stelo",
     "romanschmid",
     "jessedobbelaere",
-    "heavyrisem"
+    "heavyrisem",
+    "constantins2001"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
@@ -377,7 +402,7 @@
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.1",
     "javascript-time-ago": "^2.3.10",
-    "node-fetch": "2.5",
+    "node-fetch": "^3.2.10",
     "open": "^8.2.1",
     "url-join": "^4.0.1",
     "use-interval": "^1.4.0"
