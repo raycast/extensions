@@ -147,7 +147,7 @@ export default function Command() {
     const result = calculatePositionDetails(inputs);
 
     if ("error" in result) {
-      showToast(Toast.Style.Failure, "Calculation Error", result.error);
+      showFailureToast(result.error, { title: "Calculation Error" });
     } else {
       showToast(Toast.Style.Success, "Calculation Complete");
       push(<ResultsView results={result} />);
