@@ -107,7 +107,7 @@ export default function Command() {
 
   const handleSubmit = () => {
     if (!validateInputs()) {
-      showToast(Toast.Style.Failure, "Validation Failed", "Please check the input fields.");
+      showFailureToast("Please check the input fields.", { title: "Validation Failed" });
       return;
     }
 
