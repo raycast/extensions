@@ -72,7 +72,7 @@ export function useMyReviews(
     },
     {
       deps: [labels],
-      secondsToRefetch: 1,
+      secondsToRefetch: 5,
       secondsToInvalid: daysInSeconds(7),
     }
   );
