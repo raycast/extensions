@@ -1,6 +1,7 @@
 import { List, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { exec } from "child_process";
+import { showFailureToast } from "@raycast/utils";
 
 const SCSELECT = "/usr/sbin/scselect";
 
