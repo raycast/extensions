@@ -1,6 +1,6 @@
 # Zerion Changelog
 
-## [Zerion AI Extension] - {PR_MERGE_DATE}
+## [Zerion AI Extension] - 2025-05-13
 - Analyze token stats, info and historical prices
 - Analyze wallet portfolio
 - Generate links to Trade and Send forms with the netural language
