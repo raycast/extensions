@@ -42,13 +42,11 @@ export default async (props: LaunchProps) => {
     return;
   }
 
-  const script = `${findSysID.toString()}
-  findSysID("${sys_id}");`;
-
   const callBack = (response: string) => {
     const answer = response.match(/###(.*)###/);
     if (response.length === 0) showToast(Toast.Style.Failure, "Could not search for sys_id. (are you an Admin?)");
     else if (answer != null && answer[1]) {
+      console.log(answer[1]);
       const table = answer[1].split("^")[0];
       const path = table + ".do?sys_id=" + sys_id;
       open(`https://${instance.name}.service-now.com/${path}`);
@@ -57,7 +55,7 @@ export default async (props: LaunchProps) => {
     }
   };
 
-  await client.startBackgroundScript(script, callBack);
+  await client.startBackgroundScript(findSysID(sys_id), callBack);
 };
 
 class ServiceNowClient {
