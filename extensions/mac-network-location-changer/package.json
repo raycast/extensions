@@ -5,7 +5,6 @@
   "description": "Lists and changes current network location on Mac.",
   "icon": "extension-icon.png",
   "author": "rcouto",
-  "owner": "ruicouto-com",
   "version": "1.0.1",
   "categories": [
     "System",
