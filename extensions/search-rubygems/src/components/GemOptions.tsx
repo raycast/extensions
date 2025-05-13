@@ -26,10 +26,10 @@ export const GemOptions = ({ gem }: Props): JSX.Element => {
           key="copy-bundler-string"
           icon={Icon.Clipboard}
           title="Copy Gem String"
-          accessoryTitle={`gem '${gem.name}', '${gem.version}'`}
+          accessoryTitle={`gem '${gem.name}', '~> ${gem.version}'`}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction content={`gem '${gem.name}', '${gem.version}'`} />
+              <CopyToClipboardAction content={`gem '${gem.name}', '~> ${gem.version}'`} />
             </ActionPanel>
           }
         />
