@@ -410,6 +410,20 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       },
     },
   },
+  {
+    name: "apify",
+    title: "Apify",
+    description: "A Model Context Protocol server for Apify, enabling AI assistants to interact with Apify's web scraping and automation platform. This server provides tools to manage actors, runs, and datasets through Large Language Models.",
+    icon: "https://svgl.app/library/apify.svg",
+    homepage: "https://github.com/apify/apify-mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@Apify/mcp-server"],
+      env: {
+        APIFY_API_TOKEN: "YOUR_API_TOKEN_HERE",
+      },
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
