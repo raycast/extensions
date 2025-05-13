@@ -78,7 +78,7 @@ function SetListDetail({ setlist }: { setlist: Setlist }) {
               accessories={getSongAccessories(song)}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser title="View on Setlist.fm" url={setlist.url} icon={Icon.Rocket} />
+                  <Action.OpenInBrowser title="View on setlist.fm" url={setlist.url} icon={Icon.Rocket} />
                   <Action.CopyToClipboard
                     title="Copy Setlist to Clipboard"
                     content={getClipboardContent()}
