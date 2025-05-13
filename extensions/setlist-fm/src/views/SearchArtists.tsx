@@ -57,7 +57,7 @@ function SearchArtists() {
           actions={
             <ActionPanel>
               <Action.Push title="View Setlists" target={<ArtistSetlists artist={item} />} icon="extension-icon.png" />
-              <Action.OpenInBrowser title="View Artist on Setlist.fm" url={item.url} icon={Icon.Rocket} />
+              <Action.OpenInBrowser title="View Artist on setlist.fm" url={item.url} icon={Icon.Rocket} />
             </ActionPanel>
           }
         />
