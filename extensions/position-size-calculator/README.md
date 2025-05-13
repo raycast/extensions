@@ -45,7 +45,7 @@ Before your first use, or anytime you want to change your defaults, you can set 
     - **Trading Capital:** Your total trading capital (e.g., `200000`).
     - **Risk per Trade (%):** The percentage of your capital you are willing to risk on a single trade (e.g., `1.0` for 1%).
 
-These preferences will be used as the base for calculations unless overridden by specific modes (like "Fixed Risk ₹").
+These preferences will be used as the base for calculations unless overridden by specific modes (like "Fixed Risk").
 
 ### Input Fields
 
@@ -54,7 +54,7 @@ These preferences will be used as the base for calculations unless overridden by
     - **Fixed Price:** Define your Stop Loss and Target using exact price levels.
     - **RRR-Based:** Define your Stop Loss price and a desired Reward/Risk Ratio (RRR). The Target price will be calculated.
     - **% SL/Target:** Define your Stop Loss and Target as percentages away from your Entry Price.
-    - **Fixed Risk ₹:** Define your Stop Loss price and the exact currency amount you wish to risk. The `Risk per Trade (%)` preference is overridden for risk calculation in this mode. You also input an RRR to calculate a target for display.
+    - **Fixed Risk:** Define your Stop Loss price and the exact currency amount you wish to risk. The `Risk per Trade (%)` preference is overridden for risk calculation in this mode. You also input an RRR to calculate a target for display.
 
 2.  **Entry Price:** The price at which you intend to enter the trade.
 
@@ -64,7 +64,7 @@ These preferences will be used as the base for calculations unless overridden by
     - **Reward/Risk Ratio (RRR):** The desired ratio of potential reward to potential risk (e.g., `2` means you aim to make twice your risked amount).
     - **Stop Loss %:** The stop loss distance from entry, expressed as a percentage (e.g., `2.0` for 2%).
     - **Target %:** The profit target distance from entry, expressed as a percentage (e.g., `4.0` for 4%).
-    - **Fixed Risk Amount (₹):** The specific amount of currency (e.g., INR) you are willing to risk on this trade.
+    - **Fixed Risk Amount:** The specific amount of currency (e.g., INR) you are willing to risk on this trade.
 
 ### Performing the Calculation
 
@@ -115,10 +115,10 @@ You can use the `ActionPanel` (usually `⌘ K`) on any result item to copy its v
   - `Risk Amount = Capital * (Risk per Trade % / 100)`
   - `Position Size = Risk Amount / Risk per Share`
 
-- **Fixed Risk ₹:**
+- **Fixed Risk:**
   - `Stop Loss = Input SL Price`
   - `Risk per Share = Entry Price - Stop Loss Price`
-  - `Risk Amount = Input Fixed Risk Amount (₹)` (Overrides % risk from preferences)
+  - `Risk Amount = Input Fixed Risk Amount` (Overrides % risk from preferences)
   - `Position Size = Risk Amount / Risk per Share`
   - `Target = Entry Price + (Risk per Share * Input RRR)` (RRR is used here to calculate a target for informational purposes)
 

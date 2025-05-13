@@ -3,7 +3,7 @@ export interface Preferences {
   riskPercent: string;
 }
 
-export type CalculationMode = "Fixed Price" | "RRR-Based" | "% SL/Target" | "Fixed Risk ₹";
+export type CalculationMode = "Fixed Price" | "RRR-Based" | "% SL/Target" | "Fixed Risk";
 // Add "ATR Mode" back if needed later
 
 export interface CalculationInputs {

@@ -13,7 +13,7 @@ export function calculatePositionDetails(inputs: CalculationInputs): Calculation
   if (isNaN(capital) || capital <= 0) return { error: "Invalid Capital" };
 
   // Risk Percent is not used in "Fixed Risk ₹" mode for riskAmount calculation
-  if (mode !== "Fixed Risk ₹" && (isNaN(riskPercent) || riskPercent <= 0)) {
+  if (mode !== "Fixed Risk" && (isNaN(riskPercent) || riskPercent <= 0)) {
     return { error: "Invalid Risk Percentage" };
   }
 
@@ -65,7 +65,7 @@ export function calculatePositionDetails(inputs: CalculationInputs): Calculation
         }
         break;
 
-      case "Fixed Risk ₹":
+      case "Fixed Risk":
         if (typeof slPrice === "undefined" || isNaN(slPrice) || slPrice <= 0) {
           return { error: "Stop Loss Price is invalid or missing" };
         }
@@ -98,7 +98,7 @@ export function calculatePositionDetails(inputs: CalculationInputs): Calculation
       };
     }
 
-    if (mode === "Fixed Risk ₹") {
+    if (mode === "Fixed Risk") {
       // We've already checked fixedRiskAmt is defined and valid for this mode
       riskAmount = fixedRiskAmt as number; // Safe assertion after check
       if (riskAmount > capital) {
