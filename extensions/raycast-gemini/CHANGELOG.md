@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [New Model] - {PR_MERGE_DATE}
+## [New Model] - 2025-05-14
 
 - 🆕 New Model: Gemini 2.5 Pro Preview 0506
 
