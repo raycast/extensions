@@ -17,7 +17,7 @@ interface ExtensionPreferences {
 export const confirmation: Tool.Confirmation<CommandArguments> = async (input) => {
   return {
     message: `Are you sure you want to remove role '${input.role}' from principal '${input.principal}'?`,
-    // Potentially add a description or destructive flag if appropriate, but message should be enough.
+    destructive: true,
   };
 };
 

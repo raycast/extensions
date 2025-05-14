@@ -6,7 +6,7 @@ export async function findPrincipal(
   passedPrincipals?: IAMPrincipal[], // Optional: pass if already fetched
 ): Promise<IAMPrincipal | null | string> {
   const principalsToSearch = passedPrincipals || (await iamService.getIAMPrincipals());
-  const lowerPrincipalIdentifier = principalIdentifier.toLowerCase();
+  const lowerPrincipalIdentifier = principalIdentifier.toLowerCase().trim();
 
   let foundPrincipal: IAMPrincipal | undefined;
 

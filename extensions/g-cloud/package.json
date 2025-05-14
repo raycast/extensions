@@ -131,7 +131,6 @@
   "dependencies": {
     "@raycast/api": "^1.55.2",
     "@raycast/utils": "^1.9.0",
-    "@raycast/ai": "^1.0.0",
     "dotenv": "^16.4.7",
     "node-fetch": "^3.3.2"
   },

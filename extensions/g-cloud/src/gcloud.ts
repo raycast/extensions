@@ -47,7 +47,11 @@ export async function executeGcloudCommand(
 ) {
   // Validate inputs
   if (!gcloudPath || typeof gcloudPath !== "string") {
-    console.error("Invalid gcloud path, trying to use default 'gcloud' command");
+    showFailureToast({
+      title: "Invalid Configuration",
+      message: "Invalid gcloud path provided, falling back to default 'gcloud' command",
+    });
+    console.warn("Invalid gcloud path provided, falling back to default 'gcloud' command");
     gcloudPath = "gcloud";
   }
 

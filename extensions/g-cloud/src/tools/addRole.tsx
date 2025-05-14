@@ -16,6 +16,7 @@ interface ExtensionPreferences {
 export const confirmation: Tool.Confirmation<CommandArguments> = async (input) => {
   return {
     message: `Are you sure you want to add role '${input.role}' to principal '${input.principal}'?`,
+    destructive: true,
   };
 };
 

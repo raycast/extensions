@@ -1,4 +1,5 @@
 import { AI } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { IAMService, IAMPrincipal } from "./IAMService";
 import { getRoleInfo } from "../../utils/iamRoles";
 
@@ -22,7 +23,10 @@ export class IAMAIService {
       });
       return principals;
     } catch (error) {
-      console.error("Failed to fetch IAM principals:", error);
+      showFailureToast({
+        title: "Failed to fetch IAM principals",
+        message: error instanceof Error ? error.message : "An unknown error occurred",
+      });
       throw error;
     }
   }
