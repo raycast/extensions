@@ -1,6 +1,6 @@
 # Coin Caster Changelog
 
-## [1.1.1] - {PR_MERGE_DATE}
+## [1.1.1] - 2025-05-14
 
 - Fix error loading asset symbols
 - Remove redundant API call to improve performance
