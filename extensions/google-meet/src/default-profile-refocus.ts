@@ -26,9 +26,6 @@ export default async function main() {
     // Switch back to the previous application
     await switchToPreviousApp();
   } catch (err) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Couldn't copy to clipboard",
-    });
+    await showFailureToast(err, { title: "Couldn't copy to clipboard" });
   }
 }
