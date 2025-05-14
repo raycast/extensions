@@ -16,7 +16,7 @@
       "name": "default-profile",
       "title": "Create Meet",
       "subtitle": "Google Meet",
-      "description": "Creates a new meeting room with your default browser and copy the link to your clipboard.",
+      "description": "Creates a new meeting room with your default browser and copies the link to your clipboard.",
       "mode": "no-view"
     },
     {
