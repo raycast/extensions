@@ -7,7 +7,8 @@
   "author": "vitoorgomes",
   "contributors": [
     "hughlaw",
-    "iwex"
+    "iwex",
+    "tim_gailey"
   ],
   "license": "MIT",
   "commands": [
@@ -16,6 +17,13 @@
       "title": "Create Meet",
       "subtitle": "Google Meet",
       "description": "Creates a new meeting room with your default browser and copy the link to your clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "default-profile-refocus",
+      "title": "Create Meet and Refocus",
+      "subtitle": "Google Meet",
+      "description": "Creates a new meeting room, copies the link to your clipboard, and switches back to your previous app.",
       "mode": "no-view"
     },
     {
@@ -55,7 +63,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

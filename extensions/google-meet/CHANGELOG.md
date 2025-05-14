@@ -1,5 +1,9 @@
 # Google Meet Changelog
 
+## [New Command] - 2024-11-04
+
+- Added "Create Meet and Refocus" command that creates a new Google Meet and automatically returns focus to the previous application
+
 ## [Improvement] - 2024-10-22
 
 - Add delay before reading meeting URL from browser
