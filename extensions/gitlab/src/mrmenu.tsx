@@ -1,4 +1,5 @@
 import { getPreferenceValues, Icon, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api";
+import { useMemo } from "react";
 import { useMyMergeRequests } from "./components/mr_my";
 import { MRScope, MRState } from "./components/mr";
 import { useMyReviews } from "./components/reviews";
@@ -236,9 +237,9 @@ function useMenuMergeRequests(): {
   createdLabelsFilter: string[];
   reviewLabelsFilter: string[];
 } {
-  const assignedLabelsFilter = getAssignedLabelsPreference();
-  const reviewLabelsFilter = getReviewLabelsPreference();
-  const createdLabelsFilter = getCreatedLabelsPreference();
+  const assignedLabelsFilter = useMemo(() => getAssignedLabelsPreference(), []);
+  const reviewLabelsFilter = useMemo(() => getReviewLabelsPreference(), []);
+  const createdLabelsFilter = useMemo(() => getCreatedLabelsPreference(), []);
 
   const {
     mrs: mrsAssigned,

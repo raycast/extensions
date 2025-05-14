@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Fix] - 2025-05-14
+
+Fixed request loops that caused the extension to crash
+
 ## [Merge Requests Menu Bar] - 2025-05-13
 
 - Added "My Merge Requests" view
