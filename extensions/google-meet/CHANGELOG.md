@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [New Command] - 2024-11-04
+## [New Command] - {PR_MERGE_DATE}
 
 - Added "Create Meet and Refocus" command that creates a new Google Meet and automatically returns focus to the previous application
 
