@@ -5,7 +5,12 @@
   "description": "Generate QR codes from text or URLs.",
   "icon": "command-icon.png",
   "author": "Melvynx",
-  "contributors": ["darmiel", "mathieudutour", "pernielsentikaer", "heytommy"],
+  "contributors": [
+    "darmiel",
+    "mathieudutour",
+    "pernielsentikaer",
+    "heytommy"
+  ],
   "license": "MIT",
   "commands": [
     {
