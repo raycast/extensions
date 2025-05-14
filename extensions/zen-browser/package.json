@@ -104,6 +104,14 @@
       "title": "Limit Results",
       "description": "The amount of results that are queried from the browser database.",
       "default": "50"
+    },
+    {
+      "name": "aiSearchHistoryLimitResults",
+      "type": "textfield",
+      "required": false,
+      "title": "AI Search History Limit Results",
+      "description": "The amount of results that are queried from the browser database for AI search.",
+      "default": "50"
     }
   ],
   "tools": [
@@ -186,24 +194,6 @@
             "callsTool": {
               "name": "search-history",
               "arguments": {}
-            }
-          }
-        ]
-      },
-      {
-        "input": "@zen-browser Search 10 history",
-        "mocks": {
-          "search-history": {
-            "limitResults": 10
-          }
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "search-history",
-              "arguments": {
-                "limitResults": 10
-              }
             }
           }
         ]
