@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Chore: Fixing typos in the README] - {PR_MERGE_DATE}
+## [Chore: Fixing typos in the README] - 2025-05-14
 
 ## [Spring Cleaning] - 2025-04-05
 - Closes Raycast after creating a note with the Create Note command
