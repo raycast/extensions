@@ -1,53 +1,75 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
-import { FormValidation, useFetch, useForm } from "@raycast/utils";
-import { PaginatedResult, Product } from "./type";
+import { FormValidation, MutatePromise, useCachedPromise, useForm } from "@raycast/utils";
+import { Creem } from "creem";
+import { CreateProductRequestEntity, ProductEntity } from "creem/dist/commonjs/models/components";
 
-const preferences = getPreferenceValues<Preferences>();
-const API_URL = preferences.mode==="production" ? "https://api.creem.io/v1/" : "https://test-api.creem.io/v1/";
-const API_HEADERS = {
-    "Content-Type": "application/json",
-    "x-api-key": preferences.mode==="production" ? preferences.api_key : preferences.test_api_key
-}
+const { mode, api_key, test_api_key } = getPreferenceValues<Preferences>();
+const creem = new Creem({ serverIdx: mode==="production" ? 0 : 1 });
+const API_KEY = mode==="production" ? api_key : test_api_key;
+
 export default function ListProducts() {
-    const { isLoading, data } = useFetch(API_URL + "products/search", {
-        headers: API_HEADERS,
-        mapResult(result: PaginatedResult<Product>) {
-            return {
-                data: result.items
-            }
-        },
+    const { isLoading, data, mutate } = useCachedPromise(async () => {
+        const res = await creem.searchProducts({ xApiKey: API_KEY });
+        return res.items;
+    }, [], {
         initialData: []
-    })
-
+    });
+    
     return <List isLoading={isLoading}>
         {!isLoading && !data.length && <List.EmptyView actions={<ActionPanel>
-            <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct />} />
+            <Action.Push icon={Icon.Plus} title="Create Product" target={<CreateProduct mutate={mutate} />} />
         </ActionPanel>} />}
-        {data.map(product => <List.Item key={product.id} icon={Icon.Layers} title={product.name} />)}
+        {data.map(product => <List.Item key={product.id} icon={Icon.Layers} title={product.name} accessories={[
+            {tag: product.status}, 
+            
+            {
+            
+            date: new Date(product.createdAt)
+        }]
+     } />)}
     </List>
 }
 
-function CreateProduct() {
+function CreateProduct({ mutate }: {mutate: MutatePromise<ProductEntity[]>}) {
     type FormValues = {
         name: string;
         description: string;
-        billing_type: string;
+        billingType: string;
         currency: string;
         price: string;
-        billing_period: string;
-        tax_category: string;
-        tax_mode: boolean;
+        billingPeriod: string;
+        taxCategory: string;
+        taxMode: boolean;
     }
     const { handleSubmit, itemProps, values } = useForm<FormValues>({
         async onSubmit(values) {
             const toast = await showToast(Toast.Style.Animated, "Creating Product", values.name);
-            const body = {...values, price: +values.price, tax_mode: values.tax_mode ? "inclusive" : "exclusive"};
-            if (values.billing_type==="onetime") delete body.billing_period;
-            await fetch(API_URL + "products", {
-                method: "POST",
-                headers: API_HEADERS,
-                body: JSON.stringify(body)
-            })
+            const createProductRequestEntity: CreateProductRequestEntity = {...values, price: +values.price, taxMode: values.taxMode ? "inclusive" : "exclusive"};
+            // if (values.billingType==="onetime") delete createProductRequestEntity.billingPeriod;
+            
+            try {
+                await mutate(
+                    creem.createProduct({
+                        xApiKey: API_KEY,
+                        createProductRequestEntity
+                    })
+                )
+                toast.style = Toast.Style.Success;
+                toast.title = "Created Product";
+
+            } catch (error) {
+                toast.style = Toast.Style.Failure
+                toast.title = "Could not create";
+                
+                let message = `${error}`;
+                
+                const err = error as Error | { name: "APIError"; body: string };
+                if ("body" in err) {
+                    const body: { message: string | string[] } = JSON.parse(err.body)
+                    message = body.message instanceof Array ? body.message[0] : body.message;
+                }
+                toast.message = message;
+            }
         },
         initialValues: {
             price: "0.00"
@@ -70,7 +92,7 @@ function CreateProduct() {
 
         <Form.Separator />
         <Form.Description title="Payment Details" text="These are the pricing details that will be charged for your product" />
-        <Form.Dropdown title="Billing Type" {...itemProps.billing_type}>
+        <Form.Dropdown title="Billing Type" {...itemProps.billingType}>
             <Form.Dropdown.Item title="Single payment" value="onetime" />
             <Form.Dropdown.Item title="Subscription" value="recurring" />
         </Form.Dropdown>
@@ -80,17 +102,17 @@ function CreateProduct() {
             <Form.Dropdown.Item title="SEK" value="SEK" />
         </Form.Dropdown>
         <Form.TextField title="Pricing" {...itemProps.price} />
-        {values.billing_type==="recurring" && <Form.Dropdown title="Subscription interval" {...itemProps.billing_period}>
+        {values.billingType==="recurring" && <Form.Dropdown title="Subscription interval" {...itemProps.billingPeriod}>
             <Form.Dropdown.Item title="Monthly" value="every-month" />
-            <Form.Dropdown.Item title="3 Months" />
-            <Form.Dropdown.Item title="6 Months" />
-            <Form.Dropdown.Item title="Yearly" />
+            <Form.Dropdown.Item title="3 Months" value="every-three-months" />
+            <Form.Dropdown.Item title="6 Months" value="every-six-months" />
+            <Form.Dropdown.Item title="Yearly" value="every-year" />
         </Form.Dropdown>}
-        <Form.Dropdown title="Tax Category" {...itemProps.tax_category}>
-            <Form.Dropdown.Item title="Digital goods or services" />
+        <Form.Dropdown title="Tax Category" {...itemProps.taxCategory}>
+            <Form.Dropdown.Item title="Digital goods or services" value="saas" />
             <Form.Dropdown.Item title="Software as a Service (SaaS)" value="saas" />
-            <Form.Dropdown.Item title="Ebooks" />
+            <Form.Dropdown.Item title="Ebooks" value="saas" />
         </Form.Dropdown>
-        <Form.Checkbox title="Tax Behaviour" label="Price includes tax" {...itemProps.tax_mode} />
+        <Form.Checkbox title="Tax Behaviour" label="Price includes tax" {...itemProps.taxMode} />
     </Form>
 }
