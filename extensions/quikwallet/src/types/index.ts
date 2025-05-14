@@ -2,6 +2,7 @@ export interface UseSolanaBalanceReturn {
   balance: number | null;
   isLoading: boolean;
   error: string | null;
+  refetch: () => Promise<void>;
 }
 
 export interface SplTokenBalance {
@@ -31,5 +32,10 @@ export interface WalletSetupFormProps {
 
 export interface BalancesViewProps {
   walletAddress: string;
-  onChangeWallet: () => Promise<void>;
+  onChangeWallet: () => void;
+}
+
+export interface SolanaPriceData {
+  price: number;
+  priceChange24h: number;
 }
