@@ -1,4 +1,4 @@
-import { Clipboard, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Clipboard, Image, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Project } from "./gitlabapi";
 import { getSVGText, GitLabIcons } from "./icons";
 import * as fs from "fs/promises";

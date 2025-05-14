@@ -1,6 +1,10 @@
 # Clockify Changelog
 
-## [Autofocus description field] - {PR_MERGE_DATE}
+## [Menu Bar Timer] - {PR_MERGE_DATE}
+
+- Timer in Menu Bar that automatically syncs with changes done in this extension.
+
+## [Autofocus description field] - 2025-05-13
 
 - Autofocus description field in "Start New Timer" view.
 

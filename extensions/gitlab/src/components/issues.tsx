@@ -263,7 +263,6 @@ export function IssueList({
   state = IssueState.all,
   project = undefined,
   group = undefined,
-  searchBarAccessory = undefined,
 }: IssueListProps): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const [searchState, setSearchState] = useState<IssueState>(state);

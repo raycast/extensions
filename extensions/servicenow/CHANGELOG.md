@@ -1,4 +1,15 @@
-# Search Documate Changelog
+# ServiceNow Extension Changelog
+
+## [Updates] - 2025-05-13
+
+- Added a new command for admins to **Search by Sys_ID**, allowing to search for a Sys_ID in the selected instance, or in any matching instance from the profiles if no instance is provided.
+- Added a new Open Mode preference to control how ServiceNow content is opened when using the extension.
+- Simplified the command structure by making the instance input optional, defaulting to the selected instance if none is provided, and eliminating the need for multiple commands for:
+  - **Quick Search**
+  - **Open Instance**
+  - **Login to Instance**
+- Replaced browser-based commands with AppleScripts so that the Raycast Browser extension is no longer required.
+- Fixed an issue with displaying favorites, improving overall system stability and responsiveness.
 
 ## [Navigation History Command Fix] - 2024-12-02
 
