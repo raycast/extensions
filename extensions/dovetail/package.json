@@ -22,6 +22,12 @@
       "title": "Search Insights",
       "description": "Search for insights across your workspace.",
       "mode": "view"
+    },
+    {
+      "name": "search-contacts",
+      "title": "Search Contacts",
+      "description": "Search for contacts in your workspace.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -38,7 +44,8 @@
   "dependencies": {
     "@raycast/api": "^1.88.4",
     "@raycast/utils": "^1.17.0",
-    "date-fns": "^4.1.0"
+    "date-fns": "^4.1.0",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

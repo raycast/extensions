@@ -1,5 +1,5 @@
 import { Color, Icon } from "@raycast/api";
-import { RegistryEntry } from "./types";
+import type { RegistryEntry } from "./types";
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
@@ -125,7 +125,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "A Model Context Protocol (MCP) server lets AI assistants like Claude use the Exa AI Search API for web searches. This setup allows AI models to get real-time web information in a safe and controlled way.",
     icon: "exa.png",
-    homepage: "https://github.com/exa-dev/exa-mcp-server",
+    homepage: "https://github.com/exa-labs/exa-mcp-server",
     configuration: {
       command: "npx",
       args: ["exa-mcp-server"],
@@ -313,7 +313,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "A Model Context Protocol (MCP) server implementation that integrates with Firecrawl for web scraping capabilities.",
     icon: "🔥",
-    homepage: "https://github.com/firecrawl/firecrawl-mcp",
+    homepage: "https://github.com/mendableai/firecrawl-mcp-server",
     configuration: {
       command: "npx",
       args: ["-y", "firecrawl-mcp"],

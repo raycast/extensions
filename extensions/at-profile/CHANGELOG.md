@@ -1,5 +1,9 @@
 # @ Profile Changelog
 
+## Fixed - 2025-05-12
+
+- Fixed Twitter and X to lead to X ([#18534](https://github.com/raycast/extensions/issues/18534))
+
 ## [Add Social Platforms & Sort List] - 2025-05-07
 
 - Add new social platforms: Behance, CodePen, Dev.to, Dribbble, Medium, Product Hunt, Spotify

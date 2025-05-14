@@ -26,7 +26,7 @@ export default async function Command() {
     toast.message = error instanceof Error ? error.message : "Unknown error";
   }
 
-  if (getPreferenceValues().deleteExport == true) {
+  if (getPreferenceValues().deleteExport === true) {
     deleteEnteExport();
   }
 }

@@ -23,7 +23,8 @@
     "jagadeesh_k",
     "scottlovegrove",
     "henningmu",
-    "FlohGro"
+    "FlohGro",
+    "dedalusj"
   ],
   "commands": [
     {
@@ -107,6 +108,14 @@
           "type": "checkbox",
           "label": "Close window immediately",
           "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "autoCreateLabels",
+          "type": "checkbox",
+          "label": "Create labels automatically",
+          "description": "When enabled Raycast will parse labels and create them automatically.",
           "default": false,
           "required": false
         }
