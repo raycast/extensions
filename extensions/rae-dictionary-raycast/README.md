@@ -1,6 +1,6 @@
 # RAE Dictionary
 
-Search words in the Royal Spanish Academy dictionary directly from Raycast. Get definitions, conjugations, and expressions quickly without opening a browser. This is the official extension for the unofficial API [rae-api.com](https://rae-api.com).
+Search words in the Royal Spanish Academy dictionary directly from Raycast. Get definitions, conjugations, and expressions quickly without opening a browser. This extension uses the unofficial API [rae-api.com](https://rae-api.com).
   
 ## Features
 
