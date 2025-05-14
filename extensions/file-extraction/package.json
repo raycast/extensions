@@ -3,7 +3,7 @@
   "name": "file-extraction",
   "title": "Extract Files",
   "description": "Extracts all files with a given extension from a selected folder (including subfolders) into a new sibling folder at the same level as the selected folder.",
-  "icon": "extension-icon.png",
+  "icon": "extraction.png",
   "author": "emilbeh",
   "categories": [
     "System",

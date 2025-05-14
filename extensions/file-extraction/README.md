@@ -33,6 +33,10 @@ Extracts all files with a given extension from a selected folder (including subf
 
 - Performance depends on the number and size of files. Very large files may take longer to process.
 
+## Credits
+
+Icon made by [Freepik](https://www.flaticon.com/authors/freepik) from [www.flaticon.com](https://www.flaticon.com/)
+
 ---
 
 **Enjoy using File Extraction! If you have feedback or issues, please open an issue or contribute on GitHub.**
