@@ -52,7 +52,7 @@ export function IconGrid() {
     <Grid
       columns={8}
       inset={Grid.Inset.Large}
-      isLoading={false}
+      isLoading={isAILoading}
       navigationTitle={selectedIconName ? `Search Raycast Icons – ${selectedIconName}` : "Search Raycast Icons"}
       onSearchTextChange={handleSearchTextChange}
       onSelectionChange={handleSelectionChange}
