@@ -1,6 +1,6 @@
 # ServiceNow Extension Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-05-14
 
 Fixed an issue where the Search by Sys_ID command stopped working after publishing, due to function name minification during the build process.
 
