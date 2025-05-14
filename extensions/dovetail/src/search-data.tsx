@@ -14,7 +14,6 @@ function DataDetail({ dataId }: { dataId: string }) {
     headers: buildHeaders(token),
     parseResponse: async (response) => {
       const json = await response.json();
-      console.log(response.url, json.data);
       const data = ExportDataResponse.parse(json.data);
       const created = format(new Date(data.created_at), "dd MMM yyyy");
       let content = cleanMarkdown(data.content_markdown || "");
