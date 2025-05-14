@@ -1,6 +1,6 @@
 # VueJS Search Documentation Changelog
 
-## Update {PR_MERGE_DATE}
+## Update 2025-05-14
 
 - update dependency
 - improve search functionality
