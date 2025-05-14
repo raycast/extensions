@@ -10,7 +10,7 @@ async function switchToPreviousApp(): Promise<void> {
       keystroke tab using {command down}
     end tell
   `;
-  
+
   await runAppleScript(script);
 }
 
@@ -22,7 +22,7 @@ export default async function main() {
 
     await Clipboard.copy(meetTab);
     await showHUD("Copied meet link to clipboard");
-    
+
     // Switch back to the previous application
     await switchToPreviousApp();
   } catch (err) {
@@ -31,4 +31,4 @@ export default async function main() {
       title: "Couldn't copy to clipboard",
     });
   }
-} 
+}
