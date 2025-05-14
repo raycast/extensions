@@ -1,4 +1,4 @@
-# Slack Summarizer – Raycast Extension
+# Slack Summarizer
 
 Summarize any Slack channel or thread directly from **Raycast** using OpenAI.
 Perfect for catching-up after vacations, keeping stakeholders in the loop, or turning noisy discussions into succinct, bullet-point briefs.
