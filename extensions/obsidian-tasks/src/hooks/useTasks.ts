@@ -19,22 +19,18 @@ export const useTasks = (preferences: Preferences) => {
       setIsLoading(true);
       const highestPriorityTask = await getHighestPriorityTask();
       setTopTask(highestPriorityTask);
-      const tasks = await getAllUncompletedTasks();
+      let tasks = await getAllUncompletedTasks();
 
-      if (preferences.getOnlyCurrent) {
+      if (preferences.showOnlyCurrent) {
         const today = new Date();
         const tomorrow = new Date(today);
         tomorrow.setDate(today.getDate() + 1);
         tomorrow.setHours(0, 0, 0, 0);
 
-        for (let i = tasks.length - 1; i >= 0; i--) {
-          const dueDate = tasks[i].dueDate;
-          const scheduledDate = tasks[i].scheduledDate;
-
-          if ((dueDate && dueDate >= tomorrow) || (scheduledDate && scheduledDate >= tomorrow)) {
-            tasks.splice(i, 1);
-          }
-        }
+        tasks = tasks.filter((task) => {
+          const { dueDate, scheduledDate } = task;
+          return (dueDate && dueDate < tomorrow) || (scheduledDate && scheduledDate < tomorrow);
+        });
       }
 
       if (preferences.sortByPriority) {

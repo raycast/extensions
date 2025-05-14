@@ -5,7 +5,7 @@ export interface Preferences {
   menubarTaskCount: boolean;
   showIcon: boolean;
   sortByPriority: boolean;
-  getOnlyCurrent: boolean;
+  showOnlyCurrent: boolean;
   showCompletedDate: boolean;
   refreshIntervalInMinutes: string;
 }

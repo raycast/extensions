@@ -97,13 +97,13 @@
       "label": "Sort by priority"
     },
     {
-      "name": "getOnlyCurrent",
-      "title": "Get Only Current Tasks",
-      "description": "Include only tasks with due or scheduled date before tomorrow",
+      "name": "showOnlyCurrent",
+      "title": "Show Only Current Tasks",
+      "description": "Show only tasks with a due or scheduled date that is today or earlier",
       "type": "checkbox",
       "default": false,
       "required": false,
-      "label": "Get only current tasks"
+      "label": "Show only current tasks"
     },
     {
       "name": "maxMenubarDescriptionLength",
