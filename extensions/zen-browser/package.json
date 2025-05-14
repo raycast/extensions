@@ -25,47 +25,7 @@
       "title": "New Tab",
       "subtitle": "Zen Browser",
       "description": "Open a new Zen Browser tab.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "searchEngine",
-          "type": "dropdown",
-          "required": false,
-          "title": "Search Engine",
-          "description": "Search Engine for query (default: Browser Default).",
-          "default": "Default",
-          "data": [
-            {
-              "title": "Browser Default",
-              "value": "Default"
-            },
-            {
-              "title": "Google",
-              "value": "Google"
-            },
-            {
-              "title": "DuckDuckGo",
-              "value": "DuckDuckGo"
-            },
-            {
-              "title": "Bing",
-              "value": "Bing"
-            },
-            {
-              "title": "Baidu",
-              "value": "Baidu"
-            },
-            {
-              "title": "Brave",
-              "value": "Brave"
-            },
-            {
-              "title": "Qwant",
-              "value": "Qwant"
-            }
-          ]
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "search-history",
@@ -83,6 +43,44 @@
     }
   ],
   "preferences": [
+    {
+      "name": "searchEngine",
+      "type": "dropdown",
+      "required": false,
+      "title": "Search Engine",
+      "description": "Search Engine for query (default: Browser Default).",
+      "default": "Default",
+      "data": [
+        {
+          "title": "Browser Default",
+          "value": "Default"
+        },
+        {
+          "title": "Google",
+          "value": "Google"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "DuckDuckGo"
+        },
+        {
+          "title": "Bing",
+          "value": "Bing"
+        },
+        {
+          "title": "Baidu",
+          "value": "Baidu"
+        },
+        {
+          "title": "Brave",
+          "value": "Brave"
+        },
+        {
+          "title": "Qwant",
+          "value": "Qwant"
+        }
+      ]
+    },
     {
       "name": "profileDirectorySuffix",
       "title": "Profile Directory Suffix",
@@ -112,47 +110,7 @@
     {
       "name": "new-tab",
       "title": "New Tab",
-      "description": "Open a new Zen Browser tab",
-      "preferences": [
-        {
-          "name": "searchEngine",
-          "type": "dropdown",
-          "required": false,
-          "title": "Search Engine",
-          "description": "Search Engine for query (default: Browser Default).",
-          "default": "Default",
-          "data": [
-            {
-              "title": "Browser Default",
-              "value": "Default"
-            },
-            {
-              "title": "Google",
-              "value": "Google"
-            },
-            {
-              "title": "DuckDuckGo",
-              "value": "DuckDuckGo"
-            },
-            {
-              "title": "Bing",
-              "value": "Bing"
-            },
-            {
-              "title": "Baidu",
-              "value": "Baidu"
-            },
-            {
-              "title": "Brave",
-              "value": "Brave"
-            },
-            {
-              "title": "Qwant",
-              "value": "Qwant"
-            }
-          ]
-        }
-      ]
+      "description": "Open a new Zen Browser tab"
     },
     {
       "name": "search-history",
@@ -166,17 +124,13 @@
         "input": "@zen-browser Open a new tab",
         "mocks": {
           "new-tab": [
-            {
-              "searchText": ""
-            }
+            {}
           ]
         },
         "expected": [
           {
             "callsTool": {
-              "arguments": {
-                "searchText": ""
-              },
+              "arguments": {},
               "name": "new-tab"
             }
           }
@@ -225,17 +179,13 @@
       {
         "input": "@zen-browser Search history",
         "mocks": {
-          "search-history": {
-            "searchText": ""
-          }
+          "search-history": {}
         },
         "expected": [
           {
             "callsTool": {
               "name": "search-history",
-              "arguments": {
-                "searchText": ""
-              }
+              "arguments": {}
             }
           }
         ]
@@ -244,7 +194,6 @@
         "input": "@zen-browser Search 10 history",
         "mocks": {
           "search-history": {
-            "searchText": "",
             "limitResults": 10
           }
         },
@@ -253,7 +202,6 @@
             "callsTool": {
               "name": "search-history",
               "arguments": {
-                "searchText": "",
                 "limitResults": 10
               }
             }
