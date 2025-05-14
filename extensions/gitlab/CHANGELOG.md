@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-05-14
 
 Fixed request loops that caused the extension to crash
 
