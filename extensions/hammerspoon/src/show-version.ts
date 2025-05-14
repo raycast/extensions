@@ -1,5 +1,5 @@
 import { showHUD, showToast, Toast } from '@raycast/api'
-import { runAppleScript } from '@raycast/utils'
+import { runAppleScript, showFailureToast } from '@raycast/utils'
 import { checkHammerspoonInstallation } from './utils/installation'
 
 export default async function main() {
@@ -9,12 +9,19 @@ export default async function main() {
     return
   }
 
-  const output = await runAppleScript(`
-    tell application "Hammerspoon"
-      set hammerspoonVersion to version
-      return hammerspoonVersion
-    end tell
-  `)
+  let output
+
+  try {
+    output = await runAppleScript(`
+      tell application "Hammerspoon"
+        set hammerspoonVersion to version
+        return hammerspoonVersion
+      end tell
+    `)
+  } catch (error) {
+    await showFailureToast(error, { title: 'Could not get Hammerspoon version' })
+    return
+  }
 
   if (output != null && output !== '') {
     await showHUD(`🔨 Hammerspoon version: ${output}`)

@@ -17,19 +17,19 @@
     {
       "name": "reload-configuration-file",
       "title": "Reload Configuration File",
-      "description": "Reload Configuration File",
+      "description": "Reloads the Hammerspoon configuration file and opens the console",
       "mode": "no-view"
     },
     {
       "name": "open-console",
       "title": "Open Console",
-      "description": "Opens the Hammerspoon Console window and focus it",
+      "description": "Opens the Hammerspoon Console window and focuses it",
       "mode": "no-view"
     },
     {
       "name": "open-preferences",
       "title": "Open Preferences",
-      "description": "Displays the Hammerspoon Preferences panel and focus it",
+      "description": "Displays the Hammerspoon Preferences panel and focuses it",
       "mode": "no-view"
     },
     {

@@ -1,5 +1,5 @@
 import { showHUD } from '@raycast/api'
-import { runAppleScript } from '@raycast/utils'
+import { runAppleScript, showFailureToast } from '@raycast/utils'
 import { checkHammerspoonInstallation } from './utils/installation'
 
 export default async function main() {
@@ -9,11 +9,16 @@ export default async function main() {
     return
   }
 
-  await runAppleScript(`
-    tell application "Hammerspoon"
-      execute lua code "hs.reload(); hs.openConsole()"
-    end tell
-  `)
+  try {
+    await runAppleScript(`
+      tell application "Hammerspoon"
+        execute lua code "hs.reload(); hs.openConsole()"
+      end tell
+    `)
+  } catch (error) {
+    await showFailureToast(error, { title: 'Could not reload Hammerspoon configuration' })
+    return
+  }
 
   await showHUD('🔨 Hammerspoon Configuration File Reloaded')
 }

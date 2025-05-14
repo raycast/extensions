@@ -89,7 +89,7 @@ try {
   } else {
     // Step: Restore the dev icon and ensure build
     await step('Ensuring Dev mode', async () => {
-      updatePkg({ version: targetVersion, icon: 'icon-dev.png' })
+      updatePkg({ icon: 'icon-dev.png' })
       await $`npm run build`
     })
   }
