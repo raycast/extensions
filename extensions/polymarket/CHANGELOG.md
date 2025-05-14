@@ -1,6 +1,6 @@
 # Polymarket Changelog
 
-## [PolyMarket Search] - {PR_MERGE_DATE}
+## [PolyMarket Search] - 2025-05-14
 - Added ability to search PolyMarket for a specific market.
 
 ## [Remove old election markets] - 2024-11-18
