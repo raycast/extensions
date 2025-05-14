@@ -61,6 +61,14 @@
       "subtitle": "Clockify",
       "description": "Manage Clockify time entries with Raycast",
       "mode": "view"
+    },
+    {
+      "name": "clockifymenu",
+      "title": "Current Timer",
+      "subtitle": "Clockify",
+      "description": "Show current Clockify timer in menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
     }
   ],
   "dependencies": {

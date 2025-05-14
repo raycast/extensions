@@ -1,10 +1,14 @@
 # Clockify Changelog
 
-## [Menu Bar Timer] - {PR_MERGE_DATE}
+## [Add menu bar timer] - {PR_MERGE_DATE}
 
-- Timer in Menu Bar that automatically syncs with changes done in this extension.
+- Added a menu bar command that shows the current timer counting up.
+- Allows stopping the timer directly from the menu bar.
+- Menu bar timer automatically updates when a timer is started or stopped from other menus.
+- Fixed timer display to update properly even when the menu bar is not focused.
+- Updated the menu bar timer to use a monospace font for better readability.
 
-## [Autofocus description field] - 2025-05-13
+## [Autofocus description field] - {PR_MERGE_DATE}
 
 - Autofocus description field in "Start New Timer" view.
 

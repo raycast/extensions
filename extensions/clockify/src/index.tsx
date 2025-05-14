@@ -1,9 +1,17 @@
-import { ActionPanel, Form, Icon, List, showToast, useNavigation, Toast, Action, LocalStorage } from "@raycast/api";
+import { ActionPanel, Form, Icon, List, showToast, useNavigation, Toast, Action } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import isEmpty from "lodash.isempty";
-import uniqWith from "lodash.uniqwith";
 import useConfig from "./useConfig";
-import { fetcher, isInProgress, showElapsedTime } from "./utils";
+import {
+  isInProgress,
+  getElapsedTime,
+  getTimeEntries,
+  stopCurrentTimer,
+  addNewTimeEntry,
+  getAllTimeEntriesFromLocalStorage,
+  getProjects,
+  getTasksForProject,
+} from "./utils";
 import { TimeEntry, Project, Task } from "./types";
 
 function OpenWebPage() {
@@ -11,10 +19,10 @@ function OpenWebPage() {
 }
 
 function useClock(entry: TimeEntry) {
-  const [time, setTime] = useState(showElapsedTime(entry));
+  const [time, setTime] = useState(getElapsedTime(entry));
 
   useEffect(() => {
-    const interval = setInterval(() => setTime(showElapsedTime(entry)), 1000);
+    const interval = setInterval(() => setTime(getElapsedTime(entry)), 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -36,7 +44,7 @@ function ItemInProgress({ entry, updateTimeEntries }: { entry: TimeEntry; update
       keywords={[...(entry.description?.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
       actions={
         <ActionPanel>
-          <Action title="Stop Timer" onAction={() => stopCurrentTimer().then(() => updateTimeEntries())} />
+          <Action title="Stop Timer" onAction={() => stopCurrentTimer(updateTimeEntries)} />
           <OpenWebPage />
         </ActionPanel>
       }
@@ -56,17 +64,15 @@ export default function Main() {
     async function fetchTimeEntries() {
       setIsLoading(true);
 
-      const storedEntries: string | undefined = await LocalStorage.getItem("entries");
-
-      if (storedEntries) {
-        setEntries(JSON.parse(storedEntries));
+      const storedEntries = getAllTimeEntriesFromLocalStorage();
+      if (storedEntries.length > 0) {
+        setEntries(storedEntries);
       }
 
       const filteredEntries = await getTimeEntries({ onError: setIsValidToken });
 
       if (filteredEntries) {
         setEntries(filteredEntries);
-        LocalStorage.setItem("entries", JSON.stringify(filteredEntries));
       }
 
       setIsLoading(false);
@@ -82,7 +88,6 @@ export default function Main() {
       .then((entries) => {
         if (entries) {
           setEntries(entries);
-          LocalStorage.setItem("entries", JSON.stringify(entries));
         }
 
         setIsLoading(false);
@@ -135,9 +140,7 @@ export default function Main() {
                       <Action
                         title="Start Timer"
                         onAction={() => {
-                          addNewTimeEntry(entry.description, entry.projectId, entry.taskId).then(() =>
-                            updateTimeEntries(),
-                          );
+                          addNewTimeEntry(entry.description, entry.projectId, entry.taskId, updateTimeEntries);
                         }}
                       />
                       <OpenWebPage />
@@ -154,30 +157,26 @@ export default function Main() {
 }
 
 function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
-  const { config } = useConfig();
+  const { config, isValidToken, setIsValidToken } = useConfig();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [tasks, setTasks] = useState<Project[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { pop } = useNavigation();
 
   useEffect(() => {
-    if (isEmpty(config)) return;
+    if (isEmpty(config) || !isValidToken) return;
 
-    async function getAllProjectsOnWorkspace(): Promise<void> {
+    async function fetchProjects(): Promise<void> {
       setIsLoading(true);
 
-      const storedProjects: string | undefined = await LocalStorage.getItem("projects");
-      if (storedProjects) setProjects(JSON.parse(storedProjects));
+      const projectsData = await getProjects({ onError: setIsValidToken });
+      setProjects(projectsData);
 
-      const { data } = await fetcher(`/workspaces/${config.workspaceId}/projects?page-size=1000&archived=false`);
-
-      setProjects(data || []);
-      LocalStorage.setItem("projects", JSON.stringify(data));
       setIsLoading(false);
     }
 
-    getAllProjectsOnWorkspace();
-  }, [config]);
+    fetchProjects();
+  }, [config, isValidToken]);
 
   return (
     <Form
@@ -189,10 +188,10 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
             title="Start"
             onSubmit={({ description, projectId, taskId }) => {
               if (projectId) {
-                addNewTimeEntry(description, projectId, taskId === "-1" ? null : taskId).then(() =>
-                  updateTimeEntries(),
-                );
-                pop();
+                addNewTimeEntry(description, projectId, taskId === "-1" ? null : taskId, () => {
+                  updateTimeEntries();
+                  pop();
+                });
               } else {
                 showToast(Toast.Style.Failure, "Project is required.");
               }
@@ -205,23 +204,11 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
       <Form.Dropdown
         id="projectId"
         title="Project"
-        onChange={(projectId) => {
-          async function getAllTasksForProject(projectId: string): Promise<void> {
-            setIsLoading(true);
-
-            const storedTasks: string | undefined = await LocalStorage.getItem(`project[${projectId}]`);
-            if (storedTasks) setTasks(JSON.parse(storedTasks));
-
-            const { data } = await fetcher(
-              `/workspaces/${config.workspaceId}/projects/${projectId}/tasks?page-size=1000`,
-            );
-
-            setTasks(data || []);
-            LocalStorage.setItem(`project[${projectId}]`, JSON.stringify(data));
-            setIsLoading(false);
-          }
-
-          getAllTasksForProject(projectId);
+        onChange={async (projectId) => {
+          setIsLoading(true);
+          const tasksData = await getTasksForProject(projectId);
+          setTasks(tasksData);
+          setIsLoading(false);
         }}
       >
         {projects.map((project: Project) => (
@@ -256,79 +243,4 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
       <Form.TextField id="description" defaultValue="" title="Description" autoFocus />
     </Form>
   );
-}
-
-async function getTimeEntries({ onError }: { onError?: (state: boolean) => void }): Promise<TimeEntry[]> {
-  const workspaceId = await LocalStorage.getItem("workspaceId");
-  const userId = await LocalStorage.getItem("userId");
-
-  const { data, error } = await fetcher(
-    `/workspaces/${workspaceId}/user/${userId}/time-entries?hydrated=true&page-size=500`,
-  );
-
-  if (error === "Unauthorized") {
-    onError && onError(false);
-    return [];
-  }
-
-  if (data?.length) {
-    const filteredEntries: TimeEntry[] = uniqWith(
-      data,
-      (a: TimeEntry, b: TimeEntry) =>
-        a.projectId === b.projectId && a.taskId === b.taskId && a.description === b.description,
-    );
-
-    return filteredEntries;
-  } else {
-    return [];
-  }
-}
-
-async function stopCurrentTimer(): Promise<void> {
-  showToast(Toast.Style.Animated, "Stopping…");
-
-  const workspaceId = await LocalStorage.getItem("workspaceId");
-  const userId = await LocalStorage.getItem("userId");
-
-  const { data, error } = await fetcher(`/workspaces/${workspaceId}/user/${userId}/time-entries`, {
-    method: "PATCH",
-    body: { end: new Date().toISOString() },
-  });
-
-  if (!error && data) {
-    showToast(Toast.Style.Success, "Timer stopped");
-  } else {
-    showToast(Toast.Style.Failure, "No timer running");
-  }
-}
-
-async function addNewTimeEntry(
-  description: string | undefined | null,
-  projectId: string,
-  taskId: string | undefined | null,
-): Promise<void> {
-  showToast(Toast.Style.Animated, "Starting…");
-
-  const workspaceId = await LocalStorage.getItem("workspaceId");
-
-  const { data } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
-    method: "POST",
-    body: {
-      description,
-      taskId,
-      projectId,
-      timeInterval: {
-        start: new Date().toISOString(),
-        end: null,
-        duration: null,
-      },
-      customFieldValues: [],
-    },
-  });
-
-  if (data?.id) {
-    showToast(Toast.Style.Success, "Timer is running");
-  } else {
-    showToast(Toast.Style.Failure, "Timer could not be started");
-  }
 }
