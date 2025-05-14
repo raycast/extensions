@@ -1,3 +1,3 @@
 # Windows Theme
 
-Easily toggle your windows theme
+This extension runs only on Windows machines; you can easily toggle your Windows theme with one command
