@@ -1,6 +1,6 @@
 # QR Code Generator Changelog
 
-## [Added SVG Support] - {PR_MERGE_DATE}
+## [Added SVG Support] - 2025-05-14
 
 - Added support for generating QR codes in SVG format
 - Added option to save QR codes as vector-based SVG files
