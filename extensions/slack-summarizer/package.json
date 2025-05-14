@@ -22,7 +22,7 @@
           "name": "openaiPrompt",
           "type": "textfield",
           "title": "OpenAI prompt",
-          "description": "Custom prompt used when summarising a channel",
+          "description": "Custom prompt used when summarizing a channel",
           "placeholder": "Leave blank to use the built-in instructions",
           "required": false
         }
