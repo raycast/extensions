@@ -5,6 +5,9 @@
   "description": "Calculate your payment after taxes",
   "icon": "icon.png",
   "author": "pernielsentikaer",
+  "keywords": [
+    "skat"
+  ],
   "categories": [
     "Other"
   ],
@@ -16,6 +19,9 @@
       "subtitle": "Danish Tax Calculator",
       "description": "Calculate your payment after taxes",
       "mode": "view",
+      "keywords": [
+        "skat"
+      ],
       "arguments": [
         {
           "name": "income",
