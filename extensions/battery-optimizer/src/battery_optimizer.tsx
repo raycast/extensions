@@ -1,4 +1,5 @@
 import { Form, ActionPanel, Action, useNavigation, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { setBatteryLimit } from "./utils/batteryTools";
 import { setBatteryThreshold } from "./utils";
 
@@ -22,7 +23,11 @@ export default function Command() {
         await setBatteryLimit(limit);
       } catch (e) {
         // Fallback to the old implementation if the new one fails
-        await setBatteryThreshold(limit, `🔋 Limiting charging above: `);
+        try {
+          await setBatteryThreshold(limit, `🔋 Limiting charging above: `);
+        } catch (error) {
+          showFailureToast(error, { title: "Could not set battery limit" });
+        }
       }
 
       await showHUD(`Battery charge limit set to ${limit}%`);
@@ -31,8 +36,7 @@ export default function Command() {
       pop();
     } catch (error) {
       console.error("Error setting battery limit:", error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      await showHUD(`Error: ${errorMessage}`);
+      showFailureToast(error, { title: "Could not set battery limit" });
     }
   }
 
