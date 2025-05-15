@@ -214,6 +214,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "prisma",
+    title: "Prisma",
+    description:
+      "An MCP server that provisions and manages a Prisma Postgres database for your apps, so you don’t have to spend time fiddling with db infrastructure.",
+    icon: "https://svgl.app/library/prisma.svg",
+    homepage: "https://www.prisma.io/docs/postgres/integrations/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "prisma", "mcp"],
+    },
+  },
+  {
     name: "sentry",
     title: "Sentry",
     description: "This service provides a Model Context Provider (MCP) for interacting with Sentry's API.",
