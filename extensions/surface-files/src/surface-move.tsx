@@ -17,6 +17,7 @@ import {
   getUniqueDest,
   processFilesWithErrorsAndProgress,
   isValidExtension,
+  getDestinationFolderName,
   showInvalidExtensionToast,
   showNoFolderSelectedToast,
   showNoMatchingFilesToast,
@@ -26,40 +27,39 @@ import {
 } from "./file-utils";
 
 // Preferences
-const preferences = getPreferenceValues<{ confirmLimit: string; excludeExtensions?: string }>();
-const parsedLimit = Number(preferences.confirmLimit);
-const CONFIRM_LIMIT = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 20;
-const excludedExtensions = parseExcludedExtensions(preferences.excludeExtensions);
+const { confirmLimit, excludeExtensions, folderName, includeHiddenFiles } = getPreferenceValues<{
+  confirmLimit: string;
+  excludeExtensions?: string;
+  folderName: string;
+  includeHiddenFiles: boolean;
+}>();
+
+const CONFIRM_LIMIT = Number(confirmLimit) > 0 ? Number(confirmLimit) : 20;
+const excludedExtensions = parseExcludedExtensions(excludeExtensions);
 
 export default function Command() {
-  async function handleSubmit(values: { extension: string }) {
-    // Check for empty or invalid extension
-    if (!isValidExtension(values.extension)) {
-      showInvalidExtensionToast();
-      return;
-    }
+  async function handleSubmit({ extension }: { extension: string }) {
+    // Validate extension input
+    if (!isValidExtension(extension)) return showInvalidExtensionToast();
 
     const selected = await getSelectedFinderItems();
-    if (!selected.length) {
-      showNoFolderSelectedToast();
-      return;
-    }
-    const folder = selected[0].path;
-    const ext = "." + values.extension.replace(/^\./, "");
+    if (!selected.length) return showNoFolderSelectedToast();
 
-    // Destination folder one level above the selected folder
+    // Folder and extension setup
+    const folder = selected[0].path;
+    const ext = "." + extension.replace(/^\./, "");
     const parent = path.dirname(folder);
-    const dest = path.join(parent, `x_${ext.replace(".", "")}`);
+    const dest = path.join(parent, getDestinationFolderName(folderName, ext));
+
     try {
       await fs.mkdir(dest, { recursive: true });
     } catch {
-      showFailedToCreateDestToast(dest);
-      return;
+      return showFailedToCreateDestToast(dest);
     }
 
     // Collect all files to process
     const filesToMove: { src: string; dest: string }[] = [];
-    for await (const filePath of walk(folder)) {
+    for await (const filePath of walk(folder, includeHiddenFiles)) {
       const fileExt = path.extname(filePath).toLowerCase();
       if (filePath.endsWith(ext) && !isExcludedExtension(fileExt, excludedExtensions)) {
         const fileName = path.basename(filePath);
@@ -69,10 +69,7 @@ export default function Command() {
     }
 
     // Feedback if no files found
-    if (filesToMove.length === 0) {
-      showNoMatchingFilesToast();
-      return;
-    }
+    if (filesToMove.length === 0) return showNoMatchingFilesToast();
 
     // Confirm if the number of files exceeds the limit
     if (filesToMove.length > CONFIRM_LIMIT) {
@@ -95,9 +92,7 @@ export default function Command() {
     });
 
     let message = `${success} file(s) moved to ${dest}.`;
-    if (failed > 0) {
-      message += ` ${failed} file(s) could not be moved.`;
-    }
+    if (failed > 0) message += ` ${failed} file(s) could not be copied.`;
 
     showToast({
       style: failed > 0 ? Toast.Style.Failure : Toast.Style.Success,

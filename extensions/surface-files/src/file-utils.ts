@@ -3,11 +3,13 @@ import path from "path";
 import { showToast, Toast } from "@raycast/api";
 
 // Recursively walk through all files in a directory
-export async function* walk(dir: string): AsyncGenerator<string> {
+export async function* walk(dir: string, includeHidden = false): AsyncGenerator<string> {
   for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+    // Skip hidden files/folders if not included
+    if (!includeHidden && entry.name.startsWith(".")) continue;
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      yield* walk(fullPath);
+      yield* walk(fullPath, includeHidden);
     } else {
       yield fullPath;
     }
@@ -50,6 +52,17 @@ export async function processFilesWithErrorsAndProgress(
     if (onProgress) onProgress(i + 1, files.length);
   }
   return { success, failed };
+}
+// Validate folder input
+export function isValidFolderName(name: string | undefined): boolean {
+  return !!name && /^[^\\/:*?"<>|\0]+$/.test(name);
+}
+
+// Standarized behavoir for invalid folder name
+export function getDestinationFolderName(folderNamePref: string, ext: string): string {
+  return isValidFolderName(folderNamePref)
+    ? `${folderNamePref}_${ext.replace(".", "")}`
+    : `invalidFolderName_${ext.replace(".", "")}`;
 }
 
 // Validate file extension input

@@ -35,11 +35,28 @@
     },
     {
       "name": "excludeExtensions",
-      "title":"Exclude Extensions",
+      "title": "Exclude Extensions",
       "description": "Comma-separated list of file extensions to ignore",
       "placeholder": "txt, db, zip",
       "type": "textfield",
       "default": "",
+      "required": false
+    },
+    {
+      "name": "folderName",
+      "title": "Name of the new folder",
+      "description": "X for X_mp3, X_avi, etc.",
+      "type": "textfield",
+      "default": "X",
+      "required": false
+    },
+    {
+      "name": "includeHiddenFiles",
+      "title": "Include Hidden Files",
+      "description": "Whether to include hidden files in the extraction process.",
+      "type": "checkbox",
+      "label": "Include hidden files",
+      "default": false,
       "required": false
     }
   ],
