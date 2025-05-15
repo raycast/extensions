@@ -16,14 +16,18 @@ export default function ListPayments() {
 
   return (
     <List isLoading={isLoading}>
-      {data.map((payment) => (
-        <List.Item
-          key={payment.id}
-          icon="payments.svg"
-          title={payment.amount.toString()}
-          accessories={[{ tag: payment.status }]}
-        />
-      ))}
+      {data.length === 0 ? (
+        <List.EmptyView title="No Payments" description="No payments found." />
+      ) : (
+        data.map((payment) => (
+          <List.Item
+            key={payment.id}
+            icon="payments.svg"
+            title={payment.amount.toString()}
+            accessories={[{ tag: payment.status }]}
+          />
+        ))
+      )}
     </List>
   );
 }

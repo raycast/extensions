@@ -142,7 +142,9 @@ function CreateProduct({ mutate }: { mutate: MutatePromise<ProductEntity[]> }) {
       description: FormValidation.Required,
       price(value) {
         if (!value) return "Price is required";
-        if (!Number(value)) return "Price must be a number";
+        const num = Number(value);
+        if (isNaN(num)) return "Price must be a number";
+        if (num < 0) return "Price cannot be negative";
       },
     },
   });

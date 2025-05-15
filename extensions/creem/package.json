@@ -48,13 +48,15 @@
     {
       "name": "list-products",
       "title": "List Products",
+      "subtitle": "Creem",
       "description": "Manage your products and view their sales performance.",
       "mode": "view"
     },
     {
       "name": "list-payments",
       "title": "List Payments",
-      "description": "Manage your products and view their sales performance.",
+      "subtitle": "Creem",
+      "description": "View your payment transactions.",
       "mode": "view"
     }
   ],

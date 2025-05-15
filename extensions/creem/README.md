@@ -18,7 +18,7 @@ With this extension you can:
 
 2. **Enter your Creem API Keys**: The first time you use the extension, you'll need to enter both **Prod** and **Test** Tokens in Preferences OR at first prompt:
 
-    a. `Navigate` to  [Developers > API Keys](https://www.creem.io/dashboard/developers)
+    a. `Navigate` to [Developers > API Keys](https://www.creem.io/dashboard/developers)
 
     b. `Click` on **API Keys**
 
