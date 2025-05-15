@@ -163,6 +163,10 @@ export default function Command() {
     }
   }
 
+  function formatReminderTitle(title: string, listName?: string) {
+    return `${title} - ${listName}`;
+  }
+
   async function handleListChange(listId?: string) {
     setListId(listId);
     await mutate();
@@ -212,7 +216,7 @@ export default function Command() {
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
                 key={reminder.id}
-                title={truncate(addPriorityToTitle(reminder.title, reminder.priority))}
+                title={truncate(addPriorityToTitle(formatReminderTitle(reminder.title, reminder.list?.title), reminder.priority))}
               >
                 <MenuBarExtra.Item
                   title="Open Reminder"
