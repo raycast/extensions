@@ -13,6 +13,7 @@
     {
       "name": "calculate-payment",
       "title": "Calculate Payment",
+      "subtitle": "Danish Tax Calculator",
       "description": "Calculate your payment after taxes",
       "mode": "view",
       "arguments": [
