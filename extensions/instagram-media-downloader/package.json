@@ -14,7 +14,7 @@
     {
       "name": "download-instagram-media",
       "title": "Download Instagram Media",
-      "description": "Download instagram media with URL",
+      "description": "Download Instagram media with URL",
       "mode": "no-view",
       "arguments": [
         {
@@ -28,7 +28,7 @@
       "preferences": [
         {
           "name": "mediaDownloadPath",
-          "title": "Video Download Path",
+          "title": "Media Download Path",
           "description": "Path to save downloaded media",
           "type": "directory",
           "required": false
