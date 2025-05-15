@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, showToast, Toast, confirmAlert, Keyboard, Alert, Color } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, showToast, Toast, confirmAlert, Keyboard, Alert } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "./utils";
 import { getCalculationHistory, deleteCalculation, deleteAllCalculations } from "./storage";
