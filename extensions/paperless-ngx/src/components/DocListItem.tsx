@@ -12,25 +12,28 @@ const formatDateTime = (date: string): string => {
 const getSubTitle = (correspondent?: string, dateCreated?: string): string => {
   const stripTimeFormat = dateFormat.split(" ")[0];
   const date = moment(dateCreated).format(stripTimeFormat).toString();
+  // Show nothing
   if (!showCorrespondentInSubtitle && !showDateInSubtitle) {
     return "";
   }
+  // Show correspondent only
   if (showCorrespondentInSubtitle && !showDateInSubtitle) {
     return correspondent || "";
   }
+  // Only show date only
   if (!showCorrespondentInSubtitle && showDateInSubtitle) {
     return date || "";
   }
-  if (showCorrespondentInSubtitle && showDateInSubtitle) {
-    if (correspondent && date) {
-      return `${correspondent} - ${date}`;
-    } else if (correspondent) {
-      return correspondent;
-    } else if (date) {
-      return date;
-    }
+  // Show correspondent and date
+  if (correspondent && date) {
+    return `${correspondent} - ${date}`;
+  } else if (correspondent) {
+    return correspondent;
+  } else if (date) {
+    return date;
+  } else {
+    return "";
   }
-  return "";
 };
 
 export const DocListItem = ({ document, type, tags, correspondent }: DocItem): JSX.Element => {
