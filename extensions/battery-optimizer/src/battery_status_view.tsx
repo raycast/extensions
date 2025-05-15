@@ -1,4 +1,5 @@
-import { ActionPanel, Detail, Action, Icon, showToast, Toast, showHUD } from "@raycast/api";
+import { ActionPanel, Detail, Action, Icon, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getBatteryTool } from "./utils/batteryTools";
 import { execSync } from "node:child_process";
@@ -43,11 +44,7 @@ export default function Command() {
       console.error("Battery status error:", errorMessage);
       setError(errorMessage);
       setStatus("Error fetching battery status");
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to get battery status",
-        message: errorMessage.substring(0, 100),
-      });
+      showFailureToast(error, { title: "Failed to get battery status" });
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +133,7 @@ export default function Command() {
     // Refresh every 60 seconds
     const interval = setInterval(fetchBatteryStatus, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [currentTool]);
 
   // Format the battery status for better display in Raycast
   let formattedMarkdown;
