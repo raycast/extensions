@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 
 export enum BatteryTool {
   BCLM = "bclm",
-  BATT = "batt"
+  BATT = "batt",
 }
 
 type Preferences = {
