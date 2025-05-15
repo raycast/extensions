@@ -42,7 +42,7 @@ export function calculatePayment(
     throw new Error(incomeError);
   }
 
-  const { value: deductionValue } = validateAndParseIncome(deduction || '0');
+  const { value: deductionValue } = validateAndParseIncome(deduction || "0");
   const drawPercentageValue = parsePercentage(drawPercentage);
   const defaultPercentageValue = parsePercentage(defaultPercentage);
 
