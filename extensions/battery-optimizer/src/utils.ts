@@ -1,6 +1,6 @@
 import { showHUD } from "@raycast/api";
 import { execSync } from "node:child_process";
-import { preferences } from "./utils/getPreference";
+import { preferences, BatteryTool } from "./utils/getPreference";
 import { confirmAlertPersist } from "./utils/confirmAlertPersist";
 import {
   getBatteryTool,
@@ -54,7 +54,7 @@ export async function setBatteryThreshold(threshold: number, HUDMessage?: string
 
     // For BCLM we need to run the persist/unpersist command
     // For BATT the limit command already persists settings
-    if (batteryTool === "bclm" || (batteryTool === "batt" && persistCommand !== "")) {
+    if (batteryTool === BatteryTool.BCLM || (batteryTool === BatteryTool.BATT && persistCommand !== "")) {
       shellCommand += ` && ${toolPath} ${persistCommand}`;
     }
 

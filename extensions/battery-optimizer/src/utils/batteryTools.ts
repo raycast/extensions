@@ -1,7 +1,7 @@
 import { execSync } from "node:child_process";
 import { showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { preferences } from "./getPreference";
+import { preferences, BatteryTool } from "./getPreference";
 import { bclmPath, confirmAlertBrew } from "./initBCLM";
 import { battPath, confirmAlertBatt } from "./initBatt";
 
@@ -14,7 +14,7 @@ export const getBatteryTool = () => {
 export const getBatteryToolPath = async (): Promise<string> => {
   const tool = getBatteryTool();
 
-  if (tool === "bclm") {
+  if (tool === BatteryTool.BCLM) {
     const detectBrew = await confirmAlertBrew();
     if (!detectBrew) {
       throw new Error("BCLM not found");
@@ -33,7 +33,7 @@ export const getBatteryToolPath = async (): Promise<string> => {
 export const mapBatteryCommand = (command: string, threshold?: number): string => {
   const tool = getBatteryTool();
 
-  if (tool === "bclm") {
+  if (tool === BatteryTool.BCLM) {
     if (command === "read") return "read";
     if (command === "write" && threshold !== undefined) return `write ${threshold}`;
     if (command === "persist") return "persist";
@@ -56,7 +56,7 @@ export const parseBatteryOutput = (output: string): string => {
 
   console.log(`Parsing ${tool} output: ${output.substring(0, 300)}`);
 
-  if (tool === "bclm") {
+  if (tool === BatteryTool.BCLM) {
     // BCLM returns just the number, so return it directly
     return output.trim();
   } else {

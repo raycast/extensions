@@ -1,5 +1,6 @@
 import { ActionPanel, Detail, Action, Icon, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { BatteryTool } from "./utils/getPreference";
 import { useEffect, useState } from "react";
 import { getBatteryTool } from "./utils/batteryTools";
 import { execSync } from "node:child_process";
@@ -16,7 +17,7 @@ export default function Command() {
 
   // Check if BATT is selected
   useEffect(() => {
-    if (currentTool !== "batt") {
+    if (currentTool !== BatteryTool.BATT) {
       setError("This command is for BATT only. Please use Get Battery Threshold for BCLM.");
       showHUD("This command is for BATT only. Please use Get Battery Threshold for BCLM.");
     }
@@ -26,7 +27,7 @@ export default function Command() {
     setIsLoading(true);
 
     // Skip fetching if wrong tool is selected
-    if (currentTool !== "batt") {
+    if (currentTool !== BatteryTool.BATT) {
       setIsLoading(false);
       return;
     }
@@ -54,7 +55,7 @@ export default function Command() {
   async function getBatteryStatusDirect(): Promise<string> {
     try {
       const toolCmd = await getBatteryToolPath();
-      const command = currentTool === "bclm" ? "read" : "status";
+      const command = currentTool === BatteryTool.BCLM ? "read" : "status";
 
       console.log(`Using battery tool: ${currentTool} (${toolCmd} ${command})`);
 
