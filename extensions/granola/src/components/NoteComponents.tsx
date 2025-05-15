@@ -1,9 +1,7 @@
-// External dependencies
 import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 
-// Internal utilities
 import { getPanelId } from "../utils/getPanelId";
 import { getTranscript } from "../utils/fetchData";
 import convertHtmlToMarkdown from "../utils/convertHtmltoMarkdown";
@@ -22,12 +20,10 @@ export const sortNotesByDate = (docs: Doc[] | undefined): Doc[] => {
  * Component that provides standard actions for a note
  */
 export const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
-  // Safely get panel ID once and reuse it
   const panelId = getPanelId(panels, doc.id);
   const canShare = doc.sharing_link_visibility === "public" && panelId;
   const shareUrl = panelId ? `https://notes.granola.ai/p/${panelId}` : "";
 
-  // Safely access notes content with fallbacks at each level
   let notes = "";
   if (panels && doc.id && panels[doc.id] && panelId && panels[doc.id][panelId]) {
     notes = panels[doc.id][panelId].original_content || "";
@@ -150,14 +146,12 @@ export function NoteListItem({
                       icon={Icon.Waveform}
                       target={<FullTranscriptDetail docId={doc.id} title={doc.title ?? untitledNoteTitle} />}
                     />
-                    {/* NoteActions rendered inside Detail view for actions when viewing note details */}
                     <NoteActions doc={doc} panels={panels} />
                   </ActionPanel>
                 }
               />
             }
           />
-          {/* NoteActions rendered at ActionPanel root level for direct access to actions from the list view */}
           <NoteActions doc={doc} panels={panels} />
         </ActionPanel>
       }

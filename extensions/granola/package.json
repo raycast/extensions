@@ -19,21 +19,18 @@
     {
       "name": "search-notes",
       "title": "Search Notes",
-      "subtitle": "Search all notes",
       "description": "Search all notes from Granola",
       "mode": "view"
     },
     {
       "name": "create-note",
       "title": "Create Note",
-      "subtitle": "Create a new note in Granola",
       "description": "Create a new note in Granola",
       "mode": "no-view"
     },
     {
       "name": "browse-folders",
       "title": "Browse Folders",
-      "subtitle": "Browse folders and notes",
       "description": "Browse folders and notes",
       "mode": "view"
     }
