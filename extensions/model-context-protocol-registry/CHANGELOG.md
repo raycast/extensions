@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Nuxt MCP Server] - {PR_MERGE_DATE}
+## [Add Nuxt MCP Server] - 2025-05-15
 
 Add Official Nuxt MCP Server to registry, this allow docs and modules search.
 
