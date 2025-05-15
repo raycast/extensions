@@ -22,11 +22,7 @@ export default function ViewHistory() {
         title: "Calculation deleted",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to delete",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Failed to delete" });
     }
   };
 
