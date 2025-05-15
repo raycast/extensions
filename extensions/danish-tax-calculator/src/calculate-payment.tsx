@@ -38,6 +38,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Calcul
         <List.Item
           title="Income"
           icon={Icon.Receipt}
+          subtitle={income.includes("*") ? income : undefined}
           accessories={[{ tag: { value: formatCurrency(incomeValue), color: Color.Green } }]}
           actions={<Actions content={formatCurrency(incomeValue)} />}
         />
