@@ -19,6 +19,9 @@
       "subtitle": "Danish Tax Calculator",
       "description": "Calculate your payment after taxes",
       "mode": "view",
+      "keywords": [
+        "skat"
+      ],
       "arguments": [
         {
           "name": "income",
