@@ -1,5 +1,16 @@
 # Granola Changelog
 
+## [1.4] - {PR_MERGE_DATE}
+
+### ✨ New Features
+- Added folder browsing capability to view and navigate through folders and their notes
+- Added folder-related AI queries to support searching by folder
+
+### 🔄 Refactors and Improvements
+- Created shared components for consistent note display across commands
+- Updated types to support folder structure and improved content handling
+
+
 ## [1.3] - 2025-05-05
 
 ### 🐞 Bug Fixes
