@@ -72,17 +72,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Calcul
           actions={
             <ActionPanel>
               <Actions content={formatCurrency(salary)} />
-              <Action
-                title="Save Calculation"
-                icon={Icon.SaveDocument}
-                onAction={() => {
-                  showToast({
-                    style: Toast.Style.Success,
-                    title: "Calculation Saved",
-                    message: "Added to history",
-                  });
-                }}
-              />
             </ActionPanel>
           }
         />
