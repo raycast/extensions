@@ -44,7 +44,7 @@ export const mapBatteryCommand = (command: string, threshold?: number): string =
     if (command === "write" && threshold !== undefined) return `limit ${threshold}`;
     // BATT doesn't have separate persist/unpersist commands
     // The limit command already persists settings
-    if (command === "persist") return ""; // Empty command, will be skipped
+    if (command === "persist") throw new Error("'persist' command not needed for BATT - settings are persisted automatically");
     if (command === "unpersist") return "disable";
     return command;
   }
