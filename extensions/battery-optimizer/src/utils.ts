@@ -35,7 +35,10 @@ export async function getChargeThreshold(HUDMessage?: string) {
 export async function setBatteryThreshold(threshold: number, HUDMessage?: string) {
   try {
     const toolPath = await getBatteryToolPath();
-    if (!toolPath) return;
+    if (!toolPath) {
+      await showHUD("Battery management tool not found");
+      return;
+    }
 
     if (await confirmAlertPersist()) {
       return;
