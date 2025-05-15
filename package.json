@@ -5,6 +5,9 @@
   "description": "Display your favourite, recently played tracks, your top albums and artists and more from Last.fm on Raycast!",
   "icon": "command-icon.png",
   "author": "eggsy",
+  "contributors": [
+    "pato"
+  ],
   "license": "MIT",
   "keywords": [
     "lastfm",
@@ -15,6 +18,13 @@
     "music"
   ],
   "commands": [
+    {
+      "name": "auth",
+      "title": "Setup Scrobbling",
+      "subtitle": "Last.fm",
+      "description": "Authenticate for scrobbling functionality",
+      "mode": "view"
+    },
     {
       "name": "combined",
       "title": "Top & Recent Songs",
@@ -59,6 +69,14 @@
       "placeholder": "Your Last.fm API key",
       "required": true,
       "title": "API key"
+    },
+    {
+      "type": "password",
+      "name": "apisecret",
+      "description": "Your Last.fm API secret (needed for scrobbling)",
+      "placeholder": "Your Last.fm API secret",
+      "required": false,
+      "title": "API Secret"
     },
     {
       "type": "textfield",
@@ -109,18 +127,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.98.5",
     "node-fetch": "^3.1.0",
     "swr": "^1.1.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^18.0.0",
+    "@types/react": "^19.1.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "react-devtools": "6.1.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
