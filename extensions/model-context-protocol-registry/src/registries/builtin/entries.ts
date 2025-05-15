@@ -418,7 +418,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://mcp.apify.com",
     configuration: {
       command: "npx",
-      args: ["-y", "@Apify/mcp-server"],
+      args: ["-y", "@apify/actors-mcp-server"],
       env: {
         APIFY_API_TOKEN: "YOUR_API_TOKEN_HERE",
       },
