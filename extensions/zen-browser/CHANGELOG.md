@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [✨ AI Enhancements] - {PR_MERGE_DATE}
+## [✨ AI Enhancements] - 2025-05-15
 
 AI Tools to:
 
