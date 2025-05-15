@@ -1,13 +1,4 @@
-import {
-  Color,
-  Icon,
-  LaunchProps,
-  List,
-  getPreferenceValues,
-  ActionPanel,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Color, Icon, LaunchProps, List, getPreferenceValues, ActionPanel, showToast, Toast } from "@raycast/api";
 import { calculatePayment } from "./functions";
 import { Actions, AM_CONTRIBUTION_PERCENTAGE } from "./constants";
 import { TaxCalculation } from "./types";
