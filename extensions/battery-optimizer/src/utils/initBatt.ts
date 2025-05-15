@@ -41,8 +41,8 @@ export async function confirmAlertBatt(): Promise<boolean> {
 
   if (!battExists && !customPathValid) {
     const userConfirmed = await confirmAlert({
-      title: "Whether to install batt?",
-      message: "The batt executable was not found. Would you like to install it from GitHub?",
+      title: "Install batt?",
+      message: "The batt executable was not found. Would you like to show it on GitHub?",
       primaryAction: {
         title: "Open GitHub",
         onAction: async () => {
