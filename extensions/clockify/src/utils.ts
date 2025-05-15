@@ -2,6 +2,7 @@ import { Cache, LocalStorage, Toast, getPreferenceValues, showToast } from "@ray
 import fetch from "node-fetch";
 import uniqWith from "lodash.uniqwith";
 import { ClockifyRegion, FetcherArgs, FetcherResponse, PreferenceValues, TimeEntry, Project, Task } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 const cache = new Cache();
 const TIME_ENTRIES_CACHE_KEY = "clockify/timeEntries";
@@ -173,11 +174,14 @@ export async function stopCurrentTimer(callback?: () => void): Promise<void> {
     try {
       const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
       if (entriesString) {
-        const entries = JSON.parse(entriesString as string);
+        const entries: TimeEntry[] = JSON.parse(entriesString as string);
         if (entries && entries.length > 0) {
-          // Update the first entry (the active one) with the end time
-          entries[0].timeInterval.end = new Date().toISOString();
-          cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(entries));
+          // Find and update the active entry
+          const activeEntryIndex = entries.findIndex((entry) => !entry.timeInterval.end);
+          if (activeEntryIndex !== -1) {
+            entries[activeEntryIndex].timeInterval.end = new Date().toISOString();
+            cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(entries));
+          }
         }
       }
     } catch (e) {
@@ -253,6 +257,7 @@ export async function getTasksForProject(projectId: string): Promise<Task[]> {
 
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/projects/${projectId}/tasks?page-size=1000`);
   if (error) {
+    showFailureToast(error, { title: "Could not fetch tasks" });
     console.error("Error fetching tasks:", error);
     return [];
   }
@@ -274,7 +279,7 @@ export async function addNewTimeEntry(
   showToast(Toast.Style.Animated, "Starting…");
 
   const workspaceId = await LocalStorage.getItem("workspaceId");
-  const { data } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
+  const { data, error } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
     method: "POST",
     body: {
       description,
@@ -289,7 +294,7 @@ export async function addNewTimeEntry(
     },
   });
 
-  if (data?.id) {
+  if (!error && data?.id) {
     showToast(Toast.Style.Success, "Timer is running");
 
     // Update the cache directly or call the callback to refetch
@@ -298,10 +303,8 @@ export async function addNewTimeEntry(
       if (entriesString) {
         const entries = JSON.parse(entriesString as string);
         // Add the new entry to the beginning of the array
-        if (data) {
-          entries.unshift(data);
-          cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(entries));
-        }
+        entries.unshift(data);
+        cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(entries));
       }
     } catch (e) {
       console.error("Error updating cache:", e);

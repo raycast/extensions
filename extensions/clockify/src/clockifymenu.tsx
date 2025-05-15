@@ -1,4 +1,5 @@
 import { Color, Icon, MenuBarExtra, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getCurrentlyActiveTimeEntry, getElapsedTime, stopCurrentTimer, toMonospaceFont } from "./utils";
 import { TimeEntry } from "./types";
@@ -12,8 +13,12 @@ class DataWrapper {
 export default function ClockifyMenuCommand(): JSX.Element {
   const [currentData, setCurrentData] = useState<DataWrapper | null>(null);
 
-  const handleStopTimer = () => {
-    stopCurrentTimer(() => setCurrentData(null));
+  const handleStopTimer = async () => {
+    try {
+      await stopCurrentTimer(() => setCurrentData(null));
+    } catch (error) {
+      showFailureToast(error, { title: "Could not stop timer" });
+    }
   };
 
   useEffect(() => {

@@ -73,6 +73,7 @@
   ],
   "dependencies": {
     "@raycast/api": "1.76.0",
+    "@raycast/utils": "^1.19.1",
     "lodash.isempty": "^4.4.0",
     "lodash.uniqwith": "^4.5.0",
     "node-fetch": "^3.3.2"
