@@ -1,6 +1,6 @@
 # Sentry Changelog
 
-## [Show issues for Sentry orgs stored in Europe] - {PR_MERGE_DATE}
+## [Show issues for Sentry orgs stored in Europe] - 2025-05-15
 
 - Show issues for Sentry orgs stored in both US and Europe, previously it was showing only projects in the US.
 - Give more space to the issue title in the issues list view.
