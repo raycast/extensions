@@ -1,31 +1,28 @@
-import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { NOT_INSTALLED_MESSAGE, SEARCH_ENGINE } from "../constants";
+import { closeMainWindow, getPreferenceValues, popToRoot, Clipboard } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { SEARCH_ENGINE } from "../constants";
 import { Preferences, Tab } from "../interfaces";
 import { getNewTabShortcut } from "../util";
 
 export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
+  await Clipboard.copy(`${SEARCH_ENGINE[getPreferenceValues<Preferences>().searchEngine.toLowerCase()]}${queryText}`);
   popToRoot();
   closeMainWindow({ clearRootSearch: true });
 
   const script = `
     tell application "Zen"
-    set savedClipboard to get the clipboard
-    set the clipboard to "${SEARCH_ENGINE[getPreferenceValues<Preferences>().searchEngine.toLowerCase()]}${queryText}"
-    activate
-    repeat while not frontmost
-        delay 0.1
+      activate
+    end tell
+    repeat while not application "Zen" is frontmost
+      delay 0.1
     end repeat
     tell application "System Events"
-        ${getNewTabShortcut()}
-        keystroke "a" using {command down}
-        key code 51
-        keystroke "v" using {command down}
-        key code 36 
+      ${getNewTabShortcut()}
+      keystroke "a" using {command down}
+      key code 51
+      keystroke "v" using {command down}
+      key code 36 
     end tell
-    delay 0.1
-    set the clipboard to savedClipboard
-end tell
   `;
 
   return await runAppleScript(script);
