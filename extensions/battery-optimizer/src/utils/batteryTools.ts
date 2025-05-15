@@ -1,5 +1,6 @@
 import { execSync } from "node:child_process";
 import { showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { preferences } from "./getPreference";
 import { bclmPath, confirmAlertBrew } from "./initBCLM";
 import { battPath, confirmAlertBatt } from "./initBatt";
@@ -74,10 +75,10 @@ export const parseBatteryOutput = (output: string): string => {
       return limitMatch2[1];
     }
 
-    // Try to match any number followed by %
-    const percentMatch = output.match(/(\d+)%/);
+    // Try to match any number followed by % in a battery limit context
+    const percentMatch = output.match(/(?:limit|charging|max charge)[^\d]+(\d+)%/i);
     if (percentMatch) {
-      console.log(`Found percentage in output: ${percentMatch[1]}`);
+      console.log(`Found percentage in battery limit context: ${percentMatch[1]}`);
       return percentMatch[1];
     }
 
@@ -168,13 +169,14 @@ export async function executeBattCommand(command: string, requireAdmin = false, 
     } catch (execError: unknown) {
       const executionError = execError instanceof Error ? execError : new Error(String(execError));
       console.error(`Error executing command "${scriptCommand}": ${executionError.message}`);
+      showFailureToast(executionError, { title: "Failed to execute battery command" });
       throw new Error(`Failed to execute battery command: ${executionError.message}`);
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(`Error executing battery command: ${errorMessage}`);
     if (showOutput) {
-      await showHUD(`Error: ${errorMessage}`);
+      showFailureToast(error, { title: "Error executing battery command" });
     }
     throw error;
   }
