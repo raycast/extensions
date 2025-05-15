@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, useCachedPromise, useForm } from "@raycast/utils";
 import { CreateProductRequestEntity, ProductEntity } from "creem/dist/commonjs/models/components";
 import { useState } from "react";
@@ -100,6 +100,7 @@ function CreateProduct({ mutate }: { mutate: MutatePromise<ProductEntity[]> }) {
     taxCategory: string;
     taxMode: boolean;
   };
+  const { pop } = useNavigation();
   const { handleSubmit, itemProps, values } = useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating Product", values.name);
@@ -118,6 +119,7 @@ function CreateProduct({ mutate }: { mutate: MutatePromise<ProductEntity[]> }) {
         );
         toast.style = Toast.Style.Success;
         toast.title = "Created Product";
+        pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not create";
