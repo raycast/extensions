@@ -1,5 +1,9 @@
 # Expo Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Remove duplicate files
+
 ## [New Additions] - 2025-04-22
 
 - Added support for Two-factor authentication
