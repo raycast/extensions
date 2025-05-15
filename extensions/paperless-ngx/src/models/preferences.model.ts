@@ -3,4 +3,6 @@ export interface Preferences {
   apiToken: string;
   gridMode: boolean;
   dateFormat: string;
+  showCorrespondentInSubtitle: boolean;
+  showDateInSubtitle: boolean;
 }
