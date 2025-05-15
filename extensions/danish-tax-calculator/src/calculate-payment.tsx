@@ -5,7 +5,6 @@ import {
   List,
   getPreferenceValues,
   ActionPanel,
-  Action,
   showToast,
   Toast,
 } from "@raycast/api";
