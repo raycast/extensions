@@ -34,15 +34,6 @@
       "required": false
     },
     {
-      "name": "excludeExtensions",
-      "title": "Exclude Extensions",
-      "description": "Comma-separated list of file extensions to ignore",
-      "placeholder": "txt, db, zip",
-      "type": "textfield",
-      "default": "",
-      "required": false
-    },
-    {
       "name": "folderName",
       "title": "Name of the new folder",
       "description": "X for X_mp3, X_avi, etc.",

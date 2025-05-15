@@ -22,20 +22,16 @@ import {
   showNoFolderSelectedToast,
   showNoMatchingFilesToast,
   showFailedToCreateDestToast,
-  parseExcludedExtensions,
-  isExcludedExtension,
 } from "./file-utils";
 
 // Preferences
-const { confirmLimit, excludeExtensions, folderName, includeHiddenFiles } = getPreferenceValues<{
+const { confirmLimit, folderName, includeHiddenFiles } = getPreferenceValues<{
   confirmLimit: string;
-  excludeExtensions?: string;
   folderName: string;
   includeHiddenFiles: boolean;
 }>();
 
 const CONFIRM_LIMIT = Number(confirmLimit) > 0 ? Number(confirmLimit) : 20;
-const excludedExtensions = parseExcludedExtensions(excludeExtensions);
 
 export default function Command() {
   async function handleSubmit({ extension }: { extension: string }) {
@@ -54,8 +50,7 @@ export default function Command() {
     // Collect all files to process
     const filesToMove: { src: string; dest: string }[] = [];
     for await (const filePath of walk(folder, includeHiddenFiles)) {
-      const fileExt = path.extname(filePath).toLowerCase();
-      if (filePath.endsWith(ext) && !isExcludedExtension(fileExt, excludedExtensions)) {
+      if (filePath.endsWith(ext)) {
         const fileName = path.basename(filePath);
         const uniqueDest = await getUniqueDest(dest, fileName);
         filesToMove.push({ src: filePath, dest: uniqueDest });
