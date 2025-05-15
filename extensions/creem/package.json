@@ -3,7 +3,7 @@
   "name": "creem",
   "title": "Creem",
   "description": "Smooth payments for SaaS and Indie Hackers that don't break the bank",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "xmok",
   "categories": [
     "Finance"
@@ -15,14 +15,16 @@
       "title": "API Key",
       "type": "password",
       "required": true,
-      "description": ""
+      "placeholder": "creem_XX...XXX",
+      "description": "Prod API Key"
     },
     {
       "name": "test_api_key",
       "title": "Test API Key",
       "type": "password",
       "required": true,
-      "description": "creem_test_XX...XXX"
+      "placeholder": "creem_test_XX...XXX",
+      "description": "Test API Key"
     },
     {
       "name": "mode",
@@ -39,13 +41,19 @@
           "value": "test"
         }
       ],
-      "description": ""
+      "description": "Toggle between Test and Prod mode"
     }
   ],
   "commands": [
     {
       "name": "list-products",
       "title": "List Products",
+      "description": "Manage your products and view their sales performance.",
+      "mode": "view"
+    },
+    {
+      "name": "list-payments",
+      "title": "List Payments",
       "description": "Manage your products and view their sales performance.",
       "mode": "view"
     }
