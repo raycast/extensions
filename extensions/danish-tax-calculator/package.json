@@ -59,7 +59,7 @@
       "type": "dropdown",
       "required": true,
       "title": "Default Action",
-      "default": "Big",
+      "default": "copy",
       "placeholder": "Default Action",
       "data": [
         {
