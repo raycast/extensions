@@ -33,8 +33,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Calcul
     saveCalculation({
       timestamp: Date.now(),
       income: incomeValue,
-      tax: tax,
-      salary: salary,
+      tax,
+      salary,
     }).catch((error) => {
       showToast({
         style: Toast.Style.Failure,
