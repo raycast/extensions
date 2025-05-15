@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 interface CalculationHistory {
   timestamp: number;
