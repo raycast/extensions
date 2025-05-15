@@ -51,11 +51,7 @@ export default function ViewHistory() {
           title: "All calculations deleted",
         });
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to delete calculations",
-          message: String(error),
-        });
+        await showFailureToast(error, { title: "Failed to delete calculations" });
       }
     }
   };
