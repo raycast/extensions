@@ -3,7 +3,7 @@ import { getChargeThreshold, setBatteryThreshold } from "./utils";
 import { usePromise } from "@raycast/utils";
 import { getBatteryTool } from "./utils/batteryTools";
 
-export default function BatterOptimizerMenuBar() {
+export default function BatteryOptimizerMenuBar() {
   const {
     isLoading,
     data: chargingThreshold,
