@@ -18,7 +18,7 @@ export async function getCalculationHistory(): Promise<CalculationHistory[]> {
     const history = await LocalStorage.getItem("calculation-history");
     return typeof history === "string" ? JSON.parse(history) : [];
   } catch (error) {
-    console.error("Failed to parse calculation history:", error);
+    showFailureToast(error, { title: "Failed to parse calculation history" });
     return [];
   }
 }
