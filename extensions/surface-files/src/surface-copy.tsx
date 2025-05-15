@@ -51,12 +51,6 @@ export default function Command() {
     const parent = path.dirname(folder);
     const dest = path.join(parent, getDestinationFolderName(folderName, ext));
 
-    try {
-      await fs.mkdir(dest, { recursive: true });
-    } catch {
-      return showFailedToCreateDestToast(dest);
-    }
-
     // Collect all files to copy
     const filesToCopy: { src: string; dest: string }[] = [];
     for await (const filePath of walk(folder, includeHiddenFiles)) {
@@ -78,6 +72,13 @@ export default function Command() {
         message: `You are about to copy ${filesToCopy.length} files. Continue?`,
       });
       if (!confirmed) return;
+    }
+
+    // Create destination folder if it doesn't exist
+    try {
+      await fs.mkdir(dest, { recursive: true });
+    } catch {
+      return showFailedToCreateDestToast(dest);
     }
 
     // Collect all files to process
