@@ -432,7 +432,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["zeabur-mcp@latest"],
       env: {
-        ZEABUR_TOKEN: "sk-xxxxxx",
+        ZEABUR_TOKEN: "YOUR_ZEABUR_TOKEN_HERE",
       },
     },
   },

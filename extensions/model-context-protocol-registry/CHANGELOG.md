@@ -2,7 +2,7 @@
 
 ## [Add Zeabur MCP Server] - {PR_MERGE_DATE}
 
-Add Official Zeabur MCP Server to registry, this allow manage and deploy Zeabur projects.
+Add Official Zeabur MCP Server to registry, this allows to manage and deploy Zeabur projects.
 
 ## [Add Nuxt MCP Server] - 2025-05-15
 
