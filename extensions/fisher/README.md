@@ -20,8 +20,8 @@ To increase GitHub API rate limits during development:
 
 1. Create a `.env` file in the project root:
 
-   ```bash
-   GITHUB_TOKEN=your_personal_token_here
+   ```javascript
+   GITHUB_TOKEN = your_personal_token_here;
    ```
 
 2. Install dependencies:
@@ -32,16 +32,16 @@ To increase GitHub API rate limits during development:
 
 3. On `PluginDetail` component:
 
-   ```bash
-     const headers = {
-         Authorization: `Bearer process.env.GITHUB_TOKEN`,
-         Accept: "application/vnd.github+json",
-     };
+   ```javascript
+   const headers = {
+     Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+     Accept: "application/vnd.github+json",
+   };
 
-     const [metaRes, relRes] = await Promise.all([
-       fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers }),
-       fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`, { headers }),
-     ]);
+   const [metaRes, relRes] = await Promise.all([
+     fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers }),
+     fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`, { headers }),
+   ]);
    ```
 
 The extension uses this token to authenticate GitHub API requests when available.

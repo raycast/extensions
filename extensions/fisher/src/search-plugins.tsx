@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { pluginRegistry } from "./data/registry";
 import PluginDetail from "./components/PluginDetail";
 import { listPlugins } from "./utils/listPlugins";
+import { showFailureToast } from "@raycast/utils";
 
 export default function SearchPlugins() {
   const [installedPlugins, setInstalledPlugins] = useState<string[]>([]);
@@ -12,15 +13,16 @@ export default function SearchPlugins() {
     try {
       const allPlugins = listPlugins();
       setInstalledPlugins(allPlugins);
-    } catch {
+    } catch (error) {
       setInstalledPlugins([]);
+      showFailureToast(error as Error, { title: "Failed to list installed plugins" });
     }
   }, []);
 
   return (
     <List
       searchBarPlaceholder="Search plugins…"
-      isLoading={false}
+      isLoading={installedPlugins.length === 0}
       isShowingDetail={false}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={(value) => setShowOnlyUninstalled(value === "uninstalled")}>

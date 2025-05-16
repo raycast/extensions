@@ -15,7 +15,7 @@ export default function Command() {
       const allPlugins = listPlugins();
       setPlugins(allPlugins);
     } catch (err) {
-      showFailureToast(err as Error, { title: "Failed to list plugins" });
+      showFailureToast(err as Error, { title: "Could not list plugins" });
     } finally {
       setIsLoading(false);
     }
@@ -26,6 +26,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail={false}
       searchBarPlaceholder="Search plugins…"
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={(value) => setShowCore(value === "all")}>
@@ -34,9 +35,9 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredPlugins.map((plugin, index) => {
+      {filteredPlugins.map((plugin) => {
         const meta = getPluginMeta(plugin);
-        const isCore = index === 0 && plugin === "jorgebucaran/fisher";
+        const isCore = plugin === "jorgebucaran/fisher";
         const githubUrl = meta?.url ?? `https://github.com/${plugin}`;
 
         return (
