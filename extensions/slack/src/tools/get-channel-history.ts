@@ -68,7 +68,9 @@ async function getChannelHistory(input: {
    * This happens when users reference channels by name (e.g. 'general') rather than ID.
    * We first check if the input is a valid channel ID, if not we try to find the channel by name.
    */
-  let channelId = isValidChannelId(input.channelId) ? input.channelId : await getChannelIdByChannelName(input.channelId);
+  const channelId = isValidChannelId(input.channelId)
+    ? input.channelId
+    : await getChannelIdByChannelName(input.channelId);
 
   if (!channelId) {
     throw new Error("Channel ID not found");
