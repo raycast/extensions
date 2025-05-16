@@ -1667,6 +1667,7 @@
   "aesign/sketch": "sketch",
   "mommertf/slack": "slack",
   "petr/slack-status": "slack-status",
+  "hassan_ahmed/slack-summarizer": "slack-summarizer",
   "koh-sh/slack-templated-message": "slack-templated-message",
   "timoransky/slackmojis": "slackmojis",
   "dtmzr/sleep-timer": "sleep-timer",
