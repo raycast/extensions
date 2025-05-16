@@ -3,6 +3,7 @@
 ## [🌟 New Feature] - {PR_MERGE_DATE}
 
 - 📧 Add the copy-foreground-mail-deeplink command to copy the foreground mail deeplink to the clipboard.
+- 🔥 Add new AI tool to get email link
 
 ## [Fix] - 2025-05-12
 

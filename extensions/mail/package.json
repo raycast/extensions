@@ -178,7 +178,13 @@
       "title": "Send Email",
       "description": "Send an email with Apple Mail."
     }
-  ],
+  ,
+    {
+      "name": "copy-email-link",
+      "title": "copy-email-link",
+      "description": "Copy the local link (URI) of the selected Apple Mail email so you can jump directly to that message. This makes it convenient to locate a specific email for context."
+    }
+      ],
   "dependencies": {
     "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.19.1",
