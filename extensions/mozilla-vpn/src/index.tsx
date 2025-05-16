@@ -475,7 +475,7 @@ const Command: React.FC = () => {
           serverCity={serverCity || 'Unknown'}
           serverCountry={serverCountry || 'Unknown'}
           ipAddress={currentIP || 'Unknown'}
-          isConnected={vpnStatus || false}
+          isConnected={Boolean(vpnStatus)}
           onToggleVpn={toggleVpn}
           onSelectServer={() => navigateTo('serverSelector')}
           onBack={navigateBack}
