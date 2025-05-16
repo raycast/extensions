@@ -69,7 +69,10 @@ async function searchMessages(input: Input) {
       }) || [];
 
     allMessages.push(...currentMessages);
-    hasMorePages = (response?.messages?.pagination?.page_count ?? 1) >= page;
+
+    const totalPages = response?.messages?.pagination?.page_count ?? 1;
+    hasMorePages = page < totalPages;
+    page++;
   } while (hasMorePages);
 
   return allMessages;
