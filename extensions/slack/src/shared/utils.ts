@@ -92,10 +92,17 @@ const handleError = async (error: CodedError | Error | unknown, title?: string) 
   return showFailureToast(error, { title: title ?? "Something unexpected happened" });
 };
 
+const isValidChannelId = (channelId) => {
+  const channelIdRegex = /^C[a-zA-Z0-9]{8,}$/;
+
+  return channelIdRegex.test(channelId.trim());
+}
+
 export {
   timeDifference,
   convertTimestampToDate,
   buildScriptEnsuringSlackIsRunning,
   handleError,
   convertSlackEmojiToUnicode,
+  isValidChannelId
 };
