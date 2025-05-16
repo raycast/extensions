@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [Channel, Channel History bug fixes and "Search Message" to Tools.] - {PR_MERGE_DATE}
+- Added the `search.message` slack api to enable AI to use the tool (search for full messages)
+- Fixed fails to find channelId when using get-channel-history when using AI
+- Fixed problems that fail to import all slack channels
+
 ## [AI-Powered Emoji Search] - 2025-04-24
 
 - Enhanced the `Search Emojis` command with AI-powered search: If you can't find an emoji by name, describe what you're looking for and AI will suggest the most relevant Slack emojis.
