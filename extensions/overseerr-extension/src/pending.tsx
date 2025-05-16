@@ -11,9 +11,10 @@ import axios from "axios";
 import { useNavigation } from "@raycast/api";
 import ApprovalForm from "./ApprovalForm";
 import { preferences, OVERSEERR_API_REQUEST } from "./utils";
+import { OverseerrRequest } from "./types";
 
 export default function PendingRequests() {
-  const [requests, setRequests] = useState<any[]>([]);
+  const [requests, setRequests] = useState<OverseerrRequest[]>([]);
   const [tmdbTitles, setTmdbTitles] = useState<{ [id: number]: string }>({});
   const [loading, setLoading] = useState(true);
   const { push } = useNavigation();
@@ -25,11 +26,14 @@ export default function PendingRequests() {
   async function fetchPendingRequests() {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${OVERSEERR_API_REQUEST}?take=100`, {
-        headers: { "X-Api-Key": preferences.OVERSEERR_API_KEY },
-      });
+      const { data } = await axios.get<{ results: OverseerrRequest[] }>(
+        `${OVERSEERR_API_REQUEST}?take=100`,
+        {
+          headers: { "X-Api-Key": preferences.OVERSEERR_API_KEY },
+        },
+      );
 
-      const pending = data.results.filter((r: any) => r.status === 1);
+      const pending = data.results.filter((r) => r.status === 1);
       setRequests(pending);
 
       const titleMap: { [id: number]: string } = {};
@@ -59,11 +63,11 @@ export default function PendingRequests() {
       );
 
       setTmdbTitles(titleMap);
-    } catch (err: any) {
+    } catch (err: unknown) {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load pending requests",
-        message: err.message,
+        message: err instanceof Error ? err.message : String(err),
       });
     } finally {
       setLoading(false);

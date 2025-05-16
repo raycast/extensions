@@ -1,4 +1,3 @@
-// src/index.tsx
 import {
   List,
   showToast,
@@ -6,23 +5,21 @@ import {
   ActionPanel,
   Action,
   Icon,
-  useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { preferences, getCombinedStatus } from "./utils";
 import axios from "axios";
-import ApprovalForm from "./ApprovalForm";
+import { preferences, getCombinedStatus } from "./utils";
+import { OverseerrRequest } from "./types";
 
-const OVERSEERR_API_REQUEST = `${preferences.OVERSEERR_API_ADDRESS}/api/v1/request`;
+const OVERSEERR_API_ADDRESS = `${preferences.OVERSEERR_API_ADDRESS}/api/v1/request`;
 const OVERSEERR_API_KEY = preferences.OVERSEERR_API_KEY;
 const TMDB_KEY = preferences.TMDB_KEY;
 const TMDB_LANGUAGE = preferences.TMDB_LANGUAGE || "en";
 
 export default function Command() {
-  const [requests, setRequests] = useState<any[]>([]);
+  const [requests, setRequests] = useState<OverseerrRequest[]>([]);
   const [tmdbTitles, setTmdbTitles] = useState<{ [id: number]: string }>({});
   const [loading, setLoading] = useState(true);
-  const { push } = useNavigation();
 
   useEffect(() => {
     fetchRequests();
@@ -31,16 +28,19 @@ export default function Command() {
   async function fetchRequests() {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${OVERSEERR_API_REQUEST}?take=100`, {
-        headers: { "X-Api-Key": OVERSEERR_API_KEY },
-      });
+      const { data } = await axios.get<{ results: OverseerrRequest[] }>(
+        `${OVERSEERR_API_ADDRESS}?take=100`,
+        {
+          headers: { "X-Api-Key": OVERSEERR_API_KEY },
+        },
+      );
 
       const results = data.results || [];
       setRequests(results);
 
       const titleMap: { [id: number]: string } = {};
       await Promise.all(
-        results.map(async (r: any) => {
+        results.map(async (r) => {
           const tmdbId = r.media?.tmdbId;
           const type = r.media?.mediaType;
           if (!tmdbId || !type) return;
@@ -62,11 +62,11 @@ export default function Command() {
       );
 
       setTmdbTitles(titleMap);
-    } catch (err: any) {
+    } catch (err: unknown) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to load requests",
-        message: err.message,
+        title: "Failed to load request",
+        message: err instanceof Error ? err.message : String(err),
       });
     } finally {
       setLoading(false);
@@ -75,66 +75,50 @@ export default function Command() {
 
   async function handleRequest(id: number, action: "approve" | "decline") {
     try {
-      await axios.post(`${OVERSEERR_API_REQUEST}/${id}/${action}`, null, {
+      await axios.post(`${OVERSEERR_API_ADDRESS}/${id}/${action}`, null, {
         headers: { "X-Api-Key": OVERSEERR_API_KEY },
       });
       showToast({
         style: Toast.Style.Success,
-        title: `Request #${id} ${action === "approve" ? "Approved" : "Declined"}`,
+        title: `Request #${id} ${action === "approve" ? "Approve" : "Decline"}`,
       });
       fetchRequests();
-    } catch (err: any) {
+    } catch (err: unknown) {
       showToast({
         style: Toast.Style.Failure,
-        title: `Request ${action} failed`,
-        message: err.message,
+        title: `Request ${action} Declined`,
+        message: err instanceof Error ? err.message : String(err),
       });
     }
   }
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search requests">
-      {requests.map((r) => {
-        const title =
-          tmdbTitles[r.media?.tmdbId] || `TMDB: ${r.media?.tmdbId || "-"}`;
-        const subtitle = r.requestedBy?.plexUsername || "unknown";
-        const status = getCombinedStatus(r);
-        const isPending = r.status === 1;
-
-        return (
-          <List.Item
-            key={r.id}
-            icon={Icon.Download}
-            title={title}
-            subtitle={subtitle}
-            accessories={[{ text: `#${r.id}` }, { tag: status }]}
-            actions={
-              <ActionPanel>
-                {isPending ? (
-                  <Action
-                    title="Approve with Options"
-                    icon={Icon.CheckCircle}
-                    onAction={() => push(<ApprovalForm request={r} />)}
-                  />
-                ) : (
-                  <>
-                    <Action
-                      title="Approve"
-                      icon={Icon.Check}
-                      onAction={() => handleRequest(r.id, "approve")}
-                    />
-                    <Action
-                      title="Decline"
-                      icon={Icon.XMarkCircle}
-                      onAction={() => handleRequest(r.id, "decline")}
-                    />
-                  </>
-                )}
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+    <List isLoading={loading} searchBarPlaceholder="Search title or user">
+      {requests.map((r) => (
+        <List.Item
+          key={r.id}
+          icon={Icon.Download}
+          title={
+            tmdbTitles[r.media?.tmdbId] || `TMDB: ${r.media?.tmdbId || "-"}`
+          }
+          subtitle={`${r.requestedBy?.plexUsername || "unknown"}`}
+          accessories={[{ text: `#${r.id}` }, { tag: getCombinedStatus(r) }]}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Approve"
+                icon={Icon.Check}
+                onAction={() => handleRequest(r.id, "approve")}
+              />
+              <Action
+                title="Decline"
+                icon={Icon.XMarkCircle}
+                onAction={() => handleRequest(r.id, "decline")}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }

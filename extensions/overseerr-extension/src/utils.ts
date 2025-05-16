@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { OverseerrRequest } from "./types";
 
 type Preferences = {
   OVERSEERR_API_ADDRESS: string;
@@ -9,24 +10,17 @@ type Preferences = {
 
 const raw = getPreferenceValues<Preferences>();
 
-// sanitize address: remove trailing slash
-const baseUrl = raw.OVERSEERR_API_ADDRESS.replace(/\/+$/, "");
-
 export const preferences = {
-  OVERSEERR_API_ADDRESS: baseUrl,
+  OVERSEERR_API_ADDRESS: raw.OVERSEERR_API_ADDRESS.replace(/\/+$/, ""),
   OVERSEERR_API_KEY: raw.OVERSEERR_API_KEY,
   TMDB_KEY: raw.TMDB_KEY,
   TMDB_LANGUAGE: raw.TMDB_LANGUAGE?.trim() || "en",
 };
 
-// API endpoints constructed from base
-export const OVERSEERR_API_REQUEST = `${baseUrl}/api/v1/request`;
-export const OVERSEERR_API_SETTINGS = `${baseUrl}/api/v1/settings`;
+export const OVERSEERR_API_REQUEST = `${preferences.OVERSEERR_API_ADDRESS}/api/v1/request`;
+export const OVERSEERR_API_SETTINGS = `${preferences.OVERSEERR_API_ADDRESS}/api/v1/settings`;
 
-/**
- * Return combined status based on request and media status.
- */
-export function getCombinedStatus(r: any): string {
+export function getCombinedStatus(r: OverseerrRequest): string {
   const reqStatus = r.status;
   const mediaStatus = r.media?.status;
 

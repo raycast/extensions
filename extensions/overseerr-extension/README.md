@@ -17,14 +17,14 @@ Approve, decline, and review requests for movies and TV shows — all from the c
 ## ⚙️ Configuration
 
 Before using the extension, set the following preferences in Raycast
-
+```
 | Preference | Type | Description |
 |-----------|------|-------------|
 | `Overseerr Address` | Text | Base URL of your Overseerr instance (e.g., `http://localhost:5055`). Don't include `/api/v1` — it will be added automatically. |
 | `Overseerr API Key` | Password | Your Overseerr API key. Found in **Settings → API Key** in Overseerr. |
 | `TMDB API Key` | Password | A TMDB API key. [Get one here](https://www.themoviedb.org/settings/api). |
 | `TMDB Language` | Text (Optional) | Desired language code for TMDB titles (e.g., `en`, `ko`, `ja`, `de`). Defaults to `en`. |
-
+```
 > 📝 You can find and edit these fields in **Raycast → Extensions → Overseerr → Preferences**.
 
 ## 🗝️ How to Get Your Overseerr API Key
@@ -51,6 +51,7 @@ Follow these steps to obtain your TMDB API key:
 
 ## 📂 Folder Structure
 
+```
 overseerr-extension/
 ├── assets/         # Icons used in the extension
 ├── media/          # Screenshots for README
@@ -62,7 +63,7 @@ overseerr-extension/
 ├── package.json
 ├── tsconfig.json
 └── README.md
-
+```
 ## 🧑‍💻 Author
 
 Created by **cpm9662**

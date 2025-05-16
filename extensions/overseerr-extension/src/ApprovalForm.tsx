@@ -7,39 +7,27 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { preferences } from "./utils";
+import axios from "axios";
+import { OverseerrRequest, ServerConfig, QualityProfile } from "./types";
+
+interface ApprovalFormProps {
+  request: OverseerrRequest;
+}
 
 const BASE_API = `${preferences.OVERSEERR_API_ADDRESS}/api/v1`;
 const API_KEY = preferences.OVERSEERR_API_KEY;
 
-interface ApprovalFormProps {
-  request: any;
-}
-
-interface Profile {
-  id: number;
-  name: string;
-}
-
-interface ServerConfig {
-  id: number;
-  name: string;
-  activeProfileId: number;
-  activeProfileName: string;
-  activeDirectory: string;
-}
-
 export default function ApprovalForm({ request }: ApprovalFormProps) {
   const [servers, setServers] = useState<ServerConfig[]>([]);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [profiles, setProfiles] = useState<QualityProfile[]>([]);
   const [selectedServerId, setSelectedServerId] = useState<string>();
   const [selectedProfileId, setSelectedProfileId] = useState<string>();
   const [selectedFolder, setSelectedFolder] = useState<string>();
   const [loading, setLoading] = useState(true);
   const { pop } = useNavigation();
 
-  const mediaType = request.media?.mediaType; // 'movie' or 'tv'
+  const mediaType = request.media?.mediaType;
   const endpoint = mediaType === "tv" ? "sonarr" : "radarr";
 
   useEffect(() => {
@@ -55,9 +43,12 @@ export default function ApprovalForm({ request }: ApprovalFormProps) {
   async function loadServerOptions() {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${BASE_API}/settings/${endpoint}`, {
-        headers: { "X-Api-Key": API_KEY },
-      });
+      const { data } = await axios.get<ServerConfig[]>(
+        `${BASE_API}/settings/${endpoint}`,
+        {
+          headers: { "X-Api-Key": API_KEY },
+        },
+      );
 
       setServers(data);
 
@@ -76,11 +67,11 @@ export default function ApprovalForm({ request }: ApprovalFormProps) {
           setSelectedProfileId(first.activeProfileId.toString());
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load server settings",
-        message: err.message,
+        message: err instanceof Error ? err.message : String(err),
       });
     } finally {
       setLoading(false);
@@ -89,25 +80,20 @@ export default function ApprovalForm({ request }: ApprovalFormProps) {
 
   async function loadRadarrProfiles(serverId: number) {
     try {
-      const { data } = await axios.get(
+      const { data } = await axios.get<QualityProfile[]>(
         `${BASE_API}/settings/radarr/${serverId}/profiles`,
         {
           headers: { "X-Api-Key": API_KEY },
         },
       );
 
-      const profileOptions = data.map((p: any) => ({
-        id: p.id,
-        name: p.name,
-      }));
-
-      setProfiles(profileOptions);
-      setSelectedProfileId(profileOptions[0]?.id.toString() || "");
-    } catch (err: any) {
+      setProfiles(data);
+      setSelectedProfileId(data[0]?.id.toString() || "");
+    } catch (err: unknown) {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load Radarr profiles",
-        message: err.message,
+        message: err instanceof Error ? err.message : String(err),
       });
     }
   }
@@ -135,11 +121,11 @@ export default function ApprovalForm({ request }: ApprovalFormProps) {
         title: `Request #${request.id} Approved`,
       });
       pop();
-    } catch (err: any) {
+    } catch (err: unknown) {
       showToast({
         style: Toast.Style.Failure,
         title: "Approval failed",
-        message: err.message,
+        message: err instanceof Error ? err.message : String(err),
       });
     }
   }

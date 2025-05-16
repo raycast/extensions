@@ -22,6 +22,8 @@
   "scripts": {
     "dev": "ray dev",
     "build": "ray build",
+    "lint": "eslint . --config eslint.config.js --ext .ts,.tsx",
+    "prettier": "prettier --write \"src/**/*.{ts,tsx}\"",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
@@ -80,9 +82,8 @@
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
     "eslint": "^9.26.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.32.1"
   }
 }
