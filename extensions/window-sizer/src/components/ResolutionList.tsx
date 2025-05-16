@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, Icon, Color, Toast, showToast } from "@raycast/api";
 import { Resolution } from "../types";
 import { showFailureToast } from "@raycast/utils";
-import { LocalStorage } from "@raycast/api";
+import { useStarredResolutions } from "../hooks/useStarredResolutions";
 
 interface ResolutionListProps {
   resolutions: Resolution[];
@@ -23,6 +23,8 @@ export function ResolutionList({
   onDeleteResolution,
   onToggleStar,
 }: ResolutionListProps) {
+  const { isResolutionStarred, removeStarredResolution } = useStarredResolutions();
+
   return (
     <List.Section title={sectionTitle}>
       {resolutions.map((resolution) => (
@@ -102,20 +104,15 @@ export function ResolutionList({
                     }
 
                     // Check if resolution already exists in starred list
-                    const starredResolutions = await LocalStorage.getItem<string>("starred-resolutions");
-                    if (starredResolutions) {
-                      const existingResolutions = JSON.parse(starredResolutions);
-                      const alreadyExists = existingResolutions.some(
-                        (r: Resolution) => r.width === resolution.width && r.height === resolution.height,
-                      );
-                      if (alreadyExists) {
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: "Size already exists in Starred Sizes",
-                        });
-                        return;
-                      }
+                    const starredStatus = await isResolutionStarred(resolution);
+                    if (starredStatus) {
+                      await showToast({
+                        style: Toast.Style.Failure,
+                        title: "Size already exists in Starred Sizes",
+                      });
+                      return;
                     }
+
                     await onToggleStar(resolution);
                     await showToast({
                       style: Toast.Style.Success,
@@ -136,21 +133,12 @@ export function ResolutionList({
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={async () => {
                     try {
-                      // Check if the resolution is starred
-                      const starredResolutions = await LocalStorage.getItem<string>("starred-resolutions");
-                      if (starredResolutions) {
-                        const existingResolutions = JSON.parse(starredResolutions);
-                        const isStarred = existingResolutions.some(
-                          (r: Resolution) => r.width === resolution.width && r.height === resolution.height,
-                        );
-                        if (isStarred) {
-                          // Remove from starred list
-                          const updatedStarredResolutions = existingResolutions.filter(
-                            (r: Resolution) => !(r.width === resolution.width && r.height === resolution.height),
-                          );
-                          await LocalStorage.setItem("starred-resolutions", JSON.stringify(updatedStarredResolutions));
-                        }
+                      // Check if the resolution is starred and remove it if necessary
+                      const isStarred = await isResolutionStarred(resolution);
+                      if (isStarred) {
+                        await removeStarredResolution(resolution);
                       }
+
                       await onDeleteResolution(resolution);
                     } catch (error) {
                       await showFailureToast("Failed to delete size", {
