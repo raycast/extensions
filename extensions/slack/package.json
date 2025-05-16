@@ -134,6 +134,11 @@
       "title": "Get Emojis",
       "name": "get-emojis",
       "description": "List all custom emojis in the Slack team"
+    },
+    {
+      "title": "Search Messages",
+      "name": "search-messages",
+      "description": "Search all Messages in the Slack team"
     }
   ],
   "ai": {
