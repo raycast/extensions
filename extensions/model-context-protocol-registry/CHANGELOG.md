@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Zeabur MCP Server] - 2025-05-15
+## [Add Zeabur MCP Server] - {PR_MERGE_DATE}
 
 Add Official Zeabur MCP Server to registry, this allow manage and deploy Zeabur projects.
 
