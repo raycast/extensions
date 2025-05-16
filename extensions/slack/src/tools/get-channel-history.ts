@@ -1,6 +1,6 @@
-import {getSlackWebClient} from "../shared/client/WebClient";
-import {withSlackClient} from "../shared/withSlackClient";
-import {isValidChannelId} from "../shared/utils";
+import { getSlackWebClient } from "../shared/client/WebClient";
+import { withSlackClient } from "../shared/withSlackClient";
+import { isValidChannelId } from "../shared/utils";
 
 async function getChannelIdByChannelName(channelName: string) {
   const slackWebClient = getSlackWebClient();
@@ -22,13 +22,12 @@ async function getChannelIdByChannelName(channelName: string) {
       for (let i = 0; i < response.channels?.length ?? 0; i++) {
         const channel = response.channels[i];
         if (channel.name?.includes(channelName)) {
-          return channel.id
+          return channel.id;
         }
       }
 
       cursor = response.response_metadata?.next_cursor;
     }
-
   } while (cursor);
 
   return undefined;
@@ -59,12 +58,12 @@ async function getChannelHistory(input: {
     if (isValidChannelId(input.channelId)) {
       return input.channelId;
     } else {
-      return await getChannelIdByChannelName(input.channelId)
+      return await getChannelIdByChannelName(input.channelId);
     }
-  })()
+  })();
 
   if (!channelId) {
-    throw new Error('Not found Channel Id');
+    throw new Error("Not found Channel Id");
   }
 
   const messages = await slackWebClient.conversations.history({

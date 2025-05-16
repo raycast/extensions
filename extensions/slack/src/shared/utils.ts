@@ -96,7 +96,7 @@ const isValidChannelId = (channelId) => {
   const channelIdRegex = /^C[a-zA-Z0-9]{8,}$/;
 
   return channelIdRegex.test(channelId.trim());
-}
+};
 
 export {
   timeDifference,
@@ -104,5 +104,5 @@ export {
   buildScriptEnsuringSlackIsRunning,
   handleError,
   convertSlackEmojiToUnicode,
-  isValidChannelId
+  isValidChannelId,
 };

@@ -1,5 +1,5 @@
-import {getSlackWebClient} from "../shared/client/WebClient";
-import {withSlackClient} from "../shared/withSlackClient";
+import { getSlackWebClient } from "../shared/client/WebClient";
+import { withSlackClient } from "../shared/withSlackClient";
 
 async function getChannels() {
   const slackWebClient = getSlackWebClient();
@@ -18,12 +18,13 @@ async function getChannels() {
       throw new Error(response.error);
     }
 
-    const currentChannels = response.channels?.map((channel) => ({
-      id: channel.id,
-      name: channel.name,
-      purpose: channel.purpose?.value,
-      topic: channel.topic?.value,
-    })) || [];
+    const currentChannels =
+      response.channels?.map((channel) => ({
+        id: channel.id,
+        name: channel.name,
+        purpose: channel.purpose?.value,
+        topic: channel.topic?.value,
+      })) || [];
 
     allChannels = allChannels.concat(currentChannels);
     cursor = response.response_metadata?.next_cursor;
@@ -31,7 +32,5 @@ async function getChannels() {
 
   return allChannels;
 }
-
-
 
 export default withSlackClient(getChannels);
