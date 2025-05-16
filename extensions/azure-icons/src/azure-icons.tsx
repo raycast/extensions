@@ -28,24 +28,30 @@ export default function Command() {
 
   useEffect(() => {
     const fetchIcons = async () => {
+      setIsLoading(true);
       const _icons: AzureIcon[] = [];
-      const dir = await fs.promises.opendir(path.resolve(__dirname, "assets/icons"));
-      for await (const dirent of dir) {
-        const svgs = await fs.promises.opendir(path.resolve(__dirname, `assets/icons/${dirent.name}`));
-        for await (const svg of svgs) {
-          if (
-            svg.name.endsWith(".svg") &&
-            _icons.filter((icon) => icon.name === formatServiceName(svg.name)).length === 0
-          ) {
-            _icons.push({
-              name: formatServiceName(svg.name),
-              iconPath: path.resolve(__dirname, `assets/icons/${dirent.name}/${svg.name}`),
-              folder: dirent.name,
-            });
+      try {
+        const dir = await fs.promises.opendir(path.resolve(__dirname, "assets/icons"));
+        for await (const dirent of dir) {
+          const svgs = await fs.promises.opendir(path.resolve(__dirname, `assets/icons/${dirent.name}`));
+          for await (const svg of svgs) {
+            if (
+              svg.name.endsWith(".svg") &&
+              _icons.filter((icon) => icon.name === formatServiceName(svg.name)).length === 0
+            ) {
+              _icons.push({
+                name: formatServiceName(svg.name),
+                iconPath: path.resolve(__dirname, `assets/icons/${dirent.name}/${svg.name}`),
+                folder: dirent.name,
+              });
+            }
           }
         }
+      } catch (error) {
+        console.error(error);
       }
       setIcons(_icons);
+      setIsLoading(false);
     };
 
     fetchIcons();
@@ -62,7 +68,6 @@ export default function Command() {
           storeValue
           onChange={(newValue) => {
             setColumns(parseInt(newValue));
-            setIsLoading(false);
           }}
         >
           <Grid.Dropdown.Item title="Large" value={"3"} />
