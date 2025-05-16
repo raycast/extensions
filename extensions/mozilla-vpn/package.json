@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Vpn Connect",
+      "title": "VPN Connect",
       "subtitle": "Mozilla VPN",
       "description": "Activate or deactivate the Mozilla VPN.",
       "mode": "view"
