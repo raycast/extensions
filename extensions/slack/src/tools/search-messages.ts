@@ -6,9 +6,22 @@ type Input = {
   sort?: "timestamp" | "score";
 };
 
+type ResponseSearchMessages = {
+  channelId?: string
+  channelName?: string
+  timestamp?: number
+  time?: string
+  userName?: string
+  user?: string
+  score?: number
+  message?: string
+  messageId?: string
+  permalink?: string
+}
+
 async function searchMessages(input: Input) {
   const slackWebClient = getSlackWebClient();
-  let allMessages = [];
+  const allMessages: ResponseSearchMessages[] = [];
   let page = 1;
   let hasMorePages = false;
 
@@ -26,11 +39,12 @@ async function searchMessages(input: Input) {
 
     const currentMessages =
       response.messages?.matches?.map((matchedMessage) => {
-        const { timestamp, time } = (() => {
+        const time: { timestamp?: number; time?: string } = (() => {
           if (matchedMessage?.ts?.toString()?.includes(".")) {
+            const timestamp = parseInt(`${matchedMessage?.ts?.toString().split(".")[0]}000`);
             return {
-              timestamp: Number(`${matchedMessage?.ts?.toString().split(".")[0]}000`),
-              time: new Date(Number(`${matchedMessage?.ts?.toString().split(".")[0]}000`)).toString(),
+              timestamp: timestamp,
+              time: new Date(timestamp).toString(),
             };
           } else {
             return {
@@ -43,8 +57,8 @@ async function searchMessages(input: Input) {
         return {
           channelId: matchedMessage?.channel?.id,
           channelName: matchedMessage?.channel?.name,
-          timestamp: timestamp,
-          time: time,
+          timestamp: time.timestamp,
+          time: time.time,
           userName: matchedMessage?.username,
           user: matchedMessage?.user,
           score: matchedMessage?.score,
@@ -54,8 +68,8 @@ async function searchMessages(input: Input) {
         };
       }) || [];
 
-    allMessages = allMessages.concat(currentMessages);
-    hasMorePages = response?.messages?.pagination?.page_count >= page;
+    allMessages.push(...currentMessages);
+    hasMorePages = (response?.messages?.pagination?.page_count ?? 1) >= page;
   } while (hasMorePages);
 
   return allMessages;

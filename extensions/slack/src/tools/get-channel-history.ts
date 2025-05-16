@@ -5,7 +5,7 @@ import { isValidChannelId } from "../shared/utils";
 async function getChannelIdByChannelName(channelName: string) {
   const slackWebClient = getSlackWebClient();
   let cursor = null;
-
+  const includedChannelNames: { channelName: string, channelId: string }[] = [];
   do {
     const response = await slackWebClient.conversations.list({
       exclude_archived: true,
@@ -21,14 +21,29 @@ async function getChannelIdByChannelName(channelName: string) {
     if (response.channels) {
       for (let i = 0; i < response.channels?.length ?? 0; i++) {
         const channel = response.channels[i];
-        if (channel.name?.includes(channelName)) {
-          return channel.id;
+        if (channel.id && channel.name) {
+          if (channel.name === channelName) {
+            /**
+             * Returns the channel name as priority if it matches correctly.
+             */
+            return channel.id;
+          } else if (channel.name.includes(channelName)) {
+            /**
+             * If the input 'channelName' is included in the channel name, save it to return when there is no exact matching channel name.
+             * Go to line 44 for logic on that.
+             */
+            includedChannelNames.push({channelId: channel.id, channelName: channel.name})
+          }
         }
       }
 
       cursor = response.response_metadata?.next_cursor;
     }
   } while (cursor);
+
+  if (includedChannelNames.length > 0) {
+    return includedChannelNames[0].channelId;
+  }
 
   return undefined;
 }
@@ -50,9 +65,9 @@ async function getChannelHistory(input: {
   const unixTimestamp = input.after ? Math.floor(new Date(input.after).getTime() / 1000).toString() : undefined;
 
   /**
-   * There are cases where the channelId is not the channelId, so I will add that condition.
-   * To test for the opposite condition, if you ask @ask slack to 'Summarize the messages posted on May 12th in the #general channel,' this will occur.
-   * If you ask again, you will run getChannels, so the error will occur only the first time.
+   * Handle cases where the input might be a channel name instead of a channel ID.
+   * This happens when users reference channels by name (e.g. 'general') rather than ID.
+   * We first check if the input is a valid channel ID, if not we try to find the channel by name.
    */
   const channelId = await (async () => {
     if (isValidChannelId(input.channelId)) {
@@ -63,7 +78,7 @@ async function getChannelHistory(input: {
   })();
 
   if (!channelId) {
-    throw new Error("Not found Channel Id");
+    throw new Error("Channel ID not found");
   }
 
   const messages = await slackWebClient.conversations.history({

@@ -1,9 +1,17 @@
 import { getSlackWebClient } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
 
+type ResponseGetChannels = {
+  id?: string,
+  name?: string,
+  purpose?: string,
+  topic?: string
+}
+
+
 async function getChannels() {
   const slackWebClient = getSlackWebClient();
-  let allChannels = [];
+  const allChannels: ResponseGetChannels[] = [];
   let cursor = null;
 
   do {
@@ -11,7 +19,7 @@ async function getChannels() {
       exclude_archived: true,
       types: "public_channel,private_channel",
       limit: 1000,
-      cursor: cursor || undefined,
+      cursor: cursor,
     });
 
     if (response.error) {
@@ -26,7 +34,7 @@ async function getChannels() {
         topic: channel.topic?.value,
       })) || [];
 
-    allChannels = allChannels.concat(currentChannels);
+    allChannels.push(...currentChannels);
     cursor = response.response_metadata?.next_cursor;
   } while (cursor);
 

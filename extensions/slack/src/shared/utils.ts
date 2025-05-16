@@ -92,8 +92,8 @@ const handleError = async (error: CodedError | Error | unknown, title?: string) 
   return showFailureToast(error, { title: title ?? "Something unexpected happened" });
 };
 
-const isValidChannelId = (channelId) => {
-  const channelIdRegex = /^C[a-zA-Z0-9]{8,}$/;
+const isValidChannelId = (channelId: string) => {
+  const channelIdRegex = /^C[A-Z0-9]{8}$/;
 
   return channelIdRegex.test(channelId.trim());
 };
