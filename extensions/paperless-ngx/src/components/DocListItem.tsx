@@ -1,5 +1,4 @@
 import { environment, getPreferenceValues, Icon, List } from "@raycast/api";
-import { Preferences } from "../models/preferences.model";
 import { DocActions } from "./DocActions";
 import { DocItem } from "../models/docItem.model";
 import moment from "moment";
