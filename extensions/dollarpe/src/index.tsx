@@ -11,11 +11,11 @@ type DataResponse = [
 ];
 
 export default function Command() {
-  const { isLoading, data } = useFetch<DataResponse[]>("https://dollarpe-site.vercel.app/api");
+  const { isLoading, data } = useFetch<DataResponse[]>("https://dollarpe-api.cristianbgp.com/exchanges");
 
   return (
     <MenuBarExtra icon={Icon.Coins} isLoading={isLoading}>
-      {data?.map(([name, { buy, sell, pageUrl }]) => (
+      {data?.map(([name, { buy, sell, pageUrl }], index) => (
         <MenuBarExtra.Section key={name}>
           <MenuBarExtra.Item icon={getFavicon(pageUrl)} title={name} onAction={() => open(pageUrl)} />
           <MenuBarExtra.Section title="Buy" />
