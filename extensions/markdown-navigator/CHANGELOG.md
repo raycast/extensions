@@ -1,6 +1,6 @@
 # Markdown Navigator Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-05-16
 
 - Remove duplicate files
 
