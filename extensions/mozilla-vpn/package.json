@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mozilla-vpn",
-  "title": "Mozilla Vpn Connect",
+  "title": "Mozilla VPN Connect",
   "description": "Interact with the Mozilla VPN from Raycast.",
   "icon": "MozillaVPN.png",
   "author": "natew",
