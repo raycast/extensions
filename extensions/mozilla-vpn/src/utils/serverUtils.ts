@@ -131,7 +131,7 @@ export const selectRandomServerFromCity = async (
     return true;
   } catch (error) {
     console.error('Error selecting random server:', error);
-    await showToast(Toast.Style.Failure, 'Failed to select server');
+    showFailureToast(error, { title: 'Failed to select server' });
     return false;
   }
 };
