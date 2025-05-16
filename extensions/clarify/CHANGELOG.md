@@ -1,4 +1,4 @@
-# clarify Changelog
+# Clarify Changelog
 
 ## [New domain] - {PR_MERGE_DATE}
 
