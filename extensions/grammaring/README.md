@@ -1,6 +1,6 @@
 # Grammaring
 
-Refine your writing effortlessly. Grammaring subtly corrects your text, keeping your unique voice intact, like a personal editor who knows your style. Need a quick fact? Just ask within {curly braces} and watch it seamlessly appear in your sentence. Write smarter, not harder, with your words, perfected.
+Refine your writing effortlessly and very fast. Grammaring subtly corrects your text, keeping your unique voice intact, like a personal editor who knows your style. Need to remember a quick fact? Just ask within {curly braces} and watch it seamlessly appear in your sentence. Write smarter, not harder, with your words, perfected.
 
 ## Installation
 1. Go to Raycast Store
@@ -8,7 +8,7 @@ Refine your writing effortlessly. Grammaring subtly corrects your text, keeping 
 
 ## Setup
 ### OpenAI API Key
-1.  Go to [OpenAI's API key page](https://platform.openai.com/account/api-keys).
+1.  Go to [OpenAI's API key page](https://platform.openai.com/account/api-keys)
 2.  Create a new secret key
 3.  Copy the key
 4.  When you first run a Grammaring command, Raycast will prompt you to enter this API key in the extension preferences
