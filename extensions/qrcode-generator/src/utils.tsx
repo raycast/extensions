@@ -1,41 +1,51 @@
 import { Detail, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
-import { toDataURL } from "qrcode";
+import QRCode from "qrcode";
+import { QR_OPTIONS, SVG_OPTIONS } from "./config";
+import { showFailureToast } from "@raycast/utils";
 
-export async function generateQRCode(URL: string | undefined) {
-  const toast = await showToast({
+export async function generateQRCode(URL: string | undefined, format: "png" | "svg" = "png") {
+  await showToast({
     title: "Generating",
-    message: "Reading System Clipboard...",
+    message: "Generating QR Code...",
     style: Toast.Style.Animated,
   });
 
-  // Check if URL is undefined
   if (URL === undefined) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "An error occurred";
-    toast.message = "URL is undefined";
+    await showFailureToast({ title: "An error occurred", message: "URL is undefined" });
     return;
   }
 
-  toast.message = "Generating QR Code...";
-
-  toast.style = Toast.Style.Success;
-  toast.title = "Success";
-  toast.message = "Created QR Code";
-
-  return await toDataURL(URL);
+  try {
+    if (format === "svg") {
+      const svg = await QRCode.toString(URL, {
+        type: "svg",
+        width: SVG_OPTIONS.width,
+        color: SVG_OPTIONS.color,
+      });
+      return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+    } else {
+      return await QRCode.toDataURL(URL, QR_OPTIONS);
+    }
+  } catch (error) {
+    await showFailureToast({
+      title: "Error",
+      message: error instanceof Error ? error.message : "Failed to generate QR code",
+    });
+    throw error;
+  }
 }
 
 export function QRCodeView({ qrData }: { qrData: string }) {
-  return <Detail isLoading={!qrData} markdown={`![qrcode](${qrData}?raycast-height=355)`} />;
+  return <Detail isLoading={!qrData} markdown={`![qrcode](${qrData}?raycast-height=512)`} />;
 }
 
-export const getQRCodePath = (qrcodeUrl: string) => {
-  // `https://www.example.com/foo?bar=foo` -> `www.example.com`
-  const filename = String(qrcodeUrl.match(/^(?:https?:\/\/)?(?:[^@/\n]+@)?(?:www\.)?([^:/\n]+)/gm)).replace(
-    /^(?:https?:\/\/)?/gm,
-    ""
-  );
+export const getQRCodePath = (qrcodeUrl: string, format: "png" | "svg" = "png") => {
+  const match = qrcodeUrl.match(/^(?:https?:\/\/)?(?:[^@/\n]+@)?(?:www\.)?([^:/\n]+)/gm);
+  if (!match) {
+    throw new Error("Invalid URL format");
+  }
 
-  return `${homedir()}/Downloads/qrcode-${filename}.png`;
+  const filename = String(match).replace(/^(?:https?:\/\/)?/gm, "");
+  return `${homedir()}/Downloads/qrcode-${filename}.${format}`;
 };

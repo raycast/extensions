@@ -58,6 +58,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Pydantic Logfire](https://github.com/pydantic/logfire-mcp) | This repository contains a Model Context Protocol (MCP) server with tools that can access the OpenTelemetry traces and metrics you've sent to Logfire. This MCP server enables LLMs to retrieve your application's telemetry data, analyze distributed traces, and make use of the results of arbitrary SQL queries executed using the Logfire APIs. |
 | [Polar](https://docs.polar.sh/integrate/mcp) | Extend the capabilities of your AI Agents with Polar as MCP Server |
 | [ElevenLabs](https://github.com/elevenlabs/elevenlabs-mcp) | Official ElevenLabs Model Context Protocol (MCP) server that enables interaction with powerful Text to Speech and audio processing APIs. This server allows MCP clients like Claude Desktop, Cursor, Windsurf, OpenAI Agents and others to generate speech, clone voices, transcribe audio, and more. |
+| [Nuxt](https://mcp.nuxt.com/) | Official Nuxt Model Context Protocol (MCP) server that enables docs and modules search. |
 
 ### Community MCP Servers
 
