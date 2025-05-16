@@ -1,5 +1,8 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Grafana MCP Server] - 2025-05-16
+Add the official Grafana MCP server to the Model Context Protocol Registry. Grafana MCP server provides seamless integration with Grafana APIs, enabling monitoring, visualization, and observability capabilities for developers and tools.
+
 ## [Add Apify MCP Server] - 2025-05-16
 Add the official Apify MCP server to the Model Context Protocol Registry. Apify MCP server allows AI agents to use 5,000+ ready-made Actors for use cases such as extracting data from websites, social media, search engines, online maps, and more.
 
