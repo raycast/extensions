@@ -1,6 +1,6 @@
 # Nostr Publish Changelog
 
-## [Small Fixes] - {PR_MERGE_DATE}
+## [Small Fixes] - 2025-05-16
 
 - Fix Readme
 - Update screenshots to show both the extension's settings and main command
