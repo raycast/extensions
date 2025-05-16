@@ -20,7 +20,8 @@ import { createPlaceNavigation } from "../utils/navigation";
 const DEFAULT_PLACE_TYPE = "restaurant";
 const DEFAULT_ORIGIN = OriginOption.Home;
 const DEFAULT_CUSTOM_ADDRESS = "";
-const DEFAULT_RADIUS = getDefaultRadius();
+// Convert default radius to string for form input
+const DEFAULT_RADIUS = getDefaultRadius().toString();
 
 // Local storage keys
 const STORAGE_KEY = {
@@ -68,6 +69,9 @@ export function NearbyPlacesSearchForm() {
   // Handle search submission
   const handleSubmit = async (values: NearbyPlacesFormValues) => {
     try {
+      // Convert radius to number before using it
+      const radiusValue = parseFloat(values.radius);
+      
       // Save form values to localStorage with null/undefined checks
       if (values.placeType) setSavedPlaceType(values.placeType);
       if (values.radius) setSavedRadius(values.radius);
@@ -75,8 +79,6 @@ export function NearbyPlacesSearchForm() {
       // For custom address, we can save empty string
       setSavedCustomAddress(values.customAddress || DEFAULT_CUSTOM_ADDRESS);
       setSavedOpenNow(values.openNow);
-
-      const radiusValue = parseFloat(values.radius);
 
       // Validate origin before proceeding
       if (!values.origin || !(Object.values(OriginOption) as string[]).includes(values.origin)) {

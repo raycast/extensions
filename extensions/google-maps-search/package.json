@@ -143,11 +143,11 @@
       "description": "Choose between metric or imperial units for distances.",
       "data": [
         {
-          "title": "Metric System",
+          "title": "Metric System (Kilometers)",
           "value": "metric"
         },
         {
-          "title": "Imperial Units",
+          "title": "Imperial Units (Miles)",
           "value": "imperial"
         }
       ]

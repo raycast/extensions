@@ -2,7 +2,8 @@
 import { getPreferenceValues } from "@raycast/api";
 
 // Internal type exports
-import { Preferences } from "../types";
+import { Preferences, TravelMode, UnitSystem } from "../types";
+import { PLACE_TYPES } from "../types/places";
 
 // Conversion constants
 export const KM_PER_MILE = 1.60934;
@@ -94,4 +95,108 @@ export function getDefaultRadius(): number {
 export function getDefaultSearchRadiusInMeters(): number {
   const unitSystem = getUnitSystem();
   return unitSystem === "metric" ? DEFAULT_SEARCH_RADIUS_KM : Math.round(DEFAULT_SEARCH_RADIUS_MILES * METERS_PER_MILE);
+}
+
+/**
+ * Format distance in a user-friendly way, respecting the user's unit system preference
+ * @param distance Distance value
+ * @param unit Unit of the distance value ('km' for kilometers or 'm' for meters)
+ * @param unitSystemOverride Optional override for the unit system
+ * @returns Formatted distance string
+ */
+export function formatDistance(
+  distance: number,
+  unit: "km" | "m" = "km",
+  unitSystemOverride?: "metric" | "imperial"
+): string {
+  if (distance < 0) {
+    console.warn(`Invalid distance value: ${distance}. Expected non-negative number.`);
+    return "Invalid distance";
+  }
+  const unitSystem = unitSystemOverride || getUnitSystem();
+
+  // Convert to kilometers if input is in meters
+  const distanceKm = unit === "m" ? distance / 1000 : distance;
+
+  if (unitSystem === "metric") {
+    // Metric system (kilometers/meters)
+    if (distanceKm < 1) {
+      // Convert to meters if less than 1 km
+      return `${Math.round(distanceKm * 1000)} m`;
+    } else if (distanceKm < 10) {
+      // Show one decimal place for distances under 10 km
+      return `${distanceKm.toFixed(1)} km`;
+    } else {
+      // Round to nearest km for larger distances
+      return `${Math.round(distanceKm)} km`;
+    }
+  } else {
+    // Imperial system (miles/feet)
+    const distanceMiles = kmToMiles(distanceKm);
+
+    if (distanceMiles < 0.1) {
+      // Convert to feet if less than 0.1 miles
+      return `${Math.round(distanceMiles * 5280)} ft`;
+    } else if (distanceMiles < 10) {
+      // Show one decimal place for distances under 10 miles
+      return `${distanceMiles.toFixed(1)} mi`;
+    } else {
+      // Round to nearest mile for larger distances
+      return `${Math.round(distanceMiles)} mi`;
+    }
+  }
+}
+
+/**
+ * Get the user's preferred unit system for Google Maps API
+ * @returns The user's preferred unit system for Google Maps API
+ */
+export function getUnitSystemForApi(): UnitSystem {
+  return getUnitSystem() === "metric" ? UnitSystem.metric : UnitSystem.imperial;
+}
+
+/**
+ * Get the travel mode for Google Maps API
+ * @param mode The travel mode string
+ * @returns The validated travel mode for Google Maps API
+ */
+export function getTravelModeForApi(mode: string): TravelMode {
+  const validModes = Object.values(TravelMode);
+
+  if (validModes.includes(mode as TravelMode)) {
+    return mode as TravelMode;
+  }
+
+  console.warn(`Invalid travel mode: ${mode}. Using ${TravelMode.driving} instead.`);
+  return TravelMode.driving;
+}
+
+/**
+ * Determines if the input is likely a business name rather than a place type
+ * @param input The user input string
+ * @returns True if the input appears to be a business name
+ */
+export function isLikelyBusinessName(input: string): boolean {
+  // Check if input contains multiple words (most business names do)
+  if (input.trim().split(/\s+/).length > 1) {
+    return true;
+  }
+
+  // Check if input contains capital letters (indicating proper nouns)
+  if (/[A-Z]/.test(input) && input !== input.toUpperCase()) {
+    return true;
+  }
+
+  // Check if input contains special characters common in business names
+  if (/[&'"]/.test(input)) {
+    return true;
+  }
+
+  // Check if input is not in our place types list
+  const normalizedInput = input.toLowerCase().replace(/\s+/g, "_");
+  const isKnownPlaceType = PLACE_TYPES.some(
+    (type) => type.value === normalizedInput || type.title.toLowerCase() === input.toLowerCase()
+  );
+
+  return !isKnownPlaceType;
 }

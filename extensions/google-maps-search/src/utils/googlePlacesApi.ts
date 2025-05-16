@@ -11,13 +11,11 @@ import {
   TravelMode,
   UnitSystem,
 } from "@googlemaps/google-maps-services-js";
+import { getPreferenceValues } from "@raycast/api";
 
 // Internal type exports
 import { Preferences, PlaceSearchResult, PlaceDetails, RouteInfo, TransportType, PLACE_TYPES } from "../types";
-
-// Internal helper functions
-import { milesToKm, getUnitSystem, getDefaultRadius, getTravelModeForApi, getUnitSystemForApi } from "./common";
-import { getPreferenceValues } from "@raycast/api";
+import { getDefaultRadius, getTravelModeForApi, getUnitSystemForApi, getUnitSystem } from "./unitConversions";
 
 // Initialize the Google Maps client
 let client: Client | null = null;
@@ -351,10 +349,19 @@ export async function getNearbyPlaces(
     const unitSystem = getUnitSystem();
 
     // Convert radius to meters if using imperial units (input would be in miles)
-    const radiusInMeters = Math.min(
-      unitSystem === "imperial" ? Math.round(milesToKm(radius) * 1000) : radius,
-      50000 // Google Places API maximum radius
-    );
+  // The input radius is in the user's selected unit (miles or km), but the API expects meters
+  let radiusInMeters = radius;
+  
+  if (unitSystem === "imperial") {
+    // If using imperial, convert miles to meters (1 mile = 1609.34 meters)
+    radiusInMeters = Math.round(radius * 1609.34);
+  } else {
+    // If using metric, convert km to meters
+    radiusInMeters = Math.round(radius * 1000);
+  }
+  
+  // Ensure the radius doesn't exceed Google's maximum of 50,000 meters
+  radiusInMeters = Math.min(radiusInMeters, 50000);
 
     // Validate the place type
     const validPlaceTypes = new Set(PLACE_TYPES.map((placeType) => placeType.value as PlaceInputType));
