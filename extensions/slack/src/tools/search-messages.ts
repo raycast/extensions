@@ -7,17 +7,17 @@ type Input = {
 };
 
 type ResponseSearchMessages = {
-  channelId?: string
-  channelName?: string
-  timestamp?: number
-  time?: string
-  userName?: string
-  user?: string
-  score?: number
-  message?: string
-  messageId?: string
-  permalink?: string
-}
+  channelId?: string;
+  channelName?: string;
+  timestamp?: number;
+  time?: string;
+  userName?: string;
+  user?: string;
+  score?: number;
+  message?: string;
+  messageId?: string;
+  permalink?: string;
+};
 
 async function searchMessages(input: Input) {
   const slackWebClient = getSlackWebClient();

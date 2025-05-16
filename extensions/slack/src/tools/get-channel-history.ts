@@ -5,7 +5,7 @@ import { isValidChannelId } from "../shared/utils";
 async function getChannelIdByChannelName(channelName: string) {
   const slackWebClient = getSlackWebClient();
   let cursor = null;
-  const includedChannelNames: { channelName: string, channelId: string }[] = [];
+  const includedChannelNames: { channelName: string; channelId: string }[] = [];
   do {
     const response = await slackWebClient.conversations.list({
       exclude_archived: true,
@@ -32,7 +32,7 @@ async function getChannelIdByChannelName(channelName: string) {
              * If the input 'channelName' is included in the channel name, save it to return when there is no exact matching channel name.
              * Go to line 44 for logic on that.
              */
-            includedChannelNames.push({channelId: channel.id, channelName: channel.name})
+            includedChannelNames.push({ channelId: channel.id, channelName: channel.name });
           }
         }
       }

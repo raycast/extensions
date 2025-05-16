@@ -2,12 +2,11 @@ import { getSlackWebClient } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
 
 type ResponseGetChannels = {
-  id?: string,
-  name?: string,
-  purpose?: string,
-  topic?: string
-}
-
+  id?: string;
+  name?: string;
+  purpose?: string;
+  topic?: string;
+};
 
 async function getChannels() {
   const slackWebClient = getSlackWebClient();
