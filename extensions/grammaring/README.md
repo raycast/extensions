@@ -1,6 +1,6 @@
 # Grammaring
 
-Helps you write, fix, and answer questions that will fill your text. Always keeping your style.
+Refine your writing effortlessly. Grammaring subtly corrects your text, keeping your unique voice intact, like a personal editor who knows your style. Need a quick fact? Just ask within {curly braces} and watch it seamlessly appear in your sentence. Write smarter, not harder, with your words, perfected.
 
 ## Installation
 1. Go to Raycast Store
