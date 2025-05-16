@@ -36,7 +36,7 @@ export function ResolutionList({
               ? "icons/starred-size.svg"
               : resolution.isCustom
                 ? "icons/custom-size.svg"
-                : "icons/size.svg",
+                : "icons/default-size.svg",
             fallback: Icon.AppWindow,
             tintColor: Color.SecondaryText,
           }}
