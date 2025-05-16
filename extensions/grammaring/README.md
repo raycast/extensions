@@ -18,8 +18,26 @@ Helps you write, fix, and answer questions that will fill your text. Always keep
 2. Search for "Grammaring"
 3. Record a shortcut for "Fix & Fact. Keep your style"
 
-## Usage
-1. Select the text you want to fix or fill facts
-2. Run the Grammaring command with your shortcut
-3. The text will be fixed and filled with the facts you asked for
+---
+
+# Features
+Both features will be executed in the same command.
+
+## Fix & Keep Style
+Select the text you want to fix and run the shortcut. Grammaring will analyze your writing style, correct any grammatical errors, and enhance the text while maintaining your unique voice. The corrected text will be automatically pasted back into your document, seamlessly replacing the original selection.
+
+## Fill with Facts
+Write inside {curly braces} the facts you want to fill in the text, then run the shortcut. Grammaring will fill the text with the facts you asked for.
+
+### Example:
+```
+I'm traveling to {city where a lot of big companies were founded} to see {was founder and CEO of Apple}.
+```
+
+Grammaring will fill the text with the facts you asked for.
+```
+I'm traveling to San Francisco to see Steve Jobs.
+```
+
+
 
