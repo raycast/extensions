@@ -71,7 +71,7 @@ export function NearbyPlacesSearchForm() {
     try {
       // Convert radius to number before using it
       const radiusValue = parseFloat(values.radius);
-      
+
       // Save form values to localStorage with null/undefined checks
       if (values.placeType) setSavedPlaceType(values.placeType);
       if (values.radius) setSavedRadius(values.radius);
