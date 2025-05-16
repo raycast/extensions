@@ -117,7 +117,7 @@ export function TransactionEditForm({ transaction }: TransactionEditFormProps) {
     initialValues: {
       date: new Date(transaction.date),
       amount: formatToReadableAmount({ amount: transaction.amount, locale: false }),
-      payee_id: payees?.some((p) => p.id === transaction.payee_id) ? (transaction.payee_id ?? '') : '',
+      payee_id: transaction.payee_id ?? '',
       memo: transaction.memo ?? '',
       flag_color: transaction.flag_color?.toString() ?? undefined,
       categoryList: categoryList, // Use the validated category list

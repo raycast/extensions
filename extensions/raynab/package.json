@@ -102,7 +102,7 @@
     "budget"
   ],
   "dependencies": {
-    "@raycast/api": "^1.95.0",
+    "@raycast/api": "^1.98.5",
     "@raycast/utils": "^1.18.1",
     "dayjs": "^1.11.13",
     "fuse.js": "^6.5.3",
@@ -115,8 +115,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.17.12",
-    "@types/react": "^19.1.0",
+    "@types/node": "^22.15.18",
+    "@types/react": "^19.1.4",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^3.4.2",
