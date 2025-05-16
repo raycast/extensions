@@ -34,7 +34,7 @@ const CheckLogin: React.FC<CheckLoginProps> = ({ onBack }) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Open Mozilla Vpn" onAction={openMozillaVpnApp} />
+            <Action title="Open Mozilla VPN" onAction={openMozillaVpnApp} />
           </ActionPanel.Section>
 
           {/* Add Back to Main Menu action if onBack is provided */}
