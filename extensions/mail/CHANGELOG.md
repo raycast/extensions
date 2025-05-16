@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [🌟 New Feature] - {PR_MERGE_DATE}
+
+- 📧 Add the copy-foreground-mail-deeplink command to copy the foreground mail deeplink to the clipboard.
+
 ## [Fix] - 2025-05-12
 
 - "Paste Latest OTP Code" now correctly gets the latest OTP code across multiple mail accounts.
