@@ -421,8 +421,10 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "@apify/actors-mcp-server"],
       env: {
         APIFY_API_TOKEN: "YOUR_API_TOKEN_HERE",
-   },
-   {
+      },
+    },
+  },
+  {
     name: "nuxt",
     title: "Nuxt",
     description: "Access Nuxt documentation and modules with the public Nuxt MCP server",
@@ -433,7 +435,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["mcp-remote", "https://mcp.nuxt.space/sse"],
     },
   },
-];
+]
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
   {
