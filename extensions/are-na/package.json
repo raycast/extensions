@@ -14,7 +14,7 @@
     {
       "name": "search-channels",
       "title": "Find Channels",
-      "subtitle": "Discover Are.na Channels",
+      "subtitle": "Are.na",
       "description": "Search and browse through public and private Are.na channels",
       "mode": "view",
       "arguments": [
@@ -29,7 +29,7 @@
     {
       "name": "search-blocks",
       "title": "Find Blocks",
-      "subtitle": "Explore Are.na Content Blocks",
+      "subtitle": "Are.na",
       "description": "Search for text, images, links and other content blocks across Are.na",
       "mode": "view",
       "arguments": [
@@ -44,7 +44,7 @@
     {
       "name": "search-users",
       "title": "Find Users",
-      "subtitle": "Discover Are.na Members",
+      "subtitle": "Are.na",
       "description": "Search for people and organizations with Are.na profiles",
       "mode": "view",
       "arguments": [
@@ -59,7 +59,7 @@
     {
       "name": "create-channel",
       "title": "Create Channel",
-      "subtitle": "Add New Are.na Channel",
+      "subtitle": "Are.na",
       "description": "Quickly create a new public or private channel on your Are.na account",
       "mode": "view"
     }
