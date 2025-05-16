@@ -1,6 +1,6 @@
 # Paperless-ngx Changelog
 
-## [Add subtitle options] - {PR_MERGE_DATE}
+## [Add subtitle options] - 2025-05-16
 
 - Added configuration options for subtitle in search result list
 - Show correspondent, date created or both
