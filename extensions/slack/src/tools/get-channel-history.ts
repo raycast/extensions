@@ -30,7 +30,6 @@ async function getChannelIdByChannelName(channelName: string) {
           } else if (channel.name.includes(channelName)) {
             /**
              * If the input 'channelName' is included in the channel name, save it to return when there is no exact matching channel name.
-             * Go to line 44 for logic on that.
              */
             includedChannelNames.push({ channelId: channel.id, channelName: channel.name });
           }
