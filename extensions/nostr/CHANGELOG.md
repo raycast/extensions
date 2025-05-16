@@ -1,6 +1,5 @@
 # Nostr Publish Changelog
 
-
 ## [Small Fixes] - {PR_MERGE_DATE}
 
 - Fix Readme
