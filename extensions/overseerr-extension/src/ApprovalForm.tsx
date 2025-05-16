@@ -6,6 +6,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import React from "react";
 import { useEffect, useState } from "react";
 import { preferences } from "./utils";
 import axios from "axios";

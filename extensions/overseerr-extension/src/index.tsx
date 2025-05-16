@@ -6,6 +6,7 @@ import {
   Action,
   Icon,
 } from "@raycast/api";
+import React from "react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { preferences, getCombinedStatus } from "./utils";
