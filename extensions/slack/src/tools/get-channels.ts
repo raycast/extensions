@@ -11,7 +11,7 @@ type ResponseGetChannels = {
 async function getChannels() {
   const slackWebClient = getSlackWebClient();
   const allChannels: ResponseGetChannels[] = [];
-  let cursor = null;
+  let cursor: string | undefined = undefined;
 
   do {
     const response = await slackWebClient.conversations.list({
