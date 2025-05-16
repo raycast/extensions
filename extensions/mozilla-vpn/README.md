@@ -9,10 +9,7 @@ _Interact with the Mozilla VPN client from Raycast without even opening the Mozi
 - It connects using the Mozilla VPN client to the Mozilla VPN service.
 - It displays the current server the Mozilla VPN client is configured for.
 - It fetches the current external IP and geolocates the IP's Country and city. It then refreshes when it connects to the VPN.
-
-### What it doesn't do (yet).
-
-- Unfortunately, the command to select a server does not work. You can list the servers and pick one, but it seems the CLI command for the application is broken. I would love to figure out how to configure the configuration file or interact with the client to enable this feature. **PRs are definitely welcome!**
+- It allows you to change the server from the UI. You select a Country and city if available and if there are multiple VPN servers, it will randomly choose one to connect to.
 
 ### Requirements
 
@@ -26,6 +23,10 @@ Client Connect `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN activ
 Client Disconnect `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN deactivate`
 
 Status `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN status`
+
+List all the servers `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN servers`
+
+Select a server, must be the actual server name and not the city `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN select`
 
     Status shows if the client is connected or not, and the server city and country it is configured for. There are other details here like all devices configured for the service.
 
