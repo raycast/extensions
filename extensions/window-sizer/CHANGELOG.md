@@ -1,5 +1,11 @@
 # Window Sizer Changelog
 
+## [Starred Sizes & Improvements] - {PR_MERGE_DATE}
+
+- Added starring for frequently used window sizes
+- Unified shortcut keys for Deleting Custom and Starred Sizes
+- Improved action icons
+
 ## [New Action Icons] - 2025-05-12
 
 - Added new action icons
