@@ -12,7 +12,8 @@
     "phil_s",
     "michalzuch",
     "ridemountainpig",
-    "maxnyby"
+    "maxnyby",
+    "vmrjnvc"
   ],
   "owner": "raycast",
   "access": "public",
@@ -162,6 +163,15 @@
           "default": false,
           "required": false,
           "title": "Sort"
+        },
+        {
+          "name": "displayListTitleForMenuBarReminders",
+          "type": "checkbox",
+          "label": "Display the name of the list",
+          "description": "When enabled, the name of the list from which the reminder originates will be displayed in the menu bar next to the reminder’s name.",
+          "default": false,
+          "required": false,
+          "title": "Extra"
         }
       ],
       "interval": "10m"
