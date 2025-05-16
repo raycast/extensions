@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Zeabur MCP Server] - 2025-05-15
+
+Add Official Zeabur MCP Server to registry, this allow manage and deploy Zeabur projects.
+
 ## [Add Nuxt MCP Server] - 2025-05-15
 
 Add Official Nuxt MCP Server to registry, this allow docs and modules search.
