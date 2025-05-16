@@ -1,3 +1,4 @@
+// src/components/checkLogin.tsx
 import React from 'react';
 import {
   List,
@@ -5,8 +6,13 @@ import {
   Action,
   popToRoot,
   closeMainWindow,
+  Icon,
 } from '@raycast/api';
 import { exec } from 'child_process';
+
+interface CheckLoginProps {
+  onBack?: () => void; // Add optional onBack prop
+}
 
 const openMozillaVpnApp = () => {
   exec('open -a "Mozilla VPN"', (error) => {
@@ -19,7 +25,7 @@ const openMozillaVpnApp = () => {
   });
 };
 
-const CheckLogin: React.FC = () => {
+const CheckLogin: React.FC<CheckLoginProps> = ({ onBack }) => {
   return (
     <List.EmptyView
       title="Mozilla VPN Login Required"
@@ -27,7 +33,21 @@ const CheckLogin: React.FC = () => {
       icon="⚠️"
       actions={
         <ActionPanel>
-          <Action title="Open Mozilla VPN" onAction={openMozillaVpnApp} />
+          <ActionPanel.Section>
+            <Action title="Open Mozilla Vpn" onAction={openMozillaVpnApp} />
+          </ActionPanel.Section>
+
+          {/* Add Back to Main Menu action if onBack is provided */}
+          {onBack && (
+            <ActionPanel.Section>
+              <Action
+                title="Back to Main Menu"
+                icon={Icon.ArrowLeft}
+                onAction={onBack}
+                shortcut={{ modifiers: ['cmd'], key: 'b' }}
+              />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />

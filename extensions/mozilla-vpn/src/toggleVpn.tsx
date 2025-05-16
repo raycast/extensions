@@ -27,7 +27,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action
-              title="Activate VPN"
+              title="Activate Vpn"
               onAction={() =>
                 runCommand(
                   '/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN activate'
@@ -42,7 +42,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action
-              title="Deactivate VPN"
+              title="Deactivate Vpn"
               onAction={() =>
                 runCommand(
                   '/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN deactivate'
