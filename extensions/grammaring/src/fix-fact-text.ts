@@ -17,7 +17,7 @@ export default async function main() {
 
     const processedContent = await processText(input, apiKey);
     await Clipboard.paste(processedContent);
-    await showHUD("✅ Text processed and copied to clipboard!");
+    await showHUD("✅ Text fixed");
   } catch (err) {
     // Check if err is an Error object and has a message property
     if (err instanceof Error) {

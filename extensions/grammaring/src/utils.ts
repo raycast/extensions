@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { showFailureToast } from "@raycast/utils";
 
 export const FIX_FACT_TEXT_PROMPT = `
 You are "StealthProofreader," an expert copy-editor and fact bot.
@@ -32,21 +33,30 @@ E. Output
 
 export async function processText(inputText: string, apiKey: string): Promise<string> {
   if (!inputText?.trim()) {
+    await showFailureToast("No text to process.");
     throw new Error("No text to process.");
   }
 
   const openai = new OpenAI({ apiKey });
-  const { choices } = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: FIX_FACT_TEXT_PROMPT },
-      { role: "user", content: inputText },
-    ],
-  });
 
-  const result = choices[0].message?.content?.trim();
-  if (!result) {
-    throw new Error("Failed to get a response from OpenAI.");
+  try {
+    const { choices } = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: FIX_FACT_TEXT_PROMPT },
+        { role: "user", content: inputText },
+      ],
+    });
+
+    const result = choices?.[0]?.message?.content?.trim();
+    if (!result) {
+      await showFailureToast("Failed to get a response from OpenAI.");
+      throw new Error("Failed to get a response from OpenAI.");
+    }
+    return result;
+  } catch (error) {
+    console.error("OpenAI API call failed:", error);
+    await showFailureToast("An error occurred while processing the text.");
+    throw error;
   }
-  return result;
 }

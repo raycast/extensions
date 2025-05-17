@@ -13,13 +13,15 @@
   "commands": [
     {
       "name": "fix-fact-text",
-      "title": "Fix & Fact - Selected",
-      "description": "Fix selected text, keep style, answer {whatever}. Uses selected text.",
+      "title": "Fix & Fact - Selected Text",
+      "subtitle": "Grammaring",
+      "description": "Fix selected text, keep style, answer {whatever}.",
       "mode": "no-view"
     },
     {
       "name": "fix-fact-text-input",
       "title": "Fix & Fact - Interface",
+      "subtitle": "Grammaring",
       "description": "Fix text in UI, keep style, answer {whatever}.",
       "mode": "view"
     }

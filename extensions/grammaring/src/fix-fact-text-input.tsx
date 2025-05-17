@@ -1,6 +1,7 @@
-import { ActionPanel, Action, Form, Clipboard, getPreferenceValues, showHUD, LaunchProps } from "@raycast/api";
+import { ActionPanel, Action, Form, Clipboard, getPreferenceValues, LaunchProps, Toast, showToast } from "@raycast/api";
 import { useState } from "react";
 import { processText } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 interface CommandFormValues {
   textToProcess: string;
@@ -29,19 +30,23 @@ export default function Command(props: LaunchProps<{ arguments: CommandLaunchArg
     try {
       const { apiKey } = getPreferenceValues<{ apiKey: string }>();
       if (!apiKey) {
-        await showHUD("❌ API key not found. Please set it in preferences.");
+        await showFailureToast("API key not found. Please set it in preferences.");
         return;
       }
 
       const processedContent = await processText(values.textToProcess, apiKey);
       await Clipboard.copy(processedContent);
       setProcessedTextOutput(processedContent);
-      await showHUD("✅ Text processed, displayed below, and copied to clipboard!");
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Text processed",
+        message: "Displayed and copied to clipboard",
+      });
     } catch (err) {
       if (err instanceof Error) {
-        await showHUD(`❌ Error: ${err.message}`);
+        await showFailureToast(err.message, { title: "Error" });
       } else {
-        await showHUD(`❌ Error: ${String(err)}`);
+        await showFailureToast(String(err), { title: "Error" });
       }
       setProcessedTextOutput(undefined);
     } finally {

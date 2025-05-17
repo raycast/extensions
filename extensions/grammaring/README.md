@@ -16,7 +16,7 @@ Refine your writing effortlessly and very fast. Grammaring subtly corrects your 
 ### Shortcut
 1. Go to Extensions in Raycast Settings
 2. Search for "Grammaring"
-3. Record a shortcut for "Fix & Fact. Keep your style"
+3. Record a shortcut for "Fix & Fact - Selected Text"
 
 ---
 
@@ -31,13 +31,7 @@ Write inside {curly braces} the facts you want to fill in the text, then run the
 
 ### Example:
 ```
-I'm traveling to {city where a lot of big companies were founded} to see {was founder and CEO of Apple}.
+Input: I'm traveling to {city where a lot of big companies were founded} to see {was founder and CEO of Apple}.
+
+Output: I'm traveling to Silicon Valley to see Steve Jobs.
 ```
-
-Grammaring will fill the text with the facts you asked for.
-```
-I'm traveling to San Francisco to see Steve Jobs.
-```
-
-
-
