@@ -421,6 +421,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["mcp-remote", "https://mcp.nuxt.space/sse"],
     },
   },
+  {
+    name: "zeabur",
+    title: "Zeabur",
+    description:
+      "Zeabur provides an official Model Context Protocol (MCP) server that allows you to manage and deploy your Zeabur projects.",
+    icon: "zeabur.svg",
+    homepage: "https://zeabur.com/docs/en-US/mcp",
+    configuration: {
+      command: "npx",
+      args: ["zeabur-mcp@latest"],
+      env: {
+        ZEABUR_TOKEN: "YOUR_ZEABUR_TOKEN_HERE",
+      },
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
