@@ -1,3 +1,4 @@
+/* eslint-disable @raycast/prefer-title-case */
 import {
   Action,
   ActionPanel,
@@ -404,7 +405,7 @@ function CreateKey({ apiInfo, onKeyCreated }: CreateKeyProps) {
         if (value) {
           try {
             JSON.parse(value);
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (e) {
             return "The item must be valid JSON";
           }
@@ -559,7 +560,6 @@ function UpdateKey({ apiKey, onKeyUpdated }: UpdateKeyProps) {
 
       const response = await updateKey(apiKey.id, req);
       if (!("code" in response)) {
-        showToast(Toast.Style.Success, "Updated API Key", response.key);
         await showToast({
           title: "Updated Key",
           message: apiKey.id,
@@ -582,7 +582,7 @@ function UpdateKey({ apiKey, onKeyUpdated }: UpdateKeyProps) {
         if (value) {
           try {
             JSON.parse(value);
-          } catch (e) {
+          } catch {
             return "The item must be valid JSON";
           }
         }
