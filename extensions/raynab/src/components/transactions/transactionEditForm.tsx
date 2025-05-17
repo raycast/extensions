@@ -56,7 +56,10 @@ export function TransactionEditForm({ transaction }: TransactionEditFormProps) {
   const { value: timeline } = useLocalStorage<Period>('timeline', 'month');
 
   const { mutate } = useTransactions(activeBudgetId, timeline);
-  const { data: payees = [], isLoading: isLoadingPayees } = usePayees(activeBudgetId || '');
+  const {
+    data: payees = [{ id: transaction.payee_id ?? '', name: transaction.payee_name ?? '' }],
+    isLoading: isLoadingPayees,
+  } = usePayees(activeBudgetId || '');
   const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId || '');
 
   const isLoading = isLoadingCategories || isLoadingPayees;
