@@ -18,7 +18,7 @@ function SearchGrid() {
     <Grid
       columns={8}
       navigationTitle="Icons"
-      searchBarPlaceholder="Search Logos..."
+      searchBarPlaceholder="Search Icons..."
       inset={Grid.Inset.Large}
       isLoading={foldersLoading || imagesLoading}
       searchBarAccessory={

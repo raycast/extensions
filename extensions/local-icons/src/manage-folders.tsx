@@ -16,6 +16,10 @@ import { FoldersProvider, useFolders } from "./components/folder-context";
 import { statSync, readdirSync } from "fs";
 import { ActionAddFolder } from "./components/action-add-folder";
 import { Folder } from "./type";
+import { useImages } from "./hooks/use-images";
+import { useMemo } from "react";
+import { showFailureToast } from "@raycast/utils";
+
 function countImagesInFolder(folder: Folder): number {
   try {
     let count = 0;
@@ -39,19 +43,22 @@ function countImagesInFolder(folder: Folder): number {
     }
     return count;
   } catch (error) {
-    console.error("Error counting images in folder:", error);
+    showFailureToast(error, { title: "Error counting images in folder" });
     return 0;
   }
 }
 
-function ManageFolders() {
-  const { folders, isLoading, removeFolder } = useFolders();
-  const folderList = folders.map((folder) => ({
-    path: folder.path,
-    name: path.basename(folder.path),
-    imageCount: countImagesInFolder(folder),
-    recursive: folder.recursive,
-  }));
+function ManageFoldersList() {
+  const { folders, removeFolder } = useFolders();
+  const { images } = useImages(folders);
+
+  const folderList = useMemo(() => {
+    return folders.map((folder) => ({
+      path: folder.path,
+      name: path.basename(folder.path),
+      imageCount: countImagesInFolder(folder),
+    }));
+  }, [folders, images]);
 
   const handleCopy = async (folderPath: string) => {
     await Clipboard.copy({ text: folderPath });
@@ -89,42 +96,39 @@ function ManageFolders() {
   };
 
   return (
-    <List isLoading={isLoading} navigationTitle="Manage Icon Folders" searchBarPlaceholder="Search folders...">
-      <List.Item
-        title="Add New Folder"
-        icon={Icon.Plus}
-        accessories={[]}
-        actions={
-          <ActionPanel>
-            <ActionAddFolder />
-          </ActionPanel>
-        }
-      />
-      {folderList.map((folder) => (
-        <List.Item
-          key={folder.path}
-          title={folder.path}
-          accessories={[
-            { text: `${folder.imageCount} images` },
-            {
-              icon: folder.recursive ? Icon.NewFolder : Icon.Folder,
-              tooltip: folder.recursive ? "Recursive" : "Non-recursive",
-            },
-          ]}
+    <List navigationTitle="Manage Folders" searchBarPlaceholder="Search folders..." isLoading={folders.length === 0}>
+      {folderList.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.Folder}
+          title="No Folders Added"
+          description="Add folders containing your icons to get started"
           actions={
             <ActionPanel>
-              <Action title="Copy Path" icon={Icon.CopyClipboard} onAction={() => handleCopy(folder.path)} />
-              <Action title="Show in Finder" icon={Icon.Finder} onAction={() => handleOpen(folder.path)} />
-              <Action
-                title="Remove Folder"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                onAction={() => handleRemove(folder.path)}
-              />
+              <ActionAddFolder />
             </ActionPanel>
           }
         />
-      ))}
+      ) : (
+        folderList.map((folder) => (
+          <List.Item
+            key={folder.path}
+            title={folder.name}
+            subtitle={`${folder.imageCount} icons`}
+            actions={
+              <ActionPanel>
+                <Action title="Copy Path" icon={Icon.CopyClipboard} onAction={() => handleCopy(folder.path)} />
+                <Action title="Show in Finder" icon={Icon.Finder} onAction={() => handleOpen(folder.path)} />
+                <Action
+                  title="Remove Folder"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={() => handleRemove(folder.path)}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }
@@ -132,7 +136,7 @@ function ManageFolders() {
 export default function Command() {
   return (
     <FoldersProvider>
-      <ManageFolders />
+      <ManageFoldersList />
     </FoldersProvider>
   );
 }

@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useFolders } from "./folder-context";
 import { existsSync, statSync } from "fs";
+import { showFailureToast } from "@raycast/utils";
 
 export function ActionAddFolder() {
   const { addFolders } = useFolders();
@@ -11,11 +12,7 @@ export function ActionAddFolder() {
 
     for (const folderPath of values.iconPaths) {
       if (!existsSync(folderPath)) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Path does not exist",
-          message: `The path "${folderPath}" does not exist.`,
-        });
+        showFailureToast(new Error(`The path "${folderPath}" does not exist.`), { title: "Path does not exist" });
         continue;
       }
 
@@ -26,13 +23,17 @@ export function ActionAddFolder() {
     }
 
     if (validFolders.length > 0) {
-      await addFolders(validFolders);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Folders saved",
-        message: `Added ${validFolders.length} folder${validFolders.length > 1 ? "s" : ""} to saved folders.`,
-      });
-      navigation.pop();
+      try {
+        await addFolders(validFolders);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Folders saved",
+          message: `Added ${validFolders.length} folder${validFolders.length > 1 ? "s" : ""} to saved folders.`,
+        });
+        navigation.pop();
+      } catch (error) {
+        showFailureToast(error, { title: "Failed to add folders" });
+      }
     }
   };
 

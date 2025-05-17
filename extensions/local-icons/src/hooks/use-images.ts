@@ -2,6 +2,7 @@ import { readdir, stat } from "fs/promises";
 import { join } from "path";
 import { useState, useEffect } from "react";
 import { Folder } from "../type";
+import { showFailureToast } from "@raycast/utils";
 
 export interface ImageFile {
   path: string;
@@ -15,6 +16,7 @@ export function useImages(folders: Folder[]) {
   const validExtensions = [".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico"];
 
   useEffect(() => {
+    let isMounted = true;
     async function loadImages() {
       const loadedImages: ImageFile[] = [];
 
@@ -22,13 +24,15 @@ export function useImages(folders: Folder[]) {
         try {
           const files = await readdir(dirPath);
           for (const file of files) {
+            if (!isMounted) return;
             const fullPath = join(dirPath, file);
             const fileStat = await stat(fullPath);
 
             if (fileStat.isDirectory() && recursive) {
               await scanDirectory(fullPath, recursive);
             } else if (fileStat.isFile()) {
-              const ext = file.toLowerCase().slice(file.lastIndexOf("."));
+              const dotIndex = file.lastIndexOf(".");
+              const ext = dotIndex >= 0 ? file.toLowerCase().slice(dotIndex) : "";
               if (validExtensions.includes(ext)) {
                 loadedImages.push({
                   path: fullPath,
@@ -39,7 +43,7 @@ export function useImages(folders: Folder[]) {
             }
           }
         } catch (error) {
-          console.error(`Error reading directory ${dirPath}:`, error);
+          showFailureToast(error, { title: "Could not read directory" });
         }
       }
 
@@ -47,11 +51,17 @@ export function useImages(folders: Folder[]) {
         await scanDirectory(folder.path, folder.recursive);
       }
 
-      setImages(loadedImages);
-      setIsLoading(false);
+      if (isMounted) {
+        setImages(loadedImages);
+        setIsLoading(false);
+      }
     }
 
     loadImages();
+
+    return () => {
+      isMounted = false;
+    };
   }, [folders]);
 
   return { images, isLoading };

@@ -1,4 +1,4 @@
 export interface Folder {
-  path: string;
-  recursive: boolean;
+  readonly path: string;
+  readonly recursive: boolean;
 }

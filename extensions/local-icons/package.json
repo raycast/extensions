@@ -14,6 +14,7 @@
     {
       "name": "search-icons",
       "title": "Search Icons",
+      "subtitle": "Local Icons",
       "description": "Search icons from your local folders",
       "mode": "view",
       "arguments": [],
@@ -22,6 +23,7 @@
     {
       "name": "manage-folders",
       "title": "Manage Folders",
+      "subtitle": "Local Icons",
       "description": "Manage folders for search",
       "mode": "view",
       "arguments": [],
