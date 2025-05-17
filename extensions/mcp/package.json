@@ -5,9 +5,15 @@
   "description": "Interact with the Model Context Protocol (MCP) in Raycast AI",
   "icon": "mcp-icon.png",
   "author": "EvanZhouDev",
+  "version": "1.1.0",
   "contributors": [
+    "EugeneVanchugov",
     "radzio"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raycast/extensions"
+  },
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -163,10 +169,9 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
   },
