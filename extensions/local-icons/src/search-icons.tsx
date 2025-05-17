@@ -73,7 +73,8 @@ function SearchGrid() {
             title={file.name.replace(/\.[^/.]+$/, "")}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title={`Copy as ${file.type.toUpperCase()}`} content={{ file: file.path }} />
+                <Action.CopyToClipboard title={`Copy ${file.type.toUpperCase()}`} content={{ file: file.path }} />
+                <Action.CopyToClipboard title="Copy Path" content={file.path} />
                 <Action title="Show in Finder" icon={Icon.Finder} onAction={() => showInFinder(file.path)} />
               </ActionPanel>
             }
