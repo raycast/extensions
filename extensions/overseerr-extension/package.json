@@ -58,6 +58,20 @@
       "title": "TMDB Language",
       "description": "e.g., ko (Korean), ja, etc. (Default: en)",
       "required": false
+    },
+    {
+      "name": "SONARR_API_ADDRESS",
+      "type": "textfield",
+      "title": "Sonarr Address",
+      "description": "e.g., http://localhost:8989",
+      "required": false
+    },
+    {
+      "name": "SONARR_API_KEY",
+      "type": "password",
+      "title": "Sonarr API Key",
+      "description": "Found in Sonarr → Settings → General → API Key",
+      "required": false
     }
   ],
   "commands": [

@@ -1,3 +1,4 @@
+import React from "react";
 import {
   List,
   showToast,
@@ -5,12 +6,13 @@ import {
   ActionPanel,
   Action,
   Icon,
+  useNavigation,
 } from "@raycast/api";
-import React from "react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { preferences, getCombinedStatus } from "./utils";
 import { OverseerrRequest } from "./types";
+import ApprovalForm from "./ApprovalForm";
 
 const OVERSEERR_API_ADDRESS = `${preferences.OVERSEERR_API_ADDRESS}/api/v1/request`;
 const OVERSEERR_API_KEY = preferences.OVERSEERR_API_KEY;
@@ -21,6 +23,7 @@ export default function Command() {
   const [requests, setRequests] = useState<OverseerrRequest[]>([]);
   const [tmdbTitles, setTmdbTitles] = useState<{ [id: number]: string }>({});
   const [loading, setLoading] = useState(true);
+  const { push } = useNavigation();
 
   useEffect(() => {
     fetchRequests();
@@ -66,7 +69,7 @@ export default function Command() {
     } catch (err: unknown) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to load request",
+        title: "Failed to load requests",
         message: err instanceof Error ? err.message : String(err),
       });
     } finally {
@@ -81,13 +84,13 @@ export default function Command() {
       });
       showToast({
         style: Toast.Style.Success,
-        title: `Request #${id} ${action === "approve" ? "Approve" : "Decline"}`,
+        title: `Request #${id} ${action === "approve" ? "Approved" : "Declined"}`,
       });
       fetchRequests();
     } catch (err: unknown) {
       showToast({
         style: Toast.Style.Failure,
-        title: `Request ${action} Declined`,
+        title: `Request ${action} failed`,
         message: err instanceof Error ? err.message : String(err),
       });
     }
@@ -102,20 +105,30 @@ export default function Command() {
           title={
             tmdbTitles[r.media?.tmdbId] || `TMDB: ${r.media?.tmdbId || "-"}`
           }
-          subtitle={`${r.requestedBy?.plexUsername || "unknown"}`}
+          subtitle={r.requestedBy?.plexUsername || "unknown"}
           accessories={[{ text: `#${r.id}` }, { tag: getCombinedStatus(r) }]}
           actions={
             <ActionPanel>
-              <Action
-                title="Approve"
-                icon={Icon.Check}
-                onAction={() => handleRequest(r.id, "approve")}
-              />
-              <Action
-                title="Decline"
-                icon={Icon.XMarkCircle}
-                onAction={() => handleRequest(r.id, "decline")}
-              />
+              {r.status === 1 ? (
+                <Action
+                  title="Approve with Options"
+                  icon={Icon.CheckCircle}
+                  onAction={() => push(<ApprovalForm request={r} />)}
+                />
+              ) : (
+                <>
+                  <Action
+                    title="Approve"
+                    icon={Icon.Check}
+                    onAction={() => handleRequest(r.id, "approve")}
+                  />
+                  <Action
+                    title="Decline"
+                    icon={Icon.XMarkCircle}
+                    onAction={() => handleRequest(r.id, "decline")}
+                  />
+                </>
+              )}
             </ActionPanel>
           }
         />

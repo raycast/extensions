@@ -20,6 +20,8 @@ export interface OverseerrRequest {
 export interface QualityProfile {
   id: number;
   name: string;
+  items: unknown[];
+  upgradeAllowed?: boolean;
 }
 
 export interface ServerConfig {
