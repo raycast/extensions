@@ -228,7 +228,7 @@ export async function convertVideo(
 
   const ffmpegPath = await getFFmpegPath();
   // Basic command, can be expanded with quality options for video
-  let command = `\"${ffmpegPath}\" -i \"${filePath}\" -vcodec ${formatOptions.videoCodec} -acodec ${formatOptions.audioCodec}`;
+  let command = `"${ffmpegPath}" -i "${filePath}" -vcodec ${formatOptions.videoCodec} -acodec ${formatOptions.audioCodec}`;
 
   // Example: Add a CRF for H.264 (mp4) if quality is a number 0-51 (lower is better)
   if (outputFormat === "mp4" && quality && !isNaN(Number(quality))) {
@@ -237,7 +237,7 @@ export async function convertVideo(
   }
   // Add more video quality options here based on codec and desired control
 
-  command += ` \"${finalOutputPath}\"`;
+  command += ` "${finalOutputPath}"`;
   await execPromise(command);
 
   return finalOutputPath;
@@ -253,7 +253,7 @@ export async function convertAudio(
 
   const ffmpegPath = await getFFmpegPath();
   // Basic command, can be expanded with quality options for audio
-  let command = `\"${ffmpegPath}\" -i \"${filePath}\" -c:a ${formatOptions.audioCodec}`;
+  let command = `"${ffmpegPath}" -i "${filePath}" -c:a ${formatOptions.audioCodec}`;
 
   // Example: Add VBR setting for MP3 if quality is a number 0-9 (lower is better VBR)
   if (outputFormat === "mp3" && quality && !isNaN(Number(quality))) {
@@ -262,7 +262,7 @@ export async function convertAudio(
   }
   // Add more audio quality options here based on codec
 
-  command += ` \"${finalOutputPath}\"`;
+  command += ` "${finalOutputPath}"`;
   await execPromise(command);
 
   return finalOutputPath;
