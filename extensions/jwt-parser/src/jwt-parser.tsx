@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { getTokenDetails, isJWT } from "./utils";
 import { TokenDetails } from "./types";
 import { JwtPayload } from "jsonwebtoken";
+import { showFailureToast } from "@raycast/utils/dist/showFailureToast";
 
 interface FormValues {
   token: string;
@@ -218,11 +219,7 @@ export default function Command() {
 
       await push(<TokenView token={values.token} details={details} />);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid Token",
-        message: error instanceof Error ? error.message : "Failed to parse token",
-      });
+      showFailureToast(error, { title: "Invalid Token" });
     }
   }
 
