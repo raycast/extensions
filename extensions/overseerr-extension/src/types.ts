@@ -31,3 +31,12 @@ export interface ServerConfig {
   activeProfileName: string;
   activeDirectory: string;
 }
+
+export interface Profile {
+  id: number;
+  name: string;
+}
+
+export interface ApprovalFormProps {
+  request: OverseerrRequest;
+}
