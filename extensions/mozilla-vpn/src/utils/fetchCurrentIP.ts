@@ -59,9 +59,7 @@ const fetchWithRetry = (
             return;
           }
 
-          try {
-            resolve(data);
-          } catch (error) {
+          resolve(data);
             console.error('Failed to parse response:', error);
             reject(new Error('Failed to parse response'));
           }
