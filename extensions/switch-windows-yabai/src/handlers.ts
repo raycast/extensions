@@ -28,7 +28,7 @@ export const handleFocusWindow = (windowId: number, windowApp: string, onFocused
           message: `Window ${windowApp} focused`,
         });
       }
-    } catch (error: Error) {
+    } catch (error: unknown) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Focus Window",
@@ -60,7 +60,7 @@ export const handleCloseWindow = (windowId: number, windowApp: string, onRemove:
         });
         onRemove(windowId);
       }
-    } catch (error: Error) {
+    } catch (error: unknown) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Close Window",
@@ -146,7 +146,7 @@ export const handleAggregateToSpace = (windowId: number, windowApp: string) => {
           } else {
             console.log(`Moved window ${win.id} to space ${targetSpaceId}.`);
           }
-        } catch (innerError: Error) {
+        } catch (innerError: unknown) {
           console.error(`Exception while moving window ${win.id}: ${innerError.message}`);
         }
       }
@@ -165,7 +165,7 @@ export const handleAggregateToSpace = (windowId: number, windowApp: string) => {
         title: "Aggregation Complete",
         message: `All "${windowApp}" windows have been moved to space ${targetSpaceId} and one has been focused.`,
       });
-    } catch (error: Error) {
+    } catch (error: unknown) {
       console.error("Aggregation failed:", error);
       await showToast({
         style: Toast.Style.Failure,
@@ -197,7 +197,7 @@ export const handleCloseEmptySpaces = (windowId: number, onRemove: (id: number) 
         });
         onRemove(windowId);
       }
-    } catch (error: Error) {
+    } catch (error: unknown) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Close Empty Spaces",
