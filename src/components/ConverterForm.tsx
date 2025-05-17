@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import path from "path";
 import { convertImage, convertAudio, convertVideo } from "../utils/converter";
 import { execPromise } from "../utils/exec";
@@ -8,9 +8,22 @@ const ALLOWED_VIDEO_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".webm
 const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".heic", ".tiff", ".avif"];
 const ALLOWED_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".m4a", ".flac"];
 
-export function ConverterForm() {
+interface ConverterFormProps {
+  initialFiles?: string[];
+}
+
+export function ConverterForm({ initialFiles }: ConverterFormProps) {
   const [selectedFileType, setSelectedFileType] = useState<"video" | "image" | "audio" | null>(null);
+  const [currentFiles, setCurrentFiles] = useState<string[]>(initialFiles || []);
+
+  useEffect(() => {
+    if (initialFiles && initialFiles.length > 0) {
+      handleFileSelect(initialFiles);
+    }
+  }, [initialFiles]);
+
   const handleFileSelect = (files: string[]) => {
+    setCurrentFiles(files);
     if (files.length === 0) {
       setSelectedFileType(null);
       return true;
@@ -54,7 +67,7 @@ export function ConverterForm() {
   };
 
   const handleSubmit = async (values: { videoFile: string[]; format: string }) => {
-    if (!values.videoFile || values.videoFile.length === 0) {
+    if (!currentFiles || currentFiles.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No files selected",
@@ -63,7 +76,7 @@ export function ConverterForm() {
       return;
     }
 
-    const fileExtension = path.extname(values.videoFile[0]).toLowerCase();
+    const fileExtension = path.extname(currentFiles[0]).toLowerCase();
     const isInputVideo = ALLOWED_VIDEO_EXTENSIONS.includes(fileExtension);
     const isInputImage = ALLOWED_IMAGE_EXTENSIONS.includes(fileExtension);
     const isInputAudio = ALLOWED_AUDIO_EXTENSIONS.includes(fileExtension);
@@ -93,7 +106,7 @@ export function ConverterForm() {
       title: "Converting file...",
     });
 
-    for (const item of values.videoFile) {
+    for (const item of currentFiles) {
       try {
         let outputPath = "";
         if (isInputImage) {
@@ -136,7 +149,15 @@ export function ConverterForm() {
         </ActionPanel>
       }
     >
-      <Form.FilePicker id="videoFile" title="Select files" allowMultipleSelection={true} onChange={handleFileSelect} />
+      <Form.FilePicker
+        id="videoFile"
+        title="Select files"
+        allowMultipleSelection={true}
+        value={currentFiles}
+        onChange={(newFiles) => {
+          handleFileSelect(newFiles);
+        }}
+      />
       {selectedFileType && (
         <Form.Dropdown
           id="format"
