@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Prisma MCP Server] - {PR_MERGE_DATE}
+
+Add Official Prisma MCP Server to registry.
+
 ## [Add Zeabur MCP Server] - {PR_MERGE_DATE}
 
 Add Official Zeabur MCP Server to registry, this allows to manage and deploy Zeabur projects.
