@@ -6,6 +6,7 @@ import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard } from "@rayca
 import AddBookmark from "../add-bookmark";
 import { cache } from "../utils/cache.util";
 import { RankingEntries } from "../types";
+import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
 
 export const RequiredActions = (props: { refetch: () => void }) => {
   const { refetch } = props;
@@ -46,35 +47,42 @@ export const RequiredActions = (props: { refetch: () => void }) => {
 
 export const BookmarkItemActionPanel = (props: {
   bookmark: RouterOutputs["bookmark"]["listAll"][number];
-  me: RouterOutputs["user"]["me"] | undefined;
   refetch: () => void;
   rankingEntries: RankingEntries;
   setRankingEntries: (rankingEntries: RankingEntries | ((prev: RankingEntries) => RankingEntries)) => void;
 }) => {
-  const { bookmark, me, refetch, setRankingEntries, rankingEntries } = props;
+  const { bookmark, refetch, setRankingEntries, rankingEntries } = props;
   const { url } = bookmark;
 
-  const spaceIds = me?.associatedSpaces.map((s) => s.id) || [];
+  const { enabledSpaceIds } = useEnabledSpaces();
   const deleteBookmark = trpc.bookmark.delete.useMutation();
   const utils = trpc.useUtils();
 
   const handleDelete = async () => {
-    const confirmed = await confirmAlert({
-      title: "Delete Bookmark?",
-      primaryAction: {
-        title: "Delete",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-    if (!confirmed) return;
+    if (!enabledSpaceIds) {
+      return;
+    }
 
-    await deleteBookmark.mutateAsync(bookmark.id);
-    utils.bookmark.listAll.setData({ spaceIds }, (prev) => {
+    if (
+      !(await confirmAlert({
+        title: "Delete Bookmark?",
+        primaryAction: {
+          title: "Delete",
+          style: Alert.ActionStyle.Destructive,
+        },
+      }))
+    ) {
+      return;
+    }
+
+    utils.bookmark.listAll.setData({ spaceIds: enabledSpaceIds }, (prev) => {
       if (!prev) return prev;
 
       return prev.filter((b) => b.id !== bookmark.id);
     });
-    utils.bookmark.listAll.refetch({ spaceIds });
+
+    await deleteBookmark.mutateAsync(bookmark.id);
+    utils.bookmark.listAll.refetch({ spaceIds: enabledSpaceIds });
   };
 
   const handleResetRanking = async () => {

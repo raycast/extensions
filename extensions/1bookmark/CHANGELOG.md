@@ -1,5 +1,13 @@
 # 1bookmark Changelog
 
+## [Space Authentication Policy] - {PR_MERGE_DATE}
+
+- 0.11.0
+- 📱 Space member email auth policy is now available. This feature enhances the security of your team space.
+- 📱 Form validation has been improved.
+- 💻 There have been several small bug fixes and performance improvements.
+- 📝 Rename title from 1bookmark to 1Bookmark.
+
 ## [Index Ranking System] - 2025-04-25
 
 - 0.10.0
