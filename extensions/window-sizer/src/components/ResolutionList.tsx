@@ -32,11 +32,7 @@ export function ResolutionList({
           key={`${resolution.isCustom ? "custom" : "default"}-${resolution.title}`}
           title={resolution.title}
           icon={{
-            source: resolution.isStarred
-              ? "icons/starred-size.svg"
-              : resolution.isCustom
-                ? "icons/custom-size.svg"
-                : "icons/default-size.svg",
+            source: resolution.isCustom ? "icons/custom-size.svg" : "icons/default-size.svg",
             fallback: Icon.AppWindow,
             tintColor: Color.SecondaryText,
           }}
