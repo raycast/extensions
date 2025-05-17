@@ -16,7 +16,7 @@ import {
 import { API_HEADERS, API_URL } from "./constants";
 
 const callApi = async (endpoint: string, method: ApiMethod, body?: BodyRequest, animatedToastMessage = "") => {
-  await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
+  const toast = await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
 
   try {
     let apiResponse;
@@ -42,16 +42,22 @@ const callApi = async (endpoint: string, method: ApiMethod, body?: BodyRequest, 
 
       const response = (await apiResponse.json()) as ErrorResponse;
 
-      await showToast(Toast.Style.Failure, error, response.error);
+      toast.style = Toast.Style.Failure;
+      toast.title = error;
+      toast.message = response.error;
       return response;
     }
 
     const response = await apiResponse.json();
-    await showToast(Toast.Style.Success, `Success`);
+    toast.style = Toast.Style.Success;
+    toast.title = `Success`;
+    toast.message = "";
     return response;
   } catch {
     const error = "Failed to execute request. Please try again later.";
-    await showToast(Toast.Style.Failure, `Error`, error);
+    toast.style = Toast.Style.Failure;
+    toast.title = `Error`;
+    toast.message = error;
     return { error };
   }
 };
