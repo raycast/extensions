@@ -341,7 +341,7 @@ export async function getDirections(
 export async function getNearbyPlaces(
   location: { lat: number; lng: number },
   type: string,
-  radius = parseInt(getDefaultRadius(), 10),
+  radius = getDefaultRadius(),
   openNow = false
 ): Promise<PlaceSearchResult[]> {
   try {
