@@ -1,5 +1,5 @@
 import { withCache } from "@raycast/utils";
-import { withGoogleAPIs, getPeopleClient } from "../google";
+import { withGoogleAPIs, getPeopleClient } from "../lib/google";
 
 const getCurrentUser = async () => {
   const people = getPeopleClient();

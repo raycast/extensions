@@ -11,28 +11,32 @@ export const config: NewTabSearchConfigs = {
   yahoo: "https://search.yahoo.com/search?p=",
   ecosia: "https://www.ecosia.org/search?q=",
   kagi: "https://kagi.com/search?q=",
+  unduck: "https://unduck.link?q=",
 };
 
 export default async function command(props: LaunchProps<{ arguments: URLArguments }>) {
-  const { url } = props.arguments;
-
-  let NewIncognitoWindow = "";
+  let { url } = props.arguments;
 
   if (url) {
-    NewIncognitoWindow = url;
-    const NewIncognitoWindowAsSearch = `${config[NewIncognitoWindowPreferences.engine as keyof NewTabSearchConfigs]}${encodeURIComponent(NewIncognitoWindow)}`;
-    NewIncognitoWindow = isURL(NewIncognitoWindow) ? NewIncognitoWindow : NewIncognitoWindowAsSearch;
+    if (!isURL(url)) {
+      url = `${config[NewIncognitoWindowPreferences.engine as keyof NewTabSearchConfigs]}${encodeURIComponent(url)}`;
+    }
   } else {
-    NewIncognitoWindow = NewIncognitoWindowPreferences.url;
+    url = NewIncognitoWindowPreferences.url;
   }
 
   try {
-    if (await validateURL(NewIncognitoWindow)) {
-      // Append https:// if protocol is missing
-      const openURL = !/^\S+?:\/\//i.test(NewIncognitoWindow) ? "https://" + NewIncognitoWindow : NewIncognitoWindow;
-
+    if (!url) {
+      // No URL given or set in preferences, so open blank incognito window.
       await closeMainWindow();
-      await makeNewWindow({ incognito: true, url: openURL });
+      await makeNewWindow({ incognito: true });
+    } else if (await validateURL(url)) {
+      // Append https:// if protocol is missing
+      if (!/^\S+?:\/\//i.test(url)) {
+        url = "https://" + url;
+      }
+      await closeMainWindow();
+      await makeNewWindow({ incognito: true, url });
     }
   } catch {
     await showToast({

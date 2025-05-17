@@ -1,79 +1,58 @@
-import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
-import { LinkdingAccountMap, PostLinkdingBookmarkPayload } from "./types/linkding-types";
-import { useEffect, useState } from "react";
-import { getPersistedLinkdingAccounts } from "./service/user-account-service";
-import { validateUrl } from "./util/bookmark-util";
-import { createBookmark, getWebsiteMetadata } from "./service/bookmark-service";
+import { Action, ActionPanel, Form, getPreferenceValues, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { useEffect } from "react";
+import useBookmarks from "./hooks/use-bookmarks";
+import useUrlMetadata from "./hooks/use-url-metadata";
+import { CreateLinkdingBookmarkFormValues } from "./types/linkding-types";
+import { isValidUrl } from "./util/is-valid-url";
+import parseTags from "./util/parse-tags";
 
-export default function CreateBookmarks() {
-  const [linkdingAccountMap, setLinkdingAccountMap] = useState<LinkdingAccountMap>({});
-  const [loading, setLoading] = useState<boolean>(false);
-  useEffect(() => {
-    getPersistedLinkdingAccounts().then((linkdingMap) => {
-      if (linkdingMap) {
-        setLinkdingAccountMap(linkdingMap);
-      }
-    });
-  }, [setLinkdingAccountMap]);
+export default function createBookmarks() {
+  const preferences = getPreferenceValues<Preferences>();
+  const { createBookmark } = useBookmarks();
 
-  const { handleSubmit, itemProps, setValue } = useForm<PostLinkdingBookmarkPayload & { linkdingAccountName: string }>({
-    async onSubmit(values) {
-      const linkdingAccount = linkdingAccountMap[values.linkdingAccountName];
-
-      const toast = await showToast(Toast.Style.Animated, "Creating bookmark", values.title);
-      createBookmark(linkdingAccount, {
-        ...values,
-        shared: false,
-        is_archived: false,
-        tag_names: [],
-      })
-        .then(() => {
-          toast.title = "Bookmark created successfully";
-          popToRoot();
-        })
-        .catch((error) => {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Could not create";
-          toast.message = `${error}`;
-        });
+  const { handleSubmit, itemProps, setValue, values } = useForm<CreateLinkdingBookmarkFormValues>({
+    onSubmit: async (values) => {
+      const { tags, ...remainingValues } = values;
+      await createBookmark({
+        ...remainingValues,
+        tag_names: parseTags(tags),
+      });
+      popToRoot();
     },
     validation: {
-      url(value) {
+      url: (value) => {
         if (!value) return "URL is required";
-        if (!validateUrl(value)) return "URL must be a valid url";
-        getMetadata(value);
+        if (!isValidUrl(value)) return "URL is invalid";
       },
+    },
+    initialValues: {
+      unread: preferences.createBookmarksAsUnread,
     },
   });
 
-  function getMetadata(url: string) {
-    setLoading(true);
-    getWebsiteMetadata(url)
-      .then((metadata) => {
-        if (metadata) {
-          setValue("title", metadata.title);
-          setValue("description", metadata.description ?? "");
-        }
-      })
-      .finally(() => setLoading(false));
-  }
+  const metadata = useUrlMetadata(values.url);
+  useEffect(() => {
+    if (!metadata) return;
+    if (!values.title) setValue("title", metadata.title);
+    if (!values.description && metadata.description) setValue("description", metadata.description);
+  }, [metadata]);
 
   return (
     <Form
-      isLoading={loading}
       actions={
         <ActionPanel title="Create Bookmark">
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Bookmark" />
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Linkding Account" placeholder="Linkding Account" {...itemProps.linkdingAccountName}>
-        {Object.keys(linkdingAccountMap).map((name) => {
-          return <Form.Dropdown.Item key={name} title={name} value={name}></Form.Dropdown.Item>;
-        })}
-      </Form.Dropdown>
       <Form.TextField title="URL" placeholder="https://raycast.com" {...itemProps.url} />
+      <Form.TextField
+        title="Tags"
+        placeholder="tools productivity"
+        info="Enter any number of tags separated by space and without the hash (#). If a tag does not exist it will be automatically created."
+        {...itemProps.tags}
+      />
       <Form.TextField title="Title" placeholder="Raycast - Your shortcut to everything" {...itemProps.title} />
       <Form.TextArea
         title="Description"

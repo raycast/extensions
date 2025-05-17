@@ -1,10 +1,13 @@
-import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import algoliasearch from "algoliasearch/lite";
+import { liteClient as algoliasearch } from "algoliasearch/lite";
 import striptags from "striptags";
 import groupBy from "lodash.groupby";
 import { DocumentationList } from "./documentation_list";
 import { VersionDropdown } from "./version_dropdown";
+import { SearchHits } from "algoliasearch";
+import { Hit } from "@algolia/client-search";
+
 const APPID = "ML0LEBN7FQ";
 const APIKEY = "f49cbd92a74532cc55cfbffa5e5a7d01";
 const INDEX = "vuejs";
@@ -66,14 +69,10 @@ const vueVersions: string[] = Object.keys(DOCS);
 
 export default function Command() {
   const [query, setQuery] = useState<string>("");
-  const [searchResults, setSearchResults] = useState<any[] | undefined>();
+  const [searchResults, setSearchResults] = useState<SectionHit[] | undefined>();
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [vueVersion, setVueVersion] = useState<string | undefined>();
   const [isLoadingVueVersion, setIsLoadingVueVersion] = useState(true);
-
-  useEffect(() => {
-    (async () => setSearchResults(await search()))();
-  }, []);
 
   useEffect(() => {
     (() => {
@@ -84,6 +83,7 @@ export default function Command() {
   }, [vueVersion]);
 
   const onSearchTextChange = async (query: string) => {
+    setQuery(query);
     setSearchResults(await search(query));
   };
 
@@ -94,10 +94,6 @@ export default function Command() {
   const algoliaClient = useMemo(() => {
     return algoliasearch(APPID, APIKEY);
   }, [APPID, APIKEY]);
-
-  const algoliaIndex = useMemo(() => {
-    return algoliaClient.initIndex(INDEX);
-  }, [algoliaClient, INDEX]);
 
   const hierarchyToArray = (hierarchy: KeyValueHierarchy) => {
     return Object.values(hierarchy)
@@ -126,27 +122,32 @@ export default function Command() {
     if (query === "") {
       return;
     }
-
-    setQuery(query);
     setIsLoadingResults(true);
 
-    return await algoliaIndex
-      .search(query, {
-        hitsPerPage: 11,
-        facetFilters: [`version:${vueVersion}`],
+    return await algoliaClient
+      .search({
+        requests: [
+          {
+            indexName: INDEX,
+            query,
+            hitsPerPage: 11,
+            facetFilters: [`version:${vueVersion}`],
+          },
+        ],
       })
       .then((res) => {
-        setIsLoadingResults(false);
-        return mapHits(res.hits);
+        return mapHits((res.results[0] as SearchHits).hits);
       })
       .catch((err) => {
-        setIsLoadingResults(false);
         showToast(Toast.Style.Failure, "Error searching VueJS Documentation", err.message);
         return [];
+      })
+      .finally(() => {
+        setIsLoadingResults(false);
       });
   };
 
-  const mapHits = (hits: any[]): SectionHit[] => toSection(groupBy(hits, "hierarchy.lvl0"));
+  const mapHits = (hits: Hit<any>[]): SectionHit[] => toSection(groupBy(hits, "hierarchy.lvl0"));
   const toSection = (hits: { [k: string]: VueJsDocsHit[] }) => Object.entries(hits).map(toMappedHit);
 
   const toMappedHit = ([section, items]: [string, VueJsDocsHit[]]): SectionHit => ({
@@ -168,7 +169,7 @@ export default function Command() {
   return (
     <List
       throttle={true}
-      enableFiltering={false}
+      filtering={false}
       isLoading={isLoadingResults}
       searchText={query}
       onSearchTextChange={onSearchTextChange}

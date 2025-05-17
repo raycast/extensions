@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [Enhancement] - 2025-03-10
+
+- Add the color format dropdown option to the `Convert Color` command.
+
 ## [Extract Color] - 2025-02-25
 
 - Select image from finder

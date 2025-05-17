@@ -1,5 +1,8 @@
 # Pocket Changelog
 
+## Handle Deleted Items - 2025-03-13
+- Hide deleted items in the `Search Bookmarks` command
+
 ## [Improved Type Safety] - 2024-11-23
 - Added `Preferences` type to `preferences.ts`
 - Added `zod` for runtime validation and type inference

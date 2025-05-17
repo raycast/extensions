@@ -7,7 +7,8 @@
   "author": "shakedlokits",
   "contributors": [
     "lukerandall",
-    "pr1mal"
+    "pr1mal",
+    "JamesDommisse"
   ],
   "categories": [
     "Productivity",
@@ -84,6 +85,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   }

@@ -30,6 +30,13 @@
       "subtitle": "1bookmark",
       "description": "Search bookmark and open it",
       "mode": "view"
+    },
+    {
+      "name": "import-bookmarks",
+      "title": "Import Bookmarks",
+      "subtitle": "1bookmark",
+      "description": "Import bookmarks",
+      "mode": "view"
     }
   ],
   "preferences": [],
@@ -42,18 +49,22 @@
     "@trpc/client": "^11.0.0-rc.604",
     "@trpc/react-query": "^11.0.0-rc.604",
     "@trpc/server": "^11.0.0-rc.604",
-    "axios": "^1.7.7",
-    "jotai": "^2.10.1",
-    "minisearch": "^7.1.1",
+    "axios": "^1.8.4",
+    "fuzzysort": "^3.1.0",
+    "ini": "^4.1.1",
     "node-fetch": "^3.3.2",
     "radash": "^12.1.0",
+    "simple-plist": "^1.4.0-0",
+    "sql.js": "^1.12.0",
     "superjson": "^2.2.1",
     "ulid": "^2.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
+    "@types/ini": "^4.1.1",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
+    "@types/sql.js": "^1.4.9",
     "eslint": "^8.57.0",
     "eslint-plugin-only-warn": "^1.1.0",
     "eslint-plugin-react-hooks": "^5.1.0",
@@ -70,5 +81,8 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "clean": "rm -rf dist"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

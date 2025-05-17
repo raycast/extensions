@@ -10,20 +10,20 @@ on:
 
 jobs:
 
-  lint:
-    name: Lint
+  integrate:
+    name: Integrate
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - uses: actions/setup-node@v4
-      with:
-        node-version-file: package.json
-        cache: npm
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
 
-    - run: npm ci
+      - run: npm ci
 
-    - run: npm run lint
+      - run: npm run lint
 
-    - run: npm run build
+      - run: npm run build-dist

@@ -1,0 +1,20 @@
+---
+description: Knowledge base for the problem domain
+globs: *.ts, *.tsx, *.md
+alwaysApply: true
+---
+# Knowledge
+
+Explains the domain of HTML colors
+
+- Wikipedia: https://en.wikipedia.org/wiki/Web_colors
+- Important part: HTML color names
+    - use the table in the web page as data source
+- Extension can work with both basic and extended colors
+    - Basic colors are a subset of HTML colors that are considered fundamental (16 colors)
+    - Extended colors include all HTML colors (148 colors), including the basic ones
+    - Having basic colors defined separately from extended colors is intentional, as it allows:
+        - Easy filtering/access to just the basic colors
+        - Maintaining the semantic distinction between basic and extended colors
+        - Following the HTML color standard which recognizes these two categories
+    - wikipedia article contains table, this table specifies various shades where specific colors belong, e.g. "Pink colors", "Red colors" etc

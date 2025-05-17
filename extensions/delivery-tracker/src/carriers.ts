@@ -10,7 +10,7 @@ interface Carrier {
   name: string;
   color: Color;
   updateTracking: (delivery: Delivery) => Promise<Package[]>;
-  ableToTrackRemotely: () => Promise<boolean>;
+  ableToTrackRemotely: () => boolean;
   urlToTrackingWebpage: (delivery: Delivery) => string;
 }
 

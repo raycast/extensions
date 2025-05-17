@@ -19,4 +19,5 @@ export const ADD_DOMAIN_REGIONS = [
   { title: "North Virginia (us-east-1)", icon: "us.svg", value: "us-east-1" },
   { title: "Ireland (eu-west-1)", icon: "ie.svg", value: "eu-west-1" },
   { title: "São Paulo (sa-east-1)", icon: "br.svg", value: "sa-east-1" },
+  { title: "Tokyo (ap-northeast-1)", icon: "jp.svg", value: "ap-northeast-1" },
 ];

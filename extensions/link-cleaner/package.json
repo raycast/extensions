@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "link-cleaner",
   "title": "Link Cleaner",
-  "description": "Remove tracking parameters from the URL link in clipboard.",
+  "description": "Remove tracking parameters from URL links.",
   "icon": "command-icon.png",
   "author": "MisakiCoca",
   "contributors": [
-    "xmok"
+    "xmok",
+    "ezzylan"
   ],
   "categories": [
     "Security",
@@ -15,23 +16,29 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "main",
-      "title": "Link Cleaner",
+      "name": "clean-selected-text",
+      "title": "Clean Link from Selected Text",
+      "description": "Remove tracking parameters from the selected URL link.",
+      "mode": "no-view"
+    },
+    {
+      "name": "clean-clipboard-text",
+      "title": "Clean Link from Clipboard",
       "description": "Remove tracking parameters from the URL link in clipboard.",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0"
+    "@raycast/api": "^1.94.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.0",
+    "eslint": "^9.24.0",
+    "prettier": "^3.5.3",
+    "react": "^19.1.0",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

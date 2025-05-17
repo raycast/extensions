@@ -135,7 +135,7 @@
       "name": "convert-color",
       "title": "Convert Color",
       "description": "Convert any color to a different format",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "text",
@@ -232,5 +232,8 @@
     "lint": "ray lint",
     "pull": "ray pull-contributions",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -11,6 +11,7 @@ export type Project = {
   slug: string;
   color: string;
   dateCreated: string;
+  baseUrl?: string;
 };
 
 export type Issue = {
@@ -31,6 +32,7 @@ export type Issue = {
   culprit: string;
   firstSeen: string;
   tags: string[];
+  baseUrl?: string;
 };
 
 export type Tag = {

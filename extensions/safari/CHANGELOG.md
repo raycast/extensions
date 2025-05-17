@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Update] - 2025-03-18
+
+- Fix for `Copy Title as Link to Clipboard` command: Prevent profile or tab group name being added to the start of the page title
+
 ## [Update] - 2025-03-05
 
 - Added a fuzzy search option that can be enabled/disabled via preferences

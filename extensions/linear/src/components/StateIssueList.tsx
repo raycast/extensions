@@ -1,10 +1,9 @@
+import { IssuePriorityValue, User } from "@linear/sdk";
 import { List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { IssuePriorityValue, User } from "@linear/sdk";
 import { groupBy, uniqBy } from "lodash";
 
 import { IssueResult } from "../api/getIssues";
-
 import { getOrderedStates, StateType } from "../helpers/states";
 
 import IssueListItem from "./IssueListItem";

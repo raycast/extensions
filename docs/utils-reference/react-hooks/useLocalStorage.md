@@ -47,6 +47,11 @@ export default function Command() {
     await setTodos(newTodos);
   }
 
+  async function deleteTodo(id: string) {
+    const restTodos = todos?.filter((todo) => todo.id !== id) ?? [];
+    await setTodos(restTodos);
+  }
+
   return (
     <List isLoading={isLoading}>
       {todos?.map((todo) => (
@@ -57,7 +62,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action title={todo.done ? "Uncomplete" : "Complete"} onAction={() => toggleTodo(todo.id)} />
-              <Action title="Delete" style={Action.Style.Destructive} onAction={() => toggleTodo(todo.id)} />
+              <Action title="Delete" style={Action.Style.Destructive} onAction={() => deleteTodo(todo.id)} />
             </ActionPanel>
           }
         />
