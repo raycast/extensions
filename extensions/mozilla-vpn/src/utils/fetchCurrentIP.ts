@@ -108,8 +108,13 @@ export async function fetchCurrentIP(): Promise<string> {
       'https://api.ipify.org?format=json',
       true
     );
-    const ipResult = JSON.parse(ipData);
-    const ip = ipResult.ip;
+    try {
+      const ipResult = JSON.parse(ipData);
+      const ip = ipResult.ip;
+      if (!ip) throw new Error('Invalid response format');
+    } catch (error) {
+      throw new Error('Failed to parse IP response');
+    }
 
     // Then fetch the geolocation data for the IP
     try {
