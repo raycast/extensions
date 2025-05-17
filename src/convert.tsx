@@ -35,26 +35,35 @@ export default function Command() {
   // Load hello page status and selected Finder items
   useEffect(() => {
     async function loadInitialData() {
+      setIsLoading(true); // Ensure loading state is true at the start
       try {
         const seen = await LocalStorage.getItem("hasSeenHelloPage");
         setHasSeenHelloPage(seen === "true");
 
-        const finderItems = await getSelectedFinderItems();
-        setInitialFinderFiles(finderItems.map((item) => item.path));
+        try {
+          const finderItems = await getSelectedFinderItems();
+          setInitialFinderFiles(finderItems.map((item) => item.path));
+        } catch (finderError) {
+          // Non-fatal error: Finder might not be frontmost, or no selection.
+          // Log it but proceed, allowing manual file addition.
+          console.warn("Could not get selected Finder items:", finderError);
+          setInitialFinderFiles([]); // Default to empty array
+        }
       } catch (error) {
-        console.error("Error loading initial data:", error);
-        // Set defaults or handle error appropriately
-        if (hasSeenHelloPage === null) setHasSeenHelloPage(false); // Example: default if LocalStorage fails
-        if (initialFinderFiles === undefined) setInitialFinderFiles([]); // Example: default if getSelectedFinderItems fails
+        console.error("Error loading initial data (localStorage):", error);
+        // If localStorage fails, assume hello page hasn't been seen to be safe.
+        if (hasSeenHelloPage === null) setHasSeenHelloPage(false);
+        // If initialFinderFiles is still undefined (e.g., error before finder check), set to empty.
+        if (initialFinderFiles === undefined) setInitialFinderFiles([]);
       } finally {
         setIsLoading(false);
       }
     }
     loadInitialData();
-  }, []); // Removed hasSeenHelloPage and initialFinderFiles from dependencies to run once
+  }, []); // Run once on mount
 
-  if (isLoading) {
-    return <Detail markdown="Loading and checking FFmpeg installation..." />; // Updated loading message
+  if (isLoading || hasSeenHelloPage === null || isInstalled === null) {
+    return <Detail markdown="Loading and checking FFmpeg installation..." />;
   }
 
   if (!isInstalled) {

@@ -1,5 +1,12 @@
 # Media Converter Changelog
 
+## [1.3.0] - {PR_MERGE_DATE}
+
+### Added
+
+- Output quality control for .jpg, .webp, .heic and .avif.
+- "Convert Media" now auto-adds selected files from the Finder to the Selecte files queue.
+
 ## [Enhanced README and added new metadata images] - 2025-03-10
 
 ## [✨ AI Enhancements] - 2025-02-21
