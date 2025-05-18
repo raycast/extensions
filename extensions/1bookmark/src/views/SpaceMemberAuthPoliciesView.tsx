@@ -16,7 +16,7 @@ export const Body = (props: { spaceId: string }) => {
 
   if (space.memberAuthPolicies.length === 0) {
     return (
-      <List isLoading={isFetching}>
+      <List>
         <List.EmptyView
           title="Create a new member email auth policy"
           description="You can create authentication policies, such as allowing only certain email domains."
@@ -24,7 +24,7 @@ export const Body = (props: { spaceId: string }) => {
           actions={
             <ActionPanel>
               <Action.Push
-                title={"Create New Member Email Auth Policy"}
+                title="Create New Member Email Auth Policy"
                 icon={Icon.Plus}
                 shortcut={Keyboard.Shortcut.Common.New}
                 target={<NewSpaceMemberAuthPolicyForm spaceId={spaceId} />}

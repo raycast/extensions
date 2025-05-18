@@ -56,7 +56,7 @@ export const SpaceMemberAuthPolicyItemActionPanel = (props: {
       )}
       <ActionPanel.Section>
         <Action.Push
-          title={"Create New Member Auth Policy"}
+          title="Create New Member Auth Policy"
           icon={Icon.Plus}
           shortcut={Keyboard.Shortcut.Common.New}
           target={<NewSpaceMemberAuthPolicyForm spaceId={spaceId} />}

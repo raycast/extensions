@@ -3,7 +3,7 @@ import { z } from "zod";
 import { ActionPanel, Action, Form, Icon, Toast, showToast } from "@raycast/api";
 import { trpc } from "@/utils/trpc.util";
 import { handleSignIn } from "@/handle-signin";
-import { useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 import {
   CACHED_KEY_LOGGING_EMAIL,
   CACHED_KEY_LOGGING_TOKEN_SENT,
@@ -78,17 +78,25 @@ export function LoginFormInView() {
               }
 
               setIsLoginPending(true);
-              await handleSignIn({
+              handleSignIn({
                 email: trimmedEmail,
                 token: trimmedCode,
                 onSuccess: (sessionToken: string) => {
+                  showToast({
+                    style: Toast.Style.Success,
+                    title: "Signin Success",
+                  });
                   setSessionToken(sessionToken);
                   setTokenSent(false);
                   setEmail("");
                   setCode("");
+                  setIsLoginPending(false);
+                },
+                onError: (error: Error) => {
+                  showFailureToast(error, { title: "Signin Failed" });
+                  setIsLoginPending(false);
                 },
               });
-              setIsLoginPending(false);
             }}
           />
           {tokenSent && (

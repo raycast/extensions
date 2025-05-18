@@ -97,7 +97,7 @@ function Body(props: { spaceId: string }) {
       {data.type === "TEAM" && (
         <List.Item
           title="Member Auth Policies"
-          subtitle={data._count.memberAuthPolicies === 0 ? "" : data._count.memberAuthPolicies.toString()}
+          subtitle={data._count.memberAuthPolicies === 0 ? undefined : data._count.memberAuthPolicies.toString()}
           accessories={
             data._count.memberAuthPolicies === 0
               ? [{ tag: { value: "All users are allowed", color: Color.Orange } }]

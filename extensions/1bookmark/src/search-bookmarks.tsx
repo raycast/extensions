@@ -80,10 +80,11 @@ export function Body() {
   }, [hasSpaceFilter, hasCreatorFilter, hasTagFilter, hasFilter]);
 
   const unauthenticatedSpaceId = useMemo(() => {
-    if (!enabledSpaceIds || !authRequiredSpaceIds) return undefined;
+    if (!enabledSpaceIds || !authRequiredSpaceIds) {
+      return undefined;
+    }
 
-    const found = enabledSpaceIds.find((id) => authRequiredSpaceIds.includes(id));
-    return found;
+    return enabledSpaceIds.find((id) => authRequiredSpaceIds.includes(id));
   }, [enabledSpaceIds, authRequiredSpaceIds]);
 
   const { loggedOutStatus } = useLoggedOutStatus();

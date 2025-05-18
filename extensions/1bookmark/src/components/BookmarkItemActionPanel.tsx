@@ -75,14 +75,14 @@ export const BookmarkItemActionPanel = (props: {
       return;
     }
 
+    await deleteBookmark.mutateAsync(bookmark.id);
+
+    utils.bookmark.listAll.refetch({ spaceIds: enabledSpaceIds });
     utils.bookmark.listAll.setData({ spaceIds: enabledSpaceIds }, (prev) => {
       if (!prev) return prev;
 
       return prev.filter((b) => b.id !== bookmark.id);
     });
-
-    await deleteBookmark.mutateAsync(bookmark.id);
-    utils.bookmark.listAll.refetch({ spaceIds: enabledSpaceIds });
   };
 
   const handleResetRanking = async () => {

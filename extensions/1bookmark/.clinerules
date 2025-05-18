@@ -46,5 +46,5 @@
 
 - Follow the deployment process in `prepare-to-publish-raycast-production.sh`
 - Update version numbers appropriately
-- Update CHANGELOG.md with changes
+- Update CHANGELOG.md with changes (use {PR_MERGE_DATE} template in entry titles)
 - Test the extension before publishing

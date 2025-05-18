@@ -115,7 +115,7 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
     if (!trimmedCode.match(/^.{6}$/)) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Please input a 6-character code",
+        title: "Please input a 6-character login code",
       });
       return;
     }
@@ -136,13 +136,6 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
           setCodeSent(false);
           setVerifyingAuthEmail("");
           setAuthEmail("");
-        },
-        onError: (error) => {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to verify auth code",
-            message: error instanceof TRPCError ? error.message : "Unknown error",
-          });
         },
       },
     );
@@ -198,7 +191,7 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
               if (!code) {
                 showToast({
                   style: Toast.Style.Failure,
-                  title: "Please enter the 6-digit login code",
+                  title: "Please input a 6-character login code",
                 });
                 return;
               }
@@ -247,7 +240,7 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
           <Form.Description title="🟠" text={`[${space.data.name}] space requires you to authenticate.`} />
 
           <Form.Dropdown ref={actionRef} id="action" title="Action" onChange={(e) => setAction(e as Action)}>
-            <Form.Dropdown.Item value="send-auth-code" title="Send me a auth code" />
+            <Form.Dropdown.Item value="send-auth-code" title="Send me an auth code" />
             <Form.Dropdown.Item value="disable-space" title="Disable this space on only this device" />
             <Form.Dropdown.Item value="leave-space" title="Leave this space on all devices" />
           </Form.Dropdown>
@@ -264,7 +257,7 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
 
           {action === "send-auth-code" && spaceEmailPatterns && spaceEmailPatterns.length > 0 && (
             <Form.Description
-              text={`This space allow only following email patterns:\n${spaceEmailPatterns.join(", ")}`}
+              text={`This space allows only the following email patterns:\n${spaceEmailPatterns.join(", ")}`}
             />
           )}
 

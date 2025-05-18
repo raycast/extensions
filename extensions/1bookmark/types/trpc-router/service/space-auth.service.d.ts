@@ -20,7 +20,7 @@ export declare class SpaceAuthService {
         };
     }): Promise<boolean>;
     /**
-     * 만료일과 상관없이 이메일 패턴만 검사
+     * Check email pattern only, regardless of expiration date
      */
     checkEmailPatternPolicy(params: {
         spaceId: string;
@@ -39,7 +39,7 @@ export declare class SpaceAuthService {
         sessionId: string;
     }): Promise<void>;
     /**
-     * 만료와 상관없이 마지막으로 해당 Space에서 인증 받은 정보를 반환.
+     * Returns the last verified information from the Space regardless of expiration.
      */
     getLastVerifiedEmail(params: {
         email: string;
