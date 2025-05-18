@@ -6,12 +6,14 @@ import { Media, MediaDetails } from "./types";
 import MediaListItem from "./components/MediaListItem";
 import { sortTitles } from "./utils";
 
-interface SearchByTitleProps {
-  searchQuery?: string;
+interface SearchMediaProps {
+  arguments: {
+    search: string;
+  };
 }
 
-export default function SearchByTitle({ searchQuery }: SearchByTitleProps) {
-  const [searchText, setSearchText] = useState(searchQuery || "");
+export default function SearchByTitle(props: SearchMediaProps) {
+  const [searchText, setSearchText] = useState(props.arguments.search || "");
   const [loading, setLoading] = useState(false);
   const [titles, setTitles] = useState<Media[]>([]);
   const [sortOrder] = useState("none");
@@ -60,7 +62,7 @@ export default function SearchByTitle({ searchQuery }: SearchByTitleProps) {
       searchText={searchText}
       onSearchTextChange={onSearch}
       isShowingDetail={true}
-      searchBarPlaceholder={"Search for a Movie or Show..."}
+      searchBarPlaceholder={"Search for a Movie, TV Show, or Game..."}
       searchBarAccessory={<SearchBarAccessory viewType={viewType} setViewType={setViewType} />}
     >
       {yearsInOrder.length > 0 ? (
@@ -75,11 +77,11 @@ export default function SearchByTitle({ searchQuery }: SearchByTitleProps) {
         )
       ) : (
         <List.EmptyView
-          title={searchText && !loading ? "No Results Found" : "Enter a Movie or Show Name"}
+          title={searchText && !loading ? "No Results Found" : "Search for Media!"}
           description={
             searchText && !loading
-              ? "We couldn't find that movie or show"
-              : "Search for a movie or show to find out what ratings it has"
+              ? "We couldn't find that movie, TV show, or game"
+              : "You can search for movies, TV shows, or games to find ratings"
           }
         />
       )}

@@ -20,7 +20,7 @@
           "name": "search",
           "type": "text",
           "required": false,
-          "description": "Search query",
+          "description": "Search Query",
           "placeholder": "Search by title..."
         }
       ]
@@ -42,6 +42,232 @@
       "title": "Watch Mode API Key",
       "description": "Register for a free token at https://api.watchmode.com",
       "placeholder": "Please enter your API key here"
+    },
+    {
+      "name": "region",
+      "type": "dropdown",
+      "required": false,
+      "title": "Choose your region",
+      "description": "Choose your region",
+      "data": [
+        {
+          "title": "United States",
+          "value": "US"
+        },
+        {
+          "title": "Canada",
+          "value": "CA"
+        },
+        {
+          "title": "Great Britain",
+          "value": "GB"
+        },
+        {
+          "title": "Australia",
+          "value": "AU"
+        },
+        {
+          "title": "Brazil",
+          "value": "BR"
+        },
+        {
+          "title": "Spain",
+          "value": "ES"
+        },
+        {
+          "title": "India",
+          "value": "IN"
+        },
+        {
+          "title": "United Arab Emirates",
+          "value": "AE"
+        },
+        {
+          "title": "Austria",
+          "value": "AT"
+        },
+        {
+          "title": "Italy",
+          "value": "IT"
+        },
+        {
+          "title": "Argentina",
+          "value": "AR"
+        },
+        {
+          "title": "Belgium",
+          "value": "BE"
+        },
+        {
+          "title": "Bulgaria",
+          "value": "BG"
+        },
+        {
+          "title": "Chile",
+          "value": "CL"
+        },
+        {
+          "title": "Colombia",
+          "value": "CO"
+        },
+        {
+          "title": "Croatia",
+          "value": "HR"
+        },
+        {
+          "title": "Czech Republic",
+          "value": "CZ"
+        },
+        {
+          "title": "Denmark",
+          "value": "DK"
+        },
+        {
+          "title": "Ecuador",
+          "value": "EC"
+        },
+        {
+          "title": "Estonia",
+          "value": "EE"
+        },
+        {
+          "title": "Finland",
+          "value": "FI"
+        },
+        {
+          "title": "France",
+          "value": "FR"
+        },
+        {
+          "title": "Germany",
+          "value": "DE"
+        },
+        {
+          "title": "Greece",
+          "value": "GR"
+        },
+        {
+          "title": "Hong Kong",
+          "value": "HK"
+        },
+        {
+          "title": "Hungary",
+          "value": "HU"
+        },
+        {
+          "title": "Iceland",
+          "value": "IS"
+        },
+        {
+          "title": "Indonesia",
+          "value": "ID"
+        },
+        {
+          "title": "Ireland",
+          "value": "IE"
+        },
+        {
+          "title": "Israel",
+          "value": "IL"
+        },
+        {
+          "title": "Japan",
+          "value": "JP"
+        },
+        {
+          "title": "Lithuania",
+          "value": "LT"
+        },
+        {
+          "title": "Malaysia",
+          "value": "MY"
+        },
+        {
+          "title": "Mexico",
+          "value": "MX"
+        },
+        {
+          "title": "Netherlands",
+          "value": "NL"
+        },
+        {
+          "title": "New Zealand",
+          "value": "NZ"
+        },
+        {
+          "title": "Norway",
+          "value": "NO"
+        },
+        {
+          "title": "Panama",
+          "value": "PA"
+        },
+        {
+          "title": "Peru",
+          "value": "PE"
+        },
+        {
+          "title": "Philippines",
+          "value": "PH"
+        },
+        {
+          "title": "Poland",
+          "value": "PL"
+        },
+        {
+          "title": "Portugal",
+          "value": "PT"
+        },
+        {
+          "title": "Romania",
+          "value": "RO"
+        },
+        {
+          "title": "Russia",
+          "value": "RU"
+        },
+        {
+          "title": "Serbia",
+          "value": "RS"
+        },
+        {
+          "title": "Singapore",
+          "value": "SG"
+        },
+        {
+          "title": "South Africa",
+          "value": "ZA"
+        },
+        {
+          "title": "South Korea",
+          "value": "KR"
+        },
+        {
+          "title": "Sweden",
+          "value": "SE"
+        },
+        {
+          "title": "Switzerland",
+          "value": "CH"
+        },
+        {
+          "title": "Thailand",
+          "value": "TH"
+        },
+        {
+          "title": "Turkey",
+          "value": "TR"
+        },
+        {
+          "title": "Ukraine",
+          "value": "UA"
+        },
+        {
+          "title": "Vietnam",
+          "value": "VN"
+        }
+      ],
+      "default": "US"
     }
   ],
   "dependencies": {

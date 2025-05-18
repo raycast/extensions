@@ -1,5 +1,3 @@
-// ProvidersListView.tsx
-
 import { useEffect, useState } from "react";
 import { List, Image, ActionPanel, Action } from "@raycast/api";
 import { getProviderIcon } from "../utils";

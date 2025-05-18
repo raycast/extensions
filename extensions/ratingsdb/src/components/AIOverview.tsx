@@ -1,13 +1,17 @@
 import { AI, Detail, ActionPanel } from "@raycast/api";
 import { useAI } from "@raycast/utils";
-import { AIOverviewProps } from "../types";
+import { AIOverviewProps, StreamingProviders } from "../types";
 import { useState, useEffect } from "react";
 import { useTypingEffect } from "../hooks/useTypingEffect";
 import { MediaMetadata } from "./MediaMetadata";
 import MediaActions from "./MediaActions";
+import { ProviderActions } from "./ProviderActions";
+import { getFilteredProviders } from "../utils/requests";
 
 export default function AIReviewView({ media, episode }: AIOverviewProps) {
+  const [providers, setProviders] = useState<StreamingProviders>([]);
   const [review, setReview] = useState("");
+  const displayedReview = useTypingEffect(review, 10);
   const { data, isLoading } = useAI(
     `${
       "Type" in media && media.Type.toLowerCase() === "movie"
@@ -65,20 +69,32 @@ export default function AIReviewView({ media, episode }: AIOverviewProps) {
   );
 
   useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        const data = await getFilteredProviders(media.imdbID);
+        setProviders(data);
+      } catch (error) {
+        console.error("Error fetching providers:", error);
+        setProviders([]);
+      }
+    };
+    fetchProviders();
+  }, [media.imdbID]);
+
+  useEffect(() => {
     if (data) {
       setReview(data);
     }
   }, [data]);
 
-  const displayedReview = useTypingEffect(review, 10);
-
   return (
     <Detail
       markdown={isLoading ? "Generating AI overview..." : displayedReview}
-      metadata={<MediaMetadata media={media} />}
+      metadata={<MediaMetadata media={media} providers={providers} />}
       actions={
         <ActionPanel>
           <MediaActions media={media} component="Overview" />
+          <ProviderActions providers={providers} />
         </ActionPanel>
       }
     />

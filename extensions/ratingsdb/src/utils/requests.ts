@@ -6,6 +6,7 @@ const omdbUrl = "http://www.omdbapi.com/";
 const watchModeBaseUrl = "https://api.watchmode.com/v1/";
 const OMDB_TOKEN = preferences.omdbToken;
 const WATCHMODE_API_KEY = preferences.watchModeApiKey;
+const region = preferences.region;
 
 export async function searchTitles(query: string, type: string) {
   try {
@@ -61,10 +62,10 @@ export async function getProviders(id: string) {
     const params = {
       apiKey: WATCHMODE_API_KEY,
       append_to_response: "sources",
+      regions: region,
     };
     const response: AxiosResponse = await axios.get(watchModeBaseUrl + `title/${id}/details`, { params });
 
-    // console.log(response.data.sources)
     return response.data.sources;
   } catch (error) {
     console.error("Error searching movie or show:", error);
@@ -78,11 +79,10 @@ export async function getSourceIcons() {
   return data;
 }
 
-export async function getUSProviders(imdbID: string) {
+export async function getFilteredProviders(imdbID: string) {
   try {
-    const data = await getProviders(imdbID);
-    if (data && Array.isArray(data)) {
-      const filteredData = data.filter((provider: { region: string }) => provider.region === "US");
+    const providers = await getProviders(imdbID);
+    if (providers && Array.isArray(providers)) {
       interface Provider {
         source_id: string;
         region: string;
@@ -92,7 +92,7 @@ export async function getUSProviders(imdbID: string) {
         [key: string]: unknown;
       }
 
-      const uniqueData = filteredData.reduce((acc: Provider[], current: Provider) => {
+      const uniqueProviders = providers.reduce((acc: Provider[], current: Provider) => {
         const x = acc.find((item: Provider) => item.source_id === current.source_id);
         if (!x) {
           return acc.concat([current]);
@@ -100,7 +100,8 @@ export async function getUSProviders(imdbID: string) {
           return acc;
         }
       }, []);
-      return uniqueData;
+
+      return uniqueProviders;
     } else {
       console.log("No provider data available or invalid format");
       return [];

@@ -3,9 +3,9 @@ import { Episode, MediaDetails } from "../types";
 import { EpisodeMetadata } from "./EpisodeMetadata";
 import MediaActions from "./MediaActions";
 import { useState, useEffect } from "react";
-import { getUSProviders } from "../utils/requests";
 import { ProviderActions } from "./ProviderActions";
 import { StreamingProviders } from "../types";
+import { getFilteredProviders } from "../utils/requests";
 
 interface EpisodeOverviewProps {
   media: MediaDetails;
@@ -17,7 +17,7 @@ export default function EpisodeOverview({ media, episode }: EpisodeOverviewProps
 
   useEffect(() => {
     const fetchProviders = async () => {
-      const providers = await getUSProviders(media.imdbID);
+      const providers = await getFilteredProviders(media.imdbID);
       setProviders(providers);
     };
     fetchProviders();

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Detail } from "@raycast/api";
 import { AIOverviewProps, StreamingProviders } from "../types";
-import { getUSProviders } from "../utils/requests";
+import { getFilteredProviders } from "../utils/requests";
 import { MediaMetadata } from "./MediaMetadata";
 import { ProviderActions } from "./ProviderActions";
 import MediaActions from "./MediaActions";
@@ -14,12 +14,10 @@ export default function MediaOverview({ media }: AIOverviewProps) {
   useEffect(() => {
     const fetchProviders = async () => {
       try {
-        const data = await getUSProviders(media.imdbID);
+        const data = await getFilteredProviders(media.imdbID);
         setProviders(data);
       } catch (error) {
         console.error("Error fetching providers:", error);
-        setProviders([]);
-      } finally {
         setProviders([]);
       }
     };

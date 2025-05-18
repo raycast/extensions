@@ -73,7 +73,7 @@ export const EpisodeMetadata: React.FC<EpisodeMetadataProps> = ({ episode, media
           {providers?.map((provider, index) => (
             <Detail.Metadata.TagList.Item
               key={index}
-              text={`${provider.name} (${provider.type})`}
+              text={`${provider.name} (${provider.type === "rent" ? provider.price : `${provider.type}`})`}
               color={provider.type === "free" ? Color.Green : provider.type === "sub" ? Color.Blue : Color.Orange}
               onAction={() => open(provider.web_url)}
             />

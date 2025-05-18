@@ -9,7 +9,7 @@ export function ProviderActions({ providers }: { providers: StreamingProviders }
       {providers.map((provider, index) => (
         <Action.OpenInBrowser
           key={`${provider.name}-${index}`}
-          title={`${provider.name} ${provider.price ? `(${provider.price} ${provider.type})` : "(free)"}`}
+          title={`${provider.name} (${provider.type === "rent" ? provider.price : `${provider.type}`})`}
           url={provider.web_url}
           icon={{ source: getProviderIcon(provider), mask: Image.Mask.RoundedRectangle }}
         />

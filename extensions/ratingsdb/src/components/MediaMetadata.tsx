@@ -1,6 +1,6 @@
 import { Detail, Color, Image, open, Icon } from "@raycast/api";
 import { MediaDetails, StreamingProviders } from "../types";
-import { getRottenTomatoesUrl, getIMDBUrl, getMetacriticUrl } from "../utils";
+import { getRottenTomatoesUrl, getIMDBUrl, getMetacriticUrl, getProviderIcon } from "../utils";
 
 export const MediaMetadata = ({ media, providers }: { media: MediaDetails; providers?: StreamingProviders }) => {
   return (
@@ -49,17 +49,27 @@ export const MediaMetadata = ({ media, providers }: { media: MediaDetails; provi
 
       <Detail.Metadata.Separator />
 
-      {providers && providers.length > 0 && (
+      {providers && providers.length > 0 ? (
         <Detail.Metadata.TagList title="Where you can purchase or stream">
-          {providers?.map((provider, index) => (
+          {providers.map((provider, index) => (
             <Detail.Metadata.TagList.Item
               key={index}
-              text={`${provider.name} (${provider.type})`}
+              text={`${provider.name} (${provider.type === "rent" ? provider.price : `${provider.type}`})`}
               color={provider.type === "free" ? Color.Green : provider.type === "sub" ? Color.Blue : Color.Orange}
               onAction={() => open(provider.web_url)}
+              icon={{ source: getProviderIcon(provider), mask: Image.Mask.RoundedRectangle }}
             />
           ))}
         </Detail.Metadata.TagList>
+      ) : (
+        <Detail.Metadata.Label
+          title="Streaming Options"
+          text={
+            providers
+              ? "No streaming providers available for this title"
+              : "Error fetching providers, check your API key in Raycast settings"
+          }
+        />
       )}
     </Detail.Metadata>
   );
