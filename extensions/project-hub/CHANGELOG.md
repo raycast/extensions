@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - 2025-05-18
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add project management with customizable colors
 - Add link organization within projects
