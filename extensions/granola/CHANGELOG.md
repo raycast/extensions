@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [1.4] - {PR_MERGE_DATE}
+## [1.4] - 2025-05-18
 
 ### ✨ New Features
 - Added folder browsing capability to view and navigate through folders and their notes
