@@ -13,6 +13,13 @@
       "subtitle": "Youdao",
       "description": "Translate text using Youdao",
       "mode": "view"
+    },
+    {
+      "name": "quickly_translate",
+      "title": "Quickly Translate",
+      "subtitle": "Youdao",
+      "description": "Quickly translate text using Youdao",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -44,18 +51,20 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.2",
+    "@raycast/utils": "^1.19.1",
+    "lodash": "^4.17.21",
     "node-fetch": "^3.2.9"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.16",
     "@types/node": "^18.6.1",
     "@types/react": "^18.0.15",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
     "eslint": "^8.20.0",
     "eslint-config-prettier": "^8.5.0",
-    "react-devtools": "^4.25.0",
-    "typescript": "^4.7.4",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "typescript": "^4.7.4"
   },
   "scripts": {
     "build": "ray build -e dist",
