@@ -307,6 +307,5 @@ export const LIST_ITEMS = [
   {
     title: "Blank",
     icon: "icons/blank.svg",
-    keywords: [],
   },
 ];
