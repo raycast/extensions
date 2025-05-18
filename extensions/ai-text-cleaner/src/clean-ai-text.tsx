@@ -4,7 +4,6 @@ import {
   Action,
   showToast,
   Toast,
-  Clipboard,
   environment,
   Detail,
   Navigation,
@@ -110,13 +109,11 @@ export default function Command() {
 
         const data: ApiResponse = await response.json();
 
-        await Clipboard.copy(data.text);
-
         push(<CleaningResultDetail cleanedText={data.text} stats={data.stats} navigation={{ push, pop }} />);
 
         showToast({
           style: Toast.Style.Success,
-          title: "Text Cleaned & Copied!",
+          title: "Text Cleaned!",
           message: `Removed ${data.stats.totalRemoved} characters (${data.stats.percentReduction?.toFixed(2) || 0}%)`,
         });
       } catch (error) {
