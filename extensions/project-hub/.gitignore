@@ -8,9 +8,6 @@
 .AppleDouble
 .LSOverride
 
-# Icon must end with two \r
-Icon
-
 # Thumbnails
 ._*
 
@@ -168,8 +165,6 @@ dist
 ### Node Patch ###
 # Serverless Webpack directories
 .webpack/
-
-# Optional stylelint cache
 
 # SvelteKit build / generate output
 .svelte-kit

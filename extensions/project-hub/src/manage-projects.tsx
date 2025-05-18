@@ -5,6 +5,7 @@ import { getProjects, deleteProject } from "./utils/storage";
 import { ProjectForm } from "./components/ProjectForm";
 import { ProjectView } from "./components/ProjectView";
 import { showFailureToast } from "@raycast/utils";
+import { CreateProjectAction } from "./components/actions/CreateProjectAction";
 
 export default function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -44,12 +45,7 @@ export default function Command() {
       searchBarPlaceholder="Search projects..."
       actions={
         <ActionPanel>
-          <Action.Push
-            title="Create New Project"
-            icon={Icon.Plus}
-            target={<ProjectForm onSave={loadProjects} />}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-          />
+          <CreateProjectAction onSave={loadProjects} />
         </ActionPanel>
       }
     >
@@ -59,7 +55,7 @@ export default function Command() {
         description="Create your first project to get started"
         actions={
           <ActionPanel>
-            <Action.Push title="Create New Project" icon={Icon.Plus} target={<ProjectForm onSave={loadProjects} />} />
+            <CreateProjectAction onSave={loadProjects} showShortcut={false} />
           </ActionPanel>
         }
       />
@@ -79,12 +75,7 @@ export default function Command() {
                   target={<ProjectForm project={project} onSave={loadProjects} />}
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
                 />
-                <Action.Push
-                  title="Create New Project"
-                  icon={Icon.Plus}
-                  target={<ProjectForm onSave={loadProjects} />}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
-                />
+                <CreateProjectAction onSave={loadProjects} />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action

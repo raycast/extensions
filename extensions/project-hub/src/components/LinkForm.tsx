@@ -9,22 +9,34 @@ interface LinkFormProps {
   onSave?: () => void;
 }
 
+interface FormValues {
+  title: string;
+  url: string;
+}
+
 export function LinkForm({ projectId, link, onSave }: LinkFormProps) {
   const { pop } = useNavigation();
 
-  async function handleSubmit(values: Record<string, string>) {
+  async function handleSubmit(values: FormValues) {
     try {
+      const trimmedUrl = values.url.trim();
+      try {
+        new URL(trimmedUrl);
+      } catch {
+        throw new Error("Please enter a valid URL");
+      }
+
       if (link) {
         await updateLink({
           ...link,
-          title: values.title,
-          url: values.url,
+          title: values.title.trim(),
+          url: trimmedUrl,
         });
       } else {
         await addLink({
           projectId,
-          title: values.title,
-          url: values.url,
+          title: values.title.trim(),
+          url: trimmedUrl,
         });
       }
       onSave?.();

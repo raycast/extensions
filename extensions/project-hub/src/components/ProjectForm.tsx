@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, useNavigation, Icon } from "@raycast/api";
 import { Project } from "../types";
 import { addProject, updateProject } from "../utils/storage";
+import { showFailureToast } from "@raycast/utils";
 
 interface ProjectFormProps {
   project?: Project;
@@ -23,22 +24,30 @@ export function ProjectForm({ project, onSave }: ProjectFormProps) {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: { title: string; subtitle?: string; color?: string }) {
-    if (project) {
-      await updateProject({
-        ...project,
-        title: values.title,
-        subtitle: values.subtitle,
-        color: values.color,
-      });
-    } else {
-      await addProject({
-        title: values.title,
-        subtitle: values.subtitle,
-        color: values.color,
-      });
+    try {
+      if (!values.title.trim()) {
+        throw new Error("Title is required");
+      }
+
+      if (project) {
+        await updateProject({
+          ...project,
+          title: values.title,
+          subtitle: values.subtitle,
+          color: values.color,
+        });
+      } else {
+        await addProject({
+          title: values.title,
+          subtitle: values.subtitle,
+          color: values.color,
+        });
+      }
+      onSave?.();
+      pop();
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to save project" });
     }
-    onSave?.();
-    pop();
   }
 
   return (

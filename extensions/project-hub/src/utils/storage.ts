@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import crypto from "crypto";
 import { Project, ProjectLink } from "../types";
 
 const PROJECTS_KEY = "projects";
@@ -7,7 +8,12 @@ const LINKS_KEY = "project-links";
 // Project operations
 export async function getProjects(): Promise<Project[]> {
   const data = await LocalStorage.getItem<string>(PROJECTS_KEY);
-  return data ? JSON.parse(data) : [];
+  try {
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error("Failed to parse projects:", error);
+    return [];
+  }
 }
 
 export async function saveProjects(projects: Project[]): Promise<void> {
@@ -18,7 +24,7 @@ export async function addProject(project: Omit<Project, "id">): Promise<Project>
   const projects = await getProjects();
   const newProject: Project = {
     ...project,
-    id: Date.now().toString(),
+    id: crypto.randomUUID(),
   };
   await saveProjects([...projects, newProject]);
   return newProject;
@@ -56,7 +62,7 @@ export async function addLink(link: Omit<ProjectLink, "id">): Promise<ProjectLin
   const links = await getLinks();
   const newLink: ProjectLink = {
     ...link,
-    id: Date.now().toString(),
+    id: crypto.randomUUID(),
   };
   await saveLinks([...links, newLink]);
   return newLink;
