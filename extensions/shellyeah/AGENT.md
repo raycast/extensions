@@ -1,5 +1,8 @@
 # Agent Guidelines for Shellyeah
 
+## Documentation Reference
+- **Raycast Documentation**: Refer to `docs/raycast.md` for comprehensive information about Raycast API, extension development, manifest structure, and best practices.
+
 ## Build & Development Commands
 - `npm run dev`: Run in development mode (ray develop)
 - `npm run build`: Build the extension (ray build)

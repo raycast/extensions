@@ -19,8 +19,15 @@
     {
       "name": "generate-cli-command",
       "title": "Generate CLI Command",
+      "subtitle": "Shellyeah",
       "description": "Generates CLI commands from natural language",
       "mode": "view"
+    },
+    {
+      "name": "reset",
+      "title": "Reset",
+      "description": "Erase all preferences and restart onboarding",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -72,7 +79,35 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "prepublishOnly": "echo \"\n\nIt seems like you are trying to publish the Raycast extension to npm.\n\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\n\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "ai": {
+    "evals": [
+      {
+        "input": "How to find all text files in current directory",
+        "expected": [
+          {
+            "contains": ["find", "ls", "grep", "search"]
+          }
+        ]
+      },
+      {
+        "input": "How to compress a folder",
+        "expected": [
+          {
+            "contains": ["tar", "zip", "compress"]
+          }
+        ]
+      },
+      {
+        "input": "How to check disk space usage",
+        "expected": [
+          {
+            "contains": ["df", "du"]
+          }
+        ]
+      }
+    ]
   }
 }

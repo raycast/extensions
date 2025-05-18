@@ -7,11 +7,13 @@ import {
   getPreferenceValues,
   Icon,
   List,
+  LocalStorage,
   showHUD,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import OpenAI from "openai";
 import { useEffect, useState } from "react";
 
@@ -28,10 +30,36 @@ type CommandResult = {
 export default function Command() {
   const { push } = useNavigation();
   const [query, setQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+
+  useEffect(() => {
+    async function checkOnboarding() {
+      try {
+        const needsOnboardingFlag = (await LocalStorage.getItem("needsOnboarding")) as string | undefined;
+        const { apiKey } = getPreferenceValues<Preferences>();
+        const savedApiKey = (await LocalStorage.getItem("savedApiKey")) as string | undefined;
+
+        if (needsOnboardingFlag === "true" || (!apiKey && !savedApiKey)) {
+          setNeedsOnboarding(true);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    checkOnboarding();
+  }, []);
 
   async function handleSubmit(values: { query: string }) {
-    const { apiKey, shell } = getPreferenceValues<Preferences>();
+    const prefsValues = getPreferenceValues<Preferences>();
+    const savedApiKey = (await LocalStorage.getItem("savedApiKey")) as string | undefined;
+    const savedShell = ((await LocalStorage.getItem("savedShell")) as string | undefined) || "bash";
+
+    const apiKey = savedApiKey || prefsValues.apiKey;
+    const shell = savedShell || prefsValues.shell;
 
     if (!apiKey) {
       await showToast({
@@ -53,15 +81,17 @@ export default function Command() {
 
     setIsLoading(true);
     try {
+      await LocalStorage.removeItem("needsOnboarding");
       push(<CommandList query={values.query} shell={shell} apiKey={apiKey} />);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
+      await showFailureToast(error instanceof Error ? error.message : "Unknown error occurred");
+    } finally {
       setIsLoading(false);
     }
+  }
+
+  if (needsOnboarding) {
+    return <Onboarding />;
   }
 
   return (
@@ -85,6 +115,69 @@ export default function Command() {
   );
 }
 
+function Onboarding() {
+  const [apiKey, setApiKey] = useState("");
+  const [shell, setShell] = useState("bash");
+  const [isLoading, setIsLoading] = useState(false);
+  const { pop } = useNavigation();
+
+  async function handleSavePreferences() {
+    if (!apiKey) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "API Key Required",
+        message: "Please enter your OpenAI API key",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await LocalStorage.setItem("savedApiKey", apiKey);
+      await LocalStorage.setItem("savedShell", shell);
+      await LocalStorage.removeItem("needsOnboarding");
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Preferences Saved",
+        message: "You're all set!",
+      });
+
+      pop();
+    } catch (error) {
+      console.error(error);
+      await showFailureToast(
+        "Error Saving Preferences: " + (error instanceof Error ? error.message : "Unknown error occurred"),
+      );
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Save Preferences" onSubmit={handleSavePreferences} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description
+        title="Welcome to Shellyeah"
+        text="Before you can generate CLI commands, you need to set up a few things:"
+      />
+
+      <Form.PasswordField id="apiKey" title="OpenAI API Key" placeholder="sk-..." value={apiKey} onChange={setApiKey} />
+
+      <Form.Dropdown id="shell" title="Preferred Shell" value={shell} onChange={setShell}>
+        <Form.Dropdown.Item value="bash" title="Bash" />
+        <Form.Dropdown.Item value="zsh" title="Zsh" />
+        <Form.Dropdown.Item value="fish" title="Fish" />
+      </Form.Dropdown>
+    </Form>
+  );
+}
+
 function CommandList({ query, shell, apiKey }: { query: string; shell: string; apiKey: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [commands, setCommands] = useState<CommandResult[]>([]);
@@ -94,13 +187,12 @@ function CommandList({ query, shell, apiKey }: { query: string; shell: string; a
     try {
       const openai = new OpenAI({ apiKey });
 
-      // Prepare the prompt to generate commands
       const systemPrompt = `You are a helpful CLI assistant that generates ${shell} shell commands based on user requests. 
       Generate exactly 3 commands for the user's request. Return only the commands in this format:
       - Command: COMMAND_HERE
       - Description: BRIEF_DESCRIPTION_HERE
       
-      Keep commands concise so they don't get truncated in the UI. Keep descriptions brief but informative.
+      Keep descriptions brief but informative.
       No additional explanations, intros, or other text. Just 3 command-description pairs in the format described.`;
 
       const response = await openai.chat.completions.create({
@@ -121,14 +213,15 @@ function CommandList({ query, shell, apiKey }: { query: string; shell: string; a
       const extractedCommands = parseCommands(content);
       setCommands(extractedCommands);
     } catch (error) {
-      console.error("Error generating commands:", error);
-      setError(error instanceof Error ? error.message : "Unknown error occurred");
+      console.error(error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      await showFailureToast("Error generating commands: " + errorMessage);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   }
 
-  // Parse the response from OpenAI to extract commands and descriptions
   function parseCommands(content: string): CommandResult[] {
     const results: CommandResult[] = [];
     const lines = content.split("\n");
@@ -165,7 +258,6 @@ function CommandList({ query, shell, apiKey }: { query: string; shell: string; a
     return results;
   }
 
-  // Generate commands on component mount
   useEffect(() => {
     generateCommands();
   }, []);
