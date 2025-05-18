@@ -1,6 +1,6 @@
 # Quick Event Changelog
 
-## [Update] - 2025-05-18
+## [Update] - {PR_MERGE_DATE}
 
 - Update location parsing to use "@" and replace AI.ask. It now supports locations in `@location`, `@location-location`, or `@(location)`
 
