@@ -167,7 +167,7 @@ export const LIST_ITEMS = [
   {
     title: "Rust",
     icon: "icons/rust.svg",
-    keywords: ["rust"],
+    keywords: ["rust", "rs"],
   },
   {
     title: "Haskell",
@@ -303,5 +303,10 @@ export const LIST_ITEMS = [
     title: "Astro",
     icon: "icons/astro.svg",
     keywords: ["astro"],
+  },
+  {
+    title: "Blank",
+    icon: "icons/blank.svg",
+    keywords: [],
   },
 ];
