@@ -1,3 +1,3 @@
-# RatingsMDB Changelog
+# RatingsDB Changelog
 
 ## [Initial Version] - 2024-09-06

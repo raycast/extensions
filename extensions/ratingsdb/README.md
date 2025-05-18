@@ -1,4 +1,4 @@
-# RatingsMDB
+# RatingsDB
 
 A media ratings and information viewer built with Raycast extensions.
 
@@ -77,9 +77,9 @@ To use this extension, you will need to sign up for an API key from the Open Mov
 ## Setup
 
 1. Install Raycast
-2. Install the RatingsMDB extension
+2. Install the RatingsDB extension
 3. Configure the extension settings to your liking
-4. Start using RatingsMDB to view media information and ratings
+4. Start using RatingsDB to view media information and ratings
 
 ## Development
 
