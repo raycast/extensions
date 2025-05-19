@@ -1,6 +1,6 @@
 # Window Sizer Changelog
 
-## [Starred Sizes & Improvements] - {PR_MERGE_DATE}
+## [Starred Sizes & Improvements] - 2025-05-19
 
 - Added starring for frequently used window sizes
 - Unified shortcut keys for Deleting Custom and Starred Sizes
