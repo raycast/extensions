@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { ActionPanel, Action, Form, Icon } from "@raycast/api";
-import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
+import { z } from "zod";
+import { ActionPanel, Action, Form, Icon, Toast, showToast } from "@raycast/api";
 import { trpc } from "@/utils/trpc.util";
 import { handleSignIn } from "@/handle-signin";
-import { useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 import {
   CACHED_KEY_LOGGING_EMAIL,
   CACHED_KEY_LOGGING_TOKEN_SENT,
   CACHED_KEY_SESSION_TOKEN,
 } from "../utils/constants.util";
 
-function Body() {
+export function LoginFormInView() {
   const [, setSessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
   const generateMagicLink = trpc.login.generateMagicLink.useMutation();
   const verificationTokenRef = useRef<Form.TextField>(null);
@@ -24,9 +24,19 @@ function Body() {
 
   const [isLoginPending, setIsLoginPending] = useState(false);
   const isLoading = generateMagicLink.isPending || isLoginPending;
+
   const requestToToken = (email: string) => {
+    const trimmedEmail = email.trim();
+    if (!z.string().email().safeParse(trimmedEmail).success) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Please enter a valid email",
+      });
+      return;
+    }
+
     generateMagicLink.mutate(
-      { email },
+      { email: trimmedEmail },
       {
         onSuccess: () => {
           setTokenSent(true);
@@ -52,24 +62,41 @@ function Body() {
             icon={tokenSent && email ? Icon.Key : Icon.Envelope}
             title={tokenSent && email ? "Login" : "Send Login Code to Email"}
             onSubmit={async () => {
-              if (!tokenSent && email) {
-                requestToToken(email);
+              const trimmedEmail = email.trim();
+              if (!tokenSent) {
+                requestToToken(trimmedEmail);
                 return;
               }
 
-              if (tokenSent && email && code) {
-                setIsLoginPending(true);
-                await handleSignIn({
-                  email,
-                  token: code,
-                  onSuccess: (sessionToken: string) => {
-                    setSessionToken(sessionToken);
-                    setTokenSent(false);
-                    setEmail("");
-                  },
+              const trimmedCode = code.trim();
+              if (!trimmedCode.match(/^.{6}$/)) {
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Please input a 6-character code",
                 });
-                setIsLoginPending(false);
+                return;
               }
+
+              setIsLoginPending(true);
+              handleSignIn({
+                email: trimmedEmail,
+                token: trimmedCode,
+                onSuccess: (sessionToken: string) => {
+                  showToast({
+                    style: Toast.Style.Success,
+                    title: "Signin Success",
+                  });
+                  setSessionToken(sessionToken);
+                  setTokenSent(false);
+                  setEmail("");
+                  setCode("");
+                  setIsLoginPending(false);
+                },
+                onError: (error: Error) => {
+                  showFailureToast(error, { title: "Signin Failed" });
+                  setIsLoginPending(false);
+                },
+              });
             }}
           />
           {tokenSent && (
@@ -101,7 +128,6 @@ function Body() {
             onChange={(e) => setEmail(e)}
             autoFocus={true}
           />
-          <Form.Description text='Press "Command(⌘) + Enter"' />
         </>
       )}
 
@@ -121,13 +147,5 @@ function Body() {
         </>
       )}
     </Form>
-  );
-}
-
-export function LoginView() {
-  return (
-    <CachedQueryClientProvider>
-      <Body />
-    </CachedQueryClientProvider>
   );
 }
