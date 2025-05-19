@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Update] - 2025-04-20
+
+- Added a command to close all other tabs, leaving the current tab open.
+
 ## [Update] - 2025-03-18
 
 - Fix for `Copy Title as Link to Clipboard` command: Prevent profile or tab group name being added to the start of the page title
