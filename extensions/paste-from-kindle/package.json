@@ -2,7 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kindle-paste",
   "title": "Kindle Paste",
-  "description": "Removes citation from text copied from Kindle, and pastes the text",
+  "subtitle": "Paste Kindle quotes without metadata.",
+  "description": "Removes the automatic Kindle citation from clipboard text and pastes the cleaned text",
   "icon": "kindle-paste-icon.png",
   "author": "jasoncarey",
   "categories": [
@@ -13,7 +14,8 @@
     {
       "name": "paste-from-kindle",
       "title": "Paste from Kindle",
-      "description": "Removes the automatic Kindle citation from clipboard and pastes the text",
+      "subtitle": "Strip metadata and paste only the quote",
+      "description": "Cleans Kindle clipboard content and pastes it.",
       "mode": "no-view"
     }
   ],
