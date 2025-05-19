@@ -31,31 +31,47 @@ export default function Command() {
               markdown={`
 ### Raw Result
 ${recording.meta.rawResult}
-
+${
+  recording.meta.llmResult
+    ? `
 ### LLM Result
-${recording.meta.llmResult}
+${recording.meta.llmResult}`
+    : ""
+}
 `}
             />
           }
           actions={
             <ActionPanel>
+              <Action.Paste
+                title="Paste Result"
+                content={recording.meta.llmResult ? recording.meta.llmResult : recording.meta.rawResult}
+              />
+              <Action.CopyToClipboard
+                title="Copy Result"
+                content={recording.meta.llmResult ? recording.meta.llmResult : recording.meta.rawResult}
+              />
+              {recording.meta.llmResult ? (
+                <>
+                  <Action.Paste
+                    title="Paste Raw Result"
+                    content={recording.meta.rawResult}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Raw Result"
+                    content={recording.meta.rawResult}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+                  />
+                </>
+              ) : (
+                <></>
+              )}
               <Action.ShowInFinder
                 title="Show in Finder"
                 path={join(homedir(), "Documents", "superwhisper", "recordings", recording.directory)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
               />
-              <Action.CopyToClipboard  
-                title="Copy Result"  
-                content={recording.meta.llmResult ? recording.meta.llmResult : recording.meta.rawResult}  
-                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}  
-              />  
-              
-              { recording.meta.llmResult ? 
-              <Action.CopyToClipboard  
-                title="Copy Raw Result"  
-                content={recording.meta.rawResult}  
-                shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}  
-              /> : <></>  
-              }  
             </ActionPanel>
           }
         />
