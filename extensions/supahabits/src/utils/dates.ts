@@ -29,3 +29,21 @@ export function nextWeekDate(): Date {
   nextWeek.setDate(today.getDate() + 7);
   return nextWeek;
 }
+
+export function getTimeRemaining(dueDateStr: string) {
+  const dueDate = parseISODate(dueDateStr);
+  const today = new Date();
+  const daysLeft = getDaysDifference(today, dueDate);
+
+  if (daysLeft < 0) {
+    return "Overdue";
+  } else if (daysLeft === 0) {
+    return "Due today";
+  } else if (daysLeft === 1) {
+    return "1 day left";
+  } else if (daysLeft <= 30) {
+    return `${daysLeft} days left`;
+  } else {
+    return formatShortDate(dueDate);
+  }
+}

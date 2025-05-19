@@ -17,7 +17,7 @@ import fetch from "node-fetch";
 import { useFetch } from "@raycast/utils";
 
 import { Goal } from "./models/goal";
-import { parseISODate, getDaysDifference, formatShortDate } from "./utils/dates";
+import { getTimeRemaining } from "./utils/dates";
 import GoalForm from "./components/goal-form";
 import GoalDetailView from "./components/goal-detail-view";
 
@@ -105,7 +105,7 @@ export default function GoalsCommand() {
               }
             },
             { 
-              text: getTimeRemaining(goal.due_date), 
+              text: getTimeRemaining(goal.due_date),
               tooltip: "Time remaining" 
             }
           ]}
@@ -183,24 +183,6 @@ function getStatusColor(status: string): Color {
       return Color.Orange;
     default:
       return Color.PrimaryText;
-  }
-}
-
-function getTimeRemaining(dueDateStr: string) {
-  const dueDate = parseISODate(dueDateStr);
-  const today = new Date();
-  const daysLeft = getDaysDifference(today, dueDate);
-  
-  if (daysLeft < 0) {
-    return "Overdue";
-  } else if (daysLeft === 0) {
-    return "Due today";
-  } else if (daysLeft === 1) {
-    return "1 day left";
-  } else if (daysLeft <= 30) {
-    return `${daysLeft} days left`;
-  } else {
-    return formatShortDate(dueDate);
   }
 }
 
