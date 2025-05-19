@@ -1,3 +1,3 @@
 # RatingsDB Changelog
 
-## [Initial Version] - 2024-09-06
+## [Initial Version] - {PR_MERGE_DATE}
