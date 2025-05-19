@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Route Maintenance] - {PR_MERGE_DATE}
+## [Routine Maintenance] - {PR_MERGE_DATE}
 
 - Add icon to the Say action
 - Bump all dependencies to the latest
