@@ -69,22 +69,22 @@
     {
       "name": "add-transaction",
       "title": "Add Transaction",
-      "description": "Add a new YNAB transaction using AI"
+      "description": "Add a new YNAB transaction"
     },
     {
       "name": "get-transactions",
       "title": "Get Transactions",
-      "description": "Get YNAB transactions using AI"
+      "description": "Get YNAB transactions"
     },
     {
       "name": "get-accounts",
       "title": "Get Accounts",
-      "description": "Get all YNAB accounts and their balances using AI"
+      "description": "Get all YNAB accounts"
     },
     {
       "name": "get-account-details",
       "title": "Get Account Details",
-      "description": "Get details of a specific YNAB account using AI"
+      "description": "Get details of a specific account such as the balance, type, and on_budget status"
     },
     {
       "name": "get-big-numbers",

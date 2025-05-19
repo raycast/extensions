@@ -229,11 +229,18 @@
       },
       "expected": [
         {
+          "not": {
+            "callsTool": "get-accounts"
+          }
+        },
+        {
           "callsTool": {
+            "name": "get-account-details",
             "arguments": {
-              "account_name": "Checking"
-            },
-            "name": "get-account-details"
+              "account_name": {
+                "includes": "checking"
+              }
+            }
           }
         }
       ],
@@ -280,17 +287,25 @@
       "usedAsExample": true
     },
     {
-      "input": "@raynab what did I spend at amazon last month?",
+      "input": "@raynab what did I spend at Amazon last month?",
       "mocks": {
         "get-transactions": {
           "success": true,
           "transactions": [
             {
-              "date": "2024-03-10",
-              "payee_name": "Amazon",
-              "amount": -150.00,
+              "account_id": "123",
               "account_name": "Credit Card",
-              "cleared": true
+              "amount": "-$150.00",
+              "approved": true,
+              "category_id": "567",
+              "category_name": "Shopping",
+              "cleared": "uncleared",
+              "date": "2024-03-10",
+              "deleted": false,
+              "id": "896",
+              "payee_id": "478",
+              "payee_name": "Amazon",
+              "subtransactions": []
             }
           ]
         }
@@ -298,11 +313,13 @@
       "expected": [
         {
           "callsTool": {
+            "name": "get-transactions",
             "arguments": {
-              "payee": "Amazon",
+              "payee": {
+                "includes": "amazon"
+              },
               "period": "month"
-            },
-            "name": "get-transactions"
+            }
           }
         }
       ],
