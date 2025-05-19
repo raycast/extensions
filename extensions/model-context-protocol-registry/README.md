@@ -20,7 +20,7 @@ To add a new MCP client to the registry, you need to create a new entry in the `
 
 ### Add a new MCP registry to the registry
 
-To add a new MCP registry to the registry, you need to create a new entry in the `src/registries/index.ts` file. The registry is a function that returns a React component. You can add to the `REGISTRIES` array. A simple example are the built-in registries: `OfficialRegistry` and `CommunityRegistry`. A more complex example is the `SmitheryRegistry` that is used to discover MCP servers from the [Smithery](https://smithery.dev) registry.
+To add a new MCP registry to the registry, you need to create a new entry in the `src/registries/index.ts` file. The registry is a function that returns a React component. You can add to the `REGISTRIES` array. A simple example are the built-in registries: `OfficialRegistry` and `CommunityRegistry`. A more complex example is the `SmitheryRegistry` that is used to discover MCP servers from the [Smithery](https://smithery.ai) registry.
 
 ## MCP Servers
 
