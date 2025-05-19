@@ -132,7 +132,7 @@ export type APIToken = {
   expires_at: number | null;
   features: string[];
   has_full_access: 0 | 1;
-}
+};
 
 export type ErrorResponse = {
   metadata: Record<string, never>;

@@ -1,11 +1,11 @@
 # cPanel Changelog
 
-## [Modernize + API Tokens] - {PR_MERGE_DATE}
+## [Modernize + Manage API Tokens] - {PR_MERGE_DATE}
 
 - View API Tokens
 - Revoke API Token
 - Modernize to use latest Raycast config
-- BONUS: add new `callUAPI` func that wraps native `fetch`
+- DEV: add new `callUAPI` func that wraps native `fetch`
 
 ## [View FTP Accounts + Copy File Contents] - 2025-02-17
 
