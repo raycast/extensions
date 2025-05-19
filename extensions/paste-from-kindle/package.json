@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "paste-from-kindle",
+  "name": "kindle-paste",
   "title": "Kindle Paste",
   "description": "Removes citation from text copied from Kindle, and pastes the text",
   "icon": "kindle-paste-icon.png",
