@@ -7,7 +7,7 @@ interface Props {
   gem: GemSearchResult;
 }
 
-export const GemOptions = ({ gem }: Props): JSX.Element => {
+export const GemOptions = ({ gem }: Props) => {
   return (
     <List navigationTitle={`Search RubyGems > ${gem.name}`}>
       <List.Section title="Actions">
