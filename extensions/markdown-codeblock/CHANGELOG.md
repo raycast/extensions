@@ -1,6 +1,6 @@
 # Markdown Codeblock Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-05-19
 
 - Added support for blank codeblocks
 - Added 'rs' keyword to Rust language entry for better file extension support
