@@ -41,6 +41,14 @@ export default async ({ github, context }: API) => {
     return;
   }
 
+  if (context.payload.action === "ready_for_review" && context.payload.pull_request.draft === false) {
+    await comment({
+      github,
+      context,
+      comment: "@pernielsentikaer this PR is ready for review."
+    });
+  }
+
   const opts = github.rest.issues.listForRepo.endpoint.merge({
     ...context.issue,
     creator: sender,
