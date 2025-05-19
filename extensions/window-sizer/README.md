@@ -13,6 +13,7 @@ This extension uses Swift to interact with windows, providing the following feat
 
 - Quickly resize windows to predefined sizes
 - Create and save custom window sizes
+- Use `⌘ S` to star your frequently used window sizes
 - Apply common window sizes with a single click
 - Maximize window
 - Restore previous window size

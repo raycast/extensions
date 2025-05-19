@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { WindowInfo } from "../types/index";
 import { getActiveWindowInfo, WindowDetailsObject } from "../swift-app";
 import { log, error as logError } from "../utils/logger";
@@ -11,13 +11,24 @@ export function useWindowInfo() {
   const [windowInfo, setWindowInfo] = useState<WindowInfo | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const isMounted = useRef(true);
+
+  // Update mounted state when component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   /**
    * Get current active window information
    */
   const getWindowDetails = useCallback(async (): Promise<WindowInfo | null> => {
-    setIsLoading(true);
-    setError(null);
+    // Only update state if component is mounted
+    if (isMounted.current) {
+      setIsLoading(true);
+      setError(null);
+    }
 
     try {
       // Get active window info directly from Swift API
@@ -58,14 +69,17 @@ export function useWindowInfo() {
             height: size.height,
           };
 
-          // Update state
-          setWindowInfo(info);
+          // Only update state if component is still mounted
+          if (isMounted.current) {
+            // Update state
+            setWindowInfo(info);
 
-          // Log window info
-          if (details.app) {
-            log(`Active window info: ${details.app.name}.${details.app.processID}`, info);
-          } else {
-            log("Active window info:", info);
+            // Log window info
+            if (details.app) {
+              log(`Active window info: ${details.app.name}.${details.app.processID}`, info);
+            } else {
+              log("Active window info:", info);
+            }
           }
 
           return info;
@@ -74,12 +88,18 @@ export function useWindowInfo() {
 
       throw new Error("Invalid window information format");
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      logError("Error getting window info:", errorMsg);
-      setError(new Error(errorMsg));
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        logError("Error getting window info:", errorMsg);
+        setError(new Error(errorMsg));
+      }
       return null;
     } finally {
-      setIsLoading(false);
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
