@@ -5,6 +5,9 @@
   "description": "A Raycast extension that enables you to quickly look up gem information from RubyGems.org.",
   "icon": "command-icon.png",
   "author": "aleks",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
