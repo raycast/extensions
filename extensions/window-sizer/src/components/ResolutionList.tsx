@@ -47,7 +47,7 @@ export function ResolutionList({
               : resolution.isStarred
                 ? [
                     {
-                      icon: { source: "icons/unstar.svg", fallback: Icon.Star, tintColor: Color.SecondaryText },
+                      icon: { source: "icons/unstar.svg", fallback: Icon.StarDisabled, tintColor: Color.SecondaryText },
                       tooltip: "⇧ ⌘ S",
                     },
                   ]
@@ -77,7 +77,7 @@ export function ResolutionList({
                 title={resolution.isStarred ? "Remove from Starred" : "Mark as Starred"}
                 icon={{
                   source: resolution.isStarred ? "icons/unstar.svg" : "icons/star.svg",
-                  fallback: Icon.Star,
+                  fallback: resolution.isStarred ? Icon.StarDisabled : Icon.Star,
                   tintColor: Color.PrimaryText,
                 }}
                 shortcut={{
