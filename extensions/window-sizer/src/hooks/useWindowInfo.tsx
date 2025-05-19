@@ -26,8 +26,8 @@ export function useWindowInfo() {
   const getWindowDetails = useCallback(async (): Promise<WindowInfo | null> => {
     // Only update state if component is mounted
     if (isMounted.current) {
-    setIsLoading(true);
-    setError(null);
+      setIsLoading(true);
+      setError(null);
     }
 
     try {
@@ -71,14 +71,14 @@ export function useWindowInfo() {
 
           // Only update state if component is still mounted
           if (isMounted.current) {
-          // Update state
-          setWindowInfo(info);
+            // Update state
+            setWindowInfo(info);
 
-          // Log window info
-          if (details.app) {
-            log(`Active window info: ${details.app.name}.${details.app.processID}`, info);
-          } else {
-            log("Active window info:", info);
+            // Log window info
+            if (details.app) {
+              log(`Active window info: ${details.app.name}.${details.app.processID}`, info);
+            } else {
+              log("Active window info:", info);
             }
           }
 
@@ -90,15 +90,15 @@ export function useWindowInfo() {
     } catch (err) {
       // Only update state if component is still mounted
       if (isMounted.current) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      logError("Error getting window info:", errorMsg);
-      setError(new Error(errorMsg));
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        logError("Error getting window info:", errorMsg);
+        setError(new Error(errorMsg));
       }
       return null;
     } finally {
       // Only update state if component is still mounted
       if (isMounted.current) {
-      setIsLoading(false);
+        setIsLoading(false);
       }
     }
   }, []);
