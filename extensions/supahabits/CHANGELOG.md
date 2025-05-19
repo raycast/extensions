@@ -1,6 +1,6 @@
 # SupaHabits Changelog
 
-## [Goal Tracking] - {PR_MERGE_DATE}
+## [Goal Tracking] - 2025-05-19
 
 - Added goal tracking feature
 
