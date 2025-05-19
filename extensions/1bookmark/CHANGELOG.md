@@ -1,6 +1,6 @@
 # 1Bookmark Changelog
 
-## [Space Authentication Policy] - {PR_MERGE_DATE}
+## [Space Authentication Policy] - 2025-05-19
 
 - 0.11.0
 - 📱 Space member email auth policy is now available. This feature enhances the security of your team space.
