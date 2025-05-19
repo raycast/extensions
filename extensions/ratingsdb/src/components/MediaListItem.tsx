@@ -5,7 +5,7 @@ import DetailView from "./Detail";
 import { searchID } from "../utils/requests";
 import { MediaDetails } from "../types";
 
-const MediaListItem = ({ title }: { title: MediaDetails }) => {
+const MediaListItem = ({ title, onRemove }: { title: MediaDetails; onRemove?: (id: string) => void }) => {
   const [media, setMedia] = useState<MediaDetails>();
 
   useEffect(() => {
@@ -15,6 +15,10 @@ const MediaListItem = ({ title }: { title: MediaDetails }) => {
     };
     fetchMedia();
   }, [title.imdbID]);
+
+  if (!media) {
+    return null;
+  }
 
   function getTotalSeasons() {
     if (media && media.totalSeasons) {
@@ -28,19 +32,17 @@ const MediaListItem = ({ title }: { title: MediaDetails }) => {
     }
   }
 
-  if (!media) {
-    return null;
-  }
+  const seasons = media.Type === "series" ? { tag: { value: getTotalSeasons() || "N/A" } } : undefined;
 
   return (
     <List.Item
       key={title.imdbID}
       title={title.Title}
-      accessories={title.Type === "series" ? [{ tag: { value: getTotalSeasons() } }] : []}
+      accessories={seasons ? [seasons] : []}
       detail={<DetailView media={media} titleOrId={title.imdbID} poster={title.Poster} />}
       actions={
         <ActionPanel>
-          <MediaActions media={media} />
+          <MediaActions media={media} onRemove={onRemove} />
         </ActionPanel>
       }
     />

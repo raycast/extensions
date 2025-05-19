@@ -47,6 +47,7 @@ export async function searchID(id: string) {
     const params = {
       i: id,
       apikey: OMDB_TOKEN,
+      plot: "full",
     };
     const response: AxiosResponse = await axios.get(omdbUrl, { params });
 

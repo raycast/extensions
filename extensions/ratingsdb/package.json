@@ -24,6 +24,12 @@
           "placeholder": "Search by title..."
         }
       ]
+    },
+    {
+      "name": "view-watchlist",
+      "title": "View Watchlist",
+      "description": "View your watchlist",
+      "mode": "view"
     }
   ],
   "preferences": [

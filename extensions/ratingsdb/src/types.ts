@@ -44,6 +44,23 @@ export interface Episode {
   imdbID: string;
 }
 
+export interface EpisodeDetails extends Episode {
+  Plot: string;
+  Rated: string;
+  Season: string;
+  Runtime: string;
+  Genre: string;
+  Director: string;
+  Writer: string;
+  Actors: string;
+  Language: string;
+  Country: string;
+  Awards: string;
+  seriesID: string;
+  Type: string;
+  Response: string;
+}
+
 export interface DetailViewProps {
   media: MediaDetails;
   titleOrId: string;

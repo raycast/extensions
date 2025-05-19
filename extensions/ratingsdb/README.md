@@ -2,7 +2,7 @@
 
 A media ratings and information viewer built with Raycast extensions.
 
-An extension that allows you to search for movies and TV shows, view their ratings from IMDb, Rotten Tomatoes, and Metacritic as well as view trailers, where to watch, and more.
+An extension that allows you to search for movies and TV shows, view their ratings from IMDb, Rotten Tomatoes, and Metacritic as well as view trailers, where to watch, and more. This extension will also allow you to add items to your personal watchlist and view them!
 
 >Created by [Kenley Rodriguez](https://www.linkedin.com/in/kenley-rod/)
 
@@ -26,22 +26,26 @@ To use this extension, you will need to sign up for an API key from the Open Mov
 
 - View detailed information about movies and TV shows
 - Browse TV series episodes and seasons
+- View Ratings Graph and copy the graph to clipboard to easily share it
 - AI-powered media overview and analysis
-- Quick access to popular review platforms:
+- Quick access to popular platforms:
   - IMDb
   - Rotten Tomatoes
   - Metacritic
   - YouTube trailers
 - Detailed ratings and reviews from multiple sources
 - AI-generated media summaries and overviews
+- Add media to watchlist
 
 ## Keyboard Shortcuts
 
-- `⌘ + P` - View media overview
+- `⌘ + O` - View media overview
 - `⌘ + Y` - Open YouTube trailer
-- `⌘ + O` - View on Rotten Tomatoes
+- `⌘ + R` - View on Rotten Tomatoes
 - `⌘ + M` - View on Metacritic
-- `⌘ + I` - View AI Overview
+- `⌘ + I` - View on IMDb
+- `⌘ + Shift + A` - AI Overview
+- `⌘ + Shift + W` - Add to watchlist
 
 ## Features Breakdown
 
@@ -50,10 +54,12 @@ To use this extension, you will need to sign up for an API key from the Open Mov
 - Quick access to episode lists for TV series
 - Comprehensive media details and ratings
 
-### External Platform Integration
-- Direct links to popular review platforms
-- Easy access to trailers and additional content
-- Aggregated ratings from multiple sources
+### Ratings Graph
+- View Ratings Graph and copy the graph to clipboard to easily share it
+
+### Watchlist
+- Add media to watchlist
+- Seamlessly access the movies and TV shows that you would like to watch or revisit!
 
 ### AI Integration
 - AI-powered media analysis and overview

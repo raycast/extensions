@@ -63,7 +63,6 @@ export const EpisodeMetadata: React.FC<EpisodeMetadataProps> = ({ episode, media
       </Detail.Metadata.TagList>
 
       <Detail.Metadata.Separator />
-      <Detail.Metadata.Label title="Episode Number" text={episode.Episode.toString()} />
       {media.Genre && <Detail.Metadata.Label title="Genre" text={media.Genre} />}
 
       <Detail.Metadata.Separator />
