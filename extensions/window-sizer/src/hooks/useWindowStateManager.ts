@@ -154,9 +154,15 @@ export function useWindowStateManager() {
         const newCache = createCacheItem(limitedStates);
         safeSetWindowStatesCache(newCache);
 
-        // Persist to storage
-        await LocalStorage.setItem(WINDOW_STATES_STORAGE_KEY, JSON.stringify(limitedStates));
-        return true;
+        // Persist to storage and wait for it to complete
+        try {
+          await LocalStorage.setItem(WINDOW_STATES_STORAGE_KEY, JSON.stringify(limitedStates));
+          // Only return true after storage is confirmed
+          return true;
+        } catch (storageError) {
+          logError(`Error persisting window state for ${key}:`, storageError);
+          return false;
+        }
       } catch (err) {
         logError(`Error updating window state for ${key}:`, err);
         return false;
@@ -241,10 +247,12 @@ export function useWindowStateManager() {
       // Update single state and check if it was successful
       const saved = await updateSingleWindowState(key, windowInfo);
 
-      // Log the saved window information
-      log(`Saved window info: `, windowInfo);
+      // Log if the save was successful
+      if (saved) {
+        log(`Saved window info: `, windowInfo);
+      }
 
-      return saved;
+      return saved; // Return the actual status of the save operation
     } catch (err) {
       logError("Error saving window state:", err);
       return false;

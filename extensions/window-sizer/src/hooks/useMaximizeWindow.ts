@@ -43,7 +43,7 @@ export function useMaximizeWindow() {
         throw new Error(`Unexpected response: ${result}`);
       }
     } catch (error) {
-      console.error("Error maximizing window:", error);
+        console.error("Error maximizing window:", error);
 
       // Check error type and provide specific message
       const errorStr = String(error);
