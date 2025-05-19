@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Update] - 2025-04-20
+## [Update] - {PR_MERGE_DATE}
 
 - Added a command to close all other tabs, leaving the current tab open.
 
