@@ -50,8 +50,13 @@ export async function deleteProject(id: string): Promise<void> {
 // Link operations
 export async function getLinks(projectId?: string): Promise<ProjectLink[]> {
   const data = await LocalStorage.getItem<string>(LINKS_KEY);
-  const links = data ? JSON.parse(data) : [];
-  return projectId ? links.filter((link: ProjectLink) => link.projectId === projectId) : links;
+  try {
+    const links = data ? JSON.parse(data) : [];
+    return projectId ? links.filter((link: ProjectLink) => link.projectId === projectId) : links;
+  } catch (error) {
+    console.error("Failed to parse links:", error);
+    return [];
+  }
 }
 
 export async function saveLinks(links: ProjectLink[]): Promise<void> {
