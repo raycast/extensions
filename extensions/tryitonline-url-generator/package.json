@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tryitonline-url-generator",
+  "title": "Try It Online URL Generator",
+  "description": "Generates shareable Try It Online URLs from code and settings.",
+  "icon": "icon.png",
+  "author": "dhruv_gore",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-tio-url",
+      "title": "Generate Tio URL",
+      "description": "Generate a shareable URL for Try It Online",
+      "mode": "view",
+      "src": "src/generate-tio-url.tsx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.13.0",
+    "pako": "1.0.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
+    "@types/pako": "^2.0.3",
+    "@types/react": "^18.0.9",
+    "prettier": "^2.8.8",
+    "react": "^18.2.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "ai": {
+    "description": "Generate a Try It Online (TIO) URL for any code snippet in any supported language. Use this to quickly share runnable code links.",
+    "examples": [
+      {
+        "prompt": "Generate a TIO URL for Python code: print('Hello, World!')",
+        "arguments": {
+          "languageId": "python3",
+          "code": "print('Hello, World!')"
+        }
+      },
+      {
+        "prompt": "Give me a TIO link for a C++ program that prints 42",
+        "arguments": {
+          "languageId": "cpp-gcc",
+          "code": "#include <iostream>\\nint main() { std::cout << 42 << std::endl; }"
+        }
+      },
+      {
+        "prompt": "Create a TIO URL for JavaScript code that logs 'AI rocks!'",
+        "arguments": {
+          "languageId": "javascript-node",
+          "code": "console.log('AI rocks!')"
+        }
+      },
+      {
+        "prompt": "Share a TIO link for a Bash script that echoes 'done'",
+        "arguments": {
+          "languageId": "bash",
+          "code": "echo done"
+        }
+      }
+    ],
+    "argumentTypes": {
+      "languageId": "string",
+      "code": "string",
+      "header": "string",
+      "footer": "string",
+      "inputStr": "string",
+      "argsStr": "string",
+      "settingsString": "string"
+    }
+  }
+}
