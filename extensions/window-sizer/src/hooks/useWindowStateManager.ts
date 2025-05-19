@@ -29,13 +29,21 @@ export function useWindowStateManager() {
   // Create abort controller for async operations
   const createOperation = useCallback(() => {
     const controller = new AbortController();
-    pendingOperations.current.push(controller);
+    // Only abort operations when component is unmounted
+    if (!isMounted.current) {
+      controller.abort();
+    } else {
+      pendingOperations.current.push(controller);
+    }
     return controller;
   }, []);
 
   // Remove operation from pending list
   const removeOperation = useCallback((controller: AbortController) => {
-    pendingOperations.current = pendingOperations.current.filter((c) => c !== controller);
+    // Only remove after operation is completed
+    if (!controller.signal.aborted) {
+      pendingOperations.current = pendingOperations.current.filter((c) => c !== controller);
+    }
   }, []);
 
   // Load all saved window states from storage
@@ -124,15 +132,15 @@ export function useWindowStateManager() {
 
   // Update a single window state
   const updateSingleWindowState = useCallback(
-    async (key: string, state: WindowState): Promise<void> => {
+    async (key: string, state: WindowState): Promise<boolean> => {
       const controller = createOperation();
       try {
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted) return false;
 
         // Read current cache value. If null, load it first.
         const currentCacheValue = windowStatesCache?.value ?? (await loadAllWindowStates());
 
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted) return false;
 
         // Update the specific entry
         const updatedStates = { ...currentCacheValue, [key]: state };
@@ -140,7 +148,7 @@ export function useWindowStateManager() {
         // Limit the number of states
         const limitedStates = await limitStatesCount(updatedStates);
 
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted) return false;
 
         // Update cache
         const newCache = createCacheItem(limitedStates);
@@ -148,8 +156,10 @@ export function useWindowStateManager() {
 
         // Persist to storage
         await LocalStorage.setItem(WINDOW_STATES_STORAGE_KEY, JSON.stringify(limitedStates));
+        return true;
       } catch (err) {
         logError(`Error updating window state for ${key}:`, err);
+        return false;
       } finally {
         removeOperation(controller);
       }
@@ -211,33 +221,33 @@ export function useWindowStateManager() {
   }, [createOperation, removeOperation]);
 
   // Save window state
-  const saveWindowState = useCallback(async (): Promise<string | null> => {
+  const saveWindowState = useCallback(async (): Promise<boolean> => {
     const controller = createOperation();
     try {
-      if (controller.signal.aborted) return null;
+      if (controller.signal.aborted) return false;
 
       const windowInfo = await getCurrentWindowInfo();
 
-      if (controller.signal.aborted) return null;
+      if (controller.signal.aborted) return false;
 
       if (!windowInfo) {
         logError("No active window found");
-        return null;
+        return false;
       }
 
       // Use windowId as key
       const key = windowInfo.windowId;
 
-      // Update single state
-      await updateSingleWindowState(key, windowInfo);
+      // Update single state and check if it was successful
+      const saved = await updateSingleWindowState(key, windowInfo);
 
-      if (controller.signal.aborted) return null;
-
+      // Log the saved window information
       log(`Saved window info: `, windowInfo);
-      return key;
+
+      return saved;
     } catch (err) {
       logError("Error saving window state:", err);
-      return null;
+      return false;
     } finally {
       removeOperation(controller);
     }
@@ -345,5 +355,6 @@ export function useWindowStateManager() {
     saveWindowState,
     cleanupExpiredStates,
     getWindowState,
+    createOperation,
   };
 }
