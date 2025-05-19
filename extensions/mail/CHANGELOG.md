@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [🌟 New Feature] - {PR_MERGE_DATE}
+## [🌟 New Feature] - 2025-05-19
 
 - 📧 Add the copy-foreground-mail-deeplink command to copy the foreground mail deeplink to the clipboard.
 - 🔥 Add new AI tool to get email link
