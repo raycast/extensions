@@ -27,9 +27,11 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "concurrently \"ray develop\" \"npm run generate -- --watch\"",
+    "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "prettier:check": "prettier --check '**/*.{js,jsx,ts,tsx,json,css,md}'",
+    "prettier:format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,md}'"
   }
 }
