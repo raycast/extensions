@@ -1,5 +1,9 @@
 # SupaHabits Changelog
 
+### [Goal Tracking] - 2025-05-19
+
+- Added goal tracking feature
+
 ### [Habit stats] - 2025-04-21
 
 - Added habit stats view
