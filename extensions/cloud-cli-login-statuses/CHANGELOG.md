@@ -1,4 +1,4 @@
-# Cloud CLI login statuses Changelog
+# Cloud CLI Login Statuses Changelog
 
 ## [AWS and GCloud fallbacks] - {PR_MERGE_DATE}
 - Added fallback for AWS login status to check for each AWS profile
