@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Action, ActionPanel, Color, Detail, Form, getSelectedText, Icon, List, useNavigation } from "@raycast/api";
 
 import { translateAPI } from "./apis/translate";
-import { translateResult, translateWebResult } from "../types";
+import { TranslateResult, TranslateWebResult } from "../types";
 import { LANGUAGES } from "./consts";
 import { ErrorMessage } from "./components/error_message";
 import { generateErrorMessage } from "./utils";
@@ -41,7 +41,7 @@ function TranslateResultActionPanel(props: { copy_content: string; url: string |
 }
 
 function Translate(props: { content: string | undefined; from_language: string; to_language: string }) {
-  const [translate_result, set_translate_result] = useState<translateResult>({
+  const [translate_result, set_translate_result] = useState<TranslateResult>({
     requestId: "",
     query: "",
     basic: {},
@@ -58,17 +58,18 @@ function Translate(props: { content: string | undefined; from_language: string; 
   if (content === "" || content === undefined) {
     const errorMessage = `
 * Content can not be blank`;
-    return <ErrorMessage error_message={errorMessage} />;
+    return <ErrorMessage errorMessage={errorMessage} />;
   }
   useEffect(() => {
     (async () => {
       const response = await translateAPI(content, from_language, to_language);
+      if (!response) return;
       set_translate_result(response);
     })();
   }, []);
 
   if (translate_result && translate_result.errorCode && translate_result.errorCode !== "0") {
-    return <ErrorMessage error_message={generateErrorMessage(translate_result.errorCode)} />;
+    return <ErrorMessage errorMessage={generateErrorMessage(translate_result.errorCode)} />;
   }
   if (content.split(" ").length == 1) {
     return (
@@ -117,7 +118,7 @@ function Translate(props: { content: string | undefined; from_language: string; 
         ) : null}
         {translate_result.web && translate_result.web.length > 0 ? (
           <List.Section title="Web Translate">
-            {translate_result.web.map((item: translateWebResult, index: number) => (
+            {translate_result.web.map((item: TranslateWebResult, index: number) => (
               <List.Item
                 key={index}
                 title={item.value.join(", ")}

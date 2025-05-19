@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import crypto from "crypto";
-import { translateResult } from "../../types";
+import { TranslateResult } from "../../types";
 
 function generateSign(content: string, salt: number, app_key: string, app_secret: string) {
   const md5 = crypto.createHash("md5");
@@ -24,14 +25,16 @@ function handleContent(content: string, handle_annotation: boolean) {
   }
 
   const contentList = content.split("\n");
-  for (const i in contentList) {
-    contentList[i] = contentList[i].trim();
-    if (contentList[i] == "") {
-      contentList[i] = "\n\n";
-    }
-  }
-  content = contentList.join(" ");
-  return content;
+
+  return contentList
+    .map((item) => {
+      if (item === "") {
+        return "\n\n";
+      }
+
+      return item.trim();
+    })
+    .join(" ");
 }
 
 export function translateAPI(content: string, from_language: string, to_language: string) {
@@ -39,6 +42,7 @@ export function translateAPI(content: string, from_language: string, to_language
   const q = Buffer.from(handleContent(content, handle_annotation)).toString();
   const salt = Date.now();
   const sign = generateSign(q, salt, app_key, app_secret);
+
   const url = new URL("https://openapi.youdao.com/api");
   const params = new URLSearchParams();
   params.append("q", q);
@@ -48,8 +52,13 @@ export function translateAPI(content: string, from_language: string, to_language
   params.append("salt", String(salt));
   params.append("sign", sign);
   url.search = params.toString();
-  return fetch(url.toString(), {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  }).then((res) => res.json()) as Promise<translateResult>;
+
+  try {
+    return fetch(url.toString(), {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }).then((res) => res.json()) as Promise<TranslateResult>;
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to translate" });
+  }
 }

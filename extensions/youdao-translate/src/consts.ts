@@ -111,4 +111,4 @@ export const LANGUAGES = {
   "Serbian-Cyrillic": "sr-Cyrl",
   "Serbian-Latin": "sr-Latn",
   "Queretaro Otomi": "otq",
-};
+} as const;

@@ -3,7 +3,7 @@ import { Action, ActionPanel, Clipboard, getSelectedText, List, useNavigation } 
 import { useCachedState } from "@raycast/utils";
 
 import { translateAPI } from "./apis/translate";
-import { translateResult } from "../types";
+import { TranslateResult } from "../types";
 import { LANGUAGES } from "./consts";
 import { ErrorMessage } from "./components/error_message";
 import { generateErrorMessage } from "./utils";
@@ -13,7 +13,7 @@ export default function Command() {
   const [to, setTo] = useState("auto");
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [translateList, setTranslateList] = useCachedState<Array<translateResult>>("translateList", []);
+  const [translateList, setTranslateList] = useCachedState<Array<TranslateResult>>("translateList", []);
 
   useEffect(() => {
     (async () => {
@@ -24,8 +24,9 @@ export default function Command() {
 
       if (text.length && text[0].value && !translateList.some((item) => item.query === text[0].value)) {
         const res = await translateAPI(text[0].value, "auto", to);
+        if (!res) return;
         if (res.errorCode !== "0") {
-          push(<ErrorMessage error_message={generateErrorMessage(res.errorCode)} />);
+          push(<ErrorMessage errorMessage={generateErrorMessage(res.errorCode)} />);
           return;
         }
         setTranslateList((prev) => {
@@ -55,9 +56,8 @@ export default function Command() {
       }
       throttle
     >
-      {translateList.map((item, index) => (
+      {translateList.map((item) => (
         <List.Item
-          key={index}
           title={item.query}
           detail={<List.Item.Detail markdown={item.translation?.join("") ?? ""} />}
           actions={
@@ -68,17 +68,20 @@ export default function Command() {
                   if (!searchText) return;
                   setLoading(true);
 
-                  const res = await translateAPI(searchText, "auto", to);
-                  if (res.errorCode !== "0") {
-                    push(<ErrorMessage error_message={generateErrorMessage(res.errorCode)} />);
-                    return;
+                  try {
+                    const res = await translateAPI(searchText, "auto", to);
+                    if (!res) return;
+                    if (res.errorCode !== "0") {
+                      push(<ErrorMessage errorMessage={generateErrorMessage(res.errorCode)} />);
+                      return;
+                    }
+                    setTranslateList((prev) => {
+                      return [res, ...prev];
+                    });
+                    setSearchText("");
+                  } finally {
+                    setLoading(false);
                   }
-                  setTranslateList((prev) => {
-                    return [res, ...prev];
-                  });
-                  setSearchText("");
-
-                  setLoading(false);
                 }}
               />
               <Action.CopyToClipboard

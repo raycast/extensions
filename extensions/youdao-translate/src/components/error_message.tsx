@@ -1,14 +1,14 @@
 import { Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
 
-export function ErrorMessage(props: { error_message: string }) {
-  const { error_message } = props;
-  const errorMessage = `### ERROR
-${error_message}`;
+export function ErrorMessage(props: { errorMessage: string }) {
+  const { errorMessage } = props;
+  const msg = `### ERROR
+${errorMessage}`;
   const { pop } = useNavigation();
 
   return (
     <Detail
-      markdown={errorMessage}
+      markdown={msg}
       actions={
         <ActionPanel>
           <Action title="Back To Form" onAction={pop} />
