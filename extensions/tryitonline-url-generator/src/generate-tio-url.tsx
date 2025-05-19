@@ -5,6 +5,24 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import { LaunchProps } from "@raycast/api";
 
+// Casted components
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const FormComponent = Form as React.FC<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ActionPanelComponent = ActionPanel as React.FC<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ActionComponent = Action as React.FC<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const FormDropdownComponent = Form.Dropdown as React.FC<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const FormDropdownItemComponent = Form.Dropdown.Item as React.FC<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const FormCheckboxComponent = Form.Checkbox as React.FC<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const FormTextAreaComponent = Form.TextArea as React.FC<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const FormTextFieldComponent = Form.TextField as React.FC<any>;
+
 // Constants from TIO's frontend.js
 const FIELD_SEPARATOR = String.fromCharCode(0xff); // \xff
 const START_OF_EXTRA_FIELDS = String.fromCharCode(0xfe); // \xfe
@@ -320,14 +338,14 @@ export default function FormCommand(_props: LaunchProps) {
   }
 
   return (
-    <Form
+    <FormComponent
       actions={
-        <ActionPanel>
+        <ActionPanelComponent>
           <Action.SubmitForm
             title="Generate and Copy URL"
             onSubmit={(values) => handleSubmit(values as CommandFormValues, "copy")}
           />
-          <Action
+          <ActionComponent
             title="Open Tio URL in Browser"
             onAction={async () => {
               await handleSubmit(
@@ -345,10 +363,10 @@ export default function FormCommand(_props: LaunchProps) {
             }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           />
-        </ActionPanel>
+        </ActionPanelComponent>
       }
     >
-      <Form.Dropdown
+      <FormDropdownComponent
         id="languageId"
         title="Language"
         value={languageId}
@@ -356,39 +374,56 @@ export default function FormCommand(_props: LaunchProps) {
         storeValue // Remember the last selected language
       >
         {isLoadingLanguages ? (
-          <Form.Dropdown.Item value="" title="Loading languages..." />
+          <FormDropdownItemComponent value="" title="Loading languages..." />
         ) : languageLoadError ? (
-          <Form.Dropdown.Item value="" title={languageLoadError} />
+          <FormDropdownItemComponent value="" title={languageLoadError} />
         ) : (
-          tioSupportedLanguages.map((lang) => <Form.Dropdown.Item key={lang.id} value={lang.id} title={lang.name} />)
+          tioSupportedLanguages.map((lang) => (
+            <FormDropdownItemComponent key={lang.id} value={lang.id} title={lang.name} />
+          ))
         )}
-      </Form.Dropdown>
-      <Form.Checkbox
+      </FormDropdownComponent>
+      <FormCheckboxComponent
         id="showAllLanguages"
         label="Show all available languages"
         value={showAllLanguages}
         onChange={setShowAllLanguages}
       />
-      <Form.TextArea id="code" title="Code" value={code} onChange={setCode} placeholder="Enter your code here" />
-      <Form.TextArea
+      <FormTextAreaComponent
+        id="code"
+        title="Code"
+        value={code}
+        onChange={setCode}
+        placeholder="Enter your code here"
+      />
+      <FormTextAreaComponent
         id="header"
         title="Header"
         placeholder="Optional: Code to prepend (e.g. includes, using statements)"
       />
-      <Form.TextArea id="footer" title="Footer Code (Optional)" placeholder="Code to append" enableMarkdown={false} />
-      <Form.TextArea
+      <FormTextAreaComponent
+        id="footer"
+        title="Footer Code (Optional)"
+        placeholder="Code to append"
+        enableMarkdown={false}
+      />
+      <FormTextAreaComponent
         id="inputStr"
         title="Stdin Input (Optional)"
         placeholder="Input for your program"
         enableMarkdown={false}
       />
-      <Form.TextField id="argsStr" title="Command-line Arguments (Optional)" placeholder="Space-separated arguments" />
-      <Form.TextArea
+      <FormTextFieldComponent
+        id="argsStr"
+        title="Command-line Arguments (Optional)"
+        placeholder="Space-separated arguments"
+      />
+      <FormTextAreaComponent
         id="settingsString"
         title="TIO Settings String (Optional)"
         placeholder="Advanced: raw settings string (e.g., Vdebug=true)"
         enableMarkdown={false}
       />
-    </Form>
+    </FormComponent>
   );
 }
