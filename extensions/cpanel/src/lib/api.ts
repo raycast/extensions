@@ -32,6 +32,7 @@ export async function callUAPI<T>(
     toast.style = Toast.Style.Failure;
     toast.title = "cPanel Error";
     toast.message = `${error}`;
+    throw error;
   }
 }
 

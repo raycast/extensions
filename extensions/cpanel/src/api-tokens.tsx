@@ -49,7 +49,7 @@ export default function APITokens() {
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Created"
-                    text={new Date(token.create_time * 1000).toString()}
+                    text={new Date(token.create_time * 1000).toDateString()}
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Expires"
@@ -80,7 +80,7 @@ export default function APITokens() {
                       style: Alert.ActionStyle.Destructive,
                       title: "Revoke",
                       onAction() {
-                        revokeAPIToken(token.name);
+                        revokeAPIToken(token.name).then(revalidate);
                       },
                     },
                   })
