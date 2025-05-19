@@ -1,6 +1,6 @@
 # Gitmoji Changelog
 
-## [Upgrade gitmoji] - {PR_MERGE_DATE}
+## [Upgrade gitmoji] - 2025-05-19
 
 - Add frecency sorting
 
