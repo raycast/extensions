@@ -16,7 +16,6 @@ private func isDesktopOrFullscreen() -> (isDesktopOrFullscreen: Bool, message: S
   }
 
   let appBundleID = frontApp.bundleIdentifier ?? "unknown"
-  let appName = frontApp.localizedName ?? "unknown"
 
   // First check: Is it Finder?
   let isFinder = appBundleID == "com.apple.finder"
