@@ -11,6 +11,16 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
+  if (context.payload.action === "ready_for_review" && context.payload.pull_request.draft === false) {
+    await github.rest.issues.addAssignees({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      issue_number: context.issue.number,
+      assignees: ["pernielsentikaer"]
+    });
+    return;
+  }
+
   console.log("changed extensions", process.env.CHANGED_EXTENSIONS);
 
   if (!process.env.CHANGED_EXTENSIONS) {
@@ -39,14 +49,6 @@ export default async ({ github, context }: API) => {
   if (sender === "raycastbot") {
     console.log("We don't notify people when raycastbot is doing its stuff (usually merging the PR)");
     return;
-  }
-
-  if (context.payload.action === "ready_for_review" && context.payload.pull_request.draft === false) {
-    await comment({
-      github,
-      context,
-      comment: "@pernielsentikaer this PR is ready for review."
-    });
   }
 
   const opts = github.rest.issues.listForRepo.endpoint.merge({
