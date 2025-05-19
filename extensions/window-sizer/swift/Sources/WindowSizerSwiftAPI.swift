@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import CoreGraphics
 import Foundation
 import RaycastSwiftMacros
 
@@ -183,6 +184,29 @@ private func getActiveWindowData() -> (
   return results
 }
 
+// Get window number
+private func getWindowNumber(processId: pid_t) -> Int? {
+  let windowList =
+    CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) as? [[String: Any]]
+
+  // Find windows belonging to the current process
+  let processWindows = windowList?.filter { window in
+    if let windowPid = window[kCGWindowOwnerPID as String] as? pid_t {
+      return windowPid == processId
+    }
+    return false
+  }
+
+  // Get the window number of the first window
+  if let firstWindow = processWindows?.first,
+    let windowNumber = firstWindow[kCGWindowNumber as String] as? Int
+  {
+    return windowNumber
+  }
+
+  return nil
+}
+
 // Export active window information as structured data for direct use by JavaScript
 @raycast func getActiveWindowInfo() -> WindowDetails {
   // Check if current window is desktop or fullscreen
@@ -212,9 +236,9 @@ private func getActiveWindowData() -> (
     return errorResult
   }
 
-  // Convert AXUIElement to a string identifier
-  let axWindowRef = windowData.axWindowRef!
-  let windowRefID = "\(Unmanaged.passUnretained(axWindowRef).toOpaque())"
+  // Get window number
+  let processId = NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0
+  let windowNumber = getWindowNumber(processId: processId)
 
   // Create window info
   let position = WindowPosition(
@@ -234,14 +258,14 @@ private func getActiveWindowData() -> (
 
   let appInfo = AppInfo(
     name: windowData.appName,
-    processID: Int(NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0)
+    processID: Int(processId)
   )
 
   // Return structured data that can be converted to JSON
   return WindowDetails(
     error: false,
     message: nil,
-    windowRefID: windowRefID,
+    windowRefID: windowNumber?.description,
     window: windowInfo,
     app: appInfo
   )

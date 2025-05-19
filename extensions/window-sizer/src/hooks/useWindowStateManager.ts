@@ -181,10 +181,13 @@ export function useWindowStateManager() {
 
       // Extract window information
       const processId = String(windowDetails.app.processID);
-      // Use encodeURIComponent to handle special characters in app name and underscore as separator
-      const windowId = `${encodeURIComponent(windowDetails.app.name)}_${processId}`;
       const size = windowDetails.window.size;
       const position = windowDetails.window.position;
+
+      // Create unique identifier using app name, process ID and window number
+      const windowId = windowDetails.windowRefID
+        ? `${encodeURIComponent(windowDetails.app.name)}_${processId}_${windowDetails.windowRefID}`
+        : `${encodeURIComponent(windowDetails.app.name)}_${processId}`;
 
       // Create window state object with size and position information
       return {
