@@ -1,6 +1,6 @@
 # Unkey Changelog
 
-## [Modernize + Update Broken Endpoints] - {PR_MERGE_DATE}
+## [Modernize + Update Broken Endpoints] - 2025-05-19
 
 - Modernize to use latest Raycast config (no more `node-fetch`)
 - Update the following endpoints:
