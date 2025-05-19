@@ -7,10 +7,10 @@ function renderProgressBar(percentage: number) {
   const filledBars = Math.round(percentage / 10);
   const emptyBars = 10 - filledBars;
 
-  return "`" + "■".repeat(filledBars) + "□".repeat(emptyBars) + "`";
+  return "``" + "■".repeat(filledBars) + "□".repeat(emptyBars) + "``";
 }
 
-function getStatusIcon(status: string) {
+function getStatusIcon(status: "active" | "completed" | "upcoming") {
   switch (status) {
     case "active":
       return "🟢 Active";
@@ -37,20 +37,10 @@ export default function GoalDetailView({ goal }: { goal: Goal }) {
   } else if (daysLeft <= 0) {
     progressPercentage = 100; // Due date passed, show full bar
   } else {
-    // As days remaining decreases, progress increases
-    progressPercentage = Math.min(100, Math.max(5, 100 - daysLeft * 100));
-
-    // For more gradual progress with longer timeframes:
-    // If more than 1 day is left, use a more reasonable scale
-    if (daysLeft > 1) {
-      // This will produce a more gradual progression:
-      // 30 days left: ~10%
-      // 14 days left: ~30%
-      // 7 days left: ~50%
-      // 3 days left: ~70%
-      // 1 day left: ~90%
-      progressPercentage = Math.min(95, Math.max(5, 100 - (daysLeft / 30) * 100));
-    }
+    progressPercentage =
+      daysLeft > 1
+        ? Math.min(95, Math.max(5, 100 - (daysLeft / 30) * 100))
+        : Math.min(100, Math.max(5, 100 - daysLeft * 100));
   }
 
   const progressBar = renderProgressBar(progressPercentage);

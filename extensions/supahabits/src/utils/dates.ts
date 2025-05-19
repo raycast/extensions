@@ -25,12 +25,14 @@ export function formatLongDate(date: Date): string {
 
 export function nextWeekDate(): Date {
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const nextWeek = new Date(today);
   nextWeek.setDate(today.getDate() + 7);
   return nextWeek;
 }
 
-export function getTimeRemaining(dueDateStr: string) {
+export function getTimeRemaining(dueDateStr: string): string {
   const dueDate = parseISODate(dueDateStr);
   const today = new Date();
   const daysLeft = getDaysDifference(today, dueDate);

@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import fetch from "node-fetch";
-import { useFetch } from "@raycast/utils";
+import { showFailureToast, useFetch } from "@raycast/utils";
 
 import { Goal } from "./models/goal";
 import { getTimeRemaining } from "./utils/dates";
@@ -39,7 +39,9 @@ export default function GoalsCommand() {
       if (error.message.indexOf("Unauthorized") !== -1) {
         await showHUD("⛔ Unauthorized, Please set your secret in the extension preferences");
         await openExtensionPreferences();
+        return;
       }
+      await showFailureToast(error, { title: "🚫 Failed to fetch goals" });
     },
   });
 
@@ -217,8 +219,7 @@ async function completeGoal(goalId: string, secret: string) {
     await showToast({ style: Toast.Style.Success, title: "Goal completed successfully" });
     return true;
   } catch (error) {
-    console.error("Error completing goal:", error);
-    await showToast({ style: Toast.Style.Failure, title: "Failed to complete goal", message: String(error) });
+    await showFailureToast(error, { title: "Failed to complete goal" });
     return false;
   }
 }
@@ -240,8 +241,7 @@ async function deleteGoal(goalId: string, secret: string) {
     await showToast({ style: Toast.Style.Success, title: "Goal deleted successfully" });
     return true;
   } catch (error) {
-    console.error("Error deleting goal:", error);
-    await showToast({ style: Toast.Style.Failure, title: "Failed to delete goal", message: String(error) });
+    await showFailureToast(error, { title: "Failed to delete goal" });
     return false;
   }
 }

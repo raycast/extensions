@@ -32,7 +32,7 @@ export default function GoalForm({ goal, onSuccess, mode }: GoalFormProps) {
         secret,
         title,
         description: description || undefined,
-        due_date: dueDate,
+        due_date: dueDate.toISOString(),
       };
 
       // Add goal_id for edit mode
@@ -47,7 +47,7 @@ export default function GoalForm({ goal, onSuccess, mode }: GoalFormProps) {
       });
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+        throw new Error(`Failed to ${mode} goal: ${response.statusText}`);
       }
 
       const action = mode === "create" ? "created" : "updated";
