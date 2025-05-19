@@ -1,5 +1,9 @@
 # Google Gemini Changelog
 
+## [Add Safety Settings] - {PR_MERGE_DATE}
+
+- 🛡️ Set BLOCK_NONE as the query safety checking parameter in case of frequent policy blocking.
+
 ## [New Model] - 2025-05-14
 
 - 🆕 New Model: Gemini 2.5 Pro Preview 0506
