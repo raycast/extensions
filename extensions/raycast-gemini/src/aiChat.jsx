@@ -1,19 +1,20 @@
 import {
-  List,
-  ActionPanel,
   Action,
-  getPreferenceValues,
-  Toast,
-  Icon,
-  showToast,
-  Form,
-  useNavigation,
+  ActionPanel,
   confirmAlert,
+  Form,
+  getPreferenceValues,
+  getSelectedText,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+  useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
 import Gemini from "gemini-ai";
 import fetch from "node-fetch";
-import { LocalStorage, getSelectedText } from "@raycast/api";
+import { useEffect, useState } from "react";
 
 export default function Chat({ launchContext }) {
   let toast = async (style, title, message) => {
@@ -142,6 +143,22 @@ export default function Chat({ launchContext }) {
                     let aiChat = gemini.createChat({
                       model: currentChat.model ?? "gemini-1.5-flash-latest",
                       messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
+                      safetySettings: [
+                        // Derogatory: Negative or harmful comments targeting identity and/or protected attributes
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+
+                        // Toxic: Content that is rude, disrespectful, or profane
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+
+                        // Sexual: Contains references to sexual acts or other lewd content
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+
+                        // Violent: Describes scenarios depicting violence against an individual or group
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+
+                        // Dangerous: Promotes, facilitates, or encourages harmful acts
+                        { category: "HARM_CATEGORY_DANGEROUS", threshold: "BLOCK_NONE" },
+                      ],
                     });
 
                     await aiChat.ask(query, {
@@ -317,6 +334,22 @@ export default function Chat({ launchContext }) {
           let aiChat = gemini.createChat({
             model: "gemini-1.5-pro-latest",
             messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
+            safetySettings: [
+              // Derogatory: Negative or harmful comments targeting identity and/or protected attributes
+              { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+
+              // Toxic: Content that is rude, disrespectful, or profane
+              { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+
+              // Sexual: Contains references to sexual acts or other lewd content
+              { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+
+              // Violent: Describes scenarios depicting violence against an individual or group
+              { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+
+              // Dangerous: Promotes, facilitates, or encourages harmful acts
+              { category: "HARM_CATEGORY_DANGEROUS", threshold: "BLOCK_NONE" },
+            ],
           });
           currentChat.messages[0].answer = "";
           toast(Toast.Style.Animated, "Regenerating Last Message");
