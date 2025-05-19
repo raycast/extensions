@@ -1,6 +1,6 @@
 # cPanel Changelog
 
-## [Modernize + Manage API Tokens] - {PR_MERGE_DATE}
+## [Modernize + Manage API Tokens] - 2025-05-19
 
 - View API Tokens
 - Revoke API Token
