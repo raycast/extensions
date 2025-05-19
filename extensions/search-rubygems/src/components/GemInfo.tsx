@@ -8,7 +8,7 @@ interface Props {
   gem: GemSearchResult;
 }
 
-export const GemInfo = ({ gem }: Props): JSX.Element => {
+export const GemInfo = ({ gem }: Props) => {
   const [gemDetails, setGemInfo] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
 
