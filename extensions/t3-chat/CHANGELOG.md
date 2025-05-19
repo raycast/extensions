@@ -1,6 +1,6 @@
 # T3 Chat Changelog
 
-## [v1.1.0] - {PR_MERGE_DATE}
+## [v1.1.0] - 2025-05-19
 
 - Added new preference to use the beta version of t3.chat (beta.t3.chat)
 
