@@ -1,5 +1,11 @@
 # Rebrandly Changelog
 
+## [Update Link + Modernize] - {PR_MERGE_DATE}
+
+- add: `ctrl`+`e` to execute "Update Link" `Action`
+- fix: proper error message when invalid token
+- modernize: add latest config + remove `node-fetch`
+
 ## [Delete Link] - 2025-02-10
 
 - Use `ctrl`+`x` to execute "Delete Link" `Action`
