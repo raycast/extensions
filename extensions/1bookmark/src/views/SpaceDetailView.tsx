@@ -6,6 +6,7 @@ import { EditSpaceOneValueForm, KeyToEdit } from "./EditSpaceOneValueForm";
 import { SpaceMembersView } from "./SpaceMembersView";
 import { SpaceTagsView } from "./SpaceTagsView";
 import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
+import { SpaceMemberAuthPoliciesView } from "./SpaceMemberAuthPoliciesView";
 
 const EditAction = (props: { spaceId: string; keyToEdit: KeyToEdit; value: string; refetch: () => void }) => {
   const { spaceId, keyToEdit, value, refetch } = props;
@@ -23,7 +24,7 @@ function Body(props: { spaceId: string }) {
   const { spaceId } = props;
   const { data, isLoading, refetch } = trpc.space.get.useQuery({ spaceId });
   const me = useMe();
-  const { enabledSpaceIds, toggleEnableDisable } = useEnabledSpaces();
+  const { enabledSpaceIds, confirmAndToggleEnableDisableSpace: toggleEnableDisable } = useEnabledSpaces();
 
   if (isLoading || !data || !me.data || !enabledSpaceIds) {
     return <List isLoading />;
@@ -64,6 +65,7 @@ function Body(props: { spaceId: string }) {
           </ActionPanel>
         }
       />
+      <List.Item title="Bookmarks" subtitle={data._count.bookmarks.toString()} icon={Icon.Bookmark} />
       {data.type === "TEAM" && (
         <List.Item
           title="Members"
@@ -91,7 +93,29 @@ function Body(props: { spaceId: string }) {
           </ActionPanel>
         }
       />
-      <List.Item title="Bookmarks" subtitle={data._count.bookmarks.toString()} icon={Icon.Bookmark} />
+
+      {data.type === "TEAM" && (
+        <List.Item
+          title="Member Auth Policies"
+          subtitle={data._count.memberAuthPolicies === 0 ? undefined : data._count.memberAuthPolicies.toString()}
+          accessories={
+            data._count.memberAuthPolicies === 0
+              ? [{ tag: { value: "All users are allowed", color: Color.Orange } }]
+              : []
+          }
+          icon={Icon.Lock}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Member Auth Policies"
+                icon={Icon.Lock}
+                target={<SpaceMemberAuthPoliciesView spaceId={spaceId} />}
+                onPop={refetch}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
 
       <List.Item
         title="Enable/Disable"

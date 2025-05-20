@@ -31,8 +31,11 @@ export function useWindowResize() {
         return;
       }
 
-      // Save window state before making any changes
-      await saveWindowState();
+      // Save current window state before resize
+      const saveResult = await saveWindowState();
+      if (!saveResult) {
+        logError("Failed to save window state before resize");
+      }
 
       // Close main window first to avoid showing loading state
       await closeMainWindow();
