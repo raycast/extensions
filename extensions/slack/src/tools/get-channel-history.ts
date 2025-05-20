@@ -2,7 +2,11 @@ import { getSlackWebClient } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
 import { isValidChannelId } from "../shared/utils";
 
-async function getChannelIdByChannelName(channelName: string) {
+async function getChannelIdByChannelName(channelName?: string) {
+  if (channelName == null) {
+    return undefined;
+  }
+
   const slackWebClient = getSlackWebClient();
   let cursor = null;
   const includedChannelNames: { channelName: string; channelId: string }[] = [];
@@ -27,7 +31,7 @@ async function getChannelIdByChannelName(channelName: string) {
              * Returns the channel name as priority if it matches correctly.
              */
             return channel.id;
-          } else if (channel.name.includes(channelName)) {
+          } else if (channel.name.includes(channelName!)) {
             /**
              * If the input 'channelName' is included in the channel name, save it to return when there is no exact matching channel name.
              */
@@ -47,11 +51,11 @@ async function getChannelIdByChannelName(channelName: string) {
   return undefined;
 }
 
-async function getChannelHistory(input: {
+async function getChannelHistory(input?: {
   /**
    * The id of the channel to fetch history (eg. messages) for. Use `getChannels` to get the list of channels with their ids.
    */
-  channelId: string;
+  text: string;
   /**
    * Only messages after this ISO 8601 timestamp will be included in results. If ommited, the last 30 messages of the channel will be returned.
    *
@@ -60,17 +64,16 @@ async function getChannelHistory(input: {
   after?: string;
 }) {
   const slackWebClient = getSlackWebClient();
+  const { after, text } = input;
 
-  const unixTimestamp = input.after ? Math.floor(new Date(input.after).getTime() / 1000).toString() : undefined;
+  const unixTimestamp = after ? Math.floor(new Date(after).getTime() / 1000).toString() : undefined;
 
   /**
    * Handle cases where the input might be a channel name instead of a channel ID.
    * This happens when users reference channels by name (e.g. 'general') rather than ID.
    * We first check if the input is a valid channel ID, if not we try to find the channel by name.
    */
-  const channelId = isValidChannelId(input.channelId)
-    ? input.channelId
-    : await getChannelIdByChannelName(input.channelId);
+  const channelId = isValidChannelId(text) ? text : await getChannelIdByChannelName(text);
 
   if (!channelId) {
     throw new Error("Channel ID not found");
