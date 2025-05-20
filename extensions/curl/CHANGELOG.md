@@ -1,6 +1,6 @@
 # cURL Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-05-20
 
 - Enhanced the detail of the request error message displayed in the toast
 
