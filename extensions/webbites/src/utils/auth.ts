@@ -89,7 +89,7 @@ export const login = async (
       if (isFirstLogin == undefined || isFirstLogin == "true") {
         showToast({
           title: "Logged in",
-          message: "Successfully logged in, loading your boookmarks...",
+          message: "Successfully logged in, loading your bookmarks...",
           style: Toast.Style.Success,
         });
         await LocalStorage.setItem("is_first_login", "false");
