@@ -2,6 +2,19 @@ import { getSlackWebClient } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
 import { isValidChannelId } from "../shared/utils";
 
+type Input = {
+  /**
+   * The id of the channel to fetch history (eg. messages) for. Use `getChannels` to get the list of channels with their ids.
+   */
+  text?: string;
+  /**
+   * Only messages after this ISO 8601 timestamp will be included in results. If ommited, the last 30 messages of the channel will be returned.
+   *
+   * @example "2025-03-26T00:00:00Z"
+   */
+  after?: string;
+};
+
 async function getChannelIdByChannelName(channelName?: string) {
   if (channelName == null) {
     return undefined;
@@ -51,20 +64,9 @@ async function getChannelIdByChannelName(channelName?: string) {
   return undefined;
 }
 
-async function getChannelHistory(input?: {
-  /**
-   * The id of the channel to fetch history (eg. messages) for. Use `getChannels` to get the list of channels with their ids.
-   */
-  text: string;
-  /**
-   * Only messages after this ISO 8601 timestamp will be included in results. If ommited, the last 30 messages of the channel will be returned.
-   *
-   * @example "2025-03-26T00:00:00Z"
-   */
-  after?: string;
-}) {
+async function getChannelHistory(input: Input) {
   const slackWebClient = getSlackWebClient();
-  const { after, text } = input;
+  const { after, text }: Input = input;
 
   const unixTimestamp = after ? Math.floor(new Date(after).getTime() / 1000).toString() : undefined;
 
