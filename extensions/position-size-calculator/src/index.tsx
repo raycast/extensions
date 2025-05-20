@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Form, ActionPanel, Action, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
 import { CalculationMode, Preferences, CalculationInputs, FormValues } from "./types";
-import { calculatePositionDetails } from "./utils";
+import { calculatePositionDetails, formatCurrency } from "./utils";
 import ResultsView from "./components/ResultsView";
 import { showFailureToast } from "@raycast/utils";
 
@@ -151,7 +151,7 @@ export default function Command() {
       showFailureToast(result.error, { title: "Calculation Error" });
     } else {
       showToast(Toast.Style.Success, "Calculation Complete");
-      push(<ResultsView results={result} />);
+      push(<ResultsView results={result} currencyCode={preferences.currencyCode} />);
     }
   };
 
@@ -166,7 +166,7 @@ export default function Command() {
     >
       <Form.Description
         title="User Preferences"
-        text={`Capital: ${preferences.capital} | Risk/Trade: ${preferences.riskPercent}% (Editable in Raycast Settings)`}
+        text={`Capital: ${formatCurrency(parseFloat(preferences.capital), preferences.currencyCode)} | Risk/Trade: ${preferences.riskPercent}% | Currency: ${preferences.currencyCode.toUpperCase()} (Editable in Raycast Settings)`}
       />
       <Form.Separator />
 

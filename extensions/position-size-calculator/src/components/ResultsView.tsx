@@ -5,15 +5,16 @@ import { formatCurrency, formatPercent } from "../utils";
 
 interface ResultsViewProps {
   results: CalculationResult;
+  currencyCode: string;
 }
 
-const ResultsView: React.FC<ResultsViewProps> = ({ results }) => {
+const ResultsView: React.FC<ResultsViewProps> = ({ results, currencyCode }) => {
   const items = [
     { title: "Mode", value: results.mode },
-    { title: "Capital", value: formatCurrency(results.capital) },
+    { title: "Capital", value: formatCurrency(results.capital, currencyCode) },
     {
       title: "Risk Amount",
-      value: formatCurrency(results.riskAmount),
+      value: formatCurrency(results.riskAmount, currencyCode),
       copyValue: results.riskAmount.toString(),
     },
     {
@@ -43,12 +44,12 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results }) => {
     },
     {
       title: "Investment (Exposure)",
-      value: `${formatCurrency(results.investmentAmount)} (${formatPercent(results.exposurePercent)})`,
+      value: `${formatCurrency(results.investmentAmount, currencyCode)} (${formatPercent(results.exposurePercent)})`,
       copyValue: results.investmentAmount.toString(),
     },
     {
       title: "Potential Reward",
-      value: formatCurrency(results.reward),
+      value: formatCurrency(results.reward, currencyCode),
       copyValue: results.reward.toString(),
     },
     {

@@ -1,6 +1,7 @@
 export interface Preferences {
   capital: string; // Preferences are initially strings
   riskPercent: string;
+  currencyCode: string;
 }
 
 export type CalculationMode = "Fixed Price" | "RRR-Based" | "% SL/Target" | "Fixed Risk";

@@ -26,6 +26,80 @@
       "type": "textfield",
       "required": true,
       "default": "1.0"
+    },
+    {
+      "name": "currencyCode",
+      "title": "Currency",
+      "description": "Select your preferred currency for display.",
+      "type": "dropdown",
+      "required": true,
+      "default": "USD",
+      "data": [
+        {
+          "title": "🇺🇸 $ USD - US Dollar",
+          "value": "USD"
+        },
+        {
+          "title": "🇮🇳 ₹ INR - Indian Rupee",
+          "value": "INR"
+        },
+        {
+          "title": "🇪🇺 € EUR - Euro",
+          "value": "EUR"
+        },
+        {
+          "title": "🇯🇵 ¥ JPY - Japanese Yen",
+          "value": "JPY"
+        },
+        {
+          "title": "🇬🇧 £ GBP - British Pound",
+          "value": "GBP"
+        },
+        {
+          "title": "🇦🇺 A$ AUD - Australian Dollar",
+          "value": "AUD"
+        },
+        {
+          "title": "🇨🇦 C$ CAD - Canadian Dollar",
+          "value": "CAD"
+        },
+        {
+          "title": "🇨🇭 CHF CHF - Swiss Franc",
+          "value": "CHF"
+        },
+        {
+          "title": "🇨🇳 ¥ CNY - Chinese Yuan Renminbi",
+          "value": "CNY"
+        },
+        {
+          "title": "🇭🇰 HK$ HKD - Hong Kong Dollar",
+          "value": "HKD"
+        },
+        {
+          "title": "🇰🇷 ₩ KRW - South Korean Won",
+          "value": "KRW"
+        },
+        {
+          "title": "🇸🇬 S$ SGD - Singapore Dollar",
+          "value": "SGD"
+        },
+        {
+          "title": "🇳🇿 NZ$ NZD - New Zealand Dollar",
+          "value": "NZD"
+        },
+        {
+          "title": "🇧🇷 R$ BRL - Brazilian Real",
+          "value": "BRL"
+        },
+        {
+          "title": "🇷🇺 ₽ RUB - Russian Ruble",
+          "value": "RUB"
+        },
+        {
+          "title": "🇿🇦 R ZAR - South African Rand",
+          "value": "ZAR"
+        }
+      ]
     }
   ],
   "commands": [

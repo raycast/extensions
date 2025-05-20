@@ -7,7 +7,7 @@ The Position Size Calculator is a Raycast extension designed to help traders qui
 ## Features
 
 - **Multiple Calculation Modes:** Choose the method that best suits your trading style.
-- **Preference-Based Defaults:** Set your default trading capital and risk percentage in Raycast preferences for faster calculations.
+- **Preference-Based Defaults:** Set your default trading capital, risk percentage and currency in Raycast preferences for faster calculations.
 - **Clear Results:** Get a detailed breakdown of your trade parameters, including quantity, risk amount, potential reward, and more.
 - **Easy Input:** User-friendly form with inline guidance for each input field.
 - **Copy to Clipboard:** Quickly copy individual results or all calculated details.
@@ -44,6 +44,7 @@ Before your first use, or anytime you want to change your defaults, you can set 
 3.  Configure the following:
     - **Trading Capital:** Your total trading capital (e.g., `200000`).
     - **Risk per Trade (%):** The percentage of your capital you are willing to risk on a single trade (e.g., `1.0` for 1%).
+    - **Currency:** Select your preferred currency from the dropdown list (e.g., `🇺🇸 $ USD - US Dollar`, `🇮🇳 ₹ INR - Indian Rupee`). The extension will use this for displaying all monetary values.
 
 These preferences will be used as the base for calculations unless overridden by specific modes (like "Fixed Risk").
 

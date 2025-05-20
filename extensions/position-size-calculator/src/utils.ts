@@ -146,15 +146,19 @@ export function calculatePositionDetails(inputs: CalculationInputs): Calculation
 }
 
 // Helper to format currency
-export const formatCurrency = (value: number): string => {
+export const formatCurrency = (value: number, currencyCode: string): string => {
   if (isNaN(value)) return "N/A";
-  return value.toLocaleString("en-IN", {
-    // Example: Indian Rupee format
-    style: "currency",
-    currency: "INR",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  try {
+    return value.toLocaleString(undefined, { // Use undefined locale to let it pick system default or best match
+      style: "currency",
+      currency: currencyCode.toUpperCase(), // Ensure currency code is uppercase
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  } catch (error) {
+    console.warn(`Failed to format currency for code ${currencyCode}:`, error);
+    return `${value.toFixed(2)} ${currencyCode.toUpperCase()}`; // Fallback
+  }
 };
 
 // Helper to format percentages
