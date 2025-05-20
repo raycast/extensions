@@ -28,7 +28,7 @@ export const useEnabledSpaces = () => {
     }
   }, [me.data, disabledSpaceIds]);
 
-  const toggleEnableDisable = useCallback(
+  const confirmAndToggleEnableDisableSpace = useCallback(
     async (spaceId: string) => {
       const enabled = enabledSpaceIds?.includes(spaceId);
       const message = enabled
@@ -56,10 +56,20 @@ export const useEnabledSpaces = () => {
     [enabledSpaceIds, setDisabledSpaceIds],
   );
 
+  const disableSpace = useCallback((spaceId: string) => {
+    setDisabledSpaceIds((prev) => {
+      if (prev.includes(spaceId)) {
+        return prev;
+      }
+      return [...prev, spaceId];
+    });
+  }, []);
+
   return {
     enabledSpaces: me.data ? enabledSpaces : null,
     enabledSpaceIds: me.data ? enabledSpaceIds : null,
-    toggleEnableDisable,
+    confirmAndToggleEnableDisableSpace,
     refetch: me.refetch,
+    disableSpace,
   };
 };

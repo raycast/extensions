@@ -21,6 +21,7 @@ export async function mapType(type: RawType): Promise<Type> {
   return {
     ...type,
     name: type.name?.trim() || "Untitled", // empty string comes as \n
+    plural_name: type.plural_name?.trim() || "Untitled",
     icon: icon,
   };
 }

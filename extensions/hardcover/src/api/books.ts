@@ -2,13 +2,20 @@ import { UNKNOWN_ERROR_MESSAGE } from "../helpers/errors";
 import { HardcoverClient } from "./hardcoverClient";
 import { List } from "./lists";
 
+export const WANT_TO_READ_STATUS = 1;
+export const CURRENTLY_READING_STATUS = 2;
+export const READ_STATUS = 3;
+export const PAUSED_STATUS = 4;
+export const DID_NOT_FINISH_STATUS = 5;
+export const IGNORED_STATUS = 6;
+
 export const UserBookStatusMapping = {
-  1: "Want to Read",
-  2: "Currently Reading",
-  3: "Read",
-  4: "Paused",
-  5: "Did Not Finish",
-  6: "Ignored",
+  [WANT_TO_READ_STATUS]: "Want to Read",
+  [CURRENTLY_READING_STATUS]: "Currently Reading",
+  [READ_STATUS]: "Read",
+  // [PAUSED_STATUS]: "Paused", // Not supported in Hardcover UI for now
+  [DID_NOT_FINISH_STATUS]: "Did Not Finish",
+  // [IGNORED_STATUS]: "Ignored", // Not supported in Hardcover UI for now
 };
 
 export type UserBookStatusEnum = {
@@ -62,6 +69,29 @@ export type SearchBook = {
   featured_series?: FeaturedSeries;
 };
 
+export type BookDetail = Pick<
+  SearchBook,
+  | "id"
+  | "title"
+  | "slug"
+  | "image"
+  | "release_date"
+  | "rating"
+  | "ratings_count"
+  | "reviews_count"
+  | "content_warnings"
+  | "contributions"
+> & {
+  featured_book_series?: FeaturedSeries;
+  taggings?: {
+    id?: number;
+    tag?: {
+      id?: number;
+      tag?: string;
+    };
+  }[];
+};
+
 export type UserBookResponse = {
   id: number;
   rating: number;
@@ -101,33 +131,13 @@ export type UserBook = {
   rating: number;
   user_book_status: UserBookStatusEnum;
   user_book_reads: UserBookRead[];
+  book?: BookDetail;
 };
 
 export type ListBook = {
   id: number;
   list?: List;
-  book?: Pick<
-    SearchBook,
-    | "id"
-    | "title"
-    | "slug"
-    | "image"
-    | "release_date"
-    | "rating"
-    | "ratings_count"
-    | "reviews_count"
-    | "content_warnings"
-    | "contributions"
-  > & {
-    featured_book_series?: FeaturedSeries;
-    taggings?: {
-      id?: number;
-      tag?: {
-        id?: number;
-        tag?: string;
-      };
-    }[];
-  };
+  book?: BookDetail;
 };
 
 export type Book = {
@@ -165,6 +175,14 @@ export type GetListBooksResponse = {
   };
 };
 
+export type GetUserBooksResponse = {
+  data: {
+    me: {
+      user_books: UserBook[];
+    }[];
+  };
+};
+
 export type TransformedListBook = Omit<ListBook, "book"> & {
   book: SearchBook;
 };
@@ -176,6 +194,10 @@ export type TransformedList = {
   description: string;
   books_count: number;
   list_books: TransformedListBook[];
+};
+
+export type TransformedUserBook = Omit<UserBook, "book"> & {
+  book: SearchBook;
 };
 
 export async function searchBooks(query: string, page: number) {
@@ -464,4 +486,110 @@ export async function getListBooks() {
       };
     }),
   })) as TransformedList[];
+}
+
+export async function getUserBooksByStatus(statusId: number) {
+  const client = new HardcoverClient();
+
+  const graphql_query = `
+    query GetUserBooksByStatus($user_book_status_id: Int) {
+      me {
+        user_books(
+          where: {user_book_status: {id: {_eq: $user_book_status_id}}}
+          order_by: {date_added: desc}
+          ) {
+          id
+          rating
+          user_book_status {
+            id
+            slug
+            status
+          }
+          user_book_reads {
+            id
+            paused_at
+            progress
+            progress_pages
+            progress_seconds
+            started_at
+            finished_at
+          }
+          book {
+            id
+            title
+            description
+            slug
+            image {
+              url
+            }
+            release_date
+            rating
+            ratings_count
+            reviews_count
+            contributions {
+              author {
+                id
+                image {
+                  id
+                  url
+                }
+                slug
+                name
+              }
+            }
+            taggings(
+              where: {tag: {tag_category: {category: {_eq: "Genre"}}}}
+              distinct_on: tag_id
+            ) {
+              id
+              tag {
+                count
+                tag
+                id
+                slug
+                tag_category {
+                  category
+                }
+              }
+            }
+            featured_book_series {
+              id
+              position
+              details
+              featured
+              series {
+                id
+                name
+                primary_books_count
+                slug
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    user_book_status_id: Number(statusId),
+  };
+
+  const { data } = await client.post<GetUserBooksResponse>(graphql_query, variables);
+
+  return (data.me?.[0]?.user_books ?? []).map((user_book) => {
+    if (!user_book.book) {
+      return { ...user_book, book: {} as SearchBook };
+    }
+
+    const { featured_book_series, taggings, ...bookData } = user_book.book;
+
+    return {
+      ...user_book,
+      book: {
+        ...bookData,
+        featured_series: featured_book_series as FeaturedSeries,
+        genres: taggings?.map((t) => t.tag?.tag).filter(Boolean) || [],
+      } as SearchBook,
+    };
+  }) as TransformedUserBook[];
 }

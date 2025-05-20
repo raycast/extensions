@@ -53,6 +53,19 @@ export type CachedDataParams = {
   setData: Dispatch<SetStateAction<SyncData | undefined>>;
 };
 
+class SyncError extends Error {
+  code: number;
+  tag?: string;
+
+  constructor(message: string, code: number, tag?: string) {
+    super(message);
+    this.name = "SyncError";
+    this.code = code;
+    this.tag = tag;
+    Object.setPrototypeOf(this, SyncError.prototype);
+  }
+}
+
 export async function syncRequest(params: Record<string, unknown>) {
   const todoistApi = getTodoistApi();
   const { data } = await todoistApi.post<SyncData>("/sync", params);
@@ -60,8 +73,8 @@ export async function syncRequest(params: Record<string, unknown>) {
   if (data.sync_status) {
     const uuid = Object.keys(data.sync_status)[0];
     if (data.sync_status[uuid] !== "ok") {
-      const error = data.sync_status[uuid] as { error: string };
-      throw new Error(error.error);
+      const error = data.sync_status[uuid] as { error: string; error_code: number; error_tag?: string };
+      throw new SyncError(error.error, error.error_code, error.error_tag);
     }
   }
 
@@ -522,6 +535,42 @@ export type Label = {
   is_deleted: boolean;
   is_favorite: boolean;
 };
+
+type AddLabelArgs = {
+  name: string;
+  color?: string;
+  item_order?: number;
+  is_favorite?: boolean;
+};
+
+export async function addLabel(args: AddLabelArgs, { data, setData }: CachedDataParams) {
+  try {
+    const addedData = await syncRequest({
+      sync_token,
+      resource_types: ["labels"],
+      commands: [
+        {
+          type: "label_add",
+          temp_id: crypto.randomUUID(),
+          uuid: crypto.randomUUID(),
+          args,
+        },
+      ],
+    });
+
+    if (data) {
+      setData({
+        ...data,
+        labels: [...data.labels, addedData.labels[0]],
+      });
+    }
+  } catch (err) {
+    if (err instanceof SyncError && err.tag === "LABEL_ALREADY_EXISTS") {
+      return;
+    }
+    throw err;
+  }
+}
 
 type UpdateLabelArgs = {
   id: string;

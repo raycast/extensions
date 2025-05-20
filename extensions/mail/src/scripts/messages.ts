@@ -277,7 +277,7 @@ export const getRecentMessagesContent = async () => {
       return ""
     else
       repeat with i from 1 to msgCount
-        set messageContent to content of item i of msgs
+        set messageContent to (date received of item i of msgs) & "|||DELIMITER|||" & content of item i of msgs
         set output to output & messageContent & "$end"
       end repeat
       return output
@@ -299,10 +299,18 @@ export const getRecentMessagesContent = async () => {
     }
     return undefined;
   }
-  const messages: string[] = data.split("$end");
-  messages.pop();
 
-  return messages;
+  const messages = data.split("$end").filter(Boolean);
+
+  const sortedMessages = messages
+    .map((msg) => {
+      const [dateReceived, content] = msg.split("|||DELIMITER|||");
+      return { dateReceived: constructDate(dateReceived), content };
+    })
+    .toSorted((a, b) => b.dateReceived.getTime() - a.dateReceived.getTime()) // most recent first
+    .map((msg) => msg.content);
+
+  return sortedMessages;
 };
 
 export const getMessages = async (

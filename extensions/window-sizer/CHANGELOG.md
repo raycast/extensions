@@ -1,64 +1,44 @@
 # Window Sizer Changelog
 
-## [Update] - 2025-05-06
+## [Starred Sizes & Improvements] - 2025-05-19
 
-- Fix toast text when restoring a window with restricted size
-- Unify toast text style
+- Added starring for frequently used window sizes
+- Unified shortcut keys for Deleting Custom and Starred Sizes
+- Improved action icons
 
-## [Update] - 2025-05-05
+## [New Action Icons] - 2025-05-12
+
+- Added new action icons
+
+## [Fixes] - 2025-05-08
+
+- Fixed the delete icon tooltip text on custom size list items
+
+## [Update Extension Icon] - 2025-05-07
+
+- Updated extension icon and screenshots
+
+## [Fixes] - 2025-05-06
+
+- Fixed toast text when restoring a window with restricted size
+- Unified toast text style
+
+## [Refactored entirely in Swift] - 2025-05-05
 
 - Fully rewrote the extension in Swift for better maintainability and performance
 - Enhanced Maximize Window to support all connected screens
 - Improved screen edge detection to ensure precise window resizing
 - Various performance and UX improvements
-- Update Extension Icon
 
-## [Update] - 2025-04-28
+## [New Features & Fixes] - 2025-04-28
 
-- Fix: Screenshots and README
-
-## [Update] - 2025-04-28
-
-- Fix: Screenshots and README
-
-## [Update] - 2025-04-28
-
-- Feature: Maximize Window
-- Feature: Get Current Size
-- Fix: Position of the window when restoring previous size
-- Fix: Toasts when size exceeds the screen
-- Fix: Toast when adding a size identical to the current size
-
-## [Update] - 2025-04-25
-
-- Fixed handling of window size addition when no window is in focus
-- Improved toast notification for Restore Previous Size when no focused window
-
-## [Update] - 2025-04-25
-
-- Added loading state to prevent list flicker during data fetching
-- Improved error handling for AppleScript operations
-- Refactored window info retrieval into a shared utility function
-- Enhanced logging messages for better debugging
-- Fixed window size restoration logic
-
-## [Update] - 2025-04-25
-
-- Improved window positioning logic during resize
-- Enhanced previous window size restoration
-
-## [Update] - 2025-04-25
-
-- Remove the default size in the add page
-- Fix typo in the add page
-
-## [Update] - 2025-04-25
-
-- Fix toast emoji
+- Enabled maximizing the active window
+- Added support for displaying the current window size
+- Fixed incorrect positioning when restoring a saved size
+- Improved toast behavior when the size exceeds the screen
+- Suppressed redundant toast when saving the same size again
 
 ## [Initial Version] - 2025-04-25
-
-### Features
 
 - First release of Window Sizer
 - Support for quick window resizing to predefined sizes

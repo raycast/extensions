@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import { showToast, Toast, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ScreenInfo } from "../types";
 import { CachedItem, createCacheItem, isCacheValid, HOUR_IN_MS } from "../utils/storageUtils";
 import { getScreensInfo, getActiveWindowScreenInfo } from "../swift-app";
@@ -81,11 +82,7 @@ export function useScreenInfo() {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       setError(new Error(errorMsg));
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to get screens info",
-        message: errorMsg,
-      });
+      await showFailureToast(errorMsg, { title: "Failed to get screens info" });
       return [];
     } finally {
       setIsLoading(false);
@@ -146,11 +143,7 @@ export function useScreenInfo() {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       setError(new Error(errorMsg));
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to get active window screen info",
-        message: errorMsg,
-      });
+      await showFailureToast(errorMsg, { title: "Failed to get active window screen info" });
       throw err;
     } finally {
       setIsLoading(false);
@@ -170,11 +163,7 @@ export function useScreenInfo() {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       setError(new Error(errorMsg));
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to refresh screens info",
-        message: errorMsg,
-      });
+      await showFailureToast(errorMsg, { title: "Failed to refresh screens info" });
       return false;
     } finally {
       setIsLoading(false);

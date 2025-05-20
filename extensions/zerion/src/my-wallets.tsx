@@ -24,7 +24,7 @@ export default function Command() {
             action={
               <Action
                 onAction={() => push(<AddressView addressOrDomain={address} />)}
-                title="Go To Wallet"
+                title="Go to Wallet"
                 icon={Icon.Eye}
               />
             }
