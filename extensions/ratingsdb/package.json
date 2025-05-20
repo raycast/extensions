@@ -34,6 +34,13 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-ratings",
+      "title": "Search Movie/Tv Shows Information",
+      "description": "This tool allows to search movies/Tv shows and return the ratings for those movies/Tv shows.\nIt can also return more details like runtime, box office earnings, and streaming options."
+    }
+  ],
   "preferences": [
     {
       "name": "omdbToken",

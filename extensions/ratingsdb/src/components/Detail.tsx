@@ -10,8 +10,7 @@ export default function DetailView({ media }: DetailViewProps) {
   return (
     <List.Item.Detail
       markdown={`
-# ${media.Title} (${media.Year})
-<img src="${media.Poster}" height="140"/>
+<img src="${media.Poster}" height="200"/>
         `}
       metadata={
         <List.Item.Detail.Metadata>
