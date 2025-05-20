@@ -1,6 +1,6 @@
 # tldraw Changelog
 
-## [Bug fixes] - {PR_MERGE_DATE}
+## [Bug fixes] - 2025-05-20
 
 Allow project URLs other than https://www.tldraw.com/r/.
 
