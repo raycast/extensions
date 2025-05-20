@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Paperless MCP Server] - {PR_MERGE_DATE}
+
+Add Community Paperless MCP Server to registry, this allows to manage documents in Paperless.
+
 ## [Add Shopify Dev Server] - {PR_MERGE_DATE}
 
 Add Official Shopify Dev MCP Server to registry.
