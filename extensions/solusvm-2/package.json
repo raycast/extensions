@@ -3,7 +3,7 @@
   "name": "solusvm-2",
   "title": "SolusVM 2",
   "description": "",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "xmok",
   "categories": [
     "Developer Tools"
