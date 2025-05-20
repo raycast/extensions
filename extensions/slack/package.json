@@ -174,6 +174,25 @@
         "mocks": {
           "get-channels": []
         }
+      },
+      {
+        "input": "@ask summary the #product-team-issue-notification channel yesterday",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-channels"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-channel-history",
+              "arguments": {
+                "text": "C12345678",
+                "after": "2025-05-19T15:00:00Z"
+              }
+            }
+          }
+        ]
       }
     ]
   },
