@@ -38,9 +38,10 @@ export default function Command() {
         const instanceCfgStr = (await fs.readFile(path.join(instanceFolder, "instance.cfg"))).toString("utf-8");
         const instanceCfg = parser.parse(instanceCfgStr);
 
-        const iconPath = ["minecraft", ".minecraft"]
-          .map((subfolder) => path.join(instanceFolder, subfolder, "icon.png"))
-          .find((p) => fs.existsSync(p));
+        const paths = await async.asyncMap(["minecraft", ".minecraft"], async (subfolder) =>
+          path.join(instanceFolder, subfolder, "icon.png"),
+        );
+        const iconPath = await async.asyncFind(paths, async (p) => await fs.pathExists(p));
 
         return {
           name: instanceCfg.get("General", "name", instanceId),
