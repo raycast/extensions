@@ -13,7 +13,6 @@
     {
       "name": "timetable",
       "title": "Timetable",
-      "subtitle": "Timetable",
       "description": "Show the timetable for a specified day",
       "mode": "view"
     }
