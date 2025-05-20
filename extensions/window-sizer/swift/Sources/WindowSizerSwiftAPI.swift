@@ -173,14 +173,12 @@ private func getActiveWindowData() -> (
 
 // Retrieve all screens and their resolution info
 @raycast func getScreensInfo() -> [String] {
-  // Check if GUI environment is available
-  guard NSApp != nil else {
-    return ["0:0,0,1920,1080"]
+  let screens = NSScreen.screens
+  guard !screens.isEmpty else {
+    return ["Error"]
   }
 
-  let screens = NSScreen.screens
   var results: [String] = []
-
   for (index, screen) in screens.enumerated() {
     results.append(getScreenInfoString(screenIndex: index, screen: screen))
   }
