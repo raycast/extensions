@@ -1,7 +1,10 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getApplications, getPreferenceValues, Icon } from "@raycast/api";
+import type { Image } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
 import isUrlSuperb from "is-url-superb";
-import { Format, Video } from "./types.js";
+import { Browser, Format, Video } from "./types.js";
+import fs from "node:fs";
+import path from "node:path";
 
 export const {
   downloadPath,
@@ -21,6 +24,7 @@ export type DownloadOptions = {
   copyToClipboard: boolean;
   startTime?: string;
   endTime?: string;
+  browser?: string;
 };
 
 export function formatHHMM(seconds: number) {
@@ -120,3 +124,59 @@ export const getFormatTitle = (format: Format) =>
   [format.resolution, format.ext, formatTbr(format.tbr), formatFilesize(format.filesize)]
     .filter((x) => Boolean(x))
     .join(" | ");
+
+async function getApplicationIcon(appPath: string): Promise<Image | undefined> {
+  try {
+    const resourcesPath = path.join(appPath, "Contents", "Resources");
+    const files = await fs.promises.readdir(resourcesPath);
+    const icnsFile = files.find((file) => file.endsWith(".icns"));
+    if (icnsFile) return { source: path.join(resourcesPath, icnsFile) };
+    return undefined;
+  } catch (e) {
+    return undefined;
+  }
+}
+
+const SUPPORTED_BROWSERS_MAP: Map<string, string> = new Map([
+  ["com.brave.browser", "brave"],
+  ["com.google.chrome", "chrome"],
+  ["org.chromium.chromium", "chromium"],
+  ["com.microsoft.edgemac", "edge"],
+  ["com.operasoftware.opera", "opera"],
+  ["com.vivaldi.vivaldi", "vivaldi"],
+  ["com.naver.whale", "whale"],
+  ["org.mozilla.firefox", "firefox"],
+  ["com.apple.safari", "safari"],
+]);
+
+const SUPPORTED_BROWSER_BUNDLE_IDS = new Set(SUPPORTED_BROWSERS_MAP.keys());
+
+export const getSupportedBrowsersForImportingCookies = async (): Promise<Browser[]> => {
+  const apps = await getApplications("https://www.youtube.com");
+  const supportedApps = apps.filter(
+    (app) => app.bundleId && SUPPORTED_BROWSER_BUNDLE_IDS.has(app.bundleId.toLowerCase()),
+  );
+  const browsers = await Promise.all(
+    supportedApps.map(async (app) => ({
+      ...app,
+      iconPath: (await getApplicationIcon(app.path)) ?? Icon.Compass,
+      ytDlpCompatibleName: SUPPORTED_BROWSERS_MAP.get(app.bundleId?.toLowerCase() ?? "") ?? app.name,
+    })),
+  );
+  return browsers;
+};
+
+export const getReadableErrorTitle = (error: Error) => {
+  const msg = error.message;
+  const errorIndex = msg.indexOf("ERROR:");
+  let err = errorIndex !== -1 ? msg.slice(errorIndex + "ERROR:".length).trim() : msg;
+  // remove any Error codes
+  err = err.replace(/\[.+\]/g, "");
+  // remove any quoted paths
+  err = err.replace(/'[^']*'|"[^"]*"/g, "...");
+  // remove any absolute paths
+  err = err.replace(/\/\S+/g, "...");
+  // remove any trailing references
+  err = err.replace(/(in|at)?:? (...)?$/, "");
+  return err.charAt(0).toUpperCase() + err.slice(1);
+};
