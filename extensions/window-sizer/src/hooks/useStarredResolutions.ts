@@ -7,6 +7,7 @@ import { isSameResolution } from "../utils/resolution";
 export function useStarredResolutions() {
   const [starredResolutions, setStarredResolutions] = useState<Resolution[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load starred resolutions
   useEffect(() => {
@@ -29,6 +30,8 @@ export function useStarredResolutions() {
           title: "Failed to load starred resolutions",
           message: error instanceof Error ? error.message : "Unknown error occurred",
         });
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -62,7 +65,10 @@ export function useStarredResolutions() {
       const parsedResolutions = JSON.parse(storedResolutions);
       const updatedResolutions = parsedResolutions.filter((r: Resolution) => !isSameResolution(r, resolution));
 
+      // First ensure storage update succeeds
       await LocalStorage.setItem("starred-resolutions", JSON.stringify(updatedResolutions));
+
+      // Only refresh after storage is confirmed
       refreshStarredResolutions();
     } catch (error) {
       console.error("Error removing starred resolution:", error);
@@ -81,8 +87,11 @@ export function useStarredResolutions() {
         ? starredResolutions.filter((r) => !isSameResolution(r, resolution))
         : [...starredResolutions, { ...resolution, isStarred: true }];
 
-      setStarredResolutions(updatedResolutions);
+      // First ensure storage update succeeds
       await LocalStorage.setItem("starred-resolutions", JSON.stringify(updatedResolutions));
+
+      // Only update state after storage is confirmed
+      setStarredResolutions(updatedResolutions);
     } catch (error) {
       console.error("Error toggling star status:", error);
       await showFailureToast({
@@ -104,5 +113,6 @@ export function useStarredResolutions() {
     refreshStarredResolutions,
     isResolutionStarred,
     removeStarredResolution,
+    isLoading,
   };
 }

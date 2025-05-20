@@ -7,6 +7,7 @@ import { DefaultResolutionsList } from "./DefaultResolutionsList";
 import { StarredResolutionsList } from "./StarredResolutionsList";
 import { useStarredResolutions } from "../hooks/useStarredResolutions";
 import { useState, useEffect } from "react";
+import { generateResolutionItemId } from "../utils/resolution";
 
 interface ResolutionListContainerProps {
   isLoading: boolean;
@@ -34,41 +35,34 @@ export function ResolutionListContainer({
   const { push } = useNavigation();
   const { starredResolutions, toggleStarResolution } = useStarredResolutions();
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
-  const [showContent, setShowContent] = useState(false);
+  const [isContentReady, setIsContentReady] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Ensure all data is ready before showing the list
+  // Set content ready state when external loading is complete
   useEffect(() => {
     if (!externalIsLoading) {
-      // Add a small delay to ensure all data is loaded
-      const timer = setTimeout(() => {
-        setShowContent(true);
-      }, 50);
-      return () => clearTimeout(timer);
+      setIsContentReady(true);
     }
   }, [externalIsLoading]);
 
-  // Set the selected item after the component is loaded
+  // Set selected item when content is ready
   useEffect(() => {
-    if (showContent) {
-      // Use setTimeout to ensure the list is rendered before setting the selected item
-      const timer = setTimeout(() => {
-        if (starredResolutions.length > 0) {
-          const firstStarred = starredResolutions[0];
-          setSelectedItemId(
-            `${firstStarred.isCustom ? "custom" : "default"}-${firstStarred.width}x${firstStarred.height}-Starred Sizes-0`,
-          );
-        } else if (customResolutions.length > 0) {
-          const firstCustom = customResolutions[0];
-          setSelectedItemId(`custom-${firstCustom.width}x${firstCustom.height}-Custom Sizes-0`);
-        } else if (predefinedResolutions.length > 0) {
-          const firstDefault = predefinedResolutions[0];
-          setSelectedItemId(`default-${firstDefault.width}x${firstDefault.height}-Default Sizes-0`);
-        }
-      }, 100); // Give the list some time to render
-
-      return () => clearTimeout(timer);
+    if (isContentReady && !isInitialized) {
+      if (starredResolutions.length > 0) {
+        const firstStarred = starredResolutions[0];
+        setSelectedItemId(
+          generateResolutionItemId(firstStarred, firstStarred.isCustom ? "custom" : "default", "Starred Sizes", 0),
+        );
+      } else if (customResolutions.length > 0) {
+        const firstCustom = customResolutions[0];
+        setSelectedItemId(generateResolutionItemId(firstCustom, "custom", "Custom Sizes", 0));
+      } else if (predefinedResolutions.length > 0) {
+        const firstDefault = predefinedResolutions[0];
+        setSelectedItemId(generateResolutionItemId(firstDefault, "default", "Default Sizes", 0));
+      }
+      setIsInitialized(true);
     }
-  }, [showContent, starredResolutions, customResolutions, predefinedResolutions]);
+  }, [isContentReady, isInitialized]);
 
   const handleAddCustomResolution = async () => {
     push(
@@ -82,13 +76,13 @@ export function ResolutionListContainer({
 
   return (
     <List
-      isLoading={externalIsLoading || !showContent}
+      isLoading={externalIsLoading || !isContentReady}
       searchBarPlaceholder="Search for sizes and commands..."
       navigationTitle="Window Sizer"
       selectedItemId={selectedItemId}
       onSelectionChange={(id) => setSelectedItemId(id || undefined)}
     >
-      {showContent && (
+      {isContentReady && (
         <>
           <StarredResolutionsList
             starredResolutions={starredResolutions}

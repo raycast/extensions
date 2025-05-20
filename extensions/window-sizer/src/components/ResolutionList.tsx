@@ -49,7 +49,7 @@ export function ResolutionList({
             }}
             accessories={
               (isSelected &&
-                (showDeleteAction && resolution.isCustom === true
+                (showDeleteAction && resolution.isCustom
                   ? [
                       {
                         icon: { source: "icons/clear.svg", fallback: Icon.Trash, tintColor: Color.SecondaryText },
