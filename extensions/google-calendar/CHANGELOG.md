@@ -1,5 +1,5 @@
 # Google Calendar Changelog
-## [1.3.0] - {PR_MERGE_DATE]
+## [1.3.0] - {PR_MERGE_DATE}
 - Feat(create-event): Enable creating events with natural language duration string input.
 - Chore(deps): Added `parse-duration`.
 
