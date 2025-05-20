@@ -40,9 +40,7 @@ export function ResolutionListContainer({
 
   // Set content ready state when external loading is complete
   useEffect(() => {
-    if (!externalIsLoading) {
-      setIsContentReady(true);
-    }
+    setIsContentReady(!externalIsLoading);
   }, [externalIsLoading]);
 
   // Set selected item when content is ready
@@ -62,7 +60,7 @@ export function ResolutionListContainer({
       }
       setIsInitialized(true);
     }
-  }, [isContentReady, isInitialized]);
+  }, [isContentReady, isInitialized, starredResolutions, customResolutions, predefinedResolutions]);
 
   const handleAddCustomResolution = async () => {
     push(

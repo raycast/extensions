@@ -108,10 +108,10 @@ export function ResolutionList({
                       }}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                       onAction={async () => {
+                        if (!onToggleStar) {
+                          return;
+                        }
                         try {
-                          if (!onToggleStar) {
-                            return;
-                          }
                           await onToggleStar(resolution);
                           await showToast({
                             style: Toast.Style.Success,
@@ -152,10 +152,10 @@ export function ResolutionList({
                     }}
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
                     onAction={async () => {
+                      if (!onToggleStar) {
+                        return;
+                      }
                       try {
-                        if (!onToggleStar) {
-                          return;
-                        }
                         await onToggleStar(resolution);
                         await showToast({
                           style: Toast.Style.Success,
@@ -178,8 +178,8 @@ export function ResolutionList({
                     onAction={async () => {
                       try {
                         // First remove from starred list if it's starred
-                        if (resolutionIsStarred) {
-                          await onToggleStar?.(resolution);
+                        if (resolutionIsStarred && onToggleStar) {
+                          await onToggleStar(resolution);
                         }
 
                         // Then delete the custom resolution

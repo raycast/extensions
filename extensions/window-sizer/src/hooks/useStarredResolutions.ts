@@ -94,10 +94,6 @@ export function useStarredResolutions() {
       setStarredResolutions(updatedResolutions);
     } catch (error) {
       console.error("Error toggling star status:", error);
-      await showFailureToast({
-        title: "Failed to toggle star status",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
       throw error;
     }
   }
