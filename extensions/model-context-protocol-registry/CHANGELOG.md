@@ -1,14 +1,14 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Shopify Dev Server] - {PR_MERGE_DATE}
+## [Add Shopify Dev Server] - 2025-05-20
 
 Add Official Shopify Dev MCP Server to registry.
 
-## [Add Prisma MCP Server] - {PR_MERGE_DATE}
+## [Add Prisma MCP Server] - 2025-05-20
 
 Add Official Prisma MCP Server to registry.
 
-## [Add Zeabur MCP Server] - {PR_MERGE_DATE}
+## [Add Zeabur MCP Server] - 2025-05-20
 
 Add Official Zeabur MCP Server to registry, this allows to manage and deploy Zeabur projects.
 
