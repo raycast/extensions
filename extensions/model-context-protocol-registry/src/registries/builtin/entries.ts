@@ -237,6 +237,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "shopify-dev",
+    title: "Shopify Dev",
+    description:
+      "MCP server that interacts with Shopify Dev. This protocol supports various tools to interact with different Shopify APIs.",
+    icon: "shopify.svg",
+    homepage: "https://github.com/Shopify/dev-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@shopify/dev-mcp@latest"],
+    },
+  },
+  {
     name: "slack",
     title: "Slack",
     description: "This service provides a Model Context Provider (MCP) for interacting with Slack's API.",

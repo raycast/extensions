@@ -46,6 +46,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Perplexity](https://github.com/ppl-ai/modelcontextprotocol) | An MCP server implementation that integrates the Sonar API to provide Claude with unparalleled real-time, web-wide research. |
 | [Prisma](https://www.prisma.io/docs/postgres/integrations/mcp-server) | An MCP server that provisions and manages a Prisma Postgres database for your apps, so you don’t have to spend time fiddling with db infrastructure. |
 | [Sentry](https://mcp.sentry.dev/) | This service provides a Model Context Provider (MCP) for interacting with Sentry's API. |
+| [Shopify Dev](https://github.com/Shopify/dev-mcp) | MCP server that interacts with Shopify Dev. This protocol supports various tools to interact with different Shopify APIs. |
 | [Slack](https://github.com/modelcontextprotocol/servers/tree/main/src/slack) | This service provides a Model Context Provider (MCP) for interacting with Slack's API. |
 | [Square](https://github.com/square/square-mcp-server) | This project follows the Model Context Protocol standard, allowing AI assistants to interact with Square's connect API. |
 | [Stripe](https://github.com/stripe/agent-toolkit) | This project follows the Model Context Protocol standard, allowing AI assistants to interact with Stripe's API. |

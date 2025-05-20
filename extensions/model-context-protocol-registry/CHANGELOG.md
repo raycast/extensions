@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Shopify Dev Server] - {PR_MERGE_DATE}
+
+Add Official Shopify Dev MCP Server to registry.
+
 ## [Add Prisma MCP Server] - {PR_MERGE_DATE}
 
 Add Official Prisma MCP Server to registry.
