@@ -32,6 +32,7 @@ type MenuBarTaskProps = {
 const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
   const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
   const { taskWidth } = getPreferenceValues<Preferences.MenuBar>();
+  const { useConfetti } = getPreferenceValues<Preferences>();
 
   const collaborators = getProjectCollaborators(task.project_id, data);
   const remainingLabels = task && data?.labels ? getRemainingLabels(task, data.labels) : [];
@@ -43,7 +44,6 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
 
   async function completeTask(task: Task) {
     try {
-      throw new Error("test");
       await closeTask(task.id, { data, setData });
 
       if (focusedTask.id === task.id) {
@@ -53,6 +53,13 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
       await showToast({ style: Toast.Style.Success, title: "Completed task" });
     } catch (error) {
       await showFailureToast(error, { title: "Unable to complete task" });
+    }
+    if (useConfetti) {
+      try {
+        await open("raycast://extensions/raycast/raycast/confetti");
+      } catch (error) {
+        await showFailureToast(error, { title: "Unable to show celebration" });
+      }
     }
   }
 
