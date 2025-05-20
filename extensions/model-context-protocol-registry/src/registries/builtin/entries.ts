@@ -483,8 +483,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     icon: "https://svgl.app/library/grafana.svg",
     homepage: "https://github.com/grafana/mcp-grafana",
     configuration: {
-      command: "mcp-grafana",
-      args: [],
+      command: "docker",
+      args: [
+        "run",
+        "--rm",
+        "-p",
+        "8000:8000",
+        "-e",
+        "GRAFANA_URL",
+        "-e",
+        "GRAFANA_API_KEY",
+        "mcp/grafana"
+      ],
       env: {
         GRAFANA_URL: "YOUR_GRAFANA_URL_HERE",
         GRAFANA_API_KEY: "YOUR_SERVICE_ACCOUNT_TOKEN_HERE",
