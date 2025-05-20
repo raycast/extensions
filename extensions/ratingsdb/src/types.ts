@@ -98,8 +98,8 @@ export interface StreamingProvider {
   web_url: string;
   format: string;
   price: number | null;
-  seasons: number;
-  episodes: number;
+  seasons?: number;
+  episodes?: number;
 }
 
 export interface ProvidersListViewProps {

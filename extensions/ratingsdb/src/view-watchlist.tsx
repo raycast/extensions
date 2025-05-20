@@ -25,9 +25,13 @@ export default function Watchlist() {
   }, []);
 
   const handleRemove = async (imdbID: string) => {
-    await removeFromWatchlist(imdbID);
-    const updatedList = watchlist.filter((item) => item.imdbID !== imdbID);
-    setWatchlist(updatedList);
+    try {
+      await removeFromWatchlist(imdbID);
+      const updatedList = watchlist.filter((item) => item.imdbID !== imdbID);
+      setWatchlist(updatedList);
+    } catch (error) {
+      showFailureToast(error, { title: "Could not remove from watchlist" });
+    }
   };
 
   const loadMediaDetails = async (imdbID: string) => {
@@ -62,6 +66,7 @@ export default function Watchlist() {
       isShowingDetail={true}
       searchBarPlaceholder="View your watchlist"
       throttle={true}
+      isLoading={watchlist.length === 0}
       searchBarAccessory={<SearchBarAccessory viewType={viewType} setViewType={setViewType} />}
     >
       {filteredWatchlist.length > 0 ? (

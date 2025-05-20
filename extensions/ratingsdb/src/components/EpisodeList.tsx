@@ -27,7 +27,7 @@ export const EpisodeList = ({ media, totalSeasons }: EpisodeListProps) => {
       }
     };
     fetchEpisodes();
-  }, [viewType, media.imdbID, seasonNumber]);
+  }, [viewType, media.imdbID]);
 
   return (
     <List

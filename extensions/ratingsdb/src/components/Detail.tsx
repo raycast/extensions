@@ -54,8 +54,8 @@ export default function DetailView({ media }: DetailViewProps) {
           )}
           {media.Type === "movie" && (
             <>
-              <List.Item.Detail.Metadata.Label title="Runtime" text={media.Runtime} icon={"runtime.png"} />
-              <List.Item.Detail.Metadata.Label title="Box Office" text={media.BoxOffice} icon={"box-office.png"} />
+              <List.Item.Detail.Metadata.Label title="Runtime" text={media.Runtime} icon={Icon.Clock} />
+              <List.Item.Detail.Metadata.Label title="Box Office" text={media.BoxOffice} icon={Icon.BankNote} />
             </>
           )}
         </List.Item.Detail.Metadata>

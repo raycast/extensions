@@ -23,7 +23,7 @@ const EpisodeListItem = ({ episode, media }: EpisodeListItemProps) => {
   }, [episode.imdbID]);
 
   if (!episodeDetails) {
-    return <List.Item title="No Details for this episode" />;
+    return <List.Item title="Loading episode details..." />;
   }
 
   return (

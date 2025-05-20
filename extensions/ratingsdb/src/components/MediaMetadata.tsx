@@ -27,7 +27,7 @@ export const MediaMetadata = ({
           />
         )}
         <Detail.Metadata.TagList.Item
-          text={`🍅 Rotten Tomatoes ${media.Ratings?.[1]?.Value || ""}`}
+          text={`🍅 Rotten Tomatoes ${media.Ratings?.find((r) => r.Source === "Rotten Tomatoes")?.Value || ""}`}
           color={Color.Red}
           onAction={() => open(getRottenTomatoesUrl(media))}
         />

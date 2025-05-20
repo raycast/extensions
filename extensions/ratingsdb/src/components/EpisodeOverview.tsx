@@ -35,8 +35,6 @@ export default function EpisodeOverview({ media, episode }: EpisodeOverviewProps
         setProviders(providers);
       } catch (error) {
         showFailureToast(error, { title: "Failed to fetch providers" });
-      } finally {
-        setIsLoading(false);
       }
     };
     fetchEpisodeDetails();

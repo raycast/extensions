@@ -28,7 +28,7 @@ export const EpisodeMetadata: React.FC<EpisodeMetadataProps> = ({ episode, media
           icon={{ source: Icon.ArrowNe }}
         />
         <Detail.Metadata.TagList.Item
-          text={`🍅 Rotten Tomatoes ${media.Ratings?.[1]?.Value || ""}`}
+          text={`🍅 Rotten Tomatoes ${media.Ratings?.find((r) => r.Source === "Rotten Tomatoes")?.Value || ""}`}
           color={Color.Red}
           onAction={() => open(getRottenTomatoesUrl(media))}
         />
@@ -69,9 +69,9 @@ export const EpisodeMetadata: React.FC<EpisodeMetadataProps> = ({ episode, media
 
       {providers.length > 0 && (
         <Detail.Metadata.TagList title="Where you can purchase or stream">
-          {providers.map((provider, index) => (
+          {providers.map((provider) => (
             <Detail.Metadata.TagList.Item
-              key={index}
+              key={provider.name}
               text={`${provider.name} (${provider.type === "rent" ? provider.price : `${provider.type}`})`}
               color={provider.type === "free" ? Color.Green : provider.type === "sub" ? Color.Blue : Color.Orange}
               onAction={() => open(provider.web_url)}

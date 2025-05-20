@@ -8,6 +8,7 @@ import { showFailureToast } from "@raycast/utils";
 
 const MediaListItem = ({ title, onRemove }: { title: MediaDetails; onRemove?: (id: string) => void }) => {
   const [media, setMedia] = useState<MediaDetails>();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchMedia = async () => {
@@ -16,6 +17,8 @@ const MediaListItem = ({ title, onRemove }: { title: MediaDetails; onRemove?: (i
         setMedia(data as MediaDetails);
       } catch (error) {
         showFailureToast(error, { title: "Failed to fetch media details" });
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchMedia();
@@ -44,7 +47,13 @@ const MediaListItem = ({ title, onRemove }: { title: MediaDetails; onRemove?: (i
       key={title.imdbID}
       title={title.Title}
       accessories={seasons ? [seasons] : []}
-      detail={<DetailView media={media} titleOrId={title.imdbID} poster={title.Poster} />}
+      detail={
+        isLoading ? (
+          <List.Item.Detail markdown="Loading..." />
+        ) : (
+          <DetailView media={media} titleOrId={title.imdbID} poster={title.Poster} />
+        )
+      }
       actions={
         <ActionPanel>
           <MediaActions media={media} onRemove={onRemove} />

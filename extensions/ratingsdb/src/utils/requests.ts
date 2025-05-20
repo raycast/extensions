@@ -24,8 +24,8 @@ export async function searchTitles(query: string, type: string) {
 
     return response.data.Search;
   } catch (error) {
-    console.error("Error searching movies and shows:", error);
-    return [];
+    showFailureToast(error, { title: "Could not search movies and shows" });
+    throw error;
   }
 }
 export async function searchSeries(id: string, season?: number) {
@@ -39,8 +39,8 @@ export async function searchSeries(id: string, season?: number) {
 
     return response.data;
   } catch (error) {
-    console.error("Error searching series information:", error);
-    return null;
+    showFailureToast(error, { title: "Could not search series information" });
+    throw error;
   }
 }
 export async function searchID(id: string) {
@@ -54,8 +54,8 @@ export async function searchID(id: string) {
 
     return response.data;
   } catch (error) {
-    console.error("Error searching movie or show:", error);
-    return null;
+    showFailureToast(error, { title: "Could not search movie or show" });
+    throw error;
   }
 }
 
@@ -70,8 +70,8 @@ export async function getProviders(id: string) {
 
     return response.data.sources;
   } catch (error) {
-    console.error("Error searching movie or show:", error);
-    return null;
+    showFailureToast(error, { title: "Could not search movie or show" });
+    throw error;
   }
 }
 
@@ -85,7 +85,7 @@ export async function getSourceIcons() {
     return data;
   } catch (error) {
     showFailureToast(error, { title: "Could not fetch source icons" });
-    return [];
+    throw error;
   }
 }
 
@@ -113,11 +113,11 @@ export async function getFilteredProviders(imdbID: string) {
 
       return uniqueProviders;
     } else {
-      console.log("No provider data available or invalid format");
+      showFailureToast("No provider data available or invalid format", { title: "Could not fetch providers" });
       return [];
     }
   } catch (error) {
     showFailureToast(error, { title: "Could not fetch providers" });
-    return [];
+    throw error;
   }
 }

@@ -97,7 +97,7 @@ export default function MediaActions({
     <Action.OpenInBrowser
       key="youtube"
       title="Open Youtube Trailer"
-      url={`https://www.youtube.com/results?search_query=${encodeURIComponent(media?.Title + "trailer")}`}
+      url={`https://www.youtube.com/results?search_query=${encodeURIComponent(media.Title + "trailer")}`}
       shortcut={{ modifiers: ["cmd"], key: "y" }}
       icon={{ source: "youtube.png" }}
     />,

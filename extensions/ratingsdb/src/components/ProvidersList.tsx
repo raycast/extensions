@@ -20,10 +20,6 @@ export const ProvidersList = ({ providers, isLoading }: ProvidersListViewProps) 
     setGroupedProviders(grouped);
   }, [providers]);
 
-  useEffect(() => {
-    console.log(isLoading);
-  }, [isLoading]);
-
   return (
     <List isLoading={isLoading}>
       <List.EmptyView title="No providers found" />

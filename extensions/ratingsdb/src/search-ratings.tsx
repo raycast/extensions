@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { List } from "@raycast/api";
 import { searchTitles } from "./utils/requests";
 import SearchBarAccessory from "./components/SearchBarAccessory";
@@ -22,6 +22,7 @@ export default function SearchByTitle(props: SearchMediaProps) {
     setLoading(true);
     setSearchText(search);
     if (!search) {
+      setTitles([]);
       setLoading(false);
       return;
     }
@@ -40,21 +41,25 @@ export default function SearchByTitle(props: SearchMediaProps) {
     if (searchText) {
       onSearch(searchText);
     }
-  }, [viewType]);
+  }, [viewType, searchText]);
 
-  const groupedByYearAndType: { [key: string]: { [key: string]: Media[] } } = {};
-  const yearsInOrder: string[] = [];
+  const { groupedByYearAndType, yearsInOrder } = useMemo(() => {
+    const grouped: { [key: string]: { [key: string]: Media[] } } = {};
+    const years: string[] = [];
 
-  titles?.forEach((title) => {
-    if (!groupedByYearAndType[title.Year]) {
-      groupedByYearAndType[title.Year] = {};
-      yearsInOrder.push(title.Year);
-    }
-    if (!groupedByYearAndType[title.Year][title.Type]) {
-      groupedByYearAndType[title.Year][title.Type] = [];
-    }
-    groupedByYearAndType[title.Year][title.Type].push(title);
-  });
+    titles?.forEach((title) => {
+      if (!grouped[title.Year]) {
+        grouped[title.Year] = {};
+        years.push(title.Year);
+      }
+      if (!grouped[title.Year][title.Type]) {
+        grouped[title.Year][title.Type] = [];
+      }
+      grouped[title.Year][title.Type].push(title);
+    });
+
+    return { groupedByYearAndType: grouped, yearsInOrder: years };
+  }, [titles]);
 
   return (
     <List
@@ -70,9 +75,12 @@ export default function SearchByTitle(props: SearchMediaProps) {
         yearsInOrder?.map((year) =>
           Object.keys(groupedByYearAndType[year]).map((type) => (
             <List.Section key={`${year}-${type}`} title={year} subtitle={type.charAt(0).toUpperCase() + type.slice(1)}>
-              {groupedByYearAndType[year][type]?.map((title) => (
-                <MediaListItem key={title.imdbID} title={title as MediaDetails} />
-              ))}
+              {groupedByYearAndType[year][type]?.map((title) => {
+                // Validate title has required MediaDetails fields before rendering
+                const isValidMediaDetails = title && title.Title && title.imdbID && title.Year && title.Poster;
+
+                return isValidMediaDetails ? <MediaListItem key={title.imdbID} title={title as MediaDetails} /> : null;
+              })}
             </List.Section>
           )),
         )
