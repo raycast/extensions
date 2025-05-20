@@ -1,3 +1,5 @@
+import { Market, ParsedOutcome } from "./types";
+
 const formatVolumeWithSuffix = (volume: number): string => {
   if (!volume) return "$0";
 
@@ -40,4 +42,25 @@ const trimQuestion = (question: string): string => {
   return trimmed.length <= maxLength ? trimmed : `${trimmed.slice(0, maxLength - 3)}...`;
 };
 
-export { trimQuestion, getMarketUrl, getFirstOutcomePrice, formatVolumeWithSuffix, formatPercentage };
+const parseOutcomeData = (market: Market): ParsedOutcome[] => {
+  try {
+    const outcomes: string[] = JSON.parse(market.outcomes);
+    const outcomePrices: string[] = JSON.parse(market.outcomePrices);
+    const clobTokenIds: string[] = JSON.parse(market.clobTokenIds);
+
+    if (outcomes.length !== outcomePrices.length || outcomes.length !== clobTokenIds.length) {
+      // Should not happen as these are guaranteed to be the same length.
+      return [];
+    }
+
+    return outcomes.map((outcome, index) => ({
+      outcome,
+      outcomePrice: outcomePrices[index],
+      clobTokenId: clobTokenIds[index],
+    }));
+  } catch (error) {
+    return [];
+  }
+};
+
+export { trimQuestion, getMarketUrl, getFirstOutcomePrice, formatVolumeWithSuffix, formatPercentage, parseOutcomeData };

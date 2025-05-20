@@ -20,7 +20,7 @@ To add a new MCP client to the registry, you need to create a new entry in the `
 
 ### Add a new MCP registry to the registry
 
-To add a new MCP registry to the registry, you need to create a new entry in the `src/registries/index.ts` file. The registry is a function that returns a React component. You can add to the `REGISTRIES` array. A simple example are the built-in registries: `OfficialRegistry` and `CommunityRegistry`. A more complex example is the `SmitheryRegistry` that is used to discover MCP servers from the [Smithery](https://smithery.dev) registry.
+To add a new MCP registry to the registry, you need to create a new entry in the `src/registries/index.ts` file. The registry is a function that returns a React component. You can add to the `REGISTRIES` array. A simple example are the built-in registries: `OfficialRegistry` and `CommunityRegistry`. A more complex example is the `SmitheryRegistry` that is used to discover MCP servers from the [Smithery](https://smithery.ai) registry.
 
 ## MCP Servers
 
@@ -45,6 +45,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Paddle](https://github.com/PaddleHQ/paddle-mcp-server) | Paddle Billing is the developer-first merchant of record. We take care of payments, tax, subscriptions, and metrics with one unified API that does it all. This is a Model Context Protocol (MCP) server that provides tools for interacting with the Paddle API. |
 | [Perplexity](https://github.com/ppl-ai/modelcontextprotocol) | An MCP server implementation that integrates the Sonar API to provide Claude with unparalleled real-time, web-wide research. |
 | [Sentry](https://mcp.sentry.dev/) | This service provides a Model Context Provider (MCP) for interacting with Sentry's API. |
+| [Shopify Dev](https://github.com/Shopify/dev-mcp) | MCP server that interacts with Shopify Dev. This protocol supports various tools to interact with different Shopify APIs. |
 | [Slack](https://github.com/modelcontextprotocol/servers/tree/main/src/slack) | This service provides a Model Context Provider (MCP) for interacting with Slack's API. |
 | [Square](https://github.com/square/square-mcp-server) | This project follows the Model Context Protocol standard, allowing AI assistants to interact with Square's connect API. |
 | [Stripe](https://github.com/stripe/agent-toolkit) | This project follows the Model Context Protocol standard, allowing AI assistants to interact with Stripe's API. |
@@ -59,6 +60,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Polar](https://docs.polar.sh/integrate/mcp) | Extend the capabilities of your AI Agents with Polar as MCP Server |
 | [ElevenLabs](https://github.com/elevenlabs/elevenlabs-mcp) | Official ElevenLabs Model Context Protocol (MCP) server that enables interaction with powerful Text to Speech and audio processing APIs. This server allows MCP clients like Claude Desktop, Cursor, Windsurf, OpenAI Agents and others to generate speech, clone voices, transcribe audio, and more. |
 | [Nuxt](https://mcp.nuxt.com/) | Official Nuxt Model Context Protocol (MCP) server that enables docs and modules search. |
+| [Zeabur](https://zeabur.com/docs/en-US/mcp) | Official Zeabur Model Context Protocol (MCP) server that enables managing and deploying Zeabur projects. |
 
 ### Community MCP Servers
 

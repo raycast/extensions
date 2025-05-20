@@ -8,12 +8,8 @@ export function useMaximizeWindow() {
   // Function to maximize the active window
   async function maximizeWindow() {
     try {
-      // First, save the current window state
-      const windowId = await saveWindowState();
-
-      if (!windowId) {
-        throw new Error("Failed to save window state");
-      }
+      // Try to save the current window state, but continue even if it fails
+      await saveWindowState();
 
       // Then check if the window is already maximized
       const result = await maximizeActiveWindow();
@@ -44,7 +40,7 @@ export function useMaximizeWindow() {
         await popToRoot();
       } else {
         // Handle unexpected response
-        throw new Error("Unexpected response from maximization function");
+        throw new Error(`Unexpected response: ${result}`);
       }
     } catch (error) {
       console.error("Error maximizing window:", error);
