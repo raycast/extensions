@@ -1,6 +1,6 @@
 # Obsidian Tasks Changelog
 
-## [Include only current tasks] - {PR_MERGE_DATE}
+## [Include only current tasks] - 2025-05-20
 
 - Add preference to include only current tasks
 
