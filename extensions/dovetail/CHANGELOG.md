@@ -1,6 +1,6 @@
 # Dovetail Changelog
 
-## [Search with pagination] - {PR_MERGE_DATE}
+## [Search with pagination] - 2025-05-20
 
 - Add pagination to the search data, insights, and contacts actions
 
