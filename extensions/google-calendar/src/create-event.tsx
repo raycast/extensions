@@ -18,6 +18,7 @@ import useCalendars from "./hooks/useCalendars";
 import { addSignature, roundUpTime } from "./lib/utils";
 import { calendar_v3 } from "@googleapis/calendar";
 import { useMemo, useState } from "react";
+import parse from "parse-duration";
 
 type FormValues = {
   calendar: string;
@@ -30,6 +31,24 @@ type FormValues = {
 };
 
 const preferences: Preferences.CreateEvent = getPreferenceValues();
+
+function parseDurationAsMinutesForPlainNumbers(value: string | undefined): number | null | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  const trimmedValue = value.trim();
+  if (trimmedValue === "") {
+    return undefined;
+  }
+
+  const isPlainIntegerString = /^\d+$/.test(trimmedValue);
+  if (isPlainIntegerString) {
+    return parse(`${trimmedValue}m`);
+  } else {
+    return parse(trimmedValue);
+  }
+}
 
 function Command(props: LaunchProps<{ launchContext: FormValues }>) {
   const { calendar } = useGoogleAPIs();
@@ -64,12 +83,34 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
     },
     validation: {
       title: FormValidation.Required,
+      duration: (value) => {
+        if (!value) return undefined; // allow empty, revert to default onSubmit
+        const milliseconds = parseDurationAsMinutesForPlainNumbers(value);
+        if (milliseconds === undefined || milliseconds === null) {
+          return "Invalid format. Examples: 30, 45m, 1h, 1h30m";
+        }
+        if (milliseconds <= 0) {
+          return "Duration must be positive.";
+        }
+      },
     },
     onSubmit: async (values) => {
       await showToast({ style: Toast.Style.Animated, title: "Creating event" });
 
       const calendarId = values.calendar ?? "primary";
       const startDate = values.startDate ?? new Date();
+      const parsedMilliseconds = values.duration
+        ? parseDurationAsMinutesForPlainNumbers(values.duration)
+        : Number(preferences.defaultEventDuration) * 60 * 1000;
+      if (parsedMilliseconds === undefined || parsedMilliseconds === null || parsedMilliseconds <= 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Duration",
+          message: `Could not parse duration: "${values.duration}". Please use formats like "30", "30min", "1h", or "1h30m".`,
+        });
+        return;
+      }
+
       const requestBody: calendar_v3.Schema$Event = {
         summary: values.title,
         description: addSignature(values.description),
@@ -77,7 +118,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
           dateTime: startDate.toISOString(),
         },
         end: {
-          dateTime: new Date(startDate.getTime() + parseInt(values.duration) * 60 * 1000).toISOString(),
+          dateTime: new Date(startDate.getTime() + parsedMilliseconds).toISOString(),
         },
         attendees: values.attendees ? values.attendees.split(",").map((email) => ({ email })) : undefined,
         location:
@@ -178,14 +219,12 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         type={Form.DatePicker.Type.DateTime}
         {...itemProps.startDate}
       />
-      <Form.Dropdown title="Duration" storeValue {...itemProps.duration}>
-        <Form.Dropdown.Item value="15" title="15 Minutes" />
-        <Form.Dropdown.Item value="30" title="30 Minutes" />
-        <Form.Dropdown.Item value="45" title="45 Minutes" />
-        <Form.Dropdown.Item value="60" title="1 Hour" />
-        <Form.Dropdown.Item value="90" title="1.5 Hours" />
-        <Form.Dropdown.Item value="120" title="2 Hours" />
-      </Form.Dropdown>
+      <Form.TextField
+        title="Duration"
+        placeholder="30min, 2h, 2h30m, ..."
+        storeValue
+        {...itemProps.duration}
+      ></Form.TextField>
       <Form.TextField
         title="Guests"
         placeholder="Event guests..."
