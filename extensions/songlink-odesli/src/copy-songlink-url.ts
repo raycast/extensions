@@ -1,5 +1,6 @@
 import { Cache, Clipboard, closeMainWindow, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import got from "got";
+import fetch from "node-fetch";
+
 const cache = new Cache();
 const urlRegex = new RegExp(
   "https?://(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
@@ -40,8 +41,8 @@ export default async function Command() {
     }
     const songLinkUrl =
       cachedUrl ??
-      (await got(`https://api.song.link/v1-alpha.1/links?${searchParams.toString()}`)
-        .json<SongLinkResponse>()
+      (await fetch(`https://api.song.link/v1-alpha.1/links?${searchParams.toString()}`)
+        .then((res) => res.json() as Promise<SongLinkResponse>)
         .then((res) => res.pageUrl));
     if (!songLinkUrl) {
       await showToast({

@@ -32,7 +32,7 @@
   "dependencies": {
     "@raycast/api": "^1.98.5",
     "@raycast/utils": "^1.17.0",
-    "got": "^14.4.7"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
