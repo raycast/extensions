@@ -1,6 +1,6 @@
 # Raynab Changelog
 
-## [AI Budget Tools & Improvements] - {PR_MERGE_DATE}
+## [AI Budget Tools & Improvements] - 2025-05-21
 
 ### ✨ New Features - AI Extensions
 - Added new AI Extensions for natural language budget queries:
