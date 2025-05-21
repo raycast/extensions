@@ -10,7 +10,7 @@ import {
   getBatteryStatus,
 } from "./utils/batteryTools";
 
-export async function getChargeThreshold(HUDMessage?: string) {
+export async function getChargeThreshold(HUDMessage?: string): Promise<number | null> {
   try {
     // Use the getBatteryStatus function from batteryTools
     const rawOutput = await getBatteryStatus();
@@ -28,7 +28,7 @@ export async function getChargeThreshold(HUDMessage?: string) {
     if (HUDMessage) {
       await showHUD("Error Reading Battery Threshold");
     }
-    return "";
+    return null;
   }
 }
 
