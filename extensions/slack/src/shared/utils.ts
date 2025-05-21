@@ -95,7 +95,7 @@ const handleError = async (error: CodedError | Error | unknown, title?: string) 
 const isValidChannelId = (channelId?: string) => {
   if (channelId == null) return false;
 
-  const channelIdRegex = /^C[A-Z0-9]{8}$/;
+  const channelIdRegex = /^C[A-Z0-9]{8,}$/;
 
   return channelIdRegex.test(channelId.trim());
 };
