@@ -1,0 +1,70 @@
+import { Cache, Clipboard, closeMainWindow, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import got from "got";
+const cache = new Cache();
+const urlRegex = new RegExp(
+  "https?://(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+);
+
+interface SongLinkResponse {
+  pageUrl: string;
+}
+
+export default async function Command() {
+  const clipboard = await Clipboard.readText();
+
+  if (!clipboard) {
+    await showToast({
+      title: "No text in clipboard",
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+  const text = clipboard.trim();
+
+  const url = text.match(urlRegex);
+
+  if (!url) {
+    await showToast({
+      title: "No valid URL found",
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+  try {
+    const cachedUrl = cache.get(url[0]);
+    const searchParams = new URLSearchParams();
+    const preferences = getPreferenceValues();
+    searchParams.set("url", encodeURIComponent(url[0]));
+    if (preferences.apiKey) {
+      searchParams.set("key", preferences.apiKey);
+    }
+    const songLinkUrl =
+      cachedUrl ??
+      (await got(`https://api.song.link/v1-alpha.1/links?${searchParams.toString()}`)
+        .json<SongLinkResponse>()
+        .then((res) => res.pageUrl));
+    if (!songLinkUrl) {
+      await showToast({
+        title: "Error retrieving song.link URL",
+        message: "No song.link URL found",
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
+    await Clipboard.copy(songLinkUrl);
+    cache.set(url[0], songLinkUrl);
+    await closeMainWindow();
+    await showToast({
+      title: "Song.link URL copied to clipboard",
+      style: Toast.Style.Success,
+    });
+    return;
+  } catch (error) {
+    await showToast({
+      title: "Error retrieving song.link URL",
+      message: error instanceof Error ? error.message : "Unknown error",
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+}

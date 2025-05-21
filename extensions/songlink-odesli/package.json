@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "songlink-odesli",
+  "title": "Songlink/Odesli",
+  "description": "Converts current song url into a song.link url with links to all supported platforms.",
+  "icon": "icon.png",
+  "author": "brettm12345",
+  "categories": [
+    "Media",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-songlink-url",
+      "title": "Copy song.link url",
+      "subtitle": "Takes the current url from the clipboard and converts it into a song.link url",
+      "description": "Create universal links for your music. Share music with people cross platform",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your API key for song.link/odesli",
+      "type": "password",
+      "required": false,
+      "placeholder": "Enter your API key here"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.98.5",
+    "@raycast/utils": "^1.17.0",
+    "got": "^14.4.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
