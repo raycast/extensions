@@ -29,7 +29,7 @@
       "name": "open-to-keka",
       "title": "Open Files",
       "subtitle": "Keka",
-      "description": "Open the selected files with Keka\nKeka will decide wether to compress or extract depending or your configuration and the type of files",
+      "description": "Open the selected files with Keka\nKeka will decide whether to compress or extract depending on your configuration and the type of files",
       "mode": "no-view"
     }
   ],

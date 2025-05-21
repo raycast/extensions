@@ -1,5 +1,5 @@
 # Keka Changelog
 
-## [Added Keka] - 2025/05/21
+## [Added Keka] - {PR_MERGE_DATE}
 
 Initial version code
