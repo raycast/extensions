@@ -1,4 +1,4 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 export const scriptCompressFiles = async (filePaths: string[]) => {
   scriptExecuteFiles("compress", filePaths);
