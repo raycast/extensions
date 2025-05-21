@@ -1,5 +1,9 @@
 # cURL Changelog
 
+## [Enhancement] - 2025-05-20
+
+- Enhanced the detail of the request error message displayed in the toast
+
 ## [Allow JSONPath copy] - 2025-03-10
 
 ## [✨ AI Enhancements] - 2025-02-21
