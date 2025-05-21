@@ -14,6 +14,19 @@ const dexcomLoginURL =
 const dexcomDataURL =
   "https://shareous1.dexcom.com/ShareWebServices/Services/Publisher/ReadPublisherLatestGlucoseValues";
 
+const TREND_VALUE_MAPPING = {
+  None: "",
+  DoubleUp: "⬆️⬆️",
+  SingleUp: "⬆️",
+  FortyFiveUp: "↗️",
+  Flat: "➡️",
+  FortyFiveDown: "↘️",
+  SingleDown: "⬇️",
+  DoubleDown: "⬇️⬇️",
+  NotComputable: "🤷‍♂️",
+  RateOutOfRange: "💣",
+};
+
 export {
   usDexcomAuthenticateURL,
   usDexcomLoginURL,
@@ -22,4 +35,5 @@ export {
   usDexcomDataURL,
   dexcomApplicationId,
   dexcomDataURL,
+  TREND_VALUE_MAPPING,
 };

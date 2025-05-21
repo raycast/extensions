@@ -1,8 +1,20 @@
-enum LoadingState {
+export enum LoadingState {
   Loading = "loading",
   Error = "error",
   Success = "success",
   Idle = "idle",
 }
 
-export { LoadingState };
+export interface GlucoseData {
+  WT: string;
+  ST: string;
+  DT: string;
+  Value: number;
+  Trend: string;
+}
+
+export interface Preferences {
+  accountName: string;
+  password: string;
+  isNorthAmerica: boolean;
+}

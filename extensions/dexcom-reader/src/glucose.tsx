@@ -1,33 +1,17 @@
 // fetchGlucoseData.tsx
-import {
-  List,
-  LocalStorage,
-  getPreferenceValues,
-  ActionPanel,
-  Action,
-  openCommandPreferences,
-} from "@raycast/api";
+import { List, LocalStorage, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { usDexcomDataURL, dexcomDataURL } from "./constants";
-import { LoadingState } from "./types";
+import {
+  usDexcomDataURL,
+  dexcomDataURL,
+  TREND_VALUE_MAPPING,
+} from "./constants";
+import { GlucoseData, LoadingState, Preferences } from "./types";
 import { showFailureToast } from "@raycast/utils";
 import { authenticateWithDexcom } from "./api/auth";
 import { fetchGlucoseData } from "./api/fetchGlucoseData";
 import { AxiosResponse } from "axios";
-
-interface Preferences {
-  accountName: string;
-  password: string;
-  isNorthAmerica: boolean;
-}
-
-interface GlucoseData {
-  WT: string;
-  ST: string;
-  DT: string;
-  Value: number;
-  Trend: string;
-}
+import { UpdateCredentialsAction } from "./actions";
 
 export default function FetchGlucoseData() {
   const [glucoseData, setGlucoseData] = useState<GlucoseData[]>([]);
@@ -36,73 +20,64 @@ export default function FetchGlucoseData() {
   const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let sessionId = await LocalStorage.getItem<string>("sessionId");
-
-        if (!sessionId) {
-          sessionId = await authenticateWithDexcom(
-            preferences.accountName,
-            preferences.password,
-            preferences.isNorthAmerica,
-          );
-
-          if (!sessionId) {
-            setLoadingState(LoadingState.Error);
-            setErrorMessage("Failed to authenticate with Dexcom");
-            return;
-          }
-        }
-
-        setLoadingState(LoadingState.Loading);
-
-        const dexcomUrl = preferences.isNorthAmerica
-          ? usDexcomDataURL
-          : dexcomDataURL;
-
-        const response: AxiosResponse = await fetchGlucoseData(
-          sessionId,
-          dexcomUrl,
-        );
-
-        if (response.status !== 200) {
-          setLoadingState(LoadingState.Error);
-          setErrorMessage(`Error fetching data: ${response.statusText}`);
-          throw new Error(`Error fetching data: ${response.statusText}`);
-        }
-
-        setGlucoseData(response.data);
-        setLoadingState(LoadingState.Success);
-      } catch (error) {
-        await showFailureToast({
-          title: "Error fetching glucose data",
-          message: String(error),
-        });
-        setLoadingState(LoadingState.Error);
-        setErrorMessage(String(error));
-      }
-    };
-
     fetchData();
   }, []);
 
-  const TREND_VALUE_MAPPING = {
-    None: "",
-    DoubleUp: "⬆️⬆️",
-    SingleUp: "⬆️",
-    FortyFiveUp: "↗️",
-    Flat: "➡️",
-    FortyFiveDown: "↘️",
-    SingleDown: "⬇️",
-    DoubleDown: "⬇️⬇️",
-    NotComputable: "🤷‍♂️",
-    RateOutOfRange: "💣",
+  const fetchData = async () => {
+    try {
+      let sessionId = await LocalStorage.getItem<string>("sessionId");
+
+      if (!sessionId) {
+        sessionId = await authenticateWithDexcom(
+          preferences.accountName,
+          preferences.password,
+          preferences.isNorthAmerica,
+        );
+
+        if (!sessionId) {
+          setLoadingState(LoadingState.Error);
+          setErrorMessage("Failed to authenticate with Dexcom");
+          return;
+        }
+      }
+
+      setLoadingState(LoadingState.Loading);
+
+      const dexcomUrl = preferences.isNorthAmerica
+        ? usDexcomDataURL
+        : dexcomDataURL;
+
+      const response: AxiosResponse = await fetchGlucoseData(
+        sessionId,
+        dexcomUrl,
+      );
+
+      if (response.status !== 200) {
+        setLoadingState(LoadingState.Error);
+        setErrorMessage(`Error fetching data: ${response.statusText}`);
+        throw new Error(`Error fetching data: ${response.statusText}`);
+      }
+
+      setGlucoseData(response.data);
+      setLoadingState(LoadingState.Success);
+    } catch (error) {
+      await showFailureToast({
+        title: "Error fetching glucose data",
+        message: String(error),
+      });
+      setLoadingState(LoadingState.Error);
+      setErrorMessage(String(error));
+    }
   };
 
   if (loadingState === LoadingState.Error) {
     return (
       <List>
-        <List.Item title="Error" subtitle={errorMessage ?? "Unknown error"} />
+        <List.Item
+          title="Error"
+          subtitle={errorMessage ?? "Unknown error"}
+          actions={<UpdateCredentialsAction fetchData={fetchData} />}
+        />
       </List>
     );
   }
@@ -116,14 +91,7 @@ export default function FetchGlucoseData() {
           subtitle={new Date(
             parseInt(data.DT.match(/\d+/)?.[0] ?? "0", 10),
           ).toLocaleString()}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Update Credentials"
-                onAction={openCommandPreferences}
-              />
-            </ActionPanel>
-          }
+          actions={<UpdateCredentialsAction fetchData={fetchData} />}
         />
       ))}
     </List>
