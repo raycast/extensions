@@ -1,6 +1,6 @@
 import axios from "axios";
 import { createWriteStream, existsSync } from "fs";
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, open } from "@raycast/api";
 
 export async function getInstagramMediaURL(instagramUrl: string) {
   try {
@@ -70,6 +70,12 @@ export async function handleDownload(mediaUrl: string, mediaId: string, download
       title: "Download Complete",
       message: `Media saved to ${filePath}`,
       style: Toast.Style.Success,
+      primaryAction: {
+        title: "Open in Finder",
+        onAction: () => {
+          open(filePath);
+        },
+      },
     });
   } catch (error) {
     await showToast({
