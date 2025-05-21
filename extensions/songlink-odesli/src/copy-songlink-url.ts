@@ -1,4 +1,5 @@
 import { Cache, Clipboard, closeMainWindow, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import fetch from "node-fetch";
 
 const cache = new Cache();
@@ -11,27 +12,25 @@ interface SongLinkResponse {
 }
 
 export default async function Command() {
-  const clipboard = await Clipboard.readText();
-
-  if (!clipboard) {
-    await showToast({
-      title: "No text in clipboard",
-      style: Toast.Style.Failure,
-    });
-    return;
-  }
-  const text = clipboard.trim();
-
-  const url = text.match(urlRegex);
-
-  if (!url) {
-    await showToast({
-      title: "No valid URL found",
-      style: Toast.Style.Failure,
-    });
-    return;
-  }
   try {
+    const clipboard = await Clipboard.readText();
+
+    if (!clipboard) {
+      await showFailureToast({
+        title: "No text in clipboard",
+      });
+      return;
+    }
+    const text = clipboard.trim();
+
+    const url = text.match(urlRegex);
+
+    if (!url) {
+      await showFailureToast({
+        title: "No valid URL found",
+      });
+      return;
+    }
     const cachedUrl = cache.get(url[0]);
     const searchParams = new URLSearchParams();
     const preferences = getPreferenceValues();
@@ -45,10 +44,9 @@ export default async function Command() {
         .then((res) => res.json() as Promise<SongLinkResponse>)
         .then((res) => res.pageUrl));
     if (!songLinkUrl) {
-      await showToast({
+      await showFailureToast({
         title: "Error retrieving song.link URL",
         message: "No song.link URL found",
-        style: Toast.Style.Failure,
       });
       return;
     }
@@ -61,7 +59,7 @@ export default async function Command() {
     });
     return;
   } catch (error) {
-    await showToast({
+    await showFailureToast({
       title: "Error retrieving song.link URL",
       message: error instanceof Error ? error.message : "Unknown error",
       style: Toast.Style.Failure,

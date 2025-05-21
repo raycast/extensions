@@ -1,10 +1,10 @@
 # Songlink/Odesli
 
-Converts current song url into a song.link url with links to all supported platforms.
+Converts current song url into a song.link url with links to all supported platforms using the Songlink/Odesli API.
 
 ## Extension Preferences
 
-- `apiKey`: Your API key for song.link/odesli
+- `apiKey`: Your API key for song.link/odesli. Get your API key by signing up at [odesli.co](https://odesli.co)
 
 ## API
 
