@@ -165,7 +165,7 @@ export default function Command() {
           <Detail.Metadata.Label title="Using" text={currentTool.toUpperCase()} />
           <Detail.Metadata.Label
             title="Command"
-            text={`${currentTool} ${currentTool === "bclm" ? "read" : "status"}`}
+            text={`${currentTool} ${currentTool === BatteryTool.BCLM ? "read" : "status"}`}
           />
           {error && (
             <Detail.Metadata.TagList title="Status">
