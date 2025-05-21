@@ -2,7 +2,7 @@
 
 ## [New Additions] - {PR_MERGE_DATE}
 
-- Add 'Open Instance Window' action to control instance options
+- Add 'Open Instance Window' action to control instance settings or install content
 
 ## [Fix] - 2025-05-21
 
