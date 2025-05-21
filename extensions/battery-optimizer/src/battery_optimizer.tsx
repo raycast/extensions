@@ -21,12 +21,13 @@ export default function Command() {
       // Use both functions to ensure compatibility with both implementations
       try {
         await setBatteryLimit(limit);
-      } catch (e) {
+      } catch (originalError) {
         // Fallback to the old implementation if the new one fails
         try {
           await setBatteryThreshold(limit, `🔋 Limiting charging above: `);
-        } catch (error) {
-          showFailureToast(error, { title: "Could not set battery limit" });
+        } catch (fallbackError) {
+          showFailureToast(originalError, { title: "Could not set battery limit" });
+          throw originalError;
         }
       }
 

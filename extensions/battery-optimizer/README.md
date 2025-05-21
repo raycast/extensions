@@ -11,7 +11,7 @@ The purpose of limiting the battery's max charge is to prolong battery health an
 
 ## Usage
  - `Battery Optimizer` command will limit charging above 80%.
- - `Reset Battery Optimizer` command allow charging to continue to 100%.
+ - `Reset Battery Optimizer` command will allow charging to continue to 100%.
  - `Get Battery Threshold` command will check the current battery charging limit.
    ![battery-optimizer-1.png](media/battery-optimizer-1.png)
  - `Battery Optimizer Menu Bar` shows the current battery charging threshold and enable/disable the Battery Optimizer in the menu bar.
