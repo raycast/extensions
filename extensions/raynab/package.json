@@ -10,6 +10,9 @@
     "Finance",
     "Productivity"
   ],
+  "contributors": [
+    "omarshahine"
+  ],
   "commands": [
     {
       "name": "activeBudget",
@@ -55,11 +58,43 @@
     },
     {
       "name": "unreviewed",
-      "title": "Unreviewed transactions",
+      "title": "Unreviewed Transactions",
       "subtitle": "YNAB",
       "description": "Easily track unapproved or uncategorized transactions.",
       "mode": "menu-bar",
       "interval": "2h"
+    }
+  ],
+  "tools": [
+    {
+      "name": "add-transaction",
+      "title": "Add Transaction",
+      "description": "Add a new YNAB transaction"
+    },
+    {
+      "name": "get-transactions",
+      "title": "Get Transactions",
+      "description": "Get YNAB transactions"
+    },
+    {
+      "name": "get-accounts",
+      "title": "Get Accounts",
+      "description": "Get all YNAB accounts"
+    },
+    {
+      "name": "get-account-details",
+      "title": "Get Account Details",
+      "description": "Get details of a specific account such as the balance, type, and on_budget status"
+    },
+    {
+      "name": "get-big-numbers",
+      "title": "Big Numbers",
+      "description": "Get spending statistics for today, this week, and this month from budget accounts"
+    },
+    {
+      "name": "get-budget",
+      "title": "Get Budget",
+      "description": "Get current budget information including age of money and monthly budget details"
     }
   ],
   "keywords": [
@@ -67,7 +102,7 @@
     "budget"
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
+    "@raycast/api": "^1.98.5",
     "@raycast/utils": "^1.18.1",
     "dayjs": "^1.11.13",
     "fuse.js": "^6.5.3",
@@ -80,12 +115,12 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.17.12",
-    "@types/react": "^18.3.18",
+    "@types/node": "^22.15.18",
+    "@types/react": "^19.1.4",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^3.4.2",
-    "react-devtools": "^5.2.0",
+    "react-devtools": "^6.1.1",
     "typescript": "^5.7.2",
     "vitest": "^2.1.9"
   },

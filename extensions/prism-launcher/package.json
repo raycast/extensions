@@ -5,6 +5,9 @@
   "description": "Launch Prism Launcher instances straight from Raycast",
   "icon": "extension-icon.png",
   "author": "lockieluke3389",
+  "contributors": [
+    "tomjpeg"
+  ],
   "categories": [
     "Applications"
   ],

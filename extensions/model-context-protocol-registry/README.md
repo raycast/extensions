@@ -44,6 +44,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Filesystem](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) | Node.js server implementing Model Context Protocol (MCP) for filesystem operations. The server will only allow operations within directories specified via args. |
 | [Paddle](https://github.com/PaddleHQ/paddle-mcp-server) | Paddle Billing is the developer-first merchant of record. We take care of payments, tax, subscriptions, and metrics with one unified API that does it all. This is a Model Context Protocol (MCP) server that provides tools for interacting with the Paddle API. |
 | [Perplexity](https://github.com/ppl-ai/modelcontextprotocol) | An MCP server implementation that integrates the Sonar API to provide Claude with unparalleled real-time, web-wide research. |
+| [Prisma](https://www.prisma.io/docs/postgres/integrations/mcp-server) | An MCP server that provisions and manages a Prisma Postgres database for your apps, so you don’t have to spend time fiddling with db infrastructure. |
 | [Sentry](https://mcp.sentry.dev/) | This service provides a Model Context Provider (MCP) for interacting with Sentry's API. |
 | [Shopify Dev](https://github.com/Shopify/dev-mcp) | MCP server that interacts with Shopify Dev. This protocol supports various tools to interact with different Shopify APIs. |
 | [Slack](https://github.com/modelcontextprotocol/servers/tree/main/src/slack) | This service provides a Model Context Provider (MCP) for interacting with Slack's API. |
@@ -59,8 +60,9 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Pydantic Logfire](https://github.com/pydantic/logfire-mcp) | This repository contains a Model Context Protocol (MCP) server with tools that can access the OpenTelemetry traces and metrics you've sent to Logfire. This MCP server enables LLMs to retrieve your application's telemetry data, analyze distributed traces, and make use of the results of arbitrary SQL queries executed using the Logfire APIs. |
 | [Polar](https://docs.polar.sh/integrate/mcp) | Extend the capabilities of your AI Agents with Polar as MCP Server |
 | [ElevenLabs](https://github.com/elevenlabs/elevenlabs-mcp) | Official ElevenLabs Model Context Protocol (MCP) server that enables interaction with powerful Text to Speech and audio processing APIs. This server allows MCP clients like Claude Desktop, Cursor, Windsurf, OpenAI Agents and others to generate speech, clone voices, transcribe audio, and more. |
-| [Nuxt](https://mcp.nuxt.com/) | Official Nuxt Model Context Protocol (MCP) server that enables docs and modules search. |
-| [Zeabur](https://zeabur.com/docs/en-US/mcp) | Official Zeabur Model Context Protocol (MCP) server that enables managing and deploying Zeabur projects. |
+| [Apify](https://mcp.apify.com) | A Model Context Protocol (MCP) server for Apify enabling AI agents to use 5,000+ ready-made Actors for use cases such as extracting data from websites, social media, search engines, online maps, and more. |
+| [Nuxt](https://mcp.nuxt.com/) | Access Nuxt documentation and modules with the public Nuxt MCP server |
+| [Zeabur](https://zeabur.com/docs/en-US/mcp) | Zeabur provides an official Model Context Protocol (MCP) server that allows you to manage and deploy your Zeabur projects. |
 
 ### Community MCP Servers
 
@@ -74,10 +76,11 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [BigQuery](https://github.com/LucasHild/mcp-server-bigquery) | A Model Context Protocol server that provides access to BigQuery. This server enables LLMs to inspect database schemas and execute queries. |
 | [ClickUp](https://github.com/TaazKareem/clickup-mcp-server) | A Model Context Protocol (MCP) server for integrating ClickUp tasks with AI applications. This server allows AI agents to interact with ClickUp tasks, spaces, lists, and folders through a standardized protocol. |
 | [Discord](https://github.com/SaseQ/discord-mcp) | A Model Context Protocol (MCP) server for the Discord API (JDA), allowing seamless integration of Discord Bot with MCP-compatible applications like Claude Desktop. Enable your AI assistants to seamlessly interact with Discord. Manage channels, send messages, and retrieve server information effortlessly. Enhance your Discord experience with powerful automation capabilities. |
-| [Firebase](https://github.com/gannonh/firebase-mcp) | Firebase MCP enables AI assistants to work directly with Firebase services, including: |
+| [Firebase](https://github.com/gannonh/firebase-mcp) | Firebase MCP enables AI assistants to work directly with Firebase services. |
 | [Ghost](https://github.com/MFYDev/ghost-mcp) | A Model Context Protocol (MCP) server for interacting with Ghost CMS through LLM interfaces like Claude. This server provides secure and comprehensive access to your Ghost blog, leveraging JWT authentication and a rich set of MCP tools for managing posts, users, members, tiers, offers, and newsletters. |
 | [iTerm](https://github.com/ferrislucas/iterm-mcp) | A Model Context Protocol server that provides access to your iTerm session. |
 | [Lightdash](https://github.com/syucream/lightdash-mcp-server) | This server provides MCP-compatible access to Lightdash's API, allowing AI assistants to interact with your Lightdash data through a standardized interface. |
 | [Monday](https://github.com/sakce/mcp-server-monday) | MCP Server for monday.com, enabling MCP clients to interact with Monday.com boards, items, updates, and documents. |
+| [Paperless-NGX](https://github.com/baruchiro/paperless-mcp) | An MCP server for interacting with a Paperless-NGX API server. Manage documents, tags, correspondents, and document types in your Paperless-NGX instance. |
 
 <!-- MCP_SERVERS_END -->

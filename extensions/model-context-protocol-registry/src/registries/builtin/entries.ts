@@ -681,4 +681,20 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       },
     },
   },
+  {
+    name: "paperless-ngx",
+    title: "Paperless-NGX",
+    description:
+      "An MCP server for interacting with a Paperless-NGX API server. Manage documents, tags, correspondents, and document types in your Paperless-NGX instance.",
+    icon: "https://icons.duckduckgo.com/ip3/paperless-ngx.com.ico",
+    homepage: "https://github.com/baruchiro/paperless-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@baruchiro/paperless-mcp@latest"],
+      env: {
+        PAPERLESS_URL: "http://your-paperless-instance:8000",
+        PAPERLESS_API_KEY: "your-api-token",
+      },
+    },
+  },
 ];

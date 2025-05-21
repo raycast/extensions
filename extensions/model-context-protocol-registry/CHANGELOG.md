@@ -1,17 +1,23 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Grafana MCP Server] - {PR_MERGE_DATE}
+## [Add Grafana MCP Server] - 2025-05-21
 Add the official Grafana MCP server to the Model Context Protocol Registry. Grafana MCP server provides seamless integration with Grafana APIs, enabling monitoring, visualization, and observability capabilities for developers and tools.
 
 ## [Add Shopify Dev Server] - {PR_MERGE_DATE}
 
+## [Add Paperless MCP Server] - 2025-05-21
+
+Add Community Paperless MCP Server to registry, this allows to manage documents in Paperless.
+
+## [Add Shopify Dev Server] - 2025-05-21
+
 Add Official Shopify Dev MCP Server to registry.
 
-## [Add Prisma MCP Server] - {PR_MERGE_DATE}
+## [Add Prisma MCP Server] - 2025-05-21
 
 Add Official Prisma MCP Server to registry.
 
-## [Add Zeabur MCP Server] - {PR_MERGE_DATE}
+## [Add Zeabur MCP Server] - 2025-05-21
 
 Add Official Zeabur MCP Server to registry, this allows to manage and deploy Zeabur projects.
 
