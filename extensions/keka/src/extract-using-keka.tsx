@@ -1,9 +1,8 @@
 import {
   closeMainWindow,
-  getSelectedFinderItems,
-  showToast,
-  Toast,
+  getSelectedFinderItems
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { scriptExtractFiles } from "./utils/applescript-utils";
 import { kekaInstalled, kekaNotInstallDialog } from "./utils/common-utils";
 
@@ -16,10 +15,7 @@ export default async () => {
     await closeMainWindow({ clearRootSearch: false });
     const fileSystemItems = await getSelectedFinderItems();
     if (fileSystemItems.length === 0) {
-      await showToast({
-        title: "No files selected",
-        style: Toast.Style.Failure,
-      });
+      await showFailureToast('', { title: "No files selected" });
       return;
     }
     const filePaths = fileSystemItems.map((value) => {
@@ -28,6 +24,6 @@ export default async () => {
     await scriptExtractFiles(filePaths);
   } catch (e) {
     console.error(String(e));
-    await showToast({ title: String(e), style: Toast.Style.Failure });
+    await showFailureToast(e, { title: "Failed to extract" });
   }
 };
