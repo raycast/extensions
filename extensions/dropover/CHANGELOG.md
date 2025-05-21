@@ -1,6 +1,6 @@
 # Dropover Changelog
 
-## [Fix special characters in filenames and update docs] - {PR_MERGE_DATE}
+## [Fix special characters in filenames and update docs] - 2025-05-21
 
 - Fixed the issue with files containing special characters (like apostrophes and '#') failing to be added to Dropover
 - Improved file handling implementation by switching from `exec` to `spawn` for better process management
