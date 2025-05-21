@@ -3,8 +3,9 @@ import { Alert, confirmAlert, open } from "@raycast/api";
 
 export const kekaInstalled = () => {
   try {
-    const appPath = "/Applications/Keka.app";
-    return fs.existsSync(appPath);
+    const systemAppPath = "/Applications/Keka.app";
+    const userAppPath = `${process.env.HOME}/Applications/Keka.app`;
+    return fs.existsSync(systemAppPath) || fs.existsSync(userAppPath);
   } catch (e) {
     console.error(String(e));
     return false;
