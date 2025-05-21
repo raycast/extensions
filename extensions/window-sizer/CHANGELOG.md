@@ -1,6 +1,6 @@
 # Window Sizer Changelog
 
-## [UI improvement] - {PR_MERGE_DATE}
+## [UI improvement] - 2025-05-21
 
 - Adjusted Action icon to only display when selected
 
