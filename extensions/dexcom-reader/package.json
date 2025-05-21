@@ -15,12 +15,30 @@
       "title": "Glucose Readings",
       "description": "Get your glucose readings from Dexcom",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accountName",
+      "type": "textfield",
+      "required": true,
+      "title": "Dexcom Account Name",
+      "description": "Your Dexcom account name"
     },
     {
-      "name": "authenticate",
-      "title": "Authenticate with Dexcom",
-      "description": "Prompts for Dexcom account credentials",
-      "mode": "view"
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Dexcom Password",
+      "description": "Your Dexcom password"
+    },
+    {
+      "name": "isNorthAmerica",
+      "type": "checkbox",
+      "required": true,
+      "title": "Region",
+      "label": "North America",
+      "description": "Check if your Dexcom account is from North America"
     }
   ],
   "dependencies": {

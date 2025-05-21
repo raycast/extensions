@@ -4,25 +4,22 @@ A Raycast extension that allows you to view your Dexcom glucose readings directl
 
 ## Features
 
-- View your current glucose readings
-- Authenticate with your Dexcom account
-- Quick access to your glucose data through Raycast
+- View glucose readings of any patient using Dexcom CGM
 
 ## Installation
 
 1. Install the extension from the Raycast Store
-2. Run the "Authenticate with Dexcom" command
-3. Enter your Dexcom account credentials
-4. Start using the "Glucose" command to view your readings
+2. Start using the "Glucose Readings" command.
+3. The first time you will be prompted to add your credentials from dexcom and region of account.(This credentials stay on your device).
+4. Continue and you will see the latest glucose readings
 
 ## Commands
 
-- `Glucose`: View your current glucose readings from Dexcom
-- `Authenticate with Dexcom`: Set up your Dexcom account credentials
+- `Glucose Readings`: View last 24h of glucose readings from Dexcom
 
-## ISSUES
+## Known Issues
 
-- I haven't properly tested the links to get the info if your account was created outside of North America, so feel free to open an issue or a PR if you encounter this
+- I haven't properly tested the links to get the info if your account was created outside of North America, so feel free to open an issue or a PR if you encounter any problems.
 
 ## Author
 
