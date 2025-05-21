@@ -52,39 +52,39 @@ export const mapBatteryCommand = (command: string, threshold?: number): string =
 };
 
 // Parse the output of the battery tool
-export const parseBatteryOutput = (output: string): string => {
+export const parseBatteryOutput = (output: string): number => {
   const tool = getBatteryTool();
 
   console.log(`Parsing ${tool} output: ${output.substring(0, 300)}`);
 
   if (tool === BatteryTool.BCLM) {
     // BCLM returns just the number, so return it directly
-    return output.trim();
+    return parseInt(output.trim(), 10);
   } else {
     // BATT returns more info, extract the limit value
     // First try to match "Charging limit: X%"
     const limitMatch = output.match(/[Cc]harging limit: (\d+)%/);
     if (limitMatch) {
       console.log(`Found charge limit in output: ${limitMatch[1]}`);
-      return limitMatch[1];
+      return parseInt(limitMatch[1], 10);
     }
 
     // Try to match "charge limit is set to X%"
     const limitMatch2 = output.match(/charge limit is set to (\d+)%/);
     if (limitMatch2) {
       console.log(`Found charge limit in output: ${limitMatch2[1]}`);
-      return limitMatch2[1];
+      return parseInt(limitMatch2[1], 10);
     }
 
     // Try to match any number followed by % in a battery limit context
     const percentMatch = output.match(/(?:limit|charging|max charge)[^\d]+(\d+)%/i);
     if (percentMatch) {
       console.log(`Found percentage in battery limit context: ${percentMatch[1]}`);
-      return percentMatch[1];
+      return parseInt(percentMatch[1], 10);
     }
 
     console.log("No matching pattern found, returning default 100");
-    return "100";
+    return 100;
   }
 };
 
