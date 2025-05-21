@@ -237,6 +237,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "shopify-dev",
+    title: "Shopify Dev",
+    description:
+      "MCP server that interacts with Shopify Dev. This protocol supports various tools to interact with different Shopify APIs.",
+    icon: "shopify.svg",
+    homepage: "https://github.com/Shopify/dev-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@shopify/dev-mcp@latest"],
+    },
+  },
+  {
     name: "slack",
     title: "Slack",
     description: "This service provides a Model Context Provider (MCP) for interacting with Slack's API.",
@@ -425,7 +437,8 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "apify",
     title: "Apify",
-    description: "A Model Context Protocol (MCP) server for Apify enabling AI agents to use 5,000+ ready-made Actors for use cases such as extracting data from websites, social media, search engines, online maps, and more.",
+    description:
+      "A Model Context Protocol (MCP) server for Apify enabling AI agents to use 5,000+ ready-made Actors for use cases such as extracting data from websites, social media, search engines, online maps, and more.",
     icon: "https://apify.com/ext/apify-symbol-512px.svg",
     homepage: "https://mcp.apify.com",
     configuration: {
@@ -649,6 +662,22 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       env: {
         MONDAY_API_KEY: "your-monday-api-key",
         MONDAY_WORKSPACE_NAME: "your-monday-workspace-name",
+      },
+    },
+  },
+  {
+    name: "paperless-ngx",
+    title: "Paperless-NGX",
+    description:
+      "An MCP server for interacting with a Paperless-NGX API server. Manage documents, tags, correspondents, and document types in your Paperless-NGX instance.",
+    icon: "https://icons.duckduckgo.com/ip3/paperless-ngx.com.ico",
+    homepage: "https://github.com/baruchiro/paperless-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@baruchiro/paperless-mcp@latest"],
+      env: {
+        PAPERLESS_URL: "http://your-paperless-instance:8000",
+        PAPERLESS_API_KEY: "your-api-token",
       },
     },
   },

@@ -150,14 +150,14 @@ export function useWindowStateManager() {
 
         if (controller.signal.aborted) return false;
 
-        // Update cache
-        const newCache = createCacheItem(limitedStates);
-        safeSetWindowStatesCache(newCache);
-
-        // Persist to storage and wait for it to complete
+        // First persist to storage
         try {
           await LocalStorage.setItem(WINDOW_STATES_STORAGE_KEY, JSON.stringify(limitedStates));
-          // Only return true after storage is confirmed
+
+          // Only update cache after storage is confirmed
+          const newCache = createCacheItem(limitedStates);
+          safeSetWindowStatesCache(newCache);
+
           return true;
         } catch (storageError) {
           logError(`Error persisting window state for ${key}:`, storageError);
