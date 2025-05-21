@@ -16,20 +16,14 @@ export default async function Command() {
     const clipboard = await Clipboard.readText();
 
     if (!clipboard) {
-      await showFailureToast({
-        title: "No text in clipboard",
-      });
-      return;
+      throw new Error("No text in clipboard");
     }
     const text = clipboard.trim();
 
     const url = text.match(urlRegex);
 
     if (!url) {
-      await showFailureToast({
-        title: "No valid URL found",
-      });
-      return;
+      throw new Error("No valid URL found");
     }
     const cachedUrl = cache.get(url[0]);
     const searchParams = new URLSearchParams();
@@ -44,11 +38,7 @@ export default async function Command() {
         .then((res) => res.json() as Promise<SongLinkResponse>)
         .then((res) => res.pageUrl));
     if (!songLinkUrl) {
-      await showFailureToast({
-        title: "Error retrieving song.link URL",
-        message: "No song.link URL found",
-      });
-      return;
+      throw new Error("No song.link URL found");
     }
     await Clipboard.copy(songLinkUrl);
     cache.set(url[0], songLinkUrl);
@@ -59,11 +49,8 @@ export default async function Command() {
     });
     return;
   } catch (error) {
-    await showFailureToast({
-      title: "Error retrieving song.link URL",
-      message: error instanceof Error ? error.message : "Unknown error",
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
+      title: "Failed to retrieve song.link URL",
     });
-    return;
   }
 }
