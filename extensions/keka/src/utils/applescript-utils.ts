@@ -30,6 +30,8 @@ export const scriptExecuteFiles = async (
     await runAppleScript(script);
   } catch (e) {
     console.error(String(e));
-    await showFailureToast(e, { title: "Failed to execute" });
+    await showFailureToast(e, {
+      title: e instanceof Error ? e.toString() : "Failed to execute",
+    });
   }
 };

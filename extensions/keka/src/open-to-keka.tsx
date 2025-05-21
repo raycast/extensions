@@ -21,6 +21,8 @@ export default async () => {
     await scriptSendFiles(filePaths);
   } catch (e) {
     console.error(String(e));
-    await showFailureToast(e, { title: "Failed to open" });
+    await showFailureToast(e, {
+      title: e instanceof Error ? e.toString() : "Failed to open",
+    });
   }
 };
