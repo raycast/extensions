@@ -9,7 +9,7 @@ export default async () => {
 
   if (batteryTool === BatteryTool.BCLM) {
     try {
-      await getChargeThreshold("🔋 Charging threshold：");
+      await getChargeThreshold("🔋 Charging threshold: ");
     } catch (error) {
       await showFailureToast(error, { title: "Could not get charge threshold" });
     }
