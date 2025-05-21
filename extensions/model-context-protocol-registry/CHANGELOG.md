@@ -3,8 +3,6 @@
 ## [Add Grafana MCP Server] - 2025-05-21
 Add the official Grafana MCP server to the Model Context Protocol Registry. Grafana MCP server provides seamless integration with Grafana APIs, enabling monitoring, visualization, and observability capabilities for developers and tools.
 
-## [Add Shopify Dev Server] - {PR_MERGE_DATE}
-
 ## [Add Paperless MCP Server] - 2025-05-21
 
 Add Community Paperless MCP Server to registry, this allows to manage documents in Paperless.
