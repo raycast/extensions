@@ -222,7 +222,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://www.prisma.io/docs/postgres/integrations/mcp-server",
     configuration: {
       command: "npx",
-      args: ["-y", "prisma", "mcp"],
+      args: ["-y", "mcp-remote", "https://api.prisma.io/mcp-server/mcp"],
     },
   },
   {
