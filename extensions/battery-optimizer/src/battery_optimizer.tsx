@@ -30,10 +30,11 @@ export default function Command() {
         }
       }
 
-      await showHUD(`Battery charge limit set to ${limit}%`);
-
       // Return to the root view after successfully setting the limit
       pop();
+      
+      // Show success message after returning to the root view
+      await showHUD(`Battery charge limit set to ${limit}%`);
     } catch (error) {
       console.error("Error setting battery limit:", error);
       showFailureToast(error, { title: "Could not set battery limit" });
