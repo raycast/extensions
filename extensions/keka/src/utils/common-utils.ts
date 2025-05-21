@@ -15,7 +15,8 @@ export const kekaNotInstallDialog = async () => {
   const options: Alert.Options = {
     icon: { source: "keka-icon.png" },
     title: "Keka Not Installed",
-    message: "Keka is not installed on your Mac. Please install Keka to use this command.",
+    message:
+      "Keka is not installed on your Mac. Please install Keka to use this command.",
     primaryAction: {
       title: "Get Keka",
       onAction: () => {
