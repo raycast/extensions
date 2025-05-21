@@ -1,7 +1,4 @@
-import {
-  closeMainWindow,
-  getSelectedFinderItems
-} from "@raycast/api";
+import { closeMainWindow, getSelectedFinderItems } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { scriptSendFiles } from "./utils/applescript-utils";
 import { kekaInstalled, kekaNotInstallDialog } from "./utils/common-utils";
@@ -15,7 +12,7 @@ export default async () => {
     await closeMainWindow({ clearRootSearch: false });
     const fileSystemItems = await getSelectedFinderItems();
     if (fileSystemItems.length === 0) {
-      await showFailureToast('', { title: "No files selected" });
+      await showFailureToast("", { title: "No files selected" });
       return;
     }
     const filePaths = fileSystemItems.map((value) => {
@@ -24,6 +21,6 @@ export default async () => {
     await scriptSendFiles(filePaths);
   } catch (e) {
     console.error(String(e));
-        await showFailureToast(e, { title: "Failed to open" });
+    await showFailureToast(e, { title: "Failed to open" });
   }
 };
