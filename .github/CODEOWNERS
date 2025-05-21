@@ -109,6 +109,7 @@
 /extensions/awesome-mac                                             @ViGeng
 /extensions/awork                                                   @Malte-Hypercode @Malte-Hypercode @Malte-Hypercode @Malte-Hypercode
 /extensions/axios-docs                                              @denizyoldas @xmok
+/extensions/azure-icons                                             @tjduarte
 /extensions/background-sounds                                       @sebdanielsson @awerks
 /extensions/backstage                                               @yukukotani
 /extensions/badges                                                  @LitoMore
@@ -1492,7 +1493,7 @@
 /extensions/raycast-zoxide                                          @mrpunkin
 /extensions/raycaster                                               @stevedylandev
 /extensions/raydocs                                                 @teziovsky
-/extensions/raynab                                                  @gogocharli
+/extensions/raynab                                                  @gogocharli @omarshahine
 /extensions/raytaskwarrior                                          @AltamimiYasser @TimShilov
 /extensions/raytyping                                               @louishuyng
 /extensions/rdw-kentekencheck                                       @jeffreyvanhees
