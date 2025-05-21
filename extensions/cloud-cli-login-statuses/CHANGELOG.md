@@ -1,6 +1,6 @@
 # Cloud CLI Login Statuses Changelog
 
-## [AWS and GCloud fallbacks] - {PR_MERGE_DATE}
+## [AWS and GCloud fallbacks] - 2025-05-21
 - Added fallback for AWS login status to check for each AWS profile
 - Added fallback for default credentials to Google Cloud
 
