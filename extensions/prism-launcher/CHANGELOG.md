@@ -1,6 +1,6 @@
 # Prism Launcher Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-05-21
 
 - Fixed an issue where the extension did not use the correct folder for Prism Launcher instances and failed to locate the appropriate icon.
 
