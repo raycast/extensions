@@ -70,6 +70,15 @@ export async function setBatteryThreshold(threshold: number, HUDMessage?: string
     await getChargeThreshold(HUDMessage);
   } catch (e) {
     console.error("Error in setBatteryThreshold:", e);
-    await showHUD("Error Setting Battery Threshold");
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    
+    // Check if error is from permission denial vs other failures
+    if (errorMessage.includes("User cancelled") || errorMessage.includes("User canceled")) {
+      await showHUD("Administrator permission was cancelled");
+    } else if (errorMessage.includes("authentication") || errorMessage.includes("privilege")) {
+      await showHUD("Administrator privileges required");
+    } else {
+      await showHUD("Error Setting Battery Threshold");
+    }
   }
 }
