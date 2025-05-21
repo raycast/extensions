@@ -71,7 +71,7 @@ export async function setBatteryThreshold(threshold: number, HUDMessage?: string
   } catch (e) {
     console.error("Error in setBatteryThreshold:", e);
     const errorMessage = e instanceof Error ? e.message : String(e);
-    
+
     // Check if error is from permission denial vs other failures
     if (errorMessage.includes("User cancelled") || errorMessage.includes("User canceled")) {
       await showHUD("Administrator permission was cancelled");

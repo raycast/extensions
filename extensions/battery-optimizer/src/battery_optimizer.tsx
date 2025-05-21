@@ -32,7 +32,7 @@ export default function Command() {
 
       // Return to the root view after successfully setting the limit
       pop();
-      
+
       // Show success message after returning to the root view
       await showHUD(`Battery charge limit set to ${limit}%`);
     } catch (error) {
