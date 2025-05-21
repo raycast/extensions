@@ -20,13 +20,9 @@ const FormDropdownItemComponent = Form.Dropdown.Item as React.FC<any>;
 const FormCheckboxComponent = Form.Checkbox as React.FC<any>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const FormTextAreaComponent = Form.TextArea as React.FC<any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const FormTextFieldComponent = Form.TextField as React.FC<any>;
 
 // Constants from TIO's frontend.js
 const FIELD_SEPARATOR = String.fromCharCode(0xff); // \xff
-const START_OF_EXTRA_FIELDS = String.fromCharCode(0xfe); // \xfe
-const START_OF_SETTINGS = String.fromCharCode(0xf5); // \xf5
 
 // UTF-8 string to Byte string (string of chars with char codes as byte values)
 // Matches TIO's frontend.js implementation
@@ -57,14 +53,24 @@ function byteArrayToByteString(byteArray: Uint8Array): string {
   return result;
 }
 
-// TIO's custom Base64 encoding: URL-safe, no padding
+// TIO's custom Base64 encoding: Uses '@' for '+', no padding, no '/' replacement
 function tioSafeBase64Encode(byteString: string): string {
-  // Standard URL-safe Base64 encoding as seen in the target permalinks
-  return Buffer.from(byteString, "binary")
-    .toString("base64")
-    .replace(/\+/g, "-") // Standard URL-safe: + to -
-    .replace(/\//g, "_") // Standard URL-safe: / to _
-    .replace(/=+$/, ""); // Remove trailing padding
+  // Match TIO's frontend.js byteStringToBase64
+  // btoa is available in modern Node.js environments (like Raycast's)
+  if (typeof btoa === "function") {
+    return btoa(byteString).replace(/\+/g, "@").replace(/=+$/, "");
+  } else {
+    // Fallback for older Node.js or if btoa is somehow unavailable
+    // This fallback will produce standard base64, then try to mimic TIO
+    return (
+      Buffer.from(byteString, "binary")
+        .toString("base64")
+        .replace(/\+/g, "@") // Replace + with @ (TIO style)
+        // TIO does not replace / with _ for its '##' permalinks.
+        // Standard Base64 / is fine in URL fragments.
+        .replace(/=+$/, "")
+    ); // Remove trailing padding
+  }
 }
 
 interface CommandFormValues {
@@ -73,8 +79,6 @@ interface CommandFormValues {
   header?: string;
   footer?: string;
   inputStr?: string;
-  argsStr?: string;
-  settingsString?: string;
 }
 
 // Define the set of common language IDs to display
@@ -114,42 +118,15 @@ const COMMON_LANGUAGE_IDS = new Set([
 ]);
 
 // Implements TIO's saveState logic for ##SINGLE_B64_PAYLOAD URLs
-function generateTioUrl({
-  languageId,
-  code,
-  header = "",
-  footer = "",
-  inputStr = "",
-  argsStr = "",
-  settingsString = "", // Assuming this is the direct content part of settings
-}: CommandFormValues): string {
+function generateTioUrl({ languageId, code, header = "", footer = "", inputStr = "" }: CommandFormValues): string {
   let stateString = textToBinaryString(languageId);
   stateString += FIELD_SEPARATOR + textToBinaryString(header);
   stateString += FIELD_SEPARATOR + textToBinaryString(code);
   stateString += FIELD_SEPARATOR + textToBinaryString(footer);
   stateString += FIELD_SEPARATOR + textToBinaryString(inputStr);
 
-  // Arguments (mimicking part of TIO's extra field block)
-  if (argsStr && argsStr.trim().length > 0) {
-    const argsArray = argsStr
-      .trim()
-      .split(" ")
-      .filter((arg) => arg.length > 0);
-    if (argsArray.length > 0) {
-      stateString += START_OF_EXTRA_FIELDS + "args"; // Field name for args
-      argsArray.forEach((arg) => {
-        stateString += FIELD_SEPARATOR + textToBinaryString(arg);
-      });
-    }
-  }
-
-  // Settings (simplified: assuming settingsString is the direct content after \xf5)
-  if (settingsString && settingsString.trim().length > 0) {
-    stateString += START_OF_SETTINGS + textToBinaryString(settingsString.trim());
-  }
-
   // Deflate the entire state string
-  const compressed_state_bytes = pako.deflateRaw(byteStringToByteArray(stateString), { level: 9 });
+  const compressed_state_bytes = pako.deflateRaw(byteStringToByteArray(stateString), { level: 9 }); // Use level 9
   const b64_full_state = tioSafeBase64Encode(byteArrayToByteString(compressed_state_bytes));
 
   console.log("[Debug] Generated stateString before compression:", JSON.stringify(stateString));
@@ -213,16 +190,9 @@ export default function FormCommand(_props: LaunchProps) {
 
   const [languageId, setLanguageId] = useState<string>(""); // Default to empty, will update after load
   const [code, setCode] = useState<string>("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [header, _setHeader] = useState<string>("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [footer, _setFooter] = useState<string>("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [inputStr, _setInputStr] = useState<string>("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [argsStr, _setArgsStr] = useState<string>("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [settingsString, _setSettingsString] = useState<string>("");
+  const [header, setHeader] = useState<string>("");
+  const [footer, setFooter] = useState<string>("");
+  const [inputStr, setInputStr] = useState<string>("");
 
   // Determine which command is running
   // const commandName = props.launchContext?.commandName || "generate-tio-url";
@@ -355,8 +325,6 @@ export default function FormCommand(_props: LaunchProps) {
                   header,
                   footer,
                   inputStr,
-                  argsStr,
-                  settingsString,
                 },
                 "open"
               );
@@ -399,29 +367,24 @@ export default function FormCommand(_props: LaunchProps) {
       <FormTextAreaComponent
         id="header"
         title="Header"
+        value={header}
+        onChange={setHeader}
         placeholder="Optional: Code to prepend (e.g. includes, using statements)"
       />
       <FormTextAreaComponent
         id="footer"
         title="Footer Code (Optional)"
+        value={footer}
+        onChange={setFooter}
         placeholder="Code to append"
         enableMarkdown={false}
       />
       <FormTextAreaComponent
         id="inputStr"
         title="Stdin Input (Optional)"
+        value={inputStr}
+        onChange={setInputStr}
         placeholder="Input for your program"
-        enableMarkdown={false}
-      />
-      <FormTextFieldComponent
-        id="argsStr"
-        title="Command-line Arguments (Optional)"
-        placeholder="Space-separated arguments"
-      />
-      <FormTextAreaComponent
-        id="settingsString"
-        title="TIO Settings String (Optional)"
-        placeholder="Advanced: raw settings string (e.g., Vdebug=true)"
         enableMarkdown={false}
       />
     </FormComponent>
