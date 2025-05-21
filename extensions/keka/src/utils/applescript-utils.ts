@@ -1,30 +1,34 @@
 import { runAppleScript } from "run-applescript";
-import { showToast, Toast } from "@raycast/api";
 
 export const scriptCompressFiles = async (filePaths: string[]) => {
-	scriptExecuteFiles('compress', filePaths);
-}
+  scriptExecuteFiles("compress", filePaths);
+};
 
 export const scriptExtractFiles = async (filePaths: string[]) => {
-	scriptExecuteFiles('extract', filePaths);
-}
+  scriptExecuteFiles("extract", filePaths);
+};
 
 export const scriptSendFiles = async (filePaths: string[]) => {
-	scriptExecuteFiles('send', filePaths);
-}
+  scriptExecuteFiles("send", filePaths);
+};
 
-export const scriptExecuteFiles = async (action: string, filePaths: string[]) => {
-	try {
-		const appleScriptFileList = filePaths.map((path) => `POSIX file "${path}"`).join(", ");		
-		
-		const script = `
+export const scriptExecuteFiles = async (
+  action: string,
+  filePaths: string[],
+) => {
+  try {
+    const appleScriptFileList = filePaths
+      .map((path) => `POSIX file "${path}"`)
+      .join(", ");
+
+    const script = `
 		tell application id "com.aone.keka"
 		${action} {${appleScriptFileList}}
 		end tell
 		`;
-		
-		await runAppleScript(script);
-	} catch (e) {
-		console.error(String(e));
-	}
-}
+
+    await runAppleScript(script);
+  } catch (e) {
+    console.error(String(e));
+  }
+};
