@@ -1,6 +1,7 @@
+import { showFailureToast } from "@raycast/utils";
 import { execSync } from "child_process";
 
-export function getFishPath(): string {
+export function getFishPath() {
   try {
     return execSync("which fish", { encoding: "utf-8" }).trim();
   } catch {
@@ -19,6 +20,9 @@ export function getFishPath(): string {
         continue;
       }
     }
-    throw new Error("Fish shell not found in PATH or common locations.");
+    showFailureToast("Fish shell not found", {
+      title: "Missing Dependency",
+      message: "Could not locate Fish shell in PATH or common locations. Please install Fish or add it to your PATH.",
+    });
   }
 }
