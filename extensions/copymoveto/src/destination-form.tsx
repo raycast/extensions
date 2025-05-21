@@ -1,4 +1,13 @@
-import { Action, ActionPanel, Form, LocalStorage, Toast, popToRoot, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  LocalStorage,
+  Toast,
+  popToRoot,
+  showToast,
+  getPreferenceValues,
+} from "@raycast/api";
 
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -13,6 +22,7 @@ export type DestinationForm = Omit<Destination, "directory"> & {
   directory: string[];
 };
 export default function DestinationForm(props: EditDestinationProps) {
+  const preferences = getPreferenceValues<Preferences>();
   const [existingNames, setExistingNames] = useState<string[]>([]);
 
   useEffect(() => {
@@ -100,7 +110,7 @@ export default function DestinationForm(props: EditDestinationProps) {
         allowMultipleSelection={false}
         canChooseDirectories={true}
         canChooseFiles={false}
-        storeValue={true}
+        showHiddenFiles={preferences.showHiddenFolders}
         {...itemProps.directory}
       />
 

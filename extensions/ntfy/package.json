@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ntfy",
+  "title": "Ntfy",
+  "description": "Send notifications to your devices using ntfy.sh",
+  "icon": "ntfy.png",
+  "author": "wesleycoder",
+  "categories": [
+    "Productivity",
+    "Communication",
+    "Web",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "commands": [
+    {
+      "name": "ntfy",
+      "title": "Ntfy",
+      "subtitle": "Send a message/link via ntfy.sh",
+      "description": "Sends a message and/or link to your device via ntfy.sh notification",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "message",
+          "type": "text",
+          "placeholder": "Message",
+          "required": false
+        },
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL",
+          "required": false
+        },
+        {
+          "name": "topic",
+          "type": "text",
+          "placeholder": "Topic",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultTopic",
+      "title": "Default Topic",
+      "description": "The default topic to use for notifications",
+      "placeholder": "raycast-ntfy",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "defaultServer",
+      "title": "Default Server",
+      "description": "The default server to use for notifications",
+      "type": "textfield",
+      "placeholder": "https://ntfy.sh",
+      "default": "https://ntfy.sh",
+      "required": true
+    },
+    {
+      "name": "cache",
+      "title": "Cache (send old notifications when connected)",
+      "description": "Devices can receive notifications when connected after the message is sent.",
+      "type": "checkbox",
+      "label": "Cache",
+      "default": false,
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}

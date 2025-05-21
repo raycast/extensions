@@ -1,5 +1,9 @@
 # letterboxd Changelog
 
+## [Add movie runtime information] - 2025-04-10
+
+- Add runtime information to the movie details panel
+
 ## [Fix the issue with the emoji substring] - 2024-11-01
 
 - Fix the issue with the review content emoji substring that causes an error

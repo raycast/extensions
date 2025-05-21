@@ -11,7 +11,7 @@ import { useMemo } from "react";
 export type MailboxListProps = Account;
 
 export const MailboxList = (props: MailboxListProps) => {
-  const { id, name, fullName, email, mailboxes, numUnread } = props;
+  const { id, name, fullName, emails, mailboxes, numUnread } = props;
   const defaultAccount = Cache.getDefaultAccount();
   const isDefault = defaultAccount?.id === id;
 
@@ -24,7 +24,7 @@ export const MailboxList = (props: MailboxListProps) => {
     <List.Item
       id={id}
       title={name}
-      subtitle={email}
+      subtitle={emails.join(", ")}
       icon={numUnread > 0 ? MailIcon.Unread : MailIcon.Read}
       accessories={[
         { text: fullName, icon: Icon.PersonCircle },

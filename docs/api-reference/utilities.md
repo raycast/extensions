@@ -240,7 +240,7 @@ export default async function Command() {
 
 An object that represents a locally installed application on the system.
 
-It can be used to open files or folders in a specific application. Use [getApplications](#getapplications) or
+It can be used to open files or folders in a specific application. Use [getApplications](#getapplications) or 
 [getDefaultApplication](#getdefaultapplication) to get applications that can open a specific file or folder.
 
 #### Properties

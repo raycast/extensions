@@ -15,7 +15,8 @@
     "StevenRCE0",
     "ridemountainpig",
     "ViGeng",
-    "dante"
+    "dante",
+    "5z99tsb75z"
   ],
   "categories": [
     "Applications",
@@ -81,6 +82,15 @@
       "mode": "no-view"
     },
     {
+      "name": "paste-latest-otp-code",
+      "title": "Paste Latest OTP Code",
+      "description": "Paste the latest OTP code from your emails.",
+      "mode": "no-view",
+      "keywords": [
+        "2fa"
+      ]
+    },
+    {
       "name": "compose-new-message",
       "title": "Compose New Message",
       "description": "Compose a new message.",
@@ -139,6 +149,12 @@
       "title": "Mark All as Read",
       "description": "Mark all your emails as read.",
       "mode": "no-view"
+    },
+    {
+      "name": "copy-foreground-mail-deeplink",
+      "title": "Copy Mail Deeplink",
+      "description": "Copy the deeplink of the selected email in Apple Mail.",
+      "mode": "no-view"
     }
   ],
   "tools": [
@@ -161,6 +177,11 @@
       "name": "send-email",
       "title": "Send Email",
       "description": "Send an email with Apple Mail."
+    },
+    {
+      "name": "copy-email-link",
+      "title": "Copy Email Link",
+      "description": "Copy the local link (URI) of the selected Apple Mail email so you can jump directly to that message. This makes it convenient to locate a specific email for context."
     }
   ],
   "dependencies": {
@@ -197,5 +218,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

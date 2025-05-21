@@ -1,5 +1,10 @@
 # Fastmail Masked Email Changelog
 
+## Add Domain Field - 2025-05-12
+
+- Added domain field to the create command to allow users to specify a domain
+  when creating a new masked email.
+
 ## [Misc Extension Updates] - 2024-12-28
 
 - When a masked email is created, it will now be in the `pending` state. This allows

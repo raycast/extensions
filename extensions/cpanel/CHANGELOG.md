@@ -1,5 +1,12 @@
 # cPanel Changelog
 
+## [Modernize + Manage API Tokens] - 2025-05-19
+
+- View API Tokens
+- Revoke API Token
+- Modernize to use latest Raycast config
+- DEV: add new `callUAPI` func that wraps native `fetch`
+
 ## [View FTP Accounts + Copy File Contents] - 2025-02-17
 
 - Copy file contents after viewing in `Files`

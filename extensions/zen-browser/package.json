@@ -9,7 +9,9 @@
     "theherk",
     "walker-tx",
     "jimmy-b36",
-    "sdaza"
+    "sdaza",
+    "ellioth",
+    "ridemountainpig"
   ],
   "categories": [
     "Applications",
@@ -23,43 +25,7 @@
       "title": "New Tab",
       "subtitle": "Zen Browser",
       "description": "Open a new Zen Browser tab.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "searchEngine",
-          "type": "dropdown",
-          "required": false,
-          "title": "Search Engine",
-          "description": "Search Engine for query (default: Google).",
-          "default": "Google",
-          "data": [
-            {
-              "title": "Google",
-              "value": "Google"
-            },
-            {
-              "title": "DuckDuckGo",
-              "value": "DuckDuckGo"
-            },
-            {
-              "title": "Bing",
-              "value": "Bing"
-            },
-            {
-              "title": "Baidu",
-              "value": "Baidu"
-            },
-            {
-              "title": "Brave",
-              "value": "Brave"
-            },
-            {
-              "title": "Qwant",
-              "value": "Qwant"
-            }
-          ]
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "search-history",
@@ -77,6 +43,44 @@
     }
   ],
   "preferences": [
+    {
+      "name": "searchEngine",
+      "type": "dropdown",
+      "required": false,
+      "title": "Search Engine",
+      "description": "Search Engine for query (default: Browser Default).",
+      "default": "Default",
+      "data": [
+        {
+          "title": "Browser Default",
+          "value": "Default"
+        },
+        {
+          "title": "Google",
+          "value": "Google"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "DuckDuckGo"
+        },
+        {
+          "title": "Bing",
+          "value": "Bing"
+        },
+        {
+          "title": "Baidu",
+          "value": "Baidu"
+        },
+        {
+          "title": "Brave",
+          "value": "Brave"
+        },
+        {
+          "title": "Qwant",
+          "value": "Qwant"
+        }
+      ]
+    },
     {
       "name": "profileDirectorySuffix",
       "title": "Profile Directory Suffix",
@@ -100,20 +104,133 @@
       "title": "Limit Results",
       "description": "The amount of results that are queried from the browser database.",
       "default": "50"
+    },
+    {
+      "name": "aiSearchHistoryLimitResults",
+      "type": "textfield",
+      "required": false,
+      "title": "AI Search History Limit Results",
+      "description": "The amount of results that are queried from the browser database for AI search.",
+      "default": "50"
     }
   ],
+  "tools": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "description": "Open a new Zen Browser tab"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search the browsing history"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@zen-browser Open a new tab",
+        "mocks": {
+          "new-tab": [
+            {}
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "new-tab"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zen-browser Open a new tab search Zen Browser",
+        "mocks": {
+          "new-tab": [
+            {
+              "searchText": "Zen Browser"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchText": "Zen Browser"
+              },
+              "name": "new-tab"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zen-browser Open a new tab search Raycast",
+        "mocks": {
+          "new-tab": [
+            {
+              "searchText": "Raycast"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchText": "Raycast"
+              },
+              "name": "new-tab"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zen-browser Search history",
+        "mocks": {
+          "search-history": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-history",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zen-browser Search history about Raycast",
+        "mocks": {
+          "search-history": {
+            "searchText": "Raycast"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-history",
+              "arguments": {
+                "searchText": "Raycast"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.59.0",
-    "@raycast/utils": "^1.4.13",
-    "run-applescript": "6.0.0"
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.6",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "@types/sql.js": "1.4.4",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "react-devtools": "^6.1.1",
     "typescript": "^4.4.3"
   },
   "scripts": {

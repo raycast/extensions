@@ -1,6 +1,7 @@
 import { Initiative, Project } from "@linear/sdk";
-import { getLinearClient } from "./linearClient";
 import { sortBy } from "lodash";
+
+import { getLinearClient } from "./linearClient";
 
 export type InitiativeResult = Pick<Initiative, "id" | "name" | "color" | "icon" | "sortOrder" | "description"> & {
   projects?: { nodes: Pick<Project, "id">[] };

@@ -1,14 +1,33 @@
 import { FileSystemItem, getSelectedFinderItems, showHUD } from "@raycast/api";
-import { exec } from "child_process";
+import { spawn } from "child_process";
 
-const execPromise = function (cmd: string) {
-  return new Promise(function (resolve, reject) {
-    exec(cmd, function (err, stdout) {
-      if (err) return reject(err);
-      resolve(stdout);
+const spawnPromise = function (command: string, args: string[]) {
+  return new Promise<string>((resolve, reject) => {
+    const process = spawn(command, args, { shell: false });
+
+    let stdout = "";
+    let stderr = "";
+
+    process.stdout.on("data", (data) => {
+      stdout += data.toString();
     });
+
+    process.stderr.on("data", (data) => {
+      stderr += data.toString();
+    });
+
+    process.on("close", (code) => {
+      if (code === 0) {
+        resolve(stdout);
+      } else {
+        reject(new Error(`Command failed with code ${code}: ${stderr}`));
+      }
+    });
+
+    process.on("error", reject);
   });
 };
+
 export default async function main() {
   let files: FileSystemItem[];
   try {
@@ -22,11 +41,12 @@ export default async function main() {
     return;
   }
 
-  const command = `open -b me.damir.dropover-mac ${files.map((file) => `'${file.path}'`).join(" ")}`;
   try {
-    await execPromise(command);
-    await showHUD(`📎 Added ${files.length} to Dropover`).then();
+    const args = ["-b", "me.damir.dropover-mac", ...files.map((file) => file.path)];
+    await spawnPromise("open", args);
+    await showHUD(`📎 Added ${files.length} to Dropover`);
   } catch (e) {
-    await showHUD(`📛 Failed add files to Dropover!`);
+    console.error(e);
+    await showHUD(`📛 Failed to add files to Dropover!`);
   }
 }
