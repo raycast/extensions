@@ -13,8 +13,7 @@ This extension uses Swift to interact with windows, providing the following feat
 
 - Quickly resize windows to predefined sizes
 - Create and save custom window sizes
-- Use `⌘ S` to star your frequently used window sizes
-- Apply common window sizes with a single click
+- Star your frequently used window sizes
 - Maximize window
 - Restore previous window size
 - Get current window size
@@ -25,18 +24,11 @@ Search for the following command in Raycast:
 
 - `Window Sizer` or `Resize Window` - Open the window size selector
 
-## Predefined Sizes
+## Shortcuts
 
-The application comes with several common screen sizes:
-
-- 2560×1600
-- 1920×1200
-- 1920×1080
-- 1600×960
-- 1440×880
-- 1280×720
-- 960×640
-- 800×600
+- `⌘ S` - Star window size
+- `⇧ ⌘ S` - Unstar window size
+- `⌘ D` - Delete custom window size
 
 ## Notes
 

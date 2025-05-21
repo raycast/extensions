@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { WindowInfo } from "../types/index";
 import { getActiveWindowInfo, WindowDetailsObject } from "../swift-app";
 import { log, error as logError } from "../utils/logger";
@@ -23,7 +23,7 @@ export function useWindowInfo() {
   /**
    * Get current active window information
    */
-  const getWindowDetails = useCallback(async (): Promise<WindowInfo | null> => {
+  const getWindowDetails = async (): Promise<WindowInfo | null> => {
     // Only update state if component is mounted
     if (isMounted.current) {
       setIsLoading(true);
@@ -69,17 +69,16 @@ export function useWindowInfo() {
             height: size.height,
           };
 
+          // Log window info regardless of component mount state
+          if (details.app) {
+            log(`Active window info: ${details.app.name}.${details.app.processID}`, info);
+          } else {
+            log("Active window info:", info);
+          }
+
           // Only update state if component is still mounted
           if (isMounted.current) {
-            // Update state
             setWindowInfo(info);
-
-            // Log window info
-            if (details.app) {
-              log(`Active window info: ${details.app.name}.${details.app.processID}`, info);
-            } else {
-              log("Active window info:", info);
-            }
           }
 
           return info;
@@ -101,7 +100,7 @@ export function useWindowInfo() {
         setIsLoading(false);
       }
     }
-  }, []);
+  };
 
   return {
     windowInfo,

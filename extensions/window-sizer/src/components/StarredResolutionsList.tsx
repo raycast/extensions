@@ -1,26 +1,28 @@
 import { Resolution } from "../types";
 import { ResolutionList } from "./ResolutionList";
 
-interface DefaultResolutionsListProps {
-  predefinedResolutions: Resolution[];
+interface StarredResolutionsListProps {
+  starredResolutions: Resolution[];
   onResizeWindow: (width: number, height: number) => Promise<void>;
   onToggleStar: (resolution: Resolution) => Promise<void>;
-  selectedItemId?: string | null | undefined;
-  starredResolutions: Resolution[];
+  selectedItemId?: string | undefined;
 }
 
-export function DefaultResolutionsList({
-  predefinedResolutions,
+export function StarredResolutionsList({
+  starredResolutions,
   onResizeWindow,
   onToggleStar,
   selectedItemId,
-  starredResolutions,
-}: DefaultResolutionsListProps) {
+}: StarredResolutionsListProps) {
+  if (starredResolutions.length === 0) {
+    return null;
+  }
+
   return (
     <ResolutionList
-      resolutions={predefinedResolutions}
+      resolutions={starredResolutions}
       onResizeWindow={onResizeWindow}
-      sectionTitle="Default Sizes"
+      sectionTitle="Starred Sizes"
       onToggleStar={onToggleStar}
       selectedItemId={selectedItemId}
       starredResolutions={starredResolutions}
