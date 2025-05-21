@@ -1,6 +1,6 @@
 # Brandfetch Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2025-05-21
 
 - Add support for url queries with `scheme`
 
