@@ -138,7 +138,7 @@ function BrandView({ domain, bfApiKey }: { domain: string; bfApiKey: string }) {
   }
 
   return (
-    <Grid columns={5} isLoading={isLoading} actions={<ActionPanel></ActionPanel>}>
+    <Grid columns={5} isLoading={isLoading}>
       {(data as RetrieveBrandResponse)?.logos?.flatMap((image, idx) =>
         image.formats.map((format, index) => (
           <Grid.Item
