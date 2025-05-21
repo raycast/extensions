@@ -49,4 +49,4 @@ To use this extension, you'll need to install either BCLM or BATT based on your 
 # Acknowledgments
 - [BCLM](https://github.com/zackelia/bclm) - macOS command-line utility to limit max battery charge.
 - [BATT](https://github.com/charlie0129/batt) - macOS utility for battery limit management.
-- [batter-batt-optimizer](https://github.com/VatsalSy/battery-batt-control) - standalone Raycast extension that only supports Batt.
+- [battery-batt-optimizer](https://github.com/VatsalSy/battery-batt-control) - standalone Raycast extension that only supports Batt.
