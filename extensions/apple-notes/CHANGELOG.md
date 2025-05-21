@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Bug Fix Update] - {PR_MERGE_DATE}
+
+Add a preference for choosing the maximum number of notes to allow AI to use to prevent issues with running out of memory loading all notes.
+
 ## [Bug Fix Update] - 2025-03-06
 
 Fix for app crashing when user has not granted disk access.
