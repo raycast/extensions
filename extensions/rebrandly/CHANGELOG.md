@@ -1,6 +1,6 @@
 # Rebrandly Changelog
 
-## [Update Link + Modernize] - {PR_MERGE_DATE}
+## [Update Link + Modernize] - 2025-05-21
 
 - add: `ctrl`+`e` to execute "Update Link" `Action`
 - fix: proper error message when invalid token
