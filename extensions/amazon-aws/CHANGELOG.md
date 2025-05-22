@@ -1,5 +1,8 @@
 # Amazon AWS Changelog
 
+## [Console command] {PR_MERGE_DATE}
+- Fix full URLs (e.g. `https://quicksight.aws.amazon.com`) routing correctly to the console
+
 ## [Console command] 2025-04-25
 - Update WAF & Shield path to '/wafv2/homev2/home' for WAFv2 migration
 - Update AWS Firewall Manager path to '/wafv2/fmsv2/home' for Firewall Manager v2
