@@ -3,8 +3,8 @@ import fs from "fs";
 import { getFFmpegPath } from "./ffmpeg";
 import { execPromise } from "./exec";
 
-export const ALLOWED_VIDEO_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".webm"] as const;
-export const ALLOWED_IMAGE_EXTENSIONS = [
+export const INPUT_VIDEO_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".webm"] as const;
+export const INPUT_IMAGE_EXTENSIONS = [
   ".jpg",
   ".jpeg",
   ".png",
@@ -15,42 +15,23 @@ export const ALLOWED_IMAGE_EXTENSIONS = [
   ".avif",
   ".bmp",
 ] as const;
-export const ALLOWED_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".m4a", ".flac"] as const;
+export const INPUT_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".m4a", ".flac"] as const;
+export const INPUT_ALL_EXTENSIONS = [
+  ...INPUT_VIDEO_EXTENSIONS,
+  ...INPUT_IMAGE_EXTENSIONS,
+  ...INPUT_AUDIO_EXTENSIONS,
+] as const;
 
-export const videoConfig = {
-  ffmpegOptions: {
-    mp4: { videoCodec: "h264", audioCodec: "aac", fileExtension: ".mp4" },
-    avi: { videoCodec: "libxvid", audioCodec: "mp3", fileExtension: ".avi" },
-    mov: { videoCodec: "prores", audioCodec: "pcm_s16le", fileExtension: ".mov" },
-    mkv: { videoCodec: "libx265", audioCodec: "aac", fileExtension: ".mkv" },
-    mpg: { videoCodec: "mpeg2video", audioCodec: "mp3", fileExtension: ".mpg" },
-    webm: { videoCodec: "libvpx-vp9", audioCodec: "libopus", fileExtension: ".webm" },
-  },
-};
-
-export type VideoOutputFormats = keyof typeof videoConfig.ffmpegOptions;
-
-// Audio configuration
-export const audioConfig = {
-  mp3: { audioCodec: "libmp3lame", fileExtension: ".mp3" },
-  aac: { audioCodec: "aac", fileExtension: ".aac" },
-  wav: { audioCodec: "pcm_s16le", fileExtension: ".wav" },
-  flac: { audioCodec: "flac", fileExtension: ".flac" },
-};
-
-export type AudioOutputFormats = keyof typeof audioConfig;
-
-// Image configuration
-export const imageConfig = {
-  jpg: { fileExtension: ".jpg" },
-  png: { fileExtension: ".png" },
-  webp: { fileExtension: ".webp" },
-  heic: { fileExtension: ".heic" },
-  tiff: { fileExtension: ".tiff" },
-  avif: { fileExtension: ".avif" },
-} as const;
-
-export type ImageOutputFormats = keyof typeof imageConfig;
+// IMPORTANT: Updating these arrays?
+// Update them manually in tool/convert-media.ts as well. Read the comment there for more details.
+export const OUTPUT_VIDEO_EXTENSIONS = [".mp4", ".avi", ".mov", ".mkv", ".mpg", ".webm"] as const;
+export const OUTPUT_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".flac"] as const;
+export const OUTPUT_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".heic", ".tiff", ".avif"] as const;
+export const OUTPUT_ALL_EXTENSIONS = [
+  ...OUTPUT_VIDEO_EXTENSIONS,
+  ...OUTPUT_AUDIO_EXTENSIONS,
+  ...OUTPUT_IMAGE_EXTENSIONS,
+] as const;
 
 export function getUniqueOutputPath(filePath: string, extension: string): string {
   const outputFilePath = filePath.replace(path.extname(filePath), extension);
@@ -67,113 +48,146 @@ export function getUniqueOutputPath(filePath: string, extension: string): string
   return finalOutputPath;
 }
 
-export async function convertImage(
-  filePath: string,
-  outputFormat: ImageOutputFormats,
-  quality?: string, // Represents 0-100, and "lossless" and AVIF
-): Promise<string> {
-  const formatOptions = imageConfig[outputFormat];
-  if (!formatOptions) {
-    throw new Error(`Unsupported image format: ${outputFormat}`);
+export function checkExtensionType(file: string, allowedExtensions?: ReadonlyArray<string> | null): string | boolean {
+  const extension = path.extname(file).toLowerCase();
+  if (!allowedExtensions) {
+    return INPUT_VIDEO_EXTENSIONS.includes(extension as (typeof INPUT_VIDEO_EXTENSIONS)[number])
+      ? "video"
+      : INPUT_IMAGE_EXTENSIONS.includes(extension as (typeof INPUT_IMAGE_EXTENSIONS)[number])
+        ? "image"
+        : INPUT_AUDIO_EXTENSIONS.includes(extension as (typeof INPUT_AUDIO_EXTENSIONS)[number])
+          ? "audio"
+          : false;
+  } else {
+    return allowedExtensions.includes(extension as (typeof allowedExtensions)[number]) ? true : false;
   }
+}
 
-  const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);
+export async function convertMedia(
+  filePath: string,
+  outputFormat:
+    | (typeof OUTPUT_AUDIO_EXTENSIONS)[number]
+    | (typeof OUTPUT_VIDEO_EXTENSIONS)[number]
+    | (typeof OUTPUT_IMAGE_EXTENSIONS)[number],
+  quality?: string, // Currently represents 0-100 for some image formats, "lossless" for webp
+): Promise<string> {
+  // If image
+  if ((OUTPUT_IMAGE_EXTENSIONS as ReadonlyArray<string>).includes(outputFormat)) {
+    const currentOutputFormat = outputFormat as (typeof OUTPUT_IMAGE_EXTENSIONS)[number];
+    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
 
-  try {
-    if (outputFormat === "heic") {
-      execPromise(
-        `sips --setProperty format heic --setProperty formatOptions ${Number(quality)} "${filePath}" --out "${finalOutputPath}"`,
-      );
-    } else {
-      // FFmpeg for all other image formats
-      const ffmpegPath = await getFFmpegPath();
-      let ffmpegCmd = `"${ffmpegPath}" -i "${filePath}"`;
+    try {
+      // Only SIPS can handle converting to HEIC
+      if (currentOutputFormat === ".heic") {
+        execPromise(
+          `sips --setProperty format heic --setProperty formatOptions ${Number(quality)} "${filePath}" --out "${finalOutputPath}"`,
+        );
+      } else {
+        // FFmpeg for all other image formats
+        const ffmpegPath = await getFFmpegPath();
+        let ffmpegCmd = `"${ffmpegPath}" -i "${filePath}"`;
 
-      switch (outputFormat) {
-        case "jpg":
-          // mjpeg takes in 2 (best) to 31 (worst)
-          ffmpegCmd += ` -c:v mjpeg -q:v ${Math.round(31 - (Number(quality) / 100) * 29)}`;
-          break;
-        case "png":
-          ffmpegCmd += " -c:v png -compression_level 100";
-          break;
-        case "webp":
-          ffmpegCmd += " -c:v libwebp";
-          if (quality === "lossless") {
-            // Lossless for WebP
-            ffmpegCmd += " -lossless 1";
-          } else {
-            ffmpegCmd += ` -quality ${Number(quality)}`;
-          }
-          break;
-        case "tiff":
-          ffmpegCmd += " -c:v tiff -compression_algo lzw";
-          break;
-        case "avif":
-          // libaom-av1 takes in 0 (best/lossless (unsure about it being truly lossless but after testing,
-          // I @sacha_crispin, couldn't find a difference when "-lossless 1" was applied.
-          // https://trac.ffmpeg.org/wiki/Encode/AV1 supports that theory)) to 63 (worst)
-          ffmpegCmd += ` -c:v libaom-av1 -crf ${Math.round(63 - (Number(quality) / 100) * 63)} -still-picture 1`;
-          break;
+        switch (currentOutputFormat) {
+          case ".jpg":
+            // mjpeg takes in 2 (best) to 31 (worst)
+            ffmpegCmd += ` -c:v mjpeg -q:v ${Math.round(31 - (Number(quality) / 100) * 29)}`;
+            break;
+          case ".png":
+            ffmpegCmd += " -c:v png -compression_level 100";
+            break;
+          case ".webp":
+            ffmpegCmd += " -c:v libwebp";
+            if (quality === "lossless") {
+              ffmpegCmd += " -lossless 1";
+            } else {
+              ffmpegCmd += ` -quality ${Number(quality)}`;
+            }
+            break;
+          case ".tiff":
+            ffmpegCmd += " -c:v tiff -compression_algo lzw";
+            break;
+          case ".avif":
+            // libaom-av1 takes in 0 (best/lossless (unsure about it being truly lossless but after testing,
+            // I @sacha_crispin, couldn't find a difference when "-lossless 1" was applied.
+            // https://trac.ffmpeg.org/wiki/Encode/AV1 supports that theory)) to 63 (worst)
+            ffmpegCmd += ` -c:v libaom-av1 -crf ${Math.round(63 - (Number(quality) / 100) * 63)} -still-picture 1`;
+            break;
+        }
+        ffmpegCmd += ` "${finalOutputPath}"`;
+        await execPromise(ffmpegCmd);
       }
-      ffmpegCmd += ` "${finalOutputPath}"`;
-      await execPromise(ffmpegCmd);
+      return finalOutputPath;
+    } catch (error) {
+      console.error(`Error converting ${filePath} to ${currentOutputFormat}:`, error);
+      throw error;
     }
-    return finalOutputPath;
-  } catch (error) {
-    console.error(`Error converting ${filePath} to ${outputFormat}:`, error);
-    throw error;
   }
-}
+  // If audio
+  else if ((OUTPUT_AUDIO_EXTENSIONS as ReadonlyArray<string>).includes(outputFormat)) {
+    const currentOutputFormat = outputFormat as (typeof OUTPUT_AUDIO_EXTENSIONS)[number];
 
-export async function convertVideo(
-  filePath: string,
-  outputFormat: VideoOutputFormats, // Changed from specific strings to type
-  //quality?: string, // Optional quality parameter
-): Promise<string> {
-  const formatOptions = videoConfig.ffmpegOptions[outputFormat];
-  const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);
+    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+    const ffmpegPath = await getFFmpegPath();
+    let command = `"${ffmpegPath}" -i "${filePath}"`;
 
-  const ffmpegPath = await getFFmpegPath();
-  // Basic command, can be expanded with quality options for video
-  let command = `"${ffmpegPath}" -i "${filePath}" -vcodec ${formatOptions.videoCodec} -acodec ${formatOptions.audioCodec}`;
+    switch (currentOutputFormat) {
+      case ".mp3":
+        command += ` -c:a libmp3lame`;
+        // TODO: Add quality options for mp3 if desired, e.g., -q:a
+        break;
+      case ".aac":
+        command += ` -c:a aac`;
+        break;
+      case ".wav":
+        command += ` -c:a pcm_s16le`;
+        break;
+      case ".flac":
+        command += ` -c:a flac`;
+        break;
+      default:
+        throw new Error(`Unknown audio output format: ${currentOutputFormat}`);
+    }
 
-  // TODO: Implement quality control for video formats
-  // Example: Add a CRF for H.264 (mp4) if quality is a number 0-51 (lower is better)
-  /* if (outputFormat === "mp4" && quality && !isNaN(Number(quality))) {
-    const crf = Math.max(0, Math.min(51, Number(quality)));
-    command += ` -crf ${crf}`;
-  } */
-  // Add more video quality options here based on codec and desired control
+    command += ` "${finalOutputPath}"`;
+    await execPromise(command);
+    return finalOutputPath;
+  }
+  // If video
+  else if ((OUTPUT_VIDEO_EXTENSIONS as ReadonlyArray<string>).includes(outputFormat)) {
+    const currentOutputFormat = outputFormat as (typeof OUTPUT_VIDEO_EXTENSIONS)[number];
 
-  command += ` "${finalOutputPath}"`;
-  await execPromise(command);
+    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+    const ffmpegPath = await getFFmpegPath();
+    let command = `"${ffmpegPath}" -i "${filePath}"`;
 
-  return finalOutputPath;
-}
+    switch (currentOutputFormat) {
+      case ".mp4":
+        command += ` -vcodec h264 -acodec aac`;
+        // TODO: Add quality options for mp4 if desired, e.g., -crf
+        break;
+      case ".avi":
+        command += ` -vcodec libxvid -acodec mp3`;
+        break;
+      case ".mov":
+        command += ` -vcodec prores -acodec pcm_s16le`;
+        break;
+      case ".mkv":
+        command += ` -vcodec libx265 -acodec aac`;
+        break;
+      case ".mpg":
+        command += ` -vcodec mpeg2video -acodec mp3`;
+        break;
+      case ".webm":
+        command += ` -vcodec libvpx-vp9 -acodec libopus`;
+        break;
+      default:
+        throw new Error(`Unknown video output format: ${currentOutputFormat}`);
+    }
 
-export async function convertAudio(
-  filePath: string,
-  outputFormat: AudioOutputFormats, // Changed from specific strings to type
-  //quality?: string, // Optional quality parameter
-): Promise<string> {
-  const formatOptions = audioConfig[outputFormat];
-  const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);
-
-  const ffmpegPath = await getFFmpegPath();
-  // Basic command, can be expanded with quality options for audio
-  let command = `"${ffmpegPath}" -i "${filePath}" -c:a ${formatOptions.audioCodec}`;
-
-  // TODO: Implement quality control for audio formats
-  // Example: Add VBR setting for MP3 if quality is a number 0-9 (lower is better VBR)
-  /* if (outputFormat === "mp3" && quality && !isNaN(Number(quality))) {
-    const vbr = Math.max(0, Math.min(9, Number(quality)));
-    command += ` -q:a ${vbr}`;
-  } */
-  // Add more audio quality options here based on codec
-
-  command += ` "${finalOutputPath}"`;
-  await execPromise(command);
-
-  return finalOutputPath;
+    command += ` "${finalOutputPath}"`;
+    await execPromise(command);
+    return finalOutputPath;
+  }
+  // Theoretically, this should never happen
+  throw new Error(`Unsupported output format: ${outputFormat}`);
 }

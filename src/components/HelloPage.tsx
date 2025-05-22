@@ -5,6 +5,7 @@ export function HelloPage({ onContinue }: { onContinue: () => void }) {
   return (
     <Detail
       markdown={`
+        /* TODO UPDATE THIS */
 # Welcome to Media Converter!
 
 This extension allows you to easily convert between different media formats using FFmpeg.
