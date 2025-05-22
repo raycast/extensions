@@ -29,7 +29,8 @@ import { sortByDate } from "./hooks/useViewReminders";
 const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
 
 export default function Command() {
-  const { titleType, hideMenuBarCountWhenEmpty, view, countType } = getPreferenceValues<Preferences.MenuBar>();
+  const { titleType, hideMenuBarCountWhenEmpty, displayListTitleForMenuBarReminders, view, countType } =
+    getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
   const [listId, setListId] = useCachedState<string>("menu-bar-list");
@@ -163,8 +164,8 @@ export default function Command() {
     }
   }
 
-  function formatReminderTitle(title: string, listName?: string) {
-    return `${title} - ${listName}`;
+  function addListTitle(title: string, listName?: string) {
+    return `${title} [${listName}]`;
   }
 
   async function handleListChange(listId?: string) {
@@ -216,7 +217,14 @@ export default function Command() {
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
                 key={reminder.id}
-                title={truncate(addPriorityToTitle(formatReminderTitle(reminder.title, reminder.list?.title), reminder.priority))}
+                title={truncate(
+                  addPriorityToTitle(
+                    displayListTitleForMenuBarReminders
+                      ? addListTitle(reminder.title, reminder.list?.title)
+                      : reminder.title,
+                    reminder.priority,
+                  ),
+                )}
               >
                 <MenuBarExtra.Item
                   title="Open Reminder"
