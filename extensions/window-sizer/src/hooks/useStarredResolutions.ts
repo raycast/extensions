@@ -100,10 +100,6 @@ export function useStarredResolutions() {
       });
     } catch (error) {
       console.error("Error toggling star status:", error);
-      await showFailureToast({
-        title: isStarred ? "Failed to remove from starred" : "Failed to mark as starred",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
       throw error;
     }
   }

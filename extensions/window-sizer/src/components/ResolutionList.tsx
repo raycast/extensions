@@ -174,7 +174,7 @@ export function ResolutionList({
                         try {
                           await onToggleStar(resolution);
                         } catch (error) {
-                          await showFailureToast("Failed to toggle star status", {
+                          await showFailureToast("Failed to remove from starred", {
                             message: error instanceof Error ? error.message : String(error),
                           });
                         }
@@ -214,7 +214,7 @@ export function ResolutionList({
                       try {
                         await onToggleStar(resolution);
                       } catch (error) {
-                        await showFailureToast("Failed to toggle star status", {
+                        await showFailureToast("Failed to mark as starred", {
                           message: error instanceof Error ? error.message : String(error),
                         });
                       }
