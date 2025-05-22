@@ -1,5 +1,10 @@
 # Polymarket Changelog
 
+## [Market Details] - 2025-05-19
+- Added Market Details screen showing the price history of a market.
+- Added Raw data view to see Market JSON.
+- Updated example images.
+
 ## [PolyMarket Search] - 2025-05-14
 - Added ability to search PolyMarket for a specific market.
 

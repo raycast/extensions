@@ -1,5 +1,15 @@
 # Window Sizer Changelog
 
+## [UI improvement] - 2025-05-21
+
+- Adjusted Action icon to only display when selected
+
+## [Starred Sizes & Improvements] - 2025-05-19
+
+- Added starring for frequently used window sizes
+- Unified shortcut keys for Deleting Custom and Starred Sizes
+- Improved action icons
+
 ## [New Action Icons] - 2025-05-12
 
 - Added new action icons
