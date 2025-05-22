@@ -171,32 +171,42 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       {selectedFileType === "image" &&
         outputFormat &&
         (OUTPUT_IMAGE_EXTENSIONS as ReadonlyArray<string>).includes(outputFormat) &&
-        (outputFormat !== ".tiff" && outputFormat !== ".png" ? (
-          <Form.Dropdown
-            id="qualitySetting"
-            title={`Select quality`}
-            defaultValue="80"
-            onChange={setCurrentQualitySetting}
-          >
-            <Form.Dropdown.Section>
-              {[...Array(21).keys()].map((i) => {
-                const q = i * 5;
-                const value = q.toString();
-                const title = outputFormat === ".avif" && q === 100 ? `100 (lossless)` : value;
+        (outputFormat !== ".png" ? (
+          <>
+            <Form.Dropdown
+              id="qualitySetting"
+              title={`Select quality`}
+              defaultValue="80"
+              onChange={setCurrentQualitySetting}
+            >
+              <Form.Dropdown.Section>
+                {outputFormat !== ".tiff" ? (
+                  [...Array(21).keys()].map((i) => {
+                    const q = i * 5;
+                    const value = q.toString();
+                    const title = outputFormat === ".avif" && q === 100 ? `100 (lossless)` : value;
 
-                return <Form.Dropdown.Item key={`${outputFormat}-q-${q}`} value={value} title={title} />;
-              })}
-            </Form.Dropdown.Section>
-            {outputFormat === "webp" && (
-              <>
-                <Form.Dropdown.Section>
-                  <Form.Dropdown.Item value="lossless" title="Lossless" />
-                </Form.Dropdown.Section>
-              </>
-            )}
-          </Form.Dropdown>
+                    return <Form.Dropdown.Item key={`${outputFormat}-q-${q}`} value={value} title={title} />;
+                  })
+                ) : (
+                  <>
+                    <Form.Dropdown.Item value="deflate" title="Deflate (recommended, smaller size)" />
+                    <Form.Dropdown.Item value="lzw" title="LZW (wider compatibility)" />
+                  </>
+                )}
+              </Form.Dropdown.Section>
+              {outputFormat === "webp" && (
+                <>
+                  <Form.Dropdown.Section>
+                    <Form.Dropdown.Item value="lossless" title="Lossless" />
+                  </Form.Dropdown.Section>
+                </>
+              )}
+            </Form.Dropdown>
+            {outputFormat === ".tiff" ? <Form.Description text={`Here, .tiff is always lossless.`} /> : ""}
+          </>
         ) : (
-          <Form.Description text={`${outputFormat} is always lossless. Maximum compression is applied.`} />
+          <Form.Description text={`.png is always lossless. Maximum compression is applied.`} />
         ))}
     </Form>
   );

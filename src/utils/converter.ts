@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import os from "os";
 import { getFFmpegPath } from "./ffmpeg";
 import { execPromise } from "./exec";
 
@@ -69,12 +70,16 @@ export async function convertMedia(
     | (typeof OUTPUT_AUDIO_EXTENSIONS)[number]
     | (typeof OUTPUT_VIDEO_EXTENSIONS)[number]
     | (typeof OUTPUT_IMAGE_EXTENSIONS)[number],
-  quality?: string, // Currently represents 0-100 for some image formats, "lossless" for webp
+  quality?: string, // Currently represents 0-100 in steps of 5 for jpg heic avif webp, "lossless" for webp, "lzw" or "deflate" for tiff
 ): Promise<string> {
   // If image
   if ((OUTPUT_IMAGE_EXTENSIONS as ReadonlyArray<string>).includes(outputFormat)) {
     const currentOutputFormat = outputFormat as (typeof OUTPUT_IMAGE_EXTENSIONS)[number];
     const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+
+    let tempHeicFile: string | null = null;
+    const extension = path.extname(filePath).toLowerCase();
+    let processedInputPath = filePath;
 
     try {
       // Only SIPS can handle converting to HEIC
@@ -82,18 +87,35 @@ export async function convertMedia(
         execPromise(
           `sips --setProperty format heic --setProperty formatOptions ${Number(quality)} "${filePath}" --out "${finalOutputPath}"`,
         );
+      } else if (extension === ".heic" && outputFormat !== ".heic") {
+        // If the input file is HEIC and the output format is not HEIC, we need to convert it to PNG first
+        // so that ffmpeg can handle it
+        try {
+          const tempFileName = `${path.basename(filePath, ".heic")}_temp_${Date.now()}.png`;
+          tempHeicFile = path.join(os.tmpdir(), tempFileName);
+
+          await execPromise(`sips --setProperty format png "${filePath}" --out "${tempHeicFile}"`);
+
+          processedInputPath = tempHeicFile;
+        } catch (error) {
+          console.error(`Error pre-processing HEIC file: ${filePath}`, error);
+          if (tempHeicFile && fs.existsSync(tempHeicFile)) {
+            fs.unlinkSync(tempHeicFile);
+          }
+          throw new Error(`Failed to preprocess HEIC file: ${String(error)}`);
+        }
       } else {
         // FFmpeg for all other image formats
         const ffmpegPath = await getFFmpegPath();
-        let ffmpegCmd = `"${ffmpegPath}" -i "${filePath}"`;
+        let ffmpegCmd = `"${ffmpegPath}" -i "${processedInputPath}"`;
 
         switch (currentOutputFormat) {
           case ".jpg":
             // mjpeg takes in 2 (best) to 31 (worst)
-            ffmpegCmd += ` -c:v mjpeg -q:v ${Math.round(31 - (Number(quality) / 100) * 29)}`;
+            ffmpegCmd += ` -q:v ${Math.round(31 - (Number(quality) / 100) * 29)}`;
             break;
           case ".png":
-            ffmpegCmd += " -c:v png -compression_level 100";
+            ffmpegCmd += " -compression_level 100";
             break;
           case ".webp":
             ffmpegCmd += " -c:v libwebp";
@@ -104,7 +126,7 @@ export async function convertMedia(
             }
             break;
           case ".tiff":
-            ffmpegCmd += " -c:v tiff -compression_algo lzw";
+            ffmpegCmd += ` -compression_algo ${quality}`;
             break;
           case ".avif":
             // libaom-av1 takes in 0 (best/lossless (unsure about it being truly lossless but after testing,
@@ -118,8 +140,13 @@ export async function convertMedia(
       }
       return finalOutputPath;
     } catch (error) {
-      console.error(`Error converting ${filePath} to ${currentOutputFormat}:`, error);
+      console.error(`Error converting ${processedInputPath} to ${currentOutputFormat}:`, error);
       throw error;
+    } finally {
+      // Clean up temp file if it exists
+      if (tempHeicFile && fs.existsSync(tempHeicFile)) {
+        fs.unlinkSync(tempHeicFile);
+      }
     }
   }
   // If audio
