@@ -1,4 +1,5 @@
 import { popToRoot, showHUD, Clipboard, closeMainWindow } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getLatestDownload, hasAccessToDownloadsFolder } from "./utils";
 
 export default async function main() {
@@ -7,7 +8,14 @@ export default async function main() {
     return;
   }
 
-  const download = getLatestDownload();
+  let download;
+  try {
+    download = getLatestDownload();
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not get latest download" });
+    return;
+  }
+
   if (!download) {
     await showHUD("No downloads found");
     return;
@@ -21,8 +29,4 @@ export default async function main() {
   } catch (error) {
     await showFailureToast(error, { title: "Could not paste download" });
   }
-
-  await closeMainWindow();
-  await showHUD("Pasted latest download");
-  await popToRoot();
 }
