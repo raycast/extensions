@@ -1,6 +1,6 @@
 # Antinote Changelog
 
-## [v1.0.2] - {PR_MERGE_DATE}
+## [v1.0.2] - 2025-05-22
 - Support for Setapp version of Antinote
 
 ## [v1.0.1] - 2025-03-27
