@@ -173,12 +173,8 @@ export function ResolutionList({
                         }
                         try {
                           await onToggleStar(resolution);
-                          await showToast({
-                            style: Toast.Style.Success,
-                            title: "Removed from Starred Sizes",
-                          });
                         } catch (error) {
-                          await showFailureToast("Failed to remove from starred", {
+                          await showFailureToast("Failed to toggle star status", {
                             message: error instanceof Error ? error.message : String(error),
                           });
                         }
@@ -204,7 +200,7 @@ export function ResolutionList({
                   </>
                 ) : (
                   <Action
-                    title="Add to Starred"
+                    title="Mark as Starred"
                     icon={{
                       source: ICON_PATHS.star,
                       fallback: Icon.Star,
@@ -217,12 +213,8 @@ export function ResolutionList({
                       }
                       try {
                         await onToggleStar(resolution);
-                        await showToast({
-                          style: Toast.Style.Success,
-                          title: "Added to Starred Sizes",
-                        });
                       } catch (error) {
-                        await showFailureToast("Failed to add to starred", {
+                        await showFailureToast("Failed to toggle star status", {
                           message: error instanceof Error ? error.message : String(error),
                         });
                       }
@@ -247,10 +239,6 @@ export function ResolutionList({
                           await onToggleStar(resolution);
                         }
                         await onDeleteResolution(resolution);
-                        await showToast({
-                          style: Toast.Style.Success,
-                          title: "Deleted Custom Size",
-                        });
                       } catch (error) {
                         await showFailureToast("Failed to delete custom size", {
                           message: error instanceof Error ? error.message : String(error),
