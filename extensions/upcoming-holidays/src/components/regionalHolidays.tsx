@@ -1,19 +1,19 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import Holidays from "date-holidays";
-import moment from "moment";
 import { CountryHolidaysTemplate } from "../views/countryHolidayTemplate";
 import { Country, HolidayTypeFilter, TranslatedHoliday } from "../types";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadPinnedStates, pinState, unpinState } from "../services/pinManager";
 import { getAllCountries } from "country-locale-map";
 import { showFailureToast } from "@raycast/utils";
+import { parseISO } from "date-fns";
 
 export const RegionalHolidays = ({
   countryCode,
   dateFilter,
 }: {
   countryCode: string;
-  dateFilter?: (holidayDate: moment.Moment) => boolean;
+  dateFilter?: (holidayDate: Date) => boolean;
 }) => {
   const country = new Holidays(countryCode);
   const states = country.getStates(countryCode);
@@ -26,40 +26,38 @@ export const RegionalHolidays = ({
   });
   const [holidaysByState, setHolidaysByState] = useState<Record<string, TranslatedHoliday[]>>({});
 
-  useEffect(() => {
-    const fetchStatesAndHolidays = async () => {
-      setIsLoading(true);
-      const country = new Holidays(countryCode);
-      const states = country.getStates(countryCode);
-      const pinnedStateCodes = await loadPinnedStates(countryCode);
-      setPinnedStates(pinnedStateCodes);
+  const fetchStatesAndHolidays = useCallback(async () => {
+    setIsLoading(true);
+    const pinnedStateCodes = await loadPinnedStates(countryCode);
+    setPinnedStates(pinnedStateCodes);
 
-      const languages = country.getLanguages();
-      const allHolidaysByState: Record<string, TranslatedHoliday[]> = {};
+    const languages = country.getLanguages();
+    const allHolidaysByState: Record<string, TranslatedHoliday[]> = {};
 
-      Object.entries(states).forEach(([stateCode]) => {
-        const stateHd = new Holidays(countryCode, stateCode);
-        const nativeHolidays = stateHd.getHolidays(moment().format("YYYY"), languages[0]);
-        const englishHolidays = stateHd.getHolidays(moment().format("YYYY"), "en");
+    for (const [stateCode] of Object.entries(states)) {
+      const stateHd = new Holidays(countryCode, stateCode);
+      const nativeHolidays = stateHd.getHolidays(new Date().getFullYear(), languages[0]);
+      const englishHolidays = stateHd.getHolidays(new Date().getFullYear(), "en");
 
-        const filteredHolidays = nativeHolidays
-          .filter((native) => (dateFilter ? dateFilter(moment(native.start)) : true))
-          .map((native) => {
-            const english = englishHolidays.find((eng) => eng.date === native.date);
-            return english && native.name !== english.name ? { ...native, englishName: english.name } : native;
-          });
+      const filteredHolidays = nativeHolidays
+        .filter((native) => (dateFilter ? dateFilter(parseISO(native.date)) : true))
+        .map((native) => {
+          const english = englishHolidays.find((eng) => eng.date === native.date);
+          return english && native.name !== english.name ? { ...native, englishName: english.name } : native;
+        });
 
-        if (filteredHolidays.length > 0) {
-          allHolidaysByState[stateCode] = filteredHolidays;
-        }
-      });
+      if (filteredHolidays.length > 0) {
+        allHolidaysByState[stateCode] = filteredHolidays;
+      }
+    }
 
-      setHolidaysByState(allHolidaysByState);
-      setIsLoading(false);
-    };
-
-    fetchStatesAndHolidays();
+    setHolidaysByState(allHolidaysByState);
+    setIsLoading(false);
   }, [countryCode, dateFilter]);
+
+  useEffect(() => {
+    fetchStatesAndHolidays();
+  }, [fetchStatesAndHolidays]);
 
   const handlePinState = async (country: Country, stateCode: string, stateName: string) => {
     await pinState(country, stateCode, stateName);
@@ -73,7 +71,44 @@ export const RegionalHolidays = ({
     setState((previous) => ({ ...previous, searchText: "" }));
   };
 
-  const unpinnedStates = Object.keys(states).filter((stateCode) => !pinnedStates.includes(stateCode));
+  const unpinnedStates = useMemo(() => {
+    return Object.keys(states).filter((stateCode) => !pinnedStates.includes(stateCode));
+  }, [states, pinnedStates]);
+
+  const pinnedRegionItems = useMemo(() => {
+    return pinnedStates.map((stateCode) => {
+      const stateHolidays = holidaysByState[stateCode];
+      if (stateHolidays) {
+        return (
+          <List.Item
+            key={stateCode}
+            title={states[stateCode]} // State name as the title
+            detail={
+              <CountryHolidaysTemplate
+                filter={state.filter}
+                countryCode={countryCode}
+                stateCode={stateCode}
+                dateFilter={dateFilter}
+              />
+            }
+            accessories={[{ text: `${stateCode}` }]}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Unpin Region"
+                  icon={{ source: Icon.TackDisabled }}
+                  onAction={async () => {
+                    await handleUnpinState(stateCode); // Unpin the state
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      }
+      return null;
+    });
+  }, [pinnedStates, holidaysByState, states, state.filter, countryCode, dateFilter]);
 
   if (Object.keys(holidaysByState).length === 0) {
     return (
@@ -108,40 +143,7 @@ export const RegionalHolidays = ({
         </List.Dropdown>
       }
     >
-      <List.Section title="Pinned Regions">
-        {pinnedStates.map((stateCode) => {
-          const stateHolidays = holidaysByState[stateCode];
-          if (stateHolidays) {
-            return (
-              <List.Item
-                key={stateCode}
-                title={states[stateCode]} // State name as the title
-                detail={
-                  <CountryHolidaysTemplate
-                    filter={state.filter}
-                    countryCode={countryCode}
-                    stateCode={stateCode}
-                    dateFilter={dateFilter}
-                  />
-                }
-                accessories={[{ text: `${stateCode}` }]}
-                actions={
-                  <ActionPanel>
-                    <Action
-                      title="Unpin Region"
-                      icon={{ source: Icon.TackDisabled }}
-                      onAction={async () => {
-                        await handleUnpinState(stateCode); // Unpin the state
-                      }}
-                    />
-                  </ActionPanel>
-                }
-              />
-            );
-          }
-          return null;
-        })}
-      </List.Section>
+      <List.Section title="Pinned Regions">{pinnedRegionItems}</List.Section>
       <List.Section title="Unpinned Regions">
         {unpinnedStates.map((stateCode) => {
           return (

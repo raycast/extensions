@@ -1,26 +1,26 @@
 import { List } from "@raycast/api";
 import Holidays from "date-holidays";
-import moment from "moment";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getAllCountries } from "country-locale-map";
-import { TranslatedHoliday, HolidayTypeFilter } from "../types";
+import { TranslatedHoliday } from "../types";
 import { buildMarkdown } from "../services/buildMarkdown";
+import { getYear } from "date-fns";
 
-export default function DateHoliday({ selectedDate }: { selectedDate: moment.Moment }) {
+export default function DateHoliday({ selectedDate }: { selectedDate: Date }) {
   const [isLoading, setIsLoading] = useState(true);
   const [holidaysFound, setHolidaysFound] = useState<
     Record<string, { country: TranslatedHoliday[]; states: Record<string, TranslatedHoliday[]> }>
   >({});
-  const [state, setState] = useState<{ filter: HolidayTypeFilter | undefined; searchText: string }>({
-    filter: undefined,
+  const [state, setState] = useState<{ searchText: string }>({
     searchText: "",
   });
+
+  const countries = useMemo(() => getAllCountries(), []);
 
   useEffect(() => {
     const loadCountriesAndCheckHolidays = async () => {
       setIsLoading(true);
-      const countries = getAllCountries();
-      const dateToCheck = selectedDate.toDate();
+      const dateToCheck = selectedDate;
       const allHolidays: Record<string, { country: TranslatedHoliday[]; states: Record<string, TranslatedHoliday[]> }> =
         {};
 
@@ -31,7 +31,7 @@ export default function DateHoliday({ selectedDate }: { selectedDate: moment.Mom
         const nativeHolidays = hd.isHoliday(dateToCheck);
 
         if (nativeHolidays) {
-          const englishHolidays = hd.getHolidays(selectedDate.year(), "en");
+          const englishHolidays = hd.getHolidays(getYear(dateToCheck), "en");
 
           const countryHolidays = nativeHolidays.map((native) => {
             const english = englishHolidays.find((eng) => eng.date === native.date);
@@ -51,7 +51,7 @@ export default function DateHoliday({ selectedDate }: { selectedDate: moment.Mom
             const nativeStateHolidays = stateHd.isHoliday(dateToCheck);
 
             if (nativeStateHolidays) {
-              const englishStateHolidays = stateHd.getHolidays(selectedDate.year(), "en");
+              const englishStateHolidays = stateHd.getHolidays(getYear(dateToCheck), "en");
 
               const stateHolidays = nativeStateHolidays.map((native) => {
                 const english = englishStateHolidays.find((e) => e.date === native.date);
@@ -74,7 +74,7 @@ export default function DateHoliday({ selectedDate }: { selectedDate: moment.Mom
     };
 
     loadCountriesAndCheckHolidays();
-  }, [selectedDate]);
+  }, [selectedDate, countries]);
 
   return (
     <List
@@ -85,7 +85,6 @@ export default function DateHoliday({ selectedDate }: { selectedDate: moment.Mom
       onSearchTextChange={(newValue) => {
         setState((previous) => ({ ...previous, searchText: newValue }));
       }}
-      filtering={true}
     >
       {Object.entries(holidaysFound).length === 0 && !isLoading ? (
         <List.EmptyView title="No holidays found" description="No holidays found for the selected date." />

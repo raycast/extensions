@@ -1,4 +1,3 @@
-import moment from "moment";
 import { HolidayTypeFilter } from "../types";
 import { List } from "@raycast/api";
 import Holidays, { HolidaysTypes } from "date-holidays";
@@ -9,7 +8,7 @@ interface CountryHolidaysTemplateProps {
   countryCode: string;
   stateCode?: string;
   filter?: HolidayTypeFilter;
-  dateFilter?: (holidayDate: moment.Moment) => boolean;
+  dateFilter?: (holidayDate: Date) => boolean;
   opts?: { reverse?: boolean; relativeOrdering?: boolean };
 }
 
@@ -32,8 +31,8 @@ export const CountryHolidaysTemplate = ({
           types: filter ? [filter as HolidaysTypes.HolidayType] : [],
         });
 
-    const nativeHoliday = holidayFetcher.getHolidays(moment().format("YYYY"), languages[0]);
-    const englishHoliday = holidayFetcher.getHolidays(moment().format("YYYY"), "en");
+    const nativeHoliday = holidayFetcher.getHolidays(new Date().getFullYear(), languages[0]);
+    const englishHoliday = holidayFetcher.getHolidays(new Date().getFullYear(), "en");
 
     if (!nativeHoliday || nativeHoliday.length === 0) {
       return <List.Item.Detail markdown={"### No holidays known matching criteria."} />;
@@ -41,7 +40,7 @@ export const CountryHolidaysTemplate = ({
       const effectiveDateFilter = dateFilter || (() => true);
 
       const filteredHolidays = nativeHoliday.filter((native) => {
-        const holidayDate = moment(native.start);
+        const holidayDate = new Date(native.start);
         return effectiveDateFilter(holidayDate);
       });
 

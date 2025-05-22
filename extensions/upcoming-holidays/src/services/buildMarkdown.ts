@@ -1,4 +1,4 @@
-import moment from "moment";
+import { format, formatDistanceToNow, isAfter } from "date-fns";
 import { TranslatedHoliday } from "../types";
 
 export const buildMarkdown = (
@@ -16,20 +16,22 @@ export const buildMarkdown = (
   let sortedHolidays = holidays;
 
   if (opts?.relativeOrdering) {
-    const now = moment();
+    const now = new Date();
     const upcomingHolidays: TranslatedHoliday[] = [];
     const pastHolidays: TranslatedHoliday[] = [];
 
     sortedHolidays.forEach((holiday) => {
-      const holidayMoment = moment(holiday.start);
-      if (holidayMoment.isSameOrAfter(now)) {
+      const holidayDate = new Date(holiday.start);
+      if (isAfter(holidayDate, now)) {
         upcomingHolidays.push(holiday);
       } else {
         pastHolidays.push(holiday);
       }
     });
 
-    const sortByStartDate = (a: TranslatedHoliday, b: TranslatedHoliday) => moment(a.start).diff(moment(b.start));
+    const sortByStartDate = (a: TranslatedHoliday, b: TranslatedHoliday) => {
+      return a.start > b.start ? 1 : -1; // Simple comparison for sorting
+    };
     upcomingHolidays.sort(sortByStartDate);
     pastHolidays.sort(sortByStartDate);
     sortedHolidays = [...upcomingHolidays, ...pastHolidays];
@@ -41,9 +43,9 @@ export const buildMarkdown = (
 
   return sortedHolidays
     .map(({ start, name, englishName }) => {
-      const date = moment(start);
-      const formattedDate = date.format("dddd, MMMM Do");
-      const relativeDate = date.fromNow();
+      const date = new Date(start);
+      const formattedDate = format(date, "EEEE, MMMM Do");
+      const relativeDate = formatDistanceToNow(date, { addSuffix: true }); // Use date-fns for relative date
 
       let dateInfo = "";
       if (showStartDate) {
