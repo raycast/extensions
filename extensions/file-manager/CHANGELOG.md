@@ -1,5 +1,9 @@
 # File Manager Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added a preferences to enable search by file permissions
+
 ## [Fixes] - 2025-02-29
 
 - Fixed shell command errors caused by filenames containing single quotes.
