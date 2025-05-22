@@ -1,6 +1,6 @@
 # Jenkins Changelog
 
-## [Fix Suggestion Redirect URL] - {PR_MERGE_DATE}
+## [Fix Suggestion Redirect URL] - 2025-05-22
 
 - Fix the issue where overriding the suggestion URL when it's unnecessary caused broken links
 
