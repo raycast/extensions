@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { getFileSize, RenameForm, deleteFile, handleSetWallpaper, isImageFile } from "../utils";
-import { FileDataType, Preferences } from "../types";
+import { FileDataType } from "../types";
 
 export function FileItem(props: {
   fileData: FileDataType;

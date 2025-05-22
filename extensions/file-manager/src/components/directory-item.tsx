@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List, Toast, environment, popToRoot, showToast } from "@raycast/api";
 import { RenameForm, deleteDirectory } from "../utils";
 import { Directory } from "./directory";
-import { FileDataType, Preferences } from "../types";
+import { FileDataType } from "../types";
 import { GitIgnoreHelper } from "@gerhobbelt/gitignore-parser";
 
 export function DirectoryItem(props: {
