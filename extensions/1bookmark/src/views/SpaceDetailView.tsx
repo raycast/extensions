@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Color, useNavigation } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
 import { useMe } from "../hooks/use-me.hook";
@@ -7,6 +7,7 @@ import { SpaceMembersView } from "./SpaceMembersView";
 import { SpaceTagsView } from "./SpaceTagsView";
 import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
 import { SpaceMemberAuthPoliciesView } from "./SpaceMemberAuthPoliciesView";
+import { SpaceAuthForm } from "./SpaceAuthForm";
 
 const EditAction = (props: { spaceId: string; keyToEdit: KeyToEdit; value: string; refetch: () => void }) => {
   const { spaceId, keyToEdit, value, refetch } = props;
@@ -22,7 +23,8 @@ const EditAction = (props: { spaceId: string; keyToEdit: KeyToEdit; value: strin
 
 function Body(props: { spaceId: string }) {
   const { spaceId } = props;
-  const { data, isLoading, refetch } = trpc.space.get.useQuery({ spaceId });
+  const { data, isLoading, refetch: refetchSpace } = trpc.space.get.useQuery({ spaceId });
+  const { pop } = useNavigation();
   const me = useMe();
   const { enabledSpaceIds, confirmAndToggleEnableDisableSpace: toggleEnableDisable } = useEnabledSpaces();
 
@@ -32,6 +34,11 @@ function Body(props: { spaceId: string }) {
 
   const spaceInMe = me.data?.associatedSpaces.find((s) => s.id === spaceId);
   const image = data.image ? data.image : data.type === "TEAM" ? Icon.TwoPeople : Icon.Person;
+
+  const refetch = () => {
+    refetchSpace();
+    me.refetch();
+  };
 
   return (
     <List isLoading={me.isFetching}>
@@ -137,10 +144,66 @@ function Body(props: { spaceId: string }) {
       />
 
       <List.Section title="My Info in this space">
-        <List.Item title="My Role" subtitle={spaceInMe?.myRole || ""} icon={Icon.CreditCard} />
-        {/* WIP */}
-        {/* <List.Item title="My NickName" subtitle={spaceInMe?.myNickname || me.data.name} icon={Icon.Brush} /> */}
-        {/* <List.Item title="My Image" subtitle={spaceInMe?.myImage || ''} icon={spaceInMe?.myImage || Icon.Person} /> */}
+        {data.type === "TEAM" && (
+          <>
+            <List.Item
+              title="My Space Auth Email"
+              accessories={[
+                {
+                  text: spaceInMe?.myAuthEmail,
+                  tag: spaceInMe?.myAuthEmail ? undefined : { value: "Same as Account", color: Color.SecondaryText },
+                },
+              ]}
+              icon={Icon.Envelope}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="My Space Auth Email"
+                    icon={Icon.Envelope}
+                    target={<SpaceAuthForm spaceId={spaceId} refetch={() => pop()} />}
+                    onPop={refetch}
+                  />
+                </ActionPanel>
+              }
+            />
+            <List.Item title="My Role" accessories={[{ text: spaceInMe?.myRole }]} icon={Icon.CreditCard} />
+          </>
+        )}
+        <List.Item
+          title="My NickName"
+          accessories={[
+            {
+              text: spaceInMe?.myNickname,
+              tag: spaceInMe?.myNickname ? undefined : { value: "Same as Account", color: Color.SecondaryText },
+            },
+          ]}
+          icon={Icon.Brush}
+          actions={
+            <ActionPanel>
+              <EditAction
+                spaceId={spaceId}
+                keyToEdit="myNickname"
+                value={spaceInMe?.myNickname || ""}
+                refetch={refetch}
+              />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="My Image"
+          accessories={[
+            {
+              text: spaceInMe?.myImage,
+              tag: spaceInMe?.myImage ? undefined : { value: "Same as Account", color: Color.SecondaryText },
+            },
+          ]}
+          icon={spaceInMe?.myImage || Icon.Person}
+          actions={
+            <ActionPanel>
+              <EditAction spaceId={spaceId} keyToEdit="myImage" value={spaceInMe?.myImage || ""} refetch={refetch} />
+            </ActionPanel>
+          }
+        />
       </List.Section>
 
       {/*

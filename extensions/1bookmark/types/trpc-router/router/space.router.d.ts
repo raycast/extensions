@@ -91,6 +91,8 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
             description?: string | undefined;
             name?: string | undefined;
             image?: string | undefined;
+            myNickname?: string | undefined;
+            myImage?: string | undefined;
         };
         output: void;
     }>;

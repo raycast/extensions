@@ -9,15 +9,15 @@ import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
 import { TRPCError } from "@trpc/server";
 
 type Action = "send-auth-code" | "disable-space" | "leave-space";
-
+type MailType = "previous-email" | "new-email";
 export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void | Promise<void> }) {
   const { spaceId, refetch } = props;
   const { disableSpace } = useEnabledSpaces();
 
   const space = trpc.space.get.useQuery({ spaceId });
-  const { data: lastVerifiedEmail } = trpc.spaceAuth.lastVerifiedEmail.useQuery({ spaceId });
-  const { data: spaceEmailPatterns } = trpc.spaceAuth.listMemberAuthPolicies.useQuery({ spaceId });
+  const spaceAuthEmail = space.data?.users[0]?.authEmail;
 
+  const { data: spaceEmailPatterns } = trpc.spaceAuth.listMemberAuthPolicies.useQuery({ spaceId });
   const sendAuthCode = trpc.spaceAuth.sendAuthCode.useMutation();
   const verifyAuthCode = trpc.spaceAuth.verifyAuthCode.useMutation();
   const leave = trpc.space.leave.useMutation();
@@ -25,12 +25,29 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
   const [authEmail, setAuthEmail] = useState("");
   const [verifyingAuthEmail, setVerifyingAuthEmail] = useCachedState(CACHED_KEY_SPACE_VERIFYING_AUTH_EMAIL, "");
   const [codeSent, setCodeSent] = useCachedState(CACHED_KEY_SPACE_AUTH_CODE_SENT, false);
+  const [mailType, setMailType] = useState<"previous-email" | "new-email">("previous-email");
 
   const [action, setAction] = useState<Action>("send-auth-code");
   const [code, setCode] = useState("");
   const emailRef = useRef<Form.TextField>(null);
   const verificationTokenRef = useRef<Form.TextField>(null);
   const actionRef = useRef<Form.Dropdown>(null);
+
+  const handleMailType = (mailType: MailType) => {
+    setMailType(mailType);
+    if (mailType === "previous-email") {
+      setAuthEmail(spaceAuthEmail ?? "");
+    } else {
+      setAuthEmail("");
+    }
+  };
+
+  useEffect(() => {
+    if (spaceAuthEmail) {
+      setAuthEmail(spaceAuthEmail);
+      setMailType("previous-email");
+    }
+  }, [spaceAuthEmail]);
 
   const handleLeaveSpace = async () => {
     const confirmed = await confirmAlert({
@@ -240,14 +257,14 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
           <Form.Description title="🟠" text={`[${space.data.name}] space requires you to authenticate.`} />
 
           <Form.Dropdown ref={actionRef} id="action" title="Action" onChange={(e) => setAction(e as Action)}>
-            <Form.Dropdown.Item value="send-auth-code" title="Send me an auth code" />
+            <Form.Dropdown.Item value="send-auth-code" title="Send me an auth code to space auth email" />
             <Form.Dropdown.Item value="disable-space" title="Disable this space on only this device" />
             <Form.Dropdown.Item value="leave-space" title="Leave this space on all devices" />
           </Form.Dropdown>
 
           {action === "disable-space" && (
             <Form.Description
-              text={`This space will be disabled only on this device. You can re-enable it at any time by authenticating again in the space list.`}
+              text={`This space will be disabled only on this device. You can re-enable it at any time in the space list.`}
             />
           )}
 
@@ -255,13 +272,20 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
             <Form.Description text={`You will be removed from this space on all devices.`} />
           )}
 
-          {action === "send-auth-code" && spaceEmailPatterns && spaceEmailPatterns.length > 0 && (
-            <Form.Description
-              text={`This space allows only the following email patterns:\n${spaceEmailPatterns.join(", ")}`}
-            />
+          {action === "send-auth-code" && (
+            <Form.Dropdown
+              id="mail-type"
+              title={mailType === "previous-email" ? "Email" : undefined}
+              onChange={(e) => handleMailType(e as MailType)}
+            >
+              {spaceAuthEmail && (
+                <Form.Dropdown.Item value={"previous-email"} title={`${spaceAuthEmail} (Used in this space)`} />
+              )}
+              <Form.Dropdown.Item value="new-email" title="New space auth email 👇" />
+            </Form.Dropdown>
           )}
 
-          {action === "send-auth-code" && (
+          {action === "send-auth-code" && mailType === "new-email" && (
             <Form.TextField
               ref={emailRef}
               id="email"
@@ -272,15 +296,15 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
             />
           )}
 
-          {action === "send-auth-code" && lastVerifiedEmail && (
-            <Form.Description text={`Last verified email: ${lastVerifiedEmail}`} />
+          {action === "send-auth-code" && spaceEmailPatterns && spaceEmailPatterns.length > 0 && (
+            <Form.Description text={`Allowed email patterns: ${spaceEmailPatterns.join(", ")}`} />
           )}
         </>
       )}
 
       {codeSent && (
         <>
-          <Form.Description text={`Login code sent to ${authEmail}.`} />
+          <Form.Description text={`Auth code sent to ${authEmail}.`} />
           <Form.Description text={`Enter the 6-digit auth code sent to your email.`} />
           <Form.TextField
             ref={verificationTokenRef}

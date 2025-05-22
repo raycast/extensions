@@ -10,6 +10,7 @@ function Body(props: { spaceId: string }) {
 
   const { pop } = useNavigation();
   const create = trpc.spaceAuth.createMemberAuthPolicy.useMutation();
+  const check = trpc.spaceAuth.checkMySessionToPassAuthPolicy.useMutation();
   const [emailPattern, setEmailPattern] = useState("");
   const [authCheckInterval, setAuthCheckInterval] = useState("60d");
 
@@ -34,10 +35,24 @@ function Body(props: { spaceId: string }) {
     return "Type it like this: @example.com";
   }, [emailPattern]);
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!emailPattern) {
       showToast({
         title: "Email domain is required",
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
+
+    // If the account being configured doesn't match the policy being added,
+    // you may not be able to access the space immediately after adding the policy.
+    // Therefore, you must authenticate first before adding the policy.
+    const policyToAdd = { emailPattern, authCheckInterval };
+    const validSpaceAuth = await check.mutateAsync({ spaceId, policyToAdd });
+
+    if (!validSpaceAuth) {
+      showToast({
+        title: "Before adding this policy, you need to authenticate to the space.",
         style: Toast.Style.Failure,
       });
       return;

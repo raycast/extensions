@@ -12,6 +12,7 @@ export const SpaceMemberAuthPolicyItemActionPanel = (props: {
 
   const space = me.associatedSpaces.find((space) => space.id === spaceId);
   const deletePolicy = trpc.spaceAuth.deleteMemberAuthPolicy.useMutation();
+  const check = trpc.spaceAuth.checkMySessionToPassAuthPolicy.useMutation();
 
   const handleDelete = async (emailPattern: string) => {
     if (space?.myRole !== "OWNER") {
@@ -22,15 +23,26 @@ export const SpaceMemberAuthPolicyItemActionPanel = (props: {
       return;
     }
 
-    const confirmed = await confirmAlert({
-      title: "Delete Member Auth Policy",
-      message: `Are you sure you want to delete the member auth policy for ${emailPattern}?`,
-      primaryAction: {
-        title: "Delete",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-    if (!confirmed) {
+    if (
+      !(await confirmAlert({
+        title: "Delete Member Auth Policy",
+        message: `Are you sure you want to delete the member auth policy for ${emailPattern}?`,
+        primaryAction: {
+          title: "Delete",
+          style: Alert.ActionStyle.Destructive,
+        },
+      }))
+    ) {
+      return;
+    }
+
+    const validSpacedAuth = await check.mutateAsync({ spaceId, policyToRemove: { emailPattern } });
+    if (!validSpacedAuth) {
+      showToast({
+        title:
+          "Before deleting this policy, you need to authenticate with another email to comply with the rest of the space policies.",
+        style: Toast.Style.Failure,
+      });
       return;
     }
 
