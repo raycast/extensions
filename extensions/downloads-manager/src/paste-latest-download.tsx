@@ -13,7 +13,14 @@ export default async function main() {
     return;
   }
 
-  await Clipboard.paste({ file: download.path });
+  try {
+    await Clipboard.paste({ file: download.path });
+    await closeMainWindow();
+    await showHUD("Pasted latest download");
+    await popToRoot();
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not paste download" });
+  }
 
   await closeMainWindow();
   await showHUD("Pasted latest download");
