@@ -1,5 +1,10 @@
 # Prism Launcher Changelog
 
+## [New Additions] - {PR_MERGE_DATE}
+
+- Add favorites functionality for instances
+- Sort instances alphabetically
+
 ## [New Additions] - 2025-05-22
 
 - Add 'Open Instance Window' action to control instance settings or install content
