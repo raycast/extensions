@@ -4,7 +4,7 @@ import { getNotes } from "../api/getNotes";
 
 export default async function () {
   const { maxQueryResults } = getPreferenceValues();
-  const max = parseInt(maxQueryResults) ?? 250;
+  const max = Number.isNaN(parseInt(maxQueryResults)) ? 250 : parseInt(maxQueryResults);
   const notes = await getNotes(max);
   return notes;
 }
