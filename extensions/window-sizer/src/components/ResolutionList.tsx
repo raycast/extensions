@@ -30,10 +30,8 @@ const ICON_PATHS = {
   clear: "icons/clear.svg",
   unstar: "icons/unstar.svg",
   star: "icons/star.svg",
+  starCheck: "icons/star-check.svg",
 } as const;
-
-// Module-level icon preloading flag
-let iconsPreloaded = false;
 
 /**
  * ResolutionList component displays a list of available resolutions
@@ -48,18 +46,12 @@ export function ResolutionList({
   selectedItemId,
   starredResolutions = [],
 }: ResolutionListProps) {
-  const [isIconsReady, setIsIconsReady] = useState(iconsPreloaded);
+  const [isIconsReady, setIsIconsReady] = useState(false);
 
   useEffect(() => {
     const preloadIcons = async () => {
-      if (iconsPreloaded) {
-        setIsIconsReady(true);
-        return;
-      }
-
       try {
         await getApplications();
-        iconsPreloaded = true;
         setIsIconsReady(true);
       } catch (error) {
         console.error("Failed to preload icons:", error);
@@ -184,7 +176,7 @@ export function ResolutionList({
                       <Action
                         title="Already Starred"
                         icon={{
-                          source: "icons/star-check.svg",
+                          source: ICON_PATHS.starCheck,
                           fallback: Icon.Star,
                           tintColor: Color.PrimaryText,
                         }}
@@ -235,14 +227,15 @@ export function ResolutionList({
                         return;
                       }
                       try {
+                        await onDeleteResolution(resolution);
                         if (resolutionIsStarred && onToggleStar) {
                           await onToggleStar(resolution);
                         }
-                        await onDeleteResolution(resolution);
                       } catch (error) {
                         await showFailureToast("Failed to delete custom size", {
                           message: error instanceof Error ? error.message : String(error),
                         });
+                        return;
                       }
                     }}
                   />
