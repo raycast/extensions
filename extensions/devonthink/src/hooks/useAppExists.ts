@@ -11,7 +11,7 @@ const useAppExists = () => {
 
   useEffect(() => {
     getApplications()
-      .then((apps) => apps.find((app) => app.name === "DEVONthink 3"))
+      .then((apps) => apps.find((app) => app.name === "DEVONthink"))
       .then((app) => setState({ appExistsLoading: false, appExists: app !== undefined }));
   }, []);
 
@@ -21,7 +21,7 @@ const useAppExists = () => {
 
     showToast({
       style: Toast.Style.Failure,
-      title: "DEVONthink 3 is not installed",
+      title: "DEVONthink is not installed",
       primaryAction: {
         title: "Download app",
         onAction: (toast) => open("https://www.devontechnologies.com/apps/devonthink").then(() => toast.hide()),

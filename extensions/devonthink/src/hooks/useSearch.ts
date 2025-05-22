@@ -35,7 +35,7 @@ export default useSearch;
 const searchInDEVONThink = async (databaseUUID: string, query: string) => {
   // language=JavaScript
   const resultsString = (await jxa({ parse: true })`
-      const DT = Application("DEVONthink 3");
+      const DT = Application("DEVONthink");
 
       let results;
 

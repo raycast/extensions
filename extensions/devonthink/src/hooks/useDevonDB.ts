@@ -38,7 +38,7 @@ const getDevonDBs =
   // language=JavaScript
   async () =>
     (await jxa({ parse: true })`
-        const DT = Application("DEVONthink 3");
+        const DT = Application("DEVONthink");
 
         const databases = DT.databases();
 
