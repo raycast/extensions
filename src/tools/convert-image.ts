@@ -1,4 +1,4 @@
-import { convertImage, ImageOutputFormats } from "../utils/converter";
+import { convertImage, imageConfig } from "../utils/converter";
 import { isFFmpegInstalled } from "../utils/ffmpeg";
 import { getFullPath } from "../utils/get-full-path";
 import { Tool } from "@raycast/api";
@@ -7,7 +7,7 @@ type Input = {
   /** the absolute path to the file that the user wants to convert */
   inputPath: string;
   /** the file type to convert the input file to */
-  outputFileType: ImageOutputFormats;
+  outputFileType: keyof typeof imageConfig;
 };
 
 export default async function ConvertImage({ inputPath, outputFileType }: Input) {
