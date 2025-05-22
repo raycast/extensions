@@ -1,6 +1,6 @@
 # File Manager Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-05-22
 
 - Added a preferences to enable search by file permissions
 
