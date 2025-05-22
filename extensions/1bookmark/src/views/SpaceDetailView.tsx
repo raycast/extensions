@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, Color, useNavigation } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
 import { useMe } from "../hooks/use-me.hook";
@@ -24,7 +24,6 @@ const EditAction = (props: { spaceId: string; keyToEdit: KeyToEdit; value: strin
 function Body(props: { spaceId: string }) {
   const { spaceId } = props;
   const { data, isLoading, refetch: refetchSpace } = trpc.space.get.useQuery({ spaceId });
-  const { pop } = useNavigation();
   const me = useMe();
   const { enabledSpaceIds, confirmAndToggleEnableDisableSpace: toggleEnableDisable } = useEnabledSpaces();
 
@@ -160,7 +159,7 @@ function Body(props: { spaceId: string }) {
                   <Action.Push
                     title="My Space Auth Email"
                     icon={Icon.Envelope}
-                    target={<SpaceAuthForm spaceId={spaceId} refetch={() => pop()} />}
+                    target={<SpaceAuthForm spaceId={spaceId} needPop />}
                     onPop={refetch}
                   />
                 </ActionPanel>

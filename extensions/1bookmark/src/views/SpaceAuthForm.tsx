@@ -1,6 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
-import { ActionPanel, Action, Form, Icon, showToast, Toast, confirmAlert, Alert, Keyboard } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+  confirmAlert,
+  Alert,
+  Keyboard,
+  useNavigation,
+} from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
 import { useCachedState } from "@raycast/utils";
@@ -10,10 +21,11 @@ import { TRPCError } from "@trpc/server";
 
 type Action = "send-auth-code" | "disable-space" | "leave-space";
 type MailType = "previous-email" | "new-email";
-export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void | Promise<void> }) {
-  const { spaceId, refetch } = props;
+export function SpaceAuthFormBody(props: { spaceId: string; needPop?: boolean; refetch?: () => void | Promise<void> }) {
+  const { spaceId, needPop = false, refetch } = props;
   const { disableSpace } = useEnabledSpaces();
 
+  const { pop } = useNavigation();
   const space = trpc.space.get.useQuery({ spaceId });
   const spaceAuthEmail = space.data?.users[0]?.authEmail;
 
@@ -68,7 +80,10 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
         style: Toast.Style.Success,
         title: "You have left the space",
       });
-      refetch();
+      refetch?.();
+      if (needPop) {
+        pop();
+      }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -84,7 +99,10 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
       style: Toast.Style.Success,
       title: "Space disabled",
     });
-    refetch();
+    refetch?.();
+    if (needPop) {
+      pop();
+    }
   };
 
   const handleSendAuthCode = () => {
@@ -149,10 +167,13 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
             style: Toast.Style.Success,
             title: "Successfully verified",
           });
-          await refetch();
           setCodeSent(false);
           setVerifyingAuthEmail("");
           setAuthEmail("");
+          refetch?.();
+          if (needPop) {
+            pop();
+          }
         },
       },
     );
@@ -226,7 +247,10 @@ export function SpaceAuthFormBody(props: { spaceId: string; refetch: () => void 
                 setCodeSent(false);
                 setVerifyingAuthEmail("");
                 setAuthEmail("");
-                refetch();
+                refetch?.();
+                if (needPop) {
+                  pop();
+                }
               }}
               title="Back to Email Input"
             />
