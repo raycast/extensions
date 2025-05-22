@@ -17,8 +17,17 @@ export const buildMarkdown = (
 
   if (opts?.relativeOrdering) {
     const now = moment();
-    const upcomingHolidays = sortedHolidays.filter((holiday) => moment(holiday.start).isSameOrAfter(now));
-    const pastHolidays = sortedHolidays.filter((holiday) => moment(holiday.start).isBefore(now));
+    const upcomingHolidays: TranslatedHoliday[] = [];
+    const pastHolidays: TranslatedHoliday[] = [];
+
+    sortedHolidays.forEach((holiday) => {
+      const holidayMoment = moment(holiday.start);
+      if (holidayMoment.isSameOrAfter(now)) {
+        upcomingHolidays.push(holiday);
+      } else {
+        pastHolidays.push(holiday);
+      }
+    });
 
     const sortByStartDate = (a: TranslatedHoliday, b: TranslatedHoliday) => moment(a.start).diff(moment(b.start));
     upcomingHolidays.sort(sortByStartDate);
@@ -45,7 +54,6 @@ export const buildMarkdown = (
 
       return `
 ### ${englishName ? `${englishName} (${name})` : name}
-
 ${formattedDate} ${dateInfo}
 `;
     })

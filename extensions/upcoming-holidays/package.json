@@ -19,42 +19,42 @@
       "title": "List Upcoming Holidays",
       "description": "Allows you to see the upcoming holidays for a country and region (if applicable)",
       "mode": "view",
-      "subtitle": "Upcoming Holidays"
+      "subtitle": "View All Upcoming Holidays"
     },
     {
       "name": "all-holidays",
       "title": "List All Holidays",
       "description": "Allows you to see all the holidays, past and future, for a country and region (if applicable)",
       "mode": "view",
-      "subtitle": "Upcoming Holidays"
+      "subtitle": "View All Holidays"
     },
     {
       "name": "today-holidays",
       "title": "List Today's Holidays",
       "description": "Allows you to see all holidays happening today for a country and region (if applicable)",
       "mode": "view",
-      "subtitle": "Upcoming Holidays"
+      "subtitle": "View Today's Holidays"
     },
     {
       "name": "pinned-locations",
       "title": "List Pinned Location Holidays",
       "description": "Allows you to see all upcoming holidays happening in your pinned locations",
       "mode": "view",
-      "subtitle": "Upcoming Holidays"
+      "subtitle": "View Pinned Location Holidays"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.97.0",
+    "@raycast/api": "^1.99.1",
     "@raycast/utils": "^1.19.1",
     "country-locale-map": "^1.9.9",
-    "date-holidays": "^3.24.2",
+    "date-holidays": "^3.24.3",
     "moment": "^2.30.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "~22.15.3",
-    "@types/react": "^19.1.2",
-    "eslint": "^9.26.0",
+    "@types/node": "~22.15.21",
+    "@types/react": "^19.1.5",
+    "eslint": "^9.27.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3"
   },

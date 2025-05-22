@@ -87,6 +87,9 @@ export default function DateHoliday({ selectedDate }: { selectedDate: moment.Mom
       }}
       filtering={true}
     >
+      {Object.entries(holidaysFound).length === 0 && !isLoading ? (
+        <List.EmptyView title="No holidays found" description="No holidays found for the selected date." />
+      ) : null}
       {Object.entries(holidaysFound).flatMap(([countryCode, { country: countryHolidays, states: stateHolidays }]) => {
         const country = getAllCountries().find((c) => c.alpha2 === countryCode);
         const stateNames = new Holidays(countryCode).getStates(countryCode);
@@ -95,8 +98,8 @@ export default function DateHoliday({ selectedDate }: { selectedDate: moment.Mom
           countryHolidays?.length > 0 ? (
             <List.Item
               key={`${countryCode}-country`}
-              title={`${country?.name}`}
-              icon={country?.emoji || ""}
+              title={country?.name || ""}
+              icon={country?.emoji}
               detail={
                 <List.Item.Detail markdown={buildMarkdown(countryHolidays, { startDate: true, relativeDate: false })} />
               }
@@ -108,9 +111,9 @@ export default function DateHoliday({ selectedDate }: { selectedDate: moment.Mom
           return holidays.length > 0 ? (
             <List.Item
               key={`${countryCode}-${stateCode}`}
-              title={`${stateName}`}
+              title={stateName || ""}
               icon={country?.emoji}
-              accessories={[{ text: `${country?.alpha3}`, tooltip: `${country?.name}` }]}
+              accessories={[{ text: country?.alpha3, tooltip: country?.name }]}
               detail={<List.Item.Detail markdown={buildMarkdown(holidays, { startDate: true, relativeDate: false })} />}
             />
           ) : null;

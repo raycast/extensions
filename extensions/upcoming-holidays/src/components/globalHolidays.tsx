@@ -56,6 +56,7 @@ export default function GlobalHolidays({
   };
 
   useEffect(() => {
+    let mounted = true;
     (async () => {
       await loadCountries();
       const stateResults = await Promise.all(
@@ -64,6 +65,8 @@ export default function GlobalHolidays({
           return { code: country.alpha2, hasStates };
         }),
       );
+
+      if (!mounted) return; // Prevent state update if component is unmounted
 
       const resultsMap = stateResults.reduce(
         (acc, { code, hasStates }) => {
@@ -74,6 +77,9 @@ export default function GlobalHolidays({
       );
       setCountriesWithStates(resultsMap);
     })();
+    return () => {
+      mounted = false; // Cleanup function to prevent state update on unmount
+    };
   }, [countries]);
 
   return (

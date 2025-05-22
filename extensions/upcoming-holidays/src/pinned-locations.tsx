@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Country, HolidayTypeFilter, PinnedState } from "./types";
 import { loadAllPinnedStates, loadPinnedCountries, unpinCountry, unpinState } from "./services/pinManager";
@@ -73,8 +73,8 @@ export default function PinnedLocationsCommand() {
               <Action
                 title="Unpin Region"
                 icon={{ source: Icon.TackDisabled }}
-                onAction={async () => {
-                  await handleUnpinState(countryCode, stateCode);
+                onAction={() => {
+                  handleUnpinState(countryCode, stateCode);
                 }}
               />
             </ActionPanel>
@@ -102,8 +102,8 @@ export default function PinnedLocationsCommand() {
             <Action
               title="Unpin Country"
               icon={{ source: Icon.TackDisabled }}
-              onAction={async () => {
-                await handleUnpinCountry(country);
+              onAction={() => {
+                handleUnpinCountry(country);
               }}
             />
           </ActionPanel>
@@ -111,10 +111,6 @@ export default function PinnedLocationsCommand() {
       />
     ));
   };
-
-  if (!isLoading && pinnedCountries.length === 0 && Object.keys(pinnedStates).length === 0) {
-    return <Detail markdown="# No pinned locations found." />;
-  }
 
   return (
     <List
@@ -141,9 +137,23 @@ export default function PinnedLocationsCommand() {
         </List.Dropdown>
       }
     >
-      {pinnedCountries.length > 0 && <List.Section title="Pinned Countries">{renderPinnedCountries()}</List.Section>}
-      {Object.keys(pinnedStates).length > 0 && (
-        <List.Section title="Pinned Regions">{renderPinnedRegions()}</List.Section>
+      {isLoading ? null : (
+        <>
+          {pinnedCountries.length > 0 && (
+            <List.Section title="Pinned Countries">{renderPinnedCountries()}</List.Section>
+          )}
+
+          {Object.keys(pinnedStates).length > 0 && (
+            <List.Section title="Pinned Regions">{renderPinnedRegions()}</List.Section>
+          )}
+          {pinnedCountries.length === 0 && Object.keys(pinnedStates).length === 0 && (
+            <List.EmptyView
+              icon={Icon.Pin}
+              title="No pinned locations found"
+              description="Pin some locations to see them here."
+            />
+          )}
+        </>
       )}
     </List>
   );
