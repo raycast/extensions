@@ -1,5 +1,12 @@
 # Parcel Changelog
 
+## [Improved Date Handling] - {PR_MERGE_DATE}
+
+- Enhanced date parsing to support both American and European date formats
+- Added fallback to display raw date string if parsing fails
+- Improved error handling and logging for date-related issues
+- Refactored date parsing logic into a reusable utility function for better maintainability
+
 ## [Track on Website, Cache] - 2025-04-12
 
 - Added "Track on Website" action to open the carrier's tracking page in the default browser

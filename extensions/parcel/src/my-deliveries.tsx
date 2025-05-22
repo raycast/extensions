@@ -46,57 +46,75 @@ export default function Command() {
     return `(in ${daysUntil} day${daysUntil !== 1 ? "s" : ""})`;
   };
 
-  // Format date in a more readable way: "Feb 26, 2025"
-  const formatFriendlyDate = (dateString: string): string => {
-    if (!dateString) return "Unknown date";
-
+  // Utility function to parse dates in various formats
+  const parseDate = (dateString: string): Date | null => {
     try {
-      const date = new Date(dateString);
+      let date: Date | null = null;
 
-      // Check if date is valid
-      if (isNaN(date.getTime())) {
-        return "Unknown date";
+      // First try American format (Month DD, YYYY HH:mm)
+      if (dateString.includes(",")) {
+        date = new Date(dateString);
       }
 
-      return date.toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
+      // If American format failed or wasn't used, try European format (DD.MM.YYYY HH:mm)
+      if (!date || isNaN(date.getTime())) {
+        const [datePart, timePart] = dateString.split(" ");
+        const [day, month, year] = datePart.split(".");
+        const [hours, minutes] = timePart ? timePart.split(":") : ["00", "00"];
+
+        // Create date in ISO format (YYYY-MM-DDTHH:mm:ss)
+        const isoDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}:00`;
+        date = new Date(isoDate);
+      }
+
+      return isNaN(date.getTime()) ? null : date;
     } catch (e) {
-      return "Unknown date";
+      console.error(`Error parsing date ${dateString}:`, e);
+      return null;
     }
   };
 
-  // Format tracking history dates in a compact format: "Feb 26, 14:30"
-  const formatCompactDate = (dateString: string): string => {
-    if (!dateString) return "Unknown date";
+  // Format date in a more readable way: "Feb 26, 2025"
+  const formatFriendlyDate = (dateString: string | undefined | null): string => {
+    if (!dateString || dateString === "--//--") return "Not available";
 
-    try {
-      const date = new Date(dateString);
-
-      // Check if date is valid
-      if (isNaN(date.getTime())) {
-        return "Unknown date";
-      }
-
-      // Create compact date portion: "Feb 26"
-      const dateFormatted = date.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-      });
-
-      // Create 24-hour time format: "14:30"
-      const timeFormatted = date.toLocaleTimeString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-
-      return `${dateFormatted}, ${timeFormatted}`;
-    } catch (e) {
-      return "Unknown date";
+    const date = parseDate(dateString);
+    if (!date) {
+      console.error(`Both date formats failed for: ${dateString}`);
+      return dateString;
     }
+
+    return date.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  // Format tracking history dates in a compact format: "Feb 26, 14:30"
+  const formatCompactDate = (dateString: string | undefined | null): string => {
+    if (!dateString || dateString === "--//--") return "Not available";
+
+    const date = parseDate(dateString);
+    if (!date) {
+      console.error(`Both date formats failed for: ${dateString}`);
+      return dateString;
+    }
+
+    // Create compact date portion: "Feb 26"
+    const dateFormatted = date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+
+    // Create 24-hour time format: "14:30"
+    const timeFormatted = date.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    return `${dateFormatted}, ${timeFormatted}`;
   };
 
   // Generate full detail markdown including tracking history
