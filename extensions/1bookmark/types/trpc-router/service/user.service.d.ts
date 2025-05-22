@@ -3,6 +3,10 @@ export declare class UserService {
     get(email: string): Promise<{
         associatedSpaces: {
             myTags: string[];
+            myRole: import(".prisma/client").$Enums.TeamRole;
+            myImage: string | null;
+            myNickname: string | null;
+            myAuthEmail: string | null;
             tags: {
                 description: string | null;
                 spaceId: string;
@@ -51,6 +55,7 @@ export declare class UserService {
     })[]>;
     inviteMembers(params: {
         space: Exclude<Awaited<ReturnType<typeof db.space.findUnique>>, null>;
+        actorEmail: string;
         emails: string[];
     }): Promise<void>;
     subscribeTag(p: {
@@ -68,4 +73,7 @@ export declare class UserService {
         name?: string;
         image?: string;
     }): Promise<void>;
+    getSessionId(p: {
+        accessToken: string;
+    }): Promise<string | undefined>;
 }

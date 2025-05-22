@@ -1,5 +1,9 @@
 # LeetCode Changelog
 
+## [Fixes] - 2025-03-20
+
+- Unescape square brackets in markdown conversion to avoid matching Latex delimiters (see [this](https://leetcode.com/problems/minimum-cost-walk-in-weighted-graph/description/) LeetCode problem to see what goes wrong if we do not unescape square brackets)
+
 ## [Code Template Features] - 2025-01-23
 
 - Add Copy Code Template submenu action to copy problem's code template to clipboard

@@ -7,6 +7,7 @@ import {
   Toast,
   useNavigation,
   openExtensionPreferences,
+  open,
 } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { BundleForm } from "./components/BundleForm";
@@ -14,6 +15,7 @@ import { useBundles } from "./hooks/useBundles";
 import { getProfileNameByDirectory, openLinksInChrome } from "./utils/chrome";
 import { fuzzySearchList } from "./utils/fuzzySearch";
 import { Bundle } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const { bundles, isLoading, createBundle, editBundle, deleteBundle } = useBundles();
@@ -23,14 +25,24 @@ export default function Command() {
   const filteredBundles = useMemo(() => fuzzySearchList(bundles, searchText), [searchText, bundles]);
 
   const handleOpenBundle = async (bundle: Bundle) => {
+    const { openInDefaultBrowser } = bundle;
     try {
-      await openLinksInChrome(bundle);
-      await showToast(
-        Toast.Style.Success,
-        `Bundle opened in ${getProfileNameByDirectory(bundle.chromeProfileDirectory)} profile`,
-      );
+      if (!openInDefaultBrowser) {
+        await openLinksInChrome(bundle);
+        await showToast(
+          Toast.Style.Success,
+          `Bundle opened in ${getProfileNameByDirectory(bundle.chromeProfileDirectory)} profile`,
+        );
+      } else {
+        for (const link of [...bundle.links].reverse()) {
+          await open(link);
+        }
+        await showToast(Toast.Style.Success, "Bundle opened in default browser");
+      }
     } catch (error) {
-      await showToast(Toast.Style.Failure, "Failed to open bundle", String(error));
+      await showFailureToast(error, {
+        title: "Failed to open bundle",
+      });
     }
   };
 
@@ -58,11 +70,13 @@ export default function Command() {
           title={bundle.title}
           subtitle={bundle.description}
           accessories={[
+            bundle.openInDefaultBrowser
+              ? {}
+              : bundle.openInIncognitoWindow
+                ? { icon: Icon.Person, tag: "Incognito" }
+                : { tag: getProfileNameByDirectory(bundle.chromeProfileDirectory) },
             { icon: Icon.Link, text: `${bundle.links.length}` },
-            bundle.openInIncognitoWindow
-              ? { icon: Icon.Person, tag: "Incognito" }
-              : { tag: getProfileNameByDirectory(bundle.chromeProfileDirectory) },
-          ]}
+          ].filter(Boolean)}
           actions={
             <ActionPanel>
               <ActionPanel.Section>

@@ -6,7 +6,8 @@
   "icon": "superwhisper-light-icon.png",
   "author": "nchudleigh",
   "contributors": [
-    "stelo"
+    "stelo",
+    "nagauta"
   ],
   "categories": [
     "Productivity"
@@ -19,6 +20,14 @@
       "subtitle": "superwhisper",
       "description": "Start Recording",
       "mode": "no-view",
+      "icon": "superwhisper-light-icon.png"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "superwhisper",
+      "description": "Search through your recording history",
+      "mode": "view",
       "icon": "superwhisper-light-icon.png"
     },
     {
@@ -50,7 +59,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.64.4",
-    "@raycast/utils": "^1.16.1"
+    "@raycast/utils": "^1.16.1",
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

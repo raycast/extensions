@@ -45,7 +45,7 @@ type NoteItem = {
 
 const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
 
-export async function getNotes() {
+export async function getNotes(maxQueryResults: number) {
   const query = `
     SELECT
         'x-coredata://' || zmd.z_uuid || '/ICNote/p' || note.z_pk AS id,
@@ -75,6 +75,7 @@ export async function getNotes() {
         folder.zmarkedfordeletion != 1
     ORDER BY
         note.zmodificationdate1 DESC
+    LIMIT ${maxQueryResults}
   `;
 
   const data = await executeSQL<NoteItem>(NOTES_DB, query);

@@ -1,7 +1,8 @@
-import { AI, showToast, Toast } from "@raycast/api";
+import { AI, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect } from "react";
 import { FINDING_ANSWER } from "../../../const/toast_messages";
 import { Question } from "../../../hooks/useQuestions";
+import { RaycastPreferences } from "../../../summarizeVideoWithRaycast";
 import { generateQuestionId } from "../../../utils/generateQuestionId";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
@@ -18,6 +19,10 @@ export function useRaycastFollowUpQuestion({
   transcript,
   question,
 }: FollowUpQuestionParams) {
+  const abortController = new AbortController();
+  const preferences = getPreferenceValues() as RaycastPreferences;
+  const { creativity } = preferences;
+
   useEffect(() => {
     const handleAdditionalQuestion = async () => {
       if (!question || !transcript) return;
@@ -29,7 +34,10 @@ export function useRaycastFollowUpQuestion({
         message: FINDING_ANSWER.message,
       });
 
-      const answer = AI.ask(getFollowUpQuestionSnippet(question, transcript));
+      const answer = AI.ask(getFollowUpQuestionSnippet(question, transcript), {
+        creativity: parseInt(creativity),
+        signal: abortController.signal,
+      });
 
       setQuestions((prevQuestions) => [
         {
@@ -53,8 +61,14 @@ export function useRaycastFollowUpQuestion({
         toast.hide();
         setQuestion("");
       });
+
+      if (abortController.signal.aborted) return;
     };
 
     handleAdditionalQuestion();
+
+    return () => {
+      abortController.abort();
+    };
   }, [question, transcript]);
 }

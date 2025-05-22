@@ -1,9 +1,10 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import React from "react";
 import { callInputButtonPressService, isEditableInputButton } from "./utils";
 
-export function InputButtonPressAction(props: { state: State }): JSX.Element | null {
+export function InputButtonPressAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!isEditableInputButton(s)) {
     return null;

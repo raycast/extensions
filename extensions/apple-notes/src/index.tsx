@@ -14,10 +14,6 @@ export default function Command() {
   const { data, isLoading, permissionView, mutate } = useNotes();
   const [searchText, setSearchText] = useState<string>("");
 
-  if (permissionView) {
-    return permissionView;
-  }
-
   const filteredNotes = useMemo(() => {
     return [...(data?.pinnedNotes ?? []), ...(data?.unpinnedNotes ?? [])].filter(
       (note) =>
@@ -27,6 +23,10 @@ export default function Command() {
         note.tags.some((tag) => tag.text?.toLowerCase().includes(searchText.toLowerCase())),
     );
   }, [searchText, data]);
+
+  if (permissionView) {
+    return permissionView;
+  }
 
   // Limit the number of notes displayed (for example, to 100)
   const limitedNotes = filteredNotes.slice(0, 100);

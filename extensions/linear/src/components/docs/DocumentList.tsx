@@ -1,13 +1,15 @@
-import { useMemo, useState } from "react";
 import { Color, Icon, List } from "@raycast/api";
-import useProjects from "../../hooks/useProjects";
-import { useDocuments } from "../../hooks/useDocuments";
-import { getProjectIcon } from "../../helpers/projects";
-import { Document } from "./Document";
+import { useMemo, useState } from "react";
+
 import { ProjectResult } from "../../api/getProjects";
-import { useInitiatives } from "../../hooks/useInitiatives";
-import { DocumentEntity } from "../../tools/get-documents";
 import { getInitiativeIcon } from "../../helpers/initiatives";
+import { getProjectIcon } from "../../helpers/projects";
+import { useDocuments } from "../../hooks/useDocuments";
+import { useInitiatives } from "../../hooks/useInitiatives";
+import useProjects from "../../hooks/useProjects";
+import { DocumentEntity } from "../../tools/get-documents";
+
+import { Document } from "./Document";
 
 type DocumentListProps = {
   project?: Pick<ProjectResult, "id" | "name">;

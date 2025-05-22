@@ -1,5 +1,5 @@
 import { AI, Clipboard, closeMainWindow, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { getCurrentTabName, getCurrentTabURL } from "./utils";
+import { getCurrentTabName, getCurrentTabURL } from "./safari";
 
 const preferences: Preferences.CopyTitleAsLinkToClipboard = getPreferenceValues();
 

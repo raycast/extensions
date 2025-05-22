@@ -14,7 +14,8 @@ const command = `${taskPath} export rc.json.array:on`;
 export const getTasks = async () => {
   let tasks: Task[] = [];
   try {
-    const { stdout, stderr } = await execPromise(command);
+    const { stdout, stderr } = await execPromise(command, { maxBuffer: 1_000_000 });
+
     if (stderr && stderr !== overrideError) {
       throw new Error("please make sure you have set the path to task in the extension settings");
     }

@@ -1,5 +1,12 @@
 # Raycast Port Changelog
 
+## [Chore: Fixed typo] - 2025-03-10
+
+## [New Feature] - 2025-03-05
+
+- Add port for Window Management API
+- Fix typos in the API documentation
+
 ## [Fixes] - 2025-02-25
 
 - Fix documentation path

@@ -1,7 +1,6 @@
-import { Action, ActionPanel, Form, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useForm, useLocalStorage } from "@raycast/utils";
+import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { FormValidation, showFailureToast, useForm, useLocalStorage } from "@raycast/utils";
 import { createTodo, getProjectPeople } from "../oauth/auth";
-import { showToast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BasecampPerson } from "../utils/types";
 
@@ -40,7 +39,7 @@ export default function CreateTodoForm({
         const fetchedProjectPeople = await getProjectPeople(accountId, projectId);
         setProjectPeople(fetchedProjectPeople);
       } catch (error) {
-        console.error("Error fetching project people:", error);
+        showFailureToast(error, { title: "Error fetching project people" });
       } finally {
         setIsLoadingProjectPeople(false);
       }
@@ -69,11 +68,7 @@ export default function CreateTodoForm({
 
         onSuccess();
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Create Todo",
-          message: error instanceof Error ? error.message : "An unknown error occurred",
-        });
+        showFailureToast(error, { title: "Failed to create todo" });
       }
     },
     initialValues: {

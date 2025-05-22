@@ -1,12 +1,15 @@
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 
-import { Task, getFilterTasks } from "../api";
+import { getFilterTasks } from "../api";
 
 export default function useFilterTasks(filter = "") {
-  return useCachedPromise(async () => {
-    if (!filter) return [];
+  return usePromise(
+    async (filter: string) => {
+      if (!filter) return [];
 
-    const data = await getFilterTasks(filter);
-    return data as Task[];
-  });
+      const data = await getFilterTasks(filter);
+      return data;
+    },
+    [filter],
+  );
 }

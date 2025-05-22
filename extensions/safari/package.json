@@ -17,7 +17,8 @@
     "ChangeHow",
     "ridemountainpig",
     "1weiho",
-    "xmok"
+    "xmok",
+    "niksite"
   ],
   "pastContributors": [
     "axsuul",
@@ -132,6 +133,13 @@
           "description": "Cleans up the title with AI to make it more readable (Pro only)"
         }
       ]
+    },
+    {
+      "name": "close-other-tabs",
+      "title": "Close Other Tabs",
+      "subtitle": "Safari",
+      "description": "Close all Safari tabs except the current one",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -161,38 +169,62 @@
       "label": "Enable Pinyin search for Chinese characters",
       "description": "When enabled, allows searching Chinese characters using pinyin romanization",
       "default": false
+    },
+    {
+      "name": "enableFuzzySearch",
+      "type": "checkbox",
+      "required": false,
+      "title": "Fuzzy Search",
+      "label": "Enable fuzzy search",
+      "description": "When enabled, allows searching items using fuzzy search",
+      "default": true
     }
   ],
   "tools": [
     {
       "name": "search-bookmarks",
       "title": "Search Bookmarks",
-      "description": "Search through the Safari Bookmarks"
+      "description": "Search through Safari Bookmarks and return matching entries"
     },
     {
       "name": "search-history",
       "title": "Search History",
-      "description": "Search through the Safari Browing History"
+      "description": "Search through Safari browsing history and return matching entries"
     },
     {
       "name": "search-reading-list",
       "title": "Search Reading List",
-      "description": "Search through the Safari Reading List"
+      "description": "Search through Safari Reading List and return matching items"
     },
     {
       "name": "add-to-reading-list",
       "title": "Add to Reading List",
-      "description": "Add a URL to the Safari Reading List"
+      "description": "Add a specified URL to the Safari Reading List for later reading"
     },
     {
       "name": "open-url",
       "title": "Open URL",
-      "description": "Open a URL in Safari"
+      "description": "Open a specified URL in Safari"
+    },
+    {
+      "name": "get-all-tabs",
+      "title": "Get All Tabs",
+      "description": "Return information about all open Safari tabs across all windows"
+    },
+    {
+      "name": "get-tab-contents",
+      "title": "Get Tab Contents",
+      "description": "Retrieve the text or HTML source code of a specific Safari tab"
+    },
+    {
+      "name": "close-tab",
+      "title": "Close Tab",
+      "description": "Close either a specific Safari tab or the currently active tab"
     },
     {
       "name": "get-focused-tab",
       "title": "Get Focused Tab",
-      "description": "Get the text or HTML source code of the focused tab"
+      "description": "Return information about the currently focused Safari tab"
     }
   ],
   "ai": {
@@ -200,7 +232,7 @@
       {
         "input": "@safari Summarize this tab into 3 bullet points",
         "mocks": {
-          "get-focused-tab": "Raycast is cool"
+          "get-focused-tab": "Raycast is very cool let's goooooo"
         },
         "expected": [
           {
@@ -320,6 +352,168 @@
             }
           }
         ]
+      },
+      {
+        "input": "@safari show me all my open tabs",
+        "mocks": {
+          "get-all-tabs": [
+            {
+              "uuid": "1-1",
+              "title": "Raycast - Supercharged productivity",
+              "url": "https://www.raycast.com/",
+              "window_id": 1,
+              "index": 1,
+              "is_local": true
+            },
+            {
+              "uuid": "1-2",
+              "title": "Raycast Extensions",
+              "url": "https://www.raycast.com/extensions",
+              "window_id": 1,
+              "index": 2,
+              "is_local": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-all-tabs"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari get the content of the second tab in my first window",
+        "mocks": {
+          "get-tab-contents": "This is the content of the Raycast Extensions tab",
+          "get-all-tabs": [
+            {
+              "uuid": "1-1",
+              "title": "Raycast - Supercharged productivity",
+              "url": "https://www.raycast.com/",
+              "window_id": 1,
+              "index": 1,
+              "is_local": true
+            },
+            {
+              "uuid": "1-2",
+              "title": "Raycast Extensions",
+              "url": "https://www.raycast.com/extensions",
+              "window_id": 1,
+              "index": 2,
+              "is_local": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-all-tabs"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-tab-contents",
+              "arguments": {
+                "tab": {
+                  "windowId": 1,
+                  "index": 2
+                },
+                "type": "text"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari close the second tab in my first window",
+        "mocks": {
+          "close-tab": "Tab closed successfully",
+          "get-all-tabs": [
+            {
+              "uuid": "1-1",
+              "title": "Raycast - Supercharged productivity",
+              "url": "https://www.raycast.com/",
+              "window_id": 1,
+              "index": 1,
+              "is_local": true
+            },
+            {
+              "uuid": "1-2",
+              "title": "Raycast Extensions",
+              "url": "https://www.raycast.com/extensions",
+              "window_id": 1,
+              "index": 2,
+              "is_local": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-all-tabs"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "close-tab",
+              "arguments": {
+                "tab.windowId": 1,
+                "tab.index": 2
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari close the current tab",
+        "mocks": {
+          "close-tab": "Current tab closed successfully"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "close-tab"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari what tab am I currently on?",
+        "mocks": {
+          "get-focused-tab": {
+            "uuid": "1-1",
+            "title": "Raycast - Supercharged productivity",
+            "url": "https://www.raycast.com/",
+            "window_id": 1,
+            "index": 1,
+            "is_local": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-focused-tab"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari show me the HTML source of the tab I'm currently viewing",
+        "mocks": {
+          "get-tab-contents": "<!DOCTYPE html><html><head><title>Raycast</title></head><body>...</body></html>"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tab-contents",
+              "arguments": {
+                "type": "source"
+              }
+            }
+          }
+        ]
       }
     ]
   },
@@ -351,5 +545,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,4 +1,4 @@
-import translate from "@iamtraction/google-translate";
+import { translate } from "../vendor/@iamtraction-translate/src";
 import * as googleTTS from "google-tts-api";
 import * as os from "os";
 import * as path from "path";
@@ -40,6 +40,7 @@ export async function simpleTranslate(text: string, options: LanguageCodeSet): P
       from: options.langFrom,
       to: options.langTo[0],
       raw: true,
+      proxy: options.proxy,
     });
 
     return {

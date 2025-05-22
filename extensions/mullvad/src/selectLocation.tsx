@@ -1,7 +1,20 @@
-import { Action, ActionPanel, Detail, List, PopToRootType, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Icon,
+  List,
+  PopToRootType,
+  showHUD,
+  showToast,
+  Cache,
+  getPreferenceValues,
+} from "@raycast/api";
 import { showFailureToast, useExec, useFrecencySorting } from "@raycast/utils";
 import { execSync } from "child_process";
 import { mullvadNotInstalledHint } from "./utils";
+import RankingCache from "./RankingCache";
+import { useRef } from "react";
 
 type Location = {
   country: string;
@@ -9,8 +22,14 @@ type Location = {
   city: string;
   cityCode: string;
   id: string;
-  servers: { id: string }[];
+  servers: Server[];
 };
+
+type Server = {
+  id: string;
+};
+
+const cache = new Cache({ namespace: "rankings" });
 
 const countryRegex = /^(?<country>.+)\s\((?<countryCode>.+)\)/;
 const cityRegex = /^(?<city>.+)\s\((?<cityCode>.+)\)/;
@@ -21,7 +40,7 @@ function parseRelayList(rawRelayList: string): Location[] {
   const locations: Location[] = [];
   let currentCountry;
   let currentCountryCode;
-  let currentServerList: { id: string }[] = [];
+  let currentServerList: Server[] = [];
   if (rawRelayList) {
     const lines = rawRelayList.split("\n");
     let i = 0;
@@ -69,20 +88,55 @@ function parseRelayList(rawRelayList: string): Location[] {
 function ServerList({
   location,
   visitLocation,
+  setTopServer,
 }: {
   location: Location;
   visitLocation: (item: Location) => Promise<void>;
+  setTopServer: (server: Server) => void;
 }) {
-  const { data: sortedServers, visitItem: visitServer } = useFrecencySorting(location.servers);
+  const {
+    data: sortedServers,
+    visitItem: visitServer,
+    resetRanking,
+  } = useFrecencySorting(location.servers, { namespace: `servers-${location.id}` });
 
-  async function setServer(server: { id: string }) {
-    visitLocation(location);
-    // If we call visitServer directly afterwards, it won't update both frequencies
-    setTimeout(() => visitServer(server), 10);
+  const rankingCacheRef = useRef(new RankingCache<Set<string>>(cache, new Set<string>()));
 
+  async function setServer(server: Server) {
+    await visitLocation(location);
+    await visitServer(server);
+
+    rankingCacheRef.current.update(`ranked-servers-${location.id}`, (value) => {
+      if (value === undefined) return new Set<string>([server.id]);
+      value.add(server.id);
+      return value;
+    });
+
+    setTopServer(sortedServers[0]);
     execSync(`mullvad relay set location ${server.id}`);
 
     await showHUD("Location changed", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+  }
+
+  async function resetServerRanking(server: Server) {
+    try {
+      await resetRanking(server);
+      if (rankingCacheRef.current.get(`ranked-servers-${location.id}`).size > 1) {
+        setTopServer(sortedServers[0]);
+      } else {
+        setTopServer({ id: "" });
+      }
+
+      rankingCacheRef.current.update(`ranked-servers-${location.id}`, (value) => {
+        if (value === undefined) return new Set<string>();
+        value.delete(server.id);
+        return value;
+      });
+      showToast({ title: `Reset ranking for ${server.id}` });
+    } catch (error) {
+      if (error instanceof Error)
+        showFailureToast({ title: `Failed to reset ranking for ${server.id}`, message: error.message });
+    }
   }
 
   return (
@@ -94,7 +148,17 @@ function ServerList({
           title={server.id}
           actions={
             <ActionPanel>
-              <Action title="Select Server" onAction={() => setServer(server).catch(showFailureToast)} />
+              <Action
+                title="Select Server"
+                icon={Icon.Stars}
+                onAction={() => setServer(server).catch(showFailureToast)}
+              />
+              <Action
+                title="Reset Server Ranking"
+                icon={Icon.ArrowCounterClockwise}
+                onAction={() => resetServerRanking(server)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+              />
             </ActionPanel>
           }
         />
@@ -108,7 +172,15 @@ export default function Command() {
   const rawRelayList = useExec("mullvad", ["relay", "list"], { execute: !!isMullvadInstalled.data });
 
   const locations = rawRelayList.data ? parseRelayList(rawRelayList.data) : [];
-  const { data: sortedLocations, visitItem: visitLocation } = useFrecencySorting(locations);
+  const {
+    data: sortedLocations,
+    visitItem: visitLocation,
+    resetRanking: resetRanking,
+  } = useFrecencySorting(locations, { namespace: "locations" });
+
+  const rankingCacheRef = useRef(new RankingCache<Record<string, string>>(cache, {}));
+
+  const { selectByRanking } = getPreferenceValues<Preferences.SelectLocation>();
 
   if (rawRelayList.isLoading || isMullvadInstalled.isLoading) return <List isLoading={true} />;
   if (!isMullvadInstalled.data || isMullvadInstalled.error) return <Detail markdown={mullvadNotInstalledHint} />;
@@ -117,11 +189,32 @@ export default function Command() {
 
   async function setLocation(location: Location) {
     const [countryCode, cityCode] = location.id.split("/");
-    visitLocation(location);
+    await visitLocation(location);
 
-    execSync(`mullvad relay set location ${countryCode} ${cityCode}`);
+    let topServerID = "";
+    if (selectByRanking) topServerID = rankingCacheRef.current.get("top-servers")?.[location.id] || "";
+    execSync(`mullvad relay set location ${countryCode} ${cityCode} ${topServerID}`);
 
     await showHUD("Location changed", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+  }
+
+  function resetLocationRanking(location: Location) {
+    try {
+      resetRanking(location);
+      showToast({ title: `Reset ranking for ${location.country} / ${location.city}` });
+    } catch (error) {
+      if (error instanceof Error)
+        showFailureToast({
+          title: `Failed to reset ranking for ${location.country} / ${location.city}`,
+          message: error.message,
+        });
+    }
+  }
+
+  function setTopServersForLocation(location: Location, server: Server) {
+    rankingCacheRef.current.update("top-servers", (value) => {
+      return { ...value, [location.id]: server.id };
+    });
   }
 
   return (
@@ -144,8 +237,30 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
-              <Action title="Select Location" onAction={() => setLocation(l).catch(showFailureToast)} />
-              <Action.Push title="Switch Server" target={<ServerList location={l} visitLocation={visitLocation} />} />
+              <Action
+                title="Select Location"
+                icon={Icon.Stars}
+                onAction={() => setLocation(l).catch(showFailureToast)}
+              />
+              <Action.Push
+                title="Switch Server"
+                icon={Icon.Building}
+                target={
+                  <ServerList
+                    location={l}
+                    visitLocation={visitLocation}
+                    setTopServer={(server: Server) => setTopServersForLocation(l, server)}
+                  />
+                }
+              />
+              <Action
+                title="Reset Location Ranking"
+                icon={Icon.ArrowCounterClockwise}
+                onAction={() => {
+                  resetLocationRanking(l);
+                }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+              />
             </ActionPanel>
           }
         />

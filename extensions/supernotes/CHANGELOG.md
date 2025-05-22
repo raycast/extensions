@@ -1,5 +1,10 @@
 # Supernotes Changelog
 
+## [AI Extension Support] - {PR_MERGE_DATE}
+- Added in a tool to search cards
+- Added in a tool to append to a card
+- Added in a tool to create a new card
+
 ## [Daily Append Local Time]
 - Use the local day when appending content to a daily card
 

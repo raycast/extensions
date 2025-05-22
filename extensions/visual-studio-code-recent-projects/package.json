@@ -25,14 +25,18 @@
     "vatsalsanjay",
     "Tarocch1",
     "jonas_list",
-    "xilopaint"
+    "xilopaint",
+    "lachero",
+    "pascal_burkhard"
   ],
   "keywords": [
     "vscode",
     "cursor",
     "codium",
+    "positron",
     "windsurf",
-    "trae"
+    "trae",
+    "trae-cn"
   ],
   "license": "MIT",
   "commands": [
@@ -84,32 +88,40 @@
       "description": "Select which build of Visual Studio Code to use when searching for recent projects",
       "data": [
         {
-          "value": "Code",
-          "title": "Visual Studio Code"
+          "title": "Cursor",
+          "value": "Cursor"
         },
         {
-          "value": "Code - Insiders",
-          "title": "Visual Studio Code - Insiders"
+          "title": "Positron",
+          "value": "Positron"
         },
         {
-          "value": "VSCodium",
-          "title": "VSCodium"
+          "title": "Trae",
+          "value": "Trae"
         },
         {
-          "value": "VSCodium - Insiders",
-          "title": "VSCodium - Insiders"
+          "title": "Trae CN",
+          "value": "Trae CN"
         },
         {
-          "value": "Cursor",
-          "title": "Cursor"
+          "title": "VSCodium",
+          "value": "VSCodium"
         },
         {
-          "value": "Windsurf",
-          "title": "Windsurf"
+          "title": "VSCodium - Insiders",
+          "value": "VSCodium - Insiders"
         },
         {
-          "value": "Trae",
-          "title": "Trae"
+          "title": "Visual Studio Code",
+          "value": "Code"
+        },
+        {
+          "title": "Visual Studio Code - Insiders",
+          "value": "Code - Insiders"
+        },
+        {
+          "title": "Windsurf",
+          "value": "Windsurf"
         }
       ]
     },
@@ -179,6 +191,7 @@
   "dependencies": {
     "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.10.0",
+    "cache-func": "^1.0.2",
     "lodash.get": "^4.4.2",
     "prettier": "^2.8.1",
     "run-applescript": "^6.1.0",
@@ -201,5 +214,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

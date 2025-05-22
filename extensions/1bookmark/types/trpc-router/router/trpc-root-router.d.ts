@@ -102,10 +102,16 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
         transformer: true;
     }, {
         me: import("@trpc/server").TRPCQueryProcedure<{
-            input: void;
+            input: {
+                device?: string | undefined;
+            } | undefined;
             output: {
                 associatedSpaces: {
                     myTags: string[];
+                    myRole: import(".prisma/client").$Enums.TeamRole;
+                    myImage: string | null;
+                    myNickname: string | null;
+                    myAuthEmail: string | null;
                     tags: {
                         description: string | null;
                         spaceId: string;
@@ -240,6 +246,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 url: string;
                 tags: string[];
                 author: string;
+                authorEmail: string;
                 deletedAt: Date | null;
                 updatedAt: Date;
             };
@@ -249,15 +256,16 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 spaceIds: string[];
             };
             output: {
-                description: string | null;
-                spaceId: string;
                 id: string;
-                createdAt: Date;
+                authorEmail: string;
+                authorName: string;
+                spaceId: string;
+                spaceName: string;
+                tags: string[];
                 name: string;
                 url: string;
-                tags: string[];
-                author: string;
-                deletedAt: Date | null;
+                description: string | null;
+                createdAt: Date;
                 updatedAt: Date;
             }[];
         }>;
@@ -272,6 +280,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 url: string;
                 tags: string[];
                 author: string;
+                authorEmail: string;
                 deletedAt: Date | null;
                 updatedAt: Date;
             }[];
@@ -304,12 +313,26 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 url: string;
                 tags: string[];
                 author: string;
+                authorEmail: string;
                 deletedAt: Date | null;
                 updatedAt: Date;
             };
         }>;
+        import: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                tags: string[];
+                bookmarks: {
+                    name: string;
+                    url: string;
+                    description?: string | undefined;
+                }[];
+                browserName: string;
+            };
+            output: void;
+        }>;
     }>;
-    team: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+    space: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
         ctx: {
             db: import(".prisma/client").PrismaClient<{
                 log: "error"[];
@@ -348,13 +371,43 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
             };
             output: void;
         }>;
-        leave: import("@trpc/server").TRPCQueryProcedure<{
-            input: string;
+        leave: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+            };
             output: void;
         }>;
         get: import("@trpc/server").TRPCQueryProcedure<{
-            input: string;
-            output: {
+            input: {
+                spaceId: string;
+            };
+            output: ({
+                users: {
+                    status: import(".prisma/client").$Enums.TeamMemberStatus;
+                    spaceId: string;
+                    createdAt: Date;
+                    email: string;
+                    tags: string[];
+                    updatedAt: Date;
+                    image: string | null;
+                    nickname: string | null;
+                    authEmail: string | null;
+                    role: import(".prisma/client").$Enums.TeamRole;
+                }[];
+                memberAuthPolicies: {
+                    spaceId: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    emailPattern: string;
+                    authCheckIntervalSec: number;
+                }[];
+                _count: {
+                    tags: number;
+                    bookmarks: number;
+                    users: number;
+                    memberAuthPolicies: number;
+                };
+            } & {
                 type: import(".prisma/client").$Enums.SpaceType;
                 status: string | null;
                 description: string | null;
@@ -363,12 +416,111 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 name: string;
                 updatedAt: Date;
                 image: string | null;
-            } | null;
+            }) | null;
+        }>;
+        update: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                description?: string | undefined;
+                name?: string | undefined;
+                image?: string | undefined;
+            };
+            output: void;
         }>;
         removeUser: import("@trpc/server").TRPCMutationProcedure<{
             input: {
                 spaceId: string;
                 targetEmail: string;
+            };
+            output: void;
+        }>;
+    }>;
+    spaceAuth: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+        ctx: {
+            db: import(".prisma/client").PrismaClient<{
+                log: "error"[];
+            }, never, import("@prisma/client/runtime/library").DefaultArgs>;
+            user: {
+                email: string;
+                name: string;
+                image: string | null;
+                deviceName: string;
+            } | undefined;
+            headers: Headers;
+            accessToken: string;
+            refreshToken: string;
+            iat: number;
+            exp: number;
+        };
+        meta: object;
+        errorShape: {
+            data: {
+                zodError: import("zod").typeToFlattenedError<any, string> | null;
+                code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+                httpStatus: number;
+                path?: string;
+                stack?: string;
+            };
+            message: string;
+            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+        };
+        transformer: true;
+    }, {
+        listAuthenticatedSpaceIds: import("@trpc/server").TRPCQueryProcedure<{
+            input: void;
+            output: string[];
+        }>;
+        listAuthRequiredSpaceIds: import("@trpc/server").TRPCQueryProcedure<{
+            input: void;
+            output: string[];
+        }>;
+        sendAuthCode: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                authEmail: string;
+            };
+            output: void;
+        }>;
+        verifyAuthCode: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                code: string;
+                spaceId: string;
+                authEmail: string;
+            };
+            output: void;
+        }>;
+        lastVerifiedEmail: import("@trpc/server").TRPCQueryProcedure<{
+            input: {
+                spaceId: string;
+            };
+            output: any;
+        }>;
+        listMemberAuthPolicies: import("@trpc/server").TRPCQueryProcedure<{
+            input: {
+                spaceId: string;
+            };
+            output: string[];
+        }>;
+        createMemberAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                emailPattern: string;
+                authCheckInterval: string;
+            };
+            output: void;
+        }>;
+        deleteMemberAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                emailPattern: string;
+            };
+            output: void;
+        }>;
+        updateMemberAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                emailPattern: string;
+                authCheckInterval: string;
             };
             output: void;
         }>;
@@ -491,7 +643,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
     }, {
         create: import("@trpc/server").TRPCMutationProcedure<{
             input: {
-                type: "APP_OPEN" | "LOGIN" | "LOGOUT" | "BOOKMARK_OPEN" | "BOOKMARK_COPY" | "BOOKMARK_CREATED" | "BOOKMARK_UPDATED" | "BOOKMARK_DELETED" | "SUBSCRIBE_TAG" | "UNSUBSCRIBE_TAG" | "TAG_CREATED" | "TAG_UPDATED" | "TAG_DELETED" | "TEAM_CREATED" | "TEAM_UPDATED" | "TEAM_DELETED" | "TEAM_MEMBER_INVITED" | "TEAM_MEMBER_JOINED" | "TEAM_MEMBER_LEFT" | "TEAM_MEMBER_REMOVED" | "TEAM_MEMBER_ROLE_CHANGED" | "TEAM_PLAN_CHANGED";
+                type: "APP_OPEN" | "LOGIN" | "LOGOUT" | "BOOKMARK_OPEN" | "BOOKMARK_COPY" | "BOOKMARK_CREATED" | "BOOKMARK_UPDATED" | "BOOKMARK_DELETED" | "BOOKMARK_IMPORTED_FROM_BROWSER" | "SUBSCRIBE_TAG" | "UNSUBSCRIBE_TAG" | "TAG_CREATED" | "TAG_UPDATED" | "TAG_DELETED" | "SPACE_CREATED" | "SPACE_UPDATED" | "SPACE_DELETED" | "SPACE_MEMBER_INVITED" | "SPACE_MEMBER_JOINED" | "SPACE_MEMBER_LEFT" | "SPACE_MEMBER_REMOVED" | "SPACE_MEMBER_ROLE_CHANGED" | "SPACE_PLAN_CHANGED" | "SPACE_MEMBER_AUTH_CODE_SENT" | "SPACE_MEMBER_AUTH_CODE_VERIFIED" | "SPACE_MEMBER_AUTH_POLICY_CREATED" | "SPACE_MEMBER_AUTH_POLICY_DELETED" | "SPACE_MEMBER_AUTH_POLICY_UPDATED";
                 spaceId: string;
                 data: Record<string, string>;
             };

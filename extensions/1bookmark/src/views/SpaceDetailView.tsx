@@ -1,26 +1,164 @@
-import { List, Icon } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
+import { useMe } from "../hooks/use-me.hook";
+import { EditSpaceOneValueForm, KeyToEdit } from "./EditSpaceOneValueForm";
+import { SpaceMembersView } from "./SpaceMembersView";
+import { SpaceTagsView } from "./SpaceTagsView";
+import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
+import { SpaceMemberAuthPoliciesView } from "./SpaceMemberAuthPoliciesView";
 
-function Body() {
-  const me = trpc.user.me.useQuery();
-  const associatedSpaces = me.data?.associatedSpaces;
+const EditAction = (props: { spaceId: string; keyToEdit: KeyToEdit; value: string; refetch: () => void }) => {
+  const { spaceId, keyToEdit, value, refetch } = props;
+  return (
+    <Action.Push
+      title="Edit"
+      icon={Icon.Pencil}
+      target={<EditSpaceOneValueForm spaceId={spaceId} keyToEdit={keyToEdit} value={value} />}
+      onPop={refetch}
+    />
+  );
+};
 
-  if (me.isLoading || !associatedSpaces) {
+function Body(props: { spaceId: string }) {
+  const { spaceId } = props;
+  const { data, isLoading, refetch } = trpc.space.get.useQuery({ spaceId });
+  const me = useMe();
+  const { enabledSpaceIds, confirmAndToggleEnableDisableSpace: toggleEnableDisable } = useEnabledSpaces();
+
+  if (isLoading || !data || !me.data || !enabledSpaceIds) {
     return <List isLoading />;
   }
 
+  const spaceInMe = me.data?.associatedSpaces.find((s) => s.id === spaceId);
+  const image = data.image ? data.image : data.type === "TEAM" ? Icon.TwoPeople : Icon.Person;
+
   return (
-    <List>
-      <List.Item title={"Space Detail View"} icon={Icon.Plus} />
+    <List isLoading={me.isFetching}>
+      <List.Item
+        title="Name"
+        subtitle={data.name}
+        icon={Icon.Folder}
+        actions={
+          <ActionPanel>
+            <EditAction spaceId={spaceId} keyToEdit="name" value={data.name} refetch={refetch} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title="Image"
+        subtitle={data.image || ""}
+        icon={image}
+        actions={
+          <ActionPanel>
+            <EditAction spaceId={spaceId} keyToEdit="image" value={data.image || ""} refetch={refetch} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title="Description"
+        subtitle={data.description || ""}
+        icon={Icon.Document}
+        actions={
+          <ActionPanel>
+            <EditAction spaceId={spaceId} keyToEdit="description" value={data.description || ""} refetch={refetch} />
+          </ActionPanel>
+        }
+      />
+      <List.Item title="Bookmarks" subtitle={data._count.bookmarks.toString()} icon={Icon.Bookmark} />
+      {data.type === "TEAM" && (
+        <List.Item
+          title="Members"
+          subtitle={data._count.users.toString()}
+          icon={Icon.TwoPeople}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Members"
+                icon={Icon.TwoPeople}
+                target={<SpaceMembersView spaceId={spaceId} />}
+                onPop={refetch}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+      <List.Item
+        title="Tags"
+        subtitle={data._count.tags.toString()}
+        icon={Icon.Tag}
+        actions={
+          <ActionPanel>
+            <Action.Push title="Tags" icon={Icon.Tag} target={<SpaceTagsView spaceId={spaceId} />} onPop={refetch} />
+          </ActionPanel>
+        }
+      />
+
+      {data.type === "TEAM" && (
+        <List.Item
+          title="Member Auth Policies"
+          subtitle={data._count.memberAuthPolicies === 0 ? undefined : data._count.memberAuthPolicies.toString()}
+          accessories={
+            data._count.memberAuthPolicies === 0
+              ? [{ tag: { value: "All users are allowed", color: Color.Orange } }]
+              : []
+          }
+          icon={Icon.Lock}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Member Auth Policies"
+                icon={Icon.Lock}
+                target={<SpaceMemberAuthPoliciesView spaceId={spaceId} />}
+                onPop={refetch}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+
+      <List.Item
+        title="Enable/Disable"
+        icon={Icon.Bookmark}
+        accessories={
+          enabledSpaceIds.includes(spaceId)
+            ? [{ tag: { value: "Enabled", color: Color.Green } }]
+            : [{ tag: { value: "Disabled" } }]
+        }
+        actions={
+          <ActionPanel>
+            <Action
+              title={enabledSpaceIds.includes(spaceId) ? "Disable" : "Enable"}
+              icon={Icon.Bookmark}
+              onAction={() => toggleEnableDisable(spaceId)}
+            />
+          </ActionPanel>
+        }
+      />
+
+      <List.Section title="My Info in this space">
+        <List.Item title="My Role" subtitle={spaceInMe?.myRole || ""} icon={Icon.CreditCard} />
+        {/* WIP */}
+        {/* <List.Item title="My NickName" subtitle={spaceInMe?.myNickname || me.data.name} icon={Icon.Brush} /> */}
+        {/* <List.Item title="My Image" subtitle={spaceInMe?.myImage || ''} icon={spaceInMe?.myImage || Icon.Person} /> */}
+      </List.Section>
+
+      {/*
+      TODO: delete space feature under construction
+      <List.Item
+        title={`Delete [${data.name}]`}
+        accessories={[{ text: spaceInMe?.myRole === 'OWNER' ? `All users in this space will be unable to access space's bookmarks.` : 'Only owner can delete space', icon: Icon.Warning }]}
+        icon={Icon.Trash}
+      /> */}
     </List>
   );
 }
 
-export function SpaceDetailView() {
+export function SpaceDetailView(props: { spaceId: string }) {
+  const { spaceId } = props;
   return (
     <CachedQueryClientProvider>
-      <Body />
+      <Body spaceId={spaceId} />
     </CachedQueryClientProvider>
   );
 }

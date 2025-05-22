@@ -11,6 +11,16 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
+  if (context.payload.action === "ready_for_review" && context.payload.pull_request.draft === false) {
+    await github.rest.issues.addAssignees({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      issue_number: context.issue.number,
+      assignees: ["pernielsentikaer"]
+    });
+    return;
+  }
+
   console.log("changed extensions", process.env.CHANGED_EXTENSIONS);
 
   if (!process.env.CHANGED_EXTENSIONS) {
@@ -29,7 +39,8 @@ export default async ({ github, context }: API) => {
     return;
   }
 
-  const expectations = "Due to our current reduced availability, the initial review may take up to 10-15 business days";
+  // Due to our current reduced availability, the initial review may take up to 10-15 business days.
+  const expectations = "You can expect an initial review within five business days.";
 
   const codeowners = await getCodeOwners({ github, context });
 

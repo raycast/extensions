@@ -31,10 +31,16 @@ export declare const userRouter: import("@trpc/server/unstable-core-do-not-impor
     transformer: true;
 }, {
     me: import("@trpc/server").TRPCQueryProcedure<{
-        input: void;
+        input: {
+            device?: string | undefined;
+        } | undefined;
         output: {
             associatedSpaces: {
                 myTags: string[];
+                myRole: import(".prisma/client").$Enums.TeamRole;
+                myImage: string | null;
+                myNickname: string | null;
+                myAuthEmail: string | null;
                 tags: {
                     description: string | null;
                     spaceId: string;

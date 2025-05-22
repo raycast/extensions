@@ -1,5 +1,9 @@
 # Gmail Changelog
 
+## [Unread MenuBar unread fix] - 2025-03-11
+
+- Unread menubar list now only show unread emails in your Inbox.
+
 ## [Updated image in README] - 2024-10-07
 
 ## [MenuBar Improvements] - 2024-07-30

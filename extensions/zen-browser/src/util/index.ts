@@ -1,6 +1,8 @@
+import { getPreferenceValues } from "@raycast/api";
+import { executeSQL } from "@raycast/utils";
+import { HistoryEntry } from "../interfaces";
 import fs from "fs";
 import path from "path";
-import { getPreferenceValues } from "@raycast/api";
 
 const userDataDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -32,9 +34,72 @@ const getProfileName = (userDirectoryPath: string) => {
   return "";
 };
 
+export const getNewTabShortcut = () => {
+  const preferences = getPreferenceValues<Preferences>();
+  const key = preferences.newTabShortcut
+    .trim()
+    .charAt(preferences.newTabShortcut.length - 1)
+    .toLowerCase();
+  const finalShortcutString = `keystroke "${key}" using `;
+  const finalCommandsString = getCommands(preferences.newTabShortcut);
+
+  return finalShortcutString + finalCommandsString; // Converting the commands to an apple script string for the shortcut
+};
+
+const getCommands = (newTabShortcut: string): string => {
+  if (!newTabShortcut) return "{command down}";
+  if (newTabShortcut.includes("hyper")) return "{command down, option down, control down, shift down}";
+
+  const commandMap: Record<string, string> = {
+    cmd: "command",
+    command: "command",
+    ctrl: "control",
+    control: "control",
+    opt: "option",
+    option: "option",
+    shift: "shift",
+    alt: "option",
+    super: "command",
+  };
+
+  const finalCommands = Object.entries(commandMap)
+    .filter(([key]) => newTabShortcut.includes(key))
+    .map(([, value]) => `${value} down`);
+
+  return "{" + finalCommands.join(", ") + "}";
+};
+
 export const getHistoryDbPath = (): string => {
   const userDirectoryPath = userDataDirectoryPath();
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "places.sqlite");
+};
+
+const whereClauses = (terms: string[]) => {
+  return terms.map((t) => `moz_places.title LIKE '%${t}%'`).join(" AND ");
+};
+
+export const getHistoryQuery = (query?: string, limitResults?: number) => {
+  const preferences = getPreferenceValues<Preferences>();
+  const terms = query ? query.trim().split(" ") : [];
+  const whereClause = terms.length > 0 ? `WHERE ${whereClauses(terms)}` : "";
+
+  return `SELECT
+            id, url, title,
+            datetime(last_visit_date/1000000,'unixepoch') as lastVisited
+          FROM moz_places
+          ${whereClause}
+          ORDER BY last_visit_date DESC LIMIT ${limitResults ? limitResults : preferences.limitResults};`;
+};
+
+export const getHistory = async (query?: string, limitResults?: number) => {
+  const inQuery = getHistoryQuery(query, limitResults);
+  const dbPath = getHistoryDbPath();
+
+  if (!fs.existsSync(dbPath)) {
+    return "Zen Browser is not installed.";
+  }
+
+  return await executeSQL<HistoryEntry>(dbPath, inQuery);
 };
 
 export const getBookmarksDirectoryPath = (): string => {
