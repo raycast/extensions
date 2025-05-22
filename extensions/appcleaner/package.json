@@ -14,8 +14,7 @@
         {
             "name": "uninstall",
             "title": "Uninstall Application",
-            "description": "Uninstall applications with AppCleaner, Pearcleaner or TrashMe 3",
-            "description": "Uninstall applications with AppCleaner, Pearcleaner or TrashMe 3",
+            "description": "Uninstall applications with AppCleaner, Pearcleaner, TrashMe 3 or App Cleaner & Uninstaller",
             "mode": "view"
         }
     ],
@@ -25,9 +24,7 @@
             "key": "uninstaller_app",
             "title": "Preferred Uninstaller",
             "description": "Pick your preferred uninstaller",
-            "description": "Pick your preferred uninstaller",
             "type": "dropdown",
-            "defaultValue": "appcleaner",
             "defaultValue": "appcleaner",
             "required": false,
             "data": [
