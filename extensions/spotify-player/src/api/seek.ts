@@ -1,9 +1,12 @@
+import { runAppleScript } from "@raycast/utils";
+import { buildScriptEnsuringSpotifyIsRunning } from "../helpers/applescript";
 import { getErrorMessage } from "../helpers/getError";
 import { EpisodeObject, TrackObject } from "../helpers/spotify.api";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 export async function seek(position: number): Promise<"next" | "position" | "error"> {
   const { spotifyClient } = getSpotifyClient();
+  let playNext = false;
 
   try {
     // fetching the currently playing is only for the return value.
@@ -11,6 +14,7 @@ export async function seek(position: number): Promise<"next" | "position" | "err
     if (response) {
       const item = response.item as unknown as EpisodeObject | TrackObject;
       if (item.duration_ms && position * 1000 > item.duration_ms) {
+        playNext = true;
         await spotifyClient.postMePlayerNext();
         return "next";
       } else {
@@ -23,6 +27,22 @@ export async function seek(position: number): Promise<"next" | "position" | "err
     return "error";
   } catch (err) {
     const error = getErrorMessage(err);
+
+    if (
+      error?.toLocaleLowerCase().includes("restricted device") ||
+      error?.toLocaleLowerCase().includes("premium required")
+    ) {
+      if (playNext) {
+        const script = buildScriptEnsuringSpotifyIsRunning("next track");
+        await runAppleScript(script);
+        return "next";
+      } else {
+        const script = buildScriptEnsuringSpotifyIsRunning(`set player position to ${position}`);
+        await runAppleScript(script);
+        return "position";
+      }
+    }
+
     console.log("seek.ts Error:", error);
     throw new Error(error);
   }

@@ -79,6 +79,17 @@ export default function Command() {
                       });
                     }}
                   />
+                  <Action
+                    title="Open Instance Window"
+                    icon={"app-window-list-16"}
+                    onAction={async () => {
+                      child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --show "${instance.id}"`);
+                      await closeMainWindow({
+                        popToRootType: PopToRootType.Immediate,
+                        clearRootSearch: true,
+                      });
+                    }}
+                  />
                 </ActionPanel>
               }
             />
