@@ -8,7 +8,7 @@
 - Added preference for unit system (imperial or metric)
 - Added persistent search settings via LocalStorage for better user experience
 - Added support for saving and removing recent searches
-- Added AI Tools to search places, get addresses and place details, and to show results on a map (works with @location)
+- Added AI Tools to search places, get addresses and place details, and to show results on a map (works with `@location`)
 - Added dedicated utility files for better code organization:
   - `use-geocoding.ts` hook for centralized geocoding logic
   - `validation.ts` for form input validation
