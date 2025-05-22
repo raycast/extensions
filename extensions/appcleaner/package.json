@@ -2,9 +2,9 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "appcleaner",
     "title": "App Cleaner",
-    "description": "Uninstall applications with AppCleaner, Pearcleaner or TrashMe 3",
+    "description": "Uninstall applications with AppCleaner, Pearcleaner, TrashMe 3 or App Cleaner & Uninstaller",
     "icon": "icon.png",
-    "author": "dziad",
+    "author": "Dziad",
     "categories": [
         "System",
         "Applications"
@@ -28,23 +28,24 @@
             "defaultValue": "appcleaner",
             "required": false,
             "data": [
-                { "title": "AppCleaner", "value": "appcleaner" },
+                { "title": "AppCleaner (FreeMacSoft)", "value": "appcleaner" },
                 { "title": "Pearcleaner", "value": "pearcleaner" },
-                { "title": "TrashMe 3", "value": "trashme" }
+                { "title": "TrashMe 3", "value": "trashme" },
+                { "title": "App Cleaner & Uninstaller (Nektony)", "value": "appcleaneruninstaller" }
             ]
         }
     ],
     "dependencies": {
-        "@raycast/api": "^1.93.0",
-        "@raycast/utils": "^1.19.0"
+        "@raycast/api": "^1.94.0",
+        "@raycast/utils": "^1.19.1"
     },
     "devDependencies": {
         "@raycast/eslint-config": "^1.0.11",
-        "@types/node": "20.17.19",
-        "@types/react": "18.3.18",
+        "@types/node": "22.15.21",
+        "@types/react": "19.1.5",
         "eslint": "^8.57.1",
-        "prettier": "^3.5.2",
-        "typescript": "^5.8.2"
+        "prettier": "^3.5.3",
+        "typescript": "^5.8.3"
     },
     "scripts": {
         "build": "ray build",
