@@ -165,7 +165,7 @@ export default function Command() {
   }
 
   function addListTitle(title: string, listName?: string) {
-    return `${title} [${listName}]`;
+    return listName ? `${title} [${listName}]` : title;
   }
 
   async function handleListChange(listId?: string) {
