@@ -1,6 +1,7 @@
-import { List, ActionPanel, Action, Icon, Color, Toast, showToast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, Toast, showToast, getApplications } from "@raycast/api";
 import { Resolution } from "../types";
 import { showFailureToast } from "@raycast/utils";
+import { useMemo, useState, useEffect } from "react";
 
 interface ResolutionListProps {
   resolutions: Resolution[];
@@ -12,6 +13,27 @@ interface ResolutionListProps {
   selectedItemId?: string | null | undefined;
   starredResolutions?: Resolution[];
 }
+
+interface ListAccessory {
+  icon: {
+    source: string;
+    fallback: Icon;
+    tintColor: Color;
+  };
+  tooltip: string;
+}
+
+// Icon paths that need to be preloaded
+const ICON_PATHS = {
+  customSize: "icons/custom-size.svg",
+  defaultSize: "icons/default-size.svg",
+  clear: "icons/clear.svg",
+  unstar: "icons/unstar.svg",
+  star: "icons/star.svg",
+} as const;
+
+// Module-level icon preloading flag
+let iconsPreloaded = false;
 
 /**
  * ResolutionList component displays a list of available resolutions
@@ -26,63 +48,101 @@ export function ResolutionList({
   selectedItemId,
   starredResolutions = [],
 }: ResolutionListProps) {
+  const [isIconsReady, setIsIconsReady] = useState(iconsPreloaded);
+
+  useEffect(() => {
+    const preloadIcons = async () => {
+      if (iconsPreloaded) {
+        setIsIconsReady(true);
+        return;
+      }
+
+      try {
+        await getApplications();
+        iconsPreloaded = true;
+        setIsIconsReady(true);
+      } catch (error) {
+        console.error("Failed to preload icons:", error);
+        setIsIconsReady(true);
+      }
+    };
+
+    preloadIcons();
+  }, []);
+
   // Helper function to check if a resolution is starred
   const isStarred = (resolution: Resolution) =>
     starredResolutions.some((r) => r.width === resolution.width && r.height === resolution.height);
 
-  return (
-    <List.Section title={sectionTitle}>
-      {resolutions.map((resolution, index) => {
+  // Pre-compute accessories for each resolution to ensure stable rendering
+  const resolutionAccessories = useMemo(() => {
+    return resolutions.reduce(
+      (acc, resolution, index) => {
         const itemId = `${resolution.isCustom ? "custom" : "default"}-${resolution.width}x${resolution.height}-${sectionTitle}-${index}`;
         const isSelected = itemId === selectedItemId;
         const resolutionIsStarred = isStarred(resolution);
 
-        return (
-          <List.Item
-            key={itemId}
-            id={itemId}
-            title={resolution.title}
-            icon={{
-              source: resolution.isCustom ? "icons/custom-size.svg" : "icons/default-size.svg",
-              fallback: Icon.AppWindow,
-              tintColor: Color.SecondaryText,
-            }}
-            accessories={
-              (isSelected &&
-                (showDeleteAction && resolution.isCustom
-                  ? [
-                      {
-                        icon: { source: "icons/clear.svg", fallback: Icon.Trash, tintColor: Color.SecondaryText },
-                        tooltip: "⌘ D",
-                      },
-                    ]
-                  : resolutionIsStarred
-                    ? [
-                        {
-                          icon: {
-                            source: "icons/unstar.svg",
-                            fallback: Icon.StarDisabled,
-                            tintColor: Color.SecondaryText,
-                          },
-                          tooltip: "⇧ ⌘ S",
-                        },
-                      ]
-                    : !resolution.isCustom
-                      ? [
-                          {
-                            icon: { source: "icons/star.svg", fallback: Icon.Star, tintColor: Color.SecondaryText },
-                            tooltip: "⌘ S",
-                          },
-                        ]
-                      : [])) ||
-              []
-            }
-            actions={
+        let accessories: ListAccessory[] = [];
+        if (isSelected) {
+          if (showDeleteAction && resolution.isCustom) {
+            accessories = [
+              {
+                icon: { source: ICON_PATHS.clear, fallback: Icon.Trash, tintColor: Color.SecondaryText },
+                tooltip: "⌘ D",
+              },
+            ];
+          } else if (resolutionIsStarred) {
+            accessories = [
+              {
+                icon: {
+                  source: ICON_PATHS.unstar,
+                  fallback: Icon.StarDisabled,
+                  tintColor: Color.SecondaryText,
+                },
+                tooltip: "⇧ ⌘ S",
+              },
+            ];
+          } else if (!resolution.isCustom) {
+            accessories = [
+              {
+                icon: { source: ICON_PATHS.star, fallback: Icon.Star, tintColor: Color.SecondaryText },
+                tooltip: "⌘ S",
+              },
+            ];
+          }
+        }
+
+        acc[itemId] = accessories;
+        return acc;
+      },
+      {} as Record<string, ListAccessory[]>,
+    );
+  }, [resolutions, selectedItemId, showDeleteAction, starredResolutions, sectionTitle]);
+
+  // Pre-compute list items to ensure stable rendering
+  const listItems = useMemo(() => {
+    return resolutions.map((resolution, index) => {
+      const itemId = `${resolution.isCustom ? "custom" : "default"}-${resolution.width}x${resolution.height}-${sectionTitle}-${index}`;
+      const resolutionIsStarred = isStarred(resolution);
+
+      return (
+        <List.Item
+          key={itemId}
+          id={itemId}
+          title={resolution.title}
+          icon={{
+            source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.defaultSize,
+            fallback: Icon.AppWindow,
+            tintColor: Color.SecondaryText,
+          }}
+          accessories={resolutionAccessories[itemId] || []}
+          actions={
+            isIconsReady ? (
               <ActionPanel>
                 <Action
                   title={`Resize to ${resolution.title}`}
                   icon={{
-                    source: resolution.isCustom ? "icons/custom-size.svg" : "icons/default-size.svg",
+                    source: resolution.isCustom ? ICON_PATHS.customSize : ICON_PATHS.defaultSize,
                     fallback: Icon.AppWindow,
                     tintColor: Color.PrimaryText,
                   }}
@@ -102,7 +162,7 @@ export function ResolutionList({
                     <Action
                       title="Remove from Starred"
                       icon={{
-                        source: "icons/unstar.svg",
+                        source: ICON_PATHS.unstar,
                         fallback: Icon.StarDisabled,
                         tintColor: Color.PrimaryText,
                       }}
@@ -144,9 +204,9 @@ export function ResolutionList({
                   </>
                 ) : (
                   <Action
-                    title="Mark as Starred"
+                    title="Add to Starred"
                     icon={{
-                      source: "icons/star.svg",
+                      source: ICON_PATHS.star,
                       fallback: Icon.Star,
                       tintColor: Color.PrimaryText,
                     }}
@@ -159,33 +219,40 @@ export function ResolutionList({
                         await onToggleStar(resolution);
                         await showToast({
                           style: Toast.Style.Success,
-                          title: "Marked as Starred",
+                          title: "Added to Starred Sizes",
                         });
                       } catch (error) {
-                        await showFailureToast("Failed to mark as starred", {
+                        await showFailureToast("Failed to add to starred", {
                           message: error instanceof Error ? error.message : String(error),
                         });
                       }
                     }}
                   />
                 )}
-                {showDeleteAction && resolution.isCustom && onDeleteResolution && (
+                {showDeleteAction && resolution.isCustom && (
                   <Action
                     title="Delete Custom Size"
-                    icon={{ source: "icons/clear.svg", fallback: Icon.Trash, tintColor: Color.Red }}
-                    style={Action.Style.Destructive}
+                    icon={{
+                      source: ICON_PATHS.clear,
+                      fallback: Icon.Trash,
+                      tintColor: Color.PrimaryText,
+                    }}
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                     onAction={async () => {
+                      if (!onDeleteResolution) {
+                        return;
+                      }
                       try {
-                        // First remove from starred list if it's starred
                         if (resolutionIsStarred && onToggleStar) {
                           await onToggleStar(resolution);
                         }
-
-                        // Then delete the custom resolution
                         await onDeleteResolution(resolution);
+                        await showToast({
+                          style: Toast.Style.Success,
+                          title: "Deleted Custom Size",
+                        });
                       } catch (error) {
-                        await showFailureToast("Failed to delete size", {
+                        await showFailureToast("Failed to delete custom size", {
                           message: error instanceof Error ? error.message : String(error),
                         });
                       }
@@ -193,10 +260,21 @@ export function ResolutionList({
                   />
                 )}
               </ActionPanel>
-            }
-          />
-        );
-      })}
-    </List.Section>
-  );
+            ) : null
+          }
+        />
+      );
+    });
+  }, [
+    resolutions,
+    resolutionAccessories,
+    sectionTitle,
+    onResizeWindow,
+    onToggleStar,
+    onDeleteResolution,
+    showDeleteAction,
+    isIconsReady,
+  ]);
+
+  return <List.Section title={sectionTitle}>{listItems}</List.Section>;
 }
