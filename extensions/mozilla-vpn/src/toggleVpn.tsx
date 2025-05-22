@@ -23,11 +23,11 @@ export default function Command() {
   return (
     <List>
       <List.Item
-        title="Activate Mozilla VPN"
+        title="Activate Mozilla Vpn"
         actions={
           <ActionPanel>
             <Action
-              title="Activate VPN"
+              title="Activate Vpn"
               onAction={() =>
                 runCommand(
                   '/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN activate'
@@ -38,11 +38,11 @@ export default function Command() {
         }
       />
       <List.Item
-        title="Deactivate Mozilla VPN"
+        title="Deactivate Mozilla Vpn"
         actions={
           <ActionPanel>
             <Action
-              title="Deactivate VPN"
+              title="Deactivate Vpn"
               onAction={() =>
                 runCommand(
                   '/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN deactivate'
