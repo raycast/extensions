@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [✨ Add option to show list name in menu bar reminders ] - {PR_MERGE_DATE}
+## [✨ Add option to show list name in menu bar reminders] - {PR_MERGE_DATE}
 
 - Add an option that allows users to choose whether to display the list name next to each reminder’s name in the menu bar.
 
