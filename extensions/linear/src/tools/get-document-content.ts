@@ -1,6 +1,8 @@
-import { withAccessToken } from "@raycast/utils";
-import { getLinearClient, linear } from "../api/linearClient";
 import { Document } from "@linear/sdk";
+import { withAccessToken } from "@raycast/utils";
+
+import { getLinearClient, linear } from "../api/linearClient";
+
 import { DocumentResult } from "./get-documents";
 
 export type DocumentWithContent = Pick<Document, "content"> & DocumentResult;

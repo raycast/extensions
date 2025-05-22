@@ -1,5 +1,11 @@
 # CricketCast
 
+## [Modernize + Better Score Error Handling] - 2025-04-14
+
+- If Scores not fetched, extension does not crash
+- Use "https" link for the Livescores
+- Modernize extension: remove `node-fetch`
+
 ## [Add Latest News + Cache + TS Support] - 2024-08-07
 
 - News and Scores are now cached

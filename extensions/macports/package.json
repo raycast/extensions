@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macports",
+  "title": "MacPorts",
+  "description": "Search and install macports",
+  "icon": "icon.png",
+  "author": "guide",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-ports",
+      "title": "Search Ports",
+      "subtitle": "MacPorts",
+      "description": "Search and install macports",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search macports...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "list-installed",
+      "title": "List Installed Ports",
+      "subtitle": "MacPorts",
+      "description": "View and manage installed MacPorts packages",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.1.2"
+  },
+  "scripts": {
+    "build": "vitest run && ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest"
+  },
+  "preferences": [
+    {
+      "name": "terminalApp",
+      "type": "dropdown",
+      "required": false,
+      "default": "terminal",
+      "title": "Terminal Application",
+      "data": [
+        {
+          "title": "Alacritty",
+          "value": "alacritty"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
+          "title": "Hyper",
+          "value": "hyper"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        },
+        {
+          "title": "kitty",
+          "value": "kitty"
+        },
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "Warp",
+          "value": "warp"
+        },
+        {
+          "title": "WezTerm",
+          "value": "wezterm"
+        }
+      ],
+      "description": "The terminal application/emulator to use when using any Run in Terminal action."
+    }
+  ]
+}

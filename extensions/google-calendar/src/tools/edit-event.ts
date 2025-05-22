@@ -1,6 +1,6 @@
 import humanizeDuration from "humanize-duration";
-import { withGoogleAPIs, getCalendarClient } from "../google";
-import { addSignature, toISO8601WithTimezoneOffset } from "../utils";
+import { withGoogleAPIs, getCalendarClient } from "../lib/google";
+import { addSignature, toISO8601WithTimezoneOffset } from "../lib/utils";
 import { parseISO, addMinutes } from "date-fns";
 
 type Input = {
@@ -34,12 +34,18 @@ type Input = {
    * The description of the event
    */
   description?: string;
+  /**
+   * The ID of the calendar where the event is located
+   * @default "primary"
+   * @remarks If not provided, the event will be updated in the user's primary calendar. The calendar ID can be found using the `list-calendars` tool.
+   */
+  calendarId?: string;
 };
 
 export const confirmation = withGoogleAPIs(async (input: Input) => {
   const calendar = getCalendarClient();
   const event = await calendar.events.get({
-    calendarId: "primary",
+    calendarId: input.calendarId ?? "primary",
     eventId: input.eventId,
   });
 
@@ -96,7 +102,7 @@ const tool = async (input: Input) => {
   const calendar = getCalendarClient();
 
   const existingEvent = await calendar.events.get({
-    calendarId: "primary",
+    calendarId: input.calendarId ?? "primary",
     eventId: input.eventId,
   });
 
@@ -131,7 +137,7 @@ const tool = async (input: Input) => {
   };
 
   await calendar.events.update({
-    calendarId: "primary",
+    calendarId: input.calendarId ?? "primary",
     eventId: input.eventId,
     requestBody,
   });

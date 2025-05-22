@@ -12,6 +12,7 @@ import useFavorites from "../hooks/useFavorites";
 import { filter } from "lodash";
 import { getIconForModules } from "../utils/getIconForModules";
 import FavoriteForm from "./FavoriteForm";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function NavigationMenu(props: { groupId?: string }) {
   const { groupId = "" } = props;
@@ -24,7 +25,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
     setSelectedInstance,
   } = useInstances();
   const {
-    isUrlInFavorites,
+    isInFavorites,
     isMenuInFavorites,
     revalidateFavorites,
     addApplicationToFavorites,
@@ -244,19 +245,19 @@ export default function NavigationMenu(props: { groupId?: string }) {
                 {group.modules?.map((module) => {
                   if (module.type == "SEPARATOR" && module.modules) {
                     return module.modules.map((m) => {
-                      const url = `${instanceUrl}${m.uri?.startsWith("/") ? "" : "/"}${m.uri}`;
+                      const uri = `${m.uri?.startsWith("/") ? "" : "/"}${m.uri}`;
                       return (
                         <ModuleItem
                           key={m.id}
                           module={m}
-                          url={url}
+                          url={buildServiceNowUrl(instanceName, m.uri || "")}
                           revalidate={() => {
                             revalidate();
                             revalidateFavorites();
                           }}
                           group={group.title}
                           section={module.title}
-                          favoriteId={isUrlInFavorites(url)}
+                          favoriteId={isInFavorites(uri)}
                           addToFavorites={addModuleToFavorites}
                           removeFromFavorites={removeFromFavorites}
                           full={full == "true"}
@@ -264,18 +265,18 @@ export default function NavigationMenu(props: { groupId?: string }) {
                       );
                     });
                   }
-                  const url = `${instanceUrl}${module.uri?.startsWith("/") ? "" : "/"}${module.uri}`;
+                  const uri = `${module.uri?.startsWith("/") ? "" : "/"}${module.uri}`;
                   return (
                     <ModuleItem
                       key={module.id}
                       module={module}
-                      url={url}
+                      url={buildServiceNowUrl(instanceName, module.uri || "")}
                       revalidate={() => {
                         revalidate();
                         revalidateFavorites();
                       }}
                       group={group.title}
-                      favoriteId={isUrlInFavorites(url)}
+                      favoriteId={isInFavorites(uri)}
                       addToFavorites={addModuleToFavorites}
                       removeFromFavorites={removeFromFavorites}
                       full={full == "true"}
@@ -352,7 +353,7 @@ function ModuleItem(props: {
         <ActionPanel>
           <ActionPanel.Section title={module.title}>
             <Action.OpenInBrowser
-              title="Open in Servicenow"
+              title="Open in ServiceNow"
               url={decodeURIComponent(url)}
               icon={{ source: "servicenow.svg" }}
             />

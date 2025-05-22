@@ -1,4 +1,4 @@
-const DOLLAR_RATES = [{ name: "Blue" }, { name: "MEP" }, { name: "CCL" }];
+const DOLLAR_RATES = [{ name: "Oficial" }, { name: "Blue" }, { name: "MEP" }, { name: "CCL" }];
 
 const CRYPTO_RATES = [{ name: "BTC" }, { name: "ETH" }, { name: "USDT" }];
 

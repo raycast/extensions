@@ -35,11 +35,8 @@ export async function getUrlFromSelectionOrClipboard(): Promise<string | undefin
     if (selectedText && isValidUrl(selectedText)) {
       return selectedText;
     }
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to get selected text: ${error.message}`);
-    }
-    throw new Error("Failed to get selected text");
+  } catch {
+    // Silently continue to clipboard fallback regardless of error
   }
 
   try {

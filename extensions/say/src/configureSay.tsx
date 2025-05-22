@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Form, Action, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast } from "@raycast/api";
 import { groupBy } from "lodash";
 import { Device, Voice, say, getAudioDevices } from "mac-say";
 import { systemDefault } from "./constants.js";
@@ -49,6 +49,7 @@ export default function ConfigureSay() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={Icon.SpeechBubbleActive}
             title="Say Example"
             onSubmit={async () => {
               const foundVoice = voices.find((v) => v.name === (voice === systemDefault ? speechPlist?.voice : voice));

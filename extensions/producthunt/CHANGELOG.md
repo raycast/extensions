@@ -1,6 +1,32 @@
 # Product Hunt Changelog
 
-## [1.3] - 2025-03-24
+## [2.1] - 2025-04-09
+
+### Added
+- Added scraper tests to help with stale or incorrect counts
+
+### Changed
+- Improved handling of vote count scraping
+- Swapped vote count and comments in List Item to match Product Hunt leaderboard
+
+
+
+## [2.0] - 2025-04-07
+
+### Added
+- Enhanced image gallery with improved navigation
+- "View Previous Launch(es)" action for products with multiple launches
+- Dedicated gallery view with grid layout for product images
+- Improved navigation with "Back to Featured Products" functionality
+
+### Changed
+- Refactored frontpage implementation to eliminate code duplication
+- Consolidated product actions into a reusable component
+- Created reusable TopicsAction component for consistent UI
+- Improved image processing with better SVG handling
+- Enhanced error handling and user feedback
+
+## [1.1] - 2025-02-21
 
 ### Changed
 

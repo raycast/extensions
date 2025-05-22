@@ -11,20 +11,17 @@ import {
   showHUD,
   getFrontmostApplication,
   Keyboard,
-  Cache,
 } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
-import { useAtom } from "jotai";
+import { runAppleScript, useCachedState } from "@raycast/utils";
 import { trpc } from "./utils/trpc.util";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
 import MyAccount from "./views/MyAccount";
-import { sessionTokenAtom } from "./states/session-token.state";
-import { recentSelectedSpaceAtom, recentSelectedTagsAtom } from "./states/recent-selected.state";
-import { LoginView } from "./views/LoginView";
+import { LoginFormInView } from "./components/LoginFormInView";
 import { NewTagForm } from "./views/NewTagForm";
-import { useMe } from "./hooks/use-me.hook";
-
-const cache = new Cache();
+import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
+import { useMyTags } from "./hooks/use-tags.hook";
+import { CACHED_KEY_RECENT_SELECTED_TAGS, CACHED_KEY_RECENT_SELECTED_SPACE } from "./utils/constants.util";
+import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
 
 interface ScriptsPerBrowser {
   getURL: () => Promise<string>;
@@ -142,15 +139,19 @@ async function getCurrentBrowserPageInfo() {
   }
 }
 
+interface SelectedTag {
+  name: string;
+  spaceId: string;
+}
+
 function Body(props: { onlyPop?: boolean }) {
   const { onlyPop = false } = props;
   const { pop } = useNavigation();
   const [title, setTitle] = useState<string>("");
   const [url, setUrl] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [sessionToken] = useAtom(sessionTokenAtom);
-  const [selectedSpace, setSelectedSpace] = useAtom(recentSelectedSpaceAtom);
-  const [selectedTags, setSelectedTags] = useAtom(recentSelectedTagsAtom);
+  const [selectedSpace, setSelectedSpace] = useCachedState(CACHED_KEY_RECENT_SELECTED_SPACE, "");
+  const [selectedTags, setSelectedTags] = useCachedState<SelectedTag[]>(CACHED_KEY_RECENT_SELECTED_TAGS, []);
 
   const isSlackHuddleUrl = useMemo(() => {
     // ex: https://app.slack.com/huddle/T07LSULVCQY/C07L45LKYHY
@@ -164,13 +165,9 @@ function Body(props: { onlyPop?: boolean }) {
     });
   }, []);
 
-  const me = useMe(sessionToken);
+  const tags = useMyTags();
+  const { enabledSpaces } = useEnabledSpaces();
 
-  const spaceIds = useMemo(() => {
-    return me?.data?.associatedSpaces.map((s) => s.id) || [];
-  }, [me.data]);
-
-  const tags = trpc.tag.list.useQuery({ spaceIds });
   const spaceTags = useMemo(() => {
     if (!tags.data) return undefined;
 
@@ -179,48 +176,40 @@ function Body(props: { onlyPop?: boolean }) {
 
   const bookmarkCreate = trpc.bookmark.create.useMutation();
 
-  const handleSubmit = async () => {
-    await bookmarkCreate.mutateAsync({
-      name: title,
-      description: description,
-      url: url,
-      spaceId: selectedSpace,
-      tags: selectedTags.map((tag) => tag.name),
-    });
-
-    if (onlyPop) {
-      showToast({
-        style: Toast.Style.Success,
-        title: "Bookmark added",
-        message: "Bookmark added successfully",
-      });
-      pop();
-    } else {
-      showHUD("Bookmark added");
-      popToRoot({ clearSearchBar: true });
-    }
+  const handleSubmit = () => {
+    bookmarkCreate.mutate(
+      {
+        name: title,
+        description: description,
+        url: url,
+        spaceId: selectedSpace,
+        tags: selectedTags.map((tag) => tag.name),
+      },
+      {
+        onSuccess: () => {
+          if (onlyPop) {
+            showToast({
+              style: Toast.Style.Success,
+              title: "Bookmark added",
+              message: "Bookmark added successfully",
+            });
+            pop();
+          } else {
+            showHUD("Bookmark added");
+            popToRoot({ clearSearchBar: true });
+          }
+        },
+      },
+    );
   };
 
-  const [after1Sec, setAfter1Sec] = useState(false);
-  useEffect(() => {
-    // If this is not here, will briefly appear.
-    setTimeout(() => setAfter1Sec(true), 1000);
-  }, []);
-
-  const loggedOutStatus = !sessionToken && after1Sec;
-  useEffect(() => {
-    // Clear data when logged out.
-    if (loggedOutStatus) {
-      cache.remove("me");
-      cache.remove("bookmarks");
-    }
-  }, [loggedOutStatus]);
+  const { loggedOutStatus } = useLoggedOutStatus();
 
   if (loggedOutStatus) {
-    return <LoginView />;
+    return <LoginFormInView />;
   }
 
-  if (!me.data) {
+  if (!enabledSpaces) {
     return <Form isLoading={true} />;
   }
 
@@ -229,17 +218,7 @@ function Body(props: { onlyPop?: boolean }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create" icon={Icon.SaveDocument} onSubmit={handleSubmit} />
-          <Action.Push
-            title="My Account"
-            icon={Icon.Person}
-            target={<MyAccount />}
-            onPush={() => {
-              setAfter1Sec(false);
-            }}
-            onPop={() => {
-              setTimeout(() => setAfter1Sec(true), 100);
-            }}
-          />
+          <Action.Push title="My Account" icon={Icon.Person} target={<MyAccount />} />
           <Action.Push
             title="Create New Tag"
             icon={Icon.Tag}
@@ -270,12 +249,12 @@ function Body(props: { onlyPop?: boolean }) {
         id="space"
         title="Space"
         defaultValue={selectedSpace}
-        isLoading={!me.data}
+        isLoading={!enabledSpaces}
         onChange={(value) => {
           setSelectedSpace(value);
         }}
       >
-        {me.data?.associatedSpaces.map((s) => (
+        {enabledSpaces.map((s) => (
           <Form.Dropdown.Item key={s.id} value={s.id} title={s.name} icon={s.image || Icon.TwoPeople} />
         ))}
       </Form.Dropdown>

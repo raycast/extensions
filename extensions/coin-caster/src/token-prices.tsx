@@ -2,12 +2,12 @@ import { Action, ActionPanel, List, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useWatchlist from "./useWatchlist";
 import { distance } from "fastest-levenshtein";
-import useSymbols from "./useSymbols";
 import CommandWrapper from "./CommandWrapper";
 import { formatPrice } from "./utilities";
 import useCoins, { CoinData } from "./useCoins";
 import useChart from "./useChart";
 import getChartDataUrl from "./get-chart-data-url";
+import { showFailureToast } from "@raycast/utils";
 
 function TickerListItem({ coin, active }: { coin: CoinData; active: boolean }) {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
@@ -25,9 +25,13 @@ function TickerListItem({ coin, active }: { coin: CoinData; active: boolean }) {
     if (!active) return;
     if (!chart) return;
     if (chart.length === 0) return;
-    getChartDataUrl(chart).then((url) => {
-      setDataUrl(url);
-    });
+    getChartDataUrl(chart)
+      .then((url) => {
+        setDataUrl(url);
+      })
+      .catch(() => {
+        showFailureToast("Failed to fetch chart data");
+      });
   }, [active, dataUpdatedAt]);
 
   return (
@@ -70,7 +74,6 @@ function TokenPriceContent() {
   const { coins, isLoading } = useCoins();
   const [selected, setSelected] = useState<string | null>(null);
 
-  const { data: symbols } = useSymbols();
   const { isInWatchlist } = useWatchlist();
   const watchlistCoins = coins?.filter((coin) => isInWatchlist(coin.id));
   const otherCoins = coins?.filter((coin) => !isInWatchlist(coin.id));
@@ -97,7 +100,7 @@ function TokenPriceContent() {
       searchBarPlaceholder="Search for a token..."
       onSelectionChange={(item) => setSelected(item)}
     >
-      {symbols && (
+      {
         <>
           <List.Section title="Watchlist">
             {filteredWatchlist?.map((coin) => (
@@ -105,14 +108,12 @@ function TokenPriceContent() {
             ))}
           </List.Section>
           <List.Section title="All Tokens">
-            {filteredAllTokens
-              .filter((coin) => !isInWatchlist(coin.id))
-              .map((coin) => (
-                <TickerListItem key={coin.id} coin={coin} active={coin.id === selected} />
-              ))}
+            {filteredAllTokens.map((coin) => (
+              <TickerListItem key={coin.id} coin={coin} active={coin.id === selected} />
+            ))}
           </List.Section>
         </>
-      )}
+      }
     </List>
   );
 }

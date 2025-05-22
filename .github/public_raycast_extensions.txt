@@ -51,4 +51,10 @@ e2b
 firecrawl
 resend
 terminaldotshop
+fabric
+awork
+laravel-herd
+playtester
+model-context-protocol-registry
+clarify
 exa

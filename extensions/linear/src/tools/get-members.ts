@@ -1,6 +1,7 @@
-import { withAccessToken } from "@raycast/utils";
-import { getLinearClient, linear } from "../api/linearClient";
 import { User } from "@linear/sdk";
+import { withAccessToken } from "@raycast/utils";
+
+import { getLinearClient, linear } from "../api/linearClient";
 
 export type MemberResult = Pick<User, "id" | "description" | "displayName" | "email" | "isMe" | "name" | "url">;
 

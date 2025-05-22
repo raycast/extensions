@@ -1,30 +1,40 @@
-import { Toast, showToast, LaunchProps } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { useSpaces } from "./hooks/useSpaces";
-import { useTypes } from "./hooks/useTypes";
-import { Type } from "./helpers/schemas";
-import CreateObjectForm from "./components/CreateObjectForm";
-import EnsureAuthenticated from "./components/EnsureAuthenticated";
-
+import { LaunchProps } from "@raycast/api";
+import { CreateObjectForm, EnsureAuthenticated } from "./components";
+import { PropertyFieldValue } from "./models";
 export interface CreateObjectFormValues {
-  space: string;
-  type: string;
+  spaceId?: string;
+  typeId?: string;
+  templateId?: string;
+  listId?: string;
   name?: string;
   icon?: string;
   description?: string;
   body?: string;
   source?: string;
+
+  /**
+   * Dynamic property values coming from the selected Type definition.
+   * Keys are the property `key` strings and values depend on the property format:
+   * - "text" & "select"  -> string
+   * - "number"           -> string (raw text input before cast)
+   * - "date"             -> Date | null (Raycast DatePicker returns a Date object)
+   * - "multi_select"     -> string[]
+   * - "checkbox"         -> boolean
+   */
+  [key: string]: PropertyFieldValue;
 }
 
 interface LaunchContext {
-  defaults?: {
-    space?: string;
-    type?: string;
-    name?: string;
-    icon?: string;
-    description?: string;
-    body?: string;
-    source?: string;
+  defaults: {
+    space: string;
+    type: string;
+    template: string;
+    list: string;
+    name: string;
+    icon: string;
+    description: string;
+    body: string;
+    source: string;
   };
 }
 
@@ -45,65 +55,5 @@ function CreateObject({ draftValues, launchContext }: CreateObjectProps) {
     ...draftValues, // `draftValues` takes precedence
   };
 
-  const [selectedSpace, setSelectedSpace] = useState(mergedValues?.space || "");
-  const [selectedType, setSelectedType] = useState(mergedValues?.type || "");
-  const [filteredTypes, setFilteredTypes] = useState<Type[]>([]);
-  const { spaces, spacesError, isLoadingSpaces } = useSpaces();
-  const { types, typesError, isLoadingTypes } = useTypes(selectedSpace);
-
-  const restrictedTypes = [
-    "ot-audio",
-    "ot-chat",
-    "ot-file",
-    "ot-image",
-    "ot-objectType",
-    "ot-tag",
-    "ot-template",
-    "ot-video",
-    "ot-participant",
-  ];
-
-  useEffect(() => {
-    if (spaces.length > 0 && !selectedSpace) {
-      setSelectedSpace(spaces[0].id);
-    }
-  }, [spaces]);
-
-  useEffect(() => {
-    if (types.length > 0) {
-      const validTypes = types.filter((type) => !restrictedTypes.includes(type.unique_key));
-      setFilteredTypes(validTypes);
-    }
-  }, [types]);
-
-  useEffect(() => {
-    if (filteredTypes.length > 0 && !selectedType) {
-      setSelectedType(filteredTypes[0].unique_key);
-    }
-  }, [filteredTypes]);
-
-  useEffect(() => {
-    if (spacesError) {
-      showToast(Toast.Style.Failure, "Failed to fetch spaces", spacesError.message);
-    }
-  }, [spacesError]);
-
-  useEffect(() => {
-    if (typesError) {
-      showToast(Toast.Style.Failure, "Failed to fetch types", typesError.message);
-    }
-  }, [typesError]);
-
-  return (
-    <CreateObjectForm
-      spaces={spaces || []}
-      objectTypes={filteredTypes}
-      selectedSpace={selectedSpace}
-      setSelectedSpace={setSelectedSpace}
-      selectedType={selectedType}
-      setSelectedType={setSelectedType}
-      isLoading={isLoadingSpaces || isLoadingTypes}
-      draftValues={mergedValues as CreateObjectFormValues}
-    />
-  );
+  return <CreateObjectForm draftValues={mergedValues} enableDrafts={true} />;
 }
