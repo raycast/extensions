@@ -11,7 +11,6 @@ export default function useClickUp<T>(endpoint: string, { apiVersion }: { apiVer
     async () => {
       try {
         const response = await ClickUpClient<T>(endpoint, "GET", undefined, undefined, apiVersion);
-        console.log(response);
         return response.data;
       } catch (error) {
         const result = error as AxiosError<ErrorResult>;
