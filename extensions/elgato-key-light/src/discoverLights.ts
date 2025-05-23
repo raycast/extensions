@@ -6,10 +6,8 @@ export default async function Command() {
   try {
     const keyLight = await KeyLight.discover(true);
     if (!keyLight) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(new Error("Could not discover any Key Lights on your network"), {
         title: "No Key Lights found",
-        message: "Could not discover any Key Lights on your network",
       });
       return;
     }

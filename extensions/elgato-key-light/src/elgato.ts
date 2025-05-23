@@ -2,6 +2,7 @@ import axios from "axios";
 import BonjourService from "bonjour-service";
 import { waitUntil } from "./utils";
 import { environment, Cache, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 // Define the ElgatoService interface - represents the service returned by bonjour
 interface ElgatoService {
@@ -282,11 +283,7 @@ export class KeyLight {
         if (environment.isDevelopment) {
           console.error("Bonjour browser error:", error);
         }
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Discovery Failed",
-          message: error.message,
-        });
+        showFailureToast(error, { title: "Discovery Failed" });
         reject(new Error(`Bonjour discovery error: ${error.toString()}`));
       });
 
@@ -313,10 +310,8 @@ export class KeyLight {
           bonjour.destroy();
           clearTimeout(discoveryTimeout);
         } else {
-          showToast({
-            style: Toast.Style.Failure,
+          showFailureToast(new Error("Could not discover any Key Lights on your network"), {
             title: "No Key Lights Found",
-            message: "Could not discover any Key Lights on your network",
           });
           reject(new Error("Cannot discover any Key Lights in the network"));
         }
@@ -329,11 +324,7 @@ export class KeyLight {
       if (environment.isDevelopment) {
         console.error("Discovery failed:", error);
       }
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Discovery Failed",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
+      showFailureToast(error, { title: "Discovery Failed" });
       throw error;
     }
   }

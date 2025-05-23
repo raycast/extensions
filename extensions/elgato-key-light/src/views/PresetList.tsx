@@ -4,7 +4,8 @@ import { Preset, deletePreset, usePresets } from "../presets";
 import { convertFormTemperatureToActual, KeyLight } from "../elgato";
 import PresetForm, { FormValues } from "./PresetForm";
 import { randomUUID } from "crypto";
-import { discoverKeyLights, formatErrorResponse } from "../utils";
+import { discoverKeyLights } from "../utils";
+import { showFailureToast } from "@raycast/utils";
 
 export default function PresetList() {
   const { value: presets, isLoading, setValue: setPresets, removeValue } = usePresets();
@@ -43,12 +44,7 @@ export default function PresetList() {
         title: `Activated "${preset.name}" preset`,
       });
     } catch (error) {
-      const response = formatErrorResponse(error, `activate preset "${preset.name}"`);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: response.message,
-        message: response.error,
-      });
+      await showFailureToast(error, { title: `Failed to activate preset "${preset.name}"` });
     }
   }
 
@@ -79,12 +75,7 @@ export default function PresetList() {
         title: `Deleted "${preset.name}" preset`,
       });
     } catch (error) {
-      const response = formatErrorResponse(error, `delete preset "${preset.name}"`);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: response.message,
-        message: response.error,
-      });
+      await showFailureToast(error, { title: `Failed to delete preset "${preset.name}"` });
     }
   }
 
