@@ -72,7 +72,7 @@ export default function QuickCapture() {
         <Form.Dropdown.Item value="3" title="Normal" icon="🟡" />
         <Form.Dropdown.Item value="4" title="Low" icon="🟢" />
       </Form.Dropdown>
-      <Form.Dropdown title="Status" storeValue throttle {...itemProps.status}>
+      <Form.Dropdown title="Status" storeValue {...itemProps.status}>
         {list?.statuses.map((status) => (
           <Form.Dropdown.Item
             key={status.status}
