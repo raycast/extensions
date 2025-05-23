@@ -1,6 +1,6 @@
 # Instagram Media Downloader Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-05-23
 
 - Update the method for obtaining the Instagram media URL.
 
