@@ -92,7 +92,7 @@ export function useCodeRunner(): UseCodeRunnerReturn {
         if (toast) {
           toast.style = Toast.Style.Success;
           toast.title = "Languages detected!";
-          toast.message = detected.length > 0 ? "Ready to run code." : "No supported languages found.";
+          toast.message = "Ready to run code.";
         }
       } catch (error: unknown) {
         // Changed 'any' to 'unknown'

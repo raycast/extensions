@@ -34,8 +34,6 @@ export default function Command() {
   if (availableLanguages.length === 0) {
     return (
       <Form isLoading={false}>
-        {" "}
-        {/* isInitializing is false here */}
         <Form.Description
           title="No Supported Languages Found"
           text="Please ensure Node.js, Python3, or Go are installed and in your system's PATH."
