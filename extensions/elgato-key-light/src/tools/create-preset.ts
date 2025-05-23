@@ -44,7 +44,7 @@ export default async function tool(input: {
       ...formatErrorResponse(error, "create preset"),
       data: {
         id: "",
-        name: "",
+        name: input.name,
         icon: input.icon,
         settings: {
           brightness: 0,
