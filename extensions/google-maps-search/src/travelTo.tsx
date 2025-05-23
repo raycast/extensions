@@ -60,23 +60,43 @@ export default function Command() {
     autoFillDestination();
   }, [preferences.useSelected]);
 
+  const [error, setError] = useState<string | undefined>();
+
+  // Check if the form is valid
+  const isFormValid = !!destination?.trim();
+  
+  // Format the URL with the current state
+  const directionsURL = isFormValid 
+    ? makeDirectionsURL(originAddress, destination, mode)
+    : '';
+
   return (
     <Form
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          {/* Action to open directions in browser */}
-          <Action.OpenInBrowser
-            url={makeDirectionsURL(originAddress, destination, mode)}
-            icon={Icon.Globe}
-            onOpen={() => popToRoot()}
-          />
-          {/* Action to copy directions URL to clipboard */}
-          <Action.CopyToClipboard
-            content={makeDirectionsURL(originAddress, destination, mode)}
-            icon={Icon.Clipboard}
-            onCopy={() => popToRoot()}
-          />
+          {isFormValid ? (
+            <>
+              <Action.OpenInBrowser
+                url={directionsURL}
+                icon={Icon.Globe}
+                title="Open in Browser"
+                onOpen={() => popToRoot()}
+              />
+              <Action.CopyToClipboard
+                content={directionsURL}
+                icon={Icon.Clipboard}
+                title="Copy URL to Clipboard"
+                onCopy={() => popToRoot()}
+              />
+            </>
+          ) : (
+            <Action
+              title="Enter a Destination"
+              icon={Icon.ExclamationMark}
+              onAction={() => setError('Destination is required')}
+            />
+          )}
         </ActionPanel>
       }
     >
@@ -86,7 +106,12 @@ export default function Command() {
         title="Destination"
         placeholder="Name or Address"
         value={destination}
-        onChange={setDestination}
+        onChange={(value) => {
+          setDestination(value);
+          // Clear error when user starts typing
+          if (error) setError(undefined);
+        }}
+        error={error}
       />
       <Form.Separator />
       {/* Origin selection dropdown */}
@@ -104,6 +129,7 @@ export default function Command() {
           onChange={setOriginAddress}
         />
       )}
+
       {/* Transport mode selection dropdown */}
       <Form.Dropdown
         id="transportType"
@@ -123,6 +149,7 @@ export default function Command() {
         <Form.Dropdown.Item value={TransportType.Walking} title="Walking" icon={Icon.Footprints} />
         <Form.Dropdown.Item value={TransportType.Cycling} title="Cycling" icon={Icon.Bike} />
       </Form.Dropdown>
+      
     </Form>
   );
 }

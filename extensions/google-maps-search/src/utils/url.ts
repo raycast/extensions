@@ -13,7 +13,11 @@ import { Preferences } from "../types";
  * @param transporttype One of four possible transit types
  * @returns A properly URI encoded string according to Google Maps documentation
  */
-export function makeDirectionsURL(origin: string, destination: string, transporttype: string): string {
+export function makeDirectionsURL(
+  origin: string,
+  destination: string,
+  transporttype: string
+): string {
   const mapsBase = "https://www.google.com/maps/dir/?api=1";
 
   // If origin is empty, get the home address from preferences
