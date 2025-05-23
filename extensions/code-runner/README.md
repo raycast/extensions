@@ -11,7 +11,7 @@ A powerful Raycast extension that allows you to write and execute code snippets 
 
 This section is for anyone who wants to use the Local Code Runner to quickly test code, learn new syntax, or automate small tasks right from their Raycast launcher.
 
-**Looking to dive into the code or contribute? Jump to the [For Developers section](#💻-for-developers:-extend-&-contribute)\!**
+**Looking to dive into the code or contribute? Jump to the [For Developers section](#for-developers)!**
 
 ### ✨ What It Does
 
