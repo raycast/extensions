@@ -41,7 +41,7 @@ export default async function Command({
 
     const instagramMedias = await getInstagramMediaURLByGraphQL(shortcode);
     if (!instagramMedias) {
-      throw new Error("No medias found at the provided URL");
+      throw new Error("No media found at the provided URL");
     }
 
     for (const media of instagramMedias) {

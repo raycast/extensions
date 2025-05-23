@@ -1,6 +1,7 @@
 import axios from "axios";
 import { createWriteStream, existsSync } from "fs";
 import { showToast, Toast, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 interface InstagramMediaEdge {
   node: {
@@ -64,7 +65,7 @@ export async function getInstagramMediaURLByGraphQL(shortcode: string) {
 
     return null;
   } catch (error) {
-    console.error("Error fetching Instagram media:", (error as Error).message);
+    showFailureToast(error, { title: "Could not fetch Instagram media" });
     return null;
   }
 }
