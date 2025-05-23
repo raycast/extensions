@@ -3,12 +3,23 @@ export declare class SpaceAuthService {
         spaceIds: string[];
         accessToken: string;
     }): Promise<string[]>;
+    getSession(accessToken: string): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        userId: string;
+        createdAt: Date;
+        email: string;
+        updatedAt: Date;
+        expires: Date;
+        sessionId: string;
+        deviceName: string | null;
+    }>;
     hasValidSpaceAuthByEmailOrEmailPattern(params: {
         memberAuthPolicies: {
             emailPattern: string;
             authCheckIntervalSec: number;
         }[];
-        emailOrEmailPattern: string;
+        authEmail: string;
         authAge: number;
     }): boolean;
     hasValidSpaceAuth(params: {
@@ -18,14 +29,30 @@ export declare class SpaceAuthService {
             email: string;
             sessionId: string;
         };
+        authEmailToAdd?: string;
+        policyToAdd?: {
+            emailPattern: string;
+            authCheckIntervalSec: number;
+        };
+        policyToRemove?: {
+            emailPattern: string;
+        };
     }): Promise<boolean>;
-    /**
-     * Check email pattern only, regardless of expiration date
-     */
-    checkEmailPatternPolicy(params: {
+    getSpaceAuth(params: {
         spaceId: string;
-        email: string;
-    }): Promise<void>;
+        session: {
+            createdAt: Date;
+            email: string;
+            sessionId: string;
+        };
+        authEmailToAdd?: string;
+    }): Promise<{
+        authEmail: string;
+        updatedAt: Date;
+    }>;
+    listAllowedEmailPatterns(params: {
+        spaceId: string;
+    }): Promise<string[]>;
     sendAuthCode(params: {
         email: string;
         spaceId: string;
@@ -38,14 +65,6 @@ export declare class SpaceAuthService {
         code: string;
         sessionId: string;
     }): Promise<void>;
-    /**
-     * Returns the last verified information from the Space regardless of expiration.
-     */
-    getLastVerifiedEmail(params: {
-        email: string;
-        spaceId: string;
-        sessionId: string;
-    }): Promise<any>;
     listMemberAuthPolicies(params: {
         spaceId: string;
         email: string;
