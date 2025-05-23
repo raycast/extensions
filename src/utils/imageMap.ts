@@ -1,8 +1,8 @@
-import { Image } from "@raycast/api";
-
 // utils/imageMap.ts
-export const logoMap: { [key: string]: string } = {
-  go: "../assets/icons/go-original.svg",
-  javascript: "../assets/icons/javascript-original.svg",
-  python: "../assets/icons/python-original.svg",
+export type SupportedLanguage = 'javascript' | 'go' | 'python';
+
+export const logoMap: { [key in SupportedLanguage]?: string } = {
+  'javascript': '../assets/icons/javascript-original.svg',
+  'go': '../assets/icons/go-original.svg',
+  'python': '../assets/icons/python-original.svg',
 };

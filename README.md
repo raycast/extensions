@@ -22,7 +22,11 @@ Visit [https://developers.raycast.com](https://developers.raycast.com) to get st
 
 Be sure to read and follow our [Community](https://manual.raycast.com/community-guidelines) and [Extension](https://manual.raycast.com/extensions) guidelines when submitting your extension and interacting with other folks in this repository.
 
+<<<<<<< HEAD
 ## Feedback
+=======
+**Looking to dive into the code or contribute? Jump to the [For Developers section](#for-developers)\!**
+>>>>>>> 1d1cda3b7 (refactor: resolve review comments)
 
 Raycast wouldn't be where it is without the feedback from our community, so we would be happy to hear what you think of the API / DevX and how we can improve. Please use [GitHub issues](https://github.com/raycast/extensions/issues/new/choose) for everything API related (bugs, improvements suggestions, developer experience, docs, etc). We have a few [templates](https://developers.raycast.com/examples) that should help you get started.
 
