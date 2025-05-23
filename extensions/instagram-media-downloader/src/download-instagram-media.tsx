@@ -1,5 +1,5 @@
 import { LaunchProps, Toast, showToast, getPreferenceValues } from "@raycast/api";
-import { getInstagramMediaURL, handleDownload } from "./download-media";
+import { getInstagramMediaURLByGraphQL, handleDownload } from "./download-media";
 import { homedir } from "os";
 
 export default async function Command({
@@ -20,12 +20,26 @@ export default async function Command({
   }
 
   try {
+    const parsedUrl = new URL(instagramUrl);
+    const pathParts = parsedUrl.pathname.replace(/^\/+|\/+$/g, "").split("/");
+
+    if (pathParts.length < 2 || !["p", "reel"].includes(pathParts[0])) {
+      await showToast({
+        title: "Error",
+        message: "Invalid Instagram post URL format.",
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
+
+    const shortcode = pathParts[1];
+
     await showToast({
       title: "Fetching Media",
       style: Toast.Style.Animated,
     });
 
-    const instagramMedias = await getInstagramMediaURL(instagramUrl);
+    const instagramMedias = await getInstagramMediaURLByGraphQL(shortcode);
     if (!instagramMedias) {
       throw new Error("No medias found at the provided URL");
     }

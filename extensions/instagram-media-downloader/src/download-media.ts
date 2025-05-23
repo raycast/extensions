@@ -2,31 +2,69 @@ import axios from "axios";
 import { createWriteStream, existsSync } from "fs";
 import { showToast, Toast, open } from "@raycast/api";
 
-export async function getInstagramMediaURL(instagramUrl: string) {
+interface InstagramMediaEdge {
+  node: {
+    video_url?: string;
+    display_url: string;
+  };
+}
+
+export async function getInstagramMediaURLByGraphQL(shortcode: string) {
+  const docId = "8845758582119845";
+  const variables = {
+    shortcode,
+  };
+
+  const params = new URLSearchParams({
+    doc_id: docId,
+    variables: JSON.stringify(variables),
+  });
+
+  const headers = {
+    "User-Agent":
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+    "X-Requested-With": "XMLHttpRequest",
+    "X-Instagram-AJAX": "1",
+    Referer: "https://www.instagram.com/",
+    Origin: "https://www.instagram.com",
+  };
+
   try {
-    const response = await axios.post(
-      "https://instagram-media.zeabur.app/get-instagram-media",
-      {
-        url: instagramUrl,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
-        },
-      },
-    );
+    const response = await axios.get(`https://www.instagram.com/graphql/query?${params.toString()}`, { headers });
 
-    const mediaUrls = response.data["urls"];
+    const media = response.data?.data?.xdt_shortcode_media;
 
-    return mediaUrls;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error("Error:", error.message);
+    if (!media) throw new Error("Invalid response or shortcode not found");
+
+    const typenameMap: Record<string, string> = {
+      XDTGraphImage: "GraphImage",
+      XDTGraphVideo: "GraphVideo",
+      XDTGraphSidecar: "GraphSidecar",
+    };
+
+    if (typenameMap[media.__typename]) {
+      media.__typename = typenameMap[media.__typename];
     } else {
-      console.error("Error:", (error as Error).message);
+      throw new Error(`Unknown __typename in metadata: ${media.__typename}`);
     }
+
+    if (shortcode !== media.shortcode) {
+      console.warn("Shortcode has changed. Post may have been moved.");
+    }
+
+    if (media.__typename === "GraphImage") {
+      return [media.display_url];
+    } else if (media.__typename === "GraphVideo") {
+      return [media.video_url];
+    } else if (media.__typename === "GraphSidecar") {
+      return media.edge_sidecar_to_children.edges.map(
+        (edge: InstagramMediaEdge) => edge.node.video_url || edge.node.display_url,
+      );
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error fetching Instagram media:", (error as Error).message);
     return null;
   }
 }
