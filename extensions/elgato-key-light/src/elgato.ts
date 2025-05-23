@@ -530,7 +530,7 @@ export class KeyLight {
           try {
             await KeyLight.discover(true);
             const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-            newTemperature = Math.max(keyLight.temperature + TEMPERATURE_STEP, COLD_TEMPERATURE);
+            newTemperature = Math.min(keyLight.temperature + TEMPERATURE_STEP, WARM_TEMPERATURE);
             await this.updateKeyLight(KeyLight.keyLights[x].service, { temperature: newTemperature });
           } catch (retryError) {
             throw new Error(`Failed increasing temperature: ${(retryError as Error).message}`);
