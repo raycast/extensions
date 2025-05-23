@@ -1,3 +1,4 @@
+import { KeyLight, internalToKelvin } from "./elgato";
 import { showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { discoverKeyLights } from "./utils";

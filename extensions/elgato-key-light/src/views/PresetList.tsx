@@ -27,8 +27,12 @@ export default function PresetList() {
         if (environment.isDevelopment) {
           console.error("Failed to turn on Key Light, forcing fresh discovery and retrying");
         }
-        const keyLightRetry = await discoverKeyLights(true);
-        await keyLightRetry.turnOn();
+        try {
+          const keyLightRetry = await discoverKeyLights(true);
+          await keyLightRetry.turnOn();
+        } catch (retryError) {
+          throw new Error(`Failed to turn on Key Light after retry: ${(retryError as Error).message}`);
+        }
       }
 
       // Now apply the preset settings
