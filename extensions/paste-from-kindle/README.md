@@ -9,4 +9,4 @@ Remove the automatic citation when copying from within the Kindle app
 
 ⌘+c -> Paste from Kindle: "text from kindle"
 
-![Example Usage](./metadata/kindle-paste-1.png)
+![Example Usage](./images/kindle-paste-1.png)
