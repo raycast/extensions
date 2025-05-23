@@ -11,7 +11,7 @@ const command = async () => {
       await showToast({
         style: Toast.Style.Success,
         title:
-          brightness !== undefined
+          typeof brightness === "number"
             ? `Brightness: ${brightness.toLocaleString("en", { maximumFractionDigits: 0 })}%`
             : "Brightness decreased",
       });
