@@ -1,6 +1,6 @@
 # Prism Launcher Changelog
 
-## [New Additions] - {PR_MERGE_DATE}
+## [New Additions] - 2025-05-23
 
 - Add favorites functionality for instances
 - Sort instances alphabetically
