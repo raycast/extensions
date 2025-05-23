@@ -6,7 +6,7 @@ export default async function Command() {
   try {
     const keyLight = await KeyLight.discover(true);
     if (!keyLight) {
-      await showFailureToast(new Error("Could not discover any Key Lights on your network"), {
+      showFailureToast(new Error("Could not discover any Key Lights on your network"), {
         title: "No Key Lights found",
       });
       return;

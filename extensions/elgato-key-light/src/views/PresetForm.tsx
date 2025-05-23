@@ -97,7 +97,7 @@ export default function PresetForm(props: {
         await showToast({ title: props.preset ? "Updated preset" : "Saved preset" });
         pop();
       } catch (error) {
-        await showFailureToast(error, { title: props.preset ? "Failed updating preset" : "Failed saving preset" });
+        showFailureToast(error, { title: props.preset ? "Failed updating preset" : "Failed saving preset" });
       }
     },
     validation: {

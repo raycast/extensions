@@ -16,10 +16,10 @@ const command = async () => {
             : "Brightness decreased",
       });
     } catch (error) {
-      await showFailureToast(error, { title: "Failed to decrease brightness" });
+      showFailureToast(error, { title: "Failed to decrease brightness" });
     }
   } catch (error) {
-    await showFailureToast(error, { title: "Failed to discover Key Lights" });
+    showFailureToast(error, { title: "Failed to discover Key Lights" });
   }
 };
 

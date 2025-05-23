@@ -17,10 +17,10 @@ const command = async () => {
             : "Temperature decreased",
       });
     } catch (error) {
-      await showFailureToast(error, { title: "Failed to decrease temperature" });
+      showFailureToast(error, { title: "Failed to decrease temperature" });
     }
   } catch (error) {
-    await showFailureToast(error, { title: "Failed to discover Key Lights" });
+    showFailureToast(error, { title: "Failed to discover Key Lights" });
   }
 };
 

@@ -13,10 +13,10 @@ const command = async () => {
         title: isOn ? "Light turned on" : "Light turned off",
       });
     } catch (error) {
-      await showFailureToast(error, { title: "Failed to toggle light" });
+      showFailureToast(error, { title: "Failed to toggle light" });
     }
   } catch (error) {
-    await showFailureToast(error, { title: "Failed to discover Key Lights" });
+    showFailureToast(error, { title: "Failed to discover Key Lights" });
   }
 };
 

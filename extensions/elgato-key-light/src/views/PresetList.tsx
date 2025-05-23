@@ -44,7 +44,7 @@ export default function PresetList() {
         title: `Activated "${preset.name}" preset`,
       });
     } catch (error) {
-      await showFailureToast(error, { title: `Failed to activate preset "${preset.name}"` });
+      showFailureToast(error, { title: `Failed to activate preset "${preset.name}"` });
     }
   }
 
@@ -75,7 +75,7 @@ export default function PresetList() {
         title: `Deleted "${preset.name}" preset`,
       });
     } catch (error) {
-      await showFailureToast(error, { title: `Failed to delete preset "${preset.name}"` });
+      showFailureToast(error, { title: `Failed to delete preset "${preset.name}"` });
     }
   }
 
