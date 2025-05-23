@@ -319,7 +319,7 @@ export class KeyLight {
     });
 
     try {
-      return await waitUntil(find, { timeout: 6000, timeoutMessage: "Cannot discover any Key Lights in the network" });
+      return await waitUntil(find, { timeout: 5000, timeoutMessage: "Cannot discover any Key Lights in the network" });
     } catch (error) {
       if (environment.isDevelopment) {
         console.error("Discovery failed:", error);
