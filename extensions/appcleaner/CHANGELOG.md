@@ -1,6 +1,6 @@
 # App Cleaner Changelog
 
-## [New uninstaller] - {PR_MERGE_DATE}
+## [New uninstaller] - 2025-05-23
 - Add support for App Cleaner & Uninstaller by Nektony
 
 ## [New uninstaller] - 2025-03-02
