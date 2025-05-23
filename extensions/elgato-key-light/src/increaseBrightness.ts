@@ -1,10 +1,10 @@
-import { KeyLight } from "./elgato";
 import { showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { discoverKeyLights } from "./utils";
 
 const command = async () => {
   try {
-    const keyLight = await KeyLight.discover();
+    const keyLight = await discoverKeyLights();
     try {
       const brightness = await keyLight.increaseBrightness();
 

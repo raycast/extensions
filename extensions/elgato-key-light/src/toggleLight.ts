@@ -6,17 +6,14 @@ const command = async () => {
   try {
     const keyLight = await discoverKeyLights();
     try {
-      const brightness = await keyLight.decreaseBrightness();
+      const isOn = await keyLight.toggle();
 
       await showToast({
         style: Toast.Style.Success,
-        title:
-          typeof brightness === "number"
-            ? `Brightness: ${brightness.toLocaleString("en", { maximumFractionDigits: 0 })}%`
-            : "Brightness decreased",
+        title: isOn ? "Light turned on" : "Light turned off",
       });
     } catch (error) {
-      await showFailureToast(error, { title: "Failed to decrease brightness" });
+      await showFailureToast(error, { title: "Failed to toggle light" });
     }
   } catch (error) {
     await showFailureToast(error, { title: "Failed to discover Key Lights" });
