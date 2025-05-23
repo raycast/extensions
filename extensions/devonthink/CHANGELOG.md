@@ -1,6 +1,6 @@
 # DEVONthink Changelog
 
-## [Update] - 2025-05-23
+## [Update] - {PR_MERGE_DATE}
 
 - Recognize DEVONthink 4 (search for another app name)
 
