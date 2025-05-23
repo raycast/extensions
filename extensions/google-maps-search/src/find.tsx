@@ -15,7 +15,7 @@ export default function Command({ launchContext, fallbackText }: LaunchProps<{ l
   // Open the searchPlaces command with the same query
   const query = launchContext?.query ?? fallbackText;
   open(
-    `raycast://extensions/messina/google-maps-search/searchPlaces${query ? `?query=${encodeURIComponent(query)}` : ""}`
+    `raycast://extensions/ratoru/google-maps-search/searchPlaces${query ? `?query=${encodeURIComponent(query)}` : ""}`
   );
 
   return null;

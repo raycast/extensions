@@ -32,5 +32,5 @@ export interface GoogleMapsDirectionsParams {
   region?: string;
   traffic_model?: "best_guess" | "pessimistic" | "optimistic";
   transit_mode?: "bus" | "subway" | "train" | "tram" | "rail";
-  transit_routing_preference?: "less" | "more";
+  transit_routing_preference?: "less_walking" | "fewer_transfers";
 }

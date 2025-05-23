@@ -1,3 +1,4 @@
+import { showFailureToast } from "@raycast/utils";
 import { getApiKey } from "./googlePlacesApi";
 import { geocodePlace } from "../hooks/useGeocoding";
 
@@ -52,6 +53,11 @@ export interface RenderMapOptions {
 export const MARKER_COLORS = ["red", "blue", "green", "purple", "orange", "yellow", "gray", "brown", "black", "white"];
 
 /**
+ * Maximum allowed URL length for Google Maps Static API
+ */
+export const MAX_URL_LENGTH = 16384;
+
+/**
  * Type for geocode result
  */
 interface GeocodedLocation {
@@ -93,8 +99,9 @@ export async function generateStaticMapUrl(options: RenderMapOptions): Promise<{
   try {
     const apiKey = getApiKey();
     if (!apiKey) {
-      console.error("Missing Google Maps API key");
-      throw new Error("Google Maps API key is required");
+      const errorMessage = "Google Maps API key is required. Please set it in the extension preferences.";
+      showFailureToast(errorMessage, { title: "API Key Required" });
+      throw new Error(errorMessage);
     }
 
     const mapSize = options.size || "600x400";
@@ -270,8 +277,7 @@ export async function generateStaticMapUrl(options: RenderMapOptions): Promise<{
     // Add API key
     url += `&key=${apiKey}`;
 
-    // Check URL length - Google Maps Static API has a limit of 16,384 characters
-    const MAX_URL_LENGTH = 16384;
+    // Check URL length against the maximum allowed by the API
     if (url.length > MAX_URL_LENGTH) {
       console.warn(`Static map URL exceeds maximum length (${url.length} > ${MAX_URL_LENGTH})`);
 
@@ -413,9 +419,7 @@ export async function renderSingleLocationMap(
 
     if (!locationCoords) {
       console.error(`Could not geocode location: ${location}`);
-      return `> **Error:** Could not geocode location: \
-${location}\
-\n`;
+      return `> **Error:** Could not geocode location: ${location}\n\n`;
     }
   } else {
     locationCoords = location;

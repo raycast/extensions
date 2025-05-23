@@ -109,7 +109,14 @@ export default function Command() {
         id="transportType"
         title="Transport Preference"
         value={mode}
-        onChange={(newValue: string) => setMode(newValue as TransportType)}
+        onChange={(newValue) => {
+          // Type guard to ensure the value is a valid TransportType
+          if (Object.values(TransportType).includes(newValue as TransportType)) {
+            setMode(newValue as TransportType);
+          } else {
+            console.warn(`Invalid transport type: ${newValue}`);
+          }
+        }}
       >
         <Form.Dropdown.Item value={TransportType.Driving} title="Driving" icon={Icon.Car} />
         <Form.Dropdown.Item value={TransportType.Transit} title="Transit" icon={Icon.Train} />

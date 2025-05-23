@@ -45,7 +45,11 @@ export function isStringArray(value: unknown): value is string[] {
  * Validates that a value is a valid OriginOption
  */
 export function isOriginOption(value: unknown): value is OriginOption {
-  return typeof value === "string" && Object.values(OriginOption).includes(value as OriginOption);
+  if (typeof value !== "string") return false;
+  
+  // Safely check if the value exists in the OriginOption enum
+  const validValues = new Set(Object.values(OriginOption));
+  return validValues.has(value as OriginOption);
 }
 
 /**
@@ -196,9 +200,20 @@ export async function setStorageItem(key: string, value: StorageValue): Promise<
       }
     }
 
-    // Handle primitive values
-    await LocalStorage.setItem(key, value as string | number | boolean);
-    return true;
+    // Validate and handle primitive values
+    const type = typeof value;
+    if (type === 'string' || type === 'number' || type === 'boolean') {
+      await LocalStorage.setItem(key, value);
+      return true;
+    }
+
+    // If we get here, the value is of an unexpected type
+    console.error(
+      `Failed to save item to storage: "${key}". ` +
+      `Unexpected value type: ${type}. ` +
+      'Expected string, number, boolean, object, or null.'
+    );
+    return false;
   } catch (error) {
     console.error(`Failed to save item to storage: ${key}`, error);
     return false;

@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon, openExtensionPreferences, useNavigatio
 import { showFailureToast, useForm, useLocalStorage } from "@raycast/utils";
 import { OriginOption, PLACE_TYPES } from "../types";
 import { useNearbyPlaces } from "../hooks/useNearbyPlaces";
-import { getDefaultRadius, getUnitSystem } from "../utils/common";
+import { getDefaultRadiusInPreferredUnit, getUnitSystem } from "../utils/unitConversions";
 import { createPlaceNavigation } from "../utils/navigation";
 
 /**
@@ -21,7 +21,7 @@ const DEFAULT_PLACE_TYPE = "restaurant";
 const DEFAULT_ORIGIN = OriginOption.Home;
 const DEFAULT_CUSTOM_ADDRESS = "";
 // Convert default radius to string for form input
-const DEFAULT_RADIUS = getDefaultRadius().toString();
+const DEFAULT_RADIUS = getDefaultRadiusInPreferredUnit().toString();
 
 // Local storage keys
 const STORAGE_KEY = {
@@ -89,17 +89,20 @@ export function NearbyPlacesSearchForm() {
         return;
       }
 
+      // Store the loading state at the time of navigation to prevent race conditions
+      const wasLoading = isLoading;
       const places = await searchNearbyPlaces(
         values.placeType,
         values.origin as OriginOption,
-        values.customAddress,
         radiusValue,
+        values.customAddress,
         values.openNow
       );
 
       if (places && places.length > 0) {
         const placeNavigation = createPlaceNavigation(push, pop, places, values.placeType);
-        placeNavigation.navigateToResults(isLoading);
+        // Use the loading state captured before the async operation
+        placeNavigation.navigateToResults(wasLoading);
       } else {
         await showFailureToast({
           title: "No places found",

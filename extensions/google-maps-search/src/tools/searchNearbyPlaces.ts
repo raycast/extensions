@@ -45,9 +45,19 @@ export async function searchNearbyPlaces(input: SearchNearbyPlacesInput): Promis
     if (!preferences.googlePlacesApiKey) {
       throw new Error("Google Places API key is required");
     }
-    const radius = typeof input.radius === "number" && input.radius > 0 ? input.radius : 1000;
-    if (typeof input.radius === "number" && input.radius <= 0) {
-      console.warn(`Invalid radius value (${input.radius}), defaulting to 1000.`);
+    // Validate and set radius (must be between 1 and 50000 meters)
+    const MAX_RADIUS = 50000; // Google Places API maximum radius in meters
+    let radius = 1000; // Default radius
+    
+    if (typeof input.radius === 'number') {
+      if (input.radius <= 0) {
+        console.warn(`Invalid radius value (${input.radius} meters), must be positive. Using default: 1000m`);
+      } else if (input.radius > MAX_RADIUS) {
+        console.warn(`Radius (${input.radius}m) exceeds maximum allowed (${MAX_RADIUS}m). Using maximum allowed.`);
+        radius = MAX_RADIUS;
+      } else {
+        radius = input.radius;
+      }
     }
     const limit = typeof input.limit === "number" && input.limit > 0 ? input.limit : 5;
     if (typeof input.limit === "number" && input.limit <= 0) {
@@ -86,9 +96,11 @@ export async function searchNearbyPlaces(input: SearchNearbyPlacesInput): Promis
       response += `- **${place.name}**\n`;
       response += `  Address: ${place.address}\n`;
       response += `  Distance: ${formatDistance(distance)}\n`;
-      if (place.rating) response += `  Rating: ${place.rating}/5\n`;
+      if (place.rating) response += `  Rating: ${place.rating.toFixed(1)}/5\n`;
       if (place.openNow !== undefined) response += `  Status: ${place.openNow ? "Open Now" : "Closed"}\n`;
-      response += `  [View on Google Maps](${makeSearchURL(encodeURIComponent(`${place.name} ${place.address}`))})\n\n`;
+      const searchQuery = [place.name, place.address].filter(Boolean).join(' ');
+      response += `  [View on Google Maps](${makeSearchURL(searchQuery)})\n\n`;
+
     }
 
     if (filteredPlaces.length > limit) {

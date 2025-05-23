@@ -1,7 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
 import { makeSearchURL } from "../utils/url";
 import { searchPlaces as searchPlacesApi } from "../utils/googlePlacesApi";
-import { Preferences } from "../types";
 import { showFailureToast } from "@raycast/utils";
 
 /**
@@ -27,11 +25,6 @@ const DEFAULT_LIMIT = 3;
 
 export async function searchPlaces(input: SearchPlacesInput): Promise<string> {
   try {
-    // Get API key from preferences if needed in searchPlaces
-    const preferences = getPreferenceValues<Preferences>();
-    if (!preferences.googlePlacesApiKey) {
-      throw new Error("Google Places API key is required");
-    }
     const results = await searchPlacesApi(input.query);
 
     if (results.length === 0) {
@@ -48,7 +41,8 @@ export async function searchPlaces(input: SearchPlacesInput): Promise<string> {
       response += `  Address: ${place.address}\n`;
       if (place.rating) response += `  Rating: ${place.rating}/5\n`;
       if (place.openNow !== undefined) response += `  Status: ${place.openNow ? "Open Now" : "Closed"}\n`;
-      response += `  [View on Google Maps](${makeSearchURL(encodeURIComponent(`${place.name} ${place.address}`))})\n\n`;
+      const searchQuery = `${place.name} ${place.address}`;
+      response += `  [View on Google Maps](${makeSearchURL(searchQuery)})\n\n`;
     }
 
     if (results.length > limit) {

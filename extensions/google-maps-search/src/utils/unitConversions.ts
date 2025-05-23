@@ -8,13 +8,12 @@ import { PLACE_TYPES } from "../types/places";
 // Conversion constants
 export const KM_PER_MILE = 1.60934;
 export const FEET_PER_METER = 3.28084;
+export const FEET_PER_MILE = 5280; // 1 mile = 5280 feet
 export const METERS_PER_MILE = 1609.34;
 
-// Default values
-export const DEFAULT_RADIUS_KM = 5;
-export const DEFAULT_RADIUS_MILES = 3;
-export const DEFAULT_SEARCH_RADIUS_KM = 50000; // 50km in meters
-export const DEFAULT_SEARCH_RADIUS_MILES = 30; // miles
+// Default values in meters
+export const DEFAULT_RADIUS_METERS = 5000; // 5km
+export const DEFAULT_SEARCH_RADIUS_METERS = 50000; // 50km
 
 /**
  * Convert miles to kilometers
@@ -80,21 +79,45 @@ export function getUnitSystem(): "metric" | "imperial" {
 }
 
 /**
- * Get the default radius based on the user's preferred unit system
- * @returns Default radius as a number (5 for km, 3 for miles)
+ * Get the default search radius in the user's preferred unit system
+ * @returns Default search radius in the user's preferred unit (km or miles)
  */
-export function getDefaultRadius(): number {
+export function getDefaultSearchRadiusInPreferredUnit(): number {
   const unitSystem = getUnitSystem();
-  return unitSystem === "metric" ? DEFAULT_RADIUS_KM : DEFAULT_RADIUS_MILES;
+  if (unitSystem === "metric") {
+    return Math.round(DEFAULT_SEARCH_RADIUS_METERS / 1000); // Convert to km
+  } else {
+    return Math.round(kmToMiles(DEFAULT_SEARCH_RADIUS_METERS / 1000)); // Convert to miles
+  }
 }
 
 /**
- * Get the default search radius in meters based on the user's preferred unit system
+ * Get the default search radius in meters
  * @returns Default search radius in meters
  */
 export function getDefaultSearchRadiusInMeters(): number {
+  return DEFAULT_SEARCH_RADIUS_METERS;
+}
+
+/**
+ * Get the default radius in the user's preferred unit system
+ * @returns Default radius in the user's preferred unit (km or miles)
+ */
+export function getDefaultRadiusInPreferredUnit(): number {
   const unitSystem = getUnitSystem();
-  return unitSystem === "metric" ? DEFAULT_SEARCH_RADIUS_KM : Math.round(DEFAULT_SEARCH_RADIUS_MILES * METERS_PER_MILE);
+  if (unitSystem === "metric") {
+    return Math.round(DEFAULT_RADIUS_METERS / 1000); // Convert to km
+  } else {
+    return Math.round(kmToMiles(DEFAULT_RADIUS_METERS / 1000)); // Convert to miles
+  }
+}
+
+/**
+ * Get the default radius in meters
+ * @returns Default radius in meters
+ */
+export function getDefaultRadiusInMeters(): number {
+  return DEFAULT_RADIUS_METERS;
 }
 
 /**
@@ -136,7 +159,7 @@ export function formatDistance(
 
     if (distanceMiles < 0.1) {
       // Convert to feet if less than 0.1 miles
-      return `${Math.round(distanceMiles * 5280)} ft`;
+      return `${Math.round(distanceMiles * FEET_PER_MILE)} ft`;
     } else if (distanceMiles < 10) {
       // Show one decimal place for distances under 10 miles
       return `${distanceMiles.toFixed(1)} mi`;

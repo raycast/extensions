@@ -79,7 +79,8 @@ export default async function (input: GetPlaceDetailsInput): Promise<string> {
 
     // Links
     response += "\n**Links**:\n";
-    response += `- [View on Google Maps](${makeSearchURL(`${details.name} ${details.address}`)})\n`;
+    const searchQuery = `${details.name} ${details.address}`.trim();
+    response += `- [View on Google Maps](${makeSearchURL(searchQuery)})\n`;
     response += `- [Get Directions](${makeDirectionsURL("", details.address, preferences.preferredMode)})\n`;
 
     // Reviews

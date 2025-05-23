@@ -81,10 +81,6 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
       .then((mapMarkdown) => {
         if (isMounted && mapMarkdown) {
           setMarkdown((prevMarkdown) => {
-            // Only update if component is still mounted (prevents race conditions)
-            if (!isMounted) return prevMarkdown;
-
-            // Replace the [MAP_PLACEHOLDER] with the actual map
             return prevMarkdown.replace("[MAP_PLACEHOLDER]", mapMarkdown);
           });
         }
@@ -137,8 +133,12 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
             )}
             {placeDetails.types && placeDetails.types.length > 0 && (
               <Detail.Metadata.TagList title="Categories">
-                {placeDetails.types.slice(0, 5).map((type, index) => (
-                  <Detail.Metadata.TagList.Item key={index} text={type.replace(/_/g, " ")} color={Color.Blue} />
+                {placeDetails.types.slice(0, 5).map((type) => (
+                  <Detail.Metadata.TagList.Item 
+                    key={type} 
+                    text={type.replace(/_/g, " ")} 
+                    color={Color.Blue} 
+                  />
                 ))}
               </Detail.Metadata.TagList>
             )}

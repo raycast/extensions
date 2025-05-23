@@ -111,12 +111,12 @@ function SearchPlacesCommand({ initialSearchText }: { initialSearchText?: string
   }, []);
 
   // Format place types for display
-  const formatPlaceTypesCallback = (types: string[]): string => {
+  const formatPlaceTypesCallback = useCallback((types: string[]): string => {
     return types
       .slice(0, 3)
       .map((type) => type.replace(/_/g, " "))
       .join(", ");
-  };
+  }, []);
 
   // If a place is selected, show its details
   if (selectedPlaceId) {

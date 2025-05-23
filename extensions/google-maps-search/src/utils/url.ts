@@ -89,7 +89,7 @@ export function extractCoordinatesFromURL(url: string): { lat: number; lng: numb
  * @returns A formatted string representation of the coordinates
  */
 export function formatCoordinates(
-  coordinates: { lat: number; lng: number },
+  coordinates: { lat: number; lng: number } | null,
   format: "decimal" | "dms" | "google" = "decimal"
 ): string {
   if (coordinates === null) return "";
@@ -119,10 +119,28 @@ function convertToDMS(value: number, type: "lat" | "lng"): string {
   const absolute = Math.abs(value);
   const degrees = Math.floor(absolute);
   const minutesNotTruncated = (absolute - degrees) * 60;
-  const minutes = Math.floor(minutesNotTruncated);
-  const seconds = Math.round((minutesNotTruncated - minutes) * 60);
+  let minutes = Math.floor(minutesNotTruncated);
+  let seconds = Math.floor((minutesNotTruncated - minutes) * 60);
+  
+  // Handle floating point precision issues
+  const secondsWithPrecision = (minutesNotTruncated - minutes) * 60;
+  if (Math.abs(secondsWithPrecision - Math.round(secondsWithPrecision)) < 0.000001) {
+    seconds = Math.round(secondsWithPrecision);
+  }
+  
+  // Handle case where seconds round to 60
+  if (seconds >= 60) {
+    seconds = 0;
+    minutes += 1;
+  }
+  
+  // Handle case where minutes reach 60
+  if (minutes >= 60) {
+    minutes = 0;
+    // We don't need to handle degrees here as it's extremely unlikely with valid lat/lng values
+  }
 
   const direction = type === "lat" ? (value >= 0 ? "N" : "S") : value >= 0 ? "E" : "W";
 
-  return `${degrees}°${minutes}'${seconds}"${direction}`;
+  return `${degrees}°${minutes.toString().padStart(2, '0')}'${seconds.toString().padStart(2, '0')}"${direction}`;
 }

@@ -15,7 +15,7 @@ import { getPreferenceValues } from "@raycast/api";
 
 // Internal type exports
 import { Preferences, PlaceSearchResult, PlaceDetails, RouteInfo, TransportType, PLACE_TYPES } from "../types";
-import { getDefaultRadius, getTravelModeForApi, getUnitSystemForApi, getUnitSystem } from "./unitConversions";
+import { getDefaultRadiusInPreferredUnit, getUnitSystem } from "./unitConversions";
 
 // Initialize the Google Maps client
 let client: Client | null = null;
@@ -63,6 +63,10 @@ export async function searchPlaces(
 ): Promise<PlaceSearchResult[]> {
   try {
     const apiKey = getApiKey();
+    
+    if (!apiKey) {
+      throw new Error("Google Places API key is required");
+    }
 
     // Create properly typed params object
     const params: TextSearchRequest["params"] = {
@@ -157,21 +161,16 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceDetails> {
 
   const result = response.data.result;
 
+  if (!result.geometry?.location?.lat) throw new Error('Missing location latitude');
+  if (!result.geometry?.location?.lng) throw new Error('Missing location longitude');
+
   return {
     placeId,
     name: result.name || "",
     address: result.formatted_address || "",
     location: {
-      lat:
-        result.geometry?.location?.lat ??
-        (() => {
-          throw new Error("Missing location latitude");
-        })(),
-      lng:
-        result.geometry?.location?.lng ??
-        (() => {
-          throw new Error("Missing location longitude");
-        })(),
+      lat: result.geometry.location.lat,
+      lng: result.geometry.location.lng,
     },
     types: result.types || [],
     rating: result.rating,
@@ -287,8 +286,9 @@ export async function getDirections(
     const destinationStr = typeof destination === "string" ? destination : `${destination.lat},${destination.lng}`;
 
     // Get validated travel mode and unit system
-    const travelMode = getTravelModeForApi(mode);
-    const unitSystem = getUnitSystemForApi();
+    // Cast TransportType to TravelMode since they have the same values
+    const travelMode = mode as unknown as TravelMode;
+    const unitSystem = getUnitSystem() === 'metric' ? 'metric' : 'imperial';
 
     // Create properly typed params object
     const params: DirectionsRequest["params"] = {
@@ -341,7 +341,7 @@ export async function getDirections(
 export async function getNearbyPlaces(
   location: { lat: number; lng: number },
   type: string,
-  radius = getDefaultRadius(),
+  radius = getDefaultRadiusInPreferredUnit(),
   openNow = false
 ): Promise<PlaceSearchResult[]> {
   try {

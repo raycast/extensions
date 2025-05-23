@@ -30,14 +30,21 @@ type GetDirectionsInput = {
 export async function getDirections(input: GetDirectionsInput): Promise<string> {
   try {
     const preferences = getPreferenceValues<Preferences>();
-    let mode = input.mode || preferences.preferredMode || "driving";
-
-    // Validate that mode is one of the allowed values
-    const validModes = ["driving", "walking", "bicycling", "transit"];
-    if (!validModes.includes(mode)) {
-      console.warn(`Invalid transportation mode: ${mode}. Defaulting to driving.`);
-      mode = "driving";
-    }
+    const validModes = ["driving", "walking", "bicycling", "transit"] as const;
+    
+    // Get and validate the mode, falling back to driving if invalid
+    const getValidMode = (mode?: string) => {
+      if (mode && validModes.includes(mode as typeof validModes[number])) {
+        return mode;
+      }
+      if (mode) {
+        console.warn(`Invalid transportation mode: ${mode}.`);
+      }
+      return "driving";
+    };
+    
+    // Get the mode from input or preferences, with validation
+    const mode = getValidMode(input.mode || preferences.preferredMode);
 
     // Validate destination and origin by geocoding
     const destCoords = await geocodeAddress(input.destination);
@@ -52,17 +59,19 @@ export async function getDirections(input: GetDirectionsInput): Promise<string> 
       }
     }
 
+    // Use home address as origin if none provided
+    const origin = input.origin || preferences.homeAddress || '';
+    
     // Create directions URL
-    const directionsUrl = makeDirectionsURL(input.origin || "", input.destination, mode);
+    const directionsUrl = makeDirectionsURL(origin, input.destination, mode);
 
     // Format response
     let response = `## Directions to ${input.destination}\n\n`;
-
-    if (input.origin) {
-      response += `From: ${input.origin}\n`;
+    
+    if (origin) {
+      response += `From: ${origin === preferences.homeAddress ? `Home (${origin})` : origin}\n`;
     } else {
-      // If no origin was provided, we're using the home address from preferences
-      response += `From: Home Address (${preferences.homeAddress || "Not set"})\n`;
+      response += `From: Current Location\n`;
     }
     response += `To: ${input.destination}\n`;
     response += `Mode: ${mode.charAt(0).toUpperCase() + mode.slice(1)}\n\n`;

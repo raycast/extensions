@@ -13,16 +13,30 @@ export function validateRequired(value: string, fieldName: string): string | nul
 }
 
 /**
+ * Converts a string to a number and validates it's a valid number
+ * @internal
+ * @param value The value to convert and validate
+ * @returns The converted number or null if invalid
+ */
+function parseNumber(value: string): number | null {
+  const num = Number(value);
+  return isNaN(num) ? null : num;
+}
+
+/**
  * Validates that a value is a positive number
  * @param value The value to validate
  * @param fieldName The name of the field (for error messages)
  * @returns Error message or null if valid
  */
 export function validateNumeric(value: string, fieldName: string): string | null {
-  const num = Number(value);
-
-  // Handle NaN, zero (including negative zero), and negative numbers
-  if (isNaN(num) || num <= 0 || Object.is(num, -0)) {
+  const num = parseNumber(value);
+  if (num === null) {
+    return `${fieldName} must be a number`;
+  }
+  
+  // Handle zero (including negative zero) and negative numbers
+  if (num <= 0 || Object.is(num, -0)) {
     return `${fieldName} must be a positive number`;
   }
 
@@ -44,8 +58,8 @@ export function validateRange(value: string, min: number, max: number, fieldName
     throw new Error(`Invalid range definition: min (${min}) cannot be greater than max (${max})`);
   }
 
-  const num = Number(value);
-  if (isNaN(num)) {
+  const num = parseNumber(value);
+  if (num === null) {
     return `${fieldName} must be a number`;
   }
   if (num < min || num > max) {

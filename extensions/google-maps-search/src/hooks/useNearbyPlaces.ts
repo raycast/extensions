@@ -20,7 +20,7 @@ export function useNearbyPlaces() {
   }>({ address: "", location: null });
 
   const searchNearbyPlaces = useCallback(
-    async (placeType: string, origin: OriginOption, customAddress: string, radius: number, openNow = false) => {
+    async (placeType: string, origin: OriginOption, radius: number, customAddress?: string, openNow = false) => {
       setIsLoading(true);
 
       try {
@@ -85,7 +85,7 @@ export function useNearbyPlaces() {
   }, [preferences.homeAddress]);
 
   // Helper function to get search location based on origin type
-  const getSearchLocation = async (origin: OriginOption, customAddress: string): Promise<Location | null> => {
+  const getSearchLocation = async (origin: OriginOption, customAddress?: string): Promise<Location | null> => {
     // For home address
     if (origin === OriginOption.Home) {
       // Validate home address is not empty

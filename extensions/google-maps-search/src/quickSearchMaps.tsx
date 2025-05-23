@@ -13,6 +13,5 @@ export default async (props: LaunchProps) => {
       title: "Error opening Google Maps",
       message: error instanceof Error ? error.message : "An unexpected error occurred",
     });
-    throw error;
   }
 };

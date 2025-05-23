@@ -130,7 +130,7 @@ export async function showPlacesOnMap(input: ShowPlacesOnMapInput): Promise<stri
         center: input.center,
         zoom,
         size,
-        useColoredMarkers: input.useColoredMarkers !== false, // Default to true if not specified
+        useColoredMarkers: input.useColoredMarkers ?? true, // Default to true if not specified
         includeLink: true,
         altText: "Map of places",
       });

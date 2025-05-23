@@ -1,7 +1,9 @@
 # Google Maps Search Changelog
+
 ## [2.0] - {PR_MERGE_DATE}
 
 ### Added
+
 - Added integration of Google Places API (which requires an API key)
 - Added "Copy Coordinates URL" feature that makes it easy to get coordinates for a location ([#16136](https://github.com/raycast/extensions/issues/16136))
 - Added improved sorting options for nearby places (by proximity, rating, and price)
@@ -18,6 +20,7 @@
   - `formatting.ts` with comprehensive formatting utilities
 
 ### Changed
+
 - Improved toast messages with clearer instructions and error handling
 - Consolidated place type management by creating `./src/types`
 - Enhanced UI with better accessibility and more consistent icons
@@ -32,11 +35,12 @@
 - Improved code formatting and organization with consistent style
 
 ### Fixed
+
 - Fixed empty callback functions in navigation flow
 - Fixed issue with place details not loading correctly in some cases
 - Resolved inconsistent behavior when switching between search types
 
-## [Chore: Fixed throttle issue] - 2025-03-10 
+## [Chore: Fixed throttle issue] - 2025-03-10
 
 - Fixed [#15062](https://github.com/raycast/extensions/issues/15062)
 
