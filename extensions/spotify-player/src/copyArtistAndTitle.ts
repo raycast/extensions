@@ -13,9 +13,9 @@ export default async function Command() {
     return await showHUD("Nothing is currently playing");
   }
 
-  const { item }  = currentlyPlayingData;
+  const { item } = currentlyPlayingData;
 
-  const { artists } = item as TrackObject
+  const { artists } = item as TrackObject;
   const artistName = artists?.[0]?.name;
   const title = `${item.name} · ${artistName}`;
 
