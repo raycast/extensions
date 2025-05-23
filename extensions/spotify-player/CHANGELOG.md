@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Add Option to Copy the Current Song’s Artist and Title] - {PR_MERGE_DATE}
+
+- Add an option in the `NowPlaying` command that allows users to copy the current song’s artist and title.
+
 ## [Fix AppleScript fallback for non-premium users] - 2025-05-21
 
 - Fixed AppleScript fallback for functions that use premium-only API endpoints. Most commands now work without a premium subscription except queuing, cycleRepeat (AppleScript can only toggle context off/on) and device selection.

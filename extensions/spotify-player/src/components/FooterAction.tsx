@@ -11,6 +11,12 @@ export function FooterAction({ url, uri, title }: FooterActionProps) {
   return (
     <ActionPanel.Section>
       <Action.CopyToClipboard
+        icon={Icon.CopyClipboard}
+        title="Copy Artist And Track Title"
+        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+        content={title}
+      />
+      <Action.CopyToClipboard
         icon={Icon.Link}
         title="Copy URL"
         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
