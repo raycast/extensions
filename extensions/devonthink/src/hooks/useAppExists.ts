@@ -4,15 +4,17 @@ import { getApplications, open, showToast, Toast } from "@raycast/api";
 export type UseAppExists = {
   appExistsLoading: boolean;
   appExists: boolean;
+  appName: string;
 };
 
 const useAppExists = () => {
-  const [state, setState] = useState<UseAppExists>({ appExistsLoading: true, appExists: false });
+  const names = ["DEVONthink", "DEVONthink 3"];
+  const [state, setState] = useState<UseAppExists>({ appExistsLoading: true, appExists: false, appName: "" });
 
   useEffect(() => {
     getApplications()
-      .then((apps) => apps.find((app) => app.name === "DEVONthink 3"))
-      .then((app) => setState({ appExistsLoading: false, appExists: app !== undefined }));
+      .then((apps) => apps.find((app) => names.find((devonName) => app.name === devonName)))
+      .then((app) => setState({ appExistsLoading: false, appExists: app !== undefined, appName: app?.name ?? "" }));
   }, []);
 
   useEffect(() => {
