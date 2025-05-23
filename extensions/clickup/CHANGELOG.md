@@ -1,5 +1,10 @@
 # ClickUp Changelog
 
+## [Optionally Select Status In Capture] - {PR_MERGE_DATE}
+
+- you can now select a status in "Quick Capture" command (statuses are fetched from the ListId you enter in Preferences) (ref: [Issue #19331](https://github.com/raycast/extensions/issues/19331))
+- chore: update to use latest Raycast config
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 - AI Tools to:
