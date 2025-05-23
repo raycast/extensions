@@ -23,7 +23,7 @@ const useAppExists = () => {
 
     showToast({
       style: Toast.Style.Failure,
-      title: "DEVONthink 3 is not installed",
+      title: "DEVONthink is not installed",
       primaryAction: {
         title: "Download app",
         onAction: (toast) => open("https://www.devontechnologies.com/apps/devonthink").then(() => toast.hide()),

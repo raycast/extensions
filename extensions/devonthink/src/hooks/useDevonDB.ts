@@ -27,7 +27,7 @@ const useDevonDB = ({ appExists, appName }: UseAppExists) => {
       .then((list) => setState((prev) => ({ ...prev, databases: list })))
       .catch(handleError)
       .finally(() => setState((prev) => ({ ...prev, databasesAreLoading: false })));
-  }, [appExists]);
+  }, [appExists, appName]);
 
   return state;
 };
