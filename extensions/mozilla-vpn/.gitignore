@@ -14,4 +14,3 @@ compiled_raycast_swift
 .prettierignore
 
 eslint.config.mjs
-package-lock.json
