@@ -35,14 +35,33 @@ const CONFIRM_LIMIT = Number(confirmLimit) > 0 ? Number(confirmLimit) : 20;
 
 export default function Command() {
   async function handleSubmit({ extension }: { extension: string }) {
-    // Validate extension input
     if (!isValidExtension(extension)) return showInvalidExtensionToast();
 
-    const selected = await getSelectedFinderItems();
+    let selected;
+    try {
+      selected = await getSelectedFinderItems();
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Finder is not active",
+        message: "Please make Finder the frontmost application and select a folder.",
+      });
+      return;
+    }
     if (!selected.length) return showNoFolderSelectedToast();
 
-    // Folder and extension setup
+    // Check if selected is a folder
     const folder = selected[0].path;
+    const stats = await fs.stat(folder);
+    if (!stats.isDirectory()) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Please select a folder",
+      });
+      return;
+    }
+
+    // Folder and extension setup
     const ext = "." + extension.replace(/^\./, "");
     const parent = path.dirname(folder);
     const dest = path.join(parent, getDestinationFolderName(folderName, ext));
@@ -88,7 +107,7 @@ export default function Command() {
     });
 
     let message = `${success} file(s) moved to ${dest}.`;
-    if (failed > 0) message += ` ${failed} file(s) could not be copied.`;
+    if (failed > 0) message += ` ${failed} file(s) could not be moved.`;
 
     showToast({
       style: failed > 0 ? Toast.Style.Failure : Toast.Style.Success,

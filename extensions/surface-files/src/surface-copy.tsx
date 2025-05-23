@@ -38,11 +38,31 @@ export default function Command() {
     // Validate extension input
     if (!isValidExtension(extension)) return showInvalidExtensionToast();
 
-    const selected = await getSelectedFinderItems();
+    let selected;
+    try {
+      selected = await getSelectedFinderItems();
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Finder is not active",
+        message: "Please make Finder the frontmost application and select a folder.",
+      });
+      return;
+    }
     if (!selected.length) return showNoFolderSelectedToast();
 
-    // Folder and extension setup
+    // Check if selected is a folder
     const folder = selected[0].path;
+    const stats = await fs.stat(folder);
+    if (!stats.isDirectory()) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Please select a folder",
+      });
+      return;
+    }
+
+    // Folder and extension setup
     const ext = "." + extension.replace(/^\./, "");
     const parent = path.dirname(folder);
     const dest = path.join(parent, getDestinationFolderName(folderName, ext));

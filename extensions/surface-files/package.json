@@ -14,12 +14,14 @@
     {
       "name": "surface-copy",
       "title": "Surface + Copy",
+      "subtitle": "Surface Files",
       "description": "Copies files into a new sibling folder. Originals stay.",
       "mode": "view"
     },
     {
       "name": "surface-move",
       "title": "Surface + Move",
+      "subtitle": "Surface Files",
       "description": "Moves files into a new sibling folder. Originals are removed.",
       "mode": "view"
     }

@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 // Recursively walk through all files in a directory
 export async function* walk(dir: string, includeHidden = false): AsyncGenerator<string> {
@@ -46,7 +47,8 @@ export async function processFilesWithErrorsAndProgress(
     try {
       await operation(file.src, file.dest);
       success++;
-    } catch {
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to process file" });
       failed++;
     }
     if (onProgress) onProgress(i + 1, files.length);
@@ -58,7 +60,7 @@ export function isValidFolderName(name: string | undefined): boolean {
   return !!name && /^[^\\/:*?"<>|\0]+$/.test(name);
 }
 
-// Standarized behavoir for invalid folder name
+// Standarized behavior for invalid folder name
 export function getDestinationFolderName(folderNamePref: string, ext: string): string {
   return isValidFolderName(folderNamePref)
     ? `${folderNamePref}_${ext.replace(".", "")}`
@@ -67,7 +69,7 @@ export function getDestinationFolderName(folderNamePref: string, ext: string): s
 
 // Validate file extension input
 export function isValidExtension(extension: string | undefined): boolean {
-  return !!extension && /^[a-zA-Z0-9]+$/.test(extension);
+  return !!extension && /^[a-zA-Z0-9._-]+$/.test(extension);
 }
 
 // Show a standardized error toast for invalid extension

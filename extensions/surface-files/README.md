@@ -19,7 +19,7 @@ Surface all files with a given extension from a selected folder (including subfo
 ## Settings
 
 - **Limit:** Set the maximum number of files to be surfaced at once. If the limit is exceeded, a confirmation dialog will appear.  
-  _Note: Only positive numbers are allowed. Invalid input will fall back to the default limit (20)._
+  _Note: Only positive numbers are allowed. Invalid input will fall back to the default limit (50)._
 - **Include Hidden Files:** Enable to also process hidden files (files/folders starting with a dot).
 - **Folder Name:** Set the base name for the new folder (e.g. `XYZ` → `XYZ_mp3`).  
 
