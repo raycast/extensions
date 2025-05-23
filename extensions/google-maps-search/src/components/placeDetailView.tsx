@@ -134,11 +134,7 @@ export function PlaceDetailView({ placeId, onBack }: PlaceDetailViewProps) {
             {placeDetails.types && placeDetails.types.length > 0 && (
               <Detail.Metadata.TagList title="Categories">
                 {placeDetails.types.slice(0, 5).map((type) => (
-                  <Detail.Metadata.TagList.Item 
-                    key={type} 
-                    text={type.replace(/_/g, " ")} 
-                    color={Color.Blue} 
-                  />
+                  <Detail.Metadata.TagList.Item key={type} text={type.replace(/_/g, " ")} color={Color.Blue} />
                 ))}
               </Detail.Metadata.TagList>
             )}

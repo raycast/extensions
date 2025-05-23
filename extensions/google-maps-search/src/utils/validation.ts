@@ -34,7 +34,7 @@ export function validateNumeric(value: string, fieldName: string): string | null
   if (num === null) {
     return `${fieldName} must be a number`;
   }
-  
+
   // Handle zero (including negative zero) and negative numbers
   if (num <= 0 || Object.is(num, -0)) {
     return `${fieldName} must be a positive number`;

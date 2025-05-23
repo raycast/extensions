@@ -48,8 +48,8 @@ export async function searchNearbyPlaces(input: SearchNearbyPlacesInput): Promis
     // Validate and set radius (must be between 1 and 50000 meters)
     const MAX_RADIUS = 50000; // Google Places API maximum radius in meters
     let radius = 1000; // Default radius
-    
-    if (typeof input.radius === 'number') {
+
+    if (typeof input.radius === "number") {
       if (input.radius <= 0) {
         console.warn(`Invalid radius value (${input.radius} meters), must be positive. Using default: 1000m`);
       } else if (input.radius > MAX_RADIUS) {
@@ -98,9 +98,8 @@ export async function searchNearbyPlaces(input: SearchNearbyPlacesInput): Promis
       response += `  Distance: ${formatDistance(distance)}\n`;
       if (place.rating) response += `  Rating: ${place.rating.toFixed(1)}/5\n`;
       if (place.openNow !== undefined) response += `  Status: ${place.openNow ? "Open Now" : "Closed"}\n`;
-      const searchQuery = [place.name, place.address].filter(Boolean).join(' ');
+      const searchQuery = [place.name, place.address].filter(Boolean).join(" ");
       response += `  [View on Google Maps](${makeSearchURL(searchQuery)})\n\n`;
-
     }
 
     if (filteredPlaces.length > limit) {

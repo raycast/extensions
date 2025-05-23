@@ -31,10 +31,10 @@ export async function getDirections(input: GetDirectionsInput): Promise<string> 
   try {
     const preferences = getPreferenceValues<Preferences>();
     const validModes = ["driving", "walking", "bicycling", "transit"] as const;
-    
+
     // Get and validate the mode, falling back to driving if invalid
     const getValidMode = (mode?: string) => {
-      if (mode && validModes.includes(mode as typeof validModes[number])) {
+      if (mode && validModes.includes(mode as (typeof validModes)[number])) {
         return mode;
       }
       if (mode) {
@@ -42,7 +42,7 @@ export async function getDirections(input: GetDirectionsInput): Promise<string> 
       }
       return "driving";
     };
-    
+
     // Get the mode from input or preferences, with validation
     const mode = getValidMode(input.mode || preferences.preferredMode);
 
@@ -60,14 +60,14 @@ export async function getDirections(input: GetDirectionsInput): Promise<string> 
     }
 
     // Use home address as origin if none provided
-    const origin = input.origin || preferences.homeAddress || '';
-    
+    const origin = input.origin || preferences.homeAddress || "";
+
     // Create directions URL
     const directionsUrl = makeDirectionsURL(origin, input.destination, mode);
 
     // Format response
     let response = `## Directions to ${input.destination}\n\n`;
-    
+
     if (origin) {
       response += `From: ${origin === preferences.homeAddress ? `Home (${origin})` : origin}\n`;
     } else {

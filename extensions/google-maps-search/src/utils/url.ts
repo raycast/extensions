@@ -13,11 +13,7 @@ import { Preferences } from "../types";
  * @param transporttype One of four possible transit types
  * @returns A properly URI encoded string according to Google Maps documentation
  */
-export function makeDirectionsURL(
-  origin: string,
-  destination: string,
-  transporttype: string
-): string {
+export function makeDirectionsURL(origin: string, destination: string, transporttype: string): string {
   const mapsBase = "https://www.google.com/maps/dir/?api=1";
 
   // If origin is empty, get the home address from preferences
@@ -125,19 +121,19 @@ function convertToDMS(value: number, type: "lat" | "lng"): string {
   const minutesNotTruncated = (absolute - degrees) * 60;
   let minutes = Math.floor(minutesNotTruncated);
   let seconds = Math.floor((minutesNotTruncated - minutes) * 60);
-  
+
   // Handle floating point precision issues
   const secondsWithPrecision = (minutesNotTruncated - minutes) * 60;
   if (Math.abs(secondsWithPrecision - Math.round(secondsWithPrecision)) < 0.000001) {
     seconds = Math.round(secondsWithPrecision);
   }
-  
+
   // Handle case where seconds round to 60
   if (seconds >= 60) {
     seconds = 0;
     minutes += 1;
   }
-  
+
   // Handle case where minutes reach 60
   if (minutes >= 60) {
     minutes = 0;
@@ -146,5 +142,5 @@ function convertToDMS(value: number, type: "lat" | "lng"): string {
 
   const direction = type === "lat" ? (value >= 0 ? "N" : "S") : value >= 0 ? "E" : "W";
 
-  return `${degrees}°${minutes.toString().padStart(2, '0')}'${seconds.toString().padStart(2, '0')}"${direction}`;
+  return `${degrees}°${minutes.toString().padStart(2, "0")}'${seconds.toString().padStart(2, "0")}"${direction}`;
 }

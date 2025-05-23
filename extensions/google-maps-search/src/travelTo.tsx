@@ -64,11 +64,9 @@ export default function Command() {
 
   // Check if the form is valid
   const isFormValid = !!destination?.trim();
-  
+
   // Format the URL with the current state
-  const directionsURL = isFormValid 
-    ? makeDirectionsURL(originAddress, destination, mode)
-    : '';
+  const directionsURL = isFormValid ? makeDirectionsURL(originAddress, destination, mode) : "";
 
   return (
     <Form
@@ -94,7 +92,7 @@ export default function Command() {
             <Action
               title="Enter a Destination"
               icon={Icon.ExclamationMark}
-              onAction={() => setError('Destination is required')}
+              onAction={() => setError("Destination is required")}
             />
           )}
         </ActionPanel>
@@ -149,7 +147,6 @@ export default function Command() {
         <Form.Dropdown.Item value={TransportType.Walking} title="Walking" icon={Icon.Footprints} />
         <Form.Dropdown.Item value={TransportType.Cycling} title="Cycling" icon={Icon.Bike} />
       </Form.Dropdown>
-      
     </Form>
   );
 }

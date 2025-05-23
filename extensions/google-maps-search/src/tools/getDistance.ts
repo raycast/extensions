@@ -90,27 +90,31 @@ export async function getDistance(input: GetDistanceInput): Promise<string> {
 
     return response;
   } catch (error) {
-    console.error('Error in getDistance:', error);
-    
+    console.error("Error in getDistance:", error);
+
     // Default error message
     let errorMessage = `Sorry, I encountered an error while calculating the distance to "${input.destination}".`;
-    
+
     // Handle different types of errors
     if (error instanceof Error) {
-      if (error.message.includes('API key') || error.message.includes('API_KEY_INVALID')) {
-        errorMessage += ' Please check your Google Maps API key in the extension preferences.';
-      } else if (error.message.includes('network') || error.message.includes('fetch') || error.message.includes('Network')) {
-        errorMessage += ' Network error occurred. Please check your internet connection and try again.';
-      } else if (error.message.includes('ZERO_RESULTS')) {
-        errorMessage += ' No results found for the provided addresses.';
-      } else if (error.message.includes('QUOTA_EXCEEDED')) {
-        errorMessage += ' API quota exceeded. Please try again later or check your Google Cloud billing.';
+      if (error.message.includes("API key") || error.message.includes("API_KEY_INVALID")) {
+        errorMessage += " Please check your Google Maps API key in the extension preferences.";
+      } else if (
+        error.message.includes("network") ||
+        error.message.includes("fetch") ||
+        error.message.includes("Network")
+      ) {
+        errorMessage += " Network error occurred. Please check your internet connection and try again.";
+      } else if (error.message.includes("ZERO_RESULTS")) {
+        errorMessage += " No results found for the provided addresses.";
+      } else if (error.message.includes("QUOTA_EXCEEDED")) {
+        errorMessage += " API quota exceeded. Please try again later or check your Google Cloud billing.";
       } else {
         errorMessage += ` Error: ${error.message}`;
       }
     }
-    
-    showFailureToast(error, { title: 'Error Calculating Distance' });
+
+    showFailureToast(error, { title: "Error Calculating Distance" });
     return errorMessage;
   }
 }

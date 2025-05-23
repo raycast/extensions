@@ -63,7 +63,7 @@ export async function searchPlaces(
 ): Promise<PlaceSearchResult[]> {
   try {
     const apiKey = getApiKey();
-    
+
     if (!apiKey) {
       throw new Error("Google Places API key is required");
     }
@@ -161,8 +161,8 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceDetails> {
 
   const result = response.data.result;
 
-  if (!result.geometry?.location?.lat) throw new Error('Missing location latitude');
-  if (!result.geometry?.location?.lng) throw new Error('Missing location longitude');
+  if (!result.geometry?.location?.lat) throw new Error("Missing location latitude");
+  if (!result.geometry?.location?.lng) throw new Error("Missing location longitude");
 
   return {
     placeId,
@@ -288,7 +288,7 @@ export async function getDirections(
     // Get validated travel mode and unit system
     // Cast TransportType to TravelMode since they have the same values
     const travelMode = mode as unknown as TravelMode;
-    const unitSystem = getUnitSystem() === 'metric' ? 'metric' : 'imperial';
+    const unitSystem = getUnitSystem() === "metric" ? "metric" : "imperial";
 
     // Create properly typed params object
     const params: DirectionsRequest["params"] = {
