@@ -73,9 +73,10 @@ export interface ToolResponse<T = undefined> {
  * First attempts to use cache, then falls back to forced refresh if needed.
  *
  * @param forceRefresh Whether to bypass cache and force a new discovery
+ * @param maxRetries Maximum number of retries before giving up
  * @returns A KeyLight instance or throws an error
  */
-export async function discoverKeyLights(forceRefresh = false): Promise<KeyLight> {
+export async function discoverKeyLights(forceRefresh = false, maxRetries = 3): Promise<KeyLight> {
   try {
     const keyLight = await KeyLight.discover(forceRefresh);
     if (!keyLight) {
@@ -83,11 +84,11 @@ export async function discoverKeyLights(forceRefresh = false): Promise<KeyLight>
     }
     return keyLight;
   } catch (error) {
-    if (forceRefresh) {
+    if (forceRefresh || maxRetries <= 0) {
       throw error;
     }
     // If initial discovery failed, try forcing a refresh
-    return await discoverKeyLights(true);
+    return await discoverKeyLights(true, maxRetries - 1);
   }
 }
 
