@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Console command] {PR_MERGE_DATE}
+## [Console command] 2025-05-23
 - Fix full URLs (e.g. `https://quicksight.aws.amazon.com`) routing correctly to the console
 
 ## [Console command] 2025-04-25
