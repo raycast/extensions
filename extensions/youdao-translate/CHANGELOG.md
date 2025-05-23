@@ -1,4 +1,4 @@
-# Bilibili Changelog
+# youdao-translate Changelog
 
 ## [New Feature] - {PR_MERGE_DATE}
 

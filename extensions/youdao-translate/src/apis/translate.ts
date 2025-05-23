@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import crypto from "crypto";
-import { TranslateResult } from "../../types";
+import { TranslateResult } from "../types";
 
 function generateSign(content: string, salt: number, app_key: string, app_secret: string) {
   const md5 = crypto.createHash("md5");

@@ -3,7 +3,7 @@ import { Action, ActionPanel, Clipboard, getSelectedText, List, useNavigation } 
 import { useCachedState } from "@raycast/utils";
 
 import { translateAPI } from "./apis/translate";
-import { TranslateResult } from "../types";
+import { TranslateResult } from "./types";
 import { LANGUAGES } from "./consts";
 import { ErrorMessage } from "./components/error_message";
 import { generateErrorMessage } from "./utils";
