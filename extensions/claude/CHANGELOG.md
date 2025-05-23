@@ -1,6 +1,6 @@
 # Claude Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-05-23
 
 - Feature: Added new [Claude Sonnet 4](https://www.anthropic.com/news/claude-4)
 
