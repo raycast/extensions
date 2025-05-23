@@ -1,4 +1,4 @@
-# Paste from Kindle Changelog
+# Kindle Paste Changelog
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
