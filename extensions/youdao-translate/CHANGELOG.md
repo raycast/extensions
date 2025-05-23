@@ -1,6 +1,6 @@
 # Bilibili Changelog
 
-## [New Feature] - 2025-05-18
+## [New Feature] - {PR_MERGE_DATE}
 
 - Add a new entry for Quickly Translate
 
