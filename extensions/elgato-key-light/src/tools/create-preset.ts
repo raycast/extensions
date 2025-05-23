@@ -19,8 +19,8 @@ export default async function tool(input: {
     const id = randomUUID();
 
     // Use default values if not provided
-    const brightness = input.brightness ?? DEFAULT_BRIGHTNESS;
-    const temperature = input.temperature ?? DEFAULT_TEMPERATURE;
+    const brightness = Math.max(0, Math.min(100, input.brightness ?? DEFAULT_BRIGHTNESS));
+    const temperature = Math.max(0, Math.min(100, input.temperature ?? DEFAULT_TEMPERATURE));
 
     const preset: Preset = {
       id,
