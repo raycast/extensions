@@ -7,6 +7,7 @@ import {
   PopToRootType,
   LocalStorage,
   Icon,
+  Keyboard,
 } from "@raycast/api";
 import useAsyncEffect from "use-async-effect";
 import { useState } from "react";
@@ -143,6 +144,7 @@ export default function Command() {
                     title={instance.favorite ? "Remove from Favorites" : "Add to Favorites"}
                     icon={instance.favorite ? Icon.StarDisabled : Icon.Star}
                     onAction={() => toggleFavorite(instance.id)}
+                    shortcut={Keyboard.Shortcut.Common.Pin}
                   />
                 </ActionPanel>
               }
