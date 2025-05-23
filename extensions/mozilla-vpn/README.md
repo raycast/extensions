@@ -30,11 +30,9 @@ List all the servers `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN
 
 Select a server, must be the actual server name and not the city `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN select`
 
+Status shows if the client is connected or not, and the server city and country it is configured for. There are other details here like all devices configured for the service.
 
-
-    Status shows if the client is connected or not, and the server city and country it is configured for. There are other details here like all devices configured for the service.
-
-### Api's used for gathering IP data
+### APIs used for gathering IP data
 
 `https://api.ipify.org` For displaying the current IP address.
 
