@@ -2,7 +2,7 @@
 import { Form, ActionPanel, Action, Image, Icon } from "@raycast/api";
 import React from "react";
 import { CodeExecutionResult, DetectedLanguage } from "../utils/codeRunner";
-import { logoMap } from "../utils/imageMap";
+import { logoMap, SupportedLanguage } from "../utils/imageMap";
 
 interface CodeRunnerFormProps {
   code: string;
@@ -47,7 +47,7 @@ export const CodeRunnerForm: React.FC<CodeRunnerFormProps> = ({
             title={lang.name}
             value={lang.value}
             icon={{
-              source: logoMap[lang.value] as Image.Source,
+              source: logoMap[lang.value as SupportedLanguage] as Image.Source,
               mask: Image.Mask.RoundedRectangle,
             }}
           />
@@ -67,8 +67,7 @@ export const CodeRunnerForm: React.FC<CodeRunnerFormProps> = ({
         placeholder="Enter your code here..."
         value={code}
         onChange={onCodeChange}
-        autoFocus
-        enableMarkdown
+        autoFocus={true}
       />
 
       {/* Display Results Section */}

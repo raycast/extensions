@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { showToast, Toast, LocalStorage } from "@raycast/api";
 import { runCode, CodeExecutionResult, detectInstalledLanguages, DetectedLanguage } from "../utils/codeRunner";
+import { showFailureToast } from "@raycast/utils";
 
 // LocalStorage Key for storing detected languages
 const LANGUAGES_STORAGE_KEY = "detected_languages";
@@ -67,13 +68,18 @@ export function useCodeRunner(): UseCodeRunnerReturn {
           setLanguage(""); // No language selected if none detected
           setCode(""); // Ensure code is empty if no languages
           if (toast) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "No supported languages found!";
-            toast.message = "Please ensure Node.js, Python3, or Go are installed and in your PATH.";
+            showFailureToast(Error("Please ensure Node.js, Python3, or Go are installed and in your PATH."), {
+              title: "No supported languages found!",
+              message: "Please ensure Node.js, Python3, or Go are installed and in your PATH.",
+            });
           }
-          await LocalStorage.removeItem(LANGUAGES_STORAGE_KEY); // Clear stale language cache
-          return;
-        }
+          try {
+           await LocalStorage.removeItem(LANGUAGES_STORAGE_KEY); // Clear stale language cache
+          } catch (storageError: unknown) {
+           console.error(`[LocalStorage Error] Failed to remove ${LANGUAGES_STORAGE_KEY}:`, storageError);
+          }
+           return;
+         }
 
         await LocalStorage.setItem(LANGUAGES_STORAGE_KEY, JSON.stringify(detected));
 
@@ -92,21 +98,25 @@ export function useCodeRunner(): UseCodeRunnerReturn {
         if (toast) {
           toast.style = Toast.Style.Success;
           toast.title = "Languages detected!";
-          toast.message = "Ready to run code.";
+          toast.message = detected.length > 0 ? "Ready to run code." : "No supported languages found.";
         }
       } catch (error: unknown) {
-        // Changed 'any' to 'unknown'
         const errorMessage = error instanceof Error ? error.message : String(error);
         if (toast) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Language detection failed!";
-          toast.message = errorMessage || "An unknown error occurred during language detection.";
+          showFailureToast(error,{
+            title:"Language detection failed!",
+            message:errorMessage || "An unknown error occurred during language detection."
+          })
         }
         console.error("[Language Detection Error]", error);
         setLanguage("");
         setCode("");
-        await LocalStorage.removeItem(LANGUAGES_STORAGE_KEY); // Clear stale language cache on error
-      } finally {
+        try {
+          await LocalStorage.removeItem(LANGUAGES_STORAGE_KEY); // Clear stale language cache on error
+        } catch (storageError: unknown) {
+          console.error(`[LocalStorage Error] Failed to remove ${LANGUAGES_STORAGE_KEY} on error:`, storageError);
+        }
+       } finally {
         setIsInitializing(false); // Always set initializing to false at the end of detection
       }
     },
@@ -124,7 +134,12 @@ export function useCodeRunner(): UseCodeRunnerReturn {
       });
 
       try {
-        const cachedLanguages = await LocalStorage.getItem<string>(LANGUAGES_STORAGE_KEY);
+        let cachedLanguages: string | undefined;
+        try {
+          cachedLanguages = await LocalStorage.getItem<string>(LANGUAGES_STORAGE_KEY);
+        } catch (storageError: unknown) {
+          console.error(`[LocalStorage Error] Failed to get ${LANGUAGES_STORAGE_KEY}:`, storageError);
+        }
         let detected: DetectedLanguage[] = [];
 
         if (cachedLanguages) {
@@ -148,10 +163,10 @@ export function useCodeRunner(): UseCodeRunnerReturn {
               await performLanguageDetection(false);
             }
           } catch (parseError: unknown) {
-            // Changed 'any' to 'unknown'
             console.error("[LocalStorage Parse Error]", parseError);
-            toast.style = Toast.Style.Failure;
-            toast.title = "Failed to load cached languages. Re-detecting...";
+            showFailureToast(null,{
+              title: "Failed to load cached languages. Re-detecting..."
+            })
             await performLanguageDetection(false); // Trigger detection if parsing fails
           }
         } else {
@@ -160,7 +175,6 @@ export function useCodeRunner(): UseCodeRunnerReturn {
           await performLanguageDetection(false);
         }
       } catch (error: unknown) {
-        // Changed 'any' to 'unknown'
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast.style = Toast.Style.Failure;
         toast.title = "Initialization failed!";
@@ -237,15 +251,28 @@ export function useCodeRunner(): UseCodeRunnerReturn {
       }
 
       // Save current code before changing language
-      await LocalStorage.setItem(`code_${language}`, code);
+      try {
+       await LocalStorage.setItem(`code_${language}`, code);
+      } catch (storageError: unknown) {
+        console.error(`[LocalStorage Error] Failed to set code_${language}:`, storageError);
+     }
       setLanguage(newValue);
       setResult(null); // Clear results when language changes
 
       // Load saved code for the new language, or set to default example
-      const savedCode = await LocalStorage.getItem<string>(`code_${newValue}`);
+      let savedCode: string | undefined;
+      try {
+       savedCode = await LocalStorage.getItem<string>(`code_${newValue}`);
+     } catch (storageError: unknown) {
+       console.error(`[LocalStorage Error] Failed to get code_${newValue}:`, storageError);
+     }
       setCode(savedCode || getInitialCodeForLanguage(newValue)); // Use saved code or default
-      await LocalStorage.setItem(LAST_USED_LANGUAGE_KEY, newValue); // Save to storage
-    },
+      try {
+        await LocalStorage.setItem(LAST_USED_LANGUAGE_KEY, newValue); // Save to storage
+      } catch (storageError: unknown) {
+        console.error(`[LocalStorage Error] Failed to set ${LAST_USED_LANGUAGE_KEY}:`, storageError);
+      }
+},
     [code, language, getInitialCodeForLanguage, performLanguageDetection],
   ); // Dependencies for onLanguageChange
 
@@ -256,7 +283,11 @@ export function useCodeRunner(): UseCodeRunnerReturn {
   const onCodeChange = useCallback(
     async (newCode: string) => {
       setCode(newCode);
-      await LocalStorage.setItem(`code_${language}`, newCode); // Persist code for current language
+      try {
+       await LocalStorage.setItem(`code_${language}`, newCode); // Persist code for current language
+     } catch (storageError: unknown) {
+      console.error(`[LocalStorage Error] Failed to set code_${language}:`, storageError);
+      }
     },
     [language],
   ); // Dependency for onCodeChange

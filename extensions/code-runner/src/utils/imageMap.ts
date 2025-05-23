@@ -1,6 +1,8 @@
 // utils/imageMap.ts
-export const logoMap: { [key: string]: string } = {
-  go: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/go/go-original.svg",
-  javascript: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg",
-  python: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg",
+export type SupportedLanguage = 'javascript' | 'go' | 'python';
+
+export const logoMap: { [key in SupportedLanguage]?: string } = {
+  'javascript': '../assets/icons/javascript-original.svg',
+  'go': '../assets/icons/go-original.svg',
+  'python': '../assets/icons/python-original.svg',
 };

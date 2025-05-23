@@ -2,7 +2,6 @@
 
 # Code Runner for Raycast
 
-
 A powerful Raycast extension that allows you to write and execute code snippets directly on your local machine. Get instant feedback on your code without leaving Raycast\!
 
 ---
