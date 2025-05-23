@@ -77,11 +77,17 @@ export default function NewFileWithDetails(props: {
       >
         <Form.Dropdown.Section title={"Template"}>
           {templateFiles.map((template, index) => {
+            let title: string;
+            if (template.name.startsWith(".")) {
+              title = template.name;
+            } else {
+              title = template.name + "." + template.extension;
+            }
             return (
               <Form.Dropdown.Item
                 key={template.name + index}
                 icon={isImage(parse(template.path).ext) ? { source: template.path } : { fileIcon: template.path }}
-                title={template.name + "." + template.extension}
+                title={title}
                 value={JSON.stringify({ section: "Template", index: index })}
               />
             );

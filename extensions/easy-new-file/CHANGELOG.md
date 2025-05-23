@@ -1,5 +1,10 @@
 # Easy New File Changelog
 
+## [Create Dot Files] - {PR_MERGE_DATE}
+
+- New File Now command support Dot file type
+- New File with Template command now supports Dot file template
+
 ## [Any File Type] - 2024-06-26
 
 - Now you can create any file type with the New File Now command.
