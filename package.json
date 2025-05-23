@@ -30,6 +30,55 @@
       "description": "Convert an image, video or audio file to a different file format"
     }
   ],
+  "ai": {
+    "description": "- Always use absolute paths for the input path. \n- Never guess the input path or use placeholder values. If you are unsure, ask the user for the input path. \n- After a successful conversion, return a link to the absolute path of the converted file.",
+    "evals": [
+      {
+        "input": "@media-converter convert the last mp3 file in @finder downloads to wav",
+        "mocks": {
+          "convert-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": "convert-media"
+          }
+        ]
+      },
+      {
+        "input": "@media-converter convert all png files on my @finder desktop to webp",
+        "mocks": {
+          "convert-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": "convert-media"
+          }
+        ]
+      },
+      {
+        "input": "@media-converter convert my last screen recording in @finder downloads to webm",
+        "mocks": {
+          "convert-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": "convert-media"
+          }
+        ]
+      },
+      {
+        "input": "@media-converter convert the heic photos in @finder desktop to jpg",
+        "mocks": {
+          "convert-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": "convert-media"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.17.0"

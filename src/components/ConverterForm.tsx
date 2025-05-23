@@ -6,13 +6,16 @@ import {
   OUTPUT_VIDEO_EXTENSIONS,
   OUTPUT_AUDIO_EXTENSIONS,
   OUTPUT_IMAGE_EXTENSIONS,
+  OUTPUT_ALL_EXTENSIONS,
 } from "../utils/converter";
 import { execPromise } from "../utils/exec";
 
 export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }) {
   const [selectedFileType, setSelectedFileType] = useState<"video" | "image" | "audio" | null>(null);
   const [currentFiles, setCurrentFiles] = useState<string[]>(initialFiles || []);
-  const [outputFormat, setOutputFormat] = useState<string>("");
+  const [outputFormat, setOutputFormat] = useState<(typeof OUTPUT_ALL_EXTENSIONS)[number] | null>(null);
+  // TODO: Proper type for quality setting? Maybe split the quality setting into a union type for each format?
+  // Currently represents 0-100 in steps of 5 for jpg heic avif webp, "lossless" for webp, "lzw" or "deflate" for tiff
   const [currentQualitySetting, setCurrentQualitySetting] = useState<string>("");
 
   useEffect(() => {
@@ -144,7 +147,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
           title="Select output format"
           defaultValue={selectedFileType === "image" ? ".jpg" : selectedFileType === "audio" ? ".mp3" : ".mp4"}
           onChange={(newFormat) => {
-            setOutputFormat(newFormat);
+            setOutputFormat(newFormat as (typeof OUTPUT_ALL_EXTENSIONS)[number]);
           }}
         >
           {selectedFileType === "image" ? (
@@ -179,10 +182,15 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
               defaultValue="80"
               onChange={setCurrentQualitySetting}
             >
+              {outputFormat === ".webp" && (
+                <Form.Dropdown.Section>
+                  <Form.Dropdown.Item value="lossless" title="Lossless" />
+                </Form.Dropdown.Section>
+              )}
               <Form.Dropdown.Section>
                 {outputFormat !== ".tiff" ? (
                   [...Array(21).keys()].map((i) => {
-                    const q = i * 5;
+                    const q = 100 - i * 5;
                     const value = q.toString();
                     const title = outputFormat === ".avif" && q === 100 ? `100 (lossless)` : value;
 
@@ -195,13 +203,6 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
                   </>
                 )}
               </Form.Dropdown.Section>
-              {outputFormat === "webp" && (
-                <>
-                  <Form.Dropdown.Section>
-                    <Form.Dropdown.Item value="lossless" title="Lossless" />
-                  </Form.Dropdown.Section>
-                </>
-              )}
             </Form.Dropdown>
             {outputFormat === ".tiff" ? <Form.Description text={`Here, .tiff is always lossless.`} /> : ""}
           </>

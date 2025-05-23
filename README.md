@@ -3,6 +3,8 @@
   <p>Convert any media file with just a few keystrokes</p>
 </div>
 
+<!-- TODO Update this all -->
+
 ## Features
 
 - Convert videos, images, and audio files with a simple interface
@@ -13,11 +15,11 @@
 
 ## Supported Formats
 
-| Media Type | Supported Formats |
-|------------|------------------|
-| Video | MP4, AVI, MKV, MOV, MPG, WEBM |
-| Image | JPG, PNG, WebP, HEIC, TIFF, AVIF |
-| Audio | MP3, AAC, WAV, FLAC |
+| Media Type | Supported Formats                |
+| ---------- | -------------------------------- |
+| Video      | MP4, AVI, MKV, MOV, MPG, WEBM    |
+| Image      | JPG, PNG, WebP, HEIC, TIFF, AVIF |
+| Audio      | MP3, AAC, WAV, FLAC              |
 
 ## Usage
 
@@ -40,11 +42,12 @@
 1. Get started by typing @ in Raycast AI
 2. Example prompts:
    - Convert the last mp3 file in @finder downloads to wav
-   - Convert all png files on my @finder desktop to webp 
+   - Convert all png files on my @finder desktop to webp
    - Convert my last screen recording in @finder downloads to webm
    - Convert the heic photos in @finder desktop to png
 
 ### Requirements
+
 - FFmpeg (automatically installed if missing)
 - macOS 10.15 or later
 
