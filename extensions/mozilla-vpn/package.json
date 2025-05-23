@@ -3,7 +3,7 @@
   "name": "mozilla-vpn",
   "title": "Mozilla Vpn Connect",
   "description": "Interact with the Mozilla Vpn from Raycast.",
-  "icon": "Mozilla-Vpn.png",
+  "icon": "MozillaVpn.png",
   "author": "natew",
   "categories": [
     "Security"
