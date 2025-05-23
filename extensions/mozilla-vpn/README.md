@@ -1,23 +1,22 @@
-# Mozilla VPN Connect
+# Mozilla Vpn Connect
 
-_Interact with the Mozilla VPN client from Raycast without even opening the Mozilla client._
+_Interact with the Mozilla Vpn client from Raycast without even opening the Mozilla client._
 
 ### What does it do?
 
 - It checks that the application is installed and prompts you to download and install if it is not.
 - It checks if you are logged in and opens the app if you are not logged in.
-- It connects using the Mozilla VPN client to the Mozilla VPN service.
-- It displays the current server the Mozilla VPN client is configured for.
+- It connects using the Mozilla Vpn client to the Mozilla Vpn service.
+- It displays the current server the Mozilla Vpn client is configured for.
 - It fetches the current external IP and geolocates the IP's Country and city. It then refreshes when it connects to the VPN.
+- It allows you to change the server from the UI. You select a Country and city if available and if there are multiple VPN servers, it will randomly choose one to connect to.
 
-### What it doesn't do (yet).
 
-- Unfortunately, the command to select a server does not work. You can list the servers and pick one, but it seems the CLI command for the application is broken. I would love to figure out how to configure the configuration file or interact with the client to enable this feature. **PRs are definitely welcome!**
 
 ### Requirements
 
-- Must have a Mozilla VPN account
-- Must have the Mozilla VPN client downloaded and configured.
+- Must have a Mozilla Vpn account
+- Must have the Mozilla Vpn client downloaded and configured.
 
 ### CLI commands used for Mozilla Client
 
@@ -26,6 +25,12 @@ Client Connect `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN activ
 Client Disconnect `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN deactivate`
 
 Status `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN status`
+
+List all the servers `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN servers`
+
+Select a server, must be the actual server name and not the city `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN select`
+
+
 
     Status shows if the client is connected or not, and the server city and country it is configured for. There are other details here like all devices configured for the service.
 

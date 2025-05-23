@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mozilla-vpn",
-  "title": "Mozilla VPN Connect",
-  "description": "Interact with the Mozilla VPN from Raycast.",
+  "title": "Mozilla Vpn Connect",
+  "description": "Interact with the Mozilla Vpn from Raycast.",
   "icon": "MozillaVPN.png",
   "author": "natew",
   "categories": [
@@ -12,23 +12,32 @@
   "commands": [
     {
       "name": "index",
-      "title": "VPN Connect",
-      "subtitle": "Mozilla VPN",
-      "description": "Activate or deactivate the Mozilla VPN.",
+      "title": "Vpn Connect",
+      "subtitle": "Mozilla Vpn",
+      "description": "Activate or deactivate the Mozilla Vpn.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.71.4",
+    "@raycast/api": "^1.99.2",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.2.2"
+    "@eslint/js": "^9.27.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "react-devtools": "6.1.1",
+    "typescript": "^5.7.2"
+  },
+  "overrides": {
+    "electron": "^33.2.1",
+    "eslint": "^8.57.1",
+    "cross-spawn": "^7.0.6",
+    "got": "^13.0.0",
+    "react-devtools": "6.1.1"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -63,7 +63,7 @@ interface VpnStatusProps {
   vpnStatus: boolean | null;
   serverCity: string;
   serverCountry: string;
-  onToggleVpn: () => void;
+  onToggleVpn: () => void | Promise<void>;
   onSelectServer: () => void;
 }
 
@@ -88,15 +88,12 @@ const VpnStatus: React.FC<VpnStatusProps> = ({
       ? `${serverCity}, ${serverCountry}`
       : 'Unknown location';
 
-  // Create a proper accessory text for the server
-  const serverAccessoryText = `Configured Server: ${serverInfo}`;
-
   return (
     <List.Item
       title={title}
       icon={statusIcon}
       accessories={[
-        { text: serverAccessoryText, icon: Icon.Globe },
+        { text: serverInfo, icon: Icon.Globe },
         {
           text: vpnStatus ? 'Connected' : 'Disconnected',
           icon: {
@@ -107,18 +104,17 @@ const VpnStatus: React.FC<VpnStatusProps> = ({
       ]}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action
-              title={actionTitle}
-              icon={vpnStatus ? Icon.Stop : Icon.Play}
-              onAction={onToggleVpn}
-            />
-            <Action
-              title="Change Server"
-              icon={Icon.Globe}
-              onAction={onSelectServer}
-            />
-          </ActionPanel.Section>
+          <Action
+            title={actionTitle}
+            icon={vpnStatus ? Icon.Stop : Icon.Play}
+            onAction={onToggleVpn}
+          />
+          <Action
+            title="Change Server"
+            icon={Icon.Globe}
+            shortcut={{ modifiers: ['cmd'], key: 's' }}
+            onAction={onSelectServer}
+          />
         </ActionPanel>
       }
     />

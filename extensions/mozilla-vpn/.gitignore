@@ -13,3 +13,5 @@ compiled_raycast_swift
 .DS_Store
 .prettierignore
 
+eslint.config.mjs
+package-lock.json
