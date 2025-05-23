@@ -14,7 +14,6 @@
     {
       "name": "paste-from-kindle",
       "title": "Paste from Kindle",
-      "subtitle": "Strip metadata and paste only the quote",
       "description": "Cleans Kindle clipboard content and pastes it.",
       "mode": "no-view"
     }
