@@ -92,8 +92,7 @@ To work on this extension, you'll need:
 
     ```bash
     git clone https://github.com/abdullahnettoor/code-runner-raycast.git
-    cd your-raycast-extension-repo
-    ```
+    cd code-runner-raycast
 
 2.  **Install dependencies**:
 
