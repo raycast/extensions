@@ -18,6 +18,9 @@ interface Item {
       _created_by: string;
       name?: string | { first_name: string; last_name: string };
       description?: string;
+      email_addresses?: {
+        items: string[];
+      };
     };
   };
 }
@@ -59,34 +62,50 @@ function Command() {
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setQuery} isShowingDetail throttle>
-      {results.map((item) => (
-        <List.Item
-          key={item.id}
-          title={getName(item.attributes.record.name)}
-          accessories={[{ text: item.attributes.object.charAt(0).toUpperCase() + item.attributes.object.slice(1) }]}
-          detail={
-            <List.Item.Detail
-              markdown={item.attributes.record.description ?? "n/a"}
-              metadata={
-                <List.Item.Detail.Metadata>
-                  {[...Object.keys(item.attributes.record)].sort().map((key) => {
-                    const val = item.attributes.record[key];
-                    return <List.Item.Detail.Metadata.Label key={key} title={key} text={getText(val)} />;
-                  })}
-                </List.Item.Detail.Metadata>
-              }
-            />
-          }
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open Record in Browser"
-                url={`${config.endpoints.web}/workspaces/${config.slug}/objects/${item.attributes.object}/records/${item.attributes.record._id}`}
+      {results.map((item) => {
+        let markdown = item.attributes.record.description || "*Description is not available.*";
+
+        const emails = item.attributes.record.email_addresses?.items;
+        if (item.attributes.object === "person") {
+          markdown += `\n\nEmails: ${emails?.join(", ") || "n/a"}`;
+        }
+
+        return (
+          <List.Item
+            key={item.id}
+            title={getName(item.attributes.record.name)}
+            accessories={[{ text: item.attributes.object.charAt(0).toUpperCase() + item.attributes.object.slice(1) }]}
+            detail={
+              <List.Item.Detail
+                markdown={markdown}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    {[...Object.keys(item.attributes.record)].sort().map((key) => {
+                      const val = item.attributes.record[key];
+                      return <List.Item.Detail.Metadata.Label key={key} title={key} text={getText(val)} />;
+                    })}
+                  </List.Item.Detail.Metadata>
+                }
               />
-            </ActionPanel>
-          }
-        />
-      ))}
+            }
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title="Open Record in Browser"
+                  url={`${config.endpoints.web}/workspaces/${config.slug}/objects/${item.attributes.object}/records/${item.attributes.record._id}`}
+                />
+                {emails && emails[0] && (
+                  <Action.CopyToClipboard
+                    title="Copy Primary Email"
+                    content={emails[0]}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                )}
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

@@ -214,6 +214,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "prisma",
+    title: "Prisma",
+    description:
+      "An MCP server that provisions and manages a Prisma Postgres database for your apps, so you don’t have to spend time fiddling with db infrastructure.",
+    icon: "https://svgl.app/library/prisma.svg",
+    homepage: "https://www.prisma.io/docs/postgres/integrations/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.prisma.io/mcp-server/mcp"],
+    },
+  },
+  {
     name: "sentry",
     title: "Sentry",
     description: "This service provides a Model Context Provider (MCP) for interacting with Sentry's API.",
@@ -222,6 +234,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.sentry.dev/sse"],
+    },
+  },
+  {
+    name: "shopify-dev",
+    title: "Shopify Dev",
+    description:
+      "MCP server that interacts with Shopify Dev. This protocol supports various tools to interact with different Shopify APIs.",
+    icon: "shopify.svg",
+    homepage: "https://github.com/Shopify/dev-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@shopify/dev-mcp@latest"],
     },
   },
   {
@@ -407,6 +431,47 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["elevenlabs-mcp"],
       env: {
         ELEVENLABS_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
+    name: "apify",
+    title: "Apify",
+    description:
+      "A Model Context Protocol (MCP) server for Apify enabling AI agents to use 5,000+ ready-made Actors for use cases such as extracting data from websites, social media, search engines, online maps, and more.",
+    icon: "https://apify.com/ext/apify-symbol-512px.svg",
+    homepage: "https://mcp.apify.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@apify/actors-mcp-server"],
+      env: {
+        APIFY_API_TOKEN: "YOUR_API_TOKEN_HERE",
+      },
+    },
+  },
+  {
+    name: "nuxt",
+    title: "Nuxt",
+    description: "Access Nuxt documentation and modules with the public Nuxt MCP server",
+    icon: "nuxt.svg",
+    homepage: "https://mcp.nuxt.com/",
+    configuration: {
+      command: "npx",
+      args: ["mcp-remote", "https://mcp.nuxt.space/sse"],
+    },
+  },
+  {
+    name: "zeabur",
+    title: "Zeabur",
+    description:
+      "Zeabur provides an official Model Context Protocol (MCP) server that allows you to manage and deploy your Zeabur projects.",
+    icon: "zeabur.svg",
+    homepage: "https://zeabur.com/docs/en-US/mcp",
+    configuration: {
+      command: "npx",
+      args: ["zeabur-mcp@latest"],
+      env: {
+        ZEABUR_TOKEN: "YOUR_ZEABUR_TOKEN_HERE",
       },
     },
   },
@@ -597,6 +662,22 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       env: {
         MONDAY_API_KEY: "your-monday-api-key",
         MONDAY_WORKSPACE_NAME: "your-monday-workspace-name",
+      },
+    },
+  },
+  {
+    name: "paperless-ngx",
+    title: "Paperless-NGX",
+    description:
+      "An MCP server for interacting with a Paperless-NGX API server. Manage documents, tags, correspondents, and document types in your Paperless-NGX instance.",
+    icon: "https://icons.duckduckgo.com/ip3/paperless-ngx.com.ico",
+    homepage: "https://github.com/baruchiro/paperless-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@baruchiro/paperless-mcp@latest"],
+      env: {
+        PAPERLESS_URL: "http://your-paperless-instance:8000",
+        PAPERLESS_API_KEY: "your-api-token",
       },
     },
   },

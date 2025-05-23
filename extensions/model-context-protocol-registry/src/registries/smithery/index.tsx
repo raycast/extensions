@@ -162,7 +162,7 @@ function InstallServerAction(props: { server: Server }) {
     return (
       <Action.Push
         icon={Icon.ArrowDownCircle}
-        title="Configure MCP Server"
+        title="Configure Server"
         target={<ConfigureServerForm connection={firstConnection} server={props.server} />}
       />
     );
@@ -226,7 +226,7 @@ function InstallSmitheryServerAction(props: { server: Server; config?: Record<st
   }
 
   return (
-    <ActionPanel.Submenu title="Install MCP Server" isLoading={isLoading}>
+    <ActionPanel.Submenu title="Install Server" isLoading={isLoading}>
       <Action.InstallMCPServer
         icon={{ source: { light: Icon.RaycastLogoPos, dark: Icon.RaycastLogoNeg } }}
         title="Raycast"

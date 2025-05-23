@@ -1,7 +1,7 @@
 import { useFetch, showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import getAccessToken from "./getAccessToken";
-import { GetDocumentsResponse, TranscriptSegment } from "./types";
+import { GetDocumentsResponse, TranscriptSegment, FoldersResponse } from "./types";
 
 export function fetchGranolaData(route: string) {
   const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
@@ -86,6 +86,42 @@ export async function getTranscript(docId: string): Promise<string> {
     return formattedTranscript.trim();
   } catch (error) {
     showFailureToast({ title: "Failed to Fetch Transcript", message: String(error) });
+    throw error;
+  }
+}
+
+export async function getFolders(): Promise<FoldersResponse> {
+  const url = `https://api.granola.ai/v1/get-document-lists-metadata`;
+  try {
+    const token = await getAccessToken();
+    const requestBody = {
+      include_document_ids: true,
+      include_only_joined_lists: false,
+    };
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      let errorText = await response.text();
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorText = errorJson.message || errorText;
+      } catch (e) {
+        // Use raw text if parsing fails
+      }
+      throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+    }
+
+    return (await response.json()) as FoldersResponse;
+  } catch (error) {
+    showFailureToast({ title: "Failed to Fetch Folders", message: String(error) });
     throw error;
   }
 }
