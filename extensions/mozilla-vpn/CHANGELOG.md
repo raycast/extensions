@@ -6,4 +6,4 @@
 - Ability to see details about the vpn connected to, ip and geo location
 - You can refresh the vpn to get the latest details
 
-## [Initial Version] - 2024-04-26
+## [Initial Version] - {PR_MERGE_DATE}
