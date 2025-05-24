@@ -1,3 +1,20 @@
+type ShortRoleResource = {
+  id: number;
+  name: string;
+}
+export type UserResource = {
+  id: number;
+  email: string;
+  roles: ShortRoleResource[];
+  language: {
+    id: number;
+    name: string;
+    icon: {
+      url: string;
+    }
+  }
+}
+
 export type Project = {
   id: number;
   name: string;
@@ -25,7 +42,7 @@ export type Server = {
       name: string;
     };
   };
-  status: "started" | "stopped" | "stopping" | "starting";
+  status: "started" | "stopped" | "stopping" | "starting" | "restarting";
   real_status: "started" | "stopped";
   ip_addresses: {
     ipv4: IPv4AddressResource[];

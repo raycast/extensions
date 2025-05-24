@@ -32,7 +32,10 @@ export default function Projects() {
   });
 
   async function confirmAndDelete(project: Project) {
-    if (project.is_default) await showFailureToast("Default project can't be deleted");
+    if (project.is_default) {
+      await showFailureToast("Default project can't be deleted");
+      return;
+    }
     const options: Alert.Options = {
       title: "Delete Project",
       message: "Do you really want to delete this project?",

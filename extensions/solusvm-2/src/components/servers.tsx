@@ -39,37 +39,57 @@ export default function Servers({ project }: { project: Project }) {
     stopped: { color: "#d02d4b", text: "Stopped" },
     starting: { color: Color.Yellow, text: "Starting" },
     stopping: { color: Color.Yellow, text: "Stopping" },
+    restarting: { color: Color.Orange, text: "Restarting" }
   };
 
-  async function doServerAction(server: Server, action: "start" | "stop") {
-    if (action === "stop") {
+  const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
+  async function doServerAction(server: Server, action: "start" | "stop" | "restart") {
+    if (action !== "start") {
       if (
         !(await confirmAlert({
-          title: "Stop Server",
+          title: `${capitalize(action)} Server`,
           message: "Would you like to continue?",
           primaryAction: {
-            title: "Yes, stop!",
-          },
-          rememberUserChoice: true,
+            title: `Yes, ${action}!`,
+          }
         }))
       )
         return;
     }
 
+    let animatedToastTitle, successToastTitle, newStatus: Server["status"];
+    switch (action) {
+      case "start":
+        animatedToastTitle = "Starting project";
+        successToastTitle = "Started project";
+        newStatus = "starting";
+        break;
+      case "stop":
+        animatedToastTitle = "Stopping project";
+        successToastTitle = "Stopped project";
+        newStatus = "stopped";
+        break;
+      case "restart":
+        animatedToastTitle = "Restarting project";
+        successToastTitle = "Restarted project";
+        newStatus = "restarting"
+        break;
+    }
+
     const toast = await showToast(
       Toast.Style.Animated,
-      `${action === "start" ? "Starting" : "Stopping"} project`,
+      animatedToastTitle,
       project.name,
     );
     try {
       await mutate(callApi(`servers/${server.id}/${action}`, { method: "POST" }), {
         optimisticUpdate(data) {
-          const newStatus: Server["status"] = action === "start" ? "starting" : "stopping";
           return data.map((s) => (s.id === server.id ? { ...s, status: newStatus } : s));
         },
       });
       toast.style = Toast.Style.Success;
-      toast.title = `${action === "start" ? "Started" : "Stopped"} project`;
+      toast.title = successToastTitle;
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = `Could not ${action} project`;
@@ -101,9 +121,10 @@ export default function Servers({ project }: { project: Project }) {
                 title="Update"
                 target={<UpdateServer server={server} mutate={mutate} />}
               />
-              {server.status === "started" && (
-                <Action icon={Icon.Stop} title="Stop" onAction={() => doServerAction(server, "stop")} />
-              )}
+              {server.status === "started" && <>
+              <Action icon={Icon.Stop} title="Stop" onAction={() => doServerAction(server, "stop")} />
+              <Action icon={Icon.Redo} title="Restart" onAction={() => doServerAction(server, "restart")} />
+              </>}
               {server.status === "stopped" && (
                 <Action icon={Icon.Play} title="Start" onAction={() => doServerAction(server, "start")} />
               )}
@@ -158,7 +179,7 @@ function UpdateServer({ server, mutate }: { server: Server; mutate: MutatePromis
       }
     >
       <Form.Description title="ID" text={server.id.toString()} />
-      <Form.TextField title="Name" placeholder="Name" {...itemProps.name} />
+      <Form.TextField title="Hostname" placeholder="Hostname" info="The hostname will change the next time the server is restarted." {...itemProps.name} />
       <Form.TextField title="Description" placeholder="Description" {...itemProps.description} />
     </Form>
   );
