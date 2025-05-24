@@ -76,7 +76,7 @@ export async function sendTranslateRequest({
 }) {
   try {
     const prefs = getPreferenceValues<Preferences>();
-    const { key } = prefs;
+    const { key, closeRaycastAfterTranslation } = prefs;
     onTranslateAction ??= prefs.onTranslateAction;
 
     const text = initialText || (await readContent());
@@ -102,6 +102,12 @@ export async function sendTranslateRequest({
         case "clipboard":
           await Clipboard.copy(translation);
           await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
+          if (closeRaycastAfterTranslation) {
+            // Add a short delay so users can see the success message
+            setTimeout(async () => {
+              await closeMainWindow();
+            }, 1000);
+          }
           break;
         case "view":
           try {
@@ -120,6 +126,12 @@ export async function sendTranslateRequest({
               message: "The main Translate command must be enabled.",
             });
           }
+          if (closeRaycastAfterTranslation) {
+            // Add a short delay so users can see any messages
+            setTimeout(async () => {
+              await closeMainWindow();
+            }, 1000);
+          }
           break;
         case "paste":
           await closeMainWindow();
@@ -127,6 +139,12 @@ export async function sendTranslateRequest({
           break;
         default:
           toast.hide();
+          if (closeRaycastAfterTranslation) {
+            // Add a short delay before closing
+            setTimeout(async () => {
+              await closeMainWindow();
+            }, 500);
+          }
           break;
       }
       return { translation, detectedSourceLanguage };

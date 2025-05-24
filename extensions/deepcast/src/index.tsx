@@ -1,4 +1,15 @@
-import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  Icon,
+  LaunchProps,
+  getPreferenceValues,
+  closeMainWindow,
+  Clipboard,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   Formality,
@@ -45,7 +56,8 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
     const sourceLanguage = props?.launchContext?.sourceLanguage;
     return <TranslationView translation={translation} sourceLanguage={sourceLanguage} />;
   }
-  const { defaultTargetLanguage, showTransliteration, showFormalityConfig } = getPreferenceValues<Preferences>();
+  const { defaultTargetLanguage, showTransliteration, showFormalityConfig, closeRaycastAfterTranslation } =
+    getPreferenceValues<Preferences>();
   const [loading, setLoading] = useState(false);
   const [sourceText, setSourceText] = useState(props.fallbackText ?? "");
   const [translation, setTranslation] = useState("");
@@ -124,6 +136,39 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
   const _t = transliterate(translation);
   const transliteration = _t == translation ? "" : _t;
 
+  const handleCopyToClipboard = async () => {
+    await Clipboard.copy(translation);
+    await showToast(Toast.Style.Success, "Translation copied to clipboard!");
+    if (closeRaycastAfterTranslation) {
+      // Add a short delay so users can see the success message
+      setTimeout(async () => {
+        await closeMainWindow();
+      }, 1000);
+    }
+  };
+
+  const handlePasteInFrontmostApp = async () => {
+    await Clipboard.paste(translation);
+    await showToast(Toast.Style.Success, "Translation pasted!");
+    if (closeRaycastAfterTranslation) {
+      // Add a short delay so users can see the success message
+      setTimeout(async () => {
+        await closeMainWindow();
+      }, 1000);
+    }
+  };
+
+  const handleCopyTransliteration = async () => {
+    await Clipboard.copy(transliteration);
+    await showToast(Toast.Style.Success, "Transliteration copied to clipboard!");
+    if (closeRaycastAfterTranslation) {
+      // Add a short delay so users can see the success message
+      setTimeout(async () => {
+        await closeMainWindow();
+      }, 1000);
+    }
+  };
+
   return (
     <Form
       actions={
@@ -132,20 +177,23 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
             <Action.SubmitForm icon={Icon.ArrowRightCircle} title="Translate" onSubmit={submit} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard
+            <Action
+              icon={Icon.CopyClipboard}
               title="Copy Translation"
               shortcut={{ modifiers: ["cmd"], key: "." }}
-              content={translation}
+              onAction={handleCopyToClipboard}
             />
-            <Action.Paste
+            <Action
+              icon={Icon.Document}
               title="Paste in Frontmost App"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-              content={translation}
+              onAction={handlePasteInFrontmostApp}
             />
-            <Action.CopyToClipboard
+            <Action
+              icon={Icon.CopyClipboard}
               title="Copy Transliteration"
               shortcut={{ modifiers: ["cmd"], key: "t" }}
-              content={transliteration}
+              onAction={handleCopyTransliteration}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
