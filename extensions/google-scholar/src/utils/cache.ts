@@ -27,7 +27,7 @@ export class Cache {
         "utf8",
       );
     } catch (error) {
-      console.error("Cache write error:", error);
+      showFailureToast(error, { title: "Cache write error" });
     }
   }
 
