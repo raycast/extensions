@@ -1,5 +1,11 @@
 # Dock Changelog
 
+## [Add MenuBar Item] - {PR_MERGE_DATE}
+
+- Added a **MenuBar Item** to move the dock
+- Added the "System" category
+- Modernized extension to use latest Raycast config (remove `run-applescript`)
+
 ## [Initial Version] - 2022-04-12
 
 - Added one click "Move Dock To The Left" command

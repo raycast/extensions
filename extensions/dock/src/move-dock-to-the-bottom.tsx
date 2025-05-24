@@ -1,9 +1,9 @@
 import { closeMainWindow } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 export default async () => {
   await closeMainWindow();
   await runAppleScript(
-    'tell application "System Events" to tell dock preferences \n set screen edge to bottom \n end tell'
+    'tell application "System Events" to tell dock preferences \n set screen edge to bottom \n end tell',
   );
 };
