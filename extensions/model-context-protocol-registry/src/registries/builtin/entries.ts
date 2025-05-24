@@ -320,7 +320,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Thena",
     description:
       "A Model Context Protocol server that enables AI assistants to interact with Thena's services, providing seamless integration and enhanced capabilities for AI-powered applications.",
-    icon: "🧠",
+    icon: "thena.svg",
     homepage: "https://thena.ai",
     configuration: {
       command: "npx",
