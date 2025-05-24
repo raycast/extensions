@@ -22,7 +22,8 @@ export function FormComponent() {
             title="Clear Cache"
             onAction={async () => {
               Cache.clear();
-              // Optionally show a toast, but it might be better handled in SearchResultsComponent if it has its own clear cache button.
+              await showToast({ title: "Cache cleared" });
+            }}
             }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "x" }} // Example shortcut
           />
