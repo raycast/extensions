@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "formula1-data",
+  "title": "F1",
+  "description": "Your comprehensive guide to Formula 1, including race schedules and standings.",
+  "icon": "extension-icon.png",
+  "author": "yash_gupta",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "timeFormat",
+      "title": "Time Format",
+      "description": "Choose your preferred time format",
+      "type": "dropdown",
+      "required": false,
+      "default": "HH:mm",
+      "data": [
+        {
+          "title": "24-hour",
+          "value": "HH:mm"
+        },
+        {
+          "title": "12-hour",
+          "value": "hh:mm a"
+        }
+      ]
+    },
+    {
+      "name": "dateFormat",
+      "title": "Date Format",
+      "description": "Choose your preferred date format",
+      "type": "dropdown",
+      "required": false,
+      "default": "dd/MM/yyyy",
+      "data": [
+        {
+          "title": "DD/MM/YYYY",
+          "value": "dd/MM/yyyy"
+        },
+        {
+          "title": "MM/DD/YYYY",
+          "value": "MM/dd/yyyy"
+        },
+        {
+          "title": "23 May YYYY",
+          "value": "dd MMMM yyyy"
+        }
+      ]
+    },
+    {
+      "name": "timezone",
+      "title": "Timezone",
+      "description": "Select your preferred timezone",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        { "title": "Automatic (System Timezone)", "value": "auto" },
+        { "title": "UTC", "value": "UTC" },
+        { "title": "Europe/London", "value": "Europe/London" },
+        { "title": "Europe/Berlin", "value": "Europe/Berlin" },
+        { "title": "Europe/Paris", "value": "Europe/Paris" },
+        { "title": "Europe/Rome", "value": "Europe/Rome" },
+        { "title": "Europe/Madrid", "value": "Europe/Madrid" },
+        { "title": "Europe/Moscow", "value": "Europe/Moscow" },
+        { "title": "America/New_York", "value": "America/New_York" },
+        { "title": "America/Chicago", "value": "America/Chicago" },
+        { "title": "America/Denver", "value": "America/Denver" },
+        { "title": "America/Los_Angeles", "value": "America/Los_Angeles" },
+        { "title": "America/Sao_Paulo", "value": "America/Sao_Paulo" },
+        { "title": "Asia/Tokyo", "value": "Asia/Tokyo" },
+        { "title": "Asia/Shanghai", "value": "Asia/Shanghai" },
+        { "title": "Asia/Dubai", "value": "Asia/Dubai" },
+        { "title": "Asia/Kolkata", "value": "Asia/Kolkata" },
+        { "title": "Australia/Sydney", "value": "Australia/Sydney" },
+        { "title": "Australia/Melbourne", "value": "Australia/Melbourne" },
+        { "title": "Pacific/Auckland", "value": "Pacific/Auckland" }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "race-schedule",
+      "title": "Race Schedule",
+      "description": "View the full Formula 1 race calendar",
+      "mode": "view"
+    },
+    {
+      "name": "drivers-standings",
+      "title": "Drivers' Standings",
+      "description": "Check the latest Formula 1 driver rankings with points and positions",
+      "mode": "view"
+    },
+    {
+      "name": "constructors-standings",
+      "title": "Constructors' Standings",
+      "description": "See current team standings and total points in the Formula 1 championship.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.2",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.1.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
