@@ -116,7 +116,8 @@ export function SearchResultsComponent({ searchParams }: SearchResultsComponentP
               title: "Rate limited/blocked, retrying...",
               message: `Attempt ${retryCount + 1} of 3`,
             });
-            setTimeout(() => fetchResults(start, appending), Math.pow(2, retryCount + 1) * 1000);
+            const timeoutId = setTimeout(() => fetchResults(start, appending), Math.pow(2, retryCount + 1) * 1000);
+            return () => clearTimeout(timeoutId);
             return;
           } else {
             errorMessage = "Google Scholar is temporarily blocking requests. Try again later or use a VPN.";
