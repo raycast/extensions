@@ -1,5 +1,9 @@
 # Quit Applications Changelog
 
+## [Bug fix] - 2025-05-24
+
+- Fixed issue where excluded applications still appeared in the list when multiple windows were open
+
 ## [Update] - 2025-04-25
 
 - Added `Quit All Applications` to quit all applications at once
