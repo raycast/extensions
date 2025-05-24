@@ -73,7 +73,7 @@ export function parseScholarHtmlResults(html: string): SearchResult[] {
       .find(".gs_fl a")
       .filter((i, a) => $(a).text().includes("Cited by"));
     const citationText = citationElement.text();
-    const citationCount = citationText && citationText.match(/\d+/) ? citationText.match(/\d+/)![0] : "0";
+    const citationCount = citationText?.match(/\d+/)?.[0] || "0";
 
     pageResults.push({
       title,
