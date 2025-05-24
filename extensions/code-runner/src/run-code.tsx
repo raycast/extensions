@@ -39,7 +39,11 @@ export default function Command() {
           text="Please ensure Node.js, Python3, Go, or Swift are installed and in your system's PATH."
         />
         <ActionPanel>
-          <Action title="Retry Language Detection" onAction={() => performLanguageDetection(true)} />
+          <Action
+            title="Retry Language Detection"
+            onAction={() => performLanguageDetection(true)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          />
         </ActionPanel>
       </Form>
     );

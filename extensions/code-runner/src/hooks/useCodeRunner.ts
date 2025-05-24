@@ -38,11 +38,39 @@ export function useCodeRunner(): UseCodeRunnerReturn {
       case "go":
         return `package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello from Go!")\n    a, b := 7, 2\n    fmt.Printf("Division: %f\\n", float64(a) / float64(b))\n}`;
       case "swift":
-        return `import Foundation\n\nprint("Hello from Swift!")\nlet num1: Double = 15.0\nlet num2: Double = 4.0\nprint("Result of division: \\(num1 / num2)")`;
+        return `import Foundation\n\nprint("Hello from Swift!")\nlet num1: Double = 15.0\nlet num2: Double = 4.0\nprint("Result of division: \\(num1 / num2))")`;
       default:
         return "";
     }
   }, []);
+
+  /**
+   * Helper function to determine and set the current language and load its associated code.
+   * This centralizes logic used by both initial setup and language re-detection.
+   * @param detectedLanguages The array of languages detected on the system.
+   */
+  const handleLanguageSelection = useCallback(
+    async (detectedLanguages: DetectedLanguage[]) => {
+      // Determine the language to use: last used, or first detected
+      const savedLanguage = await LocalStorage.getItem<string>(LAST_USED_LANGUAGE_KEY);
+      const matchedLanguageValue =
+        detectedLanguages.find((lang) => lang.value === savedLanguage)?.value ?? detectedLanguages[0].value;
+
+      setLanguage(matchedLanguageValue);
+
+      // Load saved code for the matched language, or use initial snippet
+      const savedCode = await LocalStorage.getItem<string>(`code_${matchedLanguageValue}`);
+      setCode(savedCode || getInitialCodeForLanguage(matchedLanguageValue));
+
+      // Persist the last used language
+      try {
+        await LocalStorage.setItem(LAST_USED_LANGUAGE_KEY, matchedLanguageValue);
+      } catch (storageError: unknown) {
+        console.error(`[LocalStorage Error] Failed to set ${LAST_USED_LANGUAGE_KEY}:`, storageError);
+      }
+    },
+    [getInitialCodeForLanguage],
+  );
 
   const performLanguageDetection = useCallback(
     async (showLoadingToast: boolean = false): Promise<DetectedLanguage[] | null> => {
@@ -89,19 +117,7 @@ export function useCodeRunner(): UseCodeRunnerReturn {
           console.error(`[LocalStorage Error] Failed to set ${LANGUAGES_STORAGE_KEY}:`, storageError);
         }
 
-        const savedLanguage = await LocalStorage.getItem<string>(LAST_USED_LANGUAGE_KEY);
-        const matchedLanguageValue = detected.find((lang) => lang.value === savedLanguage)?.value ?? detected[0].value;
-
-        setLanguage(matchedLanguageValue);
-
-        const savedCode = await LocalStorage.getItem<string>(`code_${matchedLanguageValue}`);
-        setCode(savedCode || getInitialCodeForLanguage(matchedLanguageValue));
-
-        try {
-          await LocalStorage.setItem(LAST_USED_LANGUAGE_KEY, matchedLanguageValue);
-        } catch (storageError: unknown) {
-          console.error(`[LocalStorage Error] Failed to set ${LAST_USED_LANGUAGE_KEY}:`, storageError);
-        }
+        await handleLanguageSelection(detected);
 
         if (toast) {
           toast.style = Toast.Style.Success;
@@ -134,7 +150,7 @@ export function useCodeRunner(): UseCodeRunnerReturn {
       }
       return detectedLanguagesResult;
     },
-    [getInitialCodeForLanguage],
+    [handleLanguageSelection],
   );
 
   useEffect(() => {
@@ -161,30 +177,7 @@ export function useCodeRunner(): UseCodeRunnerReturn {
             const parsedDetected = JSON.parse(cachedLanguages);
             if (Array.isArray(parsedDetected) && parsedDetected.length > 0) {
               setAvailableLanguages(parsedDetected);
-              let savedLanguage: string | undefined;
-              try {
-                savedLanguage = await LocalStorage.getItem<string>(LAST_USED_LANGUAGE_KEY);
-              } catch (storageError: unknown) {
-                console.error(`[LocalStorage Error] Failed to get ${LAST_USED_LANGUAGE_KEY}:`, storageError);
-              }
-
-              const matchedLanguageValue =
-                parsedDetected.find((lang) => lang.value === savedLanguage)?.value ?? parsedDetected[0].value;
-              setLanguage(matchedLanguageValue);
-
-              let savedCode: string | undefined;
-              try {
-                savedCode = await LocalStorage.getItem<string>(`code_${matchedLanguageValue}`);
-              } catch (storageError: unknown) {
-                console.error(`[LocalStorage Error] Failed to get code_${matchedLanguageValue}:`, storageError);
-              }
-              setCode(savedCode || getInitialCodeForLanguage(matchedLanguageValue));
-
-              try {
-                await LocalStorage.setItem(LAST_USED_LANGUAGE_KEY, matchedLanguageValue);
-              } catch (storageError: unknown) {
-                console.error(`[LocalStorage Error] Failed to set ${LAST_USED_LANGUAGE_KEY}:`, storageError);
-              }
+              await handleLanguageSelection(parsedDetected);
               initializationSuccess = true;
             } else {
               console.log("[Initialization] Cached languages array is empty, performing fresh detection.");
@@ -227,7 +220,7 @@ export function useCodeRunner(): UseCodeRunnerReturn {
     }
 
     initializeExtension();
-  }, [performLanguageDetection, getInitialCodeForLanguage]);
+  }, [performLanguageDetection, handleLanguageSelection]);
 
   const onRunCode = useCallback(async () => {
     setIsExecutingCode(true);
