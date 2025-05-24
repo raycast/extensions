@@ -284,7 +284,6 @@ export function useCodeRunner(): UseCodeRunnerReturn {
       setLanguage(newValue);
       setResult(null);
 
-      let savedCode: string | undefined;
       try {
         savedCode = await LocalStorage.getItem<string>(`code_${newValue}`);
       } catch (storageError: unknown) {
