@@ -57,8 +57,8 @@ export function constructSearchUrl(params: SearchParams, start: number = 0): str
   if (params.sortBy === "date") {
     queryParams.append("scisbd", "1");
   } else {
-    // Default to relevance, can also explicitly set scisbd=0 but it's default
-    // queryParams.append("scisbd", "0");
+    // Default to relevance
+    queryParams.append("scisbd", "0");
   }
 
   return `${baseUrl}?${queryParams.toString()}`;

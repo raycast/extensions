@@ -6,6 +6,7 @@ import { SearchResult } from "../search-articles"; // Adjust path as needed
  * Used to avoid misinterpreting publisher links as publication venues.
  */
 const DOMAIN_REGEX = /^([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,}$/;
+const MIN_PUBLICATION_LENGTH = 5;
 
 /**
  * Parses the HTML content of a Google Scholar search results page
@@ -45,11 +46,11 @@ export function parseScholarHtmlResults(html: string): SearchResult[] {
 
       if (metaParts.length > 1) {
         const potentialPublication = metaParts[1].replace(/,\s*$/, "");
-        if (!potentialPublication.match(DOMAIN_REGEX) && potentialPublication.length > 5) {
+        if (!potentialPublication.match(DOMAIN_REGEX) && potentialPublication.length > MIN_PUBLICATION_LENGTH) {
           publication = potentialPublication;
         } else if (metaParts.length > 2) {
           const thirdPartAsPublication = metaParts[2].replace(/,\s*$/, "");
-          if (!thirdPartAsPublication.match(DOMAIN_REGEX) && thirdPartAsPublication.length > 5) {
+          if (!thirdPartAsPublication.match(DOMAIN_REGEX) && thirdPartAsPublication.length > MIN_PUBLICATION_LENGTH) {
             publication = thirdPartAsPublication;
           }
         }
@@ -59,7 +60,7 @@ export function parseScholarHtmlResults(html: string): SearchResult[] {
           .substring(authors.length)
           .replace(/^\s*-\s*/, "")
           .trim();
-        if (remainingText && !remainingText.match(DOMAIN_REGEX) && remainingText.length > 5) {
+        if (remainingText && !remainingText.match(DOMAIN_REGEX) && remainingText.length > MIN_PUBLICATION_LENGTH) {
           publication = remainingText.split(" - ")[0].trim().replace(/,\s*$/, "");
         }
       }

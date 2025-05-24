@@ -45,9 +45,7 @@ export default async function searchScholar(params: SearchParams): Promise<Searc
     const results = parseScholarHtmlResults(html);
 
     // Cache the results fetched by the AI tool
-    if (results.length > 0) {
-      Cache.set(url, results);
-    }
+    Cache.set(url, results);
 
     console.log(`AI Tool: Found ${results.length} results for`, params);
     return results;

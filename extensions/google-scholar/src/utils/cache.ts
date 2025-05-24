@@ -23,7 +23,7 @@ export class Cache {
         filePath,
         JSON.stringify({
           timestamp: Date.now(),
-          data: data,
+          data,
         }),
         "utf8",
       );
@@ -86,6 +86,7 @@ export class Cache {
         }
       } catch (error) {
         console.error("Error clearing expired cache:", error);
+        showFailureToast(error, { title: "Error clearing expired cache" });
       }
     }
   }

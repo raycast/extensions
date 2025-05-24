@@ -2,15 +2,20 @@ import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@ray
 import { Cache } from "../utils/cache"; // Adjusted path
 import type { SearchParams } from "../search-articles"; // Adjusted path for type
 import { SearchResultsComponent } from "./SearchResultsComponent"; // Adjusted path
+import { showFailureToast } from "@raycast/utils";
 
 export function FormComponent() {
   const { push } = useNavigation();
 
   const handleSubmit = async (values: SearchParams) => {
-    // The SearchParams type now includes sortBy, but the form doesn't set it directly.
-    // We can either add a sort by to the form, or let SearchResultsComponent default it.
-    // For now, SearchResultsComponent handles default sortBy if not provided.
-    push(<SearchResultsComponent searchParams={values} />);
+    try {
+      // The SearchParams type now includes sortBy, but the form doesn't set it directly.
+      // We can either add a sort by to the form, or let SearchResultsComponent default it.
+      // For now, SearchResultsComponent handles default sortBy if not provided.
+      push(<SearchResultsComponent searchParams={values} />);
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to show search results" });
+    }
   };
 
   return (
@@ -21,8 +26,12 @@ export function FormComponent() {
           <Action
             title="Clear Cache"
             onAction={async () => {
-              Cache.clear();
-              await showToast({ title: "Cache cleared", style: Toast.Style.Success });
+              try {
+                Cache.clear();
+                await showToast({ title: "Cache cleared", style: Toast.Style.Success });
+              } catch (error) {
+                showFailureToast(error, { title: "Failed to clear cache" });
+              }
             }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "x" }} // Example shortcut
           />
