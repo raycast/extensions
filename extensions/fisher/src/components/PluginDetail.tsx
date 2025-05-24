@@ -4,6 +4,7 @@ import { execSync } from "child_process";
 import { getFishPath } from "../utils/getFishPath";
 import { useEffect, useState, useRef } from "react";
 import { getPluginMeta } from "../utils/getPluginMeta";
+import { GITHUB_HEADERS } from "../utils/github";
 
 interface PluginDetailProps {
   plugin: string;
@@ -68,9 +69,11 @@ export default function PluginDetail({ plugin, onRemove, onInstall }: PluginDeta
         }
       }
 
+      const headers = GITHUB_HEADERS as Record<string, string>;
+
       const [metaRes, relRes] = await Promise.all([
-        fetch(`https://api.github.com/repos/${owner}/${repo}`),
-        fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`),
+        fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers }),
+        fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`, { headers }),
       ]);
 
       let stargazers = null;

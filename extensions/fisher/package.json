@@ -41,6 +41,15 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "required": false,
+      "name": "githubToken",
+      "type": "password",
+      "title": "GitHub API Token",
+      "description": "Optional. Used to increase rate limits for GitHub API requests."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.98.4",
     "@raycast/utils": "^1.17.0"

@@ -14,38 +14,6 @@ A Raycast extension to help you manage your Fish shell plugins with [Fisher](htt
 
 Plugin info is powered by a local JSON registry that you can update manually. It includes name, description, and GitHub repo.
 
-## 🛠️ Setup (Optional for Development)
-
-To increase GitHub API rate limits during development:
-
-1. Create a `.env` file in the project root:
-
-   ```javascript
-   GITHUB_TOKEN = your_personal_token_here;
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install dotenv
-   ```
-
-3. On `PluginDetail` component:
-
-   ```javascript
-   const headers = {
-     Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-     Accept: "application/vnd.github+json",
-   };
-
-   const [metaRes, relRes] = await Promise.all([
-     fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers }),
-     fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`, { headers }),
-   ]);
-   ```
-
-The extension uses this token to authenticate GitHub API requests when available.
-
 ## 🔒 Notes
 
 - Core plugin `jorgebucaran/fisher` is protected from accidental removal.
