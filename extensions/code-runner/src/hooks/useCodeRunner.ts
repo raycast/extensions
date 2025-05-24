@@ -75,7 +75,7 @@ export function useCodeRunner(): UseCodeRunnerReturn {
   const performLanguageDetection = useCallback(
     async (showLoadingToast: boolean = false): Promise<DetectedLanguage[] | null> => {
       setIsInitializing(true);
-      let toast: Toast | undefined;
+      let toast = await showToast({ style: Toast.Style.Success, title: "" });
       let detectedLanguagesResult: DetectedLanguage[] | null = null;
 
       if (showLoadingToast) {
@@ -93,16 +93,10 @@ export function useCodeRunner(): UseCodeRunnerReturn {
         if (detected.length === 0) {
           setLanguage("");
           setCode("");
-          if (toast) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "No supported languages found!";
-            toast.message = "Please ensure Node.js, Python3, Go, or Swift are installed and in your PATH.";
-          } else {
-            showFailureToast(new Error("No supported languages found."), {
-              title: "No supported languages found!",
-              message: "Please ensure Node.js, Python3, Go, or Swift are installed and in your PATH.",
-            });
-          }
+          showFailureToast(new Error("No supported languages found."), {
+            title: "No supported languages found!",
+            message: "Please ensure Node.js, Python3, Go, or Swift are installed and in your PATH.",
+          });
           try {
             await LocalStorage.removeItem(LANGUAGES_STORAGE_KEY);
           } catch (storageError: unknown) {
@@ -126,16 +120,12 @@ export function useCodeRunner(): UseCodeRunnerReturn {
         }
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        if (toast) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Language detection failed!";
-          toast.message = errorMessage || "An unknown error occurred during language detection.";
-        } else {
-          showFailureToast(error as Error, {
-            title: "Language detection failed!",
-            message: errorMessage || "An unknown error occurred during language detection.",
-          });
-        }
+
+        showFailureToast(error as Error, {
+          title: "Language detection failed!",
+          message: errorMessage || "An unknown error occurred during language detection.",
+        });
+
         console.error("[Language Detection Error]", error);
         setLanguage("");
         setCode("");
@@ -201,16 +191,17 @@ export function useCodeRunner(): UseCodeRunnerReturn {
           toast.title = "Initialization complete!";
           toast.message = "Ready to run code.";
         } else {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Initialization failed!";
-          toast.message =
-            "No supported languages found. Please ensure Node.js, Python3, Go, or Swift are installed and in your PATH.";
+          showFailureToast({
+            title: "Initialization failed!",
+            message:
+              "No supported languages found. Please ensure Node.js, Python3, Go, or Swift are installed and in your PATH.",
+          });
         }
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        toast.style = Toast.Style.Failure;
-        toast.title = "Initialization failed!";
-        toast.message = errorMessage || "An unknown error occurred during initialization.";
+        showFailureToast(error as Error, {
+          title: "Initialization failed!",
+          message: "An unknown error occurred during initialization.",
+        });
         console.error("[Initialization Error]", error);
         setLanguage("");
         setCode("");
@@ -233,16 +224,12 @@ export function useCodeRunner(): UseCodeRunnerReturn {
 
     try {
       if (!code.trim()) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "No code provided!";
-        toast.message = "Please enter some code to run.";
+        showFailureToast({ title: "No code provided!", message: "Please enter some code to run." });
         return;
       }
 
       if (!language) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "No language selected!";
-        toast.message = "Please select a language before running code.";
+        showFailureToast({ title: "No language selected!", message: "Please select a language before running code." });
         return;
       }
       const executionResult = await runCode(language, code);
@@ -251,9 +238,7 @@ export function useCodeRunner(): UseCodeRunnerReturn {
       console.log(`[CodeRunner] Command Executed: ${executionResult.command}`);
 
       if (executionResult.error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Code execution failed!";
-        toast.message = executionResult.error;
+        showFailureToast(executionResult.error, { title: "Code execution failed!", message: executionResult.error });
       } else {
         toast.style = Toast.Style.Success;
         toast.title = "Code executed successfully!";
@@ -261,9 +246,7 @@ export function useCodeRunner(): UseCodeRunnerReturn {
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to run code!";
-      toast.message = errorMessage || "An unknown error occurred.";
+      showFailureToast(error, { title: "Failed to run code!", message: errorMessage || "An unknown error occurred." });
       setResult({ stdout: "", stderr: "", error: errorMessage || "Unknown error", command: null });
     } finally {
       setIsExecutingCode(false);

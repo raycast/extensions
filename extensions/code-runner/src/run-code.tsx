@@ -18,7 +18,7 @@ export default function Command() {
     onCodeChange,
     onLanguageChange,
     onRunCode,
-    performLanguageDetection, // Exposed for retry action
+    performLanguageDetection,
   } = useCodeRunner();
 
   // 1. Show a general loading screen if isInitializing is true
