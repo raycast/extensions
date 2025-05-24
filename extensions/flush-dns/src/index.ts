@@ -16,8 +16,8 @@ export default async function main() {
 
   const runCommands: (keyof typeof commands)[] = [];
 
-  if (osVersion.match(/^1[1-4]/)) {
-    console.log(`OS Version: ${osVersion} parsed as 11-14`);
+  if (osVersion.match(/^1[1-5]/)) {
+    console.log(`OS Version: ${osVersion} parsed as 11-15`);
     runCommands.push("dscacheutil", "mDNSResponder");
   } else if (osVersion.match(/^10\.([7-9]|1[1-4])/) || osVersion.match(/^10\.10\.[4-5]/)) {
     console.log(`OS Version: ${osVersion} parsed as 10.7-9, 10.10.4-5, 10.11-14`);

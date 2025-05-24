@@ -1,5 +1,7 @@
 # Media Converter Changelog
 
+## [Enhanced README and added new metadata images] - 2025-03-10
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [1.2.0] - 2024-12-27

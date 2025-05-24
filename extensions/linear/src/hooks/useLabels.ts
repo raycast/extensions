@@ -1,5 +1,6 @@
-import { getLabels } from "../api/getLabels";
 import { useCachedPromise } from "@raycast/utils";
+
+import { getLabels } from "../api/getLabels";
 
 export default function useLabels(teamId?: string, config?: { execute?: boolean }) {
   const { data, error, isLoading } = useCachedPromise(getLabels, [teamId], {

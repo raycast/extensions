@@ -25,7 +25,7 @@ export class Ollama {
    * @param server - Ollama Server Route, default value: { url: "http://127.0.0.1:11434" }.
    */
   constructor(server = { url: "http://127.0.0.1:11434" } as Types.OllamaServer) {
-    this._signal = AbortSignal.timeout(180);
+    this._signal = AbortSignal.timeout(1800);
     this._server = server.url;
     if (server.auth && server.auth.mode === Enum.OllamaServerAuthorizationMethod.BASIC)
       this._headers = {
@@ -468,7 +468,7 @@ export class Ollama {
     const parameters = this._OllamaApiShowParseModelfileParameterSplit(show.parameters);
 
     return {
-      from: this._OllamaApiShowParseModelfileFrom(show.template),
+      from: show.template && this._OllamaApiShowParseModelfileFrom(show.template),
       parameter: {
         mirostat: parameters.length > 0 ? this._OllamaApiShowParseModelfileParameterMirostat(parameters) : 0,
         mirostat_eta: parameters.length > 0 ? this._OllamaApiShowParseModelfileParameterMirostatEta(parameters) : 0.1,
@@ -489,9 +489,9 @@ export class Ollama {
         top_p: parameters.length > 0 ? this._OllamaApiShowParseModelfileParameterTopP(parameters) : 0.9,
       },
       template: show.template,
-      system: this._OllamaApiShowParseModelfileSystem(show.template),
+      system: show.template && this._OllamaApiShowParseModelfileSystem(show.template),
       adapter: this._OllamaApiShowParseModelfileParameterAdapter(parameters),
-      license: this._OllamaApiShowParseModelfileLicense(show.template),
+      license: show.template && this._OllamaApiShowParseModelfileLicense(show.template),
     };
   }
 
@@ -596,12 +596,18 @@ export class Ollama {
   }
 
   /**
-   * Perform text generation with the selected model.
-   * @param body - Ollama Generate Body Request.
-   * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiGenerateResponse` object contains all metadata of inference.
+   * Handle streaming API response.
+   * @param route - Route path of the API.
+   * @param body - Request Body.
+   * @param contentExtractor - Extract content from response.
+   * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning an object contains all metadata of inference.
+   * @private
    */
-  async OllamaApiGenerate(body: Types.OllamaApiGenerateRequestBody): Promise<EventEmitter> {
-    const route = this._RouteApiGenerate;
+  private async _OllamaApiStream<T extends { model: string }>(
+    route: string,
+    body: T,
+    contentExtractor: (json: Types.OllamaApiChatResponse | Types.OllamaErrorResponse | undefined) => string | undefined
+  ): Promise<EventEmitter> {
     const url = `${this._server}${route}`;
     const req: RequestInit = {
       method: "POST",
@@ -611,6 +617,7 @@ export class Ollama {
     let emitter: EventEmitter | undefined;
 
     while (emitter === undefined) {
+      let part = "";
       emitter = await fetch(url, req)
         .then(async (response) => {
           if (!response.ok) {
@@ -626,25 +633,37 @@ export class Ollama {
 
           const e = new EventEmitter();
 
+          const emitContent = (json: Types.OllamaApiChatResponse | Types.OllamaErrorResponse | undefined) => {
+            if (json)
+              if ("done" in json) {
+                if (json.done) {
+                  e.emit("done", json);
+                } else {
+                  const content = contentExtractor(json);
+                  if (content) e.emit("data", content);
+                }
+              } else if ("error" in json && json.error) {
+                e.emit("error", json);
+              }
+          };
+
           body?.on("data", (chunk) => {
             if (chunk !== undefined) {
-              let json: Types.OllamaApiGenerateResponse | Types.OllamaErrorResponse | undefined;
               const buffer = Buffer.from(chunk);
-              try {
-                json = JSON.parse(buffer.toString());
-              } catch (err) {
-                console.error(err);
+              let jsonStr = buffer.toString();
+              if (part !== "") {
+                jsonStr = part + jsonStr;
               }
-              if (json)
-                if ("done" in json) {
-                  if (json.done) {
-                    e.emit("done", json);
-                  } else {
-                    if ("response" in json && json.response) e.emit("data", json.response);
-                  }
-                } else if ("error" in json && json.error) {
-                  e.emit("error", json);
+              for (const j of jsonStr.split("\n").filter((p) => p !== "")) {
+                try {
+                  const json = JSON.parse(j);
+                  emitContent(json);
+                  part = "";
+                } catch (err) {
+                  console.error(err);
+                  part += j;
                 }
+              }
             }
           });
 
@@ -657,6 +676,25 @@ export class Ollama {
         });
     }
     return emitter;
+  }
+
+  /**
+   * Perform text generation with the selected model.
+   * @param body - Ollama Generate Body Request.
+   * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiGenerateResponse` object contains all metadata of inference.
+   */
+  async OllamaApiGenerate(body: Types.OllamaApiGenerateRequestBody): Promise<EventEmitter> {
+    return await this._OllamaApiStream(this._RouteApiGenerate, body, (json) => {
+      if (json && "response" in json && json.response) return json.response as string;
+    });
+  }
+
+  /**
+   * Perform test generation with the selected model with out stream output.
+   * @param body - Ollama Generate Body Request.
+   */
+  async OllamaApiGenerateNoStream(body: Types.OllamaApiGenerateRequestBody): Promise<Types.OllamaApiGenerateResponse> {
+    return (await this._OllamaApiNoStream(this._RouteApiGenerate, body)) as Types.OllamaApiGenerateResponse;
   }
 
   /**
@@ -665,72 +703,30 @@ export class Ollama {
    * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiChatResponse` object contains all metadata of inference.
    */
   async OllamaApiChat(body: Types.OllamaApiChatRequestBody): Promise<EventEmitter> {
-    const route = this._RouteApiChat;
-    const url = `${this._server}${route}`;
-    const req: RequestInit = {
-      method: "POST",
-      headers: this._headers,
-      body: JSON.stringify(body),
-    };
-    let emitter: EventEmitter | undefined;
+    return await this._OllamaApiStream(this._RouteApiChat, body, (json) => {
+      if (json && "message" in json && json.message) return json.message.content;
+    });
+  }
 
-    while (emitter === undefined) {
-      emitter = await fetch(url, req)
-        .then(async (response) => {
-          if (!response.ok) {
-            const message = (await response.json()) as Types.OllamaErrorResponse;
-            this._ErrorHandlerOllamaServer(route, response.status, message, req, body.model);
-          }
-          return response.body;
-        })
-        .then((body) => {
-          if (body === undefined) {
-            return undefined;
-          }
-
-          const e = new EventEmitter();
-
-          body?.on("data", (chunk) => {
-            if (chunk !== undefined) {
-              let json: Types.OllamaApiChatResponse | Types.OllamaErrorResponse | undefined;
-              const buffer = Buffer.from(chunk);
-              try {
-                json = JSON.parse(buffer.toString());
-              } catch (err) {
-                console.error(err);
-              }
-              if (json)
-                if ("done" in json) {
-                  if (json.done) {
-                    e.emit("done", json);
-                  } else {
-                    json.message && e.emit("data", json.message.content);
-                  }
-                } else if ("error" in json && json.error) {
-                  e.emit("error", json);
-                }
-            }
-          });
-
-          return e;
-        })
-        .catch((err: FetchError | Error) => {
-          this._ErrorLogger(err);
-          if (err instanceof FetchError && err.type === "ECONNREFUSED") throw Errors.OllamaNotInstalledOrRunning;
-          throw err;
-        });
-    }
-    return emitter;
+  /**
+   * Perform test generation with the selected model with out stream output.
+   * @param body - Ollama Generate Body Request.
+   */
+  async OllamaApiChatNoStream(body: Types.OllamaApiChatRequestBody): Promise<Types.OllamaApiChatResponse> {
+    return (await this._OllamaApiNoStream(this._RouteApiChat, body)) as Types.OllamaApiChatResponse;
   }
 
   /**
    * Perform text generation with the selected model without stream.
+   * @param route - Route path of the API.
    * @param body - Ollama Generate Body Request.
    * @returns Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiGenerateResponse` object contains all metadata of inference.
    */
-  async OllamaApiGenerateNoStream(body: Types.OllamaApiGenerateRequestBody): Promise<Types.OllamaApiGenerateResponse> {
+  private async _OllamaApiNoStream(
+    route: string,
+    body: Types.OllamaApiGenerateRequestBody | Types.OllamaApiChatRequestBody
+  ): Promise<Types.OllamaApiGenerateResponse | Types.OllamaApiChatResponse> {
     body.stream = false;
-    const route = this._RouteApiGenerate;
     const url = `${this._server}${route}`;
     const req: RequestInit = {
       method: "POST",
@@ -738,7 +734,7 @@ export class Ollama {
       body: JSON.stringify(body),
     };
 
-    const response: Types.OllamaApiGenerateResponse | undefined = await fetch(url, req)
+    const response: Types.OllamaApiGenerateResponse | Types.OllamaApiChatResponse | undefined = await fetch(url, req)
       .then(async (response) => {
         if (!response.ok) {
           const message = (await response.json()) as Types.OllamaErrorResponse;

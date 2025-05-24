@@ -19,11 +19,11 @@ export const useSearchEntries = (searchText: string): State => {
   const message = (total: number) => {
     switch (total) {
       case 0:
-        return "No results found. Try a different query.";
+        return "No results found, try a different query";
       case 1:
-        return "1 result found !";
+        return "1 result found";
       default:
-        return `${total} results found !`;
+        return `${total} results found`;
     }
   };
 

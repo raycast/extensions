@@ -6,7 +6,7 @@ interface ImportFormValues {
   file: string[];
 }
 
-export default function ImportDocs() {
+export default function ImportDocs(): JSX.Element {
   const { handleSubmit, itemProps } = useForm<ImportFormValues>({
     onSubmit(values) {
       const contents = fs.readFileSync(values.file[0], "utf8");
@@ -57,7 +57,7 @@ export default function ImportDocs() {
   );
 }
 
-export async function saveDocs(docs: string) {
+export async function saveDocs(docs: string): Promise<void> {
   await LocalStorage.setItem("docs", JSON.stringify(docs));
   popToRoot();
 }

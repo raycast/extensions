@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Form, ActionPanel, Action, open, getDefaultApplication, useNavigation, showToast, Icon, Toast, Keyboard } from '@raycast/api';
+import { Form, ActionPanel, Action, open, getDefaultApplication, useNavigation, showToast, Icon, Toast, Keyboard, closeMainWindow } from '@raycast/api';
 import { focusOrOpenUrl, isSupportBrowser } from './open-url';
 import { useLocalStorage } from '@raycast/utils';
 import type { FormFields, ReusableFilter, ReusableFilterFormProps, SavedSearch } from './types';
@@ -91,6 +91,7 @@ const EXCLUDE_APPS = [
   'app/github-actions',
   'app/live-github-bot',
   'app/mend-for-github-com',
+  'app/pull',
   'app/renovate',
   'app/snyk-io',
   'app/staging-whitesource-for-github-com',
@@ -236,6 +237,7 @@ export default function Command() {
               getDefaultApplication(url).then(({ name }) => {
                 if (isSupportBrowser(name)) focusOrOpenUrl(url, 'https://github.com/search', name);
                 else open(url);
+                closeMainWindow();
               });
             }}
           />
@@ -417,11 +419,13 @@ export default function Command() {
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown id="sort" title="Sort by" storeValue value={sort} onChange={setSort}>
-        {SORT_OPTIONS.map(sort => (
-          <Form.Dropdown.Item key={sort.id} value={sort.id} title={sort.title} />
-        ))}
-      </Form.Dropdown>
+      {filter !== 'code' && (
+        <Form.Dropdown id="sort" title="Sort by" storeValue value={sort} onChange={setSort}>
+          {SORT_OPTIONS.map(sort => (
+            <Form.Dropdown.Item key={sort.id} value={sort.id} title={sort.title} />
+          ))}
+        </Form.Dropdown>
+      )}
 
       {(filter === 'code' || filter === 'repositories' || filter === 'pullrequests' || filter === 'users') && (
         <Form.Dropdown id="language" title="Language" storeValue value={language} onChange={setLanguage}>

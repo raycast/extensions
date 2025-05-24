@@ -1,5 +1,17 @@
 # Spotify Player Changelog
 
+## [Fix AppleScript fallback for non-premium users] - 2025-05-21
+
+- Fixed AppleScript fallback for functions that use premium-only API endpoints. Most commands now work without a premium subscription except queuing, cycleRepeat (AppleScript can only toggle context off/on) and device selection.
+
+## [✨ AI Enhancements] - 2025-04-30
+
+- Added AI queue interaction (e.g.,"@spotify add 10 random jazz songs to my queue").
+
+## [Fix Select Device] - 2025-02-26
+
+- Fixed a possibly undefined issue from Select Devices command
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Fix Missing Playlists in Add Playing Song to Playlist command] - 2025-02-20

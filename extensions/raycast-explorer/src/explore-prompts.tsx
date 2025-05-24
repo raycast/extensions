@@ -220,11 +220,14 @@ export default function ExplorePrompts(props: Props) {
               <List.Item
                 key={prompt.id}
                 title={prompt.title}
-                icon={isSelected ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon[icon] ?? Icon.List}
-                keywords={[category.name, prompt.creativity]}
+                icon={isSelected ? { source: Icon.CheckCircle, tintColor: Color.Green } : (Icon[icon] ?? Icon.List)}
+                keywords={[category.name, prompt.creativity || "unspecified"]}
                 accessories={[
                   { icon: Icon.ArrowUp, text: `${prompt.upvoteCount}`, tooltip: `Upvotes: ${prompt.upvoteCount}` },
-                  { icon: getCreativityIcon(prompt.creativity), tooltip: `Creativity: ${prompt.creativity}` },
+                  {
+                    icon: getCreativityIcon(prompt.creativity),
+                    tooltip: `Creativity: ${prompt.creativity || "Not specified"}`,
+                  },
                 ]}
                 detail={<List.Item.Detail markdown={getPromptMarkdown(prompt)} />}
                 actions={
@@ -325,10 +328,10 @@ function getPromptMarkdown(prompt: Prompt) {
         prompt.example.argument ? `### Argument\n\n${prompt.example.argument}\n\n` : ""
       }### Selection\n\n${wrapInCodeBlock(
         prompt.example.selection,
-        prompt.type === "code" ? prompt.language ?? "sh" : "sh",
+        prompt.type === "code" ? (prompt.language ?? "sh") : "sh",
       )}\n\n### Output\n\n${wrapInCodeBlock(
         prompt.example.output,
-        prompt.type === "code" ? prompt.language ?? "sh" : "sh",
+        prompt.type === "code" ? (prompt.language ?? "sh") : "sh",
       )}`
     : "";
 
@@ -337,13 +340,26 @@ function getPromptMarkdown(prompt: Prompt) {
     author = prompt.author.link ? `by [${prompt.author.name}](${prompt.author.link})` : prompt.author.name;
   }
 
-  return `## ${prompt.title}\n\n${prompt.prompt.replace(/\{[^{}]+\}/g, "**$&**")}${example ? `\n\n${example}` : ""}${
+  const formattedPrompt = prompt.prompt
+    .split(/(@[a-zA-Z0-9-]+\{id=[^}]+\})/)
+    .map((part) => {
+      const match = part.match(/@([a-zA-Z0-9-]+)\{id=([^}]+)\}/);
+      if (match) {
+        // Format extension references as inline code
+        return `\`@${match[1]}\``;
+      }
+      // Keep existing placeholder highlighting
+      return part.replace(/\{[^{}]+\}/g, "**$&**");
+    })
+    .join("");
+
+  return `## ${prompt.title}\n\n${formattedPrompt}${example ? `\n\n${example}` : ""}${
     author ? `\n\n---\n_${author}_` : ""
   }`;
 }
 
 function getCreativityIcon(creativity: Prompt["creativity"]) {
-  if (creativity === "none") {
+  if (!creativity || creativity === "none") {
     return Icon.CircleDisabled;
   }
 

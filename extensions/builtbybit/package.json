@@ -1,0 +1,164 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "builtbybit",
+  "title": "BuiltByBit",
+  "description": "Streamlined access to BuiltByBit, with a focus on productivity and quality of life enhancements.",
+  "icon": "bbb-icon.png",
+  "author": "YourMCGeek",
+  "categories": [
+    "Web",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-members",
+      "title": "Members Search",
+      "subtitle": "BuiltByBit",
+      "description": "Search Members on BuiltByBit by Username, User ID, or Discord ID",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "method",
+          "description": "How should we search for the member?",
+          "type": "dropdown",
+          "placeholder": "Select a method",
+          "data": [
+            {
+              "title": "Username",
+              "value": "username"
+            },
+            {
+              "title": "User ID",
+              "value": "userID"
+            },
+            {
+              "title": "Discord ID",
+              "value": "discordID"
+            }
+          ],
+          "required": true
+        },
+        {
+          "name": "search",
+          "description": "The search term",
+          "type": "text",
+          "placeholder": "Enter the search term",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-resources",
+      "title": "Search Resources by Author",
+      "subtitle": "BuiltByBit",
+      "description": "Fetch all authored resources by a specific user",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "authorId",
+          "description": "The author's user ID",
+          "type": "text",
+          "placeholder": "Author User ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "generic-search",
+      "title": "Search BuiltByBit",
+      "subtitle": "BuiltByBit",
+      "description": "Search BuiltByBit",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "type",
+          "description": "The type of search to perform",
+          "type": "dropdown",
+          "placeholder": "Choose a type",
+          "required": true,
+          "data": [
+            {
+              "title": "Everything",
+              "value": "everything"
+            },
+            {
+              "title": "Threads",
+              "value": "threads"
+            },
+            {
+              "title": "Wiki",
+              "value": "wiki"
+            },
+            {
+              "title": "Reports",
+              "value": "reports"
+            },
+            {
+              "title": "Resources",
+              "value": "resources"
+            },
+            {
+              "title": "Profile Posts",
+              "value": "profilePosts"
+            },
+            {
+              "title": "Tickets",
+              "value": "tickets"
+            },
+            {
+              "title": "Tags",
+              "value": "tags"
+            }
+          ]
+        },
+        {
+          "name": "keyword",
+          "description": "Keyword to search for",
+          "type": "text",
+          "placeholder": "Keyword",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-notifications",
+      "title": "Get Notifications",
+      "subtitle": "BuiltByBit",
+      "description": "Fetch notifications from BuiltByBit",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Private API Key",
+      "name": "apiKey",
+      "description": "Your BuiltByBit Private API Key",
+      "type": "password",
+      "required": true,
+      "placeholder": "Find your Private API key here, https://builtbybit.com/account/api. Requires an Ultimate Subscription."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.3",
+    "@raycast/utils": "^1.19.1",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.14.0",
+    "@types/react": "19.1.0",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

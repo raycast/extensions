@@ -1,0 +1,560 @@
+instructions: |-
+  # CRITICAL IMPLEMENTATION RULES
+  - When creating components, use the SIMPLEST possible implementation
+  - For components like Accordion, ONLY use the `:items` prop with the CORRECT data structure
+  - NEVER use slots unless explicitly requested by the user
+  - NEVER customize UI with the `:ui` prop unless explicitly requested
+  - NEVER create complex interfaces or data structures - use the exact structure from the documentation
+  
+  # CRITICAL TOOL USAGE AND NAMING CONVENTIONS
+  ## For Components
+  - You MUST call these tools in this EXACT sequence for EVERY component request:
+    1. FIRST: Call `get-available-components` to get the available components list
+    2. SECOND: Call `get-component-theme` with the correct componentName parameter (The only exception when user asks for props you can use the `get-component-source-code` tool instead)
+    3. THIRD: Call `get-component-source-code` with the correct componentName parameter (Use this tool when user asks for props or related information)
+  
+  - IMPORTANT: Components in the available components list are in camelCase format (e.g., "button", "buttonGroup")
+  - When calling tools, use the EXACT camelCase name from the components list (e.g., componentName: "button", NOT "Button")
+  - When displaying components in code, add the prefix "U" and capitalize the first letter (e.g., <UButton>, <UButtonGroup>)
+  
+  ## For Modules
+  - You MAY call these tools in this EXACT sequence for EVERY module request:
+    1. FIRST: Call `get-module-categories` to get the available module categories
+    2. SECOND: Call `get-modules-by-category` with the correct category parameter
+    3. Normally, you should not call any other tools for module requests
+  
+  - IMPORTANT: When recommending modules, provide a brief description of what the module does and how to install it
+  - Prioritize the official module first (type: 'official') like @nuxt/ui, @nuxt/content, @nuxt/font, etc... and then the most popular modules (using stars, forks, etc... using the key `stats` of the module object)
+  - All official modules don't have the '@nuxt/' prefix and are called like this: `ui`, `content`, `font`, etc...
+  - Include the correct installation command (e.g., `npx nuxi module add <module-name>` or `npm install <module-name>` for examples)
+  - If a category doesn't exist, use a matching one
+  - When applicable, include basic configuration examples for the module
+  
+  # CODE GENERATION RULES
+  - DO NOT include ANY import statements as we are in a Nuxt environment - all Nuxt UI components are auto-imported (and all Vue macros are also)
+  - If multiple components are requested (e.g., a button and a select menu), handle each component accordingly. (For instance, you may need to call the relevant tools for both components.)
+  - Keep component implementation MINIMAL and SIMPLE
+  - For a FAQ component, use UAccordion with items prop ONLY: `<UAccordion :items="faqItems" />`
+  - NEVER create custom templates or slots unless explicitly requested
+  - NEVER add UI customizations unless explicitly requested
+  - ALWAYS use the SIMPLEST data structure that works
+  
+  # Response Guidelines
+  - Be concise and direct in your responses
+  - Always use the composition API (script setup lang="ts") for all components
+  - Return MINIMAL component code that accomplishes the task
+  - For module recommendations, include installation instructions and basic usage examples
+  - If a user asks for a FAQ component for example, the ONLY correct implementation is:
+    ```vue
+    <script setup>
+    const faqItems = [
+      { label: "Question 1?", content: "Answer 1", icon: "i-heroicons-question-mark-circle" },
+      { label: "Question 2?", content: "Answer 2", icon: "i-heroicons-question-mark-circle" }
+    ];
+    </script>
+  
+    <template>
+      <UAccordion :items="faqItems" />
+    </template>
+    ```
+    This is an example not a full source of truth, but it should be enough to understand the concept
+  
+  # NEVER FORGET:
+  - NEVER include import statements (from Vue, Reka UI, or elsewhere) in the final code.
+  - NEVER use slots when `:items` prop is available (or any other prop use to generate the component content)
+  - NEVER customize UI unless requested
+  - NEVER create complex interfaces or data structures
+  - ALWAYS check the component theme or source code for reference, but do not copy or import it directly.
+  - ALWAYS use the simplest implementation possible
+  - ALWAYS check the component theme for the correct item structure
+  - When recommending modules, ALWAYS provide installation instructions and basic usage examples
+  - NEVER call `get-nuxt-ui-documentation` for module-related queries
+evals:
+  - input: "@nuxt Create a button component"
+    mocks:
+      get-available-components:
+        components:
+          - accordion
+          - alert
+          - avatar
+          - button
+        proseComponents:
+          - ProseH1
+          - ProseH2
+          - ProseH3
+        proComponents:
+          - pageAccordion
+          - pageCard
+      get-component-theme: |
+        import type { ModuleOptions } from '../module'
+        import { buttonGroupVariant } from './button-group'
+        
+        export default (options: Required<ModuleOptions>) => ({
+          slots: {
+            base: ['rounded-[calc(var(--ui-radius)*1.5)] font-medium inline-flex items-center focus:outline-hidden disabled:cursor-not-allowed aria-disabled:cursor-not-allowed disabled:opacity-75 aria-disabled:opacity-75', options.theme.transitions && 'transition-colors'],
+            label: 'truncate',
+            leadingIcon: 'shrink-0',
+            leadingAvatar: 'shrink-0',
+            leadingAvatarSize: '',
+            trailingIcon: 'shrink-0'
+          },
+        })
+      get-component-source-code: |
+        <script lang="ts">
+        import type { VariantProps } from 'tailwind-variants'
+        import type { AppConfig } from '@nuxt/schema'
+        import _appConfig from '#build/app.config'
+        import theme from '#build/ui/button'
+        import type { LinkProps } from './Link.vue'
+        import type { UseComponentIconsProps } from '../composables/useComponentIcons'
+        import { tv } from '../utils/tv'
+        import type { AvatarProps } from '../types'
+        import type { PartialString } from '../types/utils'
+        
+        const appConfigButton = _appConfig as AppConfig & { ui: { button: Partial<typeof theme> } }
+        
+        const button = tv({ extend: tv(theme), ...(appConfigButton.ui?.button || {}) })
+        
+        type ButtonVariants = VariantProps<typeof button>
+        
+        export interface ButtonProps extends UseComponentIconsProps, Omit<LinkProps, 'raw' | 'custom'> {
+          label?: string
+          color?: ButtonVariants['color']
+          variant?: ButtonVariants['variant']
+          size?: ButtonVariants['size']
+          /** Render the button with equal padding on all sides. */
+          square?: boolean
+          /** Render the button full width. */
+          block?: boolean
+          /** Set loading state automatically based on the `@click` promise state */
+          loadingAuto?: boolean
+          onClick?: ((event: MouseEvent) => void | Promise<void>) | Array<((event: MouseEvent) => void | Promise<void>)>
+          class?: any
+          ui?: PartialString<typeof button.slots>
+        }
+        
+        export interface ButtonSlots {
+          leading(props?: {}): any
+          default(props?: {}): any
+          trailing(props?: {}): any
+        }
+        </script>
+        
+        <script setup lang="ts">
+        import { type Ref, computed, ref, inject } from 'vue'
+        import { useForwardProps } from 'reka-ui'
+        import { useComponentIcons } from '../composables/useComponentIcons'
+        import { useButtonGroup } from '../composables/useButtonGroup'
+        import { formLoadingInjectionKey } from '../composables/useFormField'
+        import { omit } from '../utils'
+        import { pickLinkProps } from '../utils/link'
+        import UIcon from './Icon.vue'
+        import UAvatar from './Avatar.vue'
+        import ULink from './Link.vue'
+        
+        const props = defineProps<ButtonProps>()
+        const slots = defineSlots<ButtonSlots>()
+        
+        const linkProps = useForwardProps(pickLinkProps(props))
+        
+        const { orientation, size: buttonSize } = useButtonGroup<ButtonProps>(props)
+        
+        const loadingAutoState = ref(false)
+        const formLoading = inject<Ref<boolean> | undefined>(formLoadingInjectionKey, undefined)
+        
+        async function onClickWrapper(event: MouseEvent) {
+          loadingAutoState.value = true
+          const callbacks = Array.isArray(props.onClick) ? props.onClick : [props.onClick]
+          try {
+            await Promise.all(callbacks.map(fn => fn?.(event)))
+          } finally {
+            loadingAutoState.value = false
+          }
+        }
+        
+        const isLoading = computed(() => {
+          return props.loading || (props.loadingAuto && (loadingAutoState.value || (formLoading?.value && props.type === 'submit')))
+        })
+        
+        const { isLeading, isTrailing, leadingIconName, trailingIconName } = useComponentIcons(
+          computed(() => ({ ...props, loading: isLoading.value }))
+        )
+        
+        const ui = computed(() => button({
+          color: props.color,
+          variant: props.variant,
+          size: buttonSize.value,
+          loading: isLoading.value,
+          block: props.block,
+          square: props.square || (!slots.default && !props.label),
+          leading: isLeading.value,
+          trailing: isTrailing.value,
+          buttonGroup: orientation.value
+        }))
+        </script>
+        
+        <template>
+          <ULink
+            :type="type"
+            :disabled="disabled || isLoading"
+            :class="ui.base({ class: [props.class, props.ui?.base] })"
+            v-bind="omit(linkProps, ['type', 'disabled'])"
+            raw
+            @click="onClickWrapper"
+          >
+            <slot name="leading">
+              <UIcon v-if="isLeading && leadingIconName" :name="leadingIconName" :class="ui.leadingIcon({ class: props.ui?.leadingIcon })" />
+              <UAvatar v-else-if="!!avatar" :size="((props.ui?.leadingAvatarSize || ui.leadingAvatarSize()) as AvatarProps['size'])" v-bind="avatar" :class="ui.leadingAvatar({ class: props.ui?.leadingAvatar })" />
+            </slot>
+        
+            <slot>
+              <span v-if="label" :class="ui.label({ class: props.ui?.label })">
+                {{ label }}
+              </span>
+            </slot>
+        
+            <slot name="trailing">
+              <UIcon v-if="isTrailing && trailingIconName" :name="trailingIconName" :class="ui.trailingIcon({ class: props.ui?.trailingIcon })" />
+            </slot>
+          </ULink>
+        </template>
+    expected:
+      - callsTool: get-available-components
+      - callsTool:
+          arguments:
+            componentName: button
+          name: get-component-theme
+      - callsTool:
+          arguments:
+            componentName: button
+          name: get-component-source-code
+  - input: "@nuxt What components are available?"
+    mocks:
+      get-available-components:
+        components:
+          - accordion
+          - alert
+          - avatar
+        proseComponents:
+          - ProseH1
+          - ProseH2
+          - ProseH3
+        proComponents:
+          - pageAccordion
+          - pageCard
+    expected:
+      - callsTool: get-available-components
+  - input: "@nuxt Create a FAQ component"
+    mocks:
+      get-available-components:
+        components:
+          - accordion
+          - alert
+          - avatar
+        proseComponents:
+          - ProseH1
+          - ProseH2
+          - ProseH3
+        proComponents:
+          - pageAccordion
+          - pageCard
+      get-component-theme: |
+        export default {
+          slots: {
+            root: 'w-full',
+            item: 'border-b border-(--ui-border) last:border-b-0',
+            header: 'flex',
+            trigger: 'group flex-1 flex items-center gap-1.5 font-medium text-sm py-3.5 focus-visible:outline-(--ui-primary) min-w-0',
+            content: 'data-[state=open]:animate-[accordion-down_200ms_ease-out] data-[state=closed]:animate-[accordion-up_200ms_ease-out] overflow-hidden focus:outline-none',
+            body: 'text-sm pb-3.5',
+            leadingIcon: 'shrink-0 size-5',
+            trailingIcon: 'shrink-0 size-5 ms-auto group-data-[state=open]:rotate-180 transition-transform duration-200',
+            label: 'text-start break-words'
+          },
+          variants: {
+            disabled: {
+              true: {
+                trigger: 'cursor-not-allowed opacity-75'
+              }
+            }
+          }
+        }
+    expected:
+      - callsTool:
+          arguments: { }
+          name: get-available-components
+      - callsTool:
+          arguments:
+            componentName: accordion
+          name: get-component-theme
+  - input: "@nuxt How many components in Nuxt UI ?"
+    mocks:
+      get-available-components:
+        components:
+          - app
+          - accordion
+          - alert
+          - avatar
+          - avatarGroup
+          - badge
+        proComponents:
+          - banner
+          - blogPost
+          - blogPosts
+          - colorModeAvatar
+          - pageAccordion
+        proseComponents:
+          - h1
+          - h2
+          - h3
+          - h4
+          - p
+          - a
+    expected:
+      - callsTool:
+          name: get-available-components
+  - input: "@nuxt Give me the avatar theme"
+    mocks:
+      get-available-components:
+        components:
+          - app
+          - accordion
+          - alert
+          - avatar
+          - avatarGroup
+          - badge
+          - breadcrumb
+          - button
+          - buttonGroup
+          - calendar
+          - card
+        proComponents:
+          - banner
+          - blogPost
+          - blogPosts
+          - colorModeAvatar
+          - colorModeButton
+          - colorModeImage
+          - colorModeSelect
+          - colorModeSwitch
+          - contentNavigation
+          - contentSearch
+        proseComponents:
+          - h1
+          - h2
+          - h3
+          - h4
+          - p
+          - a
+          - blockquote
+          - strong
+          - em
+          - ul
+      get-component-theme: |
+        export default {
+          slots: {
+            root: 'inline-flex items-center justify-center shrink-0 select-none overflow-hidden rounded-full align-middle bg-(--ui-bg-elevated)',
+            image: 'h-full w-full rounded-[inherit] object-cover',
+            fallback: 'font-medium leading-none text-(--ui-text-muted) truncate',
+            icon: 'text-(--ui-text-muted) shrink-0'
+          },
+          variants: {
+            size: {
+              '3xs': {
+                root: 'size-4 text-[8px]'
+              },
+              '2xs': {
+                root: 'size-5 text-[10px]'
+              },
+              'xs': {
+                root: 'size-6 text-xs'
+              },
+              'sm': {
+                root: 'size-7 text-sm'
+              },
+              'md': {
+                root: 'size-8 text-base'
+              },
+              'lg': {
+                root: 'size-9 text-lg'
+              },
+              'xl': {
+                root: 'size-10 text-xl'
+              },
+              '2xl': {
+                root: 'size-11 text-[22px]'
+              },
+              '3xl': {
+                root: 'size-12 text-2xl'
+              }
+            }
+          },
+          defaultVariants: {
+            size: 'md'
+          }
+        }
+    expected:
+      - callsTool:
+          name: get-available-components
+      - callsTool:
+          arguments:
+            componentName: avatar
+          name: get-component-theme
+
+  - input: "@nuxt Is there props on the card component ?"
+    mocks:
+      get-available-components:
+        components:
+          - breadcrumb
+          - button
+          - buttonGroup
+          - calendar
+          - card
+          - carousel
+          - checkbox
+          - chip
+        proComponents:
+          - pageAnchors
+          - pageAside
+          - pageBody
+          - pageCard
+          - pageColumns
+          - pageCta
+          - pageFeature
+        proseComponents:
+          - code
+          - pre
+          - accordion
+          - badge
+          - card
+          - cardGroup
+      get-component-source-code: |
+        <script lang="ts">
+        import type { VariantProps } from 'tailwind-variants'
+        import type { AppConfig } from '@nuxt/schema'
+        import _appConfig from '#build/app.config'
+        import theme from '#build/ui/card'
+        import { tv } from '../utils/tv'
+  
+        const appConfigCard = _appConfig as AppConfig & { ui: { card: Partial<typeof theme> } }
+  
+        const card = tv({ extend: tv(theme), ...(appConfigCard.ui?.card || {}) })
+  
+        type CardVariants = VariantProps<typeof card>
+  
+        export interface CardProps {
+          /**
+           * The element or component this component should render as.
+           * @defaultValue 'div'
+           */
+          as?: any
+          variant?: CardVariants['variant']
+          class?: any
+          ui?: Partial<typeof card.slots>
+        }
+  
+        export interface CardSlots {
+          header(props?: {}): any
+          default(props?: {}): any
+          footer(props?: {}): any
+        }
+        </script>
+  
+        <script setup lang="ts">
+        import { computed } from 'vue'
+        import { Primitive } from 'reka-ui'
+  
+        const props = defineProps<CardProps>()
+        const slots = defineSlots<CardSlots>()
+  
+        const ui = computed(() => card({ variant: props.variant }))
+        </script>
+  
+        <template>
+          <Primitive :as="as" :class="ui.root({ class: [props.class, props.ui?.root] })">
+            <div v-if="!!slots.header" :class="ui.header({ class: props.ui?.header })">
+              <slot name="header" />
+            </div>
+  
+            <div v-if="!!slots.default" :class="ui.body({ class: props.ui?.body })">
+              <slot />
+            </div>
+  
+            <div v-if="!!slots.footer" :class="ui.footer({ class: props.ui?.footer })">
+              <slot name="footer" />
+            </div>
+          </Primitive>
+        </template>
+    expected:
+      - callsTool: get-available-components
+      - callsTool:
+          arguments:
+            componentName: card
+          name: get-component-source-code
+  - input: "@nuxt What module categories are available?"
+    mocks:
+      get-module-categories:
+        categories:
+          - UI
+          - CMS
+          - SEO
+          - Testing
+    expected:
+      - callsTool: get-module-categories
+  - input: "@nuxt Recommend me some UI modules"
+    mocks:
+      get-module-categories:
+        categories:
+          - UI
+          - Content
+          - SEO
+          - Analytics
+      get-modules-by-category:
+        modules:
+          - name: "@nuxt/ui"
+            description: "UI Library for Nuxt based on Tailwind CSS"
+            npm: "@nuxt/ui"
+            github: "nuxt/ui"
+            category: "UI"
+            compatibility: "Nuxt 3"
+            stars: 4500
+          - name: "@nuxtjs/tailwindcss"
+            description: "Tailwind CSS module for Nuxt"
+            npm: "@nuxtjs/tailwindcss"
+            github: "nuxt-modules/tailwindcss"
+            category: "UI"
+            compatibility: "Nuxt 2, Nuxt 3"
+            stars: 3200
+          - name: "@nuxtjs/color-mode"
+            description: "Dark and Light mode with auto detection for Nuxt"
+            npm: "@nuxtjs/color-mode"
+            github: "nuxt-modules/color-mode"
+            category: "UI"
+            compatibility: "Nuxt 2, Nuxt 3"
+            stars: 1800
+    expected:
+      - callsTool: get-module-categories
+      - callsTool:
+          arguments:
+            category: "UI"
+          name: get-modules-by-category
+  - input: "@nuxt Which modules categories are available?"
+    mocks:
+      get-module-categories:
+        categories:
+          - UI
+          - CMS
+          - SEO
+          - Testing
+    expected:
+      - callsTool: get-module-categories
+  - input: "@nuxt How to install the ui module?"
+    mocks:
+      get-module-by-name:
+        name: "ui"
+        description: "UI Library for Nuxt based on Tailwind CSS"
+        npm: "@nuxt/ui"
+        github: "nuxt/ui"
+        category: "UI"
+    expected:
+      - callsTool: get-module-by-name

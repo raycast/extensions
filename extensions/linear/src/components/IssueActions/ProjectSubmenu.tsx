@@ -3,10 +3,8 @@ import { useState } from "react";
 
 import { IssueResult } from "../../api/getIssues";
 import { ProjectResult } from "../../api/getProjects";
-
+import { getProjectIcon } from "../../helpers/projects";
 import useProjects from "../../hooks/useProjects";
-
-import { getProjectIcon, projectStatusText } from "../../helpers/projects";
 
 import { UpdateIssueParams } from "./IssueActions";
 
@@ -57,13 +55,13 @@ export default function ProjectSubmenu({
       />
 
       {!projects && isLoadingProjects ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         (projects || []).map((project) => (
           <Action
             key={project.id}
             autoFocus={project.id === issue.project?.id}
-            title={`${project.name} (${projectStatusText[project.state]})`}
+            title={`${project.name} (${project.status.name})`}
             icon={getProjectIcon(project)}
             onAction={() => setProject(project)}
           />

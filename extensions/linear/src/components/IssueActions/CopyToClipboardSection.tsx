@@ -1,4 +1,5 @@
 import { ActionPanel, Action, getPreferenceValues } from "@raycast/api";
+
 import { IssueResult } from "../../api/getIssues";
 
 type ISSUE_KEY = "title" | "identifier" | "url" | "branchName";

@@ -15,7 +15,7 @@ import { LIST_ITEMS } from "./constants";
 type Item = {
   title: string;
   icon: string;
-  keywords: string[];
+  keywords?: string[];
 };
 
 async function paste(item: Item, text?: string) {
@@ -24,7 +24,7 @@ async function paste(item: Item, text?: string) {
     return;
   }
 
-  const [codeblockTag = ""] = item.keywords;
+  const [codeblockTag = ""] = item.keywords ?? [];
   const codeblock = `\`\`\`${codeblockTag}\n${text}\n\`\`\``;
   await Clipboard.paste(codeblock);
   await updateLastUsed(item);
@@ -46,20 +46,20 @@ function sortBySearchRelevance(items: Item[], searchText: string) {
     const aKeywords = a.keywords;
     const bKeywords = b.keywords;
 
-    const aHasExactMatch = aKeywords.includes(searchLower);
-    const bHasExactMatch = bKeywords.includes(searchLower);
+    const aHasExactMatch = aKeywords?.includes(searchLower);
+    const bHasExactMatch = bKeywords?.includes(searchLower);
 
     if (aHasExactMatch && !bHasExactMatch) return -1;
     if (bHasExactMatch && !aHasExactMatch) return 1;
 
-    const aHasStartsWith = aKeywords.some((k) => k.startsWith(searchLower));
-    const bHasStartsWith = bKeywords.some((k) => k.startsWith(searchLower));
+    const aHasStartsWith = aKeywords?.some((k) => k.startsWith(searchLower));
+    const bHasStartsWith = bKeywords?.some((k) => k.startsWith(searchLower));
 
     if (aHasStartsWith && !bHasStartsWith) return -1;
     if (bHasStartsWith && !aHasStartsWith) return 1;
 
-    const aHasContains = aKeywords.some((k) => k.includes(searchLower));
-    const bHasContains = bKeywords.some((k) => k.includes(searchLower));
+    const aHasContains = aKeywords?.some((k) => k.includes(searchLower));
+    const bHasContains = bKeywords?.some((k) => k.includes(searchLower));
 
     if (aHasContains && !bHasContains) return -1;
     if (bHasContains && !aHasContains) return 1;
@@ -97,7 +97,7 @@ export default function Command() {
   function handleFiltering(searchText: string) {
     const filteredItems = LIST_ITEMS.filter(
       (item) =>
-        item.keywords.some((keyword) => keyword.includes(searchText.toLowerCase())) ||
+        item.keywords?.some((keyword) => keyword.includes(searchText.toLowerCase())) ||
         item.title.toLowerCase().includes(searchText.toLowerCase()),
     );
     const sortedItems = sortBySearchRelevance(filteredItems, searchText);
@@ -111,7 +111,7 @@ export default function Command() {
           key={`${item.title}-${i}`}
           icon={{ source: item.icon }}
           title={item.title}
-          subtitle={item.keywords.join(", ")}
+          subtitle={item.keywords?.join(", ")}
           keywords={item.keywords}
           actions={
             <ActionPanel>

@@ -15,7 +15,8 @@
     "litomore",
     "samuelkraft",
     "ridemountainpig",
-    "xilopaint"
+    "xilopaint",
+    "anwarulislam"
   ],
   "categories": [
     "Design Tools"
@@ -38,6 +39,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "extract-color",
+      "title": "Extract Color from Selected Image",
+      "description": "Extract colors from the selected Finder image",
+      "mode": "view"
     },
     {
       "name": "menu-bar",
@@ -128,7 +135,7 @@
       "name": "convert-color",
       "title": "Convert Color",
       "description": "Convert any color to a different format",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "text",
@@ -223,6 +230,10 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "pull": "ray pull-contributions",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

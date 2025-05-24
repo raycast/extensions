@@ -1,5 +1,14 @@
 # Google Chrome Changelog
 
+## [Add Omnibox-like search behavior for New Tab] - 2025-05-07
+- Add support for entering URLs or search terms in a single input field, mimicking Chrome’s Omnibox behavior.
+
+## [Add Copy Title action for Search Tab] - 2025-04-22
+- Add the ability to create new incognito window.
+
+## [Add Copy Title action for Search Tab] - 2025-02-11
+- Add Copy Title action for Search Tab command.
+
 ## [Add AI Tools] - 2025-02-21
 
 ## [Allow to configure profile path] - 2025-01-18

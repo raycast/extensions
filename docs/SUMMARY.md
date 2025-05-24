@@ -13,6 +13,14 @@
 - [Install an Extension](basics/install-an-extension.md)
 - [Review an Extension in a Pull Request](basics/review-pullrequest.md)
 
+## AI
+
+- [Getting Started](ai/getting-started.md)
+- [Create an AI Extension](ai/create-an-ai-extension.md)
+- [Learn Core Concepts of AI Extensions](ai/learn-core-concepts-of-ai-extensions.md)
+- [Write Evals for Your AI Extension](ai/write-evals-for-your-ai-extension.md)
+- [Follow Best Practices for AI Extensions](ai/follow-best-practices-for-ai-extensions.md)
+
 ## Teams
 
 - [Getting Started](teams/getting-started.md)
@@ -41,6 +49,7 @@
   - [CLI](information/developer-tools/cli.md)
   - [ESLint](information/developer-tools/eslint.md)
   - [VS Code (community tool)](information/developer-tools/vscode.md)
+  - [Templates](information/developer-tools/templates.md)
 - [Security](information/security.md)
 - [Versioning](information/versioning.md)
 
@@ -73,6 +82,7 @@
   - [Icons & Images](api-reference/user-interface/icons-and-images.md)
   - [Navigation](api-reference/user-interface/navigation.md)
 - [Raycast Window & Search Bar](api-reference/window-and-search-bar.md)
+- [Tool](api-reference/tool.md)
 - [Window Management](api-reference/window-management.md)
 
 ## Misc

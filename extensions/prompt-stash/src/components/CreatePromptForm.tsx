@@ -1,16 +1,48 @@
-import { Action, ActionPanel, Form, showToast, Toast, Icon, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  showToast,
+  Toast,
+  Icon,
+  useNavigation,
+  getSelectedText,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Prompt, PromptFormValues } from "../types";
 import { usePrompt } from "../hooks";
 import { formConfig, TAGS } from "../config";
 
 export default function CreatePromptForm() {
+  const preferences = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(false);
   const [create] = usePrompt();
   const { pop } = useNavigation();
+  const [initialContent, setInitialContent] = useState("");
 
-  const { handleSubmit, itemProps, reset } = useForm<PromptFormValues>({
+  useEffect(() => {
+    const fetchSelectedText = async () => {
+      setIsLoading(true);
+      try {
+        const selectedText = await getSelectedText();
+        if (selectedText) {
+          setInitialContent(selectedText);
+        }
+      } catch (error) {
+        setInitialContent("");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (preferences.autoInsertSelectedPrompt) {
+      fetchSelectedText();
+    }
+  }, []);
+
+  const { handleSubmit, itemProps, reset, setValue } = useForm<PromptFormValues>({
     initialValues: {
       title: "",
       content: "",
@@ -80,6 +112,12 @@ export default function CreatePromptForm() {
       },
     },
   });
+
+  useEffect(() => {
+    if (initialContent) {
+      setValue("content", initialContent);
+    }
+  }, [initialContent]);
 
   return (
     <Form

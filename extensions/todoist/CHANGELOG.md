@@ -1,5 +1,52 @@
 # Todoist Changelog
 
+## [Automatically create labels on quick add command] - 2025-05-09
+
+- Add option to automatically crete labels in the quick add command
+
+## [AI Fix] - 2025-04-15
+
+- Fixed AI not being able to get tasks
+
+## [New API] - 2025-04-14
+
+- Used new Todoist API
+- Renamed `Home` to `My Tasks`
+- Improved error handling
+- Improved app detection
+- Upgraded dependencies
+- Fixed a few bugs
+
+## [Add Default Sorting in Menu Bar] - 2025-03-31
+
+Added same sorting order as Todoist home and web app.
+
+## [Support Commas in Filters] - 2025-03-28
+
+Add support for commas in filter strings.
+
+## [Added Inbox View in Menu Bar] - 2025-03-25
+
+Added a new option for Inbox in View under Menu Bar Tasks.
+
+## [Added contributors] - 2025-03-15
+
+## [Removal of Deadline Feature for Non-Premium Users] - 2025-02-28
+
+The deadline field has been removed from the task creation process for users without a premium subscription.
+
+## [Close Window When Creating a Task] - 2025-02-28
+
+Added an option to close the window immediately after creating a task with the `Create Task` command.
+
+## [AI Extension Improvements] - 2025-02-27
+
+Improve the AI Extension to only retrieve relevant tasks, comments, projects, and sections from the REST API to avoid bloating the AI with too much data.
+
+## [Add Schedule Task Deadline Actions] - 2025-02-26
+
+It's now possible to adjust a task's deadline from the actions menu and the menubar. You can use the following shortcut from a task list item: `⌥` + `⇧` + `D`.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Add Next Task as Title in Menu Bar] - 2025-02-20
@@ -8,7 +55,7 @@ Added option to display the next upcoming task in the menu bar title when no tas
 
 ## [Fix Default Sorting] - 2025-02-20
 
-Change the default sorting to align with the task order in Todoist. 
+Change the default sorting to align with the task order in Todoist.
 
 ## [Add time format preference from Todoist preferences] - 2025-02-17
 

@@ -11,16 +11,20 @@ export class ChromeActions {
   public static TabHistory = HistoryItemActions;
 }
 
-function NewTabActions({ query }: { query?: string }): ReactElement {
+function NewTabActions({ query, url }: { query?: string; url?: string }): ReactElement {
   const { openTabInProfile } = getPreferenceValues<Preferences>();
   const [profileCurrent] = useCachedState(CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID);
 
+  let actionTitle = "Open Empty Tab";
+  if (query) {
+    actionTitle = `Search "${query}"`;
+  } else if (url) {
+    actionTitle = `Open URL "${url}"`;
+  }
+
   return (
     <ActionPanel title="New Tab">
-      <Action
-        onAction={() => openNewTab({ query, profileCurrent, openTabInProfile })}
-        title={query ? `Search "${query}"` : "Open Empty Tab"}
-      />
+      <Action onAction={() => openNewTab({ url, query, profileCurrent, openTabInProfile })} title={actionTitle} />
     </ActionPanel>
   );
 }
@@ -30,6 +34,11 @@ function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed?: () =
     <ActionPanel title={tab.title}>
       <GoToTab tab={tab} />
       <Action.CopyToClipboard title="Copy URL" content={tab.url} />
+      <Action.CopyToClipboard
+        title="Copy Title"
+        content={tab.title}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+      />
       <CloseTab tab={tab} onTabClosed={onTabClosed} />
       <ActionPanel.Section>
         <Action.CreateQuicklink

@@ -57,7 +57,7 @@ const searchHistory = (
   table: string,
   date_field: string,
   queryBuilder: (table: string, date_field: string, terms: string[]) => string,
-  query?: string
+  query?: string,
 ): SearchResult => {
   const terms = query ? query.trim().split(" ") : [""];
   const queries = queryBuilder(table, date_field, terms);
@@ -87,6 +87,6 @@ export function useHistorySearch(browser: SupportedBrowsers, query: string | und
     getHistoryTable(browser),
     getHistoryDateColumn(browser),
     getHistoryQuery(browser),
-    query
+    query,
   );
 }

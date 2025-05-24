@@ -11,20 +11,25 @@
   "contributors": [
     "jkorol3",
     "madza",
-    "bkeys818",
     "pernielsentikaer",
-    "telmen",
-    "ridemountainpig"
+    "ridemountainpig",
+    "dedalusj"
+  ],
+  "pastContributors": [
+    "bkeys818",
+    "telmen"
   ],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
     "@raycast/api": "^1.52.1",
     "@raycast/utils": "^1.1.0",
+    "chrono-node": "^2.7.8",
     "dayjs": "^1.10.7",
     "jotai": "^1.4.0",
     "lodash": "^4.17.21",
@@ -89,17 +94,34 @@
       "required": false,
       "title": "Task sorting",
       "description": "The order in which task are sorted.",
-      "default": "creation_date_accending",
+      "default": "creation_date_ascending",
       "data": [
         {
           "title": "Creation Date (ascending)",
-          "value": "creation_date_accending"
+          "value": "creation_date_ascending"
         },
         {
           "title": "Creation Date (descending)",
           "value": "creation_date_descending"
+        },
+        {
+          "title": "Title (ascending)",
+          "value": "title_ascending"
+        },
+        {
+          "title": "Title (descending)",
+          "value": "title_descending"
         }
       ]
+    },
+    {
+      "name": "nlpParsing",
+      "type": "checkbox",
+      "required": false,
+      "title": "Natural language parsing",
+      "description": "Automatically parse dates and tags",
+      "default": false,
+      "label": "Automatically parse dates and tags"
     }
   ],
   "title": "Todo List"

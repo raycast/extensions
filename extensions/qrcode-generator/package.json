@@ -2,19 +2,22 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qrcode-generator",
   "title": "QR Code Generator",
-  "description": "Generate QR code for an URL",
+  "description": "Generate QR codes from text or URLs.",
   "icon": "command-icon.png",
   "author": "Melvynx",
   "contributors": [
-    "d2a",
-    "pernielsentikaer"
+    "darmiel",
+    "mathieudutour",
+    "pernielsentikaer",
+    "heytommy"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Generate QR Code",
-      "description": "Generate a QR code from a URL in PNG format that will be automatically opened.",
+      "subtitle": "QR Code Generator",
+      "description": "Generate a QR code from text or URL",
       "mode": "view",
       "preferences": [
         {
@@ -33,13 +36,31 @@
               "value": "inline"
             }
           ]
+        },
+        {
+          "name": "defaultFormat",
+          "description": "Set the default format for generated QR codes",
+          "type": "dropdown",
+          "required": false,
+          "title": "Default Format",
+          "data": [
+            {
+              "title": "PNG",
+              "value": "png"
+            },
+            {
+              "title": "SVG",
+              "value": "svg"
+            }
+          ]
         }
       ]
     },
     {
       "name": "clipboard",
       "title": "Generate QR Code from Clipboard",
-      "description": "Generate a QR Code from Clipboard and show it directly in Raycast",
+      "subtitle": "QR Code Generator",
+      "description": "Generate a QR code from clipboard content",
       "mode": "view"
     }
   ],
@@ -65,6 +86,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
