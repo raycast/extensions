@@ -1,5 +1,6 @@
 import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { useCachedState } from "@raycast/utils";
 import { ErrorText } from "./exception";
 
 export type ResultItem = List.Item.Props & {
@@ -12,8 +13,8 @@ const markdownLink = (item: ResultItem) => `[${item.linkText ?? item.title}](${i
 const htmlLink = (item: ResultItem) => `<a href="${item.url}">${item.linkText ?? item.title}</a>`;
 
 export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: string) {
-  const [query, setQuery] = useState("");
-  const [items, setItems] = useState<ResultItem[]>([]);
+  const [query, setQuery] = useCachedState<string>("jira-search-query-query", "");
+  const [items, setItems] = useCachedState<ResultItem[]>("jira-search-query-items", []);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ErrorText>();
   useEffect(() => {

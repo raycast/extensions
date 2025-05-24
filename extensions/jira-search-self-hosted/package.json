@@ -11,7 +11,8 @@
     "ryanp",
     "LunaticMuch",
     "nick318",
-    "marinsokol"
+    "marinsokol",
+    "hayden_barnes"
   ],
   "license": "MIT",
   "commands": [
@@ -26,7 +27,7 @@
       "name": "open-issues",
       "title": "Open Issues",
       "subtitle": "Jira Search (Self-Hosted)",
-      "description": "Search Jira issues assinged to current user by text, type and project",
+      "description": "Search Jira issues assigned to current user by text, type and project",
       "mode": "view"
     },
     {
@@ -71,17 +72,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.0",
+    "@raycast/api": "^1.97.0",
+    "@raycast/utils": "^1.19.1",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@types/node": "^20.5.7",
-    "@types/react": "^18.2.21",
+    "@types/react": "^19.1.2",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "@typescript-eslint/parser": "^6.5.0",
     "eslint": "^8.48.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.3",
+    "react": "^18.1.0",
     "react-devtools": "^4.28.0",
     "typescript": "^5.2.2"
   },
@@ -90,6 +93,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "node publish.mjs"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
