@@ -75,7 +75,7 @@ export function useCodeRunner(): UseCodeRunnerReturn {
   const performLanguageDetection = useCallback(
     async (showLoadingToast: boolean = false): Promise<DetectedLanguage[] | null> => {
       setIsInitializing(true);
-      let toast = await showToast({ style: Toast.Style.Success, title: "" });
+      let toast: Toast | undefined;
       let detectedLanguagesResult: DetectedLanguage[] | null = null;
 
       if (showLoadingToast) {
@@ -258,6 +258,21 @@ export function useCodeRunner(): UseCodeRunnerReturn {
       if (newValue === "detect-new-languages") {
         await performLanguageDetection(true);
         return;
+      }
+
+      if (newValue === "detect-new-languages") {
+        await performLanguageDetection(true);
+        return;
+      }
+
+      setLanguage(newValue);
+      setResult(null);
+
+      let savedCode: string | undefined;
+      try {
+        savedCode = await LocalStorage.getItem<string>(`code_${newValue}`);
+      } catch (storageError: unknown) {
+        console.error(`[LocalStorage Error] Failed to get code_${newValue}:`, storageError);
       }
 
       try {
