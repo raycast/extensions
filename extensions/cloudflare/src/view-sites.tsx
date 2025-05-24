@@ -86,6 +86,7 @@ function Command() {
                         />
                         <Action.Push
                           icon={Icon.List}
+                          // eslint-disable-next-line @raycast/prefer-title-case
                           title="Show DNS Records"
                           target={<DnsRecordView siteId={site.id} />}
                         />
@@ -98,7 +99,7 @@ function Command() {
                       <ActionPanel.Section>
                         <Action.Push
                           icon={Icon.Hammer}
-                          title="Purge Files From Cache by URL"
+                          title="Purge Files from Cache by URL"
                           target={
                             <CachePurgeView
                               accountId={accountId}
@@ -109,7 +110,7 @@ function Command() {
                         />
                         <Action
                           icon={Icon.Hammer}
-                          title="Purge Everything From Cache"
+                          title="Purge Everything from Cache"
                           shortcut={{ modifiers: ['cmd'], key: 'e' }}
                           onAction={async () => {
                             purgeEverything(site);
@@ -117,7 +118,7 @@ function Command() {
                         />
                         <Action
                           icon={Icon.ArrowClockwise}
-                          title="Reload Sites From Cloudflare"
+                          title="Reload Sites from Cloudflare"
                           onAction={clearSiteCache}
                           shortcut={{ modifiers: ['cmd'], key: 'r' }}
                         />
@@ -186,6 +187,7 @@ function SiteView(props: SiteProps) {
           <ActionPanel.Section>
             <Action.Push
               icon={Icon.List}
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Show DNS Records"
               target={<DnsRecordView siteId={site.id} />}
             />

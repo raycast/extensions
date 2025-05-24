@@ -213,7 +213,7 @@ class Service {
       try {
         result = JSON.parse(this.cache.get(`zones-${id}`)!) as ZoneItem[];
         return result.map((item) => formatZone(item));
-      } catch (e) {
+      } catch {
         // Whenever the cache can't be parsed, clear it and fetch from API
         this.cache.remove(`zones-${id}`);
       }

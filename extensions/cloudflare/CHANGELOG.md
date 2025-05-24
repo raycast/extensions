@@ -1,5 +1,9 @@
 # Cloudflare Changelog
 
+## [Modernize] - {PR_MERGE_DATE}
+
+- Modernize extension to use latest Raycast config
+
 ## [Cache Enhancements] - 2024-12-06
 
 - `Action` to `openExtensionPreferences` on invalid token error
