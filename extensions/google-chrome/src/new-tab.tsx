@@ -53,7 +53,7 @@ export default function Command() {
         setProfileHistories([]);
       }
     }
-  }, [profiles, profile, currentProfileHistory.data, currentProfileHistory.isLoading, currentProfileHistory.errorView]);
+  }, [profiles, profile, currentProfileHistory]);
 
   if (errorViewTab || profileHistories?.some((p) => p.errorView)) {
     const errorViewHistory = profileHistories?.find((p) => p.errorView)?.errorView;
