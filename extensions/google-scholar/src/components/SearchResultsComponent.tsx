@@ -241,7 +241,7 @@ export function SearchResultsComponent({ searchParams }: SearchResultsComponentP
           {canLoadMore && !isLoading && (
             <List.Item
               title={isLoadingMore ? "Loading more results..." : "Load More Results"}
-              icon="raycast-icon-sync.png" // Consider using Raycast Icon enum if this specific asset doesn't exist
+              icon={Icon.ArrowClockwise} // Built-in Raycast icon
               actions={
                 <ActionPanel>
                   <Action title="Load More" onAction={loadMoreResults} />
