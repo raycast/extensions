@@ -1,14 +1,9 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  getPreferenceValues,
-  closeMainWindow,
-  Clipboard,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { SourceLanguage, source_languages } from "../utils";
+import { Action, ActionPanel, Detail, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
+import { SourceLanguage, source_languages, delayedCloseWindow } from "../utils";
+
+interface Preferences {
+  closeRaycastAfterTranslation: boolean;
+}
 
 export const TranslationView = (props: { translation: string | null; sourceLanguage?: string }) => {
   const translation = props.translation;
@@ -19,24 +14,24 @@ export const TranslationView = (props: { translation: string | null; sourceLangu
   if (!translation) return null;
 
   const handleCopyToClipboard = async () => {
-    await Clipboard.copy(translation);
-    await showToast(Toast.Style.Success, "Translation copied to clipboard!");
-    if (closeRaycastAfterTranslation) {
-      // Add a short delay so users can see the success message
-      setTimeout(async () => {
-        await closeMainWindow();
-      }, 1000);
+    try {
+      await Clipboard.copy(translation);
+      await showToast(Toast.Style.Success, "Translation copied to clipboard!");
+      await delayedCloseWindow(closeRaycastAfterTranslation);
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+      await showToast(Toast.Style.Failure, "Failed to copy to clipboard");
     }
   };
 
   const handlePasteInFrontmostApp = async () => {
-    await Clipboard.paste(translation);
-    await showToast(Toast.Style.Success, "Translation pasted!");
-    if (closeRaycastAfterTranslation) {
-      // Add a short delay so users can see the success message
-      setTimeout(async () => {
-        await closeMainWindow();
-      }, 1000);
+    try {
+      await Clipboard.paste(translation);
+      await showToast(Toast.Style.Success, "Translation pasted!");
+      await delayedCloseWindow(closeRaycastAfterTranslation);
+    } catch (error) {
+      console.error("Failed to paste:", error);
+      await showToast(Toast.Style.Failure, "Failed to paste in frontmost app");
     }
   };
 

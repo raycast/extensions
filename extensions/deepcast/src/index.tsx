@@ -7,7 +7,6 @@ import {
   Icon,
   LaunchProps,
   getPreferenceValues,
-  closeMainWindow,
   Clipboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
@@ -20,6 +19,7 @@ import {
   sendTranslateRequest,
   source_languages,
   target_languages,
+  delayedCloseWindow,
 } from "./utils";
 import TranslationView from "./components/TranslationView";
 import transliterate from "@sindresorhus/transliterate";
@@ -137,35 +137,35 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
   const transliteration = _t == translation ? "" : _t;
 
   const handleCopyToClipboard = async () => {
-    await Clipboard.copy(translation);
-    await showToast(Toast.Style.Success, "Translation copied to clipboard!");
-    if (closeRaycastAfterTranslation) {
-      // Add a short delay so users can see the success message
-      setTimeout(async () => {
-        await closeMainWindow();
-      }, 1000);
+    try {
+      await Clipboard.copy(translation);
+      await showToast(Toast.Style.Success, "Translation copied to clipboard!");
+      await delayedCloseWindow(closeRaycastAfterTranslation);
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+      await showToast(Toast.Style.Failure, "Failed to copy to clipboard");
     }
   };
 
   const handlePasteInFrontmostApp = async () => {
-    await Clipboard.paste(translation);
-    await showToast(Toast.Style.Success, "Translation pasted!");
-    if (closeRaycastAfterTranslation) {
-      // Add a short delay so users can see the success message
-      setTimeout(async () => {
-        await closeMainWindow();
-      }, 1000);
+    try {
+      await Clipboard.paste(translation);
+      await showToast(Toast.Style.Success, "Translation pasted!");
+      await delayedCloseWindow(closeRaycastAfterTranslation);
+    } catch (error) {
+      console.error("Failed to paste:", error);
+      await showToast(Toast.Style.Failure, "Failed to paste in frontmost app");
     }
   };
 
   const handleCopyTransliteration = async () => {
-    await Clipboard.copy(transliteration);
-    await showToast(Toast.Style.Success, "Transliteration copied to clipboard!");
-    if (closeRaycastAfterTranslation) {
-      // Add a short delay so users can see the success message
-      setTimeout(async () => {
-        await closeMainWindow();
-      }, 1000);
+    try {
+      await Clipboard.copy(transliteration);
+      await showToast(Toast.Style.Success, "Transliteration copied to clipboard!");
+      await delayedCloseWindow(closeRaycastAfterTranslation);
+    } catch (error) {
+      console.error("Failed to copy transliteration:", error);
+      await showToast(Toast.Style.Failure, "Failed to copy transliteration");
     }
   };
 
