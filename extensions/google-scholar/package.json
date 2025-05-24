@@ -1,0 +1,168 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-scholar",
+  "version": "1.0.0",
+  "title": "Google Scholar",
+  "description": "Search Google Scholar for academic articles, papers, and research.",
+  "icon": "extension-icon.png",
+  "author": "leandro.maia",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-articles",
+      "title": "Search Articles",
+      "subtitle": "Google Scholar",
+      "description": "Search Google Scholar for academic articles, papers, and research.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-scholar",
+      "title": "Search Google Scholar Articles",
+      "description": "Searches Google Scholar for academic articles based on keywords, authors, publication, and year. Use this to find research papers."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.0",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.6.2",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "ai": {
+    "evals": [
+      {
+        "input" : "@google-scholar Find me articles about machine learning between 2020 and 2025",
+        "mocks" : {
+          "search-scholar" : [
+            {
+              "authors" : "ZH Zhou",
+              "citationCount" : "3096",
+              "link" : "https://books.google.com/books?hl=en&lr=&id=ctM-EAAAQBAJ&oi=fnd&pg=PR6&dq=machine+learning&ots=o_MpU0Qr0s&sig=3v3IENNmscQu3G7kfCRsD3yDnC4",
+              "publication" : "- books.google.com",
+              "snippet" : "… from data is called learning or training. The … machine learning is to find or approximate \nground-truth. In this book, models are sometimes called learners, which are machine learning …",
+              "title" : "Machine learning",
+              "year" : "2021"
+            },
+            {
+              "authors" : "E Alpaydin",
+              "citationCount" : "1313",
+              "link" : "https://books.google.com/books?hl=en&lr=&id=Eyk5EAAAQBAJ&oi=fnd&pg=PR9&dq=machine+learning&ots=WRwRc9VgsP&sig=MnJ9K3LpsK2UOA_1lk0JDwLmOqs",
+              "publication" : "- books.google.com",
+              "snippet" : "MIT presents a concise primer on machine learning—computer programs that learn from \ndata and the basis of applications like voice recognition and driverless cars. No in-depth …",
+              "title" : "Machine learning",
+              "year" : "2021"
+            },
+            {
+              "authors" : "H Surden - Research handbook on big data law",
+              "citationCount" : "992",
+              "link" : "https://www.elgaronline.com/abstract/edcoll/9781788972819/9781788972819.00014.xml",
+              "publication" : "",
+              "snippet" : "… , machine learning has only recently started to develop. This chapter explores machine \nlearning’s … The first section describes what machine learning is, highlighting its central principles. …",
+              "title" : "Machine learning and law: An overview",
+              "year" : "2021"
+            },
+            {
+              "authors" : "B Mahesh - International Journal of Science and Research …",
+              "citationCount" : "3578",
+              "link" : "https://www.researchgate.net/profile/Batta-Mahesh/publication/344717762_Machine_Learning_Algorithms_-A_Review/links/5f8b2365299bf1b53e2d243a/Machine-Learning-Algorithms-A-Review.pdf?eid=5082902844932096t",
+              "publication" : "",
+              "snippet" : "… Here‟sa quick look at some of the commonly used algorithms in machine learning (ML) \nSupervised Learning Supervised learning is the machine learning task of learning a function …",
+              "title" : "Machine learning algorithms-a review",
+              "year" : "2020"
+            },
+            {
+              "authors" : "JF Masson, JS Biggins, E Ringe - Nature Nanotechnology",
+              "citationCount" : "81",
+              "link" : "https://www.nature.com/articles/s41565-022-01284-0",
+              "publication" : "",
+              "snippet" : "… These complex datasets and trial-and-error practices make nanoplasmonics research ripe \nfor the application of machine learning (ML) and advanced data processing methods. ML …",
+              "title" : "Machine learning for nanoplasmonics",
+              "year" : "2023"
+            },
+            {
+              "authors" : "W Li, C Wang, G Cheng, Q Song - Transactions on machine learning …",
+              "citationCount" : "2471",
+              "link" : "https://par.nsf.gov/servlets/purl/10418406",
+              "publication" : "",
+              "snippet" : "In this paper, we make the key delineation on the roles of resolution and statistical uncertainty \nin hierarchical bandits-based black-box optimization algorithms, guiding a more general …",
+              "title" : "International conference on machine learning",
+              "year" : "2023"
+            },
+            {
+              "authors" : "J Bell - Machine learning and the city: applications in …",
+              "citationCount" : "123",
+              "link" : "https://onlinelibrary.wiley.com/doi/abs/10.1002/9781119815075.ch18",
+              "publication" : "Wiley Online Library",
+              "snippet" : "… that one can employ in machine learning (ML). The required … of two learning types: supervised \nor unsupervised learning. … skills through either automated learning or learning via human …",
+              "title" : "What is machine learning?",
+              "year" : "2022"
+            },
+            {
+              "authors" : "A Jung",
+              "citationCount" : "205",
+              "link" : "https://books.google.com/books?hl=en&lr=&id=1IBaEAAAQBAJ&oi=fnd&pg=PR8&dq=machine+learning&ots=XTaQxhmyVY&sig=fvXe6ZHMOptsDX_MRdx0E2E8iKE",
+              "publication" : "- books.google.com",
+              "snippet" : "Machine learning (ML) has become a commonplace element in our everyday lives and a \nstandard tool for many fields of science and engineering. To make optimal use of ML, it is …",
+              "title" : "Machine learning: the basics",
+              "year" : "2022"
+            },
+            {
+              "authors" : "L Graves, V Nagisetty, V Ganesh - … of the AAAI Conference on Artificial …",
+              "citationCount" : "328",
+              "link" : "https://ojs.aaai.org/index.php/AAAI/article/view/17371",
+              "publication" : "",
+              "snippet" : "… It gives EU residents the ability to request deletion of their personal data, including training \nrecords used to train machine learning models. Unfortunately, Deep Neural Network models …",
+              "title" : "Amnesiac machine learning",
+              "year" : "2021"
+            },
+            {
+              "authors" : "V Goar, NS Yadav - Intelligent Optimization Techniques for Business …",
+              "citationCount" : "7353",
+              "link" : "https://www.igi-global.com/chapter/foundations-of-machine-learning/344516",
+              "publication" : "",
+              "snippet" : "… Machine learning is a rapidly evolving domain with wide-ranging … Machine learning is a \npivotal technology that has revolutionized … on their journey into the world of machine learning. …",
+              "title" : "Foundations of machine learning",
+              "year" : "2024"
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "allWords" : "machine learning",
+                "atLeastOne" : "",
+                "authors" : "",
+                "endYear" : "2025",
+                "exactPhrase" : "",
+                "publication" : "",
+                "sortBy" : "relevance",
+                "startYear" : "2020",
+                "withoutWords" : "",
+                "wordOccurrence" : "any"
+              },
+              "name" : "search-scholar"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
