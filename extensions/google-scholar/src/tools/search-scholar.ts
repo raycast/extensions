@@ -56,9 +56,7 @@ export default async function searchScholar(params: SearchParams): Promise<Searc
     // Depending on Raycast AI's error handling, we might throw the error,
     // or return an empty array/specific error object.
     // Throwing allows the AI to potentially see the error message.
-    if (error instanceof Error) {
-      throw error; // Re-throw the original error
-    }
+    throw error; // Re-throw the original error with stack trace preserved
     throw new Error("Failed to fetch or parse Google Scholar results.");
   }
 }
