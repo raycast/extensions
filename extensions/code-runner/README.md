@@ -33,6 +33,7 @@ To use this powerful tool:
     * Navigate to the directory where you've downloaded/cloned this extension's source code.
     * Run the Raycast development command to link it:
         ```bash
+        npm install
         npm run dev
         ```
     * Raycast will prompt you to "Link" the extension. Confirm this action.
@@ -63,4 +64,4 @@ To use this powerful tool:
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](./metadata/LICENSE) file for details.

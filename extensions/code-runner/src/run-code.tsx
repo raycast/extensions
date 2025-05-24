@@ -36,7 +36,7 @@ export default function Command() {
       <Form isLoading={false}>
         <Form.Description
           title="No Supported Languages Found"
-          text="Please ensure Node.js, Python3, or Go are installed and in your system's PATH."
+          text="Please ensure Node.js, Python3, Go, or Swift are installed and in your system's PATH."
         />
         <ActionPanel>
           <Action title="Retry Language Detection" onAction={() => performLanguageDetection(true)} />

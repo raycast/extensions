@@ -149,7 +149,7 @@ export async function runCode(language: string, code: string): Promise<CodeExecu
     }
 
     if (filePath) {
-      await fs.writeFile(filePath, code);
+      await fs.writeFile(filePath, code, { mode: 0o600 });
     } else {
       return { stdout: "", stderr: "", error: "Internal error: filePath not determined.", command: null };
     }

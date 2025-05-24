@@ -37,8 +37,8 @@ export function useCodeRunner(): UseCodeRunnerReturn {
         return `print("Hello from Python!")\nx = 5\ny = 3\nprint(f"Product: {x * y}")`;
       case "go":
         return `package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello from Go!")\n    a, b := 7, 2\n    fmt.Printf("Division: %f\\n", float64(a) / float64(b))\n}`;
-      case "swift": // Add Swift default snippet
-        return `import Foundation\n\nprint("Hello from Swift!")\nlet num1: Double = 15.0\nlet num2: Double = 4.0\nprint("Result of division: \\(num1 / num2))")`;
+      case "swift":
+        return `import Foundation\n\nprint("Hello from Swift!")\nlet num1: Double = 15.0\nlet num2: Double = 4.0\nprint("Result of division: \\(num1 / num2)")`;
       default:
         return "";
     }
@@ -246,6 +246,12 @@ export function useCodeRunner(): UseCodeRunnerReturn {
         return;
       }
 
+      if (!language) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "No language selected!";
+        toast.message = "Please select a language before running code.";
+        return;
+      }
       const executionResult = await runCode(language, code);
       setResult(executionResult);
 
@@ -307,10 +313,12 @@ export function useCodeRunner(): UseCodeRunnerReturn {
   const onCodeChange = useCallback(
     async (newCode: string) => {
       setCode(newCode);
-      try {
-        await LocalStorage.setItem(`code_${language}`, newCode);
-      } catch (storageError: unknown) {
-        console.error(`[LocalStorage Error] Failed to set code_${language}:`, storageError);
+      if (language) {
+        try {
+          await LocalStorage.setItem(`code_${language}`, newCode);
+        } catch (storageError: unknown) {
+          console.error(`[LocalStorage Error] Failed to set code_${language}:`, storageError);
+        }
       }
     },
     [language],
