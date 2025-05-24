@@ -149,7 +149,8 @@ export function calculatePositionDetails(inputs: CalculationInputs): Calculation
 export const formatCurrency = (value: number, currencyCode: string): string => {
   if (isNaN(value)) return "N/A";
   try {
-    return value.toLocaleString(undefined, { // Use undefined locale to let it pick system default or best match
+    return value.toLocaleString(undefined, {
+      // Use undefined locale to let it pick system default or best match
       style: "currency",
       currency: currencyCode.toUpperCase(), // Ensure currency code is uppercase
       minimumFractionDigits: 2,
