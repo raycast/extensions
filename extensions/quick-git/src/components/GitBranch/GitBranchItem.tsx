@@ -15,9 +15,12 @@ export function GitBranchItem({
 	checkBranches,
 	checkStatus,
 }: Props) {
+	// Git indicates the current branch by start that row with with a `*`
 	const currentBranch = useMemo(() => branch.startsWith("*"), [branch])
+
 	const title = useMemo(() => {
 		if (currentBranch) {
+			// Skip over the leading `*` and whitespace
 			return branch.slice(2)
 		}
 

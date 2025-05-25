@@ -18,6 +18,7 @@ export function GitBranch({ repo, checkStatus }: Props) {
 				return stdout.split("\n")
 			},
 			failureToastOptions: { title: "Could not get branch list" },
+			stripFinalNewline: true,
 		},
 	)
 

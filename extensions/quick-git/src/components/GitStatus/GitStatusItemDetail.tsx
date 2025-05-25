@@ -1,77 +1,14 @@
-import { Color, List } from "@raycast/api"
+import { List } from "@raycast/api"
 import type { BranchInfo } from "../../utils/branch.js"
-import type { GitStatus, StatusInfo } from "../../utils/status.js"
-import { useMemo } from "react"
+import type { StatusInfo } from "../../utils/status.js"
+import { GitStatusTags } from "./GitStatusTags.js"
 
 interface Props {
 	branch: BranchInfo
 	status: StatusInfo
 }
 
-function tagForStatus(stagedStatus: GitStatus) {
-	if (stagedStatus === ".") {
-		return null
-	}
-
-	switch (stagedStatus) {
-		case "A":
-			return ["Added", Color.Green]
-		case "M":
-			return ["Modified", Color.Blue]
-		case "T":
-			return ["File type changed", Color.Blue]
-		case "D":
-			return ["Deleted", Color.Red]
-		case "R":
-			return ["Renamed", Color.Magenta]
-		case "C":
-			return ["Copied", Color.Magenta]
-		case "U":
-			return ["Unmerged", Color.Orange]
-		case "?":
-			return ["Untracked", Color.Green]
-		case "!":
-			return ["Ignored", Color.SecondaryText]
-		default:
-			return null
-	}
-}
-
 export function GitStatusItemDetail({ branch, status }: Props) {
-	const stagedTag = useMemo(() => {
-		const tag = tagForStatus(status.staged)
-		if (!tag) {
-			return null
-		}
-
-		return (
-			<>
-				<List.Item.Detail.Metadata.TagList.Item
-					text="Staged"
-					color={Color.PrimaryText}
-				/>
-				<List.Item.Detail.Metadata.TagList.Item text={tag[0]} color={tag[1]} />
-			</>
-		)
-	}, [status.staged])
-
-	const unStagedTag = useMemo(() => {
-		const tag = tagForStatus(status.unstaged)
-		if (!tag) {
-			return null
-		}
-
-		return (
-			<>
-				<List.Item.Detail.Metadata.TagList.Item
-					text="Unstaged"
-					color={Color.SecondaryText}
-				/>
-				<List.Item.Detail.Metadata.TagList.Item text={tag[0]} color={tag[1]} />
-			</>
-		)
-	}, [status.unstaged])
-
 	return (
 		<List.Item.Detail
 			metadata={
@@ -86,10 +23,10 @@ export function GitStatusItemDetail({ branch, status }: Props) {
 							text={status.origPath}
 						/>
 					) : null}
-					<List.Item.Detail.Metadata.TagList title="Status">
-						{unStagedTag}
-						{stagedTag}
-					</List.Item.Detail.Metadata.TagList>
+					<GitStatusTags
+						stagedStatus={status.staged}
+						unstagedStatus={status.unstaged}
+					/>
 					<List.Item.Detail.Metadata.Separator />
 					<List.Item.Detail.Metadata.Label title="Branch" text={branch.name} />
 					{branch.upstream ? (

@@ -126,12 +126,21 @@ export function parseGitFileStatus(dataRow: string): StatusInfo {
 	}
 }
 
-export function parseGitStatus(porcelainStatus: string): {
-	branch: BranchInfo
-	files: StatusInfo[]
-} {
+export function parseGitStatus(porcelainStatus: string):
+	| {
+			branch: BranchInfo
+			files: StatusInfo[]
+	  }
+	| undefined {
+	if (!porcelainStatus) {
+		return
+	}
+
 	const status = porcelainStatus.split("\n")
-	const branch = {} as BranchInfo
+	const branch: BranchInfo = {
+		name: "",
+		commit: "",
+	}
 	const files: StatusInfo[] = []
 	status.forEach((statusRow) => {
 		if (!statusRow) {

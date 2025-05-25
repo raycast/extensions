@@ -22,12 +22,7 @@ export function GitStatus({ repo, isLoadingRepo }: Props) {
 			execute: !!repo,
 			keepPreviousData: false,
 			failureToastOptions: { title: "Could not fetch git status" },
-			parseOutput: ({ stdout }) => {
-				if (!stdout) {
-					return
-				}
-				return parseGitStatus(stdout)
-			},
+			parseOutput: ({ stdout }) => parseGitStatus(stdout),
 		},
 	)
 
