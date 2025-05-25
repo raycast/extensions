@@ -13,7 +13,7 @@ interface Props {
 }
 
 export const CreateBookmarkForm = ({ url, isLoading }: Props) => {
-  const preferences = getPreferenceValues<Preferences>();
+  const { createBookmarksAsUnread } = getPreferenceValues<Preferences>();
   const { createBookmark } = useBookmarks();
 
   const { handleSubmit, itemProps, setValue, values } = useForm<CreateLinkdingBookmarkFormValues>({
@@ -32,7 +32,7 @@ export const CreateBookmarkForm = ({ url, isLoading }: Props) => {
       },
     },
     initialValues: {
-      unread: preferences.createBookmarksAsUnread,
+      unread: createBookmarksAsUnread,
       url,
     },
   });
