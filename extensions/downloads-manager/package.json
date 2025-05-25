@@ -9,7 +9,8 @@
     "ron-myers",
     "Kimcha",
     "ridemountainpig",
-    "nagauta"
+    "nagauta",
+    "dead_hikikomori"
   ],
   "categories": [
     "Productivity",
@@ -79,6 +80,12 @@
       "name": "show-latest-download",
       "title": "Show Latest Download",
       "description": "Show the last downloaded file or folder in Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "delete-latest-download",
+      "title": "Delete Latest Download",
+      "description": "Delete the last downloaded file or folder",
       "mode": "no-view"
     }
   ],

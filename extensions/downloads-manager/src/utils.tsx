@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
-import { accessSync, constants, readdirSync, statSync } from "fs";
+import { Action, ActionPanel, confirmAlert, Detail, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { accessSync, rmSync, constants, readdirSync, statSync } from "fs";
 import { join } from "path";
 import { ComponentType } from "react";
 import untildify from "untildify";
@@ -65,6 +65,30 @@ export function hasAccessToDownloadsFolder() {
   } catch (error) {
     console.error(error);
     return false;
+  }
+}
+
+export async function deleteFileOrFolder(filePath: string) {
+  const shouldDelete = await confirmAlert({
+    title: "Delete Item?",
+    message: `Are you sure you want to delete:\n${filePath}?`,
+    primaryAction: {
+      title: "Delete",
+    },
+  });
+
+  if (!shouldDelete) {
+    await showToast({ style: Toast.Style.Animated, title: "Cancelled" });
+    return;
+  }
+
+  try {
+    rmSync(filePath, { recursive: true, force: true });
+    await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
+  } catch (error) {
+    if (error instanceof Error) {
+      await showToast({ style: Toast.Style.Failure, title: "Deletion Failed", message: error.message });
+    }
   }
 }
 
