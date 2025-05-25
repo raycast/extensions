@@ -1,11 +1,18 @@
-import { Action, ActionPanel, Icon, Keyboard, showToast } from "@raycast/api"
+import {
+	Action,
+	ActionPanel,
+	Icon,
+	Keyboard,
+	launchCommand,
+	LaunchType,
+	showToast,
+} from "@raycast/api"
 import { showFailureToast, useExec } from "@raycast/utils"
 import { useCallback, useMemo } from "react"
 import { GitCommit } from "../GitCommit.js"
 import { RemoteGitActions } from "./RemoteGitActions.js"
 import { BulkGitActions } from "./BulkGitActions.js"
 import { GitBranch } from "../GitBranch/GitBranch.js"
-import SelectRepo from "../SelectRepo.js"
 import { join } from "node:path"
 
 interface Props {
@@ -99,10 +106,15 @@ export function GitStatusItemActions({
 			<BulkGitActions repo={repo} checkStatus={checkStatus} />
 			<RemoteGitActions repo={repo} checkStatus={checkStatus} />
 			<ActionPanel.Section title="Utilities">
-				<Action.Push
+				<Action
 					icon={Icon.Folder}
 					title="Change Current Repo"
-					target={<SelectRepo />}
+					onAction={() =>
+						launchCommand({
+							name: "set-repo",
+							type: LaunchType.UserInitiated,
+						})
+					}
 				/>
 				<Action.CopyToClipboard
 					title="Copy Filename"

@@ -1,8 +1,14 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api"
+import {
+	Action,
+	ActionPanel,
+	Icon,
+	launchCommand,
+	LaunchType,
+	List,
+} from "@raycast/api"
 import type { GitStatus } from "../../utils/status.js"
 import { parseGitStatus } from "../../utils/status.js"
 import { GitStatusItem } from "./GitStatusItem.js"
-import SelectRepo from "../SelectRepo.js"
 import { showFailureToast, useExec } from "@raycast/utils"
 import { RemoteGitActions } from "./RemoteGitActions.js"
 import { GitStatusEmpty } from "./GitStatusEmpty.js"
@@ -12,6 +18,12 @@ interface Props {
 	repo?: string
 	isLoadingRepo: boolean
 }
+
+const launchSetRepo = () =>
+	launchCommand({
+		name: "set-repo",
+		type: LaunchType.UserInitiated,
+	})
 
 export function GitStatus({ repo, isLoadingRepo }: Props) {
 	const { data, isLoading, revalidate } = useExec(
@@ -44,17 +56,17 @@ export function GitStatus({ repo, isLoadingRepo }: Props) {
 								target={<GitBranch repo={repo} checkStatus={revalidate} />}
 							/>
 							<RemoteGitActions repo={repo} checkStatus={revalidate} />
-							<Action.Push
+							<Action
 								icon={Icon.Folder}
 								title="Change Current Repo"
-								target={<SelectRepo />}
+								onAction={launchSetRepo}
 							/>
 						</>
 					) : (
-						<Action.Push
+						<Action
 							icon={Icon.Folder}
 							title="Set Repo"
-							target={<SelectRepo />}
+							onAction={launchSetRepo}
 						/>
 					)}
 				</ActionPanel>

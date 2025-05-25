@@ -22,6 +22,12 @@
 			"title": "Quick Git",
 			"description": "Check and commit quickly",
 			"mode": "view"
+		},
+		{
+			"name": "set-repo",
+			"title": "Set Quick Git Repo",
+			"description": "Set the current repo that you want to focus on",
+			"mode": "view"
 		}
 	],
 	"dependencies": {
