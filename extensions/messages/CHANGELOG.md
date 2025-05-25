@@ -1,6 +1,20 @@
 # Messages Changelog
 
-## [Fix `Paste Latest OTP Code` Command for Phone #s] - 2025-01-19
+## [Fix OTP Code Parsing for Messages with Colons] - {PR_MERGE_DATE}
+
+Fixed an issue where OTP codes with colons in the message were not being parsed correctly.
+
+## [Fix OTP Code Parsing for Messages with Special Characters] - 2025-05-08
+
+Fixed issues with wrong number being parsed by adding additional common characters the regex and adding a bit more logic to select the largest OTP from the filtered list.
+
+## [Added Keyword] - 2025-02-26
+
+Added a "2FA" keyword for improved discovery
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Fix `Paste Latest OTP Code` Command for Phone numbers] - 2025-02-10
 
 Added a number filter for OTP Code messages that include phone/cellular numbers that should not be used as OTP Codes for this command.
 
