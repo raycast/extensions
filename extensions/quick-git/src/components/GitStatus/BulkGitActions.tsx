@@ -1,0 +1,57 @@
+import { Action, ActionPanel, Keyboard, showToast } from "@raycast/api"
+import { useExec } from "@raycast/utils"
+
+interface Props {
+	repo: string
+	checkStatus: () => void
+}
+
+export function BulkGitActions({ repo, checkStatus }: Props) {
+	const { revalidate: stageAllFiles } = useExec("git", ["add", "."], {
+		cwd: repo,
+		execute: false,
+		onData: () => {
+			checkStatus()
+			showToast({ title: "Added files" })
+		},
+		failureToastOptions: { title: "Could not stage files" },
+	})
+	const { revalidate: unstageAllFiles } = useExec(
+		"git",
+		["restore", "--staged", "."],
+		{
+			cwd: repo,
+			execute: false,
+			onData: () => {
+				checkStatus()
+				showToast({ title: "Unstaged files" })
+			},
+			failureToastOptions: { title: "Could not unstage files" },
+		},
+	)
+	const { revalidate: stashFiles } = useExec("git", ["stash", "."], {
+		cwd: repo,
+		execute: false,
+		onData: () => {
+			checkStatus()
+			showToast({ title: "Stashed files" })
+		},
+		failureToastOptions: { title: "Could not stash files" },
+	})
+
+	return (
+		<ActionPanel.Section title="Bulk Actions">
+			<Action
+				title="Stage All Files"
+				onAction={stageAllFiles}
+				shortcut={{ key: "a", modifiers: ["cmd", "shift"] }}
+			/>
+			<Action
+				title="Unstage All Files"
+				onAction={unstageAllFiles}
+				shortcut={Keyboard.Shortcut.Common.RemoveAll}
+			/>
+			<Action title="Stash Files" onAction={stashFiles} />
+		</ActionPanel.Section>
+	)
+}

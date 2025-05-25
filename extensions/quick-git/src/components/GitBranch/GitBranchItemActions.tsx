@@ -1,0 +1,70 @@
+import { Action, Icon, showToast } from "@raycast/api"
+import { useExec } from "@raycast/utils"
+import { GitBranchActions } from "./GitBranchActions.js"
+
+interface Props {
+	branch: string
+	repo: string
+	isCurrentBranch: boolean
+	checkBranches: () => void
+	checkStatus: () => void
+}
+
+export function GitBranchItemActions({
+	repo,
+	branch,
+	isCurrentBranch,
+	checkBranches,
+	checkStatus,
+}: Props) {
+	const { revalidate: switchBranch } = useExec("git", ["switch", branch], {
+		cwd: repo,
+		execute: false,
+		onData: () => {
+			checkBranches()
+			checkStatus()
+			showToast({ title: "Switched branch" })
+		},
+		failureToastOptions: { title: `Could not switch to ${branch}` },
+	})
+	const { revalidate: deleteBranch } = useExec(
+		"git",
+		["branch", "-D", branch],
+		{
+			cwd: repo,
+			execute: false,
+			onData: () => {
+				showToast({ title: `${branch} deleted` })
+				checkBranches()
+				checkStatus()
+			},
+			failureToastOptions: { title: `Could not delete ${branch}` },
+		},
+	)
+
+	return isCurrentBranch ? (
+		<GitBranchActions
+			repo={repo}
+			checkBranches={checkBranches}
+			checkStatus={checkStatus}
+		/>
+	) : (
+		<>
+			<Action
+				icon={Icon.Repeat}
+				title="Switch to This Branch"
+				onAction={switchBranch}
+			/>
+			<Action
+				icon={Icon.Trash}
+				title="Delete This Branch"
+				onAction={deleteBranch}
+			/>
+			<GitBranchActions
+				repo={repo}
+				checkBranches={checkBranches}
+				checkStatus={checkStatus}
+			/>
+		</>
+	)
+}
