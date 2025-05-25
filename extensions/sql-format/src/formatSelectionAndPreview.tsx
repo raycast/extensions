@@ -8,7 +8,7 @@ import { formatSQL } from "./utils";
  * Uses usePromise to handle async operations for getting selected text and formatting
  */
 export default function Command() {
-  const { data: output, isLoading, error } = usePromise(async () => await formatSQL(await getSelectedText()));
+  const { data: output } = usePromise(async () => await formatSQL(await getSelectedText()));
   if (output) {
     return <FormattedSqlDetail sql={output} />;
   }
