@@ -13,7 +13,7 @@ export const browserCommands: BrowserCommand[] = [
     id: "access-code-cast",
     name: "Access Code Cast",
     path: "access-code-cast",
-    description: "Interface for casting content using access codes to supported devices.",
+    description: "Provides an interface for casting content using access codes to supported devices.",
   },
 
   {
@@ -21,7 +21,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Accessibility",
     path: "accessibility",
     description:
-      "Shows accessibility information for each tab, and allows you to toggle accessibility on or off globally.",
+      "Displays accessibility information for each tab and allows global toggling of accessibility features.",
   },
 
   {
@@ -35,14 +35,15 @@ export const browserCommands: BrowserCommand[] = [
     id: "app-settings",
     name: "App Settings",
     path: "app-settings",
-    description: "Settings page for Chrome apps and extensions with additional app configuration options.",
+    description:
+      "Provides a settings page for managing Chrome apps and extensions, including advanced configuration options.",
   },
 
   {
     id: "appcache-internals",
     name: "AppCache Internals",
     path: "appcache-internals",
-    description: "View AppCache information.",
+    description: "Displays Application Cache (AppCache) internal status and debugging information.",
   },
 
   {
@@ -56,7 +57,7 @@ export const browserCommands: BrowserCommand[] = [
   // Start of newly added URLs from Chromium source
   {
     id: "assistant-optin",
-    name: "Assistant Optin",
+    name: "Assistant Opt-In",
     path: "assistant-optin",
     description: (preferredBrowser: { title: string }) =>
       `Opt-in page for ${preferredBrowser.title}'s built-in virtual assistant features.`,
@@ -66,35 +67,35 @@ export const browserCommands: BrowserCommand[] = [
     id: "attribution-internals",
     name: "Attribution Internals",
     path: "attribution-internals",
-    description: "Debug information for the Attribution Reporting API, used for measuring ad conversions.",
+    description: "Displays debug information for the Attribution Reporting API, used for ad conversion measurement.",
   },
 
   {
     id: "autofill-internals",
     name: "Autofill Internals",
     path: "autofill-internals",
-    description: "View messages related to the autofill feature.",
+    description: "Displays internal logs and debug data for the browser's autofill feature.",
   },
 
   {
     id: "batch-upload",
     name: "Batch Upload",
     path: "batch-upload",
-    description: "Interface for uploading multiple files in a batch operation.",
+    description: "Provides an interface for uploading multiple files in a single batch operation.",
   },
 
   {
     id: "blob-internals",
     name: "Blob Internals",
     path: "blob-internals",
-    description: "View all blob data.",
+    description: "Displays all Binary Large Object (BLOB) data currently stored by the browser.",
   },
 
   {
     id: "bluetooth-internals",
     name: "Bluetooth Internals",
     path: "bluetooth-internals",
-    description: "View information about Bluetooth adapters and devices.",
+    description: "Displays detailed information about Bluetooth adapters, connections, and paired devices.",
   },
 
   {
@@ -115,14 +116,14 @@ export const browserCommands: BrowserCommand[] = [
     id: "browser-switch",
     name: "Browser Switch",
     path: "browser-switch",
-    description: "Interface for switching between different browser profiles or instances.",
+    description: "Provides an interface for switching between different browser profiles or instances.",
   },
 
   {
     id: "certificate-manager",
     name: "Certificate Manager",
     path: "certificate-manager",
-    description: "Manage SSL/TLS certificates installed in the browser.",
+    description: "Manages SSL/TLS certificates, allowing users to view, import, and export them.",
   },
 
   {
@@ -143,7 +144,7 @@ export const browserCommands: BrowserCommand[] = [
 
   {
     id: "chrome-urls",
-    name: "Chrome Urls",
+    name: "Chrome URLs",
     path: "chrome-urls",
     description: (preferredBrowser: { title: string }) =>
       `Lists all internal ${preferredBrowser.title} URLs (similar to about page but with a different format).`,
@@ -154,7 +155,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Commerce Internals",
     path: "commerce-internals",
     isInternalDebugging: true,
-    description: "Debug information for commerce-related features and price tracking.",
+    description: "Displays debug information for commerce-related features, such as price tracking and shopping.",
   },
 
   {
@@ -190,7 +191,7 @@ export const browserCommands: BrowserCommand[] = [
     id: "conversion-internals",
     name: "Conversion Internals",
     path: "conversion-internals",
-    description: "View information about conversions.",
+    description: "Displays information about conversion tracking and measurement.",
   },
 
   {
@@ -323,7 +324,7 @@ export const browserCommands: BrowserCommand[] = [
 
   {
     id: "gpu",
-    name: "Gpu",
+    name: "GPU",
     path: "gpu",
     description: "Shows detailed information about the GPU hardware, drivers, and feature status.",
   },
@@ -383,7 +384,7 @@ export const browserCommands: BrowserCommand[] = [
     id: "indexeddb-internals",
     name: "IndexedDB Internals",
     path: "indexeddb-internals",
-    description: "View IndexedDB information.",
+    description: "Displays detailed information about IndexedDB databases and their contents.",
   },
 
   {
@@ -438,7 +439,7 @@ export const browserCommands: BrowserCommand[] = [
 
   {
     id: "interstitials-ssl",
-    name: "Interstitials Ssl",
+    name: "Interstitials SSL",
     path: "interstitials/ssl",
     description: "Shows examples of SSL certificate warning pages for testing and debugging purposes.",
   },
@@ -572,7 +573,7 @@ export const browserCommands: BrowserCommand[] = [
 
   {
     id: "ntp-tiles-internals",
-    name: "Ntp Tiles Internals",
+    name: "NTP Tiles Internals",
     path: "ntp-tiles-internals",
     description:
       "Debug information for the tiles shown on the New Tab Page, including suggestions and most visited sites.",
@@ -929,12 +930,12 @@ export const browserCommands: BrowserCommand[] = [
     name: "Translate Internals",
     path: "translate-internals",
     description: (preferredBrowser: { title: string }) =>
-      `View information about ${preferredBrowser.title}'s translation feature.`,
+      `Displays information about ${preferredBrowser.title}'s translation feature.`,
   },
 
   {
     id: "ukm",
-    name: "Ukm",
+    name: "UKM",
     path: "ukm",
     isInternalDebugging: true,
     description: "Debug information for the Unified Keyed Metrics system that collects browser usage data.",
@@ -944,7 +945,7 @@ export const browserCommands: BrowserCommand[] = [
     id: "usb-internals",
     name: "USB Internals",
     path: "usb-internals",
-    description: "View information about connected USB devices.",
+    description: "Displays information about connected USB devices and their properties.",
   },
 
   {
@@ -952,7 +953,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "User Actions",
     path: "user-actions",
     isInternalDebugging: true,
-    description: "View user action metrics and debugging information.",
+    description: "Displays user action metrics and debugging information for browser interactions.",
   },
 
   {
@@ -983,7 +984,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Web App Internals",
     path: "web-app-internals",
     description: (preferredBrowser: { title: string }) =>
-      `Debug information for Progressive Web Apps (PWAs) installed in ${preferredBrowser.title}.`,
+      `Displays debug information for Progressive Web Apps (PWAs) installed in ${preferredBrowser.title}.`,
   },
 
   {
@@ -991,7 +992,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "WebRTC Logs",
     path: "webrtc-logs",
     isInternalDebugging: true,
-    description: "View WebRTC debug logs and information.",
+    description: "Displays WebRTC debug logs and connection information.",
   },
 
   {
