@@ -17,13 +17,13 @@
     {
       "name": "search-bookmarks",
       "title": "Search Linkding",
-      "description": "Searches through Linkding Bookmarks",
+      "description": "Search Linkding bookmarks",
       "mode": "view"
     },
     {
       "name": "create-bookmarks",
       "title": "Create Bookmark",
-      "description": "Create new Bookmarks",
+      "description": "Create new bookmark",
       "mode": "view",
       "preferences": [
         {
