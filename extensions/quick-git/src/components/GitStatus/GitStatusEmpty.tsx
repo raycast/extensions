@@ -37,6 +37,8 @@ export function GitStatusEmpty({ branch, repo }: Props) {
 
 			return `Up to date with ${upstream}`
 		}
+
+		return "Nothing to commit, working tree clean"
 	}, [branch, repo])
 
 	return <List.EmptyView title={title} description={description} />

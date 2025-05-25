@@ -5,7 +5,7 @@ import {
 	showToast,
 	useNavigation,
 } from "@raycast/api"
-import { useExec, useForm } from "@raycast/utils"
+import { showFailureToast, useExec, useForm } from "@raycast/utils"
 import { useState } from "react"
 
 interface Props {
@@ -32,8 +32,10 @@ export default function CreateBranch({
 				showToast({ title: "Created branch" })
 				pop()
 			},
-			failureToastOptions: {
-				title: `Could not create a branch called ${branchName}`,
+			onError: (error) => {
+				showFailureToast(error, {
+					title: `Could not create a branch called ${branchName}`,
+				})
 			},
 		},
 	)

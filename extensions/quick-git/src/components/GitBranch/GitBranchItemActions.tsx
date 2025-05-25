@@ -1,5 +1,5 @@
 import { Action, Icon, showToast } from "@raycast/api"
-import { useExec } from "@raycast/utils"
+import { showFailureToast, useExec } from "@raycast/utils"
 import { GitBranchActions } from "./GitBranchActions.js"
 
 interface Props {
@@ -25,7 +25,9 @@ export function GitBranchItemActions({
 			checkStatus()
 			showToast({ title: "Switched branch" })
 		},
-		failureToastOptions: { title: `Could not switch to ${branch}` },
+		onError: (error) => {
+			showFailureToast(error, { title: `Could not switch to ${branch}` })
+		},
 	})
 	const { revalidate: deleteBranch } = useExec(
 		"git",
@@ -38,7 +40,9 @@ export function GitBranchItemActions({
 				checkBranches()
 				checkStatus()
 			},
-			failureToastOptions: { title: `Could not delete ${branch}` },
+			onError: (error) => {
+				showFailureToast(error, { title: `Could not delete ${branch}` })
+			},
 		},
 	)
 

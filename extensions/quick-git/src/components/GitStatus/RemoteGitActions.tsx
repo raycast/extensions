@@ -6,7 +6,7 @@ import {
 	showToast,
 	Toast,
 } from "@raycast/api"
-import { useExec } from "@raycast/utils"
+import { showFailureToast, useExec } from "@raycast/utils"
 
 interface Props {
 	repo: string
@@ -17,37 +17,43 @@ export function RemoteGitActions({ repo, checkStatus }: Props) {
 	const { revalidate: push } = useExec("git", ["push"], {
 		cwd: repo,
 		execute: false,
+		onWillExecute: () => {
+			showToast({ title: "Pushing branch", style: Toast.Style.Animated })
+		},
 		onData: () => {
 			checkStatus()
 			showToast({ title: "Remote up to date" })
 		},
-		failureToastOptions: { title: "Could not push this branch" },
-		onWillExecute: () => {
-			showToast({ title: "Pushing branch", style: Toast.Style.Animated })
+		onError: (error) => {
+			showFailureToast(error, { title: "Could not push this branch" })
 		},
 	})
 	const { revalidate: pull } = useExec("git", ["pull"], {
 		cwd: repo,
 		execute: false,
+		onWillExecute: () => {
+			showToast({ title: "Pulling branch", style: Toast.Style.Animated })
+		},
 		onData: () => {
 			checkStatus()
 			showToast({ title: "Branch up to date" })
 		},
-		failureToastOptions: { title: "Could not pull this branch" },
-		onWillExecute: () => {
-			showToast({ title: "Pulling branch", style: Toast.Style.Animated })
+		onError: (error) => {
+			showFailureToast(error, { title: "Could not pull this branch" })
 		},
 	})
 	const { revalidate: fetch } = useExec("git", ["fetch"], {
 		cwd: repo,
 		execute: false,
+		onWillExecute: () => {
+			showToast({ title: "Fetching repo data", style: Toast.Style.Animated })
+		},
 		onData: () => {
 			checkStatus()
 			showToast({ title: "Fetched data" })
 		},
-		failureToastOptions: { title: "Could not fetch data" },
-		onWillExecute: () => {
-			showToast({ title: "Fetching repo data", style: Toast.Style.Animated })
+		onError: (error) => {
+			showFailureToast(error, { title: "Could not fetch data" })
 		},
 	})
 

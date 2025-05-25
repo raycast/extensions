@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Keyboard, showToast } from "@raycast/api"
-import { useExec } from "@raycast/utils"
+import { showFailureToast, useExec } from "@raycast/utils"
 import { useCallback, useMemo } from "react"
 import { GitCommit } from "../GitCommit.js"
 import { RemoteGitActions } from "./RemoteGitActions.js"
@@ -28,7 +28,9 @@ export function GitStatusItemActions({
 			checkStatus()
 			showToast({ title: `Added ${fileName}` })
 		},
-		failureToastOptions: { title: `Could not stage ${fileName}` },
+		onError: (error) => {
+			showFailureToast(error, { title: `Could not stage ${fileName}` })
+		},
 	})
 	const { revalidate: unstageFile } = useExec(
 		"git",
@@ -40,7 +42,9 @@ export function GitStatusItemActions({
 				checkStatus()
 				showToast({ title: `Unstaged ${fileName}` })
 			},
-			failureToastOptions: { title: `Could not unstage ${fileName}` },
+			onError: (error) => {
+				showFailureToast(error, { title: `Could not unstage ${fileName}` })
+			},
 		},
 	)
 	const { revalidate: restoreFile } = useExec("git", ["restore", fileName], {
@@ -50,7 +54,9 @@ export function GitStatusItemActions({
 			checkStatus()
 			showToast({ title: `Restored ${fileName} to its previous state` })
 		},
-		failureToastOptions: { title: `Could not restore ${fileName}` },
+		onError: (error) => {
+			showFailureToast(error, { title: `Could not restore ${fileName}` })
+		},
 	})
 
 	const mainAction = useCallback(() => {
