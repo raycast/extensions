@@ -28,8 +28,9 @@ export default function Command() {
   const { deliveries, isLoading, error } = useDeliveries(filterMode);
 
   const DATE_FORMATS = [
+    "dd.MM.yyyy HH:mm:ss", // European with seconds
+    "dd.MM.yyyy HH:mm",    // European without seconds
     "MMMM dd, yyyy HH:mm", // American
-    "dd.MM.yyyy HH:mm",    // European
   ];
 
   // Calculate days until delivery
