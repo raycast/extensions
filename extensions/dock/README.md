@@ -6,4 +6,6 @@
 
 Change the position of dock towards left, right and bottom edge of the screen.
 
-> Includes a MenuBar Item
+## 🚀 MenuBar Command
+
+The extension includes a MenuBar command that is _disabled by default_. For easy access to commands via MenuBar, `enable` it in **Preferences**.
