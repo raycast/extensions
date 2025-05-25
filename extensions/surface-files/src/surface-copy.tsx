@@ -31,7 +31,7 @@ const { confirmLimit, folderName, includeHiddenFiles } = getPreferenceValues<{
   includeHiddenFiles: boolean;
 }>();
 
-const CONFIRM_LIMIT = Number(confirmLimit) > 0 ? Number(confirmLimit) : 20;
+const CONFIRM_LIMIT = Number(confirmLimit) > 0 ? Number(confirmLimit) : 50;
 
 export default function Command() {
   async function handleSubmit({ extension }: { extension: string }) {

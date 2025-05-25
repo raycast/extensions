@@ -28,7 +28,7 @@ Surface all files with a given extension from a selected folder (including subfo
 
 - Needs access to the selected folder and its subfolders.
 - macOS will prompt for permissions if needed.
-- If you see errors about permissions, check your System Preferences under "Security & Privacy" → "Files and Folders".
+- If you see errors about permissions, check your System Settings under "Security & Privacy" → "Files and Folders".
 
 ## Notes
 

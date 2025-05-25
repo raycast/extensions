@@ -23,15 +23,28 @@ export async function getUniqueDest(destDir: string, fileName: string): Promise<
   const ext = path.parse(fileName).ext;
   let candidate = path.join(destDir, fileName);
   let counter = 1;
-  while (true) {
+  let maxAttempts = 1000; // Prevent infinite loops
+
+  while (maxAttempts-- > 0) {
     try {
       await fs.access(candidate);
       candidate = path.join(destDir, `${base}_${counter}${ext}`);
       counter++;
-    } catch {
-      return candidate;
+    } catch (err: unknown) {
+      // Only return if the error is "file does not exist"
+      if (
+        err &&
+        typeof err === "object" &&
+        "code" in err &&
+        ((err as { code?: string }).code === "ENOENT" || (err as { code?: string }).code === "ENOTDIR")
+      ) {
+        return candidate;
+      } else {
+        throw err;
+      }
     }
   }
+  throw new Error("Could not find unique filename after 1000 attempts");
 }
 
 // Copies or moves files with error handling and optional progress callback
@@ -69,7 +82,7 @@ export function getDestinationFolderName(folderNamePref: string, ext: string): s
 
 // Validate file extension input
 export function isValidExtension(extension: string | undefined): boolean {
-  return !!extension && /^[a-zA-Z0-9._-]+$/.test(extension);
+  return !!extension && /^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*$/.test(extension);
 }
 
 // Show a standardized error toast for invalid extension

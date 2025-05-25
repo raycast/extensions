@@ -31,7 +31,7 @@ const { confirmLimit, folderName, includeHiddenFiles } = getPreferenceValues<{
   includeHiddenFiles: boolean;
 }>();
 
-const CONFIRM_LIMIT = Number(confirmLimit) > 0 ? Number(confirmLimit) : 20;
+const CONFIRM_LIMIT = Number(confirmLimit) > 0 ? Number(confirmLimit) : 50;
 
 export default function Command() {
   async function handleSubmit({ extension }: { extension: string }) {
@@ -52,7 +52,17 @@ export default function Command() {
 
     // Check if selected is a folder
     const folder = selected[0].path;
-    const stats = await fs.stat(folder);
+    let stats;
+    try {
+      stats = await fs.stat(folder);
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not access folder",
+        message: "Please check if the folder exists and you have permission to access it.",
+      });
+      return;
+    }
     if (!stats.isDirectory()) {
       await showToast({
         style: Toast.Style.Failure,
