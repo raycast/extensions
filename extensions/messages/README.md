@@ -64,4 +64,4 @@ If you try to open the chat from Raycast, it'll actually open the following URL:
 
 ### Can you add support for deleting messages/pinning chats/other features?
 
-Same answer as above, Apple doesn't provide any API for these actions. It'd be awesome to have them, but we're quite limited with only a `.db` file to work with.
+Same answer as above, Apple doesn't provide any API for these actions. It'd be awesome to have them, but we're quite limited with only a `.db` file to work with.# Clean OTP functionality commit
