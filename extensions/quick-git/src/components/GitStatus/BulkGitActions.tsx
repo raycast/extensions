@@ -29,7 +29,7 @@ export function BulkGitActions({ repo, checkStatus }: Props) {
 			failureToastOptions: { title: "Could not unstage files" },
 		},
 	)
-	const { revalidate: stashFiles } = useExec("git", ["stash", "."], {
+	const { revalidate: stashFiles } = useExec("git", ["stash"], {
 		cwd: repo,
 		execute: false,
 		onData: () => {

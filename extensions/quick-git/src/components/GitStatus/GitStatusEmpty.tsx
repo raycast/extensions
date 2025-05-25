@@ -10,7 +10,7 @@ interface Props {
 export function GitStatusEmpty({ branch, repo }: Props) {
 	const title = useMemo(() => {
 		if (repo && branch) {
-			return `On branch ${branch?.name}`
+			return `On branch ${branch.name}`
 		}
 
 		return "Please select a repo"

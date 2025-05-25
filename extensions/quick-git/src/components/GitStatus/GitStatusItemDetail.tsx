@@ -93,22 +93,20 @@ export function GitStatusItemDetail({ branch, status }: Props) {
 					<List.Item.Detail.Metadata.Separator />
 					<List.Item.Detail.Metadata.Label title="Branch" text={branch.name} />
 					{branch.upstream ? (
-						<List.Item.Detail.Metadata.Label
-							title="Upstream"
-							text={branch.upstream}
-						/>
-					) : null}
-					{branch.ahead ? (
-						<List.Item.Detail.Metadata.Label
-							title="Ahead"
-							text={`${branch.ahead} commits`}
-						/>
-					) : null}
-					{branch.behind ? (
-						<List.Item.Detail.Metadata.Label
-							title="Upstream"
-							text={`${branch.behind} commits`}
-						/>
+						<>
+							<List.Item.Detail.Metadata.Label
+								title="Upstream"
+								text={branch.upstream}
+							/>
+							<List.Item.Detail.Metadata.Label
+								title="Ahead"
+								text={`${branch.ahead} commits`}
+							/>
+							<List.Item.Detail.Metadata.Label
+								title="Behind"
+								text={`${branch.behind} commits`}
+							/>
+						</>
 					) : null}
 				</List.Item.Detail.Metadata>
 			}

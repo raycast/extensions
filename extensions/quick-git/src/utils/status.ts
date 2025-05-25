@@ -98,11 +98,7 @@ function parseRenamed(fields: string[]): StatusInfo {
 }
 
 function isSubmodule(field: string) {
-	if (field.startsWith("N")) {
-		return false
-	}
-
-	return true
+	return !field.startsWith("N")
 }
 
 /**
@@ -138,6 +134,10 @@ export function parseGitStatus(porcelainStatus: string): {
 	const branch = {} as BranchInfo
 	const files: StatusInfo[] = []
 	status.forEach((statusRow) => {
+		if (!statusRow) {
+			return
+		}
+
 		if (statusRow.startsWith("#")) {
 			parseBranchHeaders(statusRow, branch)
 		} else {

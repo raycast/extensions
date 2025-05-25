@@ -8,7 +8,7 @@ Supported git actions:
 - Check status of the repo
 - Stage and unstage changes, you can do this to all files at once or individually
 - Commit the currently staged changes
-- Discard changes and restore a file to it's previous state
+- Discard changes and restore a file to its previous state
 - Push, pull and fetch a branch
 - Stash all unstaged files
 - Open or copy a file

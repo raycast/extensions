@@ -9,7 +9,7 @@ import {
 export default function SelectRepo() {
 	const { value, setValue, removeValue, isLoading } = useLocalStorage<
 		string | undefined
-	>("repo")
+	>("selectedRepo")
 	const { handleSubmit, itemProps } = useForm({
 		onSubmit({ newRepo }: { newRepo: string[] }) {
 			setValue(newRepo[0])
@@ -17,7 +17,7 @@ export default function SelectRepo() {
 					showToast({
 						style: Toast.Style.Success,
 						title: "Repo set, restart command",
-						message: `${newRepo}`,
+						message: `${newRepo[0]}`,
 					})
 				})
 				.catch((error) => {

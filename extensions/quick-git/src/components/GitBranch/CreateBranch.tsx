@@ -42,10 +42,13 @@ export default function CreateBranch({
 		onSubmit: revalidate,
 		validation: {
 			newBranch: (value) => {
-				if (!value) {
+				const branchName = value.trim()
+				if (!branchName) {
 					return "A branch name is required"
-				} else if (/\s/g.test(value)) {
-					return "No whitespace characters are allowed, please use a '-' or '_' instead"
+				} else if (/[~^:?*[\\\s]/g.test(value)) {
+					return "Branch name contains invalid characters. Avoid using ~, ^, :, ?, *, [, \\, or any whitespace characters"
+				} else if (branchName.startsWith("-")) {
+					return "Branch name cannot start with '-'"
 				}
 			},
 		},

@@ -21,8 +21,6 @@ export function GitBranch({ repo, checkStatus }: Props) {
 		},
 	)
 
-	console.log("hello")
-
 	return (
 		<List
 			searchBarPlaceholder="Search branches…"

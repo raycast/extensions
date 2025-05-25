@@ -1,7 +1,7 @@
 
-import { defineConfig } from "eslint/config";
+import { defineConfig } from "eslint/config"
 import raycastConfig from "@raycast/eslint-config"
-import reactHooks from 'eslint-plugin-react-hooks';
+import reactHooks from "eslint-plugin-react-hooks"
 
 export default defineConfig([
 	...raycastConfig,

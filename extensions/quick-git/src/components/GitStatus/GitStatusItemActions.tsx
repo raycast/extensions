@@ -6,6 +6,7 @@ import { RemoteGitActions } from "./RemoteGitActions.js"
 import { BulkGitActions } from "./BulkGitActions.js"
 import { GitBranch } from "../GitBranch/GitBranch.js"
 import SelectRepo from "../SelectRepo.js"
+import { join } from "node:path"
 
 interface Props {
 	isNotStaged: boolean
@@ -47,7 +48,7 @@ export function GitStatusItemActions({
 		execute: false,
 		onData: () => {
 			checkStatus()
-			showToast({ title: "Restored files" })
+			showToast({ title: `Restored ${fileName} to its previous state` })
 		},
 		failureToastOptions: { title: `Could not restore ${fileName}` },
 	})
@@ -60,7 +61,7 @@ export function GitStatusItemActions({
 		}
 	}, [isNotStaged, addFile, unstageFile])
 
-	const filePath = useMemo(() => repo + "/" + fileName, [fileName, repo])
+	const filePath = useMemo(() => join(repo, fileName), [fileName, repo])
 
 	return (
 		<ActionPanel>
