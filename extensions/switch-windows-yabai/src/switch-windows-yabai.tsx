@@ -4,6 +4,7 @@ import { useExec } from "@raycast/utils";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { ENV, YABAI, YabaiWindow } from "./models";
 import { handleAggregateToSpace, handleCloseEmptySpaces, handleCloseWindow, handleFocusWindow } from "./handlers";
+import { DisplayActions } from "./display-actions-yabai";
 
 export default function Command() {
   const [usageTimes, setUsageTimes] = useState<Record<string, number>>({});
@@ -152,6 +153,7 @@ function WindowActions({
         onAction={handleCloseEmptySpaces(windowId, onRemove)}
         shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
       />
+      <DisplayActions />
     </ActionPanel>
   );
 }

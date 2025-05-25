@@ -24,14 +24,14 @@ export const handleFocusWindow = (windowId: number, windowApp: string, onFocused
         onFocused(windowId);
         await showToast({
           style: Toast.Style.Success,
-          title: "Window Focused",
-          message: `Window ${windowApp} focused`,
+          title: `${windowApp} focused`,
+          message: `Window ${windowApp} (${windowId}) focused`,
         });
       }
     } catch (error: unknown) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to Focus Window",
+        title: `Failed Window ${windowApp} (${windowId}) focus`,
         message: error.message || "Unknown error while focusing window",
       });
     }
@@ -202,6 +202,74 @@ export const handleCloseEmptySpaces = (windowId: number, onRemove: (id: number) 
         style: Toast.Style.Failure,
         title: "Failed to Close Empty Spaces",
         message: error.message || "Unknown error while closing window",
+      });
+    }
+  };
+};
+export const handleDisperseWindowsBySpace = (screenIdx: string) => {
+  return async () => {
+    await showToast({ style: Toast.Style.Animated, title: "Dispersing Windows Across Spaces..." });
+    try {
+      // Step 1: Query all windows on the given display
+      const windowsResult = await execFilePromise(YABAI, ["-m", "query", "--windows", "--display", screenIdx], {
+        env: ENV,
+      });
+      const windows: YabaiWindow[] = JSON.parse(windowsResult.stdout);
+
+      // Step 2: Query all spaces on the given display
+      const spacesResult = await execFilePromise(YABAI, ["-m", "query", "--spaces", "--display", screenIdx], {
+        env: ENV,
+      });
+      let spaces: YabaiSpace[] = JSON.parse(spacesResult.stdout);
+
+      // Step 3: Create new spaces if needed so that each window has a space
+      const spacesToCreate = windows.length - spaces.length - 1;
+      if (spacesToCreate > 0) {
+        for (let i = 0; i < spacesToCreate; i++) {
+          await execFilePromise(YABAI, ["-m", "space", "--create"], { env: ENV });
+        }
+        // Re-query spaces after creation
+        const updatedSpacesResult = await execFilePromise(YABAI, ["-m", "query", "--spaces"], { env: ENV });
+        spaces = JSON.parse(updatedSpacesResult.stdout);
+      }
+
+      // Step 4: Disperse each window to its corresponding space
+      for (let i = 0; i < windows.length - 1; i++) {
+        const window = windows[i];
+        const space = spaces[i];
+
+        // Move the window into the corresponding space
+        const moveResult = await execFilePromise(
+          YABAI,
+          ["-m", "window", window.id.toString(), "--space", space.index.toString()],
+          { env: ENV },
+        );
+
+        if (moveResult.stderr?.trim()) {
+          console.error(`Error moving window ${window.id}: ${moveResult.stderr.trim()}`);
+        } else {
+          console.log(`Moved window ${window.id} to space ${space.index}.`);
+        }
+      }
+
+      try {
+        // Added: Focus on the first space to ensure a target for focus exists.
+        await execFilePromise(YABAI, ["-m", "space", "--focus", "1"], { env: ENV });
+      } catch {
+        /*ignore, error will be thrown*/
+      }
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Dispersal for Display #${screenIdx} complete`,
+        message: "Windows have been evenly distributed and the first space is focused.",
+      });
+    } catch (error: unknown) {
+      console.error("Dispersal failed:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Dispersal Failed",
+        message: error.message || "An unknown error occurred during dispersal.",
       });
     }
   };
