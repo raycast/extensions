@@ -41,7 +41,7 @@ export function GitBranch({ repo, checkStatus }: Props) {
 		>
 			{data?.map((branch) => (
 				<GitBranchItem
-					key={branch}
+					key={branch.replace(/^\*\s/, "")}
 					branch={branch.trim()}
 					repo={repo}
 					checkBranches={revalidate}

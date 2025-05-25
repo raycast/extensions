@@ -31,7 +31,7 @@ export function GitBranchItemActions({
 	})
 	const { revalidate: deleteBranch } = useExec(
 		"git",
-		["branch", "-D", branch],
+		["branch", "-d", branch],
 		{
 			cwd: repo,
 			execute: false,
