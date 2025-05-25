@@ -20,7 +20,7 @@
 		{
 			"name": "quick-git",
 			"title": "Quick Git",
-			"subtitle": "Check status and commit quickly",
+			"subtitle": "Check status and commit",
 			"description": "Quick and simple git management",
 			"mode": "view"
 		},
