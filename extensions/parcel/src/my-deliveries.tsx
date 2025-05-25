@@ -73,7 +73,7 @@ export default function Command() {
 
     const date = parseDate(dateString);
     if (!date) {
-      console.error(`Both date formats failed for: ${dateString}`);
+      console.error(`All supported date formats failed for: ${dateString}`);
       return dateString;
     }
 
@@ -90,7 +90,7 @@ export default function Command() {
 
     const date = parseDate(dateString);
     if (!date) {
-      console.error(`Both date formats failed for: ${dateString}`);
+      console.error(`All supported date formats failed for: ${dateString}`);
       return dateString;
     }
 
