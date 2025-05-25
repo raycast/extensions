@@ -29,7 +29,7 @@ export default function Command() {
 
   const DATE_FORMATS = [
     "dd.MM.yyyy HH:mm:ss", // European with seconds
-    "dd.MM.yyyy HH:mm",    // European without seconds
+    "dd.MM.yyyy HH:mm", // European without seconds
     "MMMM dd, yyyy HH:mm", // American
   ];
 
@@ -69,12 +69,7 @@ export default function Command() {
 
   // Format date in a more readable way: "Feb 26, 2025"
   const formatFriendlyDate = (dateString: string | undefined | null): string => {
-    if (
-      !dateString ||
-      dateString === UNKNOWN_DATE_PLACEHOLDER ||
-      !/\d/.test(dateString)
-    )
-      return "Not available";
+    if (!dateString || dateString === UNKNOWN_DATE_PLACEHOLDER || !/\d/.test(dateString)) return "Not available";
 
     const date = parseDate(dateString);
     if (!date) {
@@ -91,12 +86,7 @@ export default function Command() {
 
   // Format tracking history dates in a compact format: "Feb 26, 14:30"
   const formatCompactDate = (dateString: string | undefined | null): string => {
-    if (
-      !dateString ||
-      dateString === UNKNOWN_DATE_PLACEHOLDER ||
-      !/\d/.test(dateString)
-    )
-      return "Not available";
+    if (!dateString || dateString === UNKNOWN_DATE_PLACEHOLDER || !/\d/.test(dateString)) return "Not available";
 
     const date = parseDate(dateString);
     if (!date) {
