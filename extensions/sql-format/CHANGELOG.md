@@ -1,6 +1,6 @@
 # Changelog
 
-## [Added SQL Format Preview] - 2025-05-25
+## [Added SQL Format Preview] - {PR_MERGE_DATE}
 ### Added New Features
 - Added new command "Format SQL" for formatting SQL with visual interface.
 - Added new command "Format Selected SQL Preview" for previewing formatted SQL in new window

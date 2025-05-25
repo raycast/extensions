@@ -21,7 +21,7 @@
     {
       "name": "formatSelection",
       "title": "Format Selected SQL",
-      "description": "Formats a SQL cluase string selected in the foremost editor and copies/pastes it back",
+      "description": "Formats a SQL clause string selected in the foremost editor and copies/pastes it back",
       "mode": "no-view"
     },
     {
