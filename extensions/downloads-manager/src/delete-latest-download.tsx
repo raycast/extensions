@@ -1,5 +1,5 @@
 import { getLatestDownload, hasAccessToDownloadsFolder, deleteFileOrFolder } from "./utils";
-import { open, popToRoot, showHUD } from "@raycast/api";
+import { popToRoot, showHUD } from "@raycast/api";
 
 export default async function main() {
   if (!hasAccessToDownloadsFolder()) {
