@@ -39,14 +39,14 @@ export const CreateBookmarkForm = ({ url, isLoading }: Props) => {
 
   useEffect(() => {
     if (url) setValue("url", url);
-  }, [url]);
+  }, [url, setValue]);
 
   const metadata = useUrlMetadata(values.url);
   useEffect(() => {
     if (!metadata) return;
     if (!values.title) setValue("title", metadata.title);
     if (!values.description && metadata.description) setValue("description", metadata.description);
-  }, [metadata]);
+  }, [metadata, setValue, values]);
 
   return (
     <Form

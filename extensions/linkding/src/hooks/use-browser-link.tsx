@@ -1,5 +1,5 @@
-import { Toast, getFrontmostApplication, showToast } from "@raycast/api";
-import { runAppleScript, usePromise } from "@raycast/utils";
+import { getFrontmostApplication } from "@raycast/api";
+import { runAppleScript, showFailureToast, usePromise } from "@raycast/utils";
 
 interface Props {
   ignoreErrors?: boolean;
@@ -53,7 +53,7 @@ export const useBrowserLink = ({ ignoreErrors }: Props = {}) => {
     [],
     {
       onError: (error) => {
-        if (!ignoreErrors) showToast(Toast.Style.Failure, error.message);
+        if (!ignoreErrors) showFailureToast(error.message);
       },
     }
   );

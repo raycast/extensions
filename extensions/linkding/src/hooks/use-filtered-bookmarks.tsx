@@ -23,7 +23,7 @@ const useFilteredBookmarks = () => {
   const filteredBookmarks = useMemo(() => {
     if (!filter) return bookmarks;
     return fuse.search(filter).map((r) => r.item);
-  }, [filter, bookmarks]);
+  }, [filter, bookmarks, fuse]);
 
   return {
     isLoading,
