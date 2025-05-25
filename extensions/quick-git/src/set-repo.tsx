@@ -28,9 +28,14 @@ export default function Command() {
 						title: "Repo set",
 						message: `${newRepo[0]}`,
 					})
+
 					launchCommand({
 						name: "quick-git",
 						type: LaunchType.UserInitiated,
+					}).catch((error) => {
+						showFailureToast(error, {
+							title: "Could not launch the Quick Git command",
+						})
 					})
 				})
 				.catch((error) => {

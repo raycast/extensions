@@ -20,13 +20,15 @@
 		{
 			"name": "quick-git",
 			"title": "Quick Git",
-			"description": "Check and commit quickly",
+			"subtitle": "Check status and commit quickly",
+			"description": "Quick and simple git management",
 			"mode": "view"
 		},
 		{
 			"name": "set-repo",
 			"title": "Set Quick Git Repo",
-			"description": "Set the current repo that you want to focus on",
+			"subtitle": "Set the repo that you want to focus on",
+			"description": "Manage the current repo that Quick Git will operate in",
 			"mode": "view"
 		}
 	],

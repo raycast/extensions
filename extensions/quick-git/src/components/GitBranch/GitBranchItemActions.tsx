@@ -45,25 +45,22 @@ export function GitBranchItemActions({
 			},
 		},
 	)
-
-	return isCurrentBranch ? (
-		<GitBranchActions
-			repo={repo}
-			checkBranches={checkBranches}
-			checkStatus={checkStatus}
-		/>
-	) : (
+	return (
 		<>
-			<Action
-				icon={Icon.Repeat}
-				title="Switch to This Branch"
-				onAction={switchBranch}
-			/>
-			<Action
-				icon={Icon.Trash}
-				title="Delete This Branch"
-				onAction={deleteBranch}
-			/>
+			{!isCurrentBranch ? (
+				<>
+					<Action
+						icon={Icon.Repeat}
+						title="Switch to This Branch"
+						onAction={switchBranch}
+					/>
+					<Action
+						icon={Icon.Trash}
+						title="Delete This Branch"
+						onAction={deleteBranch}
+					/>
+				</>
+			) : null}
 			<GitBranchActions
 				repo={repo}
 				checkBranches={checkBranches}

@@ -23,6 +23,10 @@ const launchSetRepo = () =>
 	launchCommand({
 		name: "set-repo",
 		type: LaunchType.UserInitiated,
+	}).catch((error) => {
+		showFailureToast(error, {
+			title: "Could not launch the Set Quick Git Repo Command",
+		})
 	})
 
 export function GitStatus({ repo, isLoadingRepo }: Props) {
