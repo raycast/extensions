@@ -24,7 +24,7 @@ const DetailPassword = ({
       if (isMacOs) {
         exec(
           `security find-generic-password -D "AirPort network password" -a "${networkName}" -w`,
-          async (error, password, stderr) => {
+          async (error, password) => {
             if (error) {
               console.error(`exec error: ${error}`);
               toast.style = Toast.Style.Failure;
@@ -34,19 +34,16 @@ const DetailPassword = ({
               return;
             }
 
-            // Trigger open raycast app
-            exec("open /Applications/Raycast.app", (error, stdout, stderr) => {
-              toast.style = Toast.Style.Success;
-              toast.title = "Password retrieved successfully ✅";
-              setPassword(password.trim());
-              setIsLoading(false);
-            });
+            toast.style = Toast.Style.Success;
+            toast.title = "Password retrieved successfully ✅";
+            setPassword(password.trim());
+            setIsLoading(false);
           }
         );
       }
 
       if (isWin) {
-        exec(`netsh wlan show profile name="${networkName}" key=clear`, async (error, stdout, stderr) => {
+        exec(`netsh wlan show profile name="${networkName}" key=clear`, async (error, stdout) => {
           if (error) {
             console.error(`exec error: ${error}`);
             toast.style = Toast.Style.Failure;
@@ -79,8 +76,7 @@ const DetailPassword = ({
 ## Wifi Name 📶
 ${networkName}
 ## Password 🔑
-${password}
-`}
+${password}`}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard content={password} shortcut={{ modifiers: ["cmd"], key: "." }} />
@@ -91,14 +87,14 @@ ${password}
 };
 
 export default function Command() {
-  const [networks, setNetworks] = useState<Array<string>>([]);
+  const [networks, setNetworks] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
 
     if (isMacOs) {
-      exec("/usr/sbin/networksetup -listpreferredwirelessnetworks en0", (error, stdout, stderr) => {
+      exec("/usr/sbin/networksetup -listpreferredwirelessnetworks en0", (error, stdout) => {
         if (error) {
           console.error(`exec error: ${error}`);
           setIsLoading(false);
@@ -106,7 +102,6 @@ export default function Command() {
         }
 
         const lines = stdout.trim().split("\n");
-        
         // Extract the Wi-Fi network names from the lines
         const networks = lines.slice(1).map((line) => line.trim());
 
@@ -118,7 +113,7 @@ export default function Command() {
     }
 
     if (isWin) {
-      exec("netsh wlan show profiles", (error, stdout, stderr) => {
+      exec("netsh wlan show profiles", (error, stdout) => {
         if (error) {
           console.error(`exec error: ${error}`);
           setIsLoading(false);
