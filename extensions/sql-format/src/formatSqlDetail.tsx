@@ -1,4 +1,14 @@
-import { ActionPanel, Action, Detail, getPreferenceValues, Clipboard, Icon, Toast, showToast, closeMainWindow } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Detail,
+  getPreferenceValues,
+  Clipboard,
+  Icon,
+  Toast,
+  showToast,
+  closeMainWindow,
+} from "@raycast/api";
 
 interface Preferences {
   autopaste: boolean;
@@ -26,13 +36,7 @@ export const FormattedSqlDetail = ({ sql }: { sql: string }) => {
       actions={
         <ActionPanel>
           {autopaste && <Action.Paste title="Paste" content={sql} />}
-          {!autopaste && (
-            <Action
-              title="Copy to Clipboard"
-              icon={Icon.Clipboard}
-              onAction={handleCopy}
-            />
-          )}
+          {!autopaste && <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={handleCopy} />}
         </ActionPanel>
       }
     />

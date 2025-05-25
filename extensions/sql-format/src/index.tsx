@@ -1,5 +1,4 @@
 import { ActionPanel, Action, Icon, showToast, Toast, Clipboard, Form, useNavigation } from "@raycast/api";
-import { useState } from "react";
 import { formatSQL } from "./utils";
 import { useForm } from "@raycast/utils";
 import { FormattedSqlDetail } from "./formatSqlDetail";
@@ -25,7 +24,7 @@ export default function PreviewFormat() {
      */
     onSubmit: async ({ input, action }) => {
       try {
-        const output = await formatSQL(input) || "";
+        const output = (await formatSQL(input)) || "";
         if (output) {
           if (action === "format") {
             await Clipboard.copy(output);
@@ -65,12 +64,8 @@ export default function PreviewFormat() {
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        title="SQL Statement"
-        placeholder="Enter SQL statement to format"
-        {...itemProps.input}
-      />
+      <Form.TextArea title="SQL Statement" placeholder="Enter SQL statement to format" {...itemProps.input} />
       <Form.Description text="Press Command + Shift + Enter to view result." />
     </Form>
   );
-} 
+}
