@@ -2,10 +2,9 @@
 
 ## [Improved Date Handling] - {PR_MERGE_DATE}
 
-- Enhanced date parsing to support both American and European date formats
+- Parse `DD.MM.YYYY HH:mm` formatted dates as used by European and other non-US carriers
 - Added fallback to display raw date string if parsing fails
-- Improved error handling and logging for date-related issues
-- Refactored date parsing logic into a reusable utility function for better maintainability
+- Improved error handling and logging for date parsing
 
 ## [Track on Website, Cache] - 2025-04-12
 
