@@ -23,6 +23,18 @@
       "title": "Format Selected SQL",
       "description": "Formats a SQL cluase string selected in the foremost editor and copies/pastes it back",
       "mode": "no-view"
+    },
+    {
+      "name": "index",
+      "title": "Format SQL",
+      "description": "Format SQL with a visual interface and copy/paste options",
+      "mode": "view"
+    },
+    {
+      "name": "formatSelectionAndPreview",
+      "title": "Format Selected SQL Preview",
+      "description": "Format selected SQL text and preview the formatted result in a new window",
+      "mode": "view"
     }
   ],
   "preferences": [
