@@ -1,7 +1,10 @@
-# Search Google Books from Raycast
+<p align="center">
+    <img src="./assets/google-books.png" width="150" height="150" />
+</p>
+
+# Google Books
 
 Extension for Raycast to search [Google Books](https://books.google.co.uk/).
-
 
 ## Installing
 
