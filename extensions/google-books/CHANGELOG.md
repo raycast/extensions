@@ -1,6 +1,6 @@
 # Google Books Changelog
 
-## [Modernize + Filter + Add CHANGELOG] - {PR_MERGE_DATE}
+## [Modernize + Filter + Add CHANGELOG] - 2025-05-26
 
 - modernize: use latest Raycast config
 - feat: filter results by category
