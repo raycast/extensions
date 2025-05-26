@@ -1,5 +1,9 @@
 # DigitalOcean Changelog
 
+## Fix - {PR_MERGE_DATE}
+
+Fixed an error in App Platform where it would not load if deployed using GitHub Actions
+
 ## [Minor Changes] - 2024-11-21
 
 - View "Env Vars" in `Search App Platform`
