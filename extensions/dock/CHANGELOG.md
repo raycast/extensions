@@ -5,6 +5,7 @@
 - Added a **MenuBar Item** to move the dock
 - Added the "System" category
 - Modernized extension to use latest Raycast config (removed `run-applescript`)
+- Update icons
 
 ## [Initial Version] - 2022-04-12
 
