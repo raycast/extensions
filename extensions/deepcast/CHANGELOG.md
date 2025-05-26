@@ -1,5 +1,11 @@
 # Deepcast Changelog
 
+## [Close Raycast After Translation] - 2025-05-26
+
+- Added preference option to automatically close Raycast after getting translation result
+- Improves workflow speed for quick translations by eliminating the need to manually close Raycast
+- Works with all translation commands and actions (copy to clipboard, paste, view)
+
 ## [Arabic Support as Default Target Language] - 2025-04-15
 
 - Arabic is now accepted as a default target language.
