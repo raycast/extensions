@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Detail, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
 import { SourceLanguage, source_languages, delayedCloseWindow } from "../utils";
 
-
 export const TranslationView = (props: { translation: string | null; sourceLanguage?: string }) => {
   const translation = props.translation;
   const sourceLanguage = source_languages[props.sourceLanguage as SourceLanguage] ?? "unknown language";
