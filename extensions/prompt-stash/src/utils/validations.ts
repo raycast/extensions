@@ -28,11 +28,10 @@ export const promptValidations = {
       return `Title must be at least ${VALIDATION_LIMITS.title.min} characters`;
     }
     if (value.length > VALIDATION_LIMITS.title.max) {
-      return `Title must be less than ${VALIDATION_LIMITS.title.max} characters`;
+      return `Title must be at most ${VALIDATION_LIMITS.title.max} characters`;
     }
     return undefined;
   },
-
   content: (value?: string): string | undefined => {
     if (!value) {
       return "Prompt content is required";
@@ -41,11 +40,10 @@ export const promptValidations = {
       return `Prompt content must be at least ${VALIDATION_LIMITS.content.min} characters`;
     }
     if (value.length > VALIDATION_LIMITS.content.max) {
-      return `Prompt content must be less than ${VALIDATION_LIMITS.content.max} characters`;
+      return `Prompt content must be at most ${VALIDATION_LIMITS.content.max} characters`;
     }
     return undefined;
   },
-
   tags: (value?: string[]): string | undefined => {
     if (value && value.length > VALIDATION_LIMITS.tags.max) {
       return `Maximum ${VALIDATION_LIMITS.tags.max} tags allowed`;
