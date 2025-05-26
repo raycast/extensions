@@ -1,8 +1,8 @@
 # Subwatch Changelog
 
-## ✨ [v1.1] - 2025-05-26
+## ✨ [v1.1] - {PR_MERGE_DATE}
 
-- Fixes a bug where getting subscriptions.
+- Fixes a bug where getting subscriptions fails when server overload, now I'm catch them.
 
 ## ✨ [Initial Version] - 2025-05-12
 
