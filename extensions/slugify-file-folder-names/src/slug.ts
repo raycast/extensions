@@ -155,7 +155,7 @@ export default async function Command() {
     // Log errors for failed items
     const failures = results.filter((r) => !r.success);
     if (failures.length > 0) {
-      console.error("Failed to rename items:", failures);
+      console.error("Failed to rename items:", failures.map(f => ({ path: f.originalPath, error: f.error })));
     }
   } catch (error) {
     import { getSelectedFinderItems, showToast, Toast, showHUD, Clipboard } from "@raycast/api";
