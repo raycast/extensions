@@ -97,7 +97,14 @@
       "description": "See current team standings and total points in the Formula 1 championship.",
       "mode": "view"
     }
-  ],
+  ,
+    {
+      "name": "current-session",
+      "title": "Current Session",
+      "description": "Live data from current session",
+      "mode": "view"
+    }
+      ],
   "dependencies": {
     "@raycast/api": "^1.99.2",
     "@raycast/utils": "^1.17.0",
@@ -119,6 +126,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "ray lint --fix && npx @raycast/api@latest publish"
   }
 }

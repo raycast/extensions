@@ -1,7 +1,8 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, LocalStorage } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, LocalStorage, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import { getNationalityFlag } from "./utils"; // Restored import
+import ConstructorDetailView, { ConstructorBasicInfo } from "./constructor-detail"; // Import the new detail view
 
 interface ConstructorStanding {
   position: string;
@@ -102,22 +103,44 @@ export default function Command() {
     <List isLoading={isLoading} searchBarPlaceholder="Search constructors...">
       {constructorStandings.map((standing) => {
         const teamName = standing.Constructor.name;
-        const flag = getNationalityFlag(standing.Constructor.nationality);
+        const nationality = standing.Constructor.nationality;
+        const flagIcon = getNationalityFlag(nationality);
+
         const accessories = [{ text: `${standing.points} pts` }];
-        if (flag) {
-          accessories.unshift({ text: flag });
-        }
+        // We will use the flag as the main icon, so no need to add it as an accessory here.
+        // if (flagIcon && typeof flagIcon === 'string' && flagIcon.length > 2) { // Check if it's an emoji string
+        //   accessories.unshift({ text: flagIcon });
+        // }
+
+        const iconSource: Image.ImageLike =
+          typeof flagIcon === "string" && flagIcon.length <= 2 ? { source: flagIcon } : flagIcon || Icon.Building;
 
         return (
           <List.Item
             key={standing.Constructor.constructorId}
-            icon={Icon.Building} // Reverted to Icon.Building
+            icon={iconSource} // Use flag as icon
             title={`${standing.position}. ${teamName}`}
             accessories={accessories}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title={`Open ${teamName}'s Profile`} url={standing.Constructor.url} />
+                <Action.Push
+                  title="View Function Object() { [Native Code] } Details"
+                  icon={Icon.Building}
+                  target={
+                    <ConstructorDetailView
+                      constructorInfo={
+                        {
+                          constructorId: standing.Constructor.constructorId,
+                          name: standing.Constructor.name,
+                          nationality: standing.Constructor.nationality,
+                          url: standing.Constructor.url,
+                        } as ConstructorBasicInfo
+                      }
+                    />
+                  }
+                />
                 <Action.CopyToClipboard title="Copy Team Name" content={teamName} />
+                <Action.OpenInBrowser title={`Open ${teamName}'s Wikipedia Page`} url={standing.Constructor.url} />
               </ActionPanel>
             }
           />

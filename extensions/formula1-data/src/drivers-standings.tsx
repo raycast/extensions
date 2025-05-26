@@ -1,7 +1,8 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, LocalStorage } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, LocalStorage, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import { getNationalityFlag } from "./utils";
+import DriverDetailView, { DriverBasicInfo } from "./driver-detail";
 
 interface DriverStanding {
   position: string;
@@ -116,22 +117,46 @@ export default function Command() {
         const flag = getNationalityFlag(standing.Driver.nationality);
         const driverNumber = standing.Driver.permanentNumber;
 
-        const accessories = [{ text: `${standing.points} pts` }, { text: flag }];
+        const accessories = [{ text: `${standing.points} pts` }];
         if (driverNumber) {
           accessories.unshift({ text: `#${driverNumber}` });
         }
 
+        const iconSource: Image.ImageLike =
+          typeof flag === "string" && flag.length <= 2 ? { source: flag } : flag || Icon.Person;
+
         return (
           <List.Item
             key={standing.Driver.driverId}
-            icon={Icon.Person}
+            icon={iconSource}
             title={`${standing.position}. ${driverName}`}
             subtitle={teamName}
             accessories={accessories}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title={`Open ${driverName}'s Profile`} url={standing.Driver.url} />
+                <Action.Push
+                  title="View Driver Details"
+                  icon={Icon.Person}
+                  target={
+                    <DriverDetailView
+                      driver={
+                        {
+                          driverId: standing.Driver.driverId,
+                          permanentNumber: standing.Driver.permanentNumber,
+                          code: standing.Driver.code,
+                          givenName: standing.Driver.givenName,
+                          familyName: standing.Driver.familyName,
+                          dateOfBirth: standing.Driver.dateOfBirth,
+                          nationality: standing.Driver.nationality,
+                          teamName: teamName,
+                          url: standing.Driver.url,
+                        } as DriverBasicInfo
+                      }
+                    />
+                  }
+                />
                 <Action.CopyToClipboard title="Copy Driver Name" content={driverName} />
+                <Action.OpenInBrowser title={`Open ${driverName}'s Wikipedia Page`} url={standing.Driver.url} />
               </ActionPanel>
             }
           />
