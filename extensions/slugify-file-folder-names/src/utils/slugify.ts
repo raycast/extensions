@@ -118,7 +118,7 @@ export function slugify(text: string, options: { preserveExtension?: boolean } =
   // Preserve file extension if requested
   if (options.preserveExtension) {
     const lastDotIndex = text.lastIndexOf(".");
-    if (lastDotIndex > 0 && lastDotIndex < text.length - 1) {
+    if (lastDotIndex >= 0 && lastDotIndex < text.length - 1) {
       extension = text.substring(lastDotIndex);
       slug = text.substring(0, lastDotIndex);
     }
