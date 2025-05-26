@@ -1,5 +1,10 @@
 # Linkding Changelog
 
+## [Fix & Feature] - 2025-05-26
+
+- feat: save current browser tab
+- fix: update filtered bookmarks on delete
+
 ## [Refactor & Features] - 2025-04-16
 
 - refactor!: use raycast fetch API (removes "Ignore SSL" option)
