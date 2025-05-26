@@ -88,7 +88,7 @@ The extension includes comprehensive test cases for the slugify function coverin
 
 ## Changelog
 
-### v1.0.0
+### v1.0.0 - {PR_MERGE_DATE}
 - Initial release
 - International character support
 - Batch file processing
