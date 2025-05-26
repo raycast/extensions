@@ -35,10 +35,10 @@ export async function delayedCloseWindow(closeRaycastAfterTranslation: boolean, 
   return new Promise((resolve) => {
     setTimeout(async () => {
       try {
-        await closeMainWindow();
         if (returnToRootState) {
           await popToRoot();
         }
+        await closeMainWindow();
         resolve();
       } catch (error) {
         console.error("Failed to close window:", error);

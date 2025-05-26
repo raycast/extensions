@@ -739,7 +739,7 @@
       "label": "Return to Root State",
       "name": "returnToRootState",
       "required": false,
-      "description": "Reset Raycast to root state after copying of translated result",
+      "description": "Reset Raycast to root state after copying translated result",
       "default": false,
       "type": "checkbox"
     }
