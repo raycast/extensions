@@ -7,7 +7,6 @@ import { Color, CreateTypeRequest, IconFormat, IconName, PropertyLink, TypeLayou
 import { colorToHex, getCustomTypeIcon } from "../../utils";
 
 export interface CreateTypeFormValues {
-  key?: string;
   spaceId?: string;
   name?: string;
   plural_name?: string;
@@ -18,13 +17,13 @@ export interface CreateTypeFormValues {
 }
 
 export interface CreateTypeFormProps {
-  draftValues: CreateTypeFormValues;
+  draftValues?: CreateTypeFormValues;
   enableDrafts: boolean;
 }
 
 export function CreateTypeForm({ draftValues, enableDrafts }: CreateTypeFormProps) {
   const [loading, setLoading] = useState(false);
-  const [selectedSpaceId, setSelectedSpace] = useState<string>(draftValues.spaceId || "");
+  const [selectedSpaceId, setSelectedSpace] = useState<string>(draftValues?.spaceId || "");
 
   const { spaces, isLoadingSpaces, spacesError } = useSpaces();
   const { properties, isLoadingProperties, propertiesError } = useProperties(selectedSpaceId);
@@ -52,7 +51,6 @@ export function CreateTypeForm({ draftValues, enableDrafts }: CreateTypeFormProp
           }) || [];
 
         const request: CreateTypeRequest = {
-          key: values.key || "",
           name: values.name || "",
           plural_name: values.plural_name || "",
           icon: {
@@ -162,12 +160,6 @@ export function CreateTypeForm({ draftValues, enableDrafts }: CreateTypeFormProp
           <Form.TagPicker.Item key={prop.key} value={prop.key} title={prop.name} icon={prop.icon} />
         ))}
       </Form.TagPicker>
-      <Form.TextField
-        {...itemProps.key}
-        title="Key"
-        placeholder="Add key"
-        info="The key for the type must be unique and in snake_case format"
-      />
     </Form>
   );
 }

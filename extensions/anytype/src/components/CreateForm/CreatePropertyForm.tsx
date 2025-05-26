@@ -4,7 +4,6 @@ import { createProperty } from "../../api";
 import { PropertyFormat } from "../../models";
 
 export interface CreatePropertyFormValues {
-  key?: string;
   name: string;
   format?: string;
 }
@@ -24,7 +23,6 @@ export function CreatePropertyForm({ spaceId, draftValues }: CreatePropertyFormP
         await createProperty(spaceId, {
           name: values.name,
           format: values.format as PropertyFormat,
-          key: values.key,
         });
 
         showToast(Toast.Style.Success, "Property created successfully");
@@ -58,12 +56,6 @@ export function CreatePropertyForm({ spaceId, draftValues }: CreatePropertyFormP
           );
         })}
       </Form.Dropdown>
-      <Form.TextField
-        {...itemProps.key}
-        title="Key"
-        placeholder="Add key"
-        info="The key for the property must be unique and in snake_case format"
-      />
     </Form>
   );
 }

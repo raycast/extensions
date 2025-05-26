@@ -34,7 +34,7 @@ export function UpdateSpaceForm({ space, mutateSpaces }: UpdateSpaceFormProps) {
         });
 
         await showToast(Toast.Style.Success, "Space updated successfully");
-        mutateSpaces.forEach((mutate) => mutate());
+        await Promise.all(mutateSpaces.map((mutate) => mutate()));
         pop();
       } catch (error) {
         await showFailureToast(error, { title: "Failed to update space" });

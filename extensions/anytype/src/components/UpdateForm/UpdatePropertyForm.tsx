@@ -29,7 +29,7 @@ export function UpdatePropertyForm({ spaceId, property, mutateProperties }: Upda
         await updateProperty(spaceId, property.id, { key: values.key, name: values.name });
 
         showToast(Toast.Style.Success, "Property updated successfully");
-        mutateProperties.forEach((mutate) => mutate());
+        await Promise.all(mutateProperties.map((mutate) => mutate()));
         pop();
       } catch (error) {
         await showFailureToast(error, { title: "Failed to update property" });

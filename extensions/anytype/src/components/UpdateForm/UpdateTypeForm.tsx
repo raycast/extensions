@@ -79,7 +79,7 @@ export function UpdateTypeForm({ spaceId, type, mutateTypes }: UpdateTypeFormPro
         await updateType(spaceId, type.id, request);
 
         await showToast(Toast.Style.Success, "Type updated successfully");
-        mutateTypes.forEach((mutate) => mutate());
+        await Promise.all(mutateTypes.map((mutate) => mutate()));
         pop();
       } catch (error) {
         await showFailureToast(error, { title: "Failed to update type" });

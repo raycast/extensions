@@ -12,7 +12,7 @@ import { colorToHex, iconWidth } from "./constant";
  */
 export async function getIconWithFallback(icon: ObjectIcon, layout: string, type?: RawType): Promise<Image.ImageLike> {
   // notes always show grey type icon
-  if (layout == ObjectLayout.Note) {
+  if (layout === ObjectLayout.Note) {
     if (type?.icon.format === IconFormat.Icon && type?.icon.name) {
       return getCustomTypeIcon(type.icon.name, "grey");
     } else {

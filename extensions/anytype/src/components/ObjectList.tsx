@@ -13,15 +13,7 @@ import {
   useTypes,
 } from "../hooks";
 import { Member, MemberStatus, Property, Space, SpaceObject, Type } from "../models";
-import {
-  defaultTintColor,
-  formatMemberRole,
-  isUserProperty,
-  isUserType,
-  localStorageKeys,
-  pluralize,
-  processObject,
-} from "../utils";
+import { defaultTintColor, formatMemberRole, localStorageKeys, pluralize, processObject } from "../utils";
 
 type ObjectListProps = {
   space: Space;
@@ -107,10 +99,7 @@ export function ObjectList({ space }: ObjectListProps) {
       icon: type.icon,
       title: type.name,
       subtitle: { value: "", tooltip: "" },
-      accessories: [
-        ...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : []),
-        ...(!isUserType(type.key) ? [{ icon: Icon.Lock, tooltip: "System" }] : []),
-      ],
+      accessories: [...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : [])],
       mutate: [mutateTypes, mutatePinnedTypes as MutatePromise<SpaceObject[] | Type[] | Property[] | Member[]>],
       object: type,
       layout: type.layout,
@@ -125,10 +114,7 @@ export function ObjectList({ space }: ObjectListProps) {
       icon: property.icon,
       title: property.name,
       subtitle: { value: "", tooltip: "" },
-      accessories: [
-        ...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : []),
-        ...(!isUserProperty(property.key) ? [{ icon: Icon.Lock, tooltip: "System" }] : []),
-      ],
+      accessories: [...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : [])],
       mutate: [
         mutateProperties,
         mutatePinnedProperties as MutatePromise<SpaceObject[] | Type[] | Property[] | Member[]>,

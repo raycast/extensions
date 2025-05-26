@@ -94,7 +94,6 @@ export function ObjectActions({
     ? localStorageKeys.suffixForGlobalSearch
     : localStorageKeys.suffixForViewsPerSpace(space?.id, viewType);
 
-  const isObject = viewType === ViewType.objects;
   const isType = viewType === ViewType.types;
   const isProperty = viewType === ViewType.properties;
   const isMember = viewType === ViewType.members;
@@ -127,9 +126,7 @@ export function ObjectActions({
         pop(); // pop back to list view
       }
       try {
-        if (isObject) {
-          await deleteObject(space.id, objectId);
-        } else if (isType) {
+        if (isType) {
           await deleteType(space.id, objectId);
         } else if (isProperty) {
           await deleteProperty(space.id, objectId);

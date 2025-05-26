@@ -12,7 +12,7 @@ export function getNumberFieldValidations(
       (acc, prop) => {
         acc[prop.key] = (value: unknown) => {
           const str = typeof value === "string" ? value : undefined;
-          if (str !== "" || (str && isNaN(Number(str)))) {
+          if (str && isNaN(Number(str))) {
             return "Value must be a number";
           }
           return undefined;

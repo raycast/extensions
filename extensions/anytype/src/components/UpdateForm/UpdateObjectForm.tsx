@@ -191,7 +191,7 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
         await updateObject(spaceId, object.id, payload);
 
         await showToast(Toast.Style.Success, "Object updated");
-        mutateObjects.forEach((mutate) => mutate());
+        await Promise.all(mutateObjects.map((mutate) => mutate()));
         if (mutateObject) {
           mutateObject();
         }
