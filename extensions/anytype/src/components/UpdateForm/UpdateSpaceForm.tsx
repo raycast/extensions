@@ -29,11 +29,11 @@ export function UpdateSpaceForm({ space, mutateSpaces }: UpdateSpaceFormProps) {
         });
 
         await updateSpace(space.id, {
-          name: values.name || "",
-          description: values.description || "",
+          name: values.name,
+          description: values.description,
         });
 
-        showToast(Toast.Style.Success, "Space updated successfully");
+        await showToast(Toast.Style.Success, "Space updated successfully");
         mutateSpaces.forEach((mutate) => mutate());
         pop();
       } catch (error) {
@@ -54,11 +54,11 @@ export function UpdateSpaceForm({ space, mutateSpaces }: UpdateSpaceFormProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField {...itemProps.name} title="Name" placeholder="Enter name" info="The name of the space" />
+      <Form.TextField {...itemProps.name} title="Name" placeholder="Add name" info="The name of the space" />
       <Form.TextField
         {...itemProps.description}
         title="Description"
-        placeholder="Enter description"
+        placeholder="Add description"
         info="The description of the space"
       />
     </Form>

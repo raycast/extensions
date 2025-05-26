@@ -1,7 +1,7 @@
 import { PropertyFormat, RawPropertyWithValue } from "../models";
 
 /**
- * Form validation to ensure that that number fields contain only numbers.
+ * Form validation to ensure that number fields contain only numbers.
  */
 export function getNumberFieldValidations(
   properties: RawPropertyWithValue[],
@@ -12,9 +12,10 @@ export function getNumberFieldValidations(
       (acc, prop) => {
         acc[prop.key] = (value: unknown) => {
           const str = typeof value === "string" ? value : undefined;
-          if (str && isNaN(Number(str))) {
+          if (str !== "" || (str && isNaN(Number(str)))) {
             return "Value must be a number";
           }
+          return undefined;
         };
         return acc;
       },

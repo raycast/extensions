@@ -86,7 +86,7 @@ export function ObjectList({ space }: ObjectListProps) {
         title: "Failed to fetch latest data",
       });
     }
-  }, [objectsError, typesError, membersError]);
+  }, [objectsError, typesError, propertiesError, membersError]);
 
   useEffect(() => {
     if (pinnedObjectsError || pinnedTypesError || pinnedPropertiesError || pinnedMembersError) {
@@ -94,7 +94,7 @@ export function ObjectList({ space }: ObjectListProps) {
         title: "Failed to fetch pinned data",
       });
     }
-  }, [pinnedObjectsError, pinnedTypesError, pinnedMembersError]);
+  }, [pinnedObjectsError, pinnedTypesError, pinnedPropertiesError, pinnedMembersError]);
 
   const filterItems = <T extends { name: string }>(items: T[], searchText: string): T[] => {
     return items?.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase()));
@@ -342,7 +342,7 @@ export function ObjectList({ space }: ObjectListProps) {
                 <EmptyViewType
                   title={`No ${currentView.charAt(0).toUpperCase() + currentView.slice(1)} Found`}
                   contextValues={{
-                    space: space.id,
+                    spaceId: space.id,
                     name: searchText,
                   }}
                 />

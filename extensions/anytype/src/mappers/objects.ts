@@ -10,7 +10,7 @@ import {
   SpaceObject,
   SpaceObjectWithBody,
 } from "../models";
-import { bundledPropKeys, getIconWithFallback } from "../utils";
+import { bundledPropKeys, getIconWithFallback, propKeys } from "../utils";
 import { mapTag } from "./properties";
 import { mapType } from "./types";
 
@@ -26,7 +26,9 @@ export async function mapObjects(objects: RawSpaceObject[]): Promise<SpaceObject
       return {
         ...object,
         icon: await getIconWithFallback(object.icon, object.layout, object.type),
-        name: object.name || `${object.snippet.split("\n")[0]}...` || "Untitled",
+        name:
+          object.name?.trim() ||
+          (object.snippet.includes("\n") ? `${object.snippet.split("\n")[0]}...` : object.snippet || "Untitled"),
         type: await mapType(object.type),
         properties: await Promise.all(
           (object.properties?.filter((property) => {
@@ -34,7 +36,11 @@ export async function mapObjects(objects: RawSpaceObject[]): Promise<SpaceObject
               // When sorting by name, keep the 'LastModifiedDate' property for tooltip purposes
               return property.key === SortProperty.LastModifiedDate;
             }
-            return property.key === sort || property.key === bundledPropKeys.source; // keep source to open bookmarks in browser
+            return (
+              property.key === sort ||
+              property.key === bundledPropKeys.source || // keep source to open bookmarks in browser
+              property.key === propKeys.tag // keep tags for submenu and accessories
+            );
           }) || []) as PropertyWithValue[],
         ),
       };
@@ -145,7 +151,9 @@ export async function mapObject(
   return {
     ...object,
     icon,
-    name: object.name?.trim() || `${object.snippet.split("\n")[0]}...` || "Untitled",
+    name:
+      object.name?.trim() ||
+      (object.snippet.includes("\n") ? `${object.snippet.split("\n")[0]}...` : object.snippet || "Untitled"),
     type: await mapType(object.type),
     properties: mappedProperties,
   };

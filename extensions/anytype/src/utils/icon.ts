@@ -11,6 +11,15 @@ import { colorToHex, iconWidth } from "./constant";
  * @returns The base64 data URI or Raycast Icon.
  */
 export async function getIconWithFallback(icon: ObjectIcon, layout: string, type?: RawType): Promise<Image.ImageLike> {
+  // notes always show grey type icon
+  if (layout == ObjectLayout.Note) {
+    if (type?.icon.format === IconFormat.Icon && type?.icon.name) {
+      return getCustomTypeIcon(type.icon.name, "grey");
+    } else {
+      console.warn("note type has no icon", type);
+    }
+  }
+
   if (icon && icon.format) {
     // type built-in icons
     if (icon.format === IconFormat.Icon && icon.name) {

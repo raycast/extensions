@@ -111,16 +111,19 @@ export async function fetchTypeKeysForLists(spaces: Space[]): Promise<string[]> 
   return Array.from(listTypeKeys);
 }
 
+// TODO: deprecate both functions once API changes key logic
 /**
  * Checks if a type is custom user type or not (built-in system type).
  */
 export function isUserType(key: string): boolean {
-  return apiKeyPrefixes.types.length + 24 === key.length && /\d/.test(key);
+  const bsonObjectIdPattern = /^(?=.*\d)[a-f\d]{24}$/i;
+  return apiKeyPrefixes.types.length + 24 === key.length && bsonObjectIdPattern.test(key);
 }
 
 /**
  * Checks if a property is custom user property or not (built-in system property).
  */
 export function isUserProperty(key: string): boolean {
-  return apiKeyPrefixes.properties.length + 24 === key.length && /\d/.test(key);
+  const bsonObjectIdPattern = /^(?=.*\d)[a-f\d]{24}$/i;
+  return apiKeyPrefixes.properties.length + 24 === key.length && bsonObjectIdPattern.test(key);
 }
