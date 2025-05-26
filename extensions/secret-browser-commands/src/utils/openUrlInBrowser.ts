@@ -1,11 +1,23 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import { showHUD, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { showHUD, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 const execAsync = promisify(exec);
 
 interface Preferences {
   showConfirmationHUD?: boolean;
+}
+
+async function showAppInFinder(appName: string) {
+  try {
+    await execAsync(`open /Applications -R "${appName}.app"`);
+  } catch (error) {
+    await showFailureToast(error, {
+      title: "Failed to open Finder",
+      message: "Could not locate the application in the Applications folder",
+    });
+  }
 }
 
 /**
@@ -27,48 +39,33 @@ export async function openUrlInBrowser(
   const escapedUrl = url.replace(/"/g, '\\"');
   const command = `open -a "${escapedAppName}" "${escapedUrl}"`;
 
-  try {
-    // Show a loading toast if the operation might take time
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Opening in ${appName}...`,
-    });
+  // Show a loading HUD if the operation might take time
+  await showHUD(`Opening in ${appName}...`);
 
+  try {
     await execAsync(command);
 
-    // Dismiss the loading toast
-    await toast.hide();
-
-    // Show a subtle success HUD if enabled
     if (shouldShowSuccess) {
-      await showHUD(`Opened ${new URL(url).hostname} in ${appName}`);
+      await showHUD(`Opened in ${appName}`);
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const isAppNotFound = errorMessage.includes("Application not found");
 
-    await showToast({
-      style: Toast.Style.Failure,
-      title: isAppNotFound ? "Application Not Found" : "Failed to Open URL",
-      message: isAppNotFound
-        ? `Could not find application: ${appName}`
-        : `Could not open ${url} in ${appName}. ${errorMessage}`,
-      primaryAction: {
-        title: "Show in Finder",
-        onAction: () => {
-          // Using void to explicitly ignore the Promise result
-          void (async () => {
-            try {
-              await execAsync(`open /Applications -R "${appName}.app"`);
-            } catch (error) {
-              console.error("Failed to open Finder:", error);
-            }
-          })();
+    if (isAppNotFound) {
+      await showFailureToast(error, {
+        title: "Application Not Found",
+        message: `Could not find application: ${appName}`,
+        primaryAction: {
+          title: "Show in Finder",
+          onAction: () => showAppInFinder(appName),
         },
-      },
-    });
-
-    // Re-throw to allow callers to handle the error if needed
-    throw error;
+      });
+    } else {
+      await showFailureToast(error, {
+        title: "Failed to Open URL",
+        message: `Could not open ${url} in ${appName}`,
+      });
+    }
   }
 }

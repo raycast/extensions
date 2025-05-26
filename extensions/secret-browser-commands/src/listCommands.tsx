@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Action, ActionPanel, Icon, List, Color, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { OpenInBrowserSubmenu } from "./components/OpenInActions";
 import { browserCommands } from "./data/paths";
-import { SUPPORTED_BROWSERS } from "./types/browsers";
+import { SUPPORTED_BROWSERS, BROWSER_CHROME } from "./types/browsers";
 import { openUrlInBrowser } from "./utils/openUrlInBrowser";
 
 export default function Command() {
@@ -10,19 +10,27 @@ export default function Command() {
   const [showInternalDebugging, setShowInternalDebugging] = useState<"hide-debug" | "show-all" | "show-debug">(
     "hide-debug",
   );
-  const commands = browserCommands;
   const { preferredBrowser } = getPreferenceValues<{ preferredBrowser: string }>();
 
   const getPreferredBrowser = () => {
-    const defaultBrowserKey = "chrome";
-    const browserKey = preferredBrowser || defaultBrowserKey;
-    return (
-      SUPPORTED_BROWSERS.find((b) => b.key === browserKey) ||
-      SUPPORTED_BROWSERS.find((b) => b.key === defaultBrowserKey)!
-    );
+    const DEFAULT_BROWSER_KEY = "chrome";
+    const browserKey = preferredBrowser || DEFAULT_BROWSER_KEY;
+
+    // Try to find the preferred browser or fall back to the default browser
+    const preferred = SUPPORTED_BROWSERS.find((b) => b.key === browserKey);
+    if (preferred) return preferred;
+
+    // Fall back to default browser if different from preferred
+    if (browserKey !== DEFAULT_BROWSER_KEY) {
+      const defaultBrowser = SUPPORTED_BROWSERS.find((b) => b.key === DEFAULT_BROWSER_KEY);
+      if (defaultBrowser) return defaultBrowser;
+    }
+
+    // Last resort: return the first available browser or Chrome as fallback
+    return SUPPORTED_BROWSERS[0] || BROWSER_CHROME;
   };
 
-  const filteredCommands = commands.filter((command) => {
+  const filteredCommands = browserCommands.filter((command) => {
     const description =
       typeof command.description === "function"
         ? command.description(getPreferredBrowser())
@@ -91,9 +99,17 @@ export default function Command() {
               <Action
                 title={`Open in ${getPreferredBrowser().title}`}
                 icon={Icon.Globe}
-                onAction={() => {
+                onAction={async () => {
                   const browser = getPreferredBrowser();
-                  openUrlInBrowser(browser.appName!, `${browser.scheme}${command.path}`);
+                  if (!browser.appName) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Browser Error",
+                      message: `Could not determine application name for ${browser.title}`,
+                    });
+                    return;
+                  }
+                  await openUrlInBrowser(browser.appName, `${browser.scheme}${command.path}`);
                 }}
               />
               <OpenInBrowserSubmenu commandPath={command.path} preferences={{ preferredBrowser }} />

@@ -9,10 +9,10 @@
  *    node src/utils/sort-urls.js
  *
  * The script will:
- * - Read the browser commands from `src/paths.ts`
- * - Create a backup at `src/paths.ts.bak`
+ * - Read the browser commands from `src/data/paths.ts`
+ * - Create a backup at `src/data/paths.ts.bak`
  * - Sort the commands by their path in ascending order
- * - Write the sorted commands back to `src/paths.ts`
+ * - Write the sorted commands back to `src/data/paths.ts`
  * - Print the number of commands processed
  */
 
@@ -21,11 +21,26 @@ const fs = require("fs");
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const path = require("path");
 
-const filePath = path.join(__dirname, "../paths.ts");
-const backupPath = path.join(__dirname, "../paths.ts.bak");
+const filePath = path.join(__dirname, "../data/paths.ts");
+const backupPath = path.join(__dirname, "../data/paths.ts.bak");
+
+// Create backup before making any changes
+try {
+  fs.copyFileSync(filePath, backupPath);
+  console.log(`Created backup at: ${backupPath}`);
+} catch (error) {
+  console.error(`Failed to create backup: ${error.message}`);
+  process.exit(1);
+}
 
 // Read the file
-const content = fs.readFileSync(filePath, "utf8");
+let content;
+try {
+  content = fs.readFileSync(filePath, "utf8");
+} catch (error) {
+  console.error(`Failed to read file: ${error.message}`);
+  process.exit(1);
+}
 
 // Extract the browserCommands array
 const match = content.match(/export const browserCommands: BrowserCommand\[\] = \[([\s\S]*?)\];/);
@@ -79,7 +94,12 @@ const newContent = content.replace(
 );
 
 // Write the sorted content back to the file
-fs.writeFileSync(filePath, newContent, "utf8");
-
-console.log("Browser commands have been sorted alphabetically by path.");
-console.log(`Original file backed up to: ${backupPath}`);
+try {
+  fs.writeFileSync(filePath, newContent, "utf8");
+  console.log("Browser commands have been sorted alphabetically by path.");
+  console.log(`Original file backed up to: ${backupPath}`);
+} catch (error) {
+  console.error(`Failed to write sorted content: ${error.message}`);
+  console.error("The original file remains unchanged. A backup may be available.");
+  process.exit(1);
+}

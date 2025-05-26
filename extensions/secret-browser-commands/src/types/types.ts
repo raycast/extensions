@@ -1,4 +1,13 @@
 /**
+ * Represents basic browser information used in command descriptions
+ *
+ * @property title - The display name of the browser
+ */
+export interface BrowserInfo {
+  title: string;
+}
+
+/**
  * An object representing a command in the browser.
  *
  * @property id - the identifier for the command (e.g., 'about')
@@ -12,7 +21,7 @@ export interface BrowserCommand {
   id: string;
   name: string;
   path: string;
-  description: string | ((preferredBrowser: { title: string }) => string);
+  description: string | ((preferredBrowser: BrowserInfo) => string);
   isInternalDebugging?: boolean;
 }
 

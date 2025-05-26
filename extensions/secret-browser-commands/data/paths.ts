@@ -35,7 +35,7 @@ export const browserCommands: BrowserCommand[] = [
     id: "app-settings",
     name: "App Settings",
     path: "app-settings",
-    description: "Settings page for Chrome apps and extensions with additional app configuration options.",
+    description: (preferredBrowser: { title: string }) => `Settings page for ${preferredBrowser.title} apps and extensions with additional app configuration options.`,
   },
 
 {
@@ -508,7 +508,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Media Router Internals",
     path: "media-router-internals",
     isInternalDebugging: true,
-    description: "Debug information for media casting and routing features (like Chromecast functionality).",
+    description: "Debug information for media casting and routing features (like casting to external displays).",
   },
 
 {
@@ -553,7 +553,7 @@ export const browserCommands: BrowserCommand[] = [
     id: "new-tab-page",
     name: "New Tab Page",
     path: "new-tab-page",
-    description: "Opens the customized new tab page (may differ from chrome://newtab in some browsers).",
+    description: "Opens the customized new tab page.",
   },
 
 {
@@ -766,7 +766,7 @@ export const browserCommands: BrowserCommand[] = [
     id: "segmentation-internals",
     name: "Segmentation Internals",
     path: "segmentation-internals",
-    description: "Debug information for Chrome's user segmentation system used for targeted features.",
+    description: (preferredBrowser: { title: string }) => `Debug information for ${preferredBrowser.title}'s user segmentation system used for targeted features.`,
   },
 
 {

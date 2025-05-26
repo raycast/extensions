@@ -21,9 +21,7 @@ export function OpenInBrowserSubmenu({ commandPath, preferences: propsPreference
   const preferredBrowser = SUPPORTED_BROWSERS.find((b) => b.key === effectivePrefBrowserKey);
 
   // Get all browsers except the preferred one (if any)
-  const otherBrowsers = SUPPORTED_BROWSERS.filter(
-    (browser) => !preferredBrowser || browser.key !== preferredBrowser.key,
-  );
+  const otherBrowsers = SUPPORTED_BROWSERS.filter((browser) => browser.key !== effectivePrefBrowserKey);
 
   return (
     <ActionPanel.Submenu title="Open in…" icon={Icon.Globe}>

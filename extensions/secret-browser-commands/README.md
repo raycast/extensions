@@ -7,7 +7,15 @@ Note that not all URLs are supported by all browsers.
 ## Features
 
 * Search and filter a comprehensive list of secret browser URLs.
-* Open URLs in your preferred browser (set in preferences) or other supported Chromium browsers.
+* Open URLs in your preferred browser (set in preferences) or other supported Chromium browsers:
+  * Arc
+  * Brave
+  * Chrome
+  * Dia
+  * Edge
+  * Opera
+  * Perplexity Comet
+  * Vivaldi
 
 ## Setup
 
