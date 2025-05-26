@@ -21,3 +21,18 @@ export interface Project {
   redis: [];
   compose: [];
 }
+
+export  interface Server {id: string; name: string};
+
+interface Issue {
+  code?: string;
+  expected?: string;
+  received?: string;
+  path?: string[];
+  message: string;
+}
+export interface ErrorResult {
+  message: string;
+  code?: string;
+  issues?: Issue[];
+}
