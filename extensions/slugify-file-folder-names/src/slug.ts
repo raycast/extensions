@@ -158,7 +158,8 @@ export default async function Command() {
       console.error("Failed to rename items:", failures);
     }
   } catch (error) {
-    await showFailureToast(error, { title: "Cannot slugify files" });
+    import { getSelectedFinderItems, showToast, Toast, showHUD, Clipboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
     console.error("Slugify command error:", error);
   }
 }
