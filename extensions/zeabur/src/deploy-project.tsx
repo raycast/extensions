@@ -17,7 +17,7 @@ export default function Command() {
       folders: FormValidation.Required,
     },
   });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function getSelectedFolder() {
