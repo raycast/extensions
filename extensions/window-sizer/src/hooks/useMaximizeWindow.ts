@@ -1,4 +1,4 @@
-import { closeMainWindow, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, showHUD, showToast, Toast, PopToRootType } from "@raycast/api";
 import { maximizeActiveWindow } from "../swift-app";
 import { useWindowStateManager } from "./useWindowStateManager";
 
@@ -34,10 +34,9 @@ export function useMaximizeWindow() {
         await closeMainWindow();
 
         // Display success message
-        await showHUD(`🔲 Window maximized`);
-
-        // Return to root after execution
-        await popToRoot();
+        await showHUD(`↔ Window maximized`, {
+          popToRootType: PopToRootType.Immediate,
+        });
       } else {
         // Handle unexpected response
         throw new Error(`Unexpected response: ${result}`);
