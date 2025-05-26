@@ -145,7 +145,7 @@ export default async function Command() {
         .filter((r) => r.success && r.originalPath !== r.newPath)
         .map((r) => {
           const originalName = path.basename(r.originalPath);
-          const newName = path.basename(r.newPath!);
+          const newName = path.basename(r.newPath ?? r.originalPath);
           return `${originalName} → ${newName}`;
         })
         .join("\n");
