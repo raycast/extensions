@@ -43,7 +43,6 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
 
   async function completeTask(task: Task) {
     try {
-      throw new Error("test");
       await closeTask(task.id, { data, setData });
 
       if (focusedTask.id === task.id) {
