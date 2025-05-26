@@ -14,7 +14,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     url.searchParams.set("search", "true");
   }
 
-  if (!isSearchGroundingSupported(model)) {
+  if (enableSearch && !isSearchGroundingSupported(model)) {
     await showHUD("Search grounding is not supported for this model");
   }
 
