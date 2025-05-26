@@ -1,5 +1,12 @@
 # PromptStash Changelog
 
+## [Refactor validation system and increase content limit] - {PR_MERGE_DATE}
+
+- Centralized form validations in a dedicated utils file for better maintainability
+- Increased prompt content character limit from 5,000 to 10,000 characters
+- Removed duplicate validation code between Create and Edit forms
+- Added configurable validation limits for easier future adjustments
+
 ## [Feature] - 2025-05-07
 
 - Added a preference to automatically insert the selected prompt into the text field when creating a new prompt.
