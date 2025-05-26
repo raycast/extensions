@@ -1,6 +1,6 @@
 # Zeabur Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-05-26
 
 - Updated the deploy script for the "Deploy Project" command.
 - Added a script to automatically select a folder for deployment from the Finder.
