@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Add Option to Copy the Current Song’s Artist and Title] - {PR_MERGE_DATE}
+## [Add Option to Copy the Current Song’s Artist and Title] - 2025-05-26
 
 - Add new command 'Copy Artist And Title'.
 - Add an option in the `NowPlaying` command that allows users to copy the current song’s artist and title.
