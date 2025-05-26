@@ -1,6 +1,6 @@
 # T3 Chat Changelog
 
-## [v1.2.0] - {PR_MERGE_DATE}
+## [v1.2.0] - 2025-05-26
 
 - Added search grounding support for compatible models (currently Gemini family)
 - Added user feedback when search grounding is enabled for unsupported models
