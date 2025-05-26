@@ -1,4 +1,4 @@
-# Claude Guide for Secret Browser Commands
+# Secret Browser Commands
 
 ## Commands
 
