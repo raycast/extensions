@@ -1,5 +1,6 @@
 import { getLatestDownload, hasAccessToDownloadsFolder, deleteFileOrFolder } from "./utils";
 import { popToRoot, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function main() {
   if (!hasAccessToDownloadsFolder()) {
@@ -13,6 +14,10 @@ export default async function main() {
     return;
   }
 
-  await deleteFileOrFolder(latestDownload.path);
+  try {
+    await deleteFileOrFolder(latestDownload.path);
+  } catch (error) {
+    await showFailureToast(error, { title: "Deletion Failed" });
+  }
   await popToRoot();
 }
