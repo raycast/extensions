@@ -83,7 +83,7 @@ export default function CreatePromptForm() {
         setIsLoading(false);
       }
     },
-    validation: promptValidations
+    validation: promptValidations,
   });
 
   useEffect(() => {

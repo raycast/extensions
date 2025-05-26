@@ -55,7 +55,7 @@ export default function EditPromptForm({ promptId }: { promptId: string }) {
         setIsLoading(false);
       }
     },
-    validation: promptValidations
+    validation: promptValidations,
   });
 
   useEffect(() => {
