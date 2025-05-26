@@ -1,6 +1,6 @@
 # Deepcast Changelog
 
-## [Close Raycast After Translation] - {PR_MERGE_DATE}
+## [Close Raycast After Translation] - 2025-05-26
 
 - Added preference option to automatically close Raycast after getting translation result
 - Improves workflow speed for quick translations by eliminating the need to manually close Raycast
