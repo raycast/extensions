@@ -158,11 +158,7 @@ export default async function Command() {
       console.error("Failed to rename items:", failures);
     }
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Cannot slugify files",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-    });
+    await showFailureToast(error, { title: "Cannot slugify files" });
     console.error("Slugify command error:", error);
   }
 }
