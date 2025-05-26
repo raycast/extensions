@@ -49,7 +49,10 @@ export default function Command() {
             newdata: data?.[0].data,
           }),
         }),
-      );
+      ).catch((err) => {
+        console.log("err", err);
+        throw Error(err);
+      });
       revalidate();
 
       showToast({
