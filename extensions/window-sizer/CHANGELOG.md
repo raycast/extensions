@@ -1,6 +1,6 @@
 # Window Sizer Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2025-05-26
 
 - Cleanup of internal HUD navigation logic
 
