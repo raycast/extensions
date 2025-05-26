@@ -1,4 +1,5 @@
-import { getPreferenceValues, LaunchProps, open } from "@raycast/api";
+import { getPreferenceValues, LaunchProps, open, showHUD } from "@raycast/api";
+import { isSearchGroundingSupported } from "./utils/model-check";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.AskT3Chat }>) {
   const { model, useBeta } = getPreferenceValues<Preferences.AskT3Chat>();
@@ -11,6 +12,10 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   url.searchParams.set("model", model);
   if (enableSearch) {
     url.searchParams.set("search", "true");
+  }
+
+  if (!isSearchGroundingSupported(model)) {
+    await showHUD("Search grounding is not supported for this model");
   }
 
   await open(url.toString());
