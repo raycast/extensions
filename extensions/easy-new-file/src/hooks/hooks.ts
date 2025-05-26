@@ -17,16 +17,18 @@ export const getTemplateFile = (refresh: number) => {
     try {
       fse.ensureDirSync(templateFolderPath);
       fse.readdirSync(templateFolderPath).forEach((file) => {
-        if (!file.startsWith(".")) {
-          const filePath = templateFolderPath + "/" + file;
-          const parsedPath = path.parse(filePath);
-          _templateFiles.push({
-            path: filePath,
-            name: parsedPath.name,
-            extension: parsedPath.ext.substring(1),
-            inputContent: false,
-          });
+        const filePath = templateFolderPath + "/" + file;
+        const parsedPath = path.parse(filePath);
+        let ext: string = parsedPath.ext.substring(1);
+        if (parsedPath.name.startsWith(".")) {
+          ext = parsedPath.name.split(".").length > 1 ? parsedPath.name.split(".")[1] : "";
         }
+        _templateFiles.push({
+          path: filePath,
+          name: parsedPath.name,
+          extension: ext,
+          inputContent: false,
+        });
       });
       const finderPath = await getFinderPath();
       const parsedPath = parse(finderPath);

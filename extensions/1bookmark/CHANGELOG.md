@@ -1,5 +1,11 @@
 # 1Bookmark Changelog
 
+## [Improve Space Authentication UX] - 2025-05-23
+
+- 0.11.1
+- 📱 Before modifying a space auth policy, check that the current account is compliant with the policy and then reject the policy modification. This prevents you from accidentally modifying the policy and losing access to the space.
+- 📱 You can edit the nickname and image for each space.
+
 ## [Space Authentication Policy] - 2025-05-19
 
 - 0.11.0
