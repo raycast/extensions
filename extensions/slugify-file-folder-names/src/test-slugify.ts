@@ -68,7 +68,7 @@ const filenameTests = [
 ];
 
 filenameTests.forEach((testCase, index) => {
-  const result = generateSlugFilename(testCase.input);
+  const result = generateSlugFilename(testCase.input, true);
   const passed = result === testCase.expected;
 
   console.log(`Filename Test ${index + 1}: ${passed ? "✅ PASS" : "❌ FAIL"}`);
