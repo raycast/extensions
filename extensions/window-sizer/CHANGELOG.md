@@ -1,5 +1,9 @@
 # Window Sizer Changelog
 
+## [Chore] - {PR_MERGE_DATE}
+
+- Cleanup of internal HUD navigation logic
+
 ## [Fixes] - 2025-05-23
 
 - Fixed occasional issue with action icon not displaying
