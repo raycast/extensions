@@ -17,7 +17,7 @@
 | Media Type | Supported Input Formats                          | Supported Output Formats         |
 | ---------- | ------------------------------------------------ | -------------------------------- |
 | Video      | MP4, AVI, MKV, MOV, MPG, WEBM                    | MP4, AVI, MKV, MOV, MPG, WEBM    |
-| Image      | JPG, JPEG, PNG, WEBP, HEIC, TIFF, TIF, AVIF, BMP | JPG, PNG, WebP, HEIC, TIFF, AVIF |
+| Image      | JPG, JPEG, PNG, WEBP, HEIC, TIFF, TIF, AVIF, BMP | JPG, PNG, WEBP, HEIC, TIFF, AVIF |
 | Audio      | MP3, AAC, WAV, FLAC                              | MP3, AAC, WAV, FLAC              |
 
 ## Usage

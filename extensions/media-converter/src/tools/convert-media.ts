@@ -1,8 +1,8 @@
 import {
   convertMedia,
-  OUTPUT_IMAGE_EXTENSIONS,
+  /* OUTPUT_IMAGE_EXTENSIONS,
   OUTPUT_AUDIO_EXTENSIONS,
-  OUTPUT_VIDEO_EXTENSIONS,
+  OUTPUT_VIDEO_EXTENSIONS, */
   /* OUTPUT_ALL_EXTENSIONS, */
   INPUT_IMAGE_EXTENSIONS,
   INPUT_AUDIO_EXTENSIONS,
@@ -70,13 +70,12 @@ export default async function ConvertMedia({ inputPath, outputFileType, quality 
 
   try {
     let outputPath: string;
-    // Check if the outputFileType is a valid format for the determined mediaType
-    if (mediaType === "image" && (OUTPUT_IMAGE_EXTENSIONS as ReadonlyArray<string>).includes(outputFileType)) {
-      outputPath = await convertMedia(fullPath, outputFileType as (typeof OUTPUT_IMAGE_EXTENSIONS)[number], quality);
-    } else if (mediaType === "audio" && (OUTPUT_AUDIO_EXTENSIONS as ReadonlyArray<string>).includes(outputFileType)) {
-      outputPath = await convertMedia(fullPath, outputFileType as (typeof OUTPUT_AUDIO_EXTENSIONS)[number]);
-    } else if (mediaType === "video" && (OUTPUT_VIDEO_EXTENSIONS as ReadonlyArray<string>).includes(outputFileType)) {
-      outputPath = await convertMedia(fullPath, outputFileType as (typeof OUTPUT_VIDEO_EXTENSIONS)[number]);
+    if (mediaType === "image") {
+      outputPath = await convertMedia(fullPath, outputFileType, quality);
+    } else if (mediaType === "audio") {
+      outputPath = await convertMedia(fullPath, outputFileType);
+    } else if (mediaType === "video") {
+      outputPath = await convertMedia(fullPath, outputFileType);
     } else {
       return {
         type: "error",
@@ -106,14 +105,7 @@ export const confirmation: Tool.Confirmation<Input> = async ({ inputPath, output
     { name: "Input Media Type", value: mediaType || "Unknown" },
     { name: "Output File Type", value: outputFileType },
   ];
-  if (
-    quality &&
-    mediaType === "image" &&
-    (outputFileType === ".jpg" ||
-      outputFileType === ".webp" ||
-      outputFileType === ".avif" ||
-      outputFileType === ".heic")
-  ) {
+  if (quality) {
     info.push({ name: "Quality", value: quality });
   }
 

@@ -36,10 +36,14 @@ export default function Command() {
   useEffect(() => {
     async function loadInitialData() {
       setIsLoading(true); // Ensure loading state is true at the start
+
+      if (hasSeenHelloPage === null) setHasSeenHelloPage(false);
+      // If initialFinderFiles is still undefined (e.g., error before finder check), set to empty.
+      if (initialFinderFiles === undefined) setInitialFinderFiles([]);
+
       try {
         const seen = await LocalStorage.getItem("hasSeenHelloPage");
         setHasSeenHelloPage(seen === "true");
-        /* setHasSeenHelloPage(seen === "false"); // DEV ONLY */
 
         try {
           const finderItems = await getSelectedFinderItems();
@@ -52,10 +56,6 @@ export default function Command() {
         }
       } catch (error) {
         console.error("Error loading initial data (localStorage):", error);
-        // If localStorage fails, assume hello page hasn't been seen to be safe.
-        if (hasSeenHelloPage === null) setHasSeenHelloPage(false);
-        // If initialFinderFiles is still undefined (e.g., error before finder check), set to empty.
-        if (initialFinderFiles === undefined) setInitialFinderFiles([]);
       } finally {
         setIsLoading(false);
       }

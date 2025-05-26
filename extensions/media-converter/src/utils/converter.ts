@@ -121,7 +121,12 @@ export async function convertMedia(
               const tempPaletteFileName = `${path.basename(filePath, path.extname(filePath))}_palette_${Date.now()}.png`;
               tempPaletteFile = path.join(os.tmpdir(), tempPaletteFileName);
 
-              ffmpegCmd = `"${ffmpegPath}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}" && "${ffmpegPath}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5"`;
+              // Generate palette first
+              await execPromise(
+                `"${ffmpegPath}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`,
+              );
+              // Then apply palette
+              ffmpegCmd = `"${ffmpegPath}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5"`;
               // Note: FFmpeg's PNG-8 doesn't support non-binary transparency, no way to fix it (according to my research, @sacha_crispin). We could make use of other libraries like pngquant or ImageMagick for better PNG-8 alpha support, but that would require additional dependencies.
             }
             ffmpegCmd += ` -compression_level 100 "${finalOutputPath}"`;

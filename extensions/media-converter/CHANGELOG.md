@@ -10,11 +10,13 @@
 ### Removed
 
 - Quick Convert
+  - Now replaced by the main "Convert Media" command
   - Since Convert Media now auto-selects the selected Finder files, no need for the Quick Convert action anymore
+  - The main "Convert Media" command is just as fast as was "Quick Convert". If you don't know what quality setting to choose, defaults are good.
 
 ### Fixed
 
-- Converting from and to .heic now works flawlessly from and to any formats.
+- Converting from and to .heic now works from and to any formats.
 
 ### API Changes
 

@@ -87,7 +87,12 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       return;
     }
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Converting file..." });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      // TODO: When converting video, we could show the progress percentage. This would require to find a solution when multiple files are being converted.
+      // I don't think it is possible to show the progress of images. Unsure about audio.
+      title: `Converting ${currentFiles.length} file${currentFiles.length > 1 ? "s" : ""}...`,
+    });
 
     for (const item of currentFiles) {
       try {
