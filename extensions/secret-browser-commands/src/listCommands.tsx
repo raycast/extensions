@@ -10,7 +10,7 @@ export default function Command() {
   const [showInternalDebugging, setShowInternalDebugging] = useState<"hide-debug" | "show-all" | "show-debug">(
     "hide-debug",
   );
-  const { preferredBrowser } = getPreferenceValues<{ preferredBrowser: string }>();
+  const { preferredBrowser } = getPreferenceValues<Preferences>();
 
   const getPreferredBrowser = () => {
     const DEFAULT_BROWSER_KEY = "chrome";

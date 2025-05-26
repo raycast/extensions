@@ -24,12 +24,3 @@ export interface BrowserCommand {
   description: string | ((preferredBrowser: BrowserInfo) => string);
   isInternalDebugging?: boolean;
 }
-
-/**
- * An object representing user preferences.
- *
- * @property preferredBrowser - the key of the preferred browser (e.g., 'chrome')
- */
-export interface Preferences {
-  preferredBrowser: string;
-}

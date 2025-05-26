@@ -2,10 +2,6 @@ import { Action, Icon, getPreferenceValues, ActionPanel } from "@raycast/api";
 import { SUPPORTED_BROWSERS } from "../types/browsers";
 import { openUrlInBrowser } from "../utils/openUrlInBrowser";
 
-interface Preferences {
-  preferredBrowser?: string; // The 'key' of the browser e.g. "arc", "chrome"
-}
-
 interface OpenInBrowserSubmenuProps {
   commandPath: string; // Just the path, e.g., "settings"
   preferences: {
