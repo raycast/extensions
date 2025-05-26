@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [Added] - 2025-05-03
+## [Added] - {PR_MERGE_DATE}
 
 - Add AI natural language parsing for Quick Add Task command
 - Support automatic recognition of dates, priorities, and projects
