@@ -1,28 +1,17 @@
-import { Detail, ActionPanel, Action, Icon, useNavigation, showToast, Toast, Form } from "@raycast/api";
-import { useFetch, useForm, FormValidation } from "@raycast/utils";
-import { generateApiUrl, API_HEADERS, callApi } from "../api";
+import { Detail, ActionPanel, Action, Icon, useNavigation, showToast, Toast, Form, List } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
+import { callApi } from "../api";
 import { UserResource } from "../types";
 
-export default function AccountSettings() {
-  const {
-        isLoading,
-        data: user
-      } = useFetch(generateApiUrl("account"), {
-        headers: API_HEADERS,
-        mapResult(result: { data: UserResource }) {
-          return {
-            data: result.data,
-          };
-        }
-      });
+export default function AccountSettingsTab({user}: {user?: UserResource}) {
 
-      return <Detail isLoading={isLoading} metadata={user && <Detail.Metadata>
-        <Detail.Metadata.Label title="ID" text={user.id.toString()} />
-        <Detail.Metadata.Label title="Email" text={user.email} />
-        <Detail.Metadata.TagList title="Roles">
+      return <List.Item icon={Icon.Gear} title="Settings" detail={<List.Item.Detail metadata={user && <List.Item.Detail.Metadata>
+        <List.Item.Detail.Metadata.Label title="ID" text={user.id.toString()} />
+        <List.Item.Detail.Metadata.Label title="Email" text={user.email} />
+        <List.Item.Detail.Metadata.TagList title="Roles">
           {user.roles.map(role => <Detail.Metadata.TagList.Item key={role.id} text={role.name} />)}
-        </Detail.Metadata.TagList>
-      </Detail.Metadata>} actions={user && <ActionPanel>
+        </List.Item.Detail.Metadata.TagList>
+      </List.Item.Detail.Metadata>} />} actions={user && <ActionPanel>
         <Action.Push
                         icon={Icon.Pencil}
                         title="Update"
@@ -40,7 +29,7 @@ function UpdateSettings({ user }: { user: UserResource }) {
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Updating account");
             try {
-                callApi("account", {
+                await callApi("account", {
                   method: "PATCH",
                   body: values
                 });

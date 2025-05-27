@@ -1,3 +1,14 @@
+export type ApiTokenResource = {
+  id: string;
+  name: string;
+  created_at: string;
+}
+export type AccessTokenResource = {
+  token: ApiTokenResource;
+  access_token: string;
+  token_type: string;
+}
+
 type ShortRoleResource = {
   id: number;
   name: string;
@@ -55,3 +66,11 @@ export type Server = {
     };
   };
 };
+
+export type ISOImageResource = {
+  id: number;
+  name: string;
+  visibility: "public" | "private";
+  os_type: "Linux"|"Windows";
+  size: number;
+}

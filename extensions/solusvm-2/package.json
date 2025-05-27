@@ -30,29 +30,17 @@
       "name": "account",
       "title": "Account",
       "description": "",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "tab",
-          "type": "dropdown",
-          "required": true,
-          "placeholder": "Tab",
-          "data": [
-            {
-              "title": "Settings",
-              "value": "settings"
-            },
-            {
-              "title": "API Tokens",
-              "value": "api_tokens"
-            }
-          ]
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "projects",
       "title": "Projects",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "iso-images",
+      "title": "ISO images",
       "description": "",
       "mode": "view"
     }

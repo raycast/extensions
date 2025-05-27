@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Color,
   confirmAlert,
   Form,
   Icon,
@@ -72,12 +73,12 @@ export default function Projects() {
           title={project.name}
           subtitle={project.description}
           accessories={[
-            { icon: "resource.svg", text: `${project.servers} servers` },
-            { icon: "user.svg", text: `${project.members} members` },
+            { icon: { source: "resource.svg", tintColor: Color.PrimaryText }, text: `${project.servers} servers` },
+            { icon: { source: "user.svg", tintColor: Color.PrimaryText }, text: `${project.members} members` },
           ]}
           actions={
             <ActionPanel>
-              <Action.Push title="View Servers" target={<Servers project={project} />} />
+              <Action.Push icon={{ source: "resource.svg", tintColor: Color.PrimaryText }} title="View Servers" target={<Servers project={project} />} />
               <Action.Push
                 icon={Icon.Pencil}
                 title="Update"

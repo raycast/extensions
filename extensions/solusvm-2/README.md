@@ -22,6 +22,24 @@ This is a Raycast extension for [SolusVM](https://solusvm.com/) 2 accounts ([Doc
 
     b. API Token from Account tab
 
-## 🗒️ Notes
+## ❔ FAQs
 
-- This extension is for `SolusVM 2` so instances w/ `SolusVM 1` are incompatible. For SolusVM 1 Client accounts, try: <a title="Install solusvm-1-client Raycast Extension" href="https://www.raycast.com/xmok/solusvm-1-client"><img src="https://www.raycast.com/xmok/solusvm-1-client/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+Q1. Why can't I delete API Tokens?
+
+Ans. The API does not support this.
+
+## 🗒️ Note
+
+This extension is for `SolusVM 2` so instances w/ `SolusVM 1` are incompatible. For SolusVM 1 Client accounts, try:
+
+<a title="Install solusvm-1-client Raycast Extension" href="https://www.raycast.com/xmok/solusvm-1-client"><img src="https://www.raycast.com/xmok/solusvm-1-client/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+
+---
+
+Looking for a different panel? Try these:
+
+<a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install cyberpanel Raycast Extension" href="https://www.raycast.com/xmok/cyberpanel"><img src="https://www.raycast.com/xmok/cyberpanel/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install directadmin-reseller Raycast Extension" href="https://www.raycast.com/xmok/directadmin-reseller"><img src="https://www.raycast.com/xmok/directadmin-reseller/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install hestiacp-admin Raycast Extension" href="https://www.raycast.com/xmok/hestiacp-admin"><img src="https://www.raycast.com/xmok/hestiacp-admin/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install virtualizor-enduser Raycast Extension" href="https://www.raycast.com/xmok/virtualizor-enduser"><img src="https://www.raycast.com/xmok/virtualizor-enduser/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
