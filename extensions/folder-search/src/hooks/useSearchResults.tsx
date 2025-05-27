@@ -43,8 +43,8 @@ export function useSearchResults({
 
         setResults(
           pinnedResults.filter((pin) =>
-            pin.kMDItemFSName.toLocaleLowerCase().includes(text.replace(/[[|\]]/gi, "").toLocaleLowerCase())
-          )
+            pin.kMDItemFSName.toLocaleLowerCase().includes(text.replace(/[[|\]]/gi, "").toLocaleLowerCase()),
+          ),
         );
         setIsQuerying(false);
         setHasSearched(true);
@@ -64,7 +64,7 @@ export function useSearchResults({
         setHasSearched(false);
       }
     },
-    [searchScope, pinnedResults]
+    [searchScope, pinnedResults],
   );
 
   // Re-apply filtering when pinned results change
@@ -77,8 +77,8 @@ export function useSearchResults({
 
       setResults(
         pinnedResults.filter((pin) =>
-          pin.kMDItemFSName.toLocaleLowerCase().includes(debouncedText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
-        )
+          pin.kMDItemFSName.toLocaleLowerCase().includes(debouncedText.replace(/[[|\]]/gi, "").toLocaleLowerCase()),
+        ),
       );
     }
   }, [pinnedResults, searchScope, debouncedText]);
@@ -167,7 +167,7 @@ export function useSearchResults({
         ? pinnedResults.filter(
             (pin) =>
               !searchText ||
-              pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
+              pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase()),
           )
         : results,
     isQuerying,

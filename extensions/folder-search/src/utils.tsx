@@ -353,7 +353,7 @@ export function formatDate(dateString: string | undefined | null): string {
       dateStyle: "full",
       timeStyle: "short",
     }).format(date);
-  } catch (e) {
+  } catch {
     return "-";
   }
 }

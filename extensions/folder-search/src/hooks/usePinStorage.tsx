@@ -46,7 +46,7 @@ export function usePinStorage() {
       searchScope?: string;
       isShowingDetail?: boolean;
       showNonCloudLibraryPaths?: boolean;
-    }
+    },
   ): Promise<boolean> => {
     try {
       await LocalStorage.setItem(
@@ -56,7 +56,7 @@ export function usePinStorage() {
           searchScope: additionalPrefs?.searchScope || "",
           isShowingDetail: additionalPrefs?.isShowingDetail,
           showNonCloudLibraryPaths: additionalPrefs?.showNonCloudLibraryPaths || false,
-        })
+        }),
       );
 
       // Only log on significant pin count changes

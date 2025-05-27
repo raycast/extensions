@@ -114,7 +114,7 @@ export default function Command(props: LaunchProps) {
           }}
         />
         <Action.OpenWith
-          title="Open With…"
+          title="Open with…"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           path={result.path}
           onOpen={() => popToRoot({ clearSearchBar: true })}
@@ -135,7 +135,7 @@ export default function Command(props: LaunchProps) {
           <>
             {resultIndex > 0 && (
               <Action
-                title="Move Pin Up"
+                title="Move Pin up"
                 icon={Icon.ArrowUpCircle}
                 shortcut={Keyboard.Shortcut.Common.MoveUp}
                 onAction={() => movePinUp(result, resultIndex)}
@@ -209,7 +209,7 @@ export default function Command(props: LaunchProps) {
                 shortcut: Keyboard.Shortcut;
                 appleScript: (result: SpotlightSearchResult) => string;
               },
-              pluginIndex: number
+              pluginIndex: number,
             ) => (
               <Action
                 key={pluginIndex}
@@ -222,7 +222,7 @@ export default function Command(props: LaunchProps) {
                   runAppleScript(plugin.appleScript(result));
                 }}
               />
-            )
+            ),
           )}
         </ActionPanel.Section>
       </ActionPanel>
