@@ -84,7 +84,7 @@ export default function Command(props: LaunchProps) {
   };
 
   // Render actions for the folder list items
-  const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number) => {
+  const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number, isPinnedSection = false) => {
     const enclosingFolder = path.dirname(result.path);
     return (
       <ActionPanel title={folderName(result)}>
@@ -131,7 +131,7 @@ export default function Command(props: LaunchProps) {
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           onAction={() => toggleResultPinnedStatus(result, resultIndex)}
         />
-        {resultIsPinned(result) && (
+        {resultIsPinned(result) && isPinnedSection && (
           <>
             {resultIndex > 0 && (
               <Action
@@ -258,6 +258,7 @@ export default function Command(props: LaunchProps) {
           isShowingDetail={isShowingDetail}
           resultIsPinned={resultIsPinned}
           renderActions={renderFolderActions}
+          isPinnedSection={true}
         />
       ) : !searchText && props.launchType === "userInitiated" ? (
         // No pins and no search text
@@ -290,6 +291,7 @@ export default function Command(props: LaunchProps) {
               isShowingDetail={isShowingDetail}
               resultIsPinned={resultIsPinned}
               renderActions={renderFolderActions}
+              isPinnedSection={false}
             />
           )}
         </>

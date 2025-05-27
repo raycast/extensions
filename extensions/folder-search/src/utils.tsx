@@ -18,7 +18,7 @@ import os from "os";
 import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
 
 // Logging configuration
-const LOG_ENABLED = true; // Set to true to enable all logging
+const LOG_ENABLED = false; // Set to true to enable all logging
 const LOG_LEVEL = "debug" as "debug" | "error"; // Set to "debug" for verbose logging or "error" for less noise
 const LOG_CACHE_OPERATIONS = false; // Set to true to log detailed cache operations
 
