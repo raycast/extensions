@@ -19,7 +19,7 @@ import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
 
 // Logging configuration
 const LOG_ENABLED = true; // Set to true to enable all logging
-const LOG_LEVEL: "debug" | "error" = "error"; // Set to "debug" for verbose logging or "error" for less noise
+const LOG_LEVEL = "debug" as "debug" | "error"; // Set to "debug" for verbose logging or "error" for less noise
 const LOG_CACHE_OPERATIONS = false; // Set to true to log detailed cache operations
 
 // Create a plugins cache instance with namespace
@@ -310,17 +310,6 @@ export const lastUsedSort = (a: SpotlightSearchResult, b: SpotlightSearchResult)
   return new Date(safeB).getTime() - new Date(safeA).getTime();
 };
 
-export const fixDoubleConcat = (text: string): string => {
-  const regex = /^(.+)\1$/; // Matches a string followed by the same string again
-
-  if (regex.test(text)) {
-    const originalText = text.replace(regex, "$1");
-    return originalText;
-  }
-
-  return text;
-};
-
 const CLOUD_STORAGE_PATHS = [
   // iCloud Drive
   `${userHomeDir}/Library/Mobile Documents/com~apple~CloudDocs`,
@@ -372,7 +361,6 @@ export function formatDate(dateString: string | undefined | null): string {
 // Logging utility
 export const log = (level: "debug" | "error", component: string, message: string, data?: Record<string, unknown>) => {
   if (!LOG_ENABLED) return;
-
   // Skip debug messages when log level is set to error only
   if (level === "debug" && LOG_LEVEL === "error") return;
 
@@ -437,4 +425,19 @@ export function logDiagnostics(component: string, message: string) {
   }
 
   log("debug", component, "=".repeat(50));
+}
+
+export function fixDoubleConcat(text: string): string {
+  if (!text || text.length < 2) return text;
+
+  const halfLength = Math.floor(text.length / 2);
+  const firstHalf = text.substring(0, halfLength);
+  const secondHalf = text.substring(halfLength);
+
+  // If the string is duplicated, use only the first half
+  if (text.length % 2 === 0 && firstHalf === secondHalf) {
+    return firstHalf;
+  }
+
+  return text;
 }
