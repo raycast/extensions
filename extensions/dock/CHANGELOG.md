@@ -1,6 +1,6 @@
 # Dock Changelog
 
-## [Add MenuBar Item] - {PR_MERGE_DATE}
+## [Add MenuBar Item] - 2025-05-27
 
 - Added a **MenuBar Item** to move the dock
 - Added the "System" category
