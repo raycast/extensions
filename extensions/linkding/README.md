@@ -9,10 +9,11 @@ Uses Raycast to search through Linking bookmarks.
 
 ## Features
 
-- Support bookmark search through multiple Linkding accounts and servers
+- Search bookmarks
 - Open bookmarks in the browser
 - Copy bookmarks to clipboard
 - Create and delete bookmarks in the extension
+- Save current browser tab
 
 ## Notice
 

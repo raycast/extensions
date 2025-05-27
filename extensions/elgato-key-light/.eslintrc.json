@@ -1,4 +1,4 @@
 {
   "root": true,
-  "extends": ["@raycast"]
+  "extends": ["@raycast/eslint-config"]
 }
