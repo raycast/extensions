@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Fix New Tab Command React Hooks Violation] - {PR_MERGE_DATE}
+## [Fix New Tab Command React Hooks Violation] - 2025-05-27
 
 - Fix React Rules of Hooks violation causing TypeError when opening new tabs.
 - Improve error handling for profile and history data loading.

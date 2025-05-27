@@ -1,6 +1,6 @@
 # Quit Applications Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2025-05-27
 
 - Fixed issue where excluded applications still appeared in the list when multiple windows were open
 
