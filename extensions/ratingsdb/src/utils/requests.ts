@@ -90,6 +90,10 @@ export async function searchSeries(id: string, season?: number) {
           "OMDb API key has exceeded its usage limit. Please upgrade your plan or wait for the limit to reset.";
         showFailureToast(errorMessage, { title: "API Limit Exceeded" });
         throw new Error(errorMessage);
+      } else if (axiosError.response && axiosError.response.status >= 500) {
+        const errorMessage = "OMDb API server error. Please try again later.";
+        showFailureToast(errorMessage, { title: "Server Error" });
+        throw new Error(errorMessage);
       }
     }
 
@@ -124,6 +128,10 @@ export async function searchID(id: string) {
         const errorMessage =
           "OMDb API key has exceeded its usage limit. Please upgrade your plan or wait for the limit to reset.";
         showFailureToast(errorMessage, { title: "API Limit Exceeded" });
+        throw new Error(errorMessage);
+      } else if (axiosError.response && axiosError.response.status >= 500) {
+        const errorMessage = "OMDb API server error. Please try again later.";
+        showFailureToast(errorMessage, { title: "Server Error" });
         throw new Error(errorMessage);
       }
     }
@@ -160,6 +168,10 @@ export async function getProviders(id: string) {
           "WatchMode API key has exceeded its usage limit. Please upgrade your plan or wait for the limit to reset.";
         showFailureToast(errorMessage, { title: "API Limit Exceeded" });
         throw new Error(errorMessage);
+      } else if (axiosError.response && axiosError.response.status >= 500) {
+        const errorMessage = "WatchMode API server error. Please try again later.";
+        showFailureToast(errorMessage, { title: "Server Error" });
+        throw new Error(errorMessage);
       }
     }
 
@@ -192,6 +204,10 @@ export async function getSourceIcons() {
         const errorMessage =
           "WatchMode API key has exceeded its usage limit. Please upgrade your plan or wait for the limit to reset.";
         showFailureToast(errorMessage, { title: "API Limit Exceeded" });
+        throw new Error(errorMessage);
+      } else if (axiosError.response && axiosError.response.status >= 500) {
+        const errorMessage = "WatchMode API server error. Please try again later.";
+        showFailureToast(errorMessage, { title: "Server Error" });
         throw new Error(errorMessage);
       }
     }
