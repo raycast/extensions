@@ -1,6 +1,10 @@
 # Linkding Changelog
 
-## [Fix & Feature] - {PR_MERGE_DATE}
+## [Fix] - {PR_MERGE_DATE}
+
+- fix: use more reliable AppleScript to get Firefox URL
+
+## [Fix & Feature] - 2025-05-26
 
 - feat: save current browser tab
 - fix: update filtered bookmarks on delete
