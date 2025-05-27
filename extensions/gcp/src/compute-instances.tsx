@@ -5,6 +5,28 @@ import { GCPInstance } from "./types";
 import { getGoogleAuth, getProjectId, formatDate, getMachineTypeFromSelfLink, getStatusIcon } from "./utils";
 import { getCachedData, setCachedData, getCacheKey, CACHE_TTL, clearCache } from "./cache";
 
+// Helper function to get status icon and color for instance status
+function getInstanceStatusDisplay(status: string) {
+  const normalizedStatus = status.toUpperCase();
+
+  if (normalizedStatus === "RUNNING") {
+    return {
+      icon: Icon.Circle,
+      color: Color.Green,
+    };
+  } else if (normalizedStatus.includes("ING") || normalizedStatus === "STARTING" || normalizedStatus === "STOPPING") {
+    return {
+      icon: Icon.CircleProgress,
+      color: Color.Orange,
+    };
+  } else {
+    return {
+      icon: Icon.CircleDisabled,
+      color: Color.Red,
+    };
+  }
+}
+
 interface ZoneResponse {
   items?: Array<{
     name: string;
@@ -369,66 +391,93 @@ gcloud compute ssh ${instance.name} --zone=${instance.zone}
 
   return (
     <List isLoading={loading} searchBarPlaceholder="Search instances...">
-      {instances.map((instance) => (
-        <List.Item
-          key={instance.id}
-          title={instance.name}
-          subtitle={`${instance.zone} • ${instance.machineType}`}
-          accessories={[
-            {
-              text: instance.externalIp || instance.internalIp || "No IP",
-              tooltip: instance.externalIp ? "External IP" : "Internal IP",
-            },
-            {
-              text: instance.status,
-              icon: {
-                source: instance.status === "RUNNING" ? Icon.Circle : Icon.CircleDisabled,
-                tintColor: instance.status === "RUNNING" ? Color.Green : Color.Red,
+      <List.EmptyView
+        icon={Icon.ComputerChip}
+        title="No Compute Instances Found"
+        description="No compute instances were found in your GCP project. Create an instance in the Google Cloud Console."
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser
+              title="Create Instance"
+              icon={Icon.Plus}
+              url="https://console.cloud.google.com/compute/instances"
+            />
+            <Action
+              title="Refresh"
+              icon={Icon.ArrowClockwise}
+              onAction={() => loadInstances(true)}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+            />
+          </ActionPanel>
+        }
+      />
+      {instances.map((instance) => {
+        const statusDisplay = getInstanceStatusDisplay(instance.status);
+        return (
+          <List.Item
+            key={instance.id}
+            title={instance.name}
+            subtitle={`${instance.zone} • ${instance.machineType}`}
+            accessories={[
+              {
+                text: instance.externalIp || instance.internalIp || "No IP",
+                tooltip: instance.externalIp
+                  ? `External IP: ${instance.externalIp}`
+                  : instance.internalIp
+                    ? `Internal IP: ${instance.internalIp}`
+                    : "No IP addresses assigned",
               },
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push title="Show Details" target={<InstanceDetail instance={instance} />} icon={Icon.Eye} />
-              <Action.CopyToClipboard
-                title="Copy Command"
-                content={`gcloud compute ssh ${instance.name} --zone=${instance.zone}`}
-              />
-              <Action.OpenInBrowser
-                title="Open in Console"
-                url={`https://console.cloud.google.com/compute/instancesDetail/zones/${instance.zone}/instances/${instance.name}`}
-              />
-              {instance.status === "RUNNING" && (
-                <Action
-                  title="Stop Instance"
-                  icon={Icon.Stop}
-                  onAction={() => stopInstance(instance.name, instance.zone)}
+              {
+                text: instance.status,
+                icon: {
+                  source: statusDisplay.icon,
+                  tintColor: statusDisplay.color,
+                },
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push title="Show Details" target={<InstanceDetail instance={instance} />} icon={Icon.Eye} />
+                <Action.CopyToClipboard
+                  title="Copy Command"
+                  content={`gcloud compute ssh ${instance.name} --zone=${instance.zone}`}
                 />
-              )}
-              {instance.status === "TERMINATED" && (
-                <Action
-                  title="Start Instance"
-                  icon={Icon.Play}
-                  onAction={() => startInstance(instance.name, instance.zone)}
+                <Action.OpenInBrowser
+                  title="Open in Console"
+                  url={`https://console.cloud.google.com/compute/instancesDetail/zones/${instance.zone}/instances/${instance.name}`}
                 />
-              )}
-              {instance.status === "RUNNING" && (
+                {instance.status === "RUNNING" && (
+                  <Action
+                    title="Stop Instance"
+                    icon={Icon.Stop}
+                    onAction={() => stopInstance(instance.name, instance.zone)}
+                  />
+                )}
+                {instance.status === "TERMINATED" && (
+                  <Action
+                    title="Start Instance"
+                    icon={Icon.Play}
+                    onAction={() => startInstance(instance.name, instance.zone)}
+                  />
+                )}
+                {instance.status === "RUNNING" && (
+                  <Action
+                    title="Restart Instance"
+                    icon={Icon.Repeat}
+                    onAction={() => restartInstance(instance.name, instance.zone)}
+                  />
+                )}
                 <Action
-                  title="Restart Instance"
-                  icon={Icon.Repeat}
-                  onAction={() => restartInstance(instance.name, instance.zone)}
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  onAction={() => loadInstances(true)}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
                 />
-              )}
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={() => loadInstances(true)}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
