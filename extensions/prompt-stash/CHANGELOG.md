@@ -1,6 +1,6 @@
 # PromptStash Changelog
 
-## [Refactor validation system and increase content limit] - {PR_MERGE_DATE}
+## [Refactor validation system and increase content limit] - 2025-05-27
 
 - Centralized form validations in a dedicated utils file for better maintainability
 - Increased prompt content character limit from 5,000 to 18,000 characters
