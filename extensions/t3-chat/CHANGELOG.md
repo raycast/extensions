@@ -1,5 +1,11 @@
 # T3 Chat Changelog
 
+## [v1.2.0] - 2025-05-26
+
+- Added search grounding support for compatible models (currently Gemini family)
+- Added user feedback when search grounding is enabled for unsupported models
+- Enhanced command with search grounding toggle option
+
 ## [v1.1.0] - 2025-05-19
 
 - Added new preference to use the beta version of t3.chat (beta.t3.chat)
