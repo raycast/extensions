@@ -374,7 +374,7 @@ export function formatDate(dateString: string | undefined | null): string {
 export const log = (level: "debug" | "error", component: string, message: string, data?: Record<string, unknown>) => {
   if (!LOG_ENABLED) return;
   // Skip debug messages when log level is set to error only
-  if (level === "debug" && LOG_LEVEL === "error") return;
+  if (level === "debug" && LOG_LEVEL !== "debug") return;
 
   const timestamp = new Date().toISOString();
   const logData = {
