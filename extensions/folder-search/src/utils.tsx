@@ -19,7 +19,7 @@ import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
 
 // Logging configuration
 const LOG_ENABLED = false; // Set to true to enable all logging
-const LOG_LEVEL = "debug" as "debug" | "error"; // Set to "debug" for verbose logging or "error" for less noise
+const LOG_LEVEL: "debug" | "error" = "debug"; // Set to "debug" for verbose logging or "error" for less noise
 const LOG_CACHE_OPERATIONS = false; // Set to true to log detailed cache operations
 
 // Create a plugins cache instance with namespace
@@ -252,6 +252,18 @@ export const loadPlugins = async (callerId?: string) => {
   savePluginPathsToCache(validPluginPaths);
 
   return validPlugins;
+};
+
+/**
+ * Check if a folder matches a search query by filtering special characters and comparing case-insensitively
+ */
+export const matchesSearchQuery = (folderName: string, searchQuery: string): boolean => {
+  if (!searchQuery) return true;
+
+  const cleanQuery = searchQuery.replace(/[[|\]]/gi, "").toLocaleLowerCase();
+  const cleanFolderName = folderName.toLocaleLowerCase();
+
+  return cleanFolderName.includes(cleanQuery);
 };
 
 export const safeSearchScope = (searchScope: string | undefined) => {

@@ -13,6 +13,6 @@ const flattenedConfig = raycastConfig.flat ? raycastConfig.flat() : raycastConfi
 module.exports = [
   ...flattenedConfig,
   {
-    ignores: ["src/libs/node-spotlight/*.md"]
+    ignores: ["src/libs/node-spotlight/**/*.md"]
   }
 ]; 
