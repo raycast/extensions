@@ -12,13 +12,13 @@
   "commands": [
     {
       "name": "generate-belgian-iban",
-      "title": "Generate Belgian IBAN",
+      "title": "Generate Belgian Iban",
       "description": "Generate a random Belgian IBAN number and copy it to clipboard",
       "mode": "no-view"
     },
     {
       "name": "generate-international-iban",
-      "title": "Generate International IBAN",
+      "title": "Generate International Iban",
       "description": "Generate a random IBAN number and copy it to clipboard",
       "mode": "no-view"
     }
