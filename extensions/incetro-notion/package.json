@@ -5,6 +5,15 @@
   "description": "Extenision to work with Incetro notion dashboard",
   "icon": "extension-icon.png",
   "author": "corray333",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "description": "API Key to access Incetro api",
+      "type": "password",
+      "required": true
+    }
+  ],
   "categories": [
     "Productivity"
   ],
@@ -14,6 +23,12 @@
       "name": "write-of-time",
       "title": "Write of Time",
       "description": "Write of time in notion",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create task in notion",
       "mode": "view"
     },
     {

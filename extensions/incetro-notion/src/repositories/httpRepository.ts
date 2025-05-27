@@ -2,13 +2,20 @@
 import axios from "axios";
 import { Employee } from "../entities/employee";
 import { Project } from "../entities/project";
-import { Task } from "../entities/task";
+import { NewTaskMsg, Task } from "../entities/task";
+import { getPreferenceValues } from "@raycast/api";
+import { Preferences } from "../entities/preferences";
 
 const api = axios.create({
-  baseURL: "https://management.incetro.agency/api", // замените на нужный URL
-  headers: {
-    Authorization: "Bearer NBXdfNC8H2w7q6T8x5imBx6h0wC0euoT",
-  },
+  baseURL: "https://management.incetro.agency/api",
+});
+
+api.interceptors.request.use((config) => {
+  const prefs = getPreferenceValues<Preferences>();
+  if (prefs) {
+    config.headers.Authorization = `Bearer ${prefs.api_key}`;
+  }
+  return config;
 });
 
 export class HTTPRepository {
@@ -45,14 +52,28 @@ export class HTTPRepository {
     task: Task,
     duration: number,
     description: string,
+    workDate: Date,
   ): Promise<Task[]> => {
-    const { data } = await api.post("/tracker/time", {
+    const { data } = await api.post("/time", {
       taskID: task.id,
       employeeID: employee.id,
       projectID: project.id,
       duration: duration * 60 * 60,
       description: description,
+      workDate: workDate.toISOString(),
     });
     return data;
+  };
+
+  static CreateTask = async (task: NewTaskMsg) => {
+    await api.post("/task", {
+      projectID: task.projectID,
+      executorID: task.executorID,
+      task: task.task,
+      estimate: task.estimate,
+      priority: task.priority,
+      start: task.start,
+      end: task.end,
+    });
   };
 }

@@ -5,6 +5,7 @@ import { HTTPRepository } from "./repositories/httpRepository";
 import { StorageRepository } from "./repositories/storageRepository";
 import { Project } from "./entities/project";
 import { Task } from "./entities/task";
+import { isAxiosError } from "axios";
 
 export default function Command() {
   const [input, setInput] = useState<string>("");
@@ -17,6 +18,7 @@ export default function Command() {
 
   const [whatDid, setWhatDid] = useState<string>("");
   const [hoursSpent, setHoursSpent] = useState<string>("");
+  const [workDate, setWorkDate] = useState<Date>(new Date());
 
   useEffect(() => {
     StorageRepository.getEmployee().then((emp) => {
@@ -24,7 +26,21 @@ export default function Command() {
         setInput("");
         setEmployee(emp);
       } else {
-        HTTPRepository.GetEmployees().then((empList) => setEmployees(empList));
+        HTTPRepository.GetEmployees()
+          .then((empList) => setEmployees(empList))
+          .catch((err) => {
+            if (isAxiosError(err)) {
+              showToast({
+                style: Toast.Style.Failure,
+                title: `Failed to get employees: ${err.code}`,
+              });
+            } else {
+              showToast({
+                style: Toast.Style.Failure,
+                title: `Failed to get employees: unknown error`,
+              });
+            }
+          });
       }
     });
   }, []);
@@ -32,13 +48,42 @@ export default function Command() {
   useEffect(() => {
     if (employee) {
       setInput("");
-      HTTPRepository.GetProjects(employee).then((projectList) => setProjects(projectList));
+      HTTPRepository.GetProjects(employee)
+        .then((projectList) => setProjects(projectList))
+        .catch((err) => {
+          if (isAxiosError(err)) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: `Failed to get projects: ${err.code}`,
+            });
+          } else {
+            showToast({
+              style: Toast.Style.Failure,
+              title: `Failed to get projects: unknown error`,
+            });
+          }
+        });
     }
   }, [employee]);
 
   useEffect(() => {
     setInput("");
-    if (employee && project) HTTPRepository.GetTasks(employee, project).then((taskList) => setTasks(taskList));
+    if (employee && project)
+      HTTPRepository.GetTasks(employee, project)
+        .then((taskList) => setTasks(taskList))
+        .catch((err) => {
+          if (isAxiosError(err)) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: `Failed to get tasks: ${err.code}`,
+            });
+          } else {
+            showToast({
+              style: Toast.Style.Failure,
+              title: `Failed to get tasks: unknown error`,
+            });
+          }
+        });
   }, [project]);
 
   function renderEmployeeList(empList: Employee[]) {
@@ -121,20 +166,26 @@ export default function Command() {
 
   const writeOfTime = () => {
     if (employee && project && task && whatDid && hoursSpent) {
-      try {
-        HTTPRepository.WriteOfTime(employee, project, task, parseFloat(hoursSpent), whatDid).then(() => {
+      HTTPRepository.WriteOfTime(employee, project, task, parseFloat(hoursSpent), whatDid, workDate)
+        .then(() => {
           showToast({
             style: Toast.Style.Success,
             title: "Time is recorded",
           });
+        })
+        .catch((err) => {
+          if (isAxiosError(err)) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: `Failed to write of time: ${err.code}`,
+            });
+          } else {
+            showToast({
+              style: Toast.Style.Failure,
+              title: `Failed to write of time: unknown error`,
+            });
+          }
         });
-      } catch (error) {
-        console.log(error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-        });
-      }
     }
   };
 
@@ -147,8 +198,10 @@ export default function Command() {
           </ActionPanel>
         }
       >
+        <Form.Description text={`Task: ${task?.title}, estimate ${task?.estimate} h.`} />
         <Form.TextField id="whatdid" title="What did?" onChange={(value) => setWhatDid(value)} />
         <Form.TextField id="hours" title="How many hours?" onChange={(value) => setHoursSpent(value)} />
+        <Form.DatePicker id="workdate" title="Work date" value={workDate} onChange={(value) => setWorkDate(value)} />
       </Form>
     );
   }
