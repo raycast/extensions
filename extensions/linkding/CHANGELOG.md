@@ -1,5 +1,9 @@
 # Linkding Changelog
 
+## [Fix] - 2025-05-27
+
+- fix: use more reliable AppleScript to get Firefox URL
+
 ## [Fix & Feature] - 2025-05-26
 
 - feat: save current browser tab

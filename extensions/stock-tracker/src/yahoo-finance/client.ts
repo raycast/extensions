@@ -1,22 +1,22 @@
 import { LocalStorage } from "@raycast/api";
 import fetch from "cross-fetch";
+import pkg from "../../package.json";
 
 const HEADERS = {
-  "User-Agent":
-    "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+  "User-Agent": `Mozilla/5.0 (compatible; ${pkg.name})`,
 } as const;
 
 export async function get<T>(path: string, params: { [key: string]: string }, signal: AbortSignal): Promise<T> {
   // Requests to Yahoo Finance require a cookie (header) and a crumb (query param).
-  const { cookie, crumb } = await cookieCrumb();
+  const { cookie, crumb } = await cookieCrumb(false);
 
   try {
     return await request<T>(path, { ...params, crumb }, cookie, signal);
   } catch (error) {
     console.log("yahoo-finance: request failed", error);
-    if (error instanceof YahooFinanceError && error.status === 401) {
-      console.log("yahoo-finance: cookie expired, fetching new cookie");
-      const { cookie, crumb } = await cookieCrumb();
+    if (error instanceof YahooFinanceError && error.status >= 400) {
+      console.log("yahoo-finance: cookie expired or invalid crumb, fetching new cookie and crumb");
+      const { cookie, crumb } = await cookieCrumb(true);
       return await request<T>(path, { ...params, crumb }, cookie, signal);
     }
     throw error;
@@ -59,10 +59,12 @@ interface CookieCrumb {
 }
 
 // Get a cookie and crumb from Yahoo Finance, caching the result in local storage.
-export async function cookieCrumb(): Promise<CookieCrumb> {
-  const value = await LocalStorage.getItem<string>("yahoo-cookie-crumb");
-  if (value) {
-    return JSON.parse(value);
+export async function cookieCrumb(ignoreExisting: boolean): Promise<CookieCrumb> {
+  if (!ignoreExisting) {
+    const value = await LocalStorage.getItem<string>("yahoo-cookie-crumb");
+    if (value) {
+      return JSON.parse(value);
+    }
   }
 
   console.log("yahoo-finance: fetching new cookie");

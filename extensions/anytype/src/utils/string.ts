@@ -99,7 +99,6 @@ export function injectEmojiIntoHeading(markdown: string, icon?: Image.ImageLike)
  * @returns True if the string is a valid emoji, false otherwise.
  */
 export function isEmoji(s: string) {
-  const re = emojiRegex();
-  const match = re.exec(s);
+  const match = emojiRegex().exec(s);
   return match !== null && match[0] === s;
 }

@@ -7,10 +7,12 @@ import {
   launchCommand,
   LaunchType,
   closeMainWindow,
+  popToRoot,
 } from "@raycast/api";
 import got, { HTTPError, RequestError } from "got";
 import { StatusCodes, getReasonPhrase } from "http-status-codes";
 
+const { returnToRootState } = getPreferenceValues<Preferences>();
 function isPro(key: string) {
   return !key.endsWith(":fx");
 }
@@ -23,11 +25,19 @@ const DEEPL_QUOTA_EXCEEDED = 456;
  * @param delay - Delay in milliseconds before closing (default: 1000ms)
  */
 export async function delayedCloseWindow(closeRaycastAfterTranslation: boolean, delay: number = 1000): Promise<void> {
-  if (!closeRaycastAfterTranslation) return;
+  if (!closeRaycastAfterTranslation) {
+    if (returnToRootState) {
+      await popToRoot();
+    }
+    return;
+  }
 
   return new Promise((resolve) => {
     setTimeout(async () => {
       try {
+        if (returnToRootState) {
+          await popToRoot();
+        }
         await closeMainWindow();
         resolve();
       } catch (error) {

@@ -5,7 +5,7 @@ interface Props {
   ignoreErrors?: boolean;
 }
 
-// implementation borrowed from raindrop.io extension:
+// implementation adapted from raindrop.io extension:
 // https://github.com/raycast/extensions/blob/main/extensions/raindrop-io/src/hooks/useBrowserLink.ts
 export const useBrowserLink = ({ ignoreErrors }: Props = {}) => {
   return usePromise(
@@ -27,18 +27,21 @@ export const useBrowserLink = ({ ignoreErrors }: Props = {}) => {
           return runAppleScript(`tell application "Orion" to return URL of front document`);
         case "org.mozilla.firefox":
           return runAppleScript(`
-            tell application "System Events"
-              set firefox to application process "Firefox"
-
-              -- HACK: It is important to get the list of UI elements; otherwise, we get an error
-              get properties of firefox
-
-              set frontWindow to front window of firefox
-              set firstGroup to first group of frontWindow
-              set navigation to toolbar "Navigation" of firstGroup
-              get value of UI element 1 of combo box 1 of navigation
-            end tell
-          `);
+              tell application "System Events"
+                tell application process "Firefox"
+                  set frontWindow to front window
+		  repeat with currentGroup in (groups of toolbar "Navigation" of group 1 of frontWindow)
+		    try
+		      repeat with currentComboBox in (combo boxes of currentGroup)
+			try
+			  set urlValue to value of text field 1 of currentComboBox
+			  if urlValue contains "http" then return urlValue
+		         end try
+		      end repeat
+		    end try
+		  end repeat
+	        end tell
+              end tell `);
         default:
           break;
       }

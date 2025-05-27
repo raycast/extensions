@@ -734,6 +734,14 @@
       "description": "Automatically close Raycast after getting translation result",
       "default": false,
       "type": "checkbox"
+    },
+    {
+      "label": "Return to Root State",
+      "name": "returnToRootState",
+      "required": false,
+      "description": "Reset Raycast to root state after copying translated result",
+      "default": false,
+      "type": "checkbox"
     }
   ],
   "dependencies": {

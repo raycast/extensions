@@ -30,10 +30,7 @@ export function TagList({ space, propertyId }: TagListProps) {
     });
     try {
       await mutateTags();
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Tags refreshed",
-      });
+      await showToast({ style: Toast.Style.Success, title: "Tags refreshed" });
     } catch (error) {
       await showFailureToast(error, { title: "Failed to refresh tags" });
     }
