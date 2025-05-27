@@ -1,6 +1,6 @@
 # Deepcast Changelog
 
-## [Return to Root State] - {PR_MERGE_DATE}
+## [Return to Root State] - 2025-05-27
 
 - Added preference option to reset Raycast to root state after copying the translated text
 - Improves workflow by allowing users to quickly return to the root state after translation
