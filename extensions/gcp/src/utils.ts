@@ -63,14 +63,19 @@ export async function getProjectId(): Promise<string> {
     }
 
     throw new Error("No project ID found. Please set it in preferences or configure ADC.");
-  } catch {
-    throw new Error("Failed to determine project ID");
+  } catch (error) {
+    throw new Error(`Failed to determine project ID: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
 export function formatDate(dateString: string): string {
   if (!dateString) return "Unknown";
-  return new Date(dateString).toLocaleString();
+  try {
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? "Invalid Date" : date.toLocaleString();
+  } catch {
+    return "Invalid Date";
+  }
 }
 
 export function getZoneFromSelfLink(selfLink: string): string {
@@ -90,6 +95,7 @@ export function getMachineTypeFromSelfLink(machineTypeUrl: string): string {
 
 export function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
+  if (bytes < 0) return "Invalid size";
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));

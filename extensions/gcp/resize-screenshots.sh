@@ -8,6 +8,12 @@ if ! command -v convert &> /dev/null; then
     brew install imagemagick
 fi
 
+# Check if metadata directory exists
+if [ ! -d "metadata" ]; then
+    echo "❌ metadata directory not found"
+    exit 1
+fi
+
 # Resize screenshots in metadata folder
 for file in metadata/*.png; do
     if [ -f "$file" ]; then

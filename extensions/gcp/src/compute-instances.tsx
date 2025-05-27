@@ -199,8 +199,9 @@ gcloud projects add-iam-policy-binding ${projectId} --member='serviceAccount:YOU
 
       showToast(Toast.Style.Success, "Success", `Starting instance ${instanceName}`);
       await loadInstances(true); // Force refresh
-    } catch {
-      showToast(Toast.Style.Failure, "Error", `Failed to start instance ${instanceName}`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      showToast(Toast.Style.Failure, "Error", `Failed to start instance ${instanceName}: ${errorMsg}`);
     }
   }
 
@@ -238,8 +239,9 @@ gcloud projects add-iam-policy-binding ${projectId} --member='serviceAccount:YOU
 
       showToast(Toast.Style.Success, "Success", `Stopping instance ${instanceName}`);
       await loadInstances(true); // Force refresh
-    } catch {
-      showToast(Toast.Style.Failure, "Error", `Failed to stop instance ${instanceName}`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      showToast(Toast.Style.Failure, "Error", `Failed to stop instance ${instanceName}: ${errorMsg}`);
     }
   }
 
@@ -277,8 +279,9 @@ gcloud projects add-iam-policy-binding ${projectId} --member='serviceAccount:YOU
 
       showToast(Toast.Style.Success, "Success", `Restarting instance ${instanceName}`);
       await loadInstances(true); // Force refresh
-    } catch {
-      showToast(Toast.Style.Failure, "Error", `Failed to restart instance ${instanceName}`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      showToast(Toast.Style.Failure, "Error", `Failed to restart instance ${instanceName}: ${errorMsg}`);
     }
   }
 

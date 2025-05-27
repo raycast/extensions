@@ -23,7 +23,10 @@ resize_icon() {
     elif command -v sips &> /dev/null; then
         # Using macOS sips (basic resize, no padding)
         cp "$input" "$output"
-        sips -z 512 512 "$output" --out "$output" >/dev/null 2>&1
+        if ! sips -z 512 512 "$output" --out "$output" >/dev/null 2>&1; then
+            echo "⚠️  Failed to resize $output with sips"
+            return 1
+        fi
         echo "✅ Created $output (using sips)"
     else
         # Just copy as-is

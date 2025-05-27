@@ -157,7 +157,8 @@ export default function CloudRunServices() {
               })),
             };
           });
-        } catch {
+        } catch (error) {
+          console.error(`Failed to fetch services in ${region}:`, error);
           return [];
         }
       });
@@ -204,7 +205,7 @@ gcloud projects add-iam-policy-binding ${await getProjectId()} --member='service
     const hours = 24;
     const maxRequests = 1000;
 
-    let graph = "## 📊 Request Metrics (Last 24 Hours)\n\n";
+    let graph = "## 📊 Request Metrics (Mock Data - Last 24 Hours)\n\n";
     graph += "```\n";
     graph += "Requests/hour\n";
 
@@ -243,7 +244,9 @@ gcloud projects add-iam-policy-binding ${await getProjectId()} --member='service
     const [projectId, setProjectId] = useState<string>("");
 
     useEffect(() => {
-      getProjectId().then((id) => setProjectId(id));
+      getProjectId()
+        .then((id) => setProjectId(id))
+        .catch((err) => console.error("Failed to get project ID:", err));
     }, []);
 
     // Generate monitoring dashboard URL
@@ -349,9 +352,9 @@ gcloud run services describe ${service.name} --region=${service.region}
 
   return (
     <List isLoading={loading} searchBarPlaceholder="Search Cloud Run services...">
-      {services.map((service, index) => (
+      {services.map((service) => (
         <List.Item
-          key={`${service.name}-${service.region}-${index}`}
+          key={`${service.region}/${service.name}`}
           title={service.name}
           subtitle={`${service.region} • ${service.image.split("/").pop()}`}
           accessories={[

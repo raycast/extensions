@@ -138,13 +138,9 @@ export default function CloudFunctions() {
           }
 
           return regionFunctions;
-        } catch (regionError) {
+        } catch {
           // Skip regions without access or no functions
-          const error = regionError as { code?: number };
-          if (error.code === 7 || error.code === 5) {
-            // PERMISSION_DENIED or NOT_FOUND
-            return [];
-          }
+          // PERMISSION_DENIED or NOT_FOUND
           return [];
         }
       });
@@ -187,7 +183,13 @@ gcloud projects add-iam-policy-binding ${await getProjectId()} --member='service
   }
 
   function FunctionDetail({ func }: { func: GCPFunction }) {
-    const projectId = getProjectId();
+    const [projectId, setProjectId] = useState<string>("");
+
+    useEffect(() => {
+      getProjectId()
+        .then((id) => setProjectId(id))
+        .catch((err) => console.error("Failed to get project ID:", err));
+    }, []);
     const markdown = `
 # ${func.name}
 
@@ -255,9 +257,9 @@ curl -X POST https://${func.region}-${projectId}.cloudfunctions.net/${func.name}
 
   return (
     <List isLoading={loading} searchBarPlaceholder="Search Cloud Functions...">
-      {functions.map((func, index) => (
+      {functions.map((func) => (
         <List.Item
-          key={`${func.name}-${func.region}-${index}`}
+          key={`${func.region}/${func.name}`}
           title={func.name}
           subtitle={`${func.region} • ${func.runtime} • ${func.trigger}`}
           accessories={[

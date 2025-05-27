@@ -171,40 +171,47 @@ gsutil -m rsync -r local-directory gs://${bucket.name}/directory/
 
   return (
     <List isLoading={loading} searchBarPlaceholder="Search storage buckets...">
-      {buckets.map((bucket) => (
-        <List.Item
-          key={bucket.name}
-          title={bucket.name}
-          subtitle={`${bucket.location} • ${bucket.storageClass}`}
-          accessories={[
-            ...(bucket.size ? [{ text: bucket.size, tooltip: "Bucket size" }] : []),
-            ...(bucket.objects !== undefined
-              ? [{ text: `${bucket.objects} objects`, tooltip: "Number of objects" }]
-              : []),
-            {
-              text: bucket.location,
-              icon: Icon.Globe,
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push title="Show Details" target={<BucketDetail bucket={bucket} />} icon={Icon.Eye} />
-              <Action.OpenInBrowser
-                title="Open in Console"
-                url={`https://console.cloud.google.com/storage/browser/${bucket.name}`}
-              />
-              <Action.CopyToClipboard title="Copy Bucket URL" content={`gs://${bucket.name}`} />
-              <Action.CopyToClipboard title="Copy List Command" content={`gsutil ls gs://${bucket.name}`} />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={() => loadBuckets(true)}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            </ActionPanel>
-          }
+      {buckets.length === 0 && !loading ? (
+        <List.EmptyView
+          title="No storage buckets found"
+          description="Create a bucket in GCP Console or refresh to try again"
         />
-      ))}
+      ) : (
+        buckets.map((bucket) => (
+          <List.Item
+            key={bucket.name}
+            title={bucket.name}
+            subtitle={`${bucket.location} • ${bucket.storageClass}`}
+            accessories={[
+              ...(bucket.size ? [{ text: bucket.size, tooltip: "Bucket size" }] : []),
+              ...(bucket.objects !== undefined
+                ? [{ text: `${bucket.objects} objects`, tooltip: "Number of objects" }]
+                : []),
+              {
+                text: bucket.location,
+                icon: Icon.Globe,
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push title="Show Details" target={<BucketDetail bucket={bucket} />} icon={Icon.Eye} />
+                <Action.OpenInBrowser
+                  title="Open in Console"
+                  url={`https://console.cloud.google.com/storage/browser/${bucket.name}`}
+                />
+                <Action.CopyToClipboard title="Copy Bucket URL" content={`gs://${bucket.name}`} />
+                <Action.CopyToClipboard title="Copy List Command" content={`gsutil ls gs://${bucket.name}`} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  onAction={() => loadBuckets(true)}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }

@@ -10,7 +10,7 @@ A Raycast extension for browsing and managing Google Cloud Platform resources.
   - Copy SSH commands
   - Open instances in GCP Console
 
-- **Cloud Storage**: Browse and manage storage buckets
+- **Cloud Storage**: Browse storage buckets
   - View bucket details (location, storage class, size)
   - Copy bucket URLs and gsutil commands
   - Open buckets in GCP Console
@@ -38,18 +38,7 @@ A Raycast extension for browsing and managing Google Cloud Platform resources.
 
 ### Installation
 
-1. Clone this repository
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   bun install
-   ```
-3. Build the extension:
-   ```bash
-   npm run build
-   ```
-4. Import the extension in Raycast
+1. Install the extension from the Raycast store
 
 ### Configuration
 
@@ -67,7 +56,7 @@ The extension supports two authentication methods:
 ### Required Permissions
 
 The service account or user needs the following roles:
-- `roles/compute.viewer` - For Compute Engine instances
+- `roles/compute.instanceAdmin.v1` - For Compute Engine instances (view and manage)
 - `roles/storage.objectViewer` - For Cloud Storage buckets
 - `roles/run.viewer` - For Cloud Run services
 - `roles/cloudfunctions.viewer` - For Cloud Functions
