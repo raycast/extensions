@@ -109,10 +109,12 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
               icon={Icon.MagnifyingGlass}
               target={
                 <TransactionView
-                  search={`category:${category.name
-                    .replace(/[\p{Emoji}]/gu, '')
-                    .trim()
-                    .toLowerCase()}`}
+                  search={`category:${(() => {
+                    return category.name
+                      .replace(/[\p{Emoji}\u{FE0F}\u{200B}\u{200C}\u{200D}\u{FEFF}]/gu, '')
+                      .trim()
+                      .toLowerCase();
+                  })()}`}
                 />
               }
               shortcut={Shortcuts.ShowTransactionsForCategory}
