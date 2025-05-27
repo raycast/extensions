@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "iban-generator",
-  "title": "Belgian Iban Generator",
-  "description": "Generate and copy valid Belgian IBAN numbers with proper formatting and validation",
+  "title": "Iban Generator",
+  "description": "Generate and copy valid IBAN numbers with proper formatting and validation",
   "icon": "extension-icon.png",
   "author": "m44rten1",
   "license": "MIT",
@@ -25,7 +25,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.99.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "ibankit": "^1.6.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
