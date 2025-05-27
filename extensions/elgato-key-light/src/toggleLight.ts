@@ -1,5 +1,4 @@
 import { showToast, Toast } from "@raycast/api";
-import { internalToKelvin } from "./elgato";
 import { showFailureToast } from "@raycast/utils";
 import { discoverKeyLights } from "./utils";
 
@@ -7,17 +6,14 @@ const command = async () => {
   try {
     const keyLight = await discoverKeyLights();
     try {
-      const temperature = await keyLight.decreaseTemperature();
+      const isOn = await keyLight.toggle();
 
       await showToast({
         style: Toast.Style.Success,
-        title:
-          typeof temperature === "number"
-            ? `Temperature: ${internalToKelvin(temperature).toLocaleString("en", { maximumFractionDigits: 0 })}K`
-            : "Temperature decreased",
+        title: isOn ? "Light turned on" : "Light turned off",
       });
     } catch (error) {
-      showFailureToast(error, { title: "Failed to decrease temperature" });
+      showFailureToast(error, { title: "Failed to toggle light" });
     }
   } catch (error) {
     showFailureToast(error, { title: "Failed to discover Key Lights" });
