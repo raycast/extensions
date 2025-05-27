@@ -51,11 +51,8 @@ export default function CloudFunctions() {
   const [projectId, setProjectId] = useState<string>("");
 
   useEffect(() => {
+    // loadFunctions will also set the projectId, no need for separate call
     loadFunctions();
-    // Also load project ID for URL generation
-    getProjectId()
-      .then((id) => setProjectId(id))
-      .catch((err) => console.error("Failed to get project ID:", err));
   }, []);
 
   async function loadFunctions(forceRefresh = false) {
@@ -63,7 +60,10 @@ export default function CloudFunctions() {
       setLoading(true);
       setError(null);
 
+      // Cache the project ID for the entire function to avoid multiple awaits
       const projectId = await getProjectId();
+      // Also update the component state to use in rendering
+      setProjectId(projectId);
       const cacheKey = getCacheKey("cloud-functions", projectId);
 
       // Check cache first (unless force refresh)
@@ -194,7 +194,8 @@ export default function CloudFunctions() {
       const errorMsg = err instanceof Error ? err.message : "Failed to load Cloud Functions";
 
       if (errorMsg.includes("403") || errorMsg.includes("PERMISSION_DENIED")) {
-        const currentProjectId = await getProjectId().catch(() => "YOUR-PROJECT-ID");
+        // Use the already cached projectId to avoid another async call
+        const currentProjectId = projectId || "YOUR-PROJECT-ID";
         setError(`🚫 Cloud Functions API Access Denied
 
 The service account lacks permission to access Cloud Functions.
