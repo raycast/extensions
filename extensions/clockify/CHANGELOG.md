@@ -1,5 +1,9 @@
 # Clockify Changelog
 
+## [Autofocus description field] - 2025-05-13
+
+- Autofocus description field in "Start New Timer" view.
+
 ## [Fix description requirement] - 2025-04-11
 
 - Made description on new tasks optional.

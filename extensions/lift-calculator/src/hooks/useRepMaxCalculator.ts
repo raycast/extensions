@@ -7,7 +7,7 @@ import { VALIDATION } from "../constants/shared";
 export const useRepMaxCalculator = (initialWeight?: string, initialReps?: string) => {
   const [weight, setWeight] = useState(initialWeight || "");
   const [reps, setReps] = useState(initialReps || "");
-  const [searchText, setSearchText] = useState(initialWeight && initialReps ? `${initialWeight}*${initialReps}` : "");
+  const [searchText, setSearchText] = useState(initialWeight && initialReps ? `${initialWeight}x${initialReps}` : "");
   const [results, setResults] = useState<MaxResult[]>([]);
 
   const calculateResults = useCallback(() => {
@@ -53,7 +53,7 @@ export const useRepMaxCalculator = (initialWeight?: string, initialReps?: string
 
       // Update state
       setResults(generatedResults);
-      setSearchText(`${weight}*${reps}`);
+      setSearchText(`${weight}x${reps}`);
     } catch (error) {
       // Use getErrorResult for any calculation errors
       setResults(getErrorResult(error instanceof Error ? error.message : "Invalid input"));

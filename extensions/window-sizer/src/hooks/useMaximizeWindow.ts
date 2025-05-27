@@ -1,4 +1,4 @@
-import { closeMainWindow, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, showHUD, showToast, Toast, PopToRootType } from "@raycast/api";
 import { maximizeActiveWindow } from "../swift-app";
 import { useWindowStateManager } from "./useWindowStateManager";
 
@@ -8,12 +8,8 @@ export function useMaximizeWindow() {
   // Function to maximize the active window
   async function maximizeWindow() {
     try {
-      // First, save the current window state
-      const windowId = await saveWindowState();
-
-      if (!windowId) {
-        throw new Error("Failed to save window state");
-      }
+      // Try to save the current window state, but continue even if it fails
+      await saveWindowState();
 
       // Then check if the window is already maximized
       const result = await maximizeActiveWindow();
@@ -38,13 +34,12 @@ export function useMaximizeWindow() {
         await closeMainWindow();
 
         // Display success message
-        await showHUD(`🔲 Window maximized`);
-
-        // Return to root after execution
-        await popToRoot();
+        await showHUD(`↔ Window maximized`, {
+          popToRootType: PopToRootType.Immediate,
+        });
       } else {
         // Handle unexpected response
-        throw new Error("Unexpected response from maximization function");
+        throw new Error(`Unexpected response: ${result}`);
       }
     } catch (error) {
       console.error("Error maximizing window:", error);

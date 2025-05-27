@@ -33,6 +33,6 @@ export const getErrorResult = (message?: string): MaxResult[] => [
     value: 0,
     tintColor: Color.Red,
     icon: Icon.ExclamationMark,
-    text: message || "Please enter weight and repetitions in the format: weight*reps (e.g. 70*6)",
+    text: message || "Please enter weight and repetitions in the format: weight x reps (e.g. 70x6)",
   },
 ];

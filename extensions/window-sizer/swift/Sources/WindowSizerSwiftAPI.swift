@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import CoreGraphics
 import Foundation
 import RaycastSwiftMacros
 
@@ -15,7 +16,6 @@ private func isDesktopOrFullscreen() -> (isDesktopOrFullscreen: Bool, message: S
   }
 
   let appBundleID = frontApp.bundleIdentifier ?? "unknown"
-  let appName = frontApp.localizedName ?? "unknown"
 
   // First check: Is it Finder?
   let isFinder = appBundleID == "com.apple.finder"
@@ -171,16 +171,46 @@ private func getActiveWindowData() -> (
   )
 }
 
-// Retrieve all screens and their resolution info
+private func isLaunchedByRaycast() -> Bool {
+  let env = ProcessInfo.processInfo.environment
+  return env.keys.contains(where: { $0.hasPrefix("RAYCAST_") })
+}
+
 @raycast func getScreensInfo() -> [String] {
+  guard isLaunchedByRaycast() else {
+    return ["Error: This command must be run from Raycast"]
+  }
+
   let screens = NSScreen.screens
   var results: [String] = []
-
   for (index, screen) in screens.enumerated() {
     results.append(getScreenInfoString(screenIndex: index, screen: screen))
   }
 
   return results
+}
+
+// Get window number
+private func getWindowNumber(processId: pid_t) -> Int? {
+  let windowList =
+    CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) as? [[String: Any]]
+
+  // Find windows belonging to the current process
+  let processWindows = windowList?.filter { window in
+    if let windowPid = window[kCGWindowOwnerPID as String] as? pid_t {
+      return windowPid == processId
+    }
+    return false
+  }
+
+  // Get the window number of the first window
+  if let firstWindow = processWindows?.first,
+    let windowNumber = firstWindow[kCGWindowNumber as String] as? Int
+  {
+    return windowNumber
+  }
+
+  return nil
 }
 
 // Export active window information as structured data for direct use by JavaScript
@@ -212,9 +242,9 @@ private func getActiveWindowData() -> (
     return errorResult
   }
 
-  // Convert AXUIElement to a string identifier
-  let axWindowRef = windowData.axWindowRef!
-  let windowRefID = "\(Unmanaged.passUnretained(axWindowRef).toOpaque())"
+  // Get window number
+  let processId = NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0
+  let windowNumber = getWindowNumber(processId: processId)
 
   // Create window info
   let position = WindowPosition(
@@ -234,14 +264,14 @@ private func getActiveWindowData() -> (
 
   let appInfo = AppInfo(
     name: windowData.appName,
-    processID: Int(NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0)
+    processID: Int(processId)
   )
 
   // Return structured data that can be converted to JSON
   return WindowDetails(
     error: false,
     message: nil,
-    windowRefID: windowRefID,
+    windowRefID: windowNumber?.description,
     window: windowInfo,
     app: appInfo
   )
@@ -499,17 +529,15 @@ private func getActiveWindowRef() -> AXUIElement? {
   var currentX: CGFloat
   var currentY: CGFloat
   var currentWidth: CGFloat
-  var currentHeight: CGFloat
   var currentScreenFrame: CGRect
 
-  if let wx = windowX, let wy = windowY, let ww = windowWidth, let wh = windowHeight,
+  if let wx = windowX, let wy = windowY, let ww = windowWidth, windowHeight != nil,
     let sf = screenFrame
   {
     // Use provided values - assume they're already in AX coordinates
     currentX = CGFloat(wx)
     currentY = CGFloat(wy)
     currentWidth = CGFloat(ww)
-    currentHeight = CGFloat(wh)
     currentScreenFrame = sf
   } else {
     // Parse from active window - these will be in AX coordinates
@@ -528,7 +556,6 @@ private func getActiveWindowRef() -> AXUIElement? {
     currentX = CGFloat(info.windowX)
     currentY = CGFloat(info.windowY)
     currentWidth = CGFloat(info.windowWidth)
-    currentHeight = CGFloat(info.windowHeight)
     currentScreenFrame = info.screenFrame
   }
 

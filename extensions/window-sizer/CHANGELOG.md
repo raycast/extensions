@@ -1,13 +1,39 @@
 # Window Sizer Changelog
 
-## Update Extension Icon] - 2025-05-07
+## [Chore] - 2025-05-26
 
-- Update extension icon and screenshots
+- Cleanup of internal HUD navigation logic
+
+## [Fixes] - 2025-05-23
+
+- Fixed occasional issue with action icon not displaying
+
+## [UI improvement] - 2025-05-21
+
+- Adjusted Action icon to only display when selected
+
+## [Starred Sizes & Improvements] - 2025-05-19
+
+- Added starring for frequently used window sizes
+- Unified shortcut keys for Deleting Custom and Starred Sizes
+- Improved action icons
+
+## [New Action Icons] - 2025-05-12
+
+- Added new action icons
+
+## [Fixes] - 2025-05-08
+
+- Fixed the delete icon tooltip text on custom size list items
+
+## [Update Extension Icon] - 2025-05-07
+
+- Updated extension icon and screenshots
 
 ## [Fixes] - 2025-05-06
 
-- Fix toast text when restoring a window with restricted size
-- Unify toast text style
+- Fixed toast text when restoring a window with restricted size
+- Unified toast text style
 
 ## [Refactored entirely in Swift] - 2025-05-05
 
@@ -19,8 +45,8 @@
 ## [New Features & Fixes] - 2025-04-28
 
 - Enabled maximizing the active window
-- Supported fetching and displaying the current window size
-- Resolved incorrect positioning when restoring a saved size
+- Added support for displaying the current window size
+- Fixed incorrect positioning when restoring a saved size
 - Improved toast behavior when the size exceeds the screen
 - Suppressed redundant toast when saving the same size again
 

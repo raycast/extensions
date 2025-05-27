@@ -12,7 +12,7 @@ export function useTournaments(leagueId: string) {
   };
 }
 
-interface TournamentsByLeagueResponse {
+export interface TournamentsByLeagueResponse {
   data: {
     leagues: LeaguesItem[];
   };
