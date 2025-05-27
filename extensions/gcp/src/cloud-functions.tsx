@@ -1,4 +1,5 @@
 import { ActionPanel, Action, List, Detail, showToast, Toast, Icon, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { CloudFunctionsServiceClient } from "@google-cloud/functions";
 import { GCPFunction } from "./types";
@@ -176,7 +177,9 @@ gcloud projects add-iam-policy-binding ${await getProjectId()} --member='service
         setError(errorMsg);
       }
 
-      showToast(Toast.Style.Failure, "Error", errorMsg);
+      await showFailureToast(err instanceof Error ? err : new Error(errorMsg), {
+        title: "Error loading Cloud Functions",
+      });
     } finally {
       setLoading(false);
     }

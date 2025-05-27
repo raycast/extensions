@@ -1,4 +1,5 @@
 import { ActionPanel, Action, List, Detail, showToast, Toast, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { Storage } from "@google-cloud/storage";
 import { GCPStorageBucket } from "./types";
@@ -101,7 +102,9 @@ export default function StorageBuckets() {
       setBuckets(bucketsData);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to load storage buckets";
-      showToast(Toast.Style.Failure, "Error", errorMsg);
+      await showFailureToast(err instanceof Error ? err : new Error(errorMsg), {
+        title: "Error loading storage buckets",
+      });
       setError(errorMsg);
     } finally {
       setLoading(false);

@@ -3,7 +3,7 @@
 echo "🖼️ Resizing screenshots to Raycast requirements (2000x1250)..."
 
 # Check if ImageMagick is installed
-if ! command -v convert &> /dev/null; then
+if ! command -v magick &> /dev/null; then
     echo "❌ ImageMagick not found. Installing..."
     brew install imagemagick
 fi
@@ -21,7 +21,7 @@ for file in metadata/*.png; do
         echo "Resizing $filename..."
         
         # Create a 2000x1250 canvas and place the image centered
-        convert "$file" -resize 2000x1250 -background "#1a1a1a" -gravity center -extent 2000x1250 "$file"
+        magick "$file" -resize 2000x1250 -background "#1a1a1a" -gravity center -extent 2000x1250 "$file"
         
         echo "✅ Resized $filename"
     fi

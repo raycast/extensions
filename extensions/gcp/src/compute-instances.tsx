@@ -1,4 +1,5 @@
 import { ActionPanel, Action, List, Detail, showToast, Toast, Icon, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { GCPInstance } from "./types";
 import { getGoogleAuth, getProjectId, formatDate, getMachineTypeFromSelfLink, getStatusIcon } from "./utils";
@@ -159,7 +160,9 @@ gcloud projects add-iam-policy-binding ${projectId} --member='serviceAccount:YOU
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to load instances";
       setError(errorMsg);
-      showToast(Toast.Style.Failure, "Error", errorMsg);
+      await showFailureToast(err instanceof Error ? err : new Error(errorMsg), {
+        title: "Error loading instances",
+      });
     } finally {
       setLoading(false);
     }
@@ -200,8 +203,9 @@ gcloud projects add-iam-policy-binding ${projectId} --member='serviceAccount:YOU
       showToast(Toast.Style.Success, "Success", `Starting instance ${instanceName}`);
       await loadInstances(true); // Force refresh
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "Unknown error";
-      showToast(Toast.Style.Failure, "Error", `Failed to start instance ${instanceName}: ${errorMsg}`);
+      await showFailureToast(error instanceof Error ? error : new Error("Unknown error"), {
+        title: `Failed to start instance ${instanceName}`,
+      });
     }
   }
 
@@ -240,8 +244,9 @@ gcloud projects add-iam-policy-binding ${projectId} --member='serviceAccount:YOU
       showToast(Toast.Style.Success, "Success", `Stopping instance ${instanceName}`);
       await loadInstances(true); // Force refresh
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "Unknown error";
-      showToast(Toast.Style.Failure, "Error", `Failed to stop instance ${instanceName}: ${errorMsg}`);
+      await showFailureToast(error instanceof Error ? error : new Error("Unknown error"), {
+        title: `Failed to stop instance ${instanceName}`,
+      });
     }
   }
 
@@ -280,8 +285,9 @@ gcloud projects add-iam-policy-binding ${projectId} --member='serviceAccount:YOU
       showToast(Toast.Style.Success, "Success", `Restarting instance ${instanceName}`);
       await loadInstances(true); // Force refresh
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "Unknown error";
-      showToast(Toast.Style.Failure, "Error", `Failed to restart instance ${instanceName}: ${errorMsg}`);
+      await showFailureToast(error instanceof Error ? error : new Error("Unknown error"), {
+        title: `Failed to restart instance ${instanceName}`,
+      });
     }
   }
 

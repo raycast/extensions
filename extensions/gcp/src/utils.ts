@@ -2,38 +2,47 @@ import { GoogleAuth } from "google-auth-library";
 import { getPreferenceValues } from "@raycast/api";
 import { GCPPreferences } from "./types";
 
-let auth: GoogleAuth | null = null;
+// Cache auth per project to support multiple GCP accounts/projects
+const authCache = new Map<string, GoogleAuth>();
 
 export async function getGoogleAuth(): Promise<GoogleAuth> {
-  if (auth) {
+  try {
+    const preferences = getPreferenceValues<GCPPreferences>();
+
+    // Create a cache key based on project and service account to support multiple configs
+    const cacheKey = `${preferences.projectId || "default"}-${preferences.serviceAccountPath || "adc"}`;
+
+    if (authCache.has(cacheKey)) {
+      return authCache.get(cacheKey)!;
+    }
+
+    const authOptions: {
+      scopes: string[];
+      projectId?: string;
+      keyFile?: string;
+    } = {
+      scopes: [
+        "https://www.googleapis.com/auth/cloud-platform",
+        "https://www.googleapis.com/auth/compute",
+        "https://www.googleapis.com/auth/cloud-platform.read-only",
+      ],
+    };
+
+    // Only set project ID if explicitly provided
+    if (preferences.projectId && preferences.projectId.trim()) {
+      authOptions.projectId = preferences.projectId;
+    }
+
+    if (preferences.serviceAccountPath && preferences.serviceAccountPath.trim()) {
+      authOptions.keyFile = preferences.serviceAccountPath;
+    }
+
+    const auth = new GoogleAuth(authOptions);
+    authCache.set(cacheKey, auth);
     return auth;
+  } catch (error) {
+    throw new Error(`Failed to initialize Google Auth: ${error instanceof Error ? error.message : String(error)}`);
   }
-
-  const preferences = getPreferenceValues<GCPPreferences>();
-
-  const authOptions: {
-    scopes: string[];
-    projectId?: string;
-    keyFile?: string;
-  } = {
-    scopes: [
-      "https://www.googleapis.com/auth/cloud-platform",
-      "https://www.googleapis.com/auth/compute",
-      "https://www.googleapis.com/auth/cloud-platform.read-only",
-    ],
-  };
-
-  // Only set project ID if explicitly provided
-  if (preferences.projectId && preferences.projectId.trim()) {
-    authOptions.projectId = preferences.projectId;
-  }
-
-  if (preferences.serviceAccountPath && preferences.serviceAccountPath.trim()) {
-    authOptions.keyFile = preferences.serviceAccountPath;
-  }
-
-  auth = new GoogleAuth(authOptions);
-  return auth;
 }
 
 export async function getProjectId(): Promise<string> {
@@ -79,45 +88,83 @@ export function formatDate(dateString: string): string {
 }
 
 export function getZoneFromSelfLink(selfLink: string): string {
-  const match = selfLink.match(/zones\/([^/]+)/);
-  return match ? match[1] : "unknown";
+  try {
+    if (!selfLink || typeof selfLink !== "string") {
+      return "unknown";
+    }
+    const match = selfLink.match(/zones\/([^/]+)/);
+    return match ? match[1] : "unknown";
+  } catch (error) {
+    console.error("Error parsing zone from self link:", error);
+    return "unknown";
+  }
 }
 
 export function getRegionFromSelfLink(selfLink: string): string {
-  const match = selfLink.match(/regions\/([^/]+)/);
-  return match ? match[1] : "unknown";
+  try {
+    if (!selfLink || typeof selfLink !== "string") {
+      return "unknown";
+    }
+    const match = selfLink.match(/regions\/([^/]+)/);
+    return match ? match[1] : "unknown";
+  } catch (error) {
+    console.error("Error parsing region from self link:", error);
+    return "unknown";
+  }
 }
 
 export function getMachineTypeFromSelfLink(machineTypeUrl: string): string {
-  const parts = machineTypeUrl.split("/");
-  return parts[parts.length - 1];
+  try {
+    if (!machineTypeUrl || typeof machineTypeUrl !== "string") {
+      return "unknown";
+    }
+    const parts = machineTypeUrl.split("/");
+    return parts[parts.length - 1] || "unknown";
+  } catch (error) {
+    console.error("Error parsing machine type from self link:", error);
+    return "unknown";
+  }
 }
 
 export function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  if (bytes < 0) return "Invalid size";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  try {
+    if (bytes === 0) return "0 B";
+    if (bytes < 0 || !Number.isFinite(bytes)) return "Invalid size";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    if (i >= sizes.length) return "Size too large";
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  } catch (error) {
+    console.error("Error formatting bytes:", error);
+    return "Invalid size";
+  }
 }
 
 export function getStatusIcon(status: string): string {
-  switch (status.toUpperCase()) {
-    case "RUNNING":
-    case "READY":
-    case "ACTIVE":
-      return "🟢";
-    case "STOPPED":
-    case "TERMINATED":
-    case "INACTIVE":
-      return "🔴";
-    case "STOPPING":
-    case "TERMINATING":
-    case "STARTING":
-    case "NOT_READY":
-      return "🟡";
-    default:
+  try {
+    if (!status || typeof status !== "string") {
       return "⚪";
+    }
+    switch (status.toUpperCase()) {
+      case "RUNNING":
+      case "READY":
+      case "ACTIVE":
+        return "🟢";
+      case "STOPPED":
+      case "TERMINATED":
+      case "INACTIVE":
+        return "🔴";
+      case "STOPPING":
+      case "TERMINATING":
+      case "STARTING":
+      case "NOT_READY":
+        return "🟡";
+      default:
+        return "⚪";
+    }
+  } catch (error) {
+    console.error("Error getting status icon:", error);
+    return "⚪";
   }
 }
