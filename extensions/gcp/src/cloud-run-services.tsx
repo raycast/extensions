@@ -158,8 +158,7 @@ export default function CloudRunServices() {
               })),
             };
           });
-        } catch (error) {
-          console.error(`Failed to fetch services in ${region}:`, error);
+        } catch {
           return [];
         }
       });
@@ -252,7 +251,9 @@ gcloud projects add-iam-policy-binding ${currentProjectId} --member='serviceAcco
     useEffect(() => {
       getProjectId()
         .then((id) => setProjectId(id))
-        .catch((err) => console.error("Failed to get project ID:", err));
+        .catch(() => {
+          // Project ID loading failed - handled by error boundary
+        });
     }, []);
 
     // Generate monitoring dashboard URL

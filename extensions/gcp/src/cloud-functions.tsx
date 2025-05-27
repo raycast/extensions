@@ -6,6 +6,28 @@ import { GCPFunction } from "./types";
 import { getProjectId, formatDate, getStatusIcon } from "./utils";
 import { getCachedData, setCachedData, getCacheKey, CACHE_TTL } from "./cache";
 
+// Helper function to get status icon and color for function status
+function getFunctionStatusDisplay(status: string) {
+  const normalizedStatus = status.toUpperCase();
+
+  if (normalizedStatus === "ACTIVE") {
+    return {
+      icon: Icon.Circle,
+      color: Color.Green,
+    };
+  } else if (normalizedStatus === "DEPLOYING" || normalizedStatus === "UPDATING") {
+    return {
+      icon: Icon.CircleProgress,
+      color: Color.Orange,
+    };
+  } else {
+    return {
+      icon: Icon.CircleDisabled,
+      color: Color.Red,
+    };
+  }
+}
+
 // Define interface for the Cloud Function response
 interface CloudFunctionResponse {
   name?: string;
@@ -197,14 +219,7 @@ gcloud projects add-iam-policy-binding ${currentProjectId} --member='serviceAcco
     }
   }
 
-  function FunctionDetail({ func }: { func: GCPFunction }) {
-    const [projectId, setProjectId] = useState<string>("");
-
-    useEffect(() => {
-      getProjectId()
-        .then((id) => setProjectId(id))
-        .catch((err) => console.error("Failed to get project ID:", err));
-    }, []);
+  function FunctionDetail({ func, projectId }: { func: GCPFunction; projectId: string }) {
     const markdown = `
 # ${func.name}
 
@@ -272,13 +287,29 @@ curl -X POST https://${func.region}-${projectId}.cloudfunctions.net/${func.name}
 
   return (
     <List isLoading={loading} searchBarPlaceholder="Search Cloud Functions...">
-      {functions.length === 0 && !loading ? (
-        <List.EmptyView
-          title="No Cloud Functions found"
-          description="Deploy a function in GCP Console or refresh to try again"
-        />
-      ) : (
-        functions.map((func) => (
+      <List.EmptyView
+        icon={Icon.Code}
+        title="No Cloud Functions Found"
+        description="No Cloud Functions were found in your GCP project. Deploy a function in the Google Cloud Console."
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser
+              title="Deploy Function"
+              icon={Icon.Plus}
+              url="https://console.cloud.google.com/functions"
+            />
+            <Action
+              title="Refresh"
+              icon={Icon.ArrowClockwise}
+              onAction={() => loadFunctions(true)}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+            />
+          </ActionPanel>
+        }
+      />
+      {functions.map((func) => {
+        const statusDisplay = getFunctionStatusDisplay(func.status);
+        return (
           <List.Item
             key={`${func.region}/${func.name}`}
             title={func.name}
@@ -286,19 +317,24 @@ curl -X POST https://${func.region}-${projectId}.cloudfunctions.net/${func.name}
             accessories={[
               {
                 text: func.trigger,
-                tooltip: "Trigger type",
+                tooltip: `Trigger type: ${func.trigger}`,
               },
               {
                 text: func.status,
                 icon: {
-                  source: func.status === "ACTIVE" ? Icon.Circle : Icon.CircleDisabled,
-                  tintColor: func.status === "ACTIVE" ? Color.Green : Color.Red,
+                  source: statusDisplay.icon,
+                  tintColor: statusDisplay.color,
                 },
+                tooltip: `Function status: ${func.status}`,
               },
             ]}
             actions={
               <ActionPanel>
-                <Action.Push title="Show Details" target={<FunctionDetail func={func} />} icon={Icon.Eye} />
+                <Action.Push
+                  title="Show Details"
+                  target={<FunctionDetail func={func} projectId={projectId} />}
+                  icon={Icon.Eye}
+                />
                 <Action.OpenInBrowser
                   title="Open in Console"
                   url={`https://console.cloud.google.com/functions/details/${func.region}/${func.name}`}
@@ -319,8 +355,8 @@ curl -X POST https://${func.region}-${projectId}.cloudfunctions.net/${func.name}
               </ActionPanel>
             }
           />
-        ))
-      )}
+        );
+      })}
     </List>
   );
 }

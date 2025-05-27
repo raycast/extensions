@@ -104,8 +104,7 @@ export function getZoneFromSelfLink(selfLink: string): string {
     }
     const match = selfLink.match(/zones\/([^/]+)/);
     return match ? match[1] : "unknown";
-  } catch (error) {
-    console.error("Error parsing zone from self link:", error);
+  } catch {
     return "unknown";
   }
 }
@@ -117,8 +116,7 @@ export function getRegionFromSelfLink(selfLink: string): string {
     }
     const match = selfLink.match(/regions\/([^/]+)/);
     return match ? match[1] : "unknown";
-  } catch (error) {
-    console.error("Error parsing region from self link:", error);
+  } catch {
     return "unknown";
   }
 }
@@ -130,8 +128,7 @@ export function getMachineTypeFromSelfLink(machineTypeUrl: string): string {
     }
     const parts = machineTypeUrl.split("/");
     return parts[parts.length - 1] || "unknown";
-  } catch (error) {
-    console.error("Error parsing machine type from self link:", error);
+  } catch {
     return "unknown";
   }
 }
@@ -145,8 +142,7 @@ export function formatBytes(bytes: number): string {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     if (i >= sizes.length) return "Size too large";
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  } catch (error) {
-    console.error("Error formatting bytes:", error);
+  } catch {
     return "Invalid size";
   }
 }
@@ -173,8 +169,7 @@ export function getStatusIcon(status: string): string {
       default:
         return "⚪";
     }
-  } catch (error) {
-    console.error("Error getting status icon:", error);
+  } catch {
     return "⚪";
   }
 }
