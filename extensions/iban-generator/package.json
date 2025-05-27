@@ -6,6 +6,9 @@
   "icon": "extension-icon.png",
   "author": "m44rten1",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "commands": [
     {
       "name": "generate-iban",
