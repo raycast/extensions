@@ -1,0 +1,23 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+
+# misc
+.DS_Store
+
+# GCP service account keys (security)
+*.json
+!package*.json
+!tsconfig.json
+
+# Development files
+test-setup.js
+setup.js
+*.backup
