@@ -1,6 +1,6 @@
 # Linkding Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-05-27
 
 - fix: use more reliable AppleScript to get Firefox URL
 
