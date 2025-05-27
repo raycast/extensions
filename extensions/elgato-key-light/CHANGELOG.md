@@ -1,6 +1,6 @@
 # Elgato Key Light Changelog
 
-## [Improved Controls and Feedback] - {PR_MERGE_DATE}
+## [Improved Controls and Feedback] - 2025-05-27
 
 User Interface Improvements
 - Replace showHUD with showToast for better visual feedback
