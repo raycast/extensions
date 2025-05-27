@@ -1,5 +1,17 @@
 # Raynab Changelog
 
+## [Improved Category Search & Fixed Budget Details] - {PR_MERGE_DATE}
+
+### ✨ New Features
+- Support for searching categories with emoji icons in their names
+
+### 🐞 Bug Fixes
+- Category search now works properly for categories that start with emoji icons
+- Budget details now correctly shows the current month's data instead of always showing the first month
+
+### 🔧 Technical Updates
+- Updated "Open in Ynab" button text to "Open in YNAB" to match YNAB's branding
+
 ## [AI Budget Tools & Improvements] - 2025-05-21
 
 ### ✨ New Features - AI Extensions
