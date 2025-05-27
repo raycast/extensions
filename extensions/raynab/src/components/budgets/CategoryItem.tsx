@@ -111,7 +111,7 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
                 <TransactionView
                   search={`category:${(() => {
                     return category.name
-                      .replace(/[\p{Emoji}\u{FE0F}\u{200B}\u{200C}\u{200D}\u{FEFF}]/gu, '')
+                      .replace(/[^\p{L}\p{N}\p{P}\p{Z}]/gu, '')
                       .trim()
                       .toLowerCase();
                   })()}`}
