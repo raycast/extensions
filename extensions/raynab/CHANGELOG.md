@@ -7,7 +7,7 @@
 
 ### 🐞 Bug Fixes
 - Category search now works properly for categories that start with emoji icons
-- Budget details now correctly shows the current month's data instead of always showing the first month
+- Budget details in "Show Monthly Budget" now correctly shows the current month's data instead of always showing the first month
 
 ### 🔧 Technical Updates
 - Updated "Open in Ynab" button text to "Open in YNAB" to match YNAB's branding
