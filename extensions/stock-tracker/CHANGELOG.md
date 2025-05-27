@@ -1,6 +1,6 @@
 # Stock Tracker Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-05-27
 
 - Fixed the integration with the Yahoo Finance API by changing a header value and by making it update the cookie and crumb, if it encounters an error >= 400
 
