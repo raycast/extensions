@@ -69,8 +69,9 @@ export default function StorageBuckets() {
                 }
                 size = formatBytes(totalSize);
               }
-            } catch {
-              // Skip size calculation on error
+            } catch (err) {
+              // Skip size calculation on error, but log for debugging
+              console.warn(`Failed to calculate size for bucket ${bucket.name}:`, err);
             }
 
             const bucketData = {
@@ -84,7 +85,9 @@ export default function StorageBuckets() {
             };
 
             return bucketData;
-          } catch {
+          } catch (err) {
+            // Return basic bucket info if metadata fetch fails
+            console.warn(`Failed to get metadata for bucket ${bucket.name}:`, err);
             return {
               name: bucket.name,
               location: "Unknown",

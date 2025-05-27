@@ -178,6 +178,7 @@ export default function CloudRunServices() {
       const errorMsg = err instanceof Error ? err.message : "Failed to load Cloud Run services";
 
       if (errorMsg.includes("403") || errorMsg.includes("PERMISSION_DENIED")) {
+        const currentProjectId = await getProjectId().catch(() => "YOUR-PROJECT-ID");
         setError(`🚫 Cloud Run API Access Denied
 
 The service account lacks permission to access Cloud Run.
@@ -189,7 +190,7 @@ The service account lacks permission to access Cloud Run.
 3. Click 'Edit' and add the role: 'Cloud Run Viewer'
 
 💻 Or use gcloud CLI:
-gcloud projects add-iam-policy-binding ${await getProjectId()} --member='serviceAccount:YOUR-SERVICE-ACCOUNT@${await getProjectId()}.iam.gserviceaccount.com' --role='roles/run.viewer'`);
+gcloud projects add-iam-policy-binding ${currentProjectId} --member='serviceAccount:YOUR-SERVICE-ACCOUNT@${currentProjectId}.iam.gserviceaccount.com' --role='roles/run.viewer'`);
       } else {
         setError(errorMsg);
       }
@@ -208,7 +209,9 @@ gcloud projects add-iam-policy-binding ${await getProjectId()} --member='service
     const hours = 24;
     const maxRequests = 1000;
 
-    let graph = "## 📊 Request Metrics (Mock Data - Last 24 Hours)\n\n";
+    let graph = "## 📊 Request Metrics (⚠️ MOCK DATA - Last 24 Hours)\n\n";
+    graph +=
+      "**Note: This is sample data for demonstration. Real metrics would require Cloud Monitoring API integration.**\n\n";
     graph += "```\n";
     graph += "Requests/hour\n";
 
@@ -355,43 +358,50 @@ gcloud run services describe ${service.name} --region=${service.region}
 
   return (
     <List isLoading={loading} searchBarPlaceholder="Search Cloud Run services...">
-      {services.map((service) => (
-        <List.Item
-          key={`${service.region}/${service.name}`}
-          title={service.name}
-          subtitle={`${service.region} • ${service.image.split("/").pop()}`}
-          accessories={[
-            {
-              text: service.url ? "Has URL" : "No URL",
-              tooltip: service.url,
-            },
-            {
-              text: service.status,
-              icon: {
-                source: service.status === "READY" ? Icon.Circle : Icon.CircleDisabled,
-                tintColor: service.status === "READY" ? Color.Green : Color.Red,
-              },
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push title="Show Details" target={<ServiceDetail service={service} />} icon={Icon.Eye} />
-              {service.url && <Action.OpenInBrowser title="Open Service URL" url={service.url} />}
-              <Action.OpenInBrowser
-                title="Open in Console"
-                url={`https://console.cloud.google.com/run/detail/${service.region}/${service.name}`}
-              />
-              {service.url && <Action.CopyToClipboard title="Copy Service URL" content={service.url} />}
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={() => loadServices(true)}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            </ActionPanel>
-          }
+      {services.length === 0 && !loading ? (
+        <List.EmptyView
+          title="No Cloud Run services found"
+          description="Deploy a service in GCP Console or refresh to try again"
         />
-      ))}
+      ) : (
+        services.map((service) => (
+          <List.Item
+            key={`${service.region}/${service.name}`}
+            title={service.name}
+            subtitle={`${service.region} • ${service.image.split("/").pop()}`}
+            accessories={[
+              {
+                text: service.url ? "Has URL" : "No URL",
+                tooltip: service.url,
+              },
+              {
+                text: service.status,
+                icon: {
+                  source: service.status === "READY" ? Icon.Circle : Icon.CircleDisabled,
+                  tintColor: service.status === "READY" ? Color.Green : Color.Red,
+                },
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push title="Show Details" target={<ServiceDetail service={service} />} icon={Icon.Eye} />
+                {service.url && <Action.OpenInBrowser title="Open Service URL" url={service.url} />}
+                <Action.OpenInBrowser
+                  title="Open in Console"
+                  url={`https://console.cloud.google.com/run/detail/${service.region}/${service.name}`}
+                />
+                {service.url && <Action.CopyToClipboard title="Copy Service URL" content={service.url} />}
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  onAction={() => loadServices(true)}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }

@@ -26,9 +26,14 @@ export default function CloudFunctions() {
   const [functions, setFunctions] = useState<GCPFunction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState<string>("");
 
   useEffect(() => {
     loadFunctions();
+    // Also load project ID for URL generation
+    getProjectId()
+      .then((id) => setProjectId(id))
+      .catch((err) => console.error("Failed to get project ID:", err));
   }, []);
 
   async function loadFunctions(forceRefresh = false) {
@@ -97,48 +102,54 @@ export default function CloudFunctions() {
         try {
           const parent = `projects/${projectId}/locations/${region}`;
 
-          // List functions in this region
-          const [functions] = await functionsClient.listFunctions({
-            parent,
-            pageSize: 100,
-          });
+          // List functions in this region with pagination support
+          const allRegionFunctions: GCPFunction[] = [];
+          let pageToken: string | undefined;
 
-          const regionFunctions: GCPFunction[] = [];
+          do {
+            const [functions, , response] = await functionsClient.listFunctions({
+              parent,
+              pageSize: 100,
+              pageToken,
+            });
 
-          for (const func of functions) {
-            if (func.name) {
-              const functionName = func.name.split("/").pop() || "";
+            for (const func of functions) {
+              if (func.name) {
+                const functionName = func.name.split("/").pop() || "";
 
-              // Cast to our interface to access properties safely
-              const functionData = func as unknown as CloudFunctionResponse;
+                // Cast to our interface to access properties safely
+                const functionData = func as unknown as CloudFunctionResponse;
 
-              // Map the state property correctly
-              const status = functionData.state === "ACTIVE" ? "ACTIVE" : "INACTIVE";
+                // Map the state property correctly
+                const status = functionData.state === "ACTIVE" ? "ACTIVE" : "INACTIVE";
 
-              // Handle updateTime which might be a Timestamp object
-              let lastModified = "";
-              if (functionData.updateTime) {
-                if (typeof functionData.updateTime === "string") {
-                  lastModified = functionData.updateTime;
-                } else if (functionData.updateTime.seconds) {
-                  // Convert Google Timestamp to Date
-                  lastModified = new Date(functionData.updateTime.seconds * 1000).toISOString();
+                // Handle updateTime which might be a Timestamp object
+                let lastModified = "";
+                if (functionData.updateTime) {
+                  if (typeof functionData.updateTime === "string") {
+                    lastModified = functionData.updateTime;
+                  } else if (functionData.updateTime.seconds) {
+                    // Convert Google Timestamp to Date
+                    lastModified = new Date(functionData.updateTime.seconds * 1000).toISOString();
+                  }
                 }
+
+                allRegionFunctions.push({
+                  name: functionName,
+                  region,
+                  status,
+                  runtime: functionData.runtime || "Unknown",
+                  trigger: functionData.httpsTrigger ? "HTTP" : functionData.eventTrigger ? "Event" : "Unknown",
+                  lastModified,
+                  sourceArchiveUrl: functionData.sourceArchiveUrl || undefined,
+                });
               }
-
-              regionFunctions.push({
-                name: functionName,
-                region,
-                status,
-                runtime: functionData.runtime || "Unknown",
-                trigger: functionData.httpsTrigger ? "HTTP" : functionData.eventTrigger ? "Event" : "Unknown",
-                lastModified,
-                sourceArchiveUrl: functionData.sourceArchiveUrl || undefined,
-              });
             }
-          }
 
-          return regionFunctions;
+            pageToken = response?.nextPageToken || undefined;
+          } while (pageToken);
+
+          return allRegionFunctions;
         } catch {
           // Skip regions without access or no functions
           // PERMISSION_DENIED or NOT_FOUND
@@ -161,6 +172,7 @@ export default function CloudFunctions() {
       const errorMsg = err instanceof Error ? err.message : "Failed to load Cloud Functions";
 
       if (errorMsg.includes("403") || errorMsg.includes("PERMISSION_DENIED")) {
+        const currentProjectId = await getProjectId().catch(() => "YOUR-PROJECT-ID");
         setError(`🚫 Cloud Functions API Access Denied
 
 The service account lacks permission to access Cloud Functions.
@@ -172,7 +184,7 @@ The service account lacks permission to access Cloud Functions.
 3. Click 'Edit' and add the role: 'Cloud Functions Viewer'
 
 💻 Or use gcloud CLI:
-gcloud projects add-iam-policy-binding ${await getProjectId()} --member='serviceAccount:YOUR-SERVICE-ACCOUNT@${await getProjectId()}.iam.gserviceaccount.com' --role='roles/cloudfunctions.viewer'`);
+gcloud projects add-iam-policy-binding ${currentProjectId} --member='serviceAccount:YOUR-SERVICE-ACCOUNT@${currentProjectId}.iam.gserviceaccount.com' --role='roles/cloudfunctions.viewer'`);
       } else {
         setError(errorMsg);
       }
@@ -260,48 +272,55 @@ curl -X POST https://${func.region}-${projectId}.cloudfunctions.net/${func.name}
 
   return (
     <List isLoading={loading} searchBarPlaceholder="Search Cloud Functions...">
-      {functions.map((func) => (
-        <List.Item
-          key={`${func.region}/${func.name}`}
-          title={func.name}
-          subtitle={`${func.region} • ${func.runtime} • ${func.trigger}`}
-          accessories={[
-            {
-              text: func.trigger,
-              tooltip: "Trigger type",
-            },
-            {
-              text: func.status,
-              icon: {
-                source: func.status === "ACTIVE" ? Icon.Circle : Icon.CircleDisabled,
-                tintColor: func.status === "ACTIVE" ? Color.Green : Color.Red,
-              },
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push title="Show Details" target={<FunctionDetail func={func} />} icon={Icon.Eye} />
-              <Action.OpenInBrowser
-                title="Open in Console"
-                url={`https://console.cloud.google.com/functions/details/${func.region}/${func.name}`}
-              />
-              <Action.CopyToClipboard title="Copy Function Name" content={func.name} />
-              {func.trigger === "HTTP" && (
-                <Action.CopyToClipboard
-                  title="Copy Http URL"
-                  content={`https://${func.region}-${getProjectId()}.cloudfunctions.net/${func.name}`}
-                />
-              )}
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={() => loadFunctions(true)}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            </ActionPanel>
-          }
+      {functions.length === 0 && !loading ? (
+        <List.EmptyView
+          title="No Cloud Functions found"
+          description="Deploy a function in GCP Console or refresh to try again"
         />
-      ))}
+      ) : (
+        functions.map((func) => (
+          <List.Item
+            key={`${func.region}/${func.name}`}
+            title={func.name}
+            subtitle={`${func.region} • ${func.runtime} • ${func.trigger}`}
+            accessories={[
+              {
+                text: func.trigger,
+                tooltip: "Trigger type",
+              },
+              {
+                text: func.status,
+                icon: {
+                  source: func.status === "ACTIVE" ? Icon.Circle : Icon.CircleDisabled,
+                  tintColor: func.status === "ACTIVE" ? Color.Green : Color.Red,
+                },
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push title="Show Details" target={<FunctionDetail func={func} />} icon={Icon.Eye} />
+                <Action.OpenInBrowser
+                  title="Open in Console"
+                  url={`https://console.cloud.google.com/functions/details/${func.region}/${func.name}`}
+                />
+                <Action.CopyToClipboard title="Copy Function Name" content={func.name} />
+                {func.trigger === "HTTP" && projectId && (
+                  <Action.CopyToClipboard
+                    title="Copy Http URL"
+                    content={`https://${func.region}-${projectId}.cloudfunctions.net/${func.name}`}
+                  />
+                )}
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  onAction={() => loadFunctions(true)}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }

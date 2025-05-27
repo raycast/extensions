@@ -5,17 +5,20 @@ A Raycast extension for browsing and managing Google Cloud Platform resources.
 ## Features
 
 - **Compute Engine**: Browse and manage VM instances
+
   - View instance details (status, IP addresses, machine type)
   - Start/stop/restart instances
   - Copy SSH commands
   - Open instances in GCP Console
 
-- **Cloud Storage**: Browse storage buckets
+- **Cloud Storage**: Browse storage buckets (read-only)
+
   - View bucket details (location, storage class, size)
   - Copy bucket URLs and gsutil commands
   - Open buckets in GCP Console
 
 - **Cloud Run**: Browse Cloud Run services
+
   - View service details (status, URL, traffic distribution)
   - Copy service URLs and deployment commands
   - Open services in GCP Console
@@ -39,12 +42,14 @@ A Raycast extension for browsing and managing Google Cloud Platform resources.
 ### Installation
 
 1. Install the extension from the Raycast store
+2. Configure authentication (see Configuration section below)
 
 ### Configuration
 
 The extension supports two authentication methods:
 
 1. **Application Default Credentials (ADC)** - Recommended
+
    - Run `gcloud auth application-default login`
    - Leave the service account path empty in preferences
 
@@ -56,6 +61,7 @@ The extension supports two authentication methods:
 ### Required Permissions
 
 The service account or user needs the following roles:
+
 - `roles/compute.instanceAdmin.v1` - For Compute Engine instances (view and manage)
 - `roles/storage.objectViewer` - For Cloud Storage buckets
 - `roles/run.viewer` - For Cloud Run services

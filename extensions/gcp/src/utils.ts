@@ -4,6 +4,8 @@ import { GCPPreferences } from "./types";
 
 // Cache auth per project to support multiple GCP accounts/projects
 const authCache = new Map<string, GoogleAuth>();
+// Cache project ID to avoid multiple API calls
+let cachedProjectId: string | null = null;
 
 export async function getGoogleAuth(): Promise<GoogleAuth> {
   try {
@@ -47,11 +49,17 @@ export async function getGoogleAuth(): Promise<GoogleAuth> {
 
 export async function getProjectId(): Promise<string> {
   try {
+    // Return cached project ID if available
+    if (cachedProjectId) {
+      return cachedProjectId;
+    }
+
     const preferences = getPreferenceValues<GCPPreferences>();
 
     // If explicitly set in preferences, use that
     if (preferences.projectId && preferences.projectId.trim()) {
-      return preferences.projectId;
+      cachedProjectId = preferences.projectId;
+      return cachedProjectId;
     }
 
     // Try to get from ADC
@@ -59,7 +67,8 @@ export async function getProjectId(): Promise<string> {
       const auth = await getGoogleAuth();
       const adcProjectId = await auth.getProjectId();
       if (adcProjectId) {
-        return adcProjectId;
+        cachedProjectId = adcProjectId;
+        return cachedProjectId;
       }
     } catch {
       // ADC couldn't detect project ID
@@ -68,7 +77,8 @@ export async function getProjectId(): Promise<string> {
     // Fallback to environment variables
     const envProject = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT;
     if (envProject) {
-      return envProject;
+      cachedProjectId = envProject;
+      return cachedProjectId;
     }
 
     throw new Error("No project ID found. Please set it in preferences or configure ADC.");

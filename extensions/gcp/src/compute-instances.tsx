@@ -320,7 +320,7 @@ gcloud compute ssh ${instance.name} --zone=${instance.zone}
         actions={
           <ActionPanel>
             <Action.CopyToClipboard
-              title="Copy Ssh Command"
+              title="Copy Command"
               content={`gcloud compute ssh ${instance.name} --zone=${instance.zone}`}
             />
             <Action.OpenInBrowser
@@ -391,7 +391,7 @@ gcloud compute ssh ${instance.name} --zone=${instance.zone}
             <ActionPanel>
               <Action.Push title="Show Details" target={<InstanceDetail instance={instance} />} icon={Icon.Eye} />
               <Action.CopyToClipboard
-                title="Copy Ssh Command"
+                title="Copy Command"
                 content={`gcloud compute ssh ${instance.name} --zone=${instance.zone}`}
               />
               <Action.OpenInBrowser
