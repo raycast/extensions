@@ -166,6 +166,7 @@ export default function AskDifyHistory() {
                   />
                   <Action
                     title="New Conversation"
+                    icon={Icon.Plus}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
                     onAction={() => {
                       // Use the same app for the new conversation
@@ -479,8 +480,8 @@ export default function AskDifyHistory() {
             actions={
               <ActionPanel>
                 <Action
-                  title="Continue Conversation"
-                  icon={Icon.Bubble}
+                  title={latestEntry.app_type === DifyAppType.ChatflowAgent ? "Continue Conversation" : "View Details"}
+                  icon={latestEntry.app_type === DifyAppType.ChatflowAgent ? Icon.Bubble : Icon.Eye}
                   onAction={() => continueConversation(thread)}
                 />
                 <Action
