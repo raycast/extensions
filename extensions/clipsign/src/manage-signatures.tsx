@@ -1,8 +1,22 @@
-import { List, ActionPanel, Action, confirmAlert, Alert, showToast, Toast, Icon } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  confirmAlert,
+  Alert,
+  showToast,
+  Toast,
+  Icon,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
-import { getSignatures, deleteSignature, copySignatureToClipboard } from "./utils/storage";
+import {
+  getSignatures,
+  deleteSignature,
+  copySignatureToClipboard,
+} from "./utils/storage";
 import { Signature } from "./types";
 import CreateSignature from "./create-signatures";
+import { showFailureToast } from "@raycast/utils";
 
 export default function ManageSignatures() {
   const [sigs, setSigs] = useState<Signature[]>([]);
@@ -36,8 +50,8 @@ export default function ManageSignatures() {
     try {
       await copySignatureToClipboard(sig);
       showToast(Toast.Style.Success, `Copied "${sig.name}" to clipboard`);
-    } catch {
-      showToast(Toast.Style.Failure, `Failed to copy "${sig.name}"`);
+    } catch (error) {
+      showFailureToast(error, { title: `Failed to copy "${sig.name}"` });
     }
   };
 
@@ -60,8 +74,12 @@ export default function ManageSignatures() {
       ) : (
         sigs.map((sig) => {
           const isTextBased = Boolean(sig.content);
-          const subtitle = isTextBased ? `From text (font: ${sig.font})` : "Uploaded image";
-          const iconSource = sig.imagePath ? { source: sig.imagePath } : Icon.Image;
+          const subtitle = isTextBased
+            ? `From text (font: ${sig.font})`
+            : "Uploaded image";
+          const iconSource = sig.imagePath
+            ? { source: sig.imagePath }
+            : Icon.Image;
 
           return (
             <List.Item
@@ -77,10 +95,19 @@ export default function ManageSignatures() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action title="Copy to Clipboard" icon={iconSource} onAction={() => handleCopy(sig)} />
+                  <Action
+                    title="Copy to Clipboard"
+                    icon={iconSource}
+                    onAction={() => handleCopy(sig)}
+                  />
                   <Action.Push
                     title="Edit Signature"
-                    target={<CreateSignature onSignatureCreated={load} />}
+                    target={
+                      <CreateSignature
+                        onSignatureCreated={load}
+                        signature={sig}
+                      />
+                    }
                     icon={Icon.Pencil}
                   />
                   <Action

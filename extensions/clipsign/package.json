@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clipsign",
-  "title": "Clipsign - E‑Signatures on Clipboard",
+  "title": "Clipsign",
   "version": "0.1.0",
   "description": "A lightweight Raycast extension for creating, saving, and instantly copying your e‑signature.",
   "icon": "clipsign-logo.png",
@@ -16,13 +16,13 @@
   ],
   "commands": [
     {
-      "name": "create-signatures",
+      "name": "clipsign",
       "title": "Create Signature",
       "description": "Add a new signature",
       "mode": "view"
     },
     {
-      "name": "manage-signatures",
+      "name": "clipsign",
       "title": "Manage Signatures",
       "description": "Edit or delete your saved signatures",
       "mode": "view"

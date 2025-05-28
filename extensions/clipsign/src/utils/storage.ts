@@ -18,7 +18,9 @@ export async function getSignatures(): Promise<Signature[]> {
   }
 }
 
-export async function saveSignature(signature: Omit<Signature, "id">): Promise<void> {
+export async function saveSignature(
+  signature: Omit<Signature, "id">,
+): Promise<void> {
   try {
     const signatures = await getSignatures();
     const newSignature: Signature = {
@@ -29,7 +31,7 @@ export async function saveSignature(signature: Omit<Signature, "id">): Promise<v
     //  render to PNG and convert to image type
     if (signature.type === "text" && signature.content) {
       const fontName = signature.font || "GreatVibes-Regular";
-      const fontsDir = path.join(__dirname, "assets", "fonts");
+      const fontsDir = path.join(process.cwd(), "assets", "fonts");
       const fontFile =
         fontName === "Pacifico-Regular"
           ? path.join(fontsDir, "Pacifico-Regular.ttf")
@@ -46,7 +48,9 @@ export async function saveSignature(signature: Omit<Signature, "id">): Promise<v
       measureCtx.font = `${fontSize}pt "${fontName}"`;
       const metrics = PImage.measureText(measureCtx, text);
       const width = Math.ceil(metrics.width + padding * 2);
-      const height = Math.ceil(metrics.emHeightAscent + metrics.emHeightDescent + padding * 5);
+      const height = Math.ceil(
+        metrics.emHeightAscent + metrics.emHeightDescent + padding * 5,
+      );
       const img = PImage.make(width, height);
 
       const ctx = img.getContext("2d");
@@ -57,7 +61,10 @@ export async function saveSignature(signature: Omit<Signature, "id">): Promise<v
       ctx.textBaseline = "top";
       ctx.fillText(text, padding, padding);
 
-      const outDir = path.join(process.env.HOME!, "Library/Application Support/raycast/signatures");
+      const outDir = path.join(
+        process.env.HOME!,
+        "Library/Application Support/raycast/signatures",
+      );
       await mkdir(outDir, { recursive: true });
       const outPath = path.join(outDir, `${newSignature.id}.png`);
       await new Promise<void>((resolve, reject) => {
@@ -88,7 +95,9 @@ export async function deleteSignature(id: string): Promise<void> {
   }
 }
 
-export async function copySignatureToClipboard(signature: Signature): Promise<void> {
+export async function copySignatureToClipboard(
+  signature: Signature,
+): Promise<void> {
   try {
     switch (signature.type) {
       case "text":

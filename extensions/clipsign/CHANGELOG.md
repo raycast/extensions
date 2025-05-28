@@ -1,5 +1,5 @@
 # ClipSign Changelog
 
-## 0.1.0 – 2025‑05‑27
+## 0.1.0 - {PR_MERGE_DATE}
 
 - Initial release of Clipsign
