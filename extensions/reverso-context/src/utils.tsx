@@ -90,7 +90,7 @@ export const posToPosName: Record<string, string> = {
 };
 
 // color of tags based on their pos. return array of tags with their color
-export const translationsToAccsesotyTags = (
+export const translationsToAccessoryTags = (
   translations: Translation[],
   limit: number | boolean,
 ): { tag: { value: string; color: string } }[] => {
