@@ -23,7 +23,7 @@ Proyecto is a lightweight tool designed for efficient management of local projec
 
 ### Searching for a project
 
-#### All local project in a list
+#### All local projects in a list
 
 ![search-project](metadata/search-project.png)
 
