@@ -16,6 +16,7 @@ import { FormValidation, getAvatarIcon, MutatePromise, showFailureToast, useFetc
 import { API_HEADERS, callApi, generateApiUrl } from "./api";
 import Servers from "./components/servers";
 import { Project } from "./types";
+import Members from "./components/members";
 
 export default function Projects() {
   const {
@@ -78,11 +79,21 @@ export default function Projects() {
           ]}
           actions={
             <ActionPanel>
-              <Action.Push icon={{ source: "resource.svg", tintColor: Color.PrimaryText }} title="View Servers" target={<Servers project={project} />} />
+              <Action.Push
+                icon={{ source: "resource.svg", tintColor: Color.PrimaryText }}
+                title="View Servers"
+                target={<Servers project={project} />}
+              />
+              <Action.Push
+                icon={{ source: "user.svg", tintColor: Color.PrimaryText }}
+                title="View Members"
+                target={<Members project={project} />}
+              />
               <Action.Push
                 icon={Icon.Pencil}
                 title="Update"
                 target={<UpdateProject project={project} mutate={mutate} />}
+                shortcut={Keyboard.Shortcut.Common.Edit}
               />
               <Action
                 icon={Icon.Trash}

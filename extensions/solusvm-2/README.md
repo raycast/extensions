@@ -7,10 +7,15 @@
 This is a Raycast extension for [SolusVM](https://solusvm.com/) 2 accounts ([Documentation](https://docs.solusvm.com/v2/api-reference/api.html)). With this extension you can:
 
 - View Projects
-- Update Project (name, description)
-- View Servers in your Projects
-- Update Server (name, description)
-- Start, Stop Server
+    - Update Project (name, description)
+    - View Servers in your Project
+        - Update Server (hostname, description)
+        - Start, Stop, Restart Server
+    - View Members in your Project
+- View (custom) ISO Images
+- View Account
+    - Update Settings (password)
+    - Generate API Token
 
 ## 🚀 Getting Started
 

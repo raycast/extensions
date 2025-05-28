@@ -39,7 +39,7 @@ export default function Servers({ project }: { project: Project }) {
     stopped: { color: "#d02d4b", text: "Stopped" },
     starting: { color: Color.Yellow, text: "Starting" },
     stopping: { color: Color.Yellow, text: "Stopping" },
-    restarting: { color: Color.Orange, text: "Restarting" }
+    restarting: { color: Color.Orange, text: "Restarting" },
   };
 
   const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
@@ -52,7 +52,7 @@ export default function Servers({ project }: { project: Project }) {
           message: "Would you like to continue?",
           primaryAction: {
             title: `Yes, ${action}!`,
-          }
+          },
         }))
       )
         return;
@@ -73,15 +73,11 @@ export default function Servers({ project }: { project: Project }) {
       case "restart":
         animatedToastTitle = "Restarting project";
         successToastTitle = "Restarted project";
-        newStatus = "restarting"
+        newStatus = "restarting";
         break;
     }
 
-    const toast = await showToast(
-      Toast.Style.Animated,
-      animatedToastTitle,
-      project.name,
-    );
+    const toast = await showToast(Toast.Style.Animated, animatedToastTitle, project.name);
     try {
       await mutate(callApi(`servers/${server.id}/${action}`, { method: "POST" }), {
         optimisticUpdate(data) {
@@ -121,10 +117,12 @@ export default function Servers({ project }: { project: Project }) {
                 title="Update"
                 target={<UpdateServer server={server} mutate={mutate} />}
               />
-              {server.status === "started" && <>
-              <Action icon={Icon.Stop} title="Stop" onAction={() => doServerAction(server, "stop")} />
-              <Action icon={Icon.Redo} title="Restart" onAction={() => doServerAction(server, "restart")} />
-              </>}
+              {server.status === "started" && (
+                <>
+                  <Action icon={Icon.Stop} title="Stop" onAction={() => doServerAction(server, "stop")} />
+                  <Action icon={Icon.Redo} title="Restart" onAction={() => doServerAction(server, "restart")} />
+                </>
+              )}
               {server.status === "stopped" && (
                 <Action icon={Icon.Play} title="Start" onAction={() => doServerAction(server, "start")} />
               )}
@@ -179,7 +177,12 @@ function UpdateServer({ server, mutate }: { server: Server; mutate: MutatePromis
       }
     >
       <Form.Description title="ID" text={server.id.toString()} />
-      <Form.TextField title="Hostname" placeholder="Hostname" info="The hostname will change the next time the server is restarted." {...itemProps.name} />
+      <Form.TextField
+        title="Hostname"
+        placeholder="Hostname"
+        info="The hostname will change the next time the server is restarted."
+        {...itemProps.name}
+      />
       <Form.TextField title="Description" placeholder="Description" {...itemProps.description} />
     </Form>
   );
