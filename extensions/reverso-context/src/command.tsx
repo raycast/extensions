@@ -6,7 +6,7 @@ import {
   clarifyLangPairDirection,
   clearTag,
   prefsToLangPair,
-  translationsToAccsesotyTags,
+  translationsToAccessoryTags,
   translationsToMetadataTagList,
 } from "./utils";
 
@@ -71,7 +71,7 @@ export default function Command(props: { arguments: { text: string } }) {
           subtitle={ipa}
           accessories={
             !isShowingDetail
-              ? translationsToAccsesotyTags(translations, 65 - (searchText.length + ipa.length))
+              ? translationsToAccessoryTags(translations, 65 - (searchText.length + ipa.length))
               : undefined
           }
           actions={
