@@ -1,6 +1,6 @@
 # Folder Search Changelog
 
-## [Fixes & Improvements] - {PR_MERGE_DATE}
+## [Fixes & Improvements] - 2025-05-28
 - **fixed** ESLint configuration migration from deprecated `.eslintrc.json` to new flat config format (`eslint.config.js`) for ESLint v9+ compatibility
 - **added** Pin/Unpin functionality to the "Move to a Folder" command for consistent folder management across both search and move operations
 - **fixed** Pin reordering actions (Move Pin Up/Down) now only appear in pinned sections, not in search results, for better UX clarity
