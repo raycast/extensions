@@ -18,7 +18,7 @@ export type Series = {
   page?: number;
 };
 
-export type Ressult = {
+export type Result = {
   torrents_count: number;
   limit: number;
   page: number;

@@ -1,7 +1,8 @@
-import { Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
 import Actions from "./actions";
-import { Ressult, Series } from "./types";
+import { Result, Series } from "./types";
 import { getDisplaySize, getTimeDifference } from "./util";
 
 const limit = 100;
@@ -15,28 +16,6 @@ export default function ListView() {
   const [hasMore, setHasMore] = useState(false);
   const [nextPage, setNextPage] = useState(1);
 
-  // const [list, setList] = useState<Series[]>([]);
-
-  // useEffect(() => {
-  //   const getLatest = async () => {
-  //     setIsLoading(true);
-
-  //     try {
-  //       console.log(`https://eztv.tf/api/get-torrents?limit=${limit}&page=1`);
-  //       const res = await fetch(`https://eztv.tf/api/get-torrents?limit=${limit}&page=1`);
-  //       const data = (await res.json()) as Ressult;
-  //       setList(data.torrents);
-  //     } catch (error) {
-  //       console.log(error);
-  //       setList([]);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   getLatest();
-  // }, []);
-
   const loadNextPage = useCallback(
     async (
       nextPage: number,
@@ -44,7 +23,7 @@ export default function ListView() {
     ) => {
       // alreadyCalled.current = true;
 
-      console.debug(`https://eztv.tf/api/get-torrents?limit=${limit}&page=${nextPage}`);
+      console.log(`https://eztv.tf/api/get-torrents?limit=${limit}&page=${nextPage}`);
 
       setIsLoading(true);
 
@@ -55,7 +34,7 @@ export default function ListView() {
           //   signal,
           // }
         );
-        const newData = (await res.json()) as Ressult;
+        const newData = (await res.json()) as Result;
 
         // if (signal?.aborted) {
         //   return;
@@ -69,10 +48,8 @@ export default function ListView() {
         setHasMore(nextPage < 10);
       } catch (error) {
         console.error(error);
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast(error, {
           title: "Something went wrong",
-          // message: error.message,
         });
       } finally {
         // alreadyCalled.current = false;
@@ -106,14 +83,10 @@ export default function ListView() {
   }, [nextPage]);
 
   return (
-    <List
-      isLoading={isLoading}
-      //
-      pagination={{ onLoadMore, hasMore, pageSize: limit }}
-    >
-      {data.map((item, index) => (
+    <List isLoading={isLoading} pagination={{ onLoadMore, hasMore, pageSize: limit }}>
+      {data.map((item) => (
         <List.Item
-          key={index}
+          key={item.id}
           title={item.title}
           accessories={[
             {

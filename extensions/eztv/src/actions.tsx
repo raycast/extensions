@@ -19,7 +19,6 @@ export default function Actions({ data, showDetails }: Props) {
       {data.imdb_id !== "0" && (
         <Action.OpenInBrowser title="Open IMDb Page" url={`https://www.imdb.com/title/tt${data.imdb_id}`} />
       )}
-      {/* {data.imdb_id !== "0" && <Action.Push title="List All Episodes" target={<DetailsView data={data} />} />} */}
     </ActionPanel>
   );
 }

@@ -35,9 +35,9 @@ export const getTimeDifference = (timestamp: number) => {
 
   const months = Math.floor(days / 30);
   if (months < 12) {
-    return `${months} month${months === 1 ? "" : "s"}`;
+    return `${months} mo${months === 1 ? "" : "s"}`;
   }
 
   const years = Math.floor(months / 12);
-  return `${years} year${years === 1 ? "" : "s"}`;
+  return `${years} yr${years === 1 ? "" : "s"}`;
 };
