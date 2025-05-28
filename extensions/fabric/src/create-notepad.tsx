@@ -2,7 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useForm, FormValidation, withAccessToken } from "@raycast/utils";
 
 import { CreateNotepadParams, getFabricClient, oauthService } from "./api/fabricClient";
-import { CreationMetadata } from './components/CreationMetadata';
+import { CreationMetadata } from "./components/CreationMetadata";
 
 type CreationValues = {
   name: string;

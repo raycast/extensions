@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Color, Image, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Image, List, showToast, Toast } from "@raycast/api";
 import { withAccessToken, showFailureToast } from "@raycast/utils";
 
 import { getFabricClient, Kind, Resource, SearchQuery, oauthService } from "./api/fabricClient";

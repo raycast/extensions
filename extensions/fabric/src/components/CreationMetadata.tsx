@@ -7,7 +7,7 @@ interface MetadataValues extends Form.Values {
   tagsNew: string;
   tagsExisting: string[];
   parentId: string;
-};
+}
 
 type ItemProps<T extends MetadataValues> = {
   [id in keyof T]: Partial<Form.ItemProps<T[id]>> & {

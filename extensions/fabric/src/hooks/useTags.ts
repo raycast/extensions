@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { showToast, Toast } from "@raycast/api";
 
 import { getFabricClient, Tag } from "../api/fabricClient";
@@ -25,4 +25,4 @@ export function useTags() {
   }, []);
 
   return tags;
-};
+}

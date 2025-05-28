@@ -148,7 +148,7 @@ class FabricClient {
   private async request({ path, method, body, expectedStatusCodes = [200] }: APIRequestOptions) {
     const { token } = await getAccessToken();
     const response = await fetch(`${this.endpoint}${path}`, {
-      method: method || 'GET',
+      method: method || "GET",
       headers: {
         "Content-Type": body instanceof Buffer ? "application/octet-stream" : "application/json",
         Authorization: `Bearer ${token}`,
@@ -173,9 +173,7 @@ class FabricClient {
   }
 
   private prepareCreationTags(tagsExisting?: string[], tagsNew?: string): CreationTags {
-    const tags: CreationTags = tagsExisting?.length
-      ? tagsExisting.map((tag) => ({ id: tag }))
-      : [];
+    const tags: CreationTags = tagsExisting?.length ? tagsExisting.map((tag) => ({ id: tag })) : [];
     if (tagsNew) {
       tags.push(
         ...this.parseTags(tagsNew).map((tag) => ({
@@ -195,7 +193,7 @@ class FabricClient {
         ...(query.text && { name: query.text }),
         ...(query.kind && { kind: [query.kind] }),
         order: {
-          property: 'name',
+          property: "name",
         },
       }),
       expectedStatusCodes: [200],

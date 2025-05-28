@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { showToast, Toast } from "@raycast/api";
 
 import { getFabricClient, Kind, Resource } from "../api/fabricClient";
@@ -15,7 +15,7 @@ export function useFolders() {
           kind: Kind.FOLDER,
           includeRoots: true,
           order: {
-            property: "name"
+            property: "name",
           },
         });
 
