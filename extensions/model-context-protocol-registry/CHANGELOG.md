@@ -2,7 +2,7 @@
 
 ## [Add Thena.ai MCP Server] - 2025-05-21
 
-Add Thena.ai MCP Sever to the registry, this allows AI agents to manage customer requests coming from Slack, Email, Discord and more.
+Add official Thena.ai MCP Sever to the registry, this allows AI agents to manage customer requests coming from Slack, Email, Discord and more.
 
 ## [Add Paperless MCP Server] - 2025-05-21
 
