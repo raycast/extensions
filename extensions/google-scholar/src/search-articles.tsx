@@ -34,6 +34,7 @@ export interface SearchResult {
   publication?: string;
   year?: string;
   citationCount?: string;
+  authorProfiles?: { name: string; link: string; type: "orcid" | "scholar" | "unknown" }[];
 }
 
 // Function to construct the Google Scholar search URL

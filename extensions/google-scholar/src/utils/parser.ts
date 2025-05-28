@@ -28,6 +28,29 @@ export function parseScholarHtmlResults(html: string): SearchResult[] {
     let authors = "Unknown";
     let publication = "Unknown";
     let year = "Not Found";
+    const authorProfiles: { name: string; link: string; type: "orcid" | "scholar" | "unknown" }[] = [];
+
+    // Attempt to parse author profiles from links in .gs_a
+    $(el)
+      .find(".gs_a a")
+      .each((_idx, authorLinkEl) => {
+        const profileLink = $(authorLinkEl).attr("href");
+        const profileName = $(authorLinkEl).text().trim(); // Often the author's name or part of it
+
+        if (profileLink) {
+          let type: "orcid" | "scholar" | "unknown" = "unknown";
+          if (profileLink.includes("orcid.org")) {
+            type = "orcid";
+          } else if (profileLink.includes("/citations?user=")) {
+            type = "scholar";
+          }
+          authorProfiles.push({
+            name: profileName || "Author Profile", // Fallback name
+            link: profileLink.startsWith("http") ? profileLink : `https://scholar.google.com${profileLink}`,
+            type,
+          });
+        }
+      });
 
     try {
       let processedMetaInfo = metaInfoText;
@@ -88,6 +111,7 @@ export function parseScholarHtmlResults(html: string): SearchResult[] {
       publication,
       year,
       citationCount,
+      authorProfiles,
     });
   });
 

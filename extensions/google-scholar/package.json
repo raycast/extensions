@@ -14,13 +14,39 @@
       "subtitle": "Google Scholar",
       "description": "Search Google Scholar for academic articles, papers, and research.",
       "mode": "view"
+    },
+    {
+      "name": "show-bookmarks",
+      "title": "Show Bookmarks",
+      "subtitle": "Google Scholar",
+      "description": "View and manage your saved Google Scholar articles.",
+      "mode": "view"
     }
   ],
   "tools": [
     {
       "name": "search-scholar",
       "title": "Search Google Scholar Articles",
-      "description": "Searches Google Scholar for academic articles based on keywords, authors, publication, and year. Use this to find research papers."
+      "description": "Searches Google Scholar for academic articles based on keywords, author, publication, and year. Use this to find research papers. Input is a SearchParams object.",
+      "tool": "src/tools/search-scholar.ts"
+    },
+    {
+      "name": "getSavedBookmarks",
+      "title": "Get Saved Bookmarks",
+      "description": "Retrieves a list of all currently saved bookmarked articles. Takes no arguments.",
+      "tool": "src/tools/getSavedBookmarks.ts"
+    },
+    {
+      "name": "toggleArticleBookmark",
+      "title": "Toggle Article Bookmark",
+      "description": "Saves an article to bookmarks if not already saved, or removes it if it is. This is the primary tool for adding or removing a single bookmark. Expects a complete 'SearchResult' object as input (including link, title, authors, year, publication). Returns the new bookmark state.",
+      "tool": "src/tools/toggleArticleBookmark.ts"
+    },
+    {
+      "name": "checkIfArticleIsBookmarked",
+      "title": "Check If Article Is Bookmarked",
+      "description": "Checks if an article is bookmarked without changing its state. Expects the article's unique link (URL string) as input.",
+      "tool": "src/tools/checkIfArticleIsBookmarked.ts"
     }
   ],
   "dependencies": {
@@ -48,117 +74,141 @@
   "ai": {
     "evals": [
       {
-        "input" : "@google-scholar Find me articles about machine learning between 2020 and 2025",
-        "mocks" : {
-          "search-scholar" : [
+        "input": "@google-scholar Find me articles about machine learning between 2020 and 2025",
+        "mocks": {
+          "search-scholar": [
             {
-              "authors" : "ZH Zhou",
-              "citationCount" : "3096",
-              "link" : "https://books.google.com/books?hl=en&lr=&id=ctM-EAAAQBAJ&oi=fnd&pg=PR6&dq=machine+learning&ots=o_MpU0Qr0s&sig=3v3IENNmscQu3G7kfCRsD3yDnC4",
-              "publication" : "- books.google.com",
-              "snippet" : "… from data is called learning or training. The … machine learning is to find or approximate \nground-truth. In this book, models are sometimes called learners, which are machine learning …",
-              "title" : "Machine learning",
-              "year" : "2021"
-            },
-            {
-              "authors" : "E Alpaydin",
-              "citationCount" : "1313",
-              "link" : "https://books.google.com/books?hl=en&lr=&id=Eyk5EAAAQBAJ&oi=fnd&pg=PR9&dq=machine+learning&ots=WRwRc9VgsP&sig=MnJ9K3LpsK2UOA_1lk0JDwLmOqs",
-              "publication" : "- books.google.com",
-              "snippet" : "MIT presents a concise primer on machine learning—computer programs that learn from \ndata and the basis of applications like voice recognition and driverless cars. No in-depth …",
-              "title" : "Machine learning",
-              "year" : "2021"
-            },
-            {
-              "authors" : "H Surden - Research handbook on big data law",
-              "citationCount" : "992",
-              "link" : "https://www.elgaronline.com/abstract/edcoll/9781788972819/9781788972819.00014.xml",
-              "publication" : "",
-              "snippet" : "… , machine learning has only recently started to develop. This chapter explores machine \nlearning’s … The first section describes what machine learning is, highlighting its central principles. …",
-              "title" : "Machine learning and law: An overview",
-              "year" : "2021"
-            },
-            {
-              "authors" : "B Mahesh - International Journal of Science and Research …",
-              "citationCount" : "3578",
-              "link" : "https://www.researchgate.net/profile/Batta-Mahesh/publication/344717762_Machine_Learning_Algorithms_-A_Review/links/5f8b2365299bf1b53e2d243a/Machine-Learning-Algorithms-A-Review.pdf?eid=5082902844932096t",
-              "publication" : "",
-              "snippet" : "… Here‟sa quick look at some of the commonly used algorithms in machine learning (ML) \nSupervised Learning Supervised learning is the machine learning task of learning a function …",
-              "title" : "Machine learning algorithms-a review",
-              "year" : "2020"
-            },
-            {
-              "authors" : "JF Masson, JS Biggins, E Ringe - Nature Nanotechnology",
-              "citationCount" : "81",
-              "link" : "https://www.nature.com/articles/s41565-022-01284-0",
-              "publication" : "",
-              "snippet" : "… These complex datasets and trial-and-error practices make nanoplasmonics research ripe \nfor the application of machine learning (ML) and advanced data processing methods. ML …",
-              "title" : "Machine learning for nanoplasmonics",
-              "year" : "2023"
-            },
-            {
-              "authors" : "W Li, C Wang, G Cheng, Q Song - Transactions on machine learning …",
-              "citationCount" : "2471",
-              "link" : "https://par.nsf.gov/servlets/purl/10418406",
-              "publication" : "",
-              "snippet" : "In this paper, we make the key delineation on the roles of resolution and statistical uncertainty \nin hierarchical bandits-based black-box optimization algorithms, guiding a more general …",
-              "title" : "International conference on machine learning",
-              "year" : "2023"
-            },
-            {
-              "authors" : "J Bell - Machine learning and the city: applications in …",
-              "citationCount" : "123",
-              "link" : "https://onlinelibrary.wiley.com/doi/abs/10.1002/9781119815075.ch18",
-              "publication" : "Wiley Online Library",
-              "snippet" : "… that one can employ in machine learning (ML). The required … of two learning types: supervised \nor unsupervised learning. … skills through either automated learning or learning via human …",
-              "title" : "What is machine learning?",
-              "year" : "2022"
-            },
-            {
-              "authors" : "A Jung",
-              "citationCount" : "205",
-              "link" : "https://books.google.com/books?hl=en&lr=&id=1IBaEAAAQBAJ&oi=fnd&pg=PR8&dq=machine+learning&ots=XTaQxhmyVY&sig=fvXe6ZHMOptsDX_MRdx0E2E8iKE",
-              "publication" : "- books.google.com",
-              "snippet" : "Machine learning (ML) has become a commonplace element in our everyday lives and a \nstandard tool for many fields of science and engineering. To make optimal use of ML, it is …",
-              "title" : "Machine learning: the basics",
-              "year" : "2022"
-            },
-            {
-              "authors" : "L Graves, V Nagisetty, V Ganesh - … of the AAAI Conference on Artificial …",
-              "citationCount" : "328",
-              "link" : "https://ojs.aaai.org/index.php/AAAI/article/view/17371",
-              "publication" : "",
-              "snippet" : "… It gives EU residents the ability to request deletion of their personal data, including training \nrecords used to train machine learning models. Unfortunately, Deep Neural Network models …",
-              "title" : "Amnesiac machine learning",
-              "year" : "2021"
-            },
-            {
-              "authors" : "V Goar, NS Yadav - Intelligent Optimization Techniques for Business …",
-              "citationCount" : "7353",
-              "link" : "https://www.igi-global.com/chapter/foundations-of-machine-learning/344516",
-              "publication" : "",
-              "snippet" : "… Machine learning is a rapidly evolving domain with wide-ranging … Machine learning is a \npivotal technology that has revolutionized … on their journey into the world of machine learning. …",
-              "title" : "Foundations of machine learning",
-              "year" : "2024"
+              "authors": "ZH Zhou",
+              "citationCount": "3096",
+              "link": "https://books.google.com/books?hl=en&lr=&id=ctM-EAAAQBAJ&oi=fnd&pg=PR6&dq=machine+learning&ots=o_MpU0Qr0s&sig=3v3IENNmscQu3G7kfCRsD3yDnC4",
+              "publication": "- books.google.com",
+              "snippet": "… from data is called learning or training. The … machine learning is to find or approximate \nground-truth. In this book, models are sometimes called learners, which are machine learning …",
+              "title": "Machine learning",
+              "year": "2021"
             }
           ]
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-                "allWords" : "machine learning",
-                "atLeastOne" : "",
-                "authors" : "",
-                "endYear" : "2025",
-                "exactPhrase" : "",
-                "publication" : "",
-                "sortBy" : "relevance",
-                "startYear" : "2020",
-                "withoutWords" : "",
-                "wordOccurrence" : "any"
-              },
-              "name" : "search-scholar"
+            "callsTool": {
+              "name": "search-scholar",
+              "arguments": {
+                "allWords": "machine learning",
+                "atLeastOne": "",
+                "authors": "",
+                "endYear": "2025",
+                "exactPhrase": "",
+                "publication": "",
+                "sortBy": "relevance",
+                "startYear": "2020",
+                "withoutWords": "",
+                "wordOccurrence": "any"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@google-scholar list my bookmarks",
+        "mocks": {
+          "getSavedBookmarks": {
+            "success": true,
+            "bookmarks": [
+              {
+                "title": "Sample Bookmarked Article",
+                "authors": "Author One, Author Two",
+                "year": "2023",
+                "publication": "Journal of Examples",
+                "link": "http://example.com/bookmark1",
+                "savedAt": "2023-01-01T12:00:00Z",
+                "snippet": "This is a snippet for a bookmarked article.",
+                "citationCount": "10"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "getSavedBookmarks",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@google-scholar is http://example.com/articleX bookmarked?",
+        "mocks": {
+          "checkIfArticleIsBookmarked": {
+            "success": true,
+            "isBookmarked": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "checkIfArticleIsBookmarked",
+              "arguments": {
+                "articleLink": "http://example.com/articleX"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@google-scholar bookmark the article titled 'Test Article' with link 'http://example.com/test'",
+        "mocks": {
+          "toggleArticleBookmark": {
+            "success": true,
+            "message": "Article successfully bookmarked.",
+            "newBookmarkState": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "toggleArticleBookmark",
+              "arguments": {
+                "article": {
+                  "title": "Test Article",
+                  "link": "http://example.com/test",
+                  "authors": null,
+                  "year": null,
+                  "publication": null,
+                  "snippet": null,
+                  "citationCount": null,
+                  "pdfLink": null
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@google-scholar remove the bookmark for the article 'http://example.com/test'",
+        "mocks": {
+          "toggleArticleBookmark": {
+            "success": true,
+            "message": "Article successfully removed from bookmarks.",
+            "newBookmarkState": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "toggleArticleBookmark",
+              "arguments": {
+                "article": {
+                  "link": "http://example.com/test",
+                  "title": "Unknown Title (link only)",
+                  "authors": null,
+                  "year": null,
+                  "publication": null,
+                  "snippet": null,
+                  "citationCount": null,
+                  "pdfLink": null
+                }
+              }
             }
           }
         ]

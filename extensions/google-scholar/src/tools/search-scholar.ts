@@ -3,6 +3,7 @@ import { SearchParams, SearchResult, constructSearchUrl } from "../search-articl
 import { getRandomUserAgent } from "../utils/userAgents";
 import { parseScholarHtmlResults } from "../utils/parser";
 import { Cache } from "../utils/cache"; // AI tools can also leverage caching
+import { DEFAULT_REQUEST_TIMEOUT } from "../constants";
 
 /**
  * Searches Google Scholar for articles based on the provided parameters.
@@ -29,7 +30,7 @@ export default async function searchScholar(params: SearchParams): Promise<Searc
         "User-Agent": getRandomUserAgent(),
       },
       // Consider a timeout for AI tool requests
-      timeout: 10000, // 10 seconds timeout for example
+      timeout: DEFAULT_REQUEST_TIMEOUT,
     });
 
     const html = response.data;
