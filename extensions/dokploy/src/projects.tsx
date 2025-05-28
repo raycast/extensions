@@ -1,13 +1,8 @@
-import { ActionPanel, Action, Icon, List, getPreferenceValues, Form, showToast, Toast, Grid, Alert, confirmAlert, popToRoot } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Form, showToast, Toast, Grid, Alert, confirmAlert, popToRoot } from "@raycast/api";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { ErrorResult, Project, Server } from "./interfaces";
-
-const { instance_url, api_token } = getPreferenceValues<Preferences>();
-const API_URL = new URL("api/", instance_url).toString();
-const API_HEADERS = {
-  "Content-Type": "application/json",
-    "x-api-key": api_token
-  }
+import { useContext } from "react";
+import { TokenContext } from "./api-keys";
 
 function getProjectTotalServices(project: Project) {
   return project.applications.length +
@@ -19,8 +14,9 @@ function getProjectTotalServices(project: Project) {
         project.compose.length;
 }
 export default function Projects() {
-const { isLoading, data: projects } = useFetch<Project[], Project[]>(API_URL + "project.all", {
-  headers: API_HEADERS,
+  const { url, headers } = useContext(TokenContext)
+const { isLoading, data: projects } = useFetch<Project[], Project[]>(url + "project.all", {
+  headers,
   initialData: []
 })
 
@@ -40,6 +36,8 @@ const { isLoading, data: projects } = useFetch<Project[], Project[]>(API_URL + "
 
 
 function Services({project}: {project: Project;}) {
+  const { url, headers } = useContext(TokenContext)
+
   async function deleteService(id: string, name: string) {
     const options: Alert.Options = {
       title: "Delete Services",
@@ -52,9 +50,9 @@ function Services({project}: {project: Project;}) {
     if (await confirmAlert(options)) {
       const toast = await showToast(Toast.Style.Animated, "Deleting service", name);
       try {
-          const response = await fetch(API_URL + "application.delete", {
+          const response = await fetch(url + "application.delete", {
             method: "POST",
-            headers: API_HEADERS,
+            headers,
             body: JSON.stringify({ applicationId: id })
           })
           if (!response.ok) {
@@ -88,6 +86,7 @@ function Services({project}: {project: Project;}) {
 }
 
 function CreateApplication({ project }: {project: Project}) {
+  const { url, headers } = useContext(TokenContext)
   interface FormValues {
     name: string;
     appName: string;
@@ -96,8 +95,8 @@ function CreateApplication({ project }: {project: Project}) {
     serverId: string;
   }
   
-  const { isLoading, data: servers } = useFetch<Server[], Server[]>(API_URL + "server.all", {
-  headers: API_HEADERS,
+  const { isLoading, data: servers } = useFetch<Server[], Server[]>(url + "server.all", {
+  headers,
   initialData: []
 })
 
@@ -106,9 +105,9 @@ function CreateApplication({ project }: {project: Project}) {
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating Application", values.name);
       try {
-          const response = await fetch(API_URL + "application.create", {
+          const response = await fetch(url + "application.create", {
             method: "POST",
-            headers: API_HEADERS,
+            headers,
             body: JSON.stringify({...values, projectId: project.projectId})
           })
           if (!response.ok) {
@@ -146,6 +145,8 @@ function CreateApplication({ project }: {project: Project}) {
 }
 
 function CreateDatabase({ project }: {project: Project}) {
+  const { url, headers } = useContext(TokenContext)
+
   interface FormValues {
     dbType: string;
 
@@ -161,8 +162,8 @@ function CreateDatabase({ project }: {project: Project}) {
     databaseRootPassword: string;
   }
   
-  const { isLoading, data: servers } = useFetch<Server[], Server[]>(API_URL + "server.all", {
-  headers: API_HEADERS,
+  const { isLoading, data: servers } = useFetch<Server[], Server[]>(url + "server.all", {
+  headers,
   initialData: []
 })
 
@@ -189,9 +190,9 @@ function CreateDatabase({ project }: {project: Project}) {
                 break;
         }
 
-          const response = await fetch(API_URL + `${dbType}.create`, {
+          const response = await fetch(url + `${dbType}.create`, {
             method: "POST",
-            headers: API_HEADERS,
+            headers,
             body: JSON.stringify({...db, projectId: project.projectId})
           })
           if (!response.ok) {

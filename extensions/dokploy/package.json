@@ -25,6 +25,12 @@
   ],
   "commands": [
     {
+      "name": "api-keys",
+      "title": "API Keys",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "projects",
       "title": "Projects",
       "description": "",
