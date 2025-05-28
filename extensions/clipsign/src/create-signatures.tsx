@@ -176,7 +176,7 @@ export default function CreateSignature({
           />
           <Form.Description
             title="Tip"
-            text="To hand‑draw your signature, click “Draw Signature Online” above to open a browser, draw and download your PNG, then upload it here."
+            text="To hand‑draw your signature, click “Draw Signature Online” from Actions (or short cut ⌘⇧K) to open a browser, draw and download your PNG, then upload it here."
           />
         </>
       )}
