@@ -1,12 +1,13 @@
-import { List } from "@raycast/api";
+import { LaunchProps, List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { FoodleRecipe, FoodleSearchtype } from "./utils/types";
 import { parseFoodleHtmlForRecipes, fetchFoodleHtml } from "./utils/foodleApi";
 import RecipeItem from "./components/RecipeItem";
 
-export default function Command() {
-  const [searchText, setSearchText] = useState<string>("");
+export default function Command(props: LaunchProps<{ arguments: Arguments.RecipeWith }>) {
+  const ingredients = props.arguments.ingredients || "";
+  const [searchText, setSearchText] = useState<string>(ingredients);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [foodleRecipes, setFoodleRecipes] = useState<FoodleRecipe[]>([]);
 

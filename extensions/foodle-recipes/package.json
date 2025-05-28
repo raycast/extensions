@@ -12,17 +12,33 @@
   "commands": [
     {
       "name": "recipe-for",
-      "title": "Recipe For",
+      "title": "Search Recipe",
       "subtitle": "Foodle Recipes",
-      "description": "Search recipes by name via recipe search engine foodle.recipes",
-      "mode": "view"
+      "description": "Search recipes by name via recipe search engine https://foodle.recipes",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Name",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "recipe-with",
-      "title": "Recipe With",
+      "title": "Search Recipe With",
       "subtitle": "Foodle Recipes",
-      "description": "Search recipes by ingredients via recipe search engine foodle.recipes",
-      "mode": "view"
+      "description": "Search recipes by ingredients via recipe search engine https://foodle.recipes",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ingredients",
+          "placeholder": "Ingredients",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
