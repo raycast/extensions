@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clipsign",
-  "title": "Clipsign",
+  "title": "Clipsign - E‑Signatures on Clipboard",
   "version": "0.1.0",
   "description": "A lightweight Raycast extension for creating, saving, and instantly copying your e‑signature.",
-  "icon": "extension-icon.png",
+  "icon": "clipsign-logo.png",
   "author": "gdcho",
   "owner": "rj-labs",
   "license": "MIT",
@@ -32,8 +32,7 @@
   "dependencies": {
     "@raycast/api": "^1.99.2",
     "@raycast/utils": "^1.17.0",
-    "pureimage": "^0.4.18",
-    "react-signature-canvas": "^1.1.0-alpha.2"
+    "pureimage": "^0.4.18"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -46,8 +45,8 @@
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
