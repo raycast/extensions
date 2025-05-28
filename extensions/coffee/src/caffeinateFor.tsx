@@ -12,7 +12,7 @@ export default async function Command(props: { arguments: Arguments }) {
   const hasValue = hours || minutes || seconds;
 
   if (!hasValue) {
-    await showToast(Toast.Style.Failure, "No values set for caffeinate length");
+    await showToast(Toast.Style.Failure, "No values set for Club Mate length");
     return;
   }
 
@@ -31,7 +31,7 @@ export default async function Command(props: { arguments: Arguments }) {
 
   await startCaffeinate(
     { menubar: true, status: true },
-    `Caffeinating your Mac for ${formattedTime}`,
+    `Club Mate into your Mac for ${formattedTime}`,
     `-t ${totalSeconds}`,
   );
 }

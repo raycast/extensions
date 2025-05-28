@@ -61,7 +61,7 @@ export default function Command() {
         ...updatedSchedules,
       ]);
 
-      await showToast(Toast.Style.Success, "Caffeination schedule set successfully.");
+      await showToast(Toast.Style.Success, "Club Mate schedule set successfully.");
       setSearchText("");
     } catch (error) {
       console.error("Failed to set schedule:", error);
@@ -151,13 +151,13 @@ export default function Command() {
     >
       {schedules.length === 0 ? (
         <List.EmptyView
-          title="No caffeination schedules yet"
+          title="No Club Mate schedules yet"
           description="To schedule, enter the days to be scheduled and time range, then hit enter!"
           icon={Icon.Calendar}
         />
       ) : (
         <>
-          {["Today's Schedule", "Caffeination Schedule"].map((sectionTitle, index) => (
+          {["Today's Schedule", "Club Mate Schedule"].map((sectionTitle, index) => (
             <List.Section
               key={index}
               title={sectionTitle}

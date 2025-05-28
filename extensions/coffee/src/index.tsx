@@ -74,7 +74,7 @@ export default function Command(props: LaunchProps) {
         optimisticUpdate: () => false,
       });
       if (preferences.hidenWhenDecaffeinated) {
-        showHUD("Your Mac is now decaffeinated");
+        showHUD("Your Mac now doesn't have Club Mate");
       }
     } else {
       setLocalCaffeinateStatus(true);
@@ -99,10 +99,12 @@ export default function Command(props: LaunchProps) {
     >
       {isLoading ? null : (
         <>
-          <MenuBarExtra.Section title={`Your mac is ${localCaffeinateStatus ? "caffeinated" : "decaffeinated"}`} />
+          <MenuBarExtra.Section
+            title={`Your mac does ${localCaffeinateStatus ? "have Club Mate" : "not have Club Mate"}`}
+          />
           {localCaffeinateStatus && extraInfoStr && <MenuBarExtra.Section title={extraInfoStr} />}
           <MenuBarExtra.Item
-            title={localCaffeinateStatus ? "Decaffeinate" : "Caffeinate"}
+            title={localCaffeinateStatus ? "No Club Mate" : "Club Mate"}
             onAction={handleCaffeinateStatus}
           />
         </>

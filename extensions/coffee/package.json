@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coffee",
-  "title": "Coffee",
+  "title": "Club Mate",
   "description": "Prevent the sleep function on your mac",
   "icon": "logo.png",
   "author": "mooxl",
@@ -13,61 +13,62 @@
     "xilopaint",
     "ridemountainpig",
     "zakj",
-    "Visual-Studio-Coder"
+    "Visual-Studio-Coder",
+    "jpgraphics"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "caffeinate",
-      "title": "Caffeinate",
-      "subtitle": "Coffee",
+      "title": "Drink Club Mate",
+      "subtitle": "Club Mate",
       "description": "Prevent your Mac from sleeping",
       "mode": "no-view"
     },
     {
       "name": "decaffeinate",
-      "title": "Decaffeinate",
-      "subtitle": "Coffee",
+      "title": "Remove Club Mate",
+      "subtitle": "Club Mate",
       "description": "Turn off the caffeine",
       "mode": "no-view"
     },
     {
       "name": "caffeinateWhile",
-      "title": "Caffeinate While",
-      "subtitle": "Coffee",
+      "title": "Club Mate While",
+      "subtitle": "Club Mate",
       "description": "Prevent your Mac from sleeping while an certain app is running",
       "mode": "view"
     },
     {
       "name": "index",
-      "title": "Caffeinate Status Menu Bar",
-      "subtitle": "Coffee",
+      "title": "Club Mate Status Menu Bar",
+      "subtitle": "Club Mate",
       "description": "Get the status of the current caffeination in your menu bar",
       "mode": "menu-bar",
       "interval": "1m",
       "preferences": [
         {
           "name": "hidenWhenDecaffeinated",
-          "description": "Hide the icon when decaffeinated",
+          "description": "Hide the icon if no Mate is available",
           "type": "checkbox",
           "required": false,
           "default": false,
-          "title": "When Decaffeinated",
+          "title": "When no Mate is available",
           "label": "Hide the icon"
         }
       ]
     },
     {
       "name": "caffeinateToggle",
-      "title": "Toggle Caffeinate",
-      "subtitle": "Coffee",
+      "title": "Toggle Club Mate",
+      "subtitle": "Club Mate",
       "description": "Toggle caffeination",
       "mode": "no-view"
     },
     {
       "name": "caffeinateFor",
-      "title": "Caffeinate For",
-      "subtitle": "Coffee",
+      "title": "Club Mate For",
+      "subtitle": "Club Mate",
       "description": "Prevent your Mac from sleeping for a certain time",
       "mode": "no-view",
       "arguments": [
@@ -93,8 +94,8 @@
     },
     {
       "name": "caffeinateUntil",
-      "title": "Caffeinate Until",
-      "subtitle": "Coffee",
+      "title": "Club Mate Until",
+      "subtitle": "Club Mate",
       "description": "Prevent your Mac from sleeping until a certain time",
       "mode": "no-view",
       "arguments": [
@@ -108,14 +109,14 @@
     },
     {
       "name": "addSchedule",
-      "title": "Schedule Caffeination",
-      "description": "Schedule caffeination",
+      "title": "Schedule Club Mate",
+      "description": "Schedule Club Mate",
       "mode": "view"
     },
     {
       "name": "status",
-      "title": "Caffeinate Status",
-      "description": "Show the current caffeination status",
+      "title": "Club Mate Status",
+      "description": "Show the current Club Mate status",
       "mode": "no-view",
       "interval": "15s"
     }
@@ -123,33 +124,33 @@
   "tools": [
     {
       "name": "caffeinate-for",
-      "title": "Caffeinate for Duration",
+      "title": "Club Mate for Duration",
       "description": "Keeps your Mac awake for a specified duration"
     },
     {
       "name": "caffeinate",
-      "title": "Caffeinate",
+      "title": "Club Mate",
       "description": "Keep Mac awake for unspecified duration."
     },
     {
       "name": "check-caffeination-status",
-      "title": "Check Caffeination Status",
-      "description": "Check if your Mac is currently caffeinated or not."
+      "title": "Check Club Mate Status",
+      "description": "Check if your Mac currently has Club Mate or not."
     },
     {
       "name": "decaffeinate",
-      "title": "Decaffeinate",
+      "title": "Remove Club Mate",
       "description": "Turn off your Mac's sleep prevention."
     },
     {
       "name": "schedule-caffeination",
-      "title": "Schedule Caffeination",
-      "description": "Add a schedule for your caffeination using AI."
+      "title": "Schedule Club Mate",
+      "description": "Add a schedule for your Club Mate using AI."
     },
     {
       "name": "caffeinate-while-app-is-running",
-      "title": "Caffeinate While App Is Running",
-      "description": "While an app is running, turn on caffeination."
+      "title": "Club Mate While App Is Running",
+      "description": "While an app is running, turn on Club Mate."
     }
   ],
   "preferences": [

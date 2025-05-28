@@ -36,11 +36,7 @@ export default function Command() {
           <Action.SubmitForm
             title="Caffeinate"
             onSubmit={async (data) => {
-              await startCaffeinate(
-                { menubar: true, status: true },
-                "Caffeinate process started",
-                `-w ${data.process}`,
-              );
+              await startCaffeinate({ menubar: true, status: true }, "Club Mate process started", `-w ${data.process}`);
               popToRoot();
             }}
           />

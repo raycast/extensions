@@ -41,7 +41,7 @@ export default async function Command(props: { arguments: Arguments.CaffeinateUn
 
   await startCaffeinate(
     { menubar: true, status: true },
-    `Caffeinating your Mac until ${tomorrow}${formattedTime}`,
+    `Club Mate into your Mac until ${tomorrow}${formattedTime}`,
     `-t ${totalSeconds}`,
   );
 }

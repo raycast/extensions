@@ -22,13 +22,13 @@ export function ListActionPanel({
     <ActionPanel>
       {searchText.length > 0 && <Action title="Set Schedule" icon={Icon.Calendar} onAction={onSetScheduleAction} />}
       <Action
-        title="Set Caffeination Schedule"
+        title="Set Club Mate Schedule"
         icon={Icon.CopyClipboard}
         shortcut={{ modifiers: ["cmd"], key: "s" }}
         onAction={() => onSetScheduleAction()}
       />
       <Action
-        title="Delete Caffeination Schedule"
+        title="Delete Club Mate Schedule"
         style={Action.Style.Destructive}
         icon={Icon.Trash}
         shortcut={Keyboard.Shortcut.Common.Remove}
@@ -36,17 +36,9 @@ export function ListActionPanel({
       />
 
       {schedule.IsManuallyDecafed ? (
-        <Action
-          title="Resume Caffeination Schedule"
-          icon={Icon.Play}
-          onAction={() => onResumeScheduleAction(schedule)}
-        />
+        <Action title="Resume Club Mate Schedule" icon={Icon.Play} onAction={() => onResumeScheduleAction(schedule)} />
       ) : (
-        <Action
-          title="Pause Caffeination Schedule"
-          icon={Icon.Pause}
-          onAction={() => onPauseScheduleAction(schedule)}
-        />
+        <Action title="Pause Club Mate Schedule" icon={Icon.Pause} onAction={() => onPauseScheduleAction(schedule)} />
       )}
     </ActionPanel>
   );

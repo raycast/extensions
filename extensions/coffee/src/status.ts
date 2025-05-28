@@ -64,12 +64,12 @@ export default async function Command() {
   const isCaffeinated = isCaffeinateRunning();
   const isScheduled = await checkSchedule();
 
-  let subtitle = "✖ Decaffeinated";
+  let subtitle = "✖ No Club Mate";
 
   if (isCaffeinated) {
-    subtitle = "✔ Caffeinated";
+    subtitle = "✔ Club Mate";
   } else if (isScheduled) {
-    subtitle = "✔ Caffeinated";
+    subtitle = "✔ Club Mate";
   }
 
   updateCommandMetadata({ subtitle });
