@@ -3,13 +3,13 @@ import { PaginatedResponse, RawSpaceObject, SearchRequest, SpaceObject } from ".
 import { apiEndpoints, apiFetch } from "../../utils";
 
 export async function globalSearch(
-  request: SearchRequest,
+  SearchRequest: SearchRequest,
   options: { offset: number; limit: number },
 ): Promise<PaginatedResponse<SpaceObject>> {
   const { url, method } = apiEndpoints.globalSearch(options);
   const response = await apiFetch<PaginatedResponse<RawSpaceObject>>(url, {
     method: method,
-    body: JSON.stringify(request),
+    body: JSON.stringify(SearchRequest),
   });
 
   return {

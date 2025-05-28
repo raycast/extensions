@@ -19,8 +19,7 @@ export function NotInstalled({ onRefresh }: { onRefresh: () => void }) {
     <Detail
       actions={
         <ActionPanel>
-          {/* eslint-disable-next-line @raycast/prefer-title-case */}
-          <Action title="Install FFmpeg" onAction={handleInstall} shortcut={{ modifiers: [], key: "return" }} />
+          <Action title="Install Ffmpeg" onAction={handleInstall} shortcut={{ modifiers: [], key: "return" }} />
         </ActionPanel>
       }
       markdown={`

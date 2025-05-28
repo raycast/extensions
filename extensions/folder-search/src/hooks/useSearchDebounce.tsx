@@ -10,14 +10,13 @@ interface UseSearchDebounceProps {
 /**
  * Hook for debouncing search text input
  */
-export function useSearchDebounce({ initialText = "", debounceTime = 800, onDebounced }: UseSearchDebounceProps = {}) {
+export function useSearchDebounce({ initialText = "", debounceTime = 500, onDebounced }: UseSearchDebounceProps = {}) {
   const [searchText, setSearchText] = useState<string>(initialText);
   const [debouncedText, setDebouncedText] = useState<string>(initialText);
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const searchTextRef = useRef<string>(searchText);
   const lastProcessedText = useRef<string>("");
-  const setSearchTextRef = useRef<(text: string) => void>((text: string) => setSearchText(text));
 
   // Update ref when searchText changes
   useEffect(() => {
@@ -60,10 +59,10 @@ export function useSearchDebounce({ initialText = "", debounceTime = 800, onDebo
     };
   }, [searchText, debounceTime, onDebounced]);
 
-  // Handler to update search text with stable reference
+  // Handler to update search text
   const updateSearchText = useCallback((text: string) => {
-    setSearchTextRef.current(text);
-  }, []); // Empty dependency array ensures stable function reference
+    setSearchText(text);
+  }, []);
 
   return {
     searchText,

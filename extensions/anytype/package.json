@@ -40,13 +40,6 @@
       "subtitle": "Anytype",
       "description": "Add an existing object to a list.",
       "mode": "view"
-    },
-    {
-      "name": "create-type",
-      "title": "Create Type",
-      "subtitle": "Anytype",
-      "description": "Create a new type.",
-      "mode": "view"
     }
   ],
   "tools": [
@@ -763,12 +756,10 @@
     "@raycast/utils": "^1.17.0",
     "date-fns": "^4.1.0",
     "emoji-regex": "^10.4.0",
-    "lodash": "^4.17.21",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.17.16",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",

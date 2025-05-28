@@ -21,7 +21,7 @@ const folderSpotlightSearchAttributes = [
 export async function searchSpotlight(
   search: string,
   searchScope: "pinned" | "user" | "all",
-  abortable?: React.MutableRefObject<AbortController | null | undefined>,
+  abortable?: React.MutableRefObject<AbortController | null | undefined>
 ): Promise<SpotlightSearchResult[]> {
   log("debug", "searchSpotlight", "Starting search with parameters", {
     search,
@@ -54,7 +54,7 @@ export async function searchSpotlight(
         safeSearchScope(searchScope),
         searchFilter,
         folderSpotlightSearchAttributes as string[],
-        abortable,
+        abortable
       );
 
       searchStream.on("data", (result: SpotlightSearchResult) => {

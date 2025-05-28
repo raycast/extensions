@@ -7,8 +7,7 @@
   "author": "marcmagn1",
   "contributors": [
     "omarshahine",
-    "bendrucker",
-    "damian_duchnowski"
+    "bendrucker"
   ],
   "categories": [
     "Productivity",
@@ -290,8 +289,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.92.1",
-    "@raycast/utils": "^1.17.0",
-    "date-fns": "^4.1.0"
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

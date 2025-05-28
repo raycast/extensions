@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quit-applications",
   "title": "Quit Applications",
-  "description": "Quit applications directly from Raycast",
+  "description": "Quit appplications directly from Raycast",
   "icon": "quit-app.png",
   "author": "mackopes",
   "contributors": [

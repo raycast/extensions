@@ -17,29 +17,13 @@
     {
       "name": "search-bookmarks",
       "title": "Search Linkding",
-      "description": "Search Linkding bookmarks",
+      "description": "Searches through Linkding Bookmarks",
       "mode": "view"
     },
     {
       "name": "create-bookmarks",
       "title": "Create Bookmark",
-      "description": "Create new bookmark",
-      "mode": "view",
-      "preferences": [
-        {
-          "title": "Options",
-          "name": "useCurrentBrowserTab",
-          "type": "checkbox",
-          "label": "Use current browser tab",
-          "description": "If the focused app is a browser, try to get the current tab's URL and prefill it when creating a bookmark.",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "save-browser-tab",
-      "title": "Save Browser Tab",
-      "description": "Save current browser tab to Linkding",
+      "description": "Create new Bookmarks",
       "mode": "view"
     }
   ],

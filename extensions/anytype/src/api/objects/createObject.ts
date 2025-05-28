@@ -4,13 +4,13 @@ import { apiEndpoints, apiFetch } from "../../utils";
 
 export async function createObject(
   spaceId: string,
-  request: CreateObjectRequest,
+  objectData: CreateObjectRequest,
 ): Promise<{ object: SpaceObject | null }> {
   const { url, method } = apiEndpoints.createObject(spaceId);
 
   const response = await apiFetch<{ object: RawSpaceObject }>(url, {
     method: method,
-    body: JSON.stringify(request),
+    body: JSON.stringify(objectData),
   });
 
   return {

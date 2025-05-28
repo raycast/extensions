@@ -5,7 +5,7 @@ import Style = Toast.Style;
 export async function verifyIsMullvadInstalled() {
   try {
     // Weirdly, `which` is not available here
-    execSync("mullvad --version");
+    execSync("mullvad version");
     return true;
   } catch (e) {
     console.error(e);

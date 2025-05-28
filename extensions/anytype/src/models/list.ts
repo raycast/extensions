@@ -1,7 +1,3 @@
-export interface AddObjectsToListRequest {
-  objects: string[];
-}
-
 export interface View {
   id: string;
   name: string;

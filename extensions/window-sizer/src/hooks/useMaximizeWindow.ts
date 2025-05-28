@@ -34,7 +34,7 @@ export function useMaximizeWindow() {
         await closeMainWindow();
 
         // Display success message
-        await showHUD(`↔ Window maximized`, {
+        await showHUD(`↙↗ Window maximized`, {
           popToRootType: PopToRootType.Immediate,
         });
       } else {

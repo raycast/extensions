@@ -18,8 +18,8 @@ import os from "os";
 import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
 
 // Logging configuration
-const LOG_ENABLED = false; // Set to true to enable all logging
-const LOG_LEVEL: "debug" | "error" = "debug"; // Set to "debug" for verbose logging or "error" for less noise
+const LOG_ENABLED = true; // Set to true to enable all logging
+const LOG_LEVEL: "debug" | "error" = "error"; // Set to "debug" for verbose logging or "error" for less noise
 const LOG_CACHE_OPERATIONS = false; // Set to true to log detailed cache operations
 
 // Create a plugins cache instance with namespace
@@ -254,18 +254,6 @@ export const loadPlugins = async (callerId?: string) => {
   return validPlugins;
 };
 
-/**
- * Check if a folder matches a search query by filtering special characters and comparing case-insensitively
- */
-export const matchesSearchQuery = (folderName: string, searchQuery: string): boolean => {
-  if (!searchQuery) return true;
-
-  const cleanQuery = searchQuery.replace(/[[|\]]/gi, "").toLocaleLowerCase();
-  const cleanFolderName = folderName.toLocaleLowerCase();
-
-  return cleanFolderName.includes(cleanQuery);
-};
-
 export const safeSearchScope = (searchScope: string | undefined) => {
   return searchScope === "" ? undefined : searchScope;
 };
@@ -322,6 +310,17 @@ export const lastUsedSort = (a: SpotlightSearchResult, b: SpotlightSearchResult)
   return new Date(safeB).getTime() - new Date(safeA).getTime();
 };
 
+export const fixDoubleConcat = (text: string): string => {
+  const regex = /^(.+)\1$/; // Matches a string followed by the same string again
+
+  if (regex.test(text)) {
+    const originalText = text.replace(regex, "$1");
+    return originalText;
+  }
+
+  return text;
+};
+
 const CLOUD_STORAGE_PATHS = [
   // iCloud Drive
   `${userHomeDir}/Library/Mobile Documents/com~apple~CloudDocs`,
@@ -365,7 +364,7 @@ export function formatDate(dateString: string | undefined | null): string {
       dateStyle: "full",
       timeStyle: "short",
     }).format(date);
-  } catch {
+  } catch (e) {
     return "-";
   }
 }
@@ -373,8 +372,9 @@ export function formatDate(dateString: string | undefined | null): string {
 // Logging utility
 export const log = (level: "debug" | "error", component: string, message: string, data?: Record<string, unknown>) => {
   if (!LOG_ENABLED) return;
+
   // Skip debug messages when log level is set to error only
-  if (level === "debug" && LOG_LEVEL !== "debug") return;
+  if (level === "debug" && LOG_LEVEL === "error") return;
 
   const timestamp = new Date().toISOString();
   const logData = {
@@ -437,19 +437,4 @@ export function logDiagnostics(component: string, message: string) {
   }
 
   log("debug", component, "=".repeat(50));
-}
-
-export function fixDoubleConcat(text: string): string {
-  if (!text || text.length < 2) return text;
-
-  const halfLength = Math.floor(text.length / 2);
-  const firstHalf = text.substring(0, halfLength);
-  const secondHalf = text.substring(halfLength);
-
-  // If the string is duplicated, use only the first half
-  if (text.length % 2 === 0 && firstHalf === secondHalf) {
-    return firstHalf;
-  }
-
-  return text;
 }

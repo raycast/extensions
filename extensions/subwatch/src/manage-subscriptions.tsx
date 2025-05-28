@@ -54,8 +54,15 @@ export default function Command() {
       navigationTitle="Search subscriptions"
       searchBarPlaceholder="Search your subscriptions"
       isShowingDetail
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <CreateSubscriptionAction />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
     >
-      {data?.[0]?.data?.map((item, index) => (
+      {data?.[0]?.data.map((item, index) => (
         <List.Item
           key={index}
           title={item.name.charAt(0).toUpperCase() + item.name.slice(1)}

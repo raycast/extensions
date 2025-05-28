@@ -1,7 +1,6 @@
 import { LocalStorage, environment } from "@raycast/api";
 import { log } from "../utils";
 import { SpotlightSearchResult } from "../types";
-import { DEFAULT_PREFERENCES } from "../constants";
 
 /**
  * Hook for managing pin storage operations
@@ -47,18 +46,17 @@ export function usePinStorage() {
       searchScope?: string;
       isShowingDetail?: boolean;
       showNonCloudLibraryPaths?: boolean;
-    },
+    }
   ): Promise<boolean> => {
     try {
       await LocalStorage.setItem(
         `${environment.extensionName}-preferences`,
         JSON.stringify({
           pinned: pins,
-          searchScope: additionalPrefs?.searchScope ?? DEFAULT_PREFERENCES.searchScope,
-          isShowingDetail: additionalPrefs?.isShowingDetail ?? DEFAULT_PREFERENCES.isShowingDetail,
-          showNonCloudLibraryPaths:
-            additionalPrefs?.showNonCloudLibraryPaths ?? DEFAULT_PREFERENCES.showNonCloudLibraryPaths,
-        }),
+          searchScope: additionalPrefs?.searchScope || "",
+          isShowingDetail: additionalPrefs?.isShowingDetail,
+          showNonCloudLibraryPaths: additionalPrefs?.showNonCloudLibraryPaths || false,
+        })
       );
 
       // Only log on significant pin count changes

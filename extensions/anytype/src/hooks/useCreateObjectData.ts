@@ -1,6 +1,6 @@
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { CreateObjectFormValues } from "../components";
+import { CreateObjectFormValues } from "../create-object";
 import { bundledTypeKeys, fetchAllTemplatesForSpace, fetchAllTypesForSpace } from "../utils";
 import { useSearch } from "./useSearch";
 import { useSpaces } from "./useSpaces";
@@ -60,7 +60,7 @@ export function useCreateObjectData(initialValues?: CreateObjectFormValues) {
         title: "Failed to fetch latest data",
       });
     }
-  }, [spacesError, typesError, templatesError, listsError, objectsError]);
+  }, [spacesError, typesError, templatesError, listsError]);
 
   const isLoading = isLoadingSpaces || isLoadingTypes || isLoadingTemplates || isLoadingLists || isLoadingObjects;
 

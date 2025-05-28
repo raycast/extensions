@@ -7,7 +7,6 @@ import { useSearch, useTagsMap } from "../../hooks";
 import {
   IconFormat,
   ObjectIcon,
-  ObjectLayout,
   PropertyFieldValue,
   PropertyFormat,
   PropertyLinkWithValue,
@@ -16,7 +15,7 @@ import {
   SpaceObjectWithBody,
   UpdateObjectRequest,
 } from "../../models";
-import { bundledPropKeys, defaultTintColor, getNumberFieldValidations, isEmoji } from "../../utils";
+import { bundledPropKeys, bundledTypeKeys, defaultTintColor, getNumberFieldValidations, isEmoji } from "../../utils";
 
 interface UpdateObjectFormValues {
   name?: string;
@@ -104,7 +103,7 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
   );
 
   const descriptionEntry = object.properties.find((p) => p.key === bundledPropKeys.description);
-  const initialIconValue = object.icon?.format === IconFormat.Emoji ? (object.icon.emoji ?? "") : "";
+  const initialIconValue = object.icon.format === IconFormat.Emoji ? (object.icon.emoji ?? "") : "";
 
   const initialValues: UpdateObjectFormValues = {
     name: object.name,
@@ -122,7 +121,7 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
         const propertiesEntries: PropertyLinkWithValue[] = [];
         properties.forEach((prop) => {
           const raw = itemProps[prop.key]?.value;
-          const entry: PropertyLinkWithValue = { key: prop.key };
+          const entry: PropertyLinkWithValue = { key: prop.key, format: prop.format };
           switch (prop.format) {
             case PropertyFormat.Text:
               entry.text = String(raw);
@@ -172,6 +171,7 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
         if (descriptionRaw !== undefined && descriptionRaw !== null) {
           propertiesEntries.push({
             key: bundledPropKeys.description,
+            format: PropertyFormat.Text,
             text: String(descriptionRaw),
           });
         }
@@ -183,7 +183,7 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
         }
 
         const payload: UpdateObjectRequest = {
-          name: values.name,
+          name: values.name || "",
           ...(iconPayload !== undefined && { icon: iconPayload }),
           properties: propertiesEntries,
         };
@@ -191,7 +191,7 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
         await updateObject(spaceId, object.id, payload);
 
         await showToast(Toast.Style.Success, "Object updated");
-        await Promise.all(mutateObjects.map((mutate) => mutate()));
+        mutateObjects.forEach((mutate) => mutate());
         if (mutateObject) {
           mutateObject();
         }
@@ -203,7 +203,7 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
     validation: {
       name: (v: PropertyFieldValue) => {
         const s = typeof v === "string" ? v.trim() : "";
-        if (object.layout !== ObjectLayout.Note && object.layout !== ObjectLayout.Bookmark && !s) {
+        if (![bundledTypeKeys.bookmark, bundledTypeKeys.note].includes(object.type.key) && !s) {
           return "Name is required";
         }
       },
@@ -226,51 +226,44 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
         </ActionPanel>
       }
     >
-      {object.layout !== ObjectLayout.Note && (
-        <Form.TextField {...itemProps.name} title="Name" placeholder="Add name" info="Enter the name of the object" />
+      {![bundledTypeKeys.note].includes(object.type.key) && (
+        <Form.TextField {...itemProps.name} title="Name" placeholder="Add name" />
       )}
-      {object.layout !== ObjectLayout.Note &&
-        object.layout !== ObjectLayout.Bookmark &&
-        object.layout !== ObjectLayout.Action &&
-        object.layout !== ObjectLayout.Profile && (
-          <Form.TextField
-            {...itemProps.icon}
-            title="Icon"
-            placeholder="Add emoji"
-            info={
-              object.icon?.format === IconFormat.File
-                ? "Current icon is a file. Enter an emoji to replace it."
-                : object.icon?.format === IconFormat.Icon
-                  ? "Current icon is a built-in icon. Enter an emoji to replace it."
-                  : "Add an emoji to change the icon"
-            }
-          />
-        )}
-      <Form.TextField
-        {...itemProps.description}
-        title="Description"
-        placeholder="Add description"
-        info="Provide a brief description of the object"
-      />
+      {![bundledTypeKeys.task, bundledTypeKeys.note, bundledTypeKeys.profile].includes(object.type.key) && (
+        <Form.TextField
+          {...itemProps.icon}
+          title="Icon"
+          placeholder="Add emoji"
+          info={
+            object.icon.format === IconFormat.File
+              ? "Current icon is a file. Enter an emoji to replace it."
+              : object.icon.format === IconFormat.Icon
+                ? "Current icon is a built-in icon. Enter an emoji to replace it."
+                : "Add an emoji to change the icon"
+          }
+        />
+      )}
+      <Form.TextField {...itemProps.description} title="Description" placeholder="Add description" />
 
       <Form.Separator />
 
-      {properties.map((property) => {
-        const tags = (tagsMap && tagsMap[property.id]) ?? [];
+      {properties.map((prop) => {
+        const tags = (tagsMap && tagsMap[prop.id]) ?? [];
+        const id = prop.key;
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { value, defaultValue, ...restItemProps } = itemProps[property.key];
+        const { value, defaultValue, ...restItemProps } = itemProps[id];
 
-        switch (property.format) {
+        switch (prop.format) {
           case PropertyFormat.Text:
           case PropertyFormat.Url:
           case PropertyFormat.Email:
           case PropertyFormat.Phone:
             return (
               <Form.TextField
-                key={property.id}
+                key={prop.key}
                 {...restItemProps}
-                title={property.name}
+                title={prop.name}
                 placeholder="Add text"
                 value={String(value ?? "")}
               />
@@ -278,9 +271,9 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
           case PropertyFormat.Number:
             return (
               <Form.TextField
-                key={property.id}
+                key={prop.key}
                 {...restItemProps}
-                title={property.name}
+                title={prop.name}
                 placeholder="Add number"
                 value={String(value ?? "")}
               />
@@ -288,11 +281,11 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
           case PropertyFormat.Select:
             return (
               <Form.Dropdown
-                key={property.id}
+                key={prop.key}
                 {...restItemProps}
-                title={property.name}
+                title={prop.name}
                 value={String(value ?? "")}
-                placeholder={`Select tags for ${property.name}`}
+                placeholder={`Select tags for ${prop.name}`}
               >
                 <Form.Dropdown.Item
                   key="none"
@@ -313,9 +306,9 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
           case PropertyFormat.MultiSelect:
             return (
               <Form.TagPicker
-                key={property.id}
+                key={prop.key}
                 {...restItemProps}
-                title={property.name}
+                title={prop.name}
                 value={Array.isArray(value) ? (value as string[]) : []}
                 placeholder="Add tags"
               >
@@ -332,9 +325,9 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
           case PropertyFormat.Date:
             return (
               <Form.DatePicker
-                key={property.id}
+                key={prop.key}
                 {...restItemProps}
-                title={property.name}
+                title={prop.name}
                 defaultValue={value as Date | undefined}
               />
             );
@@ -343,20 +336,14 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
             return null;
           case PropertyFormat.Checkbox:
             return (
-              <Form.Checkbox
-                key={property.id}
-                {...restItemProps}
-                label=""
-                title={property.name}
-                value={Boolean(value)}
-              />
+              <Form.Checkbox key={prop.key} {...restItemProps} label="" title={prop.name} value={Boolean(value)} />
             );
           case PropertyFormat.Objects:
             return (
               <Form.Dropdown
-                key={property.id}
+                key={prop.key}
                 {...restItemProps}
-                title={property.name}
+                title={prop.name}
                 value={String(value ?? "")}
                 onSearchTextChange={setObjectSearchText}
                 throttle={true}

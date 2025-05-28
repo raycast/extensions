@@ -5,7 +5,7 @@ import fse from "fs-extra";
 import { log } from "./utils";
 
 export async function moveFinderItems(
-  destinationFolder: string,
+  destinationFolder: string
 ): Promise<{ success: boolean; movedCount: number; skippedCount: number }> {
   try {
     log("debug", "moveFinderItems", "Starting move operation", {
@@ -149,7 +149,7 @@ export async function moveFinderItems(
         timestamp: new Date().toISOString(),
       });
       await showHUD(
-        `Moved ${movedCount} ${movedCount === 1 ? "file" : "files"} to ${path.basename(destinationFolder)}`,
+        `Moved ${movedCount} ${movedCount === 1 ? "file" : "files"} to ${path.basename(destinationFolder)}`
       );
       log("debug", "moveFinderItems", "Success HUD shown", {
         timestamp: new Date().toISOString(),

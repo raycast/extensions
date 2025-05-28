@@ -1,5 +1,4 @@
 import { addObjectsToList } from "../api";
-import { AddObjectsToListRequest } from "../models";
 
 type Input = {
   /**
@@ -26,6 +25,5 @@ type Input = {
  * This function adds the specified object to the specified list.
  */
 export default async function tool({ spaceId, listId, objectId }: Input) {
-  const request: AddObjectsToListRequest = { objects: [objectId] };
-  return await addObjectsToList(spaceId, listId, request);
+  return await addObjectsToList(spaceId, listId, [objectId]);
 }

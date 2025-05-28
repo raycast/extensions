@@ -2,13 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "media-converter",
   "title": "Media Converter",
-  "description": "This extension converts video, image, and audio files using FFmpeg",
+  "description": "This extension converts video, image, and audio files using ffmpeg",
   "icon": "extension-icon.png",
   "author": "leandro.maia",
   "contributors": [
     "wattmalsh",
-    "samuelkraft",
-    "sacha_crispin"
+    "samuelkraft"
   ],
   "categories": [
     "Productivity"
@@ -21,13 +20,30 @@
       "subtitle": "Media Converter",
       "description": "Converts a media file to a different file format",
       "mode": "view"
+    },
+    {
+      "name": "quick-convert",
+      "title": "Quick Convert",
+      "subtitle": "Media Converter",
+      "description": "Converts a media file to a different file format",
+      "mode": "view"
     }
   ],
   "tools": [
     {
-      "name": "convert-media",
-      "title": "Convert Media",
-      "description": "Convert an image, video or audio file to a different file format"
+      "name": "convert-image",
+      "title": "Convert Image",
+      "description": "Convert an image file to a different file format"
+    },
+    {
+      "name": "convert-video",
+      "title": "Convert Video",
+      "description": "Convert a video file to a different file format"
+    },
+    {
+      "name": "convert-audio",
+      "title": "Convert Audio",
+      "description": "Convert an audio file to a different file format"
     }
   ],
   "ai": {
@@ -36,60 +52,58 @@
       {
         "input": "@media-converter convert the last mp3 file in @finder downloads to wav",
         "mocks": {
-          "convert-media": {}
+          "convert-audio": {}
         },
         "expected": [
           {
-            "callsTool": "convert-media"
+            "callsTool": "convert-audio"
           }
         ]
       },
       {
         "input": "@media-converter convert all png files on my @finder desktop to webp",
         "mocks": {
-          "convert-media": {}
+          "convert-image": {}
         },
         "expected": [
           {
-            "callsTool": "convert-media"
+            "callsTool": "convert-image"
           }
         ]
       },
       {
         "input": "@media-converter convert my last screen recording in @finder downloads to webm",
         "mocks": {
-          "convert-media": {}
+          "convert-video": {}
         },
         "expected": [
           {
-            "callsTool": "convert-media"
+            "callsTool": "convert-video"
           }
         ]
       },
       {
         "input": "@media-converter convert the heic photos in @finder desktop to jpg",
         "mocks": {
-          "convert-media": {}
+          "convert-image": {}
         },
         "expected": [
           {
-            "callsTool": "convert-media"
+            "callsTool": "convert-image"
           }
         ]
       }
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.94.0",
+    "@raycast/api": "^1.89.1",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.27.0",
-    "@raycast/eslint-config": "^2.0.0",
-    "@types/node": "^22.13.10",
-    "@types/react": "^19.0.10",
-    "eslint": "^9.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
   },
@@ -99,6 +113,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+   "publish": "npx @raycast/api@latest publish"
   }
 }

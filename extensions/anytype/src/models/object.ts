@@ -54,8 +54,8 @@ export interface SpaceObject extends Omit<RawSpaceObject, "icon" | "type" | "pro
 }
 
 export interface SpaceObjectWithBody extends Omit<RawSpaceObjectWithBody, "icon" | "type" | "properties"> {
-  icon: Image.ImageLike;
   type: Type;
+  icon: Image.ImageLike;
   properties: PropertyWithValue[];
 }
 

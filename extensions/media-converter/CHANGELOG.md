@@ -1,32 +1,5 @@
 # Media Converter Changelog
 
-## [1.3.0] - 2025-05-27
-
-### Added
-
-- Support for .jpeg, .tif, .bmp files as input (not to be mistaken with .jpg and .tiff which were already supported)
-- Quality options for all image formats
-
-### Removed
-
-- Quick Convert
-  - Now replaced by the main "Convert Media" command
-  - Since Convert Media now auto-selects the selected Finder files, no need for the Quick Convert action anymore
-  - The main "Convert Media" command is just as fast as was "Quick Convert". If you don't know what quality setting to choose, defaults are good.
-
-### Fixed
-
-- Converting from and to .heic now works from and to any formats.
-
-### API Changes
-
-- Rewrote nearly the whole extension
-  - Centralised convert-media.ts tool
-  - Centralised types in converter.ts
-  - Rewrote the file handling logic in ConverterForm.tsx
-  - Added quality handling logic for images
-  - Many more. See pull request for more info.
-
 ## [Enhanced README and added new metadata images] - 2025-03-10
 
 ## [✨ AI Enhancements] - 2025-02-21

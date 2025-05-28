@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Prompt, PromptFormValues } from "../types";
 import { usePrompt } from "../hooks";
 import { formConfig, TAGS } from "../config";
-import { promptValidations } from "../utils/validations";
 
 export default function EditPromptForm({ promptId }: { promptId: string }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +54,35 @@ export default function EditPromptForm({ promptId }: { promptId: string }) {
         setIsLoading(false);
       }
     },
-    validation: promptValidations,
+    validation: {
+      title: (value) => {
+        if (!value) {
+          return "Title is required";
+        }
+        if (value.length < 3) {
+          return "Title must be at least 3 characters";
+        }
+        if (value.length > 100) {
+          return "Title must be less than 100 characters";
+        }
+      },
+      content: (value) => {
+        if (!value) {
+          return "Prompt content is required";
+        }
+        if (value.length < 10) {
+          return "Prompt content must be at least 10 characters";
+        }
+        if (value.length > 5000) {
+          return "Prompt content must be less than 5000 characters";
+        }
+      },
+      tags: (value) => {
+        if (value && value.length > 10) {
+          return "Maximum 10 tags allowed";
+        }
+      },
+    },
   });
 
   useEffect(() => {

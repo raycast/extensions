@@ -82,7 +82,7 @@ export function usePreferences() {
               log("debug", "usePreferences", "No preference changes detected, skipping save");
               return;
             }
-          } catch {
+          } catch (error) {
             log("error", "usePreferences", "Error parsing existing preferences");
             hasChanged = true; // Force save if we can't parse current prefs
           }

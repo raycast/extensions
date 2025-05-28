@@ -13,7 +13,15 @@ import {
   useTypes,
 } from "../hooks";
 import { Member, MemberStatus, Property, Space, SpaceObject, Type } from "../models";
-import { defaultTintColor, formatMemberRole, localStorageKeys, pluralize, processObject } from "../utils";
+import {
+  defaultTintColor,
+  formatMemberRole,
+  isUserProperty,
+  isUserType,
+  localStorageKeys,
+  pluralize,
+  processObject,
+} from "../utils";
 
 type ObjectListProps = {
   space: Space;
@@ -78,7 +86,7 @@ export function ObjectList({ space }: ObjectListProps) {
         title: "Failed to fetch latest data",
       });
     }
-  }, [objectsError, typesError, propertiesError, membersError]);
+  }, [objectsError, typesError, membersError]);
 
   useEffect(() => {
     if (pinnedObjectsError || pinnedTypesError || pinnedPropertiesError || pinnedMembersError) {
@@ -86,7 +94,7 @@ export function ObjectList({ space }: ObjectListProps) {
         title: "Failed to fetch pinned data",
       });
     }
-  }, [pinnedObjectsError, pinnedTypesError, pinnedPropertiesError, pinnedMembersError]);
+  }, [pinnedObjectsError, pinnedTypesError, pinnedMembersError]);
 
   const filterItems = <T extends { name: string }>(items: T[], searchText: string): T[] => {
     return items?.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase()));
@@ -99,7 +107,10 @@ export function ObjectList({ space }: ObjectListProps) {
       icon: type.icon,
       title: type.name,
       subtitle: { value: "", tooltip: "" },
-      accessories: [...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : [])],
+      accessories: [
+        ...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : []),
+        ...(!isUserType(type.key) ? [{ icon: Icon.Lock, tooltip: "System" }] : []),
+      ],
       mutate: [mutateTypes, mutatePinnedTypes as MutatePromise<SpaceObject[] | Type[] | Property[] | Member[]>],
       object: type,
       layout: type.layout,
@@ -114,7 +125,10 @@ export function ObjectList({ space }: ObjectListProps) {
       icon: property.icon,
       title: property.name,
       subtitle: { value: "", tooltip: "" },
-      accessories: [...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : [])],
+      accessories: [
+        ...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : []),
+        ...(!isUserProperty(property.key) ? [{ icon: Icon.Lock, tooltip: "System" }] : []),
+      ],
       mutate: [
         mutateProperties,
         mutatePinnedProperties as MutatePromise<SpaceObject[] | Type[] | Property[] | Member[]>,
@@ -328,7 +342,7 @@ export function ObjectList({ space }: ObjectListProps) {
                 <EmptyViewType
                   title={`No ${currentView.charAt(0).toUpperCase() + currentView.slice(1)} Found`}
                   contextValues={{
-                    spaceId: space.id,
+                    space: space.id,
                     name: searchText,
                   }}
                 />

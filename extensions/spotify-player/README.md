@@ -98,10 +98,6 @@ Use this to start a radio station based on the current song.
 
 Use this to copy the URL of the current song/episode.
 
-### Copy Artist And Title
-
-Use this to copy the artist and track title of the current song/episode.
-
 ### Just Play
 
 Use this to quickly start playing a song based on your query.

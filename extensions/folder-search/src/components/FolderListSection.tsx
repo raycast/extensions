@@ -8,8 +8,7 @@ interface FolderListSectionProps {
   results: SpotlightSearchResult[];
   isShowingDetail: boolean;
   resultIsPinned: (result: SpotlightSearchResult) => boolean;
-  renderActions: (result: SpotlightSearchResult, resultIndex: number, isPinnedSection?: boolean) => JSX.Element;
-  isPinnedSection?: boolean;
+  renderActions: (result: SpotlightSearchResult, resultIndex: number) => JSX.Element;
 }
 
 export function FolderListSection({
@@ -18,7 +17,6 @@ export function FolderListSection({
   isShowingDetail,
   resultIsPinned,
   renderActions,
-  isPinnedSection = false,
 }: FolderListSectionProps) {
   return (
     <List.Section title={title}>
@@ -59,7 +57,7 @@ export function FolderListSection({
               }
             />
           }
-          actions={renderActions(result, resultIndex, isPinnedSection)}
+          actions={renderActions(result, resultIndex)}
         />
       ))}
     </List.Section>

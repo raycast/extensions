@@ -1,13 +1,9 @@
 import { closeMainWindow } from "@raycast/api";
-import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { runAppleScript } from "run-applescript";
 
 export default async () => {
   await closeMainWindow();
-  try {
-    await runAppleScript(
-      'tell application "System Events" to tell dock preferences \n set screen edge to right \n end tell',
-    );
-  } catch (error) {
-    await showFailureToast(error, { title: "Could not move Dock" });
-  }
+  await runAppleScript(
+    'tell application "System Events" to tell dock preferences \n set screen edge to right \n end tell'
+  );
 };

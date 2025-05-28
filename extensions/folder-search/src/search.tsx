@@ -84,7 +84,7 @@ export default function Command(props: LaunchProps) {
   };
 
   // Render actions for the folder list items
-  const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number, isPinnedSection = false) => {
+  const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number) => {
     const enclosingFolder = path.dirname(result.path);
     return (
       <ActionPanel title={folderName(result)}>
@@ -114,7 +114,7 @@ export default function Command(props: LaunchProps) {
           }}
         />
         <Action.OpenWith
-          title="Open with…"
+          title="Open With…"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           path={result.path}
           onOpen={() => popToRoot({ clearSearchBar: true })}
@@ -131,11 +131,11 @@ export default function Command(props: LaunchProps) {
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           onAction={() => toggleResultPinnedStatus(result, resultIndex)}
         />
-        {resultIsPinned(result) && isPinnedSection && (
+        {resultIsPinned(result) && (
           <>
             {resultIndex > 0 && (
               <Action
-                title="Move Pin up"
+                title="Move Pin Up"
                 icon={Icon.ArrowUpCircle}
                 shortcut={Keyboard.Shortcut.Common.MoveUp}
                 onAction={() => movePinUp(result, resultIndex)}
@@ -209,7 +209,7 @@ export default function Command(props: LaunchProps) {
                 shortcut: Keyboard.Shortcut;
                 appleScript: (result: SpotlightSearchResult) => string;
               },
-              pluginIndex: number,
+              pluginIndex: number
             ) => (
               <Action
                 key={pluginIndex}
@@ -222,7 +222,7 @@ export default function Command(props: LaunchProps) {
                   runAppleScript(plugin.appleScript(result));
                 }}
               />
-            ),
+            )
           )}
         </ActionPanel.Section>
       </ActionPanel>
@@ -258,7 +258,6 @@ export default function Command(props: LaunchProps) {
           isShowingDetail={isShowingDetail}
           resultIsPinned={resultIsPinned}
           renderActions={renderFolderActions}
-          isPinnedSection={true}
         />
       ) : !searchText && props.launchType === "userInitiated" ? (
         // No pins and no search text
@@ -291,7 +290,6 @@ export default function Command(props: LaunchProps) {
               isShowingDetail={isShowingDetail}
               resultIsPinned={resultIsPinned}
               renderActions={renderFolderActions}
-              isPinnedSection={false}
             />
           )}
         </>

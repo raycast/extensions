@@ -1,6 +1,6 @@
 import { getTemplates, getTypes } from "../api";
 import { ObjectLayout, Space, SpaceObject, Type } from "../models";
-import { apiLimitMax, bundledTypeKeys } from "../utils";
+import { apiKeyPrefixes, apiLimitMax, bundledTypeKeys } from "../utils";
 
 /**
  * Fetches all `Type`s from a single space, doing pagination if necessary.
@@ -109,4 +109,18 @@ export async function fetchTypeKeysForLists(spaces: Space[]): Promise<string[]> 
       .map((type) => type.key),
   );
   return Array.from(listTypeKeys);
+}
+
+/**
+ * Checks if a type is custom user type or not (built-in system type).
+ */
+export function isUserType(key: string): boolean {
+  return apiKeyPrefixes.types.length + 24 === key.length && /\d/.test(key);
+}
+
+/**
+ * Checks if a property is custom user property or not (built-in system property).
+ */
+export function isUserProperty(key: string): boolean {
+  return apiKeyPrefixes.properties.length + 24 === key.length && /\d/.test(key);
 }

@@ -7,8 +7,7 @@
   "author": "Lermatroid",
   "contributors": [
     "Sclafus",
-    "effektsvk",
-    "wxiaoyun"
+    "effektsvk"
   ],
   "categories": [
     "Productivity",
@@ -28,23 +27,6 @@
           "type": "text",
           "required": true,
           "placeholder": "Query"
-        },
-        {
-          "name": "search",
-          "type": "dropdown",
-          "required": false,
-          "placeholder": "Search Grounding",
-          "description": "Enable search grounding for models that support it",
-          "data": [
-            {
-              "title": "Enabled",
-              "value": "true"
-            },
-            {
-              "title": "Disabled",
-              "value": "false"
-            }
-          ]
         }
       ],
       "preferences": [

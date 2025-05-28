@@ -35,7 +35,7 @@ export function usePluginManagement() {
     log(
       "debug",
       "usePluginManagement",
-      `Instance #${instanceIdRef.current} mounted, plugins cache status: ${pluginsLoaded ? "populated" : "empty"}`,
+      `Instance #${instanceIdRef.current} mounted, plugins cache status: ${pluginsLoaded ? "populated" : "empty"}`
     );
 
     const loadPluginsAsync = async () => {
@@ -45,7 +45,7 @@ export function usePluginManagement() {
           log(
             "debug",
             "usePluginManagement",
-            `Instance #${instanceIdRef.current}: Plugins are disabled in preferences`,
+            `Instance #${instanceIdRef.current}: Plugins are disabled in preferences`
           );
           setPlugins([]);
           setHasCheckedPlugins(true);
@@ -59,7 +59,7 @@ export function usePluginManagement() {
           log(
             "debug",
             "usePluginManagement",
-            `Instance #${instanceIdRef.current}: Using cached plugins (${cachedPlugins.length} plugins)`,
+            `Instance #${instanceIdRef.current}: Using cached plugins (${cachedPlugins.length} plugins)`
           );
           setPlugins(cachedPlugins);
           setHasCheckedPlugins(true);
@@ -82,7 +82,7 @@ export function usePluginManagement() {
         log(
           "debug",
           "usePluginManagement",
-          `Instance #${instanceIdRef.current}: Finished loading ${loadedPlugins.length} plugins`,
+          `Instance #${instanceIdRef.current}: Finished loading ${loadedPlugins.length} plugins`
         );
       } catch (error) {
         log("error", "usePluginManagement", `Instance #${instanceIdRef.current}: Error loading plugins`, {

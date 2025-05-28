@@ -3,8 +3,6 @@ import fs from "fs";
 import archiver from "archiver";
 import fetch from "node-fetch";
 import crypto from "crypto";
-import ignore from "ignore";
-import { readdir } from "fs/promises";
 import { showToast, Toast } from "@raycast/api";
 import { ErrorResponse, CreateUploadSessionResponse, PrepareUploadResponse } from "../type";
 
@@ -46,46 +44,40 @@ export async function deployProject(deployProjectPath: string): Promise<string> 
   }
 }
 
-async function compressDirectory(sourceDir: string, outPath: string): Promise<void> {
-  const output = fs.createWriteStream(outPath);
-  const archive = archiver("zip", { zlib: { level: 9 } });
-
+function compressDirectory(sourceDir: string, outPath: string): Promise<void> {
   return new Promise((resolve, reject) => {
+    const output = fs.createWriteStream(outPath);
+    const archive = archiver("zip", { zlib: { level: 9 } });
+
     output.on("close", () => resolve());
     archive.on("error", (err: Error) => reject(err));
+
     archive.pipe(output);
 
     const gitignorePath = path.join(sourceDir, ".gitignore");
-    const ig = ignore().add(["node_modules/", ".git/", ".zeabur/", "venv/", "env/", ".*/"]);
+    let ignorePatterns: string[] = [
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/.zeabur/**",
+      "**/venv/**",
+      "**/env/**",
+      "**/.*/**",
+    ];
 
     if (fs.existsSync(gitignorePath)) {
       const gitignoreContent = fs.readFileSync(gitignorePath, "utf8");
-      ig.add(gitignoreContent);
+      ignorePatterns = ignorePatterns.concat(
+        gitignoreContent.split("\n").filter((line) => line.trim() && !line.startsWith("#") && !line.includes("!")),
+      );
     }
 
-    async function addFiles(dir: string, base = "") {
-      const entries = await readdir(dir, { withFileTypes: true });
+    archive.glob("**/*", {
+      cwd: sourceDir,
+      ignore: ignorePatterns,
+      dot: true,
+    });
 
-      for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
-        const relativePath = path.join(base, entry.name);
-        const normalizedPath = relativePath.replace(/\\/g, "/");
-
-        if (ig.ignores(normalizedPath)) continue;
-
-        if (entry.isDirectory()) {
-          await addFiles(fullPath, normalizedPath);
-        } else {
-          archive.file(fullPath, { name: normalizedPath });
-        }
-      }
-    }
-
-    addFiles(sourceDir)
-      .then(() => {
-        archive.finalize();
-      })
-      .catch(reject);
+    archive.finalize();
   });
 }
 

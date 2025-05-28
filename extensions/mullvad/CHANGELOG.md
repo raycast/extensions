@@ -1,7 +1,5 @@
 # Mullvad Changelog
 
-## [Changed mullvad installation check] - 2025-05-26
-
 ## [Added config to select server for location based on ranking, added actions to reset ranking] - 2025-03-13
 
 ## [Added ability to select specific server, Added freceny sorting] - 2025-01-03

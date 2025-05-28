@@ -1,10 +1,5 @@
 # Parcel Changelog
 
-## [Improved Date Handling] - 2025-05-28
-
-- **Enhanced date recognition:** Improved parsing of delivery dates, including better support for European formats (like DD.MM.YYYY HH:mm and DD.MM.YYYY HH:mm:ss).
-- **More reliable display for unknown dates:** Unspecified or unparseable dates will now more consistently display as "Not available", providing clearer information.
-
 ## [Track on Website, Cache] - 2025-04-12
 
 - Added "Track on Website" action to open the carrier's tracking page in the default browser

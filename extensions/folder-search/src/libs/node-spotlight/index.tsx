@@ -18,7 +18,7 @@ const spotlight = (
   dir: string | null = null,
   filter: string[] | null = null,
   attrs: string[] = [],
-  abortable: React.MutableRefObject<AbortController | null | undefined> | undefined,
+  abortable: React.MutableRefObject<AbortController | null | undefined> | undefined
 ) => {
   if (process.platform !== "darwin") throw new Error(process.platform + " is not supported.");
   if ("string" !== typeof query) throw new Error("query must be a string.");
@@ -83,7 +83,7 @@ const spotlight = (
       }
 
       return result;
-    }),
+    })
   );
 
   search.on("error", (e) => {

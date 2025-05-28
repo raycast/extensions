@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  List,
-  closeMainWindow,
-  popToRoot,
-  open,
-  Keyboard,
-  LaunchProps,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, closeMainWindow, popToRoot, open, LaunchProps } from "@raycast/api";
 import { folderName } from "./utils";
 import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
@@ -32,9 +21,6 @@ export default function Command(props: LaunchProps) {
     selectedItemId,
     pinnedResults,
     resultIsPinned,
-    toggleResultPinnedStatus,
-    movePinUp,
-    movePinDown,
     hasCheckedPlugins,
     hasCheckedPreferences,
     hasSearched,
@@ -49,7 +35,7 @@ export default function Command(props: LaunchProps) {
   });
 
   // Render actions for the folder list items
-  const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number, isPinnedSection = false) => {
+  const renderFolderActions = (result: SpotlightSearchResult) => {
     const enclosingFolder = path.dirname(result.path);
     return (
       <ActionPanel title={folderName(result)}>
@@ -84,32 +70,6 @@ export default function Command(props: LaunchProps) {
           shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
           onAction={() => setIsShowingDetail(!isShowingDetail)}
         />
-        <Action
-          title={!resultIsPinned(result) ? "Pin" : "Unpin"}
-          icon={!resultIsPinned(result) ? Icon.Star : Icon.StarDisabled}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-          onAction={() => toggleResultPinnedStatus(result, resultIndex)}
-        />
-        {resultIsPinned(result) && isPinnedSection && (
-          <>
-            {resultIndex > 0 && (
-              <Action
-                title="Move Pin up"
-                icon={Icon.ArrowUpCircle}
-                shortcut={Keyboard.Shortcut.Common.MoveUp}
-                onAction={() => movePinUp(result, resultIndex)}
-              />
-            )}
-            {resultIndex < pinnedResults.length - 1 && (
-              <Action
-                title="Move Pin Down"
-                icon={Icon.ArrowDownCircle}
-                shortcut={Keyboard.Shortcut.Common.MoveDown}
-                onAction={() => movePinDown(result, resultIndex)}
-              />
-            )}
-          </>
-        )}
         <ActionPanel.Section>
           <Action.Push
             title="Enclosing Folder"
@@ -157,7 +117,6 @@ export default function Command(props: LaunchProps) {
           isShowingDetail={isShowingDetail}
           resultIsPinned={resultIsPinned}
           renderActions={renderFolderActions}
-          isPinnedSection={true}
         />
       ) : !searchText && props.launchType === "userInitiated" ? (
         // No pins and no search text
@@ -190,7 +149,6 @@ export default function Command(props: LaunchProps) {
               isShowingDetail={isShowingDetail}
               resultIsPinned={resultIsPinned}
               renderActions={renderFolderActions}
-              isPinnedSection={false}
             />
           )}
         </>

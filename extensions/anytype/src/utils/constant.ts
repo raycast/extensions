@@ -4,17 +4,17 @@ import { BodyFormat } from "../models";
 import { encodeQueryParams } from "./query";
 
 // Strings
-export const apiAppName = "raycast_v4_0525";
+export const apiAppName = "raycast_v3_0425";
 export const anytypeNetwork = "N83gJpVd9MuNRZAuJLZ7LiMntTThhPc6DtzWWVjb1M3PouVU";
 export const errorConnectionMessage = "Can't connect to API. Please ensure Anytype is running and reachable.";
 
 // URLs
-export const apiUrl = "http://localhost:31009";
+export const apiUrl = "http://localhost:31009/v1";
 export const downloadUrl = "https://download.anytype.io/";
 export const anytypeSpaceDeeplink = (spaceId: string) => `anytype://main/object/_blank_/space.id/${spaceId}`;
 
 // Numbers
-export const currentApiVersion = "2025-05-20";
+export const currentApiVersion = "2025-04-22";
 export const apiLimit = getPreferenceValues().limit;
 export const apiLimitMax = 1000;
 export const iconWidth = 64;
@@ -52,10 +52,6 @@ export const bundledPropKeys = {
   links: `${apiKeyPrefixes.properties}links`,
   backlinks: `${apiKeyPrefixes.properties}backlinks`,
   source: `${apiKeyPrefixes.properties}source`,
-};
-
-export const propKeys = {
-  tag: `${apiKeyPrefixes.properties}tag`,
 };
 
 export const bundledTypeKeys = {
@@ -108,174 +104,174 @@ export const defaultTintColor = { light: "black", dark: "white" };
 export const apiEndpoints = {
   // auth
   displayCode: (appName: string) => ({
-    url: `${apiUrl}/v1/auth/display_code?app_name=${appName}`,
+    url: `${apiUrl}/auth/display_code?app_name=${appName}`,
     method: "POST",
   }),
   getToken: (challengeId: string, code: string) => ({
-    url: `${apiUrl}/v1/auth/token?challenge_id=${challengeId}&code=${code}`,
+    url: `${apiUrl}/auth/token?challenge_id=${challengeId}&code=${code}`,
     method: "POST",
   }),
 
   // lists
   getListViews: (spaceId: string, listId: string, options: { offset: number; limit: number }) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/lists/${listId}/views${encodeQueryParams(options)}`,
+    url: `${apiUrl}/spaces/${spaceId}/lists/${listId}/views${encodeQueryParams(options)}`,
     method: "GET",
   }),
   getObjectsInList: (spaceId: string, listId: string, viewId: string, options: { offset: number; limit: number }) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/lists/${listId}/views/${viewId}/objects${encodeQueryParams(options)}`,
+    url: `${apiUrl}/spaces/${spaceId}/lists/${listId}/${viewId}/objects${encodeQueryParams(options)}`,
     method: "GET",
   }),
   addObjectsToList: (spaceId: string, listId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/lists/${listId}/objects`,
+    url: `${apiUrl}/spaces/${spaceId}/lists/${listId}/objects`,
     method: "POST",
   }),
   removeObjectsFromList: (spaceId: string, listId: string, objectId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/lists/${listId}/objects/${objectId}`,
+    url: `${apiUrl}/spaces/${spaceId}/lists/${listId}/objects/${objectId}`,
     method: "DELETE",
   }),
 
   // objects
   getObject: (spaceId: string, objectId: string, format: BodyFormat) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/objects/${objectId}${encodeQueryParams({ format })}`,
+    url: `${apiUrl}/spaces/${spaceId}/objects/${objectId}${encodeQueryParams({ format })}`,
     method: "GET",
   }),
   getObjects: (spaceId: string, options: { offset: number; limit: number }) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/objects${encodeQueryParams(options)}`,
+    url: `${apiUrl}/spaces/${spaceId}/objects${encodeQueryParams(options)}`,
     method: "GET",
   }),
   createObject: (spaceId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/objects`,
+    url: `${apiUrl}/spaces/${spaceId}/objects`,
     method: "POST",
   }),
   updateObject: (spaceId: string, objectId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/objects/${objectId}`,
+    url: `${apiUrl}/spaces/${spaceId}/objects/${objectId}`,
     method: "PATCH",
   }),
   deleteObject: (spaceId: string, objectId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/objects/${objectId}`,
+    url: `${apiUrl}/spaces/${spaceId}/objects/${objectId}`,
     method: "DELETE",
   }),
   getExport: (spaceId: string, objectId: string, format: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/objects/${objectId}/${format}`,
+    url: `${apiUrl}/spaces/${spaceId}/objects/${objectId}/${format}`,
     method: "GET",
   }),
 
   // properties
   getProperties: (spaceId: string, options: { offset: number; limit: number }) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/properties${encodeQueryParams(options)}`,
+    url: `${apiUrl}/spaces/${spaceId}/properties${encodeQueryParams(options)}`,
     method: "GET",
   }),
   getProperty: (spaceId: string, propertyId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/properties/${propertyId}`,
+    url: `${apiUrl}/spaces/${spaceId}/properties/${propertyId}`,
     method: "GET",
   }),
   createProperty: (spaceId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/properties`,
+    url: `${apiUrl}/spaces/${spaceId}/properties`,
     method: "POST",
   }),
   updateProperty: (spaceId: string, propertyId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/properties/${propertyId}`,
+    url: `${apiUrl}/spaces/${spaceId}/properties/${propertyId}`,
     method: "PATCH",
   }),
   deleteProperty: (spaceId: string, propertyId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/properties/${propertyId}`,
+    url: `${apiUrl}/spaces/${spaceId}/properties/${propertyId}`,
     method: "DELETE",
   }),
 
   // tags
   getTags: (spaceId: string, propertyId: string, options: { offset: number; limit: number }) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/properties/${propertyId}/tags${encodeQueryParams(options)}`,
+    url: `${apiUrl}/spaces/${spaceId}/properties/${propertyId}/tags${encodeQueryParams(options)}`,
     method: "GET",
   }),
   getTag: (spaceId: string, propertyId: string, tagId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/properties/${propertyId}/tags/${tagId}`,
+    url: `${apiUrl}/spaces/${spaceId}/properties/${propertyId}/tags/${tagId}`,
     method: "GET",
   }),
   createTag: (spaceId: string, propertyId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/properties/${propertyId}/tags`,
+    url: `${apiUrl}/spaces/${spaceId}/properties/${propertyId}/tags`,
     method: "POST",
   }),
   updateTag: (spaceId: string, propertyId: string, tagId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/properties/${propertyId}/tags/${tagId}`,
+    url: `${apiUrl}/spaces/${spaceId}/properties/${propertyId}/tags/${tagId}`,
     method: "PATCH",
   }),
   deleteTag: (spaceId: string, propertyId: string, tagId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/properties/${propertyId}/tags/${tagId}`,
+    url: `${apiUrl}/spaces/${spaceId}/properties/${propertyId}/tags/${tagId}`,
     method: "DELETE",
   }),
 
   // search
   globalSearch: (options: { offset: number; limit: number }) => ({
-    url: `${apiUrl}/v1/search${encodeQueryParams(options)}`,
+    url: `${apiUrl}/search${encodeQueryParams(options)}`,
     method: "POST",
   }),
   search: (spaceId: string, options: { offset: number; limit: number }) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/search${encodeQueryParams(options)}`,
+    url: `${apiUrl}/spaces/${spaceId}/search${encodeQueryParams(options)}`,
     method: "POST",
   }),
 
   // spaces
   getSpace: (spaceId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}`,
+    url: `${apiUrl}/spaces/${spaceId}`,
     method: "GET",
   }),
   getSpaces: (options: { offset: number; limit: number }) => ({
-    url: `${apiUrl}/v1/spaces${encodeQueryParams(options)}`,
+    url: `${apiUrl}/spaces${encodeQueryParams(options)}`,
     method: "GET",
   }),
   createSpace: {
-    url: `${apiUrl}/v1/spaces`,
+    url: `${apiUrl}/spaces`,
     method: "POST",
   },
   updateSpace: (spaceId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}`,
+    url: `${apiUrl}/spaces/${spaceId}`,
     method: "PATCH",
   }),
 
   // members
   getMember: (spaceId: string, objectId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/members/${objectId}`,
+    url: `${apiUrl}/spaces/${spaceId}/members/${objectId}`,
     method: "GET",
   }),
   getMembers: (spaceId: string, options: { offset: number; limit: number }) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/members${encodeQueryParams(options)}`,
+    url: `${apiUrl}/spaces/${spaceId}/members${encodeQueryParams(options)}`,
     method: "GET",
   }),
   //! Member management not enabled yet
   updateMember: (spaceId: string, objectId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/members/${objectId}`,
+    url: `${apiUrl}/spaces/${spaceId}/members/${objectId}`,
     method: "PATCH",
   }),
 
   // types
   getType: (spaceId: string, typeId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/types/${typeId}`,
+    url: `${apiUrl}/spaces/${spaceId}/types/${typeId}`,
     method: "GET",
   }),
   getTypes: (spaceId: string, options: { offset: number; limit: number }) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/types${encodeQueryParams(options)}`,
+    url: `${apiUrl}/spaces/${spaceId}/types${encodeQueryParams(options)}`,
     method: "GET",
   }),
   createType: (spaceId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/types`,
+    url: `${apiUrl}/spaces/${spaceId}/types`,
     method: "POST",
   }),
   updateType: (spaceId: string, typeId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/types/${typeId}`,
+    url: `${apiUrl}/spaces/${spaceId}/types/${typeId}`,
     method: "PATCH",
   }),
   deleteType: (spaceId: string, typeId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/types/${typeId}`,
+    url: `${apiUrl}/spaces/${spaceId}/types/${typeId}`,
     method: "DELETE",
   }),
 
   // templates
   getTemplate: (spaceId: string, typeId: string, templateId: string) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/types/${typeId}/templates/${templateId}`,
+    url: `${apiUrl}/spaces/${spaceId}/types/${typeId}/templates/${templateId}`,
     method: "GET",
   }),
   getTemplates: (spaceId: string, typeId: string, options: { offset: number; limit: number }) => ({
-    url: `${apiUrl}/v1/spaces/${spaceId}/types/${typeId}/templates${encodeQueryParams(options)}`,
+    url: `${apiUrl}/spaces/${spaceId}/types/${typeId}/templates${encodeQueryParams(options)}`,
     method: "GET",
   }),
 };

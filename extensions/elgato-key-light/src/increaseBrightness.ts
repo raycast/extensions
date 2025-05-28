@@ -1,26 +1,15 @@
-import { showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { discoverKeyLights } from "./utils";
+import { closeMainWindow } from "@raycast/api";
+import { KeyLight } from "./elgato";
+import { run } from "./utils";
 
 const command = async () => {
-  try {
-    const keyLight = await discoverKeyLights();
-    try {
-      const brightness = await keyLight.increaseBrightness();
+  await closeMainWindow({ clearRootSearch: true });
+  const keyLight = await KeyLight.discover();
+  const brightness = await keyLight.increaseBrightness();
 
-      await showToast({
-        style: Toast.Style.Success,
-        title:
-          typeof brightness === "number"
-            ? `Brightness: ${brightness.toLocaleString("en", { maximumFractionDigits: 0 })}%`
-            : "Brightness increased",
-      });
-    } catch (error) {
-      showFailureToast(error, { title: "Failed to increase brightness" });
-    }
-  } catch (error) {
-    showFailureToast(error, { title: "Failed to discover Key Lights" });
-  }
+  return brightness
+    ? `Increased brightness to ${brightness.toLocaleString("en", { maximumFractionDigits: 0 })}%`
+    : "Error increasing brightness";
 };
 
-export default command;
+export default run(command);

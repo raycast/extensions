@@ -28,7 +28,7 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
   const [challengeId, setChallengeId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { handleSubmit, itemProps } = useForm<{ code: string }>({
+  const { handleSubmit, itemProps } = useForm<{ userCode: string }>({
     onSubmit: async (values) => {
       if (!challengeId) {
         await showFailureToast({
@@ -40,9 +40,9 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
 
       try {
         setIsLoading(true);
-        const { app_key } = await getToken(challengeId, values.code);
+        const { app_key } = await getToken(challengeId, values.userCode);
         await LocalStorage.setItem(localStorageKeys.appKey, app_key);
-        await showToast({ style: Toast.Style.Success, title: "Successfully paired" });
+        showToast({ style: Toast.Style.Success, title: "Successfully paired" });
         setHasToken(true);
         setTokenIsValid(true);
       } catch (error) {
@@ -52,7 +52,7 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
       }
     },
     validation: {
-      code: (value) => {
+      userCode: (value) => {
         if (!value) {
           return "The code is required.";
         } else if (!/^\d{4}$/.test(value)) {
@@ -83,13 +83,13 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
       setChallengeId(challenge_id);
 
       // Prevent window from closing
-      await showToast({
+      showToast({
         style: Toast.Style.Animated,
         title: "Pairing started",
         message: "Check the app for the 4-digit code.",
       });
     } catch (error) {
-      await showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "Failed to start pairing",
         message: error instanceof Error ? error.message : "An unknown error occurred.",
@@ -134,7 +134,12 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
         </ActionPanel>
       }
     >
-      <Form.TextField {...itemProps.code} id="code" title="Code" placeholder="Enter 4-digit code from popup" />
+      <Form.TextField
+        {...itemProps.userCode}
+        id="userCode"
+        title="Verification Code"
+        placeholder="Enter the 4-digit code from popup"
+      />
     </Form>
   ) : (
     <List

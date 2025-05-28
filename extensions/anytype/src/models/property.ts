@@ -19,14 +19,12 @@ export enum PropertyFormat {
 }
 
 export interface CreatePropertyRequest {
-  key?: string;
   name: string;
   format: PropertyFormat;
 }
 
 export interface UpdatePropertyRequest {
-  key?: string;
-  name?: string;
+  name: string;
 }
 
 export interface RawProperty {
@@ -73,6 +71,7 @@ export interface PropertyLink {
 
 export interface PropertyLinkWithValue {
   key: string;
+  format: PropertyFormat;
   text?: string;
   number?: number | null;
   select?: string | null;

@@ -1,14 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  LaunchProps,
-  getPreferenceValues,
-  Clipboard,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   Formality,
@@ -19,7 +9,6 @@ import {
   sendTranslateRequest,
   source_languages,
   target_languages,
-  delayedCloseWindow,
 } from "./utils";
 import TranslationView from "./components/TranslationView";
 import transliterate from "@sindresorhus/transliterate";
@@ -56,8 +45,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
     const sourceLanguage = props?.launchContext?.sourceLanguage;
     return <TranslationView translation={translation} sourceLanguage={sourceLanguage} />;
   }
-  const { defaultTargetLanguage, showTransliteration, showFormalityConfig, closeRaycastAfterTranslation } =
-    getPreferenceValues<Preferences>();
+  const { defaultTargetLanguage, showTransliteration, showFormalityConfig } = getPreferenceValues<Preferences>();
   const [loading, setLoading] = useState(false);
   const [sourceText, setSourceText] = useState(props.fallbackText ?? "");
   const [translation, setTranslation] = useState("");
@@ -136,39 +124,6 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
   const _t = transliterate(translation);
   const transliteration = _t == translation ? "" : _t;
 
-  const handleCopyToClipboard = async () => {
-    try {
-      await Clipboard.copy(translation);
-      await showToast(Toast.Style.Success, "Translation copied to clipboard!");
-      await delayedCloseWindow(closeRaycastAfterTranslation);
-    } catch (error) {
-      console.error("Failed to copy to clipboard:", error);
-      await showToast(Toast.Style.Failure, "Failed to copy to clipboard");
-    }
-  };
-
-  const handlePasteInFrontmostApp = async () => {
-    try {
-      await Clipboard.paste(translation);
-      await showToast(Toast.Style.Success, "Translation pasted!");
-      await delayedCloseWindow(closeRaycastAfterTranslation);
-    } catch (error) {
-      console.error("Failed to paste:", error);
-      await showToast(Toast.Style.Failure, "Failed to paste in frontmost app");
-    }
-  };
-
-  const handleCopyTransliteration = async () => {
-    try {
-      await Clipboard.copy(transliteration);
-      await showToast(Toast.Style.Success, "Transliteration copied to clipboard!");
-      await delayedCloseWindow(closeRaycastAfterTranslation);
-    } catch (error) {
-      console.error("Failed to copy transliteration:", error);
-      await showToast(Toast.Style.Failure, "Failed to copy transliteration");
-    }
-  };
-
   return (
     <Form
       actions={
@@ -177,23 +132,20 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
             <Action.SubmitForm icon={Icon.ArrowRightCircle} title="Translate" onSubmit={submit} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action
-              icon={Icon.CopyClipboard}
+            <Action.CopyToClipboard
               title="Copy Translation"
               shortcut={{ modifiers: ["cmd"], key: "." }}
-              onAction={handleCopyToClipboard}
+              content={translation}
             />
-            <Action
-              icon={Icon.Document}
+            <Action.Paste
               title="Paste in Frontmost App"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-              onAction={handlePasteInFrontmostApp}
+              content={translation}
             />
-            <Action
-              icon={Icon.CopyClipboard}
+            <Action.CopyToClipboard
               title="Copy Transliteration"
               shortcut={{ modifiers: ["cmd"], key: "t" }}
-              onAction={handleCopyTransliteration}
+              content={transliteration}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

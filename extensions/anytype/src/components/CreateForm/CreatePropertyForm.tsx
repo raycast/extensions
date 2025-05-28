@@ -21,7 +21,7 @@ export function CreatePropertyForm({ spaceId, draftValues }: CreatePropertyFormP
         await showToast({ style: Toast.Style.Animated, title: "Creating property..." });
 
         await createProperty(spaceId, {
-          name: values.name,
+          name: values.name || "",
           format: values.format as PropertyFormat,
         });
 
@@ -47,7 +47,12 @@ export function CreatePropertyForm({ spaceId, draftValues }: CreatePropertyFormP
         </ActionPanel>
       }
     >
-      <Form.TextField {...itemProps.name} title="Name" placeholder="Add name" info="The name of the property" />
+      <Form.TextField
+        {...itemProps.name}
+        title="Name"
+        placeholder="Enter property name"
+        info="The name of the property"
+      />
       <Form.Dropdown {...itemProps.format} title="Format" info="The format of the property">
         {propertyFormatKeys.map((key) => {
           const value = PropertyFormat[key];

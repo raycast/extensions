@@ -4,14 +4,14 @@ import { BodyFormat } from "../models";
 
 export function useObject(spaceId: string, objectId: string, format: BodyFormat) {
   const { data, error, isLoading, mutate } = useCachedPromise(
-    async (spaceId: string, objectId: string, format: BodyFormat) => {
+    async (spaceId: string, objectId: string) => {
       const response = await getObject(spaceId, objectId, format);
       return response.object;
     },
-    [spaceId, objectId, format],
+    [spaceId, objectId],
     {
       keepPreviousData: true,
-      execute: !!spaceId && !!objectId && !!format,
+      execute: !!spaceId && !!objectId,
     },
   );
 

@@ -1,13 +1,20 @@
-<p align="center">
-    <img src="./assets/google-books.png" width="150" height="150" />
-</p>
-
-# Google Books
+# Search Google Books from Raycast
 
 Extension for Raycast to search [Google Books](https://books.google.co.uk/).
 
+
 ## Installing
 
-Make sure Raycast is installed and go to https://www.raycast.com/aparandeh/google-books
+Make sure Raycast is installed and go to https://github.com/Ali-Parandeh/raycast-google-books-extension
 
-<a title="Install google-books Raycast Extension" href="https://www.raycast.com/aparandeh/google-books"><img src="https://www.raycast.com/aparandeh/google-books/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+## Running locally
+
+```sh
+# nvm install (use node >=16.x)
+nvm --lts --latest-npm
+# make sure you have Raycast and Yarn / NPM installed
+npm i
+# Start local server
+npm run dev
+# Now open raycast. The dev tool should be the top item!
+```

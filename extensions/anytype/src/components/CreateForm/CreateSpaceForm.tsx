@@ -22,7 +22,7 @@ export function CreateSpaceForm({ draftValues }: CreateSpaceFormProps) {
           description: values.description || "",
         });
 
-        await showToast(Toast.Style.Success, "Space created successfully");
+        showToast(Toast.Style.Success, "Space created successfully");
         popToRoot();
       } catch (error) {
         await showFailureToast(error, { title: "Failed to create space" });
@@ -46,11 +46,11 @@ export function CreateSpaceForm({ draftValues }: CreateSpaceFormProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField {...itemProps.name} title="Name" placeholder="Add name" info="The name of the space" />
+      <Form.TextField {...itemProps.name} title="Name" placeholder="Enter space name" info="The name of the space" />
       <Form.TextField
         {...itemProps.description}
         title="Description"
-        placeholder="Add description"
+        placeholder="Enter space description"
         info="The description of the space"
       />
     </Form>
