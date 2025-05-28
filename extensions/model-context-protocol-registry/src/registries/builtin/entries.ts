@@ -316,6 +316,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "thena",
+    title: "Thena",
+    description:
+      "A Model Context Protocol server that enables AI assistants to interact with Thena's services, providing seamless integration and enhanced capabilities for AI-powered applications.",
+    icon: "thena.svg",
+    homepage: "https://thena.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.thena.ai/sse"],
+    },
+  },
+  {
     name: "xero",
     title: "Xero",
     description:

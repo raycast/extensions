@@ -63,6 +63,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Apify](https://mcp.apify.com) | A Model Context Protocol (MCP) server for Apify enabling AI agents to use 5,000+ ready-made Actors for use cases such as extracting data from websites, social media, search engines, online maps, and more. |
 | [Nuxt](https://mcp.nuxt.com/) | Access Nuxt documentation and modules with the public Nuxt MCP server |
 | [Zeabur](https://zeabur.com/docs/en-US/mcp) | Zeabur provides an official Model Context Protocol (MCP) server that allows you to manage and deploy your Zeabur projects. |
+| [Thena](https://mcp.thena.ai) | Thena's MCP server for enabling users and AI agents to interact with Thena's services and manage customers across different channels such as Slack, Email, Web, Discord etc. |
 | [Grafana](https://github.com/grafana/mcp-grafana) | Official Grafana MCP server that provides seamless integration with Grafana APIs, enabling monitoring, visualization, and observability capabilities for developers and tools. |
 
 ### Community MCP Servers

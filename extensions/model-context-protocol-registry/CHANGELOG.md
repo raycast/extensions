@@ -1,6 +1,11 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Thena MCP Server] - 2025-05-28
+
+Add official Thena.ai MCP Server to registry, this allows users and AI agents to interact with Thena's services and manage customer requests coming from Slack, Email, Discord and more.
+
 ## [Add Grafana MCP Server] - 2025-05-26
+
 Add the official Grafana MCP server to the Model Context Protocol Registry. Grafana MCP server provides seamless integration with Grafana APIs, enabling monitoring, visualization, and observability capabilities for developers and tools.
 
 ## [Add Paperless MCP Server] - 2025-05-21
