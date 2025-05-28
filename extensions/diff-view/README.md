@@ -14,3 +14,7 @@ Diff View command compares the last two entries of your clipboard in **VS Code**
 This extension makes use of VS Code’s CLI to open the diff view. The command used is `code --diff` or `cursor --diff`, which compares two given files. Details: https://code.visualstudio.com/docs/configure/command-line#_core-cli-options
 
 ![](/media/diff-view-command.png) ![](/media/diff-view-preferences.png)
+
+**Credits**
+
+As a former Alfred user, the inspiration for this extension comes from Aung Moe: https://alfred.app/workflows/logicxd/vscodediff/
