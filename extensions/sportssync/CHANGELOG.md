@@ -1,6 +1,14 @@
 # Sportssync Changelog
 
-## [New Commands, Views, and Small Features] - 2025-04-22
+## [Updated Game Actions with New Views] - {PR_MERGE_DATE}
+
+- Created a new team details view with information about the team record, venue and more
+- Created a roster view for all standings commands (except for f1). View all players and the head coach for the team, with details about experience, height, weight, and jersey numbers.
+- Created a new team schedule view to view the entire season schedule
+- Created a play by play view for live and completed games for all scores and schedule commands. View play by play events with time stamps during live games and after games complete. You can also see major events highlighted such as goals, saves, fights (varies based on the league).
+- Created an article content view for the news view for all tracker commands. This will allow you to view articles directly from raycast without opening ESPN.
+
+## [New Commands, Views, and Small Features] - April 21, 2025
 
 - Created a Live Scores Menubar Command - View live scores, final scores, and games. Clicking on games will set them as the menubar title. (Must set a favorite sport and league for it to work)
 - Created a Favorite Team Dashboard Command - View scheduled games, live scores, completed games, articles, injuries, transactions, standings and team info directly from one command. (Must set a favorite sport, league, and team for it to work)

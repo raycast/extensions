@@ -170,27 +170,18 @@ export default function DisplayScoresAndSchedule() {
         }
         actions={
           <ActionPanel>
-            {currentLeague !== "f1" &&
-              currentSport !== "soccer" &&
-              game?.competitions?.[0]?.status?.type?.state === "in" && (
-                <Action.Push title="View Play by Play" icon={Icon.Stopwatch} target={<Plays gameId={game.id} />} />
-              )}
+            {currentLeague !== "f1" && currentSport !== "soccer" && game?.status?.type?.state === "in" && (
+              <Action.Push title="View Play by Play" icon={Icon.Stopwatch} target={<Plays gameId={game.id} />} />
+            )}
 
-            {currentLeague !== "f1" &&
-              currentSport !== "soccer" &&
-              game?.competitions?.[0]?.status?.type?.state === "post" && (
-                <>
-                  <Action.Push title="View Play by Play" icon={Icon.Stopwatch} target={<Plays gameId={game.id} />} />
-                </>
-              )}
+            {currentLeague !== "f1" && currentSport !== "soccer" && game?.status?.type?.state === "post" && (
+              <>
+                <Action.Push title="View Play by Play" icon={Icon.Stopwatch} target={<Plays gameId={game.id} />} />
+              </>
+            )}
 
             {currentLeague !== "f1" && (
               <>
-                <Action.OpenInBrowser
-                  title="View Game Details on ESPN"
-                  url={`${game?.links?.[0]?.href ?? `https://www.espn.com/${currentLeague}`}`}
-                />
-
                 <Action.Push
                   title={`View ${game?.competitions?.[0]?.competitors?.[1]?.team?.displayName ?? "Away"} Team Details`}
                   icon={Icon.List}
@@ -228,7 +219,6 @@ export default function DisplayScoresAndSchedule() {
       />,
     );
   });
-
   gameItems.sort((a, b) => {
     const dateA = new Date(a.title);
     const dateB = new Date(b.title);
