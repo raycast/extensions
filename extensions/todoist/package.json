@@ -24,7 +24,8 @@
     "scottlovegrove",
     "henningmu",
     "FlohGro",
-    "dedalusj"
+    "dedalusj",
+    "william_sault"
   ],
   "commands": [
     {
@@ -617,6 +618,14 @@
       "title": "Focus Label",
       "description": "Shared label name to apply to your focused task. No label will be applied if left empty.",
       "placeholder": "raycast-focus"
+    },
+    {
+      "name": "useConfetti",
+      "type": "checkbox",
+      "label": "Use confetti to celebrate task completion",
+      "description": "When enabled, completing a task will trigger a confetti celebration.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
