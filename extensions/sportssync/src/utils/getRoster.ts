@@ -34,7 +34,7 @@ interface Response {
   athletes: Athlete[];
 }
 
-export default function getTeamStandings({ teamId }: { teamId: string }) {
+export default function getTeamRoster({ teamId }: { teamId: string }) {
   const currentLeague = sportInfo.getLeague();
   const currentSport = sportInfo.getSport();
 

@@ -15,7 +15,7 @@ interface ArticlesResponse {
   headlines: Article[];
 }
 
-export default function getPlayByPlayEvents({ articleId }: { articleId: string }) {
+export default function getArticleDetail({ articleId }: { articleId: string }) {
   const {
     isLoading: articleDetailLoading,
     data: articleDetailData,

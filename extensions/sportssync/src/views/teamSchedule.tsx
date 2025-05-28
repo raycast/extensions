@@ -93,15 +93,11 @@ export default function TeamSchedule({ teamId }: { teamId: string }) {
     `https://site.api.espn.com/apis/site/v2/sports/${currentSport}/${currentLeague}/teams/${teamId}/schedule`,
   );
 
-  if (scheduleLoading) {
-    return <Detail isLoading={true} />;
-  }
-
   const gameItems: DayItems[] = [];
   const games = scheduleData?.events || [];
 
   games?.forEach((game, index) => {
-    const gameDate = new Date(game?.date);
+    const gameDate = new Date(game.date);
     const gameDay = gameDate?.toLocaleDateString([], {
       dateStyle: "medium",
     });
@@ -177,8 +173,8 @@ export default function TeamSchedule({ teamId }: { teamId: string }) {
     }
 
     if (
-      game?.competitions[0]?.status?.type?.state === "post" &&
-      game?.competitions[0]?.status?.type?.completed === false
+      game?.competitions?.[0]?.status?.type?.state === "post" &&
+      game?.competitions?.[0]?.status?.type?.completed === false
     ) {
       accessoryTitle = `Postponed`;
       accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
@@ -218,9 +214,7 @@ export default function TeamSchedule({ teamId }: { teamId: string }) {
             {currentLeague !== "f1" &&
               currentSport !== "soccer" &&
               game?.competitions?.[0]?.status?.type?.state === "post" && (
-                <>
-                  <Action.Push title="View Play by Play" icon={Icon.Stopwatch} target={<Plays gameId={game.id} />} />
-                </>
+                <Action.Push title="View Play by Play" icon={Icon.Stopwatch} target={<Plays gameId={game.id} />} />
               )}
 
             {currentLeague !== "f1" && (

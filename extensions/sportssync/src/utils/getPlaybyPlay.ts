@@ -8,7 +8,7 @@ interface GameHeader {
   }[];
 }
 
-interface playByPlayData {
+interface PlayByPlayData {
   header: GameHeader;
   boxscore: {
     teams: {
@@ -32,7 +32,7 @@ export default function getPlayByPlayEvents({ gameId }: { gameId: string }) {
     isLoading: playByPlayLoading,
     data: playByPlayEventData,
     revalidate: playByPlayRevalidate,
-  } = useFetch<playByPlayData>(
+  } = useFetch<PlayByPlayData>(
     `https://site.web.api.espn.com/apis/site/v2/sports/${currentSport}/${currentLeague}/summary?event=${gameId}`,
   );
 
