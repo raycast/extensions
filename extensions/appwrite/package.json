@@ -3,7 +3,7 @@
   "name": "appwrite",
   "title": "Appwrite",
   "description": "",
-  "icon": "extension-icon.png",
+  "icon": "appwrite.png",
   "author": "xmok",
   "categories": [
     "Developer Tools"
