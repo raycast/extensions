@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aws",
-  "title": "Amazon Aws",
+  "title": "Amazon AWS",
   "description": "The best way to interact with your AWS resources",
   "icon": "aws-logo.png",
   "author": "Falcon",
@@ -46,19 +46,19 @@
   "commands": [
     {
       "name": "ec2",
-      "title": "Ec2 Instances",
+      "title": "EC2 Instances",
       "description": "Find and open an instance",
       "mode": "view"
     },
     {
       "name": "ecs",
-      "title": "Ecs Clusters",
+      "title": "ECS Clusters",
       "description": "Find and open a cluster",
       "mode": "view"
     },
     {
       "name": "ecr",
-      "title": "Ecr Repositories",
+      "title": "ECR Repositories",
       "description": "Find and open an image repository",
       "mode": "view"
     },
@@ -70,7 +70,7 @@
     },
     {
       "name": "codepipeline",
-      "title": "Codepipeline",
+      "title": "CodePipeline",
       "description": "Find and manage a pipeline, it's executions and stages",
       "mode": "view"
     },
@@ -82,7 +82,7 @@
     },
     {
       "name": "cloudformation",
-      "title": "Cloudformation",
+      "title": "CloudFormation",
       "description": "List and open stacks, resources and exports",
       "mode": "view"
     },
@@ -100,7 +100,7 @@
     },
     {
       "name": "dynamodb",
-      "title": "Dynamodb",
+      "title": "DynamoDB",
       "description": "List tables and perform CRUD operations",
       "mode": "view"
     },
@@ -112,13 +112,13 @@
     },
     {
       "name": "cloudwatch",
-      "title": "Cloudwatch Log Groups",
+      "title": "CloudWatch Log Groups",
       "description": "Find and open a log group",
       "mode": "view"
     },
     {
       "name": "ssm",
-      "title": "Ssm Parameters",
+      "title": "SSM Parameters",
       "description": "Find, view and copy a parameter value",
       "mode": "view"
     },
