@@ -76,7 +76,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       calendar: props.launchContext?.calendar ?? "primary",
       title: props.launchContext?.title ?? "",
       startDate: props.launchContext?.startDate ?? roundUpTime(),
-      duration: props.launchContext?.duration ?? preferences.defaultEventDuration,
+      duration: props.launchContext?.duration ?? `${preferences.defaultEventDuration}min`,
       attendees: props.launchContext?.attendees,
       conferencingProvider: props.launchContext?.conferencingProvider,
       description: props.launchContext?.description,
