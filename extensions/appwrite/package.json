@@ -37,8 +37,8 @@
   ],
   "commands": [
     {
-      "name": "search-sites",
-      "title": "Search Sites",
+      "name": "databases",
+      "title": "Databases",
       "description": "",
       "mode": "view"
     }
