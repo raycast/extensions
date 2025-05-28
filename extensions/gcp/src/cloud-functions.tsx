@@ -56,15 +56,17 @@ export default function CloudFunctions() {
   }, []);
 
   async function loadFunctions(forceRefresh = false) {
+    // Declare project ID variable at function level to access it in both try and catch blocks
+    let currentProjectId = "";
     try {
       setLoading(true);
       setError(null);
 
-      // Cache the project ID for the entire function to avoid multiple awaits
-      const projectId = await getProjectId();
-      // Also update the component state to use in rendering
-      setProjectId(projectId);
-      const cacheKey = getCacheKey("cloud-functions", projectId);
+      // Get and cache the project ID to avoid multiple awaits
+      currentProjectId = await getProjectId();
+      // Update the component state to use in rendering
+      setProjectId(currentProjectId);
+      const cacheKey = getCacheKey("cloud-functions", currentProjectId);
 
       // Check cache first (unless force refresh)
       if (!forceRefresh) {
@@ -122,7 +124,7 @@ export default function CloudFunctions() {
       // Check each region for functions
       const regionPromises = regions.map(async (region) => {
         try {
-          const parent = `projects/${projectId}/locations/${region}`;
+          const parent = `projects/${currentProjectId}/locations/${region}`;
 
           // List functions in this region with pagination support
           const allRegionFunctions: GCPFunction[] = [];
@@ -194,8 +196,8 @@ export default function CloudFunctions() {
       const errorMsg = err instanceof Error ? err.message : "Failed to load Cloud Functions";
 
       if (errorMsg.includes("403") || errorMsg.includes("PERMISSION_DENIED")) {
-        // Use the already cached projectId to avoid another async call
-        const currentProjectId = projectId || "YOUR-PROJECT-ID";
+        // Use the cached project ID from earlier
+        const projectIdForError = currentProjectId || "YOUR-PROJECT-ID";
         setError(`🚫 Cloud Functions API Access Denied
 
 The service account lacks permission to access Cloud Functions.
@@ -207,7 +209,7 @@ The service account lacks permission to access Cloud Functions.
 3. Click 'Edit' and add the role: 'Cloud Functions Viewer'
 
 💻 Or use gcloud CLI:
-gcloud projects add-iam-policy-binding ${currentProjectId} --member='serviceAccount:YOUR-SERVICE-ACCOUNT@${currentProjectId}.iam.gserviceaccount.com' --role='roles/cloudfunctions.viewer'`);
+gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAccount:YOUR-SERVICE-ACCOUNT@${projectIdForError}.iam.gserviceaccount.com' --role='roles/cloudfunctions.viewer'`);
       } else {
         setError(errorMsg);
       }
