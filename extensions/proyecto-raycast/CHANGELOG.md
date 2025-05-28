@@ -1,4 +1,4 @@
-##  (2025-05-28)
+## [Initial Release] - {PR_MERGE_DATE}
 
 * chore: add lint and commit hooks ([afb5ded](https://github.com/GloryWong/proyecto-raycast/commit/afb5ded))
 * chore: replace pnpm with npm ([a3f60f4](https://github.com/GloryWong/proyecto-raycast/commit/a3f60f4))
