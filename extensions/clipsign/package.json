@@ -6,7 +6,6 @@
   "description": "A lightweight Raycast extension for creating, saving, and instantly copying your e‑signature.",
   "icon": "clipsign-logo.png",
   "author": "gdcho",
-  "owner": "rj-labs",
   "license": "MIT",
   "categories": [
     "Productivity"
