@@ -1,6 +1,6 @@
 # Window Sizer Changelog
 
-## [New Feature and Improvements] - {PR_MERGE_DATE}
+## [New Feature and Improvements] - 2025-05-28
 
 - Added a new command to quickly save and resize to a favorite window size
 - Cleaned up default sizes
