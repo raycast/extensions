@@ -8,7 +8,7 @@
 - Created a play by play view for live and completed games for all scores and schedule commands. View play by play events with time stamps during live games and after games complete. You can also see major events highlighted such as goals, saves, fights (varies based on the league).
 - Created an article content view for the news view for all tracker commands. This will allow you to view articles directly from raycast without opening ESPN.
 
-## [New Commands, Views, and Small Features] - April 21, 2025
+## [New Commands, Views, and Small Features] - 2025-04-21
 
 - Created a Live Scores Menubar Command - View live scores, final scores, and games. Clicking on games will set them as the menubar title. (Must set a favorite sport and league for it to work)
 - Created a Favorite Team Dashboard Command - View scheduled games, live scores, completed games, articles, injuries, transactions, standings and team info directly from one command. (Must set a favorite sport, league, and team for it to work)
