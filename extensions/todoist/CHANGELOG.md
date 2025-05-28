@@ -1,8 +1,11 @@
 # Todoist Changelog
 
-## [Remove test exception] - 2025-05-26
 
+## [Remove test exception] - 2025-05-29
 - Remove test exception that disabled users from completing tasks via the menu bar
+
+## [Use confetti when completing tasks] - 2025-05-28
+- Add option to use the Raycast confetti command when completing tasks. 
 
 ## [Automatically create labels on quick add command] - 2025-05-09
 
