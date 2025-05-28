@@ -58,8 +58,7 @@ export function useBaseWindowResize() {
 
         // Call the completion handler with the result
         await options.onResizeComplete(result.width, result.height, sizeWasRestricted);
-      } catch (error) {
-        logError("Error setting window size:", error);
+      } catch {
         throw new Error("Failed to set window size");
       }
     } catch (err) {

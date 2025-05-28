@@ -30,9 +30,9 @@ export function useFavWindowResize() {
           errorStr.includes("process") ||
           errorStr.includes("Failed to get screen information")
         ) {
-          await showHUD("🛑 No focused window");
+          await showHUD("🛑 No focused window", { popToRootType: PopToRootType.Immediate });
         } else {
-          await showHUD("🛑 Resize failed");
+          await showHUD("🛑 Resize failed", { popToRootType: PopToRootType.Immediate });
         }
       },
     });
