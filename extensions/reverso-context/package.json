@@ -4,9 +4,9 @@
   "title": "Reverso Context",
   "description": "Get Translations and Examples via Reverso Context",
   "icon": "reverso-context.png",
-  "author": "MrModest",
+  "author": "adielBm",
   "contributors": [
-    "adielBm"
+    "MrModest"
   ],
   "categories": [
     "Web",
