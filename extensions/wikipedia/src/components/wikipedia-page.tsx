@@ -10,7 +10,7 @@ import {
   toSentenceCase,
   toTitleCase,
 } from "../utils/formatting";
-import { useLanguage } from "../utils/language";
+import { Locale } from "../utils/language";
 import { useRecentArticles } from "../utils/recents";
 
 import { ChangeLanguageSubmenu } from "./change-language-submenu";
@@ -21,16 +21,15 @@ const preferences = getPreferenceValues();
 
 const openInBrowser = preferences.openIn === "browser";
 
-export default function WikipediaPage({ title }: { title: string }) {
-  const [language] = useLanguage();
+export default function WikipediaPage({ title, language }: { title: string; language: Locale }) {
   const { addToReadArticles } = useRecentArticles();
   const [showMetadata, setShowMetadata] = useCachedState("showMetadata", false);
 
   const { page, content, metadata, links, isLoading } = usePageData(title, language);
 
   useEffect(() => {
-    addToReadArticles(title);
-  }, [title]);
+    addToReadArticles({ title, language });
+  }, [title, language]);
 
   const body = content ? renderContent(content, 2, links, language) : "";
 
@@ -124,7 +123,7 @@ export default function WikipediaPage({ title }: { title: string }) {
             title="Toggle Metadata"
             onAction={() => setShowMetadata(!showMetadata)}
           />
-          <ChangeLanguageSubmenu title={title} />
+          <ChangeLanguageSubmenu title={title} language={language} />
           <ActionPanel.Section>
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd"], key: "." }}
@@ -169,7 +168,9 @@ export default function WikipediaPage({ title }: { title: string }) {
                     />
                   );
                 }
-                return <Action.Push title={link} key={link} target={<WikipediaPage title={link} />} />;
+                return (
+                  <Action.Push title={link} key={link} target={<WikipediaPage title={link} language={language} />} />
+                );
               })}
             </ActionPanel.Submenu>
           </ActionPanel.Section>

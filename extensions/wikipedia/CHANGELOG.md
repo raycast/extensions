@@ -1,5 +1,9 @@
 # Wikipedia Changelog
 
+## [Language improvements] - {PR_MERGE_DATE}
+- Fix open article in another language
+- Add the ability to delete recent articles
+
 ## [Add simple english version] - 2024-05-31
 
 ## [Flag update] - 2024-04-19

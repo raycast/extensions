@@ -2,7 +2,7 @@ import { Toast, popToRoot, showToast } from "@raycast/api";
 import { useCachedPromise, useFetch } from "@raycast/utils";
 import wiki from "wikijs";
 
-import { PageSummary, getApiUrl, getApiOptions, WikiNode } from "@/utils/api";
+import { PageSummary, WikiNode, getApiOptions, getApiUrl } from "@/utils/api";
 
 export function usePageSummary(title: string, language: string, onError?: (error: Error) => void) {
   return useFetch<PageSummary>(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`, {
@@ -60,7 +60,7 @@ function usePageLinks(title: string, language: string) {
   );
 }
 
-export function useAvalableLanguages(title: string, language: string) {
+export function useAvailableLanguages(title: string, language: string) {
   return useCachedPromise(
     (title: string, language: string) =>
       wiki({
@@ -68,8 +68,8 @@ export function useAvalableLanguages(title: string, language: string) {
         headers: getApiOptions(language)?.headers,
       })
         .page(title)
-        .then((page) => page.langlinks().then((items) => items.flatMap((item) => item.lang)))
-        .catch(() => [language]),
+        .then((page) => page.langlinks())
+        .catch(() => [{ lang: language, title }]),
     [title, language],
   );
 }
