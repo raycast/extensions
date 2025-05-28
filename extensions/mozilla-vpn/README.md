@@ -1,13 +1,13 @@
-# Mozilla Vpn Connect
+# Mozilla VPN Connect
 
-_Interact with the Mozilla Vpn client from Raycast without even opening the Mozilla client._
+_Interact with the Mozilla VPN client from Raycast without even opening the Mozilla client._
 
 ### What does it do?
 
 - It checks that the application is installed and prompts you to download and install if it is not.
 - It checks if you are logged in and opens the app if you are not logged in.
-- It connects using the Mozilla Vpn client to the Mozilla Vpn service.
-- It displays the current server the Mozilla Vpn client is configured for.
+- It connects using the Mozilla VPN client to the Mozilla VPN service.
+- It displays the current server the Mozilla VPN client is configured for.
 - It fetches the current external IP and geolocates the IP's Country and city. It then refreshes when it connects to the VPN.
 - It allows you to change the server from the UI. You select a Country and city if available and if there are multiple VPN servers, it will randomly choose one to connect to.
 
@@ -15,8 +15,8 @@ _Interact with the Mozilla Vpn client from Raycast without even opening the Mozi
 
 ### Requirements
 
-- Must have a Mozilla Vpn account
-- Must have the Mozilla Vpn client downloaded and configured.
+- Must have a Mozilla VPN account
+- Must have the Mozilla VPN client downloaded and configured.
 
 ### CLI commands used for Mozilla Client
 
