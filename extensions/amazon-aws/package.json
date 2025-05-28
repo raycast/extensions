@@ -7,7 +7,6 @@
   "author": "Falcon",
   "contributors": [
     "Hodglim",
-    "JonathanWbn",
     "gebeto",
     "mommertf",
     "duboiss",
@@ -18,7 +17,14 @@
     "frese",
     "nagauta",
     "vineus",
-    "stelo"
+    "stelo",
+    "srikirank",
+    "b0lle",
+    "2357gi",
+    "davzoku"
+  ],
+  "pastContributors": [
+    "JonathanWbn"
   ],
   "categories": [
     "Developer Tools",
@@ -57,14 +63,14 @@
     },
     {
       "name": "sqs",
-      "title": "SQS Queues",
-      "description": "Find and open a queue (or purge it)",
+      "title": "Simple Queue Service",
+      "description": "List queues, view details and manage the messages",
       "mode": "view"
     },
     {
       "name": "codepipeline",
-      "title": "CodePipeline Pipelines",
-      "description": "Find and open a pipeline",
+      "title": "CodePipeline",
+      "description": "Find and manage a pipeline, it's executions and stages",
       "mode": "view"
     },
     {
@@ -75,8 +81,8 @@
     },
     {
       "name": "cloudformation",
-      "title": "CloudFormation Stacks",
-      "description": "Find and open a stack",
+      "title": "CloudFormation",
+      "description": "List and open stacks, resources and exports",
       "mode": "view"
     },
     {
@@ -86,9 +92,15 @@
       "mode": "view"
     },
     {
+      "name": "glue",
+      "title": "Glue",
+      "description": "List and open Glue jobs and job runs",
+      "mode": "view"
+    },
+    {
       "name": "dynamodb",
-      "title": "DynamoDB Tables",
-      "description": "Find and open a table",
+      "title": "DynamoDB",
+      "description": "List tables and perform CRUD operations",
       "mode": "view"
     },
     {
@@ -141,11 +153,13 @@
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.216.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.226.0",
-    "@aws-sdk/client-codepipeline": "^3.216.0",
+    "@aws-sdk/client-codeartifact": "^3.664.0",
+    "@aws-sdk/client-codepipeline": "^3.787.0",
     "@aws-sdk/client-dynamodb": "^3.216.0",
     "@aws-sdk/client-ec2": "^3.216.0",
     "@aws-sdk/client-ecr": "^3.216.0",
     "@aws-sdk/client-ecs": "^3.216.0",
+    "@aws-sdk/client-glue": "^3.607.0",
     "@aws-sdk/client-lambda": "^3.216.0",
     "@aws-sdk/client-s3": "^3.216.0",
     "@aws-sdk/client-secrets-manager": "^3.226.0",
@@ -153,17 +167,15 @@
     "@aws-sdk/client-sqs": "^3.216.0",
     "@aws-sdk/client-ssm": "^3.226.0",
     "@aws-sdk/shared-ini-file-loader": "^3.215.0",
+    "@aws-sdk/util-dynamodb": "^3.584.0",
     "@raycast/api": "^1.42.0",
     "@raycast/utils": "^1.4.11",
     "util": "^0.12.5"
   },
   "devDependencies": {
-    "@types/node": "^20.12.12",
-    "@types/react": "^18.3.2",
-    "@typescript-eslint/eslint-plugin": "^7.9.0",
-    "@typescript-eslint/parser": "^7.9.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/react": "^18.3.12",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.0.2",
     "typescript": "^5.4.5"
   },
@@ -171,6 +183,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

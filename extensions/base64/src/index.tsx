@@ -1,92 +1,108 @@
-import React from "react";
-import { List, ActionPanel, Action, Clipboard, Icon, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, getPreferenceValues, Color, Clipboard } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { decode, encode, isValid } from "js-base64";
 
-enum DefaultActionPreference {
-  CopyToClipboard = "copyToClipboard",
-  PasteInApp = "pasteInApp",
-  OpenInBrowser = "openInBrowser",
-}
-interface Preferences {
-  defaultAction?: DefaultActionPreference;
-}
+function _getActions(value: string) {
+  const { defaultAction } = getPreferenceValues<Preferences>();
 
-interface ActionsOpts {
-  value: string;
-}
-function _getActions({ value }: ActionsOpts) {
-  const isValidUrl = value && value.startsWith("http");
-  const defaultPreference = getPreferenceValues<Preferences>().defaultAction;
-  const ACTIONS = [
-    <Action.CopyToClipboard key={DefaultActionPreference.CopyToClipboard} content={value} />,
-    <Action.Paste key={DefaultActionPreference.PasteInApp} content={value} />,
-    isValidUrl ? <Action.OpenInBrowser key={DefaultActionPreference.OpenInBrowser} url={value} /> : null,
-  ].filter(Boolean) as React.ReactElement[];
-  const defaultAction = ACTIONS.find((action) => action.key === defaultPreference);
-  const otherActions = ACTIONS.filter((action) => action.key !== defaultPreference);
+  const actions = [
+    <Action.CopyToClipboard key="copyToClipboard" content={value} />,
+    <Action.Paste key="pasteInApp" content={value} />,
+    ...(isValidUrl(value) ? [<Action.OpenInBrowser key="openInBrowser" url={value} />] : []),
+  ];
+
+  const defaultOption = actions.find((action) => action.key === defaultAction);
+  const otherOptions = actions.filter((action) => action.key !== defaultAction);
+
   return (
     <ActionPanel>
-      <>
-        {defaultAction}
-        {otherActions}
-      </>
+      {defaultOption}
+      {otherOptions}
     </ActionPanel>
   );
 }
 
 export default function Command() {
-  const [clipboardText, setClipboardText] = React.useState<string | undefined>(undefined);
-  const [input, setInput] = React.useState(clipboardText);
-  const [encoded, setEncoded] = React.useState<string | undefined>(undefined);
-  const [decoded, setDecoded] = React.useState<string | undefined>(undefined);
-  React.useEffect(() => {
-    Clipboard.readText().then((clipboardContents) => {
-      setClipboardText(clipboardContents);
-    });
-  }, []);
-  React.useEffect(() => {
-    const _input = input || clipboardText;
-    if (_input) {
-      setDecoded(Buffer.from(_input, "base64").toString("utf8"));
-      setEncoded(Buffer.from(_input, "utf8").toString("base64"));
-    } else {
-      setDecoded(undefined);
-      setEncoded(undefined);
+  const [input, setInput] = useState<string>("");
+  const { data: decoded, isLoading: isLoadingDecoded } = usePromise(
+    async (text) => isValid(text) && decode(text),
+    [input],
+  );
+  const { data: encoded, isLoading: isLoadingEncoded } = usePromise(async (text) => encode(text), [input]);
+
+  useEffect(() => {
+    if (!input) {
+      Clipboard.read().then(({ text }) => setInput(text));
     }
-  }, [input, clipboardText]);
+  }, [input]);
 
   return (
     <List
-      onSearchTextChange={(newValue) => {
-        setInput(newValue || clipboardText);
-      }}
+      onSearchTextChange={(value) => setInput(unescapeString(value))}
       searchBarPlaceholder={"Text to encode / decode..."}
+      isLoading={isLoadingDecoded || isLoadingEncoded}
     >
-      {encoded && decoded ? (
-        <>
-          <List.Section title={`Input: ${input || clipboardText}`}>
+      {(encoded || decoded) && (
+        <List.Section title={`Input: ${escapeString(input)}`}>
+          {encoded && (
             <List.Item
               key={"encode"}
-              icon={Icon.CodeBlock}
+              icon={{ source: Icon.CodeBlock, tintColor: Color.Magenta }}
               title={"Encode"}
               subtitle={encoded}
-              actions={encoded ? _getActions({ value: encoded }) : undefined}
+              actions={_getActions(encoded)}
             />
+          )}
+          {decoded && (
             <List.Item
               key={"decode"}
-              icon={Icon.Code}
+              icon={{ source: Icon.Code, tintColor: Color.Purple }}
               title={"Decode"}
-              subtitle={decoded}
-              actions={decoded ? _getActions({ value: decoded }) : undefined}
+              subtitle={escapeString(decoded)}
+              actions={_getActions(decoded)}
             />
-          </List.Section>
-        </>
-      ) : (
-        <List.EmptyView
-          icon={Icon.QuestionMarkCircle}
-          title={"Nothing to Encode / Decode"}
-          description={"Copy some content to your clipboard, or start typing text to encode or decode."}
-        />
+          )}
+        </List.Section>
       )}
+      <List.EmptyView
+        icon={{ source: Icon.QuestionMarkCircle, tintColor: Color.Red }}
+        title={"Nothing to Encode / Decode"}
+        description={"Copy some content to your clipboard, or start typing text to encode or decode."}
+      />
     </List>
   );
 }
+
+const escapeString = (input: string) => {
+  const escapeMap: { [key: string]: string } = {
+    '"': '\\"',
+    "'": "\\'",
+    "\\": "\\\\",
+    "\n": "\\n",
+    "\r": "\\r",
+    "\t": "\\t",
+  };
+  return input.replace(/["'\\\n\r\t]/g, (char) => escapeMap[char]);
+};
+
+const unescapeString = (input: string) => {
+  const unescapeMap: { [key: string]: string } = {
+    '\\"': '"',
+    "\\'": "'",
+    "\\\\": "\\",
+    "\\n": "\n",
+    "\\r": "\r",
+    "\\t": "\t",
+  };
+  return input.replace(/\\["'\\nrt]/g, (match) => unescapeMap[match]);
+};
+
+const isValidUrl = (input: string) => {
+  try {
+    new URL(input);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};

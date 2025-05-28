@@ -1,57 +1,32 @@
-import React from "react";
-import { Cache, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
-import { formatHours, useCompany, useMyTimeEntries } from "./services/harvest";
+import { useEffect, useState } from "react";
+import { LaunchType, MenuBarExtra, getPreferenceValues, launchCommand } from "@raycast/api";
+import { formatHours, stopTimer, useCompany, useMyTimeEntries } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
 import { writeFileSync, rmSync, existsSync, mkdirSync } from "fs";
 
-const cache = new Cache();
-
-export function getCurrentTimerFromCache() {
-  const running = cache.get("running");
-  if (!running) return;
-  return JSON.parse(running) as HarvestTimeEntry;
-}
-
 export default function MenuBar() {
-  const { data, isLoading } = useMyTimeEntries();
-  const [cacheLoading, setCacheLoading] = React.useState(true);
+  const { data, isLoading: dataLoading, mutate, revalidate } = useMyTimeEntries(null);
   const { data: company, isLoading: companyLoading } = useCompany();
+  const [cacheLoading, setCacheLoading] = useState(false);
 
-  const runningTimer = getCurrentTimerFromCache();
-  const {
-    callbackURLStart,
-    callbackURLStop,
-    showTimerInMenuBar = true,
-  } = getPreferenceValues<{
-    callbackURLStart?: string;
-    callbackURLStop?: string;
+  const runningTimer = data.find((o) => o.is_running);
+
+  const { showTimerInMenuBar = true } = getPreferenceValues<{
     showTimerInMenuBar?: boolean;
     statusFolder?: string;
   }>();
 
-  React.useEffect(() => {
-    if (data && !isLoading) {
-      const found = data.find((o) => o.is_running);
-      if (runningTimer?.id !== found?.id) {
-        if (found && callbackURLStart) open(callbackURLStart);
-        if (!found && callbackURLStop) open(callbackURLStop);
-      }
-      if (found) {
-        cache.set("running", JSON.stringify(found));
-        setStatusFile(found);
-      } else {
-        cache.remove("running");
-        setStatusFile(null);
-      }
-      setCacheLoading(false);
-    }
-  }, [data, isLoading]);
+  const isLoading = dataLoading || cacheLoading;
+
+  useEffect(() => {
+    setStatusFile(runningTimer ?? null);
+  }, [runningTimer]);
 
   if (!runningTimer)
     return (
       <MenuBarExtra
         icon={{ source: runningTimer ? "../assets/harvest-logo-icon.png" : "../assets/harvest-logo-icon-gray.png" }}
-        isLoading={isLoading || cacheLoading}
+        isLoading={isLoading}
       >
         <MenuBarExtra.Item title="No Timer Running" />
         <MenuBarExtra.Item
@@ -67,7 +42,7 @@ export default function MenuBar() {
     <MenuBarExtra
       icon={{ source: "../assets/harvest-logo-icon.png" }}
       title={showTimerInMenuBar ? formatHours(runningTimer.hours.toString(), company) : undefined}
-      isLoading={isLoading || cacheLoading || companyLoading}
+      isLoading={isLoading || companyLoading}
     >
       <MenuBarExtra.Item title={`${runningTimer.project.name} - ${runningTimer.task.name}`} />
       {runningTimer.notes && runningTimer.notes.length > 0 && <MenuBarExtra.Item title={`${runningTimer.notes}`} />}
@@ -78,17 +53,16 @@ export default function MenuBar() {
           launchCommand({ extensionName: "harvest", name: "listTimeEntries", type: LaunchType.UserInitiated });
         }}
       />
-
-      {/* <MenuBarExtra.Item
-        title="Stop Timer"
-        onAction={async () => {
-          setCacheLoading(true);
-          console.log("stopping timer...");
-          await stopTimer(runningTimer);
-          revalidate();
-          setCacheLoading(false);
-        }}
-      /> */}
+      {runningTimer && (
+        <MenuBarExtra.Section>
+          <MenuBarExtra.Item
+            title="Stop Timer"
+            onAction={async () => {
+              await launchCommand({ extensionName: "harvest", name: "stopTimer", type: LaunchType.UserInitiated });
+            }}
+          />
+        </MenuBarExtra.Section>
+      )}
     </MenuBarExtra>
   );
 }

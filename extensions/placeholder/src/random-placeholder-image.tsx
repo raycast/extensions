@@ -1,137 +1,44 @@
-import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
-import React, { useState } from "react";
-import { PicsumImageAction } from "./components/picsum-image-action";
-import { getRandomPlaceholderImageURL } from "./hooks/hooks";
-import { RandomImageConfig, randomImageConfigInit } from "./types/types";
-import { Preferences } from "./types/preferences";
-import { ActionOpenPreferences } from "./components/action-open-preferences";
-import { RevealImageAction } from "./components/reveal-image-action";
+import { Picsum } from "picsum-photos/dist";
+import type { LaunchProps } from "@raycast/api";
+import { Clipboard, showHUD } from "@raycast/api";
+import type { PicsumConfig } from "@/types/types";
+import { getArguments, isEmpty } from "@/utils/common-utils";
+import { getBlur } from "@/utils/parse";
+import { blur, defaultHeight, defaultWidth, grayscale, jpg, noCache, staticRandom } from "@/utils/preferences";
 
-export default function CreateShortcut() {
-  const { primaryAction, autoRefresh } = getPreferenceValues<Preferences>();
-
-  const [picsumConfig, setPicsumConfig] = useState<RandomImageConfig>(randomImageConfigInit);
-  const [refresh, setRefresh] = useState<number>(0);
-
-  const { imageURL } = getRandomPlaceholderImageURL(picsumConfig, refresh);
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <PicsumImageAction
-            imageURL={imageURL}
-            size={parseInt(picsumConfig.width) + "x" + parseInt(picsumConfig.height)}
-            primaryAction={primaryAction}
-            autoRefresh={autoRefresh}
-            setRefresh={setRefresh}
-          />
-          <ActionPanel.Section>
-            <RevealImageAction
-              imageURL={imageURL}
-              size={parseInt(picsumConfig.width) + "x" + parseInt(picsumConfig.height)}
-              primaryAction={primaryAction}
-              autoRefresh={autoRefresh}
-              setRefresh={setRefresh}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            {picsumConfig.staticRandom && (
-              <Action
-                icon={Icon.TwoArrowsClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                title={"Refresh Image URL"}
-                onAction={() => {
-                  setRefresh(Date.now);
-                }}
-              />
-            )}
-          </ActionPanel.Section>
-          <ActionOpenPreferences />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField
-        id={"Width"}
-        title="Width"
-        value={picsumConfig.width + ""}
-        info={"Image width"}
-        placeholder={"300"}
-        onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.width = newValue;
-          setPicsumConfig(_randomImageConfig);
-        }}
-      />
-      <Form.TextField
-        id={"Height"}
-        title="Height"
-        value={picsumConfig.height}
-        info={"Image height"}
-        placeholder={"300"}
-        onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.height = newValue;
-          setPicsumConfig(_randomImageConfig);
-        }}
-      />
-      <Form.TextField
-        id={"Blur"}
-        title="Blur"
-        value={picsumConfig.blur}
-        placeholder={"0-10"}
-        info={"Level of image blurriness form 0-10"}
-        onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.blur = newValue;
-          setPicsumConfig(_randomImageConfig);
-        }}
-      />
-      <Form.Checkbox
-        id={"JPG"}
-        label={"JPG"}
-        value={picsumConfig.jpg}
-        info={"Get image url as .jpg"}
-        onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.jpg = newValue;
-          setPicsumConfig(_randomImageConfig);
-        }}
-      />
-      <Form.Checkbox
-        id={"Grayscale"}
-        label={"Grayscale"}
-        value={picsumConfig.grayscale}
-        info={"Image grayscale or normal"}
-        onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.grayscale = newValue;
-          setPicsumConfig(_randomImageConfig);
-        }}
-      />
-      <Form.Checkbox
-        id={"No Cache"}
-        label={"No Cache"}
-        value={picsumConfig.cache}
-        info={"Prevent the image from being cached"}
-        onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.cache = newValue;
-          setPicsumConfig(_randomImageConfig);
-        }}
-      />
-      <Form.Checkbox
-        id={"Static Random"}
-        label={"Static Random"}
-        value={picsumConfig.staticRandom}
-        info={"Get the same random image every time based on a seed"}
-        onChange={(newValue) => {
-          const _randomImageConfig = { ...picsumConfig };
-          _randomImageConfig.staticRandom = newValue;
-          setPicsumConfig(_randomImageConfig);
-        }}
-      />
-      <Form.Description title="Image URL" text={imageURL} />
-    </Form>
-  );
+interface PlaceholderArguments {
+  height: string;
+  width: string;
 }
+
+export default async (props: LaunchProps<{ arguments: PlaceholderArguments }>) => {
+  const { args } = getArguments([props.arguments.width, props.arguments.height], ["Width", "Height"]);
+
+  let width;
+  let height;
+  if (isEmpty(args[0]) && isEmpty(args[1])) {
+    width = parseInt(defaultWidth);
+    height = parseInt(defaultHeight);
+  } else {
+    width = parseInt(args[0]);
+    height = parseInt(args[1]);
+  }
+
+  const picsumConfig: PicsumConfig = {
+    width: width,
+    height: height,
+    blur: getBlur(blur),
+    jpg: jpg,
+    grayscale: grayscale,
+    cache: noCache,
+    staticRandom: staticRandom,
+  };
+
+  let _imageURL = Picsum.url(picsumConfig);
+  if (picsumConfig.staticRandom) {
+    _imageURL = _imageURL.replace("https://picsum.photos/", "https://picsum.photos/seed/" + Date.now() + "/");
+  }
+
+  await Clipboard.copy(_imageURL);
+  await showHUD(`✨ ${_imageURL}`);
+};

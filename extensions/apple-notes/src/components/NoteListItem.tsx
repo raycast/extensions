@@ -2,7 +2,7 @@ import { List, Icon, getPreferenceValues, Color } from "@raycast/api";
 import { format } from "date-fns";
 
 import { NoteTitle } from "..";
-import { NoteItem, useNotes } from "../useNotes";
+import { NoteItem, useNotes } from "../hooks/useNotes";
 
 import NoteActions from "./NoteActions";
 
@@ -115,6 +115,14 @@ export default function NoteListItem({ note, noteTitles, isDeleted, mutate }: No
 
   if (note.invitationLink) {
     keywords.push(...["shared"]);
+  }
+
+  if (note.links.length > 0) {
+    keywords.push("links");
+  }
+
+  if (note.backlinks.length > 0) {
+    keywords.push("backlinks");
   }
 
   return (

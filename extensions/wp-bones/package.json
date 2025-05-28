@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wp-bones",
+  "title": "WP Bones",
+  "description": "WP Bones documentation and scaffolding",
+  "icon": "extension-icon.png",
+  "author": "Undolog",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "wordpress",
+    "wp-bones",
+    "scaffolding",
+    "plugin",
+    "template",
+    "documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "WP Bones Menu Bar",
+      "subtitle": "WP Bones",
+      "description": "See your WP Bones status at a glance",
+      "interval": "60m",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "search-documentation",
+      "title": "Search in Documentation",
+      "subtitle": "WP Bones",
+      "description": "You can access the documentation and filter by search keys, then view the results in a browser.",
+      "mode": "view"
+    },
+    {
+      "name": "create-wp-bones-template",
+      "title": "Create a WP Bones Template",
+      "subtitle": "WP Bones",
+      "description": "Allows you to select the GitHub WP Bones template that suits your needs, so you can create your scaffolding in just a few seconds.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

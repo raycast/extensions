@@ -2,9 +2,10 @@ export interface Device {
   displayName: string;
   name: string;
   booted: boolean;
-  ID?: string;
+  identifier?: string;
   version?: string;
   platform: Platform;
+  type: DeviceType;
 }
 
 export interface Command {
@@ -20,4 +21,9 @@ export interface Command {
 export enum Platform {
   ios = "ios",
   android = "android",
+}
+
+export enum DeviceType {
+  virtual = "virtual",
+  physical = "physical",
 }

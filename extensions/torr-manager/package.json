@@ -1,0 +1,497 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "torr-manager",
+  "title": "Torr Manager",
+  "description": "Allows connect to selfhosted TorrServer, browse available torrents, select and watch movies directly from Raycast.",
+  "icon": "extension_icon.png",
+  "author": "dannius",
+  "categories": [
+    "Media",
+    "Fun"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "torrserverUrl",
+      "type": "textfield",
+      "title": "Torrserver URL",
+      "description": "Enter the URL/IP to your server",
+      "defaultValue": "",
+      "placeholder": "http://ip:port",
+      "required": true
+    },
+    {
+      "name": "login",
+      "type": "textfield",
+      "title": "Login",
+      "description": "Enter your login",
+      "required": true
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "title": "Password",
+      "description": "Enter your password",
+      "required": true
+    },
+    {
+      "name": "mediaPlayerApp",
+      "title": "Media Player ('iina' or 'vlc' could be better choise)",
+      "type": "appPicker",
+      "description": "Select media player app to use",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "list",
+      "title": "My Torrents",
+      "description": "List available torrents from your server",
+      "mode": "view"
+    },
+    {
+      "name": "upload",
+      "title": "Upload Torrent",
+      "description": "Upload torrent to server",
+      "mode": "view"
+    },
+    {
+      "name": "jackett-parser",
+      "title": "Search Torrents",
+      "description": "Search torrents",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "jackettParserUrl",
+          "title": "Jackett parser URL",
+          "placeholder": "http://ip:port",
+          "type": "textfield",
+          "description": "URL endpoint required for enabling search",
+          "required": true
+        },
+        {
+          "name": "jackettApiKey",
+          "title": "Jackett api key",
+          "type": "textfield",
+          "description": "Api key required for enabling search",
+          "required": false
+        },
+        {
+          "name": "Console",
+          "title": "Select search categories",
+          "label": "Console (1000)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "ConsoleNDS",
+          "title": "",
+          "label": "Console/NDS (1010)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "ConsolePSP",
+          "title": "",
+          "label": "Console/PSP (1020)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "ConsoleWii",
+          "title": "",
+          "label": "Console/Wii (1030)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "ConsoleXbox",
+          "title": "",
+          "label": "Console/XBox (1040)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "ConsoleXbox360",
+          "title": "",
+          "label": "Console/XBox 360 (1050)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "ConsolePS3",
+          "title": "",
+          "label": "Console/PS3 (1080)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "ConsoleOther",
+          "title": "",
+          "label": "Console/Other (1090)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "ConsolePSVita",
+          "title": "",
+          "label": "Console/PS Vita (1120)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "ConsolePS4",
+          "title": "",
+          "label": "Console/PS4 (1180)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "Movies",
+          "title": "",
+          "label": "Movies (2000)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "MoviesForeign",
+          "title": "",
+          "label": "Movies/Foreign (2010)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "MoviesOther",
+          "title": "",
+          "label": "Movies/Other (2020)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "MoviesHD",
+          "title": "",
+          "label": "Movies/HD (2040)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "MoviesUHD",
+          "title": "",
+          "label": "Movies/UHD (2045)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "Movies3D",
+          "title": "",
+          "label": "Movies/3D (2060)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "MoviesDVD",
+          "title": "",
+          "label": "Movies/DVD (2070)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "Audio",
+          "title": "",
+          "label": "Audio (3000)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "AudioMP3",
+          "title": "",
+          "label": "Audio/MP3 (3010)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "AudioVideo",
+          "title": "",
+          "label": "Audio/Video (3020)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "AudioAudiobook",
+          "title": "",
+          "label": "Audio/Audiobook (3030)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "AudioLossless",
+          "title": "",
+          "label": "Audio/Lossless (3040)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "PC",
+          "title": "",
+          "label": "PC (4000)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "PC0Day",
+          "title": "",
+          "label": "PC/0day (4010)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "PCISO",
+          "title": "",
+          "label": "PC/ISO (4020)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "PCMac",
+          "title": "",
+          "label": "PC/Mac (4030)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "PCMobileOther",
+          "title": "",
+          "label": "PC/Mobile-Other (4040)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "PCGames",
+          "title": "",
+          "label": "PC/Games (4050)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "PCMobileiOS",
+          "title": "",
+          "label": "PC/Mobile-iOS (4060)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "PCMobileAndroid",
+          "title": "",
+          "label": "PC/Mobile-Android (4070)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "TV",
+          "title": "",
+          "label": "TV (5000)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "TVForeign",
+          "title": "",
+          "label": "TV/Foreign (5020)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "TVSD",
+          "title": "",
+          "label": "TV/SD (5030)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "TVHD",
+          "title": "",
+          "label": "TV/HD (5040)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "TVUHD",
+          "title": "",
+          "label": "TV/UHD (5045)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "TVOther",
+          "title": "",
+          "label": "TV/Other (5050)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "TVSport",
+          "title": "",
+          "label": "TV/Sport (5060)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "TVAnime",
+          "title": "",
+          "label": "TV/Anime (5070)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "TVDocumentary",
+          "title": "",
+          "label": "TV/Documentary (5080)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "XXX",
+          "title": "",
+          "label": "XXX (6000)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "Books",
+          "title": "",
+          "label": "Books (7000)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "BooksMags",
+          "title": "",
+          "label": "Books/Mags (7010)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "BooksEBook",
+          "title": "",
+          "label": "Books/EBook (7020)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "BooksComics",
+          "title": "",
+          "label": "Books/Comics (7030)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "BooksTechnical",
+          "title": "",
+          "label": "Books/Technical (7040)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "BooksOther",
+          "title": "",
+          "label": "Books/Other (7050)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "Other",
+          "title": "",
+          "label": "Other (8000)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        },
+        {
+          "name": "OtherMisc",
+          "title": "",
+          "label": "Other/Misc (8010)",
+          "type": "checkbox",
+          "description": "Select necessary search categories",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "test-connection",
+      "title": "Test Connection",
+      "description": "Test connection to your server",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.18.0",
+    "formdata-node": "^6.0.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.7.5",
+    "@types/react": "^18.3.11",
+    "@typescript-eslint/eslint-plugin": "^8.8.1",
+    "eslint": "^9.12.0",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "categories": "ts-node ./generate-categories.ts",
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

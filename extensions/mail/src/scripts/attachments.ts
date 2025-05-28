@@ -3,11 +3,11 @@ import { homedir } from "os";
 import { showToast, Toast, open, showInFinder, closeMainWindow, getPreferenceValues } from "@raycast/api";
 
 import { tellMessage } from "./messages";
-import { Mailbox, Attachment, Message, Preferences } from "../types";
+import { Mailbox, Attachment, Message } from "../types";
 import { formatFileSize, getMIMEtype } from "../utils/finder";
 
-const preferences: Preferences = getPreferenceValues();
-let downloadDirectory = preferences.saveDirectory.replace("~", homedir());
+const { saveDirectory } = getPreferenceValues<Preferences>();
+let downloadDirectory = saveDirectory.replace("~", homedir());
 const attachmentsDirectory = downloadDirectory;
 
 if (!existsSync(downloadDirectory)) {

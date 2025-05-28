@@ -1,4 +1,4 @@
-import { Icon, Image, launchCommand, LaunchType, MenuBarExtra, open, getPreferenceValues, Color } from "@raycast/api";
+import { Icon, launchCommand, LaunchType, MenuBarExtra, open, getPreferenceValues, Color } from "@raycast/api";
 import { gitlab } from "./common";
 import { getTodoIcon, getPrettyTodoActionName } from "./components/todo";
 import { useTodos } from "./components/todo/utils";
@@ -11,11 +11,11 @@ import {
 } from "./components/menu";
 import { showErrorToast, getErrorMessage } from "./utils";
 
-function launchTodosCommand() {
+async function launchTodosCommand() {
   try {
-    launchCommand({ name: "todos", type: LaunchType.UserInitiated });
+    await launchCommand({ name: "todos", type: LaunchType.UserInitiated });
   } catch (error) {
-    showErrorToast(getErrorMessage(error), "Could not open Todos Command");
+    await showErrorToast(getErrorMessage(error), "Could not open Todos Command");
   }
 }
 
@@ -23,41 +23,20 @@ function getMaxTodosPreference(): number {
   return getBoundedPreferenceNumber({ name: "maxtodos" });
 }
 
-function getAlwaysVisiblePreference(): boolean {
-  const prefs = getPreferenceValues();
-  const result = prefs.alwaysshow as boolean;
-  return result;
-}
-
-function getShowTodoCountPreference(): boolean {
-  const prefs = getPreferenceValues();
-  const result = prefs.showtext as boolean;
-  return result;
-}
-
-function menuBarIcon(): Image.ImageLike {
-  const prefs = getPreferenceValues();
-  const useGrayscale = prefs.grayicon as boolean;
-  if (useGrayscale === true) {
-    return { source: "gitlab.svg", tintColor: Color.PrimaryText };
-  }
-  return { source: "gitlab.svg" };
-}
-
 export default function TodosMenuBarCommand(): JSX.Element | null {
   const { todos, error, isLoading } = useTodos();
+  const { grayicon, alwaysshow, showtext } = getPreferenceValues<Preferences.Todomenubar>();
 
-  if (!todos && !isLoading) {
-    if (!getAlwaysVisiblePreference()) {
-      return null;
-    }
+  if (!todos.length && !isLoading && !alwaysshow) {
+    return null;
   }
+
   return (
     <MenuBarRoot
-      icon={menuBarIcon()}
+      icon={{ source: "gitlab.svg", ...(grayicon && { tintColor: Color.PrimaryText }) }}
       isLoading={isLoading}
       error={error}
-      title={todos && todos.length > 0 && getShowTodoCountPreference() ? `${todos.length}` : undefined}
+      title={todos && todos.length > 0 && showtext ? `${todos.length}` : undefined}
       tooltip="GitLab Todos"
     >
       <MenuBarSection>

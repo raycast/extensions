@@ -1,6 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
-import { IssueResult, getLastUpdatedIssues, searchIssues } from "../api/getIssues";
 import { UseCachedPromiseReturnType } from "@raycast/utils/dist/types";
+
+import { IssueResult, getLastUpdatedIssues, searchIssues } from "../api/getIssues";
 
 export default function useSearchIssues(query: string) {
   return useCachedPromise(

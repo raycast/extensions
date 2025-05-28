@@ -1,11 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
-import ResultView from "./hook/perplexityAPI";
+import { ResultView } from "./components/ResultView";
 
 const prompt = getPreferenceValues().prompt_youtube;
 const model_override = getPreferenceValues().model_youtube;
 const toast_title = "Summarizing...";
 
-export default function Rewrite() {
+export default function Youtube() {
   return (
     <ResultView
       sys_prompt={prompt}

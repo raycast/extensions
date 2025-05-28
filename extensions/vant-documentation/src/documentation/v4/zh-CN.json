@@ -1,0 +1,770 @@
+[
+  {
+    "title": "开发指南",
+    "items": [
+      {
+        "title": "介绍",
+        "component": "home",
+        "describe": "Vant 是一个轻量、可定制的移动端组件库，于 2017 年开源。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/home.zh-CN.md?ref=main"
+      },
+      {
+        "title": "快速上手",
+        "component": "quickstart",
+        "describe": "通过本章节你可以了解到 Vant 的安装方法和基本使用姿势。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/quickstart.zh-CN.md?ref=main"
+      },
+      {
+        "title": "进阶用法",
+        "component": "advanced-usage",
+        "describe": "通过本章节你可以了解到 Vant 的一些进阶用法，比如组件插槽用法、多种浏览器适配方式。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/advanced-usage.zh-CN.md?ref=main"
+      },
+      {
+        "title": "常见问题",
+        "component": "faq",
+        "describe": "Vant 基于 CSS 变量提供了主题定制的能力，可以对组件样式进行统一修改，详见 ConfigProvider 全局配置 组件。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/faq.zh-CN.md?ref=main"
+      },
+      {
+        "title": "更新日志",
+        "component": "changelog",
+        "describe": "Vant 遵循 Semver 语义化版本规范。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/changelog.zh-CN.md?ref=main"
+      },
+      {
+        "title": "4.0 更新介绍",
+        "component": "release-note-v4",
+        "describe": "历经一年的迭代，Vant 4.0 版本已正式发布，这是 Vant 自 2017 年开源以来发布的第四个重要版本。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/release-note-v4.zh-CN.md?ref=main"
+      },
+      {
+        "title": "从 v2 升级到 v3",
+        "component": "migrate-from-v2",
+        "describe": "本文档提供了从 Vant 2 到 Vant 3 的升级指南。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/migrate-from-v2.zh-CN.md?ref=main"
+      },
+      {
+        "title": "从 v3 升级到 v4",
+        "component": "migrate-from-v3",
+        "describe": "本文档提供了从 Vant 3 到 Vant 4 的升级指南。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/migrate-from-v3.zh-CN.md?ref=main"
+      },
+      {
+        "title": "贡献指南",
+        "component": "contribution",
+        "describe": "感谢你使用 Vant。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/contribution.zh-CN.md?ref=main"
+      },
+      {
+        "title": "设计资源",
+        "component": "design",
+        "describe": "本页面提供 Vant 的设计资源下载。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/design.zh-CN.md?ref=main"
+      },
+      {
+        "title": "国际化",
+        "component": "locale",
+        "describe": "Vant 采用中文作为默认语言，同时支持多语言切换，请按照下方教程进行国际化设置。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/locale.zh-CN.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "基础组件",
+    "items": [
+      {
+        "title": "Button 按钮",
+        "component": "button",
+        "describe": "按钮用于触发一个操作，如提交表单。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/button/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Cell 单元格",
+        "component": "cell",
+        "describe": "单元格为列表中的单个展示项。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/cell/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "ConfigProvider 全局配置",
+        "component": "config-provider",
+        "describe": "用于全局配置 Vant 组件，提供深色模式、主题定制等能力。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/config-provider/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Icon 图标",
+        "component": "icon",
+        "describe": "基于字体的图标集，可以通过 Icon 组件使用，也可以在其他组件中通过 icon 属性引用。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/icon/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Image 图片",
+        "component": "image",
+        "describe": "增强版的 img 标签，提供多种图片填充模式，支持图片懒加载、加载中提示、加载失败提示。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/image/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Layout 布局",
+        "component": "col",
+        "describe": "Layout 提供了 van-row 和 van-col 两个组件来进行行列布局。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/col/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Popup 弹出层",
+        "component": "popup",
+        "describe": "弹出层容器，用于展示弹窗、信息提示等内容，支持多个弹出层叠加展示。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/popup/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Space 间距",
+        "component": "space",
+        "describe": "设置元素之间的间距。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/space/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Style 内置样式",
+        "component": "style",
+        "describe": "Vant 中默认包含了一些常用样式，可以直接通过 className 的方式使用。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/style/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Toast 轻提示",
+        "component": "toast",
+        "describe": "在页面中间弹出黑色半透明提示，用于消息通知、加载提示、操作结果提示等场景。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/toast/README.zh-CN.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "表单组件",
+    "items": [
+      {
+        "title": "Calendar 日历",
+        "component": "calendar",
+        "describe": "日历组件用于选择日期或日期区间。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/calendar/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Cascader 级联选择",
+        "component": "cascader",
+        "describe": "级联选择框，用于多层级数据的选择，典型场景为省市区选择。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/cascader/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Checkbox 复选框",
+        "component": "checkbox",
+        "describe": "在一组备选项中进行多选。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/checkbox/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "DatePicker 日期选择",
+        "component": "date-picker",
+        "describe": "日期选择器，用于选择年、月、日，通常与弹出层组件配合使用。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/date-picker/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Field 输入框",
+        "component": "field",
+        "describe": "用户可以在文本框内输入或编辑文字。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/field/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Form 表单",
+        "component": "form",
+        "describe": "用于数据录入、校验，支持输入框、单选框、复选框、文件上传等类型，需要与 Field 输入框 组件搭配使用。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/form/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "NumberKeyboard 数字键盘",
+        "component": "number-keyboard",
+        "describe": "虚拟数字键盘，可以配合密码输入框组件或自定义的输入框组件使用。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/number-keyboard/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "PasswordInput 密码输入框",
+        "component": "password-input",
+        "describe": "带网格的输入框组件，可以用于输入密码、短信验证码等场景，通常与数字键盘组件配合使用。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/password-input/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Picker 选择器",
+        "component": "picker",
+        "describe": "提供多个选项集合供用户选择，支持单列选择、多列选择和级联选择，通常与弹出层组件配合使用。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/picker/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "PickerGroup 选择器组",
+        "component": "picker-group",
+        "describe": "用于结合多个 Picker 选择器组件，在一次交互中完成多个值的选择。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/picker-group/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Radio 单选框",
+        "component": "radio",
+        "describe": "在一组备选项中进行单选。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/radio/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Rate 评分",
+        "component": "rate",
+        "describe": "用于对事物进行评级操作。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/rate/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Search 搜索",
+        "component": "search",
+        "describe": "用于搜索场景的输入框组件。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/search/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Slider 滑块",
+        "component": "slider",
+        "describe": "滑动输入条，用于在给定的范围内选择一个值。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/slider/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Signature 签名",
+        "component": "signature",
+        "describe": "用于签名场景的组件，基于 Canvas 实现。请升级 vant 到 >= 4.3.0 版本来使用该组件。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/signature/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Stepper 步进器",
+        "component": "stepper",
+        "describe": "步进器由增加按钮、减少按钮和输入框组成，用于在一定范围内输入、调整数字。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/stepper/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Switch 开关",
+        "component": "switch",
+        "describe": "用于在打开和关闭状态之间进行切换。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/switch/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "TimePicker 时间选择",
+        "component": "time-picker",
+        "describe": "时间选择器，通常与弹出层组件配合使用。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/time-picker/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Uploader 文件上传",
+        "component": "uploader",
+        "describe": "用于将本地的图片或文件上传至服务器，并在上传过程中展示预览图和上传进度。目前 Uploader 组件不包含将文件上传至服务器的接口逻辑，该步骤需要自行实现。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/uploader/README.zh-CN.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "反馈组件",
+    "items": [
+      {
+        "title": "ActionSheet 动作面板",
+        "component": "action-sheet",
+        "describe": "底部弹起的模态面板，包含与当前情境相关的多个选项。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/action-sheet/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Barrage 弹幕",
+        "component": "barrage",
+        "describe": "实现观看视频时弹出的评论性字幕功能。请升级 vant 到 >= 4.4.0 版本来使用该组件。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/barrage/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Dialog 弹出框",
+        "component": "dialog",
+        "describe": "弹出模态框，常用于消息提示、消息确认，或在当前页面内完成特定的交互操作。支持组件调用和函数调用两种方式。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/dialog/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "DropdownMenu 下拉菜单",
+        "component": "dropdown-menu",
+        "describe": "向下弹出的菜单列表。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/dropdown-menu/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "FloatingPanel 浮动面板",
+        "component": "floating-panel",
+        "describe": "浮动在页面底部的面板，可以上下拖动来浏览内容，常用于提供额外的功能或信息。请升级 vant 到 >= 4.5.0 版本来使用该组件。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/floating-panel/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "FloatingBubble 浮动气泡",
+        "component": "floating-bubble",
+        "describe": "悬浮在页面边缘的可点击气泡。请升级 vant 到 >= 4.6.0 版本来使用该组件。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/floating-bubble/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Loading 加载",
+        "component": "loading",
+        "describe": "加载图标，用于表示加载中的过渡状态。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/loading/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Notify 消息通知",
+        "component": "notify",
+        "describe": "在页面顶部展示消息提示，支持组件调用和函数调用两种方式。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/notify/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Overlay 遮罩层",
+        "component": "overlay",
+        "describe": "创建一个遮罩层，用于强调特定的页面元素，并阻止用户进行其他操作。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/overlay/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "PullRefresh 下拉刷新",
+        "component": "pull-refresh",
+        "describe": "用于提供下拉刷新的交互操作。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/pull-refresh/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "ShareSheet 分享面板",
+        "component": "share-sheet",
+        "describe": "底部弹起的分享面板，用于展示各分享渠道对应的操作按钮，不含具体的分享逻辑。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/share-sheet/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "SwipeCell 滑动单元格",
+        "component": "swipe-cell",
+        "describe": "可以左右滑动来展示操作按钮的单元格组件。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/swipe-cell/README.zh-CN.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "展示组件",
+    "items": [
+      {
+        "title": "Badge 徽标",
+        "component": "badge",
+        "describe": "在右上角展示徽标数字或小红点。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/badge/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Circle 环形进度条",
+        "component": "circle",
+        "describe": "圆环形的进度条组件，支持进度渐变动画。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/circle/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Collapse 折叠面板",
+        "component": "collapse",
+        "describe": "将一组内容放置在多个折叠面板中，点击面板的标题可以展开或收缩其内容。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/collapse/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "CountDown 倒计时",
+        "component": "count-down",
+        "describe": "用于实时展示倒计时数值，支持毫秒精度。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/count-down/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Divider 分割线",
+        "component": "divider",
+        "describe": "用于将内容分隔为多个区域。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/divider/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Empty 空状态",
+        "component": "empty",
+        "describe": "空状态时的占位提示。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/empty/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Highlight 高亮文本",
+        "component": "highlight",
+        "describe": "高亮指定文本内容。请升级 vant 到 >= 4.8.0 版本来使用该组件。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/highlight/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "ImagePreview 图片预览",
+        "component": "image-preview",
+        "describe": "图片放大预览，支持组件调用和函数调用两种方式。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/image-preview/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Lazyload 懒加载",
+        "component": "lazyload",
+        "describe": "当页面需要加载大量内容时，使用懒加载可以实现延迟加载页面可视区域外的内容，从而使页面加载更流畅。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/lazyload/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "List 列表",
+        "component": "list",
+        "describe": "瀑布流滚动加载，用于展示长列表，当列表即将滚动到底部时，会触发事件并加载更多列表项。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/list/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "NoticeBar 通知栏",
+        "component": "notice-bar",
+        "describe": "用于循环播放展示一组消息通知。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/notice-bar/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Popover 气泡弹出框",
+        "component": "popover",
+        "describe": "弹出式的气泡菜单。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/popover/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Progress 进度条",
+        "component": "progress",
+        "describe": "用于展示操作的当前进度。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/progress/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "RollingText 翻滚文本",
+        "component": "rolling-text",
+        "describe": "文本翻滚动效，可以翻滚数字和其他类型文本。请升级 vant 到 >= 4.6.0 版本来使用该组件。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/rolling-text/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Skeleton 骨架屏",
+        "component": "skeleton",
+        "describe": "用于在内容加载过程中展示一组占位图形。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/skeleton/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Steps 步骤条",
+        "component": "steps",
+        "describe": "用于展示操作流程的各个环节，让用户了解当前的操作在整体流程中的位置。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/steps/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Sticky 粘性布局",
+        "component": "sticky",
+        "describe": "Sticky 组件与 CSS 中 position: sticky 属性实现的效果一致，当组件在屏幕范围内时，会按照正常的布局排列，当组件滚出屏幕范围时，始终会固定在屏幕顶部。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/sticky/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Swipe 轮播",
+        "component": "swipe",
+        "describe": "用于循环播放一组图片或内容。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/swipe/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Tag 标签",
+        "component": "tag",
+        "describe": "用于标记关键词和概括主要内容。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/tag/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "TextEllipsis 文本省略",
+        "component": "text-ellipsis",
+        "describe": "对长文本进行省略，支持展开/收起。请升级 vant 到 >= 4.1.0 版本来使用该组件。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/text-ellipsis/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Watermark 水印",
+        "component": "watermark",
+        "describe": "在页面上添加特定的文字或图案作为水印，可用于防止信息盗用。请升级 vant 到 >= 4.2.0 版本来使用该组件。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/watermark/README.zh-CN.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "导航组件",
+    "items": [
+      {
+        "title": "ActionBar 动作栏",
+        "component": "action-bar",
+        "describe": "用于为页面相关操作提供便捷交互。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/action-bar/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "BackTop 回到顶部",
+        "component": "back-top",
+        "describe": "返回页面顶部的操作按钮。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/back-top/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Grid 宫格",
+        "component": "grid",
+        "describe": "宫格可以在水平方向上把页面分隔成等宽度的区块，用于展示内容或进行页面导航。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/grid/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "IndexBar 索引栏",
+        "component": "index-bar",
+        "describe": "用于列表的索引分类显示和快速定位。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/index-bar/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "NavBar 导航栏",
+        "component": "nav-bar",
+        "describe": "为页面提供导航功能，常用于页面顶部。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/nav-bar/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Pagination 分页",
+        "component": "pagination",
+        "describe": "数据量过多时，采用分页的形式将数据分隔，每次只加载一个页面。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/pagination/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Sidebar 侧边导航",
+        "component": "sidebar",
+        "describe": "垂直展示的导航栏，用于在不同的内容区域之间进行切换。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/sidebar/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Tab 标签页",
+        "component": "tab",
+        "describe": "选项卡组件，用于在不同的内容区域之间进行切换。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/tab/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Tabbar 标签栏",
+        "component": "tabbar",
+        "describe": "底部导航栏，用于在不同页面之间进行切换。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/tabbar/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "TreeSelect 分类选择",
+        "component": "tree-select",
+        "describe": "用于从一组相关联的数据集合中进行选择。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/tree-select/README.zh-CN.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "业务组件",
+    "items": [
+      {
+        "title": "AddressEdit 地址编辑",
+        "component": "address-edit",
+        "describe": "地址编辑组件，用于新建、更新、删除地址信息。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/address-edit/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "AddressList 地址列表",
+        "component": "address-list",
+        "describe": "展示地址信息列表。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/address-list/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Area 省市区选择",
+        "component": "area",
+        "describe": "省市区三级联动选择，通常与弹出层组件配合使用。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/area/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Card 商品卡片",
+        "component": "card",
+        "describe": "商品卡片，用于展示商品的图片、价格等信息。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/card/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "ContactCard 联系人卡片",
+        "component": "contact-card",
+        "describe": "以卡片的形式展示联系人信息。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/contact-card/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "ContactEdit 联系人编辑",
+        "component": "contact-edit",
+        "describe": "编辑并保存联系人信息。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/contact-edit/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "ContactList 联系人列表",
+        "component": "contact-list",
+        "describe": "展示联系人列表。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/contact-list/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "Coupon 优惠券",
+        "component": "coupon-list",
+        "describe": "用于优惠券的兑换和选择。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/coupon-list/README.zh-CN.md?ref=main"
+      },
+      {
+        "title": "SubmitBar 提交订单栏",
+        "component": "submit-bar",
+        "describe": "用于展示订单金额与提交订单。",
+        "version": "v4",
+        "filePath": "/packages/vant/src/submit-bar/README.zh-CN.md?ref=main"
+      }
+    ]
+  },
+  {
+    "title": "组合式 API",
+    "items": [
+      {
+        "title": "介绍",
+        "component": "vant-use-intro",
+        "describe": "Vant 底层依赖了 @vant/use 包，其中内置了一系列的组合式 API。对于使用了 Vant 的项目，可以复用这些 API 进行开发。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/vant-use-intro.zh-CN.md?ref=main"
+      },
+      {
+        "title": "useClickAway",
+        "component": "use-click-away",
+        "describe": "监听点击元素外部的事件。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-click-away.zh-CN.md?ref=main"
+      },
+      {
+        "title": "useCountDown",
+        "component": "use-count-down",
+        "describe": "提供倒计时管理能力。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-count-down.zh-CN.md?ref=main"
+      },
+      {
+        "title": "useCustomFieldValue",
+        "component": "use-custom-field-value",
+        "describe": "用于自定义 Form 组件中的表单项。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-custom-field-value.zh-CN.md?ref=main"
+      },
+      {
+        "title": "useEventListener",
+        "component": "use-event-listener",
+        "describe": "方便地进行事件绑定，在组件 mounted 和 activated 时绑定事件，unmounted 和 deactivated 时解绑事件。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-event-listener.zh-CN.md?ref=main"
+      },
+      {
+        "title": "usePageVisibility",
+        "component": "use-page-visibility",
+        "describe": "获取页面的可见状态。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-page-visibility.zh-CN.md?ref=main"
+      },
+      {
+        "title": "useRect",
+        "component": "use-rect",
+        "describe": "获取元素的大小及其相对于视口的位置，等价于 Element.getBoundingClientRect。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-rect.zh-CN.md?ref=main"
+      },
+      {
+        "title": "useRelation",
+        "component": "use-relation",
+        "describe": "建立父子组件之间的关联关系，进行数据通信和方法调用，基于 provide 和 inject 实现。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-relation.zh-CN.md?ref=main"
+      },
+      {
+        "title": "useScrollParent",
+        "component": "use-scroll-parent",
+        "describe": "获取元素最近的可滚动父元素。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-scroll-parent.zh-CN.md?ref=main"
+      },
+      {
+        "title": "useToggle",
+        "component": "use-toggle",
+        "describe": "用于在 true 和 false 之间进行切换。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-toggle.zh-CN.md?ref=main"
+      },
+      {
+        "title": "useWindowSize",
+        "component": "use-window-size",
+        "describe": "获取浏览器窗口的视口宽度和高度，并在窗口大小变化时自动更新。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-window-size.zh-CN.md?ref=main"
+      },
+      {
+        "title": "useRaf",
+        "component": "use-raf",
+        "describe": "提供便捷的 requestAnimationFrame 的调用和取消。",
+        "version": "v4",
+        "filePath": "/packages/vant/docs/markdown/use-raf.zh-CN.md?ref=main"
+      }
+    ]
+  }
+]

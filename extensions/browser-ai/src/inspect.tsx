@@ -1,11 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
-import ResultView from "./hook/perplexityAPI";
+import { ResultView } from "./components/ResultView";
 
 const prompt = getPreferenceValues().prompt_inspect;
 const model_override = getPreferenceValues().model_inspect;
 const toast_title = "Inspecting...";
 
-export default function Summarize() {
+export default function Inspect() {
   return (
     <ResultView
       sys_prompt={prompt}

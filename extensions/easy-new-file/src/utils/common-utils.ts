@@ -1,11 +1,12 @@
 import { runAppleScript } from "run-applescript";
-import { environment, getSelectedFinderItems } from "@raycast/api";
+import { environment, getSelectedFinderItems, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import fse from "fs-extra";
 import { homedir } from "os";
 import { buildFileName } from "../new-file-with-template";
 import { imgExt } from "./constants";
 import { allFileTypes, FileType, TemplateType } from "../types/file-type";
 import fileUrl from "file-url";
+import { showTips } from "../types/preferences";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -25,6 +26,7 @@ export const getFinderPath = async () => {
   try {
     return await runAppleScript(scriptFinderPath);
   } catch (e) {
+    console.error(e);
     return "Finder not running";
   }
 };
@@ -34,6 +36,7 @@ export const checkIsFile = (path: string) => {
     const stat = fse.lstatSync(path);
     return stat.isFile();
   } catch (e) {
+    console.error(e);
     return false;
   }
 };
@@ -50,6 +53,7 @@ export const getSelectedFile = async () => {
     });
     return selectedFile;
   } catch (e) {
+    console.error(e);
     return selectedFile;
   }
 };
@@ -75,9 +79,7 @@ export async function createNewFileWithText(
   fileContent = "",
   fileName = "",
 ) {
-  isEmpty(fileName)
-    ? (fileName = buildFileName(saveDirectory, "Untitled", fileExtension))
-    : (fileName = buildFileName(saveDirectory, fileName, fileExtension));
+  fileName = buildFileName(saveDirectory, fileName, fileExtension);
   const filePath = saveDirectory + fileName;
   fse.writeFileSync(filePath, fileContent);
   return { fileName: fileName, filePath: filePath };
@@ -110,7 +112,7 @@ function findFileTypeByExtension(fileExt: string): FileType | undefined {
   return allFileTypes.find((fileType) => fileType.extension === fileExt);
 }
 
-export function getNewFileType(fileName: string) {
+export function getNewFileType(fileName: string): FileType {
   const { baseName, extension } = getFileDetails(fileName);
   const fileType = findFileTypeByExtension(extension.toLowerCase());
   if (fileType) {
@@ -123,6 +125,33 @@ export function getNewFileType(fileName: string) {
     }
     return newFileType;
   } else {
-    return undefined;
+    return {
+      name: baseName,
+      extension: extension,
+      languageId: extension,
+      keywords: [extension],
+      icon: Icon.Document,
+      inputContent: false,
+    };
   }
 }
+
+export const showCustomHUD = (options: Toast.Options) => {
+  if (options.style && options.style === Toast.Style.Failure) {
+    // failure should always show toast
+    return showToast(options);
+  } else if (showTips) {
+    // success or animated should show HUD
+    if (options.style && options.style === Toast.Style.Animated) {
+      return showToast(options);
+    } else {
+      return showHUD(options.title);
+    }
+  }
+};
+export const showCustomToast = (options: Toast.Options) => {
+  if (options.style && options.style === Toast.Style.Failure) {
+    return showToast(options);
+  }
+  if (showTips) return showToast(options);
+};

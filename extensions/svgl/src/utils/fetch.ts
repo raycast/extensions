@@ -2,9 +2,14 @@ import { Clipboard, Toast, closeMainWindow, showHUD, showToast } from "@raycast/
 import fetch from "node-fetch";
 import { Category, Svg } from "../type";
 import { ONE_WEEK_MS, withCache } from "./cache";
+import { writeFileSync } from "fs";
+import path from "path";
+import os from "os";
 
 export const APP_URL = "https://svgl.app";
-export const API_URL = `${APP_URL}/api`;
+export const API_URL = "https://api.svgl.app";
+// Because copy react component is using the old API, we need to keep the old API URL.
+export const OLD_API_URL = `${APP_URL}/api`;
 
 interface SvrgApiResponse {
   data: string;
@@ -12,7 +17,7 @@ interface SvrgApiResponse {
 
 export const fetchSvgs = async () => {
   return withCache("svgl_svgs", async () => {
-    const svgsResponse = await fetch(`${API_URL}/svgs`);
+    const svgsResponse = await fetch(API_URL);
     if (!svgsResponse.ok) {
       throw new Error(`Error ${svgsResponse.status}, please try again later.`);
     }
@@ -30,7 +35,7 @@ export const fetchCategories = async () => {
   });
 };
 
-const fetchSvg = async (url: string) => {
+export const fetchSvg = async (url: string) => {
   return withCache(
     `svgl_svg_${url}`,
     async () => {
@@ -46,7 +51,7 @@ const fetchReactComponent = async (url: string, name: string, tsx: boolean) => {
   return withCache(
     `svgl_svgr_${url}_${tsx}`,
     async () => {
-      const res = await fetch(`${API_URL}/svgs/svgr`, {
+      const res = await fetch(`${OLD_API_URL}/svgs/svgr`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,6 +79,37 @@ export const fetchAndCopySvg = async (url: string, showContent: string) => {
     const svg = await fetchSvg(url);
     await toast.hide();
     Clipboard.copy(svg);
+    showHUD(showContent);
+    closeMainWindow();
+  } catch (error) {
+    if (error instanceof Error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch svg",
+        message: error.message,
+      });
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch svg",
+      });
+    }
+  }
+};
+
+export const fetchAndCopySvgFile = async (url: string, showContent: string, fileName: string) => {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Fetching svg file",
+  });
+  try {
+    const svg = await fetchSvg(url);
+    await toast.hide();
+    const filePath = path.join(os.tmpdir(), `${fileName}.svg`);
+    writeFileSync(filePath, svg, "utf-8");
+    Clipboard.copy({
+      file: filePath,
+    });
     showHUD(showContent);
     closeMainWindow();
   } catch (error) {

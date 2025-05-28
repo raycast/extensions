@@ -1,4 +1,4 @@
-import { exhaustive } from "../utilities/exhaustive";
+import { exhaustive } from "./exhaustive";
 
 function getColumnAmount(size: "small" | "medium" | "large"): number {
   switch (size) {

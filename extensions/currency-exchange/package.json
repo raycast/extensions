@@ -5,6 +5,9 @@
   "description": "Simple Currency Exchange, uses Exchange Rate API as the data source",
   "icon": "currency.png",
   "author": "xeric",
+  "contributors": [
+    "daudln"
+  ],
   "license": "MIT",
   "commands": [
     {

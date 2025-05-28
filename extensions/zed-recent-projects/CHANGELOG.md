@@ -1,4 +1,28 @@
-# zed-recent-projects Changelog
+#  Zed Recent Projects Changelog
+
+## [Fixes] - 2025-04-03
+
+- Show Git branch label based on extension preferences
+
+## [Enhancements] - 2025-04-02
+
+- Added a Git branch label for each project
+
+## [Fixes] - 2025-03-25
+
+- Fix remove recent remote projects
+
+## [Enhancements] - 2025-03-24
+
+- Added remove actions for single and all recent projects
+
+## [Add support for remote projects] - 2025-03-10
+
+- Added remote project support for `Search Recent Projects`.
+
+## [Fixes] 2024-06-20
+
+- Fixed an issue that the same entry is shown multiple times in the recent projects list.
 
 ## [Fixes] 2024-05-02
 

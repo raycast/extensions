@@ -1,26 +1,24 @@
-import { Action, ActionPanel, List } from "@raycast/api";
 import { IssuePriorityValue, User } from "@linear/sdk";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { useMemo } from "react";
 
 import { getProjectIssues } from "../api/getIssues";
-
-import useIssues from "../hooks/useIssues";
-
-import StateIssueList from "./StateIssueList";
-import CreateIssueForm from "./CreateIssueForm";
-import { useMemo } from "react";
-import useMilestones from "../hooks/useMilestones";
-import { useCachedState } from "@raycast/utils";
 import { getMilestoneIcon } from "../helpers/milestones";
+import useIssues from "../hooks/useIssues";
+import useMilestones from "../hooks/useMilestones";
+
+import CreateIssueForm from "./CreateIssueForm";
+import StateIssueList from "./StateIssueList";
 
 type ProjectIssuesProps = {
   projectId: string;
   teamId?: string;
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
 };
 
-export default function ProjectIssues({ projectId, priorities, me, users }: ProjectIssuesProps) {
+export default function ProjectIssues({ projectId, priorities, me }: ProjectIssuesProps) {
   const { issues, isLoadingIssues, mutateList } = useIssues(getProjectIssues, [projectId]);
   const [milestone, setMilestone] = useCachedState<string>("");
   const { milestones } = useMilestones(projectId);
@@ -77,13 +75,13 @@ export default function ProjectIssues({ projectId, priorities, me, users }: Proj
           <ActionPanel>
             <Action.Push
               title="Create Issue"
-              target={<CreateIssueForm projectId={projectId} priorities={priorities} users={users} me={me} />}
+              target={<CreateIssueForm projectId={projectId} priorities={priorities} me={me} />}
             />
           </ActionPanel>
         }
       />
 
-      <StateIssueList issues={filteredIssues} mutateList={mutateList} priorities={priorities} users={users} me={me} />
+      <StateIssueList issues={filteredIssues} mutateList={mutateList} priorities={priorities} me={me} />
     </List>
   );
 }

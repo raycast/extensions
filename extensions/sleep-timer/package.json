@@ -7,7 +7,8 @@
   "author": "dtmzr",
   "contributors": [
     "ThatNerd",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "ridemountainpig"
   ],
   "categories": [
     "Productivity",
@@ -37,7 +38,7 @@
       "name": "start60MinuteTimer",
       "title": "Start 60 Minute Sleep Timer",
       "description": "Set a sleep timer for 60 minutes.",
-      "mode": "view"
+      "mode": "no-view"
     },
     {
       "name": "start90MinuteTimer",

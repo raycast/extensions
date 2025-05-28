@@ -1,14 +1,18 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { Attachment } from "../api/getIssues";
 import { format } from "date-fns";
+
+import { Attachment, IssueResult } from "../api/getIssues";
+
+import { IssueAttachmentsForm } from "./IssueAttachmentsForm";
 
 type IssueAttachmentProps = {
   attachments: Attachment[];
+  issue: IssueResult;
 };
 
-export default function IssueAttachments({ attachments }: IssueAttachmentProps) {
+export default function IssueAttachments({ attachments, issue }: IssueAttachmentProps) {
   return (
-    <List>
+    <List navigationTitle={`Links for ${issue.identifier}`}>
       {attachments.map((attachment) => {
         const updatedAt = new Date(attachment.updatedAt);
 
@@ -27,6 +31,11 @@ export default function IssueAttachments({ attachments }: IssueAttachmentProps) 
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={attachment.url} />
+                <Action.Push
+                  title="Add Attachments and Links"
+                  icon={Icon.NewDocument}
+                  target={<IssueAttachmentsForm {...{ issue }} />}
+                />
               </ActionPanel>
             }
           />

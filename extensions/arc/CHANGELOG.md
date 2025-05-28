@@ -1,5 +1,59 @@
 # Arc Changelog
 
+## [New Features] - 2025-05-12
+
+- Added UnDuck search engine for the commands `Search Arc`, `Open New Little Arc Window` and `Open New Incognito Window`.
+- Added ability to automatically prepend 'https://' when opening a URL
+
+## [Improvements] - 2025-04-16
+
+- When opening a new incognito window, open a blank tab if no URL is given.
+  - A previous update caused a regression where this behavior was no longer
+    supported.
+
+## [Suggest opening URL] - 2025-03-31
+
+When searching for a URL, offer to open the URL 
+
+## [✨ AI Enhancements] - 2025-02-21
+
+AI Tools to:
+
+- Search Tabs
+- Search History
+- Open New Window
+- Open New Blank Window
+- Open New Little Arc Window
+- Open New Incognito Window
+- Open New Tab
+- Search Spaces
+
+## [Improvements] - 2024-10-25
+
+- `Search Tabs` now can search with url and search title with chinese pinyin.
+- `Search Tabs` now can do fuzzy matching.
+
+## [Improvements] - 2024-09-10
+
+- `Search History` now searches across all Arc profiles. Results from the search display which profile they are from.
+
+## [Improvements] - 2024-09-02
+
+- Added `Search Downloads` command to search for downloads in Arc.
+
+## [Improvements] - 2024-08-26
+
+- Replaced HUD error messages with toast messages.
+- Added a list section to the `Search History` command.
+
+## [Fixes] - 2024-07-22
+
+- Fixed an issue where the `Search Arc`, `Search Spaces`, `Search Tabs`, and `Access Spaces and Favorites` commands would fail if Arc was not open.
+
+## [Update] - 2024-07-06
+
+- Removed the `New Note` command.
+
 ## [Improvements] - 2024-03-15
 
 - Added search suggestions to Kagi search engine.

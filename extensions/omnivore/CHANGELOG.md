@@ -1,5 +1,10 @@
 # Omnivore Changelog
 
+## Empty label bug fixed - 2024-23-06
+
+- Saving URL without a label no longer creates an empty label in Omnivore
+- Saving URL with a label separated with spaces will create a single label (only commas can be used as separator)
+
 ## Tags/Labels support - 2024-29-04
 
 - From now you can quickly capture URL with labels

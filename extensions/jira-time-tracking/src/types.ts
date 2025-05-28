@@ -13,10 +13,14 @@ export type Project = {
   key: string;
 };
 
+export type JiraType = "cloud" | "server";
+
 export type Preferences = {
+  jiraType: JiraType;
   domain: string;
   token: string;
   username: string;
+  customJQL: string;
 };
 
 export type Issue = {

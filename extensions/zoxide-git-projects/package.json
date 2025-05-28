@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zoxide-git-projects",
+  "title": "Zoxide Git Projects",
+  "description": "Allows the user to select git repositories found by filtering a zoxide query, then open them in an application of choice.",
+  "icon": "icon.png",
+  "author": "theherk",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "find",
+      "title": "Zoxide Git Projects",
+      "description": "Find and open Git projects using zoxide",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.1",
+    "@raycast/utils": "^1.17.0",
+    "execa": "^5.1.1",
+    "fzf": "^0.5.2",
+    "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "preferences": [
+    {
+      "name": "application",
+      "title": "Application",
+      "description": "Application to open projects with",
+      "type": "appPicker",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

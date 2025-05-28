@@ -7,13 +7,7 @@ import { VersionCheck } from "./version";
 function SearchSpaces() {
   const { data, isLoading } = useCachedPromise(getSpaces);
 
-  return (
-    <List isLoading={isLoading}>
-      {data?.map((space) => (
-        <SpaceListItem key={space.id} space={space} />
-      ))}
-    </List>
-  );
+  return <List isLoading={isLoading}>{data?.map((space) => <SpaceListItem key={space.id} space={space} />)}</List>;
 }
 
 export default function Command() {

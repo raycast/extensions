@@ -1,23 +1,19 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType, Keyboard } from "@raycast/api";
 import { format } from "date-fns";
 
+import { deleteNotification as linearDeleteNotification } from "./api/deleteNotification";
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
-import { deleteNotification as linearDeleteNotification } from "./api/deleteNotification";
-
-import useNotifications from "./hooks/useNotifications";
-import usePriorities from "./hooks/usePriorities";
-import useMe from "./hooks/useMe";
-import useUsers from "./hooks/useUsers";
-
+import IssueDetail from "./components/IssueDetail";
+import OpenInLinear from "./components/OpenInLinear";
+import View from "./components/View";
+import { getBotIcon } from "./helpers/bots";
 import { getErrorMessage } from "./helpers/errors";
 import { getNotificationIcon, getNotificationTitle, getNotificationURL } from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
-import { getBotIcon } from "./helpers/bots";
-
-import View from "./components/View";
-import IssueDetail from "./components/IssueDetail";
-import OpenInLinear from "./components/OpenInLinear";
+import useMe from "./hooks/useMe";
+import useNotifications from "./hooks/useNotifications";
+import usePriorities from "./hooks/usePriorities";
 
 function Notifications() {
   const {
@@ -31,7 +27,6 @@ function Notifications() {
 
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
-  const { users, isLoadingUsers } = useUsers();
 
   const inboxUrl = `https://linear.app/${urlKey}/inbox`;
 
@@ -166,7 +161,7 @@ function Notifications() {
   }
 
   return (
-    <List isLoading={isLoadingNotifications || isLoadingPriorities || isLoadingMe || isLoadingUsers}>
+    <List isLoading={isLoadingNotifications || isLoadingPriorities || isLoadingMe}>
       <List.EmptyView title="Inbox" description="You don't have any notifications." />
 
       {sections.map(({ title, notifications }) => {
@@ -230,9 +225,7 @@ function Notifications() {
                         {notification.issue ? (
                           <Action.Push
                             title="Open Issue in Raycast"
-                            target={
-                              <IssueDetail issue={notification.issue} priorities={priorities} users={users} me={me} />
-                            }
+                            target={<IssueDetail issue={notification.issue} priorities={priorities} me={me} />}
                             icon={Icon.RaycastLogoNeg}
                             shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                           />
@@ -246,7 +239,7 @@ function Notifications() {
                           title="Delete Notification"
                           icon={Icon.Trash}
                           style={Action.Style.Destructive}
-                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
                           onAction={() => deleteNotification(notification)}
                         />
                       </ActionPanel.Section>

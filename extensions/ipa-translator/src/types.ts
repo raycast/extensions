@@ -1,10 +1,8 @@
 export interface DictionaryItem {
-  original: string;
-  ipa: string;
-}
-
-export interface Dictionary {
-  dict: DictionaryItem[];
+  // Short for original.
+  o: string;
+  // Short for IPA.
+  i: string;
 }
 
 export enum Languages {

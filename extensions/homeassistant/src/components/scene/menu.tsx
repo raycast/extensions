@@ -1,4 +1,4 @@
-import { MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { getIcon } from "@components/state/utils";
 import { State } from "@lib/haapi";
@@ -17,6 +17,7 @@ export function SceneMenubarItem(props: { state: State }) {
   return (
     <MenuBarSubmenu title={getFriendlyName(s)} icon={getIcon(s)}>
       <SceneActiveMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
   );

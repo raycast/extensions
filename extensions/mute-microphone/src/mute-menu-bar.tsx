@@ -1,51 +1,62 @@
-import { Cache, Color, Icon, MenuBarExtra, getPreferenceValues, openCommandPreferences } from "@raycast/api";
+import {
+  Color,
+  Icon,
+  MenuBarExtra,
+  getPreferenceValues,
+  openCommandPreferences,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
-import { get, toggleSystemAudioInputLevel } from "./utils";
+import { toggleSystemAudioInputLevel } from "./utils";
+import { AudioInputLevelCache } from "./audio-input-level-cache";
 
 export default function muteMenuBar() {
-  const cache = new Cache();
-  const cachedValue = cache.get("currentAudioInputLevel");
-  const cachedValueNumber = cachedValue == undefined ? 1 : Number(cachedValue);
-  const disabledIcon = { source: Icon.MicrophoneDisabled, tintColor: Color.Red };
-  const enabledIcon = { source: Icon.Microphone };
   const preferences = getPreferenceValues<Preferences.MuteMenuBar>();
-
-  const [currentAudioInputLevel, setCurrentAudioInputLevel] = useState<number>(cachedValueNumber);
-  const icon = currentAudioInputLevel == 0 ? disabledIcon : enabledIcon;
-  const menuItemText = currentAudioInputLevel == 0 ? "Unmute" : "Mute";
+  const [isMuted, setIsMuted] = useState<boolean>(AudioInputLevelCache.curInputLevel === "0");
 
   useEffect(() => {
-    const newValue = Number(get());
-    if (!isNaN(newValue)) {
-      setCurrentAudioInputLevel(newValue);
-      cache.set("currentAudioInputLevel", newValue.toString());
-    }
+    const updateIconVisibility = () => {
+      const currentAudioInputLevelCached = AudioInputLevelCache.curInputLevel;
+      setIsMuted(currentAudioInputLevelCached === "0");
+    };
+
+    AudioInputLevelCache.addListener(updateIconVisibility);
+
+    return () => {
+      AudioInputLevelCache.removeListener(updateIconVisibility);
+    };
   }, []);
 
-  function CommonMenuItems() {
-    return (
-      <MenuBarExtra icon={icon} tooltip="Audio input volume">
-        <MenuBarExtra.Section>
-          <MenuBarExtra.Item
-            title={menuItemText}
-            onAction={async () => {
-              const newLevel = await toggleSystemAudioInputLevel(currentAudioInputLevel);
-              setCurrentAudioInputLevel(Number(newLevel));
-            }}
-          />
-        </MenuBarExtra.Section>
-        <MenuBarExtra.Section>
-          <MenuBarExtra.Item title="Settings..." onAction={openCommandPreferences} />
-        </MenuBarExtra.Section>
-      </MenuBarExtra>
-    );
+  const iconColor = preferences.tint === "true" ? Color.Red : Color.PrimaryText;
+  const disabledIcon = { source: Icon.MicrophoneDisabled, tintColor: iconColor };
+  const enabledIcon = { source: Icon.Microphone };
+  const icon = isMuted ? disabledIcon : enabledIcon;
+  const menuItemText = isMuted ? "Unmute" : "Mute";
+
+  const handleToggleIconButton = async () => {
+    if (isMuted) {
+      AudioInputLevelCache.curInputLevel = AudioInputLevelCache.prevInputLevel;
+    } else {
+      AudioInputLevelCache.prevInputLevel = AudioInputLevelCache.curInputLevel;
+      AudioInputLevelCache.curInputLevel = "0";
+    }
+    await toggleSystemAudioInputLevel();
+    setIsMuted(!isMuted);
+  };
+
+  if (preferences.hideIconWhenUnmuted && !isMuted) {
+    return null;
   }
 
-  return preferences.hideIconWhenUnmuted ? (
-    currentAudioInputLevel == 0 ? (
-      <CommonMenuItems />
-    ) : null
-  ) : (
-    <CommonMenuItems />
+  return (
+    <MenuBarExtra icon={icon} tooltip="Audio input volume">
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item title={menuItemText} onAction={handleToggleIconButton} />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item title="Configure default level" onAction={openExtensionPreferences} />
+        <MenuBarExtra.Item icon={Icon.Gear} title="Settings" onAction={openCommandPreferences} />
+      </MenuBarExtra.Section>
+    </MenuBarExtra>
   );
 }

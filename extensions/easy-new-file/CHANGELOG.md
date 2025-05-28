@@ -1,5 +1,14 @@
 # Easy New File Changelog
 
+## [Create Dot Files] - 2025-05-23
+
+- New File Now command support Dot file type
+- New File with Template command now supports Dot file template
+
+## [Any File Type] - 2024-06-26
+
+- Now you can create any file type with the New File Now command.
+
 ## [New File Now] - 2024-05-21
 
 - You can now quickly create new files directly with the New File Now (previously New File With Text) command in the main window.

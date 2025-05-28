@@ -2,6 +2,7 @@ import { load } from "cheerio";
 import fetch from "node-fetch";
 
 import type { BookEntry, LibgenDownloadGateway } from "@/types";
+import { SearchType } from "@/types";
 
 import { getMirror } from "./mirrors";
 
@@ -9,6 +10,7 @@ export const getLibgenSearchResults = async (
   searchContent: string,
   libgenUrl: string | null,
   abortSignal: AbortSignal,
+  searchType: SearchType,
 ): Promise<BookEntry[]> => {
   console.log("Libgen Mirror URL: " + libgenUrl);
 
@@ -20,16 +22,25 @@ export const getLibgenSearchResults = async (
   const { parse } = getMirror(libgenUrl);
 
   const queryUrl =
-    libgenUrl +
-    "/search.php?" +
-    new URLSearchParams({
-      req: searchContent,
-      open: "0",
-      res: "100",
-      view: "detailed",
-      phrase: "1",
-      column: "def",
-    });
+    searchType === SearchType.Fiction
+      ? libgenUrl +
+        `/fiction/?` +
+        new URLSearchParams({
+          q: searchContent,
+          criteria: "",
+          language: "",
+          format: "",
+        })
+      : libgenUrl +
+        "/search.php?" +
+        new URLSearchParams({
+          req: searchContent,
+          open: "0",
+          res: "100",
+          view: "detailed",
+          phrase: "1",
+          column: "def",
+        });
 
   console.log(`Libgen Query URL: ${queryUrl}`);
 

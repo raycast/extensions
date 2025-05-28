@@ -1,20 +1,17 @@
+import type { Dispatch, SetStateAction } from "react";
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import StylizePlaceholderImage from "../stylize-placeholder-image";
-import { setWallpaper } from "../utils/common-utils";
-import { PicsumImageAction } from "./picsum-image-action";
-import { ActionOpenPreferences } from "./action-open-preferences";
-import React, { Dispatch, SetStateAction } from "react";
-import { PicsumImage } from "../types/types";
-import { Preferences } from "../types/preferences";
-import { RevealImageAction } from "./reveal-image-action";
+import type { PicsumImage } from "@/types/types";
+import { ActionOpenPreferences } from "@/components/action-open-preferences";
+import { PicsumImageAction } from "@/components/picsum-image-action";
+import { RevealImageAction } from "@/components/reveal-image-action";
+import StylizePlaceholder from "@/pages/stylize-placeholder";
 
 export function ActionOnPlaceholderImage(props: {
   picsumImage: PicsumImage;
-  preferences: Preferences;
   page: number;
   setPage: Dispatch<SetStateAction<number>>;
 }) {
-  const { picsumImage, preferences, page, setPage } = props;
+  const { picsumImage, page, setPage } = props;
   return (
     <ActionPanel>
       <Action.Push
@@ -25,20 +22,13 @@ export function ActionOnPlaceholderImage(props: {
           },
         }}
         title={"Stylize Image"}
-        target={<StylizePlaceholderImage id={picsumImage.id} width={picsumImage.width} height={picsumImage.height} />}
-      />
-      <Action
-        icon={Icon.Desktop}
-        title={"Set Desktop Wallpaper"}
-        onAction={() => {
-          setWallpaper(picsumImage.download_url, "wallpaper-" + Date.now()).then();
-        }}
+        target={<StylizePlaceholder id={picsumImage.id} width={picsumImage.width} height={picsumImage.height} />}
       />
       <ActionPanel.Section>
         <Action
           icon={Icon.ChevronUp}
           title={"Previous Page"}
-          shortcut={{ modifiers: ["cmd"], key: "pageUp" }}
+          shortcut={{ modifiers: ["cmd"], key: "[" }}
           onAction={() => {
             if (page > 1) {
               setPage(page - 1);
@@ -48,30 +38,22 @@ export function ActionOnPlaceholderImage(props: {
         <Action
           icon={Icon.ChevronDown}
           title={"Next Page"}
-          shortcut={{ modifiers: ["cmd"], key: "pageDown" }}
+          shortcut={{ modifiers: ["cmd"], key: "]" }}
           onAction={() => setPage(page + 1)}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <PicsumImageAction
-          imageURL={picsumImage.download_url}
-          size={picsumImage.width + "x" + picsumImage.height}
-          primaryAction={preferences.primaryAction}
-        />
+        <PicsumImageAction imageURL={picsumImage.download_url} size={picsumImage.width + "x" + picsumImage.height} />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <RevealImageAction
-          imageURL={picsumImage.download_url}
-          size={picsumImage.width + "x" + picsumImage.height}
-          primaryAction={preferences.primaryAction}
-        />
+        <RevealImageAction imageURL={picsumImage.download_url} size={picsumImage.width + "x" + picsumImage.height} />
         <Action.OpenInBrowser
           title={"Open in Unsplash"}
           shortcut={{ modifiers: ["cmd"], key: "u" }}
           url={picsumImage.url}
         />
         <Action.CopyToClipboard
-          shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+          shortcut={{ modifiers: ["opt", "cmd"], key: "." }}
           title={"Copy Unsplash URL"}
           content={picsumImage.url}
         />

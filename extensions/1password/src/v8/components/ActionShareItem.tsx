@@ -1,7 +1,7 @@
 import { Action, Clipboard, Icon, Keyboard, showToast, Toast, showHUD } from "@raycast/api";
 import { execFileSync } from "child_process";
 
-import { CLI_PATH, ExtensionError, handleErrors } from "../utils";
+import { ExtensionError, getCliPath, handleErrors } from "../utils";
 
 export function ShareItem({ id, title, shortcut }: { id: string; shortcut: Keyboard.Shortcut; title: string }) {
   return (
@@ -15,7 +15,7 @@ export function ShareItem({ id, title, shortcut }: { id: string; shortcut: Keybo
           title: `Sharing ${title}...`,
         });
         try {
-          const stdout = execFileSync(CLI_PATH, ["item", "share", id]);
+          const stdout = execFileSync(getCliPath(), ["item", "share", id]);
           await Clipboard.copy(stdout.toString().trim(), { concealed: true });
 
           toast.style = Toast.Style.Success;

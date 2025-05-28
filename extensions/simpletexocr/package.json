@@ -5,6 +5,9 @@
   "description": "A LaTeX OCR by Simpletex",
   "icon": "command-icon.png",
   "author": "Arthals",
+  "contributors": [
+    "FrankMao"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -16,6 +19,24 @@
       "title": "API Key",
       "description": "API Key from SimpleTex",
       "type": "password"
+    },
+    {
+      "required": true,
+      "name": "server_suffix",
+      "title": "Server Location",
+      "description": "Server Location",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "China",
+          "value": "cn"
+        },
+        {
+          "title": "Global",
+          "value": "net"
+        }
+      ],
+      "default": "China"
     }
   ],
   "commands": [
@@ -36,8 +57,7 @@
   "dependencies": {
     "@raycast/api": "^1.59.0",
     "@raycast/utils": "^1.10.0",
-    "@types/axios": "^0.14.0",
-    "axios": "^1.5.0",
+    "axios": "^1.8.4",
     "copy-paste": "^1.5.3",
     "form-data": "^4.0.0"
   },

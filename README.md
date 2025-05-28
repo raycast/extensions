@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/store-logo.png" height="128">
+  <img src="images/store-logo.webp" height="128">
   <h1 align="center">Raycast Extensions</h1>
 </p>
 
@@ -14,7 +14,7 @@
 
 [Raycast](https://raycast.com/) lets you control your tools with a few keystrokes. This repository contains all extensions that are available in the [Raycast Store](https://raycast.com/store). It also includes documentation and examples of how to extend Raycast using React.
 
-![Header](images/header.png)
+![Header](images/header.webp)
 
 ## Getting Started
 

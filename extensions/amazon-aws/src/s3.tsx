@@ -1,8 +1,8 @@
 import fs from "fs";
 import { homedir } from "os";
 import { Readable } from "stream";
-import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { ActionPanel, List, Action, Icon, showToast, Toast, Detail, Image } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import {
   Bucket,
   GetObjectCommand,
@@ -12,6 +12,7 @@ import {
   GetBucketLocationCommand,
   ListObjectsV2Command,
   CommonPrefix,
+  GetBucketPolicyCommand,
 } from "@aws-sdk/client-s3";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
@@ -39,13 +40,15 @@ function S3Bucket({ bucket }: { bucket: Bucket }) {
   return (
     <List.Item
       key={bucket.Name}
-      icon={"aws-icons/s3.png"}
-      title={bucket.Name || ""}
+      icon={{ source: "aws-icons/s3.png", mask: Image.Mask.RoundedRectangle }}
+      title={bucket.Name!}
       actions={
         <ActionPanel>
-          <Action.Push target={<S3BucketObjects bucket={bucket} />} title="List Objects" />
+          <Action.Push target={<S3BucketObjects bucket={bucket} />} title="List Objects" icon={Icon.Document} />
+          <Action.Push target={<S3BucketPolicy bucket={bucket} />} title="Show Bucket Policy" icon={Icon.Key} />{" "}
           <AwsAction.Console url={resourceToConsoleLink(bucket.Name, "AWS::S3::Bucket")} />
           <Action.CopyToClipboard title="Copy Name" content={bucket.Name || ""} />
+          <Action.CopyToClipboard title="Copy ARN" content={"arn:aws:s3:::" + bucket.Name || ""} />
         </ActionPanel>
       }
     />
@@ -53,7 +56,14 @@ function S3Bucket({ bucket }: { bucket: Bucket }) {
 }
 
 function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: string }) {
-  const { data: objects, error, isLoading } = useCachedPromise(fetchBucketObjects, [bucket.Name || "", prefix]);
+  const [isReversedOrder, setReversedOrder] = useCachedState<boolean>("reverse-order", false, {
+    cacheNamespace: "aws-s3",
+  });
+  const {
+    data: objects,
+    error,
+    isLoading,
+  } = useCachedPromise(fetchBucketObjects, [bucket.Name!, prefix, isReversedOrder]);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter objects by name...">
@@ -71,8 +81,23 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
                   <Action.Push
                     target={<S3BucketObjects bucket={bucket} prefix={commonPrefix.Prefix} />}
                     title="List Objects"
+                    icon={Icon.Document}
+                  />
+                  <Action
+                    title={`${isReversedOrder ? "Standard" : "Reversed"} Order`}
+                    onAction={() => setReversedOrder(!isReversedOrder)}
+                    icon={Icon.Switch}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  />
+                  <AwsAction.Console
+                    url={resourceToConsoleLink(`${bucket.Name}/${commonPrefix.Prefix}`, "AWS::S3::Bucket")}
                   />
                   <Action.CopyToClipboard title="Copy Prefix" content={commonPrefix.Prefix || ""} />
+                  <Action.CopyToClipboard
+                    title="Copy S3 URI"
+                    content={"s3://" + bucket.Name + "/" + (commonPrefix.Prefix || "")}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                  />
                 </ActionPanel>
               }
             />
@@ -111,6 +136,17 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
                     }}
                   />
                   <Action.CopyToClipboard title="Copy Key" content={object.Key || ""} />
+                  <Action.CopyToClipboard
+                    title="Copy S3 URI"
+                    content={"s3://" + bucket.Name + "/" + (object.Key || "")}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                  />
+                  <Action
+                    title={`${isReversedOrder ? "Standard" : "Reversed"} Order`}
+                    onAction={() => setReversedOrder(!isReversedOrder)}
+                    icon={Icon.Switch}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  />
                 </ActionPanel>
               }
               accessories={[{ text: humanFileSize(object.Size || 0) }]}
@@ -122,6 +158,22 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
   );
 }
 
+function S3BucketPolicy({ bucket }: { bucket: Bucket }) {
+  const { policy, isLoading } = fetchBucketPolicy(bucket.Name!);
+  return (
+    <Detail
+      navigationTitle="Bucket Policy"
+      isLoading={isLoading}
+      markdown={policy?.markdown || ""}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Policy" content={policy?.value || ""} />
+          <AwsAction.Console url={resourceToConsoleLink(bucket.Name, "AWS::S3::BucketPolicy")} />
+        </ActionPanel>
+      }
+    />
+  );
+}
 async function fetchBuckets() {
   if (!isReadyToFetch()) return [];
   const { Buckets } = await new S3Client({}).send(new ListBucketsCommand({}));
@@ -132,6 +184,7 @@ async function fetchBuckets() {
 async function fetchBucketObjects(
   bucket: string,
   prefix: string,
+  isReversedOrder: boolean,
   _region?: string,
   continuationToken?: string,
   objects: _Object[] = [],
@@ -143,11 +196,15 @@ async function fetchBucketObjects(
     new ListObjectsV2Command({ Bucket: bucket, ContinuationToken: continuationToken, Delimiter: "/", Prefix: prefix }),
   );
 
-  const combinedObjects = [...objects, ...(Contents || [])];
-  const combinedPrefixes = [...prefixes, ...(CommonPrefixes || [])];
+  let combinedObjects = [...objects, ...(Contents || [])];
+  let combinedPrefixes = [...prefixes, ...(CommonPrefixes || [])];
 
   if (NextContinuationToken) {
-    return fetchBucketObjects(bucket, prefix, region, NextContinuationToken, combinedObjects);
+    return fetchBucketObjects(bucket, prefix, isReversedOrder, region, NextContinuationToken, combinedObjects);
+  }
+  if (isReversedOrder) {
+    combinedObjects = combinedObjects.reverse();
+    combinedPrefixes = combinedPrefixes.reverse();
   }
 
   return { objects: combinedObjects, prefixes: combinedPrefixes };
@@ -172,3 +229,33 @@ function humanFileSize(bytes: number) {
 
   return bytes.toFixed() + " " + units[u];
 }
+
+export const fetchBucketPolicy = (bucket: string) => {
+  const {
+    data: policy,
+    error,
+    isLoading,
+  } = useCachedPromise(
+    async (bucket: string) => {
+      const { Policy = "❗Not Yet Defined" } = await new S3Client({}).send(
+        new GetBucketPolicyCommand({ Bucket: bucket }),
+      );
+      let md = "## Bucket Policy\n\n```";
+      let value = Policy;
+
+      try {
+        const json = JSON.parse(Policy.toString() || "");
+        md += `json\n${JSON.stringify(json, null, 4)}`;
+        value = JSON.stringify(json, null, 4);
+      } catch (error) {
+        md += `text\n${Policy.toString()}`;
+      }
+
+      return { value, markdown: md + "\n```" };
+    },
+    [bucket],
+    { execute: isReadyToFetch(), failureToastOptions: { title: "Failed to load bucket policy" } },
+  );
+
+  return { policy, isLoading: (!policy && !error) || isLoading };
+};

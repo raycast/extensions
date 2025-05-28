@@ -1,5 +1,18 @@
 # Quit Applications Changelog
 
+## [Bug fix] - 2025-05-27
+
+- Fixed issue where excluded applications still appeared in the list when multiple windows were open
+
+## [Update] - 2025-04-25
+
+- Added `Quit All Applications` to quit all applications at once
+
+## [Update] - 2024-09-03
+
+- Transitions component to from a class component to a function component
+- Fixes issue where quitting an app takes you back to the first element in list
+
 ## [Enhancement] - 2024-04-11
 
 - Added clearSearchBar after quitting an app.

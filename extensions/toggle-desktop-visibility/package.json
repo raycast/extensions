@@ -5,6 +5,9 @@
   "description": "Toggle Desktop file or folder visible and hidden",
   "icon": "logo.png",
   "author": "Haojen",
+  "contributors": [
+    "vatsalsanjay"
+  ],
   "license": "MIT",
   "categories": [
     "System",

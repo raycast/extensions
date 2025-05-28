@@ -1,5 +1,52 @@
 # Things Changelog
 
+## [✨ Reminders] - 2025-05-06
+
+- Update the "Today" and "Upcoming" lists to allow updating todo's reminders.
+- Fixed issue with the Deadline action to correctly remove a deadline from a todo.
+
+## [✨ Fix Complete Menu Bar Action] - 2025-04-25
+
+- Fix `Complete` menu bar action to mark the first incomplete todo as complete, rather than completing the first item in the list, even if it is already marked as completed.
+
+## [✨ Menu Bar Todo] - 2025-04-25
+
+- Update the menu bar to display only incomplete todos from today’s list
+
+## [Detect URL in Notes] - 2025-04-11
+
+- Detect a URL in todo notes and offer `Open URL From Notes` and `Copy URL From Notes` actions.
+
+## [✨ Improved Error Handling] - 2025-04-07
+
+- Fixed an issue that caused the application to crash when users attempted to update a todo item from the menu bar without a valid authentication token.
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Focus Input Fields] - 2024-10-25
+
+- Add shortcuts to focus the input fields in both the `Add New To-Do` and `Add New Project` commands.
+
+## [Quick ToDo Fixes] - 2024-08-19
+
+- Quick ToDo Command: Disable Automatic Date (when & deadline), List parsing when AI is not enabled in preferences/is not available via environment.
+
+## [Quick To-do Improvements] - 2024-08-05
+
+- Preference to disable date parsing for todo classification, sending all todo(s) to inbox.
+- The title input will still be parsed for assigning deadlines and list name followed with '#' (case-insensitive).
+
+## [Fix Generate Checklist with AI] - 2024-07-30
+
+- Action to "Generate Checklist with AI" only visible if the user has access to AI.
+- Fixed issue where all checklist items were being generated in French.
+- Fixed issue where checklist items started with a hyphen even though explicitly prompted not to.
+
+## [Fix tags for new issues] - 2024-07-24
+
+- [#13560](https://github.com/raycast/extensions/issues/13560): Tags are correctly appended to the deeplink while creating new todo(s).
+- Updated dependencies and resolved security vulnerabilities.
+
 ## [Add Status Icons in Menu Bar] - 2024-04-16
 
 - It's possible to see which to-do is completed, canceled, or to-do in the menu bar command.
@@ -11,9 +58,10 @@
 
 ## [Quick Add To-Do using natural language processing (NLP)] - 2023-09-05
 
-Ever wanted to add a new to-do to Things with plain, natural text? Well, it's possible now with the new `Quick Add To-Do` command. Just type in your to-do text, maybe set some notes and checklist items and you're good to go. 
+Ever wanted to add a new to-do to Things with plain, natural text? Well, it's possible now with the new `Quick Add To-Do` command. Just type in your to-do text, maybe set some notes and checklist items and you're good to go.
 
 Under the hood, it'll analyze and process your text to extract these parameters:
+
 - The title
 - The start date
 - The project or area the to-do belongs to
@@ -23,6 +71,7 @@ Under the hood, it'll analyze and process your text to extract these parameters:
 - If it's completed or canceled
 
 Here are some examples:
+
 - Book flights today in my Trips list
 - Add milk to my groceries list for tomorrow with Errand tag
 - Respond to mails
@@ -39,6 +88,7 @@ A big update has been released for the Things extension. Here's what's new:
 ### New actions
 
 You now have additional actions for your to-dos:
+
 - Schedule
 - Move to a project/area
 - Edit the title or notes

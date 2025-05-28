@@ -1,86 +1,98 @@
-import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { QBittorrent, prettySize, RawTorrent, RawTorrentListFilter, RawTorrentState } from "qbit.js";
+import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, Icon, Keyboard } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
+import { QBittorrent, Torrent, TorrentFilters, TorrentState } from "@ctrl/qbittorrent";
+import { filesize } from "filesize";
+import { filterStates } from "./types/filterStates";
+import { sentenceCase } from "change-case";
 
-interface Preferences {
-  address: string;
-  username: string;
-  password: string;
-  timeout: number;
-}
-const iconMap = {
-  [RawTorrentState.downloading]: "../assets/downloading.svg",
-  [RawTorrentState.uploading]: "../assets/uploading.svg",
-  [RawTorrentState.error]: "../assets/error.svg",
-  [RawTorrentState.missingFiles]: "../assets/error.svg",
-  [RawTorrentState.pausedUP]: "../assets/completed.svg",
-  [RawTorrentState.queuedUP]: "../assets/stalledUP.svg",
-  [RawTorrentState.stalledUP]: "../assets/stalledUP.svg",
-  [RawTorrentState.checkingUP]: "../assets/stalledUP.svg",
-  [RawTorrentState.forcedUP]: "../assets/stalledUP.svg",
-  [RawTorrentState.allocating]: "../assets/checking.svg",
-  [RawTorrentState.metaDL]: "../assets/downloading.svg",
-  [RawTorrentState.pausedDL]: "../assets/paused.svg",
-  [RawTorrentState.queuedDL]: "../assets/stalledDL.svg",
-  [RawTorrentState.stalledDL]: "../assets/stalledDL.svg",
-  [RawTorrentState.checkingDL]: "../assets/checking.svg",
-  [RawTorrentState.forcedDL]: "../assets/stalledDL.svg",
-  [RawTorrentState.checkingResumeData]: "../assets/checking.svg",
-  [RawTorrentState.moving]: "../assets/checking.svg",
-  [RawTorrentState.unknown]: undefined,
+const iconMap: Record<TorrentState, string | undefined> = {
+  [TorrentState.Downloading]: "../assets/downloading.svg",
+  [TorrentState.Uploading]: "../assets/uploading.svg",
+  [TorrentState.Error]: "../assets/error.svg",
+  [TorrentState.MissingFiles]: "../assets/error.svg",
+  [TorrentState.PausedUP]: "../assets/completed.svg",
+  [TorrentState.QueuedUP]: "../assets/stalledUP.svg",
+  [TorrentState.StalledUP]: "../assets/stalledUP.svg",
+  [TorrentState.CheckingUP]: "../assets/stalledUP.svg",
+  [TorrentState.ForcedUP]: "../assets/stalledUP.svg",
+  [TorrentState.Allocating]: "../assets/checking.svg",
+  [TorrentState.MetaDL]: "../assets/downloading.svg",
+  [TorrentState.PausedDL]: "../assets/paused.svg",
+  [TorrentState.QueuedDL]: "../assets/stalledDL.svg",
+  [TorrentState.StalledDL]: "../assets/stalledDL.svg",
+  [TorrentState.CheckingDL]: "../assets/checking.svg",
+  [TorrentState.ForcedDL]: "../assets/stalledDL.svg",
+  [TorrentState.CheckingResumeData]: "../assets/checking.svg",
+  [TorrentState.Moving]: "../assets/checking.svg",
+  [TorrentState.StoppedDL]: "../assets/paused.svg",
+  [TorrentState.StoppedUP]: "../assets/paused.svg",
+  [TorrentState.ForcedMetaDL]: "../assets/downloading.svg",
+  [TorrentState.QueuedForChecking]: "../assets/checking.svg",
+  [TorrentState.Unknown]: undefined,
 };
 
 enum TorrentActionType {
   RESUME,
   PAUSE,
   DELETE,
+  DELETE_INCLUDING_DATA,
 }
 
 export default function Torrents() {
-  const [filter, setFilter] = useState<RawTorrentListFilter>();
-  const [torrents, setTorrents] = useState<RawTorrent[]>([]);
+  const [filter, setFilter] = useState<TorrentFilters>();
+  const [torrents, setTorrents] = useState<Torrent[]>([]);
   const [loading, setLoading] = useState(true);
   const [updateTimestamp, setUpdateTimestamp] = useState(+new Date());
   let updateTimeout: NodeJS.Timeout;
 
-  const { address, username, password, timeout } = getPreferenceValues<Preferences>();
+  const { address, username, password, timeout } = getPreferenceValues<Preferences.Torrents>();
+
+  const qbit = useMemo(() => {
+    return new QBittorrent({
+      baseUrl: address,
+      username,
+      password,
+    });
+  }, [address, username, password]);
 
   const updateTorrents = async () => {
-    const qbit = new QBittorrent(address);
     +timeout && updateTimeout && clearTimeout(updateTimeout);
     setLoading(true);
     try {
-      await qbit.login(username, password);
-      const torrents = await qbit.api.getTorrents({ filter });
+      await qbit.login();
+      const torrents = await qbit.listTorrents({ filter });
       setTorrents(torrents);
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to load torrents",
-        message: "Please check your preferences.",
+        title: "Failed to connect to qBittorrent",
+        message: "Please check your Web UI settings and make sure qBittorrent is running.",
       });
-    }
-    setLoading(false);
-    if (+timeout) {
-      updateTimeout = setTimeout(() => {
-        setUpdateTimestamp(+new Date());
-      }, +timeout * 1000);
+      setTorrents([]);
+    } finally {
+      setLoading(false);
+      if (+timeout) {
+        updateTimeout = setTimeout(() => {
+          setUpdateTimestamp(+new Date());
+        }, +timeout * 1000);
+      }
     }
   };
 
   const torrentAction = async (actionType: TorrentActionType, hash: string) => {
     try {
-      const qbit = new QBittorrent(address);
-      await qbit.login(username, password);
       switch (actionType) {
         case TorrentActionType.RESUME:
-          await qbit.api.resumeTorrents(hash);
+          await qbit.resumeTorrent(hash);
           break;
         case TorrentActionType.PAUSE:
-          await qbit.api.pauseTorrents(hash);
+          await qbit.pauseTorrent(hash);
           break;
         case TorrentActionType.DELETE:
-          await qbit.api.deleteTorrents(hash);
+          await qbit.removeTorrent(hash);
+          break;
+        case TorrentActionType.DELETE_INCLUDING_DATA:
+          await qbit.removeTorrent(hash, true);
           break;
         default:
           break;
@@ -90,7 +102,7 @@ export default function Torrents() {
       console.log(error);
       await showToast({
         style: Toast.Style.Failure,
-        title: "Somethong wrong",
+        title: "Something went wrong",
         message: "Please try again later.",
       });
     }
@@ -103,18 +115,18 @@ export default function Torrents() {
   return (
     <List
       isLoading={loading}
-      enableFiltering
+      filtering
       searchBarPlaceholder="Search your torrents"
       searchBarAccessory={
         <List.Dropdown
           value={filter}
           tooltip="Filter by state"
           onChange={(newFilter) => {
-            setFilter(newFilter as RawTorrentListFilter);
+            setFilter(newFilter as TorrentFilters);
           }}
         >
-          {Object.keys(RawTorrentListFilter).map((key) => (
-            <List.Dropdown.Item title={key} value={key} key={key} />
+          {filterStates.map((key) => (
+            <List.Dropdown.Item title={sentenceCase(key)} value={key} key={key} />
           ))}
         </List.Dropdown>
       }
@@ -123,34 +135,48 @@ export default function Torrents() {
         return (
           <List.Item
             icon={iconMap[torrent.state]}
-            title={`${torrent.name} (${prettySize(torrent.size)})`}
-            key={torrent.infohash_v1}
+            title={`${torrent.name} (${filesize(torrent.size)})`}
+            key={torrent.hash}
             accessories={[
               {
-                text: `↑${prettySize(torrent.upspeed)}/s`,
+                text: `↑${filesize(torrent.upspeed)}/s`,
               },
               {
-                text: `↓${prettySize(torrent.dlspeed)}/s`,
+                text: `↓${filesize(torrent.dlspeed)}/s`,
               },
             ]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy Torrent Magnet Link" content={torrent.magnet_uri} />
                 <Action
-                  icon="../assets/resumed.svg"
+                  icon={Icon.Play}
                   title="Resume Torrent"
-                  onAction={() => torrentAction(TorrentActionType.RESUME, torrent.infohash_v1)}
+                  onAction={() => torrentAction(TorrentActionType.RESUME, torrent.hash)}
                 />
                 <Action
-                  icon="../assets/paused.svg"
+                  icon={Icon.Pause}
                   title="Pause Torrent"
-                  onAction={() => torrentAction(TorrentActionType.PAUSE, torrent.infohash_v1)}
+                  onAction={() => torrentAction(TorrentActionType.PAUSE, torrent.hash)}
                 />
-                <Action
+                <ActionPanel.Submenu
                   icon={Icon.Trash}
                   title="Delete Torrent"
-                  onAction={() => torrentAction(TorrentActionType.DELETE, torrent.infohash_v1)}
-                />
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                >
+                  <Action
+                    icon={Icon.Trash}
+                    title="Keep local data"
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    onAction={() => torrentAction(TorrentActionType.DELETE, torrent.hash)}
+                  />
+                  <Action
+                    icon={Icon.Trash}
+                    title="Delete local data"
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                    style={Action.Style.Destructive}
+                    onAction={() => torrentAction(TorrentActionType.DELETE_INCLUDING_DATA, torrent.hash)}
+                  />
+                </ActionPanel.Submenu>
               </ActionPanel>
             }
           />

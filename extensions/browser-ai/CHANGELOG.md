@@ -1,4 +1,18 @@
-# Browser AI Changelog
+# Browser AI Companion Changelog
+
+## [Update] - 2024-05-31
+
+- Update Logo and name
+- Refactor code
+
+## [Update] - 2024-05-30
+
+- Added support for Groq API
+- Added new Command `Ask Website`
+
+## [Update] - 2024-05-28
+
+- OpenRouter Integration. Now you can use the best models from OpenRouter.
 
 ## [Update] - 2024-05-20
 

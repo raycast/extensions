@@ -1,18 +1,29 @@
 const GET_PUBLIC_STORIES = `
-  query StoriesByType($type: FeedType!) {
-    storiesFeed(type: $type, page: 0) {
-      cuid
-      title
-      brief
-      slug
-      totalReactions
-      dateAdded
-      author {
-        photo
-        username
-        blogHandle
-        publicationDomain
-      } 
+  query StoriesByType($type: FeedType!, $after: String) {
+    feed(first: 20, after: $after, filter: {type: $type}) {
+      edges {
+        node {
+          cuid
+          title
+          brief
+          slug
+          reactionCount
+          publishedAt
+          author {
+            profilePicture
+            username
+          }
+          url
+          publication {
+            title
+            url
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
     }
   }
 `;

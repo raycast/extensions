@@ -1,5 +1,9 @@
 # Logitech Litra Changelog
 
+## [Allow `v2.x` of the `litra` CLI] - 2024-11-12
+
+- `v2.x` of the [`litra` CLI](https://github.com/timrogers/litra-rs) is now supported
+
 ## [Allow `v1.x` of the `litra` CLI] - 2024-04-25
 
 - `v1.x` of the [`litra` CLI](https://github.com/timrogers/litra-rs) is now supported, alongside `v0.x`

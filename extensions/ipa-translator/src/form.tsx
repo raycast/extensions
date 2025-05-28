@@ -18,31 +18,25 @@ export const CustomForm = ({ language, accentSwitch }: { language: Languages; ac
       break;
     case Languages.Danish:
       dictionaryPlaceholder = readDictionaryData("DA_dictionary.json");
-      dictionaryPlaceholderNoAccents = readDictionaryData("DA_dictionary.json");
       break;
     case Languages.German:
       dictionaryPlaceholder = readDictionaryData("DE_dictionary.json");
-      dictionaryPlaceholderNoAccents = readDictionaryData("DE_dictionary.json");
       break;
     case Languages.Swedish:
       dictionaryPlaceholder = readDictionaryData("SV_dictionary.json");
-      dictionaryPlaceholderNoAccents = readDictionaryData("SV_dictionary.json");
       break;
     case Languages.Czech:
       dictionaryPlaceholder = readDictionaryData("CZ_dictionary.json");
-      dictionaryPlaceholderNoAccents = readDictionaryData("CZ_dictionary.json");
       break;
   }
 
   const handleSubmit = (textToTranslate: string, accents: boolean) => {
     setWordsNotFound([]);
-    setTranslated(
-      getTranslation(
-        textToTranslate,
-        accents ? dictionaryPlaceholder : dictionaryPlaceholderNoAccents,
-        setWordsNotFound,
-      ),
-    );
+    let dictionary = JSON.parse(dictionaryPlaceholder);
+    if (language === Languages.English && !accents) {
+      dictionary = JSON.parse(dictionaryPlaceholderNoAccents);
+    }
+    setTranslated(getTranslation(textToTranslate, dictionary, setWordsNotFound));
   };
 
   const onTextChange = (newValue: string) => {

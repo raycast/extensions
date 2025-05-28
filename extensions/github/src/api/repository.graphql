@@ -15,6 +15,7 @@ fragment ShortRepositoryFields on Repository {
   mergeCommitAllowed
   squashMergeAllowed
   rebaseMergeAllowed
+  autoMergeAllowed
 }
 
 fragment ExtendedRepositoryFields on Repository {
@@ -34,6 +35,7 @@ fragment ExtendedRepositoryFields on Repository {
   stargazerCount
   isArchived
   isFork
+  isPrivate
   viewerHasStarred
   primaryLanguage {
     id
@@ -57,9 +59,13 @@ query searchRepositories($query: String!, $numberOfItems: Int!) {
   }
 }
 
-query myLatestRepositories($numberOfItems: Int!) {
+query myLatestRepositories(
+  $numberOfItems: Int!
+  $orderByField: RepositoryOrderField!
+  $orderByDirection: OrderDirection!
+) {
   viewer {
-    repositories(first: $numberOfItems, orderBy: { field: PUSHED_AT, direction: DESC }) {
+    repositories(first: $numberOfItems, orderBy: { field: $orderByField, direction: $orderByDirection }) {
       nodes {
         ...ExtendedRepositoryFields
       }
@@ -151,6 +157,20 @@ query dataForRepository($owner: String!, $name: String!) {
       about
       title
       body
+    }
+  }
+}
+
+query searchRepositoryBranches($owner: String!, $name: String!, $query: String!) {
+  repository(owner: $owner, name: $name) {
+    refs(refPrefix: "refs/heads/", direction: ASC, first: 50, query: $query) {
+      nodes {
+        id
+        name
+        target {
+          ...CommitFields
+        }
+      }
     }
   }
 }

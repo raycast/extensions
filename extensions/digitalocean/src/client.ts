@@ -1,5 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { showFailureToast, useFetch } from "@raycast/utils";
 import axios from "axios";
 
 const { token } = getPreferenceValues<ExtensionPreferences>();
@@ -189,12 +189,176 @@ export type Project = {
   is_default: boolean;
 };
 
+type AppSpec = {
+  name: string;
+  static_sites: Array<{
+    name: string;
+    git?: {
+      repo_clone_url: string;
+      branch: string;
+    };
+    github?: {
+      branch: string;
+      deploy_on_push: boolean;
+      reop: string;
+    };
+    gitlab?: {
+      branch: string;
+      deploy_on_push: boolean;
+      reop: string;
+    };
+    image?: {
+      registry: string;
+      registry_type: "DOCKER_HUB" | "DOCR" | "GHCR";
+      registry_credentials: string;
+      repository: string;
+      tag: string;
+      digest: string;
+      deploy_on_push: {
+        enabled: boolean;
+      };
+    };
+    dockerfile_path?: string;
+    build_command?: string;
+    run_command?: string;
+    source_dir?: string;
+    environment_slug?: string;
+    envs?: Array<{
+      key: string;
+      scope: "UNSET" | "RUN_TIME" | "BUILD_TIME" | "RUN_AND_BUILD_TIME";
+      type: "GENERAL" | "SECRET";
+      value: string;
+    }>;
+    // log_destinations
+    index_document: string;
+    catchall_document: string;
+    output_dir: string;
+  }>;
+  region: string;
+  envs?: Array<{
+    key: string;
+    value: string;
+    scope: string;
+    type?: "SECRET";
+  }>;
+  alerts: Array<{
+    rule: string;
+  }>;
+  ingress: {
+    rules: Array<{
+      match: {
+        path: {
+          prefix: string;
+        };
+      };
+      cors?: unknown;
+      component: {
+        name: string;
+        preserve_path_prefix?: string;
+        rewrite?: string;
+      };
+      redirect?: {
+        uri: string;
+        authority: string;
+        port: number;
+        scheme: "http" | "https";
+        redirect_code: 300 | 301 | 302 | 303 | 304 | 307 | 308;
+      };
+    }>;
+  };
+  features: string[];
+};
+type AppStep = {
+  name: string;
+  status: "UNKNOWN" | "PENDING" | "RUNNING" | "ERROR" | "SUCCESS";
+  component_name?: string;
+  message_base?: string;
+  steps?: AppStep[];
+};
+export type AppDeploymentPhase =
+  | "UNKNOWN"
+  | "PENDING_BUILD"
+  | "BUILDING"
+  | "PENDING_DEPLOY"
+  | "DEPLOYING"
+  | "ACTIVE"
+  | "SUPERSEDED"
+  | "ERROR"
+  | "CANCELED";
+type AppDeployment = {
+  id: string;
+  spec: AppSpec;
+  static_sites: Array<{
+    name: string;
+    source_commit_hash: string;
+  }>;
+  phase_last_updated_at: string;
+  created_at: string;
+  updated_at: string;
+  cause: string;
+  progress: {
+    pending_steps: number;
+    total_steps: number;
+    steps: AppStep[];
+  };
+  phase: AppDeploymentPhase;
+  tier_slug: string;
+  cause_details: {
+    digitalocean_user_action: {
+      user: {
+        uuid: string;
+        email: string;
+        full_name: string;
+      };
+      name: string;
+    };
+    type: string;
+  };
+  timing: {
+    pending: string;
+  };
+};
+export type App = {
+  id: string;
+  owner_uuid: string;
+  spec: AppSpec;
+  last_deployment_active_at: string;
+  default_ingress?: string;
+  live_url?: string;
+  created_at: string;
+  updated_at: string;
+  active_deployment?: AppDeployment;
+  in_progress_deployment?: AppDeployment;
+  last_deployment_created_at: string;
+  region: {
+    slug: string;
+    label: string;
+    flag: string;
+    continent: string;
+    data_centers: string[];
+  };
+  tier_slug: string;
+  build_config: unknown;
+};
+
 const useAuthorizedFetch =
   <T, P extends string[] = []>(path: string | ((...params: P) => string)) =>
   (...params: P) =>
     useFetch<T>(`${baseURL}/${!params || !params.length || typeof path === "string" ? path : path(...params)}`, {
       headers: {
         Authorization: `Bearer ${token}`,
+      },
+      async onError(error) {
+        await showFailureToast(error, {
+          title: "Failed to fetch latest data",
+          primaryAction:
+            error.message !== "Unauthorized"
+              ? undefined
+              : {
+                  title: "Open Extension Preferences",
+                  onAction: openExtensionPreferences,
+                },
+        });
       },
     });
 
@@ -242,3 +406,8 @@ export function useMutateDomainRecords(domain: string): {
     },
   };
 }
+
+export const useApps = useAuthorizedFetch<{ apps: App[] }>("apps");
+export const useAppDeployments = useAuthorizedFetch<{ deployments: AppDeployment[] }, [string]>(
+  (app: string) => `apps/${app}/deployments`,
+);

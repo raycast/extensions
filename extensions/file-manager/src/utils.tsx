@@ -20,6 +20,7 @@ import { FileItem } from "./components/file-item";
 import { SymlinkItem } from "./components/symlink-item";
 import { FileDataType, FileType } from "./types";
 import { runAppleScript } from "@raycast/utils";
+import { GitIgnoreHelper } from "@gerhobbelt/gitignore-parser";
 
 export async function deleteFile(filePath: string, fileName: string, refresh: () => void) {
   const options: Alert.Options = {
@@ -71,14 +72,23 @@ export function getStartDirectory(): string {
   return resolve(startDirectory);
 }
 
-export function createItem(fileData: FileDataType, refresh: () => void, preferences: Preferences) {
+export function createItem(
+  fileData: FileDataType,
+  refresh: () => void,
+  preferences: Preferences,
+  ignores: GitIgnoreHelper[],
+) {
   const filePath = `${fileData.path}/${fileData.name}`;
   if (fileData.type === "directory") {
-    return <DirectoryItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} />;
+    return (
+      <DirectoryItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} ignores={ignores} />
+    );
   } else if (fileData.type === "file") {
     return <FileItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} />;
   } else if (fileData.type === "symlink") {
-    return <SymlinkItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} />;
+    return (
+      <SymlinkItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} ignores={ignores} />
+    );
   } else {
     showToast(Toast.Style.Failure, "Unsupported file type", `File type: ${fileData.type}`);
   }
@@ -177,4 +187,8 @@ export async function handleSetWallpaper(filePath: string) {
 
 export function iCloudDrivePath(): string {
   return `${homedir()}/Library/Mobile Documents/com~apple~CloudDocs`;
+}
+
+export function escapeShellArg(arg: string): string {
+  return `'${arg.replace(/'/g, "'\\''")}'`;
 }

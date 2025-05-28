@@ -1,14 +1,15 @@
 import { Color, Icon, MenuBarExtra, getPreferenceValues, open, openCommandPreferences } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
-import { getAthleteId, getStats, provider } from "./api/client";
+import { getActivities, getAthleteId, getStats, provider } from "./api/client";
 import { sportIcons } from "./constants";
-import { formatDistance } from "./utils";
+import { formatDistance, getStartOfWeekUnix } from "./utils";
 
 function MenuBarTotals() {
   const { data: stats, isLoading } = useCachedPromise(getStats, []);
   const { data: athleteId } = useCachedPromise(getAthleteId, []);
+  const { data: recentActivities } = useCachedPromise(() => getActivities(1, 100, getStartOfWeekUnix()), []);
 
-  if (!stats) {
+  if (!stats || !recentActivities) {
     return <MenuBarExtra isLoading={isLoading} />;
   }
 
@@ -16,6 +17,15 @@ function MenuBarTotals() {
 
   const stravaProfileUrl = athleteId ? `https://www.strava.com/athletes/${athleteId}` : "https://www.strava.com";
 
+  const weekRunTotal = formatDistance(
+    recentActivities?.reduce((acc, activity) => (activity.type === "Run" ? acc + activity.distance : acc), 0) || 0,
+  );
+  const weekRideTotal = formatDistance(
+    recentActivities?.reduce((acc, activity) => (activity.type === "Ride" ? acc + activity.distance : acc), 0) || 0,
+  );
+  const weekSwimTotal = formatDistance(
+    recentActivities?.reduce((acc, activity) => (activity.type === "Swim" ? acc + activity.distance : acc), 0) || 0,
+  );
   const ytdRunTotal = formatDistance(stats.ytd_run_totals.distance);
   const ytdRideTotal = formatDistance(stats.ytd_ride_totals.distance);
   const ytdSwimTotal = formatDistance(stats.ytd_swim_totals.distance);
@@ -30,11 +40,32 @@ function MenuBarTotals() {
   const primaryStat = preferences.primary_stat;
   const iconSrc = sportIcons[primarySport];
 
-  let primarySportTotal = primaryStat === "year" ? ytdRunTotal : primaryStat === "all" ? allRunTotal : recentRunTotal;
+  let primarySportTotal =
+    primaryStat === "year"
+      ? ytdRunTotal
+      : primaryStat === "all"
+        ? allRunTotal
+        : primaryStat === "week"
+          ? weekRunTotal
+          : recentRunTotal;
   if (primarySport === "Ride") {
-    primarySportTotal = primaryStat === "year" ? ytdRideTotal : primaryStat === "all" ? allRideTotal : recentRideTotal;
+    primarySportTotal =
+      primaryStat === "year"
+        ? ytdRideTotal
+        : primaryStat === "all"
+          ? allRideTotal
+          : primaryStat === "week"
+            ? weekRideTotal
+            : recentRideTotal;
   } else if (primarySport === "Swim") {
-    primarySportTotal = primaryStat === "year" ? ytdSwimTotal : primaryStat === "all" ? allSwimTotal : recentSwimTotal;
+    primarySportTotal =
+      primaryStat === "year"
+        ? ytdSwimTotal
+        : primaryStat === "all"
+          ? allSwimTotal
+          : primaryStat === "week"
+            ? weekSwimTotal
+            : recentSwimTotal;
   }
 
   return (
@@ -46,6 +77,29 @@ function MenuBarTotals() {
       title={primarySportTotal}
       tooltip={`${primarySport} ${primaryStat}`}
     >
+      <MenuBarExtra.Section title="This week">
+        {+weekRunTotal > 0 || primarySport === "Run" ? (
+          <MenuBarExtra.Item
+            title={weekRunTotal}
+            icon={{ source: "run.svg", tintColor: Color.PrimaryText }}
+            onAction={() => open(stravaProfileUrl)}
+          />
+        ) : null}
+        {+weekRideTotal > 0 || primarySport === "Ride" ? (
+          <MenuBarExtra.Item
+            title={weekRideTotal}
+            icon={{ source: "ride.svg", tintColor: Color.PrimaryText }}
+            onAction={() => open(stravaProfileUrl)}
+          />
+        ) : null}
+        {+weekSwimTotal > 0 || primarySport === "Swim" ? (
+          <MenuBarExtra.Item
+            title={weekSwimTotal}
+            icon={{ source: "swim.svg", tintColor: Color.PrimaryText }}
+            onAction={() => open(stravaProfileUrl)}
+          />
+        ) : null}
+      </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Last 4 weeks">
         {stats.recent_run_totals.distance || primarySport === "Run" ? (
           <MenuBarExtra.Item

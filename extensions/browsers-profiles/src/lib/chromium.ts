@@ -2,13 +2,14 @@ import fs from "fs";
 import os from "os";
 
 import browsers from "./supported-browsers.json";
+import { sortProfiles } from "./utils";
 
 type ChromiumProfiles = {
   name: string;
   profiles: ChromiumProfile[];
 };
 
-type ChromiumProfile = {
+export type ChromiumProfile = {
   type: string;
   browser: string;
   app: string;
@@ -51,6 +52,8 @@ export const getChromiumProfiles = () => {
         icon: browser.icon,
       });
     });
+
+    sortProfiles(browserProfiles);
 
     profiles.push({
       name: browser.title,

@@ -1,25 +1,31 @@
-import {
-  checkIsFile,
-  isDeeplink,
-  isUrl,
-  searchEngine,
-  searchUrlBuilder,
-  showHud,
-  urlAction,
-  urlBuilder,
-} from "./common-utils";
-import { Alert, confirmAlert, Icon, open, showInFinder } from "@raycast/api";
+import { checkIsFile, isDeeplink, searchUrlBuilder, showHud, urlBuilder } from "./common-utils";
+import { Alert, confirmAlert, Icon, open, openCommandPreferences, showInFinder } from "@raycast/api";
 import { checkShortcut, runShortcut } from "./shell-utils";
 import { SHORTCUT_PEEK_IN_SAFARI_NAME, SHORTCUT_PEEK_IN_SAFARI_URL } from "./constants";
+import { fileAction, folderAction, preferredTerminal, searchEngine, urlAction } from "../types/preference";
+import validator from "validator";
 
-export const filePathAction = async (path: string, fileOperation: string) => {
-  const icon = checkIsFile(path) ? "📄" : "📂";
-  if (fileOperation === "showInFinder") {
-    await showHud(icon, "Show: " + path);
-    await showInFinder(path);
+export const filePathAction = async (path: string) => {
+  const isFile = checkIsFile(path);
+  const icon = isFile ? "📄" : "📂";
+  if (isFile) {
+    if (fileAction === "showInFinder") {
+      await showInFinder(path);
+      await showHud(icon, "Show: " + path);
+    } else {
+      await open(path);
+      await showHud(icon, "Open: " + path);
+    }
+  } else if (!isFile) {
+    if (folderAction === "showInFinder") {
+      await showInFinder(path);
+      await showHud(icon, "Show: " + path);
+    } else {
+      await open(path);
+      await showHud(icon, "Open: " + path);
+    }
   } else {
-    await showHud(icon, "Open: " + path);
-    await open(path);
+    await showHud("🚨", "Error Path: " + path);
   }
 };
 
@@ -54,7 +60,7 @@ export const shortcutNotInstallAlertDialog = async () => {
 
 export const urlPathAction = async (path: string) => {
   try {
-    if (isUrl(path)) {
+    if (validator.isURL(path)) {
       await showHud("🔗", "Open URL: " + path);
       const finalPath = urlBuilder("https://", path);
       if (urlAction == "peek") {
@@ -78,6 +84,16 @@ export const urlPathAction = async (path: string) => {
       }
     }
   } catch (e) {
-    await showHud("🚫", "Error: " + e);
+    await showHud("🚨", "Error: " + e);
+  }
+};
+
+export const openPathInTerminal = async (path: string) => {
+  if (preferredTerminal) {
+    await open(path, preferredTerminal);
+    await showHud("📟", `Open in ${preferredTerminal.name}`);
+  } else {
+    await openCommandPreferences();
+    await showHud("⚙️", `Please set the Preferred Terminal.`);
   }
 };

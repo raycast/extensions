@@ -5,6 +5,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { moviedb } from "../api";
 import Posters from "./Posters";
 import Backdrops from "./Backdrops";
+import Seasons from "./Seasons";
 
 export default function TvShowDetail({ show }: { show: ShowResponse }) {
   const { data: details, isLoading: isLoadingDetails } = useCachedPromise(
@@ -80,6 +81,7 @@ export default function TvShowDetail({ show }: { show: ShowResponse }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in TMDB" url={`https://www.themoviedb.org/tv/${show.id ?? 0}`} />
+          {show.id ? <Action.Push title="Show Seasons" icon={Icon.Image} target={<Seasons id={show.id} />} /> : null}
           {show.id ? (
             <Action.CopyToClipboard
               title={`Copy TMDB ID`}

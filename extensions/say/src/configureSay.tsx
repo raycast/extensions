@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Form, Action, showToast } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { Action, ActionPanel, Form, Icon, showToast } from "@raycast/api";
 import { groupBy } from "lodash";
 import { Device, Voice, say, getAudioDevices } from "mac-say";
 import { systemDefault } from "./constants.js";
-import { getRates, getSortedVoices, getSpeechPlist, languageCodeToEmojiFlag, voiceNameToEmojiFlag } from "./utils.js";
+import {
+  getRates,
+  getSortedVoices,
+  getSpeechPlist,
+  languageCodeToEmojiFlag,
+  useSaySettings,
+  voiceNameToEmojiFlag,
+} from "./utils.js";
 import { SpeechPlist } from "./types.js";
 
 export default function ConfigureSay() {
@@ -12,10 +18,7 @@ export default function ConfigureSay() {
   const [voices, setVoices] = useState<Voice[]>([]);
   const [audioDevices, setAudioDevices] = useState<Device[]>([]);
   const [speechPlist, setSpeechPlist] = useState<SpeechPlist>();
-
-  const [voice, setVoice] = useCachedState<string>("voice", systemDefault);
-  const [rate, setRate] = useCachedState<string>("rate", systemDefault);
-  const [device, setDevice] = useCachedState<string>("audioDevice", systemDefault);
+  const { voice, rate, device, setVoice, setRate, setAudioDevice } = useSaySettings();
 
   const loadData = async () => {
     const [audioDevices, voices, plist] = await Promise.all([
@@ -46,6 +49,7 @@ export default function ConfigureSay() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={Icon.SpeechBubbleActive}
             title="Say Example"
             onSubmit={async () => {
               const foundVoice = voices.find((v) => v.name === (voice === systemDefault ? speechPlist?.voice : voice));
@@ -114,7 +118,7 @@ export default function ConfigureSay() {
         title="Output Device"
         onChange={(value) => {
           if (value !== device) {
-            setDevice(value);
+            setAudioDevice(value);
             showToast({ title: "", message: "Changes saved" });
           }
         }}
@@ -129,6 +133,10 @@ export default function ConfigureSay() {
       <Form.Description
         title="Advanced"
         text="This configuration page does not alter you system settings. For more advanced configurations please go to System Settings -> Accessibility -> Spoken Content."
+      />
+      <Form.Description
+        title="Recommendation"
+        text="Siri is the closest to a real human voice. You can pick Siri voices in System Settings for the best experience."
       />
     </Form>
   );

@@ -1,4 +1,4 @@
-import { MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { State } from "@lib/haapi";
 import { capitalizeFirstLetter, getFriendlyName } from "@lib/utils";
@@ -44,7 +44,7 @@ function VacuumStartMenubarItem(props: { state: State }) {
   return (
     <VacuumMenubarItemBase
       title="Start"
-      icon="play.png"
+      icon="play.svg"
       actionFunction={callVacuumStartService}
       state={props.state}
       hide={props.state.state !== "docked"}
@@ -56,7 +56,7 @@ function VacuumPauseMenubarItem(props: { state: State }) {
   return (
     <VacuumMenubarItemBase
       title="Pause"
-      icon="pause.png"
+      icon="pause.svg"
       actionFunction={callVacuumPauseService}
       state={props.state}
       hide={props.state.state === "docked"}
@@ -80,7 +80,7 @@ function VacuumTurnOnMenubarItem(props: { state: State }) {
   return (
     <VacuumMenubarItemBase
       title="Turn On"
-      icon="power-btn.png"
+      icon="power-on.svg"
       actionFunction={callVacuumTurnOnService}
       state={props.state}
       hide={props.state.state !== "off"}
@@ -92,7 +92,7 @@ function VacuumTurnOffMenubarItem(props: { state: State }) {
   return (
     <VacuumMenubarItemBase
       title="Turn Off"
-      icon="power-btn.png"
+      icon="power-off.svg"
       actionFunction={callVacuumTurnOffService}
       state={props.state}
       hide={props.state.state === "off"}
@@ -123,6 +123,7 @@ export function VacuumMenubarItem(props: { state: State }) {
       <VacuumTurnOnMenubarItem state={s} />
       <VacuumTurnOffMenubarItem state={s} />
       <VacuumReturnToBaseMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
   );

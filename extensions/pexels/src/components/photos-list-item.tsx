@@ -1,5 +1,4 @@
 import { Color, Icon, List } from "@raycast/api";
-import React from "react";
 import { Photo } from "pexels";
 import { PexelsPhoto } from "../types/types";
 import { ActionOnPhotos } from "./action-on-photos";
@@ -13,6 +12,7 @@ export function PhotosListItem(props: { item: Photo; index: number }) {
       key={index + "_" + item.id}
       icon={{ source: item.src.tiny }}
       title={item.photographer}
+      keywords={[`${(item as PexelsPhoto).alt.trim()}`, item.avg_color + ""]}
       accessories={[
         {
           icon: { source: Icon.CircleFilled, tintColor: (item as PexelsPhoto).avg_color },
@@ -22,7 +22,7 @@ export function PhotosListItem(props: { item: Photo; index: number }) {
       detail={
         <List.Item.Detail
           isLoading={false}
-          markdown={`![${(item as PexelsPhoto).alt.trim()}](${item.src.medium})`}
+          markdown={`<img src="${item.src.medium}" alt="${(item as PexelsPhoto).alt.trim()}" height="${190}" />`}
           metadata={
             <List.Item.Detail.Metadata>
               {(item as PexelsPhoto).alt.trim() && (

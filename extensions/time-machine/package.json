@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "time-machine",
+  "title": "Time Machine",
+  "description": "This extension is built to integrate MacOS system backup utility \"TimeMachine\" with Raycast. With the help of tmutil CLI Utility, it offers users the ability to control their backups with ease.",
+  "icon": "command-icon.png",
+  "author": "SuoweiHu",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cmd-start-backup",
+      "title": "Start Backup",
+      "description": "Perform a standard backup. This is equivalent to choosing \"Back Up Now\" from the Time Machine menu extra.",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-stop-backup",
+      "title": "Stop Backup",
+      "description": "Cancel a backup currently in progress.",
+      "mode": "no-view"
+    },
+    {
+      "name": "cmd-list-destination",
+      "title": "List Backup",
+      "description": "Print information about destinations currently configured for use with Time Machine.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.1",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/xml2js": "^0.4.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

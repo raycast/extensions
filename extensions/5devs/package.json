@@ -1,0 +1,152 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "5devs",
+  "title": "5Devs",
+  "description": "Get realistic data for testing purposes.",
+  "icon": "5.png",
+  "author": "gustavofior",
+  "contributors": [
+    "guilhermevictor"
+  ],
+  "categories": [
+    "Data",
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "empresa",
+      "title": "Company",
+      "description": "Generate data about a company",
+      "mode": "view",
+      "icon": "empresa.png",
+      "keywords": [
+        "empresa",
+        "dados",
+        "gerador",
+        "razao social",
+        "cnpj",
+        "inscricao estadual"
+      ],
+      "subtitle": "Name, CNPJ, State registration"
+    },
+    {
+      "name": "pessoa",
+      "title": "Person",
+      "description": "Generate data about people",
+      "mode": "view",
+      "icon": "pessoa.png",
+      "keywords": [
+        "pessoa",
+        "dados",
+        "gerador",
+        "nome",
+        "sobrenome",
+        "cpf",
+        "rg",
+        "data de nascimento"
+      ],
+      "subtitle": "Name, CPF, RG, birth date"
+    },
+    {
+      "name": "endereco",
+      "title": "Address",
+      "description": "Generate data about addresses",
+      "mode": "view",
+      "icon": "endereco.png",
+      "keywords": [
+        "endereco",
+        "dados",
+        "gerador",
+        "logradouro",
+        "numero",
+        "bairro",
+        "cidade",
+        "estado",
+        "cep"
+      ],
+      "subtitle": "Street, number, city, state, CEP"
+    },
+    {
+      "name": "veiculo",
+      "title": "Vehicle",
+      "description": "Generate data about vehicles",
+      "mode": "view",
+      "icon": "veiculo.png",
+      "keywords": [
+        "veiculo",
+        "dados",
+        "gerador",
+        "marca",
+        "modelo",
+        "ano",
+        "placa",
+        "cor"
+      ],
+      "subtitle": "Brand, model, year, plate, color"
+    },
+    {
+      "name": "cartao",
+      "title": "Card",
+      "description": "Generate data about credit cards",
+      "mode": "view",
+      "icon": "cartao.png",
+      "keywords": [
+        "cartão",
+        "dados",
+        "gerador",
+        "cvv",
+        "expiração",
+        "numero"
+      ],
+      "subtitle": "CVV, expiration, number, holder"
+    },
+    {
+      "name": "uteis",
+      "title": "Utilities",
+      "description": "Generate utility data",
+      "mode": "view",
+      "icon": "uteis.png",
+      "keywords": [
+        "uteis",
+        "dados",
+        "gerador",
+        "tipo",
+        "valor",
+        "uuid",
+        "ip",
+        "ipv6",
+        "mac",
+        "hash"
+      ],
+      "subtitle": "UUID, IP, MAC, hash"
+    }
+  ],
+  "dependencies": {
+    "@mihnea.dev/credit-card-generator": "^1.0.9",
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.16.2",
+    "node-fetch": "^3.3.2",
+    "random-ipv6": "^1.0.2",
+    "react": "^18.2.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/random-ipv6": "^1.0.4",
+    "@types/react": "18.2.27",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

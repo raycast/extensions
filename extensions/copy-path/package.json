@@ -2,15 +2,19 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copy-path",
   "title": "Copy Path",
-  "description": "Copy the path of the current Finder open folder, the path of the selected file or the URL of the current browser tab.",
+  "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
   "icon": "copy-path.png",
   "author": "koinzhang",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
     "System"
   ],
   "keywords": [
+    "tab",
     "web",
     "link"
   ],
@@ -19,13 +23,13 @@
     {
       "name": "copy-path",
       "title": "Copy Path or URL",
-      "description": "Copy the path of the current Finder open folder, the path of the selected file or the URL of the current browser tab.",
+      "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
       "mode": "no-view"
     }
   ],
   "preferences": [
     {
-      "title": "Tips",
+      "title": "Advanced",
       "name": "showCopyTip",
       "type": "checkbox",
       "required": false,
@@ -34,15 +38,6 @@
       "default": true
     },
     {
-      "name": "showErrorTip",
-      "type": "checkbox",
-      "required": false,
-      "label": "Show Error Tip",
-      "description": "Display a prompt when copying fails.",
-      "default": true
-    },
-    {
-      "title": "Advanced",
       "name": "showLastCopy",
       "type": "checkbox",
       "required": false,
@@ -51,10 +46,26 @@
       "default": true
     },
     {
+      "name": "showTabTitle",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Tab Title",
+      "description": "Show the tab title of the browser when copying the URL of the current browser tab.",
+      "default": false
+    },
+    {
+      "name": "useTildeForHome",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use Tilde for Home Directory",
+      "description": "Replace the home directory in copied paths with '~' for a cleaner look.",
+      "default": false
+    },
+    {
       "name": "multiPathSeparator",
       "type": "dropdown",
       "required": false,
-      "title": "Multi-path separator",
+      "title": "Multi-path Separator",
       "description": "The separator between paths when copying multiple file paths.",
       "default": "\n",
       "data": [
@@ -84,7 +95,7 @@
       "name": "copyUrlContent",
       "type": "dropdown",
       "required": false,
-      "title": "Copy which part of the URL",
+      "title": "URL Format",
       "description": "When copying URLs, select what to copy.",
       "default": "Original",
       "data": [
@@ -105,22 +116,50 @@
           "value": "Host"
         }
       ]
+    },
+    {
+      "name": "copyWhenUnSupported",
+      "type": "dropdown",
+      "required": false,
+      "title": "Unsupported App Action",
+      "description": "When copying, select what to copy when the app is not supported.",
+      "default": "windowTitle",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Window Title",
+          "value": "windowTitle"
+        },
+        {
+          "title": "App Name",
+          "value": "appName"
+        },
+        {
+          "title": "App Path",
+          "value": "appPath"
+        },
+        {
+          "title": "Bundle ID",
+          "value": "bundleId"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.1",
-    "@raycast/utils": "^1.15.0",
+    "@raycast/api": "^1.84.6",
+    "@raycast/utils": "^1.18.0",
     "parse-url": "^9.2.0"
   },
   "devDependencies": {
-    "@types/node": "~20.12.12",
-    "@types/react": "^18.3.2",
-    "@typescript-eslint/eslint-plugin": "^7.10.0",
-    "@typescript-eslint/parser": "^7.10.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.8.2",
+    "@types/react": "18.3.12",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "build": "ray build -e dist",

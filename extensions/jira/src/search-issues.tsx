@@ -48,8 +48,13 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
 
       const singleNumberRegex = /^[0-9]+$/;
       const singleNumberMatches = query.match(singleNumberRegex);
-      if (singleNumberMatches && cachedProject) {
-        issueKeyQuery = `OR issuekey = ${cachedProject.key}-${singleNumberMatches[0]}`;
+      if (singleNumberMatches) {
+        if (cachedProject) {
+          issueKeyQuery = `OR issuekey = ${cachedProject.key}-${singleNumberMatches[0]}`;
+        } else {
+          const allPossibleIssueKeys = projects?.map((project) => `${project.key}-${singleNumberMatches[0]}`);
+          issueKeyQuery = `OR issuekey IN (${allPossibleIssueKeys?.join(",")})`;
+        }
       }
 
       const escapedQuery = query.replace(/[\\"]/g, "\\$&");

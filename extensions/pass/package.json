@@ -1,10 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pass",
+  "version": "1.1.0",
   "title": "Pass",
   "description": "An extension to handle the standard unix password manager in a convenient way using Raycast",
   "icon": "command-icon.png",
   "author": "capipo",
+  "contributors": [
+    "camiloaromero23"
+  ],
   "categories": [
     "Security",
     "Productivity"
@@ -36,6 +40,18 @@
       "title": "Homebrew Path",
       "description": "Custom Homebrew Executable Path",
       "required": false
+    },
+    {
+      "name": "defaultAction",
+      "type": "dropdown",
+      "title": "Default action",
+      "description": "What should happen when you press Enter on a content row?",
+      "default": "paste",
+      "required": false,
+      "data": [
+        { "value": "paste", "title": "Paste" },
+        { "value": "copy", "title": "Copy" }
+      ]
     }
   ],
   "scripts": {

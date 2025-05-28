@@ -1,30 +1,16 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
-import { List, Toast, showToast } from "@raycast/api";
+import type { LaunchProps } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 
 import useGoveeController from "@/hooks/useGoveeController";
-import useNameMapping from "@/hooks/useNameMapping";
-import useScenarios from "@/hooks/useScenarios";
 
-import ListItem from "@/components/DeviceListItem";
-import ScenarioListItem from "@/components/ScenarioListItem";
+import ControlGoveeLightsPage from "@/page/main";
 
-export default function ControlGoveeLights() {
-  const { devices, isLoading: isLoadingController, error, executeScenario } = useGoveeController();
-  const { getName, setName } = useNameMapping();
+import Execute from "./page/execute";
 
-  const scenariosHook = useScenarios();
-  const { scenarios } = scenariosHook;
-
-  const availableDeviceMappings = useMemo(() => {
-    return devices.reduce(
-      (acc, device) => {
-        acc[device.id] = getName(device.id) ?? device.name;
-        return acc;
-      },
-      {} as Record<string, string>,
-    );
-  }, [devices, getName]);
+export default function ControlGoveeLights(props: LaunchProps<{ launchContext?: { scenario?: string } }>) {
+  const { devices, isLoading, error, executeScenario, controller } = useGoveeController();
 
   useEffect(() => {
     if (error && error.name !== "SyntaxError") {
@@ -37,31 +23,11 @@ export default function ControlGoveeLights() {
     }
   }, [error]);
 
-  return (
-    <List isLoading={isLoadingController} searchBarPlaceholder="Search for Govee lights...">
-      <List.Section title="Scenarios">
-        {scenarios.map((scenario) => (
-          <ScenarioListItem
-            key={scenario.id}
-            scenario={scenario}
-            scenariosHook={scenariosHook}
-            availableDeviceNames={availableDeviceMappings}
-            execute={() => executeScenario({ scenario })}
-          />
-        ))}
-      </List.Section>
-      <List.Section title="Devices">
-        {devices.map((device) => (
-          <ListItem
-            key={device.id}
-            device={device}
-            displayName={getName(device.id)}
-            setName={setName}
-            scenariosHook={scenariosHook}
-            availableDeviceNames={availableDeviceMappings}
-          />
-        ))}
-      </List.Section>
-    </List>
-  );
+  if (props.launchContext?.scenario) {
+    return (
+      <Execute id={props.launchContext.scenario} isLoading={isLoading} devices={devices} controller={controller} />
+    );
+  }
+
+  return <ControlGoveeLightsPage devices={devices} isLoading={isLoading} executeScenario={executeScenario} />;
 }

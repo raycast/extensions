@@ -115,6 +115,15 @@
         }
       ],
       "default": "1"
+    },
+    {
+      "name": "useCustomPlaybackSpeed",
+      "title": "Custom Playback Speed",
+      "type": "checkbox",
+      "required": false,
+      "description": "When checked, you'll be able to enter a custom playback speed instead of selecting from the dropdown.",
+      "label": "Enable Custom Playback Speed",
+      "default": false
     }
   ],
   "dependencies": {

@@ -1,5 +1,19 @@
 # Authy Extension Changelog
 
+## [Refactoring] - 2024-07-09
+
+- Code refactoring
+- Assets cleanup 
+- Speed extension loading
+- Add Export Tokens action
+
+## [API Update, Accuracy and UI] - 2024-06-24
+
+- Update decoding in line with updated API response
+- Use tag for OTP so it gets priority over subtitle
+- Update interval to be more accurate
+- Use built in progress icon
+
 ## [UI] - 2024-04-15
 
 - Move the timer icon to right side. So the icon can be always aligned for a better visual

@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Issue } from "../api/issues";
 import { getUserAvatar } from "../helpers/avatars";
 import { getStatusColor } from "../helpers/issues";
+import { useEpicIssues } from "../hooks/useIssues";
 
 import IssueActions from "./IssueActions";
 
@@ -16,7 +17,9 @@ type IssueListItemProps = {
 export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
   const updatedAt = new Date(issue.fields.updated);
   const assignee = issue.fields.assignee;
-
+  const { issues: epicIssues } = useEpicIssues(issue?.id ?? "");
+  const hasChildIssues =
+    (issue.fields.subtasks && issue.fields.subtasks.length > 0) || (epicIssues && epicIssues.length > 0);
   const keywords = [issue.key, issue.fields.status.name, issue.fields.issuetype.name];
 
   if (issue.fields.priority) {
@@ -55,7 +58,9 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
       title={issue.fields.summary || "Unknown issue title"}
       subtitle={issue.key}
       accessories={accessories}
-      actions={<IssueActions issue={issue} mutate={mutate} showDetailsAction={true} />}
+      actions={
+        <IssueActions issue={issue} showChildIssuesAction={hasChildIssues} mutate={mutate} showDetailsAction={true} />
+      }
     />
   );
 }

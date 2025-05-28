@@ -1,5 +1,74 @@
 # Linear Changelog
 
+## [Update API and bug fixes] - 2025-04-15
+
+- Updated dependencies
+- Fix project statuses bug in AI Extension
+
+## [Fix Search Issue] - 2025-03-11
+
+- Updated getIssues to use the new searchIssues API instead of issueSearch ( now deprecated )
+
+## [Fix Creation Issue] - 2025-02-25
+
+- Fixed issue creation with stateId because of closing quote in the GraphQL mutation.
+- Added npm run publish to publish the extension to the Raycast Store as per [Docs](https://developers.raycast.com/basics/publish-an-extension).
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Focus Shortcuts] - 2025-02-07
+
+- Added input focus sub-commands to the `Create Issue` command for changing the focused form input quicker.
+
+## [Search Projects Fixes] - 2024-11-08
+
+- [#15052](https://github.com/raycast/extensions/issues/15052): Fixed incomplete project list by adding pagination and utilizing search text to fetch projects directly.
+
+## [Search Projects Fixes] - 2024-08-08
+
+- [#13882](https://github.com/raycast/extensions/issues/13882): Replaced filtering on roadmaps with filtering on initiatives, as initiatives replaced roadmaps.
+- Made Delete Project action alert destructive and added a retry option in case of errors.
+
+## [Documents and Issues Fixes] - 2024-07-25
+
+- Create Issue: Fixed issue that made projects, cycles, estimates, etc. disappear in the form after consecutive issue creation.
+- Issue Actions: Standardized the issue deletion shortcut.
+- Documents: Moving documents action does not show the current entity and removed delete action from Document Detail view.
+
+## [Document Support] - 2024-07-18
+
+- New "Search Documents" command to search documents across Linear projects and initiatives. Supports typeahead if there are too many docs.
+- New action "Show Project Documents" to look up project documents.
+
+## [Fixes] - 2024-07-08
+
+- [#10856](https://github.com/raycast/extensions/issues/10856): Typeahead search for teams while creating/editing issues and in active cycles command. Typeahead is only triggered if no. of teams is > 50.
+- [#8704](https://github.com/raycast/extensions/issues/8704): Typeahead search for users/assignees/leads in various actions and commands, getting rid of missing assignees issue. Typeahead is only triggered if no. of users is > 50.
+- [#13194](https://github.com/raycast/extensions/issues/13194): Feature to add links while creating issues and ad-hoc action to add attachments and links while viewing issues.
+- The order of teams in "Create issue" respects the order of teams in the Linear native application.
+- When using "Create issue for myself" without specifying a preferred team in settings, use first team from the sorted array of teams.
+
+## [Improved Notifications] - 2024-06-14
+
+- Added support for all types of notifications, ensuring that "Unknown Notification" no longer appear.
+
+## [Project Improvements] - 2024-06-11
+
+- Added support for all the latest Linear icons.
+- Introduced a new "See Project Updates" action.
+
+## [Action Shortcut] - 2024-06-10
+
+- Added a new shortcut in the Search Projects command: Press Cmd + Enter to open a project in Linear.
+
+## [Improvements] - 2024-05-30
+
+- Added preference to hide redundant (Done, Canceled, Duplicate) issues across all searches
+
+## [Bug Fixes] - 2024-05-25
+
+- Fixed milestones to be updated with "Create Issue" command
+
 ## [Improvements] - 2024-05-14
 
 - Notifications now support Projects (Updates, comments, reactions, added as member), Document Mentions and Bots (GitHub and GitLab)

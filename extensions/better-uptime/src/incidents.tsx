@@ -1,49 +1,30 @@
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { ActionCopyScreenshotUrl, ActionDeleteIncident } from "./actions";
-import { IncidentItem, IncidentsState, Preferences } from "./interface";
+import { IncidentsState, Preferences } from "./interface";
+import { useFetch } from "@raycast/utils";
+import { baseUrl } from "./constants";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [state, setState] = useState<IncidentsState>({ items: [], isLoading: true });
+  const {
+    isLoading,
+    data: incidents,
+    revalidate,
+  } = useFetch<IncidentsState>(`${baseUrl}/incidents`, {
+    headers: { Authorization: `Bearer ${preferences.apiKey}` },
+  });
 
-  useEffect(() => {
-    async function fetchIncidents() {
-      setState((previous) => ({ ...previous, isLoading: true }));
-
-      try {
-        const { data } = await axios.get("https://betteruptime.com/api/v2/incidents", {
-          headers: { Authorization: `Bearer ${preferences.apiKey}` },
-        });
-
-        setState((previous) => ({ ...previous, items: data.data, isLoading: false }));
-      } catch (error) {
-        setState((previous) => ({
-          ...previous,
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-          isLoading: false,
-          items: [],
-        }));
-      }
-    }
-
-    fetchIncidents();
-  }, []);
-
-  useEffect(() => {
-    if (state.error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed loading incidents",
-        message: state.error.response.data.errors,
-      });
-    }
-  }, [state.error]);
+  if (!incidents?.data?.length) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView title="No Incidents" description="You can add an incident using the 'Add Incident' command." />
+      </List>
+    );
+  }
 
   return (
-    <List isShowingDetail isLoading={state.isLoading}>
-      {state.items?.map((item: IncidentItem, index: number) => (
+    <List isShowingDetail isLoading={isLoading}>
+      {incidents.data.map((item, index) => (
         <List.Item
           key={index}
           title={item.attributes.name}
@@ -87,15 +68,7 @@ export default function Command() {
                   <ActionCopyScreenshotUrl url={item.attributes.screenshot_url} />
                 </>
               )}
-              <ActionDeleteIncident
-                item={item}
-                onDeleted={() => {
-                  setState((previous) => ({
-                    ...previous,
-                    items: previous.items.filter((_item) => _item.id !== item.id),
-                  }));
-                }}
-              />
+              <ActionDeleteIncident item={item} onDeleted={() => revalidate()} />
             </ActionPanel>
           }
         />

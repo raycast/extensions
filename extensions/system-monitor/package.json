@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-system-monitor",
   "title": "System Monitor",
-  "description": "Show information and usage related to CPU , Memory , Power and Network",
+  "description": "Show information and usage related to CPU, memory, power and network",
   "icon": "command-icon.png",
   "author": "hossammourad",
   "categories": [
@@ -11,16 +11,23 @@
   ],
   "license": "MIT",
   "contributors": [
-    "Crayon144",
+    "crehan144",
     "pernielsentikaer",
-    "lucasmezencio"
+    "lucasmezencio",
+    "ridemountainpig"
   ],
   "commands": [
     {
       "name": "system-monitor",
       "title": "System Monitor",
-      "description": "Show information and usage related to CPU , Memory , Power and Network",
+      "description": "Show information and usage related to CPU, memory, power and network",
       "mode": "view"
+    },
+    {
+      "name": "menubar-system-monitor",
+      "title": "Menubar System Monitor",
+      "description": "Show information and usage related to CPU, memory, power and network on the menubar",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
@@ -79,5 +86,8 @@
         }
       ]
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

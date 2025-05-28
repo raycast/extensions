@@ -1,10 +1,12 @@
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { getIcon } from "@components/state/utils";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 import { MenuBarExtra, Toast, showToast } from "@raycast/api";
 import { capitalize } from "lodash-es";
-import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
+import React from "react";
 
 function SwitchToggleItem(props: { state: State }) {
   const handle = async () => {
@@ -14,7 +16,7 @@ function SwitchToggleItem(props: { state: State }) {
       showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
     }
   };
-  return <MenuBarExtra.Item title="Toggle" onAction={handle} icon={"toggle.png"} />;
+  return <MenuBarExtra.Item title="Toggle" onAction={handle} icon={"cached.svg"} />;
 }
 
 function SwitchTurnOnItem(props: { state: State }) {
@@ -28,7 +30,7 @@ function SwitchTurnOnItem(props: { state: State }) {
   if (props.state.state !== "off") {
     return null;
   }
-  return <MenuBarExtra.Item title="Turn On" onAction={handle} icon={"power-btn.png"} />;
+  return <MenuBarExtra.Item title="Turn On" onAction={handle} icon={"power-on.svg"} />;
 }
 
 function SwitchTurnOffItem(props: { state: State }) {
@@ -42,10 +44,10 @@ function SwitchTurnOffItem(props: { state: State }) {
   if (props.state.state !== "on") {
     return null;
   }
-  return <MenuBarExtra.Item title="Turn Off" onAction={handle} icon={"power-btn.png"} />;
+  return <MenuBarExtra.Item title="Turn Off" onAction={handle} icon={"power-off.svg"} />;
 }
 
-export function SwitchMenubarItem(props: { state: State }): JSX.Element | null {
+export function SwitchMenubarItem(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   const friendlyName = getFriendlyName(s);
   const title = () => {
@@ -56,7 +58,8 @@ export function SwitchMenubarItem(props: { state: State }): JSX.Element | null {
       <SwitchToggleItem state={s} />
       <SwitchTurnOnItem state={s} />
       <SwitchTurnOffItem state={s} />
-      <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
+      <LastUpdateChangeMenubarItem state={s} />
+      <RUIMenuBarExtra.CopyToClipboard title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarSubmenu>
   );
 }

@@ -18,8 +18,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.1",
-    "@raycast/utils": "^1.12.5"
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

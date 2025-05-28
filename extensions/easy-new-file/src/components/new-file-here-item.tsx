@@ -38,7 +38,7 @@ export function NewFileHereItem(props: {
   ) : (
     <Grid.Item
       keywords={fileType.keywords}
-      content={{ value: fileType.icon, tooltip: fileType.name + "." + fileType.extension }}
+      content={{ value: fileType.icon, tooltip: `${fileType.name}.${fileType.extension}` }}
       title={fileType.name}
       actions={
         <ActionNewFileHere

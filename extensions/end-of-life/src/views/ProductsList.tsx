@@ -14,15 +14,7 @@ function ProductsList() {
           <List.Item
             id={product}
             key={product}
-            //   icon={{
-            //     source: standing.position + ".png",
-            //     tintColor: Color.PrimaryText,
-            //   }}
             title={product}
-            //   subtitle={standing.Constructors[standing.Constructors.length - 1]?.name}
-            // detail={
-            //   <ProductDetails product={product} />
-            // }
             actions={
               <ActionPanel title={product}>
                 <Action title={`View ${product} Cycles`} onAction={() => push(<ProductDetails product={product} />)} />
@@ -33,7 +25,6 @@ function ProductsList() {
                 />
               </ActionPanel>
             }
-            //   accessories={[{ text: standing.points }]}
           />
         ))}
       </List.Section>

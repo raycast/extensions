@@ -1,7 +1,7 @@
 import { ActionPanel, Detail } from '@raycast/api';
 import { OpenInYnabAction } from '@components/actions';
 import { BudgetDetailSummary } from '@srcTypes';
-import { formatToReadablePrice, getCurrentMonth } from '@lib/utils';
+import { formatToReadableAmount, getCurrentMonth } from '@lib/utils';
 
 export function BudgetDetails({ budget }: { budget: BudgetDetailSummary | undefined }) {
   const currentMonthBudget = budget?.months?.at(0);
@@ -12,20 +12,20 @@ export function BudgetDetails({ budget }: { budget: BudgetDetailSummary | undefi
   const markdown = `
   # ${getCurrentMonth()}
 
-  - **Budgeted**: ${formatToReadablePrice({
+  - **Budgeted**: ${formatToReadableAmount({
     amount: currentMonthBudget?.budgeted ?? 0,
     currency,
   })}
-  - **Activity this month**: ${formatToReadablePrice({
+  - **Activity this month**: ${formatToReadableAmount({
     amount: currentMonthBudget.activity,
     currency,
   })}
   - **Age of Money**: ${currentMonthBudget.age_of_money ?? 0} days
-  - **To be Budgeted**: ${formatToReadablePrice({
+  - **To be Budgeted**: ${formatToReadableAmount({
     amount: currentMonthBudget.to_be_budgeted,
     currency,
   })}
-  - **Income**: ${formatToReadablePrice({
+  - **Income**: ${formatToReadableAmount({
     amount: currentMonthBudget.income,
     currency,
   })}

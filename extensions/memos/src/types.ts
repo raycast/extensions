@@ -28,36 +28,41 @@ export interface PostMemoParams {
   resourceIdList: number[];
 }
 
-interface ResourceObj {
+export interface ResourceObj {
   uid: string;
   name: string;
-  createTime: number;
+  createTime: string;
   filename: string;
   externalLink: string;
   type: string;
-  size: number;
+  size: string;
   linkedMemoAmount: number;
+  content?: string;
 }
 
 export interface MemoInfoResponse {
-  uid: string;
   name: string;
-  rowStatus: string;
+  state: string;
   creator: string;
   createTime: string;
   updateTime: string;
   displayTime: string;
   content: string;
+  markdown?: string;
   visibility: string;
   pinned: boolean;
   displayTs: number;
   resources: ResourceObj[];
+  tags: string[];
+  property: {
+    hasLink: boolean;
+    hasTaskList: boolean;
+    hasCode: boolean;
+    hasIncompleteTasks: boolean;
+  };
 }
 
-export type TagResponse = string[];
-
 export interface MeResponse {
-  id: number;
   name: string;
   rowStatus: "ACTIVE";
   createdTime: number;
@@ -71,11 +76,11 @@ export interface MeResponse {
 export interface PostFileResponse {
   id: number;
   creatorId: number;
-  createdTs: number;
+  createdTs: string;
   updatedTs: number;
   filename: string;
   externalLink: string;
   type: string;
-  size: number;
+  size: string;
   linkedMemoAmount: number;
 }

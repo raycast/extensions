@@ -1,5 +1,16 @@
 # Mattermost Changelog
 
+## [Enhancements] - 2024-10-22
+
+- Fix: `Search Channel` not loading when ZERO channels (and related)
+- `signIn` function is now `async`
+- Show better error message when Authorization fails (should close [#14876](https://github.com/raycast/extensions/issues/14876))
+- `usePromise` in `withAuthorization` component for better control
+- You can now specify in Preferences whether to open deep links in Browser or Mattermost Application
+- Fix: various typos
+- Add an `Axios` intercept for robust error handling
+- Update dependencies
+
 ## [Fix] - 2023-10-03
 
 - Add re-login when sign-in token expired

@@ -2,26 +2,30 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "productboard",
   "title": "Productboard",
-  "description": "Add notes to Productboard quickly. Supports markdown.",
+  "description": "Add and view notes in Productboard quickly. Supports markdown.",
   "icon": "logo.png",
   "author": "honzatmn",
+  "contributors": [
+    "xmok"
+  ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "PUBLIC_API_TOKEN",
+      "type": "password",
+      "required": true,
+      "title": "Public API Access token",
+      "placeholder": "Access token",
+      "description": "Log in to Productboard and setup an Public API token on Integrations page"
+    }
+  ],
   "commands": [
     {
-      "name": "index",
-      "title": "Add Note",
-      "subtitle": "Productboard",
-      "description": "Add notes to Productboard quickly. Supports markdown.",
+      "name": "notes",
+      "title": "Notes",
+      "description": "View and Add Notes in Productboard (supports Markdown)",
       "mode": "view",
       "preferences": [
-        {
-          "name": "PUBLIC_API_TOKEN",
-          "type": "password",
-          "required": true,
-          "title": "Public API Access token",
-          "placeholder": "Access token",
-          "description": "Log in to Productboard and setup an Public API token on Integrations page"
-        },
         {
           "name": "USER_EMAIL",
           "type": "textfield",
@@ -42,24 +46,27 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.6",
+    "@raycast/api": "^1.77.0",
+    "@raycast/utils": "^1.16.1",
     "email-validator": "^2.0.4",
     "got": "^11.8.3",
     "isemail": "^3.2.0",
-    "showdown": "^1.9.1"
+    "showdown": "^2.1.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "@types/showdown": "^1.9.4",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

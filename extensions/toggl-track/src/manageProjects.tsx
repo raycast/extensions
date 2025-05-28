@@ -1,12 +1,13 @@
-import { useMemo, useState } from "react";
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useOrganizations, useWorkspaces, useProjects, useGroups, useClients } from "./hooks";
-import { Workspace, Project } from "./api";
-import Shortcut from "./helpers/shortcuts";
-import ProjectListItem from "./components/ProjectListItem";
-import ProjectForm from "./components/ProjectForm";
-import { canModifyProjectIn } from "./helpers/privileges";
+import { useMemo, useState } from "react";
+
+import { Workspace, Project } from "@/api";
+import ProjectForm from "@/components/ProjectForm";
+import ProjectListItem from "@/components/ProjectListItem";
+import { canModifyProjectIn } from "@/helpers/privileges";
+import Shortcut from "@/helpers/shortcuts";
+import { useOrganizations, useWorkspaces, useProjects, useGroups, useClients } from "@/hooks";
 
 export default function ProjectList() {
   const { organizations, isLoadingOrganizations } = useOrganizations();

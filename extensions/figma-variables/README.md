@@ -14,7 +14,7 @@ This Raycast extension allows users to interact with their Figma designs by fetc
 
 ### Locating Your File Key
 
-The File Key is part of your Figma file's URL: `https://www.figma.com/file/<FILE_KEY>/...`.
+The File Key is part of your Figma file's URL: `https://www.figma.com/design/<FILE_KEY>/...`.
 
 ## Using the Extension
 

@@ -1,12 +1,12 @@
 import { Popicon } from "../schemas/popicon";
 
-type PopIconCategory = {
+export type PopIconCategory = {
   title: string;
   icons: Array<Popicon>;
   keywords: Array<string>;
 };
 
-function getPopiconCategories(icons: Array<Popicon>): Array<PopIconCategory> {
+export function getPopiconCategories(icons: Array<Popicon>): Array<PopIconCategory> {
   if (icons.length === 0) return [];
 
   const categoryTitles = Array.from(new Set(icons.map((icon) => icon.category)));
@@ -21,5 +21,3 @@ function getPopiconCategories(icons: Array<Popicon>): Array<PopIconCategory> {
 
   return categories;
 }
-
-export { getPopiconCategories as getPopIconCategories, type PopIconCategory };

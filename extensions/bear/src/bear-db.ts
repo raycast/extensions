@@ -23,6 +23,7 @@ export interface Note {
   createdAt: Date;
   tags: string[];
   encrypted: boolean;
+  pinned: boolean;
   formattedTags: string;
   wordCount: number;
 }
@@ -97,6 +98,7 @@ export class BearDb {
       tags: tags,
       formattedTags: formatTags(tags),
       encrypted: row.encrypted === 1,
+      pinned: row.pinned === 1,
       wordCount: [...text.matchAll(/\b\w+\b/g)].length,
     };
   }
@@ -116,7 +118,7 @@ export class BearDb {
 
   getNotes(searchQuery: string, tag?: string): Note[] {
     const statement = this.database.prepare(
-      this.getBearVersion() === 2 ? BearDb.searchNotesQueries.v2 : BearDb.searchNotesQueries.v1
+      this.getBearVersion() === 2 ? BearDb.searchNotesQueries.v2 : BearDb.searchNotesQueries.v1,
     );
     if (tag) {
       statement.bind({ ":query": `${searchQuery}`, ":tag": `${tag}` });
@@ -130,6 +132,8 @@ export class BearDb {
     }
 
     statement.free();
+    // pinned notes should be at the top
+    results.sort((a, b) => (a.pinned === b.pinned ? 0 : a.pinned ? -1 : 1));
     return results;
   }
 
@@ -148,7 +152,7 @@ export class BearDb {
 
   getBacklinks(noteID: string): Note[] {
     const statement = this.database.prepare(
-      this.getBearVersion() === 2 ? BearDb.getNoteBacklinksQueries.v2 : BearDb.getNoteBacklinksQueries.v1
+      this.getBearVersion() === 2 ? BearDb.getNoteBacklinksQueries.v2 : BearDb.getNoteBacklinksQueries.v1,
     );
     statement.bind({ ":id": noteID });
 
@@ -165,7 +169,7 @@ export class BearDb {
 
   getNoteLinks(noteID: string): Note[] {
     const statement = this.database.prepare(
-      this.getBearVersion() === 2 ? BearDb.getNoteLinksQueries.v2 : BearDb.getNoteLinksQueries.v1
+      this.getBearVersion() === 2 ? BearDb.getNoteLinksQueries.v2 : BearDb.getNoteLinksQueries.v1,
     );
     statement.bind({ ":id": noteID });
 

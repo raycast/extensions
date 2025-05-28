@@ -1,6 +1,6 @@
 import axios from "axios";
 import { updateCommandMetadata, getPreferenceValues } from "@raycast/api";
-import { today, tomorrow } from "./utils/datetime";
+import { getDate } from "./utils/datetime";
 import { ReadinessResponse, SleepResponse, ActivityResponse } from "./types";
 import { convertMeters, numberWithCommas } from "./utils/measurement";
 import { Preference } from "./types";
@@ -23,15 +23,15 @@ const ouraUrl = `https://api.ouraring.com/v2/usercollection/`;
 const fetchData = async (): Promise<AllStatus | undefined> => {
   try {
     const readiness = (await axios.get(
-      `${ouraUrl}daily_readiness?start_date=${today()}&end_date=${today()}`,
+      `${ouraUrl}daily_readiness?start_date=${getDate()}&end_date=${getDate()}`,
       config,
     )) as ReadinessResponse;
     const sleep = (await axios.get(
-      `${ouraUrl}daily_sleep?start_date=${today()}&end_date=${today()}`,
+      `${ouraUrl}daily_sleep?start_date=${getDate()}&end_date=${getDate()}`,
       config,
     )) as SleepResponse;
     const activity = (await axios.get(
-      `${ouraUrl}daily_activity?start_date=${today()}&end_date=${tomorrow()}`,
+      `${ouraUrl}daily_activity?start_date=${getDate()}&end_date=${getDate(1)}`,
       config,
     )) as ActivityResponse;
     return { readiness, sleep, activity };

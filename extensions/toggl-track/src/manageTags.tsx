@@ -1,12 +1,13 @@
-import { useState } from "react";
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
-import { ExtensionContextProvider } from "./context/ExtensionContext";
-import { useWorkspaces, useTags, useGroups } from "./hooks";
-import type { Workspace } from "./api";
-import Shortcut from "./helpers/shortcuts";
-import TagListItem from "./components/TagListItem";
-import TagForm from "./components/TagForm";
-import { canModifyTagsIn } from "./helpers/privileges";
+import { useState } from "react";
+
+import type { Workspace } from "@/api";
+import TagForm from "@/components/TagForm";
+import TagListItem from "@/components/TagListItem";
+import { ExtensionContextProvider } from "@/context/ExtensionContext";
+import { canModifyTagsIn } from "@/helpers/privileges";
+import Shortcut from "@/helpers/shortcuts";
+import { useWorkspaces, useTags, useGroups } from "@/hooks";
 
 function ManageTags() {
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();

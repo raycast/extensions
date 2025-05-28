@@ -1,33 +1,30 @@
+import { IssuePriorityValue, User } from "@linear/sdk";
 import { Detail, ActionPanel, Icon } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { IssuePriorityValue, User } from "@linear/sdk";
+import { format } from "date-fns";
 
 import { IssueResult } from "../api/getIssues";
-
-import useIssueDetail from "../hooks/useIssueDetail";
-
 import { formatCycle } from "../helpers/cycles";
+import { getDateIcon } from "../helpers/dates";
 import { EstimateType, getEstimateLabel } from "../helpers/estimates";
+import { getMilestoneIcon } from "../helpers/milestones";
 import { priorityIcons } from "../helpers/priorities";
+import { getProjectIcon } from "../helpers/projects";
 import { getStatusIcon } from "../helpers/states";
 import { getUserIcon } from "../helpers/users";
+import useIssueDetail from "../hooks/useIssueDetail";
 
 import IssueActions from "./IssueActions";
-import { format } from "date-fns";
-import { getDateIcon } from "../helpers/dates";
-import { getProjectIcon } from "../helpers/projects";
-import { getMilestoneIcon } from "../helpers/milestones";
 
 type IssueDetailProps = {
   issue: IssueResult;
   mutateList?: MutatePromise<IssueResult[] | undefined>;
   showAttachmentsAction?: boolean;
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
 };
 
-export default function IssueDetail({ issue: existingIssue, mutateList, priorities, users, me }: IssueDetailProps) {
+export default function IssueDetail({ issue: existingIssue, mutateList, priorities, me }: IssueDetailProps) {
   const { issue, isLoadingIssue, mutateDetail } = useIssueDetail(existingIssue);
 
   let markdown = `# ${issue?.title}`;
@@ -158,7 +155,6 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                   priorities={priorities}
                   showAttachmentsAction={linksCount > 0}
                   attachments={issue.attachments?.nodes ?? []}
-                  users={users}
                   me={me}
                 />
               </ActionPanel>

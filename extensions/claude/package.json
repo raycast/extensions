@@ -4,7 +4,17 @@
   "title": "Claude",
   "description": "Interact with Anthropic's Claude API directly from Raycast",
   "icon": "icon.png",
-  "author": "flodo",
+  "author": "florisdobber",
+  "contributors": [
+    "alextlopez11",
+    "FelixII",
+    "midnite",
+    "gilberto_jr",
+    "ridemountainpig",
+    "abizer",
+    "ridjis",
+    "mhrmsn"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -63,9 +73,18 @@
       "required": true
     },
     {
+      "name": "useStream",
+      "label": "Enable streaming of responses",
+      "description": "Stream responses from Claude in real-time",
+      "type": "checkbox",
+      "title": "Stream Responses",
+      "default": true,
+      "required": true
+    },
+    {
       "name": "isAutoLoad",
       "label": "Enable auto-load selected text",
-      "description": "Load selected text from your frontmost application to the question bar automatically",
+      "description": "Load selected text from your front most application to the question bar automatically",
       "type": "checkbox",
       "title": "Auto-load",
       "default": false,
@@ -83,14 +102,17 @@
   ],
   "dependencies": {
     "@anthropic-ai/sdk": "^0.18.0",
-    "@raycast/api": "^1.47.0",
+    "@raycast/api": "^1.78.0",
+    "@raycast/utils": "^1.14.1",
     "@types/uuid": "^9.0.0",
+    "cross-fetch": "^4.0.0",
+    "csv-parse": "^5.5.3",
     "raycast": "^1.0.8",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
-    "@types/react": "18.2.67",
+    "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

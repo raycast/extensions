@@ -1,5 +1,4 @@
 import { NetworkSpeed } from "../types/type";
-import exp from "constants";
 
 export function getNetSpeed(testSequentially: boolean, execResult: string) {
   let network: NetworkSpeed;

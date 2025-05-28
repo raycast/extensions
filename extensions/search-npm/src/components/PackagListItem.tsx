@@ -15,7 +15,7 @@ import { getChangeLogUrl } from '../utils/getChangelogUrl'
 import { Readme } from '../screens/Readme'
 import type { Package } from '../model/npmResponse.model'
 import type { HistoryItem } from '../utils/history-storage'
-import { addToHistory } from '../utils/history-storage'
+import { addToHistory, removeItemFromHistory } from '../utils/history-storage'
 import {
   addFavorite,
   removeAllItemsFromFavorites,
@@ -30,12 +30,7 @@ interface PackageListItemProps {
   isFavorited: boolean
   handleFaveChange?: () => Promise<void>
   isViewingFavorites?: boolean
-}
-
-export interface Preferences {
-  defaultOpenAction: 'openRepository' | 'openHomepage' | 'npmPackagePage'
-  historyCount: string
-  showLinkToSearchResultsInListView: boolean
+  isHistoryItem?: boolean
 }
 
 export const PackageListItem = ({
@@ -44,18 +39,24 @@ export const PackageListItem = ({
   isFavorited,
   handleFaveChange,
   isViewingFavorites,
+  isHistoryItem,
 }: PackageListItemProps): JSX.Element => {
-  const { defaultOpenAction }: Preferences = getPreferenceValues()
+  const { defaultOpenAction, historyCount } =
+    getPreferenceValues<ExtensionPreferences>()
   const pkg = result
-  const { owner, name, type } = parseRepoUrl(pkg.links.repository)
+  const { owner, name, type, repoUrl } = parseRepoUrl(pkg.links?.repository)
   const changelogUrl = getChangeLogUrl(type, owner, name)
 
   const handleAddToHistory = async () => {
-    const history = await addToHistory({ term: pkg.name, type: 'package' })
+    const history = await addToHistory({
+      term: pkg.name,
+      type: 'package',
+      package: result,
+    })
+    if (Number(historyCount) <= 0) return
     setHistory?.(history)
     showToast(Toast.Style.Success, `Added ${result.name} to history`)
   }
-
   const handleAddToFaves = async () => {
     await addFavorite(result)
     showToast(Toast.Style.Success, `Added ${result.name} to faves`)
@@ -73,16 +74,16 @@ export const PackageListItem = ({
   }
 
   const openActions = {
-    openRepository: pkg.links?.repository ? (
+    openRepository: repoUrl ? (
       <Action.OpenInBrowser
         key="openRepository"
-        url={pkg.links.repository}
+        url={repoUrl}
         title="Open Repository"
         onOpen={handleAddToHistory}
       />
     ) : null,
     openHomepage:
-      pkg.links?.homepage && pkg.links.homepage !== pkg.links?.repository ? (
+      pkg.links?.homepage && pkg.links.homepage !== repoUrl ? (
         <Action.OpenInBrowser
           key="openHomepage"
           url={pkg.links.homepage}
@@ -95,7 +96,7 @@ export const PackageListItem = ({
       <Action.OpenInBrowser
         key="npmPackagePage"
         url={pkg.links.npm}
-        title="Open Npm Package Page"
+        title="Open npm Package Page"
         icon={{
           source: 'command-icon.png',
         }}
@@ -177,7 +178,7 @@ export const PackageListItem = ({
           <ActionPanel.Section title="Actions">
             {isFavorited ? (
               <Action
-                title="Remove From Favorites"
+                title="Remove from Favorites"
                 onAction={handleRemoveFromFaves}
                 icon={Icon.StarDisabled}
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 's' }}
@@ -206,11 +207,25 @@ export const PackageListItem = ({
                 icon={Icon.ArrowRight}
               />
             )}
+            {isHistoryItem && (
+              <Action
+                title="Remove from History"
+                onAction={async () => {
+                  const history = await removeItemFromHistory({
+                    term: pkg.name,
+                    type: 'package',
+                  })
+                  setHistory?.(history)
+                }}
+                icon={Icon.XMarkCircle}
+                style={Action.Style.Destructive}
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">
             {type === 'github' && owner && name ? (
               <Action.Push
-                title="View README"
+                title="View Readme"
                 target={<Readme user={owner} repo={name} />}
                 icon={Icon.Paragraph}
               />
@@ -223,13 +238,13 @@ export const PackageListItem = ({
             />
             <Action.OpenInBrowser
               url={`https://esm.sh/${pkg.name}`}
-              title="Open ESM.sh URL"
+              title="Open Esm.sh URL"
               icon={Icon.Cloud}
               shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
             />
-            {pkg.links?.repository && type === 'github' ? (
+            {repoUrl && type === 'github' ? (
               <Action.OpenInBrowser
-                url={pkg.links.repository.replace('github.com', 'github.dev')}
+                url={repoUrl.replace('github.com', 'github.dev')}
                 title="View Code in Github.dev"
                 icon={{
                   source: {
@@ -245,7 +260,7 @@ export const PackageListItem = ({
                 url={`https://codesandbox.io/s/${
                   type === 'github' ? 'github' : 'gitlab'
                 }/${owner}/${name}`}
-                title="View in CodeSandbox"
+                title="View in Codesandbox"
                 icon={{
                   source: {
                     light: 'codesandbox-bright.png',
@@ -270,6 +285,10 @@ export const PackageListItem = ({
             <Action.CopyToClipboard
               title="Copy Package Name"
               content={pkg.name}
+            />
+            <Action.CopyToClipboard
+              title="Copy Version"
+              content={pkg.version}
             />
           </ActionPanel.Section>
         </ActionPanel>

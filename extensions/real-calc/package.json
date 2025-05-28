@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "real-calc",
+  "title": "Real Calc",
+  "description": "Update financial values based on various Brazilian price indices",
+  "icon": "real-calc-icon.png",
+  "author": "xilopaint",
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "update-value-by-index",
+      "title": "Update Value by Price Index",
+      "description": "Update value based on price index",
+      "mode": "view"
+    },
+    {
+      "name": "get-adjustment-factors",
+      "title": "Get Adjustment Factors for Selected Dates",
+      "description": "Get adjustment factors for a list of selected dates",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "endDate",
+          "placeholder": "End date",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "indexName",
+          "placeholder": "Price index",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "IPCA",
+              "value": "433"
+            },
+            {
+              "title": "IPCA-E",
+              "value": "10764"
+            },
+            {
+              "title": "INPC",
+              "value": "188"
+            },
+            {
+              "title": "IGP-M",
+              "value": "189"
+            },
+            {
+              "title": "INCC",
+              "value": "192"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.19.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

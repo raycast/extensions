@@ -9,17 +9,23 @@
     "cy-98",
     "emilsharier",
     "pernielsentikaer",
-    "eric_huang"
+    "erich2s",
+    "ridemountainpig",
+    "jor",
+    "garrill",
+    "olafvanmidden"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-documentation",
       "title": "Search Documentation",
       "subtitle": "Tailwind CSS",
-      "keywords": [
-        "css"
-      ],
+      "keywords": ["css"],
       "description": "Search documentation and open it in the browser",
       "mode": "view"
     },
@@ -27,9 +33,7 @@
       "name": "search-classes",
       "title": "Search Classes",
       "subtitle": "Tailwind CSS",
-      "keywords": [
-        "css"
-      ],
+      "keywords": ["css"],
       "description": "Search Tailwind CSS utility classes",
       "mode": "view",
       "preferences": [
@@ -79,9 +83,7 @@
       "name": "search-colors",
       "title": "Search Colors",
       "subtitle": "Tailwind CSS",
-      "keywords": [
-        "css"
-      ],
+      "keywords": ["css"],
       "description": "Search Tailwind CSS default color palette",
       "mode": "view"
     },
@@ -89,17 +91,12 @@
       "name": "search-components",
       "title": "Search Components",
       "subtitle": "Tailwind UI",
-      "keywords": [
-        "css"
-      ],
+      "keywords": ["css"],
       "description": "Search Tailwind UI components",
       "mode": "view"
     }
   ],
-  "categories": [
-    "Documentation",
-    "Developer Tools"
-  ],
+  "categories": ["Documentation", "Developer Tools"],
   "dependencies": {
     "@raycast/api": "^1.57.2",
     "color-convert": "^2.0.1",

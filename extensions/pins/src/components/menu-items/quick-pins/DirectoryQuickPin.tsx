@@ -42,20 +42,11 @@ export default function DirectoryQuickPin(props: DirectoryQuickPinProps) {
       tooltip="Create a pin whose target path is the current directory of Finder"
       shortcut={KEYBOARD_SHORTCUT.PIN_CURRENT_DIRECTORY}
       onAction={async () => {
-        await createNewPin(
-          directory.name,
-          directory.path,
-          "Favicon / File Icon",
-          targetGroup?.name || "None",
-          "None",
-          undefined,
-          undefined,
-          false,
-          undefined,
-          undefined,
-          [],
-          "",
-        );
+        await createNewPin({
+          name: directory.name,
+          url: directory.path,
+          group: targetGroup?.name || "None",
+        });
       }}
     />
   );

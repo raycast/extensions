@@ -81,7 +81,11 @@ export function extractKeyboardShortcuts(config: AppConfig): Record<string, Shor
           shortcuts[mode + key] = {
             mode: mode,
             shortcut: key,
-            description: JSON.stringify(bindings[key]).replace(/"/g, ""),
+            description: JSON.stringify(bindings[key])
+              .replace(/"/g, "")
+              // replaces dashes in-between command descriptions so they can be fuzzy searched.
+              // For example move-workspace-to-monitor will be found by typing `move monitor`
+              .replace(/(?<=\w)[-](?=\w)/g, " "),
           };
         }
       }

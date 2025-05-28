@@ -1,12 +1,12 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useFetch, useCachedState } from "@raycast/utils";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
-import { QueryTypes, getFilesURL, File, ScopeTypes } from "./api/getFiles";
+import { QueryTypes, getFiles, ScopeTypes } from "./api/getFiles";
 import FileListItem from "./components/FileListItem";
 
 import { withGoogleAuth } from "./components/withGoogleAuth";
-import { getOAuthToken, getUserEmail } from "./api/googleAuth";
+import { getUserEmail } from "./api/googleAuth";
 
 function SearchGoogleDriveFiles() {
   const [query, setQuery] = useState("");
@@ -15,17 +15,12 @@ function SearchGoogleDriveFiles() {
 
   const email = getUserEmail();
 
-  const { data, isLoading } = useFetch<{ files: File[] }>(getFilesURL(queryType, scopeType, query), {
-    keepPreviousData: true,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getOAuthToken()}`,
-    },
-    onError(error) {
-      console.error(error);
-      showToast({ style: Toast.Style.Failure, title: "Failed to retrieve files" });
-    },
-  });
+  const { data, isLoading } = useCachedPromise(
+    async (queryType: QueryTypes, scopeType: ScopeTypes, query: string) =>
+      await getFiles({ queryType, queryText: query, scope: scopeType }),
+    [queryType, scopeType, query],
+    { failureToastOptions: { title: "Failed to retrieve files" } },
+  );
 
   return (
     <List

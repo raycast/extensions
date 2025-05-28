@@ -1,12 +1,10 @@
-import { useState } from "react";
 import { List } from "@raycast/api";
+import { useState } from "react";
 
-import usePriorities from "./hooks/usePriorities";
-import useMe from "./hooks/useMe";
-import useUsers from "./hooks/useUsers";
-
-import View from "./components/View";
 import IssueListItem from "./components/IssueListItem";
+import View from "./components/View";
+import useMe from "./hooks/useMe";
+import usePriorities from "./hooks/usePriorities";
 import useSearchIssues from "./hooks/useSearchIssues";
 
 function SearchIssues() {
@@ -15,14 +13,13 @@ function SearchIssues() {
   const { isLoading, data, mutate, pagination } = useSearchIssues(query);
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
-  const { users, isLoadingUsers } = useUsers();
 
   const numberOfIssues = data?.length === 1 ? "1 issue" : `${data?.length} issues`;
 
   return (
     <List
       navigationTitle="Search issues"
-      isLoading={isLoading || isLoadingPriorities || isLoadingMe || isLoadingUsers}
+      isLoading={isLoading || isLoadingPriorities || isLoadingMe}
       onSearchTextChange={setQuery}
       throttle
       searchBarPlaceholder="Globally search issues across projects"
@@ -30,14 +27,7 @@ function SearchIssues() {
     >
       <List.Section title="Updated Recently" subtitle={numberOfIssues}>
         {data?.map((issue) => (
-          <IssueListItem
-            issue={issue}
-            key={issue.id}
-            mutateList={mutate}
-            priorities={priorities}
-            users={users}
-            me={me}
-          />
+          <IssueListItem issue={issue} key={issue.id} mutateList={mutate} priorities={priorities} me={me} />
         ))}
       </List.Section>
     </List>

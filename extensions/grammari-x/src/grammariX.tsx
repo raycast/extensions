@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { List, Clipboard, showToast, Toast, environment, AI, LaunchProps } from "@raycast/api";
 import { OpenAIModule } from "./utils/grammerUtil";
-import { CommandType, ToneType } from "./types";
+import { CommandType, ToneType, State } from "./types";
 import { Chat } from "./types";
 import CommandList from "./components/CommandList";
 import ResultSection from "./components/ResultSection";
@@ -24,13 +24,6 @@ if (!isValidKey) {
 }
 
 const openAI = new OpenAIModule(openAIKey);
-
-type State = {
-  command: CommandType;
-  toneType: ToneType;
-  isLoading: boolean;
-  chat: Chat;
-};
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.GrammariX }>) {
   const { add } = useHistory();

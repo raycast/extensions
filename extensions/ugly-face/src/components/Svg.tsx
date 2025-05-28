@@ -8,55 +8,62 @@ function randomFromInterval(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
+export const hairColors = [
+  "rgb(0, 0, 0)", // Black
+  "rgb(44, 34, 43)", // Dark Brown
+  "rgb(80, 68, 68)", // Medium Brown
+  "rgb(167, 133, 106)", // Light Brown
+  "rgb(220, 208, 186)", // Blond
+  "rgb(233, 236, 239)", // Platinum Blond
+  "rgb(165, 42, 42)", // Red
+  "rgb(145, 85, 61)", // Auburn
+  "rgb(128, 128, 128)", // Grey
+  "rgb(185, 55, 55)", // fire
+  "rgb(255, 192, 203)", // Pastel Pink
+  "rgb(255, 105, 180)", // Bright Pink
+  "rgb(230, 230, 250)", // Lavender
+  "rgb(64, 224, 208)", // Turquoise
+  "rgb(0, 191, 255)", // Bright Blue
+  "rgb(148, 0, 211)", // Deep Purple
+  "rgb(50, 205, 50)", // Lime Green
+  "rgb(255, 165, 0)", // Vivid Orange
+  "rgb(220, 20, 60)", // Crimson Red
+  "rgb(192, 192, 192)", // Silver
+];
+export const backgroundColors = [
+  "rgb(245, 245, 220)", // Soft Beige
+  "rgb(176, 224, 230)", // Pale Blue
+  "rgb(211, 211, 211)", // Light Grey
+  "rgb(152, 251, 152)", // Pastel Green
+  "rgb(255, 253, 208)", // Cream
+  "rgb(230, 230, 250)", // Muted Lavender
+  "rgb(188, 143, 143)", // Dusty Rose
+  "rgb(135, 206, 235)", // Sky Blue
+  "rgb(245, 255, 250)", // Mint Cream
+  "rgb(245, 222, 179)", // Wheat
+  "rgb(47, 79, 79)", // Dark Slate Gray
+  "rgb(72, 61, 139)", // Dark Slate Blue
+  "rgb(60, 20, 20)", // Dark Brown
+  "rgb(25, 25, 112)", // Midnight Blue
+  "rgb(139, 0, 0)", // Dark Red
+  "rgb(85, 107, 47)", // Olive Drab
+  "rgb(128, 0, 128)", // Purple
+  "rgb(0, 100, 0)", // Dark Green
+  "rgb(0, 0, 139)", // Dark Blue
+  "rgb(105, 105, 105)", // Dim Gray
+];
+
+type SvgProps = {
+  hairColor: string | null;
+  backgroundColor: string | null;
+  width: number;
+  height: number;
+};
 /**
  * This code translate original Vue code to React
  */
-export function Svg() {
+export function Svg({ hairColor, backgroundColor, width, height }: SvgProps) {
   const faceScale = 1.8;
-  const hairColors = [
-    "rgb(0, 0, 0)", // Black
-    "rgb(44, 34, 43)", // Dark Brown
-    "rgb(80, 68, 68)", // Medium Brown
-    "rgb(167, 133, 106)", // Light Brown
-    "rgb(220, 208, 186)", // Blond
-    "rgb(233, 236, 239)", // Platinum Blond
-    "rgb(165, 42, 42)", // Red
-    "rgb(145, 85, 61)", // Auburn
-    "rgb(128, 128, 128)", // Grey
-    "rgb(185, 55, 55)", // fire
-    "rgb(255, 192, 203)", // Pastel Pink
-    "rgb(255, 105, 180)", // Bright Pink
-    "rgb(230, 230, 250)", // Lavender
-    "rgb(64, 224, 208)", // Turquoise
-    "rgb(0, 191, 255)", // Bright Blue
-    "rgb(148, 0, 211)", // Deep Purple
-    "rgb(50, 205, 50)", // Lime Green
-    "rgb(255, 165, 0)", // Vivid Orange
-    "rgb(220, 20, 60)", // Crimson Red
-    "rgb(192, 192, 192)", // Silver
-  ];
-  const backgroundColors = [
-    "rgb(245, 245, 220)", // Soft Beige
-    "rgb(176, 224, 230)", // Pale Blue
-    "rgb(211, 211, 211)", // Light Grey
-    "rgb(152, 251, 152)", // Pastel Green
-    "rgb(255, 253, 208)", // Cream
-    "rgb(230, 230, 250)", // Muted Lavender
-    "rgb(188, 143, 143)", // Dusty Rose
-    "rgb(135, 206, 235)", // Sky Blue
-    "rgb(245, 255, 250)", // Mint Cream
-    "rgb(245, 222, 179)", // Wheat
-    "rgb(47, 79, 79)", // Dark Slate Gray
-    "rgb(72, 61, 139)", // Dark Slate Blue
-    "rgb(60, 20, 20)", // Dark Brown
-    "rgb(25, 25, 112)", // Midnight Blue
-    "rgb(139, 0, 0)", // Dark Red
-    "rgb(85, 107, 47)", // Olive Drab
-    "rgb(128, 0, 128)", // Purple
-    "rgb(0, 100, 0)", // Dark Green
-    "rgb(0, 0, 139)", // Dark Blue
-    "rgb(105, 105, 105)", // Dim Gray
-  ];
 
   let rightPupilShiftX: number = 0;
   let rightPupilShiftY: number = 0;
@@ -64,9 +71,23 @@ export function Svg() {
   let leftPupilShiftY: number = 0;
   let rightNoseCenterX: number = 0;
   let rightNoseCenterY: number = 0;
-  let hairColor: string = "black";
+  // let hairColor: string = "black";
   let dyeColorOffset: string = "50%";
   let mouthPoints: number[][];
+
+  if (backgroundColor == null) {
+    backgroundColor = backgroundColors[Math.floor(Math.random() * backgroundColors.length)];
+  }
+
+  if (hairColor == null) {
+    if (Math.random() > 0.1) {
+      // use natural hair color
+      hairColor = hairColors[Math.floor(Math.random() * 10)];
+    } else {
+      hairColor = "url(#rainbowGradient)";
+      dyeColorOffset = randomFromInterval(0, 100) + "%";
+    }
+  }
 
   const faceResults = faceShape.generateFaceCountourPoints();
   const computedFacePoints = faceResults.face;
@@ -126,13 +147,6 @@ export function Svg() {
   rightNoseCenterY = randomFromInterval(0, faceHeight / 5);
   const leftNoseCenterX = randomFromInterval(-faceWidth / 18, -faceWidth / 12);
   const leftNoseCenterY = rightNoseCenterY + randomFromInterval(-faceHeight / 30, faceHeight / 20);
-  if (Math.random() > 0.1) {
-    // use natural hair color
-    hairColor = hairColors[Math.floor(Math.random() * 10)];
-  } else {
-    hairColor = "url(#rainbowGradient)";
-    dyeColorOffset = randomFromInterval(0, 100) + "%";
-  }
 
   const choice = Math.floor(Math.random() * 3);
   if (choice == 0) {
@@ -146,7 +160,7 @@ export function Svg() {
   const rangeTen = [...Array(10).keys()];
 
   return (
-    <svg viewBox="-100 -100 200 200" xmlns="http://www.w3.org/2000/svg" width="500" height="500" id="face-svg">
+    <svg viewBox="-100 -100 200 200" xmlns="http://www.w3.org/2000/svg" width={width} height={height} id="face-svg">
       <defs>
         <clipPath id="leftEyeClipPath">
           <polyline points={eyeLeftCountour.flat().join(",")} />
@@ -185,13 +199,7 @@ export function Svg() {
       </defs>
       <title>That's an ugly face</title>
       <desc>CREATED BY XUAN TANG, MORE INFO AT TXSTC55.GITHUB.IO</desc>
-      <rect
-        x="-100"
-        y="-100"
-        width="100%"
-        height="100%"
-        fill={backgroundColors[Math.floor(Math.random() * backgroundColors.length)]}
-      />
+      <rect x="-100" y="-100" width="100%" height="100%" fill={backgroundColor} />
       <polyline
         id="faceContour"
         points={computedFacePoints.flat().join(",")}

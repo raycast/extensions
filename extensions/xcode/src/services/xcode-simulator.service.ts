@@ -199,10 +199,12 @@ export class XcodeSimulatorService {
       }
     }
     // Open URL in simulator
-    return execAsync(["xcrun", "simctl", "openurl", simulator?.udid ?? "booted", trimmedUrl].join(" ")).then(() => {
-      // Silently launch Simulator application
-      XcodeSimulatorService.launchSimulatorApplication();
-    });
+    return execAsync(["xcrun", "simctl", "openurl", simulator?.udid ?? "booted", `"${trimmedUrl}"`].join(" ")).then(
+      () => {
+        // Silently launch Simulator application
+        XcodeSimulatorService.launchSimulatorApplication();
+      }
+    );
   }
 
   /**
@@ -217,6 +219,16 @@ export class XcodeSimulatorService {
     payloadPath: string
   ): Promise<void> {
     return execAsync(`xcrun simctl push ${xcodeSimulator.udid} ${bundleIdentifier} ${payloadPath}`).then();
+  }
+
+  /**
+   * Deletes App Files without uninstalling the app
+   * @param containerPath App Container Directory
+   * @param appGroupPath App Group Directory
+   */
+  static async deleteAppFiles(containerPath: string, appGroupPath?: string): Promise<void> {
+    const deleteAppGroupPathPromise = appGroupPath ? execAsync(`rm -rf ${appGroupPath}`) : Promise.resolve();
+    return Promise.all([execAsync(`rm -rf ${containerPath}`), deleteAppGroupPathPromise]).then();
   }
 
   /**

@@ -1,5 +1,19 @@
 # Espanso Changelog
 
+## [Patch] - 2024-07-09
+
+- Remove form items from the list.
+- Create a MatchItem component for readability.
+
+## [Patch] - 2024-06-15
+
+- Fixing search when the user has installed packages
+
+## [Improvements] - 2024-06-08
+
+- Add metadata display
+- Add categories and subcategories depending on folders and files
+
 ## [Improvements] - 2024-02-06
 
 - Improved user experience with enhanced syntax and better error handling.

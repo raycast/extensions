@@ -26,6 +26,7 @@ export interface State {
 export interface IssueExtended extends Issue {
   reporter: User | undefined;
   updater: User | undefined;
+  assignee: User | undefined;
   tags?: IssueTag[];
   workItemTypes?: WorkItemType[];
 }

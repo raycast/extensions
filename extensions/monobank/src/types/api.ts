@@ -15,7 +15,7 @@ export interface UserInfoResponse {
   webHookUrl: string;
   permissions: string;
   accounts: AccountResponse[];
-  jars: JarResponse[];
+  jars?: JarResponse[];
 }
 
 export interface AccountResponse {

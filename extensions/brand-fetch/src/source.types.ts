@@ -1,3 +1,11 @@
+export interface SearchBrandKeyword {
+  claimed: boolean;
+  name: string | null;
+  domain: string;
+  icon: string;
+  brandId: string | null;
+}
+
 export interface RetrieveBrandResponse {
   name: string;
   domain: string;
@@ -33,7 +41,7 @@ export interface Image {
 export interface FormatElement {
   src: string;
   background: Background | null;
-  format: FormatEnum;
+  format: string;
   height?: number;
   width?: number;
   size: number;

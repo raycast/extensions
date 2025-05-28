@@ -5,6 +5,9 @@
   "description": "Hide Your Real Email Address and Protect Your Identity and Privacy. Create a different identity for each website to hide your real e-mail address. Never receive unwanted emails again! The first 15 mailboxes are free.",
   "icon": "Icon.png",
   "author": "Flatroy",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Applications",
     "Web",
@@ -37,26 +40,29 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.2",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
     "@types/node": "~20.5.7",
     "@types/node-fetch": "^2.6.4",
-    "@types/react": "^18.2.21",
+    "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "@typescript-eslint/parser": "^6.5.0",
     "eslint": "^8.48.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.3",
-    "react-devtools": "^4.27.2",
     "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
   "preferences": [
     {

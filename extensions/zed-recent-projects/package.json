@@ -8,9 +8,13 @@
   "contributors": [
     "tleo19",
     "jylamont",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "tm.wrnr",
+    "true-real-michael"
   ],
-  "categories": ["Developer Tools"],
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -41,7 +45,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Build",
-      "default": "Code",
+      "default": "Zed",
       "description": "Select which build of Zed to use",
       "data": [
         {
@@ -53,21 +57,29 @@
           "title": "Zed Preview"
         }
       ]
+    },
+    {
+      "name": "showGitBranch",
+      "type": "checkbox",
+      "title": "Git Integration",
+      "required": false,
+      "label": "Show Git Branch",
+      "default": true,
+      "description": "Display the current Git branch for files and folders in Git repositories"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.4",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -75,5 +87,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

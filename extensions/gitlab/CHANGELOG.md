@@ -1,5 +1,30 @@
 # GitLab Changelog
 
+## [Fix] - 2025-05-14
+
+Fixed request loops that caused the extension to crash
+
+## [Merge Requests Menu Bar] - 2025-05-13
+
+- Added "My Merge Requests" view
+- Added the ability to filter for labels
+
+## [Fix] - 2024-12-17
+
+- Fix "Ignore SSL Errors" setting not working on some features
+
+## [Add Issues Assignment Filter] - 2024-10-16
+
+- Add "Assigned to Me" filter to "Search Issues"
+
+## [Add Projects Membership Filter] - 2024-09-03
+
+- Add project membership dropdown filter to "Search Projects"
+
+## [Todo Menubar Fix] - 2024-07-23
+
+- [#13612](https://github.com/raycast/extensions/issues/13612): Don't show menubar item when there are no todo(s) present.
+
 ## [Fix] - 2024-04-23
 
 - Fix limit of 50 users for user selection during Create Merge Request / Create Issue

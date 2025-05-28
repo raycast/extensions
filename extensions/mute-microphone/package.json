@@ -1,12 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mute-microphone",
-  "title": "Toggle Audio Input (microphone)",
-  "description": "Extension to mute/unmute audio input (microphone)",
+  "title": "Toggle Audio Input (Microphone)",
+  "description": "Extension to mute/unmute audio input (Microphone)",
   "icon": "mute-command-icon.png",
   "author": "Quentin23Soleil",
   "contributors": [
-    "iamyeizi"
+    "iamyeizi",
+    "aliaksandr_zhebit",
+    "thewinger"
   ],
   "pastContributors": [
     "danulqua"
@@ -32,6 +34,24 @@
           "label": "Hide icon when unmuted",
           "default": false,
           "required": false
+        },
+        {
+          "name": "tint",
+          "description": "Select muted icon color for Menu Bar",
+          "type": "dropdown",
+          "required": false,
+          "default": "true",
+          "title": "Muted icon color",
+          "data": [
+            {
+              "title": "Red",
+              "value": "true"
+            },
+            {
+              "title": "System",
+              "value": "false"
+            }
+          ]
         }
       ]
     },
@@ -40,6 +60,30 @@
       "title": "Toggle Mute Audio Input",
       "description": "Mute/unmute audio input (microphone)",
       "mode": "no-view"
+    },
+    {
+      "name": "set-level",
+      "title": "Set Level of Audio Input",
+      "description": "Set level of audio input (microphone)",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "default-level",
+          "title": "Default Input level",
+          "description": "Default level of audio input",
+          "type": "textfield",
+          "placeholder": "Must be a number from 0 to 100",
+          "default": "100",
+          "required": true
+        }
+      ],
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "0 - 100 or empty for default.",
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -64,5 +108,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -5,7 +5,9 @@
   "description": "Access Dashlane Vault. Requires installing the Dashlane CLI.",
   "icon": "dashlane-512.png",
   "author": "tm.wrnr",
-  "categories": ["Security"],
+  "categories": [
+    "Security"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -20,6 +22,13 @@
       "title": "Search Notes",
       "subtitle": "Dashlane",
       "description": "Search all notes in the Dashlane vault",
+      "mode": "view"
+    },
+    {
+      "name": "devices",
+      "title": "Manage Devices",
+      "subtitle": "Dashlane",
+      "description": "List devices connected to your accunt",
       "mode": "view"
     },
     {
@@ -56,18 +65,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.14.0",
-    "execa": "^8.0.1",
-    "valibot": "~0.28.1"
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.18.1",
+    "execa": "^9.5.2",
+    "p-queue": "^8.1.0",
+    "valibot": "~0.42.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.8",
-    "@total-typescript/ts-reset": "^0.5.1",
+    "@raycast/eslint-config": "1.0.11",
+    "@total-typescript/ts-reset": "^0.6.1",
     "@types/node": "^20.11.30",
-    "@types/react": "18.2.31",
+    "@types/react": "18.3.12",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.3.3",
     "prettier-plugin-organize-imports": "^3.2.4",
     "typescript": "^5.4.3"
   },

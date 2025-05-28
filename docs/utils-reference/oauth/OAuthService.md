@@ -98,6 +98,11 @@ const github = OAuthService.github({ scope: "repo user" });
 
 Google has verification processes based on the required scopes for your extension. Therefore, you need to configure your own client for it.
 
+{% hint style="info" %}
+Creating your own Google client ID is more tedious than other processes, so we’ve created a page to assist you: [Getting a Google client ID](./getting-google-client-id.md)
+{% endhint %}
+
+
 ##### Signature
 
 ```ts

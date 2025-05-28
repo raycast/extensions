@@ -2,6 +2,7 @@ import { formatRelative, fromUnixTime } from "date-fns";
 import fetch from "node-fetch";
 
 import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";
+import { getTenorLocale } from "../preferences";
 
 export interface TenorResults {
   results: TenorGif[];
@@ -38,7 +39,7 @@ export default async function tenor() {
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
       const reqUrl = new URL(API_BASE_URL);
-      reqUrl.searchParams.set("locale", "en_US");
+      reqUrl.searchParams.set("locale", getTenorLocale());
       reqUrl.searchParams.set("q", term);
       reqUrl.searchParams.set("media_filter", "gif,nanogif");
       reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
@@ -58,7 +59,7 @@ export default async function tenor() {
 
     async trending(opt?: APIOpt) {
       const reqUrl = new URL(API_BASE_URL);
-      reqUrl.searchParams.set("locale", "en_US");
+      reqUrl.searchParams.set("locale", getTenorLocale());
       reqUrl.searchParams.set("media_filter", "gif,nanogif");
       reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
 

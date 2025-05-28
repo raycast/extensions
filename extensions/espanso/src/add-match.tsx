@@ -6,6 +6,7 @@ import { appendMatchToFile, formatMatch, getAndSortTargetFiles, getEspansoConfig
 
 export interface Values {
   trigger: string;
+  label?: string;
   replace: string;
   matchFile: string;
 }
@@ -19,8 +20,11 @@ export default function Command() {
     const fetchData = async () => {
       try {
         const { match: matchFilesDirectory } = await getEspansoConfig();
+
         const sortedMatchFiles: { file: string; mtime: number }[] = getAndSortTargetFiles(matchFilesDirectory);
+
         setMatchFilesDirectory(matchFilesDirectory);
+
         setSortedMatchFiles(sortedMatchFiles);
       } catch (err) {
         setError(err instanceof Error ? err : null);
@@ -32,15 +36,20 @@ export default function Command() {
   const { handleSubmit, itemProps } = useForm<Values>({
     onSubmit(values) {
       const { matchFile } = values;
+
       const espansoMatch: EspansoMatch = {
         triggers: values.trigger
           .split(",")
           .map((t) => t.trim())
           .filter(Boolean),
+        label: values.label,
         replace: values.replace,
       };
+
       appendMatchToFile(formatMatch(espansoMatch), matchFile, matchFilesDirectory);
+
       popToRoot();
+
       showToast({
         style: Toast.Style.Success,
         title: "Success!",
@@ -71,12 +80,21 @@ export default function Command() {
         placeholder="Enter trigger"
         {...itemProps.trigger}
       />
+
+      <Form.TextField
+        title="Label"
+        info="A human-readable text of the trigger"
+        placeholder="Enter label"
+        {...itemProps.label}
+      />
+
       <Form.TextField
         title="Replace"
         placeholder="Enter replacement"
         info="The replacement text"
         {...itemProps.replace}
       />
+
       <Form.Dropdown title="Match File" {...itemProps.matchFile}>
         {sortedMatchFiles.map((matchFile) => (
           <Form.Dropdown.Item key={matchFile.file} value={matchFile.file} title={matchFile.file} />

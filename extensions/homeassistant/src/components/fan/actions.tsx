@@ -2,9 +2,10 @@ import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel, Color, Icon, Keyboard } from "@raycast/api";
+import React from "react";
 import { getFanSpeedValues } from "./utils";
 
-export function FanSpeedControlAction(props: { state: State }): JSX.Element | null {
+export function FanSpeedControlAction(props: { state: State }): React.ReactElement | null {
   const state = props.state;
   const step = state.attributes.percentage_step;
 
@@ -26,7 +27,7 @@ function FanSpeedAddAction(props: {
   state: State;
   add: number;
   shortcut?: Keyboard.Shortcut | undefined;
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const state = props.state;
 
   const handle = async (pvalue: number) => {
@@ -55,11 +56,11 @@ function FanSpeedAddAction(props: {
   );
 }
 
-export function FanSpeedUpAction(props: { state: State }): JSX.Element | null {
+export function FanSpeedUpAction(props: { state: State }): React.ReactElement | null {
   return <FanSpeedAddAction state={props.state} add={1} shortcut={{ modifiers: ["cmd"], key: "+" }} />;
 }
 
-export function FanSpeedDownAction(props: { state: State }): JSX.Element | null {
+export function FanSpeedDownAction(props: { state: State }): React.ReactElement | null {
   return <FanSpeedAddAction state={props.state} add={-1} shortcut={{ modifiers: ["cmd"], key: "-" }} />;
 }
 
@@ -71,19 +72,19 @@ export function FanActionPanel(props: { state: State }) {
         <Action
           title="Toggle"
           onAction={async () => await ha.toggleFan(props.state.entity_id)}
-          icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
+          icon={{ source: "cached.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Turn On"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={async () => await ha.turnOnFan(props.state.entity_id)}
-          icon={{ source: "power-btn.png", tintColor: Color.Green }}
+          icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Turn Off"
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           onAction={async () => await ha.turnOffFan(props.state.entity_id)}
-          icon={{ source: "power-btn.png", tintColor: Color.Red }}
+          icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Speed">

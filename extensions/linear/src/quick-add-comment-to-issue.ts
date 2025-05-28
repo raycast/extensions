@@ -1,6 +1,7 @@
 import { LinearClient } from "@linear/sdk";
 import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast, showHUD } from "@raycast/api";
 import { getAccessToken, withAccessToken } from "@raycast/utils";
+
 import { linear } from "./api/linearClient";
 
 const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) => {
@@ -61,7 +62,7 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
       toast.primaryAction = {
         title: "Copy Error Log",
         shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-        onAction: () => Clipboard.copy(e instanceof Error ? e.stack ?? e.message : String(e)),
+        onAction: () => Clipboard.copy(e instanceof Error ? (e.stack ?? e.message) : String(e)),
       };
     }
   }

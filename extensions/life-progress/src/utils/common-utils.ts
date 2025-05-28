@@ -6,89 +6,52 @@ export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
-const getCanvasSymbols = (titleProgressBar = false) => {
+const getCanvasSymbols = () => {
   let spentSymbol = "■";
   let leftSymbol = "□";
-  let symbolNum = 40;
   switch (progressSymbol) {
     case "■": {
       spentSymbol = "■";
       leftSymbol = "□";
-      symbolNum = titleProgressBar ? 52 : symbolNum;
       break;
     }
     case "●": {
       spentSymbol = "●";
       leftSymbol = "○";
-      symbolNum = titleProgressBar ? 52 : symbolNum;
       break;
     }
     case "♥︎": {
       spentSymbol = "♥︎︎";
       leftSymbol = "♡";
-      symbolNum = titleProgressBar ? 47 : symbolNum;
       break;
     }
     case "✿": {
       spentSymbol = "✿︎";
       leftSymbol = "❀";
-      symbolNum = titleProgressBar ? 59 : symbolNum;
       break;
     }
     case "★": {
       spentSymbol = "★";
       leftSymbol = "☆";
-      symbolNum = titleProgressBar ? 46 : symbolNum;
       break;
     }
     case "✪": {
       spentSymbol = "✪";
       leftSymbol = "○";
-      symbolNum = titleProgressBar ? 55 : symbolNum;
-      break;
-    }
-    case "✔": {
-      spentSymbol = "✔︎";
-      leftSymbol = "✘";
-      symbolNum = titleProgressBar ? 66 : symbolNum;
-      break;
-    }
-    case "⚉": {
-      spentSymbol = "⚉";
-      leftSymbol = "⚇";
-      symbolNum = titleProgressBar ? 80 : symbolNum;
-      break;
-    }
-    case "☀︎": {
-      spentSymbol = "☀︎";
-      leftSymbol = "☼";
-      symbolNum = titleProgressBar ? 45 : symbolNum;
-      break;
-    }
-    case "❄︎": {
-      spentSymbol = "❄︎︎︎︎";
-      leftSymbol = "☃︎";
-      symbolNum = titleProgressBar ? 48 : symbolNum;
       break;
     }
     default:
       break;
   }
-  return { spentSymbol: spentSymbol, leftSymbol: leftSymbol, titleSymbolNum: symbolNum };
+  return { spentSymbol: spentSymbol, leftSymbol: leftSymbol };
 };
 
-export const getLiftProgressCanvas = (
-  spentTime: number,
-  leftTime: number,
-  symbolNum: number,
-  titleProgressBar = false,
-) => {
-  const { spentSymbol, leftSymbol, titleSymbolNum } = getCanvasSymbols(titleProgressBar);
-  const finalSymbolNum = titleProgressBar ? titleSymbolNum : symbolNum;
+export const getLiftProgressCanvas = (spentTime: number, leftTime: number, symbolNum: number) => {
+  const { spentSymbol, leftSymbol } = getCanvasSymbols();
 
   const canvas =
-    spentSymbol.repeat(Math.floor((spentTime / (spentTime + leftTime)) * finalSymbolNum)) +
-    leftSymbol.repeat(finalSymbolNum - Math.floor((spentTime / (spentTime + leftTime)) * finalSymbolNum));
+    spentSymbol.repeat(Math.floor((spentTime / (spentTime + leftTime)) * symbolNum)) +
+    leftSymbol.repeat(symbolNum - Math.floor((spentTime / (spentTime + leftTime)) * symbolNum));
   const text = ((spentTime / (spentTime + leftTime)) * 100).toFixed(0) + "%";
   return { canvas: canvas, text: text };
 };
@@ -101,29 +64,29 @@ export const updateCommandSubtitle = async (lifeProgresses: LifeProgress[]) => {
   switch (commandMetadata) {
     case "Day": {
       subtitleStrSpent = 24 - lifeProgresses[6].number - 1;
-      subtitleIcon = getLiftProgressCanvas(subtitleStrSpent, lifeProgresses[6].number, 24, false).canvas;
-      subtitleStrAll = "It's now " + currentTime();
+      subtitleIcon = getLiftProgressCanvas(subtitleStrSpent, lifeProgresses[6].number, 11).canvas;
+      subtitleStrAll = currentDate() + "  " + currentTime();
       break;
     }
     case "Week": {
       const { daysSinceWeekStart, daysLeftInWeek } = getWeekStatus(weekStart);
       subtitleStrSpent = daysSinceWeekStart;
-      subtitleIcon = getLiftProgressCanvas(subtitleStrSpent, daysLeftInWeek, 7, false).canvas;
-      subtitleStrAll = currentWeek();
+      subtitleIcon = getLiftProgressCanvas(subtitleStrSpent, daysLeftInWeek, 7).canvas;
+      subtitleStrAll = currentDate();
       break;
     }
     case "Month": {
       const days = daysInCurrentMonth();
       subtitleStrSpent = days - lifeProgresses[8].number;
-      subtitleIcon = getLiftProgressCanvas(subtitleStrSpent, lifeProgresses[8].number, days, false).canvas;
-      subtitleStrAll = currentMonth();
+      subtitleIcon = getLiftProgressCanvas(subtitleStrSpent, lifeProgresses[8].number, 10).canvas;
+      subtitleStrAll = currentDate();
       break;
     }
     case "Year": {
       const years = daysInCurrentYear();
       subtitleStrSpent = years - lifeProgresses[9].number;
-      subtitleIcon = getLiftProgressCanvas(subtitleStrSpent, lifeProgresses[9].number, 24, false).canvas;
-      subtitleStrAll = "Today is day " + subtitleStrSpent.toString();
+      subtitleIcon = getLiftProgressCanvas(subtitleStrSpent, lifeProgresses[9].number, 12).canvas;
+      subtitleStrAll = currentDate() + `  Day ${subtitleStrSpent} of the year`;
       break;
     }
   }
@@ -193,40 +156,14 @@ const currentTime = () => {
   return `${hours}:${minutes}`;
 };
 
-const currentWeek = () => {
+const currentDate = () => {
   const date = new Date();
-  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  return days[date.getDay()];
+  const weekDayShort = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date);
+  return weekDayShort + " " + currentMonth();
 };
 
 const currentMonth = () => {
   const date = new Date();
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const day = date.getDate();
-  const monthIndex = date.getMonth();
-
-  const suffix =
-    day % 10 === 1 && day !== 11
-      ? "st"
-      : day % 10 === 2 && day !== 12
-        ? "nd"
-        : day % 10 === 3 && day !== 13
-          ? "rd"
-          : "th";
-
-  return `${monthNames[monthIndex]} ${day}${suffix}`;
+  const monthShort = new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
+  return `${monthShort} ${date.getDate()} ${date.getFullYear()}`;
 };

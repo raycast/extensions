@@ -1,4 +1,4 @@
-import { MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { getIcon } from "@components/state/utils";
 import { State } from "@lib/haapi";
@@ -11,7 +11,7 @@ function InputButtonPressMenubarItem(props: { state: State }) {
   if (!isEditableInputButton(s)) {
     return null;
   }
-  return <MenuBarExtra.Item title="Press" icon="toggle.png" onAction={() => callInputButtonPressService(s)} />;
+  return <MenuBarExtra.Item title="Press" icon="cached.svg" onAction={() => callInputButtonPressService(s)} />;
 }
 
 export function InputButtonMenubarItem(props: { state: State }) {
@@ -22,6 +22,7 @@ export function InputButtonMenubarItem(props: { state: State }) {
   return (
     <MenuBarSubmenu title={getFriendlyName(s)} icon={getIcon(s)}>
       <InputButtonPressMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
   );

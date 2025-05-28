@@ -13,7 +13,8 @@
     "itsmingjie",
     "erics118",
     "brandenw",
-    "j3lte"
+    "j3lte",
+    "itsmatteomanf"
   ],
   "categories": [
     "Developer Tools",
@@ -56,7 +57,18 @@
       "title": "Admin Console",
       "subtitle": "Tailscale",
       "description": "Open the Tailscale Admin Console",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "adminConsoleURL",
+          "type": "textfield",
+          "required": false,
+          "title": "Admin Console URL",
+          "description": "URL to the Tailscale Admin Console. Intended to be used with self-hosted Tailscale installations.",
+          "default": "https://login.tailscale.com/admin/machines",
+          "placeholder": "https://login.tailscale.com/admin/machines"
+        }
+      ]
     },
     {
       "name": "status",
@@ -79,6 +91,20 @@
       "subtitle": "Tailscale",
       "description": "Tailscale down",
       "mode": "no-view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Connection",
+      "subtitle": "Tailscale",
+      "description": "Toggle Tailscale connection on/off",
+      "mode": "no-view"
+    },
+    {
+      "name": "netcheck",
+      "title": "Netcheck",
+      "subtitle": "Tailscale",
+      "description": "Tailscale netcheck",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -98,15 +124,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.61.2"
+    "@raycast/api": "^1.77.3",
+    "@raycast/utils": "^1.9.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "18.18.4",
-    "@types/react": "18.2.37",
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.3",
     "eslint": "^8.53.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,36 +1,45 @@
 import { List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { getFilters } from "./api/filters";
+import { Filter, getFilters } from "./api/filters";
 import StatusIssueList from "./components/StatusIssueList";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
 import useIssues from "./hooks/useIssues";
 
 export function MyFilters() {
-  const [query, setQuery] = useState("");
-  const [filterId, setFilterId] = useCachedState("filter-id", "");
-
-  const { data: filters, isLoading: isLoadingFilters } = useCachedPromise((query) => getFilters(query), [query], {
+  const [cachedFilter, setCachedFilter] = useCachedState<Filter>("filter");
+  const [filterQuery, setFilterQuery] = useState("");
+  const { data: filters, isLoading: isLoadingFilters } = useCachedPromise((query) => getFilters(query), [filterQuery], {
     keepPreviousData: true,
   });
 
-  const jql = useMemo(() => filters?.find((filter) => filter.id === filterId)?.jql ?? "", [filters, filterId]);
+  const isSearching = filterQuery !== "";
 
-  const { issues, isLoading, mutate } = useIssues(jql, { execute: !!jql });
+  const { issues, isLoading, mutate } = useIssues(cachedFilter?.jql ?? "", {
+    execute: cachedFilter && cachedFilter.jql !== "" && !isSearching,
+  });
 
   const searchBarAccessory = filters ? (
     <List.Dropdown
       tooltip="Filter issues by filters"
-      onChange={setFilterId}
-      value={filterId}
+      onChange={(id) => {
+        setFilterQuery("");
+        setCachedFilter(filters.find((f) => f.id === id));
+      }}
+      value={cachedFilter?.id ?? ""}
       isLoading={isLoadingFilters}
-      onSearchTextChange={setQuery}
+      onSearchTextChange={setFilterQuery}
       throttle
     >
-      {filters?.map((filter) => {
-        return <List.Dropdown.Item key={filter.id} title={filter.name ?? "Unknown filter name"} value={filter.id} />;
-      })}
+      {cachedFilter && !isSearching ? (
+        <List.Dropdown.Item key={cachedFilter.id} title={cachedFilter.name} value={cachedFilter.id} />
+      ) : null}
+      {filters
+        ?.filter((filter) => (cachedFilter && !isSearching ? filter.id !== cachedFilter?.id : true))
+        ?.map((filter) => {
+          return <List.Dropdown.Item key={filter.id} title={filter.name ?? "Unknown filter name"} value={filter.id} />;
+        })}
     </List.Dropdown>
   ) : null;
 

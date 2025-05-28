@@ -1,5 +1,165 @@
 # Changelog
 
+## 1.98.0 - 2025-05-08
+
+### ✨ New
+
+- New `Action.InstallMCPServer` to push a MCP installation form
+
+### 💎 Improvements
+
+- **Shortcuts**: It’s now possible to provide platform-specific shortcuts.
+
+### 🐞 Fixes
+
+- Fixed an issue that caused extensions containing Swift code to not compile.
+
+## 1.94.0 - 2025-03-19
+
+### ✨ New
+
+- The extensions now run on Nodejs 22 and react 19. Among other benefits, this makes `fetch` globally available. There shouldn’t be any breaking change - but if you find some, please let us know!
+  Additionally, new extensions will be bootstrapped with ESLint 9
+- **Tools**: Tools can now specify some preferences, the same way Commands can
+
+### 💎 Improvements
+
+- **CLI**: When a tool or a command (when running in the background) times out, an error message will be printed in the terminal
+- **CLI**: When publishing an extension, the PR to the extensions repository will be created as draft so you can fill the description up before submitting it
+
+## 1.93.0 - 2025-02-26
+
+### ✨ New
+
+- **Tools**: We are introducing a new type of entry points for extensions: Tools. They turn a regular extension into an AI Extension. As opposed to a command, they don’t show up in the root search and the user can’t directly interact with them. Instead, they are functionalities that the AI can use to interact with an extension.
+
+## 1.91.0 - 2025-02-05
+
+### ✨ New
+
+- **AI**: The models added in [Raycast 1.90.0](https://www.raycast.com/changelog/1-90-0) are now also part of the API
+  - DeepSeek R1² reasoning model (powered by Together AI) and its distilled version¹ (powered by Groq)
+  - OpenAI o1-mini² and o1-preview² reasoning models
+  - OpenAI o3-mini¹
+  - Google Gemini 1.5 Flash¹ and Gemini 1.5 Pro², Gemini 2.0 Flash¹ and Gemini 2.0 Flash Thinking¹ models
+  - xAI Grok-2² model
+  - Perplexity Sonar¹, Sonar Pro² and Sonar Reasoning¹ models
+
+¹ available with Raycast Pro
+² available with Raycast Pro + Advanced AI
+
+### 🐞 Fixes
+
+- **Window Management**: Added missing types for `getActiveWindow`.
+
+## 1.89.0 - 2025-01-15
+
+### 💎 Improvements
+
+- **Cache**: Clearing the cache will now delete all the files in the cache folder instead of the entire folder.
+
+## 1.88.0 - 2024-12-16
+
+### 🐞 Fixes
+
+- **Markdown**: Fixed a crash when trying to print invalid surrogate code points
+- **Types**: Fixed an issue when generating the TypeScript definition for the preferences when one of their descriptions contained `*/`
+
+## 1.87.0 - 2024-12-04
+
+### ✨ New
+
+- **Docs**: You can now find a few txt files containing all the docs that you can feed to LLMs:
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt) → All the docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt) → The API docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt) → The utils docs
+
+### 🐞 Fixes
+
+- **CLI**: Fix a couple of issues when trying to publish an extension or pull contributions
+
+## 1.86.0 - 2024-11-20
+
+### 💎 Improvements
+
+- **CLI**: The CLI that comes with `@raycast/api` does not use a platform/architecture-specific binary anymore. This should fix some issues that people encountered when trying to install the API.
+
+## 1.84.0 - 2024-10-09
+
+### 💎 Improvements
+
+- When running a no-view command with arguments, only clear the argument inputs instead of clearing the entire search bar (which brings the behaviour in line with other no-view commands)
+
+### 🐞 Fixes
+
+- Fixed a regression where `selectedItemId` wouldn’t be respected
+- Fixed a typo in the extension template’s build script
+
+## 1.81.0 - 2024-08-13
+
+### ✨ New
+
+- **Detail:** You can now render LaTeX in the Detail views. We support the following delimiters:
+  - Inline math: `\(...\)` and `\begin{math}...\end{math}`
+  - Display math: `\[...\]`, `$$...$$` and `\begin{equation}...\end{equation}`
+
+### 💎 Improvements
+
+- You can now pick a different command template for each command that you add in the `Create Extension` command’s form.
+- Added a new `Add Command` action for local extensions in the `Manage Extensions` command.
+
+## 1.80.0 - 2024-07-31
+
+### ✨ New
+
+- **AI:** OpenAI GPT-4o Mini can now be used in the API.
+- **Quicklinks:** `CreateQuickLink` now accepts an `icon` prop that allows you to customize the icon of your Quicklink.
+
+### 💎 Improvements
+
+- **Menu Bar Commands** now show a confirmation toast when activated or refreshed.
+
+## 1.79.0 - 2024-07-17
+
+### ✨ New
+
+- **Navigation**: Added a second argument to `useNavigation().push` to specify a callback called when the pushed view will be popped. You can use it to update the current view when it will become active again. There’s also a new `onPop` prop on `Action.Push` to do the same thing.
+
+### 💎 Improvements
+
+- When creating or forking an extension, an alert will be shown if you specify an existing folder (and thus avoid overwriting files without warning)
+
+## 1.78.0 - 2024-07-03
+
+### ✨ New
+
+- In addition to the new Custom Window Management commands, we are introducing a `WindowManagement` API to give you total control to move your windows depending on any kind of logic you can imagine.
+- You can now access the `ownerOrAuthorName` in the `environment`, useful for re-usable libraries.
+
+### 🐞 Fixes
+
+- **Pagination**: Fixed the TypeScript definition of the `onLoadMore` callback.
+
+## 1.77.0 - 2024-06-19
+
+### ✨ New
+
+- Updated React version to 18.3.1 to prepare for the next major version of React. This shouldn't impact any extensions but let us know if you find any unexpected behaviour.
+
+### 🐞 Fixes
+
+- **Menu Bar Extra**: fixed an issue where `Submenu` icons changed appearance based on Raycast's appearance, instead of the system's.
+
+## 1.76.0 - 2024-06-05
+
+### 💎 Improvements
+
+- Some companies requires all package.json’s names to be name-spaced (eg. `@foo/bar`). However, Raycast only understands names that _aren’t_ name-spaced. This prevented some people from creating internal extensions. In order to workaround this issue, you can now use the `@workaround` namespace in extension names (eg. `@workaround/bar`).
+
+### 🐞 Fixes
+
+- **Clipboard**: Fixed an issue where 2 items were added to the pasteboard when copying a file (one with the file name, and one with the file url). It now correctly adds 1 item with 2 representations.
+
 ## 1.74.0 - 2024-05-15
 
 ### ✨ New
@@ -165,9 +325,9 @@
 
 ## Introducing the Extension Issues Dashboard
 
-![](.gitbook/assets/extension-issues.png)
+![](.gitbook/assets/extension-issues.webp)
 
-The new Extension Issues Dashboard is designed to help you quickly troubleshoot and resolve issues in any of your extensions by providing real-time visibility into errors encountered by users. You can access it at https://www.raycast.com/extension-issues, or by using the new `View Issues` action.
+The new Extension Issues Dashboard is designed to help you quickly troubleshoot and resolve issues in any of your extensions by providing real-time visibility into errors encountered by users. You can access it at <https://www.raycast.com/extension-issues>, or by using the new `View Issues` action.
 
 ### ✨ New
 
@@ -523,7 +683,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 - **Grid**: the `Grid` component accepts three new props that should give extension authors more flexibility: `columns`, `fit` and `aspectRatio`.
 
-![](.gitbook/assets/grid-styled-sections.png)
+![](.gitbook/assets/grid-styled-sections.webp)
 
 - **Grid Sections** don't all have to look the same anymore! The grid `Section` component now _also_ accepts the `columns`, `fit` and `aspectRatio` props. When specified, they will override the value of the parent `Grid` component's prop.
 - **List**: The list supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the section order is not changed based on items' ranking values; this can be useful for use cases where a small number of fix sections should always appear in the same order when the user filters the list. We are deprecating the `enableFiltering` property.
@@ -690,7 +850,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 The `<Grid />` component's made its way to our API. It's perfect to layout media-heavy information, such as icons, images or colors. The component allows you to layout differently sized items. We designed [its API](https://developers.raycast.com/api-reference/user-interface/list) close to the `<List />` component for smooth adoption.
 
-![](.gitbook/assets/grid.png)
+![](.gitbook/assets/grid.webp)
 
 ### 🐞 Fixes
 
@@ -1015,6 +1175,6 @@ The `<Grid />` component's made its way to our API. It's perfect to layout media
 
 It's happening! We're opening up our API and store for public beta.
 
-![](.gitbook/assets/changelog-hello-world.png)
+![](.gitbook/assets/changelog-hello-world.webp)
 
 This is a big milestone for our community. We couldn't have pulled it off without our alpha testers. A massive shoutout to everybody who helped us shape the API. Now let's start building. We can't wait to see what you will come up with.

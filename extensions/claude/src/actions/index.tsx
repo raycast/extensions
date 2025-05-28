@@ -36,7 +36,7 @@ export const DestructiveAction = ({
   title,
   dialog,
   onAction,
-  shortcut = { modifiers: ["cmd"], key: "delete" },
+  shortcut = { modifiers: ["cmd"], key: "d" },
 }: {
   icon?: Image.ImageLike;
   title: string;

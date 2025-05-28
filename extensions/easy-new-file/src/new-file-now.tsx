@@ -1,16 +1,8 @@
-import {
-  closeMainWindow,
-  getPreferenceValues,
-  launchCommand,
-  LaunchProps,
-  LaunchType,
-  open,
-  showHUD,
-  showInFinder,
-} from "@raycast/api";
+import { closeMainWindow, launchCommand, LaunchProps, LaunchType, open, showInFinder, Toast } from "@raycast/api";
 import { fetchItemInputClipboardFirst, fetchItemInputSelectedFirst } from "./utils/input-item-utils";
-import { Preferences } from "./types/preferences";
-import { createNewFileWithText, getFinderPath, getNewFileType, isEmpty } from "./utils/common-utils";
+import { createNewFileWithText, getFinderPath, getNewFileType, isEmpty, showCustomHUD } from "./utils/common-utils";
+import { createdAction, defaultFileContent, defaultFileType, nullArgumentsAction } from "./types/preferences";
+import Style = Toast.Style;
 
 interface NewFileWithTextArguments {
   fileName: string;
@@ -19,8 +11,6 @@ interface NewFileWithTextArguments {
 
 export default async (props: LaunchProps<{ arguments: NewFileWithTextArguments }>) => {
   const { fileName, fileContent } = props.arguments;
-  const { createdAction, nullArgumentsAction, defaultFileType, defaultFileContent } =
-    getPreferenceValues<Preferences>();
   if (isEmpty(fileName) && isEmpty(fileContent) && nullArgumentsAction === "createWithTemplate") {
     await launchCommand({
       name: "new-file-with-template",
@@ -30,7 +20,7 @@ export default async (props: LaunchProps<{ arguments: NewFileWithTextArguments }
     return;
   }
   await closeMainWindow();
-  const inputFileType = getNewFileType(fileName ? fileName : defaultFileType);
+  await showCustomHUD({ title: "Creating...", style: Style.Animated });
 
   try {
     const curFinderPath = await getFinderPath();
@@ -50,17 +40,22 @@ export default async (props: LaunchProps<{ arguments: NewFileWithTextArguments }
       }
     }
     const inputText = fileContent ? fileContent : autoContent;
-
-    const createdFile = await createNewFileWithText(
-      inputFileType ? inputFileType.extension : defaultFileType,
-      curFinderPath,
-      inputText,
-      !isEmpty(fileName)
+    let ext: string | undefined;
+    let content = inputText;
+    let name = "";
+    if (fileName.startsWith(".") && fileName.length > 1) {
+      ext = fileName.split(".").length > 1 ? fileName.split(".")[1] : "";
+    } else {
+      const inputFileType = getNewFileType(fileName ? fileName : defaultFileType);
+      ext = inputFileType ? inputFileType.extension : defaultFileType;
+      content = inputFileType.inputContent ? inputText : defaultFileContent;
+      name = !isEmpty(fileName)
         ? inputFileType
           ? inputFileType.name
           : fileName
-        : inputText.replaceAll(".", "_").substring(0, 10),
-    );
+        : inputText.replaceAll(".", "_").substring(0, 10);
+    }
+    const createdFile = await createNewFileWithText(ext, curFinderPath, content, name);
     switch (createdAction) {
       case "no": {
         break;
@@ -74,9 +69,9 @@ export default async (props: LaunchProps<{ arguments: NewFileWithTextArguments }
       }
     }
 
-    await showHUD(`📄 ${createdFile.fileName} created in ${curFinderPath}`);
+    await showCustomHUD({ title: `📄 ${createdFile.fileName} created in ${curFinderPath}` });
   } catch (e) {
-    await showHUD("❌ " + String(e));
+    await showCustomHUD({ title: "Failed to create file.", style: Style.Failure });
     console.error(String(e));
   }
 };

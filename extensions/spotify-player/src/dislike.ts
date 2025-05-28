@@ -2,6 +2,7 @@ import { showHUD } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
 import { removeFromMySavedTracks } from "./api/removeFromMySavedTracks";
+import { safeLaunchCommandInBackground } from "./helpers/safeCommandLauncher";
 
 export default async function Command() {
   await setSpotifyClient();
@@ -24,6 +25,7 @@ export default async function Command() {
       trackIds: trackId ? [trackId] : [],
     });
     await showHUD(`Disliked ${currentlyPlayingData?.item.name}`);
+    await safeLaunchCommandInBackground("current-track");
   } catch (error) {
     await showHUD("Nothing is currently playing");
   }

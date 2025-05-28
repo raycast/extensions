@@ -1,5 +1,16 @@
 # Text Shortcuts Changelog
 
+## [Fixes & Improvements] - 2024-12-13
+
+- ✨ Added MD5 Hash action
+- ✨ Added Decode URL component action
+- ✨ Added Encode URL component action
+- 🧽 Format the source code
+
+## [Fix command descriptions] - 2024-08-20
+
+- Fix descriptions in extension preferences to match their actions.
+
 ## [Sort by Frequency of Use] - 2023-11-09
 
 - Optimize Shortcuts Sorting: Sort by Frequency of Use (Please use Edit Shortcuts in the Shortcut Library command to update custom Shortcuts so that they can be sorted by frequency of use)

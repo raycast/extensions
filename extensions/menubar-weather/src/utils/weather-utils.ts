@@ -1,18 +1,18 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../types/preferences";
-import { isEmpty } from "./common-utils";
-import { getOpenMeteoLocation, getOpenMeteoWeather } from "./axios-utils";
-import { Daily, GeoLocation } from "../types/types";
+import { Daily, KLocation } from "../types/types";
 import { weatherDescriptions } from "./icon-utils";
+import { getLocationFromAddress } from "swift:../../swift/Location";
 
+// preferences
 export const {
   iconStyle,
   cityName,
   tempUnits,
   windSpeedUnits,
   precipitationUnits,
-  longitude,
   latitude,
+  longitude,
   tempType,
   menuUVI,
   menuPressure,
@@ -24,49 +24,19 @@ export const {
   showForecast,
 } = getPreferenceValues<Preferences>();
 
-export async function getGeoLocation() {
-  const geoLocation = await getOpenMeteoLocation();
-  if (
-    typeof geoLocation !== "undefined" &&
-    typeof geoLocation.results !== "undefined" &&
-    geoLocation.results.length >= 1
-  ) {
-    return geoLocation.results[0] as GeoLocation;
-  } else
-    return {
-      id: 5128581,
-      name: "New York",
-      latitude: 40.71427,
-      longitude: -74.00597,
-      elevation: 10.0,
-      feature_code: "PPL",
-      country_code: "US",
-      admin1_id: 5128638,
-      timezone: "America/New_York",
-      population: 8175133,
-      country_id: 6252001,
-      country: "United States",
-      admin1: "New York",
-      admin2: "New York",
-    };
-}
-
-export async function getCurWeather() {
-  let weatherData;
-  let geoLocation;
-  if (!isEmptyLonLat()) {
-    weatherData = await getOpenMeteoWeather(longitude, latitude);
-    geoLocation = undefined;
-  } else {
-    geoLocation = await getGeoLocation();
-    weatherData = await getOpenMeteoWeather(geoLocation.longitude.toString(), geoLocation.latitude.toString());
+export async function getGeoLocation(): Promise<KLocation> {
+  try {
+    if (latitude && longitude && !isNaN(parseFloat(latitude)) && !isNaN(parseFloat(longitude))) {
+      return { latitude: parseFloat(latitude.trim()), longitude: parseFloat(longitude.trim()) };
+    }
+    return await getLocationFromAddress(cityName);
+  } catch (e) {
+    console.error(e);
   }
-
-  return { weather: weatherData, geoLocation: geoLocation };
-}
-
-export function isEmptyLonLat() {
-  return isEmpty(longitude) || isEmpty(latitude);
+  return {
+    latitude: 40.71427,
+    longitude: -74.00597,
+  };
 }
 
 /*

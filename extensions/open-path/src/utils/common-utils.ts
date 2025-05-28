@@ -1,24 +1,8 @@
-import { getPreferenceValues, LocalStorage, showHUD } from "@raycast/api";
+import { Cache, showHUD } from "@raycast/api";
 import { fetchItemInputClipboardFirst, fetchItemInputSelectedFirst } from "./input-item";
 import { homedir } from "os";
 import fse from "fs-extra";
-import Values = LocalStorage.Values;
-
-export interface Preference extends Values {
-  trimText: boolean;
-  isShowHud: boolean;
-  fileAction: string;
-  urlAction: string;
-  priorityDetection: string;
-  searchEngine: string;
-}
-
-export const { trimText, isShowHud, fileAction, urlAction, priorityDetection, searchEngine } =
-  getPreferenceValues<Preference>();
-
-export const isEmpty = (string: string | null | undefined) => {
-  return !(string != null && String(string).length > 0);
-};
+import { isShowHud } from "../types/preference";
 
 export const checkIsFile = (path: string) => {
   try {
@@ -29,7 +13,7 @@ export const checkIsFile = (path: string) => {
   }
 };
 
-export const isFileOrFolderPath = (path: string) => {
+export const isStartWithFileOrFolderStr = (path: string) => {
   return path.startsWith("file:///") || path.startsWith("~/") || path.startsWith(homedir());
 };
 
@@ -40,28 +24,6 @@ export const getPathFromSelectionOrClipboard = async (priorityDetection: string)
     return await fetchItemInputClipboardFirst();
   }
 };
-
-export function isEmail(text: string): boolean {
-  const regex = /^[\da-zA-Z_.-]+@[\da-zA-Z_.-]+([.][a-zA-Z]+){1,2}$/;
-  return regex.test(text);
-}
-
-export function isUrl(text: string): boolean {
-  const regex = /^((http|https|ftp):\/\/)?((?:[\w-]+\.)+[a-z\d]+)((?:\/[^/?#]*)+)?(\?[^#]+)?(#.+)?$/i;
-  return regex.test(text) || isIPUrl(text);
-}
-
-export function isIPUrl(text: string): boolean {
-  return /^(http:\/\/)?(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(
-    text,
-  );
-}
-
-export function isIPUrlWithoutHttp(text: string): boolean {
-  const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/;
-
-  return ipRegex.test(text);
-}
 
 export function isDeeplink(text: string): boolean {
   const deepLinkRegex = /^[a-zA-Z0-9-]+:\/\//;
@@ -114,5 +76,22 @@ export const searchUrlBuilder = (searchEngine: string, text: string) => {
 export const showHud = async (icon: string, content: string) => {
   if (isShowHud) {
     await showHUD(icon + " " + content);
+  }
+};
+
+export const getArgument = (arg: string, argKey: string) => {
+  const cache = new Cache({ namespace: "Args" });
+  if (typeof arg !== "undefined") {
+    // call from main window
+    cache.set(argKey, arg);
+    return arg;
+  } else {
+    // call from hotkey
+    const cacheStr = cache.get(argKey);
+    if (typeof cacheStr !== "undefined") {
+      return cacheStr;
+    } else {
+      return "";
+    }
   }
 };

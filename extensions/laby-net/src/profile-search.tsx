@@ -60,7 +60,7 @@ export default function Command() {
               accessories={[
                 {
                   icon: {
-                    source: "https://laby.net/texture/profile/head/" + entry.uuid + ".png?size=8",
+                    source: "https://laby.net/texture/profile/head/" + entry.uuid + ".png?size=32",
                     mask: Image.Mask.RoundedRectangle,
                     fallback: "command-icon.png",
                   },
@@ -73,6 +73,16 @@ export default function Command() {
                     title="Copy UUID"
                     content={entry.uuid}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                  <Action
+                    title="Remove from Search History"
+                    onAction={async () => {
+                      await service.removeSearch(entry.uuid);
+                      await service.getLatestSearches().then((res) => {
+                        setResults(res);
+                      });
+                    }}
+                    icon={Icon.Trash}
                   />
                 </ActionPanel>
               }

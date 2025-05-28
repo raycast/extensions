@@ -1,5 +1,25 @@
 # Tailscale Changelog
 
+## [Add new features] - 2025-05-04
+
+- Add `toggle connection` command
+
+## [Fixes] - 2025-04-09
+
+- Better handling of shared exit node ([#18258](https://github.com/raycast/extensions/issues/18258))
+
+## [Add new features] - 2025-01-02
+
+- Add `netcheck` command
+
+## [Improvement] - 2024-11-08
+
+- Provide UI indicator, and HUD message on `connect (tailscale up)` and `disconnect (tailscale down)` commands
+
+## [Custom Admin Console URL] - 2024-07-05
+
+- Add support for custom Admin Console URLs ([#12048](https://github.com/raycast/extensions/issues/12048))
+
 ## [Improvement] - 2024-05-23
 
 - Remove trailing `.` from the end of MagicDNS addresses ([#12451](https://github.com/raycast/extensions/issues/12451))

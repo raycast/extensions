@@ -1,5 +1,60 @@
 # Home Assistant Changelog
 
+## [AI Tools Enhancement] - 2025-04-29
+
+- Improved `get-entities` tool to only return essential entity information
+- Added `get-attributes` tool to fetch entity states and attributes
+- Enhanced `run-service` tool to ensure each call only contains entities that need the same operation
+- Added comprehensive AI instructions for handling Home Assistant device control
+- Added a new example prompt to the AI Extension
+
+## [Update] - 2025-03-13
+
+- Added preference to Dashboard command to allow opening specific HA page.
+
+## [Update] 2025-03-10
+
+- Added Custom Entities command to allow to add specific entities to the list.
+
+## [✨ AI Enhancements] - 2025-02-21
+
+- Added AI tools.
+
+## [Update] - 2024-12-17
+
+- Fixed grammar in alert message of the `Updates` command.
+- Removed unnecessary emoji from the update status of the `Updates` command.
+
+## [Update] - 2024-12-16
+
+- Updated search bar placeholder of the `Assist` command.
+- Fixed icon color of the `Assist` command.
+
+## [Update] - 2024-12-06
+
+- Renamed `Mediaplayers` and `Mediaplayer Menu` commands to `Media Players` and `Media Player Menu`.
+- Updated action icons for the `Stop` action in `Vacuum Cleaners` and `Mediaplayers` commands.
+- Updated shortcuts that were removed because they are reserved by Raycast.
+- Rewritten command descriptions for better readability and conciseness.
+
+## [Update] - 2024-09-19
+
+- Corrected typos and improved the overall readability of the extension documentation and interface.
+
+## [Update] - 2024-09-18
+
+- Enhanced the display of climate entity states to show temperature and operating mode in separate item accessories with icons.
+- Added new fan and swing modes actions when applicable to the climate entity.
+- Added toast messages to climate actions.
+
+## [Weather] - 2024-07-25
+
+- Use `weather.get_forecasts` to receive weather forecasts (required since Home Assistant `2024.07`)
+- Add sun entity support for weather menu command
+- Add `Services` and `Run Service` command to be able to call Services (including Quicklinks/Deeplinks)
+- Menu items show the last update/last change info
+- Add `Calendar` and `Calendar Menu` command
+
 ## [Update] - 2024-04-06
 
 - Sort `StatesList` in alphabetical order
@@ -54,7 +109,7 @@
 
 ## [Fix] - 2023-06-24
 
-- Get persistent notifications via websocket API instead of entities because since 2023.06 the entity option does not exist anymore.
+- Get persistent notifications via websocket API instead of entities because since 2023.06 the entity option does not exist anymore
 
 ## [Update] - 2023-06-14
 
@@ -76,19 +131,24 @@
 - Fixed that some commands didn't fully support ignore certs preference.
 
 ## [Weather Menu Bar] - 2022-11-28
+
 - Add weather entity menubar command
 
 ## [Fix Script Edit Action] - 2022-11-19
+
 - Fix wrong entity id when edit a script
 
 ## [Timestamps] - 2022-11-14
+
 - Add `last_updated` and `last_changed` states as tooltip as well as to the attributes list
 - Add HACS pending updates to `Updates` command if HACS is installed
 
 ## [Video Stream Actions] - 2022-11-01
+
 - Add action to open a camera video stream in VLC, IINA and the Browser
 
 ## [Zones] - 2022-10-31
+
 - Add Grid View support for cameras
 - Add QuickLook support for cameras in Grid View
 - Add sections for `Update`, `Motions` and `Windows` commands
@@ -99,6 +159,7 @@
 - Add `Open in Google Maps` action for persons
 
 ## [Window Support] - 2022-08-09
+
 - Add icon and state support for window device class
 - Add actions to `Edit` or `Debug` scripts or automations in the browser
 - Add action to `Edit` scenes in the browser
@@ -106,24 +167,30 @@
 - Add icon support for device classes `power_factor` and `energy`
 
 ## [Fan entity support] - 2022-06-18
+
 - Adds support for Fan entities
 
 ## [Weather entity support] - 2022-05-03
+
 - Add support for weather entities (daily and hourly)
 
 ## [Dynamic temperature options] - 2022-05-02
-- The properties of base temperature options for climate entities (min_temp, max_temp, and target_temp_step) are now used for the climate entity instead of a hardcoded list.
+
+- The properties of base temperature options for climate entities (min_temp, max_temp, and target_temp_step) are now used for the climate entity instead of a hardcoded list
 
 ## [Add door support] - 2022-04-24
+
 - Add icon and state support for device class `door`
 - Add root command `Doors` to filter entities of device class `door`
 - `update` entities now show `in progress` state when an update is running
 
 ## [Add support for update entities] - 2022-04-08
+
 - Add support for update entities from HA 2022.04
 - Add Turn On and Turn Off actions for media players
 
 ## [Added support for helpers and auto camera image fetching] - 2022-04-03
+
 - Increase max. entities to `1000`
 - Remove Initial state flickering
 - Camera now auto fetch the image

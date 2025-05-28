@@ -1,10 +1,11 @@
-import { MenuBarExtra, Clipboard, open, Cache } from "@raycast/api";
+import { MenuBarExtra, Clipboard, open, Cache, captureException } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { formatDistance } from "date-fns/formatDistance";
 import { useFetchStoredReminders } from "./hooks/useFetchStoredReminders";
 import { hasFrequencyPredicate, hasNoFrequencyPredicate } from "./utils/arrayPredicates";
 import { getNextReminder } from "./utils/getNextReminder";
 import { Reminder } from "./types/reminder";
+import { buildException } from "./utils/buildException";
 
 const addReminderDeeplink = `raycast://extensions/comoser/simple-reminder/index`;
 const raycastApplication = { name: "Raycast", path: "/Applications/Raycast.app" };
@@ -12,9 +13,23 @@ const TWO_HOURS_IN_MS = 2 * 60 * 60 * 1000;
 const MAX_TOPIC_LENGTH = 30;
 
 function getDateTimeStringForMenuBarTitle(date: Date): string {
-  if (date.getTime() - new Date().getTime() < TWO_HOURS_IN_MS)
-    return formatDistance(date, new Date().toLocaleString(), { addSuffix: true });
-  return date.toLocaleString();
+  if (!date || !(date instanceof Date)) return "";
+
+  try {
+    if (date.getTime() - new Date().getTime() < TWO_HOURS_IN_MS)
+      return formatDistance(date, new Date(), { addSuffix: true });
+    return date.toLocaleString();
+  } catch (error) {
+    captureException(
+      buildException(error as Error, "Error getting date time string for menu bar title", {
+        date,
+        type: typeof date,
+        localizedDate: date.toLocaleString(),
+      }),
+    );
+  }
+
+  return "";
 }
 
 export default function Command() {

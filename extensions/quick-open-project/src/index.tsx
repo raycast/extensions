@@ -11,11 +11,11 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import Frecency from "frecency";
+import { spawn } from "child_process";
 import { mkdirSync, statSync, readFileSync, writeFileSync } from "fs";
 import { sync } from "glob";
 import { homedir } from "os";
 import { useMemo, useState } from "react";
-import open = require("open");
 import fuzzysort = require("fuzzysort");
 import config = require("parse-git-config");
 import gh = require("parse-github-url");
@@ -114,7 +114,7 @@ function searchProjects(query?: string): {
           statSync(path)?.isDirectory() ||
           (getPreferenceValues<Preferences>().includeWorkspaces &&
             statSync(path)?.isFile() &&
-            path.endsWith(".code-workspace"))
+            path.endsWith(".code-workspace")),
       )
       .map((path) => new Project(path))
       .sort((a, b) => (a.displayPath.toLowerCase > b.displayPath.toLowerCase ? -1 : 1));
@@ -155,6 +155,10 @@ function updateFrecency(searchQuery: string | undefined, project: Project) {
   projectFrecency.save({ searchQuery: searchQuery || "", selectedId: project.fullPath });
 }
 
+function open(app: string, path: string) {
+  spawn("open", ["-a", app, path], { env: {} });
+}
+
 export default function Command() {
   const [searchQuery, setSearchQuery] = useState<string>();
   const { projects } = searchProjects(searchQuery);
@@ -178,7 +182,7 @@ export default function Command() {
                 key="editor"
                 onAction={() => {
                   updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: editorApp.path } });
+                  open(editorApp.path, project.fullPath);
                   closeMainWindow();
                 }}
                 icon={{ fileIcon: editorApp.path }}
@@ -190,7 +194,7 @@ export default function Command() {
                   key="editorAlt"
                   onAction={() => {
                     updateFrecency(searchQuery, project);
-                    open(project.fullPath, { app: { name: editorAppAlt.path } });
+                    open(editorAppAlt.path, project.fullPath);
                     closeMainWindow();
                   }}
                   icon={{ fileIcon: editorAppAlt.path }}
@@ -202,9 +206,7 @@ export default function Command() {
                 key="terminal"
                 onAction={() => {
                   updateFrecency(searchQuery, project);
-                  open(project.fullPath, {
-                    app: { name: terminalApp.path, arguments: [project.fullPath] },
-                  });
+                  open(terminalApp.path, project.fullPath);
                   closeMainWindow();
                 }}
                 icon={{ fileIcon: terminalApp.path }}
@@ -215,12 +217,12 @@ export default function Command() {
                 key="both"
                 onAction={() => {
                   updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: terminalApp.path, arguments: [project.fullPath] } });
-                  open(project.fullPath, { app: { name: editorApp.path } });
+                  open(terminalApp.path, project.fullPath);
+                  open(editorApp.path, project.fullPath);
                   closeMainWindow();
                 }}
                 icon={Icon.Window}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
               />
               {project.gitRemotes().map((remote, i) => {
                 const shortcut = i === 0 ? ({ modifiers: ["cmd"], key: "b" } as Keyboard.Shortcut) : undefined;
@@ -259,7 +261,7 @@ export default function Command() {
                 key="clipboard"
                 onCopy={() => updateFrecency(searchQuery, project)}
                 content={project.fullPath}
-                shortcut={{ modifiers: ["cmd"], key: "p" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
             </ActionPanel>
           }

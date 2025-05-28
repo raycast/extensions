@@ -1,29 +1,26 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import OBSWebSocket from "obs-websocket-js";
+import type OBSWebSocket from "obs-websocket-js";
 import useSWR from "swr";
-import { getObs } from "./lib/obs";
-import { appInstalled, appNotInstallAlertDialog, showWebsocketConnectionErrorToast } from "./lib/utils";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { getObs } from "@/lib/obs";
+import { showWebsocketConnectionErrorToast } from "@/lib/utils";
+import useIsInstalled from "./hooks/use-is-installed";
 
 let obs: OBSWebSocket;
 
 export default function SetScene() {
-  const { data: isAppInstalled } = useSWR("appInstalled", async () => {
-    const installed = await appInstalled();
-
-    if (!installed) {
-      await appNotInstallAlertDialog();
-    }
-
-    return installed;
-  });
-
+  const isAppInstalled = useIsInstalled();
   const { data, mutate, error } = useSWR(
     () => (isAppInstalled ? "/api/scenes" : null),
     async () => {
       obs = await getObs();
-
-      return await obs.call("GetSceneList");
-    }
+      return (await obs.call("GetSceneList")) as unknown as {
+        scenes: Array<{
+          sceneName: string;
+          sceneIndex: number;
+        }>;
+        currentProgramSceneName: string;
+      };
+    },
   );
 
   if (error) {
@@ -32,7 +29,7 @@ export default function SetScene() {
 
   return (
     <List>
-      {data?.scenes.map((scene: any) => {
+      {data?.scenes.map((scene) => {
         const isCurrent = data?.currentProgramSceneName === scene.sceneName;
 
         return (

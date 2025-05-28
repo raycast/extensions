@@ -28,16 +28,19 @@ def convert(file_path):
     file = open(file_path, 'r', encoding='utf-8')
     file_contents = file.read()
     dict = []
+    # Adding the items to this object first removes all duplicates.
+    placeholder = {}
 
     for line in file_contents.splitlines():
         parts = regex_pattern.match(line)
-
         if not parts:
             continue
+        placeholder[parts.group(1).lower()] = {'o': parts.group(1), 'i': parts.group(2)}
 
-        dict.append({'original': parts.group(1), 'ipa': parts.group(2)})
+    for attr, value in placeholder.items():
+        dict.append(value)
 
-    return {'dict': dict}
+    return dict
 
 
 textFilePath = sys.argv[1]

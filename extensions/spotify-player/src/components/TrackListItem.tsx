@@ -6,6 +6,7 @@ import { TrackActionPanel } from "./TrackActionPanel";
 type TrackListItemProps = {
   track: SimplifiedTrackObject;
   album?: SimplifiedAlbumObject;
+  showAddToSaved?: boolean;
   showGoToAlbum?: boolean;
   playingContext?: string;
   tracksToQueue?: SimplifiedTrackObject[];
@@ -14,6 +15,7 @@ type TrackListItemProps = {
 export default function TrackListItem({
   track,
   album,
+  showAddToSaved,
   showGoToAlbum,
   playingContext,
   tracksToQueue,
@@ -39,6 +41,7 @@ export default function TrackListItem({
           title={title}
           track={track}
           album={album}
+          showAddToSaved={showAddToSaved}
           showGoToAlbum={showGoToAlbum}
           playingContext={playingContext}
           tracksToQueue={tracksToQueue}

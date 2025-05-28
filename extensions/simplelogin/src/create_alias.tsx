@@ -111,8 +111,8 @@ export default function Command() {
         </>
       </Form.Dropdown>
       <Form.Separator />
-      <Form.TextField id="alias_name" title="Alias name (optional)" placeholder="Enter name" />
-      <Form.TextArea id="note" title="Note (optional)" placeholder="Enter description" />
+      <Form.TextField id="alias_name" title="Display name (optional)" placeholder="Enter display name" />
+      <Form.TextArea id="note" title="Description (optional)" placeholder="Enter description" />
     </Form>
   );
 }

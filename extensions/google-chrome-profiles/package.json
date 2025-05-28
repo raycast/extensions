@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "frouo",
   "contributors": [
-    "erics118"
+    "erics118",
+    "jschmidtcordeiro"
   ],
   "license": "MIT",
   "commands": [
@@ -56,5 +57,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

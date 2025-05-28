@@ -3,7 +3,6 @@ import { saveUrl } from './utils'
 
 export default async function QuickCapture(props: LaunchProps<{ arguments: Arguments.OmnivoreCapture }>) {
   const { url, labels } = props.arguments
-  console.log({ labels })
 
   showToast({
     style: Toast.Style.Animated,

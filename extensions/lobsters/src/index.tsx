@@ -59,7 +59,7 @@ export default function Command() {
 }
 
 function StoryListItem({ item }: { item: ParsedItem }) {
-  const { authoredBy, nickname } = getAuthor(item.creator);
+  const { broughtBy, nickname } = getBroughtBy(item.creator);
   const icon = getIcon(nickname);
   const keywords = [...(item?.categories ?? []), nickname];
 
@@ -69,7 +69,7 @@ function StoryListItem({ item }: { item: ParsedItem }) {
       title={item.title ?? "No title"}
       subtitle={item.categories?.join(", ")}
       keywords={keywords}
-      accessoryTitle={authoredBy}
+      accessoryTitle={broughtBy}
       actions={<Actions title={item.title} link={item.link} guid={item.guid} />}
     />
   );
@@ -98,11 +98,17 @@ function getIcon(nickname: string) {
   };
 }
 
-function getAuthor(creator: string) {
-  const nickname = creator?.match(/\((.*)\)/)?.[1];
+function getBroughtBy(creator: string) {
+  let nickname = "untitled";
+
+  if (creator.includes(" via ")) {
+    nickname = creator.split(" via ")?.[1];
+  } else if (creator.includes(" by ")) {
+    nickname = creator.split(" by ")?.[1];
+  }
 
   return {
-    authoredBy: nickname ? `by ${nickname} 🦞` : "untitled",
-    nickname: nickname ?? "",
+    broughtBy: creator + "🦞",
+    nickname,
   };
 }

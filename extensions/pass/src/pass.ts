@@ -14,12 +14,15 @@ async function envPath(): Promise<string> {
 }
 
 export async function pass(cmd: string, storeDir: string = ''): Promise<string> {
-  const { stdout, stderr } = await execAsync(`pass ${cmd}`, {
+  const passCmd = `pass ${cmd}`;
+  delete process.env.LC_ALL; // Fix for nix-darwin locale error
+
+  const { stdout, stderr } = await execAsync(passCmd, {
     timeout: 10000,
     env: {
-      ...process.env,
       PATH: await envPath(),
       PASSWORD_STORE_DIR: storeDir,
+      ...process.env,
     },
   });
 
@@ -51,5 +54,9 @@ export async function list(storeDir: string, subDir: string = ''): Promise<strin
 }
 
 export async function decrypt(path: string, storeDir: string): Promise<string> {
-  return pass(path, storeDir);
+  return pass(`'${path}'`, storeDir);
+}
+
+export async function otp(path: string, storeDir: string): Promise<string> {
+  return pass(`otp '${path}'`, storeDir);
 }

@@ -3,7 +3,7 @@ import { getSelectedFinderPaths } from "./utils";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.AddQuickAccessOverlay }>) {
   const url = "cleanshot://add-quick-access-overlay";
-  const filepaths = props?.arguments?.filepath ? [props.arguments.filepath] : await getSelectedFinderPaths();
+  const filepaths = props.arguments?.filepath ? [props.arguments.filepath] : await getSelectedFinderPaths();
 
   if (filepaths.length === 0) {
     return showToast({

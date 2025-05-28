@@ -5,8 +5,13 @@
   "description": "Interact with your Alpaca trading account",
   "icon": "command-icon.png",
   "author": "stelo",
-  "contributors": ["srikirank"],
-  "categories": ["Finance", "Productivity"],
+  "contributors": [
+    "srikirank"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -65,8 +70,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.3",
     "eslint": "^8.51.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-simple-import-sort": "^12.1.0",

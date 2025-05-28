@@ -5,6 +5,9 @@
   "icon": "extension_icon.png",
   "description": "Copy & Paste Tabler Icons",
   "author": "zavbala",
+  "contributors": [
+    "bensomething"
+  ],
   "categories": [
     "Web",
     "Design Tools",
@@ -21,7 +24,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.59.0",
-    "axios": "^1.5.1"
+    "axios": "^1.8.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

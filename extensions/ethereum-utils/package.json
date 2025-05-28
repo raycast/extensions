@@ -5,6 +5,10 @@
   "description": "Collection of utils for Ethereum and EVM-compatible chain development",
   "icon": "icon.png",
   "author": "destiner",
+  "contributors": [
+    "jeremyhd",
+    "Phillip-Kemper"
+  ],
   "categories": [
     "Data",
     "Developer Tools",
@@ -67,12 +71,20 @@
       "subtitle": "Ethereum (EVM) Utils",
       "description": "Resolves decentralized naming service (e.g. ENS) records",
       "mode": "view"
+    },
+    {
+      "name": "etherscan",
+      "title": "Search on Etherscan",
+      "subtitle": "Ethereum (EVM) Utils",
+      "description": "Search Address, Transaction, or Token on Etherscan",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.69.3",
+    "@raycast/utils": "^1.16.1",
     "abi-coder": "^5.0.0",
-    "axios": "^1.6.8",
+    "axios": "^1.8.4",
     "ethers": "^6.11.1"
   },
   "devDependencies": {
@@ -88,6 +100,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

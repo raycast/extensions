@@ -1,68 +1,73 @@
 import {
-  fileAction,
+  getArgument,
   getPathFromSelectionOrClipboard,
-  isEmail,
-  isEmpty,
-  isFileOrFolderPath,
-  isIPUrlWithoutHttp,
-  priorityDetection,
+  isStartWithFileOrFolderStr,
   showHud,
-  trimText,
 } from "./utils/common-utils";
 import fse from "fs-extra";
 import { homedir } from "os";
-import { isIP } from "net";
-import { filePathAction, urlPathAction } from "./utils/path-utils";
-import { closeMainWindow, open } from "@raycast/api";
+import { filePathAction, openPathInTerminal, urlPathAction } from "./utils/path-utils";
+import { closeMainWindow, getFrontmostApplication, LaunchProps, open, updateCommandMetadata } from "@raycast/api";
+import validator, { isEmpty } from "validator";
+import { OpenIn, OpenInArguments, priorityDetection, trimText } from "./types/preference";
+import { getFinderPath } from "./utils/applescript-utils";
 
-export default async () => {
+export default async (props: LaunchProps<{ arguments: OpenInArguments }>) => {
   await closeMainWindow();
+  const openIn_ = getArgument(props.arguments.openIn, `OpenIn`);
+  const openIn = isEmpty(openIn_) ? OpenIn.FINDER : openIn_;
+
+  // Update metadata
+  await updateCommandMetadata({ subtitle: validator.isEmpty(openIn) ? OpenIn.FINDER : openIn });
+
+  const frontmostApp = await getFrontmostApplication();
+  if (openIn === OpenIn.TERMINAL && frontmostApp.name === "Finder") {
+    const finderPath = await getFinderPath();
+    await openPathInTerminal(finderPath);
+    return;
+  }
+
   const _getText = await getPathFromSelectionOrClipboard(priorityDetection);
   const path = trimText ? _getText.trim() : _getText;
 
-  if (isEmpty(path)) {
+  if (validator.isEmpty(path)) {
     await showHud("⭕️", "Nothing detected");
     return;
   }
 
   // Open file, folder
-  if (fse.pathExistsSync(path)) {
-    await filePathAction(path, fileAction);
+  const filePath = path.startsWith("~/") ? path.replace("~", homedir()) : path;
+  if (fse.pathExistsSync(filePath)) {
+    if (validator.isEmpty(openIn) || openIn === OpenIn.FINDER) {
+      await filePathAction(filePath);
+    } else if (openIn === OpenIn.TERMINAL) {
+      await openPathInTerminal(filePath);
+    }
     return;
-  }
-  // open ~/file, ~/folder
-  const homedirPath = path.startsWith("~/") ? path.replace("~", homedir()) : path;
-  if (fse.pathExistsSync(homedirPath)) {
-    await filePathAction(homedirPath, fileAction);
-    return;
-  }
-  // Re-judge, if path is similar to file path and does not exist then error is reported
-  if (isFileOrFolderPath(path)) {
-    await showHud("🚫", "Error Path: " + path);
+  } else if (isStartWithFileOrFolderStr(path)) {
+    await showHud("🚨", "Error Path: " + path);
     return;
   }
 
   //Open IP
-  if (isIP(path) !== 0 || isIPUrlWithoutHttp(path)) {
-    await showHud("🔗", "Open IP: " + path);
+  if (validator.isIP(path)) {
     if (path.startsWith("127.0.0.1")) {
       await open("http://www." + path);
     } else {
       await open("http://" + path);
     }
+    await showHud("🅿️", "Open IP: " + path);
     return;
   }
 
   // Open Email
-  if (isEmail(path)) {
-    await showHud("📧", "Send Email: " + path);
-    await open("mailto:" + path);
-    return;
-  }
-  // Open Email(mailto:)
-  if (path.startsWith("mailto:")) {
-    await showHud("📧", "Send Email: " + path);
-    await open(path);
+  if (validator.isEmail(path) || validator.isMailtoURI(path)) {
+    let email = path;
+    if (path.startsWith("mailto:")) {
+      email = path.replace("mailto:", "");
+    }
+    await showHud("📧", "Send Email: " + email);
+    await open("mailto:" + email);
     return;
   }
 

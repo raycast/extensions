@@ -4,7 +4,7 @@ This is a Raycast extension for [Resend](https://resend.com/). With this extensi
 
 ## 🚀 Getting Started
 
-1. **Install extensions**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/resend)
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/resend)
 
 2. **Get your API Key**: The first time you use the extension, you'll need to enter your Resend API key:
 
@@ -41,11 +41,4 @@ This extension provides the following commands:
   - View Contacts
   - Create, Update And Delete Contacts
 
-## 🛠️ Installation
-
-To install this extension from the source code, follow these steps:
-
-1.  Clone this repository.
-2.  Run `npm install` to install the dependencies.
-3.  Run `npm run build` to build the extension.
-4.  Run `npm run publish` to publish the extension to Raycast store.
+Additionally, this extension supports [AI tools](https://youtu.be/sHIlFKKaq0A), so you can use it with natural language by mentioning `@resend`.

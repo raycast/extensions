@@ -1,16 +1,17 @@
-import { useEffect } from "react";
 import { useCachedPromise } from "@raycast/utils";
+import { fetch } from "cross-fetch";
 import { decode } from "iconv-lite";
 import { nanoid } from "nanoid";
-import { fetch } from "cross-fetch";
-import {
-  Suggestion,
-  SearchConfigs,
-  GoogleSuggestionParser,
-  EcosiaSuggestionParser,
-  KagiSuggestionParser,
-} from "./types";
+import { useEffect } from "react";
 import { searchArcPreferences } from "./preferences";
+import {
+  EcosiaSuggestionParser,
+  GoogleSuggestionParser,
+  KagiSuggestionParser,
+  SearchConfigs,
+  Suggestion,
+} from "./types";
+import { isURL } from "./utils";
 
 const config: SearchConfigs = {
   google: {
@@ -83,6 +84,11 @@ const config: SearchConfigs = {
       });
     },
   },
+  unduck: {
+    search: "https://unduck.link?q=",
+    suggestions: null,
+    suggestionParser: null,
+  },
 };
 
 async function parseResponse(response: Response) {
@@ -109,7 +115,17 @@ function getDefaultSuggestions(searchText?: string): Suggestion[] {
   if (!searchText) {
     return [];
   }
+  const openUrl = isURL(searchText)
+    ? [
+        {
+          id: nanoid(),
+          query: `Open URL ${searchText}`,
+          url: searchText,
+        },
+      ]
+    : [];
   return [
+    ...openUrl,
     {
       id: nanoid(),
       query: searchText,
@@ -136,7 +152,7 @@ export function useSuggestions(searchText: string) {
       return [...getDefaultSuggestions(searchText), ...parsed];
     },
     [],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   useEffect(() => {

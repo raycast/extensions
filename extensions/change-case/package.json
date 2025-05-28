@@ -13,15 +13,30 @@
   "contributors": [
     "pernielsentikaer",
     "nagauta",
-    "PWrzesinski"
+    "PWrzesinski",
+    "yug2005"
   ],
   "keywords": [
     "text",
     "transform",
-    "string",
-    "sponge"
+    "capital",
+    "header",
+    "lower",
+    "pascal",
+    "random",
+    "sentence",
+    "title"
   ],
   "license": "MIT",
+  "debug": {
+    "reloadShortcut": {
+      "key": "r",
+      "modifiers": [
+        "command",
+        "shift"
+      ]
+    }
+  },
   "commands": [
     {
       "name": "change-case",
@@ -32,13 +47,31 @@
   ],
   "preferences": [
     {
-      "name": "popToRoot",
-      "type":"checkbox",
-      "default": false,
+      "name": "preserveCase",
+      "type": "checkbox",
+      "default": true,
       "title": "Behavior",
-      "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root after Action.",
-      "label": "Pop to Root after Action",
+      "description": "Uncheck this option to first lowercase the text before applying transformations. See README for details.",
+      "label": "Preserve Casing",
       "required": true
+    },
+    {
+      "name": "popToRoot",
+      "type": "checkbox",
+      "default": false,
+      "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root transforming the text.",
+      "label": "Pop to Root After Action",
+      "required": true
+    },
+    {
+      "name": "exceptions",
+      "type": "textfield",
+      "title": "Title and Sentence Case Exceptions",
+      "description": "Words or phrases that should not be modified, separated by commas.",
+      "default": "iOS, iPadOS, iPhone, macOS, tvOS, watchOS",
+      "placeholder": "Comma-separated list of words or phrases",
+      "label": "label",
+      "required": false
     },
     {
       "name": "source",
@@ -74,6 +107,22 @@
         }
       ],
       "default": "paste",
+      "required": false
+    },
+    {
+      "name": "prefixCharacters",
+      "type": "textfield",
+      "title": "Prefix Characters",
+      "description": "Characters to retain at the beginning of the input. Eg, `_` to keep underscores in `__typename`",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "suffixCharacters",
+      "type": "textfield",
+      "title": "Suffix Characters",
+      "description": "Characters to retain at the end of the input. Eg, `_` to keep underscores in `type_`",
+      "default": "",
       "required": false
     },
     {
@@ -118,14 +167,6 @@
       "required": false
     },
     {
-      "name": "KebabCase",
-      "type": "checkbox",
-      "description": "Enable the \"kebab-case\" Transformation",
-      "label": "Kebab Case",
-      "default": true,
-      "required": false
-    },
-    {
       "name": "LowerCase",
       "type": "checkbox",
       "description": "Enable the \"lower case\" Transformation",
@@ -142,14 +183,6 @@
       "required": false
     },
     {
-      "name": "MacroCase",
-      "type": "checkbox",
-      "description": "Enable the \"MACRO_CASE\" Transformation",
-      "label": "Macro Case",
-      "default": true,
-      "required": false
-    },
-    {
       "name": "NoCase",
       "type": "checkbox",
       "description": "Enable the \"no case\" Transformation",
@@ -158,10 +191,18 @@
       "required": false
     },
     {
-      "name": "ParamCase",
+      "name": "KebabCase",
       "type": "checkbox",
-      "description": "Enable the \"param-case\" Transformation",
-      "label": "Param Case",
+      "description": "Enable the \"kebab-case\" Transformation",
+      "label": "Kebab Case",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "KebabUpperCase",
+      "type": "checkbox",
+      "description": "Enable the \"KEBAB-UPPER-CASE\" Transformation",
+      "label": "Kebab Upper Case",
       "default": true,
       "required": false
     },
@@ -244,38 +285,22 @@
       "label": "Upper First",
       "default": true,
       "required": false
-    },
-    {
-      "name": "SpongeCase",
-      "type": "checkbox",
-      "description": "Enable the \"SPonGE CasE\" Transformation",
-      "label": "Sponge Case",
-      "default": true,
-      "required": false
-    },
-    {
-      "name": "TrainCase",
-      "type": "checkbox",
-      "description": "Enable the \"Train-Case\" Transformation",
-      "label": "Train Case",
-      "default": true,
-      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.1",
-    "change-case": "^5.4.3",
+    "@raycast/api": "^1.75.2",
+    "change-case": "^5.4.4",
     "sponge-case": "^2.0.3",
     "swap-case": "^3.0.3",
     "title-case": "^4.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.11.25",
-    "@types/react": "18.2.64",
+    "@types/node": "20.13.0",
+    "@types/react": "18.3.3",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.2"
+    "prettier": "^3.3.0",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -18,14 +18,14 @@ export default function Model() {
     <ActionPanel>
       <Action
         title={"Edit Model"}
-        shortcut={{ modifiers: ["cmd"], key: "t" }}
-        icon={Icon.Text}
+        shortcut={{ modifiers: ["cmd"], key: "e" }}
+        icon={Icon.Pencil}
         onAction={() => push(<ModelForm model={model} use={{ models }} />)}
       />
       <Action
         title={"Create Model"}
-        shortcut={{ modifiers: ["cmd"], key: "t" }}
-        icon={Icon.Text}
+        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        icon={Icon.Plus}
         onAction={() => push(<ModelForm name={searchText} use={{ models }} />)}
       />
       {model.id !== "default" && (
@@ -89,7 +89,7 @@ export default function Model() {
       onSearchTextChange={setSearchText}
     >
       {models.data.length === 0 ? (
-        <List.EmptyView title="No custom models" description="Create new model with ⌘ + T shortcut" icon={Icon.Stars} />
+        <List.EmptyView title="No custom models" description="Create a new model with ⌘ + N" icon={Icon.Stars} />
       ) : (
         <>
           <ModelListItem

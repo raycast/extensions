@@ -8,7 +8,7 @@ import { InputButtonMenubarItem } from "@components/input_button/menu";
 import { InputSelectMenubarItem } from "@components/input_select/menu";
 import { LightMenubarItem } from "@components/light/menu";
 import { MediaPlayerMenubarItem } from "@components/mediaplayer/menu";
-import { CopyToClipboardMenubarItem, MenuBarItemConfigureCommand, MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { PersonMenubarItem } from "@components/person/menu";
 import { SceneMenubarItem } from "@components/scene/menu";
 import { ScriptMenubarItem } from "@components/script/menu";
@@ -18,20 +18,22 @@ import { VacuumMenubarItem } from "@components/vacuum/menu";
 import { WeatherMenubarItem } from "@components/weather/menu";
 import { State } from "@lib/haapi";
 import { ensureShort, getErrorMessage, getFriendlyName } from "@lib/utils";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
 import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import React from "react";
 import { getIcon, getStateValue } from "./utils";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
   const s = props.state;
-  return <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />;
+  return <RUIMenuBarExtra.CopyToClipboard title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />;
 }
 
 export function CopyEntityStateToClipboardMenubarItem(props: { state: State }) {
   const s = props.state;
-  return <CopyToClipboardMenubarItem title="Copy Entity State" content={s.state} tooltip={s.state} />;
+  return <RUIMenuBarExtra.CopyToClipboard title="Copy Entity State" content={s.state} tooltip={s.state} />;
 }
 
-export function StateMenubarItem(props: { state: State }): JSX.Element | null {
+export function StateMenubarItem(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   const e = s.entity_id;
   const domain = e.split(".")[0];
@@ -92,6 +94,7 @@ export function StateMenubarItem(props: { state: State }): JSX.Element | null {
       subtitle={ensureShort(getStateValue(s))}
       icon={getIcon(s)}
     >
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
       <CopyEntityStateToClipboardMenubarItem state={s} />
     </MenuBarSubmenu>
@@ -113,11 +116,11 @@ export function MenuBarExtraEntity(props: { state: State | undefined; isLoading?
   return (
     <MenuBarExtra
       title={stateValue(s)}
-      icon={s ? getIcon(s) : "entity.png"}
+      icon={s ? getIcon(s) : "shape.svg"}
       tooltip={s ? getFriendlyName(s) : undefined}
       isLoading={props.isLoading}
     >
-      <MenuBarItemConfigureCommand />
+      <RUIMenuBarExtra.ConfigureCommand />
     </MenuBarExtra>
   );
 }

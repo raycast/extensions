@@ -1,5 +1,8 @@
 # Google Chrome Profiles Changelog
 
+## [Quicklinks] - 2024-07-29
+- Add support for quicklinks to open a chosen profile in a specific url.
+
 ## [Quicklinks] - 2023-09-22
 - Support quicklinks to open a chosen profile.
 

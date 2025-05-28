@@ -44,6 +44,23 @@ Got the answer that you wanted? Great.
 
 # Models available
 
+## Claude 4
+
+- `claude-sonnet-4-20250514`
+
+## Claude 3.7
+
+- `claude-3-7-sonnet-latest`
+- `claude-3-7-sonnet-20250219`
+
+## Claude 3.5
+
+- `claude-3-5-haiku-latest`
+- `claude-3-5-haiku-20241022`
+- `claude-3-5-sonnet-latest`
+- `claude-3-5-sonnet-20241022`
+- `claude-3-5-sonnet-20240620`
+
 ## Claude 3
 
 - `claude-3-haiku-20240307`
@@ -70,7 +87,8 @@ All preferences properties list that can be customize through `Raycast Settings 
 
 | Properties               | Label                  | Value                               | Required | Default | Description                                                                                                      |
 | ------------------------ | ---------------------- | ----------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| `apiKey`                 | API Key                | `string`                            | `true`   | `empty` | Your personal Anthropic API key                                                                                   |
-| `isAutoLoadText`         | Auto-load              | `boolean`                           | `false`  | `false` | Load selected text from your frontmost application to the `question bar` or `full text input form` automatically |
+| `apiKey`                 | API Key                | `string`                            | `true`   | `empty` | Your personal Anthropic API key |
+| `useStream`              | Stream Responses        | `boolean`                           | `true`   | `true`  | Stream responses from Claude in real-time |                                                                         
+| `isAutoLoadText`         | Auto-load              | `boolean`                           | `false`  | `false` | Load selected text from your front most application to the `question bar` or `full text input form` automatically |
 | `isAutoFullInput`        | Use Full Text Input    | `boolean`                           | `false`  | `false` | Switch to `full text input form` from `question bar` automatically whenever you want to ask or type a question   |
 ---

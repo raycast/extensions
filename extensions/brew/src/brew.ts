@@ -51,7 +51,7 @@ export interface CaskDependency {
 }
 
 export interface Formula extends Installable, Nameable {
-  license: string;
+  license: string | null;
   aliases: string[];
   dependencies: string[];
   build_dependencies: string[];
@@ -98,6 +98,11 @@ export interface OutdatedResults {
   casks: OutdatedCask[];
 }
 
+export interface InstalledMap {
+  formulae: Map<string, Formula>;
+  casks: Map<string, Cask>;
+}
+
 /// Paths
 
 export const brewPrefix = (() => {
@@ -119,7 +124,18 @@ const installedCachePath = utils.cachePath("installedv2.json");
 const formulaCachePath = utils.cachePath("formula.json");
 const caskCachePath = utils.cachePath("cask.json");
 
-export async function brewFetchInstalled(useCache: boolean, cancel?: AbortController): Promise<InstallableResults> {
+export async function brewFetchInstalled(
+  useCache: boolean,
+  cancel?: AbortController,
+): Promise<InstalledMap | undefined> {
+  const results = await brewFetchInstallableResults(useCache, cancel);
+  return brewMapInstalled(results);
+}
+
+async function brewFetchInstallableResults(
+  useCache: boolean,
+  cancel?: AbortController,
+): Promise<InstallableResults | undefined> {
   async function installed(): Promise<string> {
     return (await execBrew(`info --json=v2 --installed`, cancel)).stdout;
   }
@@ -175,6 +191,24 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortContro
   }
 }
 
+function brewMapInstalled(installed?: InstallableResults): InstalledMap | undefined {
+  if (!installed) {
+    return undefined;
+  }
+
+  const formulae = new Map<string, Formula>();
+  for (const formula of installed.formulae) {
+    formulae.set(formula.name, formula);
+  }
+
+  const casks = new Map<string, Cask>();
+  for (const cask of installed.casks) {
+    casks.set(cask.token, cask);
+  }
+
+  return { formulae: formulae, casks: casks };
+}
+
 export async function brewFetchOutdated(greedy: boolean, cancel?: AbortController): Promise<OutdatedResults> {
   let cmd = `outdated --json=v2`;
   if (greedy) {
@@ -208,7 +242,7 @@ export async function brewFetchCasks(): Promise<Cask[]> {
 export async function brewSearch(
   searchText: string,
   limit?: number,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<InstallableResults> {
   searchQuery = searchText;
 
@@ -240,7 +274,11 @@ export async function brewSearch(
 
     casks = casks
       ?.filter((cask) => {
-        return cask.token.toLowerCase().includes(target) || cask.desc?.toLowerCase().includes(target);
+        return (
+          cask.token.toLowerCase().includes(target) ||
+          cask.name.some((name) => name.toLowerCase().includes(target)) ||
+          cask.desc?.toLowerCase().includes(target)
+        );
       })
       .sort((lhs, rhs) => {
         return brewCompare(lhs.token, rhs.token, target);

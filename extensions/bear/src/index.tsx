@@ -26,7 +26,7 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
     showToast(Toast.Style.Failure, "Something went wrong", error.message);
   }
 
-  const showDetail = (notes ?? []).length > 0 && getPreferenceValues().showPreviewInListView;
+  const showDetail = (notes ?? []).length > 0 && getPreferenceValues<Preferences>().showPreviewInListView;
   const handleTagChange = (tag: string | null) => setSelectedTag(tag);
 
   return (
@@ -72,7 +72,7 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
           actions={
             <ActionPanel>
               <Action
-                title="Create new note"
+                title="Create New Note"
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 onAction={() => createBasicNote(searchQuery)}
               />

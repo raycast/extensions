@@ -41,6 +41,11 @@ This extension brings GitHub Enterprise support to Raycast through the use of Gr
   - `repo`
   - `user`
   - `write:discussion`
+
+  optional, if you want to use notifications command and menu bar icon
+  - `read:org`
+  - `read:project`
+
 - Click `Generate token` and save this value somewhere. **You'll only be able to see this once**.
 
 > Future updates to this extension will offer more functionality that may require additional scopes be defined in this token.

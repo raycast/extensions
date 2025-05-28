@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List, Toast, environment, popToRoot, showToa
 import { RenameForm, deleteDirectory } from "../utils";
 import { Directory } from "./directory";
 import { FileDataType } from "../types";
+import { GitIgnoreHelper } from "@gerhobbelt/gitignore-parser";
 
 export function DirectoryItem(props: {
   fileData: FileDataType;
@@ -9,6 +10,7 @@ export function DirectoryItem(props: {
   isSymlink?: boolean;
   originalPath?: string;
   preferences: Preferences;
+  ignores: GitIgnoreHelper[];
 }) {
   const isSymlink = props.isSymlink ?? false;
   const originalPath = props.originalPath ?? "";
@@ -23,12 +25,17 @@ export function DirectoryItem(props: {
       id={filePath}
       title={props.fileData.name}
       subtitle={props.preferences.showFilePermissions ? props.fileData.permissions : ""}
+      keywords={props.preferences.searchByPermissions ? [props.fileData.permissions] : undefined}
       icon={{ fileIcon: filePath }}
       quickLook={{ path: filePath, name: props.fileData.name }}
       actions={
         <ActionPanel title={props.fileData.name}>
           <ActionPanel.Section>
-            <Action.Push title={`Open ${typeName}`} icon={Icon.ArrowRight} target={<Directory path={filePath} />} />
+            <Action.Push
+              title={`Open ${typeName}`}
+              icon={Icon.ArrowRight}
+              target={<Directory path={filePath} ignores={props.ignores} />}
+            />
             <Action.OpenWith path={filePath} onOpen={() => popToRoot({ clearSearchBar: true })} />
             <Action.ShowInFinder path={filePath} shortcut={{ modifiers: ["cmd"], key: "f" }} />
             <Action.ToggleQuickLook title="Quick Look" shortcut={{ modifiers: ["cmd"], key: "y" }} />

@@ -1,25 +1,24 @@
-import { Action, ActionPanel, Form } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { say } from "mac-say";
 import { ConfigureSpokenContent } from "./components/actions.js";
 import { systemDefault } from "./constants.js";
+import { useSaySettings } from "./utils.js";
 
 export default function TextToSay() {
-  const [voice] = useCachedState<string>("voice", systemDefault);
-  const [rate] = useCachedState<string>("rate", systemDefault);
-  const [audioDevice] = useCachedState<string>("audioDevice", systemDefault);
+  const { voice, rate, device } = useSaySettings();
 
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={Icon.SpeechBubbleActive}
             title="Say"
             onSubmit={async (values) => {
               await say(values.content, {
                 voice: voice === systemDefault ? undefined : voice,
                 rate: rate === systemDefault ? undefined : parseInt(rate, 10),
-                audioDevice: audioDevice === systemDefault ? undefined : audioDevice,
+                audioDevice: device === systemDefault ? undefined : device,
               });
             }}
           />

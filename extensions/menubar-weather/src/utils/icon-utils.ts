@@ -132,6 +132,7 @@ const raycastMenuIcons = new Map([
   ["1Hour", Icon.Raindrop],
   ["Sunrise", Icon.Sunrise],
   ["Sunset", Icon.Moonrise],
+  ["Street", Icon.AlignLeft],
   ["City", Icon.Building],
   ["Country", Icon.Map],
   ["Timezone", Icon.Globe],
@@ -141,7 +142,7 @@ const raycastMenuIcons = new Map([
   ["Precipitation", Icon.Raindrop],
   ["Source", Icon.BarChart],
   ["Last Updated", Icon.Download],
-  ["Preferences", Icon.Gear],
+  ["Settings", Icon.Gear],
 ]);
 
 // sf symbols style icons
@@ -158,6 +159,7 @@ const sfSymbolsMenuIcons = new Map([
   ["1Hour", "drop"],
   ["Sunrise", "sunrise"],
   ["Sunset", "sunset"],
+  ["Street", "signpost.right"],
   ["City", "building.2"],
   ["Country", "map"],
   ["Timezone", "globe"],

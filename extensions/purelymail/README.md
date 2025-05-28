@@ -1,4 +1,8 @@
-# <img src="./assets/purelymail.png" width="20" height="20" /> Purelymail Raycast Extension
+<p align="center">
+    <img src="./assets/purelymail.png" width="150" height="150" />
+</p>
+
+# Purelymail Raycast Extension
 
 This is a Raycast extension for [Purelymail](https://purelymail.com/). With this extension, you can quickly add or delete domains from your Purelymail account, create or delete users for your domains, create or delete Routing Rules, create or delete app passwords and Check Account Credit.
 

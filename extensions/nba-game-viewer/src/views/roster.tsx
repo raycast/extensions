@@ -5,24 +5,23 @@ import PlayerComponent from "../components/Player";
 
 type RosterArgs = {
   id: number;
+  league: string;
 };
 
-const Roster = ({ id: id }: RosterArgs) => {
-  const { data, isLoading } = useRoster({ id: id });
+const Roster = ({ id, league }: RosterArgs) => {
+  const { data, isLoading } = useRoster({ id, league });
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(true);
 
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail}>
-      {data?.map((player) => {
-        return (
-          <PlayerComponent
-            key={player.id}
-            player={player}
-            setIsShowingDetail={setIsShowingDetail}
-            isShowingDetail={isShowingDetail}
-          />
-        );
-      })}
+      {data?.map((player) => (
+        <PlayerComponent
+          key={player.id}
+          player={player}
+          setIsShowingDetail={setIsShowingDetail}
+          isShowingDetail={isShowingDetail}
+        />
+      ))}
     </List>
   );
 };

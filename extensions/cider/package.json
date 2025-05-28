@@ -13,6 +13,7 @@
   "commands": [
     {
       "name": "now-playing",
+      "icon": "now-playing.png",
       "title": "Now Playing",
       "subtitle": "Cider",
       "description": "Shows information about the current track",
@@ -20,6 +21,7 @@
     },
     {
       "name": "next-track",
+      "icon": "next-track.png",
       "title": "Next Track",
       "subtitle": "Cider",
       "description": "Skips to the next track",
@@ -27,6 +29,7 @@
     },
     {
       "name": "previous-track",
+      "icon": "previous-track.png",
       "title": "Previous Track",
       "subtitle": "Cider",
       "description": "Goes back to the previous track",
@@ -34,6 +37,7 @@
     },
     {
       "name": "adjust-volume",
+      "icon": "adjust-volume.png",
       "title": "Adjust Volume",
       "subtitle": "Cider",
       "description": "Adjusts Cider's volume",
@@ -49,6 +53,7 @@
     },
     {
       "name": "toggle-autoplay",
+      "icon": "toggle-autoplay.png",
       "title": "Toggle Autoplay",
       "subtitle": "Cider",
       "description": "Toggles autoplay in Cider",
@@ -56,13 +61,23 @@
     },
     {
       "name": "add-to-library",
+      "icon": "add-to-library.png",
       "title": "Add to Library",
       "subtitle": "Cider",
       "description": "Adds the current playing track to the library",
       "mode": "no-view"
     },
     {
+      "name": "favorite-track",
+      "icon": "favorite-track.png",
+      "title": "Favorite Track",
+      "subtitle": "Cider",
+      "description": "Favorites the currently playing track",
+      "mode": "no-view"
+    },
+    {
       "name": "play-pause",
+      "icon": "play-pause.png",
       "title": "Play/Pause",
       "subtitle": "Cider",
       "description": "Alternates between play and pause in Cider",
@@ -70,6 +85,7 @@
     },
     {
       "name": "seek",
+      "icon": "seek.png",
       "title": "Seek",
       "subtitle": "Cider",
       "description": "Seeks to a certain timestamp in Cider",
@@ -85,27 +101,53 @@
     },
     {
       "name": "stop-playback",
+      "icon": "stop-playback.png",
       "title": "Stop Playback",
       "subtitle": "Cider",
       "description": "Completely stops playing anything in Cider",
       "mode": "no-view"
+    },
+    {
+      "name": "show-queue",
+      "icon": "show-queue.png",
+      "title": "Queue",
+      "subtitle": "Cider",
+      "description": "Shows the current queue in Cider",
+      "mode": "view"
+    },
+    {
+      "name": "synced-lyrics",
+      "icon": "synced-lyrics.png",
+      "title": "Synced Lyrics",
+      "subtitle": "Cider",
+      "description": "Shows synced lyrics for the current track",
+      "mode": "view"
     }
   ],
   "preferences": [
+    {
+      "name": "token",
+      "title": "Cider Token",
+      "description": "This can be generated from the Cider connectivity settings",
+      "type": "textfield",
+      "label": "Your Cider token",
+      "required": false
+    },
     {
       "name": "exitOnSuccess",
       "title": "Options",
       "description": "Closes Raycast when a command succeeds",
       "type": "checkbox",
-      "defaultValue": false,
-      "label": "Exit on Success",
+      "defaultValue": true,
+      "label": "Exit on success",
       "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.60.1",
     "@raycast/utils": "^1.9.0",
-    "cross-fetch": "^4.0.0"
+    "cross-fetch": "^4.0.0",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

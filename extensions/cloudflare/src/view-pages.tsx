@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
-import Service, { Account, Deployment, Domain, Page } from './service';
+import Service, { Deployment, Domain, Page } from './service';
 import {
   getCommitUrl,
   getDeploymentStatusIcon,
@@ -13,39 +13,51 @@ import {
   handleNetworkError,
   toUrl,
 } from './utils';
+import { useCachedPromise } from '@raycast/utils';
 
 const service = new Service(getToken());
 
 function Command() {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [pages, setPages] = useState<Record<string, Page[]>>({});
-  const [isLoading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchPages() {
-      try {
-        const accounts = await service.listAccounts();
-        setAccounts(accounts);
-
-        const pages: Record<string, Page[]> = {};
-        for (let i = 0; i < accounts.length; i++) {
-          const account = accounts[i];
-          const accountPages = await service.listPages(account.id);
-          pages[account.id] = accountPages;
-        }
-        setPages(pages);
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-        handleNetworkError(e);
+  const {
+    isLoading,
+    data: { accounts, pages },
+  } = useCachedPromise(
+    async () => {
+      const accounts = await service.listAccounts();
+      const pages: Record<string, Page[]> = {};
+      for (let i = 0; i < accounts.length; i++) {
+        const account = accounts[i];
+        const accountPages = await service.listPages(account.id);
+        pages[account.id] = accountPages;
       }
-    }
-
-    fetchPages();
-  }, []);
+      return {
+        accounts,
+        pages,
+      };
+    },
+    [],
+    {
+      initialData: {
+        accounts: [],
+        pages: [],
+      },
+    },
+  );
 
   return (
     <List isLoading={isLoading}>
+      {!isLoading && !Object.keys(pages).length && (
+        <List.EmptyView
+          icon="no-pages.svg"
+          title="Create by importing an existing Git repository"
+          description="or Upload your site's assets including HTML, CSS, and JS files directly from your computer."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser url="https://pages.cloudflare.com/" />
+            </ActionPanel>
+          }
+        />
+      )}
       {Object.entries(pages)
         .filter((entry) => entry[1].length > 0)
         .map((entry) => {

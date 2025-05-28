@@ -1,4 +1,15 @@
-import { Icon, ActionPanel, showToast, Action, Toast, Color, confirmAlert, Keyboard, AI } from '@raycast/api';
+import {
+  Icon,
+  ActionPanel,
+  showToast,
+  Action,
+  Toast,
+  Color,
+  confirmAlert,
+  Keyboard,
+  AI,
+  environment,
+} from '@raycast/api';
 
 import { AddNewTodo } from '../add-new-todo';
 import {
@@ -9,12 +20,15 @@ import {
   updateTodo,
   handleError,
   List as TList,
-  UpdateTodoParams,
+  TodoParams,
 } from '../api';
 import { getChecklistItemsWithAI, listItems, statusIcons } from '../helpers';
 import { capitalize } from '../utils';
 
 import EditTodo from './EditTodo';
+
+// Match URLs with protocols, with optional //
+const URL_REGEX = /([a-zA-Z][a-zA-Z0-9.+-]+):(?:\/\/\S+|%\S+)/;
 
 type TodoListItemActionsProps = {
   todo: Todo;
@@ -38,7 +52,9 @@ export default function TodoListItemActions({
 
   const area = todo.area || todo.project?.area;
 
-  async function updateAction(args: UpdateTodoParams, successToastOptions: Toast.Options) {
+  const notesURL = todo.notes.match(URL_REGEX)?.[0];
+
+  async function updateAction(args: TodoParams, successToastOptions: Toast.Options) {
     try {
       await updateTodo(todo.id, args);
       await showToast({
@@ -64,13 +80,13 @@ export default function TodoListItemActions({
     if (
       await confirmAlert({
         title: 'Add these items to the checklist?',
-        message: items,
+        message: items.trim(),
         icon: { source: Icon.Stars, tintColor: Color.Yellow },
       })
     ) {
-      await updateAction({ 'append-checklist-items': items }, { title: 'Added checklist items' });
+      await updateAction({ 'append-checklist-items': items.trim() }, { title: 'Added checklist items' });
     } else {
-      toast.hide();
+      await toast.hide();
     }
   }
 
@@ -123,8 +139,11 @@ New title:
     await updateAction({ 'add-tags': tag }, { title: 'Added tag' });
   }
 
-  async function setDeadline(date: Date) {
-    await updateAction({ deadline: date.toISOString() }, { title: 'Set deadline' });
+  async function setDeadline(date: string | null) {
+    const title = date === null ? 'Removed deadline' : 'Set deadline';
+    const deadline = date === null ? '' : date;
+
+    await updateAction({ deadline }, { title });
   }
 
   async function deleteToDo() {
@@ -143,6 +162,24 @@ New title:
       });
       refreshTodos();
     }
+  }
+
+  function formatDateTime(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const datePart = `${year}-${month}-${day}`;
+
+    // If the user picked a full day, we avoid providing the time, as
+    // Things leverages the time part to understand whether a reminder
+    // should be set.
+    if (Action.PickDate.isFullDay(date)) {
+      return datePart;
+    }
+
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${datePart}@${hours}:${minutes}`;
   }
 
   return (
@@ -192,8 +229,14 @@ New title:
             title="Date…"
             icon={Icon.Calendar}
             min={new Date()}
-            onChange={(date) => schedule(date ? date.toISOString() : 'anytime')}
-            type={Action.PickDate.Type.Date}
+            onChange={(date) => {
+              if (!date) {
+                return schedule('anytime');
+              }
+
+              return schedule(formatDateTime(date));
+            }}
+            type={Action.PickDate.Type.DateTime}
           />
           <Action {...listItems.someday} onAction={() => schedule('someday')} />
         </ActionPanel.Submenu>
@@ -231,19 +274,19 @@ New title:
           shortcut={{ modifiers: ['cmd', 'shift'], key: 'd' }}
           min={new Date()}
           onChange={(date) => {
-            if (date) {
-              return setDeadline(date);
-            }
+            return setDeadline(date ? formatDateTime(date) : null);
           }}
           type={Action.PickDate.Type.Date}
         />
 
-        <Action
-          title="Generate Checklist with AI"
-          icon={Icon.BulletPoints}
-          shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
-          onAction={generateChecklistWithAI}
-        />
+        {environment.canAccess(AI) && (
+          <Action
+            title="Generate Checklist with AI"
+            icon={Icon.BulletPoints}
+            shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+            onAction={generateChecklistWithAI}
+          />
+        )}
 
         <Action
           title="Make To-Do Actionable with AI"
@@ -260,6 +303,17 @@ New title:
           onAction={deleteToDo}
         />
       </ActionPanel.Section>
+
+      {notesURL && (
+        <ActionPanel.Section>
+          <Action.OpenInBrowser
+            title="Open URL From Notes"
+            url={notesURL}
+            shortcut={{ modifiers: ['cmd', 'shift'], key: 'o' }}
+          />
+          <Action.CopyToClipboard title="Copy URL From Notes" content={notesURL} />
+        </ActionPanel.Section>
+      )}
 
       <ActionPanel.Section>
         <Action.CopyToClipboard

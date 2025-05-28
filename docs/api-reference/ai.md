@@ -4,7 +4,7 @@ The AI API provides developers with seamless access to AI functionality without 
 
 {% hint style="info" %}
 
-Some users might not have access to this API. If a user doesn't have access to Raycast AI, they will be asked if they want to get access when your extension calls the AI API. If the user doesn't wish to get access, the API call will throw an error.
+Some users might not have access to this API. If a user doesn't have access to Raycast Pro, they will be asked if they want to get access when your extension calls the AI API. If the user doesn't wish to get access, the API call will throw an error.
 
 You can check if a user has access to the API using [`environment.canAccess(AI)`](./environment.md).
 
@@ -14,7 +14,7 @@ You can check if a user has access to the API using [`environment.canAccess(AI)`
 
 ### AI.ask
 
-Ask AI anything you want. Use this in “no-view” Commands, effects, or callbacks. In a React component, you might want to use the [`useAI` util hook](../utils-reference/react-hooks/useAI.md) instead.
+Ask AI anything you want. Use this in “no-view” Commands, effects, or callbacks. In a React component, you might want to use the [useAI util hook](../utils-reference/react-hooks/useAI.md) instead.
 
 #### Signature
 
@@ -152,25 +152,59 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 
 #### Enumeration members
 
-| Name                          | Description                                                                                                                                                         |
-| :---------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| OpenAI_GPT3.5-turbo           | GPT-3.5 Turbo is OpenAI’s fastest model, making it ideal for tasks that require quick response times with basic language processing capabilities.                   |
-| OpenAI_GPT4                   | GPT-4 is OpenAI’s most capable model with broad general knowledge, allowing it to follow complex instructions and solve difficult problems.                         |
-| OpenAI_GPT4-turbo             | GPT-4 Turbo from OpenAI has a big context window that fits hundreds of pages of text, making it a great choice for workloads that involve longer prompts.           |
-| OpenAI_GPT4o                  | GPT-4o is the most advanced and fastest model from OpenAI, making it a great choice for complex everyday problems and deeper conversations.                         |
-| Anthropic_Claude_Haiku        | Claude 3 Haiku is Anthropic's fastest model, with a large context window that makes it ideal for analyzing code, documents, or large amounts of text.               |
-| Anthropic_Claude_Sonnet       | Claude 3 Sonnet from Anthropic strikes a balance between speed and intelligence, making it an ideal assistant for daily tasks like coding and copywriting.          |
-| Anthropic_Claude_Opus         | Claude 3 Opus is Anthropic's most intelligent model, with best-in-market performance on highly complex tasks. It stands out for remarkable fluency.                 |
-| Perplexity_Llama3_Sonar_Small | Perplexity's Llama 3 Sonar Small is built for speed. It quickly gives you helpful answers using the latest internet knowledge while minimizing hallucinations.      |
-| Perplexity_Llama3_Sonar_Large | Perplexity's most advanced model, Llama 3 Sonar Large, can handle complex questions. It considers current web knowledge to provide well-reasoned, in-depth answers. |
-| Llama3_70B                    | Llama 3 70B from Meta is the most capable openly available LLM which can serve as a tool for various text-related tasks. Powered by Groq.                           |
-| MixtraL_8x7B                  | Mixtral 8x7B from Mistral is an open-source model that demonstrates high performance in generating code and text at an impressive speed. Powered by Groq.           |
+| Model                             | Description                                                                            |
+| --------------------------------- | -------------------------------------------------------------------------------------- |
+| OpenAI_GPT4.1                     | OpenAI's flagship model optimized for complex problem solving.                         |
+| OpenAI_GPT4.1-mini                | Balanced GPT-4.1 variant optimized for speed and cost efficiency.                      |
+| OpenAI_GPT4.1-nano                | Fastest and most cost-effective GPT-4.1 variant.                                       |
+| OpenAI_GPT4                       | Previous generation GPT-4 model with broad knowledge and complex instruction handling. |
+| OpenAI_GPT4-turbo                 | Previous generation GPT-4 with expanded context window.                                |
+| OpenAI_GPT4o                      | Advanced OpenAI model optimized for speed and complex problem solving.                 |
+| OpenAI_GPT4o-mini                 | Fast and intelligent model for everyday tasks.                                         |
+| OpenAI_o3                         | Advanced model excelling in math, science, coding, and visual tasks.                   |
+| OpenAI_o4-mini                    | Fast, efficient model optimized for coding and visual tasks.                           |
+| OpenAI_o1                         | Advanced reasoning model for complex STEM problems.                                    |
+| OpenAI_o3-mini                    | Fast reasoning model optimized for STEM tasks.                                         |
+| Anthropic_Claude_Haiku            | Anthropic's fastest model with large context window for code and text analysis.        |
+| Anthropic_Claude_Sonnet           | Enhanced Claude model for complex tasks and visual reasoning.                          |
+| Anthropic_Claude_Sonnet_3.7       | Anthropic's most intelligent model.                                                    |
+| Anthropic_Claude_Opus             | Anthropic's model for complex tasks with exceptional fluency.                          |
+| Perplexity_Sonar                  | Fast Perplexity model with integrated search capabilities.                             |
+| Perplexity_Sonar_Pro              | Advanced Perplexity model for complex queries with search integration.                 |
+| Perplexity_Sonar_Reasoning        | Fast reasoning model powered by DeepSeek R1.                                           |
+| Perplexity_Sonar_Reasoning_Pro    | Premium reasoning model with DeepSeek R1 capabilities.                                 |
+| Llama4_Scout                      | Advanced 17B parameter multimodal model with 16 experts.                               |
+| Llama3.3_70B                      | Meta's state-of-the-art model for reasoning and general knowledge.                     |
+| Llama3.1_8B                       | Fast, instruction-optimized open-source model.                                         |
+| Llama3_70B                        | Capable open-source LLM for text-related tasks.                                        |
+| Llama3.1_405B                     | Meta's flagship model with advanced capabilities across multiple domains.              |
+| Mistral_Nemo                      | Small, Apache-licensed model built with NVIDIA.                                        |
+| Mistral_Large                     | Top-tier reasoning model with strong multilingual support.                             |
+| Mistral_Small                     | Latest enterprise-grade small model with improved reasoning.                           |
+| Mistral_Codestral                 | Specialized model for code-related tasks and testing.                                  |
+| DeepSeek_R1_Distill_Llama_3.3_70B | Fine-tuned Llama model with enhanced reasoning capabilities.                           |
+| Google_Gemini_2.5_Pro             | Advanced thinking model for complex problem solving.                                   |
+| Google_Gemini_2.5_Flash           | Fast, well-rounded thinking model.                                                     |
+| Google_Gemini_2.0_Flash           | Low-latency model optimized for agentic experiences.                                   |
+| Google_Gemini_2.0_Flash_Thinking  | Experimental model with enhanced analytical capabilities.                              |
+| DeepSeek_R1                       | Open-source model matching OpenAI-o1 performance.                                      |
+| DeepSeek_V3                       | Advanced Mixture-of-Experts model.                                                     |
+| xAI_Grok_3                        | Enterprise-focused model for data, coding, and summarization tasks.                    |
+| xAI_Grok_3_Mini                   | Fast, lightweight model for logic-based tasks.                                         |
+| xAI_Grok_2                        | Advanced language model with strong reasoning capabilities.                            |
 
 If a model isn't available to the user, Raycast will fallback to a similar one:
 
-- `AI.Model.Anthropic_Claude_Opus` and `AI.Model.Anthropic_Claude_Sonnet` -> `AI.Model.Anthropic_Claude_Haiku`
-- `AI.Model.OpenAI_GPT4` and `AI.Model["OpenAI_GPT4-turbo"]` -> `AI.Model["OpenAI_GPT3.5-turbo"]`
-- `AI.Model.Perplexity_Llama3_Sonar_Large` -> `AI.Model.Perplexity_Llama3_Sonar_Small`
+- `AI.Model.OpenAI_GPT4`, `AI.Model["OpenAI_GPT4-turbo"]`, and `AI.Model.OpenAI_GPT4o` -> `AI.Model["OpenAI_GPT4o-mini"]`
+- `AI.Model.OpenAI_o1` -> `AI.Model["OpenAI_GPT4o-mini"]`
+- `AI.Model.Anthropic_Claude_Opus`, `AI.Model.Anthropic_Claude_Sonnet`, and `AI.Model["Anthropic_Claude_Sonnet_3.7"]` -> `AI.Model.Anthropic_Claude_Haiku`
+- `AI.Model.Perplexity_Sonar_Pro` -> `AI.Model.Perplexity_Sonar`
+- `AI.Model.Mistral_Large` -> `AI.Model.Mistral_Nemo`
+- `AI.Model["Llama3.1_405B"]` -> `AI.Model["Llama3.3_70B"]`
+- `AI.Model.DeepSeek_R1` -> `AI.Model["DeepSeek_R1_Distill_Llama_3.3_70B"]`
+- `AI.Model.xAI_Grok_2` -> `AI.Model["OpenAI_GPT4o-mini"]`
+- `AI.Model.xAI_Grok_3` -> `AI.Model.xAI_Grok_3_Mini`
+- `AI.Model["Google_Gemini_2.5_Pro"]` -> `AI.Model["Google_Gemini_2.5_Flash"]`
 
 ### AI.AskOptions
 

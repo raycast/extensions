@@ -1,16 +1,17 @@
 import { MenuBarExtra, Icon, launchCommand, LaunchType, Image, Color } from "@raycast/api";
 import { useState } from "react";
-import { FocusText, LongBreakText, ShortBreakText } from "../lib/constants";
-import { getCurrentInterval, isPaused, duration, preferences, progress } from "../lib/intervals";
-import { secondsToTime } from "../lib/secondsToTime";
-import { Interval, IntervalType } from "../lib/types";
+import { FocusText, LongBreakText, ShortBreakText, TimeStoppedPlaceholder } from "./lib/constants";
+import { getCurrentInterval, isPaused, duration, preferences, progress } from "./lib/intervals";
+import { secondsToTime } from "./lib/secondsToTime";
+import { Interval, IntervalType } from "./lib/types";
 import { OAuthService, getAccessToken, withAccessToken } from "@raycast/utils";
 import {
   slackContinueInterval,
   slackCreateInterval,
   slackPauseInterval,
   slackResetInterval,
-} from "../lib/slack/slackIntervals";
+  slackRestartInterval,
+} from "./lib/slack/slackIntervals";
 
 const IconTint: Color.Dynamic = {
   light: "#000000",
@@ -60,6 +61,11 @@ export function TogglePomodoroTimer() {
     setCurrentInterval(undefined);
   }
 
+  async function onRestart() {
+    await slackRestartInterval(token);
+    setCurrentInterval(getCurrentInterval());
+  }
+
   let icon: Image.ImageLike;
   icon = { source: "tomato-0.png", tintColor: IconTint };
   if (currentInterval) {
@@ -67,14 +73,12 @@ export function TogglePomodoroTimer() {
     icon = { source: `tomato-${progressInTenth}.png`, tintColor: IconTint };
   }
 
-  const title = preferences.enableTimeOnMenuBar
-    ? currentInterval
-      ? secondsToTime(currentInterval.length - duration(currentInterval))
-      : "--:--"
-    : undefined;
+  const stopedPlaceholder = preferences.hideTimeWhenStopped ? undefined : TimeStoppedPlaceholder;
+  const title = currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : stopedPlaceholder;
 
   return (
-    <MenuBarExtra icon={icon} title={title} tooltip={"Pomodoro"}>
+    <MenuBarExtra icon={icon} title={preferences.enableTimeOnMenuBar ? title : undefined} tooltip={"Pomodoro"}>
+      {preferences.enableTimeOnMenuBar ? null : <MenuBarExtra.Item icon="⏰" title={TimeStoppedPlaceholder} />}
       {currentInterval ? (
         <>
           {isPaused(currentInterval) ? (
@@ -97,6 +101,12 @@ export function TogglePomodoroTimer() {
             icon={Icon.Stop}
             onAction={async () => onReset()}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <MenuBarExtra.Item
+            title="Restart Current"
+            icon={Icon.Repeat}
+            onAction={async () => onRestart()}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
           />
         </>
       ) : (

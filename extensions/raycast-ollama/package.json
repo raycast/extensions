@@ -15,14 +15,6 @@
   },
   "preferences": [
     {
-      "name": "ollamaHost",
-      "description": "Ollama API route",
-      "type": "textfield",
-      "required": false,
-      "title": "Ollama Host",
-      "default": "http://127.0.0.1:11434/"
-    },
-    {
       "name": "ollamaResultViewInput",
       "description": "Choose preferred input source",
       "type": "dropdown",
@@ -55,6 +47,14 @@
       "required": false,
       "title": "Chat Memory Messages",
       "default": "20"
+    },
+    {
+      "name": "ollamaCertificateValidation",
+      "description": "Uncheck for Disable Certificate Validation",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Certificate Validation Enabled"
     }
   ],
   "commands": [
@@ -63,6 +63,13 @@
       "title": "Chat with Ollama",
       "subtitle": "Ollama",
       "description": "Chat with Ollama",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-browser-summarize",
+      "title": "Summarize Website",
+      "subtitle": "Ollama",
+      "description": "Summarize content from current Website.",
       "mode": "view"
     },
     {
@@ -132,7 +139,7 @@
       "name": "ollama-longer",
       "title": "Make Longer",
       "subtitle": "Ollama",
-      "description": "Make selected text longher",
+      "description": "Make selected text longer",
       "mode": "view"
     },
     {
@@ -179,6 +186,13 @@
       "mode": "view"
     },
     {
+      "name": "ollama-ps",
+      "title": "Loaded Models",
+      "subtitle": "Ollama",
+      "description": "Show models loaded on ram",
+      "mode": "view"
+    },
+    {
       "name": "ollama-custom-create",
       "title": "Create Custom Command",
       "subtitle": "Ollama",
@@ -199,35 +213,35 @@
           "required": true
         },
         {
-          "name": "image",
-          "placeholder": "Use Image",
-          "type": "dropdown",
-          "required": false,
-          "data": [
-            {
-              "title": "Yes",
-              "value": "yes"
-            },
-            {
-              "title": "No",
-              "value": "no"
-            }
-          ]
-        },
-        {
           "name": "model",
           "placeholder": "Model",
           "type": "text",
-          "required": false
+          "required": true
+        },
+        {
+          "name": "parameters",
+          "placeholder": "Parameters",
+          "type": "text",
+          "required": true
         }
       ]
+    },
+    {
+      "name": "ollama-mcp-server",
+      "title": "Manage Mcp Server",
+      "subtitle": "Ollama",
+      "description": "Manage configured Mcp Server",
+      "mode": "view"
     }
   ],
   "dependencies": {
+    "@langchain/community": "^0.2.0",
+    "@modelcontextprotocol/sdk": "^1.8.0",
     "@raycast/api": "^1.55.2",
     "@raycast/utils": "^1.9.0",
     "file-type": "^19.0.0",
-    "langchain": "^0.0.183",
+    "langchain": "^0.2.0",
+    "mammoth": "^1.7.2",
     "mime-types": "^2.1.35",
     "node-fetch": "^3.3.2",
     "pdf-parse": "^1.1.1"

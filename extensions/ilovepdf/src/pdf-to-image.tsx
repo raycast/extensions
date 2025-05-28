@@ -5,39 +5,59 @@ import {
   showToast,
   getPreferenceValues,
   Toast,
-  closeMainWindow,
   open,
   openExtensionPreferences,
 } from "@raycast/api";
 import ILovePDFApi from "@ilovepdf/ilovepdf-nodejs";
 import PdfJpgTask from "@ilovepdf/ilovepdf-js-core/tasks/PdfJpgTask";
 import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
-import { getFilePath } from "./common/utils";
+import { chooseDownloadLocation, getErrorMessage, getFilePath, handleOpenNow, validateFileType } from "./common/utils";
+import { Status } from "./common/types";
+import { useFetchSelectedFinderItems } from "./hook/use-fetch-selected-finder-items";
 
 type Values = {
   files: string[];
   mode: "pages" | "extract";
 };
 
-type Status = "init" | "success" | "failure";
-
-const { APIPublicKey: publicKey, APISecretKey: secretKey, OpenNow: openNow } = getPreferenceValues<Preferences>();
+const {
+  APIPublicKey: publicKey,
+  APISecretKey: secretKey,
+  OpenNow: openNow,
+  AskBeforeDownload: askBeforeDownload,
+  SelectFileInFinder: selectFileInFinder,
+} = getPreferenceValues<Preferences>();
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [status, setStatus] = useState<Status>("init");
   const [destinationFilePath, setDestinationFilePath] = useState<string>("");
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+
+  const {
+    isLoading: isFinderLoading,
+    selectedFiles: finderSelectedFiles,
+    status: fetchStatus,
+  } = useFetchSelectedFinderItems(selectFileInFinder);
+
+  useEffect(() => {
+    setIsLoading(isFinderLoading);
+    setSelectedFiles(finderSelectedFiles);
+    setStatus(fetchStatus);
+  }, [isFinderLoading, finderSelectedFiles, fetchStatus]);
 
   async function handleSubmit(values: Values) {
     setIsLoading(true);
-    if (!values.files.length) {
-      await showToast(Toast.Style.Failure, "You must select at least a single pdf file", "Please select a file");
+    if (!selectFileInFinder && !values.files.length) {
+      await showToast(Toast.Style.Failure, "You must select at least a single pdf file.", "Please select a file.");
       setStatus("failure");
       setIsLoading(false);
       return;
+    } else {
+      values.files = selectedFiles;
     }
 
     const toast = await showToast(Toast.Style.Animated, "Processing", "Converting PDF...");
@@ -45,25 +65,38 @@ export default function Command() {
     const instance = new ILovePDFApi(publicKey, secretKey);
     const task = instance.newTask("pdfjpg") as PdfJpgTask;
     const addedFilesPromises = [];
-    const destinationFile = getFilePath(path.dirname(values.files[0]), "pdf_images.zip");
+    let destinationFile = getFilePath(path.dirname(values.files[0]), "pdf_images.zip");
     try {
       await task.start();
       for (const file of values.files) {
-        const fileExtension = path.extname(file);
-        if (fileExtension != ".pdf") {
+        if (!validateFileType(file, "pdf")) {
           toast.style = Toast.Style.Failure;
           toast.title = "failure";
           toast.message = "You must select a PDF file.";
           setStatus("failure");
           setIsLoading(false);
-          console.log(`file is not a PDF received extension is ${fileExtension}`);
+          console.log(`file is not a PDF.`);
           return;
         }
         const iLovePdfFile = new ILovePDFFile(file);
         addedFilesPromises.push(task.addFile(iLovePdfFile));
       }
-      await Promise.all(addedFilesPromises);
+      if (askBeforeDownload) {
+        const finalName = await chooseDownloadLocation(
+          destinationFile,
+          "Save The Images As",
+          setIsLoading,
+          setStatus,
+          toast,
+        );
+        if (finalName == undefined) {
+          return;
+        }
+        destinationFile = finalName;
+      }
       setDestinationFilePath(destinationFile);
+
+      await Promise.all(addedFilesPromises);
       await task.process({ pdfjpg_mode: values.mode });
       const data = await task.download();
       fs.writeFileSync(destinationFile, data);
@@ -76,24 +109,13 @@ export default function Command() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "failure";
-      toast.message = "Error happened during converting PDF to images.";
+      toast.message = `Error happened during converting PDF to images. Reason ${getErrorMessage(error)}`;
       setStatus("failure");
       setIsLoading(false);
-      console.log(error);
       return;
     }
 
-    if (openNow) {
-      await closeMainWindow();
-      open(destinationFile);
-    } else {
-      toast.primaryAction = {
-        title: "Open File",
-        onAction: () => {
-          open(destinationFile);
-        },
-      };
-    }
+    await handleOpenNow(openNow, destinationFile, toast);
   }
 
   return (
@@ -121,7 +143,11 @@ export default function Command() {
       }
       isLoading={isLoading}
     >
-      <Form.FilePicker id="files" title="Choose PDF files" allowMultipleSelection={true} />
+      {selectFileInFinder ? (
+        <Form.Description title="Finder Selected File" text={selectedFiles.join("\n")} />
+      ) : (
+        <Form.FilePicker id="files" title="Choose PDF files" allowMultipleSelection={true} />
+      )}
       <Form.Dropdown id="mode" title="Conversion Mode" defaultValue="pages">
         <Form.Dropdown.Item value="pages" title="Convert every PDF page to a JPG image" />
         <Form.Dropdown.Item value="extract" title="Extract all embedded images to separate images" />

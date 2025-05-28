@@ -2,7 +2,9 @@ import { Action, ActionPanel, Icon, List, closeMainWindow, environment } from "@
 import { getAvatarIcon, useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
-const baseUrl = "https://themes.ray.so";
+import { CONTRIBUTE_URL } from "./helpers";
+
+const baseUrl = "https://ray.so/themes";
 
 type Theme = {
   authorUsername: string;
@@ -25,10 +27,11 @@ type Theme = {
     purple: string;
     magenta: string;
   };
+  og_image: string;
 };
 
 export default function ExploreThemes() {
-  const { data: themes, isLoading } = useFetch<Theme[]>(`${baseUrl}/api/themes`);
+  const { data: themes, isLoading } = useFetch<Theme[]>(`https:/ray.so/api/themes`);
 
   const [appearanceFilter, setAppearanceFilter] = useState("all");
 
@@ -37,8 +40,9 @@ export default function ExploreThemes() {
 
     const authorMap = new Map();
     themes.forEach(({ author, authorUsername }) => {
-      if (!authorMap.has(author)) {
-        authorMap.set(author, { name: author, username: authorUsername });
+      const mapKey = `${author}_${authorUsername}`;
+      if (!authorMap.has(mapKey)) {
+        authorMap.set(mapKey, { name: author, username: authorUsername });
       }
     });
 
@@ -93,10 +97,7 @@ export default function ExploreThemes() {
   }
 
   function getMarkdownImage(theme: Theme): string {
-    return `![Screenshot of "${theme.name}" theme](${baseUrl}/ogs/${theme.slug.replace(
-      "/",
-      "_",
-    )}.png?raycast-height=200)`;
+    return `![Screenshot of "${theme.name}" theme](${theme.og_image}?raycast-height=200)`;
   }
 
   return (
@@ -112,7 +113,12 @@ export default function ExploreThemes() {
           {authors.length > 0 ? (
             <List.Dropdown.Section>
               {authors.map(({ username, name }) => (
-                <List.Dropdown.Item key={username} title={name} value={`user/${username}`} icon={getAvatarIcon(name)} />
+                <List.Dropdown.Item
+                  key={`author_${username}_${name}`}
+                  title={name}
+                  value={`user/${username}`}
+                  icon={getAvatarIcon(name)}
+                />
               ))}
             </List.Dropdown.Section>
           ) : null}
@@ -172,12 +178,13 @@ export default function ExploreThemes() {
                     title="Contribute"
                     icon={Icon.PlusSquare}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                    url={`https://github.com/raycast/theme-explorer/tree/main/themes`}
+                    url={CONTRIBUTE_URL}
                   />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
+                    /* eslint-disable-next-line @raycast/prefer-title-case */
                     title="Copy JSON Configuration"
                     content={JSON.stringify(theme, null, 2)}
                     shortcut={{ modifiers: ["cmd"], key: "." }}

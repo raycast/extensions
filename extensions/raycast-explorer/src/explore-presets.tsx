@@ -6,12 +6,12 @@ import { getAvailableAiModels } from "./api";
 import { Preset, PresetCategory } from "./data/presets";
 import { getIcon, raycastProtocol } from "./helpers";
 
-const CONTRIBUTE_URL = "https://github.com/raycast/preset-explorer/blob/main/data/presets.ts";
-const baseUrl = "https://presets.ray.so";
+const CONTRIBUTE_URL = "https://github.com/raycast/ray-so";
+const baseUrl = "https://ray.so/presets";
 
 export default function ExplorePresets() {
   const { data: aiModels, isLoading: isAiModelsLoading } = useCachedPromise(getAvailableAiModels);
-  const { data: categories, isLoading } = useFetch<PresetCategory[]>(`${baseUrl}/api/presets`);
+  const { data: categories, isLoading } = useFetch<PresetCategory[]>(`https://ray.so/api/presets`);
   const [selectedCategory, setSelectedCategory] = useState("");
 
   const filteredCategories = useMemo(() => {
@@ -60,7 +60,7 @@ export default function ExplorePresets() {
                 key={preset.id}
                 title={preset.name}
                 icon={Icon[icon] ?? Icon.Code}
-                keywords={[category.name, preset.creativity]}
+                keywords={[category.name, preset.creativity || "unspecified"]}
                 detail={
                   <List.Item.Detail
                     markdown={preset.instructions}
@@ -68,15 +68,34 @@ export default function ExplorePresets() {
                       <List.Item.Detail.Metadata>
                         <List.Item.Detail.Metadata.Label title="Name" text={preset.name} />
                         <List.Item.Detail.Metadata.Label title="Model" text={modelName} />
-                        <List.Item.Detail.Metadata.Label
-                          title="Creativity"
-                          text={preset.creativity.charAt(0).toUpperCase() + preset.creativity.slice(1)}
-                          icon={getCreativityIcon(preset.creativity)}
-                        />
-                        <List.Item.Detail.Metadata.Label title="Web Search" text={preset.web_search ? "On" : "Off"} />
-                        {preset.image_generation ? (
-                          <List.Item.Detail.Metadata.Label title="Image Generation" text="On" />
-                        ) : null}
+                        {preset.tools ? (
+                          preset.tools.map((tool, i) => (
+                            <List.Item.Detail.Metadata.Label
+                              key={tool.id}
+                              title={i === 0 ? "AI Extensions" : ""}
+                              text={tool.name.charAt(0).toUpperCase() + tool.name.slice(1)}
+                            />
+                          ))
+                        ) : (
+                          <>
+                            <List.Item.Detail.Metadata.Label
+                              title="Creativity"
+                              text={
+                                preset.creativity
+                                  ? preset.creativity.charAt(0).toUpperCase() + preset.creativity.slice(1)
+                                  : "Not specified"
+                              }
+                              icon={getCreativityIcon(preset.creativity)}
+                            />
+                            <List.Item.Detail.Metadata.Label
+                              title="Web Search"
+                              text={preset.web_search ? "On" : "Off"}
+                            />
+                            {preset.image_generation ? (
+                              <List.Item.Detail.Metadata.Label title="Image Generation" text="On" />
+                            ) : null}
+                          </>
+                        )}
                         {preset.author ? (
                           <List.Item.Detail.Metadata.Label
                             title="Author"
@@ -122,7 +141,7 @@ export default function ExplorePresets() {
 }
 
 function getCreativityIcon(creativity: Preset["creativity"]) {
-  if (creativity === "none") {
+  if (!creativity || creativity === "none") {
     return Icon.CircleDisabled;
   }
 

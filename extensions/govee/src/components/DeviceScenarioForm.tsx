@@ -37,8 +37,6 @@ const DeviceScenarioForm = ({ deviceName, devScenario, onSave }: DeviceScenarioF
     color: string;
     devices: string[];
   }) => {
-    console.log("onSubmit device", input);
-
     if (
       input.brightness &&
       (isNaN(parseInt(input.brightness, 10)) ||

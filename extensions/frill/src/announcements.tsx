@@ -30,7 +30,6 @@ import {
 } from "@raycast/api";
 import ErrorComponent from "./components/ErrorComponent";
 import { FormValidation, getAvatarIcon, useForm } from "@raycast/utils";
-import { generateAnnouncementMarkdown } from "./lib/functions";
 import { AnnouncementCategory } from "./types/announcement-categories";
 import { Author } from "./types/common";
 import { Idea } from "./types/ideas";
@@ -123,7 +122,7 @@ export default function Announcements() {
           icon={{ source: Icon.Megaphone, tintColor: announcement.is_published ? Color.Green : Color.Red }}
           detail={
             <List.Item.Detail
-              markdown={generateAnnouncementMarkdown(announcement.content)}
+              markdown={announcement.content}
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="ID" text={announcement.idx} />
@@ -323,7 +322,7 @@ function CreateOrUpdateAnnouncement({
     initialValues: {
       name: initialAnnouncement ? initialAnnouncement.name : undefined,
       author_idx: initialAnnouncement ? initialAnnouncement.author.idx : undefined,
-      content: initialAnnouncement ? generateAnnouncementMarkdown(initialAnnouncement.content, true) : undefined,
+      content: initialAnnouncement ? initialAnnouncement.content : undefined,
       published_at: initialAnnouncement
         ? !initialAnnouncement.published_at
           ? null

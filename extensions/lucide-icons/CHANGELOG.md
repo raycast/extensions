@@ -1,5 +1,14 @@
 # Lucide Icons Changelog
 
+## [Update] - 2025-04-15
+
+- Add the preference to copy icon name in Pascal Case.
+
+## [Update] - 2024-10-07
+
+- Introduced AI-based icon search.
+- Removed the `Change Size` action and converted the `Change Color` action into a dropdown menu.
+
 ## [Update] - 2024-01-14
 
 - Removed stroke red color to mantain the icons as unchanged as possible

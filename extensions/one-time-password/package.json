@@ -5,6 +5,11 @@
   "description": "Generate time-based one-time passwords",
   "icon": "icon.png",
   "author": "lachero",
+  "contributors": [
+    "soulevans07",
+    "BalliAsghar",
+    "midskyey"
+  ],
   "categories": [
     "Security",
     "Productivity"
@@ -37,6 +42,24 @@
       "type": "checkbox",
       "required": true,
       "default": true
+    },
+    {
+      "name": "primaryAction",
+      "description": "The primary action to perform on an item.",
+      "title": "Primary Action",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -46,7 +69,8 @@
     "jimp": "^0.22.7",
     "jsqr": "^1.4.0",
     "otpauth": "^9.1.1",
-    "protobufjs": "^7.2.3"
+    "protobufjs": "^7.2.3",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

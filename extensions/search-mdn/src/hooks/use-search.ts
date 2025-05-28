@@ -3,16 +3,15 @@ import { URL } from "node:url";
 import { useRef } from "react";
 import urljoin from "url-join";
 
-import { Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import type { MDNResponse } from "@/types";
 
-export const useSearch = (query: string | null, locale: string) => {
+export const useSearch = (query: string, locale: string) => {
   const abortable = useRef<AbortController>();
   const url = new URL("https://developer.mozilla.org/api/v1/search");
 
-  url.searchParams.append("q", query || "");
+  url.searchParams.append("q", query);
   url.searchParams.append("sort", "best");
   url.searchParams.append("locale", locale);
 
@@ -29,13 +28,7 @@ export const useSearch = (query: string | null, locale: string) => {
     {
       keepPreviousData: true,
       abortable,
-      onError: (err) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: `Could not load MDN results`,
-          message: String(err),
-        });
-      },
+      failureToastOptions: { title: "Could not load MDN results" },
     },
   );
 

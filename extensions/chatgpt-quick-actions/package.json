@@ -5,6 +5,10 @@
   "description": "Performs one-shot actions with ChatGPT",
   "icon": "openai-logo.png",
   "author": "alanzchen",
+  "contributors": [
+    "kolacek.m",
+    "JonathanAquino"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -37,28 +41,24 @@
               "value": "global"
             },
             {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
+              "title": "GPT-4o",
+              "value": "gpt-4o"
             },
             {
-              "title": "GPT-3.5 Turbo (16K)",
-              "value": "gpt-3.5-turbo-16k"
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
             },
             {
               "title": "GPT-4",
               "value": "gpt-4"
             },
             {
-              "title": "GPT-4 (32K, 0613)",
-              "value": "gpt-4-32k-0613"
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
             },
             {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o (May 13, 2024)",
-              "value": "gpt-4o-2024-05-13"
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
             }
           ]
         }
@@ -91,28 +91,24 @@
               "value": "global"
             },
             {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
+              "title": "GPT-4o",
+              "value": "gpt-4o"
             },
             {
-              "title": "GPT-3.5 Turbo (16K)",
-              "value": "gpt-3.5-turbo-16k"
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
             },
             {
               "title": "GPT-4",
               "value": "gpt-4"
             },
             {
-              "title": "GPT-4 (32K, 0613)",
-              "value": "gpt-4-32k-0613"
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
             },
             {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o (May 13, 2024)",
-              "value": "gpt-4o-2024-05-13"
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
             }
           ]
         }
@@ -145,28 +141,24 @@
               "value": "global"
             },
             {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
+              "title": "GPT-4o",
+              "value": "gpt-4o"
             },
             {
-              "title": "GPT-3.5 Turbo (16K)",
-              "value": "gpt-3.5-turbo-16k"
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
             },
             {
               "title": "GPT-4",
               "value": "gpt-4"
             },
             {
-              "title": "GPT-4 (32K, 0613)",
-              "value": "gpt-4-32k-0613"
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
             },
             {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o (May 13, 2024)",
-              "value": "gpt-4o-2024-05-13"
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
             }
           ]
         }
@@ -199,28 +191,24 @@
               "value": "global"
             },
             {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
+              "title": "GPT-4o",
+              "value": "gpt-4o"
             },
             {
-              "title": "GPT-3.5 Turbo (16K)",
-              "value": "gpt-3.5-turbo-16k"
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
             },
             {
               "title": "GPT-4",
               "value": "gpt-4"
             },
             {
-              "title": "GPT-4 (32K, 0613)",
-              "value": "gpt-4-32k-0613"
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
             },
             {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o (May 13, 2024)",
-              "value": "gpt-4o-2024-05-13"
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
             }
           ]
         }
@@ -245,28 +233,24 @@
               "value": "global"
             },
             {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
+              "title": "GPT-4o",
+              "value": "gpt-4o"
             },
             {
-              "title": "GPT-3.5 Turbo (16K)",
-              "value": "gpt-3.5-turbo-16k"
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
             },
             {
               "title": "GPT-4",
               "value": "gpt-4"
             },
             {
-              "title": "GPT-4 (32K, 0613)",
-              "value": "gpt-4-32k-0613"
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
             },
             {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o (May 13, 2024)",
-              "value": "gpt-4o-2024-05-13"
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
             }
           ]
         }
@@ -291,29 +275,124 @@
               "value": "global"
             },
             {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
+              "title": "GPT-4o",
+              "value": "gpt-4o"
             },
             {
-
-              "title": "GPT-3.5 Turbo (16K)",
-              "value": "gpt-3.5-turbo-16k"
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
             },
             {
               "title": "GPT-4",
               "value": "gpt-4"
             },
             {
-              "title": "GPT-4 (32K, 0613)",
-              "value": "gpt-4-32k-0613"
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "transform",
+      "title": "Transform",
+      "description": "Replace selected text with ChatGPT output, based on a prompt entered when the command is run",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "e.g. beautify JSON",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model_transform",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
             },
             {
               "title": "GPT-4o",
               "value": "gpt-4o"
             },
             {
-              "title": "GPT-4o (May 13, 2024)",
-              "value": "gpt-4o-2024-05-13"
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "transform_preview",
+      "title": "Transform Preview",
+      "description": "Same as Transform, but shows the output in a preview window instead of replacing the selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "e.g. beautify JSON",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model_transform_preview",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
             }
           ]
         }
@@ -323,7 +402,7 @@
   "dependencies": {
     "@nem035/gpt-3-encoder": "^1.1.7",
     "@raycast/api": "^1.50.0",
-    "openai": "^3.2.1",
+    "openai": "^4.53.2",
     "run-applescript": "^6.1.0"
   },
   "preferences": [
@@ -340,28 +419,24 @@
       "type": "dropdown",
       "data": [
         {
-          "title": "GPT-3.5 Turbo",
-          "value": "gpt-3.5-turbo"
+          "title": "GPT-4o",
+          "value": "gpt-4o"
         },
         {
-          "title": "GPT-3.5 Turbo (16K)",
-          "value": "gpt-3.5-turbo-16k"
+          "title": "GPT-4o mini",
+          "value": "gpt-4o-mini"
         },
         {
           "title": "GPT-4",
           "value": "gpt-4"
         },
         {
-          "title": "GPT-4 (32K, 0613)",
-          "value": "gpt-4-32k-0613"
+          "title": "GPT-4 Turbo",
+          "value": "gpt-4-turbo"
         },
         {
-          "title": "GPT-4o",
-          "value": "gpt-4o"
-        },
-        {
-          "title": "GPT-4o (May 13, 2024)",
-          "value": "gpt-4o-2024-05-13"
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
         }
       ],
       "required": true,
@@ -391,5 +466,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

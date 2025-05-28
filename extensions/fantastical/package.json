@@ -2,11 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fantastical",
   "title": "Fantastical",
-  "description": "Create Fantastical events and reminders using Fantasticals natural language processing.",
+  "description": "Create Fantastical events and reminders using Fantastical's natural language processing.",
   "icon": "fantastical.png",
   "author": "devahschaefers",
   "contributors": [
-    "xilopaint"
+    "xilopaint",
+    "ramsay",
+    "pernielsentikaer"
   ],
   "categories": [
     "Applications",
@@ -19,6 +21,16 @@
     "reminder",
     "event"
   ],
+  "preferences": [
+    {
+      "type": "checkbox",
+      "name": "hideOnAdd",
+      "label": "Hide Raycast on add",
+      "description": "Hide the Raycast window after running a quick add command",
+      "default": true,
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "fan-add-event-editable",
@@ -28,8 +40,7 @@
       "arguments": [
         {
           "type": "text",
-          "name": "add",
-          "title": "Add Event",
+          "name": "inputText",
           "placeholder": "event",
           "required": true
         }
@@ -51,8 +62,7 @@
       "arguments": [
         {
           "type": "text",
-          "name": "add",
-          "title": "Add Reminder",
+          "name": "inputText",
           "placeholder": "reminder",
           "required": true
         }
@@ -74,8 +84,7 @@
       "arguments": [
         {
           "type": "text",
-          "name": "add",
-          "title": "Add Reminder",
+          "name": "inputText",
           "placeholder": "reminder",
           "required": true
         }
@@ -98,8 +107,7 @@
       "arguments": [
         {
           "type": "text",
-          "name": "add",
-          "title": "Add Event",
+          "name": "inputText",
           "placeholder": "event",
           "required": true
         }
@@ -116,17 +124,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
-    "default-browser-id": "^3.0.0",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.81.0",
+    "@raycast/utils": "^1.16.4",
+    "default-browser-id": "^5.0.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.7.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -134,5 +140,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

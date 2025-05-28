@@ -1,0 +1,69 @@
+name: NPM - Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR to check"
+        required: true
+  pull_request:
+    paths:
+      - "extensions/**"
+    branches: [main, master]
+
+jobs:
+  setup:
+    name: Get Extensions
+    runs-on: macos-latest
+    outputs:
+      extension_dirs: ${{ steps.get_changed_extensions_json.outputs.extension_dirs }}
+    steps:
+      - name: Get PR number
+        id: get_pr_number
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "pr_number=${{ github.event.inputs.pr_number }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Get changed extensions
+        id: get_changed_extensions
+        uses: raycast/github-actions/get-changed-extensions@master
+        with:
+          pull_request_number: "${{ steps.get_pr_number.outputs.pr_number }}"      
+      - name: to JSON
+        id: get_changed_extensions_json
+        run: |
+          changed_extensions="${{ steps.get_changed_extensions.outputs.paths }}"
+          repo_path="${GITHUB_WORKSPACE}/"
+          # Remove the repository path from each path and convert to JSON array
+          relative_paths=$(echo "$changed_extensions" | sed "s|$repo_path||g" | tr ',' '\n')
+          json_array=$(echo "$relative_paths" | jq -R -s -c 'split("\n")[:-1]')
+          echo "extension_dirs=$json_array" >> $GITHUB_OUTPUT
+  check-extensions:
+    name: ${{ matrix.extension_dir }}
+    needs: setup
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        extension_dir: ${{ fromJson(needs.setup.outputs.extension_dirs) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: ${{ matrix.extension_dir }}
+      - name: Check extension
+        continue-on-error: true
+        working-directory: ${{ matrix.extension_dir }}
+        run: |
+          npm install -g npm-check
+          npm ci
+
+          set +e
+          npm-check
+          EXIT_CODE=$?
+          set -e
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::warning::npm-check found issues in dependencies."
+          fi

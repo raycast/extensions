@@ -40,3 +40,22 @@ export const openDefaultBrowserSetting = async () => {
     console.log(e);
   }
 };
+
+export function truncate(str: string, maxLength = 32): string {
+  let length = 0;
+  let i;
+  for (i = 0; i < str.length; i++) {
+    const charCode = str.charCodeAt(i);
+    if (charCode >= 0x4e00 && charCode <= 0x9fff) {
+      length += 2.2;
+    } else {
+      length += 1;
+    }
+
+    if (length > maxLength) {
+      break;
+    }
+  }
+
+  return str.substring(0, i) + (i < str.length ? "…" : "");
+}

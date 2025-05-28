@@ -13,16 +13,19 @@ import {
   popToRoot,
   confirmAlert,
   Color,
+  environment,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getProgressIcon } from '@raycast/utils';
 import * as store from './store';
+import { MoveDir } from './store';
 import { readDataFromQRCodeOnScreen, getCurrentSeconds, splitStrToParts, ScanType, parseUrl } from './utils';
 import { TOKEN_TIME, generateToken } from './totp';
 import { extractAccountsFromMigrationUrl } from './google-authenticator';
 
 type Preferences = {
   passwordVisibility?: boolean;
+  primaryAction?: 'copy' | 'paste';
 };
 
 export default () => {
@@ -34,8 +37,10 @@ export default () => {
   const [accounts, setAccounts] = useState<store.Account[]>([]);
   const [qrCodeScanType, setQRCodeScanType] = useState<ScanType>(null);
 
+  const { theme } = environment;
+
   async function loadAccounts() {
-    setLoading(true);
+    if (accounts.length === 0) setLoading(true);
     setAccounts(await store.getAccounts());
     setLoading(false);
   }
@@ -92,23 +97,31 @@ export default () => {
   async function scanQRCode(type: ScanType) {
     if (qrCodeScanType) return;
 
-    setQRCodeScanType(type);
-    const response = await readDataFromQRCodeOnScreen(type);
-    setQRCodeScanType(null);
+    try {
+      setQRCodeScanType(type);
+      const response = await readDataFromQRCodeOnScreen(type);
+      setQRCodeScanType(null);
 
-    if (!response?.data) {
+      if (!response?.data) {
+        throw new Error('Unable to read QR code');
+      }
+
+      if (response.isGoogleAuthenticatorMigration) {
+        await handleGoogleAuthenticatorMigration(response.data);
+        await loadAccounts();
+      } else {
+        navigation.push(<SetupKey onSubmit={handleFormSubmit} secret={response.data} />);
+      }
+    } catch (err: unknown) {
+      let message = 'Unknown error';
+      if (err instanceof Error) {
+        message = err.message;
+      }
       showToast({
         style: Toast.Style.Failure,
         title: 'QR code detection failed',
+        message,
       });
-      return;
-    }
-
-    if (response.isGoogleAuthenticatorMigration) {
-      await handleGoogleAuthenticatorMigration(response.data);
-      await loadAccounts();
-    } else {
-      navigation.push(<SetupKey onSubmit={handleFormSubmit} secret={response.data} />);
     }
   }
 
@@ -151,6 +164,29 @@ export default () => {
     }
   }
 
+  const globalActions = (
+    <ActionPanel.Section>
+      <ActionPanel.Submenu title="Create New" icon={Icon.Plus} shortcut={{ modifiers: ['cmd'], key: 'n' }}>
+        <Action title="Scan a QR Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
+        <Action.Push title="Enter a Setup Key" icon={Icon.Keyboard} target={<SetupKey onSubmit={handleFormSubmit} />} />
+        <Action
+          title="Select a QR Code"
+          icon={Icon.Camera}
+          shortcut={{ modifiers: ['cmd'], key: 'i' }}
+          onAction={() => scanQRCode('select')}
+        />
+      </ActionPanel.Submenu>
+      <Action
+        title={`${preferences.passwordVisibility ? 'Hide' : 'Show'} Passwords`}
+        icon={preferences.passwordVisibility ? Icon.EyeDisabled : Icon.Eye}
+        onAction={() => {
+          openExtensionPreferences();
+          popToRoot();
+        }}
+      />
+    </ActionPanel.Section>
+  );
+
   useEffect(() => {
     loadAccounts();
     update();
@@ -160,51 +196,16 @@ export default () => {
 
   return (
     <List isLoading={loading}>
-      <List.Item
-        title={'Create new'}
-        subtitle={'Create a new one-time password'}
-        icon={Icon.Plus}
-        accessories={
-          !qrCodeScanType
-            ? [
-                {
-                  icon: Icon.Camera,
-                  tag: {
-                    value: 'Scan QR',
-                    color: '#ded260',
-                  },
-                },
-                {
-                  icon: Icon.Keyboard,
-                  tag: 'Enter Setup Key',
-                },
-              ]
-            : qrCodeScanType === 'scan'
-            ? [{ text: 'Scanning QR Code...' }]
-            : [{ text: 'Select a QR Code' }]
-        }
-        actions={
-          <ActionPanel>
-            <Action title="Scan a QR Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
-            <Action.Push
-              title="Enter a Setup Key"
-              icon={Icon.Keyboard}
-              shortcut={{ modifiers: ['cmd'], key: 'enter' }}
-              target={<SetupKey onSubmit={handleFormSubmit} />}
-            />
-            <Action
-              title="Select a QR Code"
-              icon={Icon.Camera}
-              shortcut={{ modifiers: ['cmd'], key: 'i' }}
-              onAction={() => scanQRCode('select')}
-            />
-          </ActionPanel>
-        }
-      />
       <List.Section title="Accounts">
-        {accounts.map((account, i) => (
+        {accounts.map((account, index) => (
           <List.Item
-            key={i}
+            key={account.id}
+            icon={{
+              source: `https://cdn.simpleicons.org/${account.issuer?.toLowerCase() || account.name?.toLowerCase()}/${
+                theme === 'dark' ? 'white' : 'black'
+              }`,
+              fallback: Icon.Key,
+            }}
             title={account.name}
             subtitle={displayToken(account.secret)}
             keywords={[account.issuer ?? '', account.name]}
@@ -217,9 +218,35 @@ export default () => {
             ]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={getCopyToClipboardContent(account.secret)} />
+                {...[
+                  <Action.CopyToClipboard content={getCopyToClipboardContent(account.secret)} />,
+                  <Action.Paste content={getCopyToClipboardContent(account.secret)} />,
+                ][preferences.primaryAction === 'paste' ? 'reverse' : 'slice']()}
+                {index > 0 && (
+                  <Action
+                    title="Move up"
+                    icon={Icon.ArrowUp}
+                    onAction={async () => {
+                      await store.moveAccount(account.id, MoveDir.UP);
+                      await loadAccounts();
+                    }}
+                    shortcut={{ modifiers: ['cmd', 'opt'], key: 'arrowUp' }}
+                  />
+                )}
+                {index < accounts.length - 1 && (
+                  <Action
+                    title="Move down"
+                    icon={Icon.ArrowDown}
+                    onAction={async () => {
+                      await store.moveAccount(account.id, MoveDir.DOWN);
+                      await loadAccounts();
+                    }}
+                    shortcut={{ modifiers: ['cmd', 'opt'], key: 'arrowDown' }}
+                  />
+                )}
                 <Action.Push
                   title="Edit Account"
+                  shortcut={{ modifiers: ['cmd'], key: 'e' }}
                   icon={Icon.Pencil}
                   target={
                     <SetupKey id={account.id} name={account.name} secret={account.secret} onSubmit={handleFormSubmit} />
@@ -229,22 +256,50 @@ export default () => {
                   title="Remove Account"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ['cmd'], key: 'delete' }}
+                  shortcut={{ modifiers: ['cmd'], key: 'backspace' }}
                   onAction={() => handleRemoveAccount(account)}
                 />
-                <Action
-                  title={`${preferences.passwordVisibility ? 'Hide' : 'Show'} Password`}
-                  icon={preferences.passwordVisibility ? Icon.EyeDisabled : Icon.Eye}
-                  onAction={() => {
-                    openExtensionPreferences();
-                    popToRoot();
-                  }}
-                />
+                {globalActions}
               </ActionPanel>
             }
           />
         ))}
       </List.Section>
+      {!loading && ( // NOTE: defers rendering so accounts are in focus
+        <List.Section title="New">
+          <List.Item
+            title="Create new"
+            subtitle="Create a new one-time password"
+            icon={Icon.Plus}
+            accessories={
+              !qrCodeScanType
+                ? [
+                    { icon: Icon.Camera, tag: { value: 'Scan QR', color: Color.Yellow } },
+                    { icon: Icon.Keyboard, tag: 'Enter Setup Key' },
+                  ]
+                : qrCodeScanType === 'scan'
+                ? [{ text: 'Scanning QR Code...' }]
+                : [{ text: 'Select a QR Code' }]
+            }
+            actions={
+              <ActionPanel>
+                <Action title="Scan a QR Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
+                <Action.Push
+                  title="Enter a Setup Key"
+                  icon={Icon.Keyboard}
+                  target={<SetupKey onSubmit={handleFormSubmit} />}
+                />
+                <Action
+                  title="Select a QR Code"
+                  icon={Icon.Camera}
+                  shortcut={{ modifiers: ['cmd'], key: 'i' }}
+                  onAction={() => scanQRCode('select')}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
     </List>
   );
 };
@@ -261,13 +316,12 @@ function SetupKey(props: SetupKeyProps) {
   const [secret, setSecret] = useState(props.secret ?? '');
 
   async function handleSubmit() {
-    if (props.id) {
-      await store.updateAccount(props.id, { name, secret });
-    } else {
-      await store.addAccount({ name, secret });
-    }
+    if (props.id) await store.updateAccount({ id: props.id, name, secret });
+    else await store.addAccount({ name, secret });
+
     props.onSubmit();
   }
+
   return (
     <Form
       actions={

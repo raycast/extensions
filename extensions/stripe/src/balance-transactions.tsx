@@ -1,23 +1,10 @@
-import React from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import type Stripe from "stripe";
 import { convertAmount, convertTimestampToDate, titleCase } from "./utils";
 import { useStripeApi } from "./hooks";
 import { STRIPE_ENDPOINTS } from "./enums";
 import { ListContainer, withEnvContext } from "./components";
 import { theme } from "./theme";
-
-type BalanceTransactionResp = {
-  id: string;
-  amount: number;
-  available_on: number;
-  created: number;
-  currency: string;
-  description: string | null;
-  fee: number;
-  net: number;
-  type: string;
-  status: string;
-};
 
 type BalanceTransaction = {
   id: string;
@@ -32,28 +19,19 @@ type BalanceTransaction = {
   status: string;
 };
 
-const resolveBalanceTransaction = ({
-  amount = 0,
-  currency = "",
-  description = "",
-  available_on,
-  created,
-  fee = 0,
-  net = 0,
-  ...rest
-}: BalanceTransactionResp): BalanceTransaction => {
-  const uppercaseCurrency = currency.toUpperCase();
-
-  return {
-    ...rest,
-    available_on: convertTimestampToDate(available_on),
-    created_at: convertTimestampToDate(created),
-    amount: convertAmount(amount),
-    currency: uppercaseCurrency,
-    description,
-    fee: convertAmount(fee),
-    net: convertAmount(net),
+const resolveBalanceTransaction = (balanceTransaction: Stripe.BalanceTransaction): BalanceTransaction => {
+  const resolvedBalanceTransaction: BalanceTransaction = {
+    ...balanceTransaction,
+    available_on: convertTimestampToDate(balanceTransaction.available_on),
+    created_at: convertTimestampToDate(balanceTransaction.created),
+    amount: convertAmount(balanceTransaction.amount),
+    currency: balanceTransaction.currency.toUpperCase(),
+    description: balanceTransaction.description ?? "",
+    fee: convertAmount(balanceTransaction.fee),
+    net: convertAmount(balanceTransaction.net),
   };
+
+  return resolvedBalanceTransaction;
 };
 
 const resolveMetadataValue = (value: any) => {

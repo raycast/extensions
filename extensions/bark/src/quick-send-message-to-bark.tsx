@@ -1,11 +1,22 @@
 import { getSelectedMessage, isEmpty, sendMessage } from "./utils/common-utils";
-import { showHUD } from "@raycast/api";
+import { LaunchProps, showHUD } from "@raycast/api";
+import { autoCloseWindow, autoGetMessage } from "./types/preferences";
 
-export default async () => {
-  const message = await getSelectedMessage();
-  if (isEmpty(message)) {
-    await showHUD("No message to send");
+interface BarkArguments {
+  message: string;
+  title: string;
+  subtitle: string;
+}
+
+export default async (props: LaunchProps<{ arguments: BarkArguments }>) => {
+  const { message, title, subtitle } = props.arguments;
+  let finalMessage = message;
+  if (isEmpty(message) && autoGetMessage) {
+    finalMessage = await getSelectedMessage();
+  }
+  if (isEmpty(finalMessage)) {
+    await showHUD("🚨 No message to send");
     return;
   }
-  await sendMessage(message, "", "", 0, true);
+  await sendMessage(finalMessage, isEmpty(title) ? "" : title, isEmpty(subtitle) ? "" : subtitle, 0, autoCloseWindow);
 };

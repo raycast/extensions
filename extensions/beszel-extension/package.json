@@ -1,0 +1,224 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "beszel",
+  "title": "Beszel",
+  "description": "Monitor and configure your systems managed by Beszel.",
+  "icon": "icon.png",
+  "author": "wyattjoh",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "URL",
+      "name": "url",
+      "type": "textfield",
+      "required": true,
+      "description": "The URL of the Beszel service",
+      "placeholder": "https://beszel.example.com"
+    },
+    {
+      "title": "Username",
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "description": "The username to use for authentication",
+      "placeholder": "admin"
+    },
+    {
+      "title": "Password",
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "description": "The password to use for authentication",
+      "placeholder": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-systems",
+      "title": "Search Beszel Systems",
+      "description": "Search for and display system statuses for each system monitored by Beszel",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-system",
+      "title": "Get System(s)",
+      "description": "Get a specific system monitored by Beszel by name or all the systems if no name is provided"
+    }
+  ],
+  "ai": {
+    "instructions": "Beszel is a tool for monitoring and configuring systems managed by Beszel. Use this tool to get all systems monitored by Beszel.",
+    "evals": [
+      {
+        "input": "@beszel What systems are down?",
+        "mocks": {
+          "get-system": [
+            {
+              "cpuChip": "Cortex-A76",
+              "cpuCores": 4,
+              "cpuPercent": 1.06,
+              "diskPercent": 6.75,
+              "host": "paulamyo",
+              "memoryPercent": 4.58,
+              "name": "paulamyo",
+              "network": 0.02,
+              "status": "up",
+              "threads": 4,
+              "updated": "2025-03-17 16:32:27.946Z",
+              "uptime": 5568054
+            },
+            {
+              "cpuChip": "Cortex-A53",
+              "cpuCores": 4,
+              "cpuPercent": 0.45,
+              "diskPercent": 12.28,
+              "host": "chihuahua",
+              "memoryPercent": 45.28,
+              "name": "chihuahua",
+              "network": 0,
+              "status": "up",
+              "threads": 4,
+              "updated": "2025-03-17 16:32:30.325Z",
+              "uptime": 1790833
+            },
+            {
+              "cpuChip": "Intel(R) Core(TM) i5-9600K CPU @ 3.70GHz",
+              "cpuCores": 6,
+              "cpuPercent": 2.93,
+              "diskPercent": 46.98,
+              "host": "host.docker.internal",
+              "memoryPercent": 13.87,
+              "name": "deepthought",
+              "network": 0.01,
+              "status": "up",
+              "threads": 6,
+              "updated": "2025-03-17 16:32:25.996Z",
+              "uptime": 600086
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-system"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@beszel What's the status of paulamyo?",
+        "mocks": {
+          "get-system": {
+            "cpuChip": "Cortex-A76",
+            "cpuCores": 4,
+            "cpuPercent": 1.06,
+            "diskPercent": 6.75,
+            "host": "paulamyo",
+            "memoryPercent": 4.58,
+            "name": "paulamyo",
+            "network": 0.02,
+            "status": "up",
+            "threads": 4,
+            "updated": "2025-03-17 16:32:27.946Z",
+            "uptime": 5568054
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "paulamyo"
+              },
+              "name": "get-system"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@beszel What is the disk usage of all monitored machines?",
+        "mocks": {
+          "get-system": [
+            {
+              "cpuChip": "Cortex-A76",
+              "cpuCores": 4,
+              "cpuPercent": 1.01,
+              "diskPercent": 6.75,
+              "host": "paulamyo",
+              "memoryPercent": 4.6,
+              "name": "paulamyo",
+              "network": 0.01,
+              "status": "up",
+              "threads": 4,
+              "updated": "2025-03-17 16:33:27.944Z",
+              "uptime": 5568114
+            },
+            {
+              "cpuChip": "Cortex-A53",
+              "cpuCores": 4,
+              "cpuPercent": 0.49,
+              "diskPercent": 12.28,
+              "host": "chihuahua",
+              "memoryPercent": 44.45,
+              "name": "chihuahua",
+              "network": 0,
+              "status": "up",
+              "threads": 4,
+              "updated": "2025-03-17 16:33:30.327Z",
+              "uptime": 1790893
+            },
+            {
+              "cpuChip": "Intel(R) Core(TM) i5-9600K CPU @ 3.70GHz",
+              "cpuCores": 6,
+              "cpuPercent": 2.9,
+              "diskPercent": 46.98,
+              "host": "host.docker.internal",
+              "memoryPercent": 13.86,
+              "name": "deepthought",
+              "network": 0.01,
+              "status": "up",
+              "threads": 6,
+              "updated": "2025-03-17 16:33:26.003Z",
+              "uptime": 600146
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-system"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
+    "eventsource": "^3.0.5",
+    "pocketbase": "^0.25.2",
+    "undici": "^7.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

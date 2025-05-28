@@ -5,9 +5,16 @@
   "description": "Automatically quit the application after all windows are closed",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "alextlopez11"
+  ],
   "categories": [
     "Applications",
     "System"
+  ],
+  "keywords": [
+    "quit",
+    "app"
   ],
   "license": "MIT",
   "commands": [
@@ -40,7 +47,7 @@
           "type": "dropdown",
           "description": "Set the number of columns of the app items. (Only works with Grid layout)",
           "required": false,
-          "title": "App Item Coloums",
+          "title": "App Item Columns",
           "default": "8",
           "data": [
             {
@@ -110,7 +117,7 @@
       "title": "Auto Quit App",
       "description": "Automatically quit the application after all windows are closed",
       "mode": "menu-bar",
-      "interval": "5m",
+      "interval": "1m",
       "preferences": [
         {
           "name": "refreshInterval",
@@ -118,8 +125,16 @@
           "description": "Set the refresh interval for auto-quit app extensions.",
           "required": false,
           "title": "Refresh Interval",
-          "default": "5",
+          "default": "3",
           "data": [
+            {
+              "title": "1m",
+              "value": "1"
+            },
+            {
+              "title": "3m",
+              "value": "3"
+            },
             {
               "title": "5m",
               "value": "5"
@@ -135,6 +150,18 @@
             {
               "title": "20m",
               "value": "20"
+            },
+            {
+              "title": "30m",
+              "value": "30"
+            },
+            {
+              "title": "45m",
+              "value": "45"
+            },
+            {
+              "title": "60m",
+              "value": "60"
             }
           ]
         }
@@ -142,18 +169,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.2",
-    "run-applescript": "^7.0.0"
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@types/node": "20.11.16",
-    "@types/react": "18.2.52",
-    "@typescript-eslint/eslint-plugin": "^6.20.0",
-    "@typescript-eslint/parser": "^6.20.0",
-    "eslint": "^8.56.0",
+    "@types/node": "22.7.3",
+    "@types/react": "18.3.9",
+    "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.3.3"
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -161,5 +188,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

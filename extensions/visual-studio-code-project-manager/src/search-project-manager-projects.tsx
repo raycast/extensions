@@ -1,10 +1,20 @@
-import { Action, ActionPanel, closeMainWindow, Detail, environment, getPreferenceValues, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Detail,
+  environment,
+  getPreferenceValues,
+  Icon,
+  List,
+} from "@raycast/api";
+import { useFrecencySorting } from "@raycast/utils";
 import { exec } from "child_process";
 import { existsSync, lstatSync, readFileSync } from "fs";
 import { homedir } from "os";
 import config from "parse-git-config";
 import { dirname } from "path";
-import { Fragment, ReactElement, useState } from "react";
+import { useState, useEffect, ReactElement, Fragment } from "react";
 import tildify from "tildify";
 import { CachedProjectEntry, Preferences, ProjectEntry } from "./types";
 
@@ -45,7 +55,7 @@ function getProjectEntries(storagePath: string): ProjectEntry[] {
         if (projectEntries.find(({ rootPath }) => rootPath === fullPath)) {
           return;
         }
-        projectEntries.push({ name, rootPath: fullPath, tags: [], enabled: true });
+        projectEntries.push({ id: fullPath, name, rootPath: fullPath, tags: [], enabled: true });
       });
     }
   });
@@ -94,11 +104,6 @@ function getProjectsLocationPath(): { path: string; error?: string } {
   return { path, error: `Projects Location path is not a directory: ${path}` };
 }
 
-function getSortedProjects(projects: ProjectEntry[]): ProjectEntry[] {
-  const projectsToSort = [...projects];
-  return projectsToSort.sort((a, b) => a.name.localeCompare(b.name));
-}
-
 function getProjectsGroupedByTag(projects: ProjectEntry[]): Map<string, ProjectEntry[]> {
   const groupedProjects = new Map<string, ProjectEntry[]>();
 
@@ -117,13 +122,21 @@ function getProjectsGroupedByTag(projects: ProjectEntry[]): Map<string, ProjectE
   return new Map([...groupedProjects.entries()].sort());
 }
 
-function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): ReactElement[] {
+type FrecencyReturnType<T extends { id: string }> = ReturnType<typeof useFrecencySorting<T>>;
+type FrecencyUpdateType<T extends { id: string }> = Pick<FrecencyReturnType<T>, "visitItem" | "resetRanking">;
+
+function getProjectsGroupedByTagAsElements(
+  projectEntries: ProjectEntry[],
+  updateFrecency: FrecencyUpdateType<ProjectEntry>,
+): ReactElement[] {
   const projectsGrouped = getProjectsGroupedByTag(projectEntries);
   const elements: ReactElement[] = [];
   projectsGrouped.forEach((value, key) => {
     elements.push(
       <List.Section key={key} title={key}>
-        {value?.map((project, index) => <ProjectListItem key={project.rootPath + index} {...project} />)}
+        {value?.map((project, index) => (
+          <ProjectListItem key={project.rootPath + index} item={project} updateFrecency={updateFrecency} />
+        ))}
       </List.Section>,
     );
   });
@@ -164,16 +177,52 @@ export default function Command() {
     );
   }
 
-  const sortedProjects = getSortedProjects(projectEntries);
+  const {
+    data: sortedProjects,
+    visitItem,
+    resetRanking,
+  } = useFrecencySorting(projectEntries, {
+    key: (item: ProjectEntry) => item.rootPath,
+    sortUnvisited: (a: ProjectEntry, b: ProjectEntry) => a.name.localeCompare(b.name),
+  });
+  const updateFrecency = { visitItem, resetRanking };
+
+  const [searchText, setSearchText] = useState("");
+  const [filteredProjects, filterProjects] = useState(sortedProjects);
+
+  useEffect(() => {
+    // Update project list, using frecency-sorted projects
+    const searchRgx = new RegExp([...searchText].map(escapeRegex).join(".*"), "i");
+
+    const sortedProjectsSearch = sortedProjects
+      // Include all in-exact matches in search results
+      .filter((item) => searchRgx.test(item.name))
+      // Float exact matches to the top, preserving original order
+      .sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        const search = searchText.toLowerCase();
+
+        if (aName === search) {
+          if (aName === bName) return 0;
+          return -1;
+        }
+        if (bName === search) return 1;
+
+        return +bName.includes(search) - +aName.includes(search);
+      });
+
+    filterProjects(sortedProjectsSearch);
+  }, [searchText]);
 
   const elements: ReactElement[] = [];
   if (preferences.groupProjectsByTag && !selectedTag) {
     // don't group if filtering
-    const groupedProjects = getProjectsGroupedByTagAsElements(sortedProjects);
+    const groupedProjects = getProjectsGroupedByTagAsElements(filteredProjects, updateFrecency);
     elements.push(...groupedProjects);
   } else {
-    filterProjectsByTag(sortedProjects, selectedTag).forEach((project, index) => {
-      elements.push(<ProjectListItem key={project.rootPath + index} {...project} />);
+    filterProjectsByTag(filteredProjects, selectedTag).forEach((project, index) => {
+      elements.push(<ProjectListItem key={project.rootPath + index} item={project} updateFrecency={updateFrecency} />);
     });
   }
 
@@ -183,6 +232,8 @@ export default function Command() {
 
   return (
     <List
+      filtering={false}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search projects ..."
       searchBarAccessory={
         projectTags.length ? (
@@ -204,7 +255,15 @@ export default function Command() {
   );
 }
 
-function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
+function ProjectListItem({
+  item,
+  updateFrecency,
+}: {
+  item: ProjectEntry;
+  updateFrecency: FrecencyUpdateType<ProjectEntry>;
+}) {
+  const { name, rootPath, tags } = item;
+  const { visitItem, resetRanking } = updateFrecency;
   const path = rootPath;
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
@@ -223,6 +282,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                 title={`Open in ${vscodeApp.name} (Remote)`}
                 icon={{ fileIcon: vscodeApp.path }}
                 onAction={() => {
+                  visitItem(item);
                   exec(`"${vscodeAppCLI}" --remote ${parseRemoteURL(path)}`);
                   closeMainWindow();
                 }}
@@ -233,6 +293,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                 icon={{ fileIcon: vscodeApp.path }}
                 target={path}
                 application={vscodeApp.path}
+                onOpen={() => visitItem(item)}
               />
             )}
             {terminalInstalled && (
@@ -243,6 +304,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
                 target={path}
                 application={terminalPath}
+                onOpen={() => visitItem(item)}
               />
             )}
             {gitClientInstalled && isGitRepo(path) && (
@@ -253,10 +315,11 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                 shortcut={{ modifiers: ["cmd"], key: "g" }}
                 target={path}
                 application={gitClientPath}
+                onOpen={() => visitItem(item)}
               />
             )}
             <Action.ShowInFinder path={path} />
-            <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} onOpen={() => visitItem(item)} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
@@ -267,6 +330,11 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            <Action
+              title="Reset Project Ranking"
+              icon={Icon.ArrowCounterClockwise}
+              onAction={() => resetRanking(item)}
+            />
             <Action.Trash paths={[path]} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
           </ActionPanel.Section>
           <DevelopmentActionSection />
@@ -323,4 +391,8 @@ function parseRemoteURL(path: string): string {
   path = path.slice(remotePrefix.length);
   const index = path.indexOf("/");
   return path.slice(0, index) + " " + path.slice(index) + "/";
+}
+
+function escapeRegex(x: string): string {
+  return x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

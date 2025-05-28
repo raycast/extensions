@@ -1,74 +1,59 @@
 import { XMLParser } from "fast-xml-parser";
-import fetch from "node-fetch";
-import { useQuery } from "../nextcloud";
-import { getPreferences } from "../preferences";
+import { useFetch } from "@raycast/utils";
+import { API_HEADERS, BASE_URL } from "../config";
+import { parseLinkHeader } from "@web3-storage/parse-link-header";
 
 export function useActivity() {
-  const { data, isLoading } = useQuery((signal) => performGetActivity(signal));
+  const { isLoading, data, pagination } = useFetch(
+    (options) => options.cursor || `${BASE_URL}/ocs/v2.php/apps/activity/api/v2/activity?limit=200`,
+    {
+      method: "GET",
+      headers: {
+        ...API_HEADERS,
+        "OCS-APIRequest": "true",
+      },
+      async parseResponse(response) {
+        const linkHeader = response.headers.get("Link");
+        const parsed = parseLinkHeader(linkHeader);
+        const cursor = parsed?.next.url;
+        const result = await response.text();
+        return {
+          result,
+          cursor,
+        };
+      },
+      mapResult({ result, cursor }) {
+        const parser = new XMLParser();
+        const dom = parser.parse(result) as Response;
+        if (!("ocs" in dom)) throw new Error("Invalid response: " + result);
+        if (dom.ocs.meta.status === "failure") throw new Error(dom.ocs.meta.statuscode + ": " + dom.ocs.meta.message);
 
-  return {
-    activity: data ?? [],
-    isLoading,
-  };
-}
-
-async function performGetActivity(signal: AbortSignal): Promise<Activity[]> {
-  const res = await ocsRequest({
-    signal,
-    base: `apps/activity/api/v2/activity?limit=200`,
-  });
-
-  const activities = res.element.map((element) => {
-    return {
-      activityId: element.activity_id,
-      app: element.app,
-      type: element.type,
-      user: element.user,
-      subject: element.subject,
-      objectType: element.object_type,
-      objectName: element.object_name,
-      objects: element.objects,
-      link: element.link,
-      icon: element.icon,
-      datetime: element.datetime,
-    } as Activity;
-  });
-  return activities;
-}
-
-async function ocsRequest({
-  signal,
-  base = "",
-  body,
-  method = "GET",
-}: {
-  signal: AbortSignal;
-  body?: string;
-  base?: string;
-  method?: string;
-}) {
-  const { hostname, username, password } = getPreferences();
-
-  const response = await fetch(`https://${hostname}/ocs/v2.php/${base}`, {
-    method,
-    headers: {
-      "OCS-APIRequest": "true",
-      authorization: "Basic " + Buffer.from(username + ":" + password).toString("base64"),
-    },
-    body,
-    signal,
-  });
-  const responseBody = await response.text();
-
-  const parser = new XMLParser();
-  const dom = parser.parse(responseBody) as Response;
-  if (!("ocs" in dom)) {
-    throw new Error("Invalid response: " + responseBody);
-  }
-  if (dom.ocs.meta.status === "failure") {
-    throw new Error(dom.ocs.meta.statuscode + ": " + dom.ocs.meta.message);
-  }
-  return dom.ocs.data;
+        const res = dom.ocs.data;
+        const activities = res.element.map((element) => {
+          return {
+            activityId: element.activity_id,
+            app: element.app,
+            type: element.type,
+            user: element.user,
+            subject: element.subject,
+            objectType: element.object_type,
+            objectName: element.object_name,
+            objects: element.objects,
+            link: element.link,
+            icon: element.icon,
+            datetime: element.datetime,
+          } as Activity;
+        });
+        return {
+          data: activities,
+          hasMore: !!cursor,
+          cursor,
+        };
+      },
+      initialData: [],
+    }
+  );
+  return { isLoading, activity: data, pagination };
 }
 
 export interface Activity {
@@ -86,20 +71,20 @@ export interface Activity {
   datetime: string;
 }
 
-export interface Response {
+interface Response {
   ocs: Ocs;
 }
 
-export interface Ocs {
+interface Ocs {
   meta: Meta;
   data: Data;
 }
 
-export interface Data {
+interface Data {
   element: ActivityElement[];
 }
 
-export interface ActivityElement {
+interface ActivityElement {
   activity_id: string;
   app: string;
   type: string;
@@ -114,7 +99,7 @@ export interface ActivityElement {
   datetime: string;
 }
 
-export interface Objects {
+interface Objects {
   element: string[] | string;
 }
 
@@ -126,7 +111,7 @@ export interface File {
   link: string;
 }
 
-export interface Meta {
+interface Meta {
   status: string;
   statuscode: number;
   message: string;

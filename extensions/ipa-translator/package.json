@@ -23,12 +23,6 @@
       "mode": "view"
     },
     {
-      "name": "german-to-ipa",
-      "title": "Translate German to IPA",
-      "description": "Convert german to international phonetic alphabet.",
-      "mode": "view"
-    },
-    {
       "name": "swedish-to-ipa",
       "title": "Translate Swedish to IPA",
       "description": "Convert swedish to international phonetic alphabet.",
@@ -42,7 +36,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
+    "@raycast/api": "^1.74.0",
     "fs-extra": "^11.2.0"
   },
   "devDependencies": {

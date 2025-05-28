@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Color, Icon, LaunchProps, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchProps, List, Toast, popToRoot, showToast, useNavigation } from "@raycast/api";
 import { useEffect } from "react";
 import useTimers from "./hooks/useTimers";
-import RenameView from "./RenameView";
 import CustomTimerView from "./startCustomTimer";
-import { formatDateTime, formatTime } from "./backend/formatUtils";
 import { CommandLinkParams } from "./backend/types";
 import { readCustomTimers, startTimer } from "./backend/timerBackend";
+import RunningTimerListItem from "./components/RunningTimerListItem";
+import CustomTimerListItem from "./components/CustomTimerListItem";
 
 export default function Command(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   if (props.launchContext?.timerID) {
@@ -21,21 +21,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLinkP
         timeInSeconds: ct.timeInSeconds,
         timerName: ct.name,
         selectedSound: ct.selectedSound,
-      });
+      }).then(() => popToRoot());
       return;
     }
   }
 
-  const {
-    timers,
-    customTimers,
-    isLoading,
-    refreshTimers,
-    handleStopTimer,
-    handleStartCT,
-    handleCreateCT,
-    handleDeleteCT,
-  } = useTimers();
+  const { timers, customTimers, isLoading, refreshTimers } = useTimers();
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -45,50 +36,10 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLinkP
     }, 1000);
   }, []);
 
-  const runningIcon = { tag: { value: "Running", color: Color.Yellow } };
-  const finishedIcon = { tag: { value: "Finished!", color: Color.Green } };
-
-  const createPresetLink = (ctID: string): string => {
-    const payload: CommandLinkParams = { timerID: ctID };
-    const encodedPayload = encodeURIComponent(JSON.stringify(payload));
-    return `raycast://extensions/ThatNerd/timers/manageTimers?context=${encodedPayload}`;
-  };
-
   return (
     <List isLoading={isLoading}>
       <List.Section title={timers?.length !== 0 && timers != null ? "Currently Running" : "No Timers Running"}>
-        {timers?.map((timer) => (
-          <List.Item
-            key={timer.originalFile}
-            icon={{ source: Icon.Clock, tintColor: timer.timeLeft === 0 ? Color.Green : Color.Yellow }}
-            title={timer.name}
-            subtitle={formatTime(timer.timeLeft) + " left"}
-            accessories={[
-              { text: formatTime(timer.secondsSet) + " originally" },
-              { text: `${timer.timeLeft === 0 ? "Ended" : "Ends"} at ${formatDateTime(timer.timeEnds)}` },
-              timer.timeLeft === 0 ? finishedIcon : runningIcon,
-            ]}
-            actions={
-              <ActionPanel>
-                <Action title="Stop Timer" onAction={() => handleStopTimer(timer)} />
-                <Action
-                  title="Rename Timer"
-                  onAction={() =>
-                    push(<RenameView currentName={timer.name} originalFile={timer.originalFile} ctID={null} />)
-                  }
-                />
-                <Action
-                  title="Save Timer as Preset"
-                  shortcut={{
-                    modifiers: ["cmd", "shift"],
-                    key: "enter",
-                  }}
-                  onAction={() => handleCreateCT(timer)}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+        {timers?.map((timer) => <RunningTimerListItem key={timer.originalFile} timer={timer} />)}
         <List.Item
           key={0}
           icon={Icon.Clock}
@@ -98,6 +49,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLinkP
             <ActionPanel>
               <Action
                 title="Start Timer"
+                icon={Icon.Hourglass}
                 onAction={() => push(<CustomTimerView arguments={{ hours: "", minutes: "", seconds: "" }} />)}
               />
             </ActionPanel>
@@ -109,42 +61,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLinkP
           ?.sort((a, b) => {
             return customTimers[a].timeInSeconds - customTimers[b].timeInSeconds;
           })
-          .map((ctID) => (
-            <List.Item
-              key={ctID}
-              icon={Icon.Clock}
-              title={customTimers[ctID].name}
-              subtitle={formatTime(customTimers[ctID].timeInSeconds)}
-              actions={
-                <ActionPanel>
-                  <Action title="Start Timer" onAction={() => handleStartCT({ customTimer: customTimers[ctID] })} />
-                  <Action
-                    title="Rename Timer"
-                    onAction={() =>
-                      push(
-                        <RenameView currentName={customTimers[ctID].name} originalFile={"customTimer"} ctID={ctID} />,
-                      )
-                    }
-                  />
-                  <Action
-                    title="Delete Custom Timer"
-                    shortcut={{
-                      modifiers: ["ctrl"],
-                      key: "x",
-                    }}
-                    onAction={() => handleDeleteCT(ctID)}
-                  />
-                  <Action.CreateQuicklink
-                    quicklink={{
-                      name: customTimers[ctID].name,
-                      link: createPresetLink(ctID),
-                    }}
-                    title="Add Preset to Root Search"
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
+          .map((ctID) => <CustomTimerListItem key={ctID} customTimer={customTimers[ctID]} id={ctID} />)}
       </List.Section>
     </List>
   );

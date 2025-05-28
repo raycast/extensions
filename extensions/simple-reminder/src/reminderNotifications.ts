@@ -1,4 +1,4 @@
-import { getPreferenceValues, LocalStorage, updateCommandMetadata } from "@raycast/api";
+import { captureException, getPreferenceValues, LocalStorage, updateCommandMetadata } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { addDays } from "date-fns/addDays";
 import { addWeeks } from "date-fns/addWeeks";
@@ -8,9 +8,9 @@ import { sendPushNotificationWithNtfy } from "./utils/sendPushNotificationWithNt
 import { sanitizeTopicForNotification } from "./utils/sanitizeTopicForNotification";
 import { SimpleReminderPreferences } from "./types/preferences";
 import { Frequency } from "./types/frequency";
+import { buildException } from "./utils/buildException";
 
 export default async function Command() {
-  const { mobileNotificationNtfy, mobileNotificationNtfyTopic } = getPreferenceValues<SimpleReminderPreferences>();
   const storedRemindersObject = await LocalStorage.allItems<Record<string, string>>();
   if (!Object.keys(storedRemindersObject).length) return;
 
@@ -20,9 +20,7 @@ export default async function Command() {
       const cleanTopic = sanitizeTopicForNotification(reminder.topic);
 
       await sendPushNotificationToMacOS(cleanTopic);
-      if (mobileNotificationNtfy) {
-        await sendPushNotificationWithNtfy(mobileNotificationNtfyTopic, cleanTopic);
-      }
+      await sendMobileNotification(cleanTopic);
 
       if (reminder.frequency) {
         const newDate = updateReminderDateForRecurrence(reminder);
@@ -43,7 +41,11 @@ function isReminderInThePast(reminder: Reminder) {
 }
 
 function sendPushNotificationToMacOS(cleanTopic: string) {
-  return runAppleScript(`display notification "${cleanTopic}" with title "Simple Reminder" sound name "default"`);
+  try {
+    return runAppleScript(`display notification "${cleanTopic}" with title "Simple Reminder" sound name "default"`);
+  } catch (error) {
+    captureException(buildException(error as Error, "Error sending push notification to macOS"));
+  }
 }
 
 function updateReminderDateForRecurrence(reminder: Reminder) {
@@ -56,5 +58,28 @@ function updateReminderDateForRecurrence(reminder: Reminder) {
       return addWeeks(reminder.date, 2);
     case Frequency.MONTHLY:
       return addMonths(reminder.date, 1);
+  }
+}
+
+function sendMobileNotification(cleanTopic: string) {
+  const {
+    mobileNotificationNtfy,
+    mobileNotificationNtfyTopic,
+    mobileNotificationNtfyServerUrl,
+    mobileNotificationNtfyServerAccessToken,
+  } = getPreferenceValues<SimpleReminderPreferences>();
+  const isSelfHostedServer = mobileNotificationNtfyServerUrl !== "" && mobileNotificationNtfyServerAccessToken !== "";
+
+  if (mobileNotificationNtfy && mobileNotificationNtfyTopic) {
+    return sendPushNotificationWithNtfy(
+      mobileNotificationNtfyTopic,
+      cleanTopic,
+      isSelfHostedServer
+        ? {
+            serverUrl: mobileNotificationNtfyServerUrl,
+            serverAccessToken: mobileNotificationNtfyServerAccessToken,
+          }
+        : {},
+    );
   }
 }

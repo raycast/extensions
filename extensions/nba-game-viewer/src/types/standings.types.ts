@@ -44,10 +44,3 @@ export type Team = {
   wins?: number;
   losses?: number;
 };
-
-export const Conference = {
-  Eastern: "Eastern",
-  Western: "Western",
-} as const;
-
-export const League = "League" as const;

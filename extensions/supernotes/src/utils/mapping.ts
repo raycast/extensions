@@ -1,6 +1,6 @@
 import { Color } from "@raycast/api";
 
-import { ICard } from "./types";
+import { ICard } from "~/utils/types";
 
 export const ColorMap: Record<string, string> = {
   blue: Color.Blue,

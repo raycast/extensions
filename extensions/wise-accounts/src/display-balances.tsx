@@ -4,19 +4,19 @@ import { mainProfileId, wiseReadApiToken } from "./helpers/preferences";
 import { Balance, fetchBalances } from "./api/balances";
 import { ACTIVITY_STATUS, WISE_FAVICON } from "./helpers/constants";
 import { filterPreferedBalances } from "./helpers/filterPreferedBalances";
-import { CardPayment, fetchTodaysPayments } from "./api/latestPayments";
+import { Transaction, fetchTodaysTransactions } from "./api/latestTransactions";
 import { showFailureToast, useCachedState } from "@raycast/utils";
 
 export default function Command() {
   const [balances, setBalances] = useCachedState<Balance[]>(`id-${mainProfileId}-balances`);
-  const [transactions, setTransactions] = useCachedState<CardPayment[]>(`id-${mainProfileId}-transactions`);
+  const [transactions, setTransactions] = useCachedState<Transaction[]>(`id-${mainProfileId}-transactions`);
   const [error, setError] = useState<Error | null>();
 
   useEffect(() => {
     async function getBalances() {
       try {
         const response = await fetchBalances(mainProfileId!);
-        const latestTransaction = await fetchTodaysPayments(mainProfileId!);
+        const latestTransaction = await fetchTodaysTransactions(mainProfileId!);
         setBalances(response);
         setTransactions(latestTransaction.activities);
       } catch (error) {

@@ -1,5 +1,113 @@
 # Amazon AWS Changelog
 
+## [Console command] 2025-05-23
+- Fix full URLs (e.g. `https://quicksight.aws.amazon.com`) routing correctly to the console
+
+## [Console command] 2025-04-25
+- Update WAF & Shield path to '/wafv2/homev2/home' for WAFv2 migration
+- Update AWS Firewall Manager path to '/wafv2/fmsv2/home' for Firewall Manager v2
+- Add common abbreviations 'cfn' for CloudFormation and 'sfn' for Step Functions
+
+## [S3 command] - 2025-04-15
+
+- Add "Copy S3 URI" action
+
+## [Secrets command] - 2024-12-06
+
+- Add actions to copy individual secret values [#14582](https://github.com/raycast/extensions/issues/14582)
+- Updated the dependencies to get rid of critical security vulnerabilities.
+
+## [Lambda command] - 2024-10-28
+
+- Add an Invoke option which allows to save, update or delete payloads and saves the result in clipboard
+
+## [Glue command] - 2024-10-21
+
+- Add Glue command to list Glue jobs, job runs, job definitions and to trigger a job run [#13316](https://github.com/raycast/extensions/pull/13316)
+
+## [Pipelines, DDB, CFN commands] - 2024-07-29
+
+- Pipelines: Reduced the size per page to reduce throttling: [#13304](https://github.com/raycast/extensions/issues/13304)
+- DDB: Handle pagination upfront instead of Raycast pagination. Also, adds frecency sorting.
+- DDB: Add item count to accessories and handle mutation during item update/deletion.
+- CFN: Handle pagination upfront instead of Raycast pagination. Also, adds frecency sorting.
+
+## [S3 Command] - 2024-07-12
+
+- added reverse order option
+- added bucket policy view
+
+## [SQS, Secrets, Pipelines and Logs Commands] - 2024-07-08
+
+- No unnecessary pagination with typeahead for SQS, Secrets and Logs commands. Pagination with typeahead is redundant.
+- Added frecency sorting for SQS, Secrets and Logs command results.
+- SQS: Reduced max items per search to 25 to reduce throttling, added mutation after sending message and purging.
+- Secrets: Removed pre-loading resource policy and instead provided an ad-hoc action. This reduces [throttling](https://github.com/raycast/extensions/issues/13296).
+- Pipelines: Changed icons and improved mutation logic.
+
+## [Improvements] - 2024-07-05
+
+- Adds copy option to s3 command
+
+## [Contributor maintenance] - 2024-07-04
+
+- Move @JonathanWbn to list of past contributors
+
+## [Fixes] - 2024-07-03
+
+- Reverts to rendering all pipelines at once. We can add wait later if this causes issues
+- Optimized the mutation for pipeline actions even further.
+- Reduced AWS calls during initial rendering. Also revalidates the list in pipeline action sub-menus every time it is opened.
+
+## [Improvements] - 2024-07-02
+
+- Changed AwsAction.Console component, to create sso shortcut login links, if possible
+
+## [Fixes] - 2024-06-24
+
+- Fixed [the issue](https://github.com/raycast/extensions/issues/13088) when codepipeline(s) are rendered with no executions.
+- Adds mutate optimization for toggling stage transition.
+
+## [Console command] - 2024-06-19
+
+- [Frecency sorting](https://developers.raycast.com/utilities/react-hooks/usefrecencysorting) so that most/recent used service console links appear at the top of search
+- Fixed issue where console links were improperly generated: [#13032](https://github.com/raycast/extensions/issues/13032)
+
+## [Improvements] - 2024-06-18
+
+- CodePipeline: Adds action to retry failed stage, stop ongoing execution and toggle stage transition
+- Secrets Manager: Retrieves secret value in a new Detail navigation and adds extra metadata
+- Cloudformation: Improves the resource switch action
+
+## [Console command] - 2024-06-17
+
+- Adds shortcut login for SSO profiles
+
+## [SQS, CFN, DDB, CW Logs commands] - 2024-06-14
+
+- Native raycast pagination support for DDB, SQS, CFN and CW logs commands
+- Typeahead search for SQS and CW logs command
+- Extra metadata and new icon for CW logs command
+
+## [Improvements] - 2024-06-06
+
+- Adds sort descending and consistent read functionalities to DDB queries
+- Saves the query projection expression in between form renders
+- Improved toast error handling for SQS, DDB and CFN command actions
+
+## [DynamoDB command] - 2024-05-30
+
+- Adds UpdateItem, DeleteItem and Query functionalities for the tables
+- Adds metadata for the tables in the List view
+- Adds Deletion Protection Enablement capability for tables
+
+## [CFN and SQS] - 2024-05-21
+
+- Adds update-termination-protection commands for stacks listed in CFN command ([#12497](https://github.com/raycast/extensions/issues/12497))
+- Adds listing exports feature to CFN command
+- Additional metadata for the SQS queues mapped into list item details ([#12498](https://github.com/raycast/extensions/issues/12498))
+- Adds SendMessage action for queues
+
 ## [Improvements] - 2024-05-15
 
 - Fix resource types for Step Function Command Actions ([#12353](https://github.com/raycast/extensions/issues/12353))

@@ -11,6 +11,16 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
+  if (context.payload.action === "ready_for_review" && context.payload.pull_request.draft === false) {
+    await github.rest.issues.addAssignees({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      issue_number: context.issue.number,
+      assignees: ["pernielsentikaer"]
+    });
+    return;
+  }
+
   console.log("changed extensions", process.env.CHANGED_EXTENSIONS);
 
   if (!process.env.CHANGED_EXTENSIONS) {
@@ -28,6 +38,9 @@ export default async ({ github, context }: API) => {
     console.log("We only notify people when updating a single extension");
     return;
   }
+
+  // Due to our current reduced availability, the initial review may take up to 10-15 business days.
+  const expectations = "You can expect an initial review within five business days.";
 
   const codeowners = await getCodeOwners({ github, context });
 
@@ -64,10 +77,11 @@ export default async ({ github, context }: API) => {
         repo: context.repo.repo,
         labels: ["new extension"],
       });
+      // `Congratulations on your new Raycast extension! :rocket:\n\nWe will aim to make the initial review within five working days. Once the PR is approved and merged, the extension will be available on our Store.`
       await comment({
         github,
         context,
-        comment: `Congratulations on your new Raycast extension! :rocket:\n\nWe will aim to make the initial review within five working days. Once the PR is approved and merged, the extension will be available on our Store.`,
+        comment: `Congratulations on your new Raycast extension! :rocket:\n\n${expectations}\n\nOnce the PR is approved and merged, the extension will be available on our Store.`,
       });
       return;
     }
@@ -86,7 +100,7 @@ export default async ({ github, context }: API) => {
         context,
         comment: `Thank you for your ${isFirstContribution ? "first " : ""} contribution! :tada:
 
-This is especially helpful since there were no maintainers for this extension :pray:`,
+This is especially helpful since there were no maintainers for this extension :pray:\n\n${expectations}`,
       });
     }
 
@@ -96,6 +110,12 @@ This is especially helpful since there were no maintainers for this extension :p
         owner: context.repo.owner,
         repo: context.repo.repo,
         labels: ["OP is author"],
+      });
+
+      await comment({
+        github,
+        context,
+        comment: `Thank you for the update! :tada:\n\n${expectations}`,
       });
       return;
     }
@@ -116,7 +136,7 @@ This is especially helpful since there were no maintainers for this extension :p
 
 🔔 ${[...new Set(owners.filter((x) => x !== sender))]
         .map((x) => `@${x}`)
-        .join(" ")} you might want to have a look.\n\nYou can use [this guide](https://developers.raycast.com/basics/review-pullrequest) to learn how to check out the Pull Request locally in order to test it.`,
+        .join(" ")} you might want to have a look.\n\nYou can use [this guide](https://developers.raycast.com/basics/review-pullrequest) to learn how to check out the Pull Request locally in order to test it.\n\n${expectations}`,
     });
 
     return;

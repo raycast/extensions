@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { format } from "date-fns";
 import { File } from "../api/getFiles";
 import { getFileIconLink, humanFileSize } from "../helpers/files";
@@ -9,6 +9,7 @@ type FileListItemProps = {
 };
 
 export default function FileListItem({ file, email }: FileListItemProps) {
+  const { displayFilePath } = getPreferenceValues();
   const modifiedTime = new Date(file.modifiedTime);
 
   const accessories: List.Item.Accessory[] = [
@@ -17,6 +18,13 @@ export default function FileListItem({ file, email }: FileListItemProps) {
       tooltip: `Updated: ${format(modifiedTime, "EEEE d MMMM yyyy 'at' HH:mm")}`,
     },
   ];
+
+  if (displayFilePath && file.filePath) {
+    accessories.unshift({
+      icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+      tooltip: file.filePath,
+    });
+  }
 
   if (file.starred) {
     accessories.unshift({
@@ -62,7 +70,7 @@ export default function FileListItem({ file, email }: FileListItemProps) {
               title="Download in Browser"
               icon={Icon.Download}
               shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-              url={file.webContentLink}
+              url={`${file.webContentLink}${email ? `&authuser=${email}` : ""}`}
             />
           ) : null}
 
@@ -93,7 +101,7 @@ export default function FileListItem({ file, email }: FileListItemProps) {
                 text: file.name,
               }}
               title="Copy HTML Link"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "/" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
           </ActionPanel.Section>
         </ActionPanel>

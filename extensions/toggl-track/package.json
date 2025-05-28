@@ -13,7 +13,13 @@
   "author": "franzwilhelm",
   "contributors": [
     "bkeys818",
-    "michaelfaisst"
+    "michaelfaisst",
+    "teziovsky",
+    "lukebars",
+    "AlanHuang",
+    "alexs",
+    "ARui",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -21,6 +27,12 @@
       "name": "index",
       "title": "Start/Stop Time Entry",
       "description": "Start a new time entry or end the running time entry.",
+      "mode": "view"
+    },
+    {
+      "name": "updateTimeEntry",
+      "title": "Update Time Entry",
+      "description": "Update the description, project, tags of recent time entries.",
       "mode": "view"
     },
     {
@@ -43,6 +55,51 @@
       "mode": "view"
     },
     {
+      "name": "menuBar",
+      "title": "Toggl Menu Bar",
+      "description": "View, start, or stop existing time entries from the Menu Bar.",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "showTitleInMenuBar",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Running Entry Title in Menu Bar",
+          "description": "Whether or not to show the entry title in the menu bar.",
+          "label": "Show title",
+          "default": true
+        },
+        {
+          "name": "showTimeInMenuBar",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Running Entry Time in Menu Bar",
+          "description": "Whether or not to show the entry timer in the menu bar.",
+          "label": "Show timer",
+          "default": false
+        },
+        {
+          "name": "showProjectInMenuBar",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Running Entry Project in Menu Bar",
+          "description": "Whether or not to show the entry project in the menu bar.",
+          "label": "Show project",
+          "default": false
+        },
+        {
+          "name": "showClientInMenuBar",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Running Entry Client in Menu Bar",
+          "description": "Whether or not to show the entry client in the menu bar.",
+          "label": "Show client",
+          "default": false
+        }
+      ]
+    },
+    {
       "name": "manageProjects",
       "title": "Manage Projects",
       "description": "A list of all the projects you have access to.",
@@ -53,29 +110,78 @@
     {
       "description": "The API token for your Toggl account.",
       "name": "togglApiToken",
-      "placeholder": "Can be found at https://track.toggl.com/profile",
+      "placeholder": "Can be found at https://track.toggl.com/profile#api-token-label",
       "required": true,
       "title": "Toggl API Token",
       "type": "password"
+    },
+    {
+      "name": "showClientsInForm",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Clients in Form",
+      "description": "Whether or not to show the client field in the create and update time entry forms.",
+      "label": "Show clients",
+      "default": true
+    },
+    {
+      "name": "showProjectsInForm",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Projects in Form",
+      "description": "Whether or not to show the project field in the create and update time entry forms.",
+      "label": "Show projects",
+      "default": true
+    },
+    {
+      "name": "showTasksInForm",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Tasks in Form",
+      "description": "Whether or not to show the task field in the create and update time entry forms.",
+      "label": "Show tasks",
+      "default": true
+    },
+    {
+      "name": "showTagsInForm",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Tags in Form",
+      "description": "Whether or not to show the tags field in the create and update time entry forms.",
+      "label": "Show tags",
+      "default": true
+    },
+    {
+      "name": "timeEntriesLookbackDays",
+      "type": "textfield",
+      "required": false,
+      "title": "Time Entries Lookback Days",
+      "description": "Number of days to look back when fetching time entries (default: 14, max: 60)",
+      "placeholder": "Enter a number between 1-60",
+      "default": "14"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.4",
-    "@raycast/utils": "^1.10.1",
-    "dayjs": "^1.11.10",
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.15.0",
+    "dayjs": "^1.11.11",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "~20.8.10",
-    "@types/react": "~18.2.27",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "~20.12.12",
+    "@types/react": "~18.3.3",
     "eslint": "^8.56.0",
-    "react-devtools": "~4.28.4",
-    "typescript": "^5.3.3"
+    "react-devtools": "^4.27.2",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions"
   }
 }

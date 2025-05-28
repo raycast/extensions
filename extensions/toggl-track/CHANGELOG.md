@@ -1,5 +1,63 @@
 # Toggl Track Changelog
 
+## [Enhancements] - 2025-04-23
+
+- Add preferences to select the history lookback window
+
+## [Enhancements] - 2025-03-17
+
+- Add preferences to show/hide clients, projects, tasks, and tags in the time entry form
+
+## [New Feature] - 2025-02-05
+
+- Add ability to update time entry start and stop date
+- Add ability to change the start time for a running time entry
+
+## [New Feature] - 2025-12-12
+
+- Add shortcut to "Create Similar Time Entry"
+
+## [New Feature] - 2024-12-09
+
+- Add "Update Time Entry" command to update time entries
+- Add ability to update time entry action from the list
+
+## [New Feature] - 2024-10-07
+
+- Add ability to create task for time entry form
+
+## [Bug Fixes] - 2024-08-20
+
+- Remove seconds from optional timer in the Menu Bar, as it only updates every 10 seconds.
+
+## [Bug Fixes] - 2024-08-02
+
+- Resolve issue when stopping a running time entry doesn't work
+
+## [Bug Fixes] - 2024-07-31
+
+- Do not show currently running time entry in the recent time entries list
+- Fix running time entries not showing project details
+- Fix no clients, projects, tasks on create new time entry form, if there is no selected workspace
+
+## [New Feature] - 2024-07-29
+
+- Add ability to view, start, or stop existing time entries from the Menu Bar
+
+## [Enhancements] - 2024-07-29
+
+- Add ability to set billable in new entry form
+- Add ability to delete entry from list
+
+## [Enhancements] - 2024-05-27
+
+- Prettier sort imports
+- Absolute paths in imports
+
+## [Enhancements] - 2024-05-17
+
+- Add ability to prefill form of new entry with actual selected entry
+
 ## [Bug Fixes] - 2024-03-25
 
 - Fix time entries refresh

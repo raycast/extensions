@@ -6,7 +6,7 @@ import { PlaybackSpeed, CalculationOutput } from "../utils/types";
 import Actions from "./Actions";
 
 export default function CalculationView() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const [hours, setHours] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
@@ -15,6 +15,7 @@ export default function CalculationView() {
   const [hoursError, setHoursError] = useState<string | undefined>();
   const [minutesError, setMinutesError] = useState<string | undefined>();
   const [secondsError, setSecondsError] = useState<string | undefined>();
+  const [speedError, setSpeedError] = useState<string | undefined>();
 
   const [durationCalculation, setDurationCalculation] = useState<CalculationOutput>({
     playbackDuration: "00:00:00",
@@ -94,7 +95,29 @@ export default function CalculationView() {
         }}
       ></Form.TextField>
       <Form.Description text="Select the playback speed of the video or audio." />
-      <PlaybackSpeedDropdown value={playbackSpeed} onChange={setPlaybackSpeed}></PlaybackSpeedDropdown>
+      {preferences.useCustomPlaybackSpeed ? (
+        <Form.TextField
+          id="playbackSpeed"
+          title="Speed Multiplier"
+          placeholder="2"
+          error={speedError}
+          onChange={(value) => {
+            const speedValue = Number(value) || 0;
+            if (!/^\d*\.?\d*$/.test(value)) {
+              setSpeedError("Only numbers are allowed");
+            } else if (speedValue <= 0) {
+              setSpeedError("Must be over 0");
+            } else {
+              setPlaybackSpeed(value);
+              if (speedError) {
+                setSpeedError(undefined);
+              }
+            }
+          }}
+        ></Form.TextField>
+      ) : (
+        <PlaybackSpeedDropdown value={playbackSpeed} onChange={setPlaybackSpeed}></PlaybackSpeedDropdown>
+      )}
       <Form.Separator></Form.Separator>
       <Form.Description title="New Duration" text={durationCalculation.playbackDuration} />
       <Form.Description title="Time Saved" text={durationCalculation.timeSaved} />

@@ -64,7 +64,7 @@ export default function Ask(props: { conversation?: Conversation }) {
     }
 
     setLoading(false);
-  }, [question.data]);
+  }, [question.data, models.data]);
 
   useEffect(() => {
     if (props.conversation?.id !== conversation.id || conversations.data.length === 0) {

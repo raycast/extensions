@@ -1,4 +1,4 @@
-export type ZedBuild = "Zed" | "Zed Preview";
+export type ZedBuild = Preferences["build"];
 export type ZedBundleId = "dev.zed.Zed" | "dev.zed.Zed-Preview";
 
 const ZedBundleIdBuildMapping: Record<ZedBuild, ZedBundleId> = {

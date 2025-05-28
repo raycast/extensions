@@ -1,45 +1,24 @@
 import { List } from "@raycast/api";
-import { MutatePromise, useCachedPromise } from "@raycast/utils";
+import { MutatePromise } from "@raycast/utils";
 
-import {
-  getNotificationIcon,
-  getNotificationSubtitle,
-  getNotificationTooltip,
-  getNotificationTypeTitle,
-} from "../helpers/notifications";
-import { NotificationsResponse } from "../notifications";
+import { getNotificationSubtitle, getNotificationTooltip, getNotificationTypeTitle } from "../helpers/notifications";
+import { NotificationWithIcon } from "../notifications";
 
 import NotificationActions from "./NotificationActions";
 
-export type Notification = NotificationsResponse["data"][0];
-
 type NotificationListItemProps = {
-  notification: Notification;
+  notification: NotificationWithIcon;
   userId?: string;
-  mutateList: MutatePromise<Notification[] | undefined>;
+  mutateList: MutatePromise<NotificationWithIcon[] | undefined>;
 };
 
 export default function NotificationListItem({ notification, userId, mutateList }: NotificationListItemProps) {
   const updatedAt = new Date(notification.updated_at);
 
-  const { data: icon, isLoading } = useCachedPromise(
-    async (notification: Notification) => {
-      return getNotificationIcon(notification);
-    },
-    [notification],
-    {
-      keepPreviousData: true,
-    },
-  );
-
-  if (isLoading || !icon) {
-    return null;
-  }
-
   return (
     <List.Item
       icon={{
-        value: icon.value,
+        value: notification.icon.value,
         tooltip: getNotificationTypeTitle(notification),
       }}
       title={notification.subject.title}

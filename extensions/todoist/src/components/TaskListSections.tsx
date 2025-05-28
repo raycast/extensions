@@ -10,18 +10,12 @@ import TaskListItem from "./TaskListItem";
 
 type TaskListProps = {
   sections: SectionWithTasks[];
-  isLoading?: boolean;
   mode?: ViewMode;
   viewProps?: ViewProps;
   quickLinkView?: QuickLinkView;
 };
 
-export default function TaskListSections({
-  sections,
-  mode = ViewMode.date,
-  viewProps,
-  quickLinkView,
-}: TaskListProps): JSX.Element {
+export default function TaskListSections({ sections, mode = ViewMode.date, viewProps, quickLinkView }: TaskListProps) {
   const [data, setData] = useCachedData();
 
   return (

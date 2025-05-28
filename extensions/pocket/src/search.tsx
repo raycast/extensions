@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, Image } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useState } from "react";
 import { ContentType, ReadState } from "./lib/api";
 import { View } from "./lib/oauth/view";
@@ -12,10 +13,10 @@ interface SearchArguments {
 }
 
 function SearchBookmarks(props: { arguments?: SearchArguments }) {
-  const [state, setState] = useState(preferences.defaultFilter);
+  const [state, setState] = useState<ReadState>(ReadState.All);
   const [tag, setTag] = useState<string>();
   const [contentType, setContentType] = useState<ContentType>();
-  const [search, setSearch] = useState(props.arguments?.title);
+  const [search, setSearch] = useState<string>(props.arguments?.title || "");
   const [tagSearch, setTagSearch] = useState<string>();
 
   const { tags } = useTags();
@@ -86,8 +87,8 @@ function SearchBookmarks(props: { arguments?: SearchArguments }) {
       {bookmarks.map((bookmark) => (
         <List.Item
           key={bookmark.id}
-          title={bookmark.title || bookmark.originalUrl}
-          icon={bookmark.type === "article" ? Icon.BlankDocument : bookmark.type === "image" ? Icon.Image : Icon.Video}
+          title={bookmark.title || bookmark.originalUrl || ""}
+          icon={getFavicon(bookmark.originalUrl, { mask: Image.Mask.RoundedRectangle })}
           subtitle={bookmark.author}
           accessories={[
             { icon: bookmark.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined },

@@ -1,5 +1,34 @@
 # Google Chrome Changelog
 
+## [Fix New Tab Command React Hooks Violation] - 2025-05-27
+
+- Fix React Rules of Hooks violation causing TypeError when opening new tabs.
+- Improve error handling for profile and history data loading.
+
+## [Add Omnibox-like search behavior for New Tab] - 2025-05-07
+
+- Add support for entering URLs or search terms in a single input field, mimicking Chrome's Omnibox behavior.
+
+## [Add Copy Title action for Search Tab] - 2025-04-22
+- Add the ability to create new incognito window.
+
+## [Add Copy Title action for Search Tab] - 2025-02-11
+- Add Copy Title action for Search Tab command.
+
+## [Add AI Tools] - 2025-02-21
+
+## [Allow to configure profile path] - 2025-01-18
+- The path for your profile can be configured in the settings. This allows you to use a different profile than the default one.
+
+## [Fix] - 2025-01-09
+
+- Fix Search Tabs command when "Extract the favicon from every open tab" is enabled.
+- Fix bookmark list in the Search All command.
+
+## [Add Search All Command] - 2024-08-01
+
+- Add Google Chrome tabs and history, bookmarks search.
+
 ## [Fix Search History window] - 2023-12-19
 
 - Fix Search History window not opening when the app is open but no window is opened.

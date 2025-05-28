@@ -1,13 +1,13 @@
 # Simulator Control
 
-Extension to control your apple platform simulators.
+Extension to control your Apple platform simulators.
 
 ## Showcases
 
 - Boot and shutdown simulators
 - Open data and logs directory
 
-![](./metadata/screenshot-01.png)
+![](./assets/simulator-control-1.png)
 
 ## Requirement
 

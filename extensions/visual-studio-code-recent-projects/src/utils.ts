@@ -1,18 +1,18 @@
+import { open } from "@raycast/api";
+import * as fs from "fs";
 import { existsSync } from "fs";
 import { URL } from "url";
 import { isDeepStrictEqual } from "util";
+import { getBuildScheme } from "./lib/vscode";
 import {
-  EntryType,
   EntryLike,
+  EntryType,
   FileEntry,
   FolderEntry,
   RemoteEntry,
-  WorkspaceEntry,
   RemoteWorkspaceEntry,
+  WorkspaceEntry,
 } from "./types";
-import { open } from "@raycast/api";
-import * as fs from "fs";
-import { getBuildScheme } from "./lib/vscode";
 
 // Type Guards
 
@@ -157,4 +157,8 @@ export function raycastForVSCodeURI(uri: string) {
 
 export async function openURIinVSCode(uri: string) {
   await open(raycastForVSCodeURI(uri));
+}
+
+export function isValidHexColor(color: string): boolean {
+  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
 }

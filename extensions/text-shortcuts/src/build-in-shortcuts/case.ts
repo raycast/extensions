@@ -171,4 +171,5 @@ export const cases = [
     ],
   },
 ];
+
 export const CASES_SHORTCUTS = JSON.stringify(cases);

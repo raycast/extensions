@@ -52,6 +52,9 @@ const ModelDetailView = (props: { model: Model; markdown?: string | null | undef
             <List.Item.Detail.Metadata.TagList.Item text={model.option} />
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Label title="Temperature" text={model.temperature.toLocaleString()} />
+          {model.max_tokens && (
+            <List.Item.Detail.Metadata.Label title="Max tokens" text={model.max_tokens.toLocaleString()} />
+          )}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="ID" text={model.id} />
           <List.Item.Detail.Metadata.Label title="Updated at" text={new Date(model.updated_at ?? 0).toLocaleString()} />

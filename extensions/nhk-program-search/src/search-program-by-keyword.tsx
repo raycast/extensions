@@ -21,7 +21,7 @@ export default function Command() {
     >
       <Form.Description
         text={
-          "Displays programs that include the specified keywords in the program title. \nMultiple keywords can be specified with line breaks."
+          "Displays programs that include the specified keywords in the program title. Multiple keywords can be specified with line breaks."
         }
       />
       <Form.TextArea

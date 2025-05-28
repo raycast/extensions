@@ -1,6 +1,5 @@
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { AtomicShortcut } from "../model/internal/internal-models";
-import { removeHiddenBundleId } from "../model/internal/bundle-id-remover";
 import { KeyCodes } from "../load/key-codes-provider";
 
 // language=JavaScript
@@ -80,7 +79,7 @@ function generateArguments(
   sequence: AtomicShortcut[],
   keyCodes: KeyCodes
 ): string[] {
-  const args: string[] = [removeHiddenBundleId(bundleId), String(delay), String(sequence.length)];
+  const args: string[] = [bundleId ?? "", String(delay), String(sequence.length)];
   sequence.forEach((atomic) => {
     args.push(String(atomic.modifiers.length));
     args.push(...atomic.modifiers);

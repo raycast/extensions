@@ -1,20 +1,19 @@
 import React, { useState } from "react";
-import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
-import { getFinderPath, isImage } from "./utils/common-utils";
+import { Action, ActionPanel, Form, Icon, Toast } from "@raycast/api";
+import { getFinderPath, isImage, showCustomToast } from "./utils/common-utils";
 import { createNewFile, createNewFileByTemplate } from "./new-file-with-template";
 import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "./types/file-type";
 import { getFileType } from "./hooks/hooks";
 import { parse } from "path";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
-import { Preferences } from "./types/preferences";
 import { homedir } from "os";
+import { showCode, showDocument, showScript } from "./types/preferences";
 
 export default function NewFileWithDetails(props: {
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];
   folder: string;
 }) {
-  const { showDocument, showCode, showScript } = getPreferenceValues<Preferences>();
   const templateFiles = props.templateFiles;
   const [newFileType, setNewFileType] = useState<{ section: string; index: number }>(props.newFileType);
   const [fileName, setFileName] = useState<string>("");
@@ -35,7 +34,11 @@ export default function NewFileWithDetails(props: {
                 const path = await getFinderPath();
                 await createFileWithName(newFileType, templateFiles, path, fileName, fileContent);
               } catch (e) {
-                await showToast(Toast.Style.Failure, "Failed to create file", String(e));
+                await showCustomToast({
+                  title: "Failed to create file",
+                  message: String(e),
+                  style: Toast.Style.Failure,
+                });
               }
             }}
           />
@@ -49,7 +52,11 @@ export default function NewFileWithDetails(props: {
                   const path = `${homedir()}/Desktop/`;
                   await createFileWithName(newFileType, templateFiles, path, fileName, fileContent);
                 } catch (e) {
-                  await showToast(Toast.Style.Failure, "Failed to create file", String(e));
+                  await showCustomToast({
+                    title: "Failed to create file.",
+                    message: String(e),
+                    style: Toast.Style.Failure,
+                  });
                 }
               }}
             />
@@ -70,11 +77,17 @@ export default function NewFileWithDetails(props: {
       >
         <Form.Dropdown.Section title={"Template"}>
           {templateFiles.map((template, index) => {
+            let title: string;
+            if (template.name.startsWith(".")) {
+              title = template.name;
+            } else {
+              title = template.name + "." + template.extension;
+            }
             return (
               <Form.Dropdown.Item
                 key={template.name + index}
                 icon={isImage(parse(template.path).ext) ? { source: template.path } : { fileIcon: template.path }}
-                title={template.name + "." + template.extension}
+                title={title}
                 value={JSON.stringify({ section: "Template", index: index })}
               />
             );

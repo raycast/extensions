@@ -12,8 +12,12 @@ compiled_raycast_swift
 # misc
 .DS_Store
 
+# vscode
+.vscode
+
 # xcode
 /.build
+.build
 /Packages
 /*.xcodeproj
 xcuserdata/

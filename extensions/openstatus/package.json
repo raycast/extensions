@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openstatus",
+  "title": "OpenStatus",
+  "description": "Manage your OpenStatus monitors, Incidents and status page",
+  "icon": "OpenStatus.png",
+  "author": "thibaultleouay",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-monitors",
+      "title": "Show Monitors",
+      "subtitle": "OpenStatus",
+      "description": "View all your monitors from your OpenStatus account",
+      "mode": "view"
+    },
+    {
+      "name": "create-status-report",
+      "title": "Create Status Report",
+      "subtitle": "OpenStatus",
+      "description": "Create a new status report for your status page",
+      "mode": "view"
+    },
+    {
+      "name": "show-status-page",
+      "title": "Show Status Page",
+      "subtitle": "OpenStatus",
+      "description": "View all your status page from your OpenStatus account",
+      "mode": "view"
+    },
+    {
+      "name": "create-status-report-update",
+      "title": "Create Status Report Update",
+      "subtitle": "OpenStatus",
+      "description": "Create a new Status Report Update for your Status Report",
+      "mode": "view"
+    },
+    {
+      "name": "show-incidents",
+      "title": "Show Incidents",
+      "subtitle": "OpenStatus",
+      "description": "View all your incidents from your OpenStatus account",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "access_token",
+      "description": "Enter your OpenStatus Access Token",
+      "type": "password",
+      "title": "Access Token",
+      "required": true,
+      "placeholder": "os_xxxxxxxxx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.3.2",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

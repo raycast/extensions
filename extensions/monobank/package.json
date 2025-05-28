@@ -46,7 +46,7 @@
   "dependencies": {
     "@raycast/api": "^1.57.1",
     "@raycast/utils": "^1.9.0",
-    "axios": "^1.4.0",
+    "axios": "^1.8.4",
     "currency-codes": "^2.1.0"
   },
   "devDependencies": {
@@ -62,6 +62,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions"
   }
 }
