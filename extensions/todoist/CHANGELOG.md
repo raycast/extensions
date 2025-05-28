@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Use confetti when completing tasks] - {PR_MERGE_DATE}
+## [Use confetti when completing tasks] - 2025-05-28
 - Add option to use the Raycast confetti command when completing tasks. 
 
 ## [Automatically create labels on quick add command] - 2025-05-09
