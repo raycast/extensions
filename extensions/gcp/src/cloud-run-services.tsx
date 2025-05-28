@@ -51,12 +51,16 @@ export default function CloudRunServices() {
   }, []);
 
   async function loadServices(forceRefresh = false) {
+    // Declare project ID variable at function level to access it in both try and catch blocks
+    let currentProjectId = "";
+
     try {
       setLoading(true);
       setError(null);
 
-      const projectId = await getProjectId();
-      const cacheKey = getCacheKey("cloud-run-services", projectId);
+      // Get and cache the project ID to avoid multiple awaits
+      currentProjectId = await getProjectId();
+      const cacheKey = getCacheKey("cloud-run-services", currentProjectId);
 
       // Check cache first (unless force refresh)
       if (!forceRefresh) {
@@ -118,10 +122,13 @@ export default function CloudRunServices() {
       const allServices: GCPCloudRunService[] = [];
       showToast(Toast.Style.Animated, "Loading", `Checking ${regions.length} regions...`);
 
+      // Track failed regions for better error reporting
+      const failedRegions: string[] = [];
+
       // Fetch services from all regions in parallel for better performance
       const regionPromises = regions.map(async (region) => {
         try {
-          const url = `https://run.googleapis.com/v1/projects/${projectId}/locations/${region}/services`;
+          const url = `https://run.googleapis.com/v1/projects/${currentProjectId}/locations/${region}/services`;
 
           const response = await fetch(url, {
             headers: {
@@ -132,6 +139,7 @@ export default function CloudRunServices() {
 
           if (!response.ok) {
             if (response.status === 403 || response.status === 404) {
+              // Common cases: region doesn't have Cloud Run or no permission
               return []; // Skip regions without access
             }
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -158,7 +166,13 @@ export default function CloudRunServices() {
               })),
             };
           });
-        } catch {
+        } catch (error) {
+          // Track which regions had errors for potential debugging
+          failedRegions.push(region);
+
+          // Log error to console for debugging
+          console.error(`Error fetching Cloud Run services in region ${region}:`, error);
+
           return [];
         }
       });
@@ -171,13 +185,24 @@ export default function CloudRunServices() {
       // Cache the results
       setCachedData(cacheKey, allServices);
 
-      showToast(Toast.Style.Success, "Success!", `Found ${allServices.length} Cloud Run services`);
+      // Show success toast with information about failed regions
+      if (failedRegions.length > 0) {
+        showToast(
+          Toast.Style.Success,
+          `Found ${allServices.length} Cloud Run services`,
+          `Failed to check ${failedRegions.length} region(s). See console for details.`,
+        );
+      } else {
+        showToast(Toast.Style.Success, "Success!", `Found ${allServices.length} Cloud Run services`);
+      }
+
       setServices(allServices);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to load Cloud Run services";
 
       if (errorMsg.includes("403") || errorMsg.includes("PERMISSION_DENIED")) {
-        const currentProjectId = await getProjectId().catch(() => "YOUR-PROJECT-ID");
+        // Use the cached project ID from earlier
+        const projectIdForError = currentProjectId || "YOUR-PROJECT-ID";
         setError(`🚫 Cloud Run API Access Denied
 
 The service account lacks permission to access Cloud Run.
@@ -189,7 +214,7 @@ The service account lacks permission to access Cloud Run.
 3. Click 'Edit' and add the role: 'Cloud Run Viewer'
 
 💻 Or use gcloud CLI:
-gcloud projects add-iam-policy-binding ${currentProjectId} --member='serviceAccount:YOUR-SERVICE-ACCOUNT@${currentProjectId}.iam.gserviceaccount.com' --role='roles/run.viewer'`);
+gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAccount:YOUR-SERVICE-ACCOUNT@${projectIdForError}.iam.gserviceaccount.com' --role='roles/run.viewer'`);
       } else {
         setError(errorMsg);
       }
@@ -247,19 +272,25 @@ gcloud projects add-iam-policy-binding ${currentProjectId} --member='serviceAcco
 
   function ServiceDetail({ service }: { service: GCPCloudRunService }) {
     const [projectId, setProjectId] = useState<string>("");
+    // Track any project ID loading errors
+    const [projectIdError, setProjectIdError] = useState<string | null>(null);
 
     useEffect(() => {
+      // Load project ID just once when component mounts
       getProjectId()
         .then((id) => setProjectId(id))
-        .catch(() => {
-          // Project ID loading failed - handled by error boundary
+        .catch((error) => {
+          console.error("Failed to load project ID:", error);
+          setProjectIdError("Failed to load project ID");
         });
     }, []);
 
-    // Generate monitoring dashboard URL
-    const monitoringUrl = `https://console.cloud.google.com/monitoring/dashboards/resourceList/cloud_run_revision?project=${projectId}`;
-    const logsUrl = `https://console.cloud.google.com/logs?project=${projectId}`;
-    const tracesUrl = `https://console.cloud.google.com/traces?project=${projectId}`;
+    // Generate monitoring dashboard URL (include error indication if project ID failed)
+    const monitoringUrl = projectId
+      ? `https://console.cloud.google.com/monitoring/dashboards/resourceList/cloud_run_revision?project=${projectId}`
+      : "#";
+    const logsUrl = projectId ? `https://console.cloud.google.com/logs?project=${projectId}` : "#";
+    const tracesUrl = projectId ? `https://console.cloud.google.com/traces?project=${projectId}` : "#";
 
     const markdown = `
 # ${service.name}
@@ -295,6 +326,7 @@ Concurrency    ████████████░░░░ 75%
 ---
 
 ## 🔗 Quick Actions
+${projectIdError ? "⚠️ **" + projectIdError + "** - Some links may not work correctly.\n\n" : ""}
 - [View Metrics Dashboard →](${monitoringUrl})
 - [View Logs →](${logsUrl})
 - [View Traces →](${tracesUrl})
@@ -328,11 +360,33 @@ gcloud run services describe ${service.name} --region=${service.region}
               title="Open in Console"
               url={`https://console.cloud.google.com/run/detail/${service.region}/${service.name}`}
             />
-            <Action.OpenInBrowser title="View Metrics" url={monitoringUrl} />
-            <Action.OpenInBrowser
-              title="View Logs"
-              url={`https://console.cloud.google.com/logs/query;query=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22${service.name}%22%0Aresource.labels.location%3D%22${service.region}%22?project=${projectId}`}
-            />
+            {projectId ? (
+              <>
+                <Action.OpenInBrowser title="View Metrics" url={monitoringUrl} />
+                <Action.OpenInBrowser
+                  title="View Logs"
+                  url={`https://console.cloud.google.com/logs/query;query=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22${service.name}%22%0Aresource.labels.location%3D%22${service.region}%22?project=${projectId}`}
+                />
+              </>
+            ) : (
+              <Action
+                title="Reload Project ID"
+                icon={Icon.ArrowClockwise}
+                onAction={() => {
+                  getProjectId()
+                    .then((id) => {
+                      setProjectId(id);
+                      setProjectIdError(null);
+                      showToast(Toast.Style.Success, "Project ID loaded", id);
+                    })
+                    .catch((error) => {
+                      console.error("Failed to load project ID:", error);
+                      setProjectIdError("Failed to load project ID");
+                      showToast(Toast.Style.Failure, "Failed to load project ID");
+                    });
+                }}
+              />
+            )}
             {service.url && <Action.CopyToClipboard title="Copy Service URL" content={service.url} />}
             <Action.CopyToClipboard
               title="Copy Deploy Command"
