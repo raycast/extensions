@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Fix Emoji Search Missing Scope Error] - {PR_MERGE_DATE}
+## [Fix Emoji Search Missing Scope Error] - 2025-05-28
 
 - Add missing `emoji:read` scope to fix "missing_scope" error when using Search Emojis command
 
