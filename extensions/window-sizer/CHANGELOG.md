@@ -1,5 +1,10 @@
 # Window Sizer Changelog
 
+## [New Feature and Improvements] - {PR_MERGE_DATE}
+
+- Added a new command to quickly save and resize to a favorite window size
+- Cleaned up default sizes
+
 ## [Chore] - 2025-05-26
 
 - Cleanup of internal HUD navigation logic
