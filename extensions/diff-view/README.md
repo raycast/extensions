@@ -2,7 +2,7 @@
 
 # Diff View
 
-Diff View command compares the last two entries of your clipboard in **VS Code** or **Cursor**.
+Diff View command compares the last two entries of your clipboard in **VS Code** or **Cursor**. This is especially useful when you you want to compare something without being in a code editor, but still want to leverage the powerful diff capabilities of these editors.
 
 # Requirements
 
