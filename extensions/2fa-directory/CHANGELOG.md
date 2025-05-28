@@ -1,6 +1,6 @@
 # 2FA Directory Changelog
 
-## [Add Category Filter] - {PR_MERGE_DATE}
+## [Add Category Filter] - 2025-05-28
 
 - filter sites by category
 - modernize to use latest Raycast config
