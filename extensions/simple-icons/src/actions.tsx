@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Action, Icon } from "@raycast/api";
 import { callbackLaunchCommand } from "raycast-cross-extension";
-import { getIconSlug } from "simple-icons/sdk";
+import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { IconData, LaunchContext } from "./types.js";
 import { copySvg, makeCopyToDownload } from "./utils.js";
 import Releases from "./views/releases.js";
