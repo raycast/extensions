@@ -221,7 +221,8 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       />
       <Form.TextField
         title="Duration"
-        placeholder="30min, 2h, 2h30m, ..."
+        placeholder="30min, 1h, 1h30m, ..."
+        info="Defaults to minutes without specified unit. Valid examples: 30, 45m, 1h, 1h30m."
         storeValue
         {...itemProps.duration}
       ></Form.TextField>
