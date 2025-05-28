@@ -39,7 +39,7 @@ Proyecto is a lightweight tool designed for efficient management of local projec
 
 Contributions are welcome! If you have ideas, bug fixes, or improvements, please
 Open an issue or submit a pull request on the
-[GitHub repository](https://github.com/GloryWong/proyecto-raycast).
+[GitHub repository](https://github.com/raycast/extensions).
 
 ## License
 
