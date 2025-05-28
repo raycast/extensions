@@ -79,7 +79,7 @@ const openMozillaVpnApp = () => {
 const CheckLogin: React.FC<CheckLoginProps> = ({ onBack }) => {
   return (
     <List.EmptyView
-      title="Mozilla Vpn Login Required"
+      title="Mozilla VPN Login Required"
       description="Please log in using the Mozilla Vpn application. Press Enter to open the app."
       icon="Icon.ExclamationMark"
       actions={
