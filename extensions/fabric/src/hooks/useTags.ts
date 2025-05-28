@@ -1,28 +1,29 @@
 import { useState, useEffect } from "react";
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { getFabricClient, Tag } from "../api/fabricClient";
 
 export function useTags() {
   const [tags, setTags] = useState<Tag[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchTags = async () => {
+      setIsLoading(true);
+
       const fabricClient = getFabricClient();
       try {
         const tagsList = await fabricClient.listTags();
         setTags(tagsList);
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch tags",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        showFailureToast(error, { title: "Failed to fetch tags" });
       }
+
+      setIsLoading(false);
     };
 
     fetchTags();
   }, []);
 
-  return tags;
+  return { tags, isLoading };
 }

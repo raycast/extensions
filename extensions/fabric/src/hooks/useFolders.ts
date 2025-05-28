@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { getFabricClient, Kind, Resource } from "../api/fabricClient";
 
 export function useFolders() {
   const [folders, setFolders] = useState<Resource[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchFolders = async () => {
+      setIsLoading(true);
+
       const fabricClient = getFabricClient();
       try {
         const foldersList = await fabricClient.listResources({
@@ -29,16 +32,14 @@ export function useFolders() {
 
         setFolders(foldersList);
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch folders",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        showFailureToast(error, { title: "Failed to fetch folders" });
       }
+
+      setIsLoading(false);
     };
 
     fetchFolders();
   }, []);
 
-  return folders;
+  return { folders, isLoading };
 }

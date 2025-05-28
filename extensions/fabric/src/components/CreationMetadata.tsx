@@ -20,13 +20,18 @@ type Params<T extends MetadataValues> = {
 };
 
 export function CreationMetadata<T extends MetadataValues>(params: Params<T>) {
-  const tags = useTags();
-  const folders = useFolders();
+  const { tags } = useTags();
+  const { folders, isLoading: foldersLoading } = useFolders();
 
   return (
     <>
       <Form.Separator />
-      <Form.Dropdown title="Folder" placeholder="Select a folder" {...params.itemProps.parentId}>
+      <Form.Dropdown
+        title="Folder"
+        placeholder="Select a folder"
+        isLoading={foldersLoading}
+        {...params.itemProps.parentId}
+      >
         <Form.Dropdown.Item value="@alias::inbox" title="Inbox" icon="📥" />
         {folders.map((folder) => (
           <Form.Dropdown.Item
