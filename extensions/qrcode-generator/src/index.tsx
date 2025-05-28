@@ -26,7 +26,7 @@ export default function Command() {
     async onSubmit(values) {
       if (values.inline) {
         try {
-          const qrData = await generateQRCode(values.url, values.format);
+          const qrData = await generateQRCode({ URL: values.url, format: values.format });
           if (!qrData) {
             throw new Error("Failed to generate QR code");
           }

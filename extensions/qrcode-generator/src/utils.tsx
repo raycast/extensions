@@ -1,10 +1,11 @@
 import { Detail, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
 import QRCode from "qrcode";
-import { QR_OPTIONS, SVG_OPTIONS } from "./config";
+import { QR_OPTIONS, QR_OPTIONS_PREVIEW, SVG_OPTIONS } from "./config";
 import { showFailureToast } from "@raycast/utils";
 
-export async function generateQRCode(URL: string | undefined, format: "png" | "svg" = "png") {
+export async function generateQRCode(options: { URL?: string; format?: "png" | "svg"; preview?: boolean }) {
+  const { URL, format = "png", preview = false } = options;
   await showToast({
     title: "Generating",
     message: "Generating QR Code...",
@@ -25,7 +26,7 @@ export async function generateQRCode(URL: string | undefined, format: "png" | "s
       });
       return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
     } else {
-      return await QRCode.toDataURL(URL, QR_OPTIONS);
+      return await QRCode.toDataURL(URL, preview ? QR_OPTIONS_PREVIEW : QR_OPTIONS);
     }
   } catch (error) {
     await showFailureToast({

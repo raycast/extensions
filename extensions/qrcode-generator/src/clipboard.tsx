@@ -8,7 +8,7 @@ export default function Command() {
   useEffect(() => {
     (async () => {
       const clipboard = await Clipboard.readText();
-      const qrData = await generateQRCode(clipboard);
+      const qrData = await generateQRCode({ URL: clipboard, preview: true });
       setQrData(qrData);
     })();
   }, []);

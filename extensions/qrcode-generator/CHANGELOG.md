@@ -1,5 +1,9 @@
 # QR Code Generator Changelog
 
+## [Better Visibility in Raycast UI] - 2025-05-23
+
+- Added internal argument to generate QR codes with a white background for visibility
+
 ## [Added SVG Support] - 2025-05-14
 
 - Added support for generating QR codes in SVG format
