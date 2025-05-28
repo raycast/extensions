@@ -16,7 +16,7 @@
   ],
   "commands": [
     {
-      "name": "create-signature",
+      "name": "create-signatures",
       "title": "Create Signature",
       "description": "Add a new signature",
       "mode": "view"
