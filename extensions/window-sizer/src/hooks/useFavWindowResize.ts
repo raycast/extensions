@@ -1,21 +1,19 @@
-import { showHUD, showToast, Toast, PopToRootType } from "@raycast/api";
+import { showHUD, PopToRootType } from "@raycast/api";
 import { useBaseWindowResize } from "./useBaseWindowResize";
 
-export function useWindowResize() {
+export function useFavWindowResize() {
   const { adjustWindowSize } = useBaseWindowResize();
 
   async function resizeWindow(width: number, height: number) {
     await adjustWindowSize(width, height, {
       onNoWindow: async () => {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "No focused window",
+        await showHUD("🛑 No focused window", {
+          popToRootType: PopToRootType.Immediate,
         });
       },
       onAlreadyResized: async (width, height) => {
-        await showToast({
-          style: Toast.Style.Success,
-          title: `Already in ${width}×${height}`,
+        await showHUD(`✔️ Already in ${width}×${height}`, {
+          popToRootType: PopToRootType.Immediate,
         });
       },
       onResizeComplete: async (width, height, isRestricted) => {
@@ -32,9 +30,9 @@ export function useWindowResize() {
           errorStr.includes("process") ||
           errorStr.includes("Failed to get screen information")
         ) {
-          await showHUD("🛑 No focused window");
+          await showHUD("🛑 No focused window", { popToRootType: PopToRootType.Immediate });
         } else {
-          await showHUD("🛑 Resize failed");
+          await showHUD("🛑 Resize failed", { popToRootType: PopToRootType.Immediate });
         }
       },
     });

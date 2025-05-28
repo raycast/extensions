@@ -17,12 +17,16 @@ This extension uses Swift to interact with windows, providing the following feat
 - Maximize window
 - Restore previous window size
 - Get current window size
+- An extra way to save, apply and reset a favorite window size
 
 ## Usage
 
 Search for the following command in Raycast:
 
-- `Window Sizer` or `Resize Window` - Open the window size selector
+- `Window Sizer` - Find all commands
+- `Resize Window` - Open the window size selector
+- `Resize to Favorite Size` - Save and resize to a favorite window size (best used with a shortcut)
+- `Reset Favorite Size` - Reset the saved favorite window size
 
 ## Shortcuts
 

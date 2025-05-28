@@ -15,9 +15,25 @@
       "name": "resize-window",
       "title": "Resize Window",
       "subtitle": "Window Sizer",
-      "description": "Resize the focused window to a specific resolution",
+      "description": "Resize the focused window to a specific size",
       "mode": "view",
       "icon": "extension-icon.png"
+    },
+    {
+      "name": "resize-to-fav-size",
+      "title": "Resize to Favorite Size",
+      "subtitle": "Window Sizer",
+      "description": "Resize the focused window to a saved size",
+      "mode": "view",
+      "icon": "extension-icon-fav.png"
+    },
+    {
+      "name": "reset-fav-size",
+      "title": "Reset Favorite Size",
+      "subtitle": "Window Sizer",
+      "description": "Reset the saved favorite window size",
+      "mode": "no-view",
+      "icon": "extension-icon-reset.png"
     }
   ],
   "dependencies": {
