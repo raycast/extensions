@@ -78,7 +78,7 @@ export function getSessionsByDate(date: Date): Session[] {
     .orderBy(sessionsTable.timestamp)
     .all();
 
-  return rows.map((row: { goal: string | null; duration: number | null; timestamp: number }) => ({
+  return rows.map((row: { goal: string; duration: number; timestamp: number }) => ({
     goal: row.goal,
     duration: row.duration,
     start: new Date(row.timestamp),

@@ -5,8 +5,8 @@ monitor your productivity over time.
 
 ## Screenshots
 
-![Daily Sessions](./metadata/view-sessions.png)
+![Daily Sessions](./screenshots/view-sessions.png)
 _Review Raycast Focus sessions by date_
 
-![Daily Summaries](./metadata/view-summaries.png)
+![Daily Summaries](./screenshots/view-summaries.png)
 _View summaries of your Raycast Focus goals by date_

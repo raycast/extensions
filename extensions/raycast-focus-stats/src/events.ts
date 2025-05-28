@@ -61,7 +61,7 @@ export function getEvents(): Event[] {
   // Add the `--start` flag to the `log` command to ensure only log messages starting from the
   // provided date and time are provided.
   const command = `${COMMAND} --start '${refreshedAt}'`;
-  const lines = execSync(command).toString().split("\n");
+  const lines = execSync(command, { timeout: 10000 }).toString().split("\n");
   const events: Event[] = [];
 
   // Build list of events from the command output.
