@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Color, Image, List, showToast, Toast } from "@raycast/api";
 import { withAccessToken, showFailureToast } from "@raycast/utils";
 
 import { getFabricClient, Kind, Resource, SearchQuery, oauthService } from "./api/fabricClient";
 import { getKindIcon, removeHtml } from "./utils";
-import { URL_APP, ICON_FALLBACK } from "./config";
+import { URL_APP } from "./config";
 
 const KINDS: [Kind, string][] = [
   [Kind.IMAGE, "Image"],
@@ -22,7 +22,7 @@ interface SearchResult {
   id: string;
   name: string;
   description: string;
-  icon: string;
+  icon: Image.ImageLike;
 }
 
 type SearchResponse =
@@ -61,7 +61,7 @@ const apiFilter = async (searchQuery: SearchQuery): Promise<SearchResponse> => {
       description = item.data.webpage?.description || "";
     }
 
-    let icon = ICON_FALLBACK;
+    let icon: Image.ImageLike = getKindIcon(item.kind as Kind);
     if (item.thumbnail) {
       icon = item.thumbnail.sm;
     } else if (item.data?.webpage?.favicon?.url) {
@@ -83,12 +83,7 @@ const apiFilter = async (searchQuery: SearchQuery): Promise<SearchResponse> => {
 };
 
 function Search() {
-  const emptyList: {
-    id: string;
-    name: string;
-    description: string;
-    icon: string;
-  }[] = [];
+  const emptyList: SearchResult[] = [];
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState<SearchQuery>({ text: "" });
   const [filteredList, filterList] = useState(emptyList);
