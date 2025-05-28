@@ -13,11 +13,11 @@ export const environments: {
     web: "http://localhost:3000",
   },
   dev: {
-    api: "https://api.dev.getclarify.ai/v1",
-    web: "https://app.dev.getclarify.ai",
+    api: "https://api.dev.clarify.ai/v1",
+    web: "https://app.dev.clarify.ai",
   },
   prod: {
-    api: "https://api.getclarify.ai/v1",
-    web: "https://app.getclarify.ai",
+    api: "https://api.clarify.ai/v1",
+    web: "https://app.clarify.ai",
   },
 };

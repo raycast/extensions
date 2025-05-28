@@ -48,7 +48,7 @@
   "dependencies": {
     "@raycast/api": "^1.79.1",
     "@raycast/utils": "^1.16.1",
-    "axios": "^1.7.2",
+    "axios": "^1.8.4",
     "dayjs": "^1.11.11",
     "moment": "^2.30.1"
   },

@@ -20,12 +20,17 @@
     "ridemountainpig",
     "kcole93",
     "Rob",
-    "jagadeesh_k"
+    "jagadeesh_k",
+    "scottlovegrove",
+    "henningmu",
+    "FlohGro",
+    "dedalusj",
+    "william_sault"
   ],
   "commands": [
     {
       "name": "home",
-      "title": "Home",
+      "title": "My Tasks",
       "subtitle": "Todoist",
       "description": "Show your Todoist tasks and views (inbox, today, upcoming, completed, projects, labels).",
       "mode": "view",
@@ -58,6 +63,7 @@
         }
       ],
       "keywords": [
+        "home",
         "inbox",
         "today",
         "today tasks",
@@ -103,6 +109,14 @@
           "type": "checkbox",
           "label": "Close window immediately",
           "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "autoCreateLabels",
+          "type": "checkbox",
+          "label": "Create labels automatically",
+          "description": "When enabled Raycast will parse labels and create them automatically.",
           "default": false,
           "required": false
         }
@@ -156,6 +170,10 @@
           "name": "view",
           "type": "dropdown",
           "data": [
+            {
+              "title": "Inbox",
+              "value": "inbox"
+            },
             {
               "title": "Today",
               "value": "today"
@@ -244,7 +262,8 @@
       "title": "Open Focus Task",
       "subtitle": "Todoist",
       "description": "When a task is chosen as the focused one, you can open it directly using this command.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "tools": [
@@ -599,31 +618,39 @@
       "title": "Focus Label",
       "description": "Shared label name to apply to your focused task. No label will be applied if left empty.",
       "placeholder": "raycast-focus"
+    },
+    {
+      "name": "useConfetti",
+      "type": "checkbox",
+      "label": "Use confetti to celebrate task completion",
+      "description": "When enabled, completing a task will trigger a confetti celebration.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1",
-    "@raycast/utils": "^1.18.1",
-    "axios": "^1.7.2",
-    "date-fns": "^3.6.0",
-    "form-data": "^4.0.0",
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.19.1",
+    "axios": "^1.8.4",
+    "date-fns": "^4.1.0",
+    "form-data": "^4.0.2",
     "lodash": "^4.17.21",
-    "mime": "^4.0.4",
+    "mime": "^4.0.7",
     "node-fetch": "^3.3.2",
-    "remove-markdown": "^0.5.0"
+    "remove-markdown": "^0.6.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.17.6",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.16",
     "@types/mime": "^4.0.0",
-    "@types/node": "^20.14.10",
-    "@types/react": "^18.3.3",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.0",
     "@types/remove-markdown": "^0.3.4",
-    "eslint": "^8.57.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "prettier": "^3.3.2",
-    "typescript": "^5.5.3"
+    "eslint": "^9.24.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,7 +1,8 @@
-import { withAccessToken } from "@raycast/utils";
-import { getLinearClient, linear } from "../api/linearClient";
 import { Document, Initiative, Project, User } from "@linear/sdk";
+import { withAccessToken } from "@raycast/utils";
 import { sortBy } from "lodash";
+
+import { getLinearClient, linear } from "../api/linearClient";
 
 export type DocumentResult = Pick<
   Document,

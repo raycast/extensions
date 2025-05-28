@@ -1,19 +1,30 @@
-import { Icon } from "@raycast/api";
-import { Member } from "../helpers/schemas";
-import { getIcon } from "../helpers/icon";
+import { Member, ObjectLayout, RawMember } from "../models";
+import { getIconWithFallback } from "../utils";
 
 /**
  * Map raw `Member` objects from the API into display-ready data (e.g., icon).
+ * @param members The raw `Member` objects from the API.
+ * @returns The display-ready `Member` objects.
  */
-export async function mapMembers(members: Member[]): Promise<Member[]> {
+export async function mapMembers(members: RawMember[]): Promise<Member[]> {
   return Promise.all(
     members.map(async (member) => {
-      const icon = (await getIcon(member.icon)) || Icon.PersonCircle;
-      return {
-        ...member,
-        name: member.name || "Untitled",
-        icon,
-      };
+      return mapMember(member);
     }),
   );
+}
+
+/**
+ * Map a raw `Member` object from the API into display-ready data (e.g., icon).
+ * @param member The raw `Member` object from the API.
+ * @returns The display-ready `Member` object.
+ */
+export async function mapMember(member: RawMember): Promise<Member> {
+  const icon = await getIconWithFallback(member.icon, ObjectLayout.Participant);
+
+  return {
+    ...member,
+    name: member.name?.trim() || "Untitled", // empty string comes as \n
+    icon,
+  };
 }

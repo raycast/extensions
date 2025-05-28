@@ -1,9 +1,10 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { State } from "@lib/haapi";
 import { Action, ActionPanel } from "@raycast/api";
+import React from "react";
 import { ZoneList } from "./list";
 
-export function ZoneShowDetailAction(props: { state: State }): JSX.Element | null {
+export function ZoneShowDetailAction(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("zone")) {
     return null;

@@ -1578,26 +1578,26 @@
     }
   ],
   "dependencies": {
-    "@linear/sdk": "^26.0.0",
-    "@raycast/api": "^1.87.0",
-    "@raycast/utils": "^1.17.0",
-    "date-fns": "^3.6.0",
-    "file-type": "^19.0.0",
+    "@linear/sdk": "^39.0.0",
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.19.1",
+    "date-fns": "^4.1.0",
+    "file-type": "^20.4.1",
     "lodash": "^4.17.21",
-    "nanoid": "^5.0.7",
-    "node-emoji": "^2.1.3",
-    "remove-markdown": "^0.5.0"
+    "nanoid": "^5.1.5",
+    "node-emoji": "^2.2.0",
+    "remove-markdown": "^0.6.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.14.202",
-    "@types/node": "^22.1.0",
-    "@types/react": "^18.2.46",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^22.14.1",
+    "@types/react": "^19.1.2",
     "@types/remove-markdown": "^0.3.4",
-    "eslint": "^8.56.0",
-    "prettier": "^3.1.1",
-    "react": "^18.2.0",
-    "typescript": "^5.3.3"
+    "eslint": "^9.24.0",
+    "eslint-plugin-import": "^2.31.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

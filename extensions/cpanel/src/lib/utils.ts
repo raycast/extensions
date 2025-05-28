@@ -4,7 +4,7 @@ export function isInvalidUrl() {
   try {
     new URL(CPANEL_URL);
     return false;
-  } catch (error) {
+  } catch {
     return true;
   }
 }

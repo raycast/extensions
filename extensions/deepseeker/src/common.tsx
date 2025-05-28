@@ -10,8 +10,8 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { global_model, openai } from "./api";
-import { countToken, estimatePrice, sentToSideNote } from "./util";
+import { globalModel, openai } from "./api";
+import { countToken, estimatePrice, sendToSideNote } from "./util";
 
 // Define history item type
 export interface HistoryItem {
@@ -55,26 +55,26 @@ export function getHistory(): HistoryItem[] {
 
 export default function ResultView(
   prompt: string,
-  model_override: string,
-  toast_title: string,
-  use_selected_text: boolean,
-  user_input?: string
+  modelOverride: string,
+  toastTitle: string,
+  useSelectedText: boolean,
+  userInput?: string
 ) {
   const pref = getPreferenceValues();
-  const [response_token_count, setResponseTokenCount] = useState(0);
-  const [prompt_token_count, setPromptTokenCount] = useState(0);
+  const [responseTokenCount, setResponseTokenCount] = useState(0);
+  const [promptTokenCount, setPromptTokenCount] = useState(0);
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(true);
-  const [cumulative_tokens, setCumulativeTokens] = useState(0);
-  const [cumulative_cost, setCumulativeCost] = useState(0);
-  const [model, setModel] = useState(model_override == "global" ? global_model : model_override);
+  const [cumulativeTokens, setCumulativeTokens] = useState(0);
+  const [cumulativeCost, setCumulativeCost] = useState(0);
+  const [model, setModel] = useState(modelOverride === "global" ? globalModel : modelOverride);
 
   async function getResult() {
     const now = new Date();
     let duration = 0;
-    const toast = await showToast(Toast.Style.Animated, toast_title);
+    const toast = await showToast(Toast.Style.Animated, toastTitle);
 
-    if (use_selected_text) {
+    if (useSelectedText) {
       try {
         selectedText = await getSelectedText();
       } catch (error) {
@@ -88,22 +88,22 @@ export default function ResultView(
       }
     }
 
-    let user_prompt = "";
-    if (user_input) {
-      user_prompt = "USER PROMPT: " + user_input;
+    let userPrompt = "";
+    if (userInput) {
+      userPrompt = `USER PROMPT: ${userInput}`;
     }
     if (selectedText) {
-      user_prompt += "\n\nUSER PROVIDED TEXT: " + selectedText;
+      userPrompt += `\n\nUSER PROVIDED TEXT: ${selectedText}`;
     }
 
-    console.log("Prompt:\n " + user_prompt);
+    console.log(`Prompt:\n ${userPrompt}`);
 
     try {
       const stream = await openai.chat.completions.create({
         model: model,
         messages: [
           { role: "system", content: prompt },
-          { role: "user", content: user_prompt },
+          { role: "user", content: userPrompt },
         ],
         stream: true,
       });
@@ -111,13 +111,13 @@ export default function ResultView(
 
       if (!stream) return;
 
-      let response_ = "";
+      let responseText = "";
       for await (const part of stream) {
         const message = part.choices[0].delta.content;
         if (message) {
-          response_ += message;
-          setResponse(response_);
-          setResponseTokenCount(countToken(response_));
+          responseText += message;
+          setResponse(responseText);
+          setResponseTokenCount(countToken(responseText));
         }
         if (part.choices[0].finish_reason === "stop") {
           setLoading(false);
@@ -173,22 +173,22 @@ export default function ResultView(
   }, []);
 
   useEffect(() => {
-    if (loading == false && response && !response.startsWith("⚠️")) {
-      setCumulativeTokens(cumulative_tokens + prompt_token_count + response_token_count);
-      setCumulativeCost(cumulative_cost + estimatePrice(prompt_token_count, response_token_count, model));
+    if (loading === false && response && !response.startsWith("⚠️")) {
+      setCumulativeTokens(cumulativeTokens + promptTokenCount + responseTokenCount);
+      setCumulativeCost(cumulativeCost + estimatePrice(promptTokenCount, responseTokenCount, model));
 
       // Save to history
       const historyItem: HistoryItem = {
         id: Date.now().toString(),
         timestamp: Date.now(),
         prompt: prompt,
-        user_input: user_input,
+        user_input: userInput,
         selected_text: selectedText,
         response: response,
         model: model,
-        promptTokens: prompt_token_count,
-        responseTokens: response_token_count,
-        cost: estimatePrice(prompt_token_count, response_token_count, model),
+        promptTokens: promptTokenCount,
+        responseTokens: responseTokenCount,
+        cost: estimatePrice(promptTokenCount, responseTokenCount, model),
       };
       saveToHistory(historyItem);
     }
@@ -200,7 +200,7 @@ export default function ResultView(
       <Action
         title="Send to SideNote"
         onAction={async () => {
-          await sentToSideNote(response);
+          await sendToSideNote(response);
         }}
         shortcut={{ modifiers: ["cmd"], key: "s" }}
         icon={Icon.Sidebar}
@@ -249,17 +249,17 @@ export default function ResultView(
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Current Model" text={model} />
-          <Detail.Metadata.Label title="Prompt Tokens" text={prompt_token_count.toString()} />
-          <Detail.Metadata.Label title="Response Tokens" text={response_token_count.toString()} />
+          <Detail.Metadata.Label title="Prompt Tokens" text={promptTokenCount.toString()} />
+          <Detail.Metadata.Label title="Response Tokens" text={responseTokenCount.toString()} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Total Tokens" text={(prompt_token_count + response_token_count).toString()} />
+          <Detail.Metadata.Label title="Total Tokens" text={(promptTokenCount + responseTokenCount).toString()} />
           <Detail.Metadata.Label
             title="Total Cost"
-            text={estimatePrice(prompt_token_count, response_token_count, model).toString() + " cents"}
+            text={`${estimatePrice(promptTokenCount, responseTokenCount, model).toString()} cents`}
           />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Culmulative Tokens" text={cumulative_tokens.toString()} />
-          <Detail.Metadata.Label title="Culmulative Cost" text={cumulative_cost.toString() + " cents"} />
+          <Detail.Metadata.Label title="Cumulative Tokens" text={cumulativeTokens.toString()} />
+          <Detail.Metadata.Label title="Cumulative Cost" text={`${cumulativeCost.toString()} cents`} />
         </Detail.Metadata>
       }
     />

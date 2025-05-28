@@ -34,7 +34,10 @@
     "enneemme",
     "lineville",
     "tsibog",
-    "viethung0823"
+    "viethung0823",
+    "eyal_levy",
+    "jonasengelmann",
+    "vmrjnvc"
   ],
   "pastContributors": [
     "bkeys818"
@@ -401,6 +404,14 @@
       "disabledByDefault": true
     },
     {
+      "name": "copyArtistAndTitle",
+      "title": "Copy Artist And Title",
+      "subtitle": "Spotify",
+      "description": "Copy the artist and track title of the current song/episode",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
       "name": "justPlay",
       "title": "Just Play",
       "subtitle": "Spotify",
@@ -502,6 +513,11 @@
       "name": "add-track-to-playlist",
       "title": "Add Track to Playlist",
       "description": "Adds a track to a playlist"
+    },
+    {
+      "name": "queue",
+      "title": "Queue",
+      "description": "Add tracks to queue and get the current queue state"
     }
   ],
   "dependencies": {
@@ -697,5 +713,8 @@
         }
       }
     ]
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

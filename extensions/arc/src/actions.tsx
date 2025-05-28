@@ -264,12 +264,15 @@ export function OpenLinkActionSections(props: { tabOrUrl: Tab | string; searchTe
 
   if (isTab(props.tabOrUrl)) {
     url = props.tabOrUrl.url;
+  } else {
+    const hasProto = /^https?:\/\//i.test(url);
+    url = hasProto ? url : "https://" + url;
   }
 
   return (
     <>
       <ActionPanel.Section>
-        <OpenInArcAction tabOrUrl={props.tabOrUrl} />
+        <OpenInArcAction tabOrUrl={isTab(props.tabOrUrl) ? props.tabOrUrl : url} />
         <OpenInLittleArc url={url} />
       </ActionPanel.Section>
       <ActionPanel.Section>

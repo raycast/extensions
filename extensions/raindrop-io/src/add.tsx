@@ -1,13 +1,13 @@
 import { showToast, Toast } from "@raycast/api";
-import { CreateForm } from "./components/CreateForm";
+import { BookmarkForm } from "./components/BookmarkForm";
 
 const AddBookmarks = () => {
   return (
-    <CreateForm
-      onWillCreate={() => {
+    <BookmarkForm
+      onWillSave={() => {
         showToast(Toast.Style.Animated, "Adding Link...");
       }}
-      onCreated={() => {
+      onSaved={() => {
         showToast(Toast.Style.Success, "Link Added");
       }}
       onError={() => {
