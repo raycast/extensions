@@ -25,7 +25,7 @@ function createSpotlightResult(filePath: string): SpotlightSearchResult {
       kMDItemLastUsedDate: stats.atime.toISOString(),
       kMDItemUseCount: 0,
     };
-  } catch (error) {
+  } catch {
     // Provide fallback for errors
     return {
       path: filePath,
@@ -90,7 +90,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
         .filter((file) => {
           try {
             return fs.statSync(path.join(directoryPath, file)).isDirectory();
-          } catch (e) {
+          } catch {
             return false; // Skip files we can't stat
           }
         })
@@ -172,7 +172,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
                     }}
                   />
                   <Action.OpenWith
-                    title="Open With…"
+                    title="Open with…"
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                     path={filePath}
                     onOpen={() => {

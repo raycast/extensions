@@ -1,5 +1,13 @@
 # Anytype Changelog
 
+## [UI Polish, Tag Management & Fixes] - 2025-05-26
+
+- Add context actions to manage tags on objects (add/remove)
+- Improve type indicators across all object lists
+- Support built-in SVG icons for type creation and editing
+- Standardize placeholder text and information messages
+- Update to API version 2025-05-20
+
 ## [Properties, Types & Tags] - 2025-05-07
 
 #### New Creation Options

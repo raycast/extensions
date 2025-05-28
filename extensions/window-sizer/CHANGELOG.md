@@ -1,5 +1,18 @@
 # Window Sizer Changelog
 
+## [New Feature and Improvements] - 2025-05-28
+
+- Added a new command to quickly save and resize to a favorite window size
+- Cleaned up default sizes
+
+## [Chore] - 2025-05-26
+
+- Cleanup of internal HUD navigation logic
+
+## [Fixes] - 2025-05-23
+
+- Fixed occasional issue with action icon not displaying
+
 ## [UI improvement] - 2025-05-21
 
 - Adjusted Action icon to only display when selected

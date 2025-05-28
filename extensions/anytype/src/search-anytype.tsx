@@ -94,7 +94,7 @@ function Search() {
       [ViewType.bookmarks]: [bundledTypeKeys.bookmark],
     };
     setTypes(viewToType[currentView] ?? []);
-  }, [currentView, typeKeysForPages, typeKeysForTasks]);
+  }, [currentView, typeKeysForPages, typeKeysForTasks, typeKeysForLists]);
 
   useEffect(() => {
     if (objectsError || spacesError || pinnedObjectsError) {

@@ -36,7 +36,8 @@
     "tsibog",
     "viethung0823",
     "eyal_levy",
-    "jonasengelmann"
+    "jonasengelmann",
+    "vmrjnvc"
   ],
   "pastContributors": [
     "bkeys818"
@@ -399,6 +400,14 @@
       "title": "Copy URL",
       "subtitle": "Spotify",
       "description": "Copy the URL of the current song/episode.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "copyArtistAndTitle",
+      "title": "Copy Artist And Title",
+      "subtitle": "Spotify",
+      "description": "Copy the artist and track title of the current song/episode",
       "mode": "no-view",
       "disabledByDefault": true
     },

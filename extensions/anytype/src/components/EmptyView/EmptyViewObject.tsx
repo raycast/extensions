@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { CreateObjectForm } from "..";
-import { CreateObjectFormValues } from "../../create-object";
+import { CreateObjectForm, CreateObjectFormValues } from "..";
 
 type EmptyViewObjectProps = {
   title: string;
@@ -8,16 +7,7 @@ type EmptyViewObjectProps = {
 };
 
 export function EmptyViewObject({ title, contextValues }: EmptyViewObjectProps) {
-  const draftValues: CreateObjectFormValues = {
-    spaceId: contextValues.spaceId,
-    typeId: contextValues.typeId,
-    listId: contextValues.listId,
-    name: contextValues.name,
-    icon: contextValues.icon,
-    description: contextValues.description,
-    body: contextValues.body,
-    source: contextValues.source,
-  };
+  const draftValues: CreateObjectFormValues = { ...contextValues };
 
   return (
     <List.EmptyView
