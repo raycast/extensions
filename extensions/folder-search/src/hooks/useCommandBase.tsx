@@ -13,9 +13,12 @@ export function useCommandBase({ commandName, launchProps, searchText, setSearch
   // Handle fallback text from root search
   const fallbackTextRef = useRef<string | undefined>(undefined);
   const fallbackTextProcessedRef = useRef<boolean>(false);
+  const initialMountRef = useRef<boolean>(true);
 
   useEffect(() => {
-    // Only process fallbackText once per session
+    // Only process fallbackText on initial mount
+    if (!initialMountRef.current) return;
+
     if (launchProps.fallbackText && !fallbackTextProcessedRef.current) {
       log("debug", commandName, "Processing fallback text", {
         fallbackText: launchProps.fallbackText,
@@ -25,6 +28,7 @@ export function useCommandBase({ commandName, launchProps, searchText, setSearch
       fallbackTextRef.current = launchProps.fallbackText;
       fallbackTextProcessedRef.current = true;
       setSearchText(launchProps.fallbackText);
+      initialMountRef.current = false; // Prevent future runs
     }
   }, [launchProps.fallbackText, commandName, setSearchText]);
 
