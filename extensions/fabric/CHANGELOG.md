@@ -4,7 +4,7 @@
 
 - Basic search and creation functionality.
 
-## [Location and Tag Selection] - {PR_MERGE_DATE}
+## [Location and Tag Selection] - 2025-05-28
 
 - Allow assigning existing tags, and create new ones, when saving an item.
 - Allow selecting location when saving an item.
