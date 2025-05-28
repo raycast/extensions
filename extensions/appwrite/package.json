@@ -37,8 +37,20 @@
   ],
   "commands": [
     {
+      "name": "projects",
+      "title": "Projects",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "databases",
       "title": "Databases",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "storage",
+      "title": "Storage",
       "description": "",
       "mode": "view"
     }
