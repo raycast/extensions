@@ -66,9 +66,9 @@ interface CheckLoginProps {
 }
 
 const openMozillaVpnApp = () => {
-  exec('open -a "Mozilla Vpn"', (error) => {
+  exec('open -a "Mozilla VPN"', (error) => {
     if (error) {
-      console.error('Error opening Mozilla Vpn:', error);
+      console.error('Error opening Mozilla VPN:', error);
     } else {
       popToRoot();
       closeMainWindow();
