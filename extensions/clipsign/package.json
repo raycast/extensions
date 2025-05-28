@@ -16,13 +16,13 @@
   ],
   "commands": [
     {
-      "name": "clipsign",
+      "name": "create-signature",
       "title": "Create Signature",
       "description": "Add a new signature",
       "mode": "view"
     },
     {
-      "name": "clipsign",
+      "name": "manage-signatures",
       "title": "Manage Signatures",
       "description": "Edit or delete your saved signatures",
       "mode": "view"
@@ -47,6 +47,6 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "ray publish"
   }
 }
