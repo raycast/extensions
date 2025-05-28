@@ -2,12 +2,13 @@ import { showToast, Toast, Form, closeMainWindow, popToRoot } from "@raycast/api
 import { convertFileCore } from "./core/libreoffice";
 import { getSelectedFiles } from "./core/finder";
 import { FormComponent } from "./views/form";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function ConvertFiles(props: { arguments: { format?: string; inputFiles?: string[] | null } }) {
   const format = props.arguments.format;
   const [showForm, setShowForm] = useState<boolean | null>(null);
   const [args, setArgs] = useState(props.arguments);
+  const hasRun = useRef(false);
 
   async function handleConversion(params: { inputPaths: string[]; format: string }) {
     await closeMainWindow();
@@ -49,6 +50,9 @@ export default function ConvertFiles(props: { arguments: { format?: string; inpu
   }
 
   useEffect(() => {
+    if (hasRun.current) return; // Prevent double execution
+    hasRun.current = true;
+
     (async () => {
       const selectedFiles = await getSelectedFiles();
 
