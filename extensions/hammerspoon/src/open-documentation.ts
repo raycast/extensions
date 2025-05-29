@@ -1,4 +1,4 @@
-import { getPreferenceValues, showHUD } from '@raycast/api'
+import { closeMainWindow } from '@raycast/api'
 import { runAppleScript, showFailureToast } from '@raycast/utils'
 import { checkHammerspoonInstallation } from './utils/installation'
 
@@ -13,15 +13,15 @@ export default async function main() {
     await runAppleScript(`
       tell application "Hammerspoon"
         execute lua code "
-          hs.reload();
-          ${getPreferenceValues().openConsole ? 'hs.openConsole();' : ''}
+          hs.doc.hsdocs.help()
+          hs.doc.hsdocs._browser:hswindow():focus()
         "
       end tell
     `)
   } catch (error) {
-    await showFailureToast(error, { title: 'Could not reload Hammerspoon configuration' })
+    await showFailureToast(error, { title: 'Could not open Hammerspoon documentation' })
     return
   }
 
-  await showHUD('🔨 Hammerspoon Configuration File Reloaded')
+  await closeMainWindow({ clearRootSearch: true })
 }
