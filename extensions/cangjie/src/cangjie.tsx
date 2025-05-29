@@ -1,5 +1,4 @@
 import { Action, ActionPanel, List, getSelectedText } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import cangjieData from "./cangjie5_all.json";
 
@@ -94,7 +93,6 @@ export default function Command() {
           setSearchText(selectedText);
         }
       } catch (error) {
-        showFailureToast(error, { title: "Could not get selected text" });
         setSearchText("");
       } finally {
         setIsLoading(false);
