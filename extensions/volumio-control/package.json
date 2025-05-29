@@ -22,7 +22,7 @@
   "commands": [
     {
       "name": "play-pause",
-      "title": "Play/pause",
+      "title": "Play/Pause",
       "description": "Toggle playback",
       "mode": "no-view",
       "keywords": [

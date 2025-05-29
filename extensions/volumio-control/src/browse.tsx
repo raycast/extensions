@@ -2,6 +2,16 @@ import { ActionPanel, Action, List, Icon, showToast, Toast, useNavigation } from
 import { useEffect, useState } from "react";
 import { VolumioAPI, BrowseItem, BrowseResponse } from "./volumio-api";
 
+// URI patterns for navigation items
+const NAVIGATION_URIS = ["playlists", "music-library", "artists://", "albums://", "genres://"];
+const BROWSABLE_ROOT_URIS = [...NAVIGATION_URIS, "favourites"];
+
+// Item types that can be played
+const PLAYABLE_TYPES = ["song", "track", "playlist", "album", "radio", "webradio", "folder"];
+
+// Item types that can be browsed
+const BROWSABLE_TYPES = ["folder", "playlist-category", "artist", "album"];
+
 export default function Browse() {
   const [items, setItems] = useState<BrowseItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -111,19 +121,19 @@ export default function Browse() {
   function isPlayable(item: BrowseItem) {
     // Items that can be played
     if (item.type) {
-      return ["song", "track", "playlist", "album", "radio", "webradio", "folder"].includes(item.type);
+      return PLAYABLE_TYPES.includes(item.type);
     }
     // For items without type, check if they're NOT just navigation items
-    return !["playlists", "music-library", "artists://", "albums://", "genres://"].includes(item.uri);
+    return !NAVIGATION_URIS.includes(item.uri);
   }
 
   function isBrowsable(item: BrowseItem) {
     // For root level items, check the uri pattern
     if (!item.type) {
-      return ["playlists", "music-library", "artists://", "albums://", "genres://", "favourites"].includes(item.uri);
+      return BROWSABLE_ROOT_URIS.includes(item.uri);
     }
     // These types can be browsed deeper
-    return ["folder", "playlist-category", "artist", "album"].includes(item.type);
+    return BROWSABLE_TYPES.includes(item.type);
   }
 
   return (
@@ -299,19 +309,19 @@ function BrowseView({ uri, title }: { uri: string; title: string }) {
   function isPlayable(item: BrowseItem) {
     // Items that can be played
     if (item.type) {
-      return ["song", "track", "playlist", "album", "radio", "webradio", "folder"].includes(item.type);
+      return PLAYABLE_TYPES.includes(item.type);
     }
     // For items without type, check if they're NOT just navigation items
-    return !["playlists", "music-library", "artists://", "albums://", "genres://"].includes(item.uri);
+    return !NAVIGATION_URIS.includes(item.uri);
   }
 
   function isBrowsable(item: BrowseItem) {
     // For root level items, check the uri pattern
     if (!item.type) {
-      return ["playlists", "music-library", "artists://", "albums://", "genres://", "favourites"].includes(item.uri);
+      return BROWSABLE_ROOT_URIS.includes(item.uri);
     }
     // These types can be browsed deeper
-    return ["folder", "playlist-category", "artist", "album"].includes(item.type);
+    return BROWSABLE_TYPES.includes(item.type);
   }
 
   function isShuffleable(item: BrowseItem) {
