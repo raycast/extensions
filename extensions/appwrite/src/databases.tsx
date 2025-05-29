@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getSdks, sdk } from "./sdk";
+import { sdk, SDKContext } from "./sdk";
+import { useContext } from "react";
 
 export default function Databases() {
+    const sdks = useContext(SDKContext);
     const { isLoading, data: databases } = useCachedPromise(async () => {
-            const {databases} = getSdks();
-            const res = await databases.list();
+            const res = await sdks.databases.list();
             return res.databases;
     }, [], {
         initialData: []
@@ -20,8 +21,8 @@ export default function Databases() {
 }
 
 function Collections({database}: {database: sdk.Models.Database}) {
+    const { databases } = useContext(SDKContext);
     const { isLoading, data: collections } = useCachedPromise(async () => {
-            const {databases} = getSdks();
             const res = await databases.listCollections(
                 database.$id
             );
@@ -38,8 +39,8 @@ function Collections({database}: {database: sdk.Models.Database}) {
 }
 
 function Documents({collection}: {collection: sdk.Models.Collection}) {
+    const {databases} = useContext(SDKContext);
     const {isLoading, data: documents} = useCachedPromise(async () => {
-        const {databases } = getSdks();
         const res = await databases.listDocuments(collection.databaseId, collection.$id);
         return res.documents;
     }, [], {

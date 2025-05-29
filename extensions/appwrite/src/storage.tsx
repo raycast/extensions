@@ -1,10 +1,11 @@
 import { useCachedPromise } from "@raycast/utils";
-import {getSdks} from "./sdk";
 import { List } from "@raycast/api";
+import { useContext } from "react";
+import { SDKContext } from "./sdk";
 
 export default function Storage() {
+    const {storage} = useContext(SDKContext);
     const { isLoading, data: buckets, error } = useCachedPromise(async () => {
-        const {storage} = getSdks();
         const res = await storage.listBuckets();
         return res.buckets;
     }, [], {

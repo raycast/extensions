@@ -9,48 +9,10 @@
     "Developer Tools"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "endpoint",
-      "title": "endpoint",
-      "type": "textfield",
-      "required": true,
-      "placeholder": "Your API Endpoint",
-      "description": ""
-    },
-    {
-      "name": "project",
-      "title": "project",
-      "type": "textfield",
-      "required": true,
-      "placeholder": "Your Project ID",
-      "description": ""
-    },
-    {
-      "name": "key",
-      "title": "key",
-      "type": "password",
-      "required": true,
-      "placeholder": "Your Secret API Key",
-      "description": ""
-    }
-  ],
   "commands": [
     {
       "name": "projects",
       "title": "Projects",
-      "description": "",
-      "mode": "view"
-    },
-    {
-      "name": "databases",
-      "title": "Databases",
-      "description": "",
-      "mode": "view"
-    },
-    {
-      "name": "storage",
-      "title": "Storage",
       "description": "",
       "mode": "view"
     }

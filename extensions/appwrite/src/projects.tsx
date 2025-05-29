@@ -1,13 +1,16 @@
-import { FormValidation, useCachedPromise, useForm, useLocalStorage } from "@raycast/utils";
+import { FormValidation, useForm, useLocalStorage } from "@raycast/utils";
 import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, List, popToRoot, showToast, Toast } from "@raycast/api";
-import { sdk } from "./sdk";
+import { sdk, SDKProvider } from "./sdk";
+import Databases from "./databases";
+import Storage from "./storage";
 
-interface Project {
+export interface Project {
     name: string;
     id: string;
     endpoint: string;
     key: string;
-}
+}    
+
 export default function Projects() {
     const { isLoading, value: projects = [], setValue: setProjects } = useLocalStorage<Project[]>("projects");
 
@@ -15,6 +18,9 @@ export default function Projects() {
         {!isLoading && !projects?.length ? <List.EmptyView icon="appwrite.png" title="Add a project" actions={<ActionPanel>
             <Action.Push icon={Icon.Plus} title="Add Project" target={<AddProject />} />
         </ActionPanel>} /> : projects.map(project => <List.Item key={project.id} icon="appwrite.png" title={project.name} subtitle={project.id} actions={<ActionPanel>
+            <Action.Push icon={Icon.Coin} title="Databases" target={<SDKProvider project={project}><Databases /></SDKProvider>} />
+            <Action.Push icon={Icon.Folder} title="Storage" target={<SDKProvider project={project}><Storage /></SDKProvider>} />
+            
             <Action icon={Icon.Trash} title="Remove Project" onAction={() => confirmAlert({
                 icon: { source: Icon.Trash, tintColor: Color.Red },
                 title: `Remove "${project.name}"?`,
