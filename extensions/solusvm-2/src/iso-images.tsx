@@ -22,7 +22,7 @@ export default function ISOImages() {
           key={iso.id}
           title={iso.name}
           subtitle={iso.os_type}
-          accessories={[{ text: `${(iso.size / 1024 / 1024 / 1024).toPrecision(2)} GiB` }]}
+          accessories={[{ text: `${(iso.size / 1024 / 1024 / 1024).toFixed(2)} GiB` }]}
           actions={
             <ActionPanel>
               {/* eslint-disable-next-line @raycast/prefer-title-case */}

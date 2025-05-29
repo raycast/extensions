@@ -12,6 +12,9 @@ export default function Members({ project }: { project: Project }) {
       };
     },
     initialData: [],
+    failureToastOptions: {
+      title: "Failed to fetch members",
+    },
   });
 
   return (

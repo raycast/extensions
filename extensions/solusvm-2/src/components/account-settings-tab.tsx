@@ -1,5 +1,5 @@
 import { Detail, ActionPanel, Action, Icon, showToast, Toast, Form, List, useNavigation } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
 import { callApi } from "../api";
 import { UserResource } from "../types";
 
@@ -60,7 +60,10 @@ function UpdateSettings({ user }: { user: UserResource }) {
       }
     },
     validation: {
-      password: FormValidation.Required,
+      password(value) {
+        if (!value) return "The item is required";
+        if (value.length < 8) return "Must be at least 8 characters";
+      },
     },
   });
   return (
@@ -74,7 +77,7 @@ function UpdateSettings({ user }: { user: UserResource }) {
       <Form.Description title="Email" text={user.email} />
       <Form.PasswordField
         title="Password"
-        placeholder="hunter2"
+        placeholder="Hunter2!"
         info="8 characters, 1 uppercase letter, 1 number"
         {...itemProps.password}
       />

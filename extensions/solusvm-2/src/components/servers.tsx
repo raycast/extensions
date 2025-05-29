@@ -61,18 +61,18 @@ export default function Servers({ project }: { project: Project }) {
     let animatedToastTitle, successToastTitle, newStatus: Server["status"];
     switch (action) {
       case "start":
-        animatedToastTitle = "Starting project";
-        successToastTitle = "Started project";
+        animatedToastTitle = "Starting server";
+        successToastTitle = "Started server";
         newStatus = "starting";
         break;
       case "stop":
-        animatedToastTitle = "Stopping project";
-        successToastTitle = "Stopped project";
+        animatedToastTitle = "Stopping server";
+        successToastTitle = "Stopped server";
         newStatus = "stopped";
         break;
       case "restart":
-        animatedToastTitle = "Restarting project";
-        successToastTitle = "Restarted project";
+        animatedToastTitle = "Restarting server";
+        successToastTitle = "Restarted server";
         newStatus = "restarting";
         break;
     }
@@ -88,7 +88,7 @@ export default function Servers({ project }: { project: Project }) {
       toast.title = successToastTitle;
     } catch (error) {
       toast.style = Toast.Style.Failure;
-      toast.title = `Could not ${action} project`;
+      toast.title = `Could not ${action} server`;
       toast.message = `${error}`;
     }
   }
