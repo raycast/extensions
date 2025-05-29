@@ -62,6 +62,26 @@ Find places of a specific type near a location.
 - "What are some open cafes near Central Park?"
 - "Show me gas stations within 5 miles of my current location"
 
+## Troubleshooting API Keys
+
+If you're experiencing issues with your Google API key, you can use the included testing script to verify which APIs are properly enabled and working:
+
+1. Open a terminal and navigate to the extension directory
+2. Run the API test script with your API key:
+
+   ```bash
+   node src/utils/api-test.mjs YOUR_API_KEY
+   ```
+
+3. The script will test each required API and show you which ones are working and which need to be enabled
+4. For any API showing a 403 error, you'll need to enable it in the Google Cloud Console:
+   - Go to [Google Cloud Console API Library](https://console.cloud.google.com/apis/library)
+   - Search for the API name (Places API, Geocoding API, etc.)
+   - Click on the API and then click "Enable"
+   - Wait a few minutes for the changes to take effect
+
+The most common issue is that the Places API needs to be enabled separately from the other APIs.
+
 ## Privacy
 
 This extension only stores your address locally to pass it to the Google Maps API. This extension does nothing else with your info.

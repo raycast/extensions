@@ -159,15 +159,17 @@ function SearchPlacesCommand({ initialSearchText }: { initialSearchText?: string
                       <Action.OpenInBrowser url={makeSearchURL(search)} title="Open in Google Maps" />
                       <Action
                         icon={Icon.Trash}
-                        title="Remove Search"
+                        title="Delete Search"
                         onAction={() => handleRemoveSearchCallback(search)}
-                        shortcut={{ modifiers: ["cmd"], key: "d" }}
+                        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                        style={Action.Style.Destructive}
                       />
                       <Action
                         icon={Icon.Trash}
-                        title="Clear All Searches"
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                        title="Delete All Searches"
+                        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                         onAction={handleClearAllSearchesCallback}
+                        style={Action.Style.Destructive}
                       />
                     </ActionPanel>
                   }
