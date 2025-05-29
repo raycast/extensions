@@ -20,8 +20,8 @@
       "icon": "extension-icon.png"
     },
     {
-      "name": "resize-to-fav-size",
-      "title": "Resize to Favorite Size",
+      "name": "apply-fav-size",
+      "title": "Apply Favorite Size",
       "subtitle": "Window Sizer",
       "description": "Set your favorite size and resize the focused window to it.",
       "mode": "view",

@@ -23,7 +23,7 @@ Search for the following command in Raycast:
 
 - `Window Sizer` - Find all commands
 - `Resize Window` - Open the window size selector
-- `Resize to Favorite Size` - Resize to a favorite window size (Configure in command settings first)
+- `Apply Favorite Size` - Apply a favorite window size directly (Configure in command settings first)
 
 ## Shortcuts
 
