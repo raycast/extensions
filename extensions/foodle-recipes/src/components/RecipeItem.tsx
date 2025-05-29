@@ -17,7 +17,7 @@ export default function RecipeItem({ recipe }: { recipe: FoodleRecipe }) {
     <List.Item
       title={recipe.name}
       subtitle={recipe.source}
-      icon={getFavicon(recipe.url)}
+      icon={recipe.url != "" ? getFavicon(recipe.url) : Icon.Receipt}
       accessories={accessories()}
       actions={
         <ActionPanel title={recipe.name}>

@@ -97,7 +97,10 @@ export default function RecipeDetail({ recipe }: { recipe: FoodleRecipe }) {
 
 function renderRecipe(foodleRecipe: FoodleRecipe, parsedRecipe: ParsedRecipe | null): [string, ReactNode[]] {
   const imageUrl = parsedRecipe && parsedRecipe.image ? parsedRecipe.image : foodleRecipe.imageUrl;
-  let markdown: string = "# " + foodleRecipe.name + "\n\n![" + foodleRecipe.name + "](" + imageUrl + ")";
+  let markdown: string = "# " + foodleRecipe.name + "\n\n!";
+  if (imageUrl !== "" && imageUrl !== null) {
+    markdown += "[" + foodleRecipe.name + "](" + imageUrl + ")";
+  }
 
   if (parsedRecipe == null) {
     markdown += "\n\nCould not extract recipe data from the page. Please open the recipe in your browser\n\n";
