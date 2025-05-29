@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shorten-amazon-url",
+  "title": "Shorten Amazon URL",
+  "description": "Simply removes extraneous elements of an Amazon.com (US and others) product URL. Requires an Amazon product URL to be in the clipboard.",
+  "icon": "extension-icon.png",
+  "author": "dustin_miller",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Web",
+    "Other"
+  ],
+  "commands": [
+    {
+      "name": "shorten-amazon-url",
+      "title": "Shorten Amazon Product URL",
+      "subtitle": "Clipboard",
+      "description": "Shortens Amazon product URLs to remove unneeded elements and tracking IDs",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.15.24", 
+    "@types/react": "19.1.6",
+    "eslint": "^9.27.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
