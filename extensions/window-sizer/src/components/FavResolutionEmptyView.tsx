@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, openCommandPreferences, popToRoot } from "@raycast/api";
+import { List, ActionPanel, Action, openCommandPreferences, popToRoot, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 interface FavResolutionEmptyViewProps {
@@ -66,6 +66,7 @@ export function FavResolutionEmptyView({ isResizing = false, isInvalidSize = fal
             <ActionPanel>
               <Action
                 title="Open Settings"
+                icon={Icon.Gear}
                 onAction={async () => {
                   await openCommandPreferences();
                   await popToRoot();
