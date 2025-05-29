@@ -1,6 +1,34 @@
 import { showHUD, Clipboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
+const amazonShortDomains = ["a.co", "amzn.to", "amzn.com"];
+const validAmazonDomains = {
+  us: "www.amazon.com",
+  uk: "www.amazon.co.uk",
+  ca: "www.amazon.ca",
+  de: "www.amazon.de",
+  es: "www.amazon.es",
+  fr: "www.amazon.fr",
+  it: "www.amazon.it",
+  jp: "www.amazon.co.jp",
+  in: "www.amazon.in",
+  cn: "www.amazon.cn",
+  sg: "www.amazon.com.sg",
+  mx: "www.amazon.com.mx",
+  ae: "www.amazon.ae",
+  br: "www.amazon.com.br",
+  nl: "www.amazon.nl",
+  au: "www.amazon.com.au",
+  tr: "www.amazon.com.tr",
+  sa: "www.amazon.sa",
+  se: "www.amazon.se",
+  pl: "www.amazon.pl",
+};
+/**
+ * Unshortens an Amazon short URL by following redirects to get the final product page URL.
+ * @param {string} url - The short URL to unshorten.
+ * @returns {Promise<string>} - The final unshortened URL.
+ */
 async function unfollowRedirects(url: string): Promise<string> {
   // Follow redirects to get the final URL
   try {
@@ -32,7 +60,6 @@ export default async function main() {
     }
 
     // Check if this is an Amazon short URL that needs to be unshortened
-    const amazonShortDomains = ["a.co", "amzn.to", "amzn.com"];
     const isAmazonShortUrl = amazonShortDomains.some(
       (domain) => url.hostname === domain || url.hostname === `www.${domain}`,
     );
@@ -46,28 +73,7 @@ export default async function main() {
     }
 
     // Check if the final URL is from Amazon
-    const validAmazonDomains = {
-      us: "www.amazon.com",
-      uk: "www.amazon.co.uk",
-      ca: "www.amazon.ca",
-      de: "www.amazon.de",
-      es: "www.amazon.es",
-      fr: "www.amazon.fr",
-      it: "www.amazon.it",
-      jp: "www.amazon.co.jp",
-      in: "www.amazon.in",
-      cn: "www.amazon.cn",
-      sg: "www.amazon.com.sg",
-      mx: "www.amazon.com.mx",
-      ae: "www.amazon.ae",
-      br: "www.amazon.com.br",
-      nl: "www.amazon.nl",
-      au: "www.amazon.com.au",
-      tr: "www.amazon.com.tr",
-      sa: "www.amazon.sa",
-      se: "www.amazon.se",
-      pl: "www.amazon.pl",
-    };
+
     const isValidAmazonDomain = Object.values(validAmazonDomains).some((domain) => finalUrl.hostname === domain);
     if (!isValidAmazonDomain) {
       throw new Error(`URL ${finalUrl.href} is not an Amazon product page`);
@@ -75,7 +81,7 @@ export default async function main() {
 
     // Extract the ASIN from the URL path
     const pathParts = finalUrl.pathname.split("/");
-    const dpIndex = pathParts.findIndex((part) => part === "dp");
+    const dpIndex = pathParts.findIndex((part) => part === "dp" || part === "product");
 
     if (dpIndex === -1 || dpIndex + 1 >= pathParts.length) {
       throw new Error(`Could not find product identifier in Amazon URL ${finalUrl.href}`);
