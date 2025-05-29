@@ -1,5 +1,12 @@
 # Video Downloader Changelog
 
+## [Bug fix] - {PR_MERGE_DATE}
+
+- Add support for age-restricted YouTube videos using browser cookies
+- Add browser selection preference for cookie-based authentication
+- Improve error handling with helpful messages for age-restricted content
+- Automatically retry with browser cookies when age-restriction is detected
+
 ## [Chore] - 2025-03-10
 
 - Rename extension folder and handle to `video-downloader`

@@ -12,7 +12,8 @@
     "ridemountainpig",
     "xmorse",
     "litomore",
-    "anwarulislam"
+    "anwarulislam",
+    "drewbabel"
   ],
   "categories": [
     "Applications",
@@ -123,6 +124,44 @@
       "type": "checkbox",
       "label": "Enable",
       "default": false,
+      "required": false
+    },
+    {
+      "name": "browserForCookies",
+      "title": "Browser for Age-Restricted Videos",
+      "description": "Select browser to extract cookies from for age-restricted videos. Leave empty to disable cookie authentication.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "None (Disabled)",
+          "value": ""
+        },
+        {
+          "title": "Chrome",
+          "value": "chrome"
+        },
+        {
+          "title": "Firefox",
+          "value": "firefox"
+        },
+        {
+          "title": "Safari",
+          "value": "safari"
+        },
+        {
+          "title": "Edge",
+          "value": "edge"
+        },
+        {
+          "title": "Opera",
+          "value": "opera"
+        },
+        {
+          "title": "Brave",
+          "value": "brave"
+        }
+      ],
+      "default": "",
       "required": false
     }
   ],

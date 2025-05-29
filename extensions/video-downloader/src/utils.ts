@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
 import isUrlSuperb from "is-url-superb";
-import { Format, Video } from "./types.js";
+import { Format, Video, ExtensionPreferences } from "./types.js";
 
 export const {
   downloadPath,
@@ -13,6 +13,7 @@ export const {
   autoLoadUrlFromSelectedText,
   enableBrowserExtensionSupport,
   forceIpv4,
+  browserForCookies,
 } = getPreferenceValues<ExtensionPreferences>();
 
 export type DownloadOptions = {
@@ -120,3 +121,22 @@ export const getFormatTitle = (format: Format) =>
   [format.resolution, format.ext, formatTbr(format.tbr), formatFilesize(format.filesize)]
     .filter((x) => Boolean(x))
     .join(" | ");
+
+/**
+ * Checks if an error message indicates an age-restricted video
+ */
+export function isAgeRestrictedError(errorMessage: string): boolean {
+  return (
+    errorMessage.includes("Sign in to confirm your age") ||
+    errorMessage.includes("This video may be inappropriate for some users") ||
+    errorMessage.includes("Use --cookies-from-browser or --cookies for the authentication")
+  );
+}
+
+/**
+ * Builds cookie arguments for yt-dlp based on browser preference
+ */
+export function getCookieArgs(browser: string): string[] {
+  if (!browser) return [];
+  return ["--cookies-from-browser", browser];
+}

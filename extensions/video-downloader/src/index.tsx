@@ -26,8 +26,11 @@ import {
   isValidHHMM,
   isValidUrl,
   parseHHMM,
+  isAgeRestrictedError,
+  getCookieArgs,
+  browserForCookies,
 } from "./utils.js";
-import { Video } from "./types.js";
+import { Video, ExtensionPreferences } from "./types.js";
 import Installer from "./views/installer.js";
 import Updater from "./views/updater.js";
 
@@ -58,6 +61,11 @@ export default function DownloadVideo() {
       options.push("--ffmpeg-location", ffmpegPath);
       options.push("--format", downloadFormat);
       options.push("--recode-video", recodeFormat);
+
+      // Add cookie arguments if browser is configured
+      if (browserForCookies) {
+        options.push(...getCookieArgs(browserForCookies));
+      }
 
       const toast = await showToast({
         title: "Downloading Video",
@@ -102,8 +110,21 @@ export default function DownloadVideo() {
         if (line.startsWith("ERROR:")) {
           toast.title = "Download Failed";
           toast.style = Toast.Style.Failure;
+
+          // Provide helpful message for age-restriction errors
+          if (isAgeRestrictedError(line)) {
+            if (!browserForCookies) {
+              toast.message =
+                "Age-restricted video detected. Please select a browser in preferences to enable cookie authentication.";
+            } else {
+              toast.message = `Age-restriction error with ${browserForCookies} cookies. Please ensure you're signed in to YouTube.`;
+            }
+          } else {
+            toast.message = line;
+          }
+        } else if (!line.startsWith("WARNING:")) {
+          toast.message = line;
         }
-        toast.message = line;
       });
 
       process.on("close", () => {
@@ -168,25 +189,67 @@ export default function DownloadVideo() {
       if (!url) return;
       if (!isValidUrl(url)) return;
 
-      const result = await execa(
-        ytdlPath,
-        [forceIpv4 ? "--force-ipv4" : "", "--dump-json", "--format-sort=resolution,ext,tbr", url].filter((x) =>
-          Boolean(x),
-        ),
-      );
-      return JSON.parse(result.stdout) as Video;
+      try {
+        // First attempt without cookies
+        const result = await execa(
+          ytdlPath,
+          [forceIpv4 ? "--force-ipv4" : "", "--dump-json", "--format-sort=resolution,ext,tbr", url].filter((x) =>
+            Boolean(x),
+          ),
+        );
+        return JSON.parse(result.stdout) as Video;
+      } catch (error: unknown) {
+        // Check if it's an age-restriction error and we have a browser configured
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (isAgeRestrictedError(errorMessage) && browserForCookies) {
+          try {
+            // Retry with browser cookies
+            const cookieArgs = getCookieArgs(browserForCookies);
+            const result = await execa(
+              ytdlPath,
+              [
+                forceIpv4 ? "--force-ipv4" : "",
+                ...cookieArgs,
+                "--dump-json",
+                "--format-sort=resolution,ext,tbr",
+                url,
+              ].filter((x) => Boolean(x)),
+            );
+            return JSON.parse(result.stdout) as Video;
+          } catch (cookieError: unknown) {
+            // If cookie retry also fails, throw the original error
+            throw error;
+          }
+        }
+        // Re-throw the original error if it's not age-restriction or no browser configured
+        throw error;
+      }
     },
     [values.url],
     {
       onError(error) {
+        let title = "Video not found with the provided URL";
+        let message = error instanceof Error ? error.message : String(error);
+
+        if (isAgeRestrictedError(message)) {
+          if (!browserForCookies) {
+            title = "Age-Restricted Video Detected";
+            message =
+              "This video requires authentication. Please select a browser in preferences to enable cookie-based authentication for age-restricted videos.";
+          } else {
+            title = "Age-Restricted Video Access Failed";
+            message = `Failed to access age-restricted video even with ${browserForCookies} cookies. Please ensure you're signed in to YouTube in ${browserForCookies}.`;
+          }
+        }
+
         showToast({
           style: Toast.Style.Failure,
-          title: "Video not found with the provided URL",
-          message: error.message,
+          title,
+          message,
           primaryAction: {
             title: "Copy to Clipboard",
             onAction: () => {
-              Clipboard.copy(error.message);
+              Clipboard.copy(message);
             },
           },
         });

@@ -17,3 +17,16 @@ export type Video = {
   live_status: string;
   formats: Format[];
 };
+
+export interface ExtensionPreferences {
+  downloadPath: string;
+  homebrewPath: string;
+  ytdlPath: string;
+  ffmpegPath: string;
+  ffprobePath: string;
+  autoLoadUrlFromClipboard: boolean;
+  autoLoadUrlFromSelectedText: boolean;
+  enableBrowserExtensionSupport: boolean;
+  forceIpv4: boolean;
+  browserForCookies: string;
+}
