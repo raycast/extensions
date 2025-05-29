@@ -58,7 +58,8 @@ export default function ImportTerms() {
       <Form.TextArea
         id="csvContent"
         title="CSV Content"
-        placeholder="term1, definition1&#10;term2, definition2"
+        placeholder="term1, definition1  
+term2, definition2"
       />
     </Form>
   );

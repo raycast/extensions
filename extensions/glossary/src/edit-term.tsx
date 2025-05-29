@@ -16,7 +16,7 @@ export default function EditTerm({ term, onEdit }: EditTermProps) {
     try {
       await updateTerm(term.id, {
         term: values.term,
-        definition: values.definition,
+        definition: values.definition.replace(/\n/g, "  \n"),
       });
 
       await showToast({

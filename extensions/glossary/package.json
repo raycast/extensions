@@ -14,6 +14,7 @@
     {
       "name": "search-in-the-glossary",
       "title": "Search Term",
+      "subtitle": "Glossary",
       "description": "Search for a term in your glossary",
       "mode": "view",
       "arguments": [
@@ -28,31 +29,34 @@
     {
       "name": "insert-term",
       "title": "Insert Term",
+      "subtitle": "Glossary",
       "description": "Add a new term to your glossary",
       "mode": "view"
     },
     {
       "name": "import-terms",
       "title": "Import Terms",
+      "subtitle": "Glossary",
       "description": "Paste CSV-formatted text to import terms",
       "mode": "view"
     },
     {
       "name": "export-terms",
       "title": "Export Terms",
+      "subtitle": "Glossary",
       "description": "Copy all terms as CSV-formatted text to your clipboard",
       "mode": "view"
     },
     {
       "name": "delete-all-terms",
       "title": "Delete All Terms",
+      "subtitle": "Glossary",
       "description": "Delete all terms from the glossary",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.99.3",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.99.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

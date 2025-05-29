@@ -67,6 +67,7 @@ export default function SearchGlossary(props: LaunchProps) {
         <List.Dropdown
           tooltip="Sort Order"
           storeValue
+          value={sortOrder}
           onChange={(newValue: string) => setSortOrder(newValue as SortOrder)}
         >
           <List.Dropdown.Item title="A → Z" value="a-z" />

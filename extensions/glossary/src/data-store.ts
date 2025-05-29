@@ -35,11 +35,15 @@ export async function searchTerms(query: string, term?: string): Promise<Glossar
   const searchQuery = query.toLowerCase();
   const searchTerm = term?.toLowerCase();
 
-  return terms.filter(
-    (term) =>
-      (searchTerm ? term.term.toLowerCase().includes(searchTerm) : true) &&
-      (term.term.toLowerCase().includes(searchQuery) || term.definition.toLowerCase().includes(searchQuery)),
-  );
+  return terms.filter((term) => {
+    const termLower = term.term.toLowerCase();
+    const definitionLower = term.definition.toLowerCase();
+
+    const matchesTermFilter = searchTerm ? termLower.includes(searchTerm) : true;
+    const matchesQuery = termLower.includes(searchQuery) || definitionLower.includes(searchQuery);
+
+    return matchesTermFilter && matchesQuery;
+  });
 }
 
 export async function importTerms(
