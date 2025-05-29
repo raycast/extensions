@@ -43,6 +43,6 @@ export default async function main() {
     await Clipboard.copy(shortenedUrl);
     await showHUD("Shortened Amazon URL copied to clipboard");
   } catch (error) {
-    await showHUD(`Failed to process clipboard content: ${error instanceof Error ? error.message : "Unknown error"}`);
+    await showFailureToast(error, { title: "Failed to process clipboard content" });
   }
 }
