@@ -1,41 +1,59 @@
-import { FavResolutionForm } from "./components/FavResolutionForm";
+import { showToast, Toast } from "@raycast/api";
 import { useFavWindowResize } from "./hooks/useFavWindowResize";
-import { useSavedFavResolution } from "./hooks/useSavedFavResolution";
 import { popToRoot } from "@raycast/api";
-import { useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
+import { FavResolutionEmptyView } from "./components/FavResolutionEmptyView";
+import { useSavedFavResolution } from "./hooks/useSavedFavResolution";
 
 export default function Command() {
   const { resizeWindow } = useFavWindowResize();
-  const { savedResolution, saveResolution } = useSavedFavResolution();
-  const isFirstLoad = useRef(true);
+  const [isResizing, setIsResizing] = useState(false);
+  const { savedResolution, isLoading, isValid } = useSavedFavResolution();
+  const isExecuting = useRef(false);
 
-  const handleSubmit = async (width: number, height: number) => {
-    try {
-      // On first entry, save and apply the size
-      await saveResolution(width, height);
-      await resizeWindow(width, height);
-      await popToRoot();
-    } catch (error) {
-      console.error("Error in handleSubmit:", error);
-    }
-  };
-
-  // On subsequent entries, directly apply the saved size
   useEffect(() => {
+    // Prevent multiple simultaneous executions
+    if (isExecuting.current) {
+      return;
+    }
+
     async function applySavedResolution() {
-      if (savedResolution && !isFirstLoad.current) {
+      if (savedResolution) {
+        isExecuting.current = true;
         try {
+          setIsResizing(true);
           await resizeWindow(savedResolution.width, savedResolution.height);
           await popToRoot();
         } catch (error) {
           console.error("Error applying saved resolution:", error);
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to resize window",
+          });
+        } finally {
+          setIsResizing(false);
+          isExecuting.current = false;
         }
       }
-      isFirstLoad.current = false;
     }
-
     applySavedResolution();
-  }, [savedResolution]);
+  }, [savedResolution, resizeWindow]);
 
-  return <FavResolutionForm onSubmit={handleSubmit} savedResolution={savedResolution} />;
+  if (isResizing) {
+    return <FavResolutionEmptyView isResizing={true} />;
+  }
+
+  if (isLoading) {
+    return <FavResolutionEmptyView isResizing={true} />;
+  }
+
+  if (!isValid) {
+    return <FavResolutionEmptyView isInvalidSize={true} />;
+  }
+
+  if (!savedResolution) {
+    return <FavResolutionEmptyView />;
+  }
+
+  return null;
 }
