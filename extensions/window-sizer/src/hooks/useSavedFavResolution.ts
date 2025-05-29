@@ -20,14 +20,24 @@ export function useSavedFavResolution() {
   useEffect(() => {
     try {
       const preferences = getPreferenceValues<Preferences>();
-      const width = preferences.favWidth ? parseInt(preferences.favWidth, 10) : null;
-      const height = preferences.favHeight ? parseInt(preferences.favHeight, 10) : null;
+      const width = preferences.favWidth
+        ? (() => {
+            const parsed = parseInt(preferences.favWidth, 10);
+            return isNaN(parsed) ? null : parsed;
+          })()
+        : null;
+      const height = preferences.favHeight
+        ? (() => {
+            const parsed = parseInt(preferences.favHeight, 10);
+            return isNaN(parsed) ? null : parsed;
+          })()
+        : null;
 
       // Validate if input is a valid number
       const isWidthValid = !preferences.favWidth || !isNaN(Number(preferences.favWidth));
       const isHeightValid = !preferences.favHeight || !isNaN(Number(preferences.favHeight));
 
-      if (isWidthValid && isHeightValid && width && height) {
+      if (isWidthValid && isHeightValid && width && height && width > 0 && height > 0) {
         setSavedResolution({ width, height });
         setIsValid(true);
       } else if (preferences.favWidth || preferences.favHeight) {

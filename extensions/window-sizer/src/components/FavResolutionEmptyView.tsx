@@ -6,7 +6,7 @@ interface FavResolutionEmptyViewProps {
   isInvalidSize?: boolean;
 }
 
-type ViewState = "invalid" | "resizing" | "empty";
+type ViewState = "invalid" | "resizing" | "empty" | "initializing";
 
 export function FavResolutionEmptyView({ isResizing = false, isInvalidSize = false }: FavResolutionEmptyViewProps) {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -20,7 +20,7 @@ export function FavResolutionEmptyView({ isResizing = false, isInvalidSize = fal
   }, []);
 
   const getViewState = (): ViewState => {
-    if (!isInitialized) return "empty";
+    if (!isInitialized) return "initializing";
     if (isInvalidSize) return "invalid";
     if (isResizing) return "resizing";
     return "empty";
@@ -30,8 +30,8 @@ export function FavResolutionEmptyView({ isResizing = false, isInvalidSize = fal
     const configs = {
       invalid: {
         icon: "icons/fav-size-invalid.svg",
-        title: "Invalid Size Value",
-        description: "Please set positive numbers for width and height in the command settings.",
+        title: "Invalid or Missing Size Value",
+        description: "Set positive numbers for both width and height.",
       },
       resizing: {
         icon: "icons/fav-size-resizing.svg",
@@ -42,6 +42,11 @@ export function FavResolutionEmptyView({ isResizing = false, isInvalidSize = fal
         icon: "icons/fav-size-empty.svg",
         title: "Set your Favorite Size first",
         description: "Press ⏎ to open the command settings.",
+      },
+      initializing: {
+        icon: "icons/fav-size-empty.svg",
+        title: "Loading...",
+        description: "",
       },
     };
     return configs[state];

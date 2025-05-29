@@ -10,10 +10,11 @@ export default function Command() {
   const [isResizing, setIsResizing] = useState(false);
   const { savedResolution, isLoading, isValid } = useSavedFavResolution();
   const isExecuting = useRef(false);
+  const hasResized = useRef(false);
 
   useEffect(() => {
-    // Prevent multiple simultaneous executions
-    if (isExecuting.current) {
+    // Prevent multiple simultaneous executions or re-executions
+    if (isExecuting.current || hasResized.current) {
       return;
     }
 
@@ -24,11 +25,12 @@ export default function Command() {
           setIsResizing(true);
           await resizeWindow(savedResolution.width, savedResolution.height);
           await popToRoot();
+          hasResized.current = true;
         } catch (error) {
           console.error("Error applying saved resolution:", error);
           await showToast({
             style: Toast.Style.Failure,
-            title: "Failed to resize window",
+            title: "Resize failed",
           });
         } finally {
           setIsResizing(false);
@@ -44,7 +46,7 @@ export default function Command() {
   }
 
   if (isLoading) {
-    return <FavResolutionEmptyView isResizing={true} />;
+    return <FavResolutionEmptyView />;
   }
 
   if (!isValid) {
@@ -55,5 +57,5 @@ export default function Command() {
     return <FavResolutionEmptyView />;
   }
 
-  return null;
+  return <FavResolutionEmptyView isResizing={true} />;
 }
