@@ -4,10 +4,10 @@ const cache = new Cache();
 
 // Cache configuration
 export const CACHE_TTL = {
-  INSTANCES: 60 * 1000, // 1 minute for instances (status changes frequently)
-  STORAGE: 5 * 60 * 1000, // 5 minutes for storage (changes less frequently)
-  CLOUD_RUN: 2 * 60 * 1000, // 2 minutes for Cloud Run
-  FUNCTIONS: 5 * 60 * 1000, // 5 minutes for functions
+  INSTANCES: 24 * 60 * 60 * 1000, // 1 day for instances
+  STORAGE: 24 * 60 * 60 * 1000, // 1 day for storage
+  CLOUD_RUN: 24 * 60 * 60 * 1000, // 1 day for Cloud Run
+  FUNCTIONS: 24 * 60 * 60 * 1000, // 1 day for functions
 };
 
 export interface CacheData<T> {

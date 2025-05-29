@@ -5,6 +5,32 @@ import { GCPCloudRunService } from "./types";
 import { getGoogleAuth, getProjectId, getStatusIcon } from "./utils";
 import { getCachedData, setCachedData, getCacheKey, CACHE_TTL } from "./cache";
 
+// Add interface for metrics data
+interface MetricsData {
+  requestCount: Array<{ timestamp: string; value: number }>;
+  latency: Array<{ timestamp: string; value: number }>;
+  cpuUtilization: Array<{ timestamp: string; value: number }>;
+  memoryUtilization: Array<{ timestamp: string; value: number }>;
+  containerInstances?: Array<{ timestamp: string; value: number }>;
+}
+
+// Interface for Cloud Monitoring API response
+interface MetricPoint {
+  interval: {
+    endTime: string;
+    startTime?: string;
+  };
+  value: {
+    doubleValue?: string;
+    int64Value?: string;
+    distributionValue?: {
+      mean?: string;
+      count?: string;
+      bucketCounts?: string[];
+    };
+  };
+}
+
 interface CloudRunServiceResponse {
   items?: Array<{
     metadata?: {
@@ -117,6 +143,7 @@ export default function CloudRunServices() {
         "northamerica-northeast2",
         "southamerica-east1",
         "southamerica-west1",
+        "me-central1",
       ];
 
       const allServices: GCPCloudRunService[] = [];
@@ -227,30 +254,264 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
     }
   }
 
-  function generateMetricsGraph(): string {
-    // Generate a simple ASCII graph for demonstration
-    // In a real scenario, you'd fetch actual metrics from Cloud Monitoring API
-    const hours = 24;
-    const maxRequests = 1000;
+  // New function to fetch real metrics from Cloud Monitoring API
+  async function fetchServiceMetrics(
+    projectId: string,
+    serviceName: string,
+    region: string,
+    accessToken: string,
+  ): Promise<MetricsData | null> {
+    try {
+      const endTime = new Date().toISOString();
+      const startTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(); // 24 hours ago
 
-    let graph = "## 📊 Request Metrics (⚠️ MOCK DATA - Last 24 Hours)\n\n";
-    graph +=
-      "**Note: This is sample data for demonstration. Real metrics would require Cloud Monitoring API integration.**\n\n";
+      console.log("Fetching metrics for:", { projectId, serviceName, region, startTime, endTime });
+
+      // Build the monitoring API request
+      const baseUrl = `https://monitoring.googleapis.com/v3/projects/${projectId}/timeSeries`;
+
+      // Define metrics to fetch - using correct Cloud Run metric types
+      const metrics = [
+        {
+          name: "requestCount",
+          // Use the standard Cloud Run request count metric
+          filter: `metric.type="run.googleapis.com/request_count" AND resource.type="cloud_run_revision" AND resource.label.service_name="${serviceName}" AND resource.label.location="${region}"`,
+          aligner: "ALIGN_RATE",
+          reducer: "REDUCE_SUM",
+        },
+        {
+          name: "latency",
+          filter: `metric.type="run.googleapis.com/request_latencies" AND resource.type="cloud_run_revision" AND resource.label.service_name="${serviceName}" AND resource.label.location="${region}"`,
+          aligner: "ALIGN_DELTA",
+          reducer: "REDUCE_MEAN",
+        },
+        {
+          name: "cpuUtilization",
+          // Billable container CPU allocation
+          filter: `metric.type="run.googleapis.com/container/billable_instance_time" AND resource.type="cloud_run_revision" AND resource.label.service_name="${serviceName}" AND resource.label.location="${region}"`,
+          aligner: "ALIGN_RATE",
+          reducer: "REDUCE_SUM",
+        },
+        {
+          name: "containerInstances",
+          // Container instance count
+          filter: `metric.type="run.googleapis.com/container/instance_count" AND resource.type="cloud_run_revision" AND resource.label.service_name="${serviceName}" AND resource.label.location="${region}"`,
+          aligner: "ALIGN_MAX",
+          reducer: "REDUCE_SUM",
+        },
+      ];
+
+      const metricsData: MetricsData = {
+        requestCount: [],
+        latency: [],
+        cpuUtilization: [],
+        memoryUtilization: [],
+        containerInstances: [],
+      };
+
+      // Fetch each metric
+      for (const metric of metrics) {
+        try {
+          const params: Record<string, string> = {
+            filter: metric.filter,
+            "interval.startTime": startTime,
+            "interval.endTime": endTime,
+            "aggregation.alignmentPeriod": "300s", // 5 minute intervals for better granularity
+            "aggregation.perSeriesAligner": metric.aligner,
+            "aggregation.crossSeriesReducer": metric.reducer,
+            "aggregation.groupByFields": "resource.label.service_name",
+          };
+
+          // Special handling for different metric types
+          if (metric.name === "containerInstances") {
+            // For instance count, we want the actual values, not rates
+            params["aggregation.perSeriesAligner"] = "ALIGN_MAX";
+            params["aggregation.alignmentPeriod"] = "60s"; // 1 minute intervals
+          }
+
+          const urlParams = new URLSearchParams(params);
+
+          console.log(`Fetching ${metric.name} with URL:`, `${baseUrl}?${urlParams}`);
+
+          const response = await fetch(`${baseUrl}?${urlParams}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Error fetching ${metric.name}:`, response.status, errorText);
+            continue;
+          }
+
+          const data = await response.json();
+          console.log(`${metric.name} response:`, data);
+
+          // Special logging for latency to debug
+          if (metric.name === "latency") {
+            console.log("Latency metric data structure:", JSON.stringify(data, null, 2));
+          }
+
+          if (data.timeSeries && data.timeSeries.length > 0) {
+            // Handle multiple time series if present
+            const allPoints: Array<{ timestamp: string; value: number }> = [];
+
+            for (const ts of data.timeSeries) {
+              if (ts.points) {
+                const points = ts.points.map((point: MetricPoint) => {
+                  let value = 0;
+
+                  // Handle different value types
+                  if (point.value.doubleValue !== undefined) {
+                    value = parseFloat(point.value.doubleValue);
+                  } else if (point.value.int64Value !== undefined) {
+                    value = parseFloat(point.value.int64Value);
+                  } else if (point.value.distributionValue) {
+                    // For latency metrics, use the mean value from distribution
+                    value = parseFloat(point.value.distributionValue.mean || "0");
+                  }
+
+                  // Convert latency from seconds to milliseconds if needed
+                  if (metric.name === "latency" && value < 10) {
+                    value = value * 1000; // Convert to milliseconds
+                  }
+
+                  return {
+                    timestamp: point.interval.endTime,
+                    value: value,
+                  };
+                });
+                allPoints.push(...points);
+              }
+            }
+
+            // Sort by timestamp and remove duplicates
+            metricsData[metric.name as keyof MetricsData] = allPoints
+              .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+              .filter((point, index, self) => index === self.findIndex((p) => p.timestamp === point.timestamp));
+          } else {
+            console.log(`No time series data found for ${metric.name}`);
+          }
+        } catch (metricError) {
+          console.error(`Failed to fetch ${metric.name}:`, metricError);
+        }
+      }
+
+      console.log("Final metrics data:", metricsData);
+      return metricsData;
+    } catch (error) {
+      console.error("Error fetching metrics:", error);
+      return null;
+    }
+  }
+
+  function generateMetricsGraph(metrics: MetricsData | null): string {
+    let graph = "## 📊 Request Metrics (Last 24 Hours)\n\n";
+
+    if (!metrics || metrics.requestCount.length === 0) {
+      graph += "⚠️ **No metrics data available**\n\n";
+      graph += "This could mean:\n";
+      graph += "- The service hasn't received any traffic in the last 24 hours\n";
+      graph += "- Cloud Monitoring API needs to be enabled\n";
+      graph += "- Your service account needs the 'Monitoring Viewer' role\n\n";
+      graph += "To enable monitoring:\n";
+      graph += "```bash\n";
+      graph += "gcloud services enable monitoring.googleapis.com\n";
+      graph += "```\n";
+      return graph;
+    }
+
     graph += "```\n";
-    graph += "Requests/hour\n";
+    graph += "Requests per interval\n";
 
-    // Generate random data for visualization
-    const data = Array.from({ length: hours }, () => Math.floor(Math.random() * maxRequests));
-    const maxValue = Math.max(...data);
-    const scale = maxValue / 10;
+    // Since we're using ALIGN_RATE, the values are rates per second
+    // We need to multiply by the interval period to get actual counts
+    const intervalSeconds = 300; // 5 minutes as set in our alignment period
 
-    // Create horizontal bar chart
-    for (let i = 0; i < data.length; i++) {
-      const hour = String(i).padStart(2, "0");
-      const value = data[i];
-      const barLength = Math.floor(value / scale);
-      const bar = "█".repeat(barLength);
-      graph += `${hour}:00 │ ${bar} ${value}\n`;
+    // Get all data points from the last 24 hours
+    const dataToShow = metrics.requestCount;
+
+    if (dataToShow.length === 0) {
+      graph += "No request data points available\n";
+    } else {
+      // Group by hour for display
+      const hourlyData = new Map<string, number>();
+
+      dataToShow.forEach((dataPoint) => {
+        const date = new Date(dataPoint.timestamp);
+        const hour = date.getHours().toString().padStart(2, "0");
+        const requests = dataPoint.value * intervalSeconds; // Convert rate to count
+
+        if (hourlyData.has(hour)) {
+          hourlyData.set(hour, hourlyData.get(hour)! + requests);
+        } else {
+          hourlyData.set(hour, requests);
+        }
+      });
+
+      // Create a complete 24-hour array with all hours
+      const allHours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, "0"));
+
+      // Display hourly aggregated data
+      const maxValue = Math.max(...Array.from(hourlyData.values()), 1);
+      const scale = maxValue > 0 ? maxValue / 20 : 1;
+
+      allHours.forEach((hour) => {
+        const value = hourlyData.get(hour) || 0;
+        const roundedValue = Math.round(value);
+        const barLength = Math.floor(roundedValue / scale);
+        const bar = roundedValue > 0 ? "█".repeat(Math.max(1, barLength)) : "│";
+        graph += `${hour}:00 │ ${bar} ${roundedValue}\n`;
+      });
+    }
+
+    graph += "```\n";
+
+    // Calculate total requests correctly
+    const totalRequests = metrics.requestCount.reduce((sum, d) => sum + d.value * intervalSeconds, 0);
+    graph += `\n**Total Requests**: ${Math.round(totalRequests)}\n`;
+
+    return graph;
+  }
+
+  function generateLatencyGraph(metrics: MetricsData | null): string {
+    let graph = "## ⚡ Average Response Latency\n\n";
+
+    if (!metrics || metrics.latency.length === 0) {
+      graph += "No latency data available\n";
+      graph += "This could mean:\n";
+      graph += "- The service hasn't processed any requests recently\n";
+      graph += "- Latency metrics are not yet available\n";
+      graph += "- Check the console logs for more details\n";
+      return graph;
+    }
+
+    // Calculate average and format appropriately
+    const avgLatency = metrics.latency.reduce((sum, d) => sum + d.value, 0) / metrics.latency.length;
+    const isMilliseconds = avgLatency > 1; // If > 1, assume milliseconds, otherwise seconds
+
+    graph += "```\n";
+    if (isMilliseconds) {
+      graph += `Average: ${avgLatency.toFixed(2)}ms\n\n`;
+    } else {
+      graph += `Average: ${(avgLatency * 1000).toFixed(2)}ms\n\n`;
+    }
+
+    // Show latency trend for last 12 data points
+    const recentData = metrics.latency.slice(-12);
+
+    if (recentData.length > 0) {
+      graph += "Recent latency (last " + recentData.length + " data points):\n";
+
+      recentData.forEach((dataPoint) => {
+        const time = new Date(dataPoint.timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+        const value = isMilliseconds ? dataPoint.value : dataPoint.value * 1000;
+        const barLength = Math.floor(value / 50); // Scale: 50ms per bar unit
+        const bar = "▄".repeat(Math.max(1, Math.min(barLength, 20))); // Cap at 20 bars
+        graph += `${time} │ ${bar} ${value.toFixed(0)}ms\n`;
+      });
     }
 
     graph += "```\n";
@@ -258,13 +519,37 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
     return graph;
   }
 
-  function generateLatencyGraph(): string {
-    let graph = "## ⚡ Response Latency Distribution\n\n";
+  function generateResourceGraph(metrics: MetricsData | null): string {
+    let graph = "## 📊 Container Instances & Billable Time\n\n";
+
+    if (!metrics || (!metrics.containerInstances?.length && !metrics.cpuUtilization?.length)) {
+      graph += "No container instance data available\n";
+      return graph;
+    }
+
     graph += "```\n";
-    graph += "< 100ms   │ ████████████████████████ 60%\n";
-    graph += "100-300ms │ ████████████ 30%\n";
-    graph += "300-500ms │ ███ 8%\n";
-    graph += "> 500ms   │ █ 2%\n";
+
+    // Show container instance count over time
+    if (metrics.containerInstances && metrics.containerInstances.length > 0) {
+      graph += "Container Instances (last 12 data points)\n";
+      const maxInstances = Math.max(...metrics.containerInstances.map((d) => d.value));
+
+      metrics.containerInstances.slice(-12).forEach((dataPoint) => {
+        const time = new Date(dataPoint.timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+        const value = Math.round(dataPoint.value);
+        const barLength = maxInstances > 0 ? Math.floor((value / maxInstances) * 20) : 0;
+        const bar = "█".repeat(Math.max(1, barLength));
+        graph += `${time} │ ${bar} ${value}\n`;
+      });
+    }
+
+    // Show billable time if available
+    if (metrics.cpuUtilization && metrics.cpuUtilization.length > 0) {
+      const totalBillableSeconds = metrics.cpuUtilization.reduce((sum, d) => sum + d.value, 0);
+      const totalBillableHours = totalBillableSeconds / 3600;
+      graph += `\nTotal Billable Time: ${totalBillableHours.toFixed(2)} hours\n`;
+    }
+
     graph += "```\n";
 
     return graph;
@@ -272,11 +557,11 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
 
   function ServiceDetail({ service }: { service: GCPCloudRunService }) {
     const [projectId, setProjectId] = useState<string>("");
-    // Track any project ID loading errors
     const [projectIdError, setProjectIdError] = useState<string | null>(null);
+    const [metrics, setMetrics] = useState<MetricsData | null>(null);
+    const [metricsLoading, setMetricsLoading] = useState(true);
 
     useEffect(() => {
-      // Load project ID just once when component mounts
       getProjectId()
         .then((id) => setProjectId(id))
         .catch((error) => {
@@ -285,12 +570,54 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
         });
     }, []);
 
-    // Generate monitoring dashboard URL (include error indication if project ID failed)
+    useEffect(() => {
+      // Fetch real metrics when component mounts
+      async function loadMetrics() {
+        if (!projectId) return;
+
+        try {
+          setMetricsLoading(true);
+          showToast(Toast.Style.Animated, "Loading metrics", `Fetching data for ${service.name}...`);
+
+          const auth = await getGoogleAuth();
+          const authClient = await auth.getClient();
+          const accessToken = await authClient.getAccessToken();
+
+          if (accessToken.token) {
+            const metricsData = await fetchServiceMetrics(projectId, service.name, service.region, accessToken.token);
+            setMetrics(metricsData);
+
+            // Check if we got any data
+            if (metricsData) {
+              const hasData = Object.values(metricsData).some((arr) => arr.length > 0);
+              if (hasData) {
+                showToast(Toast.Style.Success, "Metrics loaded", "Successfully fetched Cloud Run metrics");
+              } else {
+                showToast(Toast.Style.Success, "No recent activity", "Service has no traffic in the last 24 hours");
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Failed to load metrics:", error);
+          showToast(Toast.Style.Failure, "Failed to load metrics", "Check console for details");
+        } finally {
+          setMetricsLoading(false);
+        }
+      }
+
+      loadMetrics();
+    }, [projectId, service.name, service.region]);
+
+    // Generate correct Cloud Run service URLs
     const monitoringUrl = projectId
-      ? `https://console.cloud.google.com/monitoring/dashboards/resourceList/cloud_run_revision?project=${projectId}`
+      ? `https://console.cloud.google.com/run/detail/${service.region}/${service.name}/metrics?project=${projectId}`
       : "#";
-    const logsUrl = projectId ? `https://console.cloud.google.com/logs?project=${projectId}` : "#";
-    const tracesUrl = projectId ? `https://console.cloud.google.com/traces?project=${projectId}` : "#";
+    const logsUrl = projectId
+      ? `https://console.cloud.google.com/run/detail/${service.region}/${service.name}/logs?project=${projectId}`
+      : "#";
+    const consoleUrl = projectId
+      ? `https://console.cloud.google.com/run/detail/${service.region}/${service.name}?project=${projectId}`
+      : `https://console.cloud.google.com/run/detail/${service.region}/${service.name}`;
 
     const markdown = `
 # ${service.name}
@@ -307,29 +634,47 @@ ${service.traffic.map((t) => `- **${t.revisionName}**: ${t.percent}%`).join("\n"
 
 ---
 
-${generateMetricsGraph()}
+${metricsLoading ? "⏳ Loading metrics..." : generateMetricsGraph(metrics)}
 
 ---
 
-${generateLatencyGraph()}
+${metricsLoading ? "" : generateLatencyGraph(metrics)}
 
 ---
 
-## 📊 Resource Usage
+${metricsLoading ? "" : generateResourceGraph(metrics)}
 
+---
+
+## 🔍 Diagnostics
+- **Service**: ${service.name}
+- **Region**: ${service.region}
+- **Project**: ${projectId || "Loading..."}
+- **Metrics Status**: ${metricsLoading ? "Loading..." : metrics ? "Fetched" : "Failed"}
+
+${
+  service.url
+    ? `### 🚀 Generate Test Traffic
+If you're not seeing metrics, try generating some traffic:
+\`\`\`bash
+# Send test requests to your service
+for i in {1..10}; do
+  curl -s "${service.url}" > /dev/null
+  echo "Request $i sent"
+done
 \`\`\`
-CPU Usage      ████████░░░░░░░░ 50%
-Memory Usage   ██████░░░░░░░░░░ 35%
-Concurrency    ████████████░░░░ 75%
-\`\`\`
+Metrics may take 2-5 minutes to appear after traffic is generated.
+`
+    : ""
+}
 
 ---
 
 ## 🔗 Quick Actions
 ${projectIdError ? "⚠️ **" + projectIdError + "** - Some links may not work correctly.\n\n" : ""}
-- [View Metrics Dashboard →](${monitoringUrl})
-- [View Logs →](${logsUrl})
-- [View Traces →](${tracesUrl})
+- [View Service Metrics →](${monitoringUrl})
+- [View Service Logs →](${logsUrl})
+- [View in Console →](${consoleUrl})
 
 ---
 
@@ -356,17 +701,11 @@ gcloud run services describe ${service.name} --region=${service.region}
         actions={
           <ActionPanel>
             {service.url && <Action.OpenInBrowser title="Open Service URL" url={service.url} />}
-            <Action.OpenInBrowser
-              title="Open in Console"
-              url={`https://console.cloud.google.com/run/detail/${service.region}/${service.name}`}
-            />
+            <Action.OpenInBrowser title="Open in Console" url={consoleUrl} />
             {projectId ? (
               <>
-                <Action.OpenInBrowser title="View Metrics" url={monitoringUrl} />
-                <Action.OpenInBrowser
-                  title="View Logs"
-                  url={`https://console.cloud.google.com/logs/query;query=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22${service.name}%22%0Aresource.labels.location%3D%22${service.region}%22?project=${projectId}`}
-                />
+                <Action.OpenInBrowser title="View Service Metrics" url={monitoringUrl} />
+                <Action.OpenInBrowser title="View Service Logs" url={logsUrl} />
               </>
             ) : (
               <Action
@@ -391,6 +730,50 @@ gcloud run services describe ${service.name} --region=${service.region}
             <Action.CopyToClipboard
               title="Copy Deploy Command"
               content={`gcloud run deploy ${service.name} --region=${service.region}`}
+            />
+            <Action
+              title="Refresh Metrics"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+              onAction={async () => {
+                if (!projectId) {
+                  showToast(Toast.Style.Failure, "Project ID not loaded");
+                  return;
+                }
+
+                try {
+                  setMetricsLoading(true);
+                  showToast(Toast.Style.Animated, "Refreshing metrics...");
+
+                  const auth = await getGoogleAuth();
+                  const authClient = await auth.getClient();
+                  const accessToken = await authClient.getAccessToken();
+
+                  if (accessToken.token) {
+                    const metricsData = await fetchServiceMetrics(
+                      projectId,
+                      service.name,
+                      service.region,
+                      accessToken.token,
+                    );
+                    setMetrics(metricsData);
+
+                    if (metricsData) {
+                      const hasData = Object.values(metricsData).some((arr) => arr.length > 0);
+                      showToast(
+                        Toast.Style.Success,
+                        hasData ? "Metrics refreshed" : "No data",
+                        hasData ? "Found metrics data" : "No traffic in last 24h",
+                      );
+                    }
+                  }
+                } catch (error) {
+                  console.error("Failed to refresh metrics:", error);
+                  showToast(Toast.Style.Failure, "Failed to refresh metrics");
+                } finally {
+                  setMetricsLoading(false);
+                }
+              }}
             />
           </ActionPanel>
         }
