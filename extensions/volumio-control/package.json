@@ -112,6 +112,7 @@
       "title": "Volumio Host",
       "description": "Hostname or IP address of your Volumio instance",
       "type": "textfield",
+      "required": true,
       "required": false,
       "default": "volumio.local"
     }
