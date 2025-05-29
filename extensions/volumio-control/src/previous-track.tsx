@@ -1,4 +1,5 @@
-import { showToast, Toast, showHUD } from "@raycast/api";
+import { showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { VolumioAPI } from "./volumio-api";
 
 export default async function PreviousTrack() {
@@ -8,10 +9,8 @@ export default async function PreviousTrack() {
     await api.previous();
     await showHUD("⏮ Previous Track");
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Failed to skip to previous track",
-      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

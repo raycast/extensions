@@ -1,4 +1,5 @@
-import { showToast, Toast, showHUD } from "@raycast/api";
+import { showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { VolumioAPI } from "./volumio-api";
 
 export default async function ToggleShuffle() {
@@ -8,16 +9,15 @@ export default async function ToggleShuffle() {
     const state = await api.getPlayerState();
     await api.toggleRandom();
 
+    // The state is checked BEFORE toggle, so if it WAS on, it's now off
     if (state.random) {
       await showHUD("🔀 Shuffle Off");
     } else {
       await showHUD("🔀 Shuffle On");
     }
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Failed to toggle shuffle",
-      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

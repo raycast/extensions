@@ -50,16 +50,6 @@ These commands open a window with more options:
 - `Media Controls` - Full control panel with volume, shuffle, repeat
 - `Browse Music` - Navigate your music library and play content
 
-## Features
-
-- View current playing track with album art
-- Control playback with individual commands
-- Browse playlists, albums, and songs
-- Shuffle playlists and albums
-- Add items to queue
-- Control volume and mute
-- Toggle shuffle and repeat modes
-- Support for various music sources (local files, streaming services, web radio)
 
 ## Requirements
 

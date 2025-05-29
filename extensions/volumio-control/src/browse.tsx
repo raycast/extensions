@@ -13,7 +13,6 @@ export default function Browse() {
     try {
       setIsLoading(true);
       const response = await api.browse(uri);
-      console.log("Browse response:", JSON.stringify(response, null, 2));
       const allItems: BrowseItem[] = [];
 
       // Handle different response structures from Volumio
@@ -35,7 +34,6 @@ export default function Browse() {
       setItems(allItems);
       setIsLoading(false);
     } catch (error) {
-      console.error("Browse error:", error);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load items",
@@ -163,7 +161,6 @@ function BrowseView({ uri, title }: { uri: string; title: string }) {
     try {
       setIsLoading(true);
       const response = await api.browse(uri);
-      console.log("Browse response for URI:", uri, JSON.stringify(response, null, 2));
       const allItems: BrowseItem[] = [];
 
       // Handle different response structures from Volumio
@@ -196,7 +193,6 @@ function BrowseView({ uri, title }: { uri: string; title: string }) {
       setItems(allItems);
       setIsLoading(false);
     } catch (error) {
-      console.error("Browse error for URI:", uri, error);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load items",

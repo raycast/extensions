@@ -1,4 +1,5 @@
-import { showToast, Toast, showHUD } from "@raycast/api";
+import { showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { VolumioAPI } from "./volumio-api";
 
 export default async function Play() {
@@ -8,10 +9,8 @@ export default async function Play() {
     await api.play();
     await showHUD("▶️ Playing");
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Failed to start playback",
-      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

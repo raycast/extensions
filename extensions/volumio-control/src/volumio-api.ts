@@ -45,6 +45,21 @@ export interface BrowseResponse {
   };
 }
 
+export interface QueueItem {
+  service?: string;
+  name?: string;
+  title?: string;
+  artist?: string;
+  album?: string;
+  albumart?: string;
+  uri: string;
+  duration?: number;
+}
+
+export interface QueueResponse {
+  queue: QueueItem[];
+}
+
 export class VolumioAPI {
   private api: AxiosInstance;
   private baseURL: string;
@@ -90,7 +105,8 @@ export class VolumioAPI {
   }
 
   async setVolume(volume: number): Promise<void> {
-    await this.api.get(`/api/v1/commands/?cmd=volume&volume=${volume}`);
+    const clampedVolume = Math.max(0, Math.min(100, volume));
+    await this.api.get(`/api/v1/commands/?cmd=volume&volume=${clampedVolume}`);
   }
 
   async toggleMute(): Promise<void> {
@@ -128,8 +144,8 @@ export class VolumioAPI {
     await this.api.get("/api/v1/commands/?cmd=clearQueue");
   }
 
-  async getQueue(): Promise<unknown> {
-    const response = await this.api.get("/api/v1/getQueue");
+  async getQueue(): Promise<QueueResponse> {
+    const response = await this.api.get<QueueResponse>("/api/v1/getQueue");
     return response.data;
   }
 
