@@ -214,7 +214,10 @@ export const handleDisperseWindowsBySpace = (screenIdx: string) => {
       const windowsResult = await execFilePromise(YABAI, ["-m", "query", "--windows", "--display", screenIdx], {
         env: ENV,
       });
-      const windows: YabaiWindow[] = JSON.parse(windowsResult.stdout);
+
+      // Filter out windows in native MacOS fullscreen mode
+      const allWindows = JSON.parse(windowsResult.stdout);
+      const windows: YabaiWindow[] = allWindows.filter((win: YabaiWindow) => !win["is-native-fullscreen"]);
 
       // Step 2: Query all spaces on the given display
       const spacesResult = await execFilePromise(YABAI, ["-m", "query", "--spaces", "--display", screenIdx], {
