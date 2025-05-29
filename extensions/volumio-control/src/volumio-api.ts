@@ -152,6 +152,6 @@ export class VolumioAPI {
   getAlbumArtUrl(path?: string): string {
     if (!path) return "";
     if (path.startsWith("http")) return path;
-    return `${this.baseURL}${path}`;
+    return `${this.baseURL}${path.startsWith("/") ? path : "/" + path}`;
   }
 }
