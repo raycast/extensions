@@ -4,68 +4,21 @@ import { useState, useEffect } from "react";
 import { GCPCloudRunService } from "./types";
 import { getGoogleAuth, getProjectId, getStatusIcon } from "./utils";
 import { getCachedData, setCachedData, getCacheKey, CACHE_TTL } from "./cache";
-
-// Add interface for metrics data
-interface MetricsData {
-  requestCount: Array<{ timestamp: string; value: number }>;
-  latency: Array<{ timestamp: string; value: number }>;
-  cpuUtilization: Array<{ timestamp: string; value: number }>;
-  memoryUtilization: Array<{ timestamp: string; value: number }>;
-  containerInstances?: Array<{ timestamp: string; value: number }>;
-}
-
-// Interface for Cloud Monitoring API response
-interface MetricPoint {
-  interval: {
-    endTime: string;
-    startTime?: string;
-  };
-  value: {
-    doubleValue?: string;
-    int64Value?: string;
-    distributionValue?: {
-      mean?: string;
-      count?: string;
-      bucketCounts?: string[];
-    };
-  };
-}
-
-interface CloudRunServiceResponse {
-  items?: Array<{
-    metadata?: {
-      name?: string;
-      annotations?: {
-        [key: string]: string;
-      };
-    };
-    spec?: {
-      template?: {
-        spec?: {
-          containers?: Array<{
-            image?: string;
-            resources?: {
-              limits?: {
-                cpu?: string;
-                memory?: string;
-              };
-            };
-          }>;
-        };
-      };
-      traffic?: Array<{
-        revisionName?: string;
-        percent?: number;
-      }>;
-    };
-    status?: {
-      url?: string;
-      conditions?: Array<{
-        status?: string;
-      }>;
-    };
-  }>;
-}
+import {
+  ProcessedMetricsData,
+  ProcessedErrorData,
+  MonitoringQueryParams,
+  LoggingQueryBody,
+} from "./utils/cloud-run-types";
+import {
+  transformCloudRunResponse,
+  processMetricsResponse,
+  processLoggingResponse,
+  isValidCloudRunResponse,
+  isValidMonitoringResponse,
+  isValidLoggingResponse,
+  parseJsonResponse,
+} from "./utils/cloud-run-helpers";
 
 export default function CloudRunServices() {
   const [services, setServices] = useState<GCPCloudRunService[]>([]);
@@ -172,27 +125,8 @@ export default function CloudRunServices() {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
           }
 
-          const data = (await response.json()) as CloudRunServiceResponse;
-          const cloudRunServices = data.items || [];
-
-          return cloudRunServices.map((service) => {
-            const spec = service.spec || {};
-            const status = service.status || {};
-            const traffic = spec.traffic || [];
-
-            return {
-              name: service.metadata?.name || "",
-              region,
-              url: status.url || "",
-              status: status.conditions?.[0]?.status === "True" ? "READY" : "NOT_READY",
-              lastModified: service.metadata?.annotations?.["run.googleapis.com/lastModifier"] || "",
-              image: spec.template?.spec?.containers?.[0]?.image || "Unknown",
-              traffic: traffic.map((t) => ({
-                revisionName: t.revisionName || "",
-                percent: t.percent || 0,
-              })),
-            };
-          });
+          const data = await parseJsonResponse(response, isValidCloudRunResponse);
+          return transformCloudRunResponse(data, region);
         } catch (error) {
           // Track which regions had errors for potential debugging
           failedRegions.push(region);
@@ -260,7 +194,7 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
     serviceName: string,
     region: string,
     accessToken: string,
-  ): Promise<MetricsData | null> {
+  ): Promise<ProcessedMetricsData | null> {
     try {
       const endTime = new Date().toISOString();
       const startTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(); // 24 hours ago
@@ -273,27 +207,27 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
       // Define metrics to fetch - using correct Cloud Run metric types
       const metrics = [
         {
-          name: "requestCount",
+          name: "requestCount" as keyof ProcessedMetricsData,
           // Use the standard Cloud Run request count metric
           filter: `metric.type="run.googleapis.com/request_count" AND resource.type="cloud_run_revision" AND resource.label.service_name="${serviceName}" AND resource.label.location="${region}"`,
           aligner: "ALIGN_RATE",
           reducer: "REDUCE_SUM",
         },
         {
-          name: "latency",
+          name: "latency" as keyof ProcessedMetricsData,
           filter: `metric.type="run.googleapis.com/request_latencies" AND resource.type="cloud_run_revision" AND resource.label.service_name="${serviceName}" AND resource.label.location="${region}"`,
           aligner: "ALIGN_DELTA",
           reducer: "REDUCE_MEAN",
         },
         {
-          name: "cpuUtilization",
+          name: "cpuUtilization" as keyof ProcessedMetricsData,
           // Billable container CPU allocation
           filter: `metric.type="run.googleapis.com/container/billable_instance_time" AND resource.type="cloud_run_revision" AND resource.label.service_name="${serviceName}" AND resource.label.location="${region}"`,
           aligner: "ALIGN_RATE",
           reducer: "REDUCE_SUM",
         },
         {
-          name: "containerInstances",
+          name: "containerInstances" as keyof ProcessedMetricsData,
           // Container instance count
           filter: `metric.type="run.googleapis.com/container/instance_count" AND resource.type="cloud_run_revision" AND resource.label.service_name="${serviceName}" AND resource.label.location="${region}"`,
           aligner: "ALIGN_MAX",
@@ -301,7 +235,7 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
         },
       ];
 
-      const metricsData: MetricsData = {
+      const metricsData: ProcessedMetricsData = {
         requestCount: [],
         latency: [],
         cpuUtilization: [],
@@ -312,7 +246,7 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
       // Fetch each metric
       for (const metric of metrics) {
         try {
-          const params: Record<string, string> = {
+          const params: MonitoringQueryParams = {
             filter: metric.filter,
             "interval.startTime": startTime,
             "interval.endTime": endTime,
@@ -346,7 +280,7 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
             continue;
           }
 
-          const data = await response.json();
+          const data = await parseJsonResponse(response, isValidMonitoringResponse);
           console.log(`${metric.name} response:`, data);
 
           // Special logging for latency to debug
@@ -354,46 +288,8 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
             console.log("Latency metric data structure:", JSON.stringify(data, null, 2));
           }
 
-          if (data.timeSeries && data.timeSeries.length > 0) {
-            // Handle multiple time series if present
-            const allPoints: Array<{ timestamp: string; value: number }> = [];
-
-            for (const ts of data.timeSeries) {
-              if (ts.points) {
-                const points = ts.points.map((point: MetricPoint) => {
-                  let value = 0;
-
-                  // Handle different value types
-                  if (point.value.doubleValue !== undefined) {
-                    value = parseFloat(point.value.doubleValue);
-                  } else if (point.value.int64Value !== undefined) {
-                    value = parseFloat(point.value.int64Value);
-                  } else if (point.value.distributionValue) {
-                    // For latency metrics, use the mean value from distribution
-                    value = parseFloat(point.value.distributionValue.mean || "0");
-                  }
-
-                  // Convert latency from seconds to milliseconds if needed
-                  if (metric.name === "latency" && value < 10) {
-                    value = value * 1000; // Convert to milliseconds
-                  }
-
-                  return {
-                    timestamp: point.interval.endTime,
-                    value: value,
-                  };
-                });
-                allPoints.push(...points);
-              }
-            }
-
-            // Sort by timestamp and remove duplicates
-            metricsData[metric.name as keyof MetricsData] = allPoints
-              .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-              .filter((point, index, self) => index === self.findIndex((p) => p.timestamp === point.timestamp));
-          } else {
-            console.log(`No time series data found for ${metric.name}`);
-          }
+          const processedData = processMetricsResponse(data, metric.name, 300);
+          metricsData[metric.name] = processedData;
         } catch (metricError) {
           console.error(`Failed to fetch ${metric.name}:`, metricError);
         }
@@ -407,7 +303,7 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
     }
   }
 
-  function generateMetricsGraph(metrics: MetricsData | null): string {
+  function generateMetricsGraph(metrics: ProcessedMetricsData | null): string {
     let graph = "## 📊 Request Metrics (Last 24 Hours)\n\n";
 
     if (!metrics || metrics.requestCount.length === 0) {
@@ -476,7 +372,7 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
     return graph;
   }
 
-  function generateLatencyGraph(metrics: MetricsData | null): string {
+  function generateLatencyGraph(metrics: ProcessedMetricsData | null): string {
     let graph = "## ⚡ Average Response Latency\n\n";
 
     if (!metrics || metrics.latency.length === 0) {
@@ -519,7 +415,73 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
     return graph;
   }
 
-  function generateResourceGraph(metrics: MetricsData | null): string {
+  // Function to fetch recent errors from Cloud Logging
+  async function fetchRecentErrors(
+    projectId: string,
+    serviceName: string,
+    region: string,
+    accessToken: string,
+  ): Promise<ProcessedErrorData[]> {
+    try {
+      const endTime = new Date().toISOString();
+      const startTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(); // 24 hours ago
+
+      console.log("Fetching errors for:", { projectId, serviceName, region });
+
+      // Build the logging API request
+      const baseUrl = `https://logging.googleapis.com/v2/entries:list`;
+
+      // Filter for ALL errors in this specific Cloud Run service
+      // Remove the specific error pattern filter to catch all errors
+      const filter = [
+        `resource.type="cloud_run_revision"`,
+        `resource.labels.service_name="${serviceName}"`,
+        `resource.labels.location="${region}"`,
+        `severity>="ERROR"`,
+        `timestamp>="${startTime}"`,
+        `timestamp<="${endTime}"`,
+      ].join(" AND ");
+
+      const requestBody: LoggingQueryBody = {
+        resourceNames: [`projects/${projectId}`],
+        filter: filter,
+        orderBy: "timestamp desc",
+        pageSize: 200, // Increased to catch more errors
+      };
+
+      console.log("Logging API request:", { filter, requestBody });
+
+      const response = await fetch(baseUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error fetching logs:", response.status, errorText);
+
+        // Check for permission errors
+        if (response.status === 403) {
+          console.error("Permission denied. Make sure the service account has 'Logs Viewer' role");
+        }
+        return [];
+      }
+
+      const data = await parseJsonResponse(response, isValidLoggingResponse);
+      console.log("Logging API response:", { entriesCount: data.entries?.length || 0 });
+
+      return processLoggingResponse(data);
+    } catch (error) {
+      console.error("Error fetching recent errors:", error);
+      return [];
+    }
+  }
+
+  function generateResourceGraph(metrics: ProcessedMetricsData | null): string {
     let graph = "## 📊 Container Instances & Billable Time\n\n";
 
     if (!metrics || (!metrics.containerInstances?.length && !metrics.cpuUtilization?.length)) {
@@ -558,8 +520,10 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
   function ServiceDetail({ service }: { service: GCPCloudRunService }) {
     const [projectId, setProjectId] = useState<string>("");
     const [projectIdError, setProjectIdError] = useState<string | null>(null);
-    const [metrics, setMetrics] = useState<MetricsData | null>(null);
+    const [metrics, setMetrics] = useState<ProcessedMetricsData | null>(null);
     const [metricsLoading, setMetricsLoading] = useState(true);
+    const [errors, setErrors] = useState<ProcessedErrorData[]>([]);
+    const [errorsLoading, setErrorsLoading] = useState(true);
 
     useEffect(() => {
       getProjectId()
@@ -571,41 +535,48 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
     }, []);
 
     useEffect(() => {
-      // Fetch real metrics when component mounts
-      async function loadMetrics() {
+      // Fetch real metrics and errors when component mounts
+      async function loadData() {
         if (!projectId) return;
 
         try {
           setMetricsLoading(true);
-          showToast(Toast.Style.Animated, "Loading metrics", `Fetching data for ${service.name}...`);
+          setErrorsLoading(true);
+          showToast(Toast.Style.Animated, "Loading data", `Fetching metrics and errors for ${service.name}...`);
 
           const auth = await getGoogleAuth();
           const authClient = await auth.getClient();
           const accessToken = await authClient.getAccessToken();
 
           if (accessToken.token) {
+            // Fetch metrics
             const metricsData = await fetchServiceMetrics(projectId, service.name, service.region, accessToken.token);
             setMetrics(metricsData);
+
+            // Fetch errors
+            const errorsData = await fetchRecentErrors(projectId, service.name, service.region, accessToken.token);
+            setErrors(errorsData);
 
             // Check if we got any data
             if (metricsData) {
               const hasData = Object.values(metricsData).some((arr) => arr.length > 0);
               if (hasData) {
-                showToast(Toast.Style.Success, "Metrics loaded", "Successfully fetched Cloud Run metrics");
+                showToast(Toast.Style.Success, "Data loaded", "Successfully fetched metrics and errors");
               } else {
                 showToast(Toast.Style.Success, "No recent activity", "Service has no traffic in the last 24 hours");
               }
             }
           }
         } catch (error) {
-          console.error("Failed to load metrics:", error);
-          showToast(Toast.Style.Failure, "Failed to load metrics", "Check console for details");
+          console.error("Failed to load data:", error);
+          showToast(Toast.Style.Failure, "Failed to load data", "Check console for details");
         } finally {
           setMetricsLoading(false);
+          setErrorsLoading(false);
         }
       }
 
-      loadMetrics();
+      loadData();
     }, [projectId, service.name, service.region]);
 
     // Generate correct Cloud Run service URLs
@@ -619,6 +590,61 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
       ? `https://console.cloud.google.com/run/detail/${service.region}/${service.name}?project=${projectId}`
       : `https://console.cloud.google.com/run/detail/${service.region}/${service.name}`;
 
+    // Format error occurrences
+    const formatErrorOccurrences = () => {
+      if (errorsLoading) return "⏳ Loading error occurrences...";
+      if (errors.length === 0) return "✅ No errors in the last 24 hours";
+
+      let errorSection = "### ⚠️ Error Occurrences (Last 24 Hours)\n\n";
+      errorSection += "| # | Error | Last Seen |\n";
+      errorSection += "|---|-------|-----------|\n";
+
+      errors.forEach((error) => {
+        const lastSeen = new Date(error.timestamp);
+        const timeAgo = getTimeAgo(lastSeen);
+
+        // Properly escape and clean the error message for table display
+        let cleanMessage = error.message
+          .replace(/\|/g, "\\|") // Escape pipe characters
+          .replace(/[\r\n]/g, " ") // Replace newlines with spaces
+          .replace(/\s+/g, " ") // Replace multiple spaces with single space
+          .trim();
+
+        // Increase character limit since we have more space now
+        const maxLength = 70; // Increased from 45 since Count column is smaller
+        if (cleanMessage.length > maxLength) {
+          // Find the last space before the limit to avoid breaking words
+          const truncateAt = cleanMessage.lastIndexOf(" ", maxLength - 3);
+          if (truncateAt > 30) {
+            // Only use word boundary if it's not too early
+            cleanMessage = cleanMessage.substring(0, truncateAt) + "...";
+          } else {
+            cleanMessage = cleanMessage.substring(0, maxLength - 3) + "...";
+          }
+        }
+
+        // Use shorter count format: just the number instead of "**X**"
+        errorSection += `| ${error.count} | \`${cleanMessage}\` | ${timeAgo} |\n`;
+      });
+
+      return errorSection;
+    };
+
+    const getTimeAgo = (date: Date) => {
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+      if (diffHours > 0) {
+        return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+      } else if (diffMinutes > 0) {
+        return `${diffMinutes} minute${diffMinutes > 1 ? "s" : ""} ago`;
+      } else {
+        return "Just now";
+      }
+    };
+
     const markdown = `
 # ${service.name}
 
@@ -629,8 +655,28 @@ gcloud projects add-iam-policy-binding ${projectIdForError} --member='serviceAcc
 - **Image**: ${service.image.split("/").pop()}
 - **Last Modified**: ${service.lastModified}
 
-## Traffic Distribution
-${service.traffic.map((t) => `- **${t.revisionName}**: ${t.percent}%`).join("\n")}
+## Recent Activity & Errors
+
+### 📈 Traffic Routing
+${
+  service.traffic.length === 1 && service.traffic[0].revisionName === "LATEST" && service.traffic[0].percent === 100
+    ? "_All traffic going to latest revision (default)_"
+    : service.traffic
+        .map((t) => {
+          const displayName =
+            t.revisionName === "LATEST"
+              ? "Latest revision"
+              : t.revisionName.length > 30
+                ? `${t.revisionName.substring(0, 27)}...`
+                : t.revisionName;
+          return `- **${displayName}**: ${t.percent}%`;
+        })
+        .join("\n")
+}
+
+${formatErrorOccurrences()}
+
+**[View Logs →](${logsUrl})** to see full error details and stack traces.
 
 ---
 
@@ -743,35 +789,37 @@ gcloud run services describe ${service.name} --region=${service.region}
 
                 try {
                   setMetricsLoading(true);
-                  showToast(Toast.Style.Animated, "Refreshing metrics...");
+                  setErrorsLoading(true);
+                  showToast(Toast.Style.Animated, "Refreshing data...");
 
                   const auth = await getGoogleAuth();
                   const authClient = await auth.getClient();
                   const accessToken = await authClient.getAccessToken();
 
                   if (accessToken.token) {
-                    const metricsData = await fetchServiceMetrics(
-                      projectId,
-                      service.name,
-                      service.region,
-                      accessToken.token,
-                    );
+                    const [metricsData, errorsData] = await Promise.all([
+                      fetchServiceMetrics(projectId, service.name, service.region, accessToken.token),
+                      fetchRecentErrors(projectId, service.name, service.region, accessToken.token),
+                    ]);
+
                     setMetrics(metricsData);
+                    setErrors(errorsData);
 
                     if (metricsData) {
                       const hasData = Object.values(metricsData).some((arr) => arr.length > 0);
                       showToast(
                         Toast.Style.Success,
-                        hasData ? "Metrics refreshed" : "No data",
-                        hasData ? "Found metrics data" : "No traffic in last 24h",
+                        hasData ? "Data refreshed" : "No data",
+                        hasData ? "Found metrics and errors" : "No activity in last 24h",
                       );
                     }
                   }
                 } catch (error) {
-                  console.error("Failed to refresh metrics:", error);
-                  showToast(Toast.Style.Failure, "Failed to refresh metrics");
+                  console.error("Failed to refresh data:", error);
+                  showToast(Toast.Style.Failure, "Failed to refresh data");
                 } finally {
                   setMetricsLoading(false);
+                  setErrorsLoading(false);
                 }
               }}
             />
