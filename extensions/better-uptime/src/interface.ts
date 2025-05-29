@@ -42,6 +42,7 @@ export interface IncidentItemAttributes {
   sms: boolean;
   email: boolean;
   push: boolean;
+  status: string;
 }
 
 export interface IncidentsState {

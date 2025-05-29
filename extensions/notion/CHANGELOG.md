@@ -1,5 +1,7 @@
 # Notion Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Use pagination for fetching users list] - 2025-01-24
 
 - User Notion pagination to fetch the list of Notion users. This allows fetching more than 100 users.

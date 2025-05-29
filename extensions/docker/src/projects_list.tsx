@@ -21,7 +21,10 @@ export default function ProjectsList() {
       {projects?.map((project) => (
         <List.Item
           key={project.name}
-          icon={{ source: 'icon-compose.png', tintColor: Color.SecondaryText }}
+          icon={{
+            source: 'icon-compose.png',
+            tintColor: areAllContainersRunning(project) ? Color.Green : Color.SecondaryText,
+          }}
           title={project.name}
           subtitle={projectSubTitle(project)}
           actions={
@@ -63,4 +66,8 @@ const projectSubTitle = ({ containers }: ComposeProject) => {
   const runningCount = containers.reduce((memo, item) => (memo += isContainerRunning(item) ? 1 : 0), 0);
   const stoppedCount = containers.length - runningCount;
   return `${runningCount} Running, ${stoppedCount} Stopped`;
+};
+
+const areAllContainersRunning = ({ containers }: ComposeProject): boolean => {
+  return containers.every(isContainerRunning);
 };

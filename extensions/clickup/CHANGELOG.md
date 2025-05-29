@@ -1,5 +1,17 @@
 # ClickUp Changelog
 
+## [Optionally Select Status In Capture] - 2025-05-23
+
+- you can now select a status in "Quick Capture" command (statuses are fetched from the ListId you enter in Preferences) (ref: [Issue #19331](https://github.com/raycast/extensions/issues/19331))
+- chore: update to use latest Raycast config
+
+## [✨ AI Enhancements] - 2025-02-21
+
+- AI Tools to:
+    1. Get Teams
+    2. Get Spaces
+    3. Get Docs
+
 ## [Update - New Command] - 2024-09-10
 
 - New `Docs Explorer` command - for now it shows docs and their pages

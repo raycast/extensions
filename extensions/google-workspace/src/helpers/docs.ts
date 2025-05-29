@@ -1,7 +1,9 @@
 import { open } from "@raycast/api";
 import { getUserEmail } from "../api/googleAuth";
 
-export async function createDocFromUrl(prefix: string, title?: string) {
+export type Prefix = "document" | "forms" | "spreadsheets" | "presentation";
+
+export async function createDocFromUrl(prefix: Prefix, title?: string) {
   const email = await getUserEmail();
 
   const baseUrl = `https://docs.google.com/${prefix}/create`;

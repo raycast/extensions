@@ -1,5 +1,21 @@
 # Linear Changelog
 
+## [Update API and bug fixes] - 2025-04-15
+
+- Updated dependencies
+- Fix project statuses bug in AI Extension
+
+## [Fix Search Issue] - 2025-03-11
+
+- Updated getIssues to use the new searchIssues API instead of issueSearch ( now deprecated )
+
+## [Fix Creation Issue] - 2025-02-25
+
+- Fixed issue creation with stateId because of closing quote in the GraphQL mutation.
+- Added npm run publish to publish the extension to the Raycast Store as per [Docs](https://developers.raycast.com/basics/publish-an-extension).
+
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Focus Shortcuts] - 2025-02-07
 
 - Added input focus sub-commands to the `Create Issue` command for changing the focused form input quicker.

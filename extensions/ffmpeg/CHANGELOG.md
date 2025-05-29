@@ -1,5 +1,7 @@
 # FFmpeg Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Added conversion option and percentage progress] - 2023-10-17
 
 - I added a new video file conversion option, called VideoLoop Converter. This uses FFMPEG to create a h.264 .mp4 file without sound, at a bitrate of 4000kbps. This is intended to be used as a replacement for GIFs on certain websites.

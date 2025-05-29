@@ -1,6 +1,7 @@
 export const BASE_URL = "https://viacep.com.br/ws";
 
 export const STATE_CODES = [
+  "–",
   "AC",
   "AL",
   "AP",

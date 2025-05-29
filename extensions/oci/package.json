@@ -18,7 +18,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.3",
+    "@raycast/api": "^1.91.0",
     "@raycast/utils": "^1.17.0",
     "oci-sdk": "^2.99.0"
   },
@@ -28,7 +28,7 @@
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build",

@@ -7,8 +7,9 @@
  * Created at     : 2024-06-04 05:46:15
  */
 
-import { LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
 import { execSync } from "child_process";
+
+import { LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
 import { showErrorToast } from "./utils";
 
 /**
@@ -54,6 +55,7 @@ async function installAVIFEnc(): Promise<boolean> {
       toast.style = Toast.Style.Success;
       return true;
     } catch (error) {
+      console.error(error);
       showErrorToast(
         "Failed to install AVIF Encoder.",
         error as Error,
@@ -101,7 +103,6 @@ export async function getAVIFEncPaths() {
           );
         }
       } else {
-        console.error(error);
         showErrorToast(
           "AVIF Encoder not found.",
           error as Error,

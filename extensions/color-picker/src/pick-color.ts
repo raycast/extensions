@@ -1,12 +1,14 @@
-import { Clipboard, closeMainWindow, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { Clipboard, closeMainWindow, launchCommand, LaunchType, getPreferenceValues, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { callbackLaunchCommand } from "raycast-cross-extension";
+import colorNamer from "color-namer";
 import { pickColor } from "swift:../swift/color-picker";
 import { addToHistory } from "./history";
 import { Color, PickColorCommandLaunchProps } from "./types";
-import { getFormattedColor } from "./utils";
+import { getFormattedColor, getColorByProximity } from "./utils";
 
 export default async function command(props: PickColorCommandLaunchProps) {
+  const { showColorName } = getPreferenceValues<Preferences.PickColor>();
   await closeMainWindow();
 
   try {
@@ -34,7 +36,14 @@ export default async function command(props: PickColorCommandLaunchProps) {
       }
     } else {
       await Clipboard.copy(hex);
-      await showHUD(`Copied color ${hex} to clipboard`);
+      if (showColorName) {
+        const colors = colorNamer(hex);
+        const colorsByDistance = getColorByProximity(colors);
+        const firstColorName = colorsByDistance[0]?.name;
+        await showHUD(`Copied color ${hex} (${firstColorName}) to clipboard`);
+      } else {
+        await showHUD(`Copied color ${hex} to clipboard`);
+      }
     }
 
     try {

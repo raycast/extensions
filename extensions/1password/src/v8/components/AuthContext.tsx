@@ -25,6 +25,7 @@ import {
   getCliPath,
 } from "../utils";
 import { Error as ErrorGuide } from "./Error";
+import { Guide } from "./Guide";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -37,6 +38,12 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  try {
+    getCliPath();
+  } catch {
+    return <Guide />;
+  }
+
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(getSignInStatus());
   const [zshMissing] = useState<boolean>(!checkZsh());
   const [accountSelected, setAccountSelected] = useState<boolean>(true);

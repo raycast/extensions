@@ -16,7 +16,7 @@ type TaskDetailProps = {
   taskId: Task["id"];
 };
 
-export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
+export default function TaskDetail({ taskId }: TaskDetailProps) {
   const [data, setData] = useCachedData();
 
   const task = data?.items.find((task) => task.id === taskId);
@@ -53,6 +53,8 @@ export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
 
       return r.item_id === taskId;
     }) ?? [];
+
+  const use12HourFormat = data?.user?.time_format === 1;
 
   return (
     <Detail
@@ -113,9 +115,14 @@ export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
 
                 {reminders.length > 0 ? (
                   <Detail.Metadata.TagList title="Reminders">
-                    {reminders.map((reminder) => (
-                      <Detail.Metadata.TagList.Item key={reminder.id} text={displayReminderName(reminder)} />
-                    ))}
+                    {reminders.map((reminder) => {
+                      return (
+                        <Detail.Metadata.TagList.Item
+                          key={reminder.id}
+                          text={displayReminderName(reminder, use12HourFormat)}
+                        />
+                      );
+                    })}
                   </Detail.Metadata.TagList>
                 ) : null}
 

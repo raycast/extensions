@@ -1,13 +1,70 @@
-import { Action, ActionPanel, Color, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { headers, parseResponse, useGetActiveDomains } from "./hooks";
 import { FormValidation, getFavicon, useCachedState, useFetch, useForm } from "@raycast/utils";
 import { ActiveDomain } from "./types";
 import { useState } from "react";
 import { generateApiUrl } from "./utils";
+import fetch from "node-fetch";
 
 export default function MyDomains() {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("domains-show-details", false);
-  const { isLoading, data: domains, revalidate } = useGetActiveDomains();
+  const { isLoading, data: domains, revalidate, mutate } = useGetActiveDomains();
+
+  const toggleAutoRenewal = async (domain: ActiveDomain) => {
+    const toast = await showToast(
+      Toast.Style.Animated,
+      `${domain.auto_renew_enabled === "1" ? "Disabling" : "Enabling"} Auto Renewal`,
+      domain.domain_name,
+    );
+    const enabled = domain.auto_renew_enabled === "1" ? "0" : "1";
+    try {
+      await mutate(
+        fetch(generateApiUrl("update_domain_auto_renewal", { domain_name: domain.domain_name, enabled }), {
+          headers,
+        }).then((res) => parseResponse(res)),
+        {
+          optimisticUpdate(data) {
+            const index = data.findIndex((d) => d.domain_id === domain.domain_id);
+            data[index] = { ...domain, auto_renew_enabled: enabled };
+            return data;
+          },
+        },
+      );
+      toast.style = Toast.Style.Success;
+      toast.title = `${domain.auto_renew_enabled === "1" ? "Disabled" : "Enabled"} Auto Renewal`;
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `Could not ${domain.auto_renew_enabled === "1" ? "disable" : "enable"}`;
+    }
+  };
+
+  const toggleDomainPrivacy = async (domain: ActiveDomain) => {
+    const toast = await showToast(
+      Toast.Style.Animated,
+      `${domain.whois_privacy_enabled === "1" ? "Disabling" : "Enabling"} Domain Privacy`,
+      domain.domain_name,
+    );
+    const enabled = domain.whois_privacy_enabled === "1" ? "0" : "1";
+    try {
+      await mutate(
+        fetch(generateApiUrl("update_domain_privacy", { domain_name: domain.domain_name, enabled }), {
+          headers,
+        }).then((res) => parseResponse(res)),
+        {
+          optimisticUpdate(data) {
+            const index = data.findIndex((d) => d.domain_id === domain.domain_id);
+            data[index] = { ...domain, whois_privacy_enabled: enabled };
+            return data;
+          },
+        },
+      );
+      toast.style = Toast.Style.Success;
+      toast.title = `${domain.whois_privacy_enabled === "1" ? "Disabled" : "Enabled"} Domain Privacy`;
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `Could not ${domain.whois_privacy_enabled === "1" ? "disable" : "enable"}`;
+    }
+  };
 
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail}>
@@ -80,6 +137,20 @@ export default function MyDomains() {
                   title="Update Nameservers"
                   target={<UpdateNameservers domain={domain} onUpdate={revalidate} />}
                 />
+                {!isLoading && (
+                  <ActionPanel.Section>
+                    <Action
+                      icon={Icon.BankNote}
+                      title={`${domain.auto_renew_enabled === "1" ? "Disable" : "Enable"} Auto Renewal`}
+                      onAction={() => toggleAutoRenewal(domain)}
+                    />
+                    <Action
+                      icon={Icon.Lock}
+                      title={`${domain.whois_privacy_enabled === "1" ? "Disable" : "Enable"} Whois Privacy`}
+                      onAction={() => toggleDomainPrivacy(domain)}
+                    />
+                  </ActionPanel.Section>
+                )}
               </ActionPanel>
             }
           />

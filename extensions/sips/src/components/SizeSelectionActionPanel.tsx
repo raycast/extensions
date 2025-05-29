@@ -15,9 +15,11 @@ import { Action, ActionPanel, Clipboard, Icon, showHUD, showToast, Toast } from 
 
 import { generatePlaceholder } from "../utilities/generators";
 import { cleanup, getDestinationPaths, moveImageResultsToFinalDestination, showErrorToast } from "../utilities/utils";
+
 import ImagePatternGrid from "./ImagePatternGrid";
 import SettingsActionPanelSection from "./SettingsActionPanelSection";
 
+/* eslint-disable @raycast/prefer-title-case */
 /**
  * Action panel for the image size selection grid.
  *
@@ -39,7 +41,10 @@ export default function SizeSelectionActionPanel(props: { width: number; height:
         icon={Icon.Image}
         onAction={async () => {
           const destinations = await getDestinationPaths([path.join(os.tmpdir(), `${width}x${height}.png`)], true);
-          const toast = await showToast({ title: "Creating Placeholder...", style: Toast.Style.Animated });
+          const toast = await showToast({
+            title: "Creating Placeholder...",
+            style: Toast.Style.Animated,
+          });
           try {
             await generatePlaceholder(width, height, destinations[0]);
             await moveImageResultsToFinalDestination(destinations);
@@ -97,3 +102,4 @@ export default function SizeSelectionActionPanel(props: { width: number; height:
     </ActionPanel>
   );
 }
+/* eslint-enable @raycast/prefer-title-case */

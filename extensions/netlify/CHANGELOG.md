@@ -1,5 +1,21 @@
 # Changelog
 
+## [✨AI: View Env & DNS] - 2025-03-11
+
+- AI Tools to:
+    1. Get Environment Variables
+    2. Get DNS Records
+- fix typo in Create DNS Records (`Differenet` -> `Different`)
+
+## [✨ AI Enhancements] - 2025-02-21
+
+- Add AI Tools to:
+    1. Get Teams
+    2. Get Domains
+    3. Get Sites
+    4. Get Deployments
+    5. Search Docs
+
 ## [Paginated Sites] - 2024-12-19
 
 ### Enhancements

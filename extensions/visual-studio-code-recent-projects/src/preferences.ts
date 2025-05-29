@@ -1,21 +1,10 @@
 import { getPreferenceValues } from "@raycast/api";
-import { VSCodeBuild } from "./types";
+import { getBundleId } from "./utils/editor";
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
 
 function getBundleIdentifier() {
-  switch (preferences.build) {
-    case VSCodeBuild.Code:
-      return "com.microsoft.VSCode";
-    case VSCodeBuild.Insiders:
-      return "com.microsoft.VSCodeInsiders";
-    case VSCodeBuild.VSCodium:
-      return "VSCodium";
-    case VSCodeBuild.Cursor:
-      return "Cursor";
-    case VSCodeBuild.Windsurf:
-      return "Windsurf";
-  }
+  return getBundleId(preferences.build);
 }
 
 export const build = preferences.build;

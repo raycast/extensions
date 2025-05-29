@@ -1,5 +1,7 @@
 # Rectangle Changelog
 
+## [Update dependencies] - 2025-02-12
+
 ## [Add Cascade Actions] - 2025-01-10
 
 Support for two new actions has been added: Cascade All & Cascade App

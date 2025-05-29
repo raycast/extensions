@@ -1,5 +1,24 @@
 # Image Modification Changelog
 
+## [Improved Selection Detection] - 2025-05-12
+
+- Added full support for QSpace Pro
+- Added experimental support for ForkLift
+- Rewrote file selection detection scripts to improve performance
+
+## [Remove Background] - 2025-02-24
+
+- Added 'Remove Background' command to remove the background from selected images
+- Added two new metadata images showcases AI Tools and `Remove Background` command
+- Set 'Strip EXIF Data' command to be disabled by default
+- Updated to ExifTool version 13.21
+- Fixed ExifTool failing to install or not recognizing current install (Resolve #16884)
+- Fixed crash when trying to generate live preview for filters on PDFs (Resolve #16971)
+
+## [✨ AI Enhancements] - 2025-02-21
+
+- Add AI tool support for all image operations
+
 ## [Bug Fixes & New Filters] - 2025-01-30
 
 - Improved memory management when previewing filters, reducing the likelihood of out-of-memory errors

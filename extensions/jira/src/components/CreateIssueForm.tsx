@@ -38,15 +38,15 @@ export type IssueFormValues = {
   projectId: string;
   issueTypeId: string;
   summary: string;
-  description: string;
-  parent: string;
-  assigneeId: string;
-  priorityId: string;
+  description?: string;
+  parent?: string;
+  assigneeId?: string;
+  priorityId?: string;
   labels?: string[];
   components?: string[];
   fixVersions?: string[];
   dueDate?: Date | null;
-  attachments: string[];
+  attachments?: string[];
 } & Record<string, unknown>;
 
 type CreateIssueFormProps = {
@@ -124,7 +124,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
 
           focus("summary");
 
-          if (values.attachments.length > 0) {
+          if (values.attachments && values.attachments.length > 0) {
             const attachmentWord = values.attachments.length === 1 ? "attachment" : "attachments";
             try {
               toast.message = `Uploading ${attachmentWord}…`;

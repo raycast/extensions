@@ -1,32 +1,30 @@
-import { Action, ActionPanel, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Question } from "../../hooks/useQuestions";
+import FollowUpList from "./FollowUpList";
 
 type SummaryActionsProps = {
-  AskFollowUpQuestion: React.ComponentType<{
-    transcript: string;
-    setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
-    pop: () => void;
-  }>;
-  markdown?: string;
-  ownerProfileUrl: string;
-  setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
   transcript: string;
+  summary: string;
   video_url: string;
+  ownerProfileUrl: string;
+  questions: Question[];
 };
 
 export default function SummaryActions({
-  AskFollowUpQuestion,
-  markdown,
-  ownerProfileUrl,
-  setSummary,
   transcript,
+  summary,
   video_url,
+  ownerProfileUrl,
+  questions,
 }: SummaryActionsProps) {
-  const { pop } = useNavigation();
-
   return (
     <ActionPanel title="Video Actions">
-      <AskFollowUpQuestion transcript={transcript} setSummary={setSummary} pop={pop} />
-      <Action.CopyToClipboard title="Copy Result" content={markdown ?? ""} />
+      <Action.Push
+        icon={Icon.QuestionMark}
+        title="Ask Follow-up Question"
+        target={<FollowUpList transcript={transcript} questions={questions} />}
+      />
+      <Action.CopyToClipboard title="Copy Summary" content={summary ?? ""} />
       <Action.OpenInBrowser title="Go to Video" url={video_url} />
       <Action.OpenInBrowser title="Go to Channel" url={ownerProfileUrl} />
     </ActionPanel>

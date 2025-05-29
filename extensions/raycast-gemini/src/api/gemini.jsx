@@ -1,21 +1,22 @@
 import {
-  Form,
-  Detail,
-  ActionPanel,
   Action,
-  Toast,
-  showToast,
-  getSelectedText,
+  ActionPanel,
+  Detail,
+  Form,
   getPreferenceValues,
+  getSelectedText,
+  Icon,
   Keyboard,
   launchCommand,
   LaunchType,
-  Icon,
+  showToast,
+  Toast,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
-import fetch from "node-fetch";
-import Gemini from "gemini-ai";
 import fs from "fs";
+import Gemini from "gemini-ai";
+import fetch from "node-fetch";
+import { useEffect, useState } from "react";
+import { useCommandHistory } from "./useCommandHistory";
 
 export default (props, { context = undefined, allowPaste = false, useSelected = false, buffer = [] }) => {
   const Pages = {
@@ -25,7 +26,10 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
   let { query: argQuery } = props.arguments;
   if (!argQuery) argQuery = props.fallbackText ?? "";
 
-  const { apiKey, defaultModel, model } = getPreferenceValues();
+  const { apiKey, model, customModel } = getPreferenceValues();
+  // set defaultModel to customModel if customModel is a non-empty string
+  const isCustomModelValid = Boolean(customModel && customModel.trim().length > 0);
+  const defaultModel = isCustomModelValid ? customModel : getPreferenceValues().defaultModel;
   const [page, setPage] = useState(Pages.Detail);
   const [markdown, setMarkdown] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -33,6 +37,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
   const [lastQuery, setLastQuery] = useState("");
   const [lastResponse, setLastResponse] = useState("");
   const [textarea, setTextarea] = useState("");
+  const { addToHistory } = useCommandHistory();
 
   const getResponse = async (query, data) => {
     setLastQuery(query);
@@ -50,12 +55,27 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
       let response = await gemini.ask(query, {
         model: model === "default" ? defaultModel : model,
         stream: (x) => {
-          setMarkdown((markdown) => markdown + x);
+          try {
+            if (x !== undefined && x !== null) {
+              setMarkdown((markdown) => markdown + x);
+            }
+          } catch (streamError) {
+            console.error("Error in stream callback:", streamError);
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Response Failed",
+              message: streamError.message, // Display the error message in the toast notification
+            });
+          }
         },
         data: data ?? buffer,
       });
       setMarkdown(response);
       setLastResponse(response);
+
+      // Add to history with model information
+      const usedModel = model === "default" ? defaultModel : model;
+      await addToHistory(query, response, usedModel);
 
       await showToast({
         style: Toast.Style.Success,
@@ -70,11 +90,20 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
           message: "Please slow down.",
         });
         setMarkdown("## Could not access Gemini.\n\nYou have been rate limited. Please slow down and try again later.");
+      } else if (e.message.includes("The model is overloaded")) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Model Overloaded",
+          message: "The model is currently overloaded. Please try again later.",
+        });
+        setMarkdown("## Could not access Gemini.\n\nThe model is currently overloaded. Please try again later.");
       } else {
+        console.error(e);
         await showToast({
           style: Toast.Style.Failure,
           title: "Response Failed",
-          message: `${(Date.now() - start) / 1000} seconds`,
+          // message: `${(Date.now() - start) / 1000} seconds`,
+          message: e.message, // Display the error message in the toast notification
         });
         setMarkdown(
           "## Could not access Gemini.\n\nThis may be because Gemini has decided that your prompt did not comply with its regulations. Please try another prompt, and if it still does not work, create an issue on GitHub."
@@ -136,6 +165,17 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
                 }}
               />
             )}
+            <Action
+              title="View History"
+              icon={Icon.Clock}
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+              onAction={async () => {
+                await launchCommand({
+                  name: "history",
+                  type: LaunchType.UserInitiated,
+                });
+              }}
+            />
           </ActionPanel>
         )
       }

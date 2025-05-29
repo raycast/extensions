@@ -8,9 +8,13 @@ import { VSCodeBuild } from "./types";
  */
 const NewWindowMenuItemIndex: Record<VSCodeBuild, number> = {
   [VSCodeBuild.Code]: 3,
+  [VSCodeBuild.CodeInsiders]: 3,
   [VSCodeBuild.Cursor]: 2,
-  [VSCodeBuild.Insiders]: 3,
+  [VSCodeBuild.Positron]: 3,
+  [VSCodeBuild.Trae]: 3,
+  [VSCodeBuild.TraeCN]: 3,
   [VSCodeBuild.VSCodium]: 3,
+  [VSCodeBuild.VSCodiumInsiders]: 3,
   [VSCodeBuild.Windsurf]: 3,
 };
 

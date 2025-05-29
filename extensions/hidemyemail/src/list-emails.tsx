@@ -1,28 +1,28 @@
-import { useState, useEffect, useRef } from "react";
 import {
-  ActionPanel,
   Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  Image,
+  Keyboard,
   List,
   showToast,
   Toast,
-  Icon,
-  Color,
-  Clipboard,
-  getPreferenceValues,
-  Keyboard,
-  confirmAlert,
-  Alert,
   useNavigation,
-  Image,
   LocalStorage,
 } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
 import { iCloudService } from "./api/connect";
+import { iCloudSessionExpiredError } from "./api/errors";
 import { getIcon, HideMyEmail, MetaData } from "./api/hide-my-email";
-import { formatTimestamp } from "./utils";
 import { getiCloudService, Login } from "./components/Login";
 import { AddressForm, AddressFormValues } from "./components/forms/AddressForm";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { iCloudSessionExpiredError } from "./api/errors";
+import { formatTimestamp } from "./utils";
 
 enum EmailStatus {
   ANY = "ANY",
@@ -62,7 +62,7 @@ export default function Command() {
     { default: "extension-icon.png" },
     { cacheNamespace: "app-icons" },
   );
-  const { sortByCreationDate } = getPreferenceValues<Preferences.ListEmails>();
+  const { sortByCreationDate, popAfterCopy } = getPreferenceValues<Preferences.ListEmails>();
   const effectRan = useRef(false);
   const abortable = useRef<AbortController>();
   const { pop } = useNavigation();
@@ -329,6 +329,7 @@ export default function Command() {
                 key={email.id}
                 id={email.id}
                 title={`${email.label}`}
+                keywords={[email.address, ...email.note.split(/\s+/g)]}
                 icon={{ source: Icon.ChevronRightSmall, tintColor: email.isActive ? Color.Green : Color.Red }}
                 detail={
                   <List.Item.Detail
@@ -363,7 +364,15 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <Action.CopyToClipboard title={"Copy Email"} content={email.address} />
+                      <Action.CopyToClipboard
+                        title={"Copy Email"}
+                        content={email.address}
+                        onCopy={() => {
+                          if (popAfterCopy) {
+                            pop();
+                          }
+                        }}
+                      />
                       {email.domain && <Action.OpenInBrowser title={"Open Website"} url={`https://${email.domain}`} />}
                       {showLoginAction && (
                         <Action.Push

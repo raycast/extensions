@@ -1,5 +1,17 @@
 # Downloads Manager Changelog
 
+## [Add new commands] - {PR_MERGE_DATE}
+
+- Added the command `Paste Latest Download`, which pastes the latest download to the foremost active app.
+
+## [Add reload action] - 2025-05-07
+
+- Added a reload action to fetch the latest downloads in the `Manage Downloads` command.
+
+## [Enhancement] - 2025-02-25
+
+- Updated the `Show Latest Download` command to display the most recent download file.
+
 ## [Add file order preference] - 2025-01-07
 
 - Added a preference to sort files by added, modified, or created time in the `Manage Downloads` command.

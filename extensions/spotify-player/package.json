@@ -31,7 +31,13 @@
     "rhesamu",
     "themitpatel",
     "litomore",
-    "enneemme"
+    "enneemme",
+    "lineville",
+    "tsibog",
+    "viethung0823",
+    "eyal_levy",
+    "jonasengelmann",
+    "vmrjnvc"
   ],
   "pastContributors": [
     "bkeys818"
@@ -70,7 +76,7 @@
           "default": false,
           "description": "Only show results for music. Podcasts and episodes are excluded.",
           "name": "musicOnly",
-          "required": true,
+          "required": false,
           "type": "checkbox"
         },
         {
@@ -398,6 +404,14 @@
       "disabledByDefault": true
     },
     {
+      "name": "copyArtistAndTitle",
+      "title": "Copy Artist And Title",
+      "subtitle": "Spotify",
+      "description": "Copy the artist and track title of the current song/episode",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
       "name": "justPlay",
       "title": "Just Play",
       "subtitle": "Spotify",
@@ -443,11 +457,74 @@
       "description": "Start the DJ.",
       "mode": "no-view",
       "disabledByDefault": true
+    },
+    {
+      "name": "copyEmbed",
+      "title": "Copy Embed Code",
+      "subtitle": "Spotify",
+      "description": "Copy the iframe embed code for the currently playing song or podcast episode.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "skip15",
+      "title": "Skip 15 Seconds",
+      "subtitle": "Spotify",
+      "description": "Skip 15 seconds forward in an episode.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "back15",
+      "title": "Back 15 Seconds",
+      "subtitle": "Spotify",
+      "description": "Back 15 seconds in an episode.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    }
+  ],
+  "tools": [
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Search for music and podcasts on Spotify. Get Spotify catalog information about albums, artists, playlists, tracks, shows, episodes or audiobooks that match a keyword string."
+    },
+    {
+      "name": "play",
+      "title": "Play",
+      "description": "Play a song or episode on Spotify."
+    },
+    {
+      "name": "get-current-user",
+      "title": "Get Current User",
+      "description": "Get detailed profile information about the current user (including the current user's username)."
+    },
+    {
+      "name": "get-current-track",
+      "title": "Get Current Track",
+      "description": "Gets the currently playing track"
+    },
+    {
+      "name": "create-playlist",
+      "title": "Create Playlist",
+      "description": "Creates a new playlist"
+    },
+    {
+      "name": "add-track-to-playlist",
+      "title": "Add Track to Playlist",
+      "description": "Adds a track to a playlist"
+    },
+    {
+      "name": "queue",
+      "title": "Queue",
+      "description": "Add tracks to queue and get the current queue state"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.82.3",
+    "@raycast/api": "^1.87.0",
     "@raycast/utils": "^1.16.2",
+    "@types/async-retry": "^1.4.9",
+    "async-retry": "^1.3.3",
     "node-fetch": "^3.3.2",
     "oazapfts": "^4.10.0"
   },
@@ -466,5 +543,178 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "generate-spotify-client": "oazapfts --optimistic ./fixed-spotify-open-api.yml ./src/helpers/spotify.api.ts"
-  }
+  },
+  "ai": {
+    "evals": [
+      {
+        "input": "@spotify-player latest album of fred again",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search",
+              "arguments": {
+                "query": {
+                  "includes": "fred again"
+                },
+                "types": {
+                  "includes": "album"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search": {
+            "albums": [
+              {
+                "id": "1FJVbtVFLARPKbn1HepNh1",
+                "releaseDate": "2023-05-05",
+                "name": "Secret Life",
+                "type": "album",
+                "artists": [
+                  "Fred again..",
+                  "Brian Eno"
+                ]
+              },
+              {
+                "id": "3DQueEd1Ft9PHWgovDzPKh",
+                "releaseDate": "2024-09-06",
+                "name": "ten days",
+                "type": "album",
+                "artists": [
+                  "Fred again.."
+                ]
+              },
+              {
+                "id": "6CNWkUVb8kLkM3B464RMTx",
+                "releaseDate": "2024-06-14",
+                "name": "USB",
+                "type": "album",
+                "artists": [
+                  "Fred again.."
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@spotify-player show me songs by The Beatles",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search",
+              "arguments": {
+                "query": {
+                  "includes": "beatles"
+                },
+                "types": {
+                  "includes": "track"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search": {
+            "tracks": []
+          }
+        }
+      },
+      {
+        "input": "@spotify-player show me rock songs the 70s",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "year:1970-1979"
+                  },
+                  {
+                    "includes": "genre:rock"
+                  }
+                ],
+                "types": {
+                  "includes": "track"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search": {
+            "tracks": []
+          }
+        }
+      },
+      {
+        "input": "@spotify-player create me a new playlist with some london hip hop",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search",
+              "arguments": {
+                "query": {
+                  "includes": "london hip hop"
+                },
+                "types": {
+                  "includes": "track"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "create-playlist",
+              "arguments": {
+                "trackIDs": [
+                  {
+                    "includes": "1"
+                  },
+                  {
+                    "includes": "2"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search": {
+            "tracks": [
+              {
+                "id": "1",
+                "name": "Track 1",
+                "artists": [
+                  "Artist 1"
+                ]
+              },
+              {
+                "id": "2",
+                "name": "Track 2",
+                "artists": [
+                  "Artist 2"
+                ]
+              }
+            ]
+          },
+          "create-playlist": {
+            "id": "playlist123",
+            "name": "London Hip Hop"
+          },
+          "get-current-user": {
+            "id": "id",
+            "displayName": "user",
+            "email": "user@gmail.com",
+            "product": ""
+          }
+        }
+      }
+    ]
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

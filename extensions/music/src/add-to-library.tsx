@@ -5,5 +5,5 @@ import { handleTaskEitherError } from "./util/utils";
 
 export default pipe(
   music.currentTrack.addToLibrary,
-  handleTaskEitherError("Failed to Add to Library", "Added to library")
+  handleTaskEitherError("Failed to Add to Library", "Added to library"),
 );

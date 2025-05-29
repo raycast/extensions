@@ -1,59 +1,52 @@
-# Media Converter
-
-A powerful and user-friendly media conversion tool that allows you to easily convert between various video, audio, and image formats using FFmpeg.
+<div align="center">
+  <h1>Media Converter</h1>
+  <p>Convert any media file with just a few keystrokes</p>
+</div>
 
 ## Features
 
-- **Multi-Format Support**:
-  - Video: MP4, AVI, MKV, MOV, MPG, WEBM
-  - Image: JPG, PNG, WebP, HEIC, TIFF
-  - Audio: MP3, AAC, WAV, FLAC
-
-- **Two Conversion Modes**:
-  1. **Standard Conversion**: Select multiple files and convert them in batch
-  2. **Quick Convert**: Convert files directly from Finder selections
-
-- **Quality Preservation**: High-quality conversion that maintains original file quality
-- **Smart File Naming**: Automatically handles file naming conflicts
-- **User-Friendly Interface**: Simple one-click conversion process
-- **Automatic FFmpeg Management**: Handles FFmpeg installation if not present
-
-## Requirements
-
-- FFmpeg 
-
-## Usage
-
-### Standard Conversion
-1. Open Raycast and search for "Convert Media"
-2. Select one or more files of the same type (video, image, or audio)
-3. Choose your desired output format
-4. Click Convert or press ⌘↵
-
-### Quick Convert
-1. Select a file in Finder
-2. Open Raycast and search for "Quick Convert"
-3. Choose your desired output format from the list
-4. The converted file will be saved in the same directory
+- Convert videos, images, and audio files with a simple interface
+- Support for all popular media formats
+- Customise the quality of the output image
+- Preserve original quality during conversion for video and audio
+- Smart file naming to prevent conflicts
+- Automatic FFmpeg installation and management
 
 ## Supported Formats
 
-### Video
-- Input/Output: .mov, .mp4, .avi, .mkv, .mpg, .m4v, .webm
-- Video Codecs: H.264, XVID, ProRes, H.265, MPEG-2
+| Media Type | Supported Input Formats                          | Supported Output Formats         |
+| ---------- | ------------------------------------------------ | -------------------------------- |
+| Video      | MP4, AVI, MKV, MOV, MPG, WEBM                    | MP4, AVI, MKV, MOV, MPG, WEBM    |
+| Image      | JPG, JPEG, PNG, WEBP, HEIC, TIFF, TIF, AVIF, BMP | JPG, PNG, WEBP, HEIC, TIFF, AVIF |
+| Audio      | MP3, AAC, WAV, FLAC                              | MP3, AAC, WAV, FLAC              |
 
-### Image
-- Input/Output: .jpg, .jpeg, .png, .webp, .gif, .bmp, .tiff, .heic
-- High-quality conversion using native macOS APIs
+## Usage
 
-### Audio
-- Input/Output: .mp3, .aac, .wav, .flac, .m4a, .ogg, .wma
-- High-quality audio codecs for each format
+### Convert Media
+
+1. Open Raycast and search for "Convert Media"
+2. Select files to convert (⌘ + click for multiple) OR select files in Finder before opening the extension
+3. Choose your desired output format (and quality settings for images, defaults are fine)
+4. Press &#8984;↵ to start conversion
+
+### ✨ Ask Media Converter
+
+1. Get started by typing @ in Raycast AI
+2. Example prompts:
+   - Convert the last mp3 file in @finder downloads to wav
+   - Convert all png files on my @finder desktop to webp
+   - Convert my last screen recording in @finder downloads to webm
+   - Convert the heic photos in @finder desktop to png
+
+### Requirements
+
+- FFmpeg (automatically installed if missing)
+- macOS 10.15 or later
 
 ## License
 
-MIT
+MIT License
 
 ## Author
 
-leandro.maia
+Created by [@leandro.maia](https://raycast.com/leandro.maia)

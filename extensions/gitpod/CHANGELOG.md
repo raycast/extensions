@@ -1,4 +1,11 @@
-## What's Changed
+# Gitpod Changelog
+
+## [Maintenance] - 2025-02-12
+
+- Remove unused `.github` files
+- Fix changelog format
+
+## [What's Changed]
 * Updating the develop with main's version 1.0.1 version by @Palanikannan1437 in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/10
 * [feat] GitHub OAuth added for simpler auth by @Palanikannan1437 in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/27
 * [feat] Gitpod samples templates now in Raycast  by @Palanikannan1437 in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/24
@@ -21,12 +28,12 @@
 * Bug Fixes by @henit-chobisa in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/61
 * Bug fixes by @henit-chobisa in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/62
 
-## New Contributors
+## [New Contributors]
 * @mads-hartmann made their first contribution in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/39
 
 **Full Changelog**: https://github.com/gitpod-samples/Gitpod-Raycast-Extension/compare/v1.0.1...v2.0.0
 
-## What's Changed
+## [What's Changed]
 * Workspaces UI added by @Palanikannan1437 in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/1
 * [Feature] Added Mac Menubar by @henit-chobisa in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/2
 * feat: Menu Bar Alignment Fixed by @henit-chobisa in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/3
@@ -37,7 +44,7 @@
 * Support.GitHub by @henit-chobisa in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/8
 * Added Initial Caching Logic for Recently Visited Repositories with their contexts by @Palanikannan1437 in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/9
 
-## New Contributors
+## [New Contributors]
 * @Palanikannan1437 made their first contribution in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/1
 * @henit-chobisa made their first contribution in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/2
 

@@ -1,5 +1,9 @@
 # Perplexity API Changelog
 
+## [Updated Models] - 2025-02-06
+
+- Added `Sonar Reasoning 128k` and `Sonar Reasoning Pro 128k`.
+
 ## [Updated Models] - 2025-01-28
 
 - Added citations for the generated answer.

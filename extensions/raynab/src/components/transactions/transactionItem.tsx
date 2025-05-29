@@ -3,7 +3,7 @@ import { Icon, List, ActionPanel, Color, Action } from '@raycast/api';
 import { TransactionDetail } from '@srcTypes';
 import { TransactionClearedStatus } from 'ynab';
 import { useTransaction } from './transactionContext';
-import { easyGetColorFromId, formatToReadablePrice, getFlagColor, time } from '@lib/utils';
+import { easyGetColorFromId, formatToReadableAmount, getFlagColor, time } from '@lib/utils';
 
 import {
   OpenInYnabAction,
@@ -23,7 +23,13 @@ import { DeleteTransactionAction } from '@components/actions/deleteTransactionAc
 const INFLOW_ICON = { source: Icon.PlusCircle, tintColor: Color.Green };
 const OUTFLOW_ICON = { source: Icon.MinusCircle, tintColor: Color.Red };
 
-export function TransactionItem({ transaction }: { transaction: TransactionDetail }) {
+export function TransactionItem({
+  transaction,
+  onTransactionDeleted,
+}: {
+  transaction: TransactionDetail;
+  onTransactionDeleted: () => void;
+}) {
   const {
     onGroup,
     onSort,
@@ -46,7 +52,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
       icon={mainIcon}
       id={transaction.id}
       title={transaction.payee_name ?? transaction.id}
-      subtitle={formatToReadablePrice({ amount: transaction.amount, currency })}
+      subtitle={formatToReadableAmount({ amount: transaction.amount, currency })}
       accessories={
         /* Accessories should be absent when showing details @see https://developers.raycast.com/api-reference/user-interface/list#list.item.detail */
         !state.isShowingDetails
@@ -61,7 +67,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
                 icon: showFlags ? { source: Icon.Flag, tintColor: getFlagColor(transaction.flag_color) } : undefined,
               },
               {
-                text: time(transaction.date).fromNow(),
+                text: time(transaction.date).calendar(),
                 tooltip: transaction.date,
               },
             ]
@@ -74,7 +80,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
               <List.Item.Detail.Metadata.Label title="Account" text={transaction.account_name} />
               <List.Item.Detail.Metadata.Label
                 title="Amount"
-                text={formatToReadablePrice({ amount: transaction.amount, currency })}
+                text={formatToReadableAmount({ amount: transaction.amount, currency })}
               />
               <List.Item.Detail.Metadata.Label title="Date" text={time(transaction.date).format('LL')} />
               <List.Item.Detail.Metadata.TagList title={hasSubtransactions ? 'Categories' : 'Category'}>
@@ -158,7 +164,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
             <ToggleFlagsAction showFlags={showFlags} setShowFlags={setShowFlags} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Update Transaction">
-            <DeleteTransactionAction transaction={transaction} />
+            <DeleteTransactionAction transaction={transaction} onTransactionDeleted={onTransactionDeleted} />
             {transaction.approved ? '' : <ApproveTransactionAction transaction={transaction} />}
           </ActionPanel.Section>
           <ActionPanel.Section title="Change List View">

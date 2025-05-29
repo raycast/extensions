@@ -117,3 +117,46 @@ export function useGetPricing({ execute = true, onData }: { execute?: boolean; o
     onData,
   });
 }
+
+type PutBody = Record<string, string | number | boolean | undefined>;
+export function usePut(
+  endpoint: string,
+  {
+    body,
+    execute = false,
+    onData,
+    onError,
+  }: {
+    body: PutBody;
+    execute?: boolean;
+    onData?: (data: unknown) => void;
+    onError?: (error: Error) => void;
+  } = {
+    body: {},
+  },
+) {
+  const { url, api_key } = getPreferenceValues<Preferences>();
+  const api_url = new URL(`api/${endpoint}`, url).toString();
+  return useFetch(api_url, {
+    method: "PUT",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${api_key}`,
+    },
+    body: JSON.stringify(body),
+    async parseResponse(response) {
+      if (!response.ok) {
+        const result: ErrorResponse | { result: "fail"; request: PutBody } = await response.json();
+        if ("message" in result) throw new Error(result.message);
+        if ("messages" in result) throw new Error(Object.values(result.messages)[0][0]);
+        throw new Error(response.statusText);
+      }
+      const result: { result: "success" } = await response.json();
+      return result;
+    },
+    execute,
+    onData,
+    onError,
+  });
+}

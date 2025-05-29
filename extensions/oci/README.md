@@ -14,6 +14,14 @@ This is a Raycast extension for [Oracle Cloud](https://cloud.oracle.com/). With 
 
     This extension uses the official SDK and needs configuration. Refer to [Developer Resources > Developer Guide > Setup and Prerequisites > SDK and CLI Configuration File](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm#SDK_and_CLI_Configuration_File) to learn where and how your configuration file needs to be set. Once done, the extension will work without further confguration needed.
 
+    For the default method:
+    
+    - `Scroll` to the bottom of the page
+    - `Copy` the "Example Configuration"
+    - `Create` dir: `mkdir ~/.oci`
+    - `Paste` the example contents into the config
+    - `Update` the file with your own details
+
 ## 🗒️ Note
 
 There are a lot of items in Oracle Cloud. PRs are welcome but due to the complexity of the SDK, it's recommended to open an Issue for discussion first.

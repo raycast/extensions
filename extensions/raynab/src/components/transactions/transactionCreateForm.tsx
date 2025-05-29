@@ -1,4 +1,3 @@
-import { autoDistribute, easyGetColorFromId, formatToYnabAmount, getSubtransacionCategoryname } from '@lib/utils';
 import {
   ActionPanel,
   Action,
@@ -9,21 +8,31 @@ import {
   Toast,
   confirmAlert,
   Alert,
-  getPreferenceValues,
+  captureException,
+  useNavigation,
 } from '@raycast/api';
+import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
+import { useMemo, useState } from 'react';
+
 import { createTransaction } from '@lib/api';
+import {
+  autoDistribute,
+  easyGetColorFromId,
+  formatToReadableAmount,
+  formatToYnabAmount,
+  getSubtransacionCategoryname,
+} from '@lib/utils';
 import { useAccounts } from '@hooks/useAccounts';
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { nanoid as random } from 'nanoid';
 
 import { TransactionFlagColor, TransactionClearedStatus } from 'ynab';
 import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
-import { useMemo, useState } from 'react';
-import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { useTransactions } from '@hooks/useTransactions';
 import { AutoDistributeAction } from '@components/actions/autoDistributeAction';
-
-const preferences = getPreferenceValues<Preferences>();
+import { Shortcuts } from '@constants';
+import { usePayees } from '@hooks/usePayees';
+import { onSubtransactionAmountChangeHandler } from '@lib/utils/transactions';
 
 interface FormValues {
   date: Date | null;
@@ -35,124 +44,224 @@ interface FormValues {
   flag_color?: string;
   categoryList?: string[];
   cleared: boolean;
+  approved: boolean;
   subtransactions?: SaveSubTransactionWithReadableAmounts[];
 }
 
-export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: string; accountId?: string }) {
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
-  const { value: activeBudgetId = '' } = useLocalStorage('activeBudgetId', '');
+interface TransactionCreateFormProps {
+  categoryId?: string;
+  accountId?: string;
+  transaction?: {
+    account_id: string;
+    amount: number;
+    payee_name: string;
+    payee_id: string;
+    memo?: string;
+    flag_color?: string;
+    date?: string;
+    cleared?: string;
+    approved?: boolean;
+  };
+}
 
+export function TransactionCreateForm({ accountId, transaction }: TransactionCreateFormProps) {
+  const { pop } = useNavigation();
+  // 1. All hooks must be called unconditionally at the top
+  const { value: activeBudgetId = '', isLoading: isLoadingBudgetId } = useLocalStorage('activeBudgetId', '');
+  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const { value: timeline } = useLocalStorage<Period>('timeline', 'month');
 
-  const { mutate } = useTransactions(activeBudgetId, timeline);
+  // Data fetching hooks - always called but may not execute if no budget ID
+  const { mutate } = useTransactions(activeBudgetId || '', timeline);
+  const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts(activeBudgetId || '');
+  const { data: payees = [], isLoading: isLoadingPayees } = usePayees(activeBudgetId || '');
+  const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId || '');
 
-  const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts(activeBudgetId);
-  const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
-  const categories = categoryGroups?.flatMap((group) => group.categories);
+  // Memoize loading state to prevent unnecessary re-renders
+  const isLoading = useMemo(
+    () => isLoadingBudgetId || isLoadingAccounts || isLoadingPayees || isLoadingCategories,
+    [isLoadingBudgetId, isLoadingAccounts, isLoadingPayees, isLoadingCategories],
+  );
 
-  const [categoryList, setCategoryList] = useState([categoryId ?? '']);
-  const [subtransactions, setSubtransactions] = useState<SaveSubTransactionWithReadableAmounts[]>([]);
-  const [amount, setAmount] = useState('0');
+  // Memoize categories to prevent unnecessary re-renders
+  const categories = useMemo(
+    () => categoryGroups?.flatMap((group) => group.categories).filter((c) => !c.hidden),
+    [categoryGroups],
+  );
 
-  const [isTransfer, setisTransfer] = useState(false);
-  const [transferFrom, setTransferTo] = useState('');
-
+  // Memoize possible accounts to prevent unnecessary re-renders
   const possibleAccounts = useMemo(() => {
-    return accounts
-      .filter((account) => {
-        if (isTransfer) {
-          return account.transfer_payee_id !== transferFrom;
-        }
-        return true;
-      })
-      .map((account) => <Form.Dropdown.Item key={account?.id ?? random()} value={account?.id} title={account?.name} />);
-  }, [accounts, isTransfer, transferFrom]);
+    const filteredAccounts = accounts.filter((account) => !account.closed && !account.deleted && account.on_budget);
+    return filteredAccounts.map((account) => (
+      <Form.Dropdown.Item key={account?.id ?? random()} value={account?.id} title={account?.name} />
+    ));
+  }, [accounts]);
 
-  const currencySymbol = activeBudgetCurrency?.currency_symbol;
+  // Memoize payee dropdown items
+  const payeeItems = useMemo(() => {
+    return payees?.map((payee) => <Form.Dropdown.Item key={payee.id} value={payee.id} title={payee.name} />);
+  }, [payees]);
 
+  // State hooks - always called
+  const [isTransfer, setIsTransfer] = useState(false);
+  const [transferFrom, setTransferTo] = useState('');
+  const [selectOwnPayee, setselectOwnPayee] = useState(!!transaction?.payee_name);
+  const [amount, setAmount] = useState(transaction?.amount?.toString() || '');
+  const [categoryList, setCategoryList] = useState<string[]>([]);
+  const [subtransactions, setSubtransactions] = useState<SaveSubTransactionWithReadableAmounts[]>([]);
+
+  // Memoize category items
+  const categoryItems = useMemo(() => {
+    return categories?.map((category, idx) => (
+      <Form.TagPicker.Item
+        key={category.id}
+        value={category.id}
+        title={category.name}
+        icon={{ source: Icon.PlusCircle, tintColor: easyGetColorFromId(idx) }}
+      />
+    ));
+  }, [categories]);
+
+  // Memoize subtransaction fields
+  const subtransactionFields = useMemo(() => {
+    if (subtransactions.length === 0 || isTransfer) return null;
+    return subtransactions.map((transaction, idx) => (
+      <Form.TextField
+        id={`subtransaction-${idx}`}
+        key={transaction.category_id}
+        title={getSubtransacionCategoryname(categories, transaction)}
+        value={transaction.amount}
+        onChange={onSubcategoryAmountChange(transaction)}
+      />
+    ));
+  }, [subtransactions, isTransfer, categories]);
+
+  // Move the handler definition here so it's before its first usage
+  const onSubcategoryAmountChange = onSubtransactionAmountChangeHandler({
+    amount,
+    currency: activeBudgetCurrency,
+    subtransactions,
+    setSubtransactions,
+  });
+
+  // Form hook - always called
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
-      date: new Date(),
-      account_id: accountId,
-      categoryList: categoryList,
-      cleared: true,
-      payee_name: '',
-      flag_color: '',
-      payee_id: undefined,
+      date: transaction?.date ? new Date(transaction.date) : new Date(new Date().toLocaleDateString()),
+      account_id: transaction?.account_id || accountId || '',
+      amount: transaction?.amount?.toString() || '',
+      payee_name: transaction?.payee_name || '',
+      payee_id: transaction?.payee_id || '',
+      memo: transaction?.memo || '',
+      flag_color: transaction?.flag_color,
+      categoryList: [],
+      cleared: transaction?.cleared === 'cleared',
+      approved: transaction?.approved || false,
     },
     onSubmit: async (values) => {
-      const transactionData = {
-        ...values,
-        date: (values.date ?? new Date()).toISOString(),
-        amount: formatToYnabAmount(values.amount),
-        approved: true,
-        /* If there's a payee id, that means it's a transfer for which the payee is the transfer from account and the category doesn't matter */
-        category_id: values.payee_id ? null : values.categoryList?.[0] || undefined,
-        payee_name: values.payee_id ? undefined : values.payee_name,
-        cleared: values.cleared ? TransactionClearedStatus.Cleared : TransactionClearedStatus.Uncleared,
-        flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
-        subtransactions: undefined,
-      };
-
-      /**
-       * We need make sure the total of subtransactions is equal to the transaction.
-       * That validation makes sense to keep at this level
-       * */
-      if (subtransactions.length > 0) {
-        transactionData.category_id = undefined;
-
-        /* @ts-expect-error we're not allowing updates to existing subtransactions so this doesn't matter */
-        transactionData.subtransactions = subtransactions.map((s) => ({ ...s, amount: formatToYnabAmount(s.amount) }));
-
-        const subtransactionsTotal = subtransactions.reduce((total, { amount }) => total + +amount, 0);
-        const difference = subtransactionsTotal - +values.amount;
-
-        if (difference !== 0) {
-          const options: Alert.Options = {
-            title: `Something Doesn't Add Up`,
-            message: `The total is ${
-              values.amount
-            }, but the splits add up to ${subtransactionsTotal}. How would you like to handle the unassigned ${difference.toFixed(
-              2,
-            )}?`,
-            primaryAction: {
-              title: 'Auto-Distribute the amounts',
-              onAction: () => {
-                const distributedAmounts = autoDistribute(+values.amount, subtransactions.length).map((amount) =>
-                  amount.toString(),
-                );
-                setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
-              },
-            },
-            dismissAction: {
-              title: 'Adjust manually',
-            },
-          };
-          await confirmAlert(options);
-          return;
-        }
-      }
-
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Creating Transaction' });
 
-      mutate(createTransaction(activeBudgetId, transactionData))
-        .then(() => {
-          toast.style = Toast.Style.Success;
-          toast.title = 'Transaction created successfully';
-        })
-        .catch(() => {
-          toast.style = Toast.Style.Failure;
-          toast.title = 'Failed to create transaction';
-        });
+      try {
+        const transactionData = {
+          ...values,
+          date: values.date ? values.date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          amount: formatToYnabAmount(values.amount, activeBudgetCurrency),
+          approved: true,
+          category_id: isTransfer ? null : values.categoryList?.[0] || undefined,
+          payee_name: values.payee_id ? undefined : values.payee_name,
+          cleared: values.cleared ? TransactionClearedStatus.Cleared : TransactionClearedStatus.Uncleared,
+          flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
+          subtransactions: undefined,
+        };
+
+        if (subtransactions.length > 0) {
+          transactionData.category_id = undefined;
+          /* @ts-expect-error we're not allowing updates to existing subtransactions so this doesn't matter */
+          transactionData.subtransactions = subtransactions.map((s) => ({
+            ...s,
+            amount: formatToYnabAmount(s.amount, activeBudgetCurrency),
+          }));
+
+          const subtransactionsTotal = subtransactions.reduce(
+            (total, { amount }) => total + formatToYnabAmount(amount, activeBudgetCurrency),
+            0,
+          );
+          const difference = subtransactionsTotal - transactionData.amount;
+
+          if (difference !== 0) {
+            const fmtSubTotal = formatToReadableAmount({
+              amount: subtransactionsTotal,
+              currency: activeBudgetCurrency,
+              includeSymbol: false,
+            });
+            const fmtDifference = formatToReadableAmount({
+              amount: difference,
+              currency: activeBudgetCurrency,
+              includeSymbol: false,
+            });
+
+            const onAutoDistribute = () => {
+              const distributedAmounts = autoDistribute(transactionData.amount, subtransactions.length).map((amount) =>
+                formatToReadableAmount({ amount, currency: activeBudgetCurrency, includeSymbol: false }),
+              );
+              setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
+            };
+
+            const options: Alert.Options = {
+              title: `Something Doesn't Add Up`,
+              message: `The total is ${
+                values.amount
+              }, but the splits add up to ${fmtSubTotal}. How would you like to handle the unassigned ${fmtDifference}?`,
+              primaryAction: {
+                title: 'Auto-Distribute the amounts',
+                onAction: onAutoDistribute,
+              },
+              dismissAction: {
+                title: 'Adjust manually',
+              },
+            };
+
+            await toast.hide();
+            await confirmAlert(options);
+            return;
+          }
+        }
+
+        await mutate(createTransaction(activeBudgetId, transactionData));
+        toast.style = Toast.Style.Success;
+        toast.title = 'Transaction created successfully';
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        captureException(error);
+        toast.title = 'Failed to create transaction';
+
+        if (error instanceof Error) {
+          toast.message = error.message;
+        }
+      }
     },
     validation: {
       date: FormValidation.Required,
       payee_name: (value) => {
-        if (!value && !isTransfer) {
+        if (selectOwnPayee && !value && !isTransfer) {
           return 'Please add a counterparty';
         }
       },
-      amount: FormValidation.Required,
+      payee_id: (value) => {
+        const errorMessage = 'Please select or enter a payee';
+
+        if (!selectOwnPayee && !value) {
+          return errorMessage;
+        }
+      },
+      amount: (value: string | undefined) => {
+        if (!value) return 'Please enter an amount';
+        const num = Number(value);
+        if (isNaN(num)) return 'Please enter a valid number';
+        if (num === 0) return 'Amount cannot be zero';
+        return undefined;
+      },
       categoryList: (value) => {
         const errorMessage = 'Please add one or more categories to this transaction';
 
@@ -166,38 +275,10 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
     },
   });
 
-  const onSubcategoryAmountChange = (
-    sub: SaveSubTransactionWithReadableAmounts,
-  ): ((newValue: string) => void) | undefined => {
-    const eventHandler = (newAmount: string) => {
-      const oldList = [...subtransactions];
-      const previousSubtransactionIdx = oldList.findIndex((s) => s.category_id === sub.category_id);
-
-      if (previousSubtransactionIdx === -1) return;
-
-      const newSubtransaction = { ...oldList[previousSubtransactionIdx], amount: newAmount };
-      const newList = [...oldList];
-      newList[previousSubtransactionIdx] = newSubtransaction;
-
-      // If there are exactly 2 subtransactions, we can automatically calculate the second amount
-      // based on the total transaction amount and the first subtransaction amount
-      const isDualSplitTransaction = oldList.length === 2;
-      if (isDualSplitTransaction && preferences.liveDistribute) {
-        const otherSubTransactionIdx = previousSubtransactionIdx === 0 ? 1 : 0;
-        const otherSubTransaction = { ...oldList[otherSubTransactionIdx] };
-        const otherAmount = +amount - +newAmount;
-
-        if (!Number.isNaN(otherAmount)) {
-          otherSubTransaction.amount = otherAmount.toString();
-          newList[otherSubTransactionIdx] = otherSubTransaction;
-        }
-      }
-
-      setSubtransactions(newList);
-    };
-
-    return eventHandler;
-  };
+  // Now we can do our conditional rendering
+  if (isLoading) {
+    return <Form isLoading />;
+  }
 
   return (
     <Form
@@ -205,12 +286,21 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
           {subtransactions.length > 1 ? (
-            <AutoDistributeAction amount={amount} categoryList={categoryList} setSubtransactions={setSubtransactions} />
+            <AutoDistributeAction
+              amount={amount}
+              currency={activeBudgetCurrency}
+              categoryList={categoryList}
+              setSubtransactions={setSubtransactions}
+            />
           ) : null}
+          <Action
+            title={selectOwnPayee ? 'Show Payee Dropdown' : 'Show Payee Textfield'}
+            onAction={() => setselectOwnPayee((v) => !v)}
+            shortcut={Shortcuts.TogglePayeeFieldType}
+          />
         </ActionPanel>
       }
       navigationTitle="Create transaction"
-      isLoading={isLoadingAccounts || isLoadingCategories}
     >
       <Form.Description
         title="Create a new transaction"
@@ -219,23 +309,25 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
       <Form.DatePicker {...itemProps.date} title="Date of Transaction" type={Form.DatePicker.Type.Date} />
       <Form.TextField
         {...itemProps.amount}
-        title={`Amount ${currencySymbol ? `(${currencySymbol})` : ''}`}
+        title={`Amount ${activeBudgetCurrency?.currency_symbol ? `(${activeBudgetCurrency.currency_symbol})` : ''}`}
         value={amount}
         onChange={setAmount}
       />
-      <Form.Checkbox id="transfer" label="The transaction is a transfer" value={isTransfer} onChange={setisTransfer} />
+      <Form.Checkbox id="transfer" label="The transaction is a transfer" value={isTransfer} onChange={setIsTransfer} />
       {isTransfer ? (
         <Form.Dropdown {...itemProps.payee_id} title="Transfer from" value={transferFrom} onChange={setTransferTo}>
-          {accounts.map((account) => (
-            <Form.Dropdown.Item
-              key={account?.id ?? random()}
-              value={account?.transfer_payee_id ?? ''}
-              title={account?.name}
-            />
-          ))}
+          {possibleAccounts}
+        </Form.Dropdown>
+      ) : !selectOwnPayee ? (
+        <Form.Dropdown {...itemProps.payee_id} title="Payee" info="Press Opt+P to add a payee not in the list">
+          {payeeItems}
         </Form.Dropdown>
       ) : (
-        <Form.TextField {...itemProps.payee_name} title="Payee Name" placeholder="Enter the counterparty" />
+        <Form.TextField
+          {...itemProps.payee_name}
+          title="Payee"
+          info="Press Opt+P to select from the list of existing payees"
+        />
       )}
       <Form.Dropdown {...itemProps.account_id} title={isTransfer ? 'To' : 'Account'} defaultValue={accountId}>
         {possibleAccounts}
@@ -247,8 +339,11 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
           value={categoryList}
           onChange={(newCategories) => {
             if (newCategories.length > 1) {
-              const distributedAmounts = autoDistribute(+amount, newCategories.length).map((amount) =>
-                amount.toString(),
+              const distributedAmounts = autoDistribute(
+                formatToYnabAmount(amount, activeBudgetCurrency),
+                newCategories.length,
+              ).map((amount) =>
+                formatToReadableAmount({ amount, currency: activeBudgetCurrency, includeSymbol: false }),
               );
               setCategoryList(newCategories);
               setSubtransactions(
@@ -258,39 +353,15 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
               setCategoryList(newCategories);
               setSubtransactions([]);
             }
+            // Force validation reset
+            itemProps.categoryList.onChange?.(newCategories);
           }}
         >
-          {categories ? (
-            categories.map((category, idx) => (
-              <Form.TagPicker.Item
-                key={category.id}
-                value={category.id}
-                title={category.name}
-                icon={{ source: Icon.PlusCircle, tintColor: easyGetColorFromId(idx) }}
-              />
-            ))
-          ) : (
-            <Form.TagPicker.Item value="" title="" />
-          )}
+          {categoryItems}
         </Form.TagPicker>
       ) : null}
 
-      <Form.Checkbox {...itemProps.cleared} label="Mark as cleared" storeValue={true} />
-
-      {subtransactions.length > 0 && !isTransfer ? (
-        <>
-          <Form.Separator />
-          {subtransactions.map((transaction, idx) => (
-            <Form.TextField
-              id={`subtransaction-${idx}`}
-              key={transaction.category_id}
-              title={getSubtransacionCategoryname(categories, transaction)}
-              value={transaction.amount}
-              onChange={onSubcategoryAmountChange(transaction)}
-            />
-          ))}
-        </>
-      ) : null}
+      {subtransactionFields}
 
       <Form.Separator />
 

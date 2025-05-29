@@ -1,8 +1,13 @@
 # Pieces for Raycast Changelog
 
-## [Update] - 2025-01-11
+## [0.3.0] - 2025-02-27
 
-- Fix addressing port migration that broke the extension
+- Fixes website link color contrast in search results
+- Notifies user to update Raycast permissions if unable to select text in frontmost app
+
+## [0.2.0] - 2025-02-03
+
+- Renames commands according to new branding guidelines
 
 ## [0.1.0] - 2025-01-06
 

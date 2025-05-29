@@ -1,4 +1,4 @@
-import { Clipboard, closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, popToRoot, Clipboard } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { SEARCH_ENGINE } from "../constants";
 import { Preferences, Tab } from "../interfaces";

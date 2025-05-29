@@ -98,6 +98,9 @@ export type VerifyKeyResponse = {
   remaining?: number;
 };
 
+type RevokeKeyRequest = {
+  keyId: string;
+};
 export type RevokeKeyResponse = Record<string, never>;
 
 export type ApiHeaders = {
@@ -105,8 +108,13 @@ export type ApiHeaders = {
   Authorization?: string;
 };
 export type ApiMethod = "GET" | "POST" | "DELETE" | "PUT";
-export type BodyRequest = CreateKeyRequest | VerifyKeyRequest | UpdateKeyRequest;
-export type ErrorResponse = {
-  code: string;
-  error?: string;
+export type BodyRequest = CreateKeyRequest | VerifyKeyRequest | UpdateKeyRequest | RevokeKeyRequest;
+export type ErrorResponse = { code: string; error?: string };
+export type NewErrorResponse = {
+  error: {
+    code: string;
+    message: string;
+    docs: string;
+    requestId: string;
+  };
 };

@@ -1,5 +1,5 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Model, ModelHook } from "../type";
 
 export const DEFAULT_MODEL: Model = {
@@ -15,6 +15,9 @@ export const DEFAULT_MODEL: Model = {
 };
 
 const option: Model["option"][] = [
+  "claude-sonnet-4-20250514",
+  "claude-3-7-sonnet-latest",
+  "claude-3-7-sonnet-20250219",
   "claude-3-5-haiku-latest",
   "claude-3-5-haiku-20241022",
   "claude-3-5-sonnet-latest",
@@ -32,7 +35,8 @@ async function getStoredModels(): Promise<Model[]> {
   if (!storedModels) {
     return [DEFAULT_MODEL];
   }
-  return [...JSON.parse(storedModels), DEFAULT_MODEL] satisfies Model[];
+
+  return JSON.parse(storedModels) satisfies Model[];
 }
 
 export function useModel(): ModelHook {
@@ -83,7 +87,7 @@ export function useModel(): ModelHook {
   const remove = useCallback(
     async (model: Model) => {
       const toast = await showToast({
-        title: "Remove your model...",
+        title: "Removing your model...",
         style: Toast.Style.Animated,
       });
       setData((prevData) => {
@@ -99,7 +103,7 @@ export function useModel(): ModelHook {
 
   const clear = useCallback(async () => {
     const toast = await showToast({
-      title: "Clearing your models ...",
+      title: "Clearing your models...",
       style: Toast.Style.Animated,
     });
     setData((prevData) => {

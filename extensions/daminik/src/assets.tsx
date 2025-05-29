@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Grid, Icon } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Grid, Icon, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
@@ -82,6 +82,11 @@ export default function Assets() {
                 icon="daminik.png"
                 title="Edit in Workspace"
                 url={`${url}file/edit/${asset.filename}`}
+              />
+              <Action.CopyToClipboard
+                title="Copy Public URL"
+                content={asset.publicUrl}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
             </ActionPanel>
           }

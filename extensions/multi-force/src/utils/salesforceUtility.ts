@@ -11,6 +11,7 @@ import {
   SfdcUrl,
   WebOAuthServer,
   SfProject,
+  OrgAuthorization,
 } from "@salesforce/core";
 import isWsl from "is-wsl";
 import { execSync } from "node:child_process";
@@ -22,23 +23,31 @@ import { HOME_PATH } from "../constants";
 export async function getOrgList(): Promise<DeveloperOrg[]> {
   process.env["SF_DISABLE_LOG_FILE"] = "true";
   const authInfos = await AuthInfo.listAllAuthorizations();
-  const orgs: DeveloperOrg[] = authInfos.map((authInfo): DeveloperOrg => {
-    const { username } = authInfo;
+
+  // Get detailed org info for each authorization
+  const orgsPromises = authInfos.map(async (orgAuthorization: OrgAuthorization) => {
+    const { username } = orgAuthorization;
+
+    const authInfo = await AuthInfo.create({ username });
+    // Get the fields directly from AuthInfo
+    const fields = authInfo.getFields(true); // Pass true to get all fields
+
     return {
-      alias: authInfo.aliases && authInfo.aliases.length > 0 ? authInfo.aliases[0] : username,
+      alias: orgAuthorization.aliases && orgAuthorization.aliases.length > 0 ? orgAuthorization.aliases[0] : username,
       username,
-      instanceUrl: authInfo.instanceUrl ?? "",
+      instanceUrl: orgAuthorization.instanceUrl ?? "",
+      expirationDate: fields.expirationDate,
     };
   });
+
+  const orgs = await Promise.all(orgsPromises);
   return orgs;
 }
 
 async function executeLoginFlow(oauthConfig: OAuth2Config): Promise<AuthInfo> {
-  console.log(oauthConfig);
   const oauthServer = await WebOAuthServer.create({ oauthConfig });
   try {
     await oauthServer.start();
-    console.log(oauthServer.getAuthorizationUrl());
     await open(oauthServer.getAuthorizationUrl());
     return oauthServer.authorizeAndSave();
   } catch (err) {

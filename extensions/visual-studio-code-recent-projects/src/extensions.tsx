@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Color, List, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { getErrorMessage } from "./utils";
-import { Extension, getLocalExtensions } from "./lib/vscode";
+import { useEffect, useState } from "react";
 import {
   OpenExtensionByIDInBrowserAction,
   OpenExtensionByIDInVSCodeAction,
   UninstallExtensionByIDAction,
 } from "./extension-actions";
+import { Extension, getLocalExtensions } from "./lib/vscode";
+import { getErrorMessage } from "./utils";
 
 function OpenExtensionInVSCodeAction(props: { extension: Extension }): JSX.Element {
   return <OpenExtensionByIDInVSCodeAction extensionID={props.extension.id} />;
@@ -39,6 +39,7 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
           <ActionPanel.Section>
             <Action.CopyToClipboard
               content={e.id}
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Copy Extension ID"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
@@ -56,7 +57,11 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <UninstallExtensionByIDAction extensionID={e.id} afterUninstall={props.reloadExtension} />
+            <UninstallExtensionByIDAction
+              extensionID={e.id}
+              extensionName={e.name}
+              afterUninstall={props.reloadExtension}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -74,7 +79,7 @@ export default function ExtensionsRootCommand(): JSX.Element {
     <List isLoading={isLoading} searchBarPlaceholder="Search Installed Extensions">
       <List.Section title="Installed Extensions" subtitle={`${extensionsSorted?.length}`}>
         {extensionsSorted?.map((e) => (
-          <ExtensionListItem key={e.id} extension={e} reloadExtension={refresh} />
+          <ExtensionListItem key={`${e.id}-${e.version}`} extension={e} reloadExtension={refresh} />
         ))}
       </List.Section>
     </List>

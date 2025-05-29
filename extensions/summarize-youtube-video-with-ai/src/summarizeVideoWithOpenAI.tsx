@@ -1,15 +1,13 @@
+import { List, type LaunchProps } from "@raycast/api";
 import nodeFetch from "node-fetch";
-(globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
-
-import { showToast, Toast, type LaunchProps } from "@raycast/api";
-import { useEffect, useState } from "react";
-import ActionOpenAIFollowUp from "./components/openai/ActionOpenAIFollowUp";
+import { useState } from "react";
+import { useOpenAIFollowUpQuestion } from "./components/openai/hooks/useOpenAIFollowUpQuestion";
 import { useOpenAISummary } from "./components/openai/hooks/useOpenAISummary";
 import SummaryDetails from "./components/summary/SummaryDetails";
-import { ALERT } from "./const/toast_messages";
 import { useGetVideoUrl } from "./hooks/useGetVideoUrl";
-import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
-import { getVideoTranscript } from "./utils/getVideoTranscript";
+import { useQuestions } from "./hooks/useQuestions";
+import { useVideoData } from "./hooks/useVideoData";
+(globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
 
 interface SummarizeVideoWithOpenAIProps {
   video: string | undefined | null;
@@ -30,39 +28,26 @@ export default function SummarizeVideoWithOpenAI(
 ) {
   const [summary, setSummary] = useState<string | undefined>();
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
-  const [transcript, setTranscript] = useState<string | undefined>();
-  const [videoData, setVideoData] = useState<VideoDataTypes>();
   const [videoURL, setVideoURL] = useState<string | null | undefined>(props.arguments.video);
 
-  useGetVideoUrl({ input: props.arguments.video || props.launchContext?.video, setVideoURL }).then((url) =>
-    setVideoURL(url),
-  );
+  useGetVideoUrl({
+    input: props.arguments.video || props.launchContext?.video,
+    setVideoURL,
+  });
 
-  useEffect(() => {
-    if (!videoURL) return;
-    getVideoData(videoURL)
-      .then(setVideoData)
-      .catch((error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: ALERT.title,
-          message: "Error fetching video data: " + error.message,
-        });
-      });
-    getVideoTranscript(videoURL)
-      .then(setTranscript)
-      .catch((error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: ALERT.title,
-          message: "Error fetching video transcript: " + error.message,
-        });
-      });
-  }, [videoURL]);
+  const { videoData, transcript } = useVideoData(videoURL);
+  const { questions, setQuestions, question, setQuestion, handleAdditionalQuestion } = useQuestions(summary);
 
   useOpenAISummary({ transcript, setSummaryIsLoading, setSummary });
+  useOpenAIFollowUpQuestion({
+    setQuestions,
+    setQuestion,
+    transcript,
+    question,
+  });
 
-  if (!videoData || !transcript) return null;
+  if (!videoData || !transcript) return <List isLoading={true} />;
+
   const { thumbnail, title } = videoData;
 
   const markdown = summary
@@ -74,9 +59,9 @@ export default function SummarizeVideoWithOpenAI(
 
   return (
     <SummaryDetails
-      AskFollowUpQuestion={ActionOpenAIFollowUp}
-      markdown={markdown}
-      setSummary={setSummary}
+      questions={questions}
+      onQuestionSubmit={handleAdditionalQuestion}
+      summary={markdown}
       summaryIsLoading={summaryIsLoading}
       transcript={transcript}
       videoData={videoData}

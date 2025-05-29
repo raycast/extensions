@@ -11,8 +11,11 @@ import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import useInstances from "../hooks/useInstances";
 import InstanceForm from "./InstanceForm";
 import { GlobalSearchResponse, Record, SearchResult } from "../types";
+import useFavorites from "../hooks/useFavorites";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
-export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
+export default function ({ searchTerm }: { searchTerm: string }) {
+  const { isInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
   const { addInstance, mutate: mutateInstances, selectedInstance } = useInstances();
   const { commandName } = environment;
   const command = commandName == "search" ? "Search" : "Quickly Search";
@@ -73,7 +76,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
     const count = sumBy(data, (r) => r.record_count);
     if (count == 0) setNavigationTitle(`${command} > ${aliasOrName} > No results found for ${searchTerm}`);
     else setNavigationTitle(`${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for ${searchTerm}`);
-  }, [data, searchTerm, isLoading, errorFetching, selectedInstance]);
+  }, [command, selectedInstance, errorFetching, isLoading, data, searchTerm, alias, instanceName]);
 
   return (
     <List
@@ -102,6 +105,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
               source: Icon[iconName as keyof typeof Icon],
               tintColor: Color[colorName as keyof typeof Color],
             };
+            const allResultsUrl = buildServiceNowUrl(instanceName, result.all_results_url);
             return (
               <List.Section
                 key={result.name + "_" + index}
@@ -116,6 +120,10 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                     label={result.label}
                     fields={result.fields}
                     revalidateSearchResults={revalidate}
+                    favoriteId={isInFavorites(record.record_url)}
+                    addUrlToFavorites={addUrlToFavorites}
+                    removeFromFavorites={removeFromFavorites}
+                    revalidateFavorites={revalidateFavorites}
                   />
                 ))}
                 <List.Item
@@ -131,11 +139,11 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                         title={`View all ${result.name == "u_documate_page" ? "Documate Page" : result.label} matches`}
                       >
                         <Action.OpenInBrowser
-                          title="Open in Servicenow"
-                          url={`${instanceUrl}${result.all_results_url}`}
+                          title="Open in ServiceNow"
+                          url={allResultsUrl}
                           icon={{ source: "servicenow.svg" }}
                         />
-                        <Action.CopyToClipboard title="Copy URL" content={`${instanceUrl}${result.all_results_url}`} />
+                        <Action.CopyToClipboard title="Copy URL" content={allResultsUrl} />
                       </List.Dropdown.Section>
                       <Actions revalidate={revalidate} />
                     </ActionPanel>

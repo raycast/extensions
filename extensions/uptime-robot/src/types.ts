@@ -40,7 +40,7 @@ export type Monitor = {
   http_password: string;
   port: string;
   interval: number;
-  timeou: number;
+  timeout: number;
   status: number;
   create_datetime: number;
   logs: MonitorLog[];

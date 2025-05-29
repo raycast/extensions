@@ -23,7 +23,11 @@ export default function Items(props: LaunchProps<{ arguments: Arguments.Items }>
     execute: item === "labels",
   });
 
-  const { isLoading: isLoadingServers, data: servers } = useGet<Server>("servers", {
+  const {
+    isLoading: isLoadingServers,
+    data: servers,
+    mutate,
+  } = useGet<Server>("servers", {
     execute: item === "servers",
   });
   const { isLoading: isLoadingReseller, data: resellers } = useGet<Reseller>("reseller", {
@@ -80,7 +84,7 @@ export default function Items(props: LaunchProps<{ arguments: Arguments.Items }>
       {item === "servers" && (
         <List.Section title="Servers" subtitle={servers.length.toString()}>
           {servers.map((server) => (
-            <ServerItem key={server.id} server={server} />
+            <ServerItem key={server.id} server={server} mutate={mutate} />
           ))}
         </List.Section>
       )}

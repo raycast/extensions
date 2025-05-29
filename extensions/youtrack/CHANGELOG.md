@@ -1,5 +1,7 @@
 # YouTrack Changelog
 
+## [Update dependencies] - 2025-02-12
+
 ## [Update] - 2025-01-07
 
 - Update YouTrack icon

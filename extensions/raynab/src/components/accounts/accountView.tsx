@@ -3,7 +3,7 @@ import { TransactionCreateForm } from '@components/transactions/transactionCreat
 import { TransactionView } from '@components/transactions/transactionView';
 import { Shortcuts } from '@constants';
 import { useAccounts } from '@hooks/useAccounts';
-import { formatToReadablePrice } from '@lib/utils';
+import { formatToReadableAmount } from '@lib/utils';
 import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
 import { useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat } from '@srcTypes';
@@ -22,7 +22,7 @@ export function AccountView() {
           title={account.name}
           accessories={[
             {
-              text: formatToReadablePrice({
+              text: formatToReadableAmount({
                 amount: account.balance,
                 currency: activeBudgetCurrency,
               }),

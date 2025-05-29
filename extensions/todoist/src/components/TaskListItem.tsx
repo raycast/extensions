@@ -1,11 +1,10 @@
 import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
-import { format } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
 import { SyncData, Task } from "../api";
 import { getCollaboratorIcon } from "../helpers/collaborators";
 import { getColorByKey } from "../helpers/colors";
-import { isRecurring, displayDate, isExactTimeTask, displayDateTime, isOverdue } from "../helpers/dates";
+import { displayTime, displayDate, isExactTimeTask, isOverdue, isRecurring } from "../helpers/dates";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { displayReminderName } from "../helpers/reminders";
 import { ViewMode } from "../helpers/tasks";
@@ -24,14 +23,7 @@ type TaskListItemProps = {
   quickLinkView?: QuickLinkView;
 };
 
-export default function TaskListItem({
-  task,
-  mode,
-  viewProps,
-  data,
-  setData,
-  quickLinkView,
-}: TaskListItemProps): JSX.Element {
+export default function TaskListItem({ task, mode, viewProps, data, setData, quickLinkView }: TaskListItemProps) {
   const taskComments = data?.notes.filter((note) => note.item_id === task.id);
   const accessories: List.Item.Accessory[] = [];
   const keywords: string[] = [];
@@ -98,18 +90,18 @@ export default function TaskListItem({
     const exactTime = isExactTimeTask(task);
     const recurring = isRecurring(task);
     const overdue = isOverdue(task.due.date);
+    const use12HourFormat = data?.user?.time_format === 1;
 
-    const text = exactTime ? displayDateTime(task.due.date) : displayDate(task.due.date);
+    const text = displayDate(task.due.date);
 
     if (mode === ViewMode.date && recurring) {
       accessories.unshift({ icon: Icon.ArrowClockwise, tooltip: `Recurring task` });
     }
 
     if (mode === ViewMode.date && exactTime) {
-      const time = task.due?.date as string;
-      const text = format(new Date(time), "HH:mm");
+      const time = displayTime(task.due.date, use12HourFormat);
 
-      accessories.unshift({ icon: Icon.Clock, text, tooltip: `Due time: ${text}` });
+      accessories.unshift({ icon: Icon.Clock, text: time, tooltip: `Due time: ${time}` });
     }
 
     if (isOverdue(task.due.date) || mode !== ViewMode.date) {
@@ -147,10 +139,11 @@ export default function TaskListItem({
     }) ?? [];
 
   if (reminders.length > 0) {
+    const use12HourFormat = data?.user?.time_format === 1;
     accessories.unshift({
       icon: Icon.Alarm,
       tooltip: `${reminders.length} reminder${reminders.length === 1 ? "" : "s"}: ${reminders
-        .map(displayReminderName)
+        .map((r) => displayReminderName(r, use12HourFormat))
         .join(", ")}`,
       ...(reminders.length > 1 ? { text: `${reminders.length}` } : {}),
     });

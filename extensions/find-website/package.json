@@ -5,6 +5,9 @@
   "description": "Quickly find the website you are looking for.",
   "icon": "logo.png",
   "author": "nahuel_andreoli",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -37,6 +40,34 @@
         {
           "title": "Arc",
           "value": "arc"
+        },
+        {
+          "title": "Safari",
+          "value": "safari"
+        },
+        {
+          "title": "Firefox",
+          "value": "firefox"
+        },
+        {
+          "title": "Zen Browser",
+          "value": "zen"
+        },
+        {
+          "title": "Brave Browser",
+          "value": "brave"
+        },
+        {
+          "title": "Vivaldi",
+          "value": "vivaldi"
+        },
+        {
+          "title": "Opera",
+          "value": "opera"
+        },
+        {
+          "title": "Microsoft Edge",
+          "value": "edge"
         }
       ]
     },
@@ -51,10 +82,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "ini": "^5.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
+    "@types/ini": "^4.1.1",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",

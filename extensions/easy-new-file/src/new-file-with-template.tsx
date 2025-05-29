@@ -56,9 +56,9 @@ export function buildFileName(path: string, name: string, extension: string) {
 }
 
 export async function createNewFile(fileType: FileType, desPath: string, fileName = "", fileContent = "") {
-  isEmpty(fileName)
-    ? (fileName = buildFileName(desPath, fileType.name, fileType.extension))
-    : (fileName = fileName + "." + fileType.extension);
+  fileName = isEmpty(fileName)
+    ? buildFileName(desPath, fileType.name, fileType.extension)
+    : fileName + "." + fileType.extension;
   const filePath = desPath + fileName;
 
   switch (fileType.name) {
@@ -82,13 +82,25 @@ export async function createNewFile(fileType: FileType, desPath: string, fileNam
   await showCreateSuccess(fileName, filePath, desPath);
 }
 
-export async function createNewFileByTemplate(template: TemplateType, desPath: string, fileName = "") {
-  isEmpty(fileName)
-    ? (fileName = buildFileName(desPath, template.name, template.extension))
-    : (fileName = fileName + "." + template.extension);
-  const filePath = desPath + fileName;
+export async function createNewFileByTemplate(template: TemplateType, desPath: string, customFileName = "") {
+  if (isEmpty(customFileName)) {
+    if (template.name.startsWith(".")) {
+      customFileName = template.name;
+    } else {
+      customFileName = buildFileName(desPath, template.name, template.extension);
+    }
+  } else {
+    if (template.name.startsWith(".")) {
+      const ext = template.name.split(".").length > 1 ? template.name.split(".")[1] : "";
+      customFileName = customFileName + "." + ext;
+    } else {
+      customFileName = customFileName + "." + template.extension;
+    }
+  }
+
+  const filePath = desPath + customFileName;
   fse.copyFileSync(template.path, filePath);
-  await showCreateSuccess(fileName, filePath, desPath);
+  await showCreateSuccess(customFileName, filePath, desPath);
 }
 
 export const showCreateSuccess = async (fileName: string, filePath: string, folderPath: string) => {
