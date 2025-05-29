@@ -1,6 +1,6 @@
 # Checksum Changelog
 
-## \[v1.1.0] - 2025-05-29
+## [v1.1.0] - {PR_MERGE_DATE}
 #### 🔐 **Expanded Hash Algorithms**
 * Added support for popular hashing algorithms:
   * **MD5**, **SHA-1**, **SHA-2 Family** (SHA-224, SHA-256, SHA-384, SHA-512), **SHA-3 Family** (SHA3-224, SHA3-256, SHA3-384, SHA3-512)
