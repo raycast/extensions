@@ -1,4 +1,13 @@
-import { ActionPanel, Action, Form, showToast, Toast, Alert, confirmAlert, popToRoot } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Form,
+  showToast,
+  Toast,
+  Alert,
+  confirmAlert,
+  popToRoot,
+} from "@raycast/api";
 import { useState } from "react";
 import { getTerms, deleteAllTerms } from "./data-store";
 
@@ -51,7 +60,11 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Delete All Terms" onSubmit={handleSubmit} style={Action.Style.Destructive} />
+          <Action.SubmitForm
+            title="Delete All Terms"
+            onSubmit={handleSubmit}
+            style={Action.Style.Destructive}
+          />
         </ActionPanel>
       }
     >

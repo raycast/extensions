@@ -1,4 +1,11 @@
-import { ActionPanel, Action, Form, showToast, Toast, Clipboard } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Form,
+  showToast,
+  Toast,
+  Clipboard,
+} from "@raycast/api";
 import { useState } from "react";
 import { getTerms } from "./data-store";
 
@@ -10,7 +17,10 @@ export default function ExportTerms() {
     try {
       const terms = await getTerms();
       const csvContent = terms
-        .map((term) => `${term.term},${term.definition.replace(/ {2}\n/g, "\n").replace(/\n/g, "\\n")}`)
+        .map(
+          (term) =>
+            `${term.term},${term.definition.replace(/ {2}\n/g, "\n").replace(/\n/g, "\\n")}`,
+        )
         .join("\n");
 
       await Clipboard.copy(csvContent);

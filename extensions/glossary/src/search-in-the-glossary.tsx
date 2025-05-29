@@ -1,6 +1,21 @@
-import { useNavigation, ActionPanel, Action, List, Icon, showToast, Toast, Alert, confirmAlert } from "@raycast/api";
+import {
+  useNavigation,
+  ActionPanel,
+  Action,
+  List,
+  Icon,
+  showToast,
+  Toast,
+  Alert,
+  confirmAlert,
+} from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
-import { searchTerms, GlossaryTerm, deleteTerm, deleteAllTerms } from "./data-store";
+import {
+  searchTerms,
+  GlossaryTerm,
+  deleteTerm,
+  deleteAllTerms,
+} from "./data-store";
 import EditTerm from "./edit-term";
 import InsertTerm from "./insert-term";
 
@@ -40,10 +55,16 @@ export default function SearchGlossary(props: LaunchProps) {
         sortedResults.sort((a, b) => b.term.localeCompare(a.term));
         break;
       case "latest":
-        sortedResults.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        sortedResults.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
         break;
       case "oldest":
-        sortedResults.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        sortedResults.sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        );
         break;
     }
 
@@ -106,12 +127,21 @@ export default function SearchGlossary(props: LaunchProps) {
             key={term.id}
             title={term.term}
             subtitle={stripMarkdown(
-              term.definition.length > 100 ? `${term.definition.substring(0, 100)}...` : term.definition,
+              term.definition.length > 100
+                ? `${term.definition.substring(0, 100)}...`
+                : term.definition,
             )}
-            detail={<List.Item.Detail markdown={`# ${term.term}\n\n${term.definition}`} />}
+            detail={
+              <List.Item.Detail
+                markdown={`# ${term.term}\n\n${term.definition}`}
+              />
+            }
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy Definition" content={term.definition} />
+                <Action.CopyToClipboard
+                  title="Copy Definition"
+                  content={term.definition}
+                />
 
                 <Action.CopyToClipboard
                   title="Copy Term"

@@ -17,7 +17,9 @@ export async function getTerms(): Promise<GlossaryTerm[]> {
   return terms ? JSON.parse(terms) : [];
 }
 
-export async function insertTerm(term: Omit<GlossaryTerm, "id" | "createdAt" | "updatedAt">): Promise<GlossaryTerm> {
+export async function insertTerm(
+  term: Omit<GlossaryTerm, "id" | "createdAt" | "updatedAt">,
+): Promise<GlossaryTerm> {
   const terms = await getTerms();
   const newTerm: GlossaryTerm = {
     ...term,
@@ -26,11 +28,17 @@ export async function insertTerm(term: Omit<GlossaryTerm, "id" | "createdAt" | "
     updatedAt: new Date().toISOString(),
   };
 
-  await LocalStorage.setItem("glossary-terms", JSON.stringify([...terms, newTerm]));
+  await LocalStorage.setItem(
+    "glossary-terms",
+    JSON.stringify([...terms, newTerm]),
+  );
   return newTerm;
 }
 
-export async function searchTerms(query: string, term?: string): Promise<GlossaryTerm[]> {
+export async function searchTerms(
+  query: string,
+  term?: string,
+): Promise<GlossaryTerm[]> {
   const terms = await getTerms();
   const searchQuery = query.toLowerCase();
   const searchTerm = term?.toLowerCase();
@@ -39,8 +47,11 @@ export async function searchTerms(query: string, term?: string): Promise<Glossar
     const termLower = term.term.toLowerCase();
     const definitionLower = term.definition.toLowerCase();
 
-    const matchesTermFilter = searchTerm ? termLower.includes(searchTerm) : true;
-    const matchesQuery = termLower.includes(searchQuery) || definitionLower.includes(searchQuery);
+    const matchesTermFilter = searchTerm
+      ? termLower.includes(searchTerm)
+      : true;
+    const matchesQuery =
+      termLower.includes(searchQuery) || definitionLower.includes(searchQuery);
 
     return matchesTermFilter && matchesQuery;
   });
@@ -57,7 +68,10 @@ export async function importTerms(
     updatedAt: new Date().toISOString(),
   }));
 
-  await LocalStorage.setItem("glossary-terms", JSON.stringify([...existingTerms, ...newTerms]));
+  await LocalStorage.setItem(
+    "glossary-terms",
+    JSON.stringify([...existingTerms, ...newTerms]),
+  );
   return newTerms;
 }
 

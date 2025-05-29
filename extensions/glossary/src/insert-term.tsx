@@ -44,8 +44,18 @@ export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="term" title="Term" placeholder="Enter the term" defaultValue={initialTerm} autoFocus />
-      <Form.TextArea id="definition" title="Definition" placeholder="Enter the definition" />
+      <Form.TextField
+        id="term"
+        title="Term"
+        placeholder="Enter the term"
+        defaultValue={initialTerm}
+        autoFocus
+      />
+      <Form.TextArea
+        id="definition"
+        title="Definition"
+        placeholder="Enter the definition"
+      />
     </Form>
   );
 }

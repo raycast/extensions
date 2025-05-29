@@ -29,11 +29,22 @@ export default function Command() {
         <List.Item
           key={term.id}
           title={term.term}
-          subtitle={term.definition.length > 100 ? `${term.definition.substring(0, 100)}...` : term.definition}
-          detail={<List.Item.Detail markdown={`# ${term.term}\n\n${term.definition}`} />}
+          subtitle={
+            term.definition.length > 100
+              ? `${term.definition.substring(0, 100)}...`
+              : term.definition
+          }
+          detail={
+            <List.Item.Detail
+              markdown={`# ${term.term}\n\n${term.definition}`}
+            />
+          }
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard title="Copy Definition" content={term.definition} />
+              <Action.CopyToClipboard
+                title="Copy Definition"
+                content={term.definition}
+              />
               <Action.CopyToClipboard title="Copy Term" content={term.term} />
             </ActionPanel>
           }

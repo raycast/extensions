@@ -1,4 +1,11 @@
-import { ActionPanel, Action, Form, showToast, Toast, popToRoot } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Form,
+  showToast,
+  Toast,
+  popToRoot,
+} from "@raycast/api";
 import { useState } from "react";
 import { importTerms } from "./data-store";
 
@@ -12,7 +19,9 @@ export default function ImportTerms() {
       const terms = lines.map((line) => {
         const commaIndex = line.indexOf(",");
         if (commaIndex === -1) {
-          throw new Error("Invalid CSV format. Each line should have a term and definition separated by a comma.");
+          throw new Error(
+            "Invalid CSV format. Each line should have a term and definition separated by a comma.",
+          );
         }
         const term = line.slice(0, commaIndex).trim();
         const definition = line
@@ -20,7 +29,9 @@ export default function ImportTerms() {
           .trim()
           .replace(/\\n/g, "  \n");
         if (!term || !definition) {
-          throw new Error("Invalid CSV format. Each line should have a term and definition separated by a comma.");
+          throw new Error(
+            "Invalid CSV format. Each line should have a term and definition separated by a comma.",
+          );
         }
         return { term, definition };
       });

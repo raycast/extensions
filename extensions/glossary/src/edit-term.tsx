@@ -45,7 +45,13 @@ export default function EditTerm({ term, onEdit }: EditTermProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="term" title="Term" placeholder="Enter the term" defaultValue={term.term} autoFocus />
+      <Form.TextField
+        id="term"
+        title="Term"
+        placeholder="Enter the term"
+        defaultValue={term.term}
+        autoFocus
+      />
       <Form.TextArea
         id="definition"
         title="Definition"
