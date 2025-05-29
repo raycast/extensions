@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cangjie",
   "title": "Cangjie Dictionary",
-  "description": "Fast Chinese character lookup for Cangjie and Sucheng codes. Supports instant search from selected text and provides both English letters and Chinese radical representations.",
+  "description": "Fast Chinese characters lookup for Cangjie and Sucheng codes. Supports instant search from selected text and provides both English letters and Chinese radicals.",
   "icon": "icon.png",
   "author": "jimmyclchu",
   "categories": [

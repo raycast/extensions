@@ -1,4 +1,5 @@
-import { List, getSelectedText } from "@raycast/api";
+import { Action, ActionPanel, List, getSelectedText } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import cangjieData from "./cangjie5_all.json";
 
@@ -37,7 +38,7 @@ const cangjieToChinese: { [key: string]: string } = {
 };
 
 interface SearchResult {
-  charater: string;
+  character: string;
   code: string;
 }
 
@@ -55,15 +56,14 @@ function SearchListItem({ searchResult, inputMethod }: { searchResult: SearchRes
   const chineseCode = processedCode
     .toLowerCase()
     .split("")
-    .map((char) => cangjieToChinese[char] || char)
-    .join(" ");
+    .map((char) => cangjieToChinese[char] || char);
 
   return (
     <List.Item
-      title={searchResult.charater}
+      title={searchResult.character}
       accessories={[
         {
-          text: chineseCode,
+          text: chineseCode.join(" "),
           tooltip: "Chinese radicals",
         },
         {
@@ -71,6 +71,12 @@ function SearchListItem({ searchResult, inputMethod }: { searchResult: SearchRes
           tooltip: "English letters",
         },
       ]}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Radicals" content={chineseCode.join("")} />
+          <Action.CopyToClipboard title="Copy Keys" content={processedCode} />
+        </ActionPanel>
+      }
     />
   );
 }
@@ -88,6 +94,7 @@ export default function Command() {
           setSearchText(selectedText);
         }
       } catch (error) {
+        showFailureToast(error, { title: "Could not get selected text" });
         setSearchText("");
       } finally {
         setIsLoading(false);
@@ -101,7 +108,7 @@ export default function Command() {
       .split("")
       .filter((char) => Object.prototype.hasOwnProperty.call(data, char))
       .map((char) => ({
-        charater: char,
+        character: char,
         code: data[char],
       }));
   };
@@ -111,6 +118,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Enter Chinese characters..."
       searchBarAccessory={
@@ -125,7 +133,7 @@ export default function Command() {
       }
     >
       {results.length > 0 ? (
-        <List.Section title="Chinese charaters" subtitle={String(results.length)}>
+        <List.Section title="Chinese characters" subtitle={String(results.length)}>
           {results.map((result, index) => (
             <SearchListItem key={index} searchResult={result} inputMethod={inputMethod} />
           ))}
