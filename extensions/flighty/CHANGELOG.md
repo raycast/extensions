@@ -1,5 +1,11 @@
 # Flighty Changelog
 
+## [UI Improvements] - {PR_MERGE_DATE}
+
+- Flight details are now easier to read with a more compact layout
+- Scheduled and actual times are shown together for quick comparison
+- Terminal and gate information are now shown side by side for each flight
+
 ## [Added Properties] - 2025-01-07
 
 - Add Terminal and Gate for Departure and Arrival
