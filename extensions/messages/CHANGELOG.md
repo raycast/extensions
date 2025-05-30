@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Fix OTP Code Parsing for Messages with colons in the message body] - {PR_MERGE_DATE}
+## [Fix OTP Code Parsing for Messages with colons in the message body] - 2025-05-30
 
 Fixed an issue where OTP codes with colons in the message body were not being parsed correctly.
 
