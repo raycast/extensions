@@ -1,6 +1,6 @@
 # macOSIcons.com Changelog
 
-## [Code style] - {PR_MERGE_DATE}
+## [Code style] - 2025-05-30
 
 - Format code using Raycast's style rules
 
