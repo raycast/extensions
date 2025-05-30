@@ -74,8 +74,9 @@ export default function Command() {
       {/* <Form.Separator /> */}
       <Form.TextField id="name" title="Card name" placeholder="Enter text" />
       <Form.TextArea id="desc" title="Card description" placeholder="Enter multi-line text" />
-      <Form.DatePicker id="due" title="Due date?" />
+      <Form.DatePicker id="due" title="Due date" />
       <Form.Dropdown id="idMember" title="Assign to">
+        <Form.Dropdown.Item key="unassigned" value="" title="Unassigned" />
         {members.map((member) => (
           <Form.Dropdown.Item key={member.id} value={member.id} title={member.username} />
         ))}
