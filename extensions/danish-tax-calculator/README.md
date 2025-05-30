@@ -1,6 +1,6 @@
 # Danish Tax Calculator
 
-A Raycast extension to quickly calculate your payment after taxes in Denmark.
+A Raycast extension to quickly calculate your payment after taxes in Denmark. test
 
 ## Features
 
