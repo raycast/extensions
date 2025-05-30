@@ -39,7 +39,7 @@ export const PlayTextToSpeech = ({
     <>
       <Action
         icon={Icon.SpeechBubbleActive}
-        title="Play Text-to-speech"
+        title="Play Text-to-Speech"
         onAction={() => {
           textToSpeech(content, voice);
         }}
@@ -47,7 +47,7 @@ export const PlayTextToSpeech = ({
       {(isProEnhanced || !hideUnsupportedProFeatures) && (
         <Action
           icon={Icon.Stars}
-          title="Play Ai-summarized"
+          title="Play AI-Summarized"
           shortcut={{ modifiers: ["opt"], key: "enter" }}
           onAction={async () => {
             if (!isProEnhanced) {
@@ -97,7 +97,7 @@ export const StopTextToSpeech = () => {
 
   if (!isPlaying) return null;
   return (
-    <Action icon={Icon.Stop} style={Action.Style.Destructive} title="Stop Text-to-speech" onAction={killRunningSay} />
+    <Action icon={Icon.Stop} style={Action.Style.Destructive} title="Stop Text-to-Speech" onAction={killRunningSay} />
   );
 };
 
