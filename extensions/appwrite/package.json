@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "appwrite",
   "title": "Appwrite",
-  "description": "",
+  "description": "Add Projects and View Services",
   "icon": "appwrite.png",
   "author": "xmok",
   "categories": [
@@ -13,7 +13,7 @@
     {
       "name": "projects",
       "title": "Projects",
-      "description": "",
+      "description": "Manage Local Projects and View Services",
       "mode": "view"
     }
   ],
