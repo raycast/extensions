@@ -47,16 +47,18 @@ export function getAppTypeText(type: DifyAppType): string {
   }
 }
 
+import { Color } from "@raycast/api";
+
 // Helper function to get color for app type
-export function getAppTypeColor(type: DifyAppType): string {
+export function getAppTypeColor(type: DifyAppType): Color {
   switch (type) {
     case DifyAppType.ChatflowAgent:
-      return "#007AFF"; // Blue
+      return Color.Blue;
     case DifyAppType.Workflow:
-      return "#FF9500"; // Orange
+      return Color.Orange;
     case DifyAppType.TextGenerator:
-      return "#34C759"; // Green
+      return Color.Green;
     default:
-      return "#8E8E93"; // Gray
+      return Color.SecondaryText;
   }
 }

@@ -16,28 +16,24 @@
     {
       "name": "list-dify",
       "title": "List Dify",
-      "subtitle": "Dify",
       "description": "Helps you list and manage all Dify apps saved in Raycast.",
       "mode": "view"
     },
     {
       "name": "add-dify",
       "title": "Add Dify",
-      "subtitle": "Dify",
       "description": "Add a new Dify application with API endpoint and key to Raycast.",
       "mode": "view"
     },
     {
       "name": "ask-dify",
       "title": "Send to Dify",
-      "subtitle": "Dify",
       "description": "Send queries to your Dify applications and get intelligent responses",
       "mode": "view"
     },
     {
       "name": "ask-dify-history",
       "title": "View History",
-      "subtitle": "Dify",
       "description": "View and manage your conversation history with Dify applications",
       "mode": "view"
     }
@@ -61,7 +57,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/utils": "^1.19.1",
     "@types/node-fetch": "^2.6.12",
     "date-fns": "^4.1.0",
     "node-fetch": "^2.6.12"
