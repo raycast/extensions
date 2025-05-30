@@ -21,7 +21,10 @@ export default defineConfig([{
     plugins: {
         "@typescript-eslint": typescriptEslint,
     },
-
+    rules: {
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "off"
+    },
     languageOptions: {
         globals: {
             ...globals.node,

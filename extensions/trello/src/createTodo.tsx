@@ -23,7 +23,7 @@ export default function Command() {
   const [boardResults, setBoards] = useState<TrelloFetchResponse>([]);
   const [listResults, setLists] = useState<List[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [loading, setLoading] = useState<boolean>(true);
   const currentBoardId = "";
 
