@@ -1,6 +1,6 @@
 # Unix Timestamp Converter Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-05-30
 
 - Initial release
 - Added conversion from Unix timestamps to local date and time for multiple countries
