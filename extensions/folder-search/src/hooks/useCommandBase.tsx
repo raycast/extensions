@@ -10,28 +10,6 @@ interface CommandBaseProps {
 }
 
 export function useCommandBase({ commandName, launchProps, searchText, setSearchText }: CommandBaseProps) {
-  // Handle fallback text from root search
-  const fallbackTextRef = useRef<string | undefined>(undefined);
-  const fallbackTextProcessedRef = useRef<boolean>(false);
-  const initialMountRef = useRef<boolean>(true);
-
-  useEffect(() => {
-    // Only process fallbackText on initial mount
-    if (!initialMountRef.current) return;
-
-    if (launchProps.fallbackText && !fallbackTextProcessedRef.current) {
-      log("debug", commandName, "Processing fallback text", {
-        fallbackText: launchProps.fallbackText,
-        timestamp: new Date().toISOString(),
-      });
-
-      fallbackTextRef.current = launchProps.fallbackText;
-      fallbackTextProcessedRef.current = true;
-      setSearchText(launchProps.fallbackText);
-      initialMountRef.current = false; // Prevent future runs
-    }
-  }, [launchProps.fallbackText, commandName, setSearchText]);
-
   // Log launch type for debugging
   const hasLoggedLaunchRef = useRef<boolean>(false);
 
@@ -39,17 +17,14 @@ export function useCommandBase({ commandName, launchProps, searchText, setSearch
     if (!hasLoggedLaunchRef.current) {
       log("debug", commandName, "Command launched", {
         launchType: launchProps.launchType,
-        fallbackText: launchProps.fallbackText,
         searchText,
         timestamp: new Date().toISOString(),
       });
       hasLoggedLaunchRef.current = true;
     }
-  }, [launchProps.launchType, launchProps.fallbackText, searchText, commandName]);
+  }, [launchProps.launchType, searchText, commandName]);
 
   return {
-    fallbackTextRef,
-    fallbackTextProcessedRef,
     hasLoggedLaunchRef,
   };
 }

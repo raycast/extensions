@@ -14,7 +14,6 @@ export { usePinStorage } from "./usePinStorage";
 
 // Search-related hooks
 export { useSearchResults } from "./useSearchResults";
-export { useSearchDebounce } from "./useSearchDebounce";
 
 // Plugin management hooks
 export { usePluginManagement } from "./usePluginManagement";
