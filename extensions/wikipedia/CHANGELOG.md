@@ -1,6 +1,6 @@
 # Wikipedia Changelog
 
-## [Language improvements] - {PR_MERGE_DATE}
+## [Language improvements] - 2025-05-30
 - Fix open article in another language
 - Add the ability to delete recent articles
 
