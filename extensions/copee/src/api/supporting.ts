@@ -29,18 +29,23 @@ export async function handleTextToFile(
   action: (fileContent: Clipboard.Content) => Promise<void>,
   successMessage: string = "File copied to clipboard",
 ): Promise<void> {
-  const text = await getText();
-  if (!text || text.trim() === "") {
-    await showHUD("❌ No text found");
-    return;
-  }
-  const filePath = writeContentToFile(text);
-  const fileContent: Clipboard.Content = { file: filePath };
+  try {
+    const text = await getText();
+    if (!text || text.trim() === "") {
+      await showHUD("❌ No text found");
+      return;
+    }
+    const filePath = writeContentToFile(text);
+    const fileContent: Clipboard.Content = { file: filePath };
 
-  await action(fileContent);
-  await showHUD(`✅ ${successMessage}`);
+    await action(fileContent);
+    await showHUD(`✅ ${successMessage}`);
 
-  if (action === Clipboard.copy) {
-    await maybeOpenFinder(filePath);
+    if (action === Clipboard.copy) {
+      await maybeOpenFinder(filePath);
+    }
+  } catch (error) {
+    console.error("Error handling text to file:", error);
+    await showHUD("❌ Something went wrong");
   }
 }

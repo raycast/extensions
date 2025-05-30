@@ -5,6 +5,7 @@
   "description": "Copies text as txt file.",
   "icon": "extension-icon.png",
   "author": "gianpiero_spinelli",
+  "categories": ["Data", "Productivity"],
   "license": "MIT",
   "commands": [
     {
@@ -15,7 +16,7 @@
     },
     {
       "name": "make-file-from-clipboard",
-      "title": "Make File from Clipboard",
+      "title": "Generate File from Clipboard",
       "description": "Generates and copies the text file from last entry in clipboard",
       "mode": "no-view"
     },
