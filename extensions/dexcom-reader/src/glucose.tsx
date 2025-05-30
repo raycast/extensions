@@ -6,7 +6,7 @@ import {
   dexcomDataURL,
   TREND_VALUE_MAPPING,
 } from "./constants";
-import { GlucoseData, LoadingState, Preferences } from "./types";
+import { GlucoseData, LoadingState } from "./types";
 import { showFailureToast } from "@raycast/utils";
 import { authenticateWithDexcom } from "./api/auth";
 import { fetchGlucoseData } from "./api/fetchGlucoseData";
