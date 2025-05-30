@@ -50,3 +50,8 @@
 - Add search examples command
 - Add Search Examples Open in browser action
 - Add Toast feedback to Warn users in case of failed requests
+
+## [Fix search examples and components commands] - 2025-05-30
+
+- Fix "search components" command by removing dependency on the deprecated /api endpoint and fetching data directly from GitHub
+- Fix "search examples" command by updating the GitHub examples path in configuration to match the latest shadcn/ui repo structure (was causing 404 errors)
