@@ -12,9 +12,3 @@ export interface GlucoseData {
   Value: number;
   Trend: string;
 }
-
-export interface Preferences {
-  accountName: string;
-  password: string;
-  isNorthAmerica: boolean;
-}
