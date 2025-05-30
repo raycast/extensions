@@ -214,12 +214,27 @@ function Command(props: LaunchProps) {
               <Action
                 key={pluginIndex}
                 title={plugin.title}
-                icon={IconDictionaried[plugin.icon]}
+                icon={IconDictionaried[plugin.icon] || plugin.icon}
                 shortcut={{ ...plugin.shortcut }}
                 onAction={() => {
-                  popToRoot({ clearSearchBar: true });
-                  closeMainWindow({ clearRootSearch: true });
-                  runAppleScript(plugin.appleScript(result));
+                  // Debug logging to see which plugin is failing
+                  log("debug", "search", "Plugin action triggered", {
+                    title: plugin.title,
+                    appleScriptType: typeof plugin.appleScript,
+                    isFunction: typeof plugin.appleScript === "function",
+                  });
+
+                  try {
+                    popToRoot({ clearSearchBar: true });
+                    closeMainWindow({ clearRootSearch: true });
+                    runAppleScript(plugin.appleScript(result));
+                  } catch (error) {
+                    log("error", "search", "Plugin execution failed", {
+                      title: plugin.title,
+                      error: error instanceof Error ? error.message : String(error),
+                      appleScriptType: typeof plugin.appleScript,
+                    });
+                  }
                 }}
               />
             ),
