@@ -29,21 +29,21 @@
   "commands": [
     {
       "name": "account",
-      "title": "Account",
+      "title": "Show Account",
       "subtitle": "SolusVM 2",
       "description": "Manage Settings and API Tokens",
       "mode": "view"
     },
     {
       "name": "projects",
-      "title": "Projects",
+      "title": "View Projects",
       "subtitle": "SolusVM 2",
       "description": "Manage Servers and Members",
       "mode": "view"
     },
     {
       "name": "iso-images",
-      "title": "ISO images",
+      "title": "View ISO images",
       "subtitle": "SolusVM 2",
       "description": "View Custom ISO Images",
       "mode": "view"
