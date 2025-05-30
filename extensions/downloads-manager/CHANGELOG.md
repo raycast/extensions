@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Add new commands] - {PR_MERGE_DATE}
+
+- Added the command `Paste Latest Download`, which pastes the latest download to the foremost active app.
+
 ## [Add reload action] - 2025-05-07
 
 - Added a reload action to fetch the latest downloads in the `Manage Downloads` command.

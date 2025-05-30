@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Detail,
-  Icon,
-  ImageMask,
-  List,
-  OpenInBrowserAction,
-  PushAction,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Image, Keyboard, List } from "@raycast/api";
 import { useSearch } from "./hooks/useSearch";
 import { useState } from "react";
 import { VolumeItem } from "./types/google-books.dt";
@@ -52,7 +43,7 @@ function getMaskedImage(item: VolumeItem | undefined, catIndex: number) {
   return item?.volumeInfo?.imageLinks?.thumbnail
     ? {
         source: item.volumeInfo.imageLinks.thumbnail.replace("http", "https"),
-        mask: ImageMask.RoundedRectangle,
+        mask: Image.Mask.RoundedRectangle,
       }
     : getIcon(catIndex);
 }
@@ -62,12 +53,8 @@ function BookDetail({ item }: { item: VolumeItem }) {
     <Detail
       actions={
         <ActionPanel>
-          <OpenInBrowserAction icon={Icon.Globe} url={item.volumeInfo.infoLink} />
-          <CopyToClipboardAction
-            title="Copy URL to Clipboard"
-            icon={Icon.Clipboard}
-            content={item.volumeInfo.infoLink}
-          />
+          <Action.OpenInBrowser url={item.volumeInfo.infoLink} />
+          <Action.CopyToClipboard title="Copy URL to Clipboard" content={item.volumeInfo.infoLink} />
         </ActionPanel>
       }
       navigationTitle={item.volumeInfo.title}
@@ -79,15 +66,17 @@ function BookDetail({ item }: { item: VolumeItem }) {
 export default function SearchGoogleBooks() {
   const [searchText, setSearchText] = useState<string>();
   const { items, loading } = useSearch(searchText);
+  const [filter, setFilter] = useState("");
 
-  const categorisedItems = items?.reduce((acc: Record<string, VolumeItem[]>, item: VolumeItem) => {
-    const category = item.volumeInfo?.categories ? item.volumeInfo?.categories[0] : "Other";
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(item);
-    return acc;
-  }, {});
+  const categorisedItems =
+    items.reduce((acc: Record<string, VolumeItem[]>, item: VolumeItem) => {
+      const category = item.volumeInfo?.categories ? item.volumeInfo?.categories[0] : "Other";
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(item);
+      return acc;
+    }, {}) ?? {};
 
   return (
     <List
@@ -96,37 +85,45 @@ export default function SearchGoogleBooks() {
       navigationTitle="Search Google Books"
       isLoading={loading}
       onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Category" onChange={setFilter}>
+          <List.Dropdown.Item title="All" value="" />
+          {Object.keys(categorisedItems).map((category) => (
+            <List.Dropdown.Item key={category} title={category} value={category} />
+          ))}
+        </List.Dropdown>
+      }
     >
-      {categorisedItems
-        ? Object.keys(categorisedItems)?.map((category, catIndex) => (
-            <List.Section
-              key={category}
-              title={category}
-              subtitle={`📚 Total Books: ${categorisedItems[category].length}`}
-            >
-              {categorisedItems[category]?.map((item) => (
-                <List.Item
-                  key={item.id}
-                  icon={getMaskedImage(item, catIndex)}
-                  title={item.volumeInfo.title}
-                  subtitle={item?.volumeInfo?.authors ? item.volumeInfo.authors[0] : "Various Authors"}
-                  accessoryTitle={getAccessoryTitle(item)}
-                  actions={
-                    <ActionPanel>
-                      <PushAction icon={Icon.List} title="Show Book Details" target={<BookDetail item={item} />} />
-                      <OpenInBrowserAction icon={Icon.Globe} url={item.volumeInfo.infoLink} />
-                      <CopyToClipboardAction
-                        title="Copy URL to Clipboard"
-                        icon={Icon.Clipboard}
-                        content={item.volumeInfo.infoLink}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              ))}
-            </List.Section>
-          ))
-        : null}
+      {Object.keys(categorisedItems)
+        .filter((category) => !filter || category === filter)
+        .map((category, catIndex) => (
+          <List.Section
+            key={category}
+            title={category}
+            subtitle={`📚 Total Books: ${categorisedItems[category].length}`}
+          >
+            {categorisedItems[category].map((item) => (
+              <List.Item
+                key={item.id}
+                icon={getMaskedImage(item, catIndex)}
+                title={item.volumeInfo.title}
+                subtitle={item.volumeInfo?.authors ? item.volumeInfo.authors[0] : "Various Authors"}
+                accessories={[{ text: getAccessoryTitle(item) }]}
+                actions={
+                  <ActionPanel>
+                    <Action.Push icon={Icon.List} title="Show Book Details" target={<BookDetail item={item} />} />
+                    <Action.OpenInBrowser url={item.volumeInfo.infoLink} />
+                    <Action.CopyToClipboard
+                      shortcut={Keyboard.Shortcut.Common.Copy}
+                      title="Copy URL to Clipboard"
+                      content={item.volumeInfo.infoLink}
+                    />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        ))}
     </List>
   );
 }

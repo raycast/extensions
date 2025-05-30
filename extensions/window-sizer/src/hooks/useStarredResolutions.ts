@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { Resolution } from "../types";
@@ -7,6 +7,7 @@ import { isSameResolution } from "../utils/resolution";
 export function useStarredResolutions() {
   const [starredResolutions, setStarredResolutions] = useState<Resolution[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load starred resolutions
   useEffect(() => {
@@ -29,6 +30,8 @@ export function useStarredResolutions() {
           title: "Failed to load starred resolutions",
           message: error instanceof Error ? error.message : "Unknown error occurred",
         });
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -62,7 +65,10 @@ export function useStarredResolutions() {
       const parsedResolutions = JSON.parse(storedResolutions);
       const updatedResolutions = parsedResolutions.filter((r: Resolution) => !isSameResolution(r, resolution));
 
+      // First ensure storage update succeeds
       await LocalStorage.setItem("starred-resolutions", JSON.stringify(updatedResolutions));
+
+      // Only refresh after storage is confirmed
       refreshStarredResolutions();
     } catch (error) {
       console.error("Error removing starred resolution:", error);
@@ -75,20 +81,25 @@ export function useStarredResolutions() {
 
   // Function to toggle star status
   async function toggleStarResolution(resolution: Resolution) {
+    const isStarred = starredResolutions.some((r) => isSameResolution(r, resolution));
     try {
-      const isStarred = starredResolutions.some((r) => isSameResolution(r, resolution));
       const updatedResolutions = isStarred
         ? starredResolutions.filter((r) => !isSameResolution(r, resolution))
         : [...starredResolutions, { ...resolution, isStarred: true }];
 
-      setStarredResolutions(updatedResolutions);
+      // First ensure storage update succeeds
       await LocalStorage.setItem("starred-resolutions", JSON.stringify(updatedResolutions));
+
+      // Only update state after storage is confirmed
+      setStarredResolutions(updatedResolutions);
+
+      // Show toast notification
+      await showToast({
+        style: Toast.Style.Success,
+        title: isStarred ? "Removed from Starred Sizes" : "Marked as Starred",
+      });
     } catch (error) {
       console.error("Error toggling star status:", error);
-      await showFailureToast({
-        title: "Failed to toggle star status",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
       throw error;
     }
   }
@@ -104,5 +115,6 @@ export function useStarredResolutions() {
     refreshStarredResolutions,
     isResolutionStarred,
     removeStarredResolution,
+    isLoading,
   };
 }

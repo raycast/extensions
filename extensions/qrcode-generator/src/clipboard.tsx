@@ -1,4 +1,4 @@
-import { Clipboard } from "@raycast/api";
+import { Clipboard, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { generateQRCode, QRCodeView } from "./utils";
 
@@ -10,8 +10,9 @@ export default function Command() {
       const clipboard = await Clipboard.readText();
       const qrData = await generateQRCode(clipboard);
       setQrData(qrData);
+      showToast(Toast.Style.Success, "Success", "Created QR Code");
     })();
   }, []);
 
-  return <QRCodeView qrData={qrData || ""} />;
+  return <QRCodeView qrData={qrData || ""} height={355} />;
 }

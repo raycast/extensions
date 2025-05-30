@@ -131,12 +131,30 @@ export default function Command({ launchContext }: CommandProps) {
     }
 
     getRunningAppsPaths().then((appCandidatePaths) => {
-      // filter out all apps that do not end with .app
-      const apps = appCandidatePaths.map((path) => ({ name: applicationNameFromPath(path), path }));
-      setApps(apps);
+      const mappedApps = appCandidatePaths
+        .filter((path) => path.endsWith(".app"))
+        .map((path) => ({ name: applicationNameFromPath(path), path }));
 
-      if (apps && apps[0]) {
-        setSelectedId(apps[0].path);
+      const excludedNames = preferences.excludeApplications
+        ? preferences.excludeApplications.split(",").map((name: string) => name.trim().toLowerCase())
+        : [];
+
+      const filteredApps = mappedApps.filter((app) => !excludedNames.includes(app.name.toLowerCase()));
+
+      const uniqueApps: { name: string; path: string }[] = [];
+      const seenPaths = new Set<string>();
+
+      for (const app of filteredApps) {
+        if (!seenPaths.has(app.path)) {
+          seenPaths.add(app.path);
+          uniqueApps.push(app);
+        }
+      }
+
+      setApps(uniqueApps);
+
+      if (uniqueApps && uniqueApps[0]) {
+        setSelectedId(uniqueApps[0].path);
       }
 
       setIsLoading(false);

@@ -4,13 +4,13 @@ import { apiEndpoints, apiFetch } from "../../utils";
 
 export async function createProperty(
   spaceId: string,
-  propertyData: CreatePropertyRequest,
+  request: CreatePropertyRequest,
 ): Promise<{ property: Property | null }> {
   const { url, method } = apiEndpoints.createProperty(spaceId);
 
   const response = await apiFetch<{ property: RawProperty }>(url, {
     method: method,
-    body: JSON.stringify(propertyData),
+    body: JSON.stringify(request),
   });
 
   return {

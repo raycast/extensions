@@ -171,11 +171,18 @@ private func getActiveWindowData() -> (
   )
 }
 
-// Retrieve all screens and their resolution info
+private func isLaunchedByRaycast() -> Bool {
+  let env = ProcessInfo.processInfo.environment
+  return env.keys.contains(where: { $0.hasPrefix("RAYCAST_") })
+}
+
 @raycast func getScreensInfo() -> [String] {
+  guard isLaunchedByRaycast() else {
+    return ["Error: This command must be run from Raycast"]
+  }
+
   let screens = NSScreen.screens
   var results: [String] = []
-
   for (index, screen) in screens.enumerated() {
     results.append(getScreenInfoString(screenIndex: index, screen: screen))
   }
@@ -522,17 +529,15 @@ private func getActiveWindowRef() -> AXUIElement? {
   var currentX: CGFloat
   var currentY: CGFloat
   var currentWidth: CGFloat
-  var currentHeight: CGFloat
   var currentScreenFrame: CGRect
 
-  if let wx = windowX, let wy = windowY, let ww = windowWidth, let wh = windowHeight,
+  if let wx = windowX, let wy = windowY, let ww = windowWidth, windowHeight != nil,
     let sf = screenFrame
   {
     // Use provided values - assume they're already in AX coordinates
     currentX = CGFloat(wx)
     currentY = CGFloat(wy)
     currentWidth = CGFloat(ww)
-    currentHeight = CGFloat(wh)
     currentScreenFrame = sf
   } else {
     // Parse from active window - these will be in AX coordinates
@@ -551,7 +556,6 @@ private func getActiveWindowRef() -> AXUIElement? {
     currentX = CGFloat(info.windowX)
     currentY = CGFloat(info.windowY)
     currentWidth = CGFloat(info.windowWidth)
-    currentHeight = CGFloat(info.windowHeight)
     currentScreenFrame = info.screenFrame
   }
 
