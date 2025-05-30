@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Anytype MCP Server] - 2025-05-30
+## [Add Anytype MCP Server] - {PR_MERGE_DATE}
 
 Add official Anytype MCP Server to registry.
 
