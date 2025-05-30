@@ -1,9 +1,13 @@
-import { closeMainWindow } from '@raycast/api'
+import { closeMainWindow, showToast } from '@raycast/api'
 import { runAppleScript, showFailureToast } from '@raycast/utils'
 import { checkHammerspoonInstallation } from './utils/installation'
 
 export default async function main() {
   const isInstalled = await checkHammerspoonInstallation()
+
+  const loading = showToast({
+    title: 'Loading Documentation...'
+  })
 
   if (!isInstalled) {
     return
@@ -24,4 +28,5 @@ export default async function main() {
   }
 
   await closeMainWindow({ clearRootSearch: true })
+  ;(await loading).hide()
 }
