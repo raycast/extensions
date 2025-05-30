@@ -183,7 +183,7 @@ export async function listAudioFiles(
         const duration = await getAudioDuration(filePath);
 
         transcriptionFiles.push({
-          id: file,
+          id: `${stats.birthtime.getTime()}_${file}`,
           filePath,
           fileName: file,
           recordedAt: stats.birthtime,
