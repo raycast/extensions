@@ -27,11 +27,19 @@ export function PageItem({ search, title, language }: { search: string; title: s
             (openInBrowser ? (
               <>
                 <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
-                <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
+                <Action.Push
+                  icon={Icon.Window}
+                  title="Show Details"
+                  target={<WikipediaPage title={title} language={language} />}
+                />
               </>
             ) : (
               <>
-                <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
+                <Action.Push
+                  icon={Icon.Window}
+                  title="Show Details"
+                  target={<WikipediaPage title={title} language={language} />}
+                />
                 <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
               </>
             ))}
