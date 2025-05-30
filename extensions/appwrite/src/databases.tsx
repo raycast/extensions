@@ -18,29 +18,33 @@ export default function Databases() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search by name or ID">
-      {databases.map((database) => (
-        <List.Item
-          key={database.$id}
-          keywords={[database.$id]}
-          icon={Icon.Coin}
-          title={database.name}
-          actions={
-            <ActionPanel>
-              <Action.Push icon={Icon.Box} title="Collections" target={<Collections database={database} />} />
-              <Action.CopyToClipboard title="Copy ID to Clipboard" content={database.$id} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {!isLoading && !databases.length ? (
+        <List.EmptyView title="Create a database to get started." />
+      ) : (
+        databases.map((database) => (
+          <List.Item
+            key={database.$id}
+            keywords={[database.$id]}
+            icon={Icon.Coin}
+            title={database.name}
+            actions={
+              <ActionPanel>
+                <Action.Push icon={Icon.Box} title="Collections" target={<Collections databaseId={database.$id} />} />
+                <Action.CopyToClipboard title="Copy ID to Clipboard" content={database.$id} />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }
 
-function Collections({ database }: { database: sdk.Models.Database }) {
+function Collections({ databaseId }: { databaseId: string }) {
   const { databases } = useContext(SDKContext);
   const { isLoading, data: collections } = useCachedPromise(
     async () => {
-      const res = await databases.listCollections(database.$id);
+      const res = await databases.listCollections(databaseId);
       return res.collections;
     },
     [],

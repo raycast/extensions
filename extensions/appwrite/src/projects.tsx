@@ -33,8 +33,8 @@ export default function Projects() {
     <List isLoading={isLoading}>
       {!isLoading && !projects?.length ? (
         <List.EmptyView
-          icon="appwrite.png"
-          title="Add a project"
+          icon="empty.svg"
+          title="Add a project to get started"
           actions={
             <ActionPanel>
               <Action.Push icon={Icon.Plus} title="Add Project" target={<AddProject />} />
@@ -151,7 +151,6 @@ function AddProject() {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not add";
         toast.message = `${error}`;
-        console.log(error);
       }
     },
     validation: {
@@ -176,7 +175,7 @@ function AddProject() {
         {...itemProps.name}
       />
       <Form.TextField
-        title="Appwrite Endpoint"
+        title="API Endpoint"
         placeholder="https://fra.cloud.appwrite.io/v1"
         info="Enter the full endpoint with version"
         {...itemProps.endpoint}
