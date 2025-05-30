@@ -124,6 +124,25 @@
           "value": "birthTime"
         }
       ]
+    },
+    {
+      "type": "dropdown",
+      "name": "deletionBehavior",
+      "label": "Deletion Behavior",
+      "title": "Deletion Behavior",
+      "description": "Whether to trash or permanently delete",
+      "required": false,
+      "default": "trash",
+      "data": [
+        {
+          "title": "Trash",
+          "value": "trash"
+        },
+        {
+          "title": "Permanently Delete",
+          "value": "permaDel"
+        }
+      ]
     }
   ],
   "dependencies": {

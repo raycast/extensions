@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, Detail, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Detail, getPreferenceValues, showToast, Toast, trash } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { accessSync, constants, readdirSync, statSync } from "fs";
 import { rm } from "fs/promises";
@@ -71,6 +71,16 @@ export function hasAccessToDownloadsFolder() {
 }
 
 export async function deleteFileOrFolder(filePath: string) {
+  if (preferences.deletionBehavior === "trash") {
+    try {
+      await trash(filePath);
+      await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
+    } catch (error) {
+      await showFailureToast(error, { title: "Move to Trash Failed" });
+    }
+    return;
+  }
+
   const shouldDelete = await confirmAlert({
     title: "Delete Item?",
     message: `Are you sure you want to permanently delete:\n${filePath}?`,
