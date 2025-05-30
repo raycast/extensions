@@ -90,7 +90,7 @@ export function buildSoxCommand(outputPath: string, soxPath: string): string[] {
 }
 
 export async function validateAudioFile(
-  filePath: string
+  filePath: string,
 ): Promise<AudioValidationResult> {
   try {
     await access(filePath);
@@ -177,12 +177,12 @@ export async function getAudioDuration(filePath: string): Promise<number> {
 }
 
 export async function listAudioFiles(
-  directory: string
+  directory: string,
 ): Promise<TranscriptionFile[]> {
   try {
     const files = await readdir(directory);
     const audioFiles = files.filter((file) =>
-      file.endsWith(`.${RECORDING_FORMAT}`)
+      file.endsWith(`.${RECORDING_FORMAT}`),
     );
 
     const transcriptionFiles: TranscriptionFile[] = [];
@@ -210,7 +210,7 @@ export async function listAudioFiles(
     }
 
     return transcriptionFiles.sort(
-      (a, b) => b.recordedAt.getTime() - a.recordedAt.getTime()
+      (a, b) => b.recordedAt.getTime() - a.recordedAt.getTime(),
     );
   } catch (error) {
     console.error("Failed to list audio files:", error);
@@ -219,7 +219,7 @@ export async function listAudioFiles(
 }
 
 export async function cleanupTempFiles(
-  maxAgeHours: number = 24
+  maxAgeHours: number = 24,
 ): Promise<void> {
   try {
     const files = await listAudioFiles(TEMP_DIRECTORY);
