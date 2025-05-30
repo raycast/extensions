@@ -44,7 +44,7 @@ export interface Preferences {
   model: WhisperModel;
   language: string;
   prompt?: string;
-  temperature?: string;
+  temperature?: number;
   customPromptEmail?: string;
   customPromptSlack?: string;
   customPromptReport?: string;
