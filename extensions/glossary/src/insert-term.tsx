@@ -1,4 +1,11 @@
-import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Form,
+  showToast,
+  Toast,
+  popToRoot,
+} from "@raycast/api";
 import { useState } from "react";
 import { insertTerm } from "./data-store";
 
@@ -23,6 +30,8 @@ export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
       });
       if (onInsert) {
         onInsert();
+      } else {
+        popToRoot();
       }
     } catch (error) {
       await showToast({
