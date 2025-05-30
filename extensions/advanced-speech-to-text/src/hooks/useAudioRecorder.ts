@@ -38,6 +38,8 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       if (durationIntervalRef.current) {
         clearInterval(durationIntervalRef.current);
       }
+      setIsRecording(false);
+      setError(null);
     };
   }, []);
 

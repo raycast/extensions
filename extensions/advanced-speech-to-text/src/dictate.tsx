@@ -85,7 +85,7 @@ export default function Dictate() {
             try {
               const formatted = await formatTextWithChatGPT(
                 formattedResult,
-                currentFormat,
+                currentFormat
               );
               setFormattedText(formatted);
               await showToast({
@@ -280,7 +280,7 @@ export default function Dictate() {
 
   // Show results view after transcription is completed
   if (transcriptionState === "completed") {
-    const markdown = `${formattedText}`;
+    const markdown = formattedText;
 
     return (
       <Detail
