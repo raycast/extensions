@@ -229,12 +229,9 @@ export default function Command(props: LaunchProps) {
     );
   };
 
-  return !(hasCheckedPlugins && hasCheckedPreferences) ? (
-    // prevent flicker due to details pref being async
-    <Form />
-  ) : (
+  return (
     <List
-      isLoading={isQuerying}
+      isLoading={isQuerying || !(hasCheckedPlugins && hasCheckedPreferences)}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search folders"
       isShowingDetail={isShowingDetail}
@@ -251,7 +248,10 @@ export default function Command(props: LaunchProps) {
         ) : null
       }
     >
-      {!searchText && props.launchType === "userInitiated" && pinnedResults.length > 0 ? (
+      {!(hasCheckedPlugins && hasCheckedPreferences) ? (
+        // Show loading state while checking preferences and plugins
+        <List.EmptyView title="Loading..." description="Setting up folder search" icon={Icon.MagnifyingGlass} />
+      ) : !searchText && !props.fallbackText && pinnedResults.length > 0 ? (
         <FolderListSection
           title="Pinned"
           results={pinnedResults}
@@ -260,8 +260,8 @@ export default function Command(props: LaunchProps) {
           renderActions={renderFolderActions}
           isPinnedSection={true}
         />
-      ) : !searchText && props.launchType === "userInitiated" ? (
-        // No pins and no search text
+      ) : !searchText && !props.fallbackText ? (
+        // No pins and no search text (and not fallback mode)
         <List.EmptyView
           title="No Pinned Folders"
           description="Search to find folders or pin your favorites"

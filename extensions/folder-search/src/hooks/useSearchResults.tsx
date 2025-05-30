@@ -52,7 +52,14 @@ export function useSearchResults({
       setResults([]);
       setHasSearched(false);
     }
-  }, [searchText, searchScope, pinnedResults]);
+  }, [searchText, searchScope]);
+
+  // Separate effect for pinned results filtering when in pinned scope
+  useEffect(() => {
+    if (searchScope === "pinned") {
+      setResults(pinnedResults.filter((pin) => matchesSearchQuery(pin.kMDItemFSName, searchText)));
+    }
+  }, [pinnedResults, searchScope, searchText]);
 
   // Perform spotlight search
   const performSearch = useCallback(async (search: string, scope: string) => {
@@ -72,9 +79,9 @@ export function useSearchResults({
       // Create a new abort controller
       abortable.current = new AbortController();
 
-      // Start showing spinner
+      // Start showing spinner but keep existing results visible
       setIsQuerying(true);
-      setResults([]);
+      // Don't clear results immediately - let them stay visible during search
 
       // Perform the search
       const searchResults = await searchSpotlight(search, scope as "pinned" | "user" | "all", abortable);

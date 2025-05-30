@@ -24,6 +24,8 @@ export function usePinManagement({
 
   // Keep track of pending state updates
   const pendingPinUpdateRef = useRef<boolean>(false);
+  // Track if we've done the initial load
+  const hasInitialLoadRef = useRef<boolean>(false);
 
   const pinStorage = usePinStorage();
 
@@ -34,21 +36,23 @@ export function usePinManagement({
         const pins = await pinStorage.loadPins();
         setPinnedResults(pins);
         setHasCheckedPins(true);
+        hasInitialLoadRef.current = true;
       } catch (error) {
         log("error", "usePinManagement", "Error loading pins", {
           error: error instanceof Error ? error.message : String(error),
         });
         showFailureToast({ title: "Could not load pinned folders" });
         setHasCheckedPins(true);
+        hasInitialLoadRef.current = true;
       }
     };
 
     loadPinsFromStorage();
   }, []);
 
-  // Save pins when they change
+  // Save pins when they change (but not on initial load)
   useEffect(() => {
-    if (!hasCheckedPins) return;
+    if (!hasCheckedPins || !hasInitialLoadRef.current) return;
 
     const savePinsToStorage = async () => {
       // Skip saving if we're in the initial load sequence and pins weren't modified
@@ -68,7 +72,7 @@ export function usePinManagement({
     };
 
     savePinsToStorage();
-  }, [pinnedResults, searchScope, isShowingDetail, showNonCloudLibraryPaths, hasCheckedPins]);
+  }, [pinnedResults, hasCheckedPins]);
 
   /**
    * Check if a result is pinned

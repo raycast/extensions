@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { log } from "../utils";
 import { usePinManagement, usePluginManagement, useSearchResults, usePreferences } from "./";
 
@@ -10,34 +10,48 @@ export function useFolderSearch() {
   // Get preferences
   const preferences = usePreferences();
 
-  // Get pin management
-  const pinManagement = usePinManagement({
-    searchScope: preferences.searchScope,
-    isShowingDetail: preferences.isShowingDetail,
-    showNonCloudLibraryPaths: preferences.showNonCloudLibraryPaths,
-  });
+  // Get pin management with memoized props to prevent unnecessary re-renders
+  const pinManagementProps = useMemo(
+    () => ({
+      searchScope: preferences.searchScope,
+      isShowingDetail: preferences.isShowingDetail,
+      showNonCloudLibraryPaths: preferences.showNonCloudLibraryPaths,
+    }),
+    [preferences.searchScope, preferences.isShowingDetail, preferences.showNonCloudLibraryPaths],
+  );
+
+  const pinManagement = usePinManagement(pinManagementProps);
 
   // Get plugin management
   const pluginManagement = usePluginManagement();
 
-  // Get search results
-  const searchResults = useSearchResults({
-    searchScope: preferences.searchScope,
-    pinnedResults: pinManagement.pinnedResults,
-  });
+  // Get search results with memoized props
+  const searchResultsProps = useMemo(
+    () => ({
+      searchScope: preferences.searchScope,
+      pinnedResults: pinManagement.pinnedResults,
+    }),
+    [preferences.searchScope, pinManagement.pinnedResults],
+  );
+
+  const searchResults = useSearchResults(searchResultsProps);
 
   // Check if all required data is loaded
   const isReady = useCallback(() => {
     return pinManagement.hasCheckedPins && pluginManagement.hasCheckedPlugins && preferences.hasCheckedPreferences;
   }, [pinManagement.hasCheckedPins, pluginManagement.hasCheckedPlugins, preferences.hasCheckedPreferences]);
 
-  // Log when all data is ready
-  if (isReady()) {
+  // Track if we've logged ready state to avoid spam
+  const hasLoggedReadyRef = useRef<boolean>(false);
+
+  // Log when all data is ready (only once)
+  if (isReady() && !hasLoggedReadyRef.current) {
     log("debug", "useFolderSearch", "All data loaded and ready", {
       plugins: pluginManagement.plugins.length,
       pins: pinManagement.pinnedResults.length,
       searchScope: preferences.searchScope,
     });
+    hasLoggedReadyRef.current = true;
   }
 
   // Return combined API
