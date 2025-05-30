@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Action,
   ActionPanel,
@@ -113,8 +113,12 @@ export default function Dictate() {
               await showToast({
                 style: Toast.Style.Failure,
                 title: "Paste Error",
-                message: "Could not insert text",
+                message:
+                  "Could not insert text. Text is still available for manual copy/paste.",
               });
+              // Keep window open by setting state to completed
+              setTranscriptionState("completed");
+              setFormattedText(formattedResult);
             }
           }
 
@@ -276,7 +280,7 @@ export default function Dictate() {
 
   // Show results view after transcription is completed
   if (transcriptionState === "completed") {
-    const markdown = formattedText;
+    const markdown = `${formattedText}`;
 
     return (
       <Detail

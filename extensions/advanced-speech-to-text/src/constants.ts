@@ -14,7 +14,7 @@ export const SUPPORTED_LANGUAGES = [
   { code: "ru", name: "Russian" },
 ];
 
-export const TEMP_DIRECTORY = environment.supportPath;
+export const TEMP_DIRECTORY = `${environment.supportPath}/temp`;
 export const RECORDING_FORMAT = "wav";
 export const RECORDING_SAMPLE_RATE = 16000;
 export const RECORDING_CHANNELS = 1;

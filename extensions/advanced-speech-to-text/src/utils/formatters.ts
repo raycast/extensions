@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences, ErrorTypes } from "../types";
-import { getErrorMessage, isOpenAIError, createErrorMessage } from "./errors";
+import { handleOpenAIError } from "./errors";
 
 const DEFAULT_FORMATTING_PROMPTS = {
   email: `Transform the following text into a well-structured email, maintaining the original language of the input text. 
@@ -46,12 +46,20 @@ function getFormattingPrompt(mode: "email" | "slack" | "report"): string {
   }
 }
 
+function sanitizeText(text: string): string {
+  // Remove any newlines and normalize spaces
+  const sanitized = text.replace(/[\r\n]+/g, " ").trim();
+  // Escape any quotes that could break the prompt structure
+  return sanitized.replace(/"/g, '\\"');
+}
+
 export async function formatTextWithChatGPT(
   text: string,
   mode: "email" | "slack" | "report",
 ): Promise<string> {
   const preferences = getPreferenceValues<Preferences>();
   const prompt = getFormattingPrompt(mode);
+  const sanitizedText = sanitizeText(text);
 
   if (!preferences.openaiApiKey) {
     throw new Error(ErrorTypes.API_KEY_MISSING);
@@ -67,7 +75,7 @@ export async function formatTextWithChatGPT(
       messages: [
         {
           role: "user",
-          content: `${prompt}\n\n"${text}"`,
+          content: `${prompt}\n\n"${sanitizedText}"`,
         },
       ],
       temperature: 0.3,
@@ -77,16 +85,6 @@ export async function formatTextWithChatGPT(
     return response.choices[0]?.message?.content?.trim() || text;
   } catch (error) {
     console.error("Error formatting text:", error);
-
-    if (isOpenAIError(error)) {
-      throw new Error(ErrorTypes.API_KEY_MISSING);
-    }
-
-    throw new Error(
-      createErrorMessage(
-        ErrorTypes.TRANSCRIPTION_FAILED,
-        getErrorMessage(error),
-      ),
-    );
+    handleOpenAIError(error);
   }
 }

@@ -1,6 +1,6 @@
 # Advanced Speech to Text Extension for Raycast
 
-A powerful and easy-to-use extension for Raycast that converts voice to text using OpenAI's most advanced models, including GPT-4o.
+A powerful and easy-to-use extension for Raycast that converts voice to text using OpenAI's most advanced models, including GPT-4o-transcribe.
 
 ## ✨ Key Features
 
@@ -176,7 +176,7 @@ sox --version
 2. **Configure API Key**
 
    - Open Raycast Preferences
-   - Navigate to Extensions → Speech to Text
+   - Navigate to Extensions → Advanced Speech to Text
    - Paste your OpenAI API Key in the "OpenAI API Key" field
 
 3. **Customize Settings (Optional)**
@@ -275,4 +275,4 @@ If you have problems or suggestions, you can:
 
 ---
 
-Enjoy using Buddy to convert your voice to text efficiently! 🎤✨
+Enjoy using this extension to convert your voice to text efficiently! 🎤✨

@@ -6,7 +6,7 @@
     "lib": ["es2021", "dom"],
     "module": "commonjs",
     "target": "es2021",
-    "strict": false,
+    "strict": true,
     "noEmit": false,
     "isolatedModules": true,
     "esModuleInterop": true,
@@ -14,11 +14,11 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "moduleResolution": "node",
     "types": ["@raycast/api", "node"],
-    "noImplicitReturns": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   }
 }

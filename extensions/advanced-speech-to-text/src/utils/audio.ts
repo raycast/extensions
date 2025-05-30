@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-import { readdir, stat, access } from "fs/promises";
+import { readdir, stat, access, mkdir, unlink } from "fs/promises";
 import { join } from "path";
 import {
   TEMP_DIRECTORY,
@@ -18,8 +18,13 @@ export async function ensureTempDirectory(): Promise<string> {
     await access(TEMP_DIRECTORY);
     return TEMP_DIRECTORY;
   } catch (error) {
-    console.error("Cannot access temp directory:", error);
-    throw new Error(`Could not access temp directory: ${TEMP_DIRECTORY}`);
+    try {
+      await mkdir(TEMP_DIRECTORY, { recursive: true });
+      return TEMP_DIRECTORY;
+    } catch (mkdirError) {
+      console.error("Cannot create temp directory:", mkdirError);
+      throw new Error(`Could not create temp directory: ${TEMP_DIRECTORY}`);
+    }
   }
 }
 
@@ -131,9 +136,15 @@ export async function getAudioDuration(filePath: string): Promise<number> {
     try {
       const sox = spawn(soxPath, [filePath, "-n", "stat"]);
       let output = "";
+      const MAX_BUFFER_SIZE = 5 * 1024 * 1024; // 5MB limit
 
       await new Promise<void>((resolve, reject) => {
         sox.stdout.on("data", (data) => {
+          if (output.length + data.length > MAX_BUFFER_SIZE) {
+            sox.kill();
+            reject(new Error("Sox output exceeded maximum buffer size"));
+            return;
+          }
           output += data.toString();
         });
 
@@ -183,7 +194,7 @@ export async function listAudioFiles(
         const duration = await getAudioDuration(filePath);
 
         transcriptionFiles.push({
-          id: `${stats.birthtime.getTime()}_${file}`,
+          id: file,
           filePath,
           fileName: file,
           recordedAt: stats.birthtime,
@@ -204,5 +215,29 @@ export async function listAudioFiles(
   } catch (error) {
     console.error("Failed to list audio files:", error);
     return [];
+  }
+}
+
+export async function cleanupTempFiles(
+  maxAgeHours: number = 24,
+): Promise<void> {
+  try {
+    const files = await listAudioFiles(TEMP_DIRECTORY);
+    const now = new Date();
+
+    for (const file of files) {
+      const fileAge = now.getTime() - file.recordedAt.getTime();
+      const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
+
+      if (fileAge > maxAgeMs) {
+        try {
+          await unlink(file.filePath);
+        } catch (error) {
+          console.warn(`Failed to delete old file ${file.filePath}:`, error);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Failed to cleanup temp files:", error);
   }
 }

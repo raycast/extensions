@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   List,
   Action,
@@ -9,7 +9,7 @@ import {
   Icon,
   Color,
 } from "@raycast/api";
-import { listAudioFiles } from "./utils/audio";
+import { listAudioFiles, cleanupTempFiles } from "./utils/audio";
 import { transcribeAudio } from "./utils/openai";
 import { TranscriptionFile } from "./types";
 import { TEMP_DIRECTORY } from "./constants";
@@ -24,6 +24,8 @@ export default function RecordingHistory() {
 
   useEffect(() => {
     loadAudioFiles();
+    // Clean up old files when component mounts
+    cleanupTempFiles().catch(console.error);
   }, []);
 
   const loadAudioFiles = async () => {
@@ -117,7 +119,11 @@ export default function RecordingHistory() {
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search recordings...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search recordings..."
+      isShowingDetail
+    >
       {audioFiles.length === 0 ? (
         <List.EmptyView
           icon={Icon.Microphone}
@@ -170,7 +176,7 @@ export default function RecordingHistory() {
                   title="Refresh List"
                   onAction={loadAudioFiles}
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                 />
               </ActionPanel>
             }

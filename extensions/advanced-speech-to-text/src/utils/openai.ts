@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import { createReadStream } from "fs";
 import { getPreferenceValues } from "@raycast/api";
 import { ErrorTypes, Preferences, DetailedTranscriptionResult } from "../types";
-import { getErrorMessage, isOpenAIError, createErrorMessage } from "./errors";
+import { handleOpenAIError } from "./errors";
 
 export async function transcribeAudioDetailed(
   filePath: string,
@@ -17,8 +17,10 @@ export async function transcribeAudioDetailed(
     apiKey: preferences.openaiApiKey,
   });
 
+  let audioFile: ReturnType<typeof createReadStream> | undefined;
+
   try {
-    const audioFile = createReadStream(filePath);
+    audioFile = createReadStream(filePath);
 
     const transcription = await createTranscription(
       openai,
@@ -37,17 +39,12 @@ export async function transcribeAudioDetailed(
     throw new Error("Unexpected response format from OpenAI");
   } catch (error) {
     console.error("OpenAI transcription error:", error);
-
-    if (isOpenAIError(error)) {
-      throw new Error(ErrorTypes.TRANSCRIPTION_FAILED);
+    handleOpenAIError(error);
+    throw error;
+  } finally {
+    if (audioFile) {
+      audioFile.destroy();
     }
-
-    throw new Error(
-      createErrorMessage(
-        ErrorTypes.TRANSCRIPTION_FAILED,
-        getErrorMessage(error),
-      ),
-    );
   }
 }
 
@@ -61,9 +58,8 @@ function createTranscription(
   audioFile: ReturnType<typeof createReadStream>,
   preferences: Preferences,
 ) {
-  const temperature = preferences.temperature
-    ? parseFloat(preferences.temperature)
-    : 0;
+  const rawTemperature = preferences.temperature ?? 0;
+  const temperature = Math.max(0, Math.min(1, rawTemperature));
 
   return openai.audio.transcriptions.create({
     file: audioFile,
