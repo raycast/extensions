@@ -78,7 +78,7 @@ export class IAMService {
   private readonly CACHE_TTL = 300000;
 
   constructor(gcloudPath: string, projectId: string) {
-    this.gcloudPath = gcloudPath;
+    this.gcloudPath = gcloudPath || "gcloud";
     this.projectId = projectId;
   }
 
