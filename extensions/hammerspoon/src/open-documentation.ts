@@ -13,12 +13,16 @@ export default async function main() {
     await runAppleScript(`
       tell application "Hammerspoon"
         execute lua code "
-          hs.doc.hsdocs.help()
-          local hsApp = hs.application.get(hs.processInfo.bundleID);
-          local hsDocsWindow = hsApp and hsApp:findWindow('Hammerspoon docs');
+          local hsApp = hs.application.get(hs.processInfo.bundleID)
 
-          if hsDocsWindow then
-            hsDocsWindow:focus();
+          if hsApp then
+            hsApp:activate()
+            hs.doc.hsdocs.help()
+            local hsDocsWindow = hsApp:findWindow('Hammerspoon docs')
+
+            if hsDocsWindow then
+              hsDocsWindow:focus()
+            end
           end
         "
       end tell
