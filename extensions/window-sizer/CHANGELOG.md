@@ -1,5 +1,11 @@
 # Window Sizer Changelog
 
+## [Refactor Favorite Size Feature] - 2025-05-30
+
+- Refactored the logic for saving and resizing to the favorite window size
+- Removed the Reset Favorite Size command — favorite size is now configured directly in the command settings
+- Renamed the command from "Resize to Favorite Size" to "Apply Favorite Size"
+
 ## [New Feature and Improvements] - 2025-05-28
 
 - Added a new command to quickly save and resize to a favorite window size
