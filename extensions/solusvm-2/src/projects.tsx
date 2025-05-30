@@ -99,6 +99,7 @@ export default function Projects() {
                 icon={Icon.Trash}
                 title="Delete"
                 onAction={() => confirmAndDelete(project)}
+                style={Action.Style.Destructive}
                 shortcut={Keyboard.Shortcut.Common.Remove}
               />
             </ActionPanel>
