@@ -10,16 +10,16 @@ import {
   Keyboard,
   LaunchProps,
 } from "@raycast/api";
-import { folderName } from "./utils";
+import React from "react";
+import { folderName, log } from "./utils";
 import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
-import { useCommandBase } from "./hooks/useCommandBase";
 import { moveFinderItems } from "./moveUtils";
 import { FolderListSection, Directory } from "./components";
 import path from "node:path";
 import { userInfo } from "os";
 
-export default function Command(props: LaunchProps) {
+function Command(props: LaunchProps) {
   const {
     searchText,
     setSearchText,
@@ -40,13 +40,13 @@ export default function Command(props: LaunchProps) {
     hasSearched,
   } = useFolderSearch();
 
-  // Use the shared command base hook
-  useCommandBase({
-    commandName: "move",
-    launchProps: props,
-    searchText,
-    setSearchText,
-  });
+  // Simple launch logging
+  React.useEffect(() => {
+    log("debug", "move", "Command launched", {
+      searchText,
+      timestamp: new Date().toISOString(),
+    });
+  }, []); // Only log once on mount
 
   // Render actions for the folder list items
   const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number, isPinnedSection = false) => {
@@ -198,3 +198,5 @@ export default function Command(props: LaunchProps) {
     </List>
   );
 }
+
+export default Command;

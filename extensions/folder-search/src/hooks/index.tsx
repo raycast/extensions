@@ -6,7 +6,6 @@
 
 // Main hooks
 export { useFolderSearch } from "./useFolderSearch";
-export { useCommandBase } from "./useCommandBase";
 
 // Pin management hooks
 export { usePinManagement } from "./usePinManagement";

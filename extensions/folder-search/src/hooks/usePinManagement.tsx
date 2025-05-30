@@ -72,7 +72,7 @@ export function usePinManagement({
     };
 
     savePinsToStorage();
-  }, [pinnedResults, hasCheckedPins]);
+  }, [pinnedResults, hasCheckedPins, searchScope, isShowingDetail, showNonCloudLibraryPaths, pinStorage]);
 
   /**
    * Check if a result is pinned

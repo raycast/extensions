@@ -11,11 +11,11 @@ import {
   Keyboard,
   LaunchProps,
 } from "@raycast/api";
+import React from "react";
 import { folderName, copyFolderToClipboard, maybeMoveResultToTrash, log, logDiagnostics } from "./utils";
 import { runAppleScript } from "run-applescript";
 import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
-import { useCommandBase } from "./hooks/useCommandBase";
 import { moveFinderItems } from "./moveUtils";
 import { FolderListSection, Directory } from "./components";
 import path from "node:path";
@@ -29,7 +29,7 @@ interface IconDictionary {
 
 const IconDictionaried: IconDictionary = Icon as IconDictionary;
 
-export default function Command(props: LaunchProps) {
+function Command(props: LaunchProps) {
   const {
     searchText,
     setSearchText,
@@ -53,13 +53,13 @@ export default function Command(props: LaunchProps) {
     hasSearched,
   } = useFolderSearch();
 
-  // Use the shared command base hook
-  useCommandBase({
-    commandName: "search",
-    launchProps: props,
-    searchText,
-    setSearchText,
-  });
+  // Simple launch logging
+  React.useEffect(() => {
+    log("debug", "search", "Command launched", {
+      searchText,
+      timestamp: new Date().toISOString(),
+    });
+  }, []); // Only log once on mount
 
   // Handle returning from directory view
   const handleReturnFromDirectory = () => {
@@ -299,3 +299,5 @@ export default function Command(props: LaunchProps) {
     </List>
   );
 }
+
+export default Command;
