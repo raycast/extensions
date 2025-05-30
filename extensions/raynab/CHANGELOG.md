@@ -1,6 +1,6 @@
 # Raynab Changelog
 
-## [Improved Category Search & Fixed Budget Details] - {PR_MERGE_DATE}
+## [Improved Category Search & Fixed Budget Details] - 2025-05-30
 
 ### ✨ New Features
 - Support for searching categories with emoji icons in their names
