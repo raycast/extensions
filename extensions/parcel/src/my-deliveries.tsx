@@ -31,6 +31,7 @@ export default function Command() {
     "dd.MM.yyyy HH:mm:ss", // European with seconds
     "dd.MM.yyyy HH:mm", // European without seconds
     "MMMM dd, yyyy HH:mm", // American
+    "yyyy-MM-dd HH:mm:ss", // ISO 8601
   ];
 
   // Calculate days until delivery
