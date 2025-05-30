@@ -2,7 +2,7 @@
 
 ## [Add delete last downloaded item command] - {PR_MERGE_DATE}
 
-- Added the command `Delete Latest Download`, which permanently deletes the latest download.
+- Added the command `Delete Latest Download`, which deletes the latest download.
 
 ## [Add new commands] - 2025-05-22
 
