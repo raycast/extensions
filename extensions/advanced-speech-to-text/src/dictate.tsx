@@ -276,7 +276,7 @@ export default function Dictate() {
 
   // Show results view after transcription is completed
   if (transcriptionState === "completed") {
-    const markdown = `${formattedText}`;
+    const markdown = formattedText;
 
     return (
       <Detail
