@@ -12,7 +12,11 @@
   "commands": [
     {
       "name": "index",
+<<<<<<< HEAD
       "title": "VPN Connect",
+=======
+      "title": "Vpn Connect",
+>>>>>>> f5fa9dac5 (Change vpn text case)
       "subtitle": "Mozilla VPN",
       "description": "Activate or deactivate the Mozilla VPN.",
       "mode": "view"

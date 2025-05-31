@@ -81,7 +81,7 @@ export default function Command() {
   return (
     <List>
       <List.Item
-        title="Activate Mozilla Vpn"
+        title="Activate Mozilla VPN"
         actions={
           <ActionPanel>
             <Action
@@ -96,7 +96,7 @@ export default function Command() {
         }
       />
       <List.Item
-        title="Deactivate Mozilla Vpn"
+        title="Deactivate Mozilla VPN"
         actions={
           <ActionPanel>
             <Action

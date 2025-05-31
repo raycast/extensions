@@ -93,7 +93,7 @@ const ServerDetails: React.FC<ServerDetailsProps> = ({
   const statusEmoji = isConnected ? '🟢' : '🔴';
 
   const markdown = `
-  # Mozilla Vpn Status
+  # Mozilla VPN Status
 
   ## Connection Information
   - **Status**: ${statusEmoji} ${statusText}
@@ -104,18 +104,18 @@ const ServerDetails: React.FC<ServerDetailsProps> = ({
   ${
     isConnected
       ? `
-  Your connection to Mozilla Vpn is currently active. All your internet traffic is being routed through the VPN server in ${serverCity}, ${serverCountry}.
+  Your connection to Mozilla VPN is currently active. All your internet traffic is being routed through the VPN server in ${serverCity}, ${serverCountry}.
   
   Your real IP address is hidden, and websites see your VPN IP address (${ipAddress}).
   `
       : `
-  Your connection to Mozilla Vpn is currently inactive. Your internet traffic is not being protected by the VPN.
+  Your connection to Mozilla VPN is currently inactive. Your internet traffic is not being protected by the VPN.
   
   Your current IP address (${ipAddress}) is visible to websites you visit.
   `
   }
 
-  ## Mozilla Vpn Features
+  ## Mozilla VPN Features
   - **Privacy**: Encrypts your internet connection
   - **Security**: Protects your data on public WiFi
   - **No-logs Policy**: Mozilla doesn't track your network activity

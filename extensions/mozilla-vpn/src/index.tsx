@@ -8,7 +8,7 @@ import ServerSelector from './components/serverSelector';
 import ServerDetails from './components/serverDetails';
 import fs from 'fs';
 
-const MOZILLA_VPN_PATH = '/Applications/Mozilla Vpn.app';
+const MOZILLA_VPN_PATH = '/Applications/Mozilla VPN.app';
 
 // Extract components with explicit typing to avoid type conflicts
 const showToast = Raycast.showToast;
@@ -76,11 +76,11 @@ const List = (Raycast as unknown as { List: ListComponent }).List;
 // Define view types for navigation
 type ViewType = 'main' | 'serverSelector' | 'serverDetails';
 
-const isMozillaVpnInstalled = () => {
+const isMozillaVPNInstalled = () => {
   try {
     return fs.existsSync(MOZILLA_VPN_PATH);
   } catch (error) {
-    console.error('Error checking Mozilla Vpn installation:', error);
+    console.error('Error checking Mozilla VPN installation:', error);
     return false;
   }
 };
@@ -118,7 +118,7 @@ const Command: React.FC = () => {
     // Show the initial loading toast
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
-      title: `${actionText} Mozilla Vpn...`,
+      title: `${actionText} Mozilla VPN...`,
     });
 
     // Set a timeout to prevent the function from hanging indefinitely
@@ -412,7 +412,7 @@ const Command: React.FC = () => {
     let initTimeoutId: NodeJS.Timeout | null = null;
 
     const initializeExtension = async () => {
-      if (isMozillaVpnInstalled()) {
+      if (isMozillaVPNInstalled()) {
         try {
           setErrorMessage(null); // Clear previous error
           await fetchInitialData();
@@ -428,8 +428,8 @@ const Command: React.FC = () => {
           setIsLoading(false);
         }
       } else {
-        setIsLoading(false); // Stop loading if Mozilla Vpn is not installed
-        setErrorMessage('Mozilla Vpn application is not installed.');
+        setIsLoading(false); // Stop loading if Mozilla VPN is not installed
+        setErrorMessage('Mozilla VPN application is not installed.');
       }
     };
 
@@ -477,7 +477,7 @@ const Command: React.FC = () => {
     return (
       <List>
         <List.EmptyView
-          title="Mozilla Vpn Error"
+          title="Mozilla VPN Error"
           description={errorMessage}
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
           actions={
@@ -485,7 +485,7 @@ const Command: React.FC = () => {
               <ActionPanel.Section>
                 <Action.OpenInBrowser
                   url="https://www.mozilla.org/en-US/products/vpn/download/"
-                  title="Download Mozilla Vpn"
+                  title="Download Mozilla VPN"
                 />
               </ActionPanel.Section>
 
@@ -542,7 +542,7 @@ const Command: React.FC = () => {
     case 'main':
     default:
       return (
-        <List isLoading={isLoading} navigationTitle="Mozilla Vpn Connect">
+        <List isLoading={isLoading} navigationTitle="Mozilla VPN Connect">
           <List.Section title="VPN Controls">
             <VpnStatus
               vpnStatus={vpnStatus}

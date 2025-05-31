@@ -79,7 +79,7 @@ const VpnStatus: React.FC<VpnStatusProps> = ({
     ? { source: Icon.Lock, tintColor: Color.Green }
     : { source: Icon.LockUnlocked, tintColor: Color.Red };
 
-  const title = vpnStatus ? 'Deactivate Mozilla Vpn' : 'Activate Mozilla Vpn';
+  const title = vpnStatus ? 'Deactivate Mozilla VPN' : 'Activate Mozilla VPN';
   const actionTitle = vpnStatus ? 'Disconnect VPN' : 'Connect VPN';
 
   // Format server info
