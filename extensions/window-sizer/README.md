@@ -48,21 +48,31 @@ Resize the focused window to pixel-perfect presets.
 - Get current window size
 
 <div align="center">
-  <img src="assets/screenshots/5.png" alt="other features">
+  <img src="assets/screenshots/5.png" alt="other options">
 </div>
 
 ---
 
 ### Apply favorite size
 
-Set the size in the command settings before using this command.
+#### Applying when size is not set
 
 <div align="center">
   <img src="assets/screenshots/6.png" alt="apply favorite size">
 </div>
 
+#### Set favorite size in the command settings
+
+Best used with custom shortcut ✨
+
 <div align="center">
-  <img src="assets/screenshots/7.png" alt="favorite size">
+  <img src="assets/screenshots/7.png" alt="favorite size settings">
+</div>
+
+#### Resizing to favorite size
+
+<div align="center">
+  <img src="assets/screenshots/8.png" alt="resizing to favorite size">
 </div>
 
 ## Shortcuts
