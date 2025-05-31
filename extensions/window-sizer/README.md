@@ -1,25 +1,17 @@
 <div align="center">
-  <img src="assets/screenshots/0.png" alt="cover">
+  <img width=128 src="assets/screenshots/icon.png" alt="icon">
 </div>
-&nbsp;
 
-# Window Sizer
-
-Resize the focused window to pixel-perfect presets.
-
-## Usage and Features
-
-### Search commands
-
-- `Window Sizer`
-- `Resize Window`
-- `Apply Favorite Size`
+<h1 align="center">Window Sizer</h1>
+<p align="center">Resize the focused window to pixel-perfect presets</p>
 
 <div align="center">
   <img src="assets/screenshots/1.png" alt="window sizer commands">
 </div>
 
----
+<br>
+
+## Features
 
 ### Resize Window
 
@@ -63,8 +55,6 @@ Resize the focused window to pixel-perfect presets.
 
 #### Set favorite size in the command settings
 
-Best used with custom shortcut ✨
-
 <div align="center">
   <img src="assets/screenshots/7.png" alt="favorite size settings">
 </div>
@@ -83,5 +73,5 @@ Best used with custom shortcut ✨
 
 ## Notes
 
-- To resize windows, please allow Raycast to control your Mac under System Settings → Privacy & Security → Accessibility
+- To resize windows, please allow Raycast to control your Mac under `System Settings` → `Privacy & Security` → `Accessibility`
 - Some applications may restrict window resizing
