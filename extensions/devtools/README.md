@@ -131,9 +131,11 @@ A comprehensive collection of essential developer tools that enhance your produc
 
 If you encounter any issues or have suggestions:
 
+- [Open an issue](https://github.com/raycast/extensions/issues) on GitHub
 - Check the command documentation in Raycast
 - Verify input formats and requirements
 - Try different options and settings
+- Read our [contribution guidelines](https://github.com/raycast/extensions/blob/main/CONTRIBUTING.md) for more information
 
 ---
 

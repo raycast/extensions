@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ActionPanel, Action, Form, Detail, useNavigation } from '@raycast/api';
+import React, { useState } from "react";
+import { ActionPanel, Action, Form, Detail, useNavigation } from "@raycast/api";
 
 function HtmlPreview({ html, onBack }: { html: string; onBack: () => void }) {
   return (
@@ -17,7 +17,7 @@ function HtmlPreview({ html, onBack }: { html: string; onBack: () => void }) {
 }
 
 export default function Command() {
-  const [input, setInput] = useState('<h1>Hello, world!</h1>\n<p>Type your HTML here...</p>');
+  const [input, setInput] = useState("<h1>Hello, world!</h1>\n<p>Type your HTML here...</p>");
   const { push, pop } = useNavigation();
 
   function handlePreview() {
@@ -28,11 +28,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action
-            title="Preview HTML"
-            onAction={handlePreview}
-            shortcut={{ modifiers: ['cmd'], key: 'enter' }}
-          />
+          <Action title="Preview HTML" onAction={handlePreview} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
           <Action.CopyToClipboard title="Copy HTML" content={input} />
         </ActionPanel>
       }

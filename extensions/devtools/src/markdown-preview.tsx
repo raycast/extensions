@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ActionPanel, Action, Form, Detail, useNavigation } from '@raycast/api';
+import React, { useState } from "react";
+import { ActionPanel, Action, Form, Detail, useNavigation } from "@raycast/api";
 
 function MarkdownPreview({ markdown, onBack }: { markdown: string; onBack: () => void }) {
   return (
@@ -16,7 +16,7 @@ function MarkdownPreview({ markdown, onBack }: { markdown: string; onBack: () =>
 }
 
 export default function Command() {
-  const [input, setInput] = useState('# Heading 1\n\nType your markdown here...');
+  const [input, setInput] = useState("# Heading 1\n\nType your markdown here...");
   const { push, pop } = useNavigation();
 
   function handlePreview() {
@@ -30,7 +30,7 @@ export default function Command() {
           <Action
             title="Preview Markdown"
             onAction={handlePreview}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'enter' }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
           <Action.CopyToClipboard title="Copy Markdown" content={input} />
         </ActionPanel>

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { ActionPanel, Action, Form } from '@raycast/api';
-import { v4 as uuidv4, v7 as uuidv7 } from 'uuid';
+import React, { useState } from "react";
+import { ActionPanel, Action, Form } from "@raycast/api";
+import { v4 as uuidv4, v7 as uuidv7 } from "uuid";
 
 export default function Command() {
   const [uuid4, setUuid4] = useState(uuidv4());
@@ -15,11 +15,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action
-            title="Regenerate"
-            onAction={regenerate}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'enter' }}
-          />
+          <Action title="Regenerate" onAction={regenerate} shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }} />
           <Action.CopyToClipboard title="Copy UUID v4" content={uuid4} />
           <Action.CopyToClipboard title="Copy UUID v7" content={uuid7} />
         </ActionPanel>

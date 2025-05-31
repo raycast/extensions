@@ -13,18 +13,21 @@
     {
       "name": "unix-time-converter",
       "title": "Unix Time Converter",
+      "subtitle": "DevTools",
       "description": "Convert between Unix time and human-readable dates",
       "mode": "view"
     },
     {
       "name": "json-format-validate",
-      "title": "JSON Format/Validate",
+      "title": "Json Format/Validate",
+      "subtitle": "DevTools",
       "description": "Format and validate JSON input",
       "mode": "view"
     },
     {
       "name": "jwt-debugger",
-      "title": "JWT Debugger",
+      "title": "Jwt Debugger",
+      "subtitle": "DevTools",
       "description": "Decode and inspect JWT tokens",
       "mode": "view"
     },
@@ -36,13 +39,15 @@
     },
     {
       "name": "uuid-generator",
-      "title": "UUID Generator",
+      "title": "Uuid Generator",
+      "subtitle": "DevTools",
       "description": "Generate UUID v4 and v7",
       "mode": "view"
     },
     {
       "name": "base64-encode-decode",
       "title": "Base64 Encode/Decode",
+      "subtitle": "DevTools",
       "description": "Encode or decode Base64 strings",
       "mode": "view"
     },
@@ -64,6 +69,7 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "^20.11.19",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",

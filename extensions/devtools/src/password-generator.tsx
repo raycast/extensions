@@ -1,31 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { ActionPanel, Action, Form } from '@raycast/api';
+import React, { useState, useEffect } from "react";
+import { ActionPanel, Action, Form } from "@raycast/api";
 
-const DEFAULT_LENGTH = 16;
-const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
-const DIGITS = '0123456789';
-const SYMBOLS = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-
-function generatePassword(options: {
-  length: number;
+interface PasswordOptions {
   useUpper: boolean;
   useLower: boolean;
   useDigits: boolean;
   useSymbols: boolean;
-}) {
-  let charset = '';
+}
+
+const DEFAULT_LENGTH = 16;
+const UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
+const DIGITS = "0123456789";
+const SYMBOLS = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+
+function generatePassword(length: number, options: PasswordOptions): string {
+  let charset = "";
   if (options.useUpper) charset += UPPERCASE;
   if (options.useLower) charset += LOWERCASE;
   if (options.useDigits) charset += DIGITS;
   if (options.useSymbols) charset += SYMBOLS;
   if (!charset) charset = LOWERCASE + UPPERCASE + DIGITS;
-  let result = '';
-  for (let i = 0; i < options.length; i++) {
-    const idx = Math.floor(Math.random() * charset.length);
-    result += charset[idx];
+
+  // Ensure at least one character from each selected set
+  let password = "";
+  if (options.useUpper) password += UPPERCASE[Math.floor(Math.random() * UPPERCASE.length)];
+  if (options.useLower) password += LOWERCASE[Math.floor(Math.random() * LOWERCASE.length)];
+  if (options.useDigits) password += DIGITS[Math.floor(Math.random() * DIGITS.length)];
+  if (options.useSymbols) password += SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+
+  // Fill the rest of the password
+  while (password.length < length) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
   }
-  return result;
+
+  // Shuffle the password
+  return password
+    .split("")
+    .sort(() => Math.random() - 0.5)
+    .join("");
 }
 
 export default function Command() {
@@ -34,12 +48,11 @@ export default function Command() {
   const [useLower, setUseLower] = useState(true);
   const [useDigits, setUseDigits] = useState(true);
   const [useSymbols, setUseSymbols] = useState(true);
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState("");
 
   function regenerate() {
     setPassword(
-      generatePassword({
-        length,
+      generatePassword(length, {
         useUpper,
         useLower,
         useDigits,
@@ -60,7 +73,7 @@ export default function Command() {
           <Action
             title="Generate Password"
             onAction={regenerate}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'enter' }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
           <Action.CopyToClipboard title="Copy Password" content={password} />
         </ActionPanel>
@@ -70,7 +83,7 @@ export default function Command() {
         id="length"
         title="Length"
         value={length.toString()}
-        onChange={(v) => setLength(Number(v.replace(/\D/g, '')) || 0)}
+        onChange={(v) => setLength(Math.min(Math.max(Number(v.replace(/\D/g, "")) || 0, 5), 64))}
       />
       <Form.Checkbox id="upper" label="Uppercase" value={useUpper} onChange={setUseUpper} />
       <Form.Checkbox id="lower" label="Lowercase" value={useLower} onChange={setUseLower} />

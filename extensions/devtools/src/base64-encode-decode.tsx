@@ -1,39 +1,39 @@
-import React, { useState } from 'react';
-import { ActionPanel, Action, Form, showToast, Toast } from '@raycast/api';
+import React, { useState } from "react";
+import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
 
-function base64Encode(str: string) {
+function encodeBase64(str: string): string {
   try {
-    return btoa(unescape(encodeURIComponent(str)));
+    return Buffer.from(str).toString("base64");
   } catch (e) {
-    throw new Error('Input is not valid for encoding');
+    return "";
   }
 }
 
-function base64Decode(str: string) {
+function decodeBase64(str: string): string {
   try {
-    return decodeURIComponent(escape(atob(str)));
+    return Buffer.from(str, "base64").toString("utf-8");
   } catch (e) {
-    throw new Error('Input is not valid Base64');
+    return "";
   }
 }
 
 export default function Command() {
-  const [input, setInput] = useState('');
-  const [output, setOutput] = useState('');
-  const [mode, setMode] = useState('decode');
-  const [error, setError] = useState('');
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+  const [mode, setMode] = useState("encode");
+  const [error, setError] = useState("");
 
   function handleConvert() {
     try {
-      const result = mode === 'encode' ? base64Encode(input) : base64Decode(input);
+      const result = mode === "encode" ? encodeBase64(input) : decodeBase64(input);
       setOutput(result);
-      setError('');
-      showToast({ style: Toast.Style.Success, title: 'Success!' });
+      setError("");
+      showToast({ style: Toast.Style.Success, title: "Success!" });
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setOutput('');
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      setOutput("");
       setError(errorMessage);
-      showToast({ style: Toast.Style.Failure, title: 'Error', message: errorMessage });
+      showToast({ style: Toast.Style.Failure, title: "Error", message: errorMessage });
     }
   }
 
@@ -42,9 +42,9 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action
-            title={mode === 'encode' ? 'Encode' : 'Decode'}
+            title={mode === "encode" ? "Encode" : "Decode"}
             onAction={handleConvert}
-            shortcut={{ modifiers: ['cmd'], key: 'enter' }}
+            shortcut={{ modifiers: ["cmd"], key: "enter" }}
           />
           {output && <Action.CopyToClipboard title="Copy Output" content={output} />}
         </ActionPanel>
@@ -66,7 +66,7 @@ export default function Command() {
         title="Output"
         value={output}
         onChange={() => {}}
-        placeholder="Result will appear here"
+        placeholder="Output will appear here"
         enableMarkdown={false}
         autoFocus={false}
       />
