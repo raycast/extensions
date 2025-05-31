@@ -2,10 +2,12 @@ import { writeFileSync } from "fs";
 import path from "path";
 import os from "os";
 import { getPreferenceValues, showInFinder, showHUD, Clipboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export function writeContentToFile(content: string): string {
-  const fileName = getPreferenceValues<ExtensionPreferences>().fileName;
-  let directory = getPreferenceValues<ExtensionPreferences>().fileDirectory;
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const fileName = preferences.fileName;
+  let directory = preferences.fileDirectory;
 
   if (!directory || directory.trim() === "" || directory === "/") {
     directory = os.tmpdir();
@@ -25,12 +27,11 @@ export async function maybeOpenFinder(filePath: string): Promise<void> {
 }
 
 export async function handleTextToFile(
-  getText: () => Promise<string | undefined>,
+  text: string | undefined,
   action: (fileContent: Clipboard.Content) => Promise<void>,
   successMessage: string = "File copied to clipboard",
 ): Promise<void> {
   try {
-    const text = await getText();
     if (!text || text.trim() === "") {
       await showHUD("❌ No text found");
       return;
@@ -46,6 +47,6 @@ export async function handleTextToFile(
     }
   } catch (error) {
     console.error("Error handling text to file:", error);
-    await showHUD("❌ Something went wrong");
+    showFailureToast(error, { title: "Something went wrong" });
   }
 }

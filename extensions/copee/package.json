@@ -15,7 +15,7 @@
       "mode": "no-view"
     },
     {
-      "name": "make-file-from-clipboard",
+      "name": "generate-file-from-clipboard",
       "title": "Generate File from Clipboard",
       "description": "Generates and copies the text file from last entry in clipboard",
       "mode": "no-view"
