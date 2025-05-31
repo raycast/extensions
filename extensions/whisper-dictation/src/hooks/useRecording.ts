@@ -83,7 +83,7 @@ export function useRecording(
     if (currentProcess && !currentProcess.killed) {
       console.log(`useRecording: Killing existing process PID: ${currentProcess.pid} for restart.`);
       try {
-        process.kill(currentProcess.pid!, "SIGKILL");
+        if (currentProcess.pid) process.kill(currentProcess.pid, "SIGKILL");
         console.log(`useRecording: Sent SIGKILL to PID ${currentProcess.pid}`);
       } catch (e) {
         if (e instanceof Error && "code" in e && e.code !== "ESRCH") {
