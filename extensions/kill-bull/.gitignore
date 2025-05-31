@@ -3,10 +3,14 @@ node_modules/
 
 # Build output
 dist/
+.build/
+.raycast-swift-build/
+*.js.map
 
 # Environment files
 .env
 .env.local
+raycast-env.d.ts
 
 # IDE files
 .vscode/
