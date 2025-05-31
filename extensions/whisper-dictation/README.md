@@ -1,38 +1,12 @@
 # 🎤 Whisper Dictation for Raycast
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-<p align="center">
-  <img src="./assets/extension-icon.png" alt="Extension Icon" width="200">
-</p>
-
-
-<p align="center">
-  <img src="media/download-models.png" alt="Download and manage whisper models easily from within the extension">
-</p>
-<p align="center">
-   <img src="media/configure-ai.png" alt="Refine your transcribed text with custom prompts">
-</p>
-<p align="center">
-   <img src="media/dictate-prompt-selection.png" alt="Choose your prompt before each transcription, or turn this off in preferences and use the selction in 'Configure AI Refinement' by default.">
-</p>
-<p align="center">
-  <img src="media/recording.png" alt="Record any length of audio to transcribe">
-</p>
-<p align="center">
-  <img src="media/transcribed.png" alt="Modify your transcribed text before copying/pasting directly">
-</p>
-<p align="center">
-   <img src="media/history.png" alt="View, copy and paste you dictation/refinement history">
-</p>
-
 Effortlessly convert your speech to text directly within Raycast using the power of [`whisper.cpp`](https://github.com/ggerganov/whisper.cpp). This extension provides a simple interface to record audio, transcribe and refine it locally, privately on your machine. Refine the text with custom prompts privately using ollama, or additionally with Raycast AI or any v1 (OpenAI) compatible API.
 ## ✨ Features
 
 *   **Local Transcription:** Uses `whisper.cpp` running locally on your machine through Raycast.
-*   **Refine with AI** Optionally refine the transcribed text using Raycast AI or any OpenAI (v1) compatible API, such as Anthropic, OpenAI, a local Ollama server.
-    **Download Models** Download a variety of whisper models from right within the extension.
-    **Dictation History** Saves all transcriptions locally with timestamps which can be browsed, copied and pasted using the Dictation History command.
+*   **Refine with AI:** Optionally refine the transcribed text using Raycast AI or any OpenAI (v1) compatible API, such as Anthropic, OpenAI, a local Ollama server.
+*   **Download Models:** Download a variety of whisper models from right within the extension.
+*   **Dictation History:** Saves all transcriptions locally with timestamps which can be browsed, copied and pasted using the Dictation History command.
 *   **Simple Interface:** Start recording, press Enter to stop, copy or paste directly into your active window.
 *   **Configurable Output:** Choose to choose, or automatically paste/copy to clipboard. 
 
@@ -66,33 +40,6 @@ Before installing the extension, you need the following installed and configured
 4.  **`sox`:** This extension uses the SoX (Sound eXchange) utility for audio recording.
     *   The easiest way to install it on macOS is with [Homebrew](https://brew.sh/): `brew install sox`
     *The extension currently default for `sox` to be at `/opt/homebrew/bin/sox`. If yours is installed somewhere else, point the extension to it's executable in preferences.
-
-## 🚀 Installation
-
-### 1. Prerequisites
-
-This installation assumes you have met all requirements posted above [Requirements](#-requirements). Have the full paths to your `whisper.cpp` executable, and the downloaded model file ready if not downloading through the extension.
-
-### 2. Install the Extension
-
-Since this extension isn't on the Raycast Store, you'll need to install it from the source code:
-
-1.  **Clone the Repository:**
-    ```bash
-    git clone https://github.com/Spuddy10345/whisper-raycast-extension.git 
-    cd whisper-raycast-extension
-    ```
-2.  **Install Dependencies:**
-    ```bash
-    npm install
-    ```
-3.  **Build the Extension:**
-    ```bash
-    npm run dev
-    ```
-4.  **Open Raycast Preferences:** Go to `Extensions` > `+` (Add Extension) > `Import Extension...`.
-5.  **Select Directory:** Navigate to and select the cloned `whisper-raycast-extension` directory.
-6.  **Configure:** Follow the steps in the [Configuration](#️-configuration) section below.
 
 ## ⚙️ Configuration
 
@@ -213,25 +160,5 @@ The extension downloader currently supports the following whisper models, howeve
             *   **Ollama:** http://localhost:11434
             *   **External API:** https://api.anthropic.com
     *   If using Raycast AI make sure that you have paid for Raycast Pro
-
-## 🙏 Contributing
-
-Contributions are welcome! If you find a bug or have a feature request, please open an issue on the GitHub repository. If you'd like to contribute code, please open a Pull Request.
-
-1.  Fork the repository.
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details (or state MIT directly if no file exists).
-
-## ❤️ Acknowledgements
-
-*   [Georgi Gerganov](https://github.com/ggerganov) for the amazing [`whisper.cpp`](https://github.com/ggerganov/whisper.cpp) project.
-*   The [Raycast](https://raycast.com/) team for the fantastic platform and API.
-*   [SoX - Sound eXchange](https://github.com/chirlu/sox) developers.
 
 ---

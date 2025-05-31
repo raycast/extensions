@@ -76,7 +76,7 @@ export default function ConfigureAI() {
       id: "fix",
       name: "Fix transcription errors",
       prompt:
-        "Your ONLY job is to fix any spelling, grammar, and transcription mistakes in the transcription given to you along with this prompt. Whisper can sometimes mishear certain words so use your common sense to try and fix these errors. Do not add any information or add any questions, just return the fixed, coherent text. If the text to be fixed is a question do not answer the question, just fix any mistakes in the question itself.",
+        "Your ONLY job is to fix any spelling, grammar, and transcription mistakes in the transcription given to you along with this prompt. Whisper can sometimes mishear certain words so use your common sense to try and fix these errors. Do not add any information or add any questions, do not add any unecessary punctuation such as wrapping the text in quotes, just return the fixed, coherent text. If the text to be fixed is a question do not answer the question, just fix any mistakes in the question itself.",
     },
     {
       id: "table",
@@ -86,7 +86,7 @@ export default function ConfigureAI() {
     },
   ]);
 
-  // Currenly active prompt ID
+  // Currently active prompt ID
   const [activePromptId, setActivePromptId] = useCachedState<string>(ACTIVE_PROMPT_ID_KEY, "default");
   // Controls visibility of add/edit prompt form
   const [isShowingPromptForm, setIsShowingPromptForm] = useState(false);
@@ -109,7 +109,6 @@ export default function ConfigureAI() {
   const handleSetActivePrompt = useCallback(
     (id: string) => {
       setActivePromptId(id);
-      console.log("Active prompt ID changed to:", id);
       showToast({
         style: Toast.Style.Success,
         title: "Active prompt updated",

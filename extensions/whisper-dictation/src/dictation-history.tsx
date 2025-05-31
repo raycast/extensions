@@ -84,6 +84,11 @@ export default function DictationHistoryCommand() {
     }
   }, []);
 
+  // Function to escape Markdown characters for safe display
+  const escapeMarkdown = (text: string) => {
+    return text.replace(/[\\`*_{}[\]()#+\-.!]/g, '\\$&');
+  };
+
   // Sort history by timestamp (newest first)
   const sortedHistory = [...history].sort((a, b) => b.timestamp - a.timestamp);
 
@@ -117,7 +122,7 @@ export default function DictationHistoryCommand() {
               accessories={[{ text: formattedDate }]}
               detail={
                 <List.Item.Detail
-                  markdown={item.text}
+                  markdown={escapeMarkdown(item.text)}
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label icon={Icon.Clock} title="Transcribed On" text={formattedDate} />

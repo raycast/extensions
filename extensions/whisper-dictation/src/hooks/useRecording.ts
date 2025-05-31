@@ -151,6 +151,7 @@ export function useRecording(
           if (isMounted) {
             setErrorMessage(`Recording failed: ${err.message}`);
             setState("error");
+            showFailureToast(err, { title: "Recording failed" });
           }
         });
 

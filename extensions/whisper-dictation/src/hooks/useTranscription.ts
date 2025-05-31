@@ -1,5 +1,5 @@
 import { useCallback, type Dispatch, type SetStateAction } from "react";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import fs from "fs";
 import path from "path";
 import { showFailureToast } from "@raycast/utils";
@@ -112,8 +112,10 @@ export function useTranscription({
           await Clipboard.copy(text);
           await showHUD("Copied to clipboard");
         }
-        cleanupAudioFile();
-        await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+        await Promise.all([
+          cleanupAudioFile(),
+          closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate })
+        ]);
       };
 
       if (DEFAULT_ACTION === "paste") {
@@ -183,8 +185,9 @@ export function useTranscription({
     console.log(`Starting transcription with model: ${config.modelPath}`);
 
     // Execute whisper-cli
-    exec(
-      `"${config.execPath}" -m "${config.modelPath}" -f "${AUDIO_FILE_PATH}" -l auto -otxt --no-timestamps`,
+    execFile(
+      config.execPath,
+      ['-m', config.modelPath, '-f', AUDIO_FILE_PATH, '-l', 'auto', '-otxt', '--no-timestamps'],
       async (error, stdout, stderr) => {
         if (error) {
           console.error("whisper exec error:", error);
