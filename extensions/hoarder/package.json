@@ -1,12 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hoarder",
-  "title": "Hoarder",
+  "title": "Karakeep",
   "description": "A self-hostable bookmark-everything app (links, notes and images) with AI-based automatic tagging and full text search",
   "icon": "logo-icon.png",
   "author": "luolei",
   "contributors": [
-    "kdurek"
+    "kdurek",
+    "edequalsawesome"
   ],
   "categories": [
     "Web"
@@ -16,28 +17,28 @@
     {
       "name": "bookmarks",
       "title": "Bookmarks",
-      "subtitle": "Hoarder",
+      "subtitle": "Karakeep",
       "description": "List all your bookmarks",
       "mode": "view"
     },
     {
       "name": "lists",
       "title": "Lists",
-      "subtitle": "Hoarder",
+      "subtitle": "Karakeep",
       "description": "List all your lists",
       "mode": "view"
     },
     {
       "name": "tags",
       "title": "Tags",
-      "subtitle": "Hoarder",
+      "subtitle": "Karakeep",
       "description": "List all your tags",
       "mode": "view"
     },
     {
       "name": "createBookmark",
       "title": "Create Bookmark",
-      "subtitle": "Hoarder",
+      "subtitle": "Karakeep",
       "description": "Create a new bookmark",
       "mode": "view"
     }
