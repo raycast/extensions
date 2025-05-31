@@ -30,9 +30,9 @@ Effortlessly convert your speech to text directly within Raycast using the power
 ## ✨ Features
 
 *   **Local Transcription:** Uses `whisper.cpp` running locally on your machine through Raycast.
-*   **Refine with AI** Optionally refine the transcribed text using Raycast AI or any OpenAI (v1) compatible API, such as Anthropic, OpenAI, a local Ollama server.
-    **Download Models** Download a variety of whisper models from right within the extension.
-    **Dictation History** Saves all transcriptions locally with timestamps which can be browsed, copied and pasted using the Dictation History command.
+*   **Refine with AI:** Optionally refine the transcribed text using Raycast AI or any OpenAI (v1) compatible API, such as Anthropic, OpenAI, a local Ollama server.
+*   **Download Models:** Download a variety of whisper models from right within the extension.
+*   **Dictation History:** Saves all transcriptions locally with timestamps which can be browsed, copied and pasted using the Dictation History command.
 *   **Simple Interface:** Start recording, press Enter to stop, copy or paste directly into your active window.
 *   **Configurable Output:** Choose to choose, or automatically paste/copy to clipboard. 
 
