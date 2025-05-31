@@ -16,6 +16,7 @@ import {
   openExtensionPreferences,
   PopToRootType,
   List,
+  Color,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -53,6 +54,7 @@ const AUDIO_FILE_PATH = path.join(environment.supportPath, "raycast_dictate_audi
 const HISTORY_STORAGE_KEY = "dictationHistory";
 
 const AI_PROMPTS_KEY = "aiPrompts";
+const ACTIVE_PROMPT_ID_KEY = "activePromptId";
 interface AIPrompt {
   id: string;
   name: string;
@@ -88,6 +90,7 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const DEFAULT_ACTION = preferences.defaultAction || "none";
   const [prompts] = useCachedState<AIPrompt[]>(AI_PROMPTS_KEY, []);
+  const [activePromptId] = useCachedState<string>(ACTIVE_PROMPT_ID_KEY, "default");
 
   // Get refineText function from hook
   const { refineText } = useAIRefinement(setAiErrorMessage);
@@ -524,6 +527,7 @@ export default function Command() {
                 icon={{ source: Icon.Stars }}
                 title={prompt.name}
                 subtitle={prompt.prompt.length > 80 ? `${prompt.prompt.substring(0, 80)}...` : prompt.prompt}
+                accessories={[...(activePromptId === prompt.id ? [{ tag: { value: "Active", color: Color.Green } }] : [])]}
                 actions={
                   <ActionPanel>
                     <Action
@@ -564,12 +568,12 @@ export default function Command() {
   if (state === "recording") {
     let refinementSection = "";
 
-    if (isRefinementActive && currentRefinementPrompt) {
+    if (selectedSessionPrompt) {
+      refinementSection = `**AI Refinement: ${selectedSessionPrompt.name}**\n\n`;
+    } else if (isRefinementActive && currentRefinementPrompt) {
       const activePrompt = prompts.find((p) => p.prompt === currentRefinementPrompt);
       const promptName = activePrompt?.name || "Unknown Prompt";
       refinementSection = `**AI Refinement: ${promptName}**\n\n`;
-    } else if (selectedSessionPrompt) {
-      refinementSection = `**AI Refinement: ${selectedSessionPrompt.name}**\n\n`;
     }
 
     const waveformWithRefinement = refinementSection + generateWaveformMarkdown();
