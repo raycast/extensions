@@ -1,6 +1,6 @@
 # Oracle Cloud Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Add Terminate Instance Action] - {PR_MERGE_DATE}
 
 - (Confirm and) Terminate Instance
 - Add "Open in OCI" `Action`

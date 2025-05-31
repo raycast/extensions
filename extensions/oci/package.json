@@ -15,24 +15,12 @@
       "title": "Manage Core Services",
       "description": "Manage Instances and more",
       "mode": "view"
-    },
-    {
-      "name": "object-storage",
-      "title": "Manage Object Storage Services",
-      "description": "Manage Object Storage & Archive Storage",
-      "mode": "view"
-    },
-    {
-      "name": "nosql-database",
-      "title": "Manage NoSQL Databases",
-      "description": "Manage NoSQL Databases",
-      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.19.1",
-    "oci-sdk": "^2.106.2"
+    "oci-sdk": "^2.110.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
