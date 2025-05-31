@@ -114,7 +114,7 @@ export function useTranscription({
         }
         await Promise.all([
           cleanupAudioFile(),
-          closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate })
+          closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate }),
         ]);
       };
 
@@ -187,7 +187,7 @@ export function useTranscription({
     // Execute whisper-cli
     execFile(
       config.execPath,
-      ['-m', config.modelPath, '-f', AUDIO_FILE_PATH, '-l', 'auto', '-otxt', '--no-timestamps'],
+      ["-m", config.modelPath, "-f", AUDIO_FILE_PATH, "-l", "auto", "-otxt", "--no-timestamps"],
       async (error, stdout, stderr) => {
         if (error) {
           console.error("whisper exec error:", error);

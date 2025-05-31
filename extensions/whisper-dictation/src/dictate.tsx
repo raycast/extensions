@@ -527,7 +527,9 @@ export default function Command() {
                 icon={{ source: Icon.Stars }}
                 title={prompt.name}
                 subtitle={prompt.prompt.length > 80 ? `${prompt.prompt.substring(0, 80)}...` : prompt.prompt}
-                accessories={[...(activePromptId === prompt.id ? [{ tag: { value: "Active", color: Color.Green } }] : [])]}
+                accessories={[
+                  ...(activePromptId === prompt.id ? [{ tag: { value: "Active", color: Color.Green } }] : []),
+                ]}
                 actions={
                   <ActionPanel>
                     <Action

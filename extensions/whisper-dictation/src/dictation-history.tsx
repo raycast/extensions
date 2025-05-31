@@ -86,7 +86,7 @@ export default function DictationHistoryCommand() {
 
   // Function to escape Markdown characters for safe display
   const escapeMarkdown = (text: string) => {
-    return text.replace(/[\\`*_{}[\]()#+\-.!]/g, '\\$&');
+    return text.replace(/[\\`*_{}[\]()#+\-.!]/g, "\\$&");
   };
 
   // Sort history by timestamp (newest first)
