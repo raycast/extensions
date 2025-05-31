@@ -6,7 +6,7 @@
 <p align="center">Resize the focused window to pixel-perfect presets</p>
 
 <div align="center">
-  <img src="assets/screenshots/1.png" alt="window sizer commands">
+  <img src="metadata/window-sizer-1.png" alt="window sizer commands">
 </div>
 
 <br>
@@ -18,19 +18,19 @@
 #### Quickly resize a window to predefined sizes
 
 <div align="center">
-  <img src="assets/screenshots/2.png" alt="resize window">
+  <img src="metadata/window-sizer-2.png" alt="resize window">
 </div>
 
 #### Add and save custom window sizes
 
 <div align="center">
-  <img src="assets/screenshots/3.png" alt="add custom sizes">
+  <img src="metadata/window-sizer-3.png" alt="add custom sizes">
 </div>
 
 #### Star your frequently used window sizes
 
 <div align="center">
-  <img src="assets/screenshots/4.png" alt="list actions">
+  <img src="metadata/window-sizer-4.png" alt="list actions">
 </div>
 
 #### Other options
@@ -40,7 +40,7 @@
 - Get current window size
 
 <div align="center">
-  <img src="assets/screenshots/5.png" alt="other options">
+  <img src="metadata/window-sizer-5.png" alt="other options">
 </div>
 
 ---
@@ -50,19 +50,19 @@
 #### Applying when size is not set
 
 <div align="center">
-  <img src="assets/screenshots/6.png" alt="apply favorite size">
+  <img src="assets/screenshots/apply-fav-size-1.png" alt="apply favorite size">
 </div>
 
 #### Set favorite size in the command settings
 
 <div align="center">
-  <img src="assets/screenshots/7.png" alt="favorite size settings">
+  <img src="assets/screenshots/apply-fav-size-2.png" alt="favorite size settings">
 </div>
 
 #### Resizing to favorite size
 
 <div align="center">
-  <img src="assets/screenshots/8.png" alt="resizing to favorite size">
+  <img src="assets/screenshots/apply-fav-size-3.png" alt="resizing to favorite size">
 </div>
 
 ## Shortcuts
