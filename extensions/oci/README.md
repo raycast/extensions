@@ -12,7 +12,7 @@ This is a Raycast extension for [Oracle Cloud](https://cloud.oracle.com/). With 
 
 2. **Configure**:
 
-    This extension uses the official SDK and needs configuration. Refer to [Developer Resources > Developer Guide > Setup and Prerequisites > SDK and CLI Configuration File](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm#SDK_and_CLI_Configuration_File) to learn where and how your configuration file needs to be set. Once done, the extension will work without further confguration needed.
+    This extension uses the official SDK and needs configuration. Refer to [Developer Resources > Developer Guide > Setup and Prerequisites > SDK and CLI Configuration File](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm#SDK_and_CLI_Configuration_File) to learn where and how your configuration file needs to be set. Once done, the extension will work without further configuration needed.
 
     For a quick method:
     
@@ -22,8 +22,8 @@ This is a Raycast extension for [Oracle Cloud](https://cloud.oracle.com/). With 
     - `Copy` the "Example Configuration"
     - `View` the configuration file
     - `Click` "Copy"
-    - `Create` dir in MacOS: `mkdir ~/.oci`
-    - `Create` file: _config_
+    - `Create` directory: `mkdir ~/.oci`
+    - `Create` file: `~/.oci/config`
     - `Paste` the example contents into the config
 
 ## 🗒️ Note
