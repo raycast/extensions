@@ -63,9 +63,10 @@ function getDateInfo(input: string, timeZone: string) {
 }
 
 export default function Command() {
-  const [input, setInput] = useState('');
+  // Initialize input with current Unix timestamp
+  const [input, setInput] = useState(Math.floor(Date.now() / 1000).toString());
   const [timezone, setTimezone] = useState('local');
-  const info = input ? getDateInfo(input, timezone) : null;
+  const info = getDateInfo(input, timezone);
 
   return (
     <Form
