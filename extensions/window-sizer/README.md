@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/screenshot.png" alt="window-sizer">
+  <img src="assets/screenshots/0.png" alt="cover">
 </div>
 &nbsp;
 
@@ -7,23 +7,63 @@
 
 Resize the focused window to pixel-perfect presets.
 
-## Features
+## Usage and Features
 
-- Quickly resize windows to predefined sizes
-- Create and save custom window sizes
-- Star your frequently used window sizes
+### Search commands
+
+- `Window Sizer`
+- `Resize Window`
+- `Apply Favorite Size`
+
+<div align="center">
+  <img src="assets/screenshots/1.png" alt="window sizer commands">
+</div>
+
+---
+
+### Resize Window
+
+#### Quickly resize a window to predefined sizes
+
+<div align="center">
+  <img src="assets/screenshots/2.png" alt="resize window">
+</div>
+
+#### Add and save custom window sizes
+
+<div align="center">
+  <img src="assets/screenshots/3.png" alt="add custom sizes">
+</div>
+
+#### Star your frequently used window sizes
+
+<div align="center">
+  <img src="assets/screenshots/4.png" alt="list actions">
+</div>
+
+#### Other options
+
 - Maximize window
 - Restore previous window size
 - Get current window size
-- An extra way to save and apply a favorite window size
 
-## Usage
+<div align="center">
+  <img src="assets/screenshots/5.png" alt="other features">
+</div>
 
-Search for the following command in Raycast:
+---
 
-- `Window Sizer` - Find all commands
-- `Resize Window` - Open the window size selector
-- `Apply Favorite Size` - Apply a favorite window size directly (Configure in command settings first)
+### Apply favorite size
+
+Set the size in the command settings before using this command.
+
+<div align="center">
+  <img src="assets/screenshots/6.png" alt="apply favorite size">
+</div>
+
+<div align="center">
+  <img src="assets/screenshots/7.png" alt="favorite size">
+</div>
 
 ## Shortcuts
 
