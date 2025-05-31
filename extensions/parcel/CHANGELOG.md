@@ -1,6 +1,11 @@
 # Parcel Changelog
 
-## [Added ISO 8601 Date Support] - {PR-MERGE-DATE}
+## [Enhanced Date Format Support] - {PR_MERGE_DATE}
+
+- Added support for more date formats in delivery tracking, including dates with day names
+- Improved handling of various international date formats for better compatibility with carrier APIs
+
+## [Added ISO 8601 Date Support] - 2025-05-30
 
 - Added support for ISO 8601 date format (YYYY-MM-DD HH:mm:ss) in delivery date parsing
 - Improved date format handling for better compatibility with various carrier APIs
