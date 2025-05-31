@@ -1,5 +1,5 @@
 <div align="center">
-  <img width=128 src="assets/screenshots/icon.png" alt="icon">
+  <img width=128 src="assets/icons/key-icon.png" alt="icon">
 </div>
 
 <h1 align="center">Window Sizer</h1>
