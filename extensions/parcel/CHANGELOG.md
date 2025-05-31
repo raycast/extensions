@@ -1,19 +1,12 @@
 # Parcel Changelog
 
-## [Enhanced Date Format Support] - {PR_MERGE_DATE}
+## [Comprehensive Date Format Support] - {PR_MERGE_DATE}
 
-- Added support for more date formats in delivery tracking, including dates with day names
+- Added support for Amazon's date formats (e.g. "Saturday, 31 May 5:26 am")
+- Added support for ISO 8601 date format (YYYY-MM-DD HH:mm:ss)
+- Enhanced date recognition for European formats (DD.MM.YYYY HH:mm and DD.MM.YYYY HH:mm:ss)
 - Improved handling of various international date formats for better compatibility with carrier APIs
-
-## [Added ISO 8601 Date Support] - 2025-05-30
-
-- Added support for ISO 8601 date format (YYYY-MM-DD HH:mm:ss) in delivery date parsing
-- Improved date format handling for better compatibility with various carrier APIs
-
-## [Improved Date Handling] - 2025-05-28
-
-- **Enhanced date recognition:** Improved parsing of delivery dates, including better support for European formats (like DD.MM.YYYY HH:mm and DD.MM.YYYY HH:mm:ss).
-- **More reliable display for unknown dates:** Unspecified or unparseable dates will now more consistently display as "Not available", providing clearer information.
+- More reliable display for unknown dates as "Not available"
 
 ## [Track on Website, Cache] - 2025-04-12
 
