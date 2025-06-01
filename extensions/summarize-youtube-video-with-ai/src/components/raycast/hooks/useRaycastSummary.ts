@@ -12,6 +12,7 @@ type GetRaycastSummaryProps = {
 };
 
 export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastSummaryProps) => {
+  const abortController = new AbortController();
   const preferences = getPreferenceValues() as RaycastPreferences;
   const { creativity, language } = preferences;
 
@@ -30,8 +31,9 @@ export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSu
 
     const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
 
-    const raycastSummary = AI.ask(aiInstructions, {
+    const stream = AI.ask(aiInstructions, {
       creativity: parseInt(creativity),
+      signal: abortController.signal,
     });
 
     setSummaryIsLoading(true);
@@ -42,14 +44,14 @@ export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSu
       message: SUMMARIZING_VIDEO.message,
     });
 
-    raycastSummary.on("data", (data) => {
+    stream.on("data", (data) => {
       setSummary((result) => {
         if (result === undefined) return data;
         return result + data;
       });
     });
 
-    raycastSummary.finally(() => {
+    stream.finally(() => {
       setSummaryIsLoading(false);
       showToast({
         style: Toast.Style.Success,
@@ -58,12 +60,17 @@ export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSu
       });
     });
 
-    raycastSummary.catch((error) => {
+    stream.catch((error) => {
+      if (abortController.signal.aborted) return;
       showToast({
         style: Toast.Style.Failure,
         title: ALERT.title,
         message: error.message,
       });
     });
+
+    return () => {
+      abortController.abort();
+    };
   }, [transcript]);
 };

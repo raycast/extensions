@@ -62,7 +62,7 @@ export default function Command() {
     { default: "extension-icon.png" },
     { cacheNamespace: "app-icons" },
   );
-  const { sortByCreationDate } = getPreferenceValues<Preferences.ListEmails>();
+  const { sortByCreationDate, popAfterCopy } = getPreferenceValues<Preferences.ListEmails>();
   const effectRan = useRef(false);
   const abortable = useRef<AbortController>();
   const { pop } = useNavigation();
@@ -364,7 +364,15 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <Action.CopyToClipboard title={"Copy Email"} content={email.address} />
+                      <Action.CopyToClipboard
+                        title={"Copy Email"}
+                        content={email.address}
+                        onCopy={() => {
+                          if (popAfterCopy) {
+                            pop();
+                          }
+                        }}
+                      />
                       {email.domain && <Action.OpenInBrowser title={"Open Website"} url={`https://${email.domain}`} />}
                       {showLoginAction && (
                         <Action.Push

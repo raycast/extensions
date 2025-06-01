@@ -84,7 +84,7 @@ If you get a *self-signed certificate* error, you need to fix the SSL of your in
 | v-add-mail-account-autoreply | ❌ | - |
 | v-add-mail-account-forward | ❌ | - |
 | v-add-mail-account-fwd-only | ❌ | - |
-| v-add-mail-domain | ❌ | - |
+| v-add-mail-domain | ✅ | - |
 | v-add-mail-domain-antispam | ❌ | - |
 | v-add-mail-domain-antivirus | ❌ | - |
 | v-add-mail-domain-catchall | ❌ | - |
@@ -389,7 +389,7 @@ If you get a *self-signed certificate* error, you need to fix the SSL of your in
 | v-list-user-auth-log | ✅ | - |
 | v-list-user-backup | ❌ | - |
 | v-list-user-backup-exclusions | ❌ | - |
-| v-list-user-backups | ❌ | - |
+| v-list-user-backups | ✅ | - |
 | v-list-user-ips | ✅ | - |
 | v-list-user-log | ✅ | - |
 | v-list-user-notifications | ✅ | - |

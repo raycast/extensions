@@ -1,4 +1,26 @@
+import type { Application } from "@raycast/api";
+import type { SomeObject } from "./types";
+
 import { showToast, Toast } from "@raycast/api";
+import { promises as fsPromises } from "fs";
+import path from "path";
+
+function isSystem(appPath: string): boolean {
+  const normalizedPath = path.normalize(appPath);
+  if (normalizedPath.startsWith("/System/")) return true;
+  return false;
+}
+
+export function filterApps(apps: Application[]): Application[] {
+  return apps.filter((app) => isSystem(app.path) === false).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function pathExists(path: string): Promise<boolean> {
+  return fsPromises
+    .access(path)
+    .then(() => true)
+    .catch(() => false);
+}
 
 export function showError(message: string, title = "Error") {
   showToast({ style: Toast.Style.Failure, title, message });
@@ -7,10 +29,6 @@ export function showError(message: string, title = "Error") {
 export async function sleep(delay = 500): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, delay));
 }
-
-type SomeObject = {
-  [key: string]: number | string | boolean | SomeObject | null | undefined;
-};
 
 function isObject(object: unknown) {
   return object != null && typeof object === "object";

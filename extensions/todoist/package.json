@@ -20,12 +20,17 @@
     "ridemountainpig",
     "kcole93",
     "Rob",
-    "jagadeesh_k"
+    "jagadeesh_k",
+    "scottlovegrove",
+    "henningmu",
+    "FlohGro",
+    "dedalusj",
+    "william_sault"
   ],
   "commands": [
     {
       "name": "home",
-      "title": "Home",
+      "title": "My Tasks",
       "subtitle": "Todoist",
       "description": "Show your Todoist tasks and views (inbox, today, upcoming, completed, projects, labels).",
       "mode": "view",
@@ -58,6 +63,7 @@
         }
       ],
       "keywords": [
+        "home",
         "inbox",
         "today",
         "today tasks",
@@ -79,7 +85,17 @@
       "title": "Create Task",
       "subtitle": "Todoist",
       "description": "Create a Todoist task.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "quick-add-task",
@@ -91,9 +107,16 @@
         {
           "name": "shouldCloseMainWindow",
           "type": "checkbox",
-          "title": "Advanced",
           "label": "Close window immediately",
           "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "autoCreateLabels",
+          "type": "checkbox",
+          "label": "Create labels automatically",
+          "description": "When enabled Raycast will parse labels and create them automatically.",
           "default": false,
           "required": false
         }
@@ -147,6 +170,10 @@
           "name": "view",
           "type": "dropdown",
           "data": [
+            {
+              "title": "Inbox",
+              "value": "inbox"
+            },
             {
               "title": "Today",
               "value": "today"
@@ -202,7 +229,6 @@
         {
           "name": "showTaskCount",
           "type": "checkbox",
-          "title": "Advanced",
           "label": "Show the task count besides the project",
           "description": "When enabled, you can see the task count besides your project.",
           "default": false,
@@ -236,14 +262,20 @@
       "title": "Open Focus Task",
       "subtitle": "Todoist",
       "description": "When a task is chosen as the focused one, you can open it directly using this command.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "tools": [
     {
-      "name": "get-relevant-data",
-      "title": "Get Relevant Data",
-      "description": "Retrieves relevant data from Todoist"
+      "name": "get-other-data",
+      "title": "Get Other Data",
+      "description": "Retrieves other data from Todoist (e.g. filter, labels, reminders, locations, user, etc.)"
+    },
+    {
+      "name": "get-tasks",
+      "title": "Get Tasks",
+      "description": "Retrieves tasks from Todoist"
     },
     {
       "name": "get-completed-tasks",
@@ -279,6 +311,11 @@
       "name": "delete-task",
       "title": "Delete Task",
       "description": "Deletes an existing task in Todoist"
+    },
+    {
+      "name": "get-projects",
+      "title": "Get Projects",
+      "description": "Retrieves all projects from Todoist using REST API"
     },
     {
       "name": "create-project",
@@ -356,6 +393,11 @@
       "description": "Delete a Todoist filter"
     },
     {
+      "name": "get-comments",
+      "title": "Get Comments",
+      "description": "Retrieves comments for a task or project from Todoist"
+    },
+    {
       "name": "add-comment",
       "title": "Add Comment",
       "description": "Adds a comment to a Todoist task"
@@ -372,37 +414,28 @@
     }
   ],
   "ai": {
-    "instructions": "- If you need to get data (projects, sections, labels, tasks, etc.), use the get-data tool.\\n- When asked about the tasks scheduled for a specific day, only return the tasks scheduled for that day.\\n- Users can use shortcuts to create a task, they can include in the text: a project name starting with the # character (without spaces), a label starting with the @ character, an assignee starting with the + character, a priority (e.g., p1), or a description starting from // until the end of the text.\\n- Make sure the title doesn't contain the date.\\n- Before creating something, check if it already exists first.",
+    "instructions": "\\n- When getting tasks, use filters only if you can't find the tasks with the project_id, section_id, or label first.\\n- When asked about the tasks scheduled for a specific day, only return the tasks scheduled for that day.\\n- Users can use shortcuts to create a task, they can include in the text: a project name starting with the # character (without spaces), a label starting with the @ character, an assignee starting with the + character, a priority (e.g., p1), or a description starting from // until the end of the text.\\n- Make sure the title doesn't contain the date.\\n- Before creating something, check if it already exists first.",
     "evals": [
       {
         "input": "@todoist Buy groceries today at 10 in home project",
         "mocks": {
-          "get-relevant-data": {
-            "projects": [
-              {
-                "id": "fitness",
-                "color": "red",
-                "name": "Fitness"
-              },
-              {
-                "id": "home",
-                "name": "Home",
-                "color": "green"
-              }
-            ]
-          },
+          "get-projects": [
+            {
+              "id": "fitness",
+              "color": "red",
+              "name": "Fitness"
+            },
+            {
+              "id": "home",
+              "name": "Home",
+              "color": "green"
+            }
+          ],
           "create-task": "Successfully called \"create-task\""
         },
         "expected": [
           {
-            "callsTool": {
-              "arguments": {
-                "resource_types": {
-                  "includes": "projects"
-                }
-              },
-              "name": "get-relevant-data"
-            }
+            "callsTool": "get-projects"
           },
           {
             "callsTool": {
@@ -418,42 +451,33 @@
       {
         "input": "@todoist what's scheduled for today",
         "mocks": {
-          "get-relevant-data": {
-            "items": [
-              {
-                "id": "1",
-                "content": "Buy groceries",
-                "due": {
-                  "date": "2025-01-22"
-                }
-              },
-              {
-                "id": "2",
-                "content": "Finish the report",
-                "due": {
-                  "date": "2025-01-23"
-                }
-              },
-              {
-                "id": "3",
-                "content": "Schedule a meeting with the team",
-                "due": {
-                  "date": "2025-01-24"
-                }
+          "get-tasks": [
+            {
+              "id": "1",
+              "content": "Buy groceries",
+              "due": {
+                "date": "2025-01-22"
               }
-            ]
-          }
+            },
+            {
+              "id": "2",
+              "content": "Finish the report",
+              "due": {
+                "date": "2025-01-23"
+              }
+            },
+            {
+              "id": "3",
+              "content": "Schedule a meeting with the team",
+              "due": {
+                "date": "2025-01-24"
+              }
+            }
+          ]
         },
         "expected": [
           {
-            "callsTool": {
-              "arguments": {
-                "resource_types": [
-                  "items"
-                ]
-              },
-              "name": "get-relevant-data"
-            }
+            "callsTool": "get-tasks"
           },
           {
             "meetsCriteria": "The answer includes the tasks scheduled for today."
@@ -464,7 +488,7 @@
         "input": "@todoist Create a filter for my high-priority tasks in work",
         "mocks": {
           "create-filter": "Successfully called \"create-filter\"",
-          "get-relevant-data": {
+          "get-other-data": {
             "filters": []
           }
         },
@@ -523,21 +547,19 @@
       {
         "input": "@todoist Add urgent label to my website bugs tasks",
         "mocks": {
-          "get-relevant-data": {
-            "items": [
-              {
-                "id": "1",
-                "content": "Write a blog post"
-              },
-              {
-                "id": "2",
-                "content": "Strange Safari bug on website"
-              },
-              {
-                "id": "3",
-                "content": "Eat vitamins"
-              }
-            ],
+          "get-projects": [
+            {
+              "id": "fitness",
+              "color": "red",
+              "name": "Fitness"
+            },
+            {
+              "id": "home",
+              "name": "Home",
+              "color": "green"
+            }
+          ],
+          "get-other-data": {
             "labels": [
               {
                 "name": "urgent",
@@ -546,6 +568,12 @@
               }
             ]
           },
+          "get-tasks": [
+            {
+              "id": "2",
+              "content": "Strange Safari bug on website"
+            }
+          ],
           "update-task": "Successfully called \"update-task\""
         },
         "expected": [
@@ -553,17 +581,10 @@
             "callsTool": {
               "arguments": {
                 "resource_types": {
-                  "and": [
-                    {
-                      "includes": "items"
-                    },
-                    {
-                      "includes": "labels"
-                    }
-                  ]
+                  "includes": "labels"
                 }
               },
-              "name": "get-relevant-data"
+              "name": "get-other-data"
             }
           },
           {
@@ -597,31 +618,39 @@
       "title": "Focus Label",
       "description": "Shared label name to apply to your focused task. No label will be applied if left empty.",
       "placeholder": "raycast-focus"
+    },
+    {
+      "name": "useConfetti",
+      "type": "checkbox",
+      "label": "Use confetti to celebrate task completion",
+      "description": "When enabled, completing a task will trigger a confetti celebration.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1",
-    "@raycast/utils": "^1.18.1",
-    "axios": "^1.7.2",
-    "date-fns": "^3.6.0",
-    "form-data": "^4.0.0",
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.19.1",
+    "axios": "^1.8.4",
+    "date-fns": "^4.1.0",
+    "form-data": "^4.0.2",
     "lodash": "^4.17.21",
-    "mime": "^4.0.4",
+    "mime": "^4.0.7",
     "node-fetch": "^3.3.2",
-    "remove-markdown": "^0.5.0"
+    "remove-markdown": "^0.6.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.17.6",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.16",
     "@types/mime": "^4.0.0",
-    "@types/node": "^20.14.10",
-    "@types/react": "^18.3.3",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.0",
     "@types/remove-markdown": "^0.3.4",
-    "eslint": "^8.57.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "prettier": "^3.3.2",
-    "typescript": "^5.5.3"
+    "eslint": "^9.24.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

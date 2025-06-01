@@ -1,5 +1,6 @@
-import { IssueFragment, IssueResult } from "./getIssues";
 import { getLinearClient } from "../api/linearClient";
+
+import { IssueFragment, IssueResult } from "./getIssues";
 
 export type CreateIssuePayload = {
   title: string;
@@ -26,7 +27,7 @@ export async function createIssue(payload: CreateIssuePayload) {
   let issueCreateInput = `teamId: "${payload.teamId}", title: "${title}", description: "${description}", priority: ${payload.priority}`;
 
   if (payload.stateId) {
-    issueCreateInput += `, stateId: "${payload.stateId}`;
+    issueCreateInput += `, stateId: "${payload.stateId}"`;
   }
 
   if (payload.estimate) {

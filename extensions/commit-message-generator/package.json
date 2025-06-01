@@ -5,6 +5,9 @@
   "description": "Must have extension for any developer!",
   "icon": "extension-icon.png",
   "author": "rokartur",
+  "contributors": [
+    "dcp"
+  ],
   "categories": [
     "Developer Tools",
     "Fun"

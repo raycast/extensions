@@ -5,6 +5,7 @@ import { callbackLaunchCommand } from "raycast-cross-extension";
 import { getIconSlug } from "simple-icons/sdk";
 import { IconData, LaunchContext } from "./types.js";
 import { copySvg, makeCopyToDownload } from "./utils.js";
+import Releases from "./views/releases.js";
 
 type ActionProps = {
   icon: IconData;
@@ -34,6 +35,10 @@ export const CopySlug = ({ icon }: ActionProps) => (
   <Action.CopyToClipboard title="Copy Slug" content={getIconSlug(icon)} />
 );
 
+export const CopyPath = ({ icon, version }: ActionProps) => (
+  <Action title="Copy Path" onAction={() => copySvg({ version, icon, pathOnly: true })} icon={Icon.Clipboard} />
+);
+
 export const CopyCdn = ({ icon }: ActionProps) => {
   const simpleIconsCdnLink = `https://cdn.simpleicons.org/${getIconSlug(icon)}`;
   return <Action.CopyToClipboard title="Copy CDN Link" content={simpleIconsCdnLink} />;
@@ -59,6 +64,7 @@ export const CopyFontEntities = ({ icon }: ActionProps) => (
 
 export const Supports = () => (
   <>
+    <Action.Push icon={Icon.Paragraph} title="View Release Notes" target={<Releases />} />
     <Action.OpenInBrowser
       title="Request a New Icon"
       url="https://github.com/simple-icons/simple-icons/issues/new?labels=new+icon&template=icon_request.yml"
@@ -86,6 +92,7 @@ export const actions = {
   CopyColor,
   CopyTitle,
   CopySlug,
+  CopyPath,
   CopyCdn,
   CopyJsdelivr,
   CopyUnpkg,
@@ -99,6 +106,7 @@ export const defaultActionsOrder: ActionType[] = [
   "CopyColor",
   "CopyTitle",
   "CopySlug",
+  "CopyPath",
   "CopyCdn",
   "CopyJsdelivr",
   "CopyUnpkg",

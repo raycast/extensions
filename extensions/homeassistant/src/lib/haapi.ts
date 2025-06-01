@@ -121,7 +121,10 @@ export class HomeAssistant {
         extra: ["-i", "1", "-c", "1"],
       });
       return res.alive;
-    } catch (error) {
+    } catch (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      error
+    ) {
       return false;
     }
   }
@@ -225,7 +228,6 @@ export class HomeAssistant {
     return response;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async callService(
     domain: string,
     service: string,

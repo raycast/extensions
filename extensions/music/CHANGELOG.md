@@ -1,5 +1,13 @@
 # Apple Music Changelog
 
+## [Update Rate Track] - 2025-03-10
+
+- Added the track name to the `Rate Track` command.
+
+## [New Command] - 2025-03-04
+
+- Added new "Toggle Repeat" command.
+
 ## [AI Enhancements] - 2025-02-21
 
 - Added AI extensions to the Music extension.

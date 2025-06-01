@@ -13,6 +13,7 @@ enum CommandNames {
   "summarizeVideoWithRaycast" = "Raycast",
   "summarizeVideoWithAnthropic" = "Anthropic",
   "summarizeVideoWithOpenAI" = "OpenAI",
+  "summarizeVideoWithOllama" = "Ollama",
 }
 
 export default function SummaryMetadata({

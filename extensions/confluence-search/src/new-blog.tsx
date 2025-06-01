@@ -1,4 +1,4 @@
-import "./util/fetchPolyfill";
+import "cross-fetch/polyfill";
 
 import { open } from "@raycast/api";
 import { authorizeSite } from "./api/auth";

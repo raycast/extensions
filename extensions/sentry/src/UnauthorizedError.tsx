@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Detail, Icon, openCommandPreferences } from "@raycast/api";
-import { getBaseUrl } from "./utils";
+import { getDefaultBaseUrl } from "./utils";
 
 export function UnauthorizedError() {
-  const baseUrl = getBaseUrl();
+  const baseUrl = getDefaultBaseUrl();
   const markdown = `
   # Unauthorized
 

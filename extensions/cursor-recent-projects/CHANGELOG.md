@@ -1,5 +1,7 @@
 # Cursor Changelog
 
+## [Updated README] - 2025-02-26
+
 ## [Git Branch] - 2025-02-14
 
 - Display the current Git branch for recent projects in `Search Recent Projects` command as in [VSCode](https://www.raycast.com/thomas/visual-studio-code) extension

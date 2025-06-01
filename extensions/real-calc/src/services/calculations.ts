@@ -1,21 +1,9 @@
 import { CalculationResult, FinancialIndexData } from "../types";
+import { priceIndexCodes } from "../utils/constants";
 import { formatNumber } from "../utils/formatting";
 
 export function getIndexCode(indexName: string): string {
-  switch (indexName) {
-    case "IPCA":
-      return "433";
-    case "IPCA-E":
-      return "10764";
-    case "INPC":
-      return "188";
-    case "IGP-M":
-      return "189";
-    case "INCC":
-      return "192";
-    default:
-      throw new Error("Unknown financial index");
-  }
+  return priceIndexCodes[indexName];
 }
 
 export function getConversionFactor(startDate: Date): number {

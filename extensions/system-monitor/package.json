@@ -13,7 +13,8 @@
   "contributors": [
     "crehan144",
     "pernielsentikaer",
-    "lucasmezencio"
+    "lucasmezencio",
+    "ridemountainpig"
   ],
   "commands": [
     {
@@ -21,6 +22,12 @@
       "title": "System Monitor",
       "description": "Show information and usage related to CPU, memory, power and network",
       "mode": "view"
+    },
+    {
+      "name": "menubar-system-monitor",
+      "title": "Menubar System Monitor",
+      "description": "Show information and usage related to CPU, memory, power and network on the menubar",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
@@ -79,5 +86,8 @@
         }
       ]
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

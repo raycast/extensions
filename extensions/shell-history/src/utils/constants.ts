@@ -21,7 +21,7 @@ export const getTerminals = async () => {
       const app = await getDefaultApplication(terminal.path);
       terminals.push({ application: app, supportInput: terminal.supportInput, key: terminal.key });
     } catch (e) {
-      // Ignore
+      console.error(`Error getting application for path ${terminal.path}:`, e);
     }
   }
   return terminals;

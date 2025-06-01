@@ -17,11 +17,11 @@ import {
   showToast,
 } from "@raycast/api";
 import { useAI } from "@raycast/utils";
-import { execa } from "execa";
 import { Searcher } from "fast-fuzzy";
 import got, { Progress } from "got";
+import spawn from "nano-spawn";
 import { getIconSlug } from "simple-icons/sdk";
-import { JsDelivrNpmResponse, IconData, LaunchContext } from "./types.js";
+import { IconData, JsDelivrNpmResponse, LaunchContext, Release } from "./types.js";
 
 const cache = new Cache();
 
@@ -32,6 +32,7 @@ export const {
   defaultLoadSvgAction = "WithBrandColor",
   displaySimpleIconsFontFeatures,
   enableAiSearch,
+  githubToken,
 } = getPreferenceValues<ExtensionPreferences>();
 
 export const hasAccessToAi = environment.canAccess(AI);
@@ -44,8 +45,7 @@ export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
 export const downloadAssetPack = async (version: string) => {
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "",
-    message: "Downloading asset pack",
+    title: "Downloading asset pack",
   });
   return new Promise<void>((resolve) => {
     const readStream = got.stream(`https://codeload.github.com/simple-icons/simple-icons/zip/refs/tags/${version}`);
@@ -56,7 +56,7 @@ export const downloadAssetPack = async (version: string) => {
     });
     readStream.on("downloadProgress", (progress: Progress) => {
       if (progress.percent === 1) return;
-      toast.message = `Downloading asset pack (${(progress.percent * 100).toFixed(0)}%)`;
+      toast.title = `Downloading asset pack (${(progress.percent * 100).toFixed(0)}%)`;
     });
   });
 };
@@ -64,12 +64,11 @@ export const downloadAssetPack = async (version: string) => {
 export const extractAssetPack = async (version: string) => {
   await showToast({
     style: Toast.Style.Animated,
-    title: "",
-    message: "Extracting asset pack",
+    title: "Extracting asset pack",
   });
   const zipPath = join(environment.supportPath, `pack-${version}.zip`);
   const destination = join(environment.assetsPath, `pack`);
-  await execa("unzip", ["-o", zipPath, "-d", destination]);
+  await spawn("unzip", ["-o", zipPath, "-d", destination]);
 };
 
 export const cacheAssetPack = async (version: string) => {
@@ -105,16 +104,26 @@ export const loadCachedVersion = () => {
 export const loadLatestVersion = async () => {
   await showToast({
     style: Toast.Style.Animated,
-    title: "",
-    message: "Checking latest version",
+    title: "Checking latest version",
   });
   const json = await got.get("https://data.jsdelivr.com/v1/packages/npm/simple-icons").json<JsDelivrNpmResponse>();
   return json.tags.latest;
 };
 
+export const loadRecentReleases = async () =>
+  got
+    .get("https://api.github.com/repos/simple-icons/simple-icons/releases", {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: githubToken ? `Bearer ${githubToken}` : undefined,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    })
+    .json<Release[]>();
+
 export const useVersion = ({ launchContext }: { launchContext?: LaunchContext }) => {
   const cachedVersion = loadCachedVersion();
-  const [version, setVerion] = useState(cachedVersion);
+  const [version, setVersion] = useState(cachedVersion);
   useEffect(() => {
     loadLatestVersion().then(async (latestVersion) => {
       if (cachedVersion !== latestVersion) {
@@ -128,7 +137,7 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
             open("raycast://extensions/litomore/simple-icons/index" + buildDeeplinkParameters(launchContext));
           }
         } else {
-          setVerion(latestVersion);
+          setVersion(latestVersion);
         }
       }
     });
@@ -144,17 +153,17 @@ export const loadSvg = async ({ version, icon, slug }: { version: string; icon: 
   return { svg, path: svgPath, withBrandColor };
 };
 
-export const copySvg = async ({ version, icon }: { version: string; icon: IconData }) => {
+export const copySvg = async ({ version, icon, pathOnly }: { version: string; icon: IconData; pathOnly?: boolean }) => {
   const toast = await showToast({
     style: Toast.Style.Success,
-    title: "",
-    message: "Fetching icon...",
+    title: "Fetching icon...",
   });
-  const { svg } = await loadSvg({
+  let { svg } = await loadSvg({
     version,
     icon,
     slug: getIconSlug(icon),
   });
+  if (pathOnly) svg = svg.replace(/^.+ d="([^"]+)".+$/, "$1");
   toast.style = Toast.Style.Success;
   Clipboard.copy(svg);
   await showHUD("Copied to Clipboard");
@@ -208,17 +217,6 @@ export const getAliases = (icon: IconData) => {
   return [...new Set([...aka, ...dup, ...loc])];
 };
 
-export const aiSearch = async (icons: IconData[], searchString: string) => {
-  if (!searchString) return icons;
-  const searchPrompt = [
-    `Here is the full icon data JSON for brand icons in array below:`,
-    JSON.stringify(icons),
-    `Please search with the search keyword "${searchString}" from the JSON. And return at least one icon data item in array.`,
-    "Reply with the plain JSON text only (up to 500 items, no markdown format), no addition text.",
-  ].join("\n");
-  return AI.ask(searchPrompt).catch(() => []);
-};
-
 export const getKeywords = (icon: IconData) =>
   [
     icon.title,
@@ -243,7 +241,7 @@ export const useSearch = ({ icons }: { icons: IconData[] }) => {
 
   const searchPrompt = [
     `Here is the full icon data JSON for brand icons in array below:`,
-    JSON.stringify(icons),
+    JSON.stringify(icons.map((icon) => ({ title: icon.title, slug: icon.slug, hex: icon.hex, source: icon.source }))),
     "The 'title' means the company or project names, 'source' means the icon resource URL or company website, 'hex' means the icon color in hex code.",
     `Please search from the data with the search keyword "${$searchString}". And return at least one icon slug in the format below:`,
     "(icon slugs only, split with comma, up to 500 items, no markdown format, don't change data structure, no addition text, no spaces, do not return non-exist slugs)",

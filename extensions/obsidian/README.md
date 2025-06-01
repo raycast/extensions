@@ -23,10 +23,10 @@ This is a raycast extension with commands for the note taking and knowledge mana
 
 ## Search Note
 
-This command allows for quick access to all of your notes. By default you can search notes by title. Enabeling content search in the commands preferences allows you to search for notes by their content and title. If there doesn't exist a note with the title you searched for you can create a new note with that title right from the command.
+This command allows for quick access to all of your notes. By default you can search notes by title. Enabling content search in the commands preferences allows you to search for notes by their content and title. If there doesn't exist a note with the title you searched for you can create a new note with that title right from the command.
 Use the tag filter in the top right corner to filter notes based on their tags (both YAML frontmatter and inline tags).
 
-Enabeling `Show Detail` and `Show Metadata` in the extensions preferences will show a sidebar view with the following information:
+Enabling `Show Detail` and `Show Metadata` in the extensions preferences will show a sidebar view with the following information:
 
 - Note content
 - Character Count
@@ -120,6 +120,7 @@ Both the note name and note content support these templates:
 - `{millisecond}`
 - `{timestamp}`, `{zettelkastenID}`
 - `{clipboard}`, `{clip}`
+- `{selection}`, `{selected}`
 - `{\n}`, `{nl}`, `{newline}`
 
 But also the table of tokens defined in the [luxon documentation](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) (such as dd, MM, YYYY,...).

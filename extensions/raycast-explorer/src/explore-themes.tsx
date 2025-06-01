@@ -40,8 +40,9 @@ export default function ExploreThemes() {
 
     const authorMap = new Map();
     themes.forEach(({ author, authorUsername }) => {
-      if (!authorMap.has(author)) {
-        authorMap.set(author, { name: author, username: authorUsername });
+      const mapKey = `${author}_${authorUsername}`;
+      if (!authorMap.has(mapKey)) {
+        authorMap.set(mapKey, { name: author, username: authorUsername });
       }
     });
 
@@ -112,7 +113,12 @@ export default function ExploreThemes() {
           {authors.length > 0 ? (
             <List.Dropdown.Section>
               {authors.map(({ username, name }) => (
-                <List.Dropdown.Item key={username} title={name} value={`user/${username}`} icon={getAvatarIcon(name)} />
+                <List.Dropdown.Item
+                  key={`author_${username}_${name}`}
+                  title={name}
+                  value={`user/${username}`}
+                  icon={getAvatarIcon(name)}
+                />
               ))}
             </List.Dropdown.Section>
           ) : null}
@@ -178,6 +184,7 @@ export default function ExploreThemes() {
 
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
+                    /* eslint-disable-next-line @raycast/prefer-title-case */
                     title="Copy JSON Configuration"
                     content={JSON.stringify(theme, null, 2)}
                     shortcut={{ modifiers: ["cmd"], key: "." }}
