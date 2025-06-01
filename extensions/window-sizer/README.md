@@ -67,5 +67,5 @@
 
 ## Notes
 
-- To resize windows, please allow Raycast to control your Mac under<br>`System Settings` → `Privacy & Security` → `Accessibility`
+- To resize windows, please allow Raycast to control your Mac under `System Settings` → `Privacy & Security` → `Accessibility`
 - Some applications may restrict window resizing
