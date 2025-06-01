@@ -14,6 +14,7 @@ import {
   AI_ANALYSIS_GUIDE_CONTENT,
   bytesToMB,
   formatFileSizeKB,
+  SAFETY_LIMITS,
 } from "./constants";
 import type { ProjectEntry, ProcessDirectoryOptions, FileProcessorConfig } from "./types";
 import { Stats } from "fs";
@@ -153,9 +154,23 @@ async function readFileContent(filePath: string, stats: Stats, maxFileSizeBytes:
  * @returns A promise that resolves to an array of ProjectEntry objects.
  */
 async function processDirectoryRecursive(options: ProcessDirectoryOptions): Promise<ProjectEntry[]> {
-  const { projectRoot, currentPath, ignoreFilter, maxFileSizeBytes, onProgress } = options;
+  const { projectRoot, currentPath, ignoreFilter, maxFileSizeBytes, onProgress, safetyLimits } = options;
   const entries: ProjectEntry[] = [];
   let filesCollectedInThisCall = 0; // To correctly update progress for onProgress
+
+  // Check safety limits
+  if (safetyLimits) {
+    const timeElapsed = Date.now() - safetyLimits.startTime;
+    if (timeElapsed > safetyLimits.maxScanTimeMs) {
+      throw new Error(`Scan time limit exceeded (${safetyLimits.maxScanTimeMs / 1000}s)`);
+    }
+    if (safetyLimits.filesProcessed >= safetyLimits.maxFiles) {
+      throw new Error(`File count limit exceeded (${safetyLimits.maxFiles} files)`);
+    }
+    if (safetyLimits.totalSize >= safetyLimits.maxTotalSizeBytes) {
+      throw new Error(`Total size limit exceeded (${bytesToMB(safetyLimits.maxTotalSizeBytes)} MB)`);
+    }
+  }
 
   try {
     const dirContents = await fs.readdir(currentPath, { withFileTypes: true });
@@ -184,7 +199,13 @@ async function processDirectoryRecursive(options: ProcessDirectoryOptions): Prom
       const relativePath = path.relative(projectRoot, entryPath); // For display and metadata
 
       if (onProgress) {
-        onProgress({ scannedPath: relativePath, filesCollected: filesCollectedInThisCall });
+        const progressInfo = {
+          scannedPath: relativePath,
+          filesCollected: filesCollectedInThisCall,
+          totalSize: safetyLimits?.totalSize,
+          timeElapsed: safetyLimits ? Date.now() - safetyLimits.startTime : undefined,
+        };
+        onProgress(progressInfo);
       }
 
       if (dirent.isDirectory()) {
@@ -194,6 +215,7 @@ async function processDirectoryRecursive(options: ProcessDirectoryOptions): Prom
           ignoreFilter,
           maxFileSizeBytes,
           onProgress,
+          safetyLimits,
         });
         // Include directory if it has non-ignored children or if it's explicitly un-ignored by a '!' rule.
         if (children.length > 0 || !ignoreFilter.ignores(pathToCheck)) {
@@ -206,6 +228,12 @@ async function processDirectoryRecursive(options: ProcessDirectoryOptions): Prom
           });
         }
       } else if (dirent.isFile()) {
+        // Update safety counters
+        if (safetyLimits) {
+          safetyLimits.filesProcessed++;
+          safetyLimits.totalSize += stats.size || 0;
+        }
+
         const fileLanguage = getFileLanguage(entryPath);
         const fileContent = await readFileContent(entryPath, stats, maxFileSizeBytes);
         entries.push({
@@ -247,15 +275,45 @@ export async function generateProjectCodeString(
   const { filter: ignoreFilter, gitignoreUsed } = await loadIgnoreFilter(projectRoot);
 
   progressCallback("Scanning project files...");
-  const projectStructure = await processDirectoryRecursive({
-    projectRoot,
-    currentPath: projectRoot,
-    ignoreFilter,
-    maxFileSizeBytes,
-    onProgress: (progressUpdate) => {
-      progressCallback("Scanning", progressUpdate.scannedPath);
-    },
-  });
+
+  // Initialize safety limits
+  const safetyLimits = {
+    maxFiles: SAFETY_LIMITS.MAX_FILES,
+    maxScanTimeMs: SAFETY_LIMITS.MAX_SCAN_TIME_MS,
+    maxTotalSizeBytes: SAFETY_LIMITS.MAX_TOTAL_SIZE_BYTES,
+    startTime: Date.now(),
+    filesProcessed: 0,
+    totalSize: 0,
+  };
+
+  let projectStructure: ProjectEntry[];
+  try {
+    projectStructure = await processDirectoryRecursive({
+      projectRoot,
+      currentPath: projectRoot,
+      ignoreFilter,
+      maxFileSizeBytes,
+      safetyLimits,
+      onProgress: (progressUpdate) => {
+        if (safetyLimits.filesProcessed >= SAFETY_LIMITS.FILES_WARNING_THRESHOLD) {
+          progressCallback(
+            "Scanning (large project)",
+            `${progressUpdate.scannedPath} (${safetyLimits.filesProcessed} files)`,
+          );
+        } else {
+          progressCallback("Scanning", progressUpdate.scannedPath);
+        }
+      },
+    });
+  } catch (error) {
+    const errorMessage = (error as Error).message;
+    if (errorMessage.includes("limit exceeded")) {
+      throw new Error(
+        `Project too large: ${errorMessage}. Consider using .gitignore or processing a smaller directory.`,
+      );
+    }
+    throw error;
+  }
 
   progressCallback("Formatting output...");
 

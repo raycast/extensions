@@ -49,6 +49,20 @@ export const MIN_MAX_FILE_SIZE_MB = 0.1; // 100KB
 export const MAX_MAX_FILE_SIZE_MB = 50; // 50MB, to prevent accidental excessive memory usage
 
 /**
+ * Safety limits to prevent extension crashes with large directories.
+ */
+export const SAFETY_LIMITS = {
+  /** Maximum number of files to process before stopping */
+  MAX_FILES: 5000,
+  /** Maximum directory scan time in milliseconds */
+  MAX_SCAN_TIME_MS: 30000, // 30 seconds
+  /** Maximum total size of all included files in bytes */
+  MAX_TOTAL_SIZE_BYTES: 100 * 1024 * 1024, // 100MB
+  /** Show warning after this many files */
+  FILES_WARNING_THRESHOLD: 1000,
+} as const;
+
+/**
  * Hardcoded ignore patterns applied *before* .gitignore rules.
  * These patterns use the .gitignore glob syntax.
  * They are designed to exclude common build artifacts, caches, and sensitive files.

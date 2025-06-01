@@ -61,7 +61,7 @@ const sanitizeFileName = (name: string): string => {
 };
 
 const INITIAL_STATE: AppState = {
-  isLoading: true, // Start loading to check Finder selection.
+  isLoading: false, // Don't start with loading state to prevent flicker
   currentStep: "selectDirectory",
   finderSelectedPath: null,
   pickerSelectedPath: null,
@@ -84,7 +84,7 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
    */
   useEffect(() => {
     async function initializeFinderPath() {
-      setState((prev) => ({ ...prev, isLoading: true, formErrors: {} }));
+      // Don't show loading state immediately to prevent flicker
       try {
         const finderItems = await getSelectedFinderItems();
         if (finderItems.length > 0) {
@@ -95,7 +95,7 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
               ...prev,
               finderSelectedPath: firstItemPath,
               pickerSelectedPath: null,
-              isLoading: false,
+              formErrors: {},
             }));
             console.log("Initial Finder selection (directory):", firstItemPath);
             return; // Successfully found and set Finder path.
@@ -114,7 +114,8 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           console.error("Error during initial Finder path retrieval:", typedError.message || error);
         }
       }
-      setState((prev) => ({ ...prev, finderSelectedPath: null, pickerSelectedPath: null, isLoading: false }));
+      // No need to explicitly set isLoading to false since we never set it to true
+      setState((prev) => ({ ...prev, finderSelectedPath: prev.finderSelectedPath, formErrors: {} }));
     }
     initializeFinderPath();
   }, []); // Empty dependency array ensures this runs only once on mount.

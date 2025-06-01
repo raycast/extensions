@@ -29,12 +29,25 @@
   },
   "commands": [
     {
-      "name": "index", 
+      "name": "generate-project-code",
       "title": "Generate Project Code for AI",
       "subtitle": "Project to Text",
       "description": "Select a project directory to generate a consolidated code file.",
       "mode": "view",
-      "icon": "command-icon.png" 
+      "icon": "command-icon.png"
     }
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "code",
+    "project",
+    "ai",
+    "consolidation",
+    "export",
+    "text",
+    "analysis"
   ]
 }

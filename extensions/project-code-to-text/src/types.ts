@@ -27,6 +27,8 @@ export interface ProjectEntry {
 export interface ProgressInfo {
   scannedPath: string;
   filesCollected: number;
+  totalSize?: number;
+  timeElapsed?: number;
 }
 
 /**
@@ -39,6 +41,14 @@ export interface ProcessDirectoryOptions {
   ignoreFilter: ReturnType<typeof ignore>;
   maxFileSizeBytes: number;
   onProgress?: (info: ProgressInfo) => void;
+  safetyLimits?: {
+    maxFiles: number;
+    maxScanTimeMs: number;
+    maxTotalSizeBytes: number;
+    startTime: number;
+    filesProcessed: number;
+    totalSize: number;
+  };
 }
 
 /**
