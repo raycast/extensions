@@ -1,34 +1,37 @@
-import { useLocalStorage } from "@raycast/utils";
+import { LocalStorage, environment } from "@raycast/api";
 import { log } from "../utils";
 import { SpotlightSearchResult } from "../types";
-
-const STORAGE_KEY = "folder-search-pins";
-
-type PinStorageOptions = {
-  searchScope?: string;
-  isShowingDetail?: boolean;
-  showNonCloudLibraryPaths?: boolean;
-};
+import { DEFAULT_PREFERENCES } from "../constants";
 
 /**
  * Hook for managing pin storage operations
  */
 export function usePinStorage() {
-  const {
-    value: cachedPins = [],
-    setValue: setCachedPins,
-    isLoading,
-  } = useLocalStorage<SpotlightSearchResult[]>(STORAGE_KEY, []);
-
   /**
-   * Load pins from storage
+   * Load pins from LocalStorage
    */
   const loadPins = async (): Promise<SpotlightSearchResult[]> => {
     try {
-      log("debug", "usePinStorage", `Loaded ${cachedPins.length} pins from storage`);
-      return cachedPins;
+      const maybePreferences = await LocalStorage.getItem(`${environment.extensionName}-preferences`);
+
+      if (!maybePreferences) {
+        log("debug", "usePinStorage", "No preferences found in storage");
+        return [];
+      }
+
+      try {
+        const preferences = JSON.parse(maybePreferences as string);
+        const storedPins = preferences?.pinned || [];
+        log("debug", "usePinStorage", `Loaded ${storedPins.length} pins from preferences`);
+        return storedPins;
+      } catch (e) {
+        log("error", "usePinStorage", "Error parsing preferences from storage", {
+          error: e instanceof Error ? e.message : String(e),
+        });
+        return [];
+      }
     } catch (error) {
-      log("error", "usePinStorage", "Error loading pins", {
+      log("error", "usePinStorage", "Error loading pins from storage", {
         error: error instanceof Error ? error.message : String(error),
       });
       return [];
@@ -36,18 +39,36 @@ export function usePinStorage() {
   };
 
   /**
-   * Save pins to storage
+   * Save pins to LocalStorage
    */
   const savePins = async (
     pins: SpotlightSearchResult[],
-    additionalPrefs?: PinStorageOptions,
+    additionalPrefs?: {
+      searchScope?: string;
+      isShowingDetail?: boolean;
+      showNonCloudLibraryPaths?: boolean;
+    },
   ): Promise<boolean> => {
     try {
-      await setCachedPins(pins);
-      log("debug", "usePinStorage", `Saved ${pins.length} pins to storage`);
+      await LocalStorage.setItem(
+        `${environment.extensionName}-preferences`,
+        JSON.stringify({
+          pinned: pins,
+          searchScope: additionalPrefs?.searchScope ?? DEFAULT_PREFERENCES.searchScope,
+          isShowingDetail: additionalPrefs?.isShowingDetail ?? DEFAULT_PREFERENCES.isShowingDetail,
+          showNonCloudLibraryPaths:
+            additionalPrefs?.showNonCloudLibraryPaths ?? DEFAULT_PREFERENCES.showNonCloudLibraryPaths,
+        }),
+      );
+
+      // Only log on significant pin count changes
+      if (pins.length % 5 === 0) {
+        log("debug", "usePinStorage", `Saved preferences with ${pins.length} pins`);
+      }
+
       return true;
     } catch (error) {
-      log("error", "usePinStorage", "Error saving pins", {
+      log("error", "usePinStorage", "Error saving pins to storage", {
         error: error instanceof Error ? error.message : String(error),
       });
       return false;
@@ -57,7 +78,5 @@ export function usePinStorage() {
   return {
     loadPins,
     savePins,
-    isLoading,
-    cachedPins,
   };
 }
