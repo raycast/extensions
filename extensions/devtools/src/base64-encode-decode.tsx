@@ -41,11 +41,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action
-            title={mode === "encode" ? "Encode" : "Decode"}
-            onAction={handleConvert}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
+          <Action title={mode === "encode" ? "Encode" : "Decode"} onAction={handleConvert} />
           {output && <Action.CopyToClipboard title="Copy Output" content={output} />}
         </ActionPanel>
       }

@@ -70,11 +70,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action
-            title="Generate Password"
-            onAction={regenerate}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-          />
+          <Action title="Generate Password" onAction={regenerate} />
           <Action.CopyToClipboard title="Copy Password" content={password} />
         </ActionPanel>
       }

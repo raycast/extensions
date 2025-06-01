@@ -1,10 +1,9 @@
 import { ActionPanel, Action, Form } from "@raycast/api";
 import { useState } from "react";
+import { randomBytes } from "crypto";
 
 function getRandomBytes(length: number): Uint8Array {
-  const array = new Uint8Array(length);
-  crypto.getRandomValues(array);
-  return array;
+  return new Uint8Array(randomBytes(length));
 }
 
 function generateRandomString(length: number, charset: string): string {

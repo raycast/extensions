@@ -24,11 +24,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action
-            title="Format/Validate"
-            onAction={handleFormat}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-          />
+          <Action title="Format/Validate" onAction={handleFormat} />
           <Action.CopyToClipboard title="Copy Input" content={input} />
         </ActionPanel>
       }

@@ -34,6 +34,7 @@
     {
       "name": "random-string-generator",
       "title": "Random String Generator",
+      "subtitle": "DevTools",
       "description": "Generate random strings with custom options",
       "mode": "view"
     },
@@ -54,12 +55,14 @@
     {
       "name": "markdown-preview",
       "title": "Markdown Preview",
+      "subtitle": "DevTools",
       "description": "Preview and edit markdown in real-time",
       "mode": "view"
     },
     {
       "name": "password-generator",
-      "title": "Password Generator",
+      "title": "Generate Password",
+      "subtitle": "DevTools",
       "description": "Generate secure passwords with custom options",
       "mode": "view"
     }
