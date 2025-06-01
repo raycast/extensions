@@ -1,8 +1,8 @@
-import { ActionPanel, Action, Icon, List, Form, showToast, Toast, Grid, Alert, confirmAlert, popToRoot } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Form, showToast, Toast, Grid, Alert, confirmAlert, popToRoot, Color } from "@raycast/api";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
-import { ErrorResult, Project, Server } from "./interfaces";
+import { ErrorResult, Project, Server, Service } from "./interfaces";
 import { useContext } from "react";
-import { TokenContext } from "./api-keys";
+import { TokenContext, useToken } from "./api-keys";
 
 function getProjectTotalServices(project: Project) {
   return project.applications.length +
@@ -14,7 +14,7 @@ function getProjectTotalServices(project: Project) {
         project.compose.length;
 }
 export default function Projects() {
-  const { url, headers } = useContext(TokenContext)
+  const { url, headers } = useToken();
 const { isLoading, data: projects } = useFetch<Project[], Project[]>(url + "project.all", {
   headers,
   initialData: []
@@ -36,9 +36,20 @@ const { isLoading, data: projects } = useFetch<Project[], Project[]>(url + "proj
 
 
 function Services({project}: {project: Project;}) {
-  const { url, headers } = useContext(TokenContext)
+  const { url, headers } = useToken();
 
-  async function deleteService(id: string, name: string) {
+  interface GroupedService extends Service {
+    type: string;
+    id: string;
+    status: "idle" | "done";
+  }
+  const services = [
+    ...project.applications.map(a => ({...a, type: "application", id: a.applicationId, status: a.applicationStatus})),
+    ...project.postgres.map(p => ({...p, type: "postgres", id: p.postgresId, status: p.applicationStatus})),
+    ...project.compose.map(c => ({...c, type: "compose", id: c.composeId, status: c.composeStatus})),
+  ];
+
+  async function deleteService({ id, name, type }: GroupedService) {
     const options: Alert.Options = {
       title: "Delete Services",
       message: "Are you sure you want to delete 1 services? This action cannot be undone.",
@@ -49,11 +60,12 @@ function Services({project}: {project: Project;}) {
     }
     if (await confirmAlert(options)) {
       const toast = await showToast(Toast.Style.Animated, "Deleting service", name);
+      const body = type==="application" ? { applicationId: id } : { postgresId: id };
       try {
-          const response = await fetch(url + "application.delete", {
+          const response = await fetch(url + type + ".delete", {
             method: "POST",
             headers,
-            body: JSON.stringify({ applicationId: id })
+            body: JSON.stringify(body)
           })
           if (!response.ok) {
             const err: ErrorResult = await response.json();
@@ -74,13 +86,14 @@ function Services({project}: {project: Project;}) {
     {!getProjectTotalServices(project) ? <Grid.EmptyView icon="folder-input.svg" title="No services added yet. Go to Create Service." actions={<ActionPanel>
       <ActionPanel.Submenu icon={Icon.Plus} title="Create">
         <Action.Push icon="folder-input.svg" title="Application" target={<CreateApplication project={project} />} />
+        <Action.Push icon="database.svg" title="Database" target={<CreateDatabase project={project} />} />
       </ActionPanel.Submenu>
-    </ActionPanel>} /> : project.applications.map(application => <Grid.Item key={application.applicationId} content={Icon.Globe} title={application.name} accessory={{ icon: { source: Icon.CircleFilled, tintColor: "#18181B" }, tooltip: application.applicationStatus }} actions={<ActionPanel>
+    </ActionPanel>} /> : services.map(service => <Grid.Item key={service.id} content={Icon.Globe} title={service.name} accessory={{ icon: { source: Icon.CircleFilled, tintColor: service.status==="done" ? Color.Green : "#18181B" }, tooltip: service.status }} actions={<ActionPanel>
       <ActionPanel.Submenu icon={Icon.Plus} title="Create">
         <Action.Push icon="folder-input.svg" title="Application" target={<CreateApplication project={project} />} />
         <Action.Push icon="database.svg" title="Database" target={<CreateDatabase project={project} />} />
       </ActionPanel.Submenu>
-        <Action icon={Icon.Trash} title="Delete" style={Action.Style.Destructive} onAction={() => deleteService(application.applicationId, application.name)} />
+        <Action icon={Icon.Trash} title="Delete" style={Action.Style.Destructive} onAction={() => deleteService(service)} />
     </ActionPanel>} />)}
   </Grid>
 }
@@ -97,9 +110,9 @@ function CreateApplication({ project }: {project: Project}) {
   
   const { isLoading, data: servers } = useFetch<Server[], Server[]>(url + "server.all", {
   headers,
-  initialData: []
+  initialData: [],
+  execute: !!url
 })
-
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
@@ -145,8 +158,7 @@ function CreateApplication({ project }: {project: Project}) {
 }
 
 function CreateDatabase({ project }: {project: Project}) {
-  const { url, headers } = useContext(TokenContext)
-
+  const { url, headers } = useToken();
   interface FormValues {
     dbType: string;
 
@@ -164,7 +176,8 @@ function CreateDatabase({ project }: {project: Project}) {
   
   const { isLoading, data: servers } = useFetch<Server[], Server[]>(url + "server.all", {
   headers,
-  initialData: []
+  initialData: [],
+  execute: !!url
 })
 
   const { handleSubmit, itemProps, values } = useForm<FormValues>({
@@ -190,6 +203,7 @@ function CreateDatabase({ project }: {project: Project}) {
                 break;
         }
 
+        console.log(url + `${dbType}.create`)
           const response = await fetch(url + `${dbType}.create`, {
             method: "POST",
             headers,

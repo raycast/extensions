@@ -1,10 +1,20 @@
-export interface Application {
-    applicationId: string;
-    name: string;
-    appName: string;
-    description: string;
-    applicationStatus: "idle";
-    createdAt: string;
+export interface Service {
+  name: string;
+  appName: string;
+  description: string;
+  createdAt: string;
+}
+export interface Application extends Service {
+  applicationId: string;
+  applicationStatus: "idle";
+}
+interface Postgres extends Service {
+  postgresId: string;
+  applicationStatus: "idle";
+}
+interface Compose extends Service {
+  composeId: string;
+  composeStatus: "idle" | "done";
 }
 export interface Project {
   projectId: string;
@@ -17,9 +27,9 @@ export interface Project {
   mariadb: [];
   mongo: [];
   mysql: [];
-  postgres: [];
+  postgres: Postgres[];
   redis: [];
-  compose: [];
+  compose: Compose[];
 }
 
 export  interface Server {id: string; name: string};

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, List, popToRoot, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm, useLocalStorage } from "@raycast/utils";
 import Projects from "./projects";
-import { createContext, JSX } from "react";
+import { createContext, JSX, useContext } from "react";
 
 interface Token {
     key: string;
@@ -9,7 +9,7 @@ interface Token {
     name: string;
 }
 
-export const TokenContext = createContext<{ url: string; headers }>({});
+export const TokenContext = createContext<{ url: string; headers: Record<string, string>}>({ url: "", headers: {} });
 function TokenProvider({token, children}: {token: Token; children: JSX.Element}) {
     const url = new URL("api/", token.url).toString();
     const headers = {
@@ -20,6 +20,7 @@ function TokenProvider({token, children}: {token: Token; children: JSX.Element})
         {children}
     </TokenContext.Provider>
 }
+export const useToken = () => useContext(TokenContext);
 
 export default function APIKeys() {
     const { isLoading, value: tokens = [] } = useLocalStorage<Token[]>("tokens")

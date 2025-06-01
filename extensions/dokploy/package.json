@@ -29,12 +29,6 @@
       "title": "API Keys",
       "description": "",
       "mode": "view"
-    },
-    {
-      "name": "projects",
-      "title": "Projects",
-      "description": "",
-      "mode": "view"
     }
   ],
   "dependencies": {
