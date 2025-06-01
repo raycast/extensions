@@ -276,6 +276,12 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
           />
           <ActionEditBookmark bookmark={bookmark} revalidate={revalidate} />
           <Action
+            onAction={handleOpenAndArchive}
+            title="Open and Archive"
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            icon={Icon.ArrowDown}
+          />
+          <Action
             onAction={handleDelete}
             title="Delete Bookmark"
             style={Action.Style.Destructive}
