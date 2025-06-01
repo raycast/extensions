@@ -5,14 +5,10 @@ import { appendFileSync } from "fs";
 export default async function Qq(props: LaunchProps<{ arguments: { note: string } }>) {
   const pereferences = getPreferenceValues();
   const filePath = pereferences.filePath;
-  // __AUTO_GENERATED_PRINT_VAR_START__
-  console.log("Qq filePath:", filePath); // __AUTO_GENERATED_PRINT_VAR_END__
   const text = props.arguments.note;
 
   try {
     const lastNoteDateTime = await LocalStorage.getItem<string>("lastNoteDateTime");
-    // __AUTO_GENERATED_PRINT_VAR_START__
-    console.log("Qq lastNoteDateTime:", lastNoteDateTime); // __AUTO_GENERATED_PRINT_VAR_END__
     const now = new Date();
     let contentToAppend = "";
 
