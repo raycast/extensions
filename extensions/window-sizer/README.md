@@ -59,12 +59,6 @@
   <img src="assets/screenshots/apply-fav-size-2.png" alt="favorite size settings">
 </div>
 
-#### Resizing to favorite size
-
-<div align="center">
-  <img src="assets/screenshots/apply-fav-size-3.png" alt="resizing to favorite size">
-</div>
-
 ## Shortcuts
 
 - `⌘ S` - Star window size
@@ -73,5 +67,5 @@
 
 ## Notes
 
-- To resize windows, please allow Raycast to control your Mac under `System Settings` → `Privacy & Security` → `Accessibility`
+- To resize windows, please allow Raycast to control your Mac under<br>`System Settings` → `Privacy & Security` → `Accessibility`
 - Some applications may restrict window resizing
