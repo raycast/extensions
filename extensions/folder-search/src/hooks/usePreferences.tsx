@@ -1,4 +1,4 @@
-import { getPreferenceValues, openExtensionPreferences, environment } from "@raycast/api";
+import { getPreferenceValues, environment } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { log } from "../utils";
 import { userInfo } from "os";

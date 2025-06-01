@@ -10,17 +10,8 @@ export function useFolderSearch() {
   // Get preferences
   const preferences = usePreferences();
 
-  // Get pin management with memoized props to prevent unnecessary re-renders
-  const pinManagementProps = useMemo(
-    () => ({
-      searchScope: preferences.searchScope,
-      isShowingDetail: preferences.isShowingDetail,
-      showNonCloudLibraryPaths: preferences.showNonCloudLibraryPaths,
-    }),
-    [preferences.searchScope, preferences.isShowingDetail, preferences.showNonCloudLibraryPaths],
-  );
-
-  const pinManagement = usePinManagement(pinManagementProps);
+  // Get pin management
+  const pinManagement = usePinManagement();
 
   // Get plugin management
   const pluginManagement = usePluginManagement();

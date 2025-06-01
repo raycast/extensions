@@ -1,31 +1,17 @@
 import { SpotlightSearchResult } from "../types";
 import { usePinStorage } from "./usePinStorage";
-import { useState, useEffect, useCallback } from "react";
-
-type PinManagementProps = {
-  searchScope?: string;
-  isShowingDetail?: boolean;
-  showNonCloudLibraryPaths?: boolean;
-};
+import { useState, useCallback } from "react";
 
 /**
  * Hook for managing pin operations
  */
-export function usePinManagement(props: PinManagementProps) {
+export function usePinManagement() {
   const pinStorage = usePinStorage();
-  const [pinnedResults, setPinnedResults] = useState<SpotlightSearchResult[]>([]);
-  const [hasCheckedPins, setHasCheckedPins] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
-  // Load pins on mount
-  useEffect(() => {
-    const loadPins = async () => {
-      const pins = await pinStorage.loadPins();
-      setPinnedResults(pins);
-      setHasCheckedPins(true);
-    };
-    loadPins();
-  }, []);
+  // Use reactive pins from pinStorage instead of local state
+  const pinnedResults = pinStorage.pins;
+  const hasCheckedPins = pinStorage.hasCheckedPins;
 
   // Check if a result is pinned
   const resultIsPinned = useCallback(
@@ -47,20 +33,18 @@ export function usePinManagement(props: PinManagementProps) {
         newPinnedResults = [...pinnedResults, result];
       }
 
-      setPinnedResults(newPinnedResults);
-      await pinStorage.savePins(newPinnedResults, props);
+      await pinStorage.savePins(newPinnedResults);
     },
-    [pinnedResults, resultIsPinned, props],
+    [pinnedResults, resultIsPinned, pinStorage],
   );
 
   // Remove a result from pinned results
   const removeResultFromPinnedResults = useCallback(
     async (result: SpotlightSearchResult) => {
       const newPinnedResults = pinnedResults.filter((pin) => pin.path !== result.path);
-      setPinnedResults(newPinnedResults);
-      await pinStorage.savePins(newPinnedResults, props);
+      await pinStorage.savePins(newPinnedResults);
     },
-    [pinnedResults, props],
+    [pinnedResults, pinStorage],
   );
 
   // Move a pin up in the list
@@ -72,11 +56,10 @@ export function usePinManagement(props: PinManagementProps) {
           newPinnedResults[resultIndex],
           newPinnedResults[resultIndex - 1],
         ];
-        setPinnedResults(newPinnedResults);
-        await pinStorage.savePins(newPinnedResults, props);
+        await pinStorage.savePins(newPinnedResults);
       }
     },
-    [pinnedResults, props],
+    [pinnedResults, pinStorage],
   );
 
   // Move a pin down in the list
@@ -88,17 +71,15 @@ export function usePinManagement(props: PinManagementProps) {
           newPinnedResults[resultIndex + 1],
           newPinnedResults[resultIndex],
         ];
-        setPinnedResults(newPinnedResults);
-        await pinStorage.savePins(newPinnedResults, props);
+        await pinStorage.savePins(newPinnedResults);
       }
     },
-    [pinnedResults, props],
+    [pinnedResults, pinStorage],
   );
 
   // Refresh pins from storage
   const refreshPinsFromStorage = useCallback(async () => {
-    const pins = await pinStorage.loadPins();
-    setPinnedResults(pins);
+    await pinStorage.loadPins();
   }, [pinStorage]);
 
   return {
