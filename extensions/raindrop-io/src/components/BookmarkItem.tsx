@@ -9,11 +9,13 @@ import {
   showToast,
   confirmAlert,
   Alert,
+  open,
 } from "@raycast/api";
 import { Bookmark } from "../types";
 import { getFavicon } from "@raycast/utils";
 import fetch from "node-fetch";
 import { BookmarkForm } from "./BookmarkForm";
+import { useCollections } from "../hooks/useCollections";
 
 function ActionEditBookmark(props: { bookmark: Bookmark; revalidate: () => void }) {
   const { bookmark, revalidate } = props;
