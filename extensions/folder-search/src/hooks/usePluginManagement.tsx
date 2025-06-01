@@ -1,7 +1,7 @@
 import { useEffect, useRef, useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
-import { FolderSearchPlugin, SpotlightSearchPreferences } from "../types";
+import { SpotlightSearchPreferences } from "../types";
 import { loadPlugins, log } from "../utils";
 
 // Counter to track instances for debugging

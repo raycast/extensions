@@ -1,6 +1,5 @@
 import { useLocalStorage } from "@raycast/utils";
 import { log } from "../utils";
-import { SpotlightSearchPreferences } from "../types";
 import { userInfo } from "os";
 
 interface PreferencesState {

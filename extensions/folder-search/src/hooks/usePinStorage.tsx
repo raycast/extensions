@@ -2,10 +2,11 @@ import { useLocalStorage } from "@raycast/utils";
 import { LocalStorage, environment } from "@raycast/api";
 import { log } from "../utils";
 import { SpotlightSearchResult } from "../types";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "folder-search-pins";
 const PREFERENCES_KEY = `${environment.extensionName}-preferences`;
+const MIGRATION_KEY = "folder-search-migration-complete";
 
 /**
  * Hook for managing pin storage operations
@@ -24,7 +25,6 @@ export function usePinStorage() {
     setValue: setCachedPins,
     isLoading,
   } = useLocalStorage<SpotlightSearchResult[]>(STORAGE_KEY, []);
-  const migrationAttemptedRef = useRef(false);
 
   // Initialize state when loading completes
   useEffect(() => {
@@ -38,22 +38,29 @@ export function usePinStorage() {
     if (!isInitialized) return;
 
     const migrateExistingPins = async () => {
-      // Skip if already attempted or still loading
-      if (migrationAttemptedRef.current || isLoading) {
-        log("debug", "usePinStorage", "Skipping migration", {
-          reason: migrationAttemptedRef.current ? "already attempted" : "still loading",
-        });
+      // Check if migration has already been completed
+      const migrationComplete = await LocalStorage.getItem(MIGRATION_KEY);
+      if (migrationComplete) {
+        log("debug", "usePinStorage", "Migration already completed, skipping");
         return;
       }
 
-      migrationAttemptedRef.current = true;
       log("debug", "usePinStorage", "Starting migration check");
 
       try {
-        // Check old format first - only migrate if we find pins here
+        // First check if we already have pins in new format
+        const existingPins = await LocalStorage.getItem(STORAGE_KEY);
+        if (existingPins) {
+          log("debug", "usePinStorage", "Pins already exist in new format, marking migration complete");
+          await LocalStorage.setItem(MIGRATION_KEY, "true");
+          return;
+        }
+
+        // Then check old format
         const oldPreferences = await LocalStorage.getItem(PREFERENCES_KEY);
         if (!oldPreferences) {
-          log("debug", "usePinStorage", "No old preferences found, skipping migration");
+          log("debug", "usePinStorage", "No old preferences found, marking migration complete");
+          await LocalStorage.setItem(MIGRATION_KEY, "true");
           return;
         }
 
@@ -62,16 +69,8 @@ export function usePinStorage() {
           const oldPins = parsedPrefs?.pinned || [];
 
           if (oldPins.length === 0) {
-            log("debug", "usePinStorage", "No pins found in old format, skipping migration");
-            return;
-          }
-
-          // Check if we already have pins in new format
-          const existingPins = await LocalStorage.getItem(STORAGE_KEY);
-          const hasExistingPins = existingPins && JSON.parse(existingPins as string).length > 0;
-
-          if (hasExistingPins) {
-            log("debug", "usePinStorage", "Pins already exist in new format, skipping migration");
+            log("debug", "usePinStorage", "No pins found in old format, marking migration complete");
+            await LocalStorage.setItem(MIGRATION_KEY, "true");
             return;
           }
 
@@ -81,21 +80,22 @@ export function usePinStorage() {
             paths: oldPins.map((pin: SpotlightSearchResult) => pin.path),
           });
 
-          // Update new format and UI state immediately
+          // Save to new format
           await setCachedPins(oldPins);
 
-          // Force a refresh of the cached pins to ensure UI updates
-          const updatedPins = await LocalStorage.getItem(STORAGE_KEY);
-          if (updatedPins) {
-            const parsedPins = JSON.parse(updatedPins as string);
-            await setCachedPins(parsedPins);
+          // COMPLETELY REMOVE old format
+          await LocalStorage.removeItem(PREFERENCES_KEY);
+          log("debug", "usePinStorage", "Removed old preferences format after successful migration");
+
+          // Mark migration as complete
+          await LocalStorage.setItem(MIGRATION_KEY, "true");
+
+          // Only log success if we actually migrated pins
+          if (oldPins.length > 0) {
+            log("debug", "usePinStorage", "Migration completed successfully", {
+              migratedCount: oldPins.length,
+            });
           }
-
-          // Clean up old format
-          const { pinned, ...updatedPrefs } = parsedPrefs;
-          await LocalStorage.setItem(PREFERENCES_KEY, JSON.stringify(updatedPrefs));
-
-          log("debug", "usePinStorage", "Migration completed successfully");
         } catch (error) {
           log("error", "usePinStorage", "Error parsing old preferences", {
             error: error instanceof Error ? error.message : String(error),
@@ -117,6 +117,7 @@ export function usePinStorage() {
    */
   const loadPins = async (): Promise<SpotlightSearchResult[]> => {
     try {
+      // Only load from new format
       const storedPins = await LocalStorage.getItem(STORAGE_KEY);
       if (storedPins) {
         const parsedPins = JSON.parse(storedPins as string);
@@ -143,14 +144,7 @@ export function usePinStorage() {
   /**
    * Save pins to storage
    */
-  const savePins = async (
-    pins: SpotlightSearchResult[],
-    additionalPrefs?: {
-      searchScope?: string;
-      isShowingDetail?: boolean;
-      showNonCloudLibraryPaths?: boolean;
-    },
-  ): Promise<boolean> => {
+  const savePins = async (pins: SpotlightSearchResult[]) => {
     try {
       // Skip if pins haven't changed
       if (JSON.stringify(pins) === JSON.stringify(cachedPins)) {
@@ -163,6 +157,7 @@ export function usePinStorage() {
         paths: pins.map((pin) => pin.path),
       });
 
+      // Save to new format
       await setCachedPins(pins);
       return true;
     } catch (error) {

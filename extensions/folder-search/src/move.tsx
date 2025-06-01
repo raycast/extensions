@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  List,
-  closeMainWindow,
-  popToRoot,
-  open,
-  Keyboard,
-  LaunchProps,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, closeMainWindow, popToRoot, open, Keyboard, LaunchProps } from "@raycast/api";
 import React from "react";
 import { folderName, log } from "./utils";
 import { SpotlightSearchResult } from "./types";

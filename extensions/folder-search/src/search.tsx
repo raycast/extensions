@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Color,
-  Form,
   Icon,
   List,
   closeMainWindow,
