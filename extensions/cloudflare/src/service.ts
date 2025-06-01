@@ -251,6 +251,11 @@ class Service {
     });
   }
 
+  async createDnsRecord(zoneId: string, record: DnsRecordItem): Promise<DnsRecordItem> {
+    const response = await this.client.post<Response<DnsRecordItem>>(`zones/${zoneId}/dns_records`, record);
+    return response.data.result;
+  }
+
   async purgeFilesbyURL(
     zoneId: string,
     urls: string[],
