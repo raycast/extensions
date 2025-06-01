@@ -11,7 +11,7 @@ import {
   Keyboard,
   LaunchProps,
 } from "@raycast/api";
-import React from "react";
+import React, { useRef } from "react";
 import { folderName, copyFolderToClipboard, maybeMoveResultToTrash, log, logDiagnostics } from "./utils";
 import { runAppleScript } from "run-applescript";
 import { SpotlightSearchResult } from "./types";
@@ -53,13 +53,19 @@ function Command(props: LaunchProps) {
     hasSearched,
   } = useFolderSearch();
 
-  // Simple launch logging
+  // Use a ref to track if we've logged
+  const hasLoggedRef = useRef(false);
+
+  // Simple launch logging - only once per mount
   React.useEffect(() => {
-    log("debug", "search", "Command launched", {
-      searchText,
-      timestamp: new Date().toISOString(),
-    });
-  }, []); // Only log once on mount
+    if (!hasLoggedRef.current) {
+      log("debug", "search", "Command launched", {
+        searchText,
+        timestamp: new Date().toISOString(),
+      });
+      hasLoggedRef.current = true;
+    }
+  }, []); // Empty dependency array ensures this only runs once
 
   // Handle returning from directory view
   const handleReturnFromDirectory = () => {

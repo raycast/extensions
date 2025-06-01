@@ -9,7 +9,7 @@ const PREFERENCES_KEY = `${environment.extensionName}-preferences`;
 
 /**
  * Hook for managing pin storage operations
- * 
+ *
  * Migration Note (Added June 2024):
  * This code includes migration logic to move pins from the old storage format
  * (stored in preferences) to the new format (stored in LocalStorage). This migration
@@ -19,7 +19,11 @@ const PREFERENCES_KEY = `${environment.extensionName}-preferences`;
 export function usePinStorage() {
   // State
   const [isInitialized, setIsInitialized] = useState(false);
-  const { value: cachedPins, setValue: setCachedPins, isLoading } = useLocalStorage<SpotlightSearchResult[]>(STORAGE_KEY, []);
+  const {
+    value: cachedPins,
+    setValue: setCachedPins,
+    isLoading,
+  } = useLocalStorage<SpotlightSearchResult[]>(STORAGE_KEY, []);
   const migrationAttemptedRef = useRef(false);
 
   // Initialize state when loading completes
@@ -37,7 +41,7 @@ export function usePinStorage() {
       // Skip if already attempted or still loading
       if (migrationAttemptedRef.current || isLoading) {
         log("debug", "usePinStorage", "Skipping migration", {
-          reason: migrationAttemptedRef.current ? "already attempted" : "still loading"
+          reason: migrationAttemptedRef.current ? "already attempted" : "still loading",
         });
         return;
       }
@@ -65,7 +69,7 @@ export function usePinStorage() {
           // Check if we already have pins in new format
           const existingPins = await LocalStorage.getItem(STORAGE_KEY);
           const hasExistingPins = existingPins && JSON.parse(existingPins as string).length > 0;
-          
+
           if (hasExistingPins) {
             log("debug", "usePinStorage", "Pins already exist in new format, skipping migration");
             return;
@@ -74,12 +78,12 @@ export function usePinStorage() {
           // Migrate pins
           log("debug", "usePinStorage", "Migrating pins", {
             count: oldPins.length,
-            paths: oldPins.map((pin: SpotlightSearchResult) => pin.path)
+            paths: oldPins.map((pin: SpotlightSearchResult) => pin.path),
           });
 
           // Update new format and UI state immediately
           await setCachedPins(oldPins);
-          
+
           // Force a refresh of the cached pins to ensure UI updates
           const updatedPins = await LocalStorage.getItem(STORAGE_KEY);
           if (updatedPins) {
@@ -95,12 +99,12 @@ export function usePinStorage() {
         } catch (error) {
           log("error", "usePinStorage", "Error parsing old preferences", {
             error: error instanceof Error ? error.message : String(error),
-            rawPreferences: oldPreferences
+            rawPreferences: oldPreferences,
           });
         }
       } catch (error) {
         log("error", "usePinStorage", "Migration failed", {
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     };
@@ -118,19 +122,19 @@ export function usePinStorage() {
         const parsedPins = JSON.parse(storedPins as string);
         log("debug", "usePinStorage", "Loaded pins from storage", {
           count: parsedPins.length,
-          paths: parsedPins.map((pin: SpotlightSearchResult) => pin.path)
+          paths: parsedPins.map((pin: SpotlightSearchResult) => pin.path),
         });
         return parsedPins;
       }
 
       log("debug", "usePinStorage", "No pins in storage, using cached pins", {
         hasCachedPins: Boolean(cachedPins),
-        count: cachedPins?.length
+        count: cachedPins?.length,
       });
       return cachedPins || [];
     } catch (error) {
       log("error", "usePinStorage", "Error loading pins", {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return [];
     }
@@ -156,14 +160,14 @@ export function usePinStorage() {
 
       log("debug", "usePinStorage", "Saving pins", {
         count: pins.length,
-        paths: pins.map(pin => pin.path)
+        paths: pins.map((pin) => pin.path),
       });
-      
+
       await setCachedPins(pins);
       return true;
     } catch (error) {
       log("error", "usePinStorage", "Error saving pins", {
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }

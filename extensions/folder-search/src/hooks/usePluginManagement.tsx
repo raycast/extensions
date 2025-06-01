@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 import { FolderSearchPlugin, SpotlightSearchPreferences } from "../types";
@@ -11,16 +11,19 @@ let instanceCounter = 0;
  * Hook for managing plugins
  */
 export function usePluginManagement() {
-  // Create a unique ID for this hook instance
-  const instanceIdRef = useRef<number>(++instanceCounter);
+  // Create a stable instance ID that won't change between renders
+  const instanceIdRef = useRef<number>(useMemo(() => ++instanceCounter, []));
 
   // Get current preferences
   const { pluginsEnabled } = getPreferenceValues<SpotlightSearchPreferences>();
 
-  // Use Raycast's useCachedPromise for much simpler caching
+  // Use Raycast's useCachedPromise with proper caching
   const { data: plugins = [], isLoading } = useCachedPromise(
     async () => {
-      log("debug", "usePluginManagement", `Instance #${instanceIdRef.current}: Loading plugins`, { pluginsEnabled });
+      // Only log if not already loaded
+      if (!plugins.length) {
+        log("debug", "usePluginManagement", `Instance #${instanceIdRef.current}: Loading plugins`, { pluginsEnabled });
+      }
 
       if (!pluginsEnabled) {
         log("debug", "usePluginManagement", `Instance #${instanceIdRef.current}: Plugins are disabled in preferences`);
@@ -35,14 +38,15 @@ export function usePluginManagement() {
     },
   );
 
-  // Log mount/unmount for debugging
+  // Log mount/unmount for debugging, but only once per instance
   useEffect(() => {
-    log("debug", "usePluginManagement", `Instance #${instanceIdRef.current} mounted`);
+    const instanceId = instanceIdRef.current;
+    log("debug", "usePluginManagement", `Instance #${instanceId} mounted`);
 
     return () => {
-      log("debug", "usePluginManagement", `Instance #${instanceIdRef.current} unmounted`);
+      log("debug", "usePluginManagement", `Instance #${instanceId} unmounted`);
     };
-  }, []);
+  }, []); // Empty dependency array ensures this only runs once per instance
 
   return {
     plugins,

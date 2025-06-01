@@ -26,6 +26,8 @@ export function usePinManagement({
   const pendingPinUpdateRef = useRef<boolean>(false);
   // Track if we've done the initial load
   const hasInitialLoadRef = useRef<boolean>(false);
+  // Track the last saved state to prevent redundant saves
+  const lastSavedStateRef = useRef<string>("");
 
   const pinStorage = usePinStorage();
 
@@ -37,6 +39,8 @@ export function usePinManagement({
         setPinnedResults(pins);
         setHasCheckedPins(true);
         hasInitialLoadRef.current = true;
+        // Store initial state
+        lastSavedStateRef.current = JSON.stringify(pins);
       } catch (error) {
         log("error", "usePinManagement", "Error loading pins", {
           error: error instanceof Error ? error.message : String(error),
@@ -56,19 +60,32 @@ export function usePinManagement({
 
     const savePinsToStorage = async () => {
       // Skip saving if we're in the initial load sequence and pins weren't modified
-      // This prevents unnecessary writes on command startup
       if (pinnedResults.length === 0 && pendingPinUpdateRef.current === false) {
-        // If we have zero pins and no pending updates, likely just loaded defaults
-        // Skip the automatic save to prevent unnecessary writes
         log("debug", "usePinManagement", "Skipping initial empty pins save");
         return;
       }
 
-      await pinStorage.savePins(pinnedResults, {
-        searchScope,
-        isShowingDetail,
-        showNonCloudLibraryPaths,
-      });
+      // Compare current state with last saved state
+      const currentState = JSON.stringify(pinnedResults);
+      if (currentState === lastSavedStateRef.current) {
+        log("debug", "usePinManagement", "Pins unchanged, skipping save");
+        return;
+      }
+
+      try {
+        await pinStorage.savePins(pinnedResults, {
+          searchScope,
+          isShowingDetail,
+          showNonCloudLibraryPaths,
+        });
+        // Update last saved state
+        lastSavedStateRef.current = currentState;
+        pendingPinUpdateRef.current = false;
+      } catch (error) {
+        log("error", "usePinManagement", "Error saving pins", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
     };
 
     savePinsToStorage();

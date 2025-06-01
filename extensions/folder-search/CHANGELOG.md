@@ -5,6 +5,7 @@
 - Removed a lot of code that was causing unecessary issues with flickering and fallback
 - I have tested the fallback issues and they appear fixed now, due to removing debouncing and some other gode
 - Migrated PINs to localstorage
+- Fixes some bugs with the plugins, added a new plugin to the plugin folder
 
 
 ## [Fixes & Improvements] - 2025-05-28
