@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Update] 2025-06-01
+
+- Added a custom layout for Custom Entities command to categorize the different states of all entities.
+
 ## [AI Tools Enhancement] - 2025-04-29
 
 - Improved `get-entities` tool to only return essential entity information
