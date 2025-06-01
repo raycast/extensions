@@ -83,8 +83,8 @@ async function getAuthCookieValue(
 export async function getCachedOrFreshAuthCookie(
   preferences: ExtensionPreferences,
 ): Promise<string | null> {
-  const COOKIE_CACHE_KEY = "chotto-auth-cookie";
-  const COOKIE_TIMESTAMP_KEY = "chotto-auth-cookie-timestamp";
+  const COOKIE_CACHE_KEY = "chhoto-auth-cookie";
+  const COOKIE_TIMESTAMP_KEY = "chhoto-auth-cookie-timestamp";
   const COOKIE_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
   try {
