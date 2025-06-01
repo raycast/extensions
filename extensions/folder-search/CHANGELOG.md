@@ -6,6 +6,7 @@
 - I have tested the fallback issues and they appear fixed now, due to removing debouncing and some other gode
 - Migrated PINs to localstorage
 - Fixes some bugs with the plugins, added a new plugin to the plugin folder
+- Fixes search results not showing when there are more than max results
 
 
 ## [Fixes & Improvements] - 2025-05-28
