@@ -1,5 +1,12 @@
 # Folder Search Changelog
 
+## Bug Fixes and Code Huygeine {PR_MERGE_DATE}
+- moved code to use standard Raycast Cache / Localstorage
+- Removed a lot of code that was causing unecessary issues with flickering and fallback
+- I have tested the fallback issues and they appear fixed now, due to removing debouncing and some other gode
+- Migrated PINs to localstorage
+
+
 ## [Fixes & Improvements] - 2025-05-28
 - **fixed** ESLint configuration migration from deprecated `.eslintrc.json` to new flat config format (`eslint.config.js`) for ESLint v9+ compatibility
 - **added** Pin/Unpin functionality to the "Move to a Folder" command for consistent folder management across both search and move operations
