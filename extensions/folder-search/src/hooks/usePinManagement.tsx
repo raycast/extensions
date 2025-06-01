@@ -1,7 +1,4 @@
-import { LocalStorage, environment } from "@raycast/api";
-import { log } from "../utils";
 import { SpotlightSearchResult } from "../types";
-import { DEFAULT_PREFERENCES } from "../constants";
 import { usePinStorage } from "./usePinStorage";
 import { useState, useEffect, useCallback } from "react";
 
@@ -40,7 +37,7 @@ export function usePinManagement(props: PinManagementProps) {
 
   // Toggle pin status of a result
   const toggleResultPinnedStatus = useCallback(
-    async (result: SpotlightSearchResult, resultIndex: number) => {
+    async (result: SpotlightSearchResult) => {
       const isPinned = resultIsPinned(result);
       let newPinnedResults: SpotlightSearchResult[];
 

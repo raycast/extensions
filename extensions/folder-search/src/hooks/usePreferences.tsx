@@ -1,7 +1,17 @@
+import { getPreferenceValues, openExtensionPreferences, environment } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { log } from "../utils";
 import { userInfo } from "os";
 
+// Raycast preferences from package.json
+export interface RaycastPreferences {
+  maxResults: string;
+  filterLibraryFolders: boolean;
+  pluginsEnabled: boolean;
+  pluginsFolder: string;
+}
+
+// Dynamic preferences stored in LocalStorage
 interface PreferencesState {
   searchScope: string;
   isShowingDetail: boolean;
@@ -15,14 +25,18 @@ const defaultPreferences: PreferencesState = {
 };
 
 /**
- * Hook for managing user preferences
+ * Hook for managing both Raycast preferences and dynamic preferences
  */
 export function usePreferences() {
+  // Get Raycast preferences
+  const raycastPrefs = getPreferenceValues<RaycastPreferences>();
+
+  // Get dynamic preferences from LocalStorage
   const {
     value: preferences,
     setValue: setPreferences,
-    isLoading: hasCheckedPreferences,
-  } = useLocalStorage<PreferencesState>("folder-search-preferences", defaultPreferences);
+    isLoading,
+  } = useLocalStorage<PreferencesState>(`${environment.extensionName}-preferences`, defaultPreferences);
 
   // Individual setters for backward compatibility
   const setSearchScope = (value: string) => {
@@ -52,12 +66,21 @@ export function usePreferences() {
   const currentPrefs = preferences || defaultPreferences;
 
   return {
+    // Raycast preferences
+    maxResults: parseInt(raycastPrefs.maxResults) || 250,
+    filterLibraryFolders: raycastPrefs.filterLibraryFolders,
+    pluginsEnabled: raycastPrefs.pluginsEnabled,
+    pluginsFolder: raycastPrefs.pluginsFolder,
+
+    // Dynamic preferences
     searchScope: currentPrefs.searchScope,
     setSearchScope,
     isShowingDetail: currentPrefs.isShowingDetail,
     setIsShowingDetail,
     showNonCloudLibraryPaths: currentPrefs.showNonCloudLibraryPaths,
     setShowNonCloudLibraryPaths,
-    hasCheckedPreferences: !hasCheckedPreferences, // invert since isLoading means not checked
+
+    // UI
+    hasCheckedPreferences: !isLoading, // Fixed: when not loading, preferences are checked
   };
 }
