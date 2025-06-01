@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import { showFailureToast } from "@raycast/utils";
 import { usePinStorage } from "./usePinStorage";
 import { SpotlightSearchResult } from "../types";
@@ -18,158 +18,78 @@ export function usePinManagement({
   isShowingDetail = true,
   showNonCloudLibraryPaths = false,
 }: PinManagementDependencies = {}) {
-  const [pinnedResults, setPinnedResults] = useState<SpotlightSearchResult[]>([]);
-  const [hasCheckedPins, setHasCheckedPins] = useState<boolean>(false);
   const [selectedItemId, setSelectedItemId] = useState<string>("");
+  const pinStorage = usePinStorage();
 
   // Keep track of pending state updates
   const pendingPinUpdateRef = useRef<boolean>(false);
-  // Track if we've done the initial load
-  const hasInitialLoadRef = useRef<boolean>(false);
-  // Track the last saved state to prevent redundant saves
-  const lastSavedStateRef = useRef<string>("");
-
-  const pinStorage = usePinStorage();
-
-  // Initial load of pins
-  useEffect(() => {
-    const loadPinsFromStorage = async () => {
-      try {
-        const pins = await pinStorage.loadPins();
-        setPinnedResults(pins);
-        setHasCheckedPins(true);
-        hasInitialLoadRef.current = true;
-        // Store initial state
-        lastSavedStateRef.current = JSON.stringify(pins);
-      } catch (error) {
-        log("error", "usePinManagement", "Error loading pins", {
-          error: error instanceof Error ? error.message : String(error),
-        });
-        showFailureToast({ title: "Could not load pinned folders" });
-        setHasCheckedPins(true);
-        hasInitialLoadRef.current = true;
-      }
-    };
-
-    loadPinsFromStorage();
-  }, []);
-
-  // Save pins when they change (but not on initial load)
-  useEffect(() => {
-    if (!hasCheckedPins || !hasInitialLoadRef.current) return;
-
-    const savePinsToStorage = async () => {
-      // Skip saving if we're in the initial load sequence and pins weren't modified
-      if (pinnedResults.length === 0 && pendingPinUpdateRef.current === false) {
-        log("debug", "usePinManagement", "Skipping initial empty pins save");
-        return;
-      }
-
-      // Compare current state with last saved state
-      const currentState = JSON.stringify(pinnedResults);
-      if (currentState === lastSavedStateRef.current) {
-        log("debug", "usePinManagement", "Pins unchanged, skipping save");
-        return;
-      }
-
-      try {
-        await pinStorage.savePins(pinnedResults, {
-          searchScope,
-          isShowingDetail,
-          showNonCloudLibraryPaths,
-        });
-        // Update last saved state
-        lastSavedStateRef.current = currentState;
-        pendingPinUpdateRef.current = false;
-      } catch (error) {
-        log("error", "usePinManagement", "Error saving pins", {
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    };
-
-    savePinsToStorage();
-  }, [pinnedResults, hasCheckedPins, searchScope, isShowingDetail, showNonCloudLibraryPaths, pinStorage]);
 
   /**
    * Check if a result is pinned
    */
   const resultIsPinned = useCallback(
     (result: SpotlightSearchResult) => {
-      return pinnedResults.some((pin) => pin.path === result.path);
+      return pinStorage.cachedPins.some((pin) => pin.path === result.path);
     },
-    [pinnedResults],
+    [pinStorage.cachedPins],
   );
 
   /**
    * Remove a result from pinned results
    */
-  const removeResultFromPinnedResults = useCallback((result: SpotlightSearchResult) => {
-    setPinnedResults((prevPins) => prevPins.filter((pin) => pin.path !== result.path));
-  }, []);
+  const removeResultFromPinnedResults = useCallback(async (result: SpotlightSearchResult) => {
+    const newPins = pinStorage.cachedPins.filter((pin) => pin.path !== result.path);
+    await pinStorage.savePins(newPins);
+  }, [pinStorage]);
 
   /**
    * Toggle a result's pinned status
    */
   const toggleResultPinnedStatus = useCallback(
-    (result: SpotlightSearchResult, resultIndex: number) => {
+    async (result: SpotlightSearchResult, resultIndex: number) => {
       log(
         "debug",
         "usePinManagement",
-        `${resultIsPinned(result) ? "Unpinning" : "Pinning"} folder: ${result.path.split("/").pop()}`,
+        `Toggling pin status for folder: ${result.path.split("/").pop()}`,
       );
 
       // Mark that we have a pin update in progress
       pendingPinUpdateRef.current = true;
 
-      let newPins: SpotlightSearchResult[] = [];
+      try {
+        const isPinned = resultIsPinned(result);
+        let newPins: SpotlightSearchResult[] = [];
 
-      // Update state and capture the new pins
-      if (!resultIsPinned(result)) {
-        setPinnedResults((prevPins) => {
-          newPins = [result, ...prevPins];
-          return newPins;
-        });
-      } else {
-        setPinnedResults((prevPins) => {
-          newPins = prevPins.filter((pin) => pin.path !== result.path);
-          return newPins;
-        });
-      }
-
-      // Immediately save to localStorage
-      (async () => {
-        try {
-          const success = await pinStorage.savePins(newPins, {
-            searchScope,
-            isShowingDetail,
-            showNonCloudLibraryPaths,
-          });
-
-          if (success) {
-            log("debug", "usePinManagement", `Immediately saved pin change (${newPins.length} pins)`);
-          }
-
-          // Small delay to ensure state has updated in React
-          setTimeout(() => {
-            pendingPinUpdateRef.current = false;
-          }, 50);
-        } catch {
-          log("error", "usePinManagement", "Error saving pins");
-          pendingPinUpdateRef.current = false;
+        if (!isPinned) {
+          newPins = [result, ...pinStorage.cachedPins];
+        } else {
+          newPins = pinStorage.cachedPins.filter((pin) => pin.path !== result.path);
         }
-      })();
+
+        await pinStorage.savePins(newPins);
+        log("debug", "usePinManagement", `Saved pin change (${newPins.length} pins)`);
+      } catch (error) {
+        log("error", "usePinManagement", "Error toggling pin status", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        showFailureToast({ title: "Could not update pin status" });
+      } finally {
+        // Small delay to ensure state has updated
+        setTimeout(() => {
+          pendingPinUpdateRef.current = false;
+        }, 50);
+      }
 
       setSelectedItemId(`result-${resultIndex.toString()}`);
     },
-    [resultIsPinned, pinnedResults, searchScope, isShowingDetail, showNonCloudLibraryPaths],
+    [pinStorage, resultIsPinned],
   );
 
   /**
    * Move a pin up in the list
    */
   const movePinUp = useCallback(
-    (result: SpotlightSearchResult, resultIndex: number) => {
+    async (result: SpotlightSearchResult, resultIndex: number) => {
       try {
         log("debug", "usePinManagement", "Moving pin up", {
           resultPath: result.path,
@@ -186,13 +106,13 @@ export function usePinManagement({
           return;
         }
 
-        const newPinnedResults = [...pinnedResults];
+        const newPinnedResults = [...pinStorage.cachedPins];
         [newPinnedResults[resultIndex], newPinnedResults[newIndex]] = [
           newPinnedResults[newIndex],
           newPinnedResults[resultIndex],
         ];
-        setPinnedResults(newPinnedResults);
-
+        
+        await pinStorage.savePins(newPinnedResults);
         log("debug", "usePinManagement", "Successfully moved pin up", {
           resultPath: result.path,
           oldIndex: resultIndex,
@@ -200,21 +120,19 @@ export function usePinManagement({
         });
       } catch (error) {
         log("error", "usePinManagement", "Error moving pin up", {
-          error,
-          resultPath: result.path,
-          currentIndex: resultIndex,
+          error: error instanceof Error ? error.message : String(error),
         });
-        showFailureToast(error, { title: "Error moving item up" });
+        showFailureToast({ title: "Error moving item up" });
       }
     },
-    [pinnedResults],
+    [pinStorage],
   );
 
   /**
    * Move a pin down in the list
    */
   const movePinDown = useCallback(
-    (result: SpotlightSearchResult, resultIndex: number) => {
+    async (result: SpotlightSearchResult, resultIndex: number) => {
       try {
         log("debug", "usePinManagement", "Moving pin down", {
           resultPath: result.path,
@@ -223,7 +141,7 @@ export function usePinManagement({
         });
 
         const newIndex = resultIndex + 1;
-        if (newIndex >= pinnedResults.length) {
+        if (newIndex >= pinStorage.cachedPins.length) {
           log("debug", "usePinManagement", "Cannot move pin down - already at bottom", {
             resultPath: result.path,
             currentIndex: resultIndex,
@@ -231,13 +149,13 @@ export function usePinManagement({
           return;
         }
 
-        const newPinnedResults = [...pinnedResults];
+        const newPinnedResults = [...pinStorage.cachedPins];
         [newPinnedResults[resultIndex], newPinnedResults[newIndex]] = [
           newPinnedResults[newIndex],
           newPinnedResults[resultIndex],
         ];
-        setPinnedResults(newPinnedResults);
-
+        
+        await pinStorage.savePins(newPinnedResults);
         log("debug", "usePinManagement", "Successfully moved pin down", {
           resultPath: result.path,
           oldIndex: resultIndex,
@@ -245,139 +163,35 @@ export function usePinManagement({
         });
       } catch (error) {
         log("error", "usePinManagement", "Error moving pin down", {
-          error,
-          resultPath: result.path,
-          currentIndex: resultIndex,
+          error: error instanceof Error ? error.message : String(error),
         });
-        showFailureToast(error, { title: "Error moving item down" });
+        showFailureToast({ title: "Error moving item down" });
       }
     },
-    [pinnedResults],
+    [pinStorage],
   );
-
-  // Counter for tracking function calls
-  let refreshCallCounter = 0;
-
-  // Ref to track if a refresh is currently in progress
-  const isRefreshingRef = useRef<boolean>(false);
 
   /**
    * Refresh pins from storage (used when returning from another view)
    */
-  const refreshPinsFromStorage = useCallback(() => {
-    // If a refresh is already in progress, don't start another one
-    if (isRefreshingRef.current) {
+  const refreshPinsFromStorage = useCallback(async () => {
+    if (pendingPinUpdateRef.current) {
       log("debug", "usePinManagement", "Refresh already in progress, skipping duplicate call");
       return;
     }
 
-    const callId = ++refreshCallCounter;
-    log(
-      "debug",
-      "usePinManagement",
-      `[refresh #${callId}] Explicitly refreshing pins from storage (current pin count: ${pinnedResults.length})`,
-    );
-
-    // Mark that a refresh is in progress
-    isRefreshingRef.current = true;
-
-    const refreshPins = async () => {
-      try {
-        // When we have a pending update, read directly from localStorage instead of waiting
-        if (pendingPinUpdateRef.current) {
-          log(
-            "debug",
-            "usePinManagement",
-            `[refresh #${callId}] Pending pin update detected, reading directly from storage`,
-          );
-
-          try {
-            // Get the current pins directly from localStorage
-            const storedPins = await pinStorage.loadPins();
-
-            // Update state with the most recent values
-            log(
-              "debug",
-              "usePinManagement",
-              `[refresh #${callId}] Loaded ${storedPins.length} pins directly from storage`,
-            );
-            setPinnedResults(storedPins);
-
-            // Reset the pending flag since we've now processed the latest state
-            pendingPinUpdateRef.current = false;
-
-            // Mark that refresh is complete
-            isRefreshingRef.current = false;
-            return;
-          } catch (error) {
-            log("error", "usePinManagement", `[refresh #${callId}] Error reading pins during pending update`, {
-              error: error instanceof Error ? error.message : String(error),
-            });
-            // Continue with standard refresh flow if direct access fails
-          }
-        }
-
-        // Standard path - load pins from storage
-        const storedPins = await pinStorage.loadPins();
-
-        // Check if pins have actually changed
-        const currentPaths = new Set(pinnedResults.map((pin) => pin.path));
-        const storedPaths = new Set(storedPins.map((pin: SpotlightSearchResult) => pin.path));
-
-        // Compare pin paths to determine if an update is needed
-        let pathsChanged = false;
-
-        if (currentPaths.size !== storedPaths.size) {
-          log(
-            "debug",
-            "usePinManagement",
-            `[refresh #${callId}] Pin count changed: ${currentPaths.size} → ${storedPaths.size}`,
-          );
-          pathsChanged = true;
-        } else {
-          // Check if any paths in storedPaths are not in currentPaths
-          for (const pathStr of storedPaths) {
-            if (!currentPaths.has(String(pathStr))) {
-              log("debug", "usePinManagement", `[refresh #${callId}] Found new pin: ${pathStr}`);
-              pathsChanged = true;
-              break;
-            }
-          }
-
-          // Also check if any paths in currentPaths are not in storedPaths
-          if (!pathsChanged) {
-            for (const pathStr of currentPaths) {
-              if (!storedPaths.has(String(pathStr))) {
-                log("debug", "usePinManagement", `[refresh #${callId}] Pin removed: ${pathStr}`);
-                pathsChanged = true;
-                break;
-              }
-            }
-          }
-        }
-
-        if (pathsChanged) {
-          log("debug", "usePinManagement", `[refresh #${callId}] Pins changed, updating state`);
-          setPinnedResults(storedPins);
-        } else {
-          log("debug", "usePinManagement", `[refresh #${callId}] Pins unchanged, skipping update`);
-        }
-      } catch (e) {
-        log("error", "usePinManagement", `[refresh #${callId}] Error refreshing pins`, {
-          error: e instanceof Error ? e.message : String(e),
-        });
-      } finally {
-        // Always mark refresh as complete, even if there was an error
-        isRefreshingRef.current = false;
-      }
-    };
-
-    refreshPins();
-  }, [pinnedResults, pinStorage]);
+    try {
+      await pinStorage.loadPins();
+    } catch (error) {
+      log("error", "usePinManagement", "Error refreshing pins", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }, [pinStorage]);
 
   return {
-    pinnedResults,
-    hasCheckedPins,
+    pinnedResults: pinStorage.cachedPins,
+    hasCheckedPins: !pinStorage.isLoading,
     selectedItemId,
     setSelectedItemId,
     resultIsPinned,
