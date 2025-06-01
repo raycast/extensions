@@ -1,7 +1,13 @@
 # Cloudflare Changelog
 
-## [Modernize] - {PR_MERGE_DATE}
+## [DNS Record Enhancements] - {PR_MERGE_DATE}
 
+- Add DNS Records:
+    - A
+    - AAAA
+    - TXT
+- Delete any DNS Record
+- Improve error handling function so it shows the proper error message
 - Modernize extension to use latest Raycast config
 
 ## [Cache Enhancements] - 2024-12-06

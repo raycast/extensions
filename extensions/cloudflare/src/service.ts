@@ -54,12 +54,15 @@ interface Zone {
 }
 
 interface DnsRecordItem {
+  id: string;
   name: string;
   type: string;
   content: string;
+  ttl: number;
 }
 
 interface DnsRecord {
+  id: string;
   name: string;
   type: string;
   content: string;
@@ -246,13 +249,29 @@ class Service {
       `zones/${zoneId}/dns_records`,
     );
     return response.data.result.map((item) => {
-      const { name, type, content } = item;
-      return { name, type, content };
+      const { id, name, type, content } = item;
+      return { id, name, type, content };
     });
   }
 
-  async createDnsRecord(zoneId: string, record: DnsRecordItem): Promise<DnsRecordItem> {
-    const response = await this.client.post<Response<DnsRecordItem>>(`zones/${zoneId}/dns_records`, record);
+  async createDnsRecord(
+    zoneId: string,
+    record: Omit<DnsRecordItem, 'id'>,
+  ): Promise<DnsRecordItem> {
+    const response = await this.client.post<Response<DnsRecordItem>>(
+      `zones/${zoneId}/dns_records`,
+      record,
+    );
+    return response.data.result;
+  }
+
+  async deleteDnsRecord(
+    zoneId: string,
+    recordId: string,
+  ): Promise<{ id: string }> {
+    const response = await this.client.delete<Response<{ id: string }>>(
+      `zones/${zoneId}/dns_records/${recordId}`,
+    );
     return response.data.result;
   }
 

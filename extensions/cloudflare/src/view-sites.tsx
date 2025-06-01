@@ -1,6 +1,8 @@
 import {
   Action,
   ActionPanel,
+  Alert,
+  confirmAlert,
   Detail,
   Form,
   Icon,
@@ -238,14 +240,15 @@ interface DnsRecordProps {
 
 function DnsRecordView(props: DnsRecordProps) {
   const { siteId } = props;
-  const { isLoading, data: records, revalidate } = useCachedPromise(
-    async () => await service.listDnsRecords(siteId),
-    [],
-    {
-      initialData: [],
-      onError: handleNetworkError,
-    },
-  );
+  const {
+    isLoading,
+    data: records,
+    revalidate,
+    mutate,
+  } = useCachedPromise(async () => await service.listDnsRecords(siteId), [], {
+    initialData: [],
+    onError: handleNetworkError,
+  });
 
   return (
     <List isLoading={isLoading}>
@@ -278,8 +281,56 @@ function DnsRecordView(props: DnsRecordProps) {
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                {/* eslint-disable-next-line @raycast/prefer-title-case */}
-                <Action.Push icon={Icon.Plus} title="Add Record" target={<CreateDnsRecordView siteId={siteId} onCreate={revalidate} />} shortcut={Keyboard.Shortcut.Common.New} />
+                <Action.Push
+                  icon={Icon.Plus}
+                  title="Add Record"
+                  target={
+                    <CreateDnsRecordView
+                      siteId={siteId}
+                      onCreate={revalidate}
+                    />
+                  }
+                  shortcut={Keyboard.Shortcut.Common.New}
+                />
+                <Action
+                  icon={Icon.Trash}
+                  title="Delete Record"
+                  onAction={() =>
+                    confirmAlert({
+                      title: 'Delete DNS records',
+                      message:
+                        'Are you sure you want to permanently delete 1 record?',
+                      primaryAction: {
+                        title: 'Delete',
+                        style: Alert.ActionStyle.Destructive,
+                        async onAction() {
+                          const toast = await showToast(
+                            Toast.Style.Animated,
+                            'Deleting DNS Record',
+                            record.id,
+                          );
+                          try {
+                            await mutate(
+                              service.deleteDnsRecord(siteId, record.id),
+                              {
+                                optimisticUpdate(data) {
+                                  return data.filter((d) => d.id !== record.id);
+                                },
+                                shouldRevalidateAfter: false,
+                              },
+                            );
+                            toast.style = Toast.Style.Success;
+                            toast.title = 'Deleted DNS Record';
+                          } catch (error) {
+                            handleNetworkError(error);
+                          }
+                        },
+                      },
+                    })
+                  }
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  style={Action.Style.Destructive}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -289,8 +340,14 @@ function DnsRecordView(props: DnsRecordProps) {
   );
 }
 
-function CreateDnsRecordView({ siteId,onCreate }: {siteId: string; onCreate: () => void}) {
-  const { pop} = useNavigation();
+function CreateDnsRecordView({
+  siteId,
+  onCreate,
+}: {
+  siteId: string;
+  onCreate: () => void;
+}) {
+  const { pop } = useNavigation();
   interface FormValues {
     type: string;
     name: string;
@@ -299,35 +356,40 @@ function CreateDnsRecordView({ siteId,onCreate }: {siteId: string; onCreate: () 
     comment: string;
   }
   const TYPES: Record<string, string> = {
-    A: "IPv4 address",
-    AAAA: "IPv6 address",
-    TXT: "Content"
-  }
+    A: 'IPv4 address',
+    AAAA: 'IPv6 address',
+    TXT: 'Content',
+  };
   const TTLS = {
-    1: "Auto",
-    60: "1 min",
-    120: "2 min",
-    300: "5 min",
-    600: "10 min",
-    900: "15 min",
-    1800: "30 min",
-    3600: "1 hr",
-    7200: "2 hr",
-    18000: "5 hr",
-    43200: "12 hr",
-    86400: "1 day"
-  }
+    1: 'Auto',
+    60: '1 min',
+    120: '2 min',
+    300: '5 min',
+    600: '10 min',
+    900: '15 min',
+    1800: '30 min',
+    3600: '1 hr',
+    7200: '2 hr',
+    18000: '5 hr',
+    43200: '12 hr',
+    86400: '1 day',
+  };
 
-  const {handleSubmit,itemProps,values} = useForm<FormValues>({
+  const { handleSubmit, itemProps, values } = useForm<FormValues>({
     async onSubmit(values) {
-      const toast = await showToast(Toast.Style.Animated, "Creating DNS Record", values.type);
+      const toast = await showToast(
+        Toast.Style.Animated,
+        'Creating DNS Record',
+        values.type,
+      );
       try {
         const record = values;
-        if (values.type!=="TXT") record.ttl = "1";
+        const content = `"${record.content}"`; // if we do not add quotation marks it will still work but shows a warning on Dash
+        const ttl = values.type !== 'TXT' ? 1 : +record.ttl;
 
-        await service.createDnsRecord(siteId, record);
+        await service.createDnsRecord(siteId, { ...record, content, ttl });
         toast.style = Toast.Style.Success;
-        toast.title = "Created DNS Record";
+        toast.title = 'Created DNS Record';
         onCreate();
         pop();
       } catch (error) {
@@ -335,36 +397,61 @@ function CreateDnsRecordView({ siteId,onCreate }: {siteId: string; onCreate: () 
       }
     },
     initialValues: {
-      type: "A",
-      ttl: "1"
+      type: 'A',
+      ttl: '1',
     },
     validation: {
       name: FormValidation.Required,
-      content: FormValidation.Required
-    }
-  })
-  return <Form actions={<ActionPanel>
-    <Action.SubmitForm title='Save' onSubmit={handleSubmit} />
-  </ActionPanel>}>
-    <Form.Dropdown title='Type' {...itemProps.type}>
-      {Object.keys(TYPES).map(type => <Form.Dropdown.Item key={type} title={type} value={type} />)}
-    </Form.Dropdown>
+      content: FormValidation.Required,
+    },
+  });
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown title="Type" {...itemProps.type}>
+        {Object.keys(TYPES).map((type) => (
+          <Form.Dropdown.Item key={type} title={type} value={type} />
+        ))}
+      </Form.Dropdown>
 
-    <Form.TextField title='Name' placeholder='Use @ for root' {...itemProps.name} />
-    {values.type!=="TXT" ? <>
-      <Form.TextField title={TYPES[values.type]} {...itemProps.content} />
-      <Form.Description title='TTL' text='Auto' />
-    </> : <>
-    <Form.TextArea title='Content' {...itemProps.content} />
-    <Form.Dropdown title='TTL' {...itemProps.ttl}>
-      {Object.entries(TTLS).map(([ttl, title]) => <Form.Dropdown.Item key={ttl} title={title} value={ttl} />)}
-    </Form.Dropdown>
-    </>}
-    
-    <Form.Separator />
-    <Form.Description title='Record Attributes' text='The information provided here will not impact DNS record resolution and is only meant for your reference.' />
-    <Form.TextField title='Comment' placeholder='Enter your comment here (up to 100 characters).' {...itemProps.comment} />
-  </Form>
+      <Form.TextField
+        title="Name"
+        placeholder="Use @ for root"
+        {...itemProps.name}
+      />
+      {values.type !== 'TXT' ? (
+        <>
+          <Form.TextField title={TYPES[values.type]} {...itemProps.content} />
+          <Form.Description title="TTL" text="Auto" />
+        </>
+      ) : (
+        <>
+          <Form.TextArea title="Content" {...itemProps.content} />
+          <Form.Dropdown title="TTL" {...itemProps.ttl}>
+            {Object.entries(TTLS).map(([ttl, title]) => (
+              <Form.Dropdown.Item key={ttl} title={title} value={ttl} />
+            ))}
+          </Form.Dropdown>
+        </>
+      )}
+
+      <Form.Separator />
+      <Form.Description
+        title="Record Attributes"
+        text="The information provided here will not impact DNS record resolution and is only meant for your reference."
+      />
+      <Form.TextField
+        title="Comment"
+        placeholder="Enter your comment here (up to 100 characters)."
+        {...itemProps.comment}
+      />
+    </Form>
+  );
 }
 
 async function clearSiteCache() {
