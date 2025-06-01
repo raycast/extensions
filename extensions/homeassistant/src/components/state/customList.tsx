@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useStateSearch } from "./hooks";
 import { StateListItem } from "@components/state/list";
 
-export function CustomStatesList(props: { entitiesState?: State[] | undefined }): JSX.Element {
+export function CustomStatesList(props: { entitiesState?: State[] | undefined }): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(searchText, "", undefined, props.entitiesState ?? allStates);
