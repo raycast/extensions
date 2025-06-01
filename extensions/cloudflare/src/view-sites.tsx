@@ -298,8 +298,7 @@ function DnsRecordView(props: DnsRecordProps) {
                   onAction={() =>
                     confirmAlert({
                       title: 'Delete DNS records',
-                      message:
-                        'Are you sure you want to permanently delete 1 record?',
+                      message: `Are you sure you want to permanently delete the '${record.type} - ${record.content.slice(0, 50)}' record?`,
                       primaryAction: {
                         title: 'Delete',
                         style: Alert.ActionStyle.Destructive,
@@ -385,7 +384,7 @@ function CreateDnsRecordView({
       try {
         const record = values;
         const content = `"${record.content}"`; // if we do not add quotation marks it will still work but shows a warning on Dash
-        const ttl = values.type !== 'TXT' ? 1 : +record.ttl;
+        const ttl = values.type !== 'TXT' ? 1 : +record.ttl; // errors out if we do not pass a number
 
         await service.createDnsRecord(siteId, { ...record, content, ttl });
         toast.style = Toast.Style.Success;
@@ -403,6 +402,10 @@ function CreateDnsRecordView({
     validation: {
       name: FormValidation.Required,
       content: FormValidation.Required,
+      comment(value) {
+        if (value && value.length > 100)
+          return 'Comment must not be more than 100 characters';
+      },
     },
   });
   return (
