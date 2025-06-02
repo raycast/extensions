@@ -10,6 +10,7 @@
 		{
 			"name": "shorten-url",
 			"title": "Shorten URL",
+			"subtitle": "Chotto",
 			"description": "Turns a long URL into a short one with optional short URL slug.",
 			"mode": "view"
 		},
