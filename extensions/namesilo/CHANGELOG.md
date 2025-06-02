@@ -1,5 +1,10 @@
 # NameSilo Changelog
 
+## [View Contact Profiles] - {PR_MERGE_DATE}
+
+- View Contact Profiles in your account
+- Modernize to use latest Raycast config (+ remove `cross-fetch`)
+
 ## [Manage Name Servers + Add DNS Records] - 2024-10-26
 
 - For each domain, you can have up to 13 Name Server IPs
