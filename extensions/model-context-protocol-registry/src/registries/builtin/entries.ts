@@ -177,8 +177,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "kagimcp",
     title: "Kagi Search",
-    description:
-      "The Official Model Context Protocol (MCP) server for Kagi search & other tools.",
+    description: "The Official Model Context Protocol (MCP) server for Kagi search & other tools.",
     icon: "kagi.svg",
     homepage: "https://github.com/kagisearch/kagimcp",
     configuration: {
@@ -186,7 +185,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["kagimcp"],
       env: {
         KAGI_API_KEY: "YOUR_API_KEY_HERE",
-        KAGI_SUMMARIZER_ENGINE: "YOUR_ENGINE_CHOICE_HERE" // Defaults to "cecil" engine if env var not present
+        KAGI_SUMMARIZER_ENGINE: "YOUR_ENGINE_CHOICE_HERE", // Defaults to "cecil" engine if env var not present
       },
     },
   },
