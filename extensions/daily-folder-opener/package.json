@@ -1,0 +1,55 @@
+{
+  "name": "daily-folder-opener",
+  "title": "Daily Folder Opener",
+  "description": "Automatically opens today's folder based on date structure (YEAR/MONTH/DAY) with customizable base path. Perfect for daily filing systems and organized document workflows.",
+  "icon": "folder.png",
+  "author": "dacasine",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "folder",
+    "daily",
+    "date",
+    "organization",
+    "productivity",
+    "filing",
+    "workflow"
+  ],
+  "commands": [
+    {
+      "name": "open-daily-folder",
+      "title": "Open Daily Folder",
+      "description": "Opens today's folder with customizable path",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "basePath",
+      "type": "textfield",
+      "required": true,
+      "title": "Base Folder Path",
+      "description": "The base path to your daily folders (use ~ for home directory)",
+      "default": "~/Library/CloudStorage/Box-Box/Courrier entrant et sortant/Courrier entrant",
+      "placeholder": "~/Documents/DailyFolders"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~20.10.0",
+    "@types/react": "^18.2.45",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
