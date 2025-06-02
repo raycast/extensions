@@ -221,7 +221,7 @@ export default function Command() {
                   onAction={() => copyShortUrl(urlItem.shortlink)}
                 />
                 <Action
-                  title="Open  URL"
+                  title="Open URL"
                   onAction={() => openUrl(urlItem.shortlink)}
                 />
                 <Action
