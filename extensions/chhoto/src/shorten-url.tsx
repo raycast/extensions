@@ -123,10 +123,12 @@ export default function Command() {
                 }
             },
             slug: (value) => {
-                return value?.match(/^([a-zA-Z_][a-zA-Z0-9_-]*)$/) ||
-                    value === ""
+                if (!value || value === "") {
+                    return null; // Empty slug is allowed
+                }
+                return value.match(/^[a-zA-Z0-9_-]+$/)
                     ? null
-                    : "Only a-z, 0-9, - and _ are allowed";
+                    : "Only letters, numbers, hyphens, and underscores are allowed";
             },
         },
     });
@@ -135,7 +137,7 @@ export default function Command() {
         const getClipboardContents = async () => {
             try {
                 const content = await Clipboard.readText();
-                if (content?.match(/https?:\/\/.+\..+/)) {
+                if (content?.match(/^https?:\/\/[^\s]+\.[^\s]+/)) {
                     itemProps.longurl.onChange?.call(globalThis, content);
                     showToast({
                         style: Toast.Style.Success,
