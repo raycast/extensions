@@ -16,7 +16,7 @@
 		},
 		{
 			"name": "list-urls",
-			"title": "List URLs",
+			"title": "List Urls",
 			"description": "Shows you a list of all your shortened URLs.",
 			"mode": "view"
 		}
