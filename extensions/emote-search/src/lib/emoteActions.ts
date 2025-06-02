@@ -37,7 +37,7 @@ export async function copyEmote(
     // Add to recent emotes
     const newRecent = [
       { ...emote, timestamp: Date.now() },
-      ...recent.filter((e) => e.id !== emote.id || e.source !== emote.source),
+      ...recent.filter((e) => e.id !== emote.id && e.source !== emote.source),
     ].slice(0, RECENT_LIMIT);
 
     setRecent(newRecent);
