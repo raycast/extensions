@@ -3,6 +3,9 @@ import React from "react";
 import { List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
+const hasImageFileExtension = (path: string) =>
+  path.endsWith(".pdf") || path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".png");
+
 export default function BookmarkListSection({
   title,
   bookmarks,
@@ -25,11 +28,7 @@ export default function BookmarkListSection({
             <List.Item.Detail
               isLoading={false}
               markdown={
-                isFileSection &&
-                (bookmark.path.endsWith(".pdf") ||
-                  bookmark.path.endsWith(".jpg") ||
-                  bookmark.path.endsWith(".jpeg") ||
-                  bookmark.path.endsWith(".png"))
+                isFileSection && hasImageFileExtension(bookmark.path)
                   ? `<img src="${encodeURIComponent(bookmark.path)}" alt="${bookmark.title}" height="190" />`
                   : isFileSection
                   ? undefined
