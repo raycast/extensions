@@ -45,7 +45,7 @@ export default function Command() {
         },
       });
 
-      setUrls(result.toReversed() || []);
+      setUrls([...result].reverse() || []);
     } catch (error) {
       console.error("Error fetching URLs:", error);
       showToast({
