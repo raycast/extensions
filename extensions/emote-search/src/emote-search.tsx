@@ -55,8 +55,8 @@ export default function Command() {
         }>;
         setRecent(parsed);
       }
-    } catch {
-      // Error handling removed
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to load recent emotes" });
     }
   };
 
