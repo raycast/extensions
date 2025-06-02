@@ -1,5 +1,9 @@
 # awork Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Added error response when authenticating fails
+
 ## [Bug Fix] - 2025-04-15
 
 - Fix error when searching in projects and tasks

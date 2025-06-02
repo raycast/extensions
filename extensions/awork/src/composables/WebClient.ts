@@ -126,12 +126,15 @@ export const refreshToken = async () => {
               },
             },
           });
+          return
         }
         return response.text();
       })
       .then(async (result) => {
-        const newTokens = <OAuth.TokenResponse>JSON.parse(result);
-        await client.setTokens(newTokens);
+        if (result) {
+          const newTokens = <OAuth.TokenResponse>JSON.parse(result);
+          await client.setTokens(newTokens);
+        }
       })
       .catch((error: Error) => console.error(error));
 
