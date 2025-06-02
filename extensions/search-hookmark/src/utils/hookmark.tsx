@@ -10,7 +10,7 @@ const convertLineSeparatedToBookmarks = (input: string) => {
 
   // Bookmarks are separated by linefeed, each bookmark has 3 lines: title, address, path
   const bookmarks = [];
-  for (let bookmarkIndex = 0; bookmarkIndex < lines.length; bookmarkIndex += 3) {
+  for (let bookmarkIndex = 0; bookmarkIndex + 2 < lines.length; bookmarkIndex += 3) {
     bookmarks.push({
       title: lines[bookmarkIndex],
       address: lines[bookmarkIndex + 1],
