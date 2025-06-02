@@ -52,9 +52,9 @@ export default function Command(props: LaunchProps) {
         renderActions={(bookmark) => (
           <ActionPanel>
             <Action
-              icon={{ fileIcon: `${iconPath}` }}
-              title="Open in Hookmark"
+              icon={{ fileIcon: iconPath }}
               onAction={() => openInHook(bookmark.title, bookmark.address)}
+              title="Open in Hookmark"
             />
             <Action.Push title="Show Hooked Bookmarks" target={<ShowHookedSubmenu {...bookmark} />} />
             <Action.OpenInBrowser title="Open in Finder" url={bookmark.address} />
