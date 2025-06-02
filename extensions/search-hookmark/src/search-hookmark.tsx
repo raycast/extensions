@@ -94,7 +94,7 @@ export default function Command(props: LaunchProps) {
             />
             <Action.Push title="Show Hooked Bookmarks" target={<ShowHookedSubmenu {...bookmark} />} />
             <Action.CopyToClipboard
-              title="Copy As Markdown Link"
+              title="Copy as Markdown Link"
               content={`[${bookmark.title}](${bookmark.address})`}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
