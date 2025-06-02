@@ -16,11 +16,7 @@ import * as yup from "yup";
 import path from "path";
 import os from "os";
 import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
-
-// Logging configuration
-const LOG_ENABLED = true; // Set to true to enable all logging
-const LOG_LEVEL: "debug" | "error" = "debug"; // Set to "debug" for verbose logging or "error" for less noise
-const LOG_CACHE_OPERATIONS = false; // Set to true to log detailed cache operations
+import { LOG_ENABLED, LOG_LEVEL, LOG_CACHE_OPERATIONS } from "./hooks/useFolderSearch";
 
 // Create a plugins cache instance with namespace
 const pluginsCache = new Cache({

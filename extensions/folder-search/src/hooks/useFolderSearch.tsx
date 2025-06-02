@@ -1,6 +1,14 @@
 import { useCallback, useMemo, useRef } from "react";
+import { environment } from "@raycast/api";
 import { log } from "../utils";
 import { usePinManagement, usePluginManagement, useSearchResults, usePreferences } from "./";
+
+// ============================================================================
+// Logging Configuration - Centralized here as the main orchestrator hook
+// ============================================================================
+export const LOG_ENABLED = environment.isDevelopment; // Enable logging only in development mode
+export const LOG_LEVEL: "debug" | "error" = "debug"; // Set to "debug" for verbose logging or "error" for less noise
+export const LOG_CACHE_OPERATIONS = false; // Set to true to log detailed cache operations
 
 /**
  * Main hook for folder search functionality.
