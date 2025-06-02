@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-emotes",
+  "title": "Emote Search",
+  "description": "Search and copy emotes from BTTV, 7TV, and FFZ",
+  "icon": "icon.png",
+  "author": "th1lo",
+  "categories": [
+    "Media",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-emotes",
+      "title": "Search Emotes",
+      "subtitle": "Search emotes from BTTV, 7TV, and FFZ",
+      "description": "Search and copy emotes from BTTV, 7TV, and FFZ",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.19.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "eslint": "^9.27.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "type": "module"
+}
