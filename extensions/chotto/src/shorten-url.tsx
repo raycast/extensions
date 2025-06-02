@@ -83,14 +83,7 @@ export default function Command() {
         popToRoot({ clearSearchBar: true });
       } catch (error) {
         console.error("Error shortening URL:", error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to shorten URL",
-          message:
-            error instanceof Error
-              ? error.message.split(":").pop()
-              : "An unknown error occurred",
-        });
+        showFailureToast(error, { title: "Failed to shorten URL" });
       }
     },
     validation: {
