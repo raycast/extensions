@@ -7,6 +7,7 @@ import { moveFinderItems } from "./moveUtils";
 import { FolderListSection, Directory } from "./components";
 import path from "node:path";
 import { userInfo } from "os";
+import { showFailureToast } from "@raycast/utils";
 
 function Command(props: LaunchProps) {
   const {
@@ -55,9 +56,8 @@ function Command(props: LaunchProps) {
                 popToRoot({ clearSearchBar: true });
               }
             } catch (error) {
-              // Error is already handled in moveFinderItems, but we need to catch it here
-              // to prevent unhandled promise rejections
-              console.error("Error in Move to This Folder action:", error);
+              // Show error to user with showFailureToast
+              showFailureToast(error, { title: "Could not move to this folder" });
             }
           }}
         />
@@ -77,7 +77,7 @@ function Command(props: LaunchProps) {
           title={!resultIsPinned(result) ? "Pin" : "Unpin"}
           icon={!resultIsPinned(result) ? Icon.Star : Icon.StarDisabled}
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-          onAction={() => toggleResultPinnedStatus(result, resultIndex)}
+          onAction={() => toggleResultPinnedStatus(result)}
         />
         {resultIsPinned(result) && isPinnedSection && (
           <>
@@ -125,7 +125,7 @@ function Command(props: LaunchProps) {
       isShowingDetail={isShowingDetail}
       throttle={true}
       searchText={searchText}
-      selectedItemId={selectedItemId}
+      selectedItemId={selectedItemId || undefined}
       searchBarAccessory={
         hasCheckedPlugins && hasCheckedPreferences ? (
           <List.Dropdown tooltip="Scope" onChange={setSearchScope} value={searchScope}>

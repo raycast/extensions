@@ -114,7 +114,6 @@ function Command(props: LaunchProps) {
             } catch (error) {
               // Show error to user with showFailureToast
               showFailureToast(error, { title: "Could not move Finder selection" });
-              console.error("Error in Move Finder Selection action:", error);
             }
           }}
         />
@@ -134,7 +133,7 @@ function Command(props: LaunchProps) {
           title={!resultIsPinned(result) ? "Pin" : "Unpin"}
           icon={!resultIsPinned(result) ? Icon.Star : Icon.StarDisabled}
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-          onAction={() => toggleResultPinnedStatus(result, resultIndex)}
+          onAction={() => toggleResultPinnedStatus(result)}
         />
         {resultIsPinned(result) && isPinnedSection && (
           <>
@@ -234,6 +233,9 @@ function Command(props: LaunchProps) {
                     closeMainWindow({ clearRootSearch: true });
                     runAppleScript(plugin.appleScript(result));
                   } catch (error) {
+                    // Show user-friendly error message
+                    showFailureToast(error, { title: `Plugin "${plugin.title}" failed` });
+                    // Keep debug logging for developers
                     log("error", "search", "Plugin execution failed", {
                       title: plugin.title,
                       error: error instanceof Error ? error.message : String(error),
@@ -257,7 +259,7 @@ function Command(props: LaunchProps) {
       isShowingDetail={isShowingDetail}
       throttle={true}
       searchText={searchText}
-      selectedItemId={selectedItemId}
+      selectedItemId={selectedItemId || undefined}
       searchBarAccessory={
         hasCheckedPlugins && hasCheckedPreferences ? (
           <List.Dropdown tooltip="Scope" onChange={setSearchScope} value={searchScope}>

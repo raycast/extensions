@@ -72,7 +72,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
     log("debug", "Directory", `[${timestamp}] ${action} folder: ${result.path}`);
 
     // Toggle the pin status
-    toggleResultPinnedStatus(result, resultIndex);
+    toggleResultPinnedStatus(result);
 
     // Add a delay to ensure the pin toggle has completed
     setTimeout(() => {
