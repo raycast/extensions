@@ -10,14 +10,14 @@ interface ProjectFormProps {
 
 // List of predefined colors
 const COLORS = [
-  { value: "red", label: "Red" },
-  { value: "orange", label: "Orange" },
-  { value: "yellow", label: "Yellow" },
-  { value: "green", label: "Green" },
-  { value: "blue", label: "Blue" },
-  { value: "purple", label: "Purple" },
-  { value: "pink", label: "Pink" },
-  { value: "gray", label: "Gray" },
+  { value: "#FF3B30", label: "Red" },
+  { value: "#FF9500", label: "Orange" },
+  { value: "#FFCC00", label: "Yellow" },
+  { value: "#34C759", label: "Green" },
+  { value: "#007AFF", label: "Blue" },
+  { value: "#AF52DE", label: "Purple" },
+  { value: "#FF2D55", label: "Pink" },
+  { value: "#8E8E93", label: "Gray" },
 ] as const;
 
 interface FormValues {
@@ -58,7 +58,7 @@ export function ProjectForm({ project, onSave }: ProjectFormProps) {
     initialValues: {
       title: project?.title ?? "",
       subtitle: project?.subtitle ?? "",
-      color: project?.color ?? "gray",
+      color: project?.color ?? "#8E8E93",
     },
   });
 

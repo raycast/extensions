@@ -4,7 +4,7 @@ import { Project } from "./types";
 import { getProjects, deleteProject } from "./utils/storage";
 import { ProjectForm } from "./components/ProjectForm";
 import { ProjectView } from "./components/ProjectView";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, getAvatarIcon } from "@raycast/utils";
 import { CreateProjectAction } from "./components/actions/CreateProjectAction";
 
 export default function Command() {
@@ -62,7 +62,7 @@ export default function Command() {
       {projects.map((project) => (
         <List.Item
           key={project.id}
-          icon={{ source: Icon.Folder, tintColor: project.color }}
+          icon={getAvatarIcon(project.title, { background: project.color || "#8E8E93", gradient: false })}
           title={project.title}
           subtitle={project.subtitle}
           actions={

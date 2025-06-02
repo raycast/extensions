@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import { Project, ProjectLink } from "../types";
 import { getLinks, deleteLink } from "../utils/storage";
 import { LinkForm } from "./LinkForm";
-import { getFaviconUrl } from "../utils/favicon";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, getFavicon } from "@raycast/utils";
 import { OpenAllLinksAction } from "./actions/OpenAllLinksAction";
 
 interface ProjectViewProps {
@@ -77,7 +76,7 @@ export function ProjectView({ project }: ProjectViewProps) {
       {links.map((link) => (
         <List.Item
           key={link.id}
-          icon={getFaviconUrl(link.url) || Icon.Link}
+          icon={getFavicon(link.url) || Icon.Link}
           title={link.title}
           subtitle={link.url}
           actions={

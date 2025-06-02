@@ -1,4 +1,4 @@
-export type Color = "red" | "orange" | "yellow" | "green" | "blue" | "purple" | "pink" | "gray";
+export type Color = "#FF3B30" | "#FF9500" | "#FFCC00" | "#34C759" | "#007AFF" | "#AF52DE" | "#FF2D55" | "#8E8E93";
 
 export interface Project {
   id: string;
