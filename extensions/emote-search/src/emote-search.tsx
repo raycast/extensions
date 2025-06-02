@@ -102,8 +102,11 @@ export default function Command() {
       try {
         const results = await searchEmotes(source, searchText);
         if (!cancelled) setEmotes(results);
-      } catch {
-        if (!cancelled) setEmotes([]);
+      } catch (error) {
+        if (!cancelled) {
+          setEmotes([]);
+          showFailureToast(error, { title: "Failed to search emotes" });
+        }
       } finally {
         if (!cancelled) setIsLoading(false);
       }
