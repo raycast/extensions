@@ -60,7 +60,13 @@ const authorizeClient = async () => {
   body.append("code", authorizationCode);
 
   await fetch(`${baseURI}/accounts/token`, getRequestOptions(body))
-    .then((response) => response.text())
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(`Unable to authorize: ${response.status} ${response.statusText}, ${await response.text()}`);
+      } else {
+        return await response.text();
+      }
+    })
     .then((result) => {
       client.setTokens(<OAuth.TokenResponse>JSON.parse(result));
     })
@@ -107,7 +113,20 @@ export const refreshToken = async () => {
 
     await fetch(`${baseURI}/accounts/token`, getRequestOptions(body))
       .then((response) => {
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          confirmAlert({
+            title: "Couldn't refresh token",
+            message: "To continue using this extension please re-authorize.",
+            primaryAction: {
+              title: "Authorize",
+              style: Alert.ActionStyle.Default,
+              onAction: async () => {
+                await client.removeTokens();
+                await authorizeClient();
+              },
+            },
+          });
+        }
         return response.text();
       })
       .then(async (result) => {
@@ -168,10 +187,10 @@ export const getTokens = async () => {
   if (!(await client.getTokens())) {
     console.log("Authorize Client");
     return await authorizeClient();
-  }
-  if ((await client.getTokens())?.isExpired()) {
+  } else if ((await client.getTokens())?.isExpired()) {
     console.log("Refresh token");
-    await refreshToken();
+    return await refreshToken();
+  } else {
+    return await client.getTokens();
   }
-  return await client.getTokens();
 };
