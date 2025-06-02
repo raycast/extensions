@@ -101,7 +101,7 @@ export default function Command() {
         }
       },
       slug: (value) => {
-        return value?.match(/^([a-zA-Z_][a-zA-Z_0-9]*)$/) || value === ""
+        return value?.match(/^([a-zA-Z_][a-zA-Z0-9_-]*)$/) || value === ""
           ? null
           : "Only a-z, 0-9, - and _ are allowed";
       },
