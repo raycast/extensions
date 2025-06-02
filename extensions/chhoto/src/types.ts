@@ -20,5 +20,5 @@ export interface UrlItem {
   shortlink: string;
   longlink: string;
   hits: number;
-  expiry_time?: number | null;
+  expiry_time?: number;
 }
