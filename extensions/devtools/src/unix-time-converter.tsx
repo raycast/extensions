@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ActionPanel, Action, Form } from "@raycast/api";
 
 const TIMEZONES = [
@@ -16,9 +16,16 @@ function getDateInfo(input: string, timeZone: string) {
   let error = "";
 
   if (/^\d+$/.test(input)) {
-    // Input is a Unix timestamp (seconds)
-    unix = parseInt(input, 10);
-    date = new Date(unix * 1000);
+    const num = parseInt(input, 10);
+    if (input.length > 10) {
+      // Assume milliseconds if more than 10 digits (typical for seconds)
+      date = new Date(num);
+      unix = Math.floor(num / 1000);
+    } else {
+      // Input is a Unix timestamp (seconds)
+      unix = num;
+      date = new Date(unix * 1000);
+    }
   } else {
     // Try to parse as date string
     const parsed = Date.parse(input);
@@ -35,8 +42,53 @@ function getDateInfo(input: string, timeZone: string) {
     return { error };
   }
 
-  const local = timeZone === "local" ? date.toLocaleString() : date.toLocaleString("en-US", { timeZone });
-  const utc = date.toISOString();
+  // Format for GMT
+  const gmtString = date.toLocaleString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    fractionalSecondDigits: 3,
+    hour12: true,
+    timeZone: "GMT",
+  });
+
+  // Format for Your time zone
+  const localTimeString = date.toLocaleString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    fractionalSecondDigits: 3,
+    hour12: true,
+    timeZone: timeZone === "local" ? undefined : timeZone,
+    timeZoneName: "shortOffset",
+  });
+
+  // Calculate relative time in days
+  const now = new Date();
+  const diffTime = date.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  let relativeTime = "";
+  if (diffDays === 0) {
+    relativeTime = "Today";
+  } else if (diffDays === 1) {
+    relativeTime = "Tomorrow";
+  } else if (diffDays === -1) {
+    relativeTime = "Yesterday";
+  } else if (diffDays > 1) {
+    relativeTime = `${diffDays} days from now`;
+  } else {
+    relativeTime = `${Math.abs(diffDays)} days ago`;
+  }
+
+  // Calculate Day of year, Week of year, and Is leap year?
   const start = new Date(date.getFullYear(), 0, 0);
   const diff = date.getTime() - start.getTime() + (start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000;
   const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -44,9 +96,10 @@ function getDateInfo(input: string, timeZone: string) {
   const isLeapYear = date.getFullYear() % 4 === 0 && (date.getFullYear() % 100 !== 0 || date.getFullYear() % 400 === 0);
 
   return {
-    local,
-    utc,
+    gmt: gmtString,
+    local: localTimeString,
     unix,
+    relative: relativeTime,
     dayOfYear,
     weekOfYear,
     isLeapYear,
@@ -56,9 +109,13 @@ function getDateInfo(input: string, timeZone: string) {
 
 export default function Command() {
   // Initialize input with current Unix timestamp
-  const [input, setInput] = useState(Math.floor(Date.now() / 1000).toString());
+  const [input, setInput] = useState(Date.now().toString()); // Use milliseconds for initial value
   const [timezone, setTimezone] = useState("local");
-  const info = getDateInfo(input, timezone);
+  const [info, setInfo] = useState(getDateInfo(input, timezone));
+
+  useEffect(() => {
+    setInfo(getDateInfo(input, timezone));
+  }, [input, timezone]);
 
   return (
     <Form
@@ -66,11 +123,23 @@ export default function Command() {
         info && !info.error ? (
           <ActionPanel>
             <Action.CopyToClipboard title="Copy Unix Time" content={info.unix?.toString() || ""} />
-            <Action.CopyToClipboard
-              title={`Copy Time (${TIMEZONES.find((z) => z.id === timezone)?.name})`}
-              content={info.local || ""}
-            />
-            <Action.CopyToClipboard title="Copy UTC Time" content={info.utc || ""} />
+            {info.gmt && <Action.CopyToClipboard title="Copy GMT Time" content={info.gmt} />}
+            {info.local && (
+              <Action.CopyToClipboard
+                title={`Copy Time (${TIMEZONES.find((z) => z.id === timezone)?.name})`}
+                content={info.local}
+              />
+            )}
+            {info.relative && <Action.CopyToClipboard title="Copy Relative Time" content={info.relative} />}
+            {info.dayOfYear && (
+              <Action.CopyToClipboard title="Copy Day of Year" content={info.dayOfYear?.toString() || ""} />
+            )}
+            {info.weekOfYear && (
+              <Action.CopyToClipboard title="Copy Week of Year" content={info.weekOfYear?.toString() || ""} />
+            )}
+            {info.isLeapYear !== undefined && (
+              <Action.CopyToClipboard title="Copy Is Leap Year" content={info.isLeapYear ? "Yes" : "No"} />
+            )}
           </ActionPanel>
         ) : null
       }
@@ -78,7 +147,7 @@ export default function Command() {
       <Form.TextField
         id="input"
         title="Input"
-        placeholder="Unix time (seconds) or date string"
+        placeholder="Unix time (seconds or milliseconds) or date string"
         value={input}
         onChange={setInput}
       />
@@ -89,11 +158,9 @@ export default function Command() {
       </Form.Dropdown>
       {info && !info.error && (
         <>
-          <Form.Description
-            title={`Time (${TIMEZONES.find((z) => z.id === timezone)?.name})`}
-            text={info.local || ""}
-          />
-          <Form.Description title="UTC (ISO 8601)" text={info.utc || ""} />
+          {info.gmt && <Form.Description title="GMT" text={info.gmt} />}
+          {info.local && <Form.Description title="Your time zone" text={info.local} />}
+          {info.relative && <Form.Description title="Relative" text={info.relative} />}
           <Form.Description title="Unix time" text={info.unix?.toString() || ""} />
           <Form.Description title="Day of year" text={info.dayOfYear?.toString() || ""} />
           <Form.Description title="Week of year" text={info.weekOfYear?.toString() || ""} />
