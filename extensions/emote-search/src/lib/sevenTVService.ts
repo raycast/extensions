@@ -83,7 +83,8 @@ export async function searchEmotes(searchText: string): Promise<Emote[]> {
         name: item.name,
       };
     });
-  } catch {
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to search emotes" });
     return [];
   }
 }
