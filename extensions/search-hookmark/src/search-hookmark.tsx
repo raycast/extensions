@@ -34,8 +34,9 @@ export default function Command(props: LaunchProps) {
     );
   });
 
-  const files = uniqueBookmarks?.filter((bookmark) => bookmark.path !== "missing value") ?? [];
-  const urls = uniqueBookmarks?.filter((bookmark) => bookmark.path.includes("missing value")) ?? [];
+  const missingPathValue = "missing value";
+  const files = uniqueBookmarks?.filter((bookmark) => bookmark.path !== missingPathValue) ?? [];
+  const urls = uniqueBookmarks?.filter((bookmark) => bookmark.path.includes(missingPathValue)) ?? [];
 
   return (
     <List
