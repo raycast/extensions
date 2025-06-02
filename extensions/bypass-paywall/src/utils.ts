@@ -1,5 +1,4 @@
-import { runAppleScript } from "@raycast/utils";
-import { showToast, Toast } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 interface BrowserInfo {
   engine: "webkit" | "chromium" | "gecko";
@@ -30,11 +29,8 @@ async function getActiveBrowserInfo(): Promise<{ name: string; engine: BrowserIn
 
   try {
     frontmostAppName = await runAppleScript(script);
-    console.log(`[getActiveBrowserInfo] Detected frontmost app name: '${frontmostAppName}'`);
   } catch (error) {
-    console.error("[getActiveBrowserInfo] AppleScript failed to get frontmost application name:", error);
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Error Getting Active App",
       message: "Could not determine the frontmost application.",
     });
@@ -45,10 +41,6 @@ async function getActiveBrowserInfo(): Promise<{ name: string; engine: BrowserIn
   if (browserInfo) {
     return { name: frontmostAppName, engine: browserInfo.engine };
   } else {
-    console.warn(
-      `[getActiveBrowserInfo] Frontmost app ('${frontmostAppName}') is not in SUPPORTED_BROWSERS. Assuming Chromium engine as a fallback.`,
-    );
-
     // If there's unknown browser – assume that's Chromium (works in most cases)
     return { name: frontmostAppName, engine: "chromium" };
   }
@@ -72,6 +64,7 @@ export async function getCurrentTabURL(): Promise<string> {
       tell application "System Events"
         keystroke "l" using command down
         keystroke "c" using command down
+        delay 0.1
       end tell
       return the clipboard
     `;
@@ -80,9 +73,7 @@ export async function getCurrentTabURL(): Promise<string> {
   try {
     return await runAppleScript(script);
   } catch (error) {
-    console.error(error);
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: `Failed to get URL from ${browserInfo.name}`,
       message: "Make sure the browser is running and a tab is active.",
     });
@@ -99,9 +90,7 @@ export async function openURL(url: string): Promise<void> {
     await runAppleScript(script);
     // await runAppleScript(`tell application "${browserInfo.name}" to activate`);
   } catch (error) {
-    console.error(error);
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: `Failed to open URL in ${browserInfo.name}`,
       message: "Make sure the browser is running.",
     });

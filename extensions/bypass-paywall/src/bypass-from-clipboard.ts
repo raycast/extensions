@@ -1,4 +1,5 @@
 import { Clipboard, closeMainWindow, showHUD, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getBypassURL } from "./utils";
 
 export default async function Command() {
@@ -30,11 +31,8 @@ export default async function Command() {
       });
     }
   } catch (error) {
-    console.error(error);
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Error Processing Clipboard",
-      message: error instanceof Error ? error.message : "An unknown error occurred",
     });
   }
 }
