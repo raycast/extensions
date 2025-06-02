@@ -126,7 +126,7 @@ export const refreshToken = async () => {
               },
             },
           });
-          return
+          return;
         }
         return response.text();
       })
