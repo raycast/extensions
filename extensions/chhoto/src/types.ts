@@ -1,6 +1,6 @@
 export interface ExtensionPreferences {
-  "chotto-host": string;
-  "chotto-password": string;
+  "chhoto-host": string;
+  "chhoto-password": string;
 }
 
 // API Request Types

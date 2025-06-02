@@ -96,7 +96,7 @@ export async function getCachedOrFreshAuthCookie(
       if (now - timestamp < COOKIE_CACHE_DURATION) {
         // Test if the cookie is still valid by making a simple request
         try {
-          const testUrl = new URL("/api/all", preferences["chotto-host"]);
+          const testUrl = new URL("/api/all", preferences["chhoto-host"]);
           await ofetch(testUrl.href, {
             method: "GET",
             headers: {
@@ -114,10 +114,10 @@ export async function getCachedOrFreshAuthCookie(
 
     // Get a fresh cookie
     const authCookie = await getAuthCookieValue(
-      new URL("/api/login", preferences["chotto-host"]).href,
+      new URL("/api/login", preferences["chhoto-host"]).href,
       {
         method: "POST",
-        body: preferences["chotto-password"],
+        body: preferences["chhoto-password"],
         headers: {
           "Content-Type": "text/plain",
         },

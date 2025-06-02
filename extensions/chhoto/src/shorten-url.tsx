@@ -49,7 +49,7 @@ export default function Command() {
         title: "Shortening URL...",
       });
       try {
-        const url = new URL("/api/new", preferences["chotto-host"]);
+        const url = new URL("/api/new", preferences["chhoto-host"]);
         const authCookie = await getCachedOrFreshAuthCookie(preferences);
         if (!authCookie) {
           showToast({
@@ -77,7 +77,7 @@ export default function Command() {
           },
         });
 
-        const shortened = new URL(result, preferences["chotto-host"]);
+        const shortened = new URL(result, preferences["chhoto-host"]);
         Clipboard.copy(shortened.href);
         showHUD("Copied to clipboard");
         popToRoot({ clearSearchBar: true });

@@ -37,7 +37,7 @@ export default function Command() {
         return;
       }
 
-      const url = new URL("/api/all", preferences["chotto-host"]);
+      const url = new URL("/api/all", preferences["chhoto-host"]);
       const result = await ofetch<UrlItem[]>(url.href, {
         method: "GET",
         headers: {
@@ -64,7 +64,7 @@ export default function Command() {
   }, []);
 
   const copyShortUrl = async (shortlink: string) => {
-    const fullUrl = new URL(shortlink, preferences["chotto-host"]);
+    const fullUrl = new URL(shortlink, preferences["chhoto-host"]);
     await Clipboard.copy(fullUrl.href);
     showHUD("Short URL copied to clipboard");
   };
@@ -75,7 +75,7 @@ export default function Command() {
   };
 
   const openUrl = async (shortlink: string) => {
-    const fullUrl = new URL(shortlink, preferences["chotto-host"]);
+    const fullUrl = new URL(shortlink, preferences["chhoto-host"]);
     await open(fullUrl.href);
   };
 
@@ -104,7 +104,7 @@ export default function Command() {
 
       const deleteUrl = new URL(
         `/api/del/${shortlink}`,
-        preferences["chotto-host"],
+        preferences["chhoto-host"],
       );
       await ofetch<DeleteUrlResponse>(deleteUrl.href, {
         method: "DELETE",
