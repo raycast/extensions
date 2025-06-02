@@ -46,7 +46,6 @@ export default function BookmarkListSection({
                   <List.Item.Detail.Metadata.Link title="Address" text={bookmark.address} target={bookmark.address} />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="Path" text={bookmark.path} />
-                  <List.Item.Detail.Metadata.Separator />
                 </List.Item.Detail.Metadata>
               }
             />
