@@ -65,12 +65,7 @@ async function getAuthCookieValue(
     return null;
   } catch (error) {
     console.error("Error fetching data for authentication:", error);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Authentication Failed",
-      message:
-        error instanceof Error ? error.message : "An unknown error occurred",
-    });
+    showFailureToast(error, { title: "Authentication Failed" });
     return null;
   }
 }
