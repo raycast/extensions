@@ -1,8 +1,7 @@
 import { ActionPanel, Action, Icon, List, Form, showToast, Toast, Grid, Alert, confirmAlert, popToRoot, Color } from "@raycast/api";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { ErrorResult, Project, Server, Service } from "./interfaces";
-import { useContext } from "react";
-import { TokenContext, useToken } from "./api-keys";
+import { useToken } from "./api-keys";
 
 function getProjectTotalServices(project: Project) {
   return project.applications.length +
@@ -15,6 +14,7 @@ function getProjectTotalServices(project: Project) {
 }
 export default function Projects() {
   const { url, headers } = useToken();
+
 const { isLoading, data: projects } = useFetch<Project[], Project[]>(url + "project.all", {
   headers,
   initialData: []
@@ -36,7 +36,7 @@ const { isLoading, data: projects } = useFetch<Project[], Project[]>(url + "proj
 
 
 function Services({project}: {project: Project;}) {
-  const { url, headers } = useToken();
+    const { url, headers } = useToken();
 
   interface GroupedService extends Service {
     type: string;
@@ -99,7 +99,8 @@ function Services({project}: {project: Project;}) {
 }
 
 function CreateApplication({ project }: {project: Project}) {
-  const { url, headers } = useContext(TokenContext)
+    const { url, headers } = useToken();
+
   interface FormValues {
     name: string;
     appName: string;
@@ -110,8 +111,7 @@ function CreateApplication({ project }: {project: Project}) {
   
   const { isLoading, data: servers } = useFetch<Server[], Server[]>(url + "server.all", {
   headers,
-  initialData: [],
-  execute: !!url
+  initialData: []
 })
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
@@ -158,7 +158,7 @@ function CreateApplication({ project }: {project: Project}) {
 }
 
 function CreateDatabase({ project }: {project: Project}) {
-  const { url, headers } = useToken();
+    const { url, headers } = useToken();
   interface FormValues {
     dbType: string;
 
@@ -176,8 +176,7 @@ function CreateDatabase({ project }: {project: Project}) {
   
   const { isLoading, data: servers } = useFetch<Server[], Server[]>(url + "server.all", {
   headers,
-  initialData: [],
-  execute: !!url
+  initialData: []
 })
 
   const { handleSubmit, itemProps, values } = useForm<FormValues>({

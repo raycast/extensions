@@ -1,35 +1,44 @@
 import { Action, ActionPanel, Form, Icon, List, popToRoot, showToast, Toast } from "@raycast/api";
-import { FormValidation, useForm, useLocalStorage } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm, useLocalStorage } from "@raycast/utils";
 import Projects from "./projects";
-import { createContext, JSX, useContext } from "react";
+
 
 interface Token {
     key: string;
     url: string;
     name: string;
 }
-
-export const TokenContext = createContext<{ url: string; headers: Record<string, string>}>({ url: "", headers: {} });
-function TokenProvider({token, children}: {token: Token; children: JSX.Element}) {
-    const url = new URL("api/", token.url).toString();
-    const headers = {
-                        "Content-Type": "application/json",
-                        "x-api-key": token.key
-                    }
-    return <TokenContext.Provider value={{ url, headers }}>
-        {children}
-    </TokenContext.Provider>
+interface CachedToken {
+    url: string;
+    headers: Record<string, string>
 }
-export const useToken = () => useContext(TokenContext);
-
+export function useToken() {
+    const [token] = useCachedState<CachedToken>("token", { url: "", headers: {} });
+    return token;
+  }
 export default function APIKeys() {
+    const [, setToken] = useCachedState<CachedToken>("token");
+    
     const { isLoading, value: tokens = [] } = useLocalStorage<Token[]>("tokens")
-    return <List>
+
+    function onSelectionChange(key: string | null) {
+        if (!key) return;
+        const token = tokens.find(t => t.key===key);
+        if (!token) return;
+        const url = new URL("api/", token.url).toString();
+        const headers = {
+            "Content-Type": "application/json",
+            "x-api-key": token.key
+        }
+        setToken({ url, headers });
+    }
+
+    return <List onSelectionChange={onSelectionChange}>
         {!isLoading && !tokens.length ? <List.EmptyView actions={<ActionPanel>
             <Action.Push icon={Icon.Plus} title="Add Token" target={<AddToken />} />
         </ActionPanel>} />
-        : tokens.map(token => <List.Item key={token.key} icon={Icon.Key} title={token.name} subtitle={token.url} actions={<ActionPanel>
-            <Action.Push icon={Icon.Folder} title="Projects" target={<TokenProvider token={token}><Projects /></TokenProvider>} />
+        : tokens.map(token => <List.Item key={token.key} id={token.key} icon={Icon.Key} title={token.name} subtitle={token.url} actions={<ActionPanel>
+            <Action.Push icon={Icon.Folder} title="Projects" target={<Projects />} />
         </ActionPanel>} />)}
     </List>
 }
