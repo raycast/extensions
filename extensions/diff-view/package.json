@@ -14,7 +14,7 @@
     {
       "name": "diff-view",
       "title": "Diff View",
-      "subtitle": "Compare the last two entries of your clipboard in VS Code or Cursor",
+      "subtitle": "Compare clipboard's last two entries in VS Code or Cursor",
       "description": "Compare the last two entries of your clipboard in VS Code or Cursor",
       "mode": "no-view"
     }
