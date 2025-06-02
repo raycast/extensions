@@ -8,6 +8,7 @@ import {
   getPreferenceValues,
   showHUD,
   popToRoot,
+  Icon,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useEffect } from "react";
@@ -151,7 +152,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Shorten URL" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Shorten URL"
+            onSubmit={handleSubmit}
+            icon={Icon.Link}
+          />
         </ActionPanel>
       }
     >

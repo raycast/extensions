@@ -237,20 +237,25 @@ export default function Command() {
                 <Action
                   title="Copy Short URL"
                   onAction={() => copyShortUrl(urlItem.shortlink)}
+                  icon={Icon.Clipboard}
                 />
                 <Action
                   title="Open URL"
                   onAction={() => openUrl(urlItem.shortlink)}
+                  icon={Icon.Globe}
                 />
                 <Action
                   title="Copy Long URL"
                   onAction={() => copyLongUrl(urlItem.longlink)}
+                  icon={Icon.CopyClipboard}
+                  shortcut={{ modifiers: ["cmd"], key: "l" }}
                 />
                 <Action
                   title="Delete URL"
                   onAction={() => deleteUrl(urlItem.shortlink)}
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
                 />
               </ActionPanel>
             }
