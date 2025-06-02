@@ -1,13 +1,14 @@
 import { showHUD, Clipboard, getPreferenceValues } from "@raycast/api";
 import { writeFile } from "fs/promises";
 import { exec } from "child_process";
+import { showFailureToast } from "@raycast/utils";
 
 interface Preferences {
   editor: "code" | "cursor"; // VS Code or Cursor
 }
 
 export default async function main() {
-  // GEt the user's preference for the editor
+  // Get the user's preference for the editor
   const { editor } = getPreferenceValues<Preferences>();
 
   // Grab the clipboard content at offset 0 and 1
@@ -32,12 +33,12 @@ export default async function main() {
   exec(command, (error: Error | null, stdout: string, stderr: string) => {
     if (error) {
       console.error(`Error executing command: ${error.message}`);
-      showHUD("Failed to open diff view in Editor.");
+      showFailureToast(error, { title: "Failed to open diff view in Editor" });
       return;
     }
     if (stderr) {
       console.error(`stderr: ${stderr}`);
-      showHUD("An error occurred while opening the diff view.");
+      showFailureToast({ title: "An error occurred while opening the diff view." });
       return;
     }
     console.log(`stdout: ${stdout}`);

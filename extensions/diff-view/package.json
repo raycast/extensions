@@ -7,7 +7,7 @@
   "license": "MIT",
   "icon": "extension-icon.png",
   "categories": [
-    "Design Tools",
+    "Developer Tools",
     "Productivity"
   ],
   "commands": [
@@ -24,7 +24,7 @@
       "required": true,
       "name": "editor",
       "title": "Editor",
-      "description": "Select your preferred Editor",
+      "description": "Select Your Preferred Editor",
       "type": "dropdown",
       "default": "code",
       "data": [
