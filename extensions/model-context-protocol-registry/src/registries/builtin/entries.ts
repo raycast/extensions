@@ -187,7 +187,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         KAGI_API_KEY: "YOUR_API_KEY_HERE",
         KAGI_SUMMARIZER_ENGINE: "YOUR_ENGINE_CHOICE_HERE" // Defaults to "cecil" engine if env var not present
-      }
+      },
     },
   },
   {
