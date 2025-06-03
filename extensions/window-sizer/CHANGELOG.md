@@ -2,6 +2,10 @@
 
 ## [Chore] - 2025-06-03
 
+- Fixed store page styling
+
+## [Chore] - 2025-06-03
+
 - Fixed navigation title for the resize window command
 
 ## [Refactor Favorite Size Feature] - 2025-05-30
