@@ -1,5 +1,5 @@
 # Search Rubygems Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-06-03
 
 - Updated extension
