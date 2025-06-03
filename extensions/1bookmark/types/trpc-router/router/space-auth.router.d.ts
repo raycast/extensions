@@ -53,12 +53,6 @@ export declare const spaceAuthRouter: import("@trpc/server/unstable-core-do-not-
         };
         output: void;
     }>;
-    lastVerifiedEmail: import("@trpc/server").TRPCQueryProcedure<{
-        input: {
-            spaceId: string;
-        };
-        output: any;
-    }>;
     listMemberAuthPolicies: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             spaceId: string;
@@ -87,5 +81,18 @@ export declare const spaceAuthRouter: import("@trpc/server/unstable-core-do-not-
             authCheckInterval: string;
         };
         output: void;
+    }>;
+    checkMySessionToPassAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+            policyToAdd?: {
+                emailPattern: string;
+                authCheckInterval: string;
+            } | undefined;
+            policyToRemove?: {
+                emailPattern: string;
+            } | undefined;
+        };
+        output: boolean;
     }>;
 }>;

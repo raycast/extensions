@@ -2,6 +2,13 @@ import { ActionPanel, Action, List, Toast, showToast, Icon, open, Color } from "
 import { useState, useEffect } from "react";
 import { Delivery, STATUS_DESCRIPTIONS, FilterMode } from "./api";
 import { useDeliveries } from "./hooks/useDeliveries";
+import { parse, isValid } from "date-fns";
+
+/**
+ * Placeholder value returned by some carriers when the date is unknown.
+ * This is based on observed API responses and may not be exhaustive.
+ */
+const UNKNOWN_DATE_PLACEHOLDER = "--//--";
 
 // Map status codes to icons that represent state
 const STATUS_ICONS_UI: Record<number, Icon> = {
@@ -19,6 +26,13 @@ const STATUS_ICONS_UI: Record<number, Icon> = {
 export default function Command() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.ACTIVE);
   const { deliveries, isLoading, error } = useDeliveries(filterMode);
+
+  const DATE_FORMATS = [
+    "dd.MM.yyyy HH:mm:ss", // European with seconds
+    "dd.MM.yyyy HH:mm", // European without seconds
+    "MMMM dd, yyyy HH:mm", // American
+    "yyyy-MM-dd HH:mm:ss", // ISO 8601
+  ];
 
   // Calculate days until delivery
   const getDaysUntilDelivery = (delivery: Delivery): number | null => {
@@ -46,57 +60,55 @@ export default function Command() {
     return `(in ${daysUntil} day${daysUntil !== 1 ? "s" : ""})`;
   };
 
-  // Format date in a more readable way: "Feb 26, 2025"
-  const formatFriendlyDate = (dateString: string): string => {
-    if (!dateString) return "Unknown date";
-
-    try {
-      const date = new Date(dateString);
-
-      // Check if date is valid
-      if (isNaN(date.getTime())) {
-        return "Unknown date";
-      }
-
-      return date.toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    } catch (e) {
-      return "Unknown date";
+  const parseDate = (dateString: string): Date | null => {
+    for (const fmt of DATE_FORMATS) {
+      const date = parse(dateString, fmt, new Date());
+      if (isValid(date)) return date;
     }
+    return null;
+  };
+
+  // Format date in a more readable way: "Feb 26, 2025"
+  const formatFriendlyDate = (dateString: string | undefined | null): string => {
+    if (!dateString || dateString === UNKNOWN_DATE_PLACEHOLDER || !/\d/.test(dateString)) return "Not available";
+
+    const date = parseDate(dateString);
+    if (!date) {
+      console.error(`All supported date formats failed for: ${dateString}`);
+      return dateString;
+    }
+
+    return date.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   // Format tracking history dates in a compact format: "Feb 26, 14:30"
-  const formatCompactDate = (dateString: string): string => {
-    if (!dateString) return "Unknown date";
+  const formatCompactDate = (dateString: string | undefined | null): string => {
+    if (!dateString || dateString === UNKNOWN_DATE_PLACEHOLDER || !/\d/.test(dateString)) return "Not available";
 
-    try {
-      const date = new Date(dateString);
-
-      // Check if date is valid
-      if (isNaN(date.getTime())) {
-        return "Unknown date";
-      }
-
-      // Create compact date portion: "Feb 26"
-      const dateFormatted = date.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-      });
-
-      // Create 24-hour time format: "14:30"
-      const timeFormatted = date.toLocaleTimeString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-
-      return `${dateFormatted}, ${timeFormatted}`;
-    } catch (e) {
-      return "Unknown date";
+    const date = parseDate(dateString);
+    if (!date) {
+      console.error(`All supported date formats failed for: ${dateString}`);
+      return dateString;
     }
+
+    // Create compact date portion: "Feb 26"
+    const dateFormatted = date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+
+    // Create 24-hour time format: "14:30"
+    const timeFormatted = date.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    return `${dateFormatted}, ${timeFormatted}`;
   };
 
   // Generate full detail markdown including tracking history

@@ -5,11 +5,9 @@
 
 # Window Sizer
 
-Resize application windows to pixel-perfect presets.
+Resize the focused window to pixel-perfect presets.
 
 ## Features
-
-This extension uses Swift to interact with windows, providing the following features:
 
 - Quickly resize windows to predefined sizes
 - Create and save custom window sizes
@@ -17,12 +15,15 @@ This extension uses Swift to interact with windows, providing the following feat
 - Maximize window
 - Restore previous window size
 - Get current window size
+- An extra way to save and apply a favorite window size
 
 ## Usage
 
 Search for the following command in Raycast:
 
-- `Window Sizer` or `Resize Window` - Open the window size selector
+- `Window Sizer` - Find all commands
+- `Resize Window` - Open the window size selector
+- `Apply Favorite Size` - Apply a favorite window size directly (Configure in command settings first)
 
 ## Shortcuts
 

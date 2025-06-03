@@ -77,7 +77,7 @@ export function usePinManagement({
     (result: SpotlightSearchResult) => {
       return pinnedResults.some((pin) => pin.path === result.path);
     },
-    [pinnedResults]
+    [pinnedResults],
   );
 
   /**
@@ -95,7 +95,7 @@ export function usePinManagement({
       log(
         "debug",
         "usePinManagement",
-        `${resultIsPinned(result) ? "Unpinning" : "Pinning"} folder: ${result.path.split("/").pop()}`
+        `${resultIsPinned(result) ? "Unpinning" : "Pinning"} folder: ${result.path.split("/").pop()}`,
       );
 
       // Mark that we have a pin update in progress
@@ -133,7 +133,7 @@ export function usePinManagement({
           setTimeout(() => {
             pendingPinUpdateRef.current = false;
           }, 50);
-        } catch (error) {
+        } catch {
           log("error", "usePinManagement", "Error saving pins");
           pendingPinUpdateRef.current = false;
         }
@@ -141,7 +141,7 @@ export function usePinManagement({
 
       setSelectedItemId(`result-${resultIndex.toString()}`);
     },
-    [resultIsPinned, pinnedResults, searchScope, isShowingDetail, showNonCloudLibraryPaths]
+    [resultIsPinned, pinnedResults, searchScope, isShowingDetail, showNonCloudLibraryPaths],
   );
 
   /**
@@ -186,7 +186,7 @@ export function usePinManagement({
         showFailureToast(error, { title: "Error moving item up" });
       }
     },
-    [pinnedResults]
+    [pinnedResults],
   );
 
   /**
@@ -231,7 +231,7 @@ export function usePinManagement({
         showFailureToast(error, { title: "Error moving item down" });
       }
     },
-    [pinnedResults]
+    [pinnedResults],
   );
 
   // Counter for tracking function calls
@@ -254,7 +254,7 @@ export function usePinManagement({
     log(
       "debug",
       "usePinManagement",
-      `[refresh #${callId}] Explicitly refreshing pins from storage (current pin count: ${pinnedResults.length})`
+      `[refresh #${callId}] Explicitly refreshing pins from storage (current pin count: ${pinnedResults.length})`,
     );
 
     // Mark that a refresh is in progress
@@ -267,7 +267,7 @@ export function usePinManagement({
           log(
             "debug",
             "usePinManagement",
-            `[refresh #${callId}] Pending pin update detected, reading directly from storage`
+            `[refresh #${callId}] Pending pin update detected, reading directly from storage`,
           );
 
           try {
@@ -278,7 +278,7 @@ export function usePinManagement({
             log(
               "debug",
               "usePinManagement",
-              `[refresh #${callId}] Loaded ${storedPins.length} pins directly from storage`
+              `[refresh #${callId}] Loaded ${storedPins.length} pins directly from storage`,
             );
             setPinnedResults(storedPins);
 
@@ -310,7 +310,7 @@ export function usePinManagement({
           log(
             "debug",
             "usePinManagement",
-            `[refresh #${callId}] Pin count changed: ${currentPaths.size} → ${storedPaths.size}`
+            `[refresh #${callId}] Pin count changed: ${currentPaths.size} → ${storedPaths.size}`,
           );
           pathsChanged = true;
         } else {

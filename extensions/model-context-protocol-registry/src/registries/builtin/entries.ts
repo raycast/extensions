@@ -316,6 +316,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "thena",
+    title: "Thena",
+    description:
+      "A Model Context Protocol server that enables AI assistants to interact with Thena's services, providing seamless integration and enhanced capabilities for AI-powered applications.",
+    icon: "thena.svg",
+    homepage: "https://thena.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.thena.ai/sse"],
+    },
+  },
+  {
     name: "xero",
     title: "Xero",
     description:
@@ -472,6 +484,37 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["zeabur-mcp@latest"],
       env: {
         ZEABUR_TOKEN: "YOUR_ZEABUR_TOKEN_HERE",
+      },
+    },
+  },
+  {
+    name: "grafana",
+    title: "Grafana",
+    description:
+      "Official Grafana MCP server that provides seamless integration with Grafana APIs, enabling monitoring, visualization, and observability capabilities for developers and tools.",
+    icon: "https://svgl.app/library/grafana.svg",
+    homepage: "https://github.com/grafana/mcp-grafana",
+    configuration: {
+      command: "docker",
+      args: ["run", "--rm", "-p", "8000:8000", "-e", "GRAFANA_URL", "-e", "GRAFANA_API_KEY", "mcp/grafana"],
+      env: {
+        GRAFANA_URL: "YOUR_GRAFANA_URL_HERE",
+        GRAFANA_API_KEY: "YOUR_SERVICE_ACCOUNT_TOKEN_HERE",
+      },
+    },
+  },
+  {
+    name: "anytype",
+    title: "Anytype",
+    description:
+      "A Model Context Protocol (MCP) server for Anytype that enables AI assistants to seamlessly interact with Anytype's API through natural language. Manage spaces, objects, properties, types and more in your knowledge base.",
+    icon: "anytype.png",
+    homepage: "https://github.com/anyproto/anytype-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@anyproto/anytype-mcp"],
+      env: {
+        OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-05-20"}',
       },
     },
   },
