@@ -5,9 +5,7 @@
 <h1 align="center">Window Sizer</h1>
 <p align="center">Resize the focused window to pixel-perfect presets</p>
 
-<div align="center">
-  <img src="metadata/window-sizer-1.png" alt="window sizer commands">
-</div>
+![window sizer commands](metadata/window-sizer-1.png)
 
 <br>
 
@@ -15,55 +13,36 @@
 
 ### Resize Window
 
-#### Quickly resize a window to predefined sizes
-
-<div align="center">
-  <img src="metadata/window-sizer-2.png" alt="resize window">
-</div>
-
-#### Add and save custom window sizes
-
-<div align="center">
-  <img src="metadata/window-sizer-3.png" alt="add custom sizes">
-</div>
-
-#### Star your frequently used window sizes
-
-<div align="center">
-  <img src="metadata/window-sizer-4.png" alt="list actions">
-</div>
-
-#### Other options
-
+- Quickly resize a window to predefined sizes
+- Add and save custom window sizes
+- Star your frequently used window sizes
 - Maximize window
 - Restore previous window size
 - Get current window size
 
-<div align="center">
-  <img src="metadata/window-sizer-5.png" alt="other options">
-</div>
+![resize window](metadata/window-sizer-2.png)
+![add custom sizes](metadata/window-sizer-3.png)
+![list actions](metadata/window-sizer-4.png)
+![other options](metadata/window-sizer-5.png)
 
----
+<p align="center">-</p>
 
 ### Apply favorite size
 
-#### Applying when size is not set
+To use this feature, set your favorite size in the command settings.
 
-<div align="center">
-  <img src="assets/screenshots/apply-fav-size-1.png" alt="apply favorite size">
-</div>
+![apply favorite size](assets/screenshots/apply-fav-size-1.png)
+![favorite size settings](assets/screenshots/apply-fav-size-2.png)
 
-#### Set favorite size in the command settings
-
-<div align="center">
-  <img src="assets/screenshots/apply-fav-size-2.png" alt="favorite size settings">
-</div>
+<br>
 
 ## Shortcuts
 
 - `⌘ S` - Star window size
 - `⇧ ⌘ S` - Unstar window size
 - `⌘ D` - Delete custom window size
+
+<br>
 
 ## Notes
 

@@ -1,5 +1,9 @@
 # Window Sizer Changelog
 
+## [Chore] - {PR_MERGE_DATE}
+
+- Fixed store page styling
+
 ## [Chore] - 2025-06-03
 
 - Fixed navigation title for the resize window command
