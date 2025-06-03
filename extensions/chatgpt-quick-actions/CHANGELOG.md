@@ -1,5 +1,15 @@
 # ChatGPT Quick Actions Changelog
 
+## [Models Update and Consolidation] - {PR_MERGE_DATE}
+
+- Added latest OpenAI models: GPT-4.1, GPT-4.1 mini, GPT-4.1 nano, o1, o1-mini, o1-pro, o3, o3-mini, o4-mini
+- Removed obsolete models: GPT-3.5 Turbo, GPT-4, GPT-4 Turbo
+- Added consolidation system for model maintenance
+- Models now defined in single location instead of 9 places
+- Added npm run build-package script
+- Updated pricing structure to per 1M tokens
+- Updated parameter naming to input_token/output_token
+
 ## [Add Transform and Transform Preview commands] - 2024-09-18
 
 - Add a Transform command which replaces the selected text with transformed text based on a prompt that is entered when the command is run.
