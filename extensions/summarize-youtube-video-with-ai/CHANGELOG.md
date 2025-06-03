@@ -1,6 +1,6 @@
 # Summarize YouTube Video Changelog
 
-## [New Features] - 2025-06-03
+## [New Features] - {PR_MERGE_DATE}
 
 - 📜 Added support for a summary history.
 - ⬆️ Upgraded dependencies
