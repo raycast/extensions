@@ -40,7 +40,7 @@ export function searchEnglish(db: Database, query: string) {
       GROUP BY e.entry_id -- Get one result per dictionary entry
       ORDER BY rank ASC LIMIT 20
     `,
-    { ":query": query },
+    { ":query": `"${query}"` },
   );
 }
 
