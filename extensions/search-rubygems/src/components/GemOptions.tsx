@@ -1,4 +1,4 @@
-import { Icon, PushAction, List, ActionPanel, OpenInBrowserAction, CopyToClipboardAction } from "@raycast/api";
+import { Icon, List, ActionPanel, Action } from "@raycast/api";
 import type { GemSearchResult } from "../rubygems/types";
 import { GemInfo } from "./GemInfo";
 import { mapGemLinks } from "../utils";
@@ -7,7 +7,7 @@ interface Props {
   gem: GemSearchResult;
 }
 
-export const GemOptions = ({ gem }: Props): JSX.Element => {
+export const GemOptions = ({ gem }: Props) => {
   return (
     <List navigationTitle={`Search RubyGems > ${gem.name}`}>
       <List.Section title="Actions">
@@ -15,23 +15,35 @@ export const GemOptions = ({ gem }: Props): JSX.Element => {
           key="gem-name"
           icon={Icon.ArrowRight}
           title="Show details"
-          accessoryTitle="Dependencies and more"
           actions={
             <ActionPanel>
-              <PushAction title="Show Details" icon={Icon.TextDocument} target={<GemInfo key={gem.sha} gem={gem} />} />
+              <Action.Push
+                title="Show Details"
+                icon={Icon.BlankDocument}
+                target={<GemInfo key={gem.sha} gem={gem} />}
+              />
             </ActionPanel>
           }
+          accessories={[
+            {
+              text: "Dependencies and more",
+            },
+          ]}
         />
         <List.Item
           key="copy-bundler-string"
           icon={Icon.Clipboard}
           title="Copy Gem String"
-          accessoryTitle={`gem '${gem.name}', '${gem.version}'`}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction content={`gem '${gem.name}', '${gem.version}'`} />
+              <Action.CopyToClipboard content={`gem '${gem.name}', '~> ${gem.version}'`} />
             </ActionPanel>
           }
+          accessories={[
+            {
+              text: `gem '${gem.name}', '~> ${gem.version}'`,
+            },
+          ]}
         />
       </List.Section>
       <List.Section title="Links">
@@ -39,14 +51,18 @@ export const GemOptions = ({ gem }: Props): JSX.Element => {
           return (
             <List.Item
               title={`Open ${link["title"]}`}
-              accessoryTitle={link["link"]}
               key={link["title"]}
               icon={Icon.Globe}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction title="Open" url={link["link"]} />
+                  <Action.OpenInBrowser title="Open" url={link["link"]} />
                 </ActionPanel>
               }
+              accessories={[
+                {
+                  text: link["link"],
+                },
+              ]}
             />
           );
         })}
