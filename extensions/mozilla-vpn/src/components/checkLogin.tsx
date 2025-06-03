@@ -65,11 +65,7 @@ interface CheckLoginProps {
   onBack?: () => void; // Add optional onBack prop
 }
 
-<<<<<<< HEAD
-const openMozillaVpnApp = () => {
-=======
 const openMozillaVPNApp = () => {
->>>>>>> f5fa9dac5 (Change vpn text case)
   exec('open -a "Mozilla VPN"', (error) => {
     if (error) {
       console.error('Error opening Mozilla VPN:', error);
@@ -84,11 +80,7 @@ const CheckLogin: React.FC<CheckLoginProps> = ({ onBack }) => {
   return (
     <List.EmptyView
       title="Mozilla VPN Login Required"
-<<<<<<< HEAD
-      description="Please log in using the Mozilla Vpn application. Press Enter to open the app."
-=======
       description="Please log in using the Mozilla VPN application. Press Enter to open the app."
->>>>>>> f5fa9dac5 (Change vpn text case)
       icon="Icon.ExclamationMark"
       actions={
         <ActionPanel>
