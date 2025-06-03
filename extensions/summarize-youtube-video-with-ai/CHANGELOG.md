@@ -1,5 +1,10 @@
 # Summarize YouTube Video Changelog
 
+## [New Features] - 2025-06-03
+
+- 📜 Added support for a summary history.
+- ⬆️ Upgraded dependencies
+
 ## [New Features] - 2025-03-05
 
 - 🤖 created separate command for Ollama
