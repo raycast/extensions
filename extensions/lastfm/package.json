@@ -16,13 +16,6 @@
   ],
   "commands": [
     {
-      "name": "combined",
-      "title": "Top & Recent Songs",
-      "subtitle": "Last.fm",
-      "description": "Display your top and recent songs!",
-      "mode": "view"
-    },
-    {
       "name": "songs",
       "title": "Top Songs",
       "subtitle": "Last.fm",
@@ -106,15 +99,31 @@
           "value": "12month"
         }
       ]
+    },
+    {
+      "type": "dropdown",
+      "title": "Listing View",
+      "name": "view",
+      "required": true,
+      "default": "7day",
+      "description": "Select the period of songs that you want to display.",
+      "data": [
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
-    "node-fetch": "^3.1.0",
-    "swr": "^1.1.2"
+    "@raycast/api": "^1.99.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
+    "@types/node": "~16.10.9",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
@@ -127,5 +136,6 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint"
-  }
+  },
+  "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
 }

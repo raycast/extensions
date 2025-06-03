@@ -1,62 +1,86 @@
-import React from "react";
-import {
-  ActionPanel,
-  showToast,
-  ToastStyle,
-  getPreferenceValues,
-  List,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-  Icon,
-} from "@raycast/api";
+import React, { useState } from "react";
+import { ActionPanel, showToast, getPreferenceValues, List, Toast, Action, Icon, Grid } from "@raycast/api";
+import { Album, ItemProps, periodTypes } from "./types";
+import { useTopAlbums } from "./lib/use-lastfm";
+import { PeriodDropdown } from "./components/period";
+import { ListResults } from "./components/list";
+import { generateMusicServiceAction, getCoverUrlsBySize } from "./lib/utils";
+import { GridResults } from "./components/grid";
 
-// Hooks
-import useTopAlbums from "./hooks/useTopAlbums";
+export const procesAlbumItem = (album: Album, idx: number): ItemProps => {
+  const { view } = getPreferenceValues();
+  const covers = getCoverUrlsBySize(album.image);
 
-// Types
-import type { Album } from "@/types/AlbumResponse";
+  return {
+    key: `${album.name}-${idx}`, // not quite uniq
+    title: album.name,
+    subtitle: album.artist ? `by ${album.artist.name}` : undefined,
+    cover: view == "grid" ? covers.large : covers.small,
+    accessories: [{ text: album.playcount ? `${album.playcount} plays` : undefined }],
+    accessory: album.playcount ? { tooltip: album.playcount } : undefined,
+    actions: (
+      <ActionPanel>
+        <ActionPanel.Section title="Open And Search">
+          <Action.OpenInBrowser url={album.url} title="Open on Last.fm" />
+          {album.artist.url && <Action.OpenInBrowser url={album.artist.url} title="Open Artist Page on Last.fm" />}
+          {generateMusicServiceAction({ term: `${album.artist.name} - ${album.name}`, type: "album" }).map(
+            (service: { url: string; label: string }) => {
+              return <Action.OpenInBrowser url={service.url} title={service.label} />;
+            }
+          )}
+        </ActionPanel.Section>
+        <ActionPanel.Section title="Copy">
+          <Action.CopyToClipboard title="Copy URL to Clipboard" content={album.url} />
+          <Action.CopyToClipboard title="Copy Album Name to Clipboard" content={album.name} />
+          {album.artist.name && (
+            <Action.CopyToClipboard title="Copy Artist Name to Clipboard" content={album.artist.name} />
+          )}
+        </ActionPanel.Section>
+      </ActionPanel>
+    ),
+  };
+};
 
-const LastFm: React.FC = () => {
-  const { username, apikey, period, limit } = getPreferenceValues();
-  const { loading, error, albums } = useTopAlbums({ username, apikey, period, limit });
+const TopAlbums: React.FC = () => {
+  const { period: defaultPeriod, view } = getPreferenceValues();
+  const [period, setPeriod] = useState<periodTypes>(defaultPeriod);
+  const { loading, error, albums, revalidate } = useTopAlbums({ period });
 
   if (error !== null) {
-    showToast(ToastStyle.Failure, "Something went wrong.", String(error));
+    showToast(Toast.Style.Failure, "Something went wrong.", String(error));
+  }
+
+  function onPeriodChange(value: string) {
+    setPeriod(value as periodTypes);
+    revalidate();
+  }
+
+  const data = albums.map(procesAlbumItem);
+
+  if (view == "grid") {
+    return (
+      <Grid
+        isLoading={loading}
+        searchBarPlaceholder="Search album..."
+        searchBarAccessory={<PeriodDropdown selectedPeriod={period} onPeriodChange={onPeriodChange} />}
+        aspectRatio="3/4"
+        columns={4}
+        fit={Grid.Fit.Contain}
+      >
+        <GridResults items={data} />;
+      </Grid>
+    );
   }
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search songs...">
-      <List.Section title="Results">
-        {albums.map((a, idx) => {
-          const album = a as Album;
-          const image =
-            album.image?.find((image) => image.size === "large")?.["#text"] || "../assets/default-album.jpeg";
-          const { url, name } = album.artist;
-
-          return (
-            <List.Item
-              key={`${album.name}-${idx}`}
-              icon={image}
-              title={album.name}
-              subtitle={name ? `by ${name}` : undefined}
-              accessoryTitle={album.playcount ? `${album.playcount} plays` : undefined}
-              accessoryIcon={album.playcount ? Icon.Star : undefined}
-              actions={
-                <ActionPanel>
-                  <OpenInBrowserAction url={album.url} title="Open on Last.fm" />
-                  {url && <OpenInBrowserAction url={url} title="Open Artist Page on Last.fm" />}
-
-                  <CopyToClipboardAction title="Copy URL to Clipboard" content={album.url} />
-                  <CopyToClipboardAction title="Copy Album Name to Clipboard" content={album.name} />
-                  {name && <CopyToClipboardAction title="Copy Artist Name to Clipboard" content={name} />}
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+    <List
+      isLoading={loading}
+      searchBarPlaceholder="Search album..."
+      searchBarAccessory={<PeriodDropdown selectedPeriod={period} onPeriodChange={onPeriodChange} />}
+    >
+      <ListResults items={data} />;
     </List>
   );
 };
 
-export default LastFm;
+export default TopAlbums;
