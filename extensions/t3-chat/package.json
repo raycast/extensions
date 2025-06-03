@@ -5,7 +5,11 @@
   "description": "Query T3 Chat directly from Raycast",
   "icon": "raycast-t3-chat.png",
   "author": "Lermatroid",
-  "contributors": ["Sclafus"],
+  "contributors": [
+    "Sclafus",
+    "effektsvk",
+    "wxiaoyun"
+  ],
   "categories": [
     "Productivity",
     "Applications",
@@ -24,6 +28,23 @@
           "type": "text",
           "required": true,
           "placeholder": "Query"
+        },
+        {
+          "name": "search",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Search Grounding",
+          "description": "Enable search grounding for models that support it",
+          "data": [
+            {
+              "title": "Enabled",
+              "value": "true"
+            },
+            {
+              "title": "Disabled",
+              "value": "false"
+            }
+          ]
         }
       ],
       "preferences": [
@@ -151,6 +172,15 @@
               "value": "qwq-32b"
             }
           ]
+        },
+        {
+          "name": "useBeta",
+          "title": "Beta Features",
+          "label": "Use Beta",
+          "description": "Use the beta version of t3.chat (beta.t3.chat)",
+          "type": "checkbox",
+          "required": false,
+          "default": false
         }
       ]
     }

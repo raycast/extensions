@@ -1,4 +1,4 @@
-import { showFailureToast } from "@raycast/utils";
+import { showToast, Toast } from "@raycast/api";
 import { PaginatedResponse, RawSpace } from "../../models";
 import { apiEndpoints, apiFetch, currentApiVersion, errorConnectionMessage } from "../../utils";
 
@@ -10,15 +10,17 @@ export async function checkApiTokenValidity(): Promise<boolean> {
 
     const apiVersion = response.headers.get("Anytype-Version");
     if (!apiVersion || apiVersion < currentApiVersion) {
-      await showFailureToast({
-        title: "App Update Required",
-        message: `Please update the Anytype app to match the extension's API version ${currentApiVersion}.`,
-      });
+      await showToast(
+        Toast.Style.Failure,
+        "App Update Required",
+        `Please update the Anytype app to match the extension's API version ${currentApiVersion}.`,
+      );
     } else if (apiVersion > currentApiVersion) {
-      await showFailureToast({
-        title: "Extension Update Required",
-        message: `Please update the extension to match the Anytype app's API version ${apiVersion}.`,
-      });
+      await showToast(
+        Toast.Style.Failure,
+        "Extension Update Required",
+        `Please update the extension to match the Anytype app's API version ${apiVersion}.`,
+      );
     }
     return true;
   } catch (error) {

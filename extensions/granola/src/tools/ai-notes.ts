@@ -2,7 +2,7 @@ import getCache from "../utils/getCache";
 import { convertDocumentToMarkdown } from "../utils/convertJsonNodes";
 import { showFailureToast } from "@raycast/utils";
 import { Document, DocumentStructure } from "../utils/types";
-import { getTranscript } from "../utils/fetchData";
+import { getTranscript, getFolders } from "../utils/fetchData";
 
 type Input = {
   /**
@@ -32,6 +32,16 @@ type Input = {
    * Use when a user refers to a specific note they want to examine in detail
    */
   noteId?: string;
+  /**
+   * Whether to list folders instead of notes
+   * Set to true when user asks about folders or wants to see folder organization
+   */
+  listFolders?: boolean;
+  /**
+   * Optional folder ID to fetch notes from a specific folder
+   * Use when a user asks about notes in a specific folder
+   */
+  folderId?: string;
 };
 
 type Note = {
@@ -57,12 +67,72 @@ type Note = {
    * The ID of the note, useful for follow-up queries
    */
   id: string;
+  /**
+   * Optional folder IDs that this note belongs to
+   */
+  folderIds?: string[];
+};
+
+type FolderInfo = {
+  /**
+   * The ID of the folder
+   */
+  id: string;
+  /**
+   * The title/name of the folder
+   */
+  name: string;
+  /**
+   * Optional description of the folder
+   */
+  description?: string;
+  /**
+   * The number of notes in the folder
+   */
+  noteCount: number;
+  /**
+   * The date when the folder was created
+   */
+  createdAt: string;
+  /**
+   * List of note IDs in this folder
+   */
+  noteIds: string[];
 };
 
 /**
- * Returns a list of notes from Granola that match the provided filters
+ * Returns a list of notes from Granola that match the provided filters,
+ * or folder information when listFolders is true.
+ *
+ * This tool supports two primary functions:
+ * 1. Note retrieval and filtering with optional transcript inclusion
+ * 2. Folder listing and organization features
+ *
+ * For note queries, it can filter by title, content, date, or folder.
+ * For folder queries, it returns folder metadata including note counts.
  */
-export default async function tool(input: Input): Promise<Note[]> {
+export default async function tool(input: Input): Promise<Note[] | FolderInfo[]> {
+  // Handle folder listing request
+  if (input.listFolders) {
+    try {
+      const response = await getFolders();
+      const folders = Object.values(response.lists);
+
+      return folders.map((folder) => ({
+        id: folder.id,
+        name: folder.title,
+        description: folder.description || undefined,
+        noteCount: folder.document_ids.length,
+        createdAt: folder.created_at,
+        noteIds: folder.document_ids,
+      }));
+    } catch (error) {
+      console.error("Error fetching folders:", error);
+      showFailureToast({ title: "Failed to fetch folders", message: String(error) });
+      return [];
+    }
+  }
+
   const cache = getCache();
   const documents = Object.values(cache?.state?.documents) as Document[];
   const notes: Note[] = [];
@@ -71,15 +141,52 @@ export default async function tool(input: Input): Promise<Note[]> {
     return [];
   }
 
+  // If folderId is provided, get the folder's document IDs
+  let folderDocumentIds: string[] = [];
+  if (input.folderId) {
+    try {
+      const response = await getFolders();
+      const folder = Object.values(response.lists).find((f) => f.id === input.folderId);
+      if (folder) {
+        folderDocumentIds = folder.document_ids;
+      }
+    } catch (error) {
+      console.error("Error fetching folder:", error);
+      showFailureToast({ title: "Failed to fetch folder", message: String(error) });
+    }
+  }
+
+  // Get folder information for each document
+  const documentToFolders: Record<string, string[]> = {};
+  try {
+    const response = await getFolders();
+    Object.values(response.lists).forEach((folder) => {
+      folder.document_ids.forEach((docId) => {
+        if (!documentToFolders[docId]) {
+          documentToFolders[docId] = [];
+        }
+        documentToFolders[docId].push(folder.id);
+      });
+    });
+  } catch (error) {
+    console.error("Error mapping documents to folders:", error);
+  }
+
   // Collect all notes first
   for (const document of documents) {
     if (!document?.title || !document?.created_at || !document?.notes?.content || !document?.id) continue;
+
+    // Skip if we're filtering by folder and this document isn't in the folder
+    if (input.folderId && folderDocumentIds.length > 0 && !folderDocumentIds.includes(document.id)) {
+      continue;
+    }
 
     const note: Note = {
       title: document.title,
       date: new Date(document.created_at).toISOString(),
       content: convertDocumentToMarkdown(document.notes as unknown as DocumentStructure),
       id: document.id,
+      folderIds: documentToFolders[document.id] || [],
     };
     notes.push(note);
   }

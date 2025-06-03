@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { showFailureToast } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 import { SpotlightSearchResult, SpotlightSearchPreferences } from "../types";
-import { log, shouldShowPath, lastUsedSort } from "../utils";
+import { log, shouldShowPath, lastUsedSort, matchesSearchQuery } from "../utils";
 import { searchSpotlight } from "../search-spotlight";
 import { useSearchDebounce } from "./useSearchDebounce";
 
@@ -41,11 +41,7 @@ export function useSearchResults({
           pinnedCount: pinnedResults.length,
         });
 
-        setResults(
-          pinnedResults.filter((pin) =>
-            pin.kMDItemFSName.toLocaleLowerCase().includes(text.replace(/[[|\]]/gi, "").toLocaleLowerCase())
-          )
-        );
+        setResults(pinnedResults.filter((pin) => matchesSearchQuery(pin.kMDItemFSName, text)));
         setIsQuerying(false);
         setHasSearched(true);
       } else if (text) {
@@ -64,7 +60,7 @@ export function useSearchResults({
         setHasSearched(false);
       }
     },
-    [searchScope, pinnedResults]
+    [searchScope, pinnedResults],
   );
 
   // Re-apply filtering when pinned results change
@@ -75,11 +71,7 @@ export function useSearchResults({
         pinnedCount: pinnedResults.length,
       });
 
-      setResults(
-        pinnedResults.filter((pin) =>
-          pin.kMDItemFSName.toLocaleLowerCase().includes(debouncedText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
-        )
-      );
+      setResults(pinnedResults.filter((pin) => matchesSearchQuery(pin.kMDItemFSName, debouncedText)));
     }
   }, [pinnedResults, searchScope, debouncedText]);
 
@@ -164,11 +156,7 @@ export function useSearchResults({
     setSearchText,
     results:
       searchScope === "pinned"
-        ? pinnedResults.filter(
-            (pin) =>
-              !searchText ||
-              pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
-          )
+        ? pinnedResults.filter((pin) => matchesSearchQuery(pin.kMDItemFSName, searchText))
         : results,
     isQuerying,
     hasSearched,

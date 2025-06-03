@@ -48,7 +48,9 @@ export function useModifiableApplications(search?: string) {
       });
       const objects = results.map((r) => r.obj);
 
-      const otherApplications = (apps || []).filter((app) => !objects.includes(app));
+      const otherApplications = (apps || []).filter(
+        (app) => !objects.includes(app),
+      );
 
       return [...objects, ...otherApplications];
     },
