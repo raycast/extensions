@@ -97,6 +97,10 @@
         {
           "title": "12 months",
           "value": "12month"
+        },
+        {
+          "title": "All Time",
+          "value": "overall"
         }
       ]
     },
@@ -105,7 +109,7 @@
       "title": "Listing View",
       "name": "view",
       "required": true,
-      "default": "7day",
+      "default": "list",
       "description": "Select the period of songs that you want to display.",
       "data": [
         {
