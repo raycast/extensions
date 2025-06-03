@@ -1,5 +1,9 @@
 # Window Sizer Changelog
 
+## [Chore] - 2025-06-03
+
+- Fixed navigation title for the resize window command
+
 ## [Refactor Favorite Size Feature] - 2025-05-30
 
 - Refactored the logic for saving and resizing to the favorite window size

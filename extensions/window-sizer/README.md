@@ -1,29 +1,63 @@
 <div align="center">
-  <img src="assets/screenshot.png" alt="window-sizer">
+  <img width=128 src="assets/icons/key-icon.png" alt="icon">
 </div>
-&nbsp;
 
-# Window Sizer
+<h1 align="center">Window Sizer</h1>
+<p align="center">Resize the focused window to pixel-perfect presets</p>
 
-Resize the focused window to pixel-perfect presets.
+<div align="center">
+  <img src="metadata/window-sizer-1.png" alt="window sizer commands">
+</div>
+
+<br>
 
 ## Features
 
-- Quickly resize windows to predefined sizes
-- Create and save custom window sizes
-- Star your frequently used window sizes
+### Resize Window
+
+#### Quickly resize a window to predefined sizes
+
+<div align="center">
+  <img src="metadata/window-sizer-2.png" alt="resize window">
+</div>
+
+#### Add and save custom window sizes
+
+<div align="center">
+  <img src="metadata/window-sizer-3.png" alt="add custom sizes">
+</div>
+
+#### Star your frequently used window sizes
+
+<div align="center">
+  <img src="metadata/window-sizer-4.png" alt="list actions">
+</div>
+
+#### Other options
+
 - Maximize window
 - Restore previous window size
 - Get current window size
-- An extra way to save and apply a favorite window size
 
-## Usage
+<div align="center">
+  <img src="metadata/window-sizer-5.png" alt="other options">
+</div>
 
-Search for the following command in Raycast:
+---
 
-- `Window Sizer` - Find all commands
-- `Resize Window` - Open the window size selector
-- `Apply Favorite Size` - Apply a favorite window size directly (Configure in command settings first)
+### Apply favorite size
+
+#### Applying when size is not set
+
+<div align="center">
+  <img src="assets/screenshots/apply-fav-size-1.png" alt="apply favorite size">
+</div>
+
+#### Set favorite size in the command settings
+
+<div align="center">
+  <img src="assets/screenshots/apply-fav-size-2.png" alt="favorite size settings">
+</div>
 
 ## Shortcuts
 
@@ -33,5 +67,5 @@ Search for the following command in Raycast:
 
 ## Notes
 
-- To resize windows, please allow Raycast to control your Mac under System Settings → Privacy & Security → Accessibility
+- To resize windows, please allow Raycast to control your Mac under `System Settings` → `Privacy & Security` → `Accessibility`
 - Some applications may restrict window resizing
