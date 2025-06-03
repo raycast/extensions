@@ -4,7 +4,7 @@
   "title": "Summarize YouTube Videos with AI",
   "description": "Summarize any YouTube Video with AI. Choose between Raycast, OpenAI or Anthropic. You have to either be a Raycast Pro Member or have an OpenAI/Anthropic API Key.",
   "icon": "extension_icon.png",
-  "author": "iKasch",
+  "author": "kom",
   "contributors": [
     "bl1nk"
   ],
