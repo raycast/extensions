@@ -1,5 +1,5 @@
 import { Image, ImageSizes } from "@/types";
-import { environment, showToast, Toast } from "@raycast/api";
+import { environment } from "@raycast/api";
 import { join } from "path";
 
 export const getErrorMessage = (errorNumber: number): string => {
@@ -32,7 +32,7 @@ export const getCoverUrlsBySize = (coverSizes?: Image[]) => {
   }
 
   for (const cover of coverSizes) {
-    if (cover["#text"] !== "" || cover["#text"] != null) {
+    if (cover["#text"] !== "" && cover["#text"] != null) {
       const url = cover["#text"] ? cover["#text"] : PlaceholderCover;
       result[cover.size as ImageSizes] = url;
     }
@@ -52,7 +52,7 @@ const blocks = [
   {
     service: "spotify",
     search: ({ term, type }: ServiceActionProps) => {
-      let pathMaps = {
+      const pathMaps = {
         artist: "artists",
         album: "albums",
         song: "tracks",

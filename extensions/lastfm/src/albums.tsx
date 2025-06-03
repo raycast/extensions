@@ -7,7 +7,7 @@ import { ListResults } from "./components/list";
 import { generateMusicServiceAction, getCoverUrlsBySize } from "./lib/utils";
 import { GridResults } from "./components/grid";
 
-export const procesAlbumItem = (album: Album, idx: number): ItemProps => {
+export const processAlbumItem = (album: Album, idx: number): ItemProps => {
   const { view } = getPreferenceValues();
   const covers = getCoverUrlsBySize(album.image);
 
@@ -15,7 +15,7 @@ export const procesAlbumItem = (album: Album, idx: number): ItemProps => {
     key: `${album.name}-${idx}`, // not quite uniq
     title: album.name,
     subtitle: album.artist ? `by ${album.artist.name}` : undefined,
-    cover: view == "grid" ? covers.large : covers.small,
+    cover: view === "grid" ? covers.large : covers.small,
     accessories: [{ text: album.playcount ? `${album.playcount} plays` : undefined }],
     accessory: album.playcount ? { tooltip: album.playcount } : undefined,
     actions: (
@@ -48,6 +48,11 @@ const TopAlbums: React.FC = () => {
 
   if (error !== null) {
     showToast(Toast.Style.Failure, "Something went wrong.", String(error));
+    return (
+      <List isLoading={false}>
+        <List.EmptyView title="Something went wrong" description={String(error)} />
+      </List>
+    );
   }
 
   function onPeriodChange(value: string) {
@@ -55,7 +60,7 @@ const TopAlbums: React.FC = () => {
     revalidate();
   }
 
-  const data = albums.map(procesAlbumItem);
+  const data = albums.map(processAlbumItem);
 
   if (view == "grid") {
     return (
@@ -67,7 +72,7 @@ const TopAlbums: React.FC = () => {
         columns={4}
         fit={Grid.Fit.Contain}
       >
-        <GridResults items={data} />;
+        <GridResults items={data} />
       </Grid>
     );
   }
@@ -78,7 +83,7 @@ const TopAlbums: React.FC = () => {
       searchBarPlaceholder="Search album..."
       searchBarAccessory={<PeriodDropdown selectedPeriod={period} onPeriodChange={onPeriodChange} />}
     >
-      <ListResults items={data} />;
+      <ListResults items={data} />
     </List>
   );
 };

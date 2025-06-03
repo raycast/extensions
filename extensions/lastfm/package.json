@@ -6,6 +6,9 @@
   "icon": "command-icon.png",
   "author": "eggsy",
   "license": "MIT",
+  "contributors": [
+    "c0b41"
+  ],
   "keywords": [
     "lastfm",
     "last.fm",
@@ -110,7 +113,7 @@
       "name": "view",
       "required": true,
       "default": "list",
-      "description": "Select the period of songs that you want to display.",
+      "description": "Select the view type to display results.",
       "data": [
         {
           "title": "List",
@@ -124,21 +127,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.99.0"
+    "@raycast/api": "^1.96.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.9",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

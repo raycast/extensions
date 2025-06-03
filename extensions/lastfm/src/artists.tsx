@@ -30,7 +30,7 @@ export const procesArtistItem = (artist: Artist, idx: number): ItemProps => {
         </ActionPanel.Section>
         <ActionPanel.Section title="Copy">
           <Action.CopyToClipboard title="Copy URL to Clipboard" content={artist.url} />
-          <Action.CopyToClipboard title="Copy Artist Name" content={`${artist.name}`} />
+          <Action.CopyToClipboard title="Copy Artist Name" content={artist.name} />
         </ActionPanel.Section>
       </ActionPanel>
     ),
@@ -44,6 +44,11 @@ const TopArtists: React.FC = () => {
 
   if (error !== null) {
     showToast(Toast.Style.Failure, "Something went wrong.", String(error));
+    return (
+      <List isLoading={false}>
+        <List.EmptyView title="Something went wrong" description={String(error)} />
+      </List>
+    );
   }
 
   function onPeriodChange(value: string) {
@@ -63,7 +68,7 @@ const TopArtists: React.FC = () => {
         columns={4}
         fit={Grid.Fit.Contain}
       >
-        <GridResults items={data} />;
+        <GridResults items={data} />
       </Grid>
     );
   }
@@ -74,7 +79,7 @@ const TopArtists: React.FC = () => {
       searchBarPlaceholder="Search artist..."
       searchBarAccessory={<PeriodDropdown selectedPeriod={period} onPeriodChange={onPeriodChange} />}
     >
-      <ListResults items={data} />;
+      <ListResults items={data} />
     </List>
   );
 };

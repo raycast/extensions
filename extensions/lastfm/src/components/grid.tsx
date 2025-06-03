@@ -3,7 +3,7 @@ import { Grid } from "@raycast/api";
 
 export function GridResults(props: ResultItemProps) {
   return (
-    <Grid.Section title="Results">
+    <Grid.Section title="Results" isLoading={props.isLoading}>
       {props.items.map((item: ItemProps) => (
         <Grid.Item
           key={item.key}

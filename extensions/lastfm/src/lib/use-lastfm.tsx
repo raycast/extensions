@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, showFailureToast } from "@raycast/api";
 import {
   AlbumResponse,
   ArtistResponse,
@@ -17,11 +17,10 @@ async function fetchLastFmData<T>(method: LastFmMethod, params?: LastFmParams): 
   const { username, apikey, limit } = getPreferenceValues<ExtensionPreferences>();
 
   if (!username || !apikey) {
-    await showToast(
-      Toast.Style.Failure,
-      "Configuration Error",
-      "Please set your Last.fm username and API key in the extension preferences."
-    );
+    await showFailureToast(new Error("Last.fm username or API key is missing from preferences."), {
+      title: "Configuration Error",
+      message: "Please set your Last.fm username and API key in the extension preferences.",
+    });
     throw new Error("Last.fm username or API key is missing from preferences.");
   }
 
@@ -71,7 +70,6 @@ async function fetchLastFmData<T>(method: LastFmMethod, params?: LastFmParams): 
   }
 }
 
-
 export function useLastFm<T>(method: LastFmMethod, params?: LastFmParams): UseLastFmResult<T> {
   const { username, apikey, limit, view, period } = getPreferenceValues<ExtensionPreferences>();
 
@@ -96,7 +94,7 @@ export function useLastFm<T>(method: LastFmMethod, params?: LastFmParams): UseLa
 
   useEffect(() => {
     fetchData();
-  }, [method, username, apikey, period, limit, view, timestamp]);
+  }, [method, username, apikey, period, limit, view, timestamp, params]);
 
   const revalidate = () => {
     setTimestamp(Date.now());

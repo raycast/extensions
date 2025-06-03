@@ -6,7 +6,7 @@ import { generateMusicServiceAction, getCoverUrlsBySize } from "./lib/utils";
 import { GridResults } from "./components/grid";
 import { ListResults } from "./components/list";
 
-export const procesSongItem = (track: Track, idx: number): ItemProps => {
+export const processSongItem = (track: Track, idx: number): ItemProps => {
   const { view } = getPreferenceValues();
   const covers = getCoverUrlsBySize(track.image);
   const nowPlaying = track["@attr"]?.nowplaying || false;
@@ -51,11 +51,16 @@ const RecentTracks: React.FC = () => {
 
   if (error !== null) {
     showToast(Toast.Style.Failure, "Something went wrong.", String(error));
+    return (
+      <List isLoading={false}>
+        <List.EmptyView title="Something went wrong" description={String(error)} />
+      </List>
+    );
   }
 
-  const data = songs.map(procesSongItem);
+  const data = songs.map(processSongItem);
 
-  if (view == "grid") {
+  if (view === "grid") {
     return (
       <Grid
         isLoading={loading}
@@ -64,14 +69,14 @@ const RecentTracks: React.FC = () => {
         columns={4}
         fit={Grid.Fit.Contain}
       >
-        <GridResults items={data} />;
+        <GridResults items={data} />
       </Grid>
     );
   }
 
   return (
     <List isLoading={loading} searchBarPlaceholder="Search songs...">
-      <ListResults items={data} />;
+      <ListResults items={data} />
     </List>
   );
 };

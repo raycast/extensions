@@ -22,7 +22,7 @@ export const procesSongItem = (track: TopTrack, idx: number): ItemProps => {
       <ActionPanel>
         <ActionPanel.Section title="Open And Search">
           <Action.OpenInBrowser url={track.url} title="Open on Last.fm" />
-          {generateMusicServiceAction({ term: `${track.artist.name}  - ${track.name}`, type: "song" }).map(
+          {generateMusicServiceAction({ term: `${track.artist.name} - ${track.name}`, type: "song" }).map(
             (service: { url: string; label: string }) => {
               return <Action.OpenInBrowser url={service.url} title={service.label} />;
             }
@@ -44,6 +44,11 @@ const TopSongs: React.FC = () => {
 
   if (error !== null) {
     showToast(Toast.Style.Failure, "Something went wrong.", String(error));
+    return (
+      <List isLoading={false}>
+        <List.EmptyView title="Something went wrong" description={String(error)} />
+      </List>
+    );
   }
 
   function onPeriodChange(value: string) {
@@ -53,7 +58,7 @@ const TopSongs: React.FC = () => {
 
   const data = songs.map(procesSongItem);
 
-  if (view == "grid") {
+  if (view === "grid") {
     return (
       <Grid
         isLoading={loading}
@@ -63,7 +68,7 @@ const TopSongs: React.FC = () => {
         columns={4}
         fit={Grid.Fit.Contain}
       >
-        <GridResults items={data} />;
+        <GridResults items={data} />
       </Grid>
     );
   }
@@ -74,7 +79,7 @@ const TopSongs: React.FC = () => {
       searchBarPlaceholder="Search songs..."
       searchBarAccessory={<PeriodDropdown selectedPeriod={period} onPeriodChange={onPeriodChange} />}
     >
-      <ListResults items={data} />;
+      <ListResults items={data} />
     </List>
   );
 };
