@@ -1,6 +1,6 @@
 # Reverso Context Changelog
 
-## [bugfixing and add examples] - {PR_MERGE_DATE}
+## [bugfixing and add examples] - 2025-06-03
 
 - Fixed [#17164](https://github.com/raycast/extensions/issues/17164)
 - Added examples to the translation results
