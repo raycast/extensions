@@ -9,7 +9,6 @@ interface SummaryDetailsProps {
   summaryIsLoading: boolean;
   transcript: string;
   videoData: VideoDataTypes;
-  onQuestionSubmit?: (question: string) => void;
 }
 
 export default function SummaryDetails({
