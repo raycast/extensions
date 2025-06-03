@@ -13,6 +13,20 @@ import { getErrorMessage } from "./utils";
 
 const API = new URL(`https://ws.audioscrobbler.com/2.0/`);
 
+interface LastFmErrorResponse {
+  error: number;
+  message: string;
+}
+
+function isLastFmErrorResponse(data: unknown): data is LastFmErrorResponse {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "error" in data &&
+    typeof (data as LastFmErrorResponse).error === "number"
+  );
+}
+
 async function fetchLastFmData<T>(method: LastFmMethod, params?: LastFmParams): Promise<T> {
   const { username, apikey, limit } = getPreferenceValues<ExtensionPreferences>();
 
@@ -24,7 +38,7 @@ async function fetchLastFmData<T>(method: LastFmMethod, params?: LastFmParams): 
     throw new Error("Last.fm username or API key is missing from preferences.");
   }
 
-  const fields: Record<string, any> = new URLSearchParams({
+  const fields: URLSearchParams = new URLSearchParams({
     method,
     user: username,
     api_key: apikey,
@@ -53,17 +67,24 @@ async function fetchLastFmData<T>(method: LastFmMethod, params?: LastFmParams): 
     }
     const data = await response.json();
 
-    if ((data as any).error) {
-      const lastFmError = (data as any).error as number;
-      const message = getErrorMessage(lastFmError);
+    if (isLastFmErrorResponse(data)) {
+      const message = getErrorMessage(data.error);
       await showToast(Toast.Style.Failure, "Last.fm API Error", message);
       throw new Error(message);
     }
 
     return data as T;
-  } catch (e: any) {
-    if (!e.message.includes("Last.fm API Error") && !e.message.includes("Configuration Error")) {
-      await showToast(Toast.Style.Failure, "Fetching Error", e.message || "An unexpected error occurred.");
+  } catch (e: unknown) {
+    let errorMessage = "An unexpected error occurred.";
+
+    if (e instanceof Error) {
+      errorMessage = e.message;
+    } else if (typeof e === "string") {
+      errorMessage = e;
+    }
+
+    if (!errorMessage.includes("Last.fm API Error") && !errorMessage.includes("Configuration Error")) {
+      await showToast(Toast.Style.Failure, "Fetching Error", errorMessage);
     }
 
     throw e;
@@ -84,8 +105,14 @@ export function useLastFm<T>(method: LastFmMethod, params?: LastFmParams): UseLa
     try {
       const result = await fetchLastFmData<T>(method, params);
       setData(result);
-    } catch (err: any) {
-      setError(err.message || "An unknown error occurred.");
+    } catch (err: unknown) {
+      let errorMessage = "An unknown error occurred.";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === "string") {
+        errorMessage = err;
+      }
+      setError(errorMessage);
       setData(null);
     } finally {
       setLoading(false);

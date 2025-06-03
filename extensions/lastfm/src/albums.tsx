@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ActionPanel, showToast, getPreferenceValues, List, Toast, Action, Icon, Grid } from "@raycast/api";
+import { ActionPanel, showToast, getPreferenceValues, List, Toast, Action, Grid } from "@raycast/api";
 import { Album, ItemProps, periodTypes } from "./types";
 import { useTopAlbums } from "./lib/use-lastfm";
 import { PeriodDropdown } from "./components/period";
@@ -26,7 +26,7 @@ export const processAlbumItem = (album: Album, idx: number): ItemProps => {
           {generateMusicServiceAction({ term: `${album.artist.name} - ${album.name}`, type: "album" }).map(
             (service: { url: string; label: string }) => {
               return <Action.OpenInBrowser url={service.url} title={service.label} />;
-            }
+            },
           )}
         </ActionPanel.Section>
         <ActionPanel.Section title="Copy">

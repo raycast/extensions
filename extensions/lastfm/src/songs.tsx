@@ -25,7 +25,7 @@ export const procesSongItem = (track: TopTrack, idx: number): ItemProps => {
           {generateMusicServiceAction({ term: `${track.artist.name} - ${track.name}`, type: "song" }).map(
             (service: { url: string; label: string }) => {
               return <Action.OpenInBrowser url={service.url} title={service.label} />;
-            }
+            },
           )}
         </ActionPanel.Section>
         <ActionPanel.Section title="Copy">

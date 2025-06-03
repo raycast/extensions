@@ -20,7 +20,7 @@ export interface Image {
 export interface Artist {
   url: string;
   name: string;
-  mbid?: string; 
+  mbid?: string;
   image?: Image[];
   playcount?: string;
   streamable?: string;
@@ -44,7 +44,6 @@ export interface Album {
   playcount: string;
   name: string;
 }
-
 
 export interface ArtistResponse {
   message?: string;
@@ -105,7 +104,7 @@ export interface UseLastFmResult<T> {
   revalidate: () => void;
 }
 
-export type LastFmParams = Record<string, any>;
+export type LastFmParams = Record<string, string>;
 
 export interface ItemProps {
   key: string;
