@@ -1,6 +1,6 @@
 # Parcel Changelog
 
-## [Enhanced Date Format Support] - {PR_MERGE_DATE}
+## [Enhanced Date Format Support] - 2025-06-03
 
 - Added support for more date formats in delivery tracking, including dates with day names
 - Improved handling of various international date formats for better compatibility with carrier APIs
