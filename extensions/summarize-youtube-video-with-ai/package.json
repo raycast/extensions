@@ -406,7 +406,7 @@
     }
   ],
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.33.1",
+    "@anthropic-ai/sdk": "^0.52.0",
     "@raycast/api": "^1.99.3",
     "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
