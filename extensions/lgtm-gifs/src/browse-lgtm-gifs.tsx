@@ -45,6 +45,7 @@ export default function Command() {
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Filter by Category"
+          defaultValue="All"
           storeValue
           onChange={(newValue) => setSelectedCategory(newValue as Category)}
         >
