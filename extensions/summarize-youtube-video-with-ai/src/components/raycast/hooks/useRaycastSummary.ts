@@ -25,6 +25,7 @@ export const useRaycastSummary = ({ transcript, setSummaryIsLoading, setSummary 
     return;
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `abortController ` in dependencies will lead to an error
   useEffect(() => {
     if (!transcript) return;
 
@@ -71,5 +72,5 @@ export const useRaycastSummary = ({ transcript, setSummaryIsLoading, setSummary 
     return () => {
       abortController.abort();
     };
-  }, [transcript, abortController, language, creativity, setSummary, setSummaryIsLoading]);
+  }, [transcript, language, creativity, setSummary, setSummaryIsLoading]);
 };

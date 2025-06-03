@@ -26,6 +26,7 @@ export const useOpenAISummary = ({ transcript, setSummaryIsLoading, setSummary }
     return;
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `abortController ` in dependencies will lead to an error
   useEffect(() => {
     if (!transcript) return;
 
@@ -83,15 +84,5 @@ export const useOpenAISummary = ({ transcript, setSummaryIsLoading, setSummary }
     return () => {
       abortController.abort();
     };
-  }, [
-    transcript,
-    language,
-    openaiApiToken,
-    openaiEndpoint,
-    openaiModel,
-    creativity,
-    setSummary,
-    setSummaryIsLoading,
-    abortController,
-  ]);
+  }, [creativity, language, openaiApiToken, openaiEndpoint, openaiModel, setSummary, setSummaryIsLoading, transcript]);
 };

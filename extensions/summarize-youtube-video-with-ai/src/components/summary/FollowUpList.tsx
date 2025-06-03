@@ -1,7 +1,7 @@
 /* Copy All Q&A would be weirdly formatted otherwise */
 /* eslint-disable @raycast/prefer-title-case */
 import { Action, ActionPanel, AI, List, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FINDING_ANSWER } from "../../const/toast_messages";
 import type { Question } from "../../hooks/useQuestions";
 import { generateQuestionId } from "../../utils/generateQuestionId";
@@ -21,6 +21,16 @@ export default function FollowUpList({
   const [question, setQuestion] = useState("");
   const [selectedQuestionId, setSelectedQuestionId] = useState(initialQuestions[0]?.id ?? "");
   const [questions, setQuestions] = useState(initialQuestions);
+
+  useEffect(() => {
+    if (onQuestionsUpdate) {
+      onQuestionsUpdate(questions);
+    }
+  }, [questions, onQuestionsUpdate]);
+
+  const updateQuestions = useCallback((updatedQuestions: Question[]) => {
+    setQuestions(updatedQuestions);
+  }, []);
 
   const handleAdditionalQuestion = async () => {
     if (!question) return;
@@ -43,10 +53,7 @@ export default function FollowUpList({
       },
       ...questions,
     ];
-    setQuestions(updatedQuestions);
-    if (onQuestionsUpdate) {
-      onQuestionsUpdate(updatedQuestions);
-    }
+    updateQuestions(updatedQuestions);
 
     setQuestion("");
     let isFirstChunk = true;
@@ -56,24 +63,13 @@ export default function FollowUpList({
         isFirstChunk = false;
       }
       setQuestions((prevQuestions) => {
-        const updatedQuestions = prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + data } : q));
-        if (onQuestionsUpdate) {
-          onQuestionsUpdate(updatedQuestions);
-        }
-        return updatedQuestions;
+        return prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + data } : q));
       });
     });
 
     answer.finally(() => {
       toast.hide();
       setSelectedQuestionId(qID);
-
-      if (onQuestionsUpdate) {
-        setQuestions((currentQuestions) => {
-          onQuestionsUpdate(currentQuestions);
-          return currentQuestions;
-        });
-      }
     });
   };
 

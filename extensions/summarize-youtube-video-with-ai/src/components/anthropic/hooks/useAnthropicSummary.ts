@@ -31,6 +31,7 @@ export const useAnthropicSummary = async ({
     return;
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `abortController ` in dependencies will lead to an error
   useEffect(() => {
     if (!transcript) return;
 
@@ -88,14 +89,5 @@ export const useAnthropicSummary = async ({
     return () => {
       abortController.abort();
     };
-  }, [
-    transcript,
-    abortController,
-    anthropicApiToken,
-    anthropicModel,
-    creativity,
-    language,
-    setSummary,
-    setSummaryIsLoading,
-  ]);
+  }, [transcript, anthropicApiToken, anthropicModel, creativity, language, setSummary, setSummaryIsLoading]);
 };

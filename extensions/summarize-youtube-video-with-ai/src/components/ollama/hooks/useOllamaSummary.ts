@@ -17,6 +17,7 @@ export const useOllamaSummary = ({ transcript, setSummaryIsLoading, setSummary }
   const preferences = getPreferenceValues() as OllamaPreferences;
   const { creativity, language, ollamaEndpoint, ollamaModel } = preferences;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `abortController ` in dependencies will lead to an error
   useEffect(() => {
     if (!transcript) return;
 
@@ -71,5 +72,5 @@ export const useOllamaSummary = ({ transcript, setSummaryIsLoading, setSummary }
     return () => {
       abortController.abort();
     };
-  }, [transcript, abortController, creativity, language, ollamaEndpoint, ollamaModel, setSummary, setSummaryIsLoading]);
+  }, [transcript, creativity, language, ollamaEndpoint, ollamaModel, setSummary, setSummaryIsLoading]);
 };
