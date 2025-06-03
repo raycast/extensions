@@ -1,5 +1,5 @@
 import { useAddresses, ListItem } from "./utils/useAddresses";
-import { ChainList } from "@bgd-labs/rpc-env";
+import { ChainList } from "@bgd-labs/toolbox";
 import { ActionPanel, Action, List, Color } from "@raycast/api";
 import uFuzzy from "@leeoniya/ufuzzy";
 import { useMemo, useState } from "react";

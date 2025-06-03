@@ -1,5 +1,7 @@
 # Arc Changelog
 
+## [Chore: Moved contributor] - 2025-06-03
+
 ## [New Features] - 2025-05-12
 
 - Added UnDuck search engine for the commands `Search Arc`, `Open New Little Arc Window` and `Open New Incognito Window`.
