@@ -49,20 +49,22 @@ export function useMyPullRequests({
       const results = await Promise.all(
         [
           `is:pr author:@me archived:false is:open`,
-          ...(enableClosed ? [`is:pr author:@me archived:false is:closed`] : []),
+          ...(enableClosed ? [`is:pr author:@me archived:false is:closed ${updatedFilter}`] : []),
           ...(enableAssigned ? [`is:pr assignee:@me archived:false is:open`] : []),
-          ...(enableAssigned && enableClosed ? [`is:pr assignee:@me archived:false is:closed`] : []),
+          ...(enableAssigned && enableClosed ? [`is:pr assignee:@me archived:false is:closed ${updatedFilter}`] : []),
           ...(enableMentioned ? [`is:pr mentions:@me archived:false is:open`] : []),
-          ...(enableMentioned && enableClosed ? [`is:pr mentions:@me archived:false is:closed`] : []),
+          ...(enableMentioned && enableClosed ? [`is:pr mentions:@me archived:false is:closed ${updatedFilter}`] : []),
           ...(enableReviewRequests ? [`is:pr ${reviewRequestedQuery}:@me archived:false is:open`] : []),
           ...(enableReviewRequests && enableClosed
-            ? [`is:pr ${reviewRequestedQuery}:@me archived:false is:closed`]
+            ? [`is:pr ${reviewRequestedQuery}:@me archived:false is:closed ${updatedFilter}`]
             : []),
           ...(enableReviewed ? [`is:pr reviewed-by:@me archived:false is:open`] : []),
-          ...(enableReviewed && enableClosed ? [`is:pr reviewed-by:@me archived:false is:closed`] : []),
+          ...(enableReviewed && enableClosed
+            ? [`is:pr reviewed-by:@me archived:false is:closed ${updatedFilter}`]
+            : []),
         ].map((query) =>
           github.searchPullRequests({
-            query: `${query} ${sortTxt} ${updatedFilter} ${repositoryFilter}`,
+            query: `${query} ${sortTxt} ${repositoryFilter}`,
             numberOfItems: 20,
           }),
         ),

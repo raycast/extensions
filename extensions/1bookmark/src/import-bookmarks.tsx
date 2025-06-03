@@ -1,15 +1,15 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
-import { LoginView } from "./views/LoginView";
+import { LoginFormInView } from "./components/LoginFormInView";
 import useAvailableBrowsers from "./browser-bookmark-hooks/useAvailableBrowsers";
 import { BROWSERS_BUNDLE_ID } from "./browser-bookmark-hooks/useAvailableBrowsers";
 import { BookmarksImportFromBrowserView } from "./views/BookmarksToImportFromBrowserView";
-import { useMe } from "./hooks/use-me.hook";
 import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
+import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
 
 function Body() {
   const { data: availableBrowsers, isLoading } = useAvailableBrowsers();
-  const me = useMe();
+  const { enabledSpaces } = useEnabledSpaces();
 
   // Get browser icon from bundle ID
   const getBrowserIcon = (bundleId: string): string => {
@@ -60,10 +60,10 @@ function Body() {
   const { loggedOutStatus } = useLoggedOutStatus();
 
   if (loggedOutStatus) {
-    return <LoginView />;
+    return <LoginFormInView />;
   }
 
-  if (!me.data) {
+  if (!enabledSpaces) {
     return <List isLoading={true} />;
   }
 
@@ -84,7 +84,7 @@ function Body() {
                 <ActionPanel title={`Import Bookmarks from ${browser.name}`}>
                   <ActionPanel.Submenu title="Add Label">
                     <ActionPanel.Section title="Which Space to Import Bookmarks">
-                      {me.data.associatedSpaces.map((s) => {
+                      {enabledSpaces.map((s) => {
                         return (
                           <Action.Push
                             key={s.id}

@@ -43,5 +43,8 @@
     "lint": "ray lint",
     "test": "mocha",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

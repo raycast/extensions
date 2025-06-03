@@ -1,5 +1,25 @@
 # Todoist Changelog
 
+## [Use confetti when completing tasks] - 2025-05-28
+- Add option to use the Raycast confetti command when completing tasks. 
+
+## [Automatically create labels on quick add command] - 2025-05-09
+
+- Add option to automatically crete labels in the quick add command
+
+## [AI Fix] - 2025-04-15
+
+- Fixed AI not being able to get tasks
+
+## [New API] - 2025-04-14
+
+- Used new Todoist API
+- Renamed `Home` to `My Tasks`
+- Improved error handling
+- Improved app detection
+- Upgraded dependencies
+- Fixed a few bugs
+
 ## [Add Default Sorting in Menu Bar] - 2025-03-31
 
 Added same sorting order as Todoist home and web app.

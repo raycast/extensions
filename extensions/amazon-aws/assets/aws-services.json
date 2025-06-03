@@ -266,7 +266,7 @@
       "id": "cfo",
       "title": "CloudFormation",
       "subtitle": "Create and Manage Resources with Templates",
-      "match": "cfo CloudFormation",
+      "match": "cfo cfn CloudFormation",
       "arg": "/cloudformation/home",
       "autocomplete": "CloudFormation",
       "icon": {
@@ -769,7 +769,7 @@
       "title": "AWS Firewall Manager",
       "subtitle": "Central management of firewall rules",
       "match": "firewall-manager AWS Firewall Manager",
-      "arg": "/wafv2/home",
+      "arg": "/wafv2/fmsv2/home",
       "autocomplete": "AWS Firewall Manager",
       "icon": {
         "path": "./aws-icons/firewall-manager.png"
@@ -1724,7 +1724,7 @@
       "title": "WAF & Shield",
       "subtitle": "Protects Against DDoS Attacks and Malicious Web Traffic",
       "match": "waf WAF & Shield",
-      "arg": "/wafv2/home",
+      "arg": "/wafv2/homev2/home",
       "autocomplete": "WAF & Shield",
       "icon": {
         "path": "./aws-icons/waf.png"
@@ -2146,7 +2146,7 @@
       "id": "states",
       "title": "Step Functions",
       "subtitle": "Coordinate Distributed Applications",
-      "match": "states Step Functions",
+      "match": "states sfn Step Functions",
       "arg": "/states/home",
       "autocomplete": "Step Functions",
       "icon": {

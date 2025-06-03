@@ -1,7 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getTemplates } from "../api/getTemplates";
 import { useMemo } from "react";
-import { apiLimit } from "../helpers/constants";
+import { getTemplates } from "../api";
+import { apiLimit } from "../utils";
 
 export function useTemplates(spaceId: string, typeId: string) {
   const { data, error, isLoading, mutate, pagination } = useCachedPromise(
@@ -17,6 +17,7 @@ export function useTemplates(spaceId: string, typeId: string) {
     [spaceId, typeId],
     {
       keepPreviousData: true,
+      execute: !!spaceId && !!typeId,
     },
   );
 

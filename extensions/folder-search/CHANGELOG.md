@@ -1,5 +1,29 @@
 # Folder Search Changelog
 
+## [Fixes & Improvements] - 2025-05-28
+- **fixed** ESLint configuration migration from deprecated `.eslintrc.json` to new flat config format (`eslint.config.js`) for ESLint v9+ compatibility
+- **added** Pin/Unpin functionality to the "Move to a Folder" command for consistent folder management across both search and move operations
+- **fixed** Pin reordering actions (Move Pin Up/Down) now only appear in pinned sections, not in search results, for better UX clarity
+- **fixed** Persistent issues with fallback invocation command handling - hopefully it works this time
+- **enhanced** Code organization with proper TypeScript types for pin section detection
+
+## [Fixes & Improvements] - 2025-05-05
+- **improved** Error handling by replacing showToast with showFailureToast for better error reporting
+- **fixed** Type issues with selectedItemId in List components
+- **improved** Code organization and type safety in useFolderSearch hook
+- **updated** Dependencies to latest versions (@raycast/api@1.81.2, @raycast/utils@1.19.1)
+- **added** Filter option for Library folders
+- **improved** Date handling and formatting
+- **refactored** useFolderSearch hook to simplify state management
+- **removed** Unnecessary debounce logic and state variables
+- **streamlined** Preference saving mechanism
+- **enhanced** User navigation in folder search actions
+- **improved** Search execution conditions and performance
+
+## [Fixes] - 2025-04-12
+- **fixed** Search results flickering when using fallback command by adding 150ms debounce to search updates
+- **improved** Search text handling by removing fixDoubleConcat workaround and relying on debouncing to handle rapid text changes
+
 ## [New Features] - 2025-03-13
 
 - **added** 'Move' action for selected finder items

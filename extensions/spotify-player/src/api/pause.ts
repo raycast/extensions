@@ -10,7 +10,10 @@ export async function pause() {
   } catch (err) {
     const error = getErrorMessage(err);
 
-    if (error?.toLocaleLowerCase().includes("restricted device")) {
+    if (
+      error?.toLocaleLowerCase().includes("restricted device") ||
+      error?.toLocaleLowerCase().includes("premium required")
+    ) {
       const script = buildScriptEnsuringSpotifyIsRunning("pause");
       await runAppleScript(script);
       return;

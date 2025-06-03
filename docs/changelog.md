@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.98.0 - 2025-05-08
+
+### ✨ New
+
+- New `Action.InstallMCPServer` to push a MCP installation form
+
+### 💎 Improvements
+
+- **Shortcuts**: It’s now possible to provide platform-specific shortcuts.
+
+### 🐞 Fixes
+
+- Fixed an issue that caused extensions containing Swift code to not compile.
+
 ## 1.94.0 - 2025-03-19
 
 ### ✨ New

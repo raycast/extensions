@@ -1,17 +1,59 @@
-import { Icon, List, ActionPanel, Action, LocalStorage, Color } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Action, ActionPanel, Color, Icon, List, LocalStorage } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { executeWritingToolCommand } from "./api";
+import { CommandNumber, CommandTitle } from "./Command";
 
 const commands = [
-  { title: "Proofread", icon: Icon.MagnifyingGlass, category: "On Device" },
-  { title: "Rewrite", icon: Icon.ArrowCounterClockwise, category: "On Device" },
-  { title: "Make Friendly", icon: Icon.Emoji, category: "On Device" },
-  { title: "Make Professional", icon: Icon.Building, category: "On Device" },
-  { title: "Make Concise", icon: Icon.ShortParagraph, category: "On Device" },
-  { title: "Summarize", icon: Icon.Document, category: "Private Cloud Compute" },
-  { title: "Create Key Points", icon: Icon.BulletPoints, category: "Private Cloud Compute" },
-  { title: "Make List", icon: Icon.NumberList, category: "Private Cloud Compute" },
-  { title: "Make Table", icon: Icon.AppWindowGrid2x2, category: "Private Cloud Compute" },
+  { title: CommandTitle.PROOFREAD, number: CommandNumber.PROOFREAD, icon: Icon.MagnifyingGlass, category: "On Device" },
+  {
+    title: CommandTitle.REWRITE,
+    number: CommandNumber.REWRITE,
+    icon: Icon.ArrowCounterClockwise,
+    category: "On Device",
+  },
+  { title: CommandTitle.MAKE_FRIENDLY, number: CommandNumber.MAKE_FRIENDLY, icon: Icon.Emoji, category: "On Device" },
+  {
+    title: CommandTitle.MAKE_PROFESSIONAL,
+    number: CommandNumber.MAKE_PROFESSIONAL,
+    icon: Icon.Building,
+    category: "On Device",
+  },
+  {
+    title: CommandTitle.MAKE_CONCISE,
+    number: CommandNumber.MAKE_CONCISE,
+    icon: Icon.ShortParagraph,
+    category: "On Device",
+  },
+  {
+    title: CommandTitle.SUMMARIZE,
+    number: CommandNumber.SUMMARIZE,
+    icon: Icon.Document,
+    category: "Private Cloud Compute",
+  },
+  {
+    title: CommandTitle.CREATE_KEY_POINTS,
+    number: CommandNumber.CREATE_KEY_POINTS,
+    icon: Icon.BulletPoints,
+    category: "Private Cloud Compute",
+  },
+  {
+    title: CommandTitle.MAKE_LIST,
+    number: CommandNumber.MAKE_LIST,
+    icon: Icon.NumberList,
+    category: "Private Cloud Compute",
+  },
+  {
+    title: CommandTitle.MAKE_TABLE,
+    number: CommandNumber.MAKE_TABLE,
+    icon: Icon.AppWindowGrid2x2,
+    category: "Private Cloud Compute",
+  },
+  {
+    title: CommandTitle.COMPOSE,
+    number: CommandNumber.COMPOSE,
+    icon: Icon.Pencil,
+    category: "OpenAI",
+  },
 ];
 
 export default function Command() {
@@ -67,7 +109,11 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
-              <Action title={"Execute Command"} onAction={() => executeWritingToolCommand(cmd.title)} icon={cmd.icon} />
+              <Action
+                title={"Execute Command"}
+                onAction={() => executeWritingToolCommand(cmd.number, cmd.title)}
+                icon={cmd.icon}
+              />
               <Action
                 title={pinnedCommands.includes(cmd.title) ? "Unpin" : "Pin"}
                 icon={pinnedCommands.includes(cmd.title) ? Icon.PinDisabled : Icon.Pin}
@@ -100,7 +146,7 @@ export default function Command() {
                   <ActionPanel>
                     <Action
                       title={"Execute Command"}
-                      onAction={() => executeWritingToolCommand(cmd!.title)}
+                      onAction={() => executeWritingToolCommand(cmd!.number, cmd!.title)}
                       icon={cmd!.icon}
                     />
                     <Action
@@ -129,6 +175,7 @@ export default function Command() {
       )}
       <List.Section title="On Device">{renderCommands("On Device")}</List.Section>
       <List.Section title="Private Cloud Compute">{renderCommands("Private Cloud Compute")}</List.Section>
+      <List.Section title="OpenAI">{renderCommands("OpenAI")}</List.Section>
     </List>
   );
 }

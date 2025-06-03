@@ -1,29 +1,25 @@
-import { userInfo } from "os";
 import {
   Action,
   ActionPanel,
   Form,
   Icon,
   List,
-  Toast,
   closeMainWindow,
   popToRoot,
-  showToast,
-  showHUD,
-  confirmAlert,
   open,
-  getSelectedFinderItems,
+  Keyboard,
+  LaunchProps,
 } from "@raycast/api";
-
-import path from "node:path";
-import fse from "fs-extra";
-
-import { useFolderSearch } from "./hooks/useFolderSearch";
-import { FolderListSection } from "./components/FolderListSection";
 import { folderName } from "./utils";
 import { SpotlightSearchResult } from "./types";
+import { useFolderSearch } from "./hooks/useFolderSearch";
+import { useCommandBase } from "./hooks/useCommandBase";
+import { moveFinderItems } from "./moveUtils";
+import { FolderListSection, Directory } from "./components";
+import path from "node:path";
+import { userInfo } from "os";
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
   const {
     searchText,
     setSearchText,
@@ -36,74 +32,25 @@ export default function Command() {
     selectedItemId,
     pinnedResults,
     resultIsPinned,
+    toggleResultPinnedStatus,
+    movePinUp,
+    movePinDown,
     hasCheckedPlugins,
     hasCheckedPreferences,
+    hasSearched,
   } = useFolderSearch();
 
-  // Function to move selected Finder items to the selected folder
-  const moveSelectedFinderItemsToFolder = async (destinationFolder: string) => {
-    const selectedItems = await getSelectedFinderItems();
-
-    if (selectedItems.length === 0) {
-      await showHUD(`⚠️  No Finder selection to move.`);
-      return false;
-    }
-
-    let movedCount = 0;
-    let skippedCount = 0;
-
-    for (const item of selectedItems) {
-      const sourceFileName = path.basename(item.path);
-      const destinationFile = path.join(destinationFolder, sourceFileName);
-
-      try {
-        const exists = await fse.pathExists(destinationFile);
-        if (exists) {
-          const overwrite = await confirmAlert({
-            title: "Overwrite the existing file?",
-            message: sourceFileName + " already exists in " + destinationFolder,
-          });
-
-          if (overwrite) {
-            if (item.path === destinationFile) {
-              await showHUD("The source and destination file are the same");
-              skippedCount++;
-              continue;
-            }
-            await fse.move(item.path, destinationFile, { overwrite: true });
-            movedCount++;
-          } else {
-            await showHUD("Cancelling move for " + sourceFileName);
-            skippedCount++;
-            continue;
-          }
-        } else {
-          await fse.move(item.path, destinationFile);
-          movedCount++;
-        }
-      } catch (e) {
-        console.error("ERROR " + String(e));
-        await showToast(Toast.Style.Failure, "Error moving file " + String(e));
-        return false;
-      }
-    }
-
-    if (movedCount === 0) {
-      await showHUD(`No files were moved`);
-      return false;
-    } else if (skippedCount > 0) {
-      await showHUD(
-        `Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}, skipped ${skippedCount} item(s)`
-      );
-    } else {
-      await showHUD(`Moved ${movedCount} item(s) to ${path.basename(destinationFolder)}`);
-    }
-
-    return movedCount > 0;
-  };
+  // Use the shared command base hook
+  useCommandBase({
+    commandName: "move",
+    launchProps: props,
+    searchText,
+    setSearchText,
+  });
 
   // Render actions for the folder list items
-  const renderFolderActions = (result: SpotlightSearchResult) => {
+  const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number, isPinnedSection = false) => {
+    const enclosingFolder = path.dirname(result.path);
     return (
       <ActionPanel title={folderName(result)}>
         <Action
@@ -111,24 +58,25 @@ export default function Command() {
           icon={Icon.ArrowRight}
           shortcut={{ modifiers: ["cmd"], key: "return" }}
           onAction={async () => {
-            const success = await moveSelectedFinderItemsToFolder(result.path);
-            if (success) {
-              open(result.path);
-              closeMainWindow();
-              popToRoot({ clearSearchBar: true });
+            try {
+              const moveResult = await moveFinderItems(result.path);
+              if (moveResult.success) {
+                open(result.path);
+                closeMainWindow();
+                popToRoot({ clearSearchBar: true });
+              }
+            } catch (error) {
+              // Error is already handled in moveFinderItems, but we need to catch it here
+              // to prevent unhandled promise rejections
+              console.error("Error in Move to This Folder action:", error);
             }
           }}
         />
         <Action.Open
-          title="Open"
+          title="Open in Finder"
           icon={Icon.Folder}
           target={result.path}
           onOpen={() => popToRoot({ clearSearchBar: true })}
-        />
-        <Action.ShowInFinder
-          title="Show in Finder"
-          path={result.path}
-          onShow={() => popToRoot({ clearSearchBar: true })}
         />
         <Action
           title="Toggle Details"
@@ -136,6 +84,46 @@ export default function Command() {
           shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
           onAction={() => setIsShowingDetail(!isShowingDetail)}
         />
+        <Action
+          title={!resultIsPinned(result) ? "Pin" : "Unpin"}
+          icon={!resultIsPinned(result) ? Icon.Star : Icon.StarDisabled}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          onAction={() => toggleResultPinnedStatus(result, resultIndex)}
+        />
+        {resultIsPinned(result) && isPinnedSection && (
+          <>
+            {resultIndex > 0 && (
+              <Action
+                title="Move Pin up"
+                icon={Icon.ArrowUpCircle}
+                shortcut={Keyboard.Shortcut.Common.MoveUp}
+                onAction={() => movePinUp(result, resultIndex)}
+              />
+            )}
+            {resultIndex < pinnedResults.length - 1 && (
+              <Action
+                title="Move Pin Down"
+                icon={Icon.ArrowDownCircle}
+                shortcut={Keyboard.Shortcut.Common.MoveDown}
+                onAction={() => movePinDown(result, resultIndex)}
+              />
+            )}
+          </>
+        )}
+        <ActionPanel.Section>
+          <Action.Push
+            title="Enclosing Folder"
+            icon={Icon.ArrowUp}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+            target={<Directory path={enclosingFolder} />}
+          />
+          <Action.Push
+            title="Enter Folder"
+            icon={Icon.ArrowDown}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+            target={<Directory path={result.path} />}
+          />
+        </ActionPanel.Section>
       </ActionPanel>
     );
   };
@@ -146,7 +134,6 @@ export default function Command() {
   ) : (
     <List
       isLoading={isQuerying}
-      enableFiltering={false}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search for destination folder to move files"
       isShowingDetail={isShowingDetail}
@@ -163,22 +150,50 @@ export default function Command() {
         ) : null
       }
     >
-      {!searchText ? (
+      {!searchText && props.launchType === "userInitiated" && pinnedResults.length > 0 ? (
         <FolderListSection
           title="Pinned"
           results={pinnedResults}
           isShowingDetail={isShowingDetail}
           resultIsPinned={resultIsPinned}
           renderActions={renderFolderActions}
+          isPinnedSection={true}
+        />
+      ) : !searchText && props.launchType === "userInitiated" ? (
+        // No pins and no search text
+        <List.EmptyView
+          title="No Pinned Folders"
+          description="Search to find folders or pin your favorites from the search command"
+          icon={Icon.Star}
         />
       ) : (
-        <FolderListSection
-          title="Results"
-          results={results}
-          isShowingDetail={isShowingDetail}
-          resultIsPinned={resultIsPinned}
-          renderActions={renderFolderActions}
-        />
+        <>
+          {isQuerying || (searchText && !hasSearched) ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for destination folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : hasSearched && results.length === 0 ? (
+            <List.EmptyView title="No Results" description="Try a different search term" icon={Icon.Folder} />
+          ) : !searchText ? (
+            // Only show this when there's no search text at all
+            <List.EmptyView
+              title="Enter a search term"
+              description="Type to search for folders to move files to"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : (
+            <FolderListSection
+              title="Results"
+              results={results}
+              isShowingDetail={isShowingDetail}
+              resultIsPinned={resultIsPinned}
+              renderActions={renderFolderActions}
+              isPinnedSection={false}
+            />
+          )}
+        </>
       )}
     </List>
   );

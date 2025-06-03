@@ -1,5 +1,22 @@
 # Mail Changelog
 
+## [🌟 New Feature] - 2025-05-19
+
+- 📧 Add the copy-foreground-mail-deeplink command to copy the foreground mail deeplink to the clipboard.
+- 🔥 Add new AI tool to get email link
+
+## [Fix] - 2025-05-12
+
+- "Paste Latest OTP Code" now correctly gets the latest OTP code across multiple mail accounts.
+
+## [New Feature] - 2025-04-30
+
+- Add "Paste Latest OTP Code" command
+
+## [New Feature] - 2025-04-07
+
+- Add russian aliases for folders
+
 ## [Fix] - 2025-04-02
 
 - Support for mail accounts with multiple sender addresses.

@@ -69,7 +69,7 @@ export default function main() {
         }
       }
     },
-    [setCurrentComic, lastViewed, readStatus, selectedId]
+    [setCurrentComic, lastViewed, readStatus, selectedId],
   );
 
   if (loading) return <List isLoading />;

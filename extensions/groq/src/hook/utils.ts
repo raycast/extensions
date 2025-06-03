@@ -2,6 +2,8 @@ import { encode } from "gpt-tokenizer";
 
 export const allModels = [
   { name: "Follow global model", id: "global" },
+  { name: "Llama 4 Scout 131k", id: "meta-llama/llama-4-scout-17b-16e-instruct" },
+  { name: "Llama 4 Maverick 131k", id: "meta-llama/llama-4-maverick-17b-128e-instruct" },
   { name: "DeepSeek R1 70B 128k", id: "deepseek-r1-distill-llama-70b" },
   { name: "DeepSeek R1 32B 128K", id: "deepseek-r1-distill-qwen-32b" },
   { name: "Llama 3.3 70B 128k", id: "llama-3.3-70b-versatile" },
@@ -34,6 +36,12 @@ export function countToken(content: string) {
 export function estimatePrice(prompt_token: number, output_token: number, model: string) {
   let price = 0;
   switch (model) {
+    case "meta-llama/llama-4-scout-17b-16e-instruct":
+      price = ((prompt_token * 0.11) / 1_000_000 + (output_token * 0.34) / 1_000_000) * 100;
+      break;
+    case "meta-llama/llama-4-maverick-17b-128e-instruct":
+      price = ((prompt_token * 0.5) / 1_000_000 + (output_token * 0.77) / 1_000_000) * 100;
+      break;
     case "deepseek-r1-distill-llama-70b":
       price = ((prompt_token * 0.75) / 1_000_000 + (output_token * 0.99) / 1_000_000) * 100;
       break;

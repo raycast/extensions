@@ -1,6 +1,13 @@
 # Google Calendar Changelog
+## [1.3.0] - 2025-05-30
+- Feat(create-event): Enable creating events with natural language duration string input.
+- Chore(deps): Added `parse-duration`.
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.1] - 2025-05-30
+
+- Changed "Copy Meeting Link" action shortcut to "cmd + shift + ," to not conflict with "Copy Event Title"
+
+## [1.2.0] - 2025-05-30
 
 - Added listing of calendars (request [#17411](https://github.com/raycast/extensions/issues/17411))
 - Fix issue with timezones in calendar event creation using AI

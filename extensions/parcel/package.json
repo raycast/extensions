@@ -6,7 +6,9 @@
   "icon": "extension-icon.png",
   "author": "marcmagn1",
   "contributors": [
-    "omarshahine"
+    "omarshahine",
+    "bendrucker",
+    "damian_duchnowski"
   ],
   "categories": [
     "Productivity",
@@ -34,7 +36,7 @@
       "description": "Get a list of your active or recent deliveries."
     },
     {
-      "name": "get-delivery-details", 
+      "name": "get-delivery-details",
       "title": "Get Delivery Details",
       "description": "Get detailed information about a specific delivery by tracking number."
     }
@@ -288,7 +290,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.92.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

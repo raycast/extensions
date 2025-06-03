@@ -1,11 +1,11 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
-import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
 import { Spaces } from "./views/SpacesView";
 import { BookmarkItem } from "./components/BookmarkItem";
 import { BookmarkFilter } from "./components/BookmarkFilter";
-import { LoginView } from "./views/LoginView";
+import { LoginFormInView } from "./components/LoginFormInView";
 import { useMe } from "./hooks/use-me.hook";
 import { useMyBookmarks } from "./hooks/use-bookmarks.hook";
 import { usePrepareBookmarkSearch } from "./hooks/use-prepare-bookmark-search.hook";
@@ -13,21 +13,30 @@ import { useBookmarkSearch } from "./hooks/use-bookmark-search.hook";
 import { useFilterBookmark } from "./hooks/use-filter-bookmark.hook";
 import { RequiredActions } from "./components/BookmarkItemActionPanel";
 import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
+import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
+import { cache } from "./utils/cache.util";
+import { useCachedState } from "@raycast/utils";
+import { CACHED_KEY_RANKING_ENTRIES } from "./utils/constants.util";
+import { RankingEntries } from "./types";
+import { trpc } from "./utils/trpc.util";
+import { SpaceAuthFormBody } from "./views/SpaceAuthForm";
 
 export function Body() {
   const me = useMe();
-  const [keyword, setKeyword] = useState("");
-
-  const spaceIds = useMemo(() => {
-    return me.data?.associatedSpaces.map((s) => s.id) || [];
-  }, [me.data?.associatedSpaces]);
-
+  const { enabledSpaceIds } = useEnabledSpaces();
+  const { data: authRequiredSpaceIds, refetch: refetchAuthRequiredSpaceIds } =
+    trpc.spaceAuth.listAuthRequiredSpaceIds.useQuery();
   const { data, isFetching, isFetched, refetch: refetchBookmarks } = useMyBookmarks();
+  const [rankingEntries, setRankingEntries] = useCachedState<RankingEntries>(CACHED_KEY_RANKING_ENTRIES, {});
 
-  const refetch = useCallback(() => {
-    refetchBookmarks();
-    me.refetch();
-  }, [refetchBookmarks, me.refetch]);
+  const [keyword, setKeyword] = useState("");
+  useEffect(() => {
+    cache.set("keyword", keyword);
+  }, [keyword]);
+
+  const refetch = useCallback(async () => {
+    await Promise.all([refetchBookmarks(), me.refetch(), refetchAuthRequiredSpaceIds()]);
+  }, [refetchBookmarks, me.refetch, refetchAuthRequiredSpaceIds]);
 
   const selectedTags = useMemo(() => {
     if (!me.data) return [];
@@ -55,9 +64,8 @@ export function Body() {
     untaggedPrepare: filteredData.filteredUntaggedPreparedBookmarks,
     taggedBookmarks: preparedData.taggedBookmarks,
     untaggedBookmarks: preparedData.untaggedBookmarks,
+    rankingEntries,
   });
-
-  const { loggedOutStatus } = useLoggedOutStatus();
 
   const { hasSpaceFilter, hasCreatorFilter, hasTagFilter } = filteredData;
   const hasFilter = hasSpaceFilter || hasCreatorFilter || hasTagFilter;
@@ -71,8 +79,21 @@ export function Body() {
     return hasFilter ? `Filtered by ${helpTexts.join(", ")} pattern` : "";
   }, [hasSpaceFilter, hasCreatorFilter, hasTagFilter, hasFilter]);
 
+  const unauthenticatedSpaceId = useMemo(() => {
+    if (!enabledSpaceIds || !authRequiredSpaceIds) {
+      return undefined;
+    }
+
+    return enabledSpaceIds.find((id) => authRequiredSpaceIds.includes(id));
+  }, [enabledSpaceIds, authRequiredSpaceIds]);
+
+  const { loggedOutStatus } = useLoggedOutStatus();
   if (loggedOutStatus) {
-    return <LoginView />;
+    return <LoginFormInView />;
+  }
+
+  if (unauthenticatedSpaceId) {
+    return <SpaceAuthFormBody spaceId={unauthenticatedSpaceId} refetch={refetch} />;
   }
 
   if (!data) {
@@ -109,7 +130,7 @@ export function Body() {
     return (
       <List
         isLoading={isFetching || !me.data}
-        searchBarAccessory={me.data && <BookmarkFilter spaceIds={spaceIds} me={me.data} />}
+        searchBarAccessory={me.data && enabledSpaceIds && <BookmarkFilter spaceIds={enabledSpaceIds} me={me.data} />}
         searchText={keyword}
         onSearchTextChange={setKeyword}
       >
@@ -125,7 +146,7 @@ export function Body() {
   return (
     <List
       isLoading={isFetching || !me.data}
-      searchBarAccessory={me.data && <BookmarkFilter spaceIds={spaceIds} me={me.data} />}
+      searchBarAccessory={me.data && enabledSpaceIds && <BookmarkFilter spaceIds={enabledSpaceIds} me={me.data} />}
       searchText={keyword}
       onSearchTextChange={setKeyword}
     >
@@ -133,7 +154,14 @@ export function Body() {
       {searchedTaggedList.length > 0 && (
         <List.Section title={`${searchedTaggedList.length} tagged items${filterText ? ` - ${filterText}` : ""}`}>
           {searchedTaggedList.map((item) => (
-            <BookmarkItem key={item.id} bookmark={item} me={me.data} refetch={refetch} />
+            <BookmarkItem
+              key={item.id}
+              bookmark={item}
+              me={me.data}
+              refetch={refetch}
+              rankingEntries={rankingEntries}
+              setRankingEntries={setRankingEntries}
+            />
           ))}
         </List.Section>
       )}
@@ -141,7 +169,14 @@ export function Body() {
       {searchedUntaggedList.length > 0 && (
         <List.Section title={`${searchedUntaggedList.length} untagged items${filterText ? ` - ${filterText}` : ""}`}>
           {searchedUntaggedList.map((item) => (
-            <BookmarkItem key={item.id} bookmark={item} me={me.data} refetch={refetch} />
+            <BookmarkItem
+              key={item.id}
+              bookmark={item}
+              me={me.data}
+              refetch={refetch}
+              rankingEntries={rankingEntries}
+              setRankingEntries={setRankingEntries}
+            />
           ))}
         </List.Section>
       )}

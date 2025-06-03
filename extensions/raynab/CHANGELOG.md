@@ -1,5 +1,49 @@
 # Raynab Changelog
 
+## [Improved Category Search & Fixed Budget Details] - 2025-05-30
+
+### ✨ New Features
+- Support for searching categories with emoji icons in their names
+
+### 🐞 Bug Fixes
+- Category search now works properly for categories that start with emoji icons
+- Budget details in "Show Monthly Budget" now correctly shows the current month's data instead of always showing the first month
+
+### 🔧 Technical Updates
+- Updated "Open in Ynab" button text to "Open in YNAB" to match YNAB's branding
+
+## [AI Budget Tools & Improvements] - 2025-05-21
+
+### ✨ New Features - AI Extensions
+- Added new AI Extensions for natural language budget queries:
+  - `get-budget`: Query budget information including age of money and monthly details
+    - Example: "What is the age of money in my March budget?"
+    - Example: "Tell me about this month's budget?"
+  - `get-big-numbers`: Track spending for today, this week, and this month
+    - Example: "How much have I spent today?"
+    - Example: "What are my big three numbers?"
+  - `get-transactions`: Search and filter transactions with natural language
+    - Example: "Show me all transactions from Taco Bell last month"
+    - Example: "Find my largest expense this week"
+  - `get-categories`: Query category information and spending
+    - Example: "How much did I spend on groceries last month?"
+    - Example: "Which categories are over budget?"
+
+### 💎 Improvements
+- Enhanced budget data retrieval with proper date formatting
+- Improved error handling for budget queries by sending you to the select a budget screen
+- Added detailed logging for budget tool debugging
+- Enhanced currency formatting in budget responses
+- Added support for natural language queries across all tools
+- Improved error messages and user feedback for AI tool operations
+
+### 🐞 Bug Fixes
+- Fixed date format mismatch in budget month queries
+- Fixed budget data retrieval for specific months
+- Resolved issues with budget currency formatting
+- Fixed error handling in AI tool operations
+- Resolved issues with transaction form validation for create and edit
+
 ## [Improvements & Bug fixes] - 2025-02-14
 
 - Add a dropdown to choose the transaction's payee. Optionally allow manual input

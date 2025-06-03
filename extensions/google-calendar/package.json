@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [
-    "j3lte"
+    "j3lte",
+    "markusjura",
+    "fabitosh"
   ],
   "categories": [
     "Productivity",
@@ -144,12 +146,14 @@
     "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
     "humanize-duration": "^3.32.1",
-    "nanoid": "^5.1.5"
+    "nanoid": "^5.1.5",
+    "parse-duration": "^2.1.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/humanize-duration": "^3.27.4",
     "@types/node": "22.13.14",
+    "@types/parse-duration": "^0.1.0",
     "@types/react": "19.0.12",
     "eslint": "^9.23.0",
     "prettier": "^3.5.3",

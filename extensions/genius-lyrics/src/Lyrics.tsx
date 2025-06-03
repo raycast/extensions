@@ -9,7 +9,7 @@ export default function Lyrics({ url, title }: { url: string; title: string }) {
 
   const $ = load(data || "");
   $("br").text("\n\n");
-  const text = $("[data-lyrics-container=true]").text();
+  const text = $("[data-lyrics-container=true]").find("[data-exclude-from-selection=true]").remove().end().text();
 
   return (
     <Detail

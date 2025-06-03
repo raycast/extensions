@@ -6,7 +6,10 @@
   "icon": "inbox-ai-icon.png",
   "author": "dreetje",
   "license": "MIT",
-  "categories": ["Applications", "Productivity"],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "screenshot",
@@ -79,5 +82,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

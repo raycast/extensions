@@ -7,7 +7,7 @@ import fetch from "node-fetch";
 import crypto from "crypto";
 
 import { Favorite, FavoriteRecord, FavoritesResponse, Module } from "../types";
-import { extractParamFromURL } from "../utils/extractParamFromURL";
+import { extractPathAndParam } from "../utils/extractPathAndParam";
 import useInstances from "./useInstances";
 
 const useFavorites = () => {
@@ -71,7 +71,7 @@ const useFavorites = () => {
           if (!favoriteURL.startsWith("/")) {
             favoriteURL = "/" + favoriteURL;
           }
-          urlsParams.push({ ...extractParamFromURL(`${instanceUrl}${favoriteURL}`), id: favorite.id });
+          urlsParams.push({ ...extractPathAndParam(favoriteURL), id: favorite.id });
         }
 
         if (favorite.favorites) {
@@ -88,11 +88,11 @@ const useFavorites = () => {
     return favoritesGroups.find((favorite) => favorite.applicationId === groupId)?.id || "";
   };
 
-  const isUrlInFavorites = useCallback(
-    (url: string) => {
+  const isInFavorites = useCallback(
+    (path: string) => {
       if (!favoritesData) return "";
 
-      const menuURLData = extractParamFromURL(url);
+      const menuURLData = extractPathAndParam(path);
       const favorite = favoritesData.find((favorite) => {
         return favorite.path == menuURLData.path && favorite.param == menuURLData.param;
       });
@@ -441,7 +441,7 @@ const useFavorites = () => {
     favoritesGroups,
     isLoading,
     errorFetching,
-    isUrlInFavorites,
+    isInFavorites,
     isMenuInFavorites,
     revalidateFavorites,
     addApplicationToFavorites,
