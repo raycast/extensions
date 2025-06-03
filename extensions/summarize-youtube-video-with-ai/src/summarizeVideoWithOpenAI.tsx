@@ -51,7 +51,6 @@ export default function SummarizeVideoWithOpenAI(
 
   const [historyItem, setHistoryItem] = useState<string | null>(null);
 
-  // Add to history when summary is first created
   useEffect(() => {
     if (summary && videoData && transcript && !historyItem) {
       const item = {
@@ -68,7 +67,6 @@ export default function SummarizeVideoWithOpenAI(
     }
   }, [summary, videoData, transcript, addToHistory, videoURL, historyItem, questions]);
 
-  // Update history when questions change
   useEffect(() => {
     if (historyItem && questions.length > 0) {
       addToHistory({

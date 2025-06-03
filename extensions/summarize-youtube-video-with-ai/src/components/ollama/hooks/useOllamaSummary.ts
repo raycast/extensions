@@ -1,9 +1,9 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import OpenAI from "openai";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { OLLAMA_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
-import { OllamaPreferences } from "../../../summarizeVideoWithOllama";
+import type { OllamaPreferences } from "../../../summarizeVideoWithOllama";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
 
 type GetOllamaSummaryProps = {
@@ -37,7 +37,7 @@ export const useOllamaSummary = ({ transcript, setSummaryIsLoading, setSummary }
 
     const stream = openai.beta.chat.completions.stream({
       model: ollamaModel || OLLAMA_MODEL,
-      temperature: parseFloat(creativity),
+      temperature: Number.parseFloat(creativity),
       messages: [{ role: "user", content: aiInstructions }],
       stream: true,
     });
@@ -71,5 +71,5 @@ export const useOllamaSummary = ({ transcript, setSummaryIsLoading, setSummary }
     return () => {
       abortController.abort();
     };
-  }, [transcript]);
+  }, [transcript, abortController, creativity, language, ollamaEndpoint, ollamaModel, setSummary, setSummaryIsLoading]);
 };

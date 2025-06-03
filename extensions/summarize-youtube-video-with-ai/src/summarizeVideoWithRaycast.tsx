@@ -48,7 +48,6 @@ export default function SummarizeVideoWithRaycast(
 
   const [historyItem, setHistoryItem] = useState<string | null>(null);
 
-  // Add to history when summary is first created
   useEffect(() => {
     if (summary && videoData && !historyItem) {
       const item = {
@@ -65,7 +64,6 @@ export default function SummarizeVideoWithRaycast(
     }
   }, [summary, videoData, addToHistory, videoURL, historyItem, questions]);
 
-  // Update history when questions change
   useEffect(() => {
     if (historyItem && questions.length > 0) {
       addToHistory({

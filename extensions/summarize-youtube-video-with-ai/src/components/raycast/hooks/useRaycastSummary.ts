@@ -1,8 +1,7 @@
 import { AI, environment, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
-
-import { RaycastPreferences } from "../../../summarizeVideoWithRaycast";
+import type { RaycastPreferences } from "../../../summarizeVideoWithRaycast";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
 
 type GetRaycastSummaryProps = {
@@ -11,7 +10,7 @@ type GetRaycastSummaryProps = {
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastSummaryProps) => {
+export const useRaycastSummary = ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastSummaryProps) => {
   const abortController = new AbortController();
   const preferences = getPreferenceValues() as RaycastPreferences;
   const { creativity, language } = preferences;
@@ -32,7 +31,7 @@ export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSu
     const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
 
     const stream = AI.ask(aiInstructions, {
-      creativity: parseInt(creativity),
+      creativity: Number.parseInt(creativity),
       signal: abortController.signal,
     });
 
@@ -72,5 +71,5 @@ export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSu
     return () => {
       abortController.abort();
     };
-  }, [transcript]);
+  }, [transcript, abortController, language, creativity, setSummary, setSummaryIsLoading]);
 };

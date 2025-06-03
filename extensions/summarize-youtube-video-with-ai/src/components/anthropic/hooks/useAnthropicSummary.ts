@@ -1,10 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { ANTHROPIC_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
-
-import { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
+import type { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
 
 type GetAnthropicSummaryProps = {
@@ -55,7 +54,7 @@ export const useAnthropicSummary = async ({
         max_tokens: 8192,
         stream: true,
         messages: [{ role: "user", content: aiInstructions }],
-        temperature: parseInt(creativity),
+        temperature: Number.parseInt(creativity),
       },
       { signal: abortController.signal },
     );
@@ -89,5 +88,14 @@ export const useAnthropicSummary = async ({
     return () => {
       abortController.abort();
     };
-  }, [transcript]);
+  }, [
+    transcript,
+    abortController,
+    anthropicApiToken,
+    anthropicModel,
+    creativity,
+    language,
+    setSummary,
+    setSummaryIsLoading,
+  ]);
 };

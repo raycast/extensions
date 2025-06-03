@@ -17,7 +17,6 @@ export function useQuestions(summary: string | undefined) {
     },
   ]);
 
-  // Set initial summary as first answered question
   useEffect(() => {
     if (summary) {
       setQuestions((prevQuestions) => [

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import { Question } from "../../hooks/useQuestions";
+import type { Question } from "../../hooks/useQuestions";
 import FollowUpList from "./FollowUpList";
 
 type SummaryActionsProps = {

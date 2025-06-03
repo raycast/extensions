@@ -13,7 +13,11 @@ type FollowUpListProps = {
   onQuestionsUpdate?: (updatedQuestions: Question[]) => void;
 };
 
-export default function FollowUpList({ transcript, questions: initialQuestions, onQuestionsUpdate }: FollowUpListProps) {
+export default function FollowUpList({
+  transcript,
+  questions: initialQuestions,
+  onQuestionsUpdate,
+}: FollowUpListProps) {
   const [question, setQuestion] = useState("");
   const [selectedQuestionId, setSelectedQuestionId] = useState(initialQuestions[0]?.id ?? "");
   const [questions, setQuestions] = useState(initialQuestions);
@@ -21,7 +25,7 @@ export default function FollowUpList({ transcript, questions: initialQuestions, 
   const handleAdditionalQuestion = async () => {
     if (!question) return;
     const qID = generateQuestionId();
-    const questionText = question; // Store the current question text
+    const questionText = question;
 
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -34,7 +38,7 @@ export default function FollowUpList({ transcript, questions: initialQuestions, 
     const updatedQuestions = [
       {
         id: qID,
-        question: questionText, // Use the stored question text
+        question: questionText,
         answer: "",
       },
       ...questions,
@@ -63,10 +67,9 @@ export default function FollowUpList({ transcript, questions: initialQuestions, 
     answer.finally(() => {
       toast.hide();
       setSelectedQuestionId(qID);
-      
-      // Make sure we sync the final state of questions to parent component
+
       if (onQuestionsUpdate) {
-        setQuestions(currentQuestions => {
+        setQuestions((currentQuestions) => {
           onQuestionsUpdate(currentQuestions);
           return currentQuestions;
         });

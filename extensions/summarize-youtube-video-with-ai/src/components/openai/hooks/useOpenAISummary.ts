@@ -1,10 +1,9 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import OpenAI from "openai";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { OPENAI_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
-
-import { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
+import type { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
 
 type GetOpenAISummaryProps = {
@@ -13,7 +12,7 @@ type GetOpenAISummaryProps = {
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetOpenAISummaryProps) => {
+export const useOpenAISummary = ({ transcript, setSummaryIsLoading, setSummary }: GetOpenAISummaryProps) => {
   const abortController = new AbortController();
   const preferences = getPreferenceValues() as OpenAIPreferences;
   const { creativity, openaiApiToken, language, openaiEndpoint, openaiModel } = preferences;
@@ -50,7 +49,7 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
 
     const stream = openai.beta.chat.completions.stream({
       model: openaiModel || OPENAI_MODEL,
-      temperature: parseInt(creativity),
+      temperature: Number.parseInt(creativity),
       messages: [{ role: "user", content: aiInstructions }],
       stream: true,
     });
@@ -84,5 +83,15 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
     return () => {
       abortController.abort();
     };
-  }, [transcript]);
+  }, [
+    transcript,
+    language,
+    openaiApiToken,
+    openaiEndpoint,
+    openaiModel,
+    creativity,
+    setSummary,
+    setSummaryIsLoading,
+    abortController,
+  ]);
 };
