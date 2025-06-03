@@ -23,6 +23,7 @@ export function useRaycastFollowUpQuestion({
   const preferences = getPreferenceValues() as RaycastPreferences;
   const { creativity } = preferences;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `abortController ` in dependencies will lead to an error
   useEffect(() => {
     const handleAdditionalQuestion = async () => {
       if (!question || !transcript) return;
@@ -69,5 +70,5 @@ export function useRaycastFollowUpQuestion({
     return () => {
       abortController.abort();
     };
-  }, [question, transcript, abortController, creativity, setQuestion, setQuestions]);
+  }, [question, transcript, creativity, setQuestion, setQuestions]);
 }
