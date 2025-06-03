@@ -31,7 +31,7 @@
     {
       "name": "generate-project-code",
       "title": "Generate Project Code for AI",
-      "subtitle": "Project to Text",
+      "subtitle": "Project Code to Text",
       "description": "Select a project directory to generate a consolidated code file.",
       "mode": "view",
       "icon": "command-icon.png"
