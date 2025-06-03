@@ -1,6 +1,6 @@
 # United Nations Extension
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-06-03
 
 - Replace broken UN documents GA RSS feed source
 - Add SC, HRC and ESC feeds
