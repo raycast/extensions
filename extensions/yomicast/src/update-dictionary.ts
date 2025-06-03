@@ -51,6 +51,10 @@ export default async function Command() {
     toast.style = Toast.Style.Success;
     toast.title = "Dictionary updated successfully";
     toast.message = "";
+  } else if (!abortSignal.aborted) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to update dictionary";
+    toast.message = "Please try again later.";
   }
 
   db.close();

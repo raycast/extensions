@@ -61,8 +61,7 @@ export function populateTables(db: Database, toast: Toast, abortSignal: AbortSig
   console.log("Populating dictionary...");
   return new Promise<boolean>((resolve) => {
     let count = 0;
-    const total = 212062; // TODO: Get the total number from somewhere more reliable
-    console.time("Populating tables");
+    const total = 212062;
 
     // No need for rollback journal during initial population
     db.run("PRAGMA journal_mode = OFF;");
@@ -127,13 +126,12 @@ export function populateTables(db: Database, toast: Toast, abortSignal: AbortSig
       count += 1;
       if (count % 1000 === 0) {
         toast.title = "Indexing database...";
-        toast.message = `Progress: ${Math.round((count / total) * 100)}%`;
+        toast.message = `Progress: ${Math.round((count / Math.max(total, count)) * 100)}%`;
         toast.style = Toast.Style.Animated;
       }
     });
     loader.onEnd(() => {
       db.run("COMMIT;");
-      console.timeEnd("Populating tables");
       console.log(`Indexed ${count} entries.`);
       console.log("Dictionary loaded successfully.");
       resolve(true);

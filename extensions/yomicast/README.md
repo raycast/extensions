@@ -1,8 +1,6 @@
-# Yomicast
+# Yomicast – Offline Japanese-English Dictionary
 
-Offline Japanese-English dictionary lookup. Yomitan's instant search within Raycast.
-
-Search kanji, kana, romaji, and English terms without an internet connection.
+Offline Japanese-English dictionary. Instant search for kanji, kana, and English terms.
 
 ### Getting Started
 

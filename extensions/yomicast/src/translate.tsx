@@ -45,10 +45,7 @@ async function getDb() {
 function search(db: Database, query: string) {
   const japaneseQuery = normalizeKana(query);
   if (!isJapanese(japaneseQuery)) {
-    console.time(`searchEnglish ${query}`);
-    const def = searchEnglish(db, query);
-    console.timeEnd(`searchEnglish ${query}`);
-    return def;
+    return searchEnglish(db, query);
   }
 
   if (isKana(japaneseQuery)) {
@@ -158,7 +155,7 @@ export default function Command() {
     return res;
   }, [db, query]);
 
-  const formattedData = results.map((item) => formatKanjiItem(item, db!));
+  const formattedData = db ? results.map((item) => formatKanjiItem(item, db)) : [];
 
   return (
     <List
