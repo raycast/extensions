@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Update] - 2024-06-03
+- Update to the package.json description to include Outlook as a valid calendar provider.
+
 ## [Fixes] - 2025-04-02
 - Don't split surrogate pairs
 
