@@ -1,5 +1,4 @@
-"use client"
-
+"use client";
 
 import {
   Form,
@@ -11,96 +10,96 @@ import {
   popToRoot,
   Icon,
   List,
-} from "@raycast/api"
-import { createHash } from "crypto"
-import { useState } from "react"
-import { HashDropdown } from "./components/dropdown"
-import type { Values } from "./types"
+} from "@raycast/api";
+import { createHash } from "crypto";
+import { useState } from "react";
+import { HashDropdown } from "./components/dropdown";
+import type { Values } from "./types";
 
 interface ExtensionPreferences {
-  popRootAfterSubmit: boolean
+  popRootAfterSubmit: boolean;
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<ExtensionPreferences>()
-  const [isLoading, setIsLoading] = useState(false)
-  const [results, setResults] = useState<Array<{ algorithm: string; hash: string }>>([])
-  const [originalText, setOriginalText] = useState<string>("")
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<Array<{ algorithm: string; hash: string }>>([]);
+  const [originalText, setOriginalText] = useState<string>("");
 
   async function handleSubmit(values: Values) {
     if (!values.textfield.trim()) {
       showToast({
         title: "Error",
         message: "Please enter some text to hash",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
-    const text = values.textfield
-    setOriginalText(text)
+    setIsLoading(true);
+    const text = values.textfield;
+    setOriginalText(text);
 
     try {
-      const buff = Buffer.from(text, "utf8")
+      const buff = Buffer.from(text, "utf8");
 
-      const algorithms = ["md5", "sha1", "sha256", "sha512"]
-      const allResults = []
+      const algorithms = ["md5", "sha1", "sha256", "sha512"];
+      const allResults = [];
 
       for (const algorithm of algorithms) {
         try {
-          const hash = createHash(algorithm)
-          hash.update(buff)
+          const hash = createHash(algorithm);
+          hash.update(buff);
           allResults.push({
             algorithm: algorithm.toUpperCase(),
             hash: hash.digest("hex"),
-          })
+          });
         } catch (error) {
-          console.warn(`Algorithm ${algorithm} not available`)
+          console.warn(`Algorithm ${algorithm} not available`);
         }
       }
 
       if (!algorithms.includes(values.dropdown)) {
         try {
-          const hash = createHash(values.dropdown)
-          hash.update(buff)
+          const hash = createHash(values.dropdown);
+          hash.update(buff);
           allResults.unshift({
             algorithm: values.dropdown.toUpperCase(),
             hash: hash.digest("hex"),
-          })
+          });
         } catch (error) {
-          console.warn(`Selected algorithm ${values.dropdown} not available`)
+          console.warn(`Selected algorithm ${values.dropdown} not available`);
         }
       }
 
-      setResults(allResults)
+      setResults(allResults);
 
-      const selectedHash = allResults.find((r) => r.algorithm.toLowerCase() === values.dropdown)?.hash
+      const selectedHash = allResults.find((r) => r.algorithm.toLowerCase() === values.dropdown)?.hash;
       if (selectedHash) {
-        await Clipboard.copy(selectedHash)
+        await Clipboard.copy(selectedHash);
         await showToast({
           title: `${values.dropdown.toUpperCase()} hash copied!`,
           message: `Text length: ${text.length} characters`,
-        })
+        });
       }
 
       if (preferences.popRootAfterSubmit) {
-        await popToRoot()
+        await popToRoot();
       }
     } catch (err) {
       if (err instanceof Error) {
         await showToast({
           title: "Error",
           message: err.message,
-        })
+        });
       }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   async function copyHash(hash: string, algorithm: string) {
-    await Clipboard.copy(hash)
-    await showToast({ title: `${algorithm} hash copied to clipboard` })
+    await Clipboard.copy(hash);
+    await showToast({ title: `${algorithm} hash copied to clipboard` });
   }
 
   if (results.length > 0) {
@@ -129,8 +128,8 @@ export default function Command() {
                   title="Back to Form"
                   icon={Icon.ArrowLeft}
                   onAction={() => {
-                    setResults([])
-                    setOriginalText("")
+                    setResults([]);
+                    setOriginalText("");
                   }}
                 />
               </ActionPanel>
@@ -138,7 +137,7 @@ export default function Command() {
           />
         ))}
       </List>
-    )
+    );
   }
 
   return (
@@ -158,5 +157,5 @@ export default function Command() {
       />
       <HashDropdown />
     </Form>
-  )
+  );
 }

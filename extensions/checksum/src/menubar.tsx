@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType } from "@raycast/api"
+import { MenuBarExtra, Icon, launchCommand, LaunchType } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -8,9 +8,9 @@ export default function Command() {
         icon={Icon.CheckCircle}
         onAction={async () => {
           try {
-            await launchCommand({ name: "checksum", type: LaunchType.UserInitiated })
+            await launchCommand({ name: "checksum", type: LaunchType.UserInitiated });
           } catch (error) {
-            console.error(error)
+            console.error(error);
           }
         }}
       />
@@ -20,9 +20,9 @@ export default function Command() {
         icon={Icon.Document}
         onAction={async () => {
           try {
-            await launchCommand({ name: "hashfile", type: LaunchType.UserInitiated })
+            await launchCommand({ name: "hashfile", type: LaunchType.UserInitiated });
           } catch (error) {
-            console.error(error)
+            console.error(error);
           }
         }}
       />
@@ -31,12 +31,12 @@ export default function Command() {
         icon={Icon.Text}
         onAction={async () => {
           try {
-            await launchCommand({ name: "hashtext", type: LaunchType.UserInitiated })
+            await launchCommand({ name: "hashtext", type: LaunchType.UserInitiated });
           } catch (error) {
-            console.error(error)
+            console.error(error);
           }
         }}
       />
     </MenuBarExtra>
-  )
+  );
 }

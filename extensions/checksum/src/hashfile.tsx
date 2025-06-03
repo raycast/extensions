@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Form,
@@ -10,96 +10,96 @@ import {
   popToRoot,
   Icon,
   List,
-} from "@raycast/api"
-import { createHash } from "crypto"
-import fs from "fs"
-import path from "path"
-import { useState } from "react"
-import { HashDropdown } from "./components/dropdown"
-import type { Values } from "./types"
+} from "@raycast/api";
+import { createHash } from "crypto";
+import fs from "fs";
+import path from "path";
+import { useState } from "react";
+import { HashDropdown } from "./components/dropdown";
+import type { Values } from "./types";
 
 interface ExtensionPreferences {
-  popRootAfterSubmit: boolean
+  popRootAfterSubmit: boolean;
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<ExtensionPreferences>()
-  const [isLoading, setIsLoading] = useState(false)
-  const [results, setResults] = useState<Array<{ algorithm: string; hash: string }>>([])
-  const [fileInfo, setFileInfo] = useState<{ name: string; size: string } | null>(null)
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<Array<{ algorithm: string; hash: string }>>([]);
+  const [fileInfo, setFileInfo] = useState<{ name: string; size: string } | null>(null);
 
   async function handleSubmit(values: Values) {
     if (!values.file || values.file.length === 0) {
       showToast({
         title: "Error",
         message: "Please select a file",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
-    const filePath = values.file[0]
+    setIsLoading(true);
+    const filePath = values.file[0];
 
     try {
       // Get file info
-      const stats = fs.statSync(filePath)
-      const fileSize = (stats.size / 1024 / 1024).toFixed(2)
-      const fileName = path.basename(filePath)
+      const stats = fs.statSync(filePath);
+      const fileSize = (stats.size / 1024 / 1024).toFixed(2);
+      const fileName = path.basename(filePath);
 
-      setFileInfo({ name: fileName, size: fileSize })
+      setFileInfo({ name: fileName, size: fileSize });
 
-      const buff = fs.readFileSync(filePath)
-      const hash = createHash(values.dropdown)
-      hash.update(buff)
-      const result = hash.digest("hex")
+      const buff = fs.readFileSync(filePath);
+      const hash = createHash(values.dropdown);
+      hash.update(buff);
+      const result = hash.digest("hex");
 
-      const commonHashes = ["md5", "sha1", "sha256", "sha512"]
-      const allResults = []
+      const commonHashes = ["md5", "sha1", "sha256", "sha512"];
+      const allResults = [];
 
       for (const algorithm of commonHashes) {
         if (algorithm === values.dropdown) {
-          allResults.push({ algorithm: algorithm.toUpperCase(), hash: result })
+          allResults.push({ algorithm: algorithm.toUpperCase(), hash: result });
         } else {
           try {
-            const h = createHash(algorithm)
-            h.update(buff)
-            allResults.push({ algorithm: algorithm.toUpperCase(), hash: h.digest("hex") })
+            const h = createHash(algorithm);
+            h.update(buff);
+            allResults.push({ algorithm: algorithm.toUpperCase(), hash: h.digest("hex") });
           } catch (error) {
-            console.warn(`Algorithm ${algorithm} not available`)
+            console.warn(`Algorithm ${algorithm} not available`);
           }
         }
       }
 
       if (!commonHashes.includes(values.dropdown)) {
-        allResults.unshift({ algorithm: values.dropdown.toUpperCase(), hash: result })
+        allResults.unshift({ algorithm: values.dropdown.toUpperCase(), hash: result });
       }
 
-      setResults(allResults)
+      setResults(allResults);
 
-      await Clipboard.copy(result)
+      await Clipboard.copy(result);
       await showToast({
         title: `${values.dropdown.toUpperCase()} hash copied!`,
         message: `${fileName} (${fileSize} MB)`,
-      })
+      });
 
       if (preferences.popRootAfterSubmit) {
-        await popToRoot()
+        await popToRoot();
       }
     } catch (err) {
       if (err instanceof Error) {
         await showToast({
           title: "Error",
           message: err.message,
-        })
+        });
       }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   async function copyHash(hash: string, algorithm: string) {
-    await Clipboard.copy(hash)
-    await showToast({ title: `${algorithm} hash copied to clipboard` })
+    await Clipboard.copy(hash);
+    await showToast({ title: `${algorithm} hash copied to clipboard` });
   }
 
   if (results.length > 0 && fileInfo) {
@@ -123,8 +123,8 @@ export default function Command() {
                   title="Back to Form"
                   icon={Icon.ArrowLeft}
                   onAction={() => {
-                    setResults([])
-                    setFileInfo(null)
+                    setResults([]);
+                    setFileInfo(null);
                   }}
                 />
               </ActionPanel>
@@ -132,7 +132,7 @@ export default function Command() {
           />
         ))}
       </List>
-    )
+    );
   }
 
   return (
@@ -152,5 +152,5 @@ export default function Command() {
       />
       <HashDropdown />
     </Form>
-  )
+  );
 }
