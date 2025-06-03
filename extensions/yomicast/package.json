@@ -32,7 +32,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.99.2",
-    "@raycast/utils": "^1.17.0",
     "@scriptin/jmdict-simplified-loader": "^3.6.1",
     "adm-zip": "^0.5.16",
     "sql.js": "1.13.0",
