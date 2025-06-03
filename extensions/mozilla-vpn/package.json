@@ -12,11 +12,7 @@
   "commands": [
     {
       "name": "index",
-<<<<<<< HEAD
       "title": "VPN Connect",
-=======
-      "title": "Vpn Connect",
->>>>>>> f5fa9dac5 (Change vpn text case)
       "subtitle": "Mozilla VPN",
       "description": "Activate or deactivate the Mozilla VPN.",
       "mode": "view"
@@ -35,24 +31,11 @@
     "prettier": "^3.4.2",
     "typescript": "^5.7.2"
   },
-  "overrides": {
-    "electron": "^33.2.1",
-    "eslint": "^8.57.1",
-    "cross-spawn": "^7.0.6",
-    "react-devtools": "6.1.1",
-    "react-devtools-core": "^4.28.5",
-    "ip": "^2.0.1",
-    "ws": "^8.18.0"
-  },
-  "engines": {
-    "node": ">=22.14.0"
-  },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish --skip-validation",
     "prettier:check": "prettier --check '**/*.{js,jsx,ts,tsx,json,css,md}'",
     "prettier:format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,md}'"
   }
