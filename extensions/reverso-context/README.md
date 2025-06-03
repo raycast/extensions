@@ -1,6 +1,8 @@
+# Reverso Context
+
 Get Translations and Examples via Reverso Context
 
-# Usage
+## Usage
 
 - `home` will translate "home" from default source language to default target language. (Auto reverse direction if enabled)
 - `>es home` will translate "home" from default language to Spanish.
