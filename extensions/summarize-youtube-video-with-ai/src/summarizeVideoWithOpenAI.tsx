@@ -1,10 +1,12 @@
 import { List, type LaunchProps } from "@raycast/api";
 import nodeFetch from "node-fetch";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useOpenAIFollowUpQuestion } from "./components/openai/hooks/useOpenAIFollowUpQuestion";
 import { useOpenAISummary } from "./components/openai/hooks/useOpenAISummary";
 import SummaryDetails from "./components/summary/SummaryDetails";
+import { aiService } from "./const/aiService";
 import { useGetVideoUrl } from "./hooks/useGetVideoUrl";
+import { useHistory } from "./hooks/useHistory";
 import { useQuestions } from "./hooks/useQuestions";
 import { useVideoData } from "./hooks/useVideoData";
 (globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
@@ -29,6 +31,7 @@ export default function SummarizeVideoWithOpenAI(
   const [summary, setSummary] = useState<string | undefined>();
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
   const [videoURL, setVideoURL] = useState<string | null | undefined>(props.arguments.video);
+  const { addToHistory } = useHistory();
 
   useGetVideoUrl({
     input: props.arguments.video || props.launchContext?.video,
@@ -36,7 +39,7 @@ export default function SummarizeVideoWithOpenAI(
   });
 
   const { videoData, transcript } = useVideoData(videoURL);
-  const { questions, setQuestions, question, setQuestion, handleAdditionalQuestion } = useQuestions(summary);
+  const { questions, setQuestions, question, setQuestion } = useQuestions(summary);
 
   useOpenAISummary({ transcript, setSummaryIsLoading, setSummary });
   useOpenAIFollowUpQuestion({
@@ -44,7 +47,22 @@ export default function SummarizeVideoWithOpenAI(
     setQuestion,
     transcript,
     question,
+    videoId: videoData?.videoId,
   });
+
+  useEffect(() => {
+    if (summary && videoData && transcript) {
+      addToHistory({
+        aiService: aiService,
+        createdAt: new Date(),
+        id: videoData.videoId,
+        questions,
+        summary,
+        title: videoData.title,
+        videoUrl: videoURL ?? "",
+      });
+    }
+  }, [summary, videoData, questions, addToHistory, transcript, videoURL]);
 
   if (!videoData || !transcript) return <List isLoading={true} />;
 
@@ -60,7 +78,6 @@ export default function SummarizeVideoWithOpenAI(
   return (
     <SummaryDetails
       questions={questions}
-      onQuestionSubmit={handleAdditionalQuestion}
       summary={markdown}
       summaryIsLoading={summaryIsLoading}
       transcript={transcript}

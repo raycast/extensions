@@ -3,8 +3,9 @@ import OpenAI from "openai";
 import { useEffect } from "react";
 import { OLLAMA_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
-import { Question } from "../../../hooks/useQuestions";
-import { OllamaPreferences } from "../../../summarizeVideoWithOllama";
+import { useHistory } from "../../../hooks/useHistory";
+import type { Question } from "../../../hooks/useQuestions";
+import type { OllamaPreferences } from "../../../summarizeVideoWithOllama";
 import { generateQuestionId } from "../../../utils/generateQuestionId";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
@@ -13,9 +14,17 @@ type FollowUpQuestionParams = {
   setQuestion: React.Dispatch<React.SetStateAction<string>>;
   transcript: string | undefined;
   question: string;
+  videoId?: string;
 };
 
-export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcript, question }: FollowUpQuestionParams) {
+export function useOllamaFollowUpQuestion({
+  setQuestions,
+  setQuestion,
+  transcript,
+  question,
+  videoId,
+}: FollowUpQuestionParams) {
+  const { updateHistory } = useHistory();
   const preferences = getPreferenceValues() as OllamaPreferences;
   const { ollamaEndpoint, ollamaModel, creativity } = preferences;
 
@@ -51,7 +60,7 @@ export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcrip
           model: ollamaModel || OLLAMA_MODEL,
           messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
           stream: true,
-          creativity: parseInt(creativity),
+          creativity: Number.parseInt(creativity),
         },
         { signal: abortController.signal },
       );
@@ -66,6 +75,14 @@ export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcrip
       answer.finalChatCompletion().then(() => {
         toast.hide();
         setQuestion("");
+
+        // Update the history with the new questions
+        if (videoId) {
+          setQuestions((prevQuestions) => {
+            updateHistory(videoId, prevQuestions);
+            return prevQuestions;
+          });
+        }
       });
 
       if (abortController.signal.aborted) return;
@@ -83,5 +100,15 @@ export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcrip
     return () => {
       abortController.abort();
     };
-  }, [question, transcript]);
+  }, [
+    question,
+    transcript,
+    creativity,
+    ollamaEndpoint,
+    ollamaModel,
+    setQuestion,
+    setQuestions,
+    updateHistory,
+    videoId,
+  ]);
 }

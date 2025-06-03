@@ -1,10 +1,12 @@
 import { List, type LaunchProps } from "@raycast/api";
 import nodeFetch from "node-fetch";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRaycastFollowUpQuestion } from "./components/raycast/hooks/useRaycastFollowUpQuestion";
 import { useRaycastSummary } from "./components/raycast/hooks/useRaycastSummary";
 import SummaryDetails from "./components/summary/SummaryDetails";
+import { aiService } from "./const/aiService";
 import { useGetVideoUrl } from "./hooks/useGetVideoUrl";
+import { useHistory } from "./hooks/useHistory";
 import { useQuestions } from "./hooks/useQuestions";
 import { useVideoData } from "./hooks/useVideoData";
 (globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
@@ -26,6 +28,7 @@ export default function SummarizeVideoWithRaycast(
   const [summary, setSummary] = useState<string | undefined>();
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
   const [videoURL, setVideoURL] = useState<string | null | undefined>(props.arguments.video);
+  const { addToHistory } = useHistory();
 
   useGetVideoUrl({
     input: props.arguments.video || props.launchContext?.video,
@@ -33,7 +36,7 @@ export default function SummarizeVideoWithRaycast(
   });
 
   const { videoData, transcript } = useVideoData(videoURL);
-  const { questions, setQuestions, question, setQuestion, handleAdditionalQuestion } = useQuestions(summary);
+  const { questions, setQuestions, question, setQuestion } = useQuestions(summary);
 
   useRaycastSummary({ transcript, setSummaryIsLoading, setSummary });
   useRaycastFollowUpQuestion({
@@ -41,7 +44,22 @@ export default function SummarizeVideoWithRaycast(
     setQuestion,
     transcript,
     question,
+    videoId: videoData?.videoId,
   });
+
+  useEffect(() => {
+    if (summary && videoData) {
+      addToHistory({
+        aiService: aiService,
+        createdAt: new Date(),
+        id: videoData.videoId,
+        questions,
+        summary,
+        title: videoData.title,
+        videoUrl: videoURL ?? "",
+      });
+    }
+  }, [summary, videoData, questions, addToHistory, videoURL]);
 
   if (!videoData || !transcript) return <List isLoading={true} />;
 
@@ -57,7 +75,6 @@ export default function SummarizeVideoWithRaycast(
   return (
     <SummaryDetails
       questions={questions}
-      onQuestionSubmit={handleAdditionalQuestion}
       summary={markdown}
       summaryIsLoading={summaryIsLoading}
       transcript={transcript}
