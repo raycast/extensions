@@ -89,7 +89,7 @@ export async function searchPlaces(
       console.error(`Places API error: ${response.data.status}`);
       throw new Error(`Places API error: ${response.data.status}`);
     }
-    
+
     // Return empty array for ZERO_RESULTS
     if (response.data.status === Status.ZERO_RESULTS) {
       return [];
