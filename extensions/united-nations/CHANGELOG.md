@@ -1,5 +1,10 @@
 # United Nations Extension
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Drop unexpected LaTeX content
+- Bump all dependencies to the latest
+
 ## [Bugfix] - 2025-06-03
 
 - Replace broken UN documents GA RSS feed source
