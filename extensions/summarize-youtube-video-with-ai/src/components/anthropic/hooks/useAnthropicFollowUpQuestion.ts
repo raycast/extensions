@@ -55,7 +55,7 @@ export function useAnthropicFollowUpQuestion({
           max_tokens: 8192,
           stream: true,
           messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
-          temperature: Number.parseInt(creativity),
+          temperature: Number.parseInt(creativity, 10),
         },
         { signal: abortController.signal },
       );

@@ -35,7 +35,7 @@ export function useRaycastFollowUpQuestion({
       });
 
       const answer = AI.ask(getFollowUpQuestionSnippet(question, transcript), {
-        creativity: Number.parseInt(creativity),
+        creativity: Number.parseInt(creativity, 10),
         signal: abortController.signal,
       });
 

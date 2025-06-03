@@ -51,7 +51,7 @@ export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcrip
           model: ollamaModel || OLLAMA_MODEL,
           messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
           stream: true,
-          creativity: Number.parseInt(creativity),
+          creativity: Number.parseInt(creativity, 10),
         },
         { signal: abortController.signal },
       );

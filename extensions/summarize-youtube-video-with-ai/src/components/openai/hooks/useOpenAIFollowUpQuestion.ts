@@ -54,7 +54,7 @@ export function useOpenAIFollowUpQuestion({ setQuestions, setQuestion, transcrip
           model: openaiModel || OPENAI_MODEL,
           messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
           stream: true,
-          creativity: Number.parseInt(creativity),
+          creativity: Number.parseInt(creativity, 10),
         },
         { signal: abortController.signal },
       );
