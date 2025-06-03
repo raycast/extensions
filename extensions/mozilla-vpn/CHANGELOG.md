@@ -6,8 +6,4 @@
 - Ability to see details about the vpn connected to, ip and geo location
 - You can refresh the vpn to get the latest details
 
-<<<<<<< HEAD
 ## [Initial Version] - {PR_MERGE_DATE}
-=======
-## [Initial Version] - {PR_MERGE_DATE}
->>>>>>> f5fa9dac5 (Change vpn text case)
