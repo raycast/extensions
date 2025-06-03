@@ -48,6 +48,9 @@ export default async function Command() {
   if (success) {
     db.run("VACUUM;");
     await fs.promises.writeFile(DB_PATH, db.export());
+    toast.style = Toast.Style.Success;
+    toast.title = "Dictionary updated successfully";
+    toast.message = "";
   }
 
   db.close();
