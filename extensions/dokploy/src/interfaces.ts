@@ -8,8 +8,24 @@ export interface Application extends Service {
   applicationId: string;
   applicationStatus: "idle";
 }
+interface Mariadb extends Service {
+  mariadbId: string;
+  applicationStatus: "idle";
+}
+interface Mongo extends Service {
+  mongoId: string;
+  applicationStatus: "idle";
+}
+interface Mysql extends Service {
+  mysqlId: string;
+  applicationStatus: "idle";
+}
 interface Postgres extends Service {
   postgresId: string;
+  applicationStatus: "idle";
+}
+interface Redis extends Service {
+  redisId: string;
   applicationStatus: "idle";
 }
 interface Compose extends Service {
@@ -24,11 +40,11 @@ export interface Project {
   organizationId: string;
   env: string;
   applications: Application[];
-  mariadb: [];
-  mongo: [];
-  mysql: [];
+  mariadb: Mariadb[];
+  mongo: Mongo[];
+  mysql: Mysql[];
   postgres: Postgres[];
-  redis: [];
+  redis: Redis[];
   compose: Compose[];
 }
 

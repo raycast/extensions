@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, Form, showToast, Toast, Grid, Alert, confirmAlert, popToRoot, Color } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Form, showToast, Toast, Alert, confirmAlert, popToRoot, Color } from "@raycast/api";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { ErrorResult, Project, Server, Service } from "./interfaces";
 import { useToken } from "./api-keys";
@@ -43,9 +43,13 @@ function Services({project}: {project: Project;}) {
     id: string;
     status: "idle" | "done";
   }
-  const services = [
+  const services: GroupedService[] = [
     ...project.applications.map(a => ({...a, type: "application", id: a.applicationId, status: a.applicationStatus})),
+    ...project.mariadb.map(m => ({...m, type: "mariadb", id: m.mariadbId, status: m.applicationStatus})),
+    ...project.mongo.map(m => ({...m, type: "mongo", id: m.mongoId, status: m.applicationStatus})),
+    ...project.mysql.map(m => ({...m, type: "mysql", id: m.mysqlId, status: m.applicationStatus})),
     ...project.postgres.map(p => ({...p, type: "postgres", id: p.postgresId, status: p.applicationStatus})),
+    ...project.redis.map(r => ({...r, type: "redis", id: r.redisId, status: r.applicationStatus})),
     ...project.compose.map(c => ({...c, type: "compose", id: c.composeId, status: c.composeStatus})),
   ];
 
@@ -60,9 +64,36 @@ function Services({project}: {project: Project;}) {
     }
     if (await confirmAlert(options)) {
       const toast = await showToast(Toast.Style.Animated, "Deleting service", name);
-      const body = type==="application" ? { applicationId: id } : { postgresId: id };
+      let body: Record<string, string> = {};
+      let endpoint = "";
+      switch (type) {
+        case "application":
+          body = { applicationId: id };
+          endpoint = "application.delete";
+          break;
+        case "mariadb":
+          body = { mariadbId: id };
+          endpoint = "mariadb.remove";
+          break;
+        case "mysql":
+          body = { mysqlId: id };
+          endpoint = "mysql.remove";
+          break;
+        case "postgres":
+          body = { postgresId: id };
+          endpoint = "postgres.remove";
+          break;
+        case "redis":
+          body = { redisId: id };
+          endpoint = "redis.remove";
+          break;
+        case "compose":
+          body = { composeId: id };
+          endpoint = "compose.delete";
+          break;
+      }
       try {
-          const response = await fetch(url + type + ".delete", {
+          const response = await fetch(url + endpoint, {
             method: "POST",
             headers,
             body: JSON.stringify(body)
@@ -82,20 +113,35 @@ function Services({project}: {project: Project;}) {
     }
   }
 
-  return <Grid>
-    {!getProjectTotalServices(project) ? <Grid.EmptyView icon="folder-input.svg" title="No services added yet. Go to Create Service." actions={<ActionPanel>
+  const SERVICE_ICONS: Record<GroupedService["type"], string> = {
+    application: Icon.Globe,
+    compose: "circuit-board.svg",
+    mariadb: "mariadb.svg",
+    mongo: "mongo.svg",
+    mysql: "mysql.svg",
+    postgres: "postgres.svg",
+    redis: "redis.svg"
+  }
+
+  return <List isShowingDetail>
+    {!getProjectTotalServices(project) ? <List.EmptyView icon="folder-input.svg" title="No services added yet. Go to Create Service." actions={<ActionPanel>
       <ActionPanel.Submenu icon={Icon.Plus} title="Create">
         <Action.Push icon="folder-input.svg" title="Application" target={<CreateApplication project={project} />} />
         <Action.Push icon="database.svg" title="Database" target={<CreateDatabase project={project} />} />
       </ActionPanel.Submenu>
-    </ActionPanel>} /> : services.map(service => <Grid.Item key={service.id} content={Icon.Globe} title={service.name} accessory={{ icon: { source: Icon.CircleFilled, tintColor: service.status==="done" ? Color.Green : "#18181B" }, tooltip: service.status }} actions={<ActionPanel>
+    </ActionPanel>} /> : services.map(service => <List.Item key={service.id} icon={SERVICE_ICONS[service.type]} title={service.name} accessories={[
+      { icon: { source: Icon.CircleFilled, tintColor: service.status==="done" ? Color.Green : "#18181B" }, tooltip: service.status }
+    ]} detail={<List.Item.Detail markdown={service.description} metadata={<List.Item.Detail.Metadata>
+      <List.Item.Detail.Metadata.Label title="Name" text={service.name} />
+      <List.Item.Detail.Metadata.Label title="Application Name" text={service.appName} />
+    </List.Item.Detail.Metadata>} />} actions={<ActionPanel>
       <ActionPanel.Submenu icon={Icon.Plus} title="Create">
         <Action.Push icon="folder-input.svg" title="Application" target={<CreateApplication project={project} />} />
         <Action.Push icon="database.svg" title="Database" target={<CreateDatabase project={project} />} />
       </ActionPanel.Submenu>
         <Action icon={Icon.Trash} title="Delete" style={Action.Style.Destructive} onAction={() => deleteService(service)} />
     </ActionPanel>} />)}
-  </Grid>
+  </List>
 }
 
 function CreateApplication({ project }: {project: Project}) {
@@ -202,7 +248,6 @@ function CreateDatabase({ project }: {project: Project}) {
                 break;
         }
 
-        console.log(url + `${dbType}.create`)
           const response = await fetch(url + `${dbType}.create`, {
             method: "POST",
             headers,
