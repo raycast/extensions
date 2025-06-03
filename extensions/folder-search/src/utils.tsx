@@ -355,9 +355,10 @@ const CLOUD_STORAGE_PATHS = [
   `${userHomeDir}/Library/CloudStorage/Dropbox`,
   // Google Drive
   `${userHomeDir}/Library/CloudStorage/GoogleDrive`,
-  // OneDrive
-  `${userHomeDir}/Library/CloudStorage/OneDrive-Personal`,
-  `${userHomeDir}/Library/CloudStorage/OneDrive-Microsoft`,
+  // OneDrive (dynamic tenant name)
+  `${userHomeDir}/Library/CloudStorage/OneDrive`,
+  // Synology Drive (dynamic server name)
+  `${userHomeDir}/Library/CloudStorage/SynologyDrive`,
 ];
 
 export function isCloudStoragePath(path: string): boolean {

@@ -1,12 +1,14 @@
 # Folder Search Changelog
 
-## Bug Fixes and Code Huygeine {PR_MERGE_DATE}
-- moved code to use standard Raycast Cache / Localstorage
-- Removed a lot of code that was causing unecessary issues with flickering and fallback
-- I have tested the fallback issues and they appear fixed now, due to removing debouncing and some other gode
-- Migrated PINs to localstorage
-- Fixes some bugs with the plugins, added a new plugin to the plugin folder
-- Fixes search results not showing when there are more than max results
+## Bug Fixes and Code Hygiene {PR_MERGE_DATE}
+- **fixed** Multiple OneDrive accounts search functionality - users can now search across both personal and business OneDrive accounts simultaneously ([#19187](https://github.com/raycast/extensions/issues/19187))
+- **fixed** SynologyDrive folders not showing up when 'Filter Library Folders' is enabled ([#19574](https://github.com/raycast/extensions/issues/19574))
+- **moved** Code to use standard Raycast Cache / LocalStorage
+- **removed** A lot of code that was causing unnecessary issues with flickering and fallback
+- **tested** The fallback issues and they appear fixed now, due to removing debouncing and some other code
+- **migrated** PINs to LocalStorage
+- **fixed** Some bugs with the plugins, added a new plugin to the plugin folder
+- **fixed** Search results not showing when there are more than max results
 
 
 ## [Fixes & Improvements] - 2025-05-28
