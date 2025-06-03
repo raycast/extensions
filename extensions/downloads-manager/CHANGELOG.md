@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Add delete last downloaded item command] - {PR_MERGE_DATE}
+## [Add delete last downloaded item command] - 2025-06-03
 
 - Added the command `Delete Latest Download`, which deletes the latest download.
 
