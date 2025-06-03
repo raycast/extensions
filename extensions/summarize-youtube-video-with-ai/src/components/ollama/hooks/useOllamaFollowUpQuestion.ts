@@ -15,12 +15,7 @@ type FollowUpQuestionParams = {
   question: string;
 };
 
-export function useOllamaFollowUpQuestion({
-  setQuestions,
-  setQuestion,
-  transcript,
-  question,
-}: FollowUpQuestionParams) {
+export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcript, question }: FollowUpQuestionParams) {
   const preferences = getPreferenceValues() as OllamaPreferences;
   const { ollamaEndpoint, ollamaModel, creativity } = preferences;
 
@@ -51,7 +46,7 @@ export function useOllamaFollowUpQuestion({
         ...prevQuestions,
       ]);
 
-      const answer = openai.beta.chat.completions.stream(
+      const answer = openai.chat.completions.stream(
         {
           model: ollamaModel || OLLAMA_MODEL,
           messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
@@ -88,13 +83,5 @@ export function useOllamaFollowUpQuestion({
     return () => {
       abortController.abort();
     };
-  }, [
-    question,
-    transcript,
-    creativity,
-    ollamaEndpoint,
-    ollamaModel,
-    setQuestion,
-    setQuestions,
-  ]);
+  }, [question, transcript, creativity, ollamaEndpoint, ollamaModel, setQuestion, setQuestions]);
 }

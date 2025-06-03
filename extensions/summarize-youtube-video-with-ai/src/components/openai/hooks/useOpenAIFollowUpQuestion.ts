@@ -15,12 +15,7 @@ type FollowUpQuestionParams = {
   question: string;
 };
 
-export function useOpenAIFollowUpQuestion({
-  setQuestions,
-  setQuestion,
-  transcript,
-  question,
-}: FollowUpQuestionParams) {
+export function useOpenAIFollowUpQuestion({ setQuestions, setQuestion, transcript, question }: FollowUpQuestionParams) {
   const preferences = getPreferenceValues() as OpenAIPreferences;
   const { openaiApiToken, openaiEndpoint, openaiModel, creativity } = preferences;
 
@@ -54,7 +49,7 @@ export function useOpenAIFollowUpQuestion({
         ...prevQuestions,
       ]);
 
-      const answer = openai.beta.chat.completions.stream(
+      const answer = openai.chat.completions.stream(
         {
           model: openaiModel || OPENAI_MODEL,
           messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
@@ -91,14 +86,5 @@ export function useOpenAIFollowUpQuestion({
     return () => {
       abortController.abort();
     };
-  }, [
-    question,
-    transcript,
-    creativity,
-    openaiApiToken,
-    openaiEndpoint,
-    openaiModel,
-    setQuestion,
-    setQuestions,
-  ]);
+  }, [question, transcript, creativity, openaiApiToken, openaiEndpoint, openaiModel, setQuestion, setQuestions]);
 }

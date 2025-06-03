@@ -48,7 +48,7 @@ export const useOpenAISummary = ({ transcript, setSummaryIsLoading, setSummary }
       message: SUMMARIZING_VIDEO.message,
     });
 
-    const stream = openai.beta.chat.completions.stream({
+    const stream = openai.chat.completions.stream({
       model: openaiModel || OPENAI_MODEL,
       temperature: Number.parseInt(creativity),
       messages: [{ role: "user", content: aiInstructions }],

@@ -36,7 +36,7 @@ export const useOllamaSummary = ({ transcript, setSummaryIsLoading, setSummary }
       message: SUMMARIZING_VIDEO.message,
     });
 
-    const stream = openai.beta.chat.completions.stream({
+    const stream = openai.chat.completions.stream({
       model: ollamaModel || OLLAMA_MODEL,
       temperature: Number.parseFloat(creativity),
       messages: [{ role: "user", content: aiInstructions }],
