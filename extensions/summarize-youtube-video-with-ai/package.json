@@ -396,6 +396,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "summarizeVideoHistory",
+      "title": "Summarize Video History",
+      "description": "View your summary history.",
+      "mode": "view",
+      "arguments": []
     }
   ],
   "dependencies": {
