@@ -1,6 +1,6 @@
 # WP-CLI Command Explorer for Raycast Changelog
 
-## [0.1.0] - {PR_MERGE_DATE}
+## [0.1.0] - 2025-06-03
 - Show sub commands count
 - Add option to copy commands with help flag
 - Add option to copy usage examples
