@@ -9,6 +9,7 @@ interface SummaryDetailsProps {
   summaryIsLoading: boolean;
   transcript: string;
   videoData: VideoDataTypes;
+  onQuestionsUpdate?: (updatedQuestions: Question[]) => void;
 }
 
 export default function SummaryDetails({
@@ -17,6 +18,7 @@ export default function SummaryDetails({
   transcript,
   videoData,
   questions,
+  onQuestionsUpdate,
 }: SummaryDetailsProps) {
   if (!summary) return null;
   const { duration, ownerChannelName, ownerProfileUrl, publishDate, title, video_url, viewCount } = videoData;
@@ -30,6 +32,7 @@ export default function SummaryDetails({
           video_url={video_url}
           ownerProfileUrl={ownerProfileUrl}
           questions={questions}
+          onQuestionsUpdate={onQuestionsUpdate}
         />
       }
       isLoading={summaryIsLoading}

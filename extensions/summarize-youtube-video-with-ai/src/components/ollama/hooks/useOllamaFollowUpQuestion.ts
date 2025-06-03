@@ -3,7 +3,6 @@ import OpenAI from "openai";
 import { useEffect } from "react";
 import { OLLAMA_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
-import { useHistory } from "../../../hooks/useHistory";
 import type { Question } from "../../../hooks/useQuestions";
 import type { OllamaPreferences } from "../../../summarizeVideoWithOllama";
 import { generateQuestionId } from "../../../utils/generateQuestionId";
@@ -14,7 +13,6 @@ type FollowUpQuestionParams = {
   setQuestion: React.Dispatch<React.SetStateAction<string>>;
   transcript: string | undefined;
   question: string;
-  videoId?: string;
 };
 
 export function useOllamaFollowUpQuestion({
@@ -22,9 +20,7 @@ export function useOllamaFollowUpQuestion({
   setQuestion,
   transcript,
   question,
-  videoId,
 }: FollowUpQuestionParams) {
-  const { updateHistory } = useHistory();
   const preferences = getPreferenceValues() as OllamaPreferences;
   const { ollamaEndpoint, ollamaModel, creativity } = preferences;
 
@@ -75,14 +71,6 @@ export function useOllamaFollowUpQuestion({
       answer.finalChatCompletion().then(() => {
         toast.hide();
         setQuestion("");
-
-        // Update the history with the new questions
-        if (videoId) {
-          setQuestions((prevQuestions) => {
-            updateHistory(videoId, prevQuestions);
-            return prevQuestions;
-          });
-        }
       });
 
       if (abortController.signal.aborted) return;
@@ -108,7 +96,5 @@ export function useOllamaFollowUpQuestion({
     ollamaModel,
     setQuestion,
     setQuestions,
-    updateHistory,
-    videoId,
   ]);
 }

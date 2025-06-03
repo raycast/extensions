@@ -3,7 +3,6 @@ import OpenAI from "openai";
 import { useEffect } from "react";
 import { OPENAI_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
-import { useHistory } from "../../../hooks/useHistory";
 import type { Question } from "../../../hooks/useQuestions";
 import type { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
 import { generateQuestionId } from "../../../utils/generateQuestionId";
@@ -14,7 +13,6 @@ type FollowUpQuestionParams = {
   setQuestion: React.Dispatch<React.SetStateAction<string>>;
   transcript: string | undefined;
   question: string;
-  videoId?: string;
 };
 
 export function useOpenAIFollowUpQuestion({
@@ -22,9 +20,7 @@ export function useOpenAIFollowUpQuestion({
   setQuestion,
   transcript,
   question,
-  videoId,
 }: FollowUpQuestionParams) {
-  const { updateHistory } = useHistory();
   const preferences = getPreferenceValues() as OpenAIPreferences;
   const { openaiApiToken, openaiEndpoint, openaiModel, creativity } = preferences;
 
@@ -78,13 +74,6 @@ export function useOpenAIFollowUpQuestion({
       answer.finalChatCompletion().then(() => {
         toast.hide();
         setQuestion("");
-
-        if (videoId) {
-          setQuestions((prevQuestions) => {
-            updateHistory(videoId, prevQuestions);
-            return prevQuestions;
-          });
-        }
       });
 
       if (abortController.signal.aborted) return;
@@ -111,7 +100,5 @@ export function useOpenAIFollowUpQuestion({
     openaiModel,
     setQuestion,
     setQuestions,
-    updateHistory,
-    videoId,
   ]);
 }

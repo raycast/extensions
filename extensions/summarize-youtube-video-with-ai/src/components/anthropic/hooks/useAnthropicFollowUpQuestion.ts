@@ -3,7 +3,6 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect } from "react";
 import { ANTHROPIC_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
-import { useHistory } from "../../../hooks/useHistory";
 import type { Question } from "../../../hooks/useQuestions";
 import type { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
 import { generateQuestionId } from "../../../utils/generateQuestionId";
@@ -14,7 +13,6 @@ type FollowUpQuestionParams = {
   setQuestion: React.Dispatch<React.SetStateAction<string>>;
   transcript: string | undefined;
   question: string;
-  videoId?: string;
 };
 
 export function useAnthropicFollowUpQuestion({
@@ -22,9 +20,7 @@ export function useAnthropicFollowUpQuestion({
   setQuestion,
   transcript,
   question,
-  videoId,
 }: FollowUpQuestionParams) {
-  const { updateHistory } = useHistory();
   const abortController = new AbortController();
   const preferences = getPreferenceValues() as AnthropicPreferences;
   const { anthropicApiToken, anthropicModel, creativity } = preferences;
@@ -47,7 +43,7 @@ export function useAnthropicFollowUpQuestion({
       setQuestions((prevQuestions) => [
         {
           id: qID,
-          question: "Initial Summary of the video",
+          question,
           answer: "",
         },
         ...prevQuestions,
@@ -74,14 +70,6 @@ export function useAnthropicFollowUpQuestion({
       answer.finalMessage().then(() => {
         toast.hide();
         setQuestion("");
-
-        // Update the history with the new questions
-        if (videoId) {
-          setQuestions((prevQuestions) => {
-            updateHistory(videoId, prevQuestions);
-            return prevQuestions;
-          });
-        }
       });
 
       if (abortController.signal.aborted) return;
@@ -99,16 +87,5 @@ export function useAnthropicFollowUpQuestion({
     return () => {
       abortController.abort();
     };
-  }, [
-    question,
-    transcript,
-    abortController,
-    anthropicApiToken,
-    anthropicModel,
-    creativity,
-    setQuestion,
-    setQuestions,
-    updateHistory,
-    videoId,
-  ]);
+  }, [question, transcript, abortController, anthropicApiToken, anthropicModel, creativity, setQuestion, setQuestions]);
 }

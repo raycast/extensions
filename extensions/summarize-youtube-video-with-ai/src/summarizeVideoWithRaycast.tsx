@@ -7,7 +7,7 @@ import SummaryDetails from "./components/summary/SummaryDetails";
 import { aiService } from "./const/aiService";
 import { useGetVideoUrl } from "./hooks/useGetVideoUrl";
 import { useHistory } from "./hooks/useHistory";
-import { useQuestions } from "./hooks/useQuestions";
+import { type Question, useQuestions } from "./hooks/useQuestions";
 import { useVideoData } from "./hooks/useVideoData";
 (globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
 
@@ -44,12 +44,14 @@ export default function SummarizeVideoWithRaycast(
     setQuestion,
     transcript,
     question,
-    videoId: videoData?.videoId,
   });
 
+  const [historyItem, setHistoryItem] = useState<string | null>(null);
+
+  // Add to history when summary is first created
   useEffect(() => {
-    if (summary && videoData) {
-      addToHistory({
+    if (summary && videoData && !historyItem) {
+      const item = {
         aiService: aiService,
         createdAt: new Date(),
         id: videoData.videoId,
@@ -57,9 +59,26 @@ export default function SummarizeVideoWithRaycast(
         summary,
         title: videoData.title,
         videoUrl: videoURL ?? "",
+      };
+      addToHistory(item);
+      setHistoryItem(videoData.videoId);
+    }
+  }, [summary, videoData, addToHistory, videoURL, historyItem, questions]);
+
+  // Update history when questions change
+  useEffect(() => {
+    if (historyItem && questions.length > 0) {
+      addToHistory({
+        aiService: aiService,
+        createdAt: new Date(),
+        id: historyItem,
+        questions,
+        summary: summary || "",
+        title: videoData?.title || "",
+        videoUrl: videoURL ?? "",
       });
     }
-  }, [summary, videoData, questions, addToHistory, videoURL]);
+  }, [questions, historyItem, addToHistory, summary, videoData, videoURL]);
 
   if (!videoData || !transcript) return <List isLoading={true} />;
 
@@ -72,6 +91,10 @@ export default function SummarizeVideoWithRaycast(
   `
     : undefined;
 
+  const handleQuestionsUpdate = (updatedQuestions: Question[]) => {
+    setQuestions(updatedQuestions);
+  };
+
   return (
     <SummaryDetails
       questions={questions}
@@ -79,6 +102,7 @@ export default function SummarizeVideoWithRaycast(
       summaryIsLoading={summaryIsLoading}
       transcript={transcript}
       videoData={videoData}
+      onQuestionsUpdate={handleQuestionsUpdate}
     />
   );
 }

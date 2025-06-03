@@ -27,18 +27,7 @@ export const useHistory = () => {
     }
   };
 
-  const updateHistory = async (id: string, questions: Question[]) => {
-    // Get the existing item
-    const itemString = await LocalStorage.getItem<string>(`${HISTORY_KEYS_PREFIX}${id}`);
-    if (!itemString) return;
 
-    // Update the item with the new questions
-    const item = JSON.parse(itemString);
-    item.questions = questions;
-
-    // Save the updated item
-    await LocalStorage.setItem(`${HISTORY_KEYS_PREFIX}${id}`, JSON.stringify(item));
-  };
 
   const getHistory = async (): Promise<HistoryItem[]> => {
     const keys = await getHistoryKeys();
@@ -63,6 +52,5 @@ export const useHistory = () => {
   return {
     addToHistory,
     getHistory,
-    updateHistory,
   };
 };
