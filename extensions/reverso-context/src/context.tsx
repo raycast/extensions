@@ -10,7 +10,7 @@ import {
   translationsToMetadataTagList,
 } from "./utils";
 
-export default function Command(props: { arguments: { text: string } }) {
+export default function Context(props: { arguments: { text: string } }) {
   const [examples, setExamples] = useState<UsageExample[]>([]);
   const [translations, setTranslations] = useState<Translation[]>([]);
   const [ipa, setIpa] = useState("");

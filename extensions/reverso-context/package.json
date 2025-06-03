@@ -15,7 +15,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "command",
+      "name": "context",
       "title": "Translate",
       "subtitle": "Reverso Context",
       "description": "Get Translations, Pronunciation and Examples.",
