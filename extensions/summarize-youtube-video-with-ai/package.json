@@ -407,21 +407,21 @@
   ],
   "dependencies": {
     "@anthropic-ai/sdk": "^0.33.1",
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
     "node-fetch": "^3.3.2",
     "openai": "^4.77.0",
     "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.29",
+    "@types/react": "^19.1.6",
+    "eslint": "^9.28.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
     "ytdl-core": "^4.11.5"
   },
   "scripts": {
