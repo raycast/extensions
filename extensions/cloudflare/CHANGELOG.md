@@ -1,6 +1,6 @@
 # Cloudflare Changelog
 
-## [DNS Record Enhancements] - {PR_MERGE_DATE}
+## [DNS Record Enhancements] - 2025-06-03
 
 - Add DNS Records:
     - A
