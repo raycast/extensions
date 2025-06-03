@@ -85,9 +85,14 @@ export async function searchPlaces(
 
     const response = await getClient().textSearch({ params });
 
-    if (response.data.status !== Status.OK) {
+    if (response.data.status !== Status.OK && response.data.status !== Status.ZERO_RESULTS) {
       console.error(`Places API error: ${response.data.status}`);
       throw new Error(`Places API error: ${response.data.status}`);
+    }
+    
+    // Return empty array for ZERO_RESULTS
+    if (response.data.status === Status.ZERO_RESULTS) {
+      return [];
     }
 
     if (!response.data.results || !Array.isArray(response.data.results)) {

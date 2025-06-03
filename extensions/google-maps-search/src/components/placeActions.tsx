@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 import { PlaceSearchResult, Preferences } from "../types";
-import { makeDirectionsURL, makeSearchURL } from "../utils/url";
+import { makeDirectionsURL } from "../utils/url";
 
 interface PlaceActionsProps {
   place: PlaceSearchResult;
@@ -25,7 +25,7 @@ export function PlaceActions({ place, onViewDetails, onBack, preferredMode, isDe
       <ActionPanel.Section title="Browser">
         <Action.OpenInBrowser
           title="Open in Google Maps"
-          url={makeSearchURL(encodeURIComponent(`${place.name} ${place.address}`))}
+          url={`https://www.google.com/maps/place?q=place_id:${place.placeId}`}
           icon={Icon.Globe}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
@@ -43,6 +43,12 @@ export function PlaceActions({ place, onViewDetails, onBack, preferredMode, isDe
           content={place.address}
           icon={Icon.Clipboard}
           shortcut={{ modifiers: ["cmd"], key: "c" }}
+        />
+        <Action.CopyToClipboard
+          title="Copy Google Maps URL"
+          content={`https://www.google.com/maps/place?q=place_id:${place.placeId}`}
+          icon={Icon.Link}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
         />
         <Action.CopyToClipboard
           title="Copy Coordinates"
