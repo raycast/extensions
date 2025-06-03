@@ -58,7 +58,7 @@ export default function Command() {
     <List isLoading={isLoading}>
       {history.map((item) => (
         <List.Item
-          key={item.id}
+          key={`${item.id}-${item.aiService}`}
           icon={Icon.Video}
           title={item.title}
           subtitle={new Date(item.createdAt).toLocaleDateString()}

@@ -16,11 +16,12 @@ const HISTORY_KEYS_LIST_KEY = "youtube-summary-keys";
 
 export const useHistory = () => {
   const addToHistory = async (item: HistoryItem) => {
-    await LocalStorage.setItem(`${HISTORY_KEYS_PREFIX}${item.id}`, JSON.stringify(item));
+    const uniqueKey = `${item.id}-${item.aiService}`;
+    await LocalStorage.setItem(`${HISTORY_KEYS_PREFIX}${uniqueKey}`, JSON.stringify(item));
 
     const keys = await getHistoryKeys();
-    if (!keys.includes(item.id)) {
-      keys.unshift(item.id); // Add new ID to the beginning
+    if (!keys.includes(uniqueKey)) {
+      keys.unshift(uniqueKey);
       await LocalStorage.setItem(HISTORY_KEYS_LIST_KEY, JSON.stringify(keys));
     }
   };
