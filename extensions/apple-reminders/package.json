@@ -571,7 +571,7 @@
     "@date-fns/utc": "^1.2.0",
     "@raycast/api": "^1.96.1",
     "@raycast/utils": "^1.18.1",
-    "chrono-node": "^2.7.5",
+    "chrono-node": "^2.8.2",
     "date-fns": "^3.6.0",
     "lodash": "^4.17.21"
   },
