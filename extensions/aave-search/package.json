@@ -20,7 +20,7 @@
     }
   ],
   "dependencies": {
-    "@bgd-labs/rpc-env": "^2.3.2",
+    "@bgd-labs/toolbox": "^0.0.15",
     "@leeoniya/ufuzzy": "^1.0.18",
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.17.0"
