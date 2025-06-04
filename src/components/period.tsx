@@ -1,27 +1,32 @@
 import { List } from "@raycast/api";
 
-export type Period = "overall" | "7day" | "1month" | "3month" | "6month" | "12month";
+type PeriodType = { value: string; label: string };
 
-interface PeriodDropdownProps {
-  period: Period;
-  onPeriodChange: (period: Period) => void;
-}
+const Periods = [
+  { value: "7day", label: "Last 7 Days" },
+  { value: "1month", label: "Last 30 Days" },
+  { value: "3month", label: "Last 90 Days" },
+  { value: "6month", label: "Last 180 Days" },
+  { value: "12month", label: "Last 365 Days" },
+  { value: "overall", label: "All Time" },
+] as PeriodType[];
 
-export function PeriodDropdown({ period, onPeriodChange }: PeriodDropdownProps) {
+export function PeriodDropdown(props: { selectedPeriod: string; onPeriodChange: (newValue: string) => void }) {
+  const { onPeriodChange, selectedPeriod } = props;
   return (
     <List.Dropdown
-      tooltip="Select Time Period"
-      value={period}
-      onChange={(newPeriod) => onPeriodChange(newPeriod as Period)}
+      tooltip="Select Date Period"
+      storeValue={true}
+      value={selectedPeriod}
+      onChange={(newValue: string) => {
+        onPeriodChange(newValue);
+      }}
     >
-      <List.Dropdown.Item value="overall" title="Overall" />
-      <List.Dropdown.Item value="7day" title="Last 7 Days" />
-      <List.Dropdown.Item value="1month" title="Last Month" />
-      <List.Dropdown.Item value="3month" title="Last 3 Months" />
-      <List.Dropdown.Item value="6month" title="Last 6 Months" />
-      <List.Dropdown.Item value="12month" title="Last Year" />
+      <List.Dropdown.Section>
+        {Periods.map((period: PeriodType) => (
+          <List.Dropdown.Item key={period.value} title={period.label} value={period.value} />
+        ))}
+      </List.Dropdown.Section>
     </List.Dropdown>
   );
 }
-
-export default PeriodDropdown;
