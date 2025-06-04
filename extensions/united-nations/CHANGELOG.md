@@ -1,6 +1,6 @@
 # United Nations Extension
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-06-04
 
 - Drop unexpected LaTeX content
 - Bump all dependencies to the latest
