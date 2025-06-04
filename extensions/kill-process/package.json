@@ -11,7 +11,8 @@
     "Saafo",
     "erics118",
     "xilopaint",
-    "validate"
+    "validate",
+    "dead_hikikomori"
   ],
   "license": "MIT",
   "commands": [
@@ -19,6 +20,12 @@
       "name": "index",
       "title": "Kill Process",
       "description": "Lists all running processes, ordered by CPU or memory usage and allows killing one",
+      "mode": "view"
+    },
+    {
+      "name": "index",
+      "title": "Force Kill Process",
+      "description": "Kills the chosen process with sudo (requires enabling sudo authentication with fingerprint)",
       "mode": "view"
     }
   ],

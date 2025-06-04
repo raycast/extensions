@@ -97,8 +97,8 @@ export default function ProcessList() {
     return "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ExecutableBinaryIcon.icns";
   };
 
-  const killProcess = (process: Process) => {
-    exec(`kill -9 ${process.id}`);
+  const killProcess = (process: Process, force: boolean = false) => {
+    exec(`zsh -c '${force ? "sudo " : ""}kill -9 ${process.id}'`);
     setFetchResult(state.filter((p) => p.id !== process.id));
     if (closeWindowAfterKill) {
       closeMainWindow();
@@ -282,6 +282,7 @@ export default function ProcessList() {
                 actions={
                   <ActionPanel>
                     <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
+                    <Action title="Force Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process, true)} />
                     {process.path == null ? null : <Action.CopyToClipboard title="Copy Path" content={process.path} />}
                     <Action
                       title="Reload"
