@@ -1,25 +1,103 @@
 import { Detail, List, Color, Icon, Action, ActionPanel } from "@raycast/api";
-import getScoresAndSchedule from "../utils/getSchedule";
+import { useFetch } from "@raycast/utils";
 import sportInfo from "../utils/getSportInfo";
-import getCountryCode from "../utils/getF1RaceFlag";
 import Plays from "../views/playbyplay";
 import TeamDetail from "../views/teamDetail";
+
+interface Competitor {
+  team: {
+    logos: { href: string }[];
+    abbreviation: string;
+    displayName: string;
+    logo: string;
+    links: { href: string }[];
+    id: string;
+  };
+  score: {
+    displayValue: string;
+  };
+  records?: { summary: string }[];
+  probables?: { athlete: { displayName: string; headshot: string } }[];
+}
+
+interface Status {
+  type: {
+    state: string;
+    completed?: boolean;
+    detail?: string;
+  };
+  period?: number;
+  displayClock?: string;
+}
+
+interface Competition {
+  competitors: Competitor[];
+  type: { id: number };
+  status: Status;
+  venue: {
+    fullName: string;
+    indoor: boolean;
+    address: {
+      city: string;
+      state: string;
+      country: string;
+    };
+  };
+  tickets: [
+    {
+      summary: string;
+    },
+  ];
+  season: {
+    year: string;
+    slug: string;
+  };
+}
+
+interface Game {
+  id: string;
+  name: string;
+  shortName: string;
+  date: string;
+  status: Status;
+  competitions: Competition[];
+  links: { href: string }[];
+  season: {
+    year: string;
+    slug: string;
+  };
+  displayName: string;
+}
 
 interface DayItems {
   title: string;
   games: JSX.Element[];
 }
 
-export default function DisplayScoresAndSchedule() {
-  const { scheduleLoading, scheduleData, scheduleRevalidate } = getScoresAndSchedule();
+interface Response {
+  events: Game[];
+  day: { date: string };
+}
+
+export default function TeamSchedule({ teamId }: { teamId: string }) {
   const currentLeague = sportInfo.getLeague();
   const currentSport = sportInfo.getSport();
+
+  // Fetch Schedule
+
+  const {
+    isLoading: scheduleLoading,
+    data: scheduleData,
+    revalidate: scheduleRevalidate,
+  } = useFetch<Response>(
+    `https://site.api.espn.com/apis/site/v2/sports/${currentSport}/${currentLeague}/teams/${teamId}/schedule`,
+  );
 
   const gameItems: DayItems[] = [];
   const games = scheduleData?.events || [];
 
   games?.forEach((game, index) => {
-    const gameDate = new Date(game?.date);
+    const gameDate = new Date(game.date);
     const gameDay = gameDate?.toLocaleDateString([], {
       dateStyle: "medium",
     });
@@ -70,10 +148,6 @@ export default function DisplayScoresAndSchedule() {
       periodNumber = "";
     }
 
-    if (currentSport === "racing") {
-      period = "L";
-    }
-
     const startingSoonInterval = 15 * 60 * 1000;
     const currentDate = new Date();
     const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
@@ -84,90 +158,51 @@ export default function DisplayScoresAndSchedule() {
       accessoryToolTip = "Starting Soon";
     }
 
-    if (currentLeague !== "f1") {
-      if (game?.status?.type?.state === "in") {
-        accessoryTitle = `${game?.competitions[0]?.competitors[1]?.team.abbreviation} ${game?.competitions[0]?.competitors[1]?.score} - ${game?.competitions[0]?.competitors[0]?.team?.abbreviation} ${game?.competitions[0]?.competitors[0]?.score}     ${period}${periodNumber} ${timeDisplay}`;
-        accessoryColor = Color.Green;
-        accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
-        accessoryToolTip = "In Progress";
-      } else {
-        if (game.status.type.state === "in") {
-          accessoryTitle = `${game.competitions[4].competitors[0].athlete.shortName}     L${game.competitions[4].status.period} ${game.status.displayClock}`;
-          accessoryColor = Color.Green;
-          accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
-          accessoryToolTip = "Current Leader & Lap";
-        }
-      }
+    if (game?.competitions?.[0]?.status?.type?.state === "in") {
+      accessoryTitle = `${game?.competitions[0]?.competitors[1]?.team.abbreviation} ${game?.competitions[0]?.competitors[1]?.score.displayValue} - ${game?.competitions[0]?.competitors[0]?.team?.abbreviation} ${game?.competitions[0]?.competitors[0]?.score.displayValue}     ${period}${periodNumber} ${timeDisplay}`;
+      accessoryColor = Color.Green;
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
+      accessoryToolTip = "In Progress";
     }
 
-    if (currentLeague !== "f1") {
-      if (game?.status?.type?.state === "post") {
-        accessoryTitle = `${game?.competitions[0]?.competitors[1]?.team?.abbreviation} ${game?.competitions[0]?.competitors[1]?.score} - ${game?.competitions[0]?.competitors[0]?.team?.abbreviation} ${game?.competitions[0]?.competitors[0]?.score}`;
-        accessoryColor = Color.SecondaryText;
-        accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
-        accessoryToolTip = "Final";
-      }
-    } else {
-      if (
-        game?.competitions[4]?.type?.abbreviation === "Race" &&
-        game?.competitions[4]?.status?.type?.completed === true
-      ) {
-        accessoryTitle = `${game?.competitions?.[4]?.competitors[0]?.athlete?.shortName}`;
-        accessoryColor = Color.SecondaryText;
-        accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
-        accessoryToolTip = "Winner";
-      }
+    if (game?.competitions?.[0]?.status?.type?.state === "post") {
+      accessoryTitle = `${game?.competitions?.[0]?.competitors?.[1]?.team?.abbreviation} ${game?.competitions?.[0]?.competitors?.[1]?.score.displayValue} - ${game?.competitions?.[0]?.competitors?.[0]?.team?.abbreviation} ${game?.competitions?.[0]?.competitors?.[0]?.score.displayValue}`;
+      accessoryColor = Color.SecondaryText;
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
+      accessoryToolTip = "Final";
     }
 
-    if (game?.status?.type?.state === "post" && game?.status?.type?.completed === false) {
+    if (
+      game?.competitions?.[0]?.status?.type?.state === "post" &&
+      game?.competitions?.[0]?.status?.type?.completed === false
+    ) {
       accessoryTitle = `Postponed`;
       accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
       accessoryColor = Color.Orange;
     }
 
     let gameTitle = game?.name ?? "Unknown";
-    let subtitle;
 
     if (currentSport === "hockey") {
       gameTitle = game?.name?.replace(" at ", " vs ");
     }
 
-    if (currentLeague === "f1") {
-      subtitle = `${game?.circuit?.address?.city}, ${game?.circuit?.address?.country}`;
-    }
-
-    const raceLocation = `${game?.circuit?.address?.country ?? "Unknown"}`;
-
     sportGameDay?.games.push(
       <List.Item
         key={index}
         title={gameTitle}
-        subtitle={subtitle}
         icon={{
           source:
-            game?.competitions?.[0]?.competitors?.[1]?.team?.logo ??
-            (currentLeague === "f1"
-              ? `https://a.espncdn.com/combiner/i?img=/i/teamlogos/countries/500/${getCountryCode(raceLocation)}.png&scale=crop&cquality=40&location=origin&w=80&h=80`
-              : `https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500/${currentLeague}.png&w=100&h=100&transparent=true`),
+            game?.competitions[0]?.competitors[1]?.team?.logos[0].href ??
+            `https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500/${currentLeague}.png&w=100&h=100&transparent=true`,
         }}
-        accessories={
-          currentLeague !== "f1"
-            ? [
-                {
-                  text: { value: `${accessoryTitle ?? "No Date Found"}`, color: accessoryColor },
-                  tooltip: accessoryToolTip ?? "Unknown",
-                },
-                { icon: accessoryIcon },
-              ]
-            : [
-                { tag: { value: (index + 1).toString(), color: Color.Green }, icon: Icon.Flag, tooltip: "Race #" },
-                {
-                  text: { value: `${accessoryTitle}`, color: accessoryColor },
-                  tooltip: accessoryToolTip,
-                },
-                { icon: accessoryIcon },
-              ]
-        }
+        accessories={[
+          {
+            text: { value: `${accessoryTitle ?? "No Date Found"}`, color: accessoryColor },
+            tooltip: accessoryToolTip ?? "Unknown",
+          },
+          { icon: accessoryIcon },
+        ]}
         actions={
           <ActionPanel>
             {currentLeague !== "f1" &&
@@ -179,9 +214,7 @@ export default function DisplayScoresAndSchedule() {
             {currentLeague !== "f1" &&
               currentSport !== "soccer" &&
               game?.competitions?.[0]?.status?.type?.state === "post" && (
-                <>
-                  <Action.Push title="View Play by Play" icon={Icon.Stopwatch} target={<Plays gameId={game.id} />} />
-                </>
+                <Action.Push title="View Play by Play" icon={Icon.Stopwatch} target={<Plays gameId={game.id} />} />
               )}
 
             {currentLeague !== "f1" && (
@@ -229,18 +262,6 @@ export default function DisplayScoresAndSchedule() {
     );
   });
 
-  gameItems.sort((a, b) => {
-    const dateA = new Date(a.title);
-    const dateB = new Date(b.title);
-    return dateA.getTime() - dateB.getTime();
-  });
-
-  let subTitleText = "Game";
-
-  if (currentSport === "racing") {
-    subTitleText = "Race";
-  }
-
   if (scheduleLoading) {
     return <Detail isLoading={true} />;
   }
@@ -250,16 +271,16 @@ export default function DisplayScoresAndSchedule() {
   }
 
   return (
-    <>
+    <List searchBarPlaceholder="Search for a game or team" isLoading={scheduleLoading}>
       {gameItems?.map((sportGameDay, index) => (
         <List.Section
           key={index}
           title={`${sportGameDay?.title ?? "Unknown"}`}
-          subtitle={`${sportGameDay?.games?.length} ${subTitleText}${sportGameDay?.games?.length !== 1 ? "s" : ""}`}
+          subtitle={`${sportGameDay?.games?.length} Game${sportGameDay?.games?.length !== 1 ? "s" : ""}`}
         >
           {sportGameDay?.games}
         </List.Section>
       ))}
-    </>
+    </List>
   );
 }
