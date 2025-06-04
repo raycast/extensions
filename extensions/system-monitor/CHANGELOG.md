@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-06-04
 
 - Improve the script to ensure it waits for the Activity Monitor to open before clicking the radio button
 
