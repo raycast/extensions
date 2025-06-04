@@ -6,6 +6,7 @@ import {
   Toast,
   popToRoot,
 } from "@raycast/api";
+import { useForm } from "@raycast/utils";
 import { useState } from "react";
 import { insertTerm } from "./data-store";
 
@@ -14,10 +15,33 @@ interface InsertTermProps {
   initialTerm?: string;
 }
 
+interface FormValues {
+  term: string;
+  definition: string;
+}
+
 export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(values: { term: string; definition: string }) {
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    onSubmit(values) {
+      _handleSubmit(values);
+    },
+    validation: {
+      term: (value) => {
+        if (!value) {
+          return "Term is required";
+        }
+      },
+      definition: (value) => {
+        if (!value) {
+          return "Definition is required";
+        }
+      },
+    },
+  });
+
+  async function _handleSubmit(values: FormValues) {
     setIsLoading(true);
     try {
       await insertTerm({
@@ -54,6 +78,7 @@ export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
       }
     >
       <Form.TextField
+        {...itemProps.term}
         id="term"
         title="Term"
         placeholder="Enter the term"
@@ -61,6 +86,7 @@ export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
         autoFocus
       />
       <Form.TextArea
+        {...itemProps.definition}
         id="definition"
         title="Definition"
         placeholder="Enter the definition"

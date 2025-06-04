@@ -46,17 +46,11 @@
       "subtitle": "Glossary",
       "description": "Copy all terms as CSV-formatted text to your clipboard",
       "mode": "view"
-    },
-    {
-      "name": "delete-all-terms",
-      "title": "Delete All Terms",
-      "subtitle": "Glossary",
-      "description": "Delete all terms from the glossary",
-      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.99.3"
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
