@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Routine Maintenance] - {PR_MERGE_DATE}
+## [Routine Maintenance] - 2025-06-04
 
 - Use local vendor instead of simple-icons/sdk
 - Add compatibility with Simple Icons v15
