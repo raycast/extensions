@@ -303,6 +303,12 @@ function Command(props: LaunchProps) {
               description="Looking for matching folders"
               icon={Icon.MagnifyingGlass}
             />
+          ) : props.fallbackText && !hasSearched ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for matching folders"
+              icon={Icon.MagnifyingGlass}
+            />
           ) : hasSearched && results.length === 0 ? (
             <List.EmptyView title="No Results" description="Try a different search term" icon={Icon.Folder} />
           ) : results.length > 0 ? (
@@ -315,7 +321,7 @@ function Command(props: LaunchProps) {
               isPinnedSection={false}
             />
           ) : (
-            // Fallback for when there's search text but no results yet
+            // Only show this when there's truly no search text and no fallback
             <List.EmptyView
               title="Enter a search term"
               description="Type to search for folders"
