@@ -45,7 +45,17 @@ type NoteItem = {
 
 const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
 
-export async function getNotes(maxQueryResults: number) {
+export async function getNotes(maxQueryResults: number, randomOrder = false, searchTags: string[] = []) {
+  let searchClause = "";
+  if (searchTags.length) {
+    searchClause = `AND ${searchTags
+      .map((tag) => {
+        tag = tag.replace("#", "");
+        return `note.zsnippet LIKE '%#${tag}%'`;
+      })
+      .join(" AND ")}`;
+  }
+
   const query = `
     SELECT
         'x-coredata://' || zmd.z_uuid || '/ICNote/p' || note.z_pk AS id,
@@ -73,8 +83,9 @@ export async function getNotes(maxQueryResults: number) {
         note.z_pk IS NOT NULL AND
         note.zmarkedfordeletion != 1 AND
         folder.zmarkedfordeletion != 1
+        ${searchClause}
     ORDER BY
-        note.zmodificationdate1 DESC
+        ${randomOrder ? "RANDOM()" : "note.zmodificationdate1 DESC"}
     LIMIT ${maxQueryResults}
   `;
 

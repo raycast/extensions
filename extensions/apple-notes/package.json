@@ -18,7 +18,8 @@
     "ridemountainpig",
     "teemu_suvinen",
     "juan_saldana",
-    "andreaselia"
+    "andreaselia",
+    "charlesharries"
   ],
   "license": "MIT",
   "commands": [
@@ -46,6 +47,20 @@
           "name": "text",
           "type": "text",
           "placeholder": "Text"
+        }
+      ]
+    },
+    {
+      "name": "random-note",
+      "title": "View Random Note",
+      "subtitle": "Apple Notes",
+      "description": "View a random note in your Apple Notes.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "tags",
+          "type": "text",
+          "placeholder": "Tags"
         }
       ]
     },
