@@ -1,6 +1,10 @@
 # Downloads Manager Changelog
 
-## [Add new commands] - {PR_MERGE_DATE}
+## [Add delete last downloaded item command] - 2025-06-03
+
+- Added the command `Delete Latest Download`, which deletes the latest download.
+
+## [Add new commands] - 2025-05-22
 
 - Added the command `Paste Latest Download`, which pastes the latest download to the foremost active app.
 

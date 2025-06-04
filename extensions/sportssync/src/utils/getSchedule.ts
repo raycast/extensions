@@ -13,6 +13,7 @@ interface Competitor {
     displayName: string;
     logo: string;
     links: { href: string }[];
+    id: string;
   };
   score: string;
   records?: { summary: string }[];
