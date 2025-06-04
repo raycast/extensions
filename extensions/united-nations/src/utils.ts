@@ -100,3 +100,8 @@ export const arrayifyRssItem = (rssItem?: RssItem | RssItem[]): RssItem[] => {
   if (typeof rssItem === "object") return [rssItem];
   return [];
 };
+
+export const stripSpecialEscapedCharacters = (markdownContent: string) =>
+  markdownContent
+    // We don't want LaTeX content
+    .replace(/\\([[\]])/g, "$1");

@@ -5,7 +5,7 @@ import got from "got";
 import TurndownService from "turndown";
 import { newsFeedUrlDict } from "./constants.js";
 import { NewsType, SiteIndex, UnDocument, UnPhoto, UnPress, UnNews, LanguageCode, RssResponse } from "./types.js";
-import { arrayifyRssItem } from "./utils.js";
+import { arrayifyRssItem, stripSpecialEscapedCharacters } from "./utils.js";
 
 export const fetchUnDocuments = async () => {
   const [ga, sc, hrc, esc] = await Promise.all([
@@ -83,9 +83,9 @@ export const fetchDetail = async (link: string, selector: string) => {
     .get()
     .map((el) => $(el).text())
     .join("\n")
-    .replace(/&nbsp/g, "");
+    .replace(/&nbsp;/g, "");
   const turndownService = new TurndownService();
-  const markdownContent = turndownService.turndown(htmlContent || "");
+  const markdownContent = stripSpecialEscapedCharacters(turndownService.turndown(htmlContent || ""));
   return { markdownContent, textContent };
 };
 
