@@ -1,3 +1,5 @@
+import { Color } from "@raycast/api";
+
 // Define app types enum
 export enum DifyAppType {
   ChatflowAgent = "Chatflow/Agent",
@@ -46,8 +48,6 @@ export function getAppTypeText(type: DifyAppType): string {
       return "Unknown";
   }
 }
-
-import { Color } from "@raycast/api";
 
 // Helper function to get color for app type
 export function getAppTypeColor(type: DifyAppType): Color {
