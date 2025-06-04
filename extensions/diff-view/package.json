@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "diff-view",
-      "title": "Diff View",
+      "title": "Show Diff View",
       "description": "Compare the last two entries of your clipboard in VS Code or Cursor",
       "mode": "no-view"
     }
