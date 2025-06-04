@@ -1,6 +1,6 @@
 # macOSIcons.com Changelog
 
-## [User Applications] - {PR_MERGE_DATE}
+## [User Applications] - 2025-06-04
 
 - Adds support for applying icons to user applications (`~/Applications`).
 
