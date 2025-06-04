@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Added force kill] - MERGE_DATE
+## [Added force kill] - {PR_MERGE_DATE}
 
 - Force kills the chosen process with sudo (requires enabling sudo authentication with fingerprint)
 
