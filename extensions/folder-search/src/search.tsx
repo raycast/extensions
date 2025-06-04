@@ -253,7 +253,7 @@ function Command(props: LaunchProps) {
 
   return (
     <List
-      isLoading={isQuerying || !(hasCheckedPlugins && hasCheckedPreferences)}
+      isLoading={!(hasCheckedPlugins && hasCheckedPreferences)}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search folders"
       isShowingDetail={isShowingDetail}
@@ -291,7 +291,13 @@ function Command(props: LaunchProps) {
         />
       ) : (
         <>
-          {isQuerying || (searchText && !hasSearched) ? (
+          {isQuerying ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for matching folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : searchText && !hasSearched ? (
             <List.EmptyView
               title="Searching..."
               description="Looking for matching folders"
@@ -299,14 +305,7 @@ function Command(props: LaunchProps) {
             />
           ) : hasSearched && results.length === 0 ? (
             <List.EmptyView title="No Results" description="Try a different search term" icon={Icon.Folder} />
-          ) : !searchText ? (
-            // Only show this when there's no search text at all
-            <List.EmptyView
-              title="Enter a search term"
-              description="Type to search for folders"
-              icon={Icon.MagnifyingGlass}
-            />
-          ) : (
+          ) : results.length > 0 ? (
             <FolderListSection
               title="Results"
               results={results}
@@ -314,6 +313,13 @@ function Command(props: LaunchProps) {
               resultIsPinned={resultIsPinned}
               renderActions={renderFolderActions}
               isPinnedSection={false}
+            />
+          ) : (
+            // Fallback for when there's search text but no results yet
+            <List.EmptyView
+              title="Enter a search term"
+              description="Type to search for folders"
+              icon={Icon.MagnifyingGlass}
             />
           )}
         </>
