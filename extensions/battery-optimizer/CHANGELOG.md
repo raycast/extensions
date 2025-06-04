@@ -1,6 +1,6 @@
 # Battery Optimizer Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-06-04
 
 Add support for BATT in addition to BCLM for macOS 15+ compatibility
 
