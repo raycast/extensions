@@ -1,6 +1,6 @@
 # Sportssync Changelog
 
-## [Updated Game Actions with New Views] - {PR_MERGE_DATE}
+## [Updated Game Actions with New Views] - 2025-06-04
 
 - Created a new team details view with information about the team record, venue and more
 - Created a roster view for all standings commands (except for f1). View all players and the head coach for the team, with details about experience, height, weight, and jersey numbers.
