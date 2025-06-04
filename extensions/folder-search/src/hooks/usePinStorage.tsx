@@ -26,15 +26,18 @@ export function usePinStorage() {
             const parsed = JSON.parse(oldPreferences as string);
             if (parsed?.pinned && parsed.pinned.length > 0) {
               log("debug", "usePinStorage", `Migrating ${parsed.pinned.length} pins from old storage`);
-              
+
               // Copy pins to new location
               await setPins(parsed.pinned);
-              
+
               // Remove pins from old location to complete the migration
               const updatedPreferences = { ...parsed };
               delete updatedPreferences.pinned;
-              await LocalStorage.setItem(`${environment.extensionName}-preferences`, JSON.stringify(updatedPreferences));
-              
+              await LocalStorage.setItem(
+                `${environment.extensionName}-preferences`,
+                JSON.stringify(updatedPreferences),
+              );
+
               log("debug", "usePinStorage", "Migration completed, pins removed from old storage");
             }
           }

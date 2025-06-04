@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef } from "react";
 import { environment } from "@raycast/api";
 import { log } from "../utils";
-import { usePinManagement, usePluginManagement, useSearchResults, usePreferences } from "./";
+import { usePinManagement, usePluginManagement, useSearchResults, usePreferences } from "./index";
 
 // ============================================================================
 // Logging Configuration - Centralized here as the main orchestrator hook

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, popToRoot, Color } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import path from "node:path";
+import path from "path";
 import { useEffect, useState } from "react";
 import fs from "fs";
 import { folderName, log } from "../utils";
@@ -66,7 +66,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
   };
 
   // Function that toggles pins and calls onReturn afterward
-  const handleTogglePin = (result: SpotlightSearchResult, resultIndex: number) => {
+  const handleTogglePin = (result: SpotlightSearchResult) => {
     const timestamp = new Date().toISOString().slice(11, 23);
     const action = resultIsPinned(result) ? "Unpinning" : "Pinning";
     log("debug", "Directory", `[${timestamp}] ${action} folder: ${result.path}`);

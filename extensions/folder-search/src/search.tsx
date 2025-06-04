@@ -17,7 +17,7 @@ import { SpotlightSearchResult } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
 import { moveFinderItems } from "./moveUtils";
 import { FolderListSection, Directory } from "./components";
-import path from "node:path";
+import path from "path";
 import { userInfo } from "os";
 import { showFailureToast } from "@raycast/utils";
 
