@@ -4,9 +4,9 @@ interface GridItemProps {
   key: string;
   title: string;
   subtitle?: string;
-  content?: Grid.Item.Props["content"];
+  content?: string;
   accessory?: Grid.Item.Accessory;
-  actions?: Grid.Item.Props["actions"];
+  actions?: any;
 }
 
 interface GridResultsProps {

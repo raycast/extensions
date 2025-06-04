@@ -4,9 +4,9 @@ interface ListItemProps {
   key: string;
   title: string;
   subtitle?: string;
-  icon?: List.Item.Props["icon"];
-  accessories?: List.Item.Accessory[];
-  actions?: List.Item.Props["actions"];
+  icon?: string;
+  accessories?: Array<{ text: string | null }>;
+  actions?: any;
 }
 
 interface ListResultsProps {
