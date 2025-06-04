@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "eggsy",
   "contributors": [
-    "rafpato"
+    "rafpato",
+    "c0b41"
   ],
   "license": "MIT",
   "keywords": [
@@ -138,6 +139,28 @@
         {
           "title": "12 months",
           "value": "12month"
+        },
+        {
+          "title": "All Time",
+          "value": "overall"
+        }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "title": "Listing View",
+      "name": "view",
+      "required": true,
+      "default": "list",
+      "description": "Select the view type to display results.",
+      "data": [
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
         }
       ]
     },
@@ -192,6 +215,9 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
