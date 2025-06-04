@@ -1,6 +1,6 @@
 # Hammerspoon Changelog
 
-## [Improvements] 1.1.0 - {PR_MERGE_DATE}
+## [Improvements] 1.1.0 - 2025-06-04
 
 - add Open Documentation command
 - add option to not open console on reload
