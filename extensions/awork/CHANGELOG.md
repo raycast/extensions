@@ -1,6 +1,6 @@
 # awork Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2025-06-04
 
 - Added error response when authenticating fails
 
