@@ -6,7 +6,7 @@
   "icon": "command-icon.png",
   "author": "eggsy",
   "contributors": [
-    "pato"
+    "rafpato"
   ],
   "license": "MIT",
   "keywords": [
@@ -18,6 +18,22 @@
     "music"
   ],
   "commands": [
+    {
+      "name": "background",
+      "title": "Background Scrobbling",
+      "subtitle": "Last.fm",
+      "description": "Automatically scrobble music in the background",
+      "mode": "no-view",
+      "interval": "30s"
+    },
+
+    {
+      "name": "scrobbling",
+      "title": "Scrobbling Dashboard",
+      "subtitle": "Last.fm",
+      "description": "View scrobbling status and manage queue",
+      "mode": "view"
+    },
     {
       "name": "auth",
       "title": "Setup Scrobbling",
@@ -124,11 +140,43 @@
           "value": "12month"
         }
       ]
+    },
+    {
+      "type": "dropdown",
+      "title": "Scrobble Interval",
+      "name": "scrobbleInterval",
+      "required": false,
+      "default": "30",
+      "description": "How often to check for music changes (in seconds)",
+      "data": [
+        {
+          "title": "15 seconds",
+          "value": "15"
+        },
+        {
+          "title": "30 seconds",
+          "value": "30"
+        },
+        {
+          "title": "60 seconds",
+          "value": "60"
+        }
+      ]
+    },
+    {
+      "type": "textfield",
+      "title": "Minimum Play Duration",
+      "name": "minPlayDuration",
+      "required": false,
+      "default": "30",
+      "description": "Minimum seconds a track must play before scrobbling (Last.fm requirement: 30s)",
+      "placeholder": "30"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.98.5",
     "node-fetch": "^3.1.0",
+    "run-applescript": "^7.0.0",
     "swr": "^1.1.2"
   },
   "devDependencies": {
