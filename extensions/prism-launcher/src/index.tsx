@@ -138,6 +138,7 @@ export default function Command() {
                   <Action
                     title="Open Instance Window"
                     icon={"app-window-list-16"}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
                     onAction={async () => {
                       child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --show "${instance.id}"`);
                       await closeMainWindow({
@@ -149,7 +150,7 @@ export default function Command() {
                   <Action
                     title="Open Minecraft Folder in Finder"
                     icon={Icon.Finder}
-                    shortcut={{ modifiers: ["cmd"], key: "f" }}
+                    shortcut={{ modifiers: ["shift", "cmd"], key: "o" }}
                     onAction={async () => {
                       const minecraftPath = path.join(instancesPath, instance.id, "minecraft");
                       if (await fs.pathExists(minecraftPath)) {
