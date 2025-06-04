@@ -32,21 +32,21 @@ const pathExists = (path: string): boolean => {
   }
 };
 
-// Remind users to install bclm
-export async function confirmAlertBrew(): Promise<boolean> {
-  const customPath = preferences.customBCLMPath;
+// Remind users to install batt
+export async function confirmAlertBatt(): Promise<boolean> {
+  const customPath = preferences.customBattPath;
 
-  const bclmExists = commandExists("bclm");
+  const battExists = commandExists("batt");
   const customPathValid = customPath && pathExists(customPath);
 
-  if (!bclmExists && !customPathValid) {
+  if (!battExists && !customPathValid) {
     const userConfirmed = await confirmAlert({
-      title: "Install bclm?",
-      message: "The bclm executable was not found. Would you like to show it on GitHub?",
+      title: "Install batt?",
+      message: "The batt executable was not found. Would you like to show it on GitHub?",
       primaryAction: {
         title: "Open GitHub",
         onAction: async () => {
-          await open("https://github.com/zackelia/bclm");
+          await open("https://github.com/charlie0129/batt");
         },
       },
     });
@@ -54,19 +54,19 @@ export async function confirmAlertBrew(): Promise<boolean> {
     return userConfirmed;
   }
 
-  return true; // Indicate that bclm exists either via command or custom path
+  return true; // Indicate that batt exists either via command or custom path
 }
 
-// Function to get the bclm path
-export const bclmPath = () => {
+// Function to get the batt path
+export const battPath = () => {
   try {
-    if (commandExists("bclm")) {
+    if (commandExists("batt")) {
       const PATH = "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin";
-      return execSync(`zsh -l -c 'export PATH="$PATH:${PATH}" && which bclm'`).toString().trim();
-    } else if (preferences.customBCLMPath) {
-      return preferences.customBCLMPath;
+      return execSync(`zsh -l -c 'export PATH="$PATH:${PATH}" && which batt'`).toString().trim();
+    } else if (preferences.customBattPath) {
+      return preferences.customBattPath;
     } else {
-      throw new Error("The bclm executable was not found, and no custom path is set.");
+      throw new Error("The batt executable was not found, and no custom path is set.");
     }
   } catch (e) {
     if (e instanceof Error && "stdout" in e) {
@@ -75,6 +75,6 @@ export const bclmPath = () => {
         "commandExists stdout:" + execError.stdout.toString() + "\ncommandExists stderr:" + execError.stderr.toString(),
       );
     }
-    throw new Error("The bclm executable was not found, and no custom path is set.");
+    throw new Error("The batt executable was not found, and no custom path is set.");
   }
 };
