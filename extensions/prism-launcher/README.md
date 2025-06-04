@@ -2,7 +2,7 @@
 
 Launch and manage your Minecraft Prism Launcher instances straight from Raycast.
 
-# Features
+## Features
 
 - Launch Minecraft Prism Launcher instances
 - Open Instance settings
