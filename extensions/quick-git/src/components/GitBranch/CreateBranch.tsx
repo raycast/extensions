@@ -2,6 +2,7 @@ import {
 	Action,
 	ActionPanel,
 	Form,
+	Icon,
 	showToast,
 	useNavigation,
 } from "@raycast/api"
@@ -62,7 +63,11 @@ export default function CreateBranch({
 			isLoading={isLoading}
 			actions={
 				<ActionPanel>
-					<Action.SubmitForm title="Create Branch" onSubmit={handleSubmit} />
+					<Action.SubmitForm
+						title="Create Branch"
+						onSubmit={handleSubmit}
+						icon={Icon.Checkmark}
+					/>
 				</ActionPanel>
 			}
 		>

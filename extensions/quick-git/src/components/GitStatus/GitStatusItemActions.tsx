@@ -17,6 +17,7 @@ import { join } from "node:path"
 
 interface Props {
 	isNotStaged: boolean
+	isCommittedFile: boolean
 	fileName: string
 	repo: string
 	checkStatus: () => void
@@ -24,6 +25,7 @@ interface Props {
 
 export function GitStatusItemActions({
 	isNotStaged,
+	isCommittedFile,
 	fileName,
 	repo,
 	checkStatus,
@@ -89,7 +91,7 @@ export function GitStatusItemActions({
 					title="Commit"
 					target={<GitCommit repo={repo} checkStatus={checkStatus} />}
 				/>
-				{isNotStaged ? (
+				{isNotStaged && isCommittedFile ? (
 					<Action
 						icon={Icon.Undo}
 						title="Restore File"
@@ -98,7 +100,7 @@ export function GitStatusItemActions({
 				) : null}
 			</ActionPanel.Section>
 			<Action.Push
-				icon={Icon.Tree}
+				icon={Icon.Switch}
 				title="Switch Branch"
 				shortcut={{ key: "b", modifiers: ["cmd"] }}
 				target={<GitBranch repo={repo} checkStatus={checkStatus} />}

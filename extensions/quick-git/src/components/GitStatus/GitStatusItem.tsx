@@ -17,6 +17,10 @@ export function GitStatusItem({ repo, status, branch, checkStatus }: Props) {
 		return status.staged === "." || status.staged === "?"
 	}, [status.staged])
 
+	const isCommittedFile = useMemo(() => {
+		return status.format !== "untracked" && status.format !== "ignored"
+	}, [status.format])
+
 	const title = useMemo(() => {
 		if (status.origPath) {
 			return `${status.origPath} -> ${status.fileName}`
@@ -31,6 +35,7 @@ export function GitStatusItem({ repo, status, branch, checkStatus }: Props) {
 			actions={
 				<GitStatusItemActions
 					isNotStaged={isNotStaged}
+					isCommittedFile={isCommittedFile}
 					repo={repo}
 					fileName={status.fileName}
 					checkStatus={checkStatus}

@@ -2,6 +2,7 @@ import {
 	Action,
 	ActionPanel,
 	Form,
+	Icon,
 	launchCommand,
 	LaunchType,
 	showToast,
@@ -55,8 +56,16 @@ export default function Command() {
 			isLoading={isLoading}
 			actions={
 				<ActionPanel>
-					<Action.SubmitForm title="Set Repo" onSubmit={handleSubmit} />
-					<Action.SubmitForm title="Unset Repo" onSubmit={removeValue} />
+					<Action.SubmitForm
+						title="Set Repo"
+						onSubmit={handleSubmit}
+						icon={Icon.Checkmark}
+					/>
+					<Action.SubmitForm
+						title="Unset Repo"
+						onSubmit={removeValue}
+						icon={Icon.Xmark}
+					/>
 				</ActionPanel>
 			}
 		>

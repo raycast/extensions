@@ -55,7 +55,7 @@ export function GitStatus({ repo, isLoadingRepo }: Props) {
 					{repo ? (
 						<>
 							<Action.Push
-								icon={Icon.Tree}
+								icon={Icon.Switch}
 								title="Switch Branch"
 								target={<GitBranch repo={repo} checkStatus={revalidate} />}
 							/>

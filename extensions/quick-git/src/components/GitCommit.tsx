@@ -3,6 +3,7 @@ import {
 	Action,
 	ActionPanel,
 	Form,
+	Icon,
 	showToast,
 	useNavigation,
 } from "@raycast/api"
@@ -45,7 +46,11 @@ export const GitCommit = ({ repo, checkStatus }: Props) => {
 			navigationTitle="Commit Staged Changes"
 			actions={
 				<ActionPanel>
-					<Action.SubmitForm title="Commit" onSubmit={handleSubmit} />
+					<Action.SubmitForm
+						title="Commit"
+						onSubmit={handleSubmit}
+						icon={Icon.Checkmark}
+					/>
 				</ActionPanel>
 			}
 		>

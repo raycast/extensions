@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Keyboard, showToast } from "@raycast/api"
+import { Action, ActionPanel, Icon, Keyboard, showToast } from "@raycast/api"
 import { showFailureToast, useExec } from "@raycast/utils"
 
 interface Props {
@@ -48,16 +48,22 @@ export function BulkGitActions({ repo, checkStatus }: Props) {
 	return (
 		<ActionPanel.Section title="Bulk Actions">
 			<Action
-				title="Stage All Files"
+				title="Add All Files"
 				onAction={stageAllFiles}
+				icon={Icon.PlusCircle}
 				shortcut={{ key: "a", modifiers: ["cmd", "shift"] }}
 			/>
 			<Action
-				title="Unstage All Files"
+				title="Restore Staged Files"
 				onAction={unstageAllFiles}
+				icon={Icon.MinusCircle}
 				shortcut={Keyboard.Shortcut.Common.RemoveAll}
 			/>
-			<Action title="Stash Files" onAction={stashFiles} />
+			<Action
+				title="Stash Files"
+				onAction={stashFiles}
+				icon={Icon.SaveDocument}
+			/>
 		</ActionPanel.Section>
 	)
 }
