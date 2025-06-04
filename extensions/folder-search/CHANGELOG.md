@@ -26,6 +26,11 @@
 - **tested** the fallback issues and they appear fixed now, due to removing debouncing and some other code
 - **fixed** search results not showing when there are more than max results
 
+These Bugs should be resolved:
+https://github.com/raycast/extensions/issues/19574
+https://github.com/raycast/extensions/issues/19187
+https://github.com/raycast/extensions/issues/19006
+
 ### Plugin Improvements
 - **fixed** some bugs with the plugins, added a new plugin to the plugin folder
 
