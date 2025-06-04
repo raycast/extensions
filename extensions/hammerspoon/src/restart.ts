@@ -1,4 +1,4 @@
-import { showHUD, showToast, Toast, popToRoot } from '@raycast/api'
+import { getPreferenceValues, popToRoot, showHUD, showToast, Toast } from '@raycast/api'
 import { runAppleScript, showFailureToast } from '@raycast/utils'
 
 import { checkHammerspoonInstallation } from './utils/installation'
@@ -47,15 +47,17 @@ export default async function main() {
   }
 
   if (output === 'true') {
-    try {
-      await runAppleScript(`
-        tell application "Hammerspoon"
-          execute lua code "hs.openConsole()"
-        end tell
-      `)
-    } catch (error) {
-      await showFailureToast(error, { title: 'Could not reload Hammerspoon configuration' })
-      return
+    if (getPreferenceValues().openConsole) {
+      try {
+        await runAppleScript(`
+          tell application "Hammerspoon"
+            execute lua code "hs.openConsole()"
+          end tell
+        `)
+      } catch (error) {
+        await showFailureToast(error, { title: 'Could not open Hammerspoon console' })
+        return
+      }
     }
 
     await showHUD('🔨 Hammerspoon was restarted')

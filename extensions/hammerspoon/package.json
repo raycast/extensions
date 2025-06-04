@@ -3,7 +3,7 @@
   "name": "hammerspoon",
   "title": "Hammerspoon",
   "description": "Control Hammerspoon from Raycast",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "icon": "icon-prod.png",
   "author": "bjrmatos",
   "contributors": [
@@ -46,6 +46,12 @@
       "mode": "no-view"
     },
     {
+      "name": "browse-docs",
+      "title": "Browse Documentation",
+      "description": "Browse Hammerspoon documentation",
+      "mode": "view"
+    },
+    {
       "name": "open-documentation",
       "title": "Open Documentation",
       "description": "Displays the Hammerspoon documentation panel and focuses it",
@@ -55,7 +61,17 @@
       "name": "restart",
       "title": "Restart",
       "description": "Quits and restarts Hammerspoon",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "openConsole",
+          "label": "Open Console",
+          "description": "Open the Hammerspoon Console after reloading the configuration file",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
     },
     {
       "name": "show-version",
