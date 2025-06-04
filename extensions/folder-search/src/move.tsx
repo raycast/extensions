@@ -119,7 +119,7 @@ function Command(props: LaunchProps) {
 
   return (
     <List
-      isLoading={isQuerying || !(hasCheckedPlugins && hasCheckedPreferences)}
+      isLoading={!(hasCheckedPlugins && hasCheckedPreferences)}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search for destination folder to move files"
       isShowingDetail={isShowingDetail}
@@ -157,7 +157,19 @@ function Command(props: LaunchProps) {
         />
       ) : (
         <>
-          {isQuerying || (searchText && !hasSearched) ? (
+          {isQuerying ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for destination folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : searchText && !hasSearched ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for destination folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : props.fallbackText && !hasSearched ? (
             <List.EmptyView
               title="Searching..."
               description="Looking for destination folders"
@@ -165,14 +177,7 @@ function Command(props: LaunchProps) {
             />
           ) : hasSearched && results.length === 0 ? (
             <List.EmptyView title="No Results" description="Try a different search term" icon={Icon.Folder} />
-          ) : !searchText ? (
-            // Only show this when there's no search text at all
-            <List.EmptyView
-              title="Enter a search term"
-              description="Type to search for folders to move files to"
-              icon={Icon.MagnifyingGlass}
-            />
-          ) : (
+          ) : results.length > 0 ? (
             <FolderListSection
               title="Results"
               results={results}
@@ -180,6 +185,13 @@ function Command(props: LaunchProps) {
               resultIsPinned={resultIsPinned}
               renderActions={renderFolderActions}
               isPinnedSection={false}
+            />
+          ) : (
+            // Only show this when there's truly no search text and no fallback
+            <List.EmptyView
+              title="Enter a search term"
+              description="Type to search for folders to move files to"
+              icon={Icon.MagnifyingGlass}
             />
           )}
         </>
