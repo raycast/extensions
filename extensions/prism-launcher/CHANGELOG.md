@@ -1,5 +1,9 @@
 # Prism Launcher Changelog
 
+## [New Additions] - {PR_MERGE_DATE}
+
+- Add 'Open Minecraft Folder in Finder' action to quickly access the Minecraft folder
+
 ## [New Additions] - 2025-05-23
 
 - Add favorites functionality for instances
