@@ -1,6 +1,6 @@
 # reclaim Changelog
 
-## [Update] - 2025-06-03
+## [Update] - {PR_MERGE_DATE}
 - Update to the package.json description to include Outlook as a valid calendar provider.
 
 ## [Fixes] - 2025-04-02
