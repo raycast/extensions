@@ -1,5 +1,9 @@
 # Zen Changelog
 
+## [Fix New Tab and History Tab] - {PR_MERGE_DATE}
+
+- Fix new tab and history tab commands, by adding a delay to the script to ensure the URL bar is focused.
+
 ## [✨ AI Enhancements] - 2025-05-15
 
 AI Tools to:
