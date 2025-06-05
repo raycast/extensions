@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Add repository filtering] - {PR_MERGE_DATE}
+## [Add repository filtering] - 2025-06-05
 
 - my-issues, my-pull-requests and menu counterparts can now specify repositories to include / exclude
 
