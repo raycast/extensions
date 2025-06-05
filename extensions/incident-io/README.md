@@ -6,25 +6,22 @@ Learn how to get your Incident.io API key [here](https://api-docs.incident.io/#s
 
 ## Features
 
-### AI-Powered Incident Search
+### Search Incidents with AI
 
-Search for incidents using natural language queries. The AI understands context like:
+Search for incidents using natural language queries. The AI extracts relevant keywords from your query to find matching incidents in titles and descriptions.
 
-- "critical database incidents from last week"
-- "resolved network issues in production"
-- "recent API failures affecting payments team"
+Examples:
 
-The AI will parse your query to extract:
+- "database connection errors"
+- "API failures in payment service"
+- "critical outage issues"
+- "authentication problems"
 
-- Keywords and search terms
-- Time ranges (last week, yesterday, recent, etc.)
-- Incident status (active, resolved, closed)
-- Severity levels (critical, major, minor)
-- Team and service names
+The AI will extract important keywords and search through incident titles and descriptions to find relevant matches.
 
 ### Other Commands
 
-- **Search Incidents with AI**: Search incidents using natural language queries
+- **Search Incidents with AI**: Extract keywords from natural language and search incident titles and descriptions
 - **Show All Incidents**: Browse all incidents with filtering
 - **Show Who Is Currently On-Call**: View current on-call schedules
 - **Active Incidents**: Monitor live incidents in the menu bar

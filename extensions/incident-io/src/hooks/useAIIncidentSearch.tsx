@@ -4,14 +4,6 @@ import axios from "axios";
 
 interface ParsedQuery {
   keywords: string[];
-  timeRange?: {
-    start?: string;
-    end?: string;
-  };
-  status?: string[];
-  severity?: string[];
-  teams?: string[];
-  services?: string[];
 }
 
 interface Incident {
@@ -49,44 +41,23 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
       return queryCache.current.get(query)!;
     }
 
-    const prompt = `Parse the following natural language query about incidents into structured search parameters.
+    const prompt = `Extract important keywords from the following incident search query.
     Query: "${query}"
     
-    Extract the following information:
-    1. Keywords: Important terms to search for (include both English and original language if applicable)
-    2. Time range: When the incidents occurred
-       - "last week" / "先週" = "7 days ago" to "now"
-       - "yesterday" / "昨日" = "1 day ago" to "1 day ago"
-       - "last month" / "先月" = "30 days ago" to "now"
-       - "recent" / "最近" = "3 days ago" to "now"
-       - "2 weeks" / "2週間" = "14 days ago" to "now"
-       - "ここ2週間" = "14 days ago" to "now"
-    3. Status: Incident status (map to: "active", "resolved", "closed", "cancelled")
-    4. Severity: Incident severity (map to: "critical", "major", "minor", "info")
-    5. Teams: Team names mentioned
-    6. Services: Service names mentioned
-    
-    For time ranges, use these exact formats:
-    - start: "X days ago" or "X weeks ago" (where X is a number)
-    - end: "now" or "X days ago"
+    Extract meaningful search terms that would help find relevant incidents.
+    Include both English and original language terms if applicable.
+    Focus on technical terms, service names, error types, and important descriptive words.
     
     Return ONLY a valid JSON object with this structure:
     {
-      "keywords": ["keyword1", "keyword2"],
-      "timeRange": {
-        "start": "X days ago or X weeks ago or null",
-        "end": "now or X days ago or null"
-      },
-      "status": ["status1"] or null,
-      "severity": ["severity1"] or null,
-      "teams": ["team1"] or null,
-      "services": ["service1"] or null
+      "keywords": ["keyword1", "keyword2", "keyword3"]
     }
     
     Examples:
-    - "critical database incidents from last week" → {"keywords": ["database"], "timeRange": {"start": "7 days ago", "end": "now"}, "severity": ["critical"]}
-    - "ここ2週間の障害" → {"keywords": ["障害"], "timeRange": {"start": "14 days ago", "end": "now"}}
-    - "recent API failures affecting payments team" → {"keywords": ["API", "failure", "payments"], "timeRange": {"start": "3 days ago", "end": "now"}, "teams": ["payments"]}`;
+    - "database connection errors" → {"keywords": ["database", "connection", "errors"]}
+    - "API failures in payment service" → {"keywords": ["API", "failures", "payment", "service"]}
+    - "ここ2週間の障害" → {"keywords": ["障害"]}
+    - "critical outage last week" → {"keywords": ["critical", "outage"]}`;
 
     try {
       const response = await AI.ask(prompt, {
@@ -98,57 +69,6 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
-
-        // Process time ranges
-        if (parsed.timeRange) {
-          const now = new Date();
-
-          // Handle various time range formats
-          if (parsed.timeRange.start) {
-            if (parsed.timeRange.start.includes("days ago")) {
-              const daysMatch = parsed.timeRange.start.match(/(\d+)\s*days?\s*ago/);
-              if (daysMatch) {
-                const daysAgo = parseInt(daysMatch[1]);
-                const startDate = new Date(now);
-                startDate.setDate(startDate.getDate() - daysAgo);
-                startDate.setHours(0, 0, 0, 0); // Start of day
-                parsed.timeRange.start = startDate.toISOString();
-              }
-            } else if (parsed.timeRange.start.includes("weeks ago")) {
-              const weeksMatch = parsed.timeRange.start.match(/(\d+)\s*weeks?\s*ago/);
-              if (weeksMatch) {
-                const weeksAgo = parseInt(weeksMatch[1]);
-                const startDate = new Date(now);
-                startDate.setDate(startDate.getDate() - weeksAgo * 7);
-                startDate.setHours(0, 0, 0, 0); // Start of day
-                parsed.timeRange.start = startDate.toISOString();
-              }
-            }
-          }
-
-          if (parsed.timeRange.end === "now ISO" || parsed.timeRange.end === "now") {
-            parsed.timeRange.end = now.toISOString();
-          }
-
-          // Ensure dates are not in the future
-          if (parsed.timeRange.start) {
-            const startDate = new Date(parsed.timeRange.start);
-            if (startDate > now) {
-              // If start date is in the future, set it to 30 days ago
-              const thirtyDaysAgo = new Date(now);
-              thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-              parsed.timeRange.start = thirtyDaysAgo.toISOString();
-            }
-          }
-
-          if (parsed.timeRange.end) {
-            const endDate = new Date(parsed.timeRange.end);
-            if (endDate > now) {
-              // If end date is in the future, set it to now
-              parsed.timeRange.end = now.toISOString();
-            }
-          }
-        }
 
         // Cache the result
         if (queryCache.current.size >= QUERY_CACHE_SIZE) {
@@ -196,57 +116,10 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
         // Debug: Log AI parsing result
         console.log("AI Parsed Query:", JSON.stringify(parsed, null, 2));
 
-        // Build API query parameters
+        // Build API query parameters - fetch all incidents for client-side filtering
         const params: Record<string, string> = {
           page_size: "50",
         };
-
-        // Add time range filter - use YYYY-MM-DD format as required by API
-        // Reference: https://api-docs.incident.io/tag/Incidents-V2
-        // Note: incident.io API accepts only one operator at a time for date filtering
-        if (parsed.timeRange?.start && parsed.timeRange?.end) {
-          // For now, use only the end date to get recent incidents
-          const endDate = new Date(parsed.timeRange.end).toISOString().split("T")[0];
-          params["created_at[lte]"] = endDate;
-          console.log("Note: Using only end date due to API limitation");
-        } else if (parsed.timeRange?.start) {
-          const startDate = new Date(parsed.timeRange.start).toISOString().split("T")[0];
-          params["created_at[gte]"] = startDate;
-        } else if (parsed.timeRange?.end) {
-          const endDate = new Date(parsed.timeRange.end).toISOString().split("T")[0];
-          params["created_at[lte]"] = endDate;
-        }
-
-        // Debug: Log what parameters we're actually sending
-        console.log("Date filter being used:", {
-          hasStartAndEnd: !!(parsed.timeRange?.start && parsed.timeRange?.end),
-          actualParam: Object.keys(params).find((key) => key.startsWith("created_at")),
-          value: params[Object.keys(params).find((key) => key.startsWith("created_at")) || ""],
-        });
-
-        // Add status filter
-        if (parsed.status && parsed.status.length > 0) {
-          params["incident_status[category]"] = parsed.status.join(",");
-        }
-
-        // Add severity filter if API supports it
-        if (parsed.severity && parsed.severity.length > 0) {
-          params["severity"] = parsed.severity.join(",");
-        }
-
-        // Debug: Log API parameters
-        console.log("API Parameters:", JSON.stringify(params, null, 2));
-        console.log("Full API URL:", `https://api.incident.io/v2/incidents?${new URLSearchParams(params).toString()}`);
-
-        // Debug: Log time range details
-        if (parsed.timeRange) {
-          console.log("Time Range Details:", {
-            start: parsed.timeRange.start,
-            end: parsed.timeRange.end,
-            startDate: parsed.timeRange.start ? new Date(parsed.timeRange.start) : null,
-            endDate: parsed.timeRange.end ? new Date(parsed.timeRange.end) : null,
-          });
-        }
 
         // Debug: Log the actual request being sent
         console.log("Axios request config:", {
@@ -281,19 +154,11 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
         if (response.data && Array.isArray(response.data.incidents)) {
           let filteredIncidents = response.data.incidents;
 
-          // Client-side filtering by keywords
+          // Client-side filtering by keywords in title and description
           if (parsed.keywords && parsed.keywords.length > 0) {
             filteredIncidents = filteredIncidents.filter((incident) => {
               const searchText = `${incident.name} ${incident.summary || ""}`.toLowerCase();
               return parsed.keywords.some((keyword) => searchText.includes(keyword.toLowerCase()));
-            });
-          }
-
-          // Client-side filtering by teams/services if mentioned in name/summary
-          if (parsed.teams && parsed.teams.length > 0) {
-            filteredIncidents = filteredIncidents.filter((incident) => {
-              const searchText = `${incident.name} ${incident.summary || ""}`.toLowerCase();
-              return parsed.teams!.some((team) => searchText.includes(team.toLowerCase()));
             });
           }
 

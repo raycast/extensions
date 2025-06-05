@@ -54,7 +54,7 @@ export default function AIIncidentSearchCommand() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder="Describe incidents in natural language..."
+      searchBarPlaceholder="Describe what you're looking for (e.g., database errors, API failures)..."
       searchText={searchQuery}
       onSearchTextChange={setSearchQuery}
       actions={
@@ -65,14 +65,7 @@ export default function AIIncidentSearchCommand() {
     >
       {parsedQuery && (
         <List.Section title="AI Understanding">
-          <List.Item
-            title="Parsed Query"
-            subtitle={`Keywords: ${parsedQuery.keywords.join(", ") || "none"}`}
-            accessories={[
-              { text: parsedQuery.status ? `Status: ${parsedQuery.status.join(", ")}` : "" },
-              { text: parsedQuery.severity ? `Severity: ${parsedQuery.severity.join(", ")}` : "" },
-            ]}
-          />
+          <List.Item title="Search Keywords" subtitle={`${parsedQuery.keywords.join(", ") || "none"}`} />
         </List.Section>
       )}
 
@@ -113,7 +106,7 @@ export default function AIIncidentSearchCommand() {
       {!loading && incidents.length === 0 && searchQuery && (
         <List.EmptyView
           title="No incidents found"
-          description="Try describing what you're looking for in natural language"
+          description="Try using different keywords to describe the incidents you're looking for"
           actions={
             <ActionPanel>
               <Action title="Search with AI" onAction={handleSearch} shortcut={{ modifiers: ["cmd"], key: "return" }} />
