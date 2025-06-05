@@ -26,15 +26,16 @@
   ],
   "commands": [
     {
-      "name": "products",
-      "title": "Products",
+      "name": "licenses",
+      "title": "Licenses",
       "description": "",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.99.3",
-    "@raycast/utils": "^1.19.1"
+    "@raycast/utils": "^1.19.1",
+    "dayjs": "^1.11.13"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
