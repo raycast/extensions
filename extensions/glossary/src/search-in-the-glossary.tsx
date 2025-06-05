@@ -59,13 +59,13 @@ export default function SearchGlossary(props: LaunchProps) {
       case "latest":
         sortedResults.sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
         break;
       case "oldest":
         sortedResults.sort(
           (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         );
         break;
     }
@@ -131,7 +131,7 @@ export default function SearchGlossary(props: LaunchProps) {
             subtitle={stripMarkdown(
               term.definition.length > 100
                 ? `${term.definition.substring(0, 100)}...`
-                : term.definition
+                : term.definition,
             )}
             detail={
               <List.Item.Detail
