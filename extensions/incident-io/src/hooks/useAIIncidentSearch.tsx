@@ -201,7 +201,8 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
       };
       
       // Add time range filter - use YYYY-MM-DD format as required by API
-      // incident.io API seems to accept only one operator at a time
+      // Reference: https://api-docs.incident.io/tag/Incidents-V2
+      // Note: incident.io API accepts only one operator at a time for date filtering
       if (parsed.timeRange?.start && parsed.timeRange?.end) {
         // For now, use only the end date to get recent incidents
         const endDate = new Date(parsed.timeRange.end).toISOString().split('T')[0];
@@ -255,6 +256,7 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
       });
       
       // Fetch incidents from API
+      // Reference: https://api-docs.incident.io/tag/Incidents-V2
       const response = await axios.get<{
         incidents: Array<{
           id: string;
