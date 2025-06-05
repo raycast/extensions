@@ -1,13 +1,13 @@
-import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, launchCommand, LaunchType, open } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useMemo } from "react";
 
 import {
+  getBoundedPreferenceNumber,
   MenuBarItem,
   MenuBarItemConfigureCommand,
   MenuBarRoot,
   MenuBarSection,
-  getBoundedPreferenceNumber,
 } from "./components/Menu";
 import { SortMenuBarAction } from "./components/SortAction";
 import { PullRequestFieldsFragment } from "./generated/graphql";
@@ -72,6 +72,8 @@ function MyPullRequestsMenu() {
     includeRecentlyClosed,
     includeReviewRequests,
     includeReviewed,
+    filterMode: repositoryFilterMode,
+    repositoryList: repositoryListArray,
   });
 
   const sections = useMemo(() => {

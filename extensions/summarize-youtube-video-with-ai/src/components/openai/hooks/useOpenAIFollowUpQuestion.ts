@@ -3,8 +3,8 @@ import OpenAI from "openai";
 import { useEffect } from "react";
 import { OPENAI_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
-import { Question } from "../../../hooks/useQuestions";
-import { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
+import type { Question } from "../../../hooks/useQuestions";
+import type { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
 import { generateQuestionId } from "../../../utils/generateQuestionId";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
@@ -49,12 +49,12 @@ export function useOpenAIFollowUpQuestion({ setQuestions, setQuestion, transcrip
         ...prevQuestions,
       ]);
 
-      const answer = openai.beta.chat.completions.stream(
+      const answer = openai.chat.completions.stream(
         {
           model: openaiModel || OPENAI_MODEL,
           messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
           stream: true,
-          creativity: parseInt(creativity),
+          creativity: Number.parseInt(creativity, 10),
         },
         { signal: abortController.signal },
       );
@@ -86,5 +86,5 @@ export function useOpenAIFollowUpQuestion({ setQuestions, setQuestion, transcrip
     return () => {
       abortController.abort();
     };
-  }, [question, transcript]);
+  }, [question, transcript, creativity, openaiApiToken, openaiEndpoint, openaiModel, setQuestion, setQuestions]);
 }

@@ -3,8 +3,8 @@ import OpenAI from "openai";
 import { useEffect } from "react";
 import { OLLAMA_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
-import { Question } from "../../../hooks/useQuestions";
-import { OllamaPreferences } from "../../../summarizeVideoWithOllama";
+import type { Question } from "../../../hooks/useQuestions";
+import type { OllamaPreferences } from "../../../summarizeVideoWithOllama";
 import { generateQuestionId } from "../../../utils/generateQuestionId";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
@@ -46,12 +46,12 @@ export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcrip
         ...prevQuestions,
       ]);
 
-      const answer = openai.beta.chat.completions.stream(
+      const answer = openai.chat.completions.stream(
         {
           model: ollamaModel || OLLAMA_MODEL,
           messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
           stream: true,
-          creativity: parseInt(creativity),
+          creativity: Number.parseInt(creativity, 10),
         },
         { signal: abortController.signal },
       );
@@ -83,5 +83,5 @@ export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcrip
     return () => {
       abortController.abort();
     };
-  }, [question, transcript]);
+  }, [question, transcript, creativity, ollamaEndpoint, ollamaModel, setQuestion, setQuestions]);
 }

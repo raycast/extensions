@@ -83,3 +83,7 @@ Choose one of the models from Ollama's [model catalog](https://ollama.com/search
 ### Language
 
 The language you want the summary to be in. Your choice will be used in a prompt like this "Answer in english". (default: `english`).
+
+## `summarizeVideoHistory`
+
+Every summary is stored in the local database. You can retrieve and interact with the summaries by running the `summarizeVideoHistory` command.

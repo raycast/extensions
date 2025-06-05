@@ -1,6 +1,10 @@
 import { IconMetadata, IconsResponse, SearchIcon } from "../types.ts";
 
-export async function search(apiKey: string, page: number, query?: string): Promise<IconsResponse> {
+export async function search(
+  apiKey: string,
+  page: number,
+  query?: string,
+): Promise<IconsResponse> {
   const searchResponse = await fetch("https://api.macosicons.com/api/search", {
     method: "POST",
     headers: {
@@ -34,5 +38,7 @@ export async function search(apiKey: string, page: number, query?: string): Prom
     };
   }
 
-  throw new Error(data.message || searchResponse.statusText || "Search request failed");
+  throw new Error(
+    data.message || searchResponse.statusText || "Search request failed",
+  );
 }

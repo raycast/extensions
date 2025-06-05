@@ -1,5 +1,13 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Kagi Search MCP Server] - 2025-06-05
+
+Add official Kagi Search MCP Server to registry.
+
+## [Add Anytype MCP Server] - 2025-05-30
+
+Add official Anytype MCP Server to registry.
+
 ## [Add Thena MCP Server] - 2025-05-28
 
 Add official Thena.ai MCP Server to registry, this allows users and AI agents to interact with Thena's services and manage customer requests coming from Slack, Email, Discord and more.

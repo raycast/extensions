@@ -39,7 +39,7 @@ export const getProjects =
   (token: string, searchText: string, pageSize: number) => async (options: { page: number }) => {
     return fetch(
       new URL(
-        `${baseURI}/projects?page=${options.page + 1}&pageSize=${pageSize}&orderby=updatedOn desc${searchText ? `&filterby=substringof('${encodeURIComponent(searchText)}',name)` : ""}`,
+        `${baseURI}/projects?page=${options.page + 1}&pageSize=${pageSize}&orderby=updatedOn desc${searchText ? `&filterby=substringof('${encodeURIComponent(searchText.replaceAll("'", ""))}',name)` : ""}`,
       ),
       getRequestOptions(token),
     )
@@ -82,13 +82,13 @@ export const getTasks =
       const searchTextIsUuid = searchText.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
 
       if (searchTextIsUuid) {
-        filterBy = `${filterBy} and id eq guid'${searchText}'`;
+        filterBy = `${filterBy} and id eq guid'${encodeURIComponent(searchText)}'`;
       } else {
-        filterBy = `${filterBy} and (substringof('${searchText}',name) or substringof('${searchText}',project/name))`;
+        filterBy = `${filterBy} and (substringof('${encodeURIComponent(searchText.replaceAll("'", ""))}',name) or substringof('${encodeURIComponent(searchText.replaceAll("'", ""))}',project/name))`;
       }
     }
 
-    return fetch(new URL(`${baseURI}/${route}?${pagination}&${encodeURIComponent(filterBy)}`), getRequestOptions(token))
+    return fetch(new URL(`${baseURI}/${route}?${pagination}&${filterBy}`), getRequestOptions(token))
       .then((response) => ({
         body: response.text(),
         headers: response.headers,
