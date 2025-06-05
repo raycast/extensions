@@ -1,6 +1,6 @@
 # Open Latest URL from Clipboard
 
-Opens the latest URL from Clipboard if one is found in the latest 5 entries
+Opens the latest URL from Clipboard if one is found in the latest 6 entries
 
 ## Features
 
