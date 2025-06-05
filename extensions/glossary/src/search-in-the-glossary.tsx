@@ -8,6 +8,7 @@ import {
   Toast,
   Alert,
   confirmAlert,
+  Keyboard,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
@@ -58,13 +59,13 @@ export default function SearchGlossary(props: LaunchProps) {
       case "latest":
         sortedResults.sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         break;
       case "oldest":
         sortedResults.sort(
           (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         );
         break;
     }
@@ -130,7 +131,7 @@ export default function SearchGlossary(props: LaunchProps) {
             subtitle={stripMarkdown(
               term.definition.length > 100
                 ? `${term.definition.substring(0, 100)}...`
-                : term.definition,
+                : term.definition
             )}
             detail={
               <List.Item.Detail
@@ -181,7 +182,7 @@ export default function SearchGlossary(props: LaunchProps) {
                   title="Delete Term"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={async () => {
                     const confirmed = await confirmAlert({
                       title: "Delete Term",
@@ -212,7 +213,7 @@ export default function SearchGlossary(props: LaunchProps) {
                   title="Delete All Terms"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                  shortcut={Keyboard.Shortcut.Common.RemoveAll}
                   onAction={async () => {
                     const confirmed = await confirmAlert({
                       title: "Delete All Terms",
