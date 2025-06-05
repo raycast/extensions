@@ -21,7 +21,7 @@ function isValidUrl(url: string): boolean {
 export default async function Main() {
   await closeMainWindow();
 
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 0; i <= 5; i++) {
     const { text } = await Clipboard.read({ offset: i });
     const trimmedText = text?.trim();
     if (trimmedText && isValidUrl(trimmedText)) {
