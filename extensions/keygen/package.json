@@ -3,13 +3,14 @@
   "name": "keygen",
   "title": "Keygen",
   "description": "",
-  "icon": "extension-icon.png",
+  "icon": "logomark.png",
   "author": "xmok",
   "license": "MIT",
   "preferences": [
     {
       "name": "account_id",
       "title": "Account ID",
+      "placeholder": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx",
       "type": "textfield",
       "required": true,
       "description": ""
@@ -17,6 +18,7 @@
     {
       "name": "api_token",
       "title": "API Token",
+      "placeholder": "prod-xxxx...xxxx",
       "type": "password",
       "required": true,
       "description": ""
