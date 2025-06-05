@@ -23,7 +23,7 @@
       "mode": "view"
     },
     {
-      "name": "force-kill",
+      "name": "index",
       "title": "Force Kill Process",
       "description": "Kills the chosen process with sudo (requires enabling sudo authentication with fingerprint)",
       "mode": "view"
