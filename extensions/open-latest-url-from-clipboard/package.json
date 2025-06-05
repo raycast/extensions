@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-latest-url-from-clipboard",
   "title": "Open Latest URL from Clipboard",
-  "description": "Opens the latest URL from Clipboard if one is found in the latest 5 entries",
+  "description": "Opens the latest URL from Clipboard if one is found in the latest 6 entries",
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "categories": [
