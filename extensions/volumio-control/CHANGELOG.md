@@ -1,6 +1,6 @@
 # Volumio Control Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-06-05
 - Initial release
 - Media control commands (Play, Pause, Next, Previous, Stop)
 - Play/Pause toggle command
