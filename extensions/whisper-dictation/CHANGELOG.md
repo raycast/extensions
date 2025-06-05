@@ -1,6 +1,6 @@
  # Changelog
 
- ## [0.1.0] - {PR_MERGE_DATE}
+ ## [0.1.0] - 2025-06-05
 
  ### Added
 - Initial release of **Whisper Dictation** extension
