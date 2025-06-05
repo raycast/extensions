@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-06-05
 
 - Add a new callback return value `formattedColor` to return the color in the user's preferred format
 - Fix an issue where the callback hex color was not being returned correctly
