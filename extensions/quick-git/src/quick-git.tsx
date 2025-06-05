@@ -1,8 +1,8 @@
-import { useLocalStorage } from "@raycast/utils"
-import { GitStatus } from "./components/GitStatus/GitStatus.js"
+import { useLocalStorage } from "@raycast/utils";
+import { GitStatus } from "./components/GitStatus/GitStatus.js";
 
 export default function Command() {
-	const { value, isLoading } = useLocalStorage<string>("selectedRepo")
+  const { value, isLoading } = useLocalStorage<string>("selectedRepo");
 
-	return <GitStatus repo={value} isLoadingRepo={isLoading} />
+  return <GitStatus repo={value} isLoadingRepo={isLoading} />;
 }
