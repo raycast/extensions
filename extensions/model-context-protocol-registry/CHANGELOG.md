@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Updated Prisma MCP Server URL] - 2025-06-05
+
+The Prisma MCP server URL was updated.
+
 ## [Add Kagi Search MCP Server] - 2025-06-05
 
 Add official Kagi Search MCP Server to registry.
