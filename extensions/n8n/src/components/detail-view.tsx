@@ -25,7 +25,7 @@ export function DetailView(props: { workflow: Workflow }) {
           {workflow.tags.length > 0 && (
             <>
               <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title={"Tags"} text={workflow.tags.join(", ")} />
+              <List.Item.Detail.Metadata.Label title={"Tags"} text={workflow.tags.map((tag) => tag.name).join(", ")} />
             </>
           )}
         </List.Item.Detail.Metadata>

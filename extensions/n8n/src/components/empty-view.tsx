@@ -1,13 +1,57 @@
-import { ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { ActionOpenPreferences } from "./action-open-preferences";
+import React from "react"; // Import React for ReactNode type
 
-export function EmptyView(props: { title: string; extensionPreferences: boolean }) {
-  const { title, extensionPreferences } = props;
+export function EmptyView(props: {
+  title: string;
+  extensionPreferences: boolean;
+  actions?: React.ReactNode;
+  description?: string;
+}) {
+  const { title, extensionPreferences, actions, description } = props;
+
+  // Helper function to determine if the node is already an ActionPanel
+  const isActionPanel = (node: React.ReactNode): boolean => {
+    return React.isValidElement(node) && node.type === ActionPanel;
+  };
+
+  // Prepare the actions prop for List.EmptyView
+  let finalActions: React.ReactNode = undefined;
+
+  if (actions) {
+    // If actions is already an ActionPanel, use it directly
+    if (isActionPanel(actions)) {
+      finalActions = actions;
+    }
+    // Otherwise, wrap it in ActionPanel to ensure proper structure
+    else {
+      try {
+        finalActions = <ActionPanel>{actions}</ActionPanel>;
+      } catch (error) {
+        // Fallback to a safe default
+        finalActions = (
+          <ActionPanel>
+            <Action title="Fallback Action" />
+          </ActionPanel>
+        );
+      }
+    }
+  }
+  // If no actions provided but extensionPreferences is true, use default ActionOpenPreferences
+  else if (extensionPreferences) {
+    finalActions = (
+      <ActionPanel>
+        <ActionOpenPreferences />
+      </ActionPanel>
+    );
+  }
+
   return (
     <List.EmptyView
-      title={title}
+      title={title ?? "No Title"}
+      description={description}
       icon={"empty-icon.png"}
-      actions={<ActionPanel>{extensionPreferences && <ActionOpenPreferences />}</ActionPanel>}
+      actions={finalActions}
     />
   );
 }

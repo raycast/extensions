@@ -1,9 +1,6 @@
-import { Action, ActionPanel, Icon, openCommandPreferences } from "@raycast/api";
+import { Action, Icon, openCommandPreferences } from "@raycast/api";
 
 export function ActionOpenPreferences() {
-  return (
-    <ActionPanel.Section>
-      <Action icon={Icon.Gear} title={"Open Command Preferences"} onAction={openCommandPreferences} />
-    </ActionPanel.Section>
-  );
+  // Return only the Action, not wrapped in a section
+  return <Action icon={Icon.Gear} title={"Open Command Preferences"} onAction={openCommandPreferences} />;
 }
