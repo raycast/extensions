@@ -51,14 +51,7 @@
 - Add Search Examples Open in browser action
 - Add Toast feedback to Warn users in case of failed requests
 
-# shadcn/ui Changelog
-
 ## [Fix search examples and components commands] - {PR_MERGE_DATE}
-
-- Fix "search components" command by removing dependency on the deprecated /api endpoint and fetching data directly from GitHub
-- Fix "search examples" command by updating the GitHub examples path in configuration to match the latest shadcn/ui repo structure
-
-## [Update shadcn/ui add component command] - 2024-09-11
 
 - Fix "search components" command by removing dependency on the deprecated /api endpoint and fetching data directly from GitHub
 - Fix "search examples" command by updating the GitHub examples path in configuration to match the latest shadcn/ui repo structure
