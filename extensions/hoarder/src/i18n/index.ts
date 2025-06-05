@@ -63,6 +63,12 @@ export const translations = {
         note: "📒 Note",
       },
 
+      // Checkboxes
+      archived: "Archived",
+      archivedLabel: "Archive this bookmark",
+      favourited: "Favorited",
+      favouritedLabel: "Favorite this bookmark",
+
       // Actions
       actions: {
         openInBrowser: "Open in Browser",
@@ -125,6 +131,11 @@ export const translations = {
       updating: "Updating bookmark...",
       updateSuccess: "Bookmark updated successfully",
       updateFailed: "Bookmark update failed",
+
+      // Form fields
+      fields: {
+        note: "📒 Note",
+      },
     },
 
     // List Related
@@ -301,6 +312,12 @@ export const translations = {
         note: "📒 笔记",
       },
 
+      // Checkboxes
+      archived: "归档",
+      archivedLabel: "归档此书签",
+      favourited: "收藏",
+      favouritedLabel: "收藏此书签",
+
       // 操作
       actions: {
         openInBrowser: "在浏览器中打开",
@@ -363,6 +380,11 @@ export const translations = {
       updating: "更新中...",
       updateSuccess: "更新成功",
       updateFailed: "更新失败",
+
+      // Form fields
+      fields: {
+        note: "📒 笔记",
+      },
     },
 
     // 列表相关

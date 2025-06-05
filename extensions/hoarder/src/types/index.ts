@@ -89,6 +89,8 @@ export interface Bookmark {
 export interface List {
   id: string;
   name: string;
+  icon: string;
+  parentId: string | null;
 }
 
 export interface ListDetails {

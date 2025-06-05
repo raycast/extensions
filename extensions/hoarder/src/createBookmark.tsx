@@ -20,6 +20,9 @@ export default function CreateBookmarkView() {
   const { lists } = useGetAllLists();
 
   const { handleSubmit, itemProps, values } = useForm<FormValues>({
+    initialValues: {
+      type: "link",
+    },
     validation: {
       type: FormValidation.Required,
       content: (value: string | undefined) => {
