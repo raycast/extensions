@@ -23,6 +23,8 @@ import {
   getFormats,
   getFormatTitle,
   getFormatValue,
+  getReadableErrorTitle,
+  getSupportedBrowsersForImportingCookies,
   isValidHHMM,
   isValidUrl,
   parseHHMM,
@@ -45,6 +47,7 @@ const {
 export default function DownloadVideo() {
   const [error, setError] = useState(0);
   const [warning, setWarning] = useState("");
+  const [showCookiesImport, setShowCookiesImport] = useState(false);
 
   const { handleSubmit, values, itemProps, setValue, setValidationError } = useForm<DownloadOptions>({
     initialValues: {
@@ -58,6 +61,10 @@ export default function DownloadVideo() {
       options.push("--ffmpeg-location", ffmpegPath);
       options.push("--format", downloadFormat);
       options.push("--recode-video", recodeFormat);
+
+      if (values.browser) {
+        options.push("--cookies-from-browser", values.browser);
+      }
 
       const toast = await showToast({
         title: "Downloading Video",
@@ -164,35 +171,60 @@ export default function DownloadVideo() {
   });
 
   const { data: video, isLoading } = usePromise(
-    async (url: string) => {
+    async (url: string, browserArg?: string) => {
       if (!url) return;
       if (!isValidUrl(url)) return;
 
       const result = await execa(
         ytdlPath,
-        [forceIpv4 ? "--force-ipv4" : "", "--dump-json", "--format-sort=resolution,ext,tbr", url].filter((x) =>
-          Boolean(x),
-        ),
+        [
+          forceIpv4 ? "--force-ipv4" : "",
+          browserArg ? "--cookies-from-browser" : "",
+          browserArg ?? "",
+          "--dump-json",
+          "--format-sort=resolution,ext,tbr",
+          url,
+        ].filter((x) => Boolean(x)),
       );
       return JSON.parse(result.stdout) as Video;
     },
-    [values.url],
+    [values.url, values.browser],
     {
       onError(error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Video not found with the provided URL",
-          message: error.message,
-          primaryAction: {
-            title: "Copy to Clipboard",
-            onAction: () => {
-              Clipboard.copy(error.message);
+        console.error(error);
+
+        if (error.message.includes("Sign in to confirm your age")) {
+          setShowCookiesImport(true);
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Video is age restricted",
+            message: "Please import cookies from your browser and try again.",
+          });
+        } else {
+          showToast({
+            style: Toast.Style.Failure,
+            title: getReadableErrorTitle(error),
+            message: error.message,
+            primaryAction: {
+              title: "Copy to Clipboard",
+              onAction: () => {
+                Clipboard.copy(error.message);
+              },
             },
-          },
-        });
+          });
+        }
       },
     },
   );
+
+  useEffect(() => {
+    if (showCookiesImport) {
+      setShowCookiesImport(false);
+      setValue("browser", "");
+    }
+  }, [values.url]);
+
+  const { data: browsers, isLoading: isLoadingBrowsers } = usePromise(getSupportedBrowsersForImportingCookies, []);
 
   useEffect(() => {
     if (video) {
@@ -284,11 +316,32 @@ export default function DownloadVideo() {
       <Form.Description title="Title" text={video?.title ?? "Video not found"} />
       <Form.TextField
         {...itemProps.url}
-        autoFocus
+        autoFocus={!showCookiesImport}
         title="URL"
         placeholder="https://www.youtube.com/watch?v=ykaj0pS4A1A"
       />
       {warning && <Form.Description text={warning} />}
+      {showCookiesImport && (
+        <>
+          <Form.Description
+            title="Age Restricted"
+            text="This video is age-restricted. To download it, please select a browser to import your cookies from, which will verify your age."
+          />
+          <Form.Dropdown {...itemProps.browser} isLoading={isLoadingBrowsers} autoFocus={true} title="Choose Browser">
+            <Form.Dropdown.Item value="" title="Please select a browser..." key="__placeholder__" />
+            {browsers?.map((browser) => {
+              return (
+                <Form.Dropdown.Item
+                  key={browser.name}
+                  value={browser.ytDlpCompatibleName}
+                  title={browser.name}
+                  icon={browser.iconPath}
+                />
+              );
+            })}
+          </Form.Dropdown>
+        </>
+      )}
       {video && (
         <Form.Dropdown {...itemProps.format} title="Format">
           {Object.entries(formats).map(([category, formats]) => (
