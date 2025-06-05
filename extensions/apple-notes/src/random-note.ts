@@ -13,7 +13,7 @@ export default async (props: LaunchProps<{ arguments: Arguments.RandomNote }>) =
     const { maxQueryResults } = getPreferenceValues();
     const max = Number.isNaN(parseInt(maxQueryResults)) ? 250 : parseInt(maxQueryResults);
 
-    const notes = await getNotes(max, true, tags);
+    const notes = await getNotes(max, tags);
 
     if (!Array.isArray(notes) || notes.length === 0) {
       showFailureToast(null, {
@@ -23,7 +23,8 @@ export default async (props: LaunchProps<{ arguments: Arguments.RandomNote }>) =
       return;
     }
 
-    open(getOpenNoteURL(notes[0].UUID));
+    const randomNote = notes[Math.floor(Math.random() * notes.length)];
+    open(getOpenNoteURL(randomNote.UUID));
   } catch (error) {
     showFailureToast(error, { title: "Could not open a random note." });
   }
