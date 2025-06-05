@@ -1,5 +1,8 @@
 # Amazon AWS Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+- Fix local development crashing without AWS Vault.
+
 ## [Console command] 2025-05-23
 - Fix full URLs (e.g. `https://quicksight.aws.amazon.com`) routing correctly to the console
 
