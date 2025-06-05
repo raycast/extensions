@@ -1,11 +1,4 @@
-import {
-	Action,
-	ActionPanel,
-	Icon,
-	Keyboard,
-	showToast,
-	Toast,
-} from "@raycast/api"
+import { Action, ActionPanel, Icon, Keyboard, showToast, Toast } from "@raycast/api"
 import { showFailureToast, useExec } from "@raycast/utils"
 
 interface Props {
@@ -59,18 +52,8 @@ export function RemoteGitActions({ repo, checkStatus }: Props) {
 
 	return (
 		<ActionPanel.Section title="Remote">
-			<Action
-				title="Push"
-				onAction={push}
-				icon={Icon.Upload}
-				shortcut={Keyboard.Shortcut.Common.MoveUp}
-			/>
-			<Action
-				title="Pull"
-				onAction={pull}
-				icon={Icon.Download}
-				shortcut={Keyboard.Shortcut.Common.MoveDown}
-			/>
+			<Action title="Push" onAction={push} icon={Icon.Upload} shortcut={Keyboard.Shortcut.Common.MoveUp} />
+			<Action title="Pull" onAction={pull} icon={Icon.Download} shortcut={Keyboard.Shortcut.Common.MoveDown} />
 			<Action title="Fetch" onAction={fetch} icon={Icon.ArrowClockwise} />
 		</ActionPanel.Section>
 	)

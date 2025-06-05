@@ -1,18 +1,6 @@
 import { useState } from "react"
-import {
-	Action,
-	ActionPanel,
-	Form,
-	Icon,
-	showToast,
-	useNavigation,
-} from "@raycast/api"
-import {
-	FormValidation,
-	showFailureToast,
-	useExec,
-	useForm,
-} from "@raycast/utils"
+import { Action, ActionPanel, Form, Icon, showToast, useNavigation } from "@raycast/api"
+import { FormValidation, showFailureToast, useExec, useForm } from "@raycast/utils"
 
 interface Props {
 	repo: string
@@ -46,11 +34,7 @@ export const GitCommit = ({ repo, checkStatus }: Props) => {
 			navigationTitle="Commit Staged Changes"
 			actions={
 				<ActionPanel>
-					<Action.SubmitForm
-						title="Commit"
-						onSubmit={handleSubmit}
-						icon={Icon.Checkmark}
-					/>
+					<Action.SubmitForm title="Commit" onSubmit={handleSubmit} icon={Icon.Checkmark} />
 				</ActionPanel>
 			}
 		>

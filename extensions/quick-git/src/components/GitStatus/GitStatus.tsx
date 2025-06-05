@@ -1,11 +1,4 @@
-import {
-	Action,
-	ActionPanel,
-	Icon,
-	launchCommand,
-	LaunchType,
-	List,
-} from "@raycast/api"
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, List } from "@raycast/api"
 import type { GitStatus } from "../../utils/status.js"
 import { parseGitStatus } from "../../utils/status.js"
 import { GitStatusItem } from "./GitStatusItem.js"
@@ -30,19 +23,15 @@ const launchSetRepo = () =>
 	})
 
 export function GitStatus({ repo, isLoadingRepo }: Props) {
-	const { data, isLoading, revalidate } = useExec(
-		"git",
-		["status", "--porcelain=2", "--branch"],
-		{
-			cwd: repo,
-			execute: !!repo,
-			keepPreviousData: false,
-			onError: (error) => {
-				showFailureToast(error, { title: "Could not fetch git status" })
-			},
-			parseOutput: ({ stdout }) => parseGitStatus(stdout),
+	const { data, isLoading, revalidate } = useExec("git", ["status", "--porcelain=2", "--branch"], {
+		cwd: repo,
+		execute: !!repo,
+		keepPreviousData: false,
+		onError: (error) => {
+			showFailureToast(error, { title: "Could not fetch git status" })
 		},
-	)
+		parseOutput: ({ stdout }) => parseGitStatus(stdout),
+	})
 
 	return (
 		<List
@@ -60,18 +49,10 @@ export function GitStatus({ repo, isLoadingRepo }: Props) {
 								target={<GitBranch repo={repo} checkStatus={revalidate} />}
 							/>
 							<RemoteGitActions repo={repo} checkStatus={revalidate} />
-							<Action
-								icon={Icon.Folder}
-								title="Change Current Repo"
-								onAction={launchSetRepo}
-							/>
+							<Action icon={Icon.Folder} title="Change Current Repo" onAction={launchSetRepo} />
 						</>
 					) : (
-						<Action
-							icon={Icon.Folder}
-							title="Set Repo"
-							onAction={launchSetRepo}
-						/>
+						<Action icon={Icon.Folder} title="Set Repo" onAction={launchSetRepo} />
 					)}
 				</ActionPanel>
 			}

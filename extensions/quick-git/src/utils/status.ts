@@ -22,12 +22,7 @@ export type GitStatus =
 	/** ignored */
 	| "!"
 
-type GitStatusFormat =
-	| "changed"
-	| "renamed"
-	| "unmerged"
-	| "untracked"
-	| "ignored"
+type GitStatusFormat = "changed" | "renamed" | "unmerged" | "untracked" | "ignored"
 
 export interface StatusInfo {
 	format: GitStatusFormat

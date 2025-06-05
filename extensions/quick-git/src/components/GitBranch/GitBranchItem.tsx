@@ -9,12 +9,7 @@ interface Props {
 	checkStatus: () => void
 }
 
-export function GitBranchItem({
-	branch,
-	repo,
-	checkBranches,
-	checkStatus,
-}: Props) {
+export function GitBranchItem({ branch, repo, checkBranches, checkStatus }: Props) {
 	// Git indicates the current branch by start that row with with a `*`
 	const currentBranch = useMemo(() => branch.startsWith("*"), [branch])
 

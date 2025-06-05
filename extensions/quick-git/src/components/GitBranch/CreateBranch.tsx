@@ -1,11 +1,4 @@
-import {
-	Action,
-	ActionPanel,
-	Form,
-	Icon,
-	showToast,
-	useNavigation,
-} from "@raycast/api"
+import { Action, ActionPanel, Form, Icon, showToast, useNavigation } from "@raycast/api"
 import { showFailureToast, useExec, useForm } from "@raycast/utils"
 import { useState } from "react"
 
@@ -15,31 +8,23 @@ interface Props {
 	checkStatus: () => void
 }
 
-export default function CreateBranch({
-	repo,
-	checkBranches,
-	checkStatus,
-}: Props) {
+export default function CreateBranch({ repo, checkBranches, checkStatus }: Props) {
 	const [branchName, setBranchName] = useState("")
-	const { revalidate, isLoading } = useExec(
-		"git",
-		["switch", "-c", branchName],
-		{
-			cwd: repo,
-			execute: false,
-			onData: () => {
-				checkBranches()
-				checkStatus()
-				showToast({ title: "Created branch" })
-				pop()
-			},
-			onError: (error) => {
-				showFailureToast(error, {
-					title: `Could not create a branch called ${branchName}`,
-				})
-			},
+	const { revalidate, isLoading } = useExec("git", ["switch", "-c", branchName], {
+		cwd: repo,
+		execute: false,
+		onData: () => {
+			checkBranches()
+			checkStatus()
+			showToast({ title: "Created branch" })
+			pop()
 		},
-	)
+		onError: (error) => {
+			showFailureToast(error, {
+				title: `Could not create a branch called ${branchName}`,
+			})
+		},
+	})
 	const { pop } = useNavigation()
 	const { handleSubmit, itemProps } = useForm({
 		onSubmit: revalidate,
@@ -63,11 +48,7 @@ export default function CreateBranch({
 			isLoading={isLoading}
 			actions={
 				<ActionPanel>
-					<Action.SubmitForm
-						title="Create Branch"
-						onSubmit={handleSubmit}
-						icon={Icon.Checkmark}
-					/>
+					<Action.SubmitForm title="Create Branch" onSubmit={handleSubmit} icon={Icon.Checkmark} />
 				</ActionPanel>
 			}
 		>

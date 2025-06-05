@@ -1,24 +1,8 @@
-import {
-	Action,
-	ActionPanel,
-	Form,
-	Icon,
-	launchCommand,
-	LaunchType,
-	showToast,
-	Toast,
-} from "@raycast/api"
-import {
-	FormValidation,
-	showFailureToast,
-	useForm,
-	useLocalStorage,
-} from "@raycast/utils"
+import { Action, ActionPanel, Form, Icon, launchCommand, LaunchType, showToast, Toast } from "@raycast/api"
+import { FormValidation, showFailureToast, useForm, useLocalStorage } from "@raycast/utils"
 
 export default function Command() {
-	const { value, setValue, removeValue, isLoading } = useLocalStorage<
-		string | undefined
-	>("selectedRepo")
+	const { value, setValue, removeValue, isLoading } = useLocalStorage<string | undefined>("selectedRepo")
 
 	const { handleSubmit, itemProps } = useForm({
 		onSubmit({ newRepo }: { newRepo: string[] }) {
@@ -56,16 +40,8 @@ export default function Command() {
 			isLoading={isLoading}
 			actions={
 				<ActionPanel>
-					<Action.SubmitForm
-						title="Set Repo"
-						onSubmit={handleSubmit}
-						icon={Icon.Checkmark}
-					/>
-					<Action.SubmitForm
-						title="Unset Repo"
-						onSubmit={removeValue}
-						icon={Icon.Xmark}
-					/>
+					<Action.SubmitForm title="Set Repo" onSubmit={handleSubmit} icon={Icon.Checkmark} />
+					<Action.SubmitForm title="Unset Repo" onSubmit={removeValue} icon={Icon.Xmark} />
 				</ActionPanel>
 			}
 		>

@@ -18,21 +18,17 @@ export function BulkGitActions({ repo, checkStatus }: Props) {
 			showFailureToast(error, { title: "Could not stage files" })
 		},
 	})
-	const { revalidate: unstageAllFiles } = useExec(
-		"git",
-		["restore", "--staged", "."],
-		{
-			cwd: repo,
-			execute: false,
-			onData: () => {
-				checkStatus()
-				showToast({ title: "Unstaged files" })
-			},
-			onError: (error) => {
-				showFailureToast(error, { title: "Could not unstage files" })
-			},
+	const { revalidate: unstageAllFiles } = useExec("git", ["restore", "--staged", "."], {
+		cwd: repo,
+		execute: false,
+		onData: () => {
+			checkStatus()
+			showToast({ title: "Unstaged files" })
 		},
-	)
+		onError: (error) => {
+			showFailureToast(error, { title: "Could not unstage files" })
+		},
+	})
 	const { revalidate: stashFiles } = useExec("git", ["stash"], {
 		cwd: repo,
 		execute: false,
@@ -59,11 +55,7 @@ export function BulkGitActions({ repo, checkStatus }: Props) {
 				icon={Icon.MinusCircle}
 				shortcut={Keyboard.Shortcut.Common.RemoveAll}
 			/>
-			<Action
-				title="Stash Files"
-				onAction={stashFiles}
-				icon={Icon.SaveDocument}
-			/>
+			<Action title="Stash Files" onAction={stashFiles} icon={Icon.SaveDocument} />
 		</ActionPanel.Section>
 	)
 }
