@@ -16,8 +16,15 @@ function MyPullRequests() {
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", PR_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-my-pr",
   });
-  const { includeAssigned, includeMentioned, includeReviewed, includeReviewRequests, includeRecentlyClosed } =
-    getPreferenceValues<Preferences.MyPullRequests>();
+  const {
+    includeAssigned,
+    includeMentioned,
+    includeReviewed,
+    includeReviewRequests,
+    includeRecentlyClosed,
+    repositoryFilterMode,
+    repositoryList,
+  } = getPreferenceValues<Preferences.MyPullRequests>();
   const {
     data: sections,
     isLoading,
@@ -30,6 +37,8 @@ function MyPullRequests() {
     includeRecentlyClosed,
     includeReviewRequests,
     includeReviewed,
+    filterMode: repositoryFilterMode,
+    repositoryList: repositoryList?.split(",").map((r) => r.trim()) || [],
   });
 
   return (
