@@ -1,4 +1,5 @@
-import { Action, ActionPanel, List, Toast, getPreferenceValues, showToast, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, List, getPreferenceValues, Icon, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { useAIIncidentSearch } from "./hooks/useAIIncidentSearch";
 
@@ -13,11 +14,7 @@ export default function AIIncidentSearchCommand() {
 
   useEffect(() => {
     if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Search Error",
-        message: error,
-      });
+      showFailureToast(error, { title: "Search Error" });
     }
   }, [error]);
 
