@@ -1,6 +1,6 @@
 # Apple Notes Changelog
 
-## [View a random note] - 2024-06-04
+## [View Random Note command] - {PR_MERGE_DATE}
 
 Add a new command for viewing a random note from a user's note library.
 

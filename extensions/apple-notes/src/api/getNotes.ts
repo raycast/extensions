@@ -45,17 +45,7 @@ type NoteItem = {
 
 const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
 
-export async function getNotes(maxQueryResults: number, randomOrder = false, searchTags: string[] = []) {
-  let searchClause = "";
-  if (searchTags.length) {
-    searchClause = `AND ${searchTags
-      .map((tag) => {
-        tag = tag.replace("#", "");
-        return `note.zsnippet LIKE '%#${tag}%'`;
-      })
-      .join(" AND ")}`;
-  }
-
+export async function getNotes(maxQueryResults: number, randomNote = false, searchTags: string[] = []) {
   const query = `
     SELECT
         'x-coredata://' || zmd.z_uuid || '/ICNote/p' || note.z_pk AS id,
@@ -83,9 +73,8 @@ export async function getNotes(maxQueryResults: number, randomOrder = false, sea
         note.z_pk IS NOT NULL AND
         note.zmarkedfordeletion != 1 AND
         folder.zmarkedfordeletion != 1
-        ${searchClause}
     ORDER BY
-        ${randomOrder ? "RANDOM()" : "note.zmodificationdate1 DESC"}
+        note.zmodificationdate1 DESC
     LIMIT ${maxQueryResults}
   `;
 
@@ -157,7 +146,7 @@ export async function getNotes(maxQueryResults: number, randomOrder = false, sea
     })
     .sort((a, b) => (a.modifiedAt && b.modifiedAt && a.modifiedAt < b.modifiedAt ? 1 : -1));
 
-  const notesWithAdditionalFields = notes.map((note) => {
+  let notesWithAdditionalFields = notes.map((note) => {
     const noteInvitation = invitations?.find((inv) => inv.noteId === note.id);
     const noteLinks = links?.filter((link) => link.notePk == note.pk);
 
@@ -186,6 +175,17 @@ export async function getNotes(maxQueryResults: number, randomOrder = false, sea
       tags: noteTags ?? [],
     };
   });
+
+  if (randomNote) {
+    if (searchTags.length) {
+      notesWithAdditionalFields = notesWithAdditionalFields.filter((note) => {
+        const noteTags = note.tags.map((t) => t.text);
+        return searchTags.every((searchTag) => noteTags.includes(`#${searchTag.replace("#", "")}`));
+      });
+    }
+
+    return [notesWithAdditionalFields[Math.floor(Math.random() * notesWithAdditionalFields.length)]];
+  }
 
   return notesWithAdditionalFields;
 }

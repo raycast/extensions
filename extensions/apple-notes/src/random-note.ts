@@ -1,4 +1,4 @@
-import { open, closeMainWindow, LaunchProps } from "@raycast/api";
+import { open, closeMainWindow, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 import { getNotes } from "./api/getNotes";
@@ -10,7 +10,10 @@ export default async (props: LaunchProps<{ arguments: Arguments.RandomNote }>) =
   try {
     const tags = props.arguments.tags?.trim() ? props.arguments.tags.split(/\s+/) : [];
 
-    const notes = await getNotes(1, true, tags);
+    const { maxQueryResults } = getPreferenceValues();
+    const max = Number.isNaN(parseInt(maxQueryResults)) ? 250 : parseInt(maxQueryResults);
+
+    const notes = await getNotes(max, true, tags);
 
     if (!Array.isArray(notes) || notes.length === 0) {
       showFailureToast(null, {
