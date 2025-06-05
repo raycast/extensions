@@ -61,10 +61,19 @@
       "subtitle": "Clockify",
       "description": "Manage Clockify time entries with Raycast",
       "mode": "view"
+    },
+    {
+      "name": "clockifymenu",
+      "title": "Current Timer",
+      "subtitle": "Clockify",
+      "description": "Show current Clockify timer in menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
     }
   ],
   "dependencies": {
     "@raycast/api": "1.76.0",
+    "@raycast/utils": "^1.19.1",
     "lodash.isempty": "^4.4.0",
     "lodash.uniqwith": "^4.5.0",
     "node-fetch": "^3.3.2"
