@@ -28,15 +28,17 @@ export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
       _handleSubmit(values);
     },
     validation: {
-      term: (value: string) => {
+      term: (value: string | undefined): string | undefined => {
         if (!value) {
           return "Term is required";
         }
+        return undefined;
       },
-      definition: (value: string) => {
+      definition: (value: string | undefined): string | undefined => {
         if (!value) {
           return "Definition is required";
         }
+        return undefined;
       },
     },
   });
