@@ -1,4 +1,4 @@
 export interface PreferencesType {
   primaryAction: "save" | "inline";
-  defaultFormat: "png" | "svg";
+  defaultFormat: "png" | "svg" | "jpeg";
 }

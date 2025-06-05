@@ -1,5 +1,11 @@
 # QR Code Generator Changelog
 
+## [Added JPEG Support] - 2025-06-03
+- Added support for generating QR codes in JPEG format
+- Updated documentation to reflect new JPEG feature
+- Refactored image format choice in generateQRCode
+- Added new contributor
+
 ## [Improved User Experience] - 2025-05-30
 
 - Added success toast notification when generating QR code from clipboard

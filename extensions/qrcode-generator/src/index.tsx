@@ -9,7 +9,7 @@ import { QR_OPTIONS, SVG_OPTIONS } from "./config";
 interface FormValues {
   url: string;
   inline: boolean;
-  format: "png" | "svg";
+  format: "png" | "svg" | "jpeg";
 }
 
 interface Preferences {
@@ -113,10 +113,11 @@ export default function Command() {
         id="format"
         title="Format"
         value={itemProps.format.value}
-        onChange={(value) => itemProps.format.onChange?.(value as "png" | "svg")}
+        onChange={(value) => itemProps.format.onChange?.(value as "png" | "svg" | "jpeg")}
       >
         <Form.Dropdown.Item value="png" title="PNG" />
         <Form.Dropdown.Item value="svg" title="SVG" />
+        <Form.Dropdown.Item value="jpeg" title="JPEG" />
       </Form.Dropdown>
     </Form>
   );
