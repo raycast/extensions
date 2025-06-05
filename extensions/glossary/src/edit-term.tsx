@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { updateTerm, GlossaryTerm } from "./data-store";
 
@@ -26,11 +27,7 @@ export default function EditTerm({ term, onEdit }: EditTermProps) {
 
       onEdit();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update term",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Failed to update term" });
     } finally {
       setIsLoading(false);
     }

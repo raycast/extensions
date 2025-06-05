@@ -6,6 +6,7 @@ import {
   Toast,
   popToRoot,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { importTerms } from "./data-store";
 
@@ -46,11 +47,7 @@ export default function ImportTerms() {
 
       popToRoot();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to import terms",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Failed to import terms" });
     } finally {
       setIsLoading(false);
     }

@@ -1,4 +1,5 @@
 import { ActionPanel, Action, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { searchTerms, GlossaryTerm } from "./data-store";
 
@@ -10,9 +11,14 @@ export default function Command() {
   useEffect(() => {
     async function search() {
       setIsLoading(true);
-      const results = await searchTerms(searchText);
-      setTerms(results);
-      setIsLoading(false);
+      try {
+        const results = await searchTerms(searchText);
+        setTerms(results);
+      } catch (error) {
+        showFailureToast(error, { title: "Failed to search terms" });
+      } finally {
+        setIsLoading(false);
+      }
     }
     search();
   }, [searchText]);

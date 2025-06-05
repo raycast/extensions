@@ -9,6 +9,7 @@ import {
   Alert,
   confirmAlert,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 import {
   searchTerms,
@@ -200,10 +201,8 @@ export default function SearchGlossary(props: LaunchProps) {
                         });
                         search();
                       } catch (error) {
-                        await showToast({
-                          style: Toast.Style.Failure,
+                        showFailureToast(error, {
                           title: "Failed to delete term",
-                          message: String(error),
                         });
                       }
                     }
@@ -233,10 +232,8 @@ export default function SearchGlossary(props: LaunchProps) {
                         });
                         search();
                       } catch (error) {
-                        await showToast({
-                          style: Toast.Style.Failure,
+                        showFailureToast(error, {
                           title: "Failed to delete all terms",
-                          message: String(error),
                         });
                       }
                     }

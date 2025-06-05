@@ -6,6 +6,7 @@ import {
   Toast,
   Clipboard,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { getTerms } from "./data-store";
 
@@ -30,11 +31,7 @@ export default function ExportTerms() {
         message: `Copied ${terms.length} terms to clipboard`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to export terms",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Failed to export terms" });
     } finally {
       setIsLoading(false);
     }

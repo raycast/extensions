@@ -6,7 +6,7 @@ import {
   Toast,
   popToRoot,
 } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { useForm, showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { insertTerm } from "./data-store";
 
@@ -24,16 +24,16 @@ export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
-    onSubmit(values) {
+    onSubmit(values: FormValues) {
       _handleSubmit(values);
     },
     validation: {
-      term: (value) => {
+      term: (value: string) => {
         if (!value) {
           return "Term is required";
         }
       },
-      definition: (value) => {
+      definition: (value: string) => {
         if (!value) {
           return "Definition is required";
         }
@@ -58,11 +58,7 @@ export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
         popToRoot();
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to insert term",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Failed to insert term" });
     } finally {
       setIsLoading(false);
     }
