@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Kagi Search MCP Server] - 2025-06-05
+
+Add official Kagi Search MCP Server to registry.
+
 ## [Add Anytype MCP Server] - 2025-05-30
 
 Add official Anytype MCP Server to registry.
