@@ -30,18 +30,6 @@ interface Config {
   modelPath: string;
   soxPath: string;
 }
-interface Preferences {
-  whisperExecutable: string;
-  modelPath: string;
-  soxExecutablePath: string;
-  defaultAction: "paste" | "copy" | "none";
-  aiRefinementMethod: "disabled" | "raycast" | "ollama";
-  aiModel: string;
-  ollamaEndpoint: string;
-  ollamaApiKey: string;
-  ollamaModel: string;
-  promptBeforeDictation: boolean;
-}
 
 const AUDIO_FILE_PATH = path.join(environment.supportPath, "raycast_dictate_audio.wav");
 const WAV_HEADER_SIZE = 44;
