@@ -24,12 +24,6 @@ type CommandState =
   | "done"
   | "error";
 
-interface Preferences {
-  whisperExecutable: string;
-  modelPath: string;
-  soxExecutablePath: string;
-}
-
 interface Config {
   execPath: string;
   modelPath: string;

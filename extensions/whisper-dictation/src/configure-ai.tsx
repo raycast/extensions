@@ -26,14 +26,6 @@ const ACTIVE_PROMPT_ID_KEY = "activePromptId";
 
 type APIStatus = "checking" | "online" | "offline";
 
-interface Preferences {
-  aiRefinementMethod: "disabled" | "raycast" | "ollama";
-  aiModel: string;
-  ollamaEndpoint: string;
-  ollamaApiKey: string;
-  ollamaModel: string;
-}
-
 interface AIPrompt {
   id: string;
   name: string;

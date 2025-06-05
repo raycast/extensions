@@ -30,19 +30,6 @@ import { useRecording } from "./hooks/useRecording";
 import { useTranscription } from "./hooks/useTranscription";
 import { useAIRefinement } from "./hooks/useAIRefinement";
 
-interface Preferences {
-  whisperExecutable: string;
-  modelPath: string;
-  soxExecutablePath: string;
-  defaultAction: "paste" | "copy" | "none";
-  aiRefinementMethod: "disabled" | "raycast" | "ollama";
-  aiModel: string;
-  ollamaEndpoint: string;
-  ollamaApiKey: string;
-  ollamaModel: string;
-  promptBeforeDictation: boolean;
-}
-
 interface TranscriptionHistoryItem {
   id: string;
   timestamp: number;
