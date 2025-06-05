@@ -18,7 +18,7 @@ export default function ColorNames() {
     try {
       const colors = colorNamer(searchString);
       setColors(colors);
-    } catch (error) {
+    } catch {
       setColors(undefined);
     }
     setIsSearching(false);
