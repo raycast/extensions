@@ -1,6 +1,6 @@
 # Flighty Changelog
 
-## [UI Improvements] - {PR_MERGE_DATE}
+## [UI Improvements] - 2025-06-05
 
 - Flight details are now easier to read with a more compact layout
 - Scheduled and actual times are shown together for quick comparison
