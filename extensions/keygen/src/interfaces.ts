@@ -11,6 +11,7 @@ export interface License {
   attributes: {
     name: string | null;
     key: string;
+    expiry: string;
     status: LicenseStatus;
     protected: boolean;
     suspended: boolean;
@@ -26,6 +27,12 @@ export interface License {
     updated: string;
   }
   relationships: {
+    policy: {
+      data: {
+        type: "policies";
+        id: string;
+      }
+    }
     users: {
       meta: {
         count: number;
@@ -39,6 +46,14 @@ export interface License {
     }
   }
 }
+
+export interface Policy {
+  id: string;
+  attributes: {
+    name: string;
+  }
+}
+
 export interface Result<T> {
   data: T;
 }
