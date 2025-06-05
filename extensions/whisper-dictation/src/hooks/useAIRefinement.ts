@@ -2,14 +2,6 @@ import { useCallback, type Dispatch, type SetStateAction } from "react";
 import { AI, LocalStorage, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-interface Preferences {
-  aiRefinementMethod: "disabled" | "raycast" | "ollama";
-  aiModel: string;
-  ollamaEndpoint: string;
-  ollamaApiKey: string;
-  ollamaModel: string;
-}
-
 const AI_PROMPTS_KEY = "aiPrompts";
 const ACTIVE_PROMPT_ID_KEY = "activePromptId";
 
