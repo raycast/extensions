@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Kagi Search MCP Server] - {PR_MERGE_DATE}
+## [Add Kagi Search MCP Server] - 2025-06-05
 
 Add official Kagi Search MCP Server to registry.
 
