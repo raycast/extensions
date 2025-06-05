@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [View Random Note command] - {PR_MERGE_DATE}
+
+Add a new command for viewing a random note from a user's note library.
+
 ## [Bug Fix Update] - 2025-05-22
 
 Add a preference for choosing the maximum number of notes to allow AI to use to prevent issues with running out of memory loading all notes.
