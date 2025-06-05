@@ -39,15 +39,15 @@ export default function AIIncidentSearchCommand() {
   }
 
   function getSeverityBadge(severity?: string) {
-    if (!severity || typeof severity !== 'string') return null;
-    
+    if (!severity || typeof severity !== "string") return null;
+
     const colors: Record<string, Color> = {
       critical: Color.Red,
       major: Color.Orange,
       minor: Color.Yellow,
       info: Color.Blue,
     };
-    
+
     return {
       value: severity.toUpperCase(),
       color: colors[severity.toLowerCase()] || Color.SecondaryText,
@@ -62,11 +62,7 @@ export default function AIIncidentSearchCommand() {
       onSearchTextChange={setSearchQuery}
       actions={
         <ActionPanel>
-          <Action
-            title="Search with AI"
-            onAction={handleSearch}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-          />
+          <Action title="Search with AI" onAction={handleSearch} shortcut={{ modifiers: ["cmd"], key: "return" }} />
         </ActionPanel>
       }
     >
@@ -82,7 +78,7 @@ export default function AIIncidentSearchCommand() {
           />
         </List.Section>
       )}
-      
+
       {incidents.length > 0 && (
         <List.Section title={`Found ${incidents.length} incidents`}>
           {incidents.map((incident) => {
@@ -100,15 +96,8 @@ export default function AIIncidentSearchCommand() {
                 ]}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser 
-                      title="Open in Browser" 
-                      url={incident.permalink} 
-                    />
-                    <Action
-                      title="Search Again"
-                      onAction={handleSearch}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    />
+                    <Action.OpenInBrowser title="Open in Browser" url={incident.permalink} />
+                    <Action title="Search Again" onAction={handleSearch} shortcut={{ modifiers: ["cmd"], key: "r" }} />
                     {incident.summary && (
                       <Action.CopyToClipboard
                         title="Copy Summary"
@@ -123,22 +112,18 @@ export default function AIIncidentSearchCommand() {
           })}
         </List.Section>
       )}
-      
+
       {!loading && incidents.length === 0 && searchQuery && (
         <List.EmptyView
           title="No incidents found"
           description="Try describing what you're looking for in natural language"
           actions={
             <ActionPanel>
-              <Action
-                title="Search with AI"
-                onAction={handleSearch}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
-              />
+              <Action title="Search with AI" onAction={handleSearch} shortcut={{ modifiers: ["cmd"], key: "return" }} />
             </ActionPanel>
           }
         />
       )}
     </List>
   );
-} 
+}

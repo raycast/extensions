@@ -39,7 +39,7 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [parsedQuery, setParsedQuery] = useState<ParsedQuery | null>(null);
-  
+
   // Cache for parsed queries
   const queryCache = useRef<Map<string, ParsedQuery>>(new Map());
 
@@ -89,20 +89,20 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
     - "recent API failures affecting payments team" → {"keywords": ["API", "failure", "payments"], "timeRange": {"start": "3 days ago", "end": "now"}, "teams": ["payments"]}`;
 
     try {
-      const response = await AI.ask(prompt, { 
+      const response = await AI.ask(prompt, {
         creativity: 0.1,
-        model: AI.Model.OpenAI_GPT4o
+        model: AI.Model.OpenAI_GPT4o,
       });
-      
+
       // Extract JSON from response
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
-        
+
         // Process time ranges
         if (parsed.timeRange) {
           const now = new Date();
-          
+
           // Handle various time range formats
           if (parsed.timeRange.start) {
             if (parsed.timeRange.start.includes("days ago")) {
@@ -119,17 +119,17 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
               if (weeksMatch) {
                 const weeksAgo = parseInt(weeksMatch[1]);
                 const startDate = new Date(now);
-                startDate.setDate(startDate.getDate() - (weeksAgo * 7));
+                startDate.setDate(startDate.getDate() - weeksAgo * 7);
                 startDate.setHours(0, 0, 0, 0); // Start of day
                 parsed.timeRange.start = startDate.toISOString();
               }
             }
           }
-          
+
           if (parsed.timeRange.end === "now ISO" || parsed.timeRange.end === "now") {
             parsed.timeRange.end = now.toISOString();
           }
-          
+
           // Ensure dates are not in the future
           if (parsed.timeRange.start) {
             const startDate = new Date(parsed.timeRange.start);
@@ -140,7 +140,7 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
               parsed.timeRange.start = thirtyDaysAgo.toISOString();
             }
           }
-          
+
           if (parsed.timeRange.end) {
             const endDate = new Date(parsed.timeRange.end);
             if (endDate > now) {
@@ -149,7 +149,7 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
             }
           }
         }
-        
+
         // Cache the result
         if (queryCache.current.size >= QUERY_CACHE_SIZE) {
           const firstKey = queryCache.current.keys().next().value;
@@ -158,202 +158,221 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
           }
         }
         queryCache.current.set(query, parsed);
-        
+
         return parsed;
       }
-      
+
       // Fallback
       const fallback = {
-        keywords: query.split(" ").filter(word => word.length > 2),
+        keywords: query.split(" ").filter((word) => word.length > 2),
       };
       queryCache.current.set(query, fallback);
       return fallback;
     } catch (error) {
       console.error("AI parsing error:", error);
       const fallback = {
-        keywords: query.split(" ").filter(word => word.length > 2),
+        keywords: query.split(" ").filter((word) => word.length > 2),
       };
       queryCache.current.set(query, fallback);
       return fallback;
     }
   }, []);
 
-  const searchWithAI = useCallback(async (query: string) => {
-    if (!query.trim()) {
-      setError("Please enter a search query");
-      return;
-    }
+  const searchWithAI = useCallback(
+    async (query: string) => {
+      if (!query.trim()) {
+        setError("Please enter a search query");
+        return;
+      }
 
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Parse query with AI
-      const parsed = await parseQueryWithAI(query);
-      setParsedQuery(parsed);
-      
-      // Debug: Log AI parsing result
-      console.log("AI Parsed Query:", JSON.stringify(parsed, null, 2));
-      
-      // Build API query parameters
-      const params: any = {
-        page_size: 50,
-      };
-      
-      // Add time range filter - use YYYY-MM-DD format as required by API
-      // Reference: https://api-docs.incident.io/tag/Incidents-V2
-      // Note: incident.io API accepts only one operator at a time for date filtering
-      if (parsed.timeRange?.start && parsed.timeRange?.end) {
-        // For now, use only the end date to get recent incidents
-        const endDate = new Date(parsed.timeRange.end).toISOString().split('T')[0];
-        params["created_at[lte]"] = endDate;
-        console.log("Note: Using only end date due to API limitation");
-      } else if (parsed.timeRange?.start) {
-        const startDate = new Date(parsed.timeRange.start).toISOString().split('T')[0];
-        params["created_at[gte]"] = startDate;
-      } else if (parsed.timeRange?.end) {
-        const endDate = new Date(parsed.timeRange.end).toISOString().split('T')[0];
-        params["created_at[lte]"] = endDate;
-      }
-      
-      // Debug: Log what parameters we're actually sending
-      console.log("Date filter being used:", {
-        hasStartAndEnd: !!(parsed.timeRange?.start && parsed.timeRange?.end),
-        actualParam: Object.keys(params).find(key => key.startsWith('created_at')),
-        value: params[Object.keys(params).find(key => key.startsWith('created_at')) || ''],
-      });
-      
-      // Add status filter
-      if (parsed.status && parsed.status.length > 0) {
-        params["incident_status[category]"] = parsed.status.join(",");
-      }
-      
-      // Add severity filter if API supports it
-      if (parsed.severity && parsed.severity.length > 0) {
-        params["severity"] = parsed.severity.join(",");
-      }
-      
-      // Debug: Log API parameters
-      console.log("API Parameters:", JSON.stringify(params, null, 2));
-      console.log("Full API URL:", `https://api.incident.io/v2/incidents?${new URLSearchParams(params).toString()}`);
-      
-      // Debug: Log time range details
-      if (parsed.timeRange) {
-        console.log("Time Range Details:", {
-          start: parsed.timeRange.start,
-          end: parsed.timeRange.end,
-          startDate: parsed.timeRange.start ? new Date(parsed.timeRange.start) : null,
-          endDate: parsed.timeRange.end ? new Date(parsed.timeRange.end) : null,
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Parse query with AI
+        const parsed = await parseQueryWithAI(query);
+        setParsedQuery(parsed);
+
+        // Debug: Log AI parsing result
+        console.log("AI Parsed Query:", JSON.stringify(parsed, null, 2));
+
+        // Build API query parameters
+        const params: Record<string, string> = {
+          page_size: "50",
+        };
+
+        // Add time range filter - use YYYY-MM-DD format as required by API
+        // Reference: https://api-docs.incident.io/tag/Incidents-V2
+        // Note: incident.io API accepts only one operator at a time for date filtering
+        if (parsed.timeRange?.start && parsed.timeRange?.end) {
+          // For now, use only the end date to get recent incidents
+          const endDate = new Date(parsed.timeRange.end).toISOString().split("T")[0];
+          params["created_at[lte]"] = endDate;
+          console.log("Note: Using only end date due to API limitation");
+        } else if (parsed.timeRange?.start) {
+          const startDate = new Date(parsed.timeRange.start).toISOString().split("T")[0];
+          params["created_at[gte]"] = startDate;
+        } else if (parsed.timeRange?.end) {
+          const endDate = new Date(parsed.timeRange.end).toISOString().split("T")[0];
+          params["created_at[lte]"] = endDate;
+        }
+
+        // Debug: Log what parameters we're actually sending
+        console.log("Date filter being used:", {
+          hasStartAndEnd: !!(parsed.timeRange?.start && parsed.timeRange?.end),
+          actualParam: Object.keys(params).find((key) => key.startsWith("created_at")),
+          value: params[Object.keys(params).find((key) => key.startsWith("created_at")) || ""],
         });
-      }
-      
-      // Debug: Log the actual request being sent
-      console.log("Axios request config:", {
-        method: 'GET',
-        url: "https://api.incident.io/v2/incidents",
-        params: params,
-        paramsSerialized: new URLSearchParams(params).toString(),
-      });
-      
-      // Fetch incidents from API
-      // Reference: https://api-docs.incident.io/tag/Incidents-V2
-      const response = await axios.get<{
-        incidents: Array<{
-          id: string;
-          name: string;
-          permalink: string;
-          created_at: string;
-          incident_status: {
-            category: string;
-          };
-          summary?: string;
-          severity?: string;
-        }>;
-      }>("https://api.incident.io/v2/incidents", {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        params,
-      });
 
-      if (response.data && Array.isArray(response.data.incidents)) {
-        let filteredIncidents = response.data.incidents;
-        
-        // Client-side filtering by keywords
-        if (parsed.keywords && parsed.keywords.length > 0) {
-          filteredIncidents = filteredIncidents.filter(incident => {
-            const searchText = `${incident.name} ${incident.summary || ""}`.toLowerCase();
-            return parsed.keywords.some(keyword => 
-              searchText.includes(keyword.toLowerCase())
-            );
+        // Add status filter
+        if (parsed.status && parsed.status.length > 0) {
+          params["incident_status[category]"] = parsed.status.join(",");
+        }
+
+        // Add severity filter if API supports it
+        if (parsed.severity && parsed.severity.length > 0) {
+          params["severity"] = parsed.severity.join(",");
+        }
+
+        // Debug: Log API parameters
+        console.log("API Parameters:", JSON.stringify(params, null, 2));
+        console.log("Full API URL:", `https://api.incident.io/v2/incidents?${new URLSearchParams(params).toString()}`);
+
+        // Debug: Log time range details
+        if (parsed.timeRange) {
+          console.log("Time Range Details:", {
+            start: parsed.timeRange.start,
+            end: parsed.timeRange.end,
+            startDate: parsed.timeRange.start ? new Date(parsed.timeRange.start) : null,
+            endDate: parsed.timeRange.end ? new Date(parsed.timeRange.end) : null,
           });
         }
-        
-        // Client-side filtering by teams/services if mentioned in name/summary
-        if (parsed.teams && parsed.teams.length > 0) {
-          filteredIncidents = filteredIncidents.filter(incident => {
-            const searchText = `${incident.name} ${incident.summary || ""}`.toLowerCase();
-            return parsed.teams!.some(team => 
-              searchText.includes(team.toLowerCase())
-            );
-          });
-        }
-        
-        // Sort by relevance (keyword matches) and recency
-        filteredIncidents.sort((a, b) => {
-          const aText = `${a.name} ${a.summary || ""}`.toLowerCase();
-          const bText = `${b.name} ${b.summary || ""}`.toLowerCase();
-          
-          let aScore = 0;
-          let bScore = 0;
-          
-          parsed.keywords.forEach(keyword => {
-            if (aText.includes(keyword.toLowerCase())) aScore++;
-            if (bText.includes(keyword.toLowerCase())) bScore++;
-          });
-          
-          if (aScore !== bScore) {
-            return bScore - aScore;
+
+        // Debug: Log the actual request being sent
+        console.log("Axios request config:", {
+          method: "GET",
+          url: "https://api.incident.io/v2/incidents",
+          params: params,
+          paramsSerialized: new URLSearchParams(params).toString(),
+        });
+
+        // Fetch incidents from API
+        // Reference: https://api-docs.incident.io/tag/Incidents-V2
+        const response = await axios.get<{
+          incidents: Array<{
+            id: string;
+            name: string;
+            permalink: string;
+            created_at: string;
+            incident_status: {
+              category: string;
+            };
+            summary?: string;
+            severity?: string;
+          }>;
+        }>("https://api.incident.io/v2/incidents", {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          params,
+        });
+
+        if (response.data && Array.isArray(response.data.incidents)) {
+          let filteredIncidents = response.data.incidents;
+
+          // Client-side filtering by keywords
+          if (parsed.keywords && parsed.keywords.length > 0) {
+            filteredIncidents = filteredIncidents.filter((incident) => {
+              const searchText = `${incident.name} ${incident.summary || ""}`.toLowerCase();
+              return parsed.keywords.some((keyword) => searchText.includes(keyword.toLowerCase()));
+            });
           }
-          
-          // If same score, sort by date
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        });
-        
-        // Map to our incident structure
-        const mappedIncidents = filteredIncidents.map((incident) => ({
-          id: incident.id,
-          name: incident.name,
-          permalink: incident.permalink,
-          created_at: incident.created_at,
-          status: incident.incident_status.category,
-          summary: incident.summary,
-          severity: incident.severity,
-        }));
 
-        setIncidents(mappedIncidents);
-      }
-    } catch (err: any) {
-      console.error("API Error Details:", {
-        status: err.response?.status,
-        statusText: err.response?.statusText,
-        data: err.response?.data,
-        errors: err.response?.data?.errors ? JSON.stringify(err.response.data.errors, null, 2) : null,
-        headers: err.response?.headers,
-        config: {
-          url: err.config?.url,
-          params: err.config?.params,
+          // Client-side filtering by teams/services if mentioned in name/summary
+          if (parsed.teams && parsed.teams.length > 0) {
+            filteredIncidents = filteredIncidents.filter((incident) => {
+              const searchText = `${incident.name} ${incident.summary || ""}`.toLowerCase();
+              return parsed.teams!.some((team) => searchText.includes(team.toLowerCase()));
+            });
+          }
+
+          // Sort by relevance (keyword matches) and recency
+          filteredIncidents.sort((a, b) => {
+            const aText = `${a.name} ${a.summary || ""}`.toLowerCase();
+            const bText = `${b.name} ${b.summary || ""}`.toLowerCase();
+
+            let aScore = 0;
+            let bScore = 0;
+
+            parsed.keywords.forEach((keyword) => {
+              if (aText.includes(keyword.toLowerCase())) aScore++;
+              if (bText.includes(keyword.toLowerCase())) bScore++;
+            });
+
+            if (aScore !== bScore) {
+              return bScore - aScore;
+            }
+
+            // If same score, sort by date
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          });
+
+          // Map to our incident structure
+          const mappedIncidents = filteredIncidents.map((incident) => ({
+            id: incident.id,
+            name: incident.name,
+            permalink: incident.permalink,
+            created_at: incident.created_at,
+            status: incident.incident_status.category,
+            summary: incident.summary,
+            severity: incident.severity,
+          }));
+
+          setIncidents(mappedIncidents);
         }
-      });
-      
-      const errorMessage = err.response?.data?.message || err.message || "Search failed";
-      setError(`${err.response?.status || 'Error'}: ${errorMessage}`);
-      setIncidents([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [apiKey, parseQueryWithAI]);
+      } catch (err: unknown) {
+        const isAxiosError = (
+          error: unknown,
+        ): error is {
+          response?: {
+            status?: number;
+            statusText?: string;
+            data?: { message?: string; errors?: unknown };
+            headers?: unknown;
+          };
+          config?: { url?: string; params?: unknown };
+          message?: string;
+        } => {
+          return typeof error === "object" && error !== null;
+        };
+
+        if (isAxiosError(err)) {
+          console.error("API Error Details:", {
+            status: err.response?.status,
+            statusText: err.response?.statusText,
+            data: err.response?.data,
+            errors: err.response?.data?.errors ? JSON.stringify(err.response.data.errors, null, 2) : null,
+            headers: err.response?.headers,
+            config: {
+              url: err.config?.url,
+              params: err.config?.params,
+            },
+          });
+
+          const errorMessage = err.response?.data?.message || err.message || "Search failed";
+          setError(`${err.response?.status || "Error"}: ${errorMessage}`);
+        } else {
+          console.error("Unknown error:", err);
+          setError("An unexpected error occurred");
+        }
+        setIncidents([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [apiKey, parseQueryWithAI],
+  );
 
   return {
     incidents,
@@ -362,4 +381,4 @@ export function useAIIncidentSearch(apiKey: string): UseAIIncidentSearchResult {
     parsedQuery,
     searchWithAI,
   };
-} 
+}
