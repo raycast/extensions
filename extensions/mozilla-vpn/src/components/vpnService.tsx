@@ -1,12 +1,10 @@
-// src/components/checkLogin.tsx
+// src/components/vpnStatus.tsx
 import React from 'react';
 import * as Raycast from '@raycast/api';
-import { exec } from 'child_process';
 
 // Extract simple components
-const popToRoot = Raycast.popToRoot;
-const closeMainWindow = Raycast.closeMainWindow;
 const Icon = Raycast.Icon;
+const Color = Raycast.Color;
 
 // Define proper types for List to avoid 'any' usage and interface extension issues
 interface ListProps {
@@ -61,48 +59,66 @@ const ActionPanel = (
 ).ActionPanel;
 const Action = (Raycast as unknown as { Action: ActionComponent }).Action;
 
-interface CheckLoginProps {
-  onBack?: () => void; // Add optional onBack prop
+interface VpnStatusProps {
+  vpnStatus: boolean | null;
+  serverCity: string;
+  serverCountry: string;
+  onToggleVpn: () => void | Promise<void>;
+  onSelectServer: () => void;
 }
 
-const openMozillaVPNApp = () => {
-  exec('open -a "Mozilla VPN"', (error) => {
-    if (error) {
-      console.error('Error opening Mozilla VPN:', error);
-    } else {
-      popToRoot();
-      closeMainWindow();
-    }
-  });
-};
+const VpnStatus: React.FC<VpnStatusProps> = ({
+  vpnStatus,
+  serverCity,
+  serverCountry,
+  onToggleVpn,
+  onSelectServer,
+}) => {
+  // Determine appropriate icons and colors based on VPN status
+  const statusIcon = vpnStatus
+    ? { source: Icon.Lock, tintColor: Color.Green }
+    : { source: Icon.LockUnlocked, tintColor: Color.Red };
 
-const CheckLogin: React.FC<CheckLoginProps> = ({ onBack }) => {
+  const title = vpnStatus ? 'Deactivate Mozilla VPN' : 'Activate Mozilla VPN';
+  const actionTitle = vpnStatus ? 'Disconnect VPN' : 'Connect VPN';
+
+  // Format server info
+  const serverInfo =
+    serverCity && serverCountry
+      ? `${serverCity}, ${serverCountry}`
+      : 'Unknown location';
+
   return (
-    <List.EmptyView
-      title="Mozilla VPN Login Required"
-      description="Please log in using the Mozilla VPN application. Press Enter to open the app."
-      icon="Icon.ExclamationMark"
+    <List.Item
+      title={title}
+      icon={statusIcon}
+      accessories={[
+        { text: serverInfo, icon: Icon.Globe },
+        {
+          text: vpnStatus ? 'Connected' : 'Disconnected',
+          icon: {
+            source: vpnStatus ? Icon.CheckCircle : Icon.XmarkCircle,
+            tintColor: vpnStatus ? Color.Green : Color.Red,
+          },
+        },
+      ]}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action title="Open Mozilla VPN" onAction={openMozillaVPNApp} />
-          </ActionPanel.Section>
-
-          {/* Add Back to Main Menu action if onBack is provided */}
-          {onBack && (
-            <ActionPanel.Section>
-              <Action
-                title="Back to Main Menu"
-                icon={Icon.ArrowLeft}
-                onAction={onBack}
-                shortcut={{ modifiers: ['cmd'], key: 'b' }}
-              />
-            </ActionPanel.Section>
-          )}
+          <Action
+            title={actionTitle}
+            icon={vpnStatus ? Icon.Stop : Icon.Play}
+            onAction={onToggleVpn}
+          />
+          <Action
+            title="Change Server"
+            icon={Icon.Globe}
+            shortcut={{ modifiers: ['cmd'], key: 's' }}
+            onAction={onSelectServer}
+          />
         </ActionPanel>
       }
     />
   );
 };
 
-export default CheckLogin;
+export default VpnStatus;
