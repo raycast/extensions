@@ -56,7 +56,7 @@ No API keys or external configuration required. Just install and use!
 
 - All user data (URLs, aliases) is stored locally and never shared.
 - No external services or credentials are required.
-- The extension is designed for productivity and respects Raycast's [community guidelines](https://manual.raycast.com/extensions).
+- The extension is designed for productivity and respects Raycast's [community guidelines](https://developers.raycast.com/basics/prepare-an-extension-for-store).
 
 ## Contributing
 
