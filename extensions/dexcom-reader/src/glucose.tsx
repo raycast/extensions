@@ -24,6 +24,7 @@ export default function FetchGlucoseData() {
   }, []);
 
   const fetchData = async () => {
+    let retries = 0;
     try {
       let sessionId = await LocalStorage.getItem<string>("sessionId");
 
@@ -61,12 +62,23 @@ export default function FetchGlucoseData() {
       setGlucoseData(response.data);
       setLoadingState(LoadingState.Success);
     } catch (error) {
-      await showFailureToast({
-        title: "Error fetching glucose data",
-        message: String(error),
-      });
-      setLoadingState(LoadingState.Error);
-      setErrorMessage(String(error));
+      if (retries < 2) {
+        retries++;
+        const sessionId = await authenticateWithDexcom(
+          preferences.accountName,
+          preferences.password,
+          preferences.isNorthAmerica,
+        );
+        LocalStorage.setItem("sessionId", sessionId!);
+        fetchData();
+      } else {
+        await showFailureToast({
+          title: "Error fetching glucose data",
+          message: String(error),
+        });
+        setLoadingState(LoadingState.Error);
+        setErrorMessage(String(error));
+      }
     }
   };
 
