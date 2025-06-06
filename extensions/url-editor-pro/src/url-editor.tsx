@@ -15,7 +15,7 @@ import {
   Color,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { getFavicon, useCachedState } from "@raycast/utils";
+import { getFavicon, showFailureToast, useCachedState } from "@raycast/utils";
 import QRCode from "qrcode";
 import * as fs from "fs";
 import * as os from "os";
@@ -98,7 +98,7 @@ function QrDetail({ qr, url }: { qr: string; url: ParseResult | null }) {
       await open(filePath);
     } catch (error) {
       console.error(error);
-      showToast({ style: Toast.Style.Failure, title: "Failed to save QR code" });
+      showFailureToast(error, { title: "Failed to save QR code" });
     }
   }
 
@@ -109,7 +109,7 @@ function QrDetail({ qr, url }: { qr: string; url: ParseResult | null }) {
         url?.href ? (
           <ActionPanel>
             <Action.CopyToClipboard content={url.href} title="Copy URL" />
-            <Action title="Save QR Code to Downloads" onAction={handleSaveQr} />
+            <Action title="Save Qr Code to Downloads" onAction={handleSaveQr} />
           </ActionPanel>
         ) : undefined
       }
