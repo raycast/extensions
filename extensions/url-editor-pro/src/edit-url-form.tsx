@@ -70,7 +70,7 @@ export function EditUrlForm({ url, onSave }: { url: ParseResult; onSave: (parsed
       push(<QrDetail qr={dataUrl} url={fields} />);
     } catch (error) {
       console.error(error);
-      showToast({ style: Toast.Style.Failure, title: "Failed to generate QR code" });
+      showFailureToast(error, { title: "Failed to generate QR code" });
     }
   }
 
