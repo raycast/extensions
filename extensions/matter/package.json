@@ -16,14 +16,23 @@
   "commands": [
     {
       "name": "index",
-      "title": "Matter",
+      "title": "List saved articles",
+      "subtitle": "Matter",
       "description": "View your saved for later articles in your Matter account.",
+      "mode": "view"
+    },
+    {
+      "name": "bookmark-url",
+      "title": "Bookmark URL",
+      "subtitle": "Matter",
+      "description": "Bookmark a URL from your clipboard in Matter.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.18.0",
+    "raycast-hooks": "^1.0.3",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {

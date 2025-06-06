@@ -1,5 +1,9 @@
 # Matter Changelog
 
+## [Automatic URL Bookmarking] - {PR_MERGE_DATE}
+
+- Added automatic URL bookmarking command: instantly bookmarks a URL from your clipboard
+
 ## [🕹️ 1.2] - 2024-10-28
 
 - add `Pagination`
