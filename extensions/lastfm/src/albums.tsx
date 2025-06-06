@@ -62,7 +62,7 @@ const TopAlbums: React.FC = () => {
 
   const data = albums.map(processAlbumItem);
 
-  if (view == "grid") {
+  if (view === "grid") {
     return (
       <Grid
         isLoading={loading}

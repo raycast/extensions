@@ -58,7 +58,7 @@ const TopArtists: React.FC = () => {
 
   const data = artists.map(procesArtistItem);
 
-  if (view == "grid") {
+  if (view === "grid") {
     return (
       <Grid
         isLoading={loading}
