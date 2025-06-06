@@ -188,7 +188,7 @@ export default function Command() {
                 title={item.displayName || item.identity}
                 subtitle={item.displayName && item.displayName === item.identity ? item.address || "" : item.identity}
                 icon={{
-                  source: item.avatar || `${PROD_API_ENDPOINT}/avatar/svg/${item.identity}`,
+                  source: item.avatar || `${PROD_API_ENDPOINT}/avatar/svg/${item.platform},${item.identity}`,
                   mask: Image.Mask.Circle,
                 }}
                 accessories={[
