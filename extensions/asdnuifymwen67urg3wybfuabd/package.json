@@ -1,43 +1,21 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "host-io",
-  "title": "Host.io",
-  "description": "A Powerful and Fast Domain Name Data API",
-  "icon": "extension_icon.png",
+  "name": "asdnuifymwen67urg3wybfuabd",
+  "title": "asdnuifymwen67urg3wybfuabd",
+  "description": "",
+  "icon": "extension-icon.png",
   "author": "xmok",
-  "categories": [
-    "Data",
-    "Developer Tools"
-  ],
   "license": "MIT",
-  "preferences": [
-    {
-      "title": "API Token",
-      "name": "token",
-    "type": "password",
-    "required": true,
-    "description": "API Token from Host.io Dashboard",
-          "placeholder": "xXXxx0X"
-    }
-  ],
   "commands": [
     {
-      "name": "get-full-domain-data",
-      "title": "Get Full Domain Data",
-      "description": "Get Full Domain Data",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "domain",
-          "placeholder": "DOMAIN",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "name": "s",
+      "title": "s",
+      "description": "",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.98.2",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {

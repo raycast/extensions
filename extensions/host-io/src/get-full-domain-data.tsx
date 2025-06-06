@@ -41,12 +41,10 @@ type Web = {
   email?: string;
   links: string[];
 };
-type RelatedItem =
-  | {
-      value: string;
+type RelatedItem = {
+      value?: string;
       count: number;
-    }
-  | { count: 0 };
+    };
 
 type Result = {
   domain: string;
@@ -93,9 +91,9 @@ ${Object.entries(data.web)
       metadata={
         data && (
           <Detail.Metadata>
-            {Object.entries(data.related).map(([key, vals]) => (
-              <Detail.Metadata.Label key={key} title={key} text={vals.length.toString()} />
-            ))}
+            {Object.entries(data.related).map(([key, vals]) => <Detail.Metadata.TagList key={key} title={key}>
+              {vals.map((val, valIndex) => <Detail.Metadata.TagList.Item key={key+valIndex} text={`${val.value}: ${val.count} `} />)}
+            </Detail.Metadata.TagList>)}
           </Detail.Metadata>
         )
       }
