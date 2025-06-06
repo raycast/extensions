@@ -63,7 +63,7 @@ export async function createNote(vault: Vault, params: CreateNoteParams) {
 
   console.log(params.content);
 
-  content = content + createObsidianProperties(params.tags);
+  content = createObsidianProperties(params.tags) + content;
   content = await applyTemplates(content);
   name = await applyTemplates(name);
 
