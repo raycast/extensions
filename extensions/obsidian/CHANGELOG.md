@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Bug fixes] - 2025-06-08
+## [Bug fixes] - {PR_MERGE_DATE}
 
 - Fixes a bug, which create a tagged note a wrong way. Changes an order of properties block and note text
 
