@@ -26,6 +26,12 @@
   ],
   "commands": [
     {
+      "name": "policies",
+      "title": "Policies",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "licenses",
       "title": "Licenses",
       "description": "",

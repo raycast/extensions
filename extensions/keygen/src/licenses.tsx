@@ -53,7 +53,7 @@ export default function Licenses() {
 }
 
 function NewLicense() {
-  const { isLoading, data: policies = [] } = useKeygen<Policy[]>("policies");
+  const { isLoading, data: policies = [] } = useKeygen<Policy[]>("policies", { execute: false });
 
 interface FormValues {
   name: string;
@@ -126,7 +126,7 @@ interface FormValues {
     {/* <Form.Description text="Metadata" /> */}
 
     <Form.Description text="Relationships" />
-    <Form.Dropdown info="The policy to implement for the license." {...itemProps.policy}>
+    <Form.Dropdown title="Policy" info="The policy to implement for the license." {...itemProps.policy}>
       {policies.map(policy => <Form.Dropdown.Item key={policy.id} title={`${policy.id.slice(0,8)} ${policy.attributes.name}`} value={policy.id} />)}
     </Form.Dropdown>
   </Form>

@@ -47,7 +47,49 @@ export interface License {
   }
 }
 
+enum ExpirationStrategy {
+  RESTRICT_ACCESS="RESTRICT_ACCESS",
+  REVOKE_ACCESS="REVOKE_ACCESS",
+  MAINTAIN_ACCESS="MAINTAIN_ACCESS",
+  ALLOW_ACCESS="ALLOW_ACCESS",
+}
+enum AuthenticationStrategy {
+  TOKEN="TOKEN",
+  LICENSE="LICENSE",
+  MIXED="MIXED",
+  NONE="NONE",
+}
+enum ExpirationBasis {
+  FROM_CREATION="FROM_CREATION",
+  FROM_FIRST_VALIDATION="FROM_FIRST_VALIDATION",
+  FROM_FIRST_ACTIVATION="FROM_FIRST_ACTIVATION",
+  FROM_FIRST_DOWNLOAD="FROM_FIRST_DOWNLOAD",
+  FROM_FIRST_USE="FROM_FIRST_USE",
+}
+enum RenewalBasis {
+  FROM_EXPIRY="FROM_EXPIRY",
+  FROM_NOW="FROM_NOW",
+  FROM_NOW_IF_EXPIRED="FROM_NOW_IF_EXPIRED",
+}
+enum TransferStrategy {
+  RESET_EXPIRY="RESET_EXPIRY",
+  KEEP_EXPIRY="KEEP_EXPIRY",
+}
 export interface Policy {
+  id: string;
+  attributes: {
+    name: string;
+    expirationStrategy: ExpirationStrategy;
+    authenticationStrategy: AuthenticationStrategy;
+    expirationBasis: ExpirationBasis;
+    renewalBasis: RenewalBasis;
+    transferStrategy: TransferStrategy
+    created: string;
+    updated: string;
+  }
+}
+
+export interface Product {
   id: string;
   attributes: {
     name: string;
