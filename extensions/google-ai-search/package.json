@@ -1,0 +1,122 @@
+{
+  "name": "google-ai-search",
+  "title": "Google AI Search",
+  "description": "Search with Google AI",
+  "icon": "stars.png",
+  "owner": "superformula",
+  "author": "will_prater",
+  "access": "public",
+  "license": "MIT",
+  "keywords": [
+    "search",
+    "google",
+    "ai",
+    "gemini"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Google AI Overview",
+      "subtitle": "Google AI",
+      "description": "Get AI-powered overviews like Google Search",
+      "mode": "view",
+      "keywords": [
+        "search",
+        "google",
+        "ai",
+        "overview",
+        "gemini"
+      ],
+      "arguments": [
+        {
+          "name": "fallbackText",
+          "type": "text",
+          "placeholder": "Search query",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "health",
+      "title": "Health Check",
+      "subtitle": "Test API connections",
+      "description": "Check if all Google APIs are working correctly",
+      "mode": "view",
+      "keywords": [
+        "test",
+        "check",
+        "api",
+        "health",
+        "status"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "googleCloudApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Google Cloud API Key",
+      "description": "Your Google Cloud API key for Gemini, Maps, and Custom Search",
+      "placeholder": "Enter your Google Cloud API key"
+    },
+    {
+      "name": "model",
+      "type": "dropdown",
+      "required": false,
+      "title": "AI Model",
+      "description": "Choose the Gemini model to use",
+      "default": "gemini-2.0-flash-exp",
+      "data": [
+        {
+          "title": "Gemini 2.0 Flash Experimental (Fastest)",
+          "value": "gemini-2.0-flash-exp"
+        },
+        {
+          "title": "Gemini 1.5 Pro (Best Quality)",
+          "value": "gemini-1.5-pro-latest"
+        },
+        {
+          "title": "Gemini 1.5 Flash (Balanced)",
+          "value": "gemini-1.5-flash-latest"
+        }
+      ]
+    },
+    {
+      "name": "googleSearchEngineId",
+      "type": "textfield",
+      "required": false,
+      "title": "Google Search Engine ID (Optional)",
+      "description": "Custom Search Engine ID for Google searches",
+      "placeholder": "Enter your Custom Search Engine ID"
+    },
+    {
+      "name": "googleMapsPlatformApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Google Maps Platform API Key (Optional)",
+      "description": "API key for Google Places API to enhance address detection",
+      "placeholder": "Enter your Google Maps Platform API key"
+    }
+  ],
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^1.19.1",
+    "node-fetch": "^2.7.0",
+    "use-debounce": "^10.0.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "build:force": "tsc --noEmit false || true && ray build -e dist",
+    "dev": "ray develop"
+  }
+}

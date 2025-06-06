@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+
+# Production build
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# TypeScript
+*.tsbuildinfo
+
+# Raycast specific
+raycast-env.d.ts
+
+# API Keys (extra safety)
+*api-key*
+*apikey*
+*.key
+
+# Claude Code
+.zed/
+
+# Test files
+test-*.ts
+test-*.js
