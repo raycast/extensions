@@ -251,7 +251,7 @@ export default function Command() {
           <Action.SubmitForm
             title="Search Domain"
             onSubmit={handleSubmit}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
+            shortcut={{ modifiers: [], key: "return" }}
           />
           {isAvailable && result && !loading && (
             <Action title="Purchase" onAction={handleBuy} shortcut={{ modifiers: ["cmd"], key: "p" }} />
