@@ -1,6 +1,6 @@
 # Brand.dev Changelog
 
-## [Show Stocks, Fonts] - {PR_MERGE_DATE}
+## [Show Stocks, Fonts, Contact] - {PR_MERGE_DATE}
 
 - Replace "View on brand.dev" with "Go to example.com" as Brand.dev has removed their world.brand.dev site for previews
 - Modernize to use latest Raycast config

@@ -91,7 +91,7 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
   const { isLoading, value: brands = [], setValue: setBrands } = useLocalStorage<BrandInStorage[]>("brands", []);
 
   async function updateBrands(newBrand: BrandInStorage) {
-    const newBrands = brands;
+    const newBrands = [...brands];
     const index = newBrands.findIndex((brand) => brand.domain === newBrand.domain);
     if (index !== -1) newBrands[index] = newBrand;
     else newBrands.push(newBrand);
