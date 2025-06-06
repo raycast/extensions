@@ -1,0 +1,143 @@
+instructions: |
+  When asked about a place's details, follow these steps:
+  1. First search for the place using searchPlaces
+  2. Then get detailed information using getPlaceDetails
+  3. Finally, show the place on a map using showPlacesOnMap
+  
+  When asked about distance to a place:
+  1. First search for the place using searchPlaces
+  2. Then calculate the distance using getDistance
+  
+  Always use showPlacesOnMap to display the location of places when providing information about them.
+
+evals:
+  - input: "@google-maps-search find restaurants in San Francisco"
+    mocks:
+      searchPlaces: |
+        Here are some places matching "restaurants in San Francisco":
+
+        - **Lazy Bear**
+          Address: 3416 19th St, San Francisco, CA 94110, USA
+          Rating: 4.5/5
+          Status: Open Now
+          [View on Google Maps](https://www.google.com/maps/search/Lazy+Bear+3416+19th+St%2C+San+Francisco%2C+CA+94110%2C+USA)
+
+        - **Nopa**
+          Address: 560 Divisadero St, San Francisco, CA 94117, USA
+          Rating: 4.6/5
+          Status: Closed
+          [View on Google Maps](https://www.google.com/maps/search/Nopa+560+Divisadero+St%2C+San+Francisco%2C+CA+94117%2C+USA)
+
+        - **State Bird Provisions**
+          Address: 1529 Fillmore St, San Francisco, CA 94115, USA
+          Rating: 4.5/5
+          Status: Open Now
+          [View on Google Maps](https://www.google.com/maps/search/State+Bird+Provisions+1529+Fillmore+St%2C+San+Francisco%2C+CA+94115%2C+USA)
+      showPlacesOnMap: |
+        # Restaurants on Map
+
+        [![Map of Restaurants](https://maps.googleapis.com/maps/api/staticmap?size=600x400&format=png32&scale=2&maptype=roadmap&markers=color:red%7Clabel:1%7C37.7597,-122.4270&markers=color:red%7Clabel:2%7C37.7754,-122.4373&markers=color:red%7Clabel:3%7C37.7858,-122.4330&visible=37.7597,-122.4270,37.7754,-122.4373,37.7858,-122.4330&key=)](https://www.google.com/maps?q=37.7597,-122.4270)
+
+        ## Places Shown
+
+        1. Lazy Bear, 3416 19th St, San Francisco, CA 94110, USA
+        2. Nopa, 560 Divisadero St, San Francisco, CA 94117, USA
+        3. State Bird Provisions, 1529 Fillmore St, San Francisco, CA 94115, USA
+    expected:
+      - callsTool:
+          name: "searchPlaces"
+      - callsTool:
+          name: "showPlacesOnMap"
+
+  - input: "@google-maps-search show me a nearby coffee shop on a map"
+    mocks:
+      searchPlaces: |
+        Here is a place matching "coffee shop":
+
+        - **Damask Rose**
+          Address: 6606 Shattuck Ave., Oakland, CA 94609, United States
+          Rating: 4.9/5
+          Status: Open Now
+          [View on Google Maps](https://www.google.com/maps/search/?api=1&query=Damask%2520Rose%25206606%2520Shattuck%2520Ave.%252C%2520Oakland%252C%2520CA%252094609%252C%2520United%2520States)
+      showPlacesOnMap: |
+        # Place on Map
+
+        [![Map of place](https://maps.googleapis.com/maps/api/staticmap?size=600x400&format=png32&scale=2&maptype=roadmap&markers=color:red%7Clabel:A%7C37.811722,-122.267222&visible=37.811722,-122.267222&key=)](https://www.google.com/maps?q=37.8117223,-122.2672224)
+
+        ## Place Shown
+
+        1. Damask Rose
+    expected:
+      - callsTool:
+          name: "searchPlaces"
+      - callsTool:
+          name: "showPlacesOnMap"
+
+  - input: "@google-maps-search tell me about the Ferry Building in San Francisco"
+    mocks:
+      searchPlaces: |
+        Here is a place matching "Ferry Building in San Francisco":
+
+        - **Ferry Building**
+          Address: Ferry Building, San Francisco, CA 94111, USA
+          Rating: 4.7/5
+          Status: Open Now
+          [View on Google Maps](https://www.google.com/maps/search/?api=1&query=Ferry%2520Building%2520Ferry%2520Building%252C%2520San%2520Francisco%252C%2520CA%252094111%252C%2520USA)
+      getPlaceDetails: |
+        # Ferry Building
+
+        **Address**: Ferry Building, San Francisco, CA 94111, USA
+        **Phone**: +1 415-983-8000
+        **Website**: [https://www.ferrybuildingmarketplace.com/](https://www.ferrybuildingmarketplace.com/)
+        **Rating**: ★★★★★ (4.7) based on 25,413 reviews
+        **Price Level**: $$
+        **Status**: Open Now
+
+        **Opening Hours**:
+        - Monday: 7:00 AM - 10:00 PM
+        - Tuesday: 7:00 AM - 10:00 PM
+        - Wednesday: 7:00 AM - 10:00 PM
+        - Thursday: 7:00 AM - 10:00 PM
+        - Friday: 7:00 AM - 10:00 PM
+        - Saturday: 8:00 AM - 10:00 PM
+        - Sunday: 8:00 AM - 10:00 PM
+
+        **Categories**: tourist_attraction, food, point_of_interest, establishment
+
+        **Links**:
+        - [View on Google Maps](https://www.google.com/maps/search/Ferry+Building+Ferry+Building%2C+San+Francisco%2C+CA+94111%2C+USA)
+        - [Get Directions](https://www.google.com/maps/dir/?api=1&destination=Ferry+Building%2C+San+Francisco%2C+CA+94111%2C+USA&travelmode=driving)
+      showPlacesOnMap: |
+        # Ferry Building on Map
+
+        [![Map of Ferry Building](https://maps.googleapis.com/maps/api/staticmap?size=600x400&format=png32&scale=2&maptype=roadmap&markers=color:red%7Clabel:F%7C37.7956,-122.3933&visible=37.7956,-122.3933&key=)](https://www.google.com/maps?q=37.7956,-122.3933)
+
+        ## Place Shown
+
+        1. Ferry Building, San Francisco, CA 94111, USA
+    expected:
+      - callsTool:
+          name: "searchPlaces"
+          input:
+            query: "Ferry Building, San Francisco"
+            limit: 1
+      - callsTool:
+          name: "showPlacesOnMap"
+          input:
+            places: "Ferry Building, San Francisco, CA 94111, USA"
+
+  - input: "@google-maps-search how do I get from Fisherman's Wharf to Alcatraz Island?"
+    mocks:
+      getDirections: |
+        ## Directions to Alcatraz Island
+
+        From: Fisherman's Wharf
+        To: Alcatraz Island
+        Mode: Driving
+
+        [Open Directions in Google Maps](https://www.google.com/maps/dir/?api=1&origin=Fisherman%27s+Wharf&destination=Alcatraz+Island&travelmode=driving)
+
+        You can view turn-by-turn directions, traffic information, and estimated travel time by opening the link in Google Maps.
+    expected:
+      - callsTool:
+          name: "getDirections"
