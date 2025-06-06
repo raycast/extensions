@@ -38,7 +38,7 @@ const DetailPassword = ({
             toast.title = "Password retrieved successfully ✅";
             setPassword(password.trim());
             setIsLoading(false);
-          }
+          },
         );
       }
 

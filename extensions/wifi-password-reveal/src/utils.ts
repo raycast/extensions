@@ -45,7 +45,7 @@ type ResponseNetwork = {
 };
 
 export function parseNetshWlanProfileEssentials(output: string): ResponseNetwork {
-  let response: ResponseNetwork = {};
+  const response: ResponseNetwork = {};
 
   if (output.includes('Profile "') && output.includes('" is not found on the system.')) {
     response.error = {
@@ -86,7 +86,7 @@ export function parseNetshWlanProfileEssentials(output: string): ResponseNetwork
         essentials.authentication = parts[1].trim();
       }
     }
-    
+
     // Extract key content (password)
     else if (trimmedLine.startsWith("Key Content")) {
       const parts = trimmedLine.split(":");
