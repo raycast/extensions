@@ -1,5 +1,16 @@
 # Brand.dev Changelog
 
+## [Show Stocks, Fonts] - {PR_MERGE_DATE}
+
+- Replace "View on brand.dev" with "Go to example.com" as Brand.dev has removed their world.brand.dev site for previews
+- Modernize to use latest Raycast config
+- Update Brand data:
+    - add: Stock (only for listed companies)
+    - add: Fonts
+    - add: Email
+    - add: Phone
+    - remove: Verified
+
 ## [Open Multiple Logos] - 2025-01-26
 
 - In `Detail` view the proper Address item title is shown e.g. "Country Code" instead of "country_code"
