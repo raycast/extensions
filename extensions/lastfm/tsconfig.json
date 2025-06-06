@@ -1,22 +1,18 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 16",
-  "include": ["src/**/*", "src/types"],
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "lib": ["es2020", "dom"],
+    "noEmit": true,
+    "allowJs": true,
+    "lib": ["ES2023"],
     "module": "commonjs",
-    "target": "es2020",
+    "target": "ES2023",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "typeRoots": ["src/types"],
-    "types": ["node"],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "resolveJsonModule": true
   }
 }
