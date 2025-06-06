@@ -1,6 +1,6 @@
 import React from "react";
 import { ActionPanel, showToast, getPreferenceValues, List, Grid, Icon, Toast, Action } from "@raycast/api";
-import type { ItemProps, Track } from "@/types";
+import type { ItemProps, Track } from "./types";
 import { useRecentTracks } from "./lib/use-lastfm";
 import { generateMusicServiceAction, getCoverUrlsBySize } from "./lib/utils";
 import { GridResults } from "./components/grid";

@@ -1,9 +1,9 @@
-import { ItemProps, ResultItemProps } from "@/types";
+import { ItemProps, ResultItemProps } from "../types";
 import { Grid } from "@raycast/api";
 
 export function GridResults(props: ResultItemProps) {
   return (
-    <Grid.Section title="Results" isLoading={props.isLoading}>
+    <Grid.Section title="Results">
       {props.items.map((item: ItemProps) => (
         <Grid.Item
           key={item.key}

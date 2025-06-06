@@ -1,4 +1,4 @@
-import { Image, ImageSizes } from "@/types";
+import { Image, ImageSizes } from "../types";
 import { environment } from "@raycast/api";
 import { join } from "path";
 

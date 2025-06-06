@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { getPreferenceValues, showToast, Toast, showFailureToast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   AlbumResponse,
   ArtistResponse,
@@ -8,7 +9,7 @@ import {
   SongResponse,
   UseLastFmResult,
   LastFmParams,
-} from "@/types";
+} from "../types";
 import { getErrorMessage } from "./utils";
 
 const API = new URL(`https://ws.audioscrobbler.com/2.0/`);

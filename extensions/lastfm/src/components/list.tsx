@@ -1,4 +1,4 @@
-import { ItemProps, ResultItemProps } from "@/types";
+import { ItemProps, ResultItemProps } from "../types";
 import { List } from "@raycast/api";
 
 export function ListResults(props: ResultItemProps) {
