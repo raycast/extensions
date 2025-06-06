@@ -1,3 +1,12 @@
+export interface DockerContainer {
+  containerId: string;
+  name: string;
+  image: string;
+  ports: string;
+  state: string;
+  status: string;
+}
+
 export interface Service {
   name: string;
   appName: string;
@@ -46,6 +55,17 @@ export interface Project {
   postgres: Postgres[];
   redis: Redis[];
   compose: Compose[];
+}
+
+export interface User {
+  id: string;
+  userId: string;
+  role: string;
+  createdAt: string;
+  user: {
+    email: string;
+    twoFactorEnabled: boolean
+  }
 }
 
 export  interface Server {id: string; name: string};

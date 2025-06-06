@@ -55,8 +55,8 @@ function Services({project}: {project: Project;}) {
 
   async function deleteService({ id, name, type }: GroupedService) {
     const options: Alert.Options = {
-      title: "Delete Services",
-      message: "Are you sure you want to delete 1 services? This action cannot be undone.",
+      title: "Are you absolutely sure?",
+      message: "This action cannot be undone. This will permanently delete the service.",
       primaryAction: {
         style: Alert.ActionStyle.Destructive,
         title: "Confirm"
@@ -134,6 +134,7 @@ function Services({project}: {project: Project;}) {
     ]} detail={<List.Item.Detail markdown={service.description} metadata={<List.Item.Detail.Metadata>
       <List.Item.Detail.Metadata.Label title="Name" text={service.name} />
       <List.Item.Detail.Metadata.Label title="Application Name" text={service.appName} />
+      <List.Item.Detail.Metadata.Label title="Created" text={service.createdAt} />
     </List.Item.Detail.Metadata>} />} actions={<ActionPanel>
       <ActionPanel.Submenu icon={Icon.Plus} title="Create">
         <Action.Push icon="folder-input.svg" title="Application" target={<CreateApplication project={project} />} />

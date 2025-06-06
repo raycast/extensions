@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Form, Icon, List, popToRoot, showToast, Toast } from "@raycast/api";
 import { FormValidation, useCachedState, useForm, useLocalStorage } from "@raycast/utils";
 import Projects from "./projects";
-
+import Docker from "./docker";
+import Users from "./users";
 
 interface Token {
     key: string;
@@ -39,6 +40,10 @@ export default function APIKeys() {
         </ActionPanel>} />
         : tokens.map(token => <List.Item key={token.key} id={token.key} icon={Icon.Key} title={token.name} subtitle={token.url} actions={<ActionPanel>
             <Action.Push icon={Icon.Folder} title="Projects" target={<Projects />} />
+            <Action.Push icon="blocks.svg" title="Docker" target={<Docker/>} />
+            <ActionPanel.Section title="Settings">
+                <Action.Push icon={Icon.TwoPeople} title="Users" target={<Users />} />
+            </ActionPanel.Section>
         </ActionPanel>} />)}
     </List>
 }
