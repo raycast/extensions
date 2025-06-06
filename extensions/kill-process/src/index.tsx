@@ -4,6 +4,7 @@ import {
   clearSearchBar,
   closeMainWindow,
   Color,
+  confirmAlert,
   getPreferenceValues,
   Icon,
   List,
@@ -97,8 +98,29 @@ export default function ProcessList() {
     return "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ExecutableBinaryIcon.icns";
   };
 
-  const killProcess = (process: Process, force: boolean = false) => {
-    exec(`zsh -c '${force ? "sudo " : ""}kill -9 ${process.id}'`);
+  const killProcess = async (process: Process, force: boolean = false) => {
+    const processName = process.processName === "-" ? `process ${process.id}?` : process.processName;
+    if (
+      !(await confirmAlert({
+        title: `${force ? "Force " : ""}Kill ${processName}?`,
+        rememberUserChoice: true,
+      }))
+    ) {
+      showToast({
+        title: `Cancelled Killing ${processName}`,
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
+    exec(`zsh -c '${force ? "sudo " : ""}kill -9 ${process.id}'`, (error) => {
+      if (error) {
+        showToast({
+          title: `Failed Killing ${processName}`,
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
+    });
     setFetchResult(state.filter((p) => p.id !== process.id));
     if (closeWindowAfterKill) {
       closeMainWindow();
@@ -110,7 +132,7 @@ export default function ProcessList() {
       clearSearchBar({ forceScrollToTop: true });
     }
     showToast({
-      title: `Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`,
+      title: `Killed ${processName}`,
       style: Toast.Style.Success,
     });
   };
