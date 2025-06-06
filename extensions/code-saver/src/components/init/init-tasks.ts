@@ -14,8 +14,7 @@ import fs from "fs";
 import dayjs from "dayjs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { arch } from "os";
-import { DownloadFile, ExtractAndRewrite } from "../../lib/utils/download-file";
+import { DownloadFile, ExtractAndRewrite, GetProperCipherAssetDownloadLink } from "../../lib/utils/download-file";
 
 export type InitErrorMarkDown = string;
 export type InitTaskFunc = () => Promise<Option<InitErrorMarkDown>>;
@@ -23,15 +22,15 @@ export type InitTaskFunc = () => Promise<Option<InitErrorMarkDown>>;
 const newBackUpDBPath = `${UserDefinedDBPath}.${new Date().toLocaleDateString("en-CA")}`;
 
 export const downloadDependency: InitTaskFunc = async () => {
-  const downloadLink = `https://github.com/m4heshd/better-sqlite3-multiple-ciphers/releases/download/${"v8.7.0"}/better-sqlite3-multiple-ciphers-${"v8.7.0"}-node-v${
-    process.versions.modules
-  }-darwin-${arch()}.tar.gz`;
-
+  const downloadLink = await GetProperCipherAssetDownloadLink();
+  console.log("downloadLink", downloadLink);
   try {
     if (fs.existsSync(SqliteBindingPath)) {
+      console.log("SqliteBindingPath exists, skip download");
       return None;
     }
     if (!fs.existsSync(SqliteBindingFolder)) {
+      console.log("SqliteBindingFolder not exists, create it");
       fs.mkdirSync(SqliteBindingFolder, { recursive: true });
     }
     const tmpDir = tmpdir();
@@ -39,6 +38,7 @@ export const downloadDependency: InitTaskFunc = async () => {
     console.log("tmp dir: ", tmpDir);
     console.log("tmp file: ", tmpFile);
     await DownloadFile(downloadLink, tmpFile);
+    console.log("DownloadFile finish: ", tmpFile);
 
     await ExtractAndRewrite(tmpFile, "build/Release/better_sqlite3.node", SqliteBindingPath);
   } catch (exc) {
@@ -58,6 +58,7 @@ ${exc instanceof Error ? exc.stack : String(exc)}
 
 export const checkDBStorePath: InitTaskFunc = async () => {
   try {
+    console.log("checkDBStorePath", UserDefinedDBPath);
     GetDBInstance();
   } catch (exc) {
     const errMarkdown = `# Failed to open SQLite DB file
