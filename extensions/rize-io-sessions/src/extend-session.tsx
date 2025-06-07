@@ -9,7 +9,7 @@ import {
   getPreferenceValues,
   showToast,
 } from "@raycast/api";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 
 // Interfaces for type safety
 interface Session {
@@ -43,11 +43,6 @@ const DURATION_OPTIONS = [
   { label: "1.5 hours", value: 5400 },
   { label: "2 hours", value: 7200 },
 ];
-
-// Type guard for Axios errors
-function isAxiosError(error: unknown): error is AxiosError {
-  return error instanceof Error && "response" in error;
-}
 
 export default function ExtendSessionCommand() {
   const [selectedDuration, setSelectedDuration] = useState("1800"); // Default to 30 minutes
@@ -140,7 +135,7 @@ export default function ExtendSessionCommand() {
     } catch (error: unknown) {
       console.error("Full error details:", error);
 
-      if (isAxiosError(error)) {
+      if (axios.isAxiosError(error)) {
         console.error("Error response:", {
           data: error.response?.data,
           status: error.response?.status,
