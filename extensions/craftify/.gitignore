@@ -8,7 +8,6 @@ raycast-env.d.ts
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
-config.ts
 
 # misc
 .DS_Store
