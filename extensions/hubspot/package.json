@@ -28,9 +28,9 @@
   "preferences": [
     {
       "name": "accessToken",
-      "title": "Hubspot AccessToken",
+      "title": "HubSpot AccessToken",
       "placeholder": "pat-xxx-xxx...xxx",
-      "description": "Hubspot AccessToken",
+      "description": "HubSpot AccessToken",
       "type": "password",
       "required": true
     },

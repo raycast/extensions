@@ -103,7 +103,6 @@ export default function Command() {
                   onAction={() => setShowingDetail(!showingDetail)}
                 />
                 {phone && <Action.OpenInBrowser title="Call" url={`tel:${phone}`} icon={Icon.Phone} />}
-                {/* eslint-disable-next-line @raycast/prefer-title-case */}
                 {phone && <Action.OpenInBrowser title="WhatsApp" url={`https://wa.me/${phone}`} icon={Icon.Message} />}
                 {email && <Action.OpenInBrowser title="Send Email" url={`mailto:${email}`} />}
                 {website && <Action.OpenInBrowser title="Open Website" url={website} />}
