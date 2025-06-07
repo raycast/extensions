@@ -23,13 +23,14 @@
       "name": "start-session",
       "title": "Start Session",
       "subtitle": "Rize.io",
-      "description": "Initiate a new Rize session - break, meeting, or focus.",
+      "description": "Quickly start a new Rize session, select session type (Focus, Meeting, Break) and can choose custom duration and an optional description.",
       "mode": "view",
       "render": "src/start-session.tsx"
     },
     {
       "name": "stop-session",
       "title": "Stop Session",
+      "subtitle": "Rize.io",
       "description": "This stops the current Rize session.",
       "mode": "no-view",
       "render": "src/stop-session.tsx"
@@ -37,7 +38,8 @@
     {
       "name": "extend-session",
       "title": "Extend Session",
-      "description": "This extends the current Rize session.",
+      "subtitle": "Rize.io",
+      "description": "This extends the current Rize session, and you can select from predefined duration options.",
       "mode": "view",
       "render": "src/extend-session.tsx"
     }
