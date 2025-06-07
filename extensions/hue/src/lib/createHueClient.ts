@@ -1,11 +1,8 @@
 import { ClientHttp2Session, connect, sensitiveHeaders } from "http2";
 import React from "react";
 import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
-import fs from "fs";
-import { environment } from "@raycast/api";
 import dns from "dns";
 import HueClient from "./HueClient";
-import * as path from "path";
 import { getCaCertificate } from "../helpers/hueNetworking";
 
 const CONNECTION_TIMEOUT_MS = 5000;
