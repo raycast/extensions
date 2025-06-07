@@ -1,5 +1,5 @@
 // start-session.tsx
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Action,
   ActionPanel,
@@ -9,7 +9,7 @@ import {
   getPreferenceValues,
   showToast,
 } from "@raycast/api";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 
 // Interfaces for type safety
 interface Session {
@@ -32,6 +32,13 @@ interface GraphQLResponse<T> {
 
 interface Preferences {
   apiKey: string;
+}
+
+interface AxiosErrorResponse {
+  response?: {
+    data?: { message?: string };
+    status?: number;
+  };
 }
 
 // Utility function marked with @ts-ignore to suppress unused warning
@@ -59,11 +66,11 @@ const DURATION_OPTIONS = [
 ];
 
 // Type guard for Axios errors
-function isAxiosError(error: unknown): error is AxiosError {
-  return error instanceof Error && "response" in error;
+function isAxiosError(error: unknown): error is AxiosErrorResponse {
+  return typeof error === "object" && error !== null && "response" in error;
 }
 
-export default function StartSessionCommand() {
+const StartSessionCommand: React.FC = () => {
   const [selectedType, setSelectedType] = useState("focus");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState<number>(1800); // Default to 30 minutes for focus
@@ -182,7 +189,6 @@ export default function StartSessionCommand() {
         console.error("Error response:", {
           data: error.response?.data,
           status: error.response?.status,
-          headers: error.response?.headers,
         });
 
         await showToast({
@@ -248,4 +254,6 @@ export default function StartSessionCommand() {
       />
     </Form>
   );
-}
+};
+
+export default StartSessionCommand;

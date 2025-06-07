@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -55,7 +55,7 @@ function isAxiosError(error: unknown): error is AxiosErrorResponse {
   return typeof error === "object" && error !== null && "response" in error;
 }
 
-export default function ExtendSessionCommand() {
+const ExtendSessionCommand: React.FC = () => {
   const [selectedDuration, setSelectedDuration] = useState("1800"); // Default to 30 minutes
 
   const extendSession = async () => {
@@ -194,4 +194,6 @@ export default function ExtendSessionCommand() {
       </Form.Dropdown>
     </Form>
   );
-}
+};
+
+export default ExtendSessionCommand;

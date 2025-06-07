@@ -1,11 +1,11 @@
-// stop-session.tsx
+import React, { useEffect } from "react";
 import {
   getPreferenceValues,
   showToast,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Toast,
 } from "@raycast/api";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 
 // Interfaces for type safety
 interface Session {
@@ -31,134 +31,153 @@ interface Preferences {
   apiKey: string;
 }
 
+interface AxiosErrorResponse {
+  response?: {
+    data?: { message?: string };
+    status?: number;
+  };
+}
+
 // Type guard for Axios errors
-function isAxiosError(error: unknown): error is AxiosError {
-  return error instanceof Error && "response" in error;
+function isAxiosError(error: unknown): error is AxiosErrorResponse {
+  return typeof error === "object" && error !== null && "response" in error;
 }
 
-export default async function Command() {
-  try {
-    // Retrieve preferences
-    const preferences = getPreferenceValues<Preferences>();
+const StopSessionCommand: React.FC = () => {
+  useEffect(() => {
+    const runStopSession = async () => {
+      try {
+        // Retrieve preferences
+        const preferences = getPreferenceValues<Preferences>();
 
-    // Validate API key
-    if (!preferences.apiKey) {
-      await showToast({
-        title: "API Key Required",
-        message: "Please set up your Rize.io API key in Raycast Preferences",
-      });
-      return;
-    }
+        // Validate API key
+        if (!preferences.apiKey) {
+          await showToast({
+            title: "API Key Required",
+            message:
+              "Please set up your Rize.io API key in Raycast Preferences",
+          });
+          return;
+        }
 
-    // Check current session
-    const currentSessionResponse = await axios.post(
-      "https://api.rize.io/api/v1/graphql",
-      {
-        query: `
-          query {
-            currentSession {
-              id
-              type
-              title
-            }
-          }
-        `,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${preferences.apiKey}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        timeout: 10000,
-      },
-    );
-
-    // Check if there's an active session using optional chaining
-    if (!currentSessionResponse.data?.data?.currentSession) {
-      await showToast({
-        title: "No Active Session",
-        message: "There is no active session to stop",
-      });
-      return;
-    }
-
-    // Stop the session
-    const response = await axios.post<
-      GraphQLResponse<{
-        stopSessionTimer: {
-          clientMutationId?: string;
-          session?: Session;
-        };
-      }>
-    >(
-      "https://api.rize.io/api/v1/graphql",
-      {
-        query: `
-          mutation StopSessionTimer($input: StopSessionTimerInput!) {
-            stopSessionTimer(input: $input) {
-              clientMutationId
-              session {
-                id
-                type
-                title
+        // Check current session
+        const currentSessionResponse = await axios.post(
+          "https://api.rize.io/api/v1/graphql",
+          {
+            query: `
+              query {
+                currentSession {
+                  id
+                  type
+                  title
+                }
               }
-            }
-          }
-        `,
-        variables: {
-          input: {
-            clientMutationId: "stop-session-raycast",
+            `,
           },
-        },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${preferences.apiKey}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        timeout: 10000,
-      },
-    );
+          {
+            headers: {
+              Authorization: `Bearer ${preferences.apiKey}`,
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            timeout: 10000,
+          },
+        );
 
-    // Check for GraphQL errors using optional chaining
-    if (response.data?.errors) {
-      throw new Error(response.data.errors.map((e) => e.message).join(", "));
-    }
+        // Check if there's an active session using optional chaining
+        if (!currentSessionResponse.data?.data?.currentSession) {
+          await showToast({
+            title: "No Active Session",
+            message: "There is no active session to stop",
+          });
+          return;
+        }
 
-    // Check the mutation result using optional chaining
-    const mutationResult = response.data?.data?.stopSessionTimer;
+        // Stop the session
+        const response = await axios.post<
+          GraphQLResponse<{
+            stopSessionTimer: {
+              clientMutationId?: string;
+              session?: Session;
+            };
+          }>
+        >(
+          "https://api.rize.io/api/v1/graphql",
+          {
+            query: `
+              mutation StopSessionTimer($input: StopSessionTimerInput!) {
+                stopSessionTimer(input: $input) {
+                  clientMutationId
+                  session {
+                    id
+                    type
+                    title
+                  }
+                }
+              }
+            `,
+            variables: {
+              input: {
+                clientMutationId: "stop-session-raycast",
+              },
+            },
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${preferences.apiKey}`,
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            timeout: 10000,
+          },
+        );
 
-    // If we have a session, show success
-    if (mutationResult?.session) {
-      await showToast({
-        title: "Session Stopped",
-        message: mutationResult.session.title
-          ? `Stopped session: ${mutationResult.session.title}`
-          : "Your Rize.io session has ended",
-      });
-    } else {
-      throw new Error("Could not stop session");
-    }
-  } catch (error: unknown) {
-    console.error("Stop session error:", error);
+        // Check for GraphQL errors using optional chaining
+        if (response.data?.errors) {
+          throw new Error(
+            response.data.errors.map((e) => e.message).join(", "),
+          );
+        }
 
-    // Detailed error handling
-    if (isAxiosError(error)) {
-      await showToast({
-        title: "Stop Session Failed",
-        message:
-          error.response?.data?.message ||
-          error.message ||
-          "Unable to stop session",
-      });
-    } else {
-      await showToast({
-        title: "Stop Session Failed",
-        message:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      });
-    }
-  }
-}
+        // Check the mutation result using optional chaining
+        const mutationResult = response.data?.data?.stopSessionTimer;
+
+        // If we have a session, show success
+        if (mutationResult?.session) {
+          await showToast({
+            title: "Session Stopped",
+            message: mutationResult.session.title
+              ? `Stopped session: ${mutationResult.session.title}`
+              : "Your Rize.io session has ended",
+          });
+        } else {
+          throw new Error("Could not stop session");
+        }
+      } catch (error: unknown) {
+        console.error("Stop session error:", error);
+
+        // Detailed error handling
+        if (isAxiosError(error)) {
+          await showToast({
+            title: "Stop Session Failed",
+            message: error.response?.data?.message || "Unable to stop session",
+          });
+        } else {
+          await showToast({
+            title: "Stop Session Failed",
+            message:
+              error instanceof Error
+                ? error.message
+                : "An unknown error occurred",
+          });
+        }
+      }
+    };
+
+    runStopSession();
+  }, []); // Empty dependency array means this runs once when the component mounts
+
+  return null; // This command runs immediately and doesn't render a UI
+};
+
+export default StopSessionCommand;
