@@ -1,4 +1,3 @@
-// extend-session.tsx
 import { useState } from "react";
 import {
   Action,
@@ -34,6 +33,13 @@ interface Preferences {
   apiKey: string;
 }
 
+interface AxiosErrorResponse {
+  response?: {
+    data?: { message?: string };
+    status?: number;
+  };
+}
+
 // Duration options in seconds
 const DURATION_OPTIONS = [
   { label: "15 minutes", value: 900 },
@@ -43,6 +49,11 @@ const DURATION_OPTIONS = [
   { label: "1.5 hours", value: 5400 },
   { label: "2 hours", value: 7200 },
 ];
+
+// Type guard for Axios errors
+function isAxiosError(error: unknown): error is AxiosErrorResponse {
+  return typeof error === "object" && error !== null && "response" in error;
+}
 
 export default function ExtendSessionCommand() {
   const [selectedDuration, setSelectedDuration] = useState("1800"); // Default to 30 minutes
@@ -135,11 +146,10 @@ export default function ExtendSessionCommand() {
     } catch (error: unknown) {
       console.error("Full error details:", error);
 
-      if (axios.isAxiosError(error)) {
+      if (isAxiosError(error)) {
         console.error("Error response:", {
           data: error.response?.data,
           status: error.response?.status,
-          headers: error.response?.headers,
         });
 
         await showToast({
