@@ -1,4 +1,7 @@
-node-modules/
+node_modules/
+.env.local
+src/config.local.ts
+-M
 node_modules/
 .env.local
 src/config.local.ts
