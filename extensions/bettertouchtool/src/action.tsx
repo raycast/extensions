@@ -35,20 +35,26 @@ export default function Command() {
 
 function ActionInput({ actionResult }: { actionResult: ActionResult }) {
   async function handleSubmit(values: { param: string }) {
-    const preferences: Preferences.Action = getPreferenceValues();
-    const shared_secret = preferences.bttSharedSecret;
+    try {
+      const { bttSharedSecret: shared_secret } = getPreferenceValues<Preferences.Action>();
 
-    const jsxCommand = `
-      var BetterTouchTool = Application('BetterTouchTool');
-      var actionDefinition = {
-        "BTTPredefinedActionType": ${actionResult.type},
-        ${actionResult.param ? `"${actionResult.param}": "${values.param}"` : ""}
-      };
-      BetterTouchTool.trigger_action(JSON.stringify(actionDefinition), { shared_secret: "${shared_secret}" });
-    `;
+      const jsxCommand = `
+        var BetterTouchTool = Application('BetterTouchTool');
+        var actionDefinition = {
+          "BTTPredefinedActionType": ${actionResult.type},
+          ${actionResult.param ? `"${actionResult.param}": "${values.param}"` : ""}
+        };
+        BetterTouchTool.trigger_action(JSON.stringify(actionDefinition), { shared_secret: ${JSON.stringify(shared_secret)} });
+      `;
 
-    await runAppleScript(jsxCommand, { language: "JavaScript" });
+      await runAppleScript(jsxCommand, { language: "JavaScript" });
+    } catch (e) {
+      await showFailureToast(e, {
+        title: "Failed to run action",
+      });
+    }
   }
+
   return (
     <Form
       actions={
@@ -80,7 +86,7 @@ function ActionItem({ actionResult }: { actionResult: ActionResult }) {
       await runAppleScript(osaCommand);
     } catch (error) {
       console.error(error);
-      showFailureToast(error);
+      await showFailureToast(error);
     }
   };
 
@@ -99,6 +105,7 @@ function ActionItem({ actionResult }: { actionResult: ActionResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
+            {/* eslint-disable-next-line @raycast/prefer-title-case */}
             <Action title="Run Action with BTT" onAction={() => handleRun()} icon={Icon.PlayFilled} />
             <Action title="Run Action in Background" onAction={() => handleRun(true)} icon={Icon.Play} />
           </ActionPanel.Section>
