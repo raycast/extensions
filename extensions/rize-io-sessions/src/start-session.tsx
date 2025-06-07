@@ -1,11 +1,6 @@
 import { useState, useEffect } from "react";
 import { showFailureToast } from "@raycast/utils";
-import {
-  Action,
-  ActionPanel,
-  Form,
-  getPreferenceValues,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues } from "@raycast/api";
 import axios from "axios";
 
 // Interfaces for type safety
@@ -69,16 +64,16 @@ const StartSessionCommand: React.FC = () => {
     }
   }, [selectedType]);
 
-    const startSession = React.useCallback(async () => {
-      let preferences: Preferences;
-      try {
-        preferences = getPreferenceValues<Preferences>();
-      } catch {
-        await showFailureToast("API Key Missing", {
-          message: "Please set up your Rize.io API key in Raycast Preferences",
-        });
-        return;
-      }
+  const startSession = React.useCallback(async () => {
+    let preferences: Preferences;
+    try {
+      preferences = getPreferenceValues<Preferences>();
+    } catch {
+      await showFailureToast("API Key Missing", {
+        message: "Please set up your Rize.io API key in Raycast Preferences",
+      });
+      return;
+    }
 
     if (!preferences.apiKey) {
       await showFailureToast("API Key Required", {
@@ -87,8 +82,7 @@ const StartSessionCommand: React.FC = () => {
       return;
     }
 
-
-        try {
+    try {
       // Find the selected session type
       const sessionType = SESSION_TYPES.find(
         (type) => type.value === selectedType,
