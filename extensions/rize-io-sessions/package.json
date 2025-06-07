@@ -20,7 +20,6 @@
   ],
   "commands": [
     {
-      {
       "name": "start-session",
       "title": "Start Session",
       "subtitle": "Rize.io",
