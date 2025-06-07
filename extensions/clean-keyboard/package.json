@@ -8,7 +8,8 @@
   "contributors": [
     "AndersDigital",
     "xilopaint",
-    "ridemountainpig"
+    "ridemountainpig",
+    "kamil_drzastwa"
   ],
   "categories": [
     "Productivity",
@@ -29,6 +30,12 @@
         "freeze",
         "dirty"
       ]
+    },
+    {
+      "name": "keyboard-status",
+      "title": "Keyboard Status",
+      "description": "Shows keyboard lock status in menu bar",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
