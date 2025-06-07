@@ -13,18 +13,31 @@ const TIMEZONES = [
 function getDateInfo(input: string, timeZone: string) {
   let date: Date | null = null;
   let unix: number | null = null;
+  let unixNano: bigint | null = null;
   let error = "";
 
   if (/^\d+$/.test(input)) {
-    const num = parseInt(input, 10);
-    if (input.length > 10) {
-      // Assume milliseconds if more than 10 digits (typical for seconds)
-      date = new Date(num);
-      unix = Math.floor(num / 1000);
+    const num = BigInt(input);
+    if (input.length > 19) {
+      // Assume nanoseconds if more than 19 digits (typical for seconds)
+      date = new Date(Number(num / BigInt(1_000_000)));
+      unix = Math.floor(Number(num / BigInt(1_000_000_000)));
+      unixNano = num;
+    } else if (input.length > 13) {
+      // Assume microseconds if more than 13 digits
+      date = new Date(Number(num / BigInt(1_000)));
+      unix = Math.floor(Number(num / BigInt(1_000_000)));
+      unixNano = num * BigInt(1_000);
+    } else if (input.length > 10) {
+      // Assume milliseconds if more than 10 digits
+      date = new Date(Number(num));
+      unix = Math.floor(Number(num) / 1000);
+      unixNano = num * BigInt(1_000_000);
     } else {
       // Input is a Unix timestamp (seconds)
-      unix = num;
+      unix = Number(num);
       date = new Date(unix * 1000);
+      unixNano = num * BigInt(1_000_000_000);
     }
   } else {
     // Try to parse as date string
@@ -32,6 +45,7 @@ function getDateInfo(input: string, timeZone: string) {
     if (!isNaN(parsed)) {
       date = new Date(parsed);
       unix = Math.floor(date.getTime() / 1000);
+      unixNano = BigInt(date.getTime()) * BigInt(1_000_000);
     } else {
       error = "Invalid date or unix time";
     }
@@ -42,8 +56,8 @@ function getDateInfo(input: string, timeZone: string) {
     return { error };
   }
 
-  // Format for GMT
-  const gmtString = date.toLocaleString("en-US", {
+  // Format for GMT with nanosecond precision
+  const gmtBase = date.toLocaleString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -56,8 +70,12 @@ function getDateInfo(input: string, timeZone: string) {
     timeZone: "GMT",
   });
 
-  // Format for Your time zone
-  const localTimeString = date.toLocaleString("en-US", {
+  // Add nanosecond precision manually
+  const gmtNano = date.getTime() % 1000;
+  const gmtString = `${gmtBase.slice(0, -4)}${gmtNano.toString().padStart(3, "0")}${gmtBase.slice(-4)}`;
+
+  // Format for Your time zone with nanosecond precision
+  const localBase = date.toLocaleString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -70,6 +88,10 @@ function getDateInfo(input: string, timeZone: string) {
     timeZone: timeZone === "local" ? undefined : timeZone,
     timeZoneName: "shortOffset",
   });
+
+  // Add nanosecond precision manually
+  const localNano = date.getTime() % 1000;
+  const localTimeString = `${localBase.slice(0, -4)}${localNano.toString().padStart(3, "0")}${localBase.slice(-4)}`;
 
   // Calculate relative time in days
   const now = new Date();
@@ -99,6 +121,7 @@ function getDateInfo(input: string, timeZone: string) {
     gmt: gmtString,
     local: localTimeString,
     unix,
+    unixNano: unixNano?.toString(),
     relative: relativeTime,
     dayOfYear,
     weekOfYear,
@@ -108,8 +131,8 @@ function getDateInfo(input: string, timeZone: string) {
 }
 
 export default function Command() {
-  // Initialize input with current Unix timestamp
-  const [input, setInput] = useState(Date.now().toString()); // Use milliseconds for initial value
+  // Initialize input with current Unix timestamp in seconds
+  const [input, setInput] = useState(Math.floor(Date.now() / 1000).toString());
   const [timezone, setTimezone] = useState("local");
   const [info, setInfo] = useState(getDateInfo(input, timezone));
 
@@ -147,7 +170,7 @@ export default function Command() {
       <Form.TextField
         id="input"
         title="Input"
-        placeholder="Unix time (seconds or milliseconds) or date string"
+        placeholder="Unix time in seconds (e.g. 1709123456) or date string"
         value={input}
         onChange={setInput}
       />
