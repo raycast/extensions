@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { showFailureToast } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
   Form,
   getPreferenceValues,
-  showToast,
 } from "@raycast/api";
 import axios from "axios";
 
@@ -30,13 +30,6 @@ interface GraphQLResponse<T> {
 interface Preferences {
   apiKey: string;
 }
-
-// Utility function marked with @ts-ignore to suppress unused warning
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const formatDuration = (_seconds: number): string => {
-  // Placeholder implementation to satisfy linter
-  return "Duration";
-};
 
 // Session type options with default durations
 const SESSION_TYPES = [
@@ -76,27 +69,26 @@ const StartSessionCommand: React.FC = () => {
     }
   }, [selectedType]);
 
-  const startSession = React.useCallback(async () => {
-    let preferences: Preferences;
-    try {
-      preferences = getPreferenceValues<Preferences>();
-    } catch {
-      await showToast({
-        title: "API Key Missing",
-        message: "Please set up your Rize.io API key in Raycast Preferences",
-      });
-      return;
-    }
+    const startSession = React.useCallback(async () => {
+      let preferences: Preferences;
+      try {
+        preferences = getPreferenceValues<Preferences>();
+      } catch {
+        await showFailureToast("API Key Missing", {
+          message: "Please set up your Rize.io API key in Raycast Preferences",
+        });
+        return;
+      }
 
     if (!preferences.apiKey) {
-      await showToast({
-        title: "API Key Required",
+      await showFailureToast("API Key Required", {
         message: "Please set up your Rize.io API key in Raycast Preferences",
       });
       return;
     }
 
-    try {
+
+        try {
       // Find the selected session type
       const sessionType = SESSION_TYPES.find(
         (type) => type.value === selectedType,
@@ -170,12 +162,8 @@ const StartSessionCommand: React.FC = () => {
     } catch (error: unknown) {
       console.error("Full error details:", error);
 
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-
-      await showToast({
-        title: "Start Session Failed",
-        message: errorMessage,
+      await showFailureToast("Start Session Failed", {
+        message: error instanceof Error ? error.message : String(error),
       });
     }
   }, [selectedType, description, duration]);
