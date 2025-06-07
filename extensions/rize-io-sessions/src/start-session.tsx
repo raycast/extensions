@@ -1,11 +1,8 @@
-// start-session.tsx
 import React, { useState, useEffect } from "react";
 import {
   Action,
   ActionPanel,
   Form,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Toast,
   getPreferenceValues,
   showToast,
 } from "@raycast/api";
@@ -34,13 +31,6 @@ interface Preferences {
   apiKey: string;
 }
 
-interface AxiosErrorResponse {
-  response?: {
-    data?: { message?: string };
-    status?: number;
-  };
-}
-
 // Utility function marked with @ts-ignore to suppress unused warning
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const formatDuration = (_seconds: number): string => {
@@ -65,11 +55,6 @@ const DURATION_OPTIONS = [
   { label: "2 hours", value: 7200 },
 ];
 
-// Type guard for Axios errors
-function isAxiosError(error: unknown): error is AxiosErrorResponse {
-  return typeof error === "object" && error !== null && "response" in error;
-}
-
 const StartSessionCommand: React.FC = () => {
   const [selectedType, setSelectedType] = useState("focus");
   const [description, setDescription] = useState("");
@@ -91,7 +76,7 @@ const StartSessionCommand: React.FC = () => {
     }
   }, [selectedType]);
 
-  const startSession = async () => {
+  const startSession = React.useCallback(async () => {
     let preferences: Preferences;
     try {
       preferences = getPreferenceValues<Preferences>();
@@ -185,29 +170,15 @@ const StartSessionCommand: React.FC = () => {
     } catch (error: unknown) {
       console.error("Full error details:", error);
 
-      if (isAxiosError(error)) {
-        console.error("Error response:", {
-          data: error.response?.data,
-          status: error.response?.status,
-        });
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
-        await showToast({
-          title: "Start Session Failed",
-          message: `Error ${error.response?.status}: ${error.response?.data?.message || "Unable to start session"}`,
-        });
-      } else if (error instanceof Error) {
-        await showToast({
-          title: "Start Session Failed",
-          message: error.message,
-        });
-      } else {
-        await showToast({
-          title: "Start Session Failed",
-          message: String(error),
-        });
-      }
+      await showToast({
+        title: "Start Session Failed",
+        message: errorMessage,
+      });
     }
-  };
+  }, [selectedType, description, duration]);
 
   return (
     <Form

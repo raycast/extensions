@@ -3,8 +3,6 @@ import {
   Action,
   ActionPanel,
   Form,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Toast,
   getPreferenceValues,
   showToast,
 } from "@raycast/api";
@@ -33,13 +31,6 @@ interface Preferences {
   apiKey: string;
 }
 
-interface AxiosErrorResponse {
-  response?: {
-    data?: { message?: string };
-    status?: number;
-  };
-}
-
 // Duration options in seconds
 const DURATION_OPTIONS = [
   { label: "15 minutes", value: 900 },
@@ -50,15 +41,10 @@ const DURATION_OPTIONS = [
   { label: "2 hours", value: 7200 },
 ];
 
-// Type guard for Axios errors
-function isAxiosError(error: unknown): error is AxiosErrorResponse {
-  return typeof error === "object" && error !== null && "response" in error;
-}
-
 const ExtendSessionCommand: React.FC = () => {
-  const [selectedDuration, setSelectedDuration] = useState("1800"); // Default to 30 minutes
+  const [selectedDuration, setSelectedDuration] = useState("1800");
 
-  const extendSession = async () => {
+  const extendSession = React.useCallback(async () => {
     let preferences: Preferences;
     try {
       preferences = getPreferenceValues<Preferences>();
@@ -79,7 +65,6 @@ const ExtendSessionCommand: React.FC = () => {
     }
 
     try {
-      // Find the selected duration option
       const durationOption = DURATION_OPTIONS.find(
         (option) => option.value.toString() === selectedDuration,
       );
@@ -146,29 +131,15 @@ const ExtendSessionCommand: React.FC = () => {
     } catch (error: unknown) {
       console.error("Full error details:", error);
 
-      if (isAxiosError(error)) {
-        console.error("Error response:", {
-          data: error.response?.data,
-          status: error.response?.status,
-        });
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
-        await showToast({
-          title: "Extend Session Failed",
-          message: `Error ${error.response?.status}: ${error.response?.data?.message || "Unable to extend session"}`,
-        });
-      } else if (error instanceof Error) {
-        await showToast({
-          title: "Extend Session Failed",
-          message: error.message,
-        });
-      } else {
-        await showToast({
-          title: "Extend Session Failed",
-          message: String(error),
-        });
-      }
+      await showToast({
+        title: "Extend Session Failed",
+        message: errorMessage,
+      });
     }
-  };
+  }, [selectedDuration]);
 
   return (
     <Form

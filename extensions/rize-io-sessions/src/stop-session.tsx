@@ -1,10 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  getPreferenceValues,
-  showToast,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Toast,
-} from "@raycast/api";
+import { getPreferenceValues, showToast } from "@raycast/api";
 import axios from "axios";
 
 // Interfaces for type safety
@@ -29,18 +24,6 @@ interface GraphQLResponse<T> {
 
 interface Preferences {
   apiKey: string;
-}
-
-interface AxiosErrorResponse {
-  response?: {
-    data?: { message?: string };
-    status?: number;
-  };
-}
-
-// Type guard for Axios errors
-function isAxiosError(error: unknown): error is AxiosErrorResponse {
-  return typeof error === "object" && error !== null && "response" in error;
 }
 
 const StopSessionCommand: React.FC = () => {
@@ -156,28 +139,20 @@ const StopSessionCommand: React.FC = () => {
       } catch (error: unknown) {
         console.error("Stop session error:", error);
 
-        // Detailed error handling
-        if (isAxiosError(error)) {
-          await showToast({
-            title: "Stop Session Failed",
-            message: error.response?.data?.message || "Unable to stop session",
-          });
-        } else {
-          await showToast({
-            title: "Stop Session Failed",
-            message:
-              error instanceof Error
-                ? error.message
-                : "An unknown error occurred",
-          });
-        }
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+
+        await showToast({
+          title: "Stop Session Failed",
+          message: errorMessage,
+        });
       }
     };
 
     runStopSession();
-  }, []); // Empty dependency array means this runs once when the component mounts
+  }, []);
 
-  return null; // This command runs immediately and doesn't render a UI
+  return null;
 };
 
 export default StopSessionCommand;
