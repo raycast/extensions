@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keygen",
   "title": "Keygen",
-  "description": "",
-  "icon": "logomark.png",
+  "description": "View Licenses and Policies",
+  "icon": "extension_icon.png",
   "author": "xmok",
   "license": "MIT",
   "preferences": [
@@ -13,28 +13,28 @@
       "placeholder": "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx",
       "type": "textfield",
       "required": true,
-      "description": ""
+      "description": "Account ID from Keygen Dashboard"
     },
     {
       "name": "api_token",
       "title": "API Token",
-      "placeholder": "prod-xxxx...xxxx",
+      "placeholder": "admin-xxxx...xxxx",
       "type": "password",
       "required": true,
-      "description": ""
+      "description": "Admin Token generated via Keygen API"
     }
   ],
   "commands": [
     {
-      "name": "policies",
-      "title": "Policies",
-      "description": "",
+      "name": "licenses",
+      "title": "Licenses",
+      "description": "List Licenses and Create new ones",
       "mode": "view"
     },
     {
-      "name": "licenses",
-      "title": "Licenses",
-      "description": "",
+      "name": "policies",
+      "title": "Policies",
+      "description": "List Policies and Create new ones",
       "mode": "view"
     }
   ],
