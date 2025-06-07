@@ -15,7 +15,7 @@ import {
   showToast,
 } from "@raycast/api";
 import debounce from "lodash/debounce.js";
-import { getIconSlug } from "simple-icons/sdk";
+import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { CopyFontEntities, LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
 import {
   cacheAssetPack,

@@ -103,7 +103,7 @@ export default function Command() {
   };
 
   if (qrData) {
-    return <QRCodeView qrData={qrData} />;
+    return <QRCodeView qrData={qrData} height={512} />;
   }
 
   return (

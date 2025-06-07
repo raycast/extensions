@@ -1,4 +1,4 @@
-import { showHUD } from '@raycast/api'
+import { getPreferenceValues, showHUD } from '@raycast/api'
 import { runAppleScript, showFailureToast } from '@raycast/utils'
 import { checkHammerspoonInstallation } from './utils/installation'
 
@@ -12,7 +12,10 @@ export default async function main() {
   try {
     await runAppleScript(`
       tell application "Hammerspoon"
-        execute lua code "hs.reload(); hs.openConsole()"
+        execute lua code "
+          hs.reload();
+          ${getPreferenceValues().openConsole ? 'hs.openConsole();' : ''}
+        "
       end tell
     `)
   } catch (error) {

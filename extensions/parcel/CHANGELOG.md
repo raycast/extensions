@@ -1,5 +1,15 @@
 # Parcel Changelog
 
+## [Enhanced Date Format Support] - 2025-06-03
+
+- Added support for more date formats in delivery tracking, including dates with day names
+- Improved handling of various international date formats for better compatibility with carrier APIs
+
+## [Added ISO 8601 Date Support] - 2025-05-30
+
+- Added support for ISO 8601 date format (YYYY-MM-DD HH:mm:ss) in delivery date parsing
+- Improved date format handling for better compatibility with various carrier APIs
+
 ## [Improved Date Handling] - 2025-05-28
 
 - **Enhanced date recognition:** Improved parsing of delivery dates, including better support for European formats (like DD.MM.YYYY HH:mm and DD.MM.YYYY HH:mm:ss).

@@ -114,6 +114,7 @@ export default function Command(props: LaunchProps) {
       }
     >
       {tasks &&
+        Array.isArray(tasks) &&
         tasks
           .filter((task) => !projectId || task.projectId === projectId)
           .map((task) => <TaskItem key={task.id} task={task} />)}

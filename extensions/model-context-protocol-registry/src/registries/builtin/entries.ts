@@ -175,6 +175,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "kagimcp",
+    title: "Kagi Search",
+    description: "The Official Model Context Protocol (MCP) server for Kagi search & other tools.",
+    icon: "kagi.svg",
+    homepage: "https://github.com/kagisearch/kagimcp",
+    configuration: {
+      command: "uvx",
+      args: ["kagimcp"],
+      env: {
+        KAGI_API_KEY: "YOUR_API_KEY_HERE",
+        KAGI_SUMMARIZER_ENGINE: "YOUR_ENGINE_CHOICE_HERE", // Defaults to "cecil" engine if env var not present
+      },
+    },
+  },
+  {
     name: "filesystem",
     title: "Filesystem",
     description:
@@ -222,7 +237,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://www.prisma.io/docs/postgres/integrations/mcp-server",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://api.prisma.io/mcp-server/mcp"],
+      args: ["-y", "mcp-remote", "https://mcp.prisma.io/mcp"],
     },
   },
   {
@@ -409,7 +424,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "pydantic-logfire",
     title: "Pydantic Logfire",
     description:
-      "This repository contains a Model Context Protocol (MCP) server with tools that can access the OpenTelemetry traces and metrics you've sent to Logfire.\n\nThis MCP server enables LLMs to retrieve your application's telemetry data, analyze distributed traces, and make use of the results of arbitrary SQL queries executed using the Logfire APIs.",
+      "This repository contains a Model Context Protocol (MCP) server with tools that can access the OpenTelemetry traces and metrics you've sent to Logfire. This MCP server enables LLMs to retrieve your application's telemetry data, analyze distributed traces, and make use of the results of arbitrary SQL queries executed using the Logfire APIs.",
     icon: "pydantic.svg",
     homepage: "https://github.com/pydantic/logfire-mcp",
     configuration: {
@@ -500,6 +515,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         GRAFANA_URL: "YOUR_GRAFANA_URL_HERE",
         GRAFANA_API_KEY: "YOUR_SERVICE_ACCOUNT_TOKEN_HERE",
+      },
+    },
+  },
+  {
+    name: "anytype",
+    title: "Anytype",
+    description:
+      "A Model Context Protocol (MCP) server for Anytype that enables AI assistants to seamlessly interact with Anytype's API through natural language. Manage spaces, objects, properties, types and more in your knowledge base.",
+    icon: "anytype.png",
+    homepage: "https://github.com/anyproto/anytype-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@anyproto/anytype-mcp"],
+      env: {
+        OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-05-20"}',
       },
     },
   },

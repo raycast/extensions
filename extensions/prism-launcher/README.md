@@ -1,3 +1,3 @@
 # Prism Launcher
 
-Launch Prism Launcher instances straight from Raycast
+Launch and manage your Minecraft Prism Launcher instances straight from Raycast.

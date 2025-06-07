@@ -1,5 +1,17 @@
 # Battery Optimizer Changelog
 
+## [Feature] - 2025-06-04
+
+Add support for BATT in addition to BCLM for macOS 15+ compatibility
+
+- Add dropdown preference to toggle between BCLM and BATT tools
+- Implement utility functions for BATT support
+- Create abstraction layer to handle both battery management tools
+- Update all commands to work with either tool based on preference
+- Add custom path setting for BATT executable
+- Update documentation to explain differences between tools
+- Enhance menu bar to show which tool is being used
+
 ## [Feature] - 2024-09-22
 
 Add menu bar for Battery Optimizer to show charging threshold and enable/disable Battery Optimizer.
