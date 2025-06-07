@@ -10,6 +10,7 @@ export default async function Command() {
         style: Toast.Style.Failure,
         title: "Clipboard is empty",
         message: "Please copy some text first",
+      });
       return;
     }
 
