@@ -1,11 +1,13 @@
 import { Action, ActionPanel, Form, LocalStorage, showHUD } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
-import { exec } from "child_process";
+import { ChildProcess, exec } from "child_process";
 
 interface CommandFormValues {
   input: string;
   instruction: string;
 }
+
+const allowedInstructions = ["shut down", "restart", "sleep"];
 
 export default function Command() {
   const { handleSubmit, itemProps } = useForm<CommandFormValues>({
@@ -58,13 +60,19 @@ export default function Command() {
 
       if (timer >= 120 * 60) {
         // greater than two hours
-        // console.log("too long", timer);
         await showFailureToast("Timer greater than 2 hours");
         return;
       }
       /* 
             the apple script uses seconds for the delay
-        */
+            the instruction needs to be sanitized first
+      */
+
+      if (!allowedInstructions.includes(instruction)) {
+        await showFailureToast("Invalid instruction");
+        return;
+      }
+
       const command = `
             osascript -e 'on run argv
                 delay (item 1 of argv)
@@ -74,7 +82,15 @@ export default function Command() {
             end run' ${timer}
         `;
 
-      const processRef = exec(command); // runs script in background
+      // checks to see if the process is created
+      let processRef: ChildProcess;
+      try {
+        processRef = exec(command); // runs script in background
+      } catch (err) {
+        console.error(err);
+        await showFailureToast(err, { title: "Failed to start shutdown timer" });
+        return;
+      }
 
       /* 
             Right now the command works and it delays for the time period specified
@@ -91,7 +107,13 @@ export default function Command() {
     },
     validation: {
       input: FormValidation.Required,
-      instruction: FormValidation.Required,
+      instruction: (value) => {
+        if (value && !allowedInstructions.includes(value)) {
+          return "The instruction selected is invalid";
+        } else if (!value) {
+          return "The item is required";
+        }
+      },
     },
   });
 
