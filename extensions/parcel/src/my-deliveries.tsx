@@ -131,8 +131,8 @@ export default function Command() {
 
       const showYear = date.getFullYear() !== now.getFullYear();
       return date.toLocaleDateString(undefined, {
-        day: "2-digit",
         month: "short",
+        day: "numeric",
         ...(showYear ? { year: "numeric" } : {}),
       });
     }
