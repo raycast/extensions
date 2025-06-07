@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "craftify",
+  "title": "Craftify",
+  "description": "Some useful tools for your daily work",
+  "icon": "extension-icon-512x512.png",
+  "author": "stanislav_korchagin",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "to-en",
+      "title": "-> English",
+      "description": "Translate selected text from any language to English and any other language to native language",
+      "mode": "no-view"
+    },
+    {
+      "name": "to-bg",
+      "title": "-> Bulgarian",
+      "description": "Translate selected text any language To Bulgarian and any other language to native language",
+      "mode": "no-view"
+    },
+    {
+      "name": "to-ua",
+      "title": "-> Ukrainian",
+      "description": "Translate selected text any language To Ukrainian and any other language to native language",
+      "mode": "no-view"
+    },
+    {
+      "name": "fix-text",
+      "title": "Fix Text Errors",
+      "description": "Fix errors in selected text",
+      "mode": "no-view"
+    },
+    {
+      "name": "explain",
+      "title": "Explain Text",
+      "description": "Explain texts, web pages, youtube videos, etc. in simple words by professional",
+      "mode": "view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize texts, web pages, youtube videos, etc.",
+      "mode": "view"
+    },
+    {
+      "name": "simplify",
+      "title": "Simplify",
+      "description": "Simplify texts, web pages, youtube videos, etc.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@agentic/stdlib": "^7.6.7",
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@mozilla/readability": "^0.6.0",
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.17.0",
+    "@wrtnlabs/web-content-extractor": "^3.2.4",
+    "jsdom": "^26.1.0",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.86.1",
+    "youtube-transcript": "^1.2.1",
+    "zod": "^3.25.55"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.6",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "llmModel",
+      "type": "textfield",
+      "title": "LLM Model",
+      "description": "LLM model to use for the extension",
+      "default": "gpt-4.1-mini",
+      "required": true
+    },
+    {
+      "name": "llmToken",
+      "type": "password",
+      "title": "LLM API Token",
+      "description": "LLM API token to use for the extension",
+      "required": true
+    },
+    {
+      "name": "nativeLanguage",
+      "type": "textfield",
+      "title": "Native Language",
+      "description": "The language into which texts, summaries, explanations, and so on will be translated",
+      "default": "russian",
+      "required": true
+    }
+  ]
+}
