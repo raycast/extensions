@@ -52,7 +52,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   // Get pin functionality from useFolderSearch hook
-  const { resultIsPinned, toggleResultPinnedStatus, pinnedResults } = useFolderSearch();
+  const { resultIsPinned, toggleResultPinnedStatus } = useFolderSearch();
 
   // Handle return to main view with callback
   const handleReturn = () => {
@@ -131,7 +131,6 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
                 {(() => {
                   const parentPath = safeParentDirectory(directoryPath);
                   const parentResult = createSpotlightResult(parentPath);
-                  const parentPinnedIndex = pinnedResults.findIndex((pin) => pin.path === parentPath);
 
                   return (
                     <Action
@@ -152,7 +151,6 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
         {files.map((file) => {
           const filePath = path.join(directoryPath, file);
           const result = createSpotlightResult(filePath);
-          const pinnedIndex = pinnedResults.findIndex((pin) => pin.path === filePath);
 
           return (
             <List.Item
