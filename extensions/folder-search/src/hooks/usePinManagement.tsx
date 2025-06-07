@@ -30,7 +30,7 @@ export function usePinManagement() {
       if (isPinned) {
         newPinnedResults = pinnedResults.filter((pin) => pin.path !== result.path);
       } else {
-        newPinnedResults = [...pinnedResults, result];
+        newPinnedResults = [result, ...pinnedResults];
       }
 
       await pinStorage.savePins(newPinnedResults);
