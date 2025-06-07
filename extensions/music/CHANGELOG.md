@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [New Config] - 2025-06-07
+
+- Added a new configuration option to disable HUDs
+
 ## [Update Rate Track] - 2025-03-10
 
 - Added the track name to the `Rate Track` command.
