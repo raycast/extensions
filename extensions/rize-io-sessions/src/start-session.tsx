@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { showFailureToast } from "@raycast/utils";
-import { Action, ActionPanel, Form, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Toast,
+  getPreferenceValues,
+} from "@raycast/api";
 import axios from "axios";
 
 // Interfaces for type safety
@@ -26,6 +32,27 @@ interface Preferences {
   apiKey: string;
 }
 
+// Utility function to format duration (may be used in future)
+/* eslint-disable @typescript-eslint/no-unused-vars */
+function formatDuration(seconds: number): string {
+  if (seconds < 3600) {
+    const minutes = Math.round(seconds / 60);
+    return minutes === 1 ? "1 minute" : `${minutes} minutes`;
+  } else {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.round((seconds % 3600) / 60);
+
+    if (minutes === 0) {
+      return hours === 1 ? "1 hour" : `${hours} hours`;
+    } else {
+      const hourPart = hours === 1 ? "1 hour" : `${hours} hours`;
+      const minutePart = minutes === 1 ? "1 minute" : `${minutes} minutes`;
+      return `${hourPart} ${minutePart}`.trim();
+    }
+  }
+}
+/* eslint-enable @typescript-eslint/no-unused-vars */
+
 // Session type options with default durations
 const SESSION_TYPES = [
   { label: "Focus", value: "focus", defaultLength: 1800 }, // 30 minutes
@@ -43,7 +70,7 @@ const DURATION_OPTIONS = [
   { label: "2 hours", value: 7200 },
 ];
 
-const StartSessionCommand: React.FC = () => {
+export default function StartSessionCommand() {
   const [selectedType, setSelectedType] = useState("focus");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState<number>(1800); // Default to 30 minutes for focus
@@ -64,20 +91,20 @@ const StartSessionCommand: React.FC = () => {
     }
   }, [selectedType]);
 
-  const startSession = React.useCallback(async () => {
+  const startSession = async () => {
     let preferences: Preferences;
     try {
       preferences = getPreferenceValues<Preferences>();
-    } catch {
+    } catch (_error) {
       await showFailureToast("API Key Missing", {
-        message: "Please set up your Rize.io API key in Raycast Preferences",
+        description: "Please set up your Rize.io API key in Raycast Preferences",
       });
       return;
     }
 
     if (!preferences.apiKey) {
       await showFailureToast("API Key Required", {
-        message: "Please set up your Rize.io API key in Raycast Preferences",
+        description: "Please set up your Rize.io API key in Raycast Preferences",
       });
       return;
     }
@@ -147,20 +174,33 @@ const StartSessionCommand: React.FC = () => {
       // If we have a session, show success
       if (mutationResult.session) {
         await showToast({
+          style: Toast.Style.Success,
           title: "Session Started",
           message: `Started ${sessionType.label.toLowerCase()} session${description ? `: ${description}` : ""}`,
         });
       } else {
         throw new Error("No session was created");
       }
-    } catch (error: unknown) {
+    } catch (error) {
       console.error("Full error details:", error);
 
-      await showFailureToast("Start Session Failed", {
-        message: error instanceof Error ? error.message : String(error),
-      });
+      if (axios.isAxiosError(error)) {
+        console.error("Error response:", {
+          data: error.response?.data,
+          status: error.response?.status,
+          headers: error.response?.headers,
+        });
+
+        await showFailureToast("Start Session Failed", {
+          description: `Error ${error.response?.status}: ${error.response?.data?.message || "Unable to start session"}`,
+        });
+      } else {
+        await showFailureToast("Start Session Failed", {
+          description: error instanceof Error ? error.message : String(error),
+        });
+      }
     }
-  }, [selectedType, description, duration]);
+  };
 
   return (
     <Form
@@ -207,6 +247,4 @@ const StartSessionCommand: React.FC = () => {
       />
     </Form>
   );
-};
-
-export default StartSessionCommand;
+}
