@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { showFailureToast } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
   Form,
+  showToast,
   Toast,
   getPreferenceValues,
 } from "@raycast/api";
@@ -96,15 +96,21 @@ export default function StartSessionCommand() {
     try {
       preferences = getPreferenceValues<Preferences>();
     } catch (_error) {
-      await showFailureToast("API Key Missing", {
-        description: "Please set up your Rize.io API key in Raycast Preferences",
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const error = _error;
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "API Key Missing",
+        message: "Please set up your Rize.io API key in Raycast Preferences",
       });
       return;
     }
 
     if (!preferences.apiKey) {
-      await showFailureToast("API Key Required", {
-        description: "Please set up your Rize.io API key in Raycast Preferences",
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "API Key Required",
+        message: "Please set up your Rize.io API key in Raycast Preferences",
       });
       return;
     }
@@ -191,12 +197,16 @@ export default function StartSessionCommand() {
           headers: error.response?.headers,
         });
 
-        await showFailureToast("Start Session Failed", {
-          description: `Error ${error.response?.status}: ${error.response?.data?.message || "Unable to start session"}`,
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Start Session Failed",
+          message: `Error ${error.response?.status}: ${error.response?.data?.message || "Unable to start session"}`,
         });
       } else {
-        await showFailureToast("Start Session Failed", {
-          description: error instanceof Error ? error.message : String(error),
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Start Session Failed",
+          message: error instanceof Error ? error.message : String(error),
         });
       }
     }
