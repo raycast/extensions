@@ -8,9 +8,8 @@ export default async function Command() {
     if (!clipboardContent || !clipboardContent.trim()) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "剪贴板为空",
-        message: "请先复制一些文本",
-      });
+        title: "Clipboard is empty",
+        message: "Please copy some text first",
       return;
     }
 
