@@ -19,7 +19,7 @@ interface GraphQLError {
 }
 
 interface GraphQLResponse<T> {
-  data: T;
+  data?: T;
   errors?: GraphQLError[];
 }
 
@@ -66,8 +66,8 @@ export default async function Command() {
       },
     );
 
-    // Check if there's an active session
-    if (!currentSessionResponse.data.data.currentSession) {
+    // Check if there's an active session using optional chaining
+    if (!currentSessionResponse.data?.data?.currentSession) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No Active Session",
@@ -115,22 +115,26 @@ export default async function Command() {
       },
     );
 
-    // Check for GraphQL errors
-    if (response.data.errors) {
+    // Check for GraphQL errors using optional chaining
+    if (response.data?.errors) {
       throw new Error(response.data.errors.map((e) => e.message).join(", "));
     }
 
-    // Check the mutation result
-    const mutationResult = response.data.data.stopSessionTimer;
+    // Check the mutation result using optional chaining
+    const mutationResult = response.data?.data?.stopSessionTimer;
 
-    // If we have a session, show success
-    if (mutationResult.session) {
+    // If we have a session, show success with UserInitiated style
+    if (mutationResult?.session) {
       await showToast({
         style: Toast.Style.Success,
         title: "Session Stopped",
         message: mutationResult.session.title
           ? `Stopped session: ${mutationResult.session.title}`
           : "Your Rize.io session has ended",
+        primaryAction: {
+          title: "OK",
+          style: Toast.ActionStyle.UserInitiated,
+        },
       });
     } else {
       throw new Error("Could not stop session");
@@ -138,7 +142,7 @@ export default async function Command() {
   } catch (error) {
     console.error("Stop session error:", error);
 
-    // Detailed error handling
+    // Detailed error handling with UserInitiated style
     if (axios.isAxiosError(error)) {
       await showToast({
         style: Toast.Style.Failure,
@@ -147,6 +151,10 @@ export default async function Command() {
           error.response?.data?.message ||
           error.message ||
           "Unable to stop session",
+        primaryAction: {
+          title: "OK",
+          style: Toast.ActionStyle.UserInitiated,
+        },
       });
     } else {
       await showToast({
@@ -154,6 +162,10 @@ export default async function Command() {
         title: "Stop Session Failed",
         message:
           error instanceof Error ? error.message : "An unknown error occurred",
+        primaryAction: {
+          title: "OK",
+          style: Toast.ActionStyle.UserInitiated,
+        },
       });
     }
   }
