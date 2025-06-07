@@ -137,7 +137,7 @@ const StopSessionCommand: React.FC = () => {
           throw new Error("Could not stop session");
         }
       } catch (error: unknown) {
-        console.error("Stop session error:", error);
+        showFailureToast(error, { title: "Stop Session Failed" });
 
         const errorMessage =
           error instanceof Error ? error.message : String(error);

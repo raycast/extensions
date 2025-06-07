@@ -135,7 +135,11 @@ const ExtendSessionCommand: React.FC = () => {
         error instanceof Error ? error.message : String(error);
 
       await showToast({
+        await showToast({
         title: "Extend Session Failed",
+        message: errorMessage,
+        style: Toast.Style.Failure,
+      });
         message: errorMessage,
       });
     }
