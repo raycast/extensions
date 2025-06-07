@@ -7,7 +7,7 @@ import {
   Toast,
   getPreferenceValues,
 } from "@raycast/api";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 // Interfaces for type safety
 interface Session {
@@ -42,6 +42,11 @@ const DURATION_OPTIONS = [
   { label: "2 hours", value: 7200 },
 ];
 
+// Type guard for Axios errors
+function isAxiosError(error: unknown): error is AxiosError {
+  return axios.isAxiosError(error);
+}
+
 export default function ExtendSessionCommand() {
   const [selectedDuration, setSelectedDuration] = useState("1800"); // Default to 30 minutes
 
@@ -49,9 +54,7 @@ export default function ExtendSessionCommand() {
     let preferences: Preferences;
     try {
       preferences = getPreferenceValues<Preferences>();
-    } catch (_error) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const error = _error;
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "API Key Missing",
@@ -135,10 +138,10 @@ export default function ExtendSessionCommand() {
       } else {
         throw new Error("Could not extend session");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Full error details:", error);
 
-      if (axios.isAxiosError(error)) {
+      if (isAxiosError(error)) {
         console.error("Error response:", {
           data: error.response?.data,
           status: error.response?.status,
@@ -150,11 +153,17 @@ export default function ExtendSessionCommand() {
           title: "Extend Session Failed",
           message: `Error ${error.response?.status}: ${error.response?.data?.message || "Unable to extend session"}`,
         });
+      } else if (error instanceof Error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Extend Session Failed",
+          message: error.message,
+        });
       } else {
         await showToast({
           style: Toast.Style.Failure,
           title: "Extend Session Failed",
-          message: error instanceof Error ? error.message : String(error),
+          message: String(error),
         });
       }
     }
@@ -163,7 +172,7 @@ export default function ExtendSessionCommand() {
   return (
     <Form
       actions={
-        <ActionPanel style={ActionPanel.Style.UserInitiated}>
+        <ActionPanel>
           <Action title="Extend Session" onAction={extendSession} />
         </ActionPanel>
       }
