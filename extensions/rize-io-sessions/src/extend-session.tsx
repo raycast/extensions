@@ -1,49 +1,20 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
   Form,
   getPreferenceValues,
+  showToast,
 } from "@raycast/api";
 import axios from "axios";
 
-
-// Interfaces for type safety
-interface Session {
-  id?: string;
-  type: string;
-  title?: string;
-  startTime?: string;
-  description?: string;
-}
-
-interface GraphQLError {
-  message: string;
-  path?: string[];
-}
-
-interface GraphQLResponse<T> {
-  data: T;
-  errors?: GraphQLError[];
-}
-
-interface Preferences {
-  apiKey: string;
-}
-
-// Duration options in seconds
-const DURATION_OPTIONS = [
-  { label: "15 minutes", value: 900 },
-  { label: "30 minutes", value: 1800 },
-  { label: "45 minutes", value: 2700 },
-  { label: "1 hour", value: 3600 },
-  { label: "1.5 hours", value: 5400 },
-  { label: "2 hours", value: 7200 },
-];
+// Existing interfaces remain the same
 
 const ExtendSessionCommand: React.FC = () => {
-  const [selectedDuration, setSelectedDuration] = useState(DURATION_OPTIONS[1].value.toString());
+  const [selectedDuration, setSelectedDuration] = useState(
+    DURATION_OPTIONS[1].value.toString(),
+  );
 
   const extendSession = React.useCallback(async () => {
     let preferences: Preferences;
@@ -137,39 +108,33 @@ const ExtendSessionCommand: React.FC = () => {
   }, [selectedDuration]);
 
   return React.createElement(
-    Form as any,
+    Form,
     {
       actions: React.createElement(
-        ActionPanel as any,
+        ActionPanel,
         {},
-        React.createElement(
-          Action as any, 
-          { 
-            title: "Extend Session", 
-            onAction: extendSession 
-          }
-        )
-      )
+        React.createElement(Action, {
+          title: "Extend Session",
+          onAction: extendSession,
+        }),
+      ),
     },
     React.createElement(
-      (Form.Dropdown as any),
+      Form.Dropdown,
       {
         id: "duration",
         title: "Extension Duration",
         value: selectedDuration,
-        onChange: setSelectedDuration
+        onChange: setSelectedDuration,
       },
-      DURATION_OPTIONS.map((option) => 
-        React.createElement(
-          (Form.Dropdown.Item as any),
-          {
-            key: option.value,
-            value: option.value.toString(),
-            title: option.label
-          }
-        )
-      )
-    )
+      DURATION_OPTIONS.map((option) =>
+        React.createElement(Form.Dropdown.Item, {
+          key: option.value,
+          value: option.value.toString(),
+          title: option.label,
+        }),
+      ),
+    ),
   );
 };
 
