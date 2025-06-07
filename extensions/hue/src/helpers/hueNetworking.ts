@@ -172,14 +172,12 @@ function validateBridgeCertificate(peerCertificate: PeerCertificate, bridgeId: s
   return undefined;
 }
 
-let _CaCertificate: Buffer | null = null;
+let _caCertificate: Buffer | null = null;
 
 export function getCaCertificate(): Buffer {
-  if (_CaCertificate) return _CaCertificate;
+  if (_caCertificate) return _caCertificate;
 
-  _CaCertificate = fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem");
+  _caCertificate = fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem");
 
-  if (!_CaCertificate) throw new Error("Could not read CA certificate file");
-
-  return _CaCertificate;
+  return _caCertificate;
 }

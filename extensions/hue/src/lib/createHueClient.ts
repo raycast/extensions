@@ -6,6 +6,7 @@ import { environment } from "@raycast/api";
 import dns from "dns";
 import HueClient from "./HueClient";
 import * as path from "path";
+import { getCaCertificate } from "../helpers/hueNetworking";
 
 const CONNECTION_TIMEOUT_MS = 5000;
 
@@ -18,12 +19,6 @@ export default async function createHueClient(
   setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>,
 ) {
   const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
-    const caCertificate: Buffer = fs.readFileSync(path.join(environment.assetsPath, "huebridge_cacert.pem"));
-
-    if (!caCertificate) {
-      return reject("Hue Bridge Root CA certificate not found.");
-    }
-
     console.log("Connecting to the Hue Bridge…");
 
     /*
@@ -32,7 +27,7 @@ export default async function createHueClient(
      * to IP addresses using TLS.
      */
     const session = connect(`https://${bridgeConfig.id}`, {
-      ca: caCertificate,
+      ca: getCaCertificate(),
       checkServerIdentity: (_hostname, peerCertificate) => {
         if (peerCertificate.subject.CN.toLowerCase() !== bridgeConfig.id.toLowerCase()) {
           throw new Error(
