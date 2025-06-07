@@ -10,7 +10,7 @@
     {
       "name": "smart-space-remover",
       "title": "Smart Space Remover",
-      "description": "Remove extra spaces in clipboard text, keep single space between English words, remove extra spaces, remove spaces between Chinese words",
+      "description": "Remove extra spaces in clipboard text, keep single space between English words, remove spaces between Chinese words",
       "mode": "no-view"
     }
   ],
