@@ -36,7 +36,7 @@ export default async function createHueClient(
     const session = connect(`https://${bridgeConfig.id}`, {
       ca: certificate, // Either the bridge’s self-signed certificate or the Hue Bridge Root CA
       checkServerIdentity: (hostname, cert) => {
-        if (cert.subject.CN !== bridgeConfig.id) {
+        if (cert.subject.CN.toLowerCase() !== bridgeConfig.id.toLowerCase()) {
           throw new Error(
             "Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.",
           );
