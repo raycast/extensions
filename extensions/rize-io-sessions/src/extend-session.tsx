@@ -141,34 +141,32 @@ const ExtendSessionCommand: React.FC = () => {
     }
   }, [selectedDuration]);
 
-  return React.createElement(
-    Form,
-    {
-      actions: React.createElement(
-        ActionPanel,
-        {},
-        React.createElement(Action, {
-          title: "Extend Session",
-          onAction: extendSession,
-        }),
-      ),
-    },
-    React.createElement(
-      Form.Dropdown,
-      {
-        id: "duration",
-        title: "Extension Duration",
-        value: selectedDuration,
-        onChange: setSelectedDuration,
-      },
-      DURATION_OPTIONS.map((option) =>
-        React.createElement(Form.Dropdown.Item, {
-          key: option.value,
-          value: option.value.toString(),
-          title: option.label,
-        }),
-      ),
-    ),
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action
+            title="Extend Session"
+            onAction={extendSession as () => void}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown
+        id="duration"
+        title="Extension Duration"
+        value={selectedDuration}
+        onChange={setSelectedDuration}
+      >
+        {DURATION_OPTIONS.map((option) => (
+          <Form.Dropdown.Item
+            key={option.value}
+            value={option.value.toString()}
+            title={option.label}
+          />
+        ))}
+      </Form.Dropdown>
+    </Form>
   );
 };
 
