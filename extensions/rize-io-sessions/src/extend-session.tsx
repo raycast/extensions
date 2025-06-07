@@ -3,11 +3,12 @@ import {
   Action,
   ActionPanel,
   Form,
-  showToast,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Toast,
   getPreferenceValues,
+  showToast,
 } from "@raycast/api";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 
 // Interfaces for type safety
 interface Session {
@@ -42,11 +43,6 @@ const DURATION_OPTIONS = [
   { label: "2 hours", value: 7200 },
 ];
 
-// Type guard for Axios errors
-function isAxiosError(error: unknown): error is AxiosError {
-  return axios.isAxiosError(error);
-}
-
 export default function ExtendSessionCommand() {
   const [selectedDuration, setSelectedDuration] = useState("1800"); // Default to 30 minutes
 
@@ -56,7 +52,6 @@ export default function ExtendSessionCommand() {
       preferences = getPreferenceValues<Preferences>();
     } catch {
       await showToast({
-        style: Toast.Style.Failure,
         title: "API Key Missing",
         message: "Please set up your Rize.io API key in Raycast Preferences",
       });
@@ -65,7 +60,6 @@ export default function ExtendSessionCommand() {
 
     if (!preferences.apiKey) {
       await showToast({
-        style: Toast.Style.Failure,
         title: "API Key Required",
         message: "Please set up your Rize.io API key in Raycast Preferences",
       });
@@ -131,7 +125,6 @@ export default function ExtendSessionCommand() {
       // If we have a session, show success
       if (mutationResult.session) {
         await showToast({
-          style: Toast.Style.Success,
           title: "Session Extended",
           message: `Session extended by ${durationOption.label}`,
         });
@@ -141,7 +134,7 @@ export default function ExtendSessionCommand() {
     } catch (error: unknown) {
       console.error("Full error details:", error);
 
-      if (isAxiosError(error)) {
+      if (axios.isAxiosError(error)) {
         console.error("Error response:", {
           data: error.response?.data,
           status: error.response?.status,
@@ -149,19 +142,16 @@ export default function ExtendSessionCommand() {
         });
 
         await showToast({
-          style: Toast.Style.Failure,
           title: "Extend Session Failed",
           message: `Error ${error.response?.status}: ${error.response?.data?.message || "Unable to extend session"}`,
         });
       } else if (error instanceof Error) {
         await showToast({
-          style: Toast.Style.Failure,
           title: "Extend Session Failed",
           message: error.message,
         });
       } else {
         await showToast({
-          style: Toast.Style.Failure,
           title: "Extend Session Failed",
           message: String(error),
         });

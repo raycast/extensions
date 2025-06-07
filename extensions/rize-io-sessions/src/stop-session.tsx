@@ -1,6 +1,9 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { runAppleScript } from "@raycast/utils";
+import {
+  getPreferenceValues,
+  showToast,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  Toast,
+} from "@raycast/api";
 import axios from "axios";
 
 // Interfaces for type safety
@@ -35,7 +38,6 @@ export default async function Command() {
     // Validate API key
     if (!preferences.apiKey) {
       await showToast({
-        style: Toast.Style.Failure,
         title: "API Key Required",
         message: "Please set up your Rize.io API key in Raycast Preferences",
       });
@@ -69,7 +71,6 @@ export default async function Command() {
     // Check if there's an active session using optional chaining
     if (!currentSessionResponse.data?.data?.currentSession) {
       await showToast({
-        style: Toast.Style.Failure,
         title: "No Active Session",
         message: "There is no active session to stop",
       });
@@ -123,49 +124,34 @@ export default async function Command() {
     // Check the mutation result using optional chaining
     const mutationResult = response.data?.data?.stopSessionTimer;
 
-    // If we have a session, show success with UserInitiated style
+    // If we have a session, show success
     if (mutationResult?.session) {
       await showToast({
-        style: Toast.Style.Success,
         title: "Session Stopped",
         message: mutationResult.session.title
           ? `Stopped session: ${mutationResult.session.title}`
           : "Your Rize.io session has ended",
-        primaryAction: {
-          title: "OK",
-          style: Toast.ActionStyle.UserInitiated,
-        },
       });
     } else {
       throw new Error("Could not stop session");
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Stop session error:", error);
 
-    // Detailed error handling with UserInitiated style
+    // Detailed error handling
     if (axios.isAxiosError(error)) {
       await showToast({
-        style: Toast.Style.Failure,
         title: "Stop Session Failed",
         message:
           error.response?.data?.message ||
           error.message ||
           "Unable to stop session",
-        primaryAction: {
-          title: "OK",
-          style: Toast.ActionStyle.UserInitiated,
-        },
       });
     } else {
       await showToast({
-        style: Toast.Style.Failure,
         title: "Stop Session Failed",
         message:
           error instanceof Error ? error.message : "An unknown error occurred",
-        primaryAction: {
-          title: "OK",
-          style: Toast.ActionStyle.UserInitiated,
-        },
       });
     }
   }

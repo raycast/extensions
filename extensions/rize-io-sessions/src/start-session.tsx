@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { showFailureToast } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
   Form,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Toast,
   getPreferenceValues,
   showToast,
@@ -83,18 +83,17 @@ export default function StartSessionCommand() {
     try {
       preferences = getPreferenceValues<Preferences>();
     } catch {
-      // Removed error parameter to suppress unused variable warning
-      await showFailureToast("API Key Missing", {
-        description:
-          "Please set up your Rize.io API key in Raycast Preferences",
+      await showToast({
+        title: "API Key Missing",
+        message: "Please set up your Rize.io API key in Raycast Preferences",
       });
       return;
     }
 
     if (!preferences.apiKey) {
-      await showFailureToast("API Key Required", {
-        description:
-          "Please set up your Rize.io API key in Raycast Preferences",
+      await showToast({
+        title: "API Key Required",
+        message: "Please set up your Rize.io API key in Raycast Preferences",
       });
       return;
     }
@@ -164,7 +163,6 @@ export default function StartSessionCommand() {
       // If we have a session, show success
       if (mutationResult.session) {
         await showToast({
-          style: Toast.Style.Success,
           title: "Session Started",
           message: `Started ${sessionType.label.toLowerCase()} session${description ? `: ${description}` : ""}`,
         });
@@ -172,9 +170,9 @@ export default function StartSessionCommand() {
         throw new Error("No session was created");
       }
     } catch {
-      // Removed error parameter to suppress unused variable warning
-      await showFailureToast("Start Session Failed", {
-        description: "Unable to start session",
+      await showToast({
+        title: "Start Session Failed",
+        message: "Unable to start session",
       });
     }
   };
