@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
   Form,
   getPreferenceValues,
-  showToast,
 } from "@raycast/api";
 import axios from "axios";
+
 
 // Interfaces for type safety
 interface Session {
@@ -42,23 +43,21 @@ const DURATION_OPTIONS = [
 ];
 
 const ExtendSessionCommand: React.FC = () => {
-  const [selectedDuration, setSelectedDuration] = useState("1800");
+  const [selectedDuration, setSelectedDuration] = useState(DURATION_OPTIONS[1].value.toString());
 
   const extendSession = React.useCallback(async () => {
     let preferences: Preferences;
     try {
       preferences = getPreferenceValues<Preferences>();
     } catch {
-      await showToast({
-        title: "API Key Missing",
+      await showFailureToast("API Key Missing", {
         message: "Please set up your Rize.io API key in Raycast Preferences",
       });
       return;
     }
 
     if (!preferences.apiKey) {
-      await showToast({
-        title: "API Key Required",
+      await showFailureToast("API Key Required", {
         message: "Please set up your Rize.io API key in Raycast Preferences",
       });
       return;
@@ -131,46 +130,46 @@ const ExtendSessionCommand: React.FC = () => {
     } catch (error: unknown) {
       console.error("Full error details:", error);
 
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-
-      await showToast({
-        await showToast({
-        title: "Extend Session Failed",
-        message: errorMessage,
-        style: Toast.Style.Failure,
-      });
-        message: errorMessage,
+      await showFailureToast("Extend Session Failed", {
+        message: error instanceof Error ? error.message : String(error),
       });
     }
   }, [selectedDuration]);
 
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action
-            title="Extend Session"
-            onAction={extendSession as () => void}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.Dropdown
-        id="duration"
-        title="Extension Duration"
-        value={selectedDuration}
-        onChange={setSelectedDuration}
-      >
-        {DURATION_OPTIONS.map((option) => (
-          <Form.Dropdown.Item
-            key={option.value}
-            value={option.value.toString()}
-            title={option.label}
-          />
-        ))}
-      </Form.Dropdown>
-    </Form>
+  return React.createElement(
+    Form as any,
+    {
+      actions: React.createElement(
+        ActionPanel as any,
+        {},
+        React.createElement(
+          Action as any, 
+          { 
+            title: "Extend Session", 
+            onAction: extendSession 
+          }
+        )
+      )
+    },
+    React.createElement(
+      (Form.Dropdown as any),
+      {
+        id: "duration",
+        title: "Extension Duration",
+        value: selectedDuration,
+        onChange: setSelectedDuration
+      },
+      DURATION_OPTIONS.map((option) => 
+        React.createElement(
+          (Form.Dropdown.Item as any),
+          {
+            key: option.value,
+            value: option.value.toString(),
+            title: option.label
+          }
+        )
+      )
+    )
   );
 };
 
