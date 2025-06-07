@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { QrDetail, buildUrl, parseUrl } from "./url-editor";
 import { ParseResult } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 export function EditUrlForm({ url, onSave }: { url: ParseResult; onSave: (parsed: ParseResult) => void }) {
   const [fields, setFields] = useState<ParseResult | null>(null);
