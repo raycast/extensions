@@ -27,9 +27,8 @@ export default async function Command() {
 
     await showToast({
       style: Toast.Style.Success,
-      title: "空格已处理",
-      message: "处理后的文本已复制到剪贴板",
-    });
+      title: "Spaces processed",
+      message: "Processed text copied to clipboard",
   } catch (error) {
     console.error("Error:", error);
 import { showFailureToast } from "@raycast/utils";
