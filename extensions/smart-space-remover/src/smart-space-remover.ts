@@ -32,10 +32,7 @@ export default async function Command() {
     });
   } catch (error) {
     console.error("Error:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "操作失败",
-      message: error instanceof Error ? error.message : "未知错误",
-    });
+import { showFailureToast } from "@raycast/utils";
+    showFailureToast(error, { title: "Failed to Process Text" });
   }
 }
