@@ -97,7 +97,7 @@ export default function Command() {
    * Rules:
    * - If the delivery is today, show: 'Today' (plus time if not 00:00)
    * - If the delivery is tomorrow, show: 'Tomorrow' (plus time if not 00:00)
-   * - If within the current week, show: 'Weekday' (plus time if not 00:00)
+   * - If within the next 7 days, show: 'Weekday' (plus time if not 00:00)
    * - Otherwise, show: 'DD Mon' (plus year if not current year, plus time if not 00:00)
    * - For ranges, show: 'StartLabel [StartTime] – EndLabel [EndTime]'
    * - If the time is exactly 00:00, omit it.
@@ -119,16 +119,16 @@ export default function Command() {
     function getLabel(date: Date): string {
       if (date.toDateString() === now.toDateString()) return "Today";
       if (date.toDateString() === tomorrow.toDateString()) return "Tomorrow";
-      // Week boundaries
-      const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay());
-      weekStart.setHours(0, 0, 0, 0);
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6);
-      weekEnd.setHours(23, 59, 59, 999);
-      if (date >= weekStart && date <= weekEnd) {
+
+      // Next 7 days window
+      const nextWeek = new Date(now);
+      nextWeek.setDate(now.getDate() + 7);
+      nextWeek.setHours(23, 59, 59, 999);
+
+      if (date <= nextWeek) {
         return date.toLocaleDateString(undefined, { weekday: "long" });
       }
+
       const showYear = date.getFullYear() !== now.getFullYear();
       return date.toLocaleDateString(undefined, {
         day: "2-digit",
