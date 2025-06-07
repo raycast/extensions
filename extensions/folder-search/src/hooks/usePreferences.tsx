@@ -38,11 +38,13 @@ export function usePreferences() {
     isLoading,
   } = useLocalStorage<PreferencesState>(`${environment.extensionName}-preferences`, defaultPreferences);
 
+  const currentPrefs = preferences || defaultPreferences;
+
   // Individual setters for backward compatibility
   const setSearchScope = (value: string) => {
     log("debug", "usePreferences", "Updating search scope", { value });
     setPreferences({
-      ...(preferences || defaultPreferences),
+      ...currentPrefs,
       searchScope: value,
     });
   };
@@ -50,7 +52,7 @@ export function usePreferences() {
   const setIsShowingDetail = (value: boolean) => {
     log("debug", "usePreferences", "Updating detail view", { value });
     setPreferences({
-      ...(preferences || defaultPreferences),
+      ...currentPrefs,
       isShowingDetail: value,
     });
   };
@@ -58,12 +60,10 @@ export function usePreferences() {
   const setShowNonCloudLibraryPaths = (value: boolean) => {
     log("debug", "usePreferences", "Updating library paths setting", { value });
     setPreferences({
-      ...(preferences || defaultPreferences),
+      ...currentPrefs,
       showNonCloudLibraryPaths: value,
     });
   };
-
-  const currentPrefs = preferences || defaultPreferences;
 
   return {
     // Raycast preferences
