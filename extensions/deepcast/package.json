@@ -19,7 +19,8 @@
     "erics118",
     "riadhrebei",
     "islam_hassan",
-    "shashank_rm"
+    "shashank_rm",
+    "heyflorentin"
   ],
   "license": "MIT",
   "commands": [
@@ -742,6 +743,28 @@
       "description": "Reset Raycast to root state after copying translated result",
       "default": false,
       "type": "checkbox"
+    },
+    {
+      "name": "defaultFormality",
+      "type": "dropdown",
+      "title": "Default Formality",
+      "description": "Choose a default formality level for supported languages",
+      "required": false,
+      "data": [
+        {
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "More Formal",
+          "value": "prefer_more"
+        },
+        {
+          "title": "Less Formal",
+          "value": "prefer_less"
+        }
+      ],
+      "default": "default"
     }
   ],
   "dependencies": {
