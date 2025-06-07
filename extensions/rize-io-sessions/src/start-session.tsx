@@ -1,3 +1,4 @@
+// start-session.tsx
 import { useState, useEffect } from "react";
 import {
   Action,
@@ -8,7 +9,7 @@ import {
   getPreferenceValues,
   showToast,
 } from "@raycast/api";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 // Interfaces for type safety
 interface Session {
@@ -56,6 +57,11 @@ const DURATION_OPTIONS = [
   { label: "1.5 hours", value: 5400 },
   { label: "2 hours", value: 7200 },
 ];
+
+// Type guard for Axios errors
+function isAxiosError(error: unknown): error is AxiosError {
+  return error instanceof Error && "response" in error;
+}
 
 export default function StartSessionCommand() {
   const [selectedType, setSelectedType] = useState("focus");
@@ -169,11 +175,31 @@ export default function StartSessionCommand() {
       } else {
         throw new Error("No session was created");
       }
-    } catch {
-      await showToast({
-        title: "Start Session Failed",
-        message: "Unable to start session",
-      });
+    } catch (error: unknown) {
+      console.error("Full error details:", error);
+
+      if (isAxiosError(error)) {
+        console.error("Error response:", {
+          data: error.response?.data,
+          status: error.response?.status,
+          headers: error.response?.headers,
+        });
+
+        await showToast({
+          title: "Start Session Failed",
+          message: `Error ${error.response?.status}: ${error.response?.data?.message || "Unable to start session"}`,
+        });
+      } else if (error instanceof Error) {
+        await showToast({
+          title: "Start Session Failed",
+          message: error.message,
+        });
+      } else {
+        await showToast({
+          title: "Start Session Failed",
+          message: String(error),
+        });
+      }
     }
   };
 

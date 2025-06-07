@@ -1,10 +1,11 @@
+// stop-session.tsx
 import {
   getPreferenceValues,
   showToast,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Toast,
 } from "@raycast/api";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 // Interfaces for type safety
 interface Session {
@@ -28,6 +29,11 @@ interface GraphQLResponse<T> {
 
 interface Preferences {
   apiKey: string;
+}
+
+// Type guard for Axios errors
+function isAxiosError(error: unknown): error is AxiosError {
+  return error instanceof Error && "response" in error;
 }
 
 export default async function Command() {
@@ -139,7 +145,7 @@ export default async function Command() {
     console.error("Stop session error:", error);
 
     // Detailed error handling
-    if (axios.isAxiosError(error)) {
+    if (isAxiosError(error)) {
       await showToast({
         title: "Stop Session Failed",
         message:
