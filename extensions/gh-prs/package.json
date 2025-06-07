@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gh-prs",
+  "title": "GH",
+  "description": "Displays PRs awaiting my review and my PRs using local gh tool",
+  "icon": "icon.png",
+  "author": "Persidskii",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-prs-awaiting-my-review",
+      "title": "View PRs awaiting my review",
+      "description": "Shows PRs awaiting my review",
+      "mode": "view"
+    },
+    {
+      "name": "view-my-prs",
+      "title": "View My PRs",
+      "description": "Views my PRs",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
