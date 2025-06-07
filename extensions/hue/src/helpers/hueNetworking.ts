@@ -6,7 +6,7 @@ import Bonjour from "bonjour-service";
 import { isIPv4 } from "net";
 
 /**
- * Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
+ * Ignoring that there could be more than one Hue Bridge on a network as this is rare.
  */
 export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: string; id: string }> {
   console.info("Discovering bridge using MeetHue's public API…");
@@ -57,7 +57,7 @@ export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: st
 }
 
 /**
- * Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
+ * Ignoring that there could be more than one Hue Bridge on a network as this is rare.
  */
 export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id: string }> {
   console.info("Discovering bridge using mDNS…");

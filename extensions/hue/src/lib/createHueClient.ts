@@ -30,8 +30,8 @@ export default async function createHueClient(
 
     /*
      * Connect to the Hue Bridge using the Bridge ID as the hostname instead of the IP address, which is then resolved
-     * using the function provided to the `lookup` option. This is necessary because connecting to IP addresses using
-     * TLS is not permitted by RFC 6066.
+     * using the function provided to the `lookup` option. This is necessary because RFC 6066 does not permit connecting
+     * to IP addresses using TLS.
      */
     const session = connect(`https://${bridgeConfig.id}`, {
       ca: certificate, // Either the bridge’s self-signed certificate or the Hue Bridge Root CA
