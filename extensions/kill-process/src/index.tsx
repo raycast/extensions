@@ -8,6 +8,7 @@ import {
   getPreferenceValues,
   Icon,
   List,
+  open,
   popToRoot,
   showToast,
   Toast,
@@ -114,12 +115,29 @@ export default function ProcessList() {
     }
     exec(`zsh -c '${force ? "sudo " : ""}kill -9 ${process.id}'`, (error) => {
       if (error) {
-        showToast({
-          title: `Failed Killing ${processName}`,
-          style: Toast.Style.Failure,
-        });
+        if (force) {
+          confirmAlert({
+            title: `Failed Killing ${processName}`,
+            message:
+              "Please ensure that touch id/password prompt is enabled for sudo: https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28",
+            primaryAction: {
+              title: "Open Link",
+              onAction: () =>
+                open("https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28"),
+            },
+          });
+        } else {
+          showToast({
+            title: `Failed Killing ${processName}`,
+            style: Toast.Style.Failure,
+          });
+        }
         return;
       }
+      showToast({
+        title: `Killed ${processName}`,
+        style: Toast.Style.Success,
+      });
     });
     setFetchResult(state.filter((p) => p.id !== process.id));
     if (closeWindowAfterKill) {
@@ -131,10 +149,6 @@ export default function ProcessList() {
     if (clearSearchBarAfterKill) {
       clearSearchBar({ forceScrollToTop: true });
     }
-    showToast({
-      title: `Killed ${processName}`,
-      style: Toast.Style.Success,
-    });
   };
 
   const subtitleString = (process: Process) => {
