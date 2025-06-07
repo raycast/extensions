@@ -163,7 +163,7 @@ export default function ExtendSessionCommand() {
   return (
     <Form
       actions={
-        <ActionPanel>
+        <ActionPanel style={ActionPanel.Style.UserInitiated}>
           <Action title="Extend Session" onAction={extendSession} />
         </ActionPanel>
       }
