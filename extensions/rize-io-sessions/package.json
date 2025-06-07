@@ -20,8 +20,10 @@
   ],
   "commands": [
     {
+      {
       "name": "start-session",
       "title": "Start Session",
+      "subtitle": "Rize.io",
       "description": "Initiate a new Rize session - break, meeting, or focus.",
       "mode": "view",
       "render": "src/start-session.tsx"
