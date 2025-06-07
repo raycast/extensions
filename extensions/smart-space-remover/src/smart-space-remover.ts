@@ -29,6 +29,7 @@ export default async function Command() {
       style: Toast.Style.Success,
       title: "Spaces processed",
       message: "Processed text copied to clipboard",
+    });
   } catch (error) {
     console.error("Error:", error);
 import { showFailureToast } from "@raycast/utils";
