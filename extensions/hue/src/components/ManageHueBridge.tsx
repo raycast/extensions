@@ -134,7 +134,7 @@ export default function ManageHueBridge(
       break;
     case "linkWithBridge":
       contextActions = [
-        <Action key="link" title="Link With Hue Bridge" onAction={() => sendHueMessage("LINK")} icon={Icon.Plug} />,
+        <Action key="link" title="Link with Hue Bridge" onAction={() => sendHueMessage("LINK")} icon={Icon.Plug} />,
       ];
       markdown = linkWithBridgeMessage;
       toast.hide().then();

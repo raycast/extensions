@@ -159,9 +159,7 @@ export function getBridgeHttpsAgent(bridgeId: string): https.Agent {
  */
 function validateBridgeCertificate(peerCertificate: PeerCertificate, bridgeId: string) {
   if (peerCertificate.subject.CN.toLowerCase() !== bridgeId.toLowerCase()) {
-    throw new Error(
-      "Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.",
-    );
+    throw new Error("Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.");
   }
 
   if (peerCertificate.issuer.CN !== "root-bridge") {

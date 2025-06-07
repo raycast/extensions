@@ -124,7 +124,7 @@ function Group(props: {
   }
 
   const content = props.groupedLight?.on?.on
-    ? props.gradientUri ?? ""
+    ? (props.gradientUri ?? "")
     : ({
         source: {
           light: "group-off.png",
