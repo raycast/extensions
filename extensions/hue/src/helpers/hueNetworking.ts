@@ -4,6 +4,8 @@ import * as https from "https";
 import { HueApiService, LinkResponse, MDnsService } from "../lib/types";
 import Bonjour from "bonjour-service";
 import { isIPv4 } from "net";
+import { environment } from "@raycast/api";
+import fs from "fs";
 
 /**
  * Ignoring that there could be more than one Hue Bridge on a network as this is rare.
@@ -84,20 +86,11 @@ export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id
   });
 }
 
-function isValidBridgeCertificate(peerCertificate: PeerCertificate, bridgeId?: string) {
-  return (
-    // The subject CN is the given Bridge ID or a valid Bridge ID
-    (peerCertificate.subject.CN === bridgeId || /^([0-9a-fA-F]){16}$/.test(peerCertificate.subject.CN)) &&
-    // The issuer CN is equal to the subject CN or “root-bridge”
-    (peerCertificate.subject.CN === peerCertificate.issuer.CN || peerCertificate.issuer.CN === "root-bridge")
-  );
+function isValidBridgeCertificate(peerCertificate: PeerCertificate, bridgeId: string) {
+  return peerCertificate.subject.CN === bridgeId && peerCertificate.issuer.CN === "root-bridge";
 }
 
-export async function getUsernameFromBridge(
-  ipAddress: string,
-  bridgeId: string | undefined = undefined,
-  certificate: Buffer,
-): Promise<string> {
+export async function getUsernameFromBridge(ipAddress: string, bridgeId: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const request = https.request(
       {
@@ -105,9 +98,9 @@ export async function getUsernameFromBridge(
         path: "/api",
         hostname: ipAddress,
         port: 443,
-        ca: certificate,
+        ca: getCaCertificate(),
         agent: new https.Agent({
-          checkServerIdentity: (hostname, peerCertificate) => {
+          checkServerIdentity: (_hostname, peerCertificate) => {
             if (!isValidBridgeCertificate(peerCertificate, bridgeId)) {
               reject("TLS certificate is not a valid Hue Bridge certificate");
             }
@@ -148,13 +141,12 @@ export async function getUsernameFromBridge(
   });
 }
 
-export function getCertificate(host: string, bridgeId?: string): Promise<PeerCertificate> {
+export function getCertificate(host: string, bridgeId: string): Promise<PeerCertificate> {
   return new Promise((resolve, reject) => {
     const socket = tls.connect(
       {
         host: host,
         port: 443,
-        rejectUnauthorized: false,
       },
       () => {
         console.log("Getting certificate from the Hue Bridge…");
@@ -162,9 +154,8 @@ export function getCertificate(host: string, bridgeId?: string): Promise<PeerCer
         const peerCertificate: PeerCertificate = socket.getPeerCertificate();
 
         /*
-         * The Hue Bridge uses either a self-signed certificate, or a certificate signed by a root-bridge certificate.
-         * In both cases, the CN (common name) of the certificate is the ID of the Hue Bridge, which is a 16 character hex string.
-         * The CN of a self-signed certificate is also the ID of the Hue Bridge.
+         * The Hue Bridge uses a certificate signed by a root-bridge certificate.
+         * The CN (common name) of the certificate matches the ID of the Hue Bridge, which is a 16-character hex string.
          * The CN of a certificate signed by the Hue Bridge root certificate is 'root-bridge'.
          * https://developers.meethue.com/develop/application-design-guidance/using-https/#Common%20name%20validation
          * https://developers.meethue.com/develop/application-design-guidance/using-https/#Self-signed%20certificates
@@ -190,4 +181,16 @@ export function createPemString(cert: PeerCertificate): string {
   };
   const base64 = cert.raw.toString("base64");
   return `-----BEGIN CERTIFICATE-----\n${insertNewlines(base64)}-----END CERTIFICATE-----\n`;
+}
+
+let cachedCaCertificate: Buffer | null = null;
+
+export function getCaCertificate(): Buffer {
+  if (cachedCaCertificate) return cachedCaCertificate;
+
+  cachedCaCertificate = fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem");
+
+  if (!cachedCaCertificate) throw new Error("Could not read CA certificate file");
+
+  return cachedCaCertificate;
 }

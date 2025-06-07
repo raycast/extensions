@@ -279,6 +279,7 @@ export default function hueBridgeMachine(
           id: "linking",
           src: async (context) => {
             if (context.bridgeIpAddress === undefined) throw Error("No bridge IP address");
+            if (context.bridgeId === undefined) throw Error("No bridge ID");
 
             console.log("Linking with Hue Bridge and saving configuration…");
 
