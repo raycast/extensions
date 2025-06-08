@@ -35,7 +35,7 @@ export default async function Command() {
     // Validate API key
     if (!preferences.apiKey) {
       await showToast({
-        style: Toast.Style.Failure,
+        style: Toast.Style.UserInitiated,
         title: "API Key Required",
         message: "Please set up your Rize.io API key in Raycast Preferences",
       });
@@ -126,7 +126,7 @@ export default async function Command() {
     // If we have a session, show success with UserInitiated style
     if (mutationResult?.session) {
       await showToast({
-        style: Toast.Style.Success,
+        style: Toast.Style.UserInitiated,
         title: "Session Stopped",
         message: mutationResult.session.title
           ? `Stopped session: ${mutationResult.session.title}`

@@ -46,13 +46,7 @@ export default function ExtendSessionCommand() {
     try {
       preferences = getPreferenceValues<Preferences>();
     } catch (_error) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const error = _error;
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "API Key Missing",
-        message: "Please set up your Rize.io API key in Raycast Preferences",
-      });
+      showFailureToast(_error, { title: "API Key Missing" });
       return;
     }
 
