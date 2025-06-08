@@ -105,9 +105,7 @@ export default function Command() {
                   const buffer = Buffer.from(await data.arrayBuffer());
                   // get temp directory
                   const tempDir = await os.tmpdir();
-                  console.log(tempDir);
                   const tempFile = path.join(tempDir, randomUUID() + (image.link.split("/").pop() || ".png"));
-                  console.log(tempFile);
                   await writeFile(tempFile, buffer);
 
                   try {
