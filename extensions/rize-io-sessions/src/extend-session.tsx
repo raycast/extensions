@@ -28,9 +28,6 @@ interface GraphQLResponse<T> {
   errors?: GraphQLError[];
 }
 
-interface Preferences {
-  apiKey: string;
-}
 
 // Duration options in seconds
 const DURATION_OPTIONS = [
@@ -163,7 +160,7 @@ export default function ExtendSessionCommand() {
   return (
     <Form
       actions={
-        <ActionPanel style={ActionPanel.Style.UserInitiated}>
+        <ActionPanel>
           <Action title="Extend Session" onAction={extendSession} />
         </ActionPanel>
       }

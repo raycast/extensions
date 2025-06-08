@@ -131,10 +131,6 @@ export default async function Command() {
         message: mutationResult.session.title
           ? `Stopped session: ${mutationResult.session.title}`
           : "Your Rize.io session has ended",
-        primaryAction: {
-          title: "OK",
-          style: Toast.ActionStyle.UserInitiated,
-        },
       });
     } else {
       throw new Error("Could not stop session");
@@ -151,10 +147,6 @@ export default async function Command() {
           error.response?.data?.message ||
           error.message ||
           "Unable to stop session",
-        primaryAction: {
-          title: "OK",
-          style: Toast.ActionStyle.UserInitiated,
-        },
       });
     } else {
       await showToast({
@@ -162,10 +154,6 @@ export default async function Command() {
         title: "Stop Session Failed",
         message:
           error instanceof Error ? error.message : "An unknown error occurred",
-        primaryAction: {
-          title: "OK",
-          style: Toast.ActionStyle.UserInitiated,
-        },
       });
     }
   }
