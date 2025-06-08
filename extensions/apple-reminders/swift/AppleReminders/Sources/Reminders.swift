@@ -22,6 +22,7 @@ struct Reminder: Codable {
   let recurrenceRule: String
   let list: ReminderList?
   let location: Location?
+  let creationDate: Date?
 }
 
 struct ReminderList: Codable {
