@@ -12,7 +12,7 @@ let index: number = 0;
 export default async function Command() {
   const currentTime = Date.now();
 
-  // Check if enough time has passed since the last execution to avoid overwriting the clipboardItem with what is being currently pasted.
+  // Check if enough time has passed since the last execution to avoid overwriting the latest clipboard item with what is being currently pasted.
   if (await getDebounce(currentTime)) {
     await closeMainWindow();
     return;
@@ -56,7 +56,7 @@ async function handleClipboardAndStorage(latestClipboardItem: string): Promise<v
 
   // Replace clipboard item in local storage if newer and reset index
   if (latestClipboardItem !== clipboardItemFromStorage) {
-    // ClipboardItem is different
+    // latestClipboardItem is different
     await clearStorage();
 
     await LocalStorage.setItem(STORAGE_ITEM_KEY, latestClipboardItem);
@@ -66,7 +66,7 @@ async function handleClipboardAndStorage(latestClipboardItem: string): Promise<v
 
     await LocalStorage.setItem(STORAGE_INDEX_KEY, +index);
   } else {
-    // ClipboardItem matches
+    // latestClipboardItem matches
     // Load List
     const listStringFromStorage = (await LocalStorage.getItem<string>(STORAGE_LIST_KEY)) ?? "";
     list = JSON.parse(listStringFromStorage);
