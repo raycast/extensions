@@ -1,6 +1,4 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { runAppleScript } from "@raycast/utils";
 import axios from "axios";
 
 // Interfaces for type safety
@@ -35,7 +33,7 @@ export default async function Command() {
     // Validate API key
     if (!preferences.apiKey) {
       await showToast({
-        style: Toast.Style.UserInitiated,
+        style: Toast.Style.Failure,
         title: "API Key Required",
         message: "Please set up your Rize.io API key in Raycast Preferences",
       });
@@ -126,7 +124,7 @@ export default async function Command() {
     // If we have a session, show success with UserInitiated style
     if (mutationResult?.session) {
       await showToast({
-        style: Toast.Style.UserInitiated,
+        style: Toast.Style.Success,
         title: "Session Stopped",
         message: mutationResult.session.title
           ? `Stopped session: ${mutationResult.session.title}`
