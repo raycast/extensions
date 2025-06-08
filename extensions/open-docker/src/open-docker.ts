@@ -1,5 +1,5 @@
 import { closeMainWindow, getApplications, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
@@ -23,29 +23,25 @@ export default async function Command() {
       tell application "Docker Desktop" to activate
     `;
 
-    exec(`osascript -e '${script}'`, async (error) => {
-      if (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to open Docker Desktop",
-          message: error.message,
-        });
-        return;
-      }
+    try {
+      await runAppleScript(script);
 
       await showToast({
         style: Toast.Style.Success,
         title: "Docker Desktop is opening",
         message: "Switching to Docker Desktop...",
       });
-    });
+    } catch (error) {
+      await showFailureToast(error, {
+        title: "Failed to open Docker Desktop",
+      });
+      return;
+    }
 
     await closeMainWindow();
   } catch (e) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(e, {
       title: "An unexpected error occurred",
-      message: e instanceof Error ? e.message : "Unknown error",
     });
   }
 }
