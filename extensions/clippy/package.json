@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clippy",
+  "title": "Clippy",
+  "description": "The simplest way to capture and organize your links in Notion",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "icon": "icon.png",
+  "author": "brianlovin",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "save-current-tab",
+      "title": "Save Current Tab",
+      "description": "Save the current browser tab to Clippy",
+      "mode": "view"
+    },
+    {
+      "name": "save-new-link",
+      "title": "Save Link",
+      "description": "Save a link to Clippy",
+      "mode": "view"
+    },
+    {
+      "name": "open-clippy-notion",
+      "title": "Open in Notion",
+      "description": "Open your Clippy database in Notion",
+      "mode": "no-view"
+    },
+    {
+      "name": "view-reading-list",
+      "title": "View Reading List",
+      "description": "View and manage your reading list",
+      "mode": "view"
+    }
+  ],
+  "preferences": [],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
