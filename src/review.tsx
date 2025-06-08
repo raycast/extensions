@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, showToast, Toast, useNavigation, List, Icon, Detail } from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, useNavigation, List, Icon, Detail, Image } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { WaniKaniClient } from "./api/client";
 import { ReviewSession, Subject, Assignment } from "./types/wanikani";
@@ -30,12 +30,18 @@ export default function Command() {
       // Get the subjects for these assignments
       const subjectIds = assignments.map(a => a.data.subject_id);
       const subjects = await client.getSubjects(subjectIds);
+      
+      // Get study materials for these subjects
+      const studyMaterials = await client.getStudyMaterials(subjectIds);
+      const studyMaterialMap = new Map(studyMaterials.map(sm => [sm.data.subject_id, sm]));
 
       const sessions: ReviewSession[] = [];
       
       for (const assignment of assignments) {
         const subject = subjects.find(s => s.id === assignment.data.subject_id);
         if (!subject) continue;
+
+        const studyMaterial = studyMaterialMap.get(subject.id);
 
         // Add meaning question for all items that have meanings
         if (subject.data.meanings.length > 0) {
@@ -45,17 +51,30 @@ export default function Command() {
             questionType: "meaning",
             incorrectMeaningAnswers: 0,
             incorrectReadingAnswers: 0,
+            studyMaterial,
           });
         }
 
-        // Add reading question for kanji and vocabulary (not radicals)
+        // Add reading questions for kanji and vocabulary (not radicals)
         if (subject.object !== "radical" && subject.data.readings && subject.data.readings.length > 0) {
-          sessions.push({
-            subject,
-            assignment,
-            questionType: "reading",
-            incorrectMeaningAnswers: 0,
-            incorrectReadingAnswers: 0,
+          // Get unique reading types that have accepted answers
+          const readingTypes = [...new Set(
+            subject.data.readings
+              .filter(r => r.accepted_answer)
+              .map(r => r.type)
+          )];
+          
+          // Create a session for each reading type
+          readingTypes.forEach(readingType => {
+            sessions.push({
+              subject,
+              assignment,
+              questionType: "reading",
+              readingType,
+              incorrectMeaningAnswers: 0,
+              incorrectReadingAnswers: 0,
+              studyMaterial,
+            });
           });
         }
       }
@@ -105,53 +124,11 @@ interface ReviewScreenProps {
 
 function ReviewScreen({ sessions, startIndex }: ReviewScreenProps) {
   const [currentIndex, setCurrentIndex] = useState(startIndex);
-  const [answer, setAnswer] = useState("");
-  const [showResult, setShowResult] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
   const { push, pop } = useNavigation();
 
   const currentSession = sessions[currentIndex];
   const progress = `${currentIndex + 1} / ${sessions.length}`;
 
-  async function handleAnswerSubmit() {
-    push(
-      <AnswerForm
-        session={currentSession}
-        onSubmit={async (userAnswer) => {
-          const normalizedAnswer = userAnswer.trim().toLowerCase();
-          let correct = false;
-
-          if (currentSession.questionType === "meaning") {
-            correct = currentSession.subject.data.meanings.some(m => 
-              m.accepted_answer && m.meaning.toLowerCase() === normalizedAnswer
-            );
-          } else {
-            correct = currentSession.subject.data.readings!.some(r => 
-              r.accepted_answer && r.reading === normalizedAnswer
-            );
-          }
-
-          if (!correct) {
-            if (currentSession.questionType === "meaning") {
-              currentSession.incorrectMeaningAnswers++;
-            } else {
-              currentSession.incorrectReadingAnswers++;
-            }
-          }
-
-          pop();
-
-          if (currentIndex < sessions.length - 1) {
-            push(<ReviewScreen sessions={sessions} startIndex={currentIndex + 1} />);
-          } else {
-            await submitAllReviews();
-          }
-        }}
-        isCorrect={isCorrect}
-        correctAnswers={getAcceptedAnswers()}
-      />
-    );
-  }
 
   async function submitAllReviews() {
     const client = new WaniKaniClient();
@@ -186,13 +163,22 @@ function ReviewScreen({ sessions, startIndex }: ReviewScreenProps) {
 
   function getAcceptedAnswers() {
     if (currentSession.questionType === "meaning") {
-      return currentSession.subject.data.meanings
+      const officialMeanings = currentSession.subject.data.meanings
         .filter(m => m.accepted_answer)
-        .map(m => m.meaning)
-        .join(", ");
+        .map(m => m.meaning);
+      
+      // Add synonyms if available
+      const synonyms = currentSession.studyMaterial?.data.meaning_synonyms || [];
+      const allMeanings = [...officialMeanings, ...synonyms];
+      
+      return allMeanings.join(", ");
     } else {
-      return currentSession.subject.data.readings!
-        .filter(r => r.accepted_answer)
+      // For reading questions, filter by reading type if specified
+      const readings = currentSession.subject.data.readings!
+        .filter(r => r.accepted_answer && 
+          (!currentSession.readingType || r.type === currentSession.readingType));
+      
+      return readings
         .map(r => r.reading)
         .join(", ");
     }
@@ -201,24 +187,68 @@ function ReviewScreen({ sessions, startIndex }: ReviewScreenProps) {
   const markdown = `
 # ${currentSession.subject.data.characters}
 
-**${currentSession.questionType === "meaning" ? "What is the meaning?" : "What is the reading?"}**
+**${currentSession.questionType === "meaning" ? "What is the meaning?" : 
+  currentSession.readingType ? `What is the ${currentSession.readingType} reading?` : "What is the reading?"}**
 
 ---
 
 Level ${currentSession.subject.data.level} ${currentSession.subject.object} • Progress: ${progress}
   `;
 
+  // Directly show the answer form instead of Detail view
   return (
-    <Detail
-      markdown={markdown}
-      navigationTitle={`Review (${progress})`}
-      actions={
-        <ActionPanel>
-          <Action title="Answer" onAction={handleAnswerSubmit} />
-        </ActionPanel>
-      }
+    <AnswerForm
+      session={currentSession}
+      onSubmit={handleSubmit}
+      isCorrect={false}
+      correctAnswers={getAcceptedAnswers()}
+      progress={progress}
     />
   );
+  
+  async function handleSubmit(userAnswer: string) {
+    const normalizedAnswer = userAnswer.trim().toLowerCase();
+    let correct = false;
+
+    if (currentSession.questionType === "meaning") {
+      // Check official meanings
+      correct = currentSession.subject.data.meanings.some(m => 
+        m.accepted_answer && m.meaning.toLowerCase() === normalizedAnswer
+      );
+      
+      // Also check study material synonyms if not already correct
+      if (!correct && currentSession.studyMaterial?.data.meaning_synonyms) {
+        correct = currentSession.studyMaterial.data.meaning_synonyms.some(synonym =>
+          synonym.toLowerCase() === normalizedAnswer
+        );
+      }
+    } else {
+      // For reading questions, check for the specific reading type if specified
+      if (currentSession.readingType) {
+        correct = currentSession.subject.data.readings!.some(r => 
+          r.accepted_answer && r.reading === normalizedAnswer && r.type === currentSession.readingType
+        );
+      } else {
+        correct = currentSession.subject.data.readings!.some(r => 
+          r.accepted_answer && r.reading === normalizedAnswer
+        );
+      }
+    }
+
+    if (!correct) {
+      if (currentSession.questionType === "meaning") {
+        currentSession.incorrectMeaningAnswers++;
+      } else {
+        currentSession.incorrectReadingAnswers++;
+      }
+    }
+
+    if (currentIndex < sessions.length - 1) {
+      push(<ReviewScreen sessions={sessions} startIndex={currentIndex + 1} />);
+    } else {
+      await submitAllReviews();
+    }
+  }
 }
 
 interface AnswerFormProps {
@@ -226,9 +256,10 @@ interface AnswerFormProps {
   onSubmit: (answer: string) => Promise<void>;
   isCorrect: boolean;
   correctAnswers: string;
+  progress?: string;
 }
 
-function AnswerForm({ session, onSubmit, correctAnswers }: AnswerFormProps) {
+function AnswerForm({ session, onSubmit, correctAnswers, progress }: AnswerFormProps) {
   const [answer, setAnswer] = useState("");
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -244,13 +275,28 @@ function AnswerForm({ session, onSubmit, correctAnswers }: AnswerFormProps) {
     let correct = false;
 
     if (session.questionType === "meaning") {
+      // Check official meanings
       correct = session.subject.data.meanings.some(m => 
         m.accepted_answer && m.meaning.toLowerCase() === normalizedAnswer
       );
+      
+      // Also check study material synonyms if not already correct
+      if (!correct && session.studyMaterial?.data.meaning_synonyms) {
+        correct = session.studyMaterial.data.meaning_synonyms.some(synonym =>
+          synonym.toLowerCase() === normalizedAnswer
+        );
+      }
     } else {
-      correct = session.subject.data.readings!.some(r => 
-        r.accepted_answer && r.reading === normalizedAnswer
-      );
+      // For reading questions, check for the specific reading type if specified
+      if (session.readingType) {
+        correct = session.subject.data.readings!.some(r => 
+          r.accepted_answer && r.reading === normalizedAnswer && r.type === session.readingType
+        );
+      } else {
+        correct = session.subject.data.readings!.some(r => 
+          r.accepted_answer && r.reading === normalizedAnswer
+        );
+      }
     }
 
     setIsCorrect(correct);
@@ -265,6 +311,7 @@ function AnswerForm({ session, onSubmit, correctAnswers }: AnswerFormProps) {
   return (
     <Form
       isLoading={isSubmitting}
+      navigationTitle={progress ? `Review (${progress})` : "Review"}
       actions={
         <ActionPanel>
           {!showResult ? (
@@ -276,13 +323,20 @@ function AnswerForm({ session, onSubmit, correctAnswers }: AnswerFormProps) {
       }
     >
       <Form.Description 
-        title="Character"
-        text={session.subject.data.characters}
+        title={`${session.subject.object === "radical" ? "🔵 Radical" : 
+          session.subject.object === "kanji" ? "🩷 Kanji" : 
+          "🟣 Vocabulary"} • Level ${session.subject.data.level}`}
+        text={`
+
+        ${session.subject.data.characters}
+
+`}
       />
       
       <Form.Description 
         title="Question"
-        text={session.questionType === "meaning" ? "What is the meaning?" : "What is the reading?"}
+        text={session.questionType === "meaning" ? "What is the meaning?" : 
+          session.readingType ? `What is the ${session.readingType} reading?` : "What is the reading?"}
       />
       
       <Form.TextField
@@ -306,6 +360,30 @@ function AnswerForm({ session, onSubmit, correctAnswers }: AnswerFormProps) {
               title="Correct Answer" 
               text={correctAnswers} 
             />
+          )}
+          
+          {/* Display study material notes if available */}
+          {session.studyMaterial && (
+            <>
+              {session.studyMaterial.data.meaning_note && session.questionType === "meaning" && (
+                <Form.Description 
+                  title="💡 Meaning Note" 
+                  text={session.studyMaterial.data.meaning_note} 
+                />
+              )}
+              {session.studyMaterial.data.reading_note && session.questionType === "reading" && (
+                <Form.Description 
+                  title="💡 Reading Note" 
+                  text={session.studyMaterial.data.reading_note} 
+                />
+              )}
+              {session.studyMaterial.data.meaning_synonyms.length > 0 && session.questionType === "meaning" && (
+                <Form.Description 
+                  title="📝 Your Synonyms" 
+                  text={session.studyMaterial.data.meaning_synonyms.join(", ")} 
+                />
+              )}
+            </>
           )}
         </>
       )}

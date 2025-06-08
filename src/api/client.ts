@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Assignment, Review, Subject, Summary } from "../types/wanikani";
+import { Assignment, Review, Subject, Summary, StudyMaterial } from "../types/wanikani";
 
 interface Preferences {
   apiToken: string;
@@ -77,6 +77,12 @@ export class WaniKaniClient {
     const response = await this.fetch<{ data: Assignment }>(`/assignments/${assignmentId}/start`, {
       method: "PUT",
     });
+    return response.data;
+  }
+
+  async getStudyMaterials(subjectIds: number[]): Promise<StudyMaterial[]> {
+    const ids = subjectIds.join(",");
+    const response = await this.fetch<{ data: StudyMaterial[] }>(`/study_materials?subject_ids=${ids}`);
     return response.data;
   }
 }

@@ -3,7 +3,7 @@
   "name": "wanikani",
   "title": "WaniKani",
   "description": "Connect to WaniKani and practice your Kanji within Raycast.",
-  "icon": "extension-icon.png",
+  "icon": "wanikani-logo-white.png",
   "author": "samuel_bretz",
   "license": "MIT",
   "commands": [

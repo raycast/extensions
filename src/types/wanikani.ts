@@ -60,10 +60,25 @@ export interface Review {
   };
 }
 
+export interface StudyMaterial {
+  id: number;
+  object: "study_material";
+  data: {
+    subject_id: number;
+    subject_type: "kanji" | "vocabulary" | "radical";
+    meaning_note: string | null;
+    reading_note: string | null;
+    meaning_synonyms: string[];
+    created_at: string;
+  };
+}
+
 export interface ReviewSession {
   subject: Subject;
   assignment: Assignment;
   questionType: "meaning" | "reading";
+  readingType?: "onyomi" | "kunyomi" | "nanori";
   incorrectMeaningAnswers: number;
   incorrectReadingAnswers: number;
+  studyMaterial?: StudyMaterial;
 }
