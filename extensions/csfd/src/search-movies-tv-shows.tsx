@@ -215,7 +215,7 @@ ${description}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            title="Open in ČSFD"
+            title="Open in ČSfd"
             url={`https://www.csfd.cz/film/${movie?.id}`}
             shortcut={{ modifiers: [], key: "return" }}
           />
@@ -285,7 +285,7 @@ export default function Command() {
 
   const search = useCallback(async (query: string) => {
     if (!query.trim()) {
-      return { movies: [], tvSeries: [] };
+      return undefined; // Don't return anything for empty searches
     }
 
     try {
@@ -293,6 +293,7 @@ export default function Command() {
       return {
         movies: results.movies || [],
         tvSeries: results.tvSeries || [],
+        hasSearched: true,
       };
     } catch (error) {
       console.error("Error searching ČSFD:", error);
@@ -301,13 +302,12 @@ export default function Command() {
         title: "Failed to search ČSFD",
         message: String(error),
       });
-      return { movies: [], tvSeries: [] };
+      return { movies: [], tvSeries: [], hasSearched: true };
     }
   }, []);
 
   const { data: searchResults, isLoading } = useCachedPromise(search, [searchText], {
-    keepPreviousData: true,
-    initialData: { movies: [], tvSeries: [] },
+    keepPreviousData: false,
   });
 
   // Combine and filter movies and TV series based on contentFilter
@@ -329,16 +329,19 @@ export default function Command() {
     }));
 
     // Apply content filter
+    let result: ContentItem[];
     if (contentFilter === "all") {
-      return [...moviesWithSource, ...tvWithSource];
+      result = [...moviesWithSource, ...tvWithSource];
     } else if (contentFilter === "movies") {
-      return moviesWithSource;
+      result = moviesWithSource;
     } else if (contentFilter === "tvshows") {
-      return tvWithSource;
+      result = tvWithSource;
+    } else {
+      result = [];
     }
 
-    return [];
-  }, [searchResults, contentFilter]);
+    return result;
+  }, [searchResults, contentFilter, searchText, isLoading]);
 
   const getColorRatingIcon = (colorRating?: string) => {
     switch (colorRating) {
@@ -434,42 +437,91 @@ export default function Command() {
           </Grid.Dropdown>
         }
       >
-        {/* Conditionally render sections based on the filter */}
-        {contentFilter === "all" || contentFilter === "movies" ? (
-          <Grid.Section title={contentFilter === "all" ? "Movies" : "Movies"}>
-            {(contentFilter === "all" ? movies : (allContent as ContentItem[])).map((movie) => {
-              const imageSource = getMovieImage(movie);
-              return (
-                <Grid.Item
-                  key={movie.uniqueId}
-                  content={{ source: imageSource }}
-                  title={movie.title}
-                  subtitle={movie.year ? String(movie.year) : undefined}
-                  keywords={[movie.type || ""]}
-                  actions={movieActions(movie)}
-                />
-              );
-            })}
-          </Grid.Section>
-        ) : null}
+        {(() => {
+          const showInitialMessage = searchText === "";
 
-        {contentFilter === "all" || contentFilter === "tvshows" ? (
-          <Grid.Section title={contentFilter === "all" ? "TV Shows & Videos" : "TV Shows & Videos"}>
-            {(contentFilter === "all" ? tvShows : (allContent as ContentItem[])).map((show) => {
-              const imageSource = getMovieImage(show);
-              return (
-                <Grid.Item
-                  key={show.uniqueId}
-                  content={{ source: imageSource }}
-                  title={show.title}
-                  subtitle={show.year ? String(show.year) : undefined}
-                  keywords={[show.type || ""]}
-                  actions={movieActions(show)}
-                />
-              );
-            })}
-          </Grid.Section>
-        ) : null}
+          if (showInitialMessage) {
+            return (
+              <Grid.EmptyView
+                icon={Icon.MagnifyingGlass}
+                title="Search for movies and TV shows"
+                description="Start typing to discover movies and TV shows from ČSFD"
+              />
+            );
+          }
+
+          return (
+            <>
+              {/* Show no results if we have completed search with no results */}
+              {(() => {
+                const showNoResults = !isLoading && searchResults && allContent.length === 0;
+
+                if (showNoResults) {
+                  return (
+                    <Grid.EmptyView
+                      icon={Icon.MagnifyingGlass}
+                      title="No results found"
+                      description={`No movies or TV shows found for "${searchText}"`}
+                    />
+                  );
+                }
+
+                // If we have content, show the sections
+                if (allContent.length > 0) {
+                  return (
+                    <>
+                      {/* Conditionally render sections based on the filter */}
+                      {contentFilter === "all" || contentFilter === "movies" ? (
+                        <Grid.Section title={contentFilter === "all" ? "Movies" : "Movies"}>
+                          {(contentFilter === "all" ? movies : (allContent as ContentItem[])).map((movie) => {
+                            const imageSource = getMovieImage(movie);
+                            return (
+                              <Grid.Item
+                                key={movie.uniqueId}
+                                content={{ source: imageSource }}
+                                title={movie.title}
+                                subtitle={movie.year ? String(movie.year) : undefined}
+                                keywords={[movie.type || ""]}
+                                actions={movieActions(movie)}
+                              />
+                            );
+                          })}
+                        </Grid.Section>
+                      ) : null}
+
+                      {contentFilter === "all" || contentFilter === "tvshows" ? (
+                        <Grid.Section title={contentFilter === "all" ? "TV Shows & Videos" : "TV Shows & Videos"}>
+                          {(contentFilter === "all" ? tvShows : (allContent as ContentItem[])).map((show) => {
+                            const imageSource = getMovieImage(show);
+                            return (
+                              <Grid.Item
+                                key={show.uniqueId}
+                                content={{ source: imageSource }}
+                                title={show.title}
+                                subtitle={show.year ? String(show.year) : undefined}
+                                keywords={[show.type || ""]}
+                                actions={movieActions(show)}
+                              />
+                            );
+                          })}
+                        </Grid.Section>
+                      ) : null}
+                    </>
+                  );
+                }
+
+                // If we're loading, show a loading message
+                return (
+                  <Grid.EmptyView
+                    icon={Icon.MagnifyingGlass}
+                    title="Searching..."
+                    description="Looking for movies and TV shows on ČSFD"
+                  />
+                );
+              })()}
+            </>
+          );
+        })()}
       </Grid>
     );
   }
@@ -498,50 +550,94 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {/* Conditionally render sections based on the filter */}
-      {contentFilter === "all" || contentFilter === "movies" ? (
-        <List.Section title={contentFilter === "all" ? "Movies" : "Movies"}>
-          {(contentFilter === "all" ? movies : (allContent as ContentItem[])).map((movie) => {
-            const imageSource = getMovieImage(movie);
-            return (
-              <List.Item
-                key={movie.uniqueId}
-                title={movie.title}
-                subtitle={movie.year ? `(${movie.year})` : ""}
-                accessories={[{ text: movie.type || "" }, { icon: getColorRatingIcon(movie.colorRating) }]}
-                icon={{ source: imageSource }}
-                actions={movieActions(movie)}
-              />
-            );
-          })}
-        </List.Section>
-      ) : null}
+      {(() => {
+        const showInitialMessage = searchText === "";
 
-      {contentFilter === "all" || contentFilter === "tvshows" ? (
-        <List.Section title={contentFilter === "all" ? "TV Shows & Videos" : "TV Shows & Videos"}>
-          {(contentFilter === "all" ? tvShows : (allContent as ContentItem[])).map((show) => {
-            const imageSource = getMovieImage(show);
-            return (
-              <List.Item
-                key={show.uniqueId}
-                title={show.title}
-                subtitle={show.year ? `(${show.year})` : ""}
-                accessories={[{ text: show.type || "" }, { icon: getColorRatingIcon(show.colorRating) }]}
-                icon={{ source: imageSource }}
-                actions={movieActions(show)}
-              />
-            );
-          })}
-        </List.Section>
-      ) : null}
+        if (showInitialMessage) {
+          return (
+            <List.EmptyView
+              icon={Icon.MagnifyingGlass}
+              title="Search for movies and TV shows"
+              description="Start typing to discover movies and TV shows from ČSFD"
+            />
+          );
+        }
 
-      {allContent?.length === 0 && searchText.length > 0 && (
-        <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title="No results found"
-          description={`No movies or TV shows found for "${searchText}"`}
-        />
-      )}
+        return (
+          <>
+            {/* Show no results if we have completed search with no results */}
+            {(() => {
+              const showNoResults = !isLoading && searchResults && allContent.length === 0;
+
+              if (showNoResults) {
+                return (
+                  <List.EmptyView
+                    icon={Icon.MagnifyingGlass}
+                    title="No results found"
+                    description={`No movies or TV shows found for "${searchText}"`}
+                  />
+                );
+              }
+
+              // If we have content, show the sections
+              if (allContent.length > 0) {
+                return (
+                  <>
+                    {/* Conditionally render sections based on the filter */}
+                    {contentFilter === "all" || contentFilter === "movies" ? (
+                      <List.Section title={contentFilter === "all" ? "Movies" : "Movies"}>
+                        {(contentFilter === "all" ? movies : (allContent as ContentItem[])).map((movie) => {
+                          const imageSource = getMovieImage(movie);
+                          return (
+                            <List.Item
+                              key={movie.uniqueId}
+                              title={movie.title}
+                              subtitle={movie.year ? `(${movie.year})` : ""}
+                              accessories={[
+                                { text: movie.type || "" },
+                                { icon: getColorRatingIcon(movie.colorRating) },
+                              ]}
+                              icon={{ source: imageSource }}
+                              actions={movieActions(movie)}
+                            />
+                          );
+                        })}
+                      </List.Section>
+                    ) : null}
+
+                    {contentFilter === "all" || contentFilter === "tvshows" ? (
+                      <List.Section title={contentFilter === "all" ? "TV Shows & Videos" : "TV Shows & Videos"}>
+                        {(contentFilter === "all" ? tvShows : (allContent as ContentItem[])).map((show) => {
+                          const imageSource = getMovieImage(show);
+                          return (
+                            <List.Item
+                              key={show.uniqueId}
+                              title={show.title}
+                              subtitle={show.year ? `(${show.year})` : ""}
+                              accessories={[{ text: show.type || "" }, { icon: getColorRatingIcon(show.colorRating) }]}
+                              icon={{ source: imageSource }}
+                              actions={movieActions(show)}
+                            />
+                          );
+                        })}
+                      </List.Section>
+                    ) : null}
+                  </>
+                );
+              }
+
+              // If we're loading, show a loading message
+              return (
+                <List.EmptyView
+                  icon={Icon.MagnifyingGlass}
+                  title="Searching..."
+                  description="Looking for movies and TV shows on ČSFD"
+                />
+              );
+            })()}
+          </>
+        );
+      })()}
     </List>
   );
 }
