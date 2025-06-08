@@ -1,6 +1,6 @@
 # Grammaring Changelog
 
-## [1.0.1] - 2025-06-08
+## [1.0.1] - {PR_MERGE_DATE}
 
 ### ✨ New
 
