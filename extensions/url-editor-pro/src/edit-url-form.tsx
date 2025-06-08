@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, Icon, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { QrDetail, buildUrl, parseUrl } from "./url-editor";
+import { QrDetail, buildUrl, parseUrl } from "./url-editor-pro";
 import { ParseResult } from "./types";
 import { showFailureToast } from "@raycast/utils";
 
@@ -110,9 +110,9 @@ export function EditUrlForm({ url, onSave }: { url: ParseResult; onSave: (parsed
       navigationTitle="Edit URL"
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard content={fullUrl} title="Copy To Clipboard" />
+          <Action.CopyToClipboard content={fullUrl} title="Copy to Clipboard" />
           <Action.Push
-            title="Show QR Code"
+            title="Show Qr Code"
             icon={Icon.Code}
             target={<QrDetail qr={qr || ""} url={fields} />}
             onPush={handleGenerateQrAndShow}
@@ -133,7 +133,7 @@ export function EditUrlForm({ url, onSave }: { url: ParseResult; onSave: (parsed
             />
           )}
           <Action
-            title="Save/Pin to History"
+            title="Save/pin to History"
             shortcut={Keyboard.Shortcut.Common.Pin}
             onAction={handleSubmit}
             icon={Icon.Check}
@@ -169,9 +169,9 @@ export function EditUrlForm({ url, onSave }: { url: ParseResult; onSave: (parsed
       <Form.TextField id="hash" title="Hash" value={fields.hash || ""} onChange={(v) => handleFieldChange("hash", v)} />
       {/* Query Params */}
       {fields.query &&
-        Object.entries(fields.query).map(([k, v], idx) => (
+        Object.entries(fields.query).map(([k, v]) => (
           <Form.TextField
-            key={k + idx}
+            key={k}
             id={`query:${k}`}
             title={`Query: ${k}`}
             value={v as string}
