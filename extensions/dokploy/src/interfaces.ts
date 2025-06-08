@@ -64,11 +64,14 @@ export interface User {
   createdAt: string;
   user: {
     email: string;
-    twoFactorEnabled: boolean
-  }
+    twoFactorEnabled: boolean;
+  };
 }
 
-export  interface Server {id: string; name: string};
+export interface Server {
+  id: string;
+  name: string;
+}
 
 interface Issue {
   code?: string;

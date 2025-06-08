@@ -6,28 +6,11 @@
   "icon": "extension-icon.png",
   "author": "xmok",
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "instance_url",
-      "title": "Instance URL",
-      "placeholder": "https://dokploy.example.com/",
-      "type": "textfield",
-      "required": true,
-      "description": ""
-    },
-    {
-      "name": "api_token",
-      "title": "API Token",
-      "type": "password",
-      "required": true,
-      "description": ""
-    }
-  ],
   "commands": [
     {
-      "name": "api-keys",
-      "title": "API Keys",
-      "description": "",
+      "name": "instances",
+      "title": "Instances",
+      "description": "Manage Instances and their Projects, Services and more",
       "mode": "view"
     }
   ],
