@@ -51,6 +51,7 @@ export function PluginDetails({ data }: IPluginDetails) {
             url={`${data.download_link}`}
             title={`Download Latest Version - ${data.version}`}
             icon={Icon.Download}
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
         </ActionPanel>
       }
