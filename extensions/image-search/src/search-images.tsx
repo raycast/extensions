@@ -172,11 +172,15 @@ export default function SearchImagesCommand() {
   }, []);
 
   useEffect(() => {
+    setIsLoading(true);
     const timeoutId = setTimeout(() => {
       searchImages(searchText);
     }, SEARCH_DEBOUNCE_MS);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+      setIsLoading(false);
+    };
   }, [searchText, searchImages]);
 
   return (
@@ -187,6 +191,7 @@ export default function SearchImagesCommand() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search for images..."
     >
+      <Grid.EmptyView title={searchText && !isLoading ? "No images found" : "Start typing to search for images"} />
       {images.map((image, index) => (
         <Grid.Item
           key={`${image.link}-${index}`}

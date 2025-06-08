@@ -1,6 +1,6 @@
 # Image Web Search
 
-Searches image using Google Image API
+Searches images using Google Image API
 
 ## Setup Instructions
 
