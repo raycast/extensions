@@ -25,26 +25,26 @@ export default function Command() {
     try {
       setIsLoading(true);
       const client = new WaniKaniClient();
-      
+
       const summary = await client.getSummary();
-      const availableLessons = summary.data.lessons.filter(l => new Date(l.available_at) <= new Date());
-      
+      const availableLessons = summary.data.lessons.filter((l) => new Date(l.available_at) <= new Date());
+
       if (availableLessons.length === 0) {
         showToast({ style: Toast.Style.Success, title: "No lessons available" });
         setIsLoading(false);
         return;
       }
 
-      const subjectIds = availableLessons.flatMap(l => l.subject_ids).slice(0, 5);
+      const subjectIds = availableLessons.flatMap((l) => l.subject_ids).slice(0, 5);
       const [subjects, assignments] = await Promise.all([
         client.getSubjects(subjectIds),
         client.getLessonAssignments(subjectIds),
       ]);
 
       const sessions: LessonSession[] = [];
-      
+
       for (const assignment of assignments) {
-        const subject = subjects.find(s => s.id === assignment.data.subject_id);
+        const subject = subjects.find((s) => s.id === assignment.data.subject_id);
         if (!subject) continue;
 
         sessions.push({
@@ -64,7 +64,11 @@ export default function Command() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load lessons");
       setIsLoading(false);
-      showToast({ style: Toast.Style.Failure, title: "Failed to load lessons", message: err instanceof Error ? err.message : undefined });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load lessons",
+        message: err instanceof Error ? err.message : undefined,
+      });
     }
   }
 
@@ -83,7 +87,11 @@ export default function Command() {
   if (lessonSessions.length === 0) {
     return (
       <List>
-        <List.EmptyView title="No Lessons Available" description="You have no lessons available at this time." icon={Icon.CheckCircle} />
+        <List.EmptyView
+          title="No Lessons Available"
+          description="You have no lessons available at this time."
+          icon={Icon.CheckCircle}
+        />
       </List>
     );
   }
@@ -98,13 +106,13 @@ interface LessonViewProps {
 function LessonView({ sessions }: LessonViewProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { push } = useNavigation();
-  
+
   const currentSession = sessions[currentIndex];
   const progress = `${currentIndex + 1} / ${sessions.length}`;
 
   const handleNext = () => {
     const quizSessions: LessonSession[] = [];
-    
+
     for (const session of sessions.slice(0, currentIndex + 1)) {
       if (session.subject.data.meanings.length > 0) {
         quizSessions.push({
@@ -113,8 +121,12 @@ function LessonView({ sessions }: LessonViewProps) {
           quizType: "meaning",
         });
       }
-      
-      if (session.subject.object !== "radical" && session.subject.data.readings && session.subject.data.readings.length > 0) {
+
+      if (
+        session.subject.object !== "radical" &&
+        session.subject.data.readings &&
+        session.subject.data.readings.length > 0
+      ) {
         quizSessions.push({
           ...session,
           phase: "quiz",
@@ -122,7 +134,7 @@ function LessonView({ sessions }: LessonViewProps) {
         });
       }
     }
-    
+
     if (currentIndex < sessions.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
@@ -133,16 +145,16 @@ function LessonView({ sessions }: LessonViewProps) {
 
   const getMeanings = () => {
     return currentSession.subject.data.meanings
-      .filter(m => m.primary)
-      .map(m => m.meaning)
+      .filter((m) => m.primary)
+      .map((m) => m.meaning)
       .join(", ");
   };
 
   const getReadings = () => {
     if (!currentSession.subject.data.readings) return "N/A";
     return currentSession.subject.data.readings
-      .filter(r => r.primary)
-      .map(r => `${r.reading} (${r.type})`)
+      .filter((r) => r.primary)
+      .map((r) => `${r.reading} (${r.type})`)
       .join(", ");
   };
 
@@ -205,13 +217,11 @@ function LessonQuiz({ sessions }: LessonQuizProps) {
     let correct = false;
 
     if (currentSession.quizType === "meaning") {
-      correct = currentSession.subject.data.meanings.some(m => 
-        m.accepted_answer && m.meaning.toLowerCase() === normalizedAnswer
+      correct = currentSession.subject.data.meanings.some(
+        (m) => m.accepted_answer && m.meaning.toLowerCase() === normalizedAnswer,
       );
     } else {
-      correct = currentSession.subject.data.readings!.some(r => 
-        r.accepted_answer && r.reading === normalizedAnswer
-      );
+      correct = currentSession.subject.data.readings!.some((r) => r.accepted_answer && r.reading === normalizedAnswer);
     }
 
     setIsCorrect(correct);
@@ -219,7 +229,7 @@ function LessonQuiz({ sessions }: LessonQuizProps) {
 
     if (!correct) {
       currentSession.incorrectAnswers++;
-      
+
       const retrySession = { ...currentSession };
       sessions.push(retrySession);
     }
@@ -238,7 +248,7 @@ function LessonQuiz({ sessions }: LessonQuizProps) {
   async function startAssignments() {
     setIsSubmitting(true);
     const client = new WaniKaniClient();
-    
+
     try {
       const uniqueAssignments = new Set<number>();
       for (const session of sessions) {
@@ -252,7 +262,11 @@ function LessonQuiz({ sessions }: LessonQuizProps) {
       showToast({ style: Toast.Style.Success, title: "Lessons completed!" });
       pop();
     } catch (err) {
-      showToast({ style: Toast.Style.Failure, title: "Failed to start assignments", message: err instanceof Error ? err.message : undefined });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to start assignments",
+        message: err instanceof Error ? err.message : undefined,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -261,13 +275,13 @@ function LessonQuiz({ sessions }: LessonQuizProps) {
   const getAcceptedAnswers = () => {
     if (currentSession.quizType === "meaning") {
       return currentSession.subject.data.meanings
-        .filter(m => m.accepted_answer)
-        .map(m => m.meaning)
+        .filter((m) => m.accepted_answer)
+        .map((m) => m.meaning)
         .join(", ");
     } else {
-      return currentSession.subject.data.readings!
-        .filter(r => r.accepted_answer)
-        .map(r => r.reading)
+      return currentSession.subject.data
+        .readings!.filter((r) => r.accepted_answer)
+        .map((r) => r.reading)
         .join(", ");
     }
   };
@@ -279,29 +293,34 @@ function LessonQuiz({ sessions }: LessonQuizProps) {
       actions={
         <ActionPanel>
           {!showResult ? (
-            <Action.SubmitForm title="Submit Answer" onSubmit={handleSubmit} shortcut={{ modifiers: [], key: "return" }} />
+            <Action.SubmitForm
+              title="Submit Answer"
+              onSubmit={handleSubmit}
+              shortcut={{ modifiers: [], key: "return" }}
+            />
           ) : (
-            <Action title={currentIndex === sessions.length - 1 ? "Finish" : "Next"} onAction={handleNext} shortcut={{ modifiers: [], key: "return" }} />
+            <Action
+              title={currentIndex === sessions.length - 1 ? "Finish" : "Next"}
+              onAction={handleNext}
+              shortcut={{ modifiers: [], key: "return" }}
+            />
           )}
         </ActionPanel>
       }
     >
       <Form.Description text={`Level ${currentSession.subject.data.level} ${currentSession.subject.object}`} />
-      
+
       <Form.Separator />
-      
-      <Form.Description 
-        title="　　　　　　　　　　"
-        text={`　　　　${currentSession.subject.data.characters}　　　　`} 
-      />
-      
+
+      <Form.Description title="Character" text={currentSession.subject.data.characters} />
+
       <Form.Separator />
-      
-      <Form.Description 
-        title="Question" 
-        text={currentSession.quizType === "meaning" ? "What is the meaning?" : "What is the reading?"} 
+
+      <Form.Description
+        title="Question"
+        text={currentSession.quizType === "meaning" ? "What is the meaning?" : "What is the reading?"}
       />
-      
+
       <Form.TextField
         id="answer"
         title="Your Answer"
@@ -310,20 +329,12 @@ function LessonQuiz({ sessions }: LessonQuizProps) {
         onChange={setAnswer}
         autoFocus={true}
       />
-      
+
       {showResult && (
         <>
           <Form.Separator />
-          <Form.Description 
-            title="Result" 
-            text={isCorrect ? "✅ Correct!" : "❌ Incorrect - Try again later"} 
-          />
-          {!isCorrect && (
-            <Form.Description 
-              title="Correct Answer" 
-              text={getAcceptedAnswers()} 
-            />
-          )}
+          <Form.Description title="Result" text={isCorrect ? "✅ Correct!" : "❌ Incorrect - Try again later"} />
+          {!isCorrect && <Form.Description title="Correct Answer" text={getAcceptedAnswers()} />}
         </>
       )}
     </Form>

@@ -44,7 +44,9 @@ export class WaniKaniClient {
 
   async getAssignments(subjectIds: number[]): Promise<Assignment[]> {
     const ids = subjectIds.join(",");
-    const response = await this.fetch<{ data: Assignment[] }>(`/assignments?subject_ids=${ids}&immediately_available_for_review=true`);
+    const response = await this.fetch<{ data: Assignment[] }>(
+      `/assignments?subject_ids=${ids}&immediately_available_for_review=true`,
+    );
     return response.data;
   }
 
@@ -55,11 +57,17 @@ export class WaniKaniClient {
 
   async getLessonAssignments(subjectIds: number[]): Promise<Assignment[]> {
     const ids = subjectIds.join(",");
-    const response = await this.fetch<{ data: Assignment[] }>(`/assignments?subject_ids=${ids}&immediately_available_for_lessons`);
+    const response = await this.fetch<{ data: Assignment[] }>(
+      `/assignments?subject_ids=${ids}&immediately_available_for_lessons`,
+    );
     return response.data;
   }
 
-  async createReview(assignmentId: number, incorrectMeaningAnswers: number, incorrectReadingAnswers: number): Promise<Review> {
+  async createReview(
+    assignmentId: number,
+    incorrectMeaningAnswers: number,
+    incorrectReadingAnswers: number,
+  ): Promise<Review> {
     const response = await this.fetch<{ data: Review }>("/reviews", {
       method: "POST",
       body: JSON.stringify({
