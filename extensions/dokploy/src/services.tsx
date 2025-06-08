@@ -349,7 +349,7 @@ function CreateDatabase({ project }: { project: Project }) {
       <Form.Dropdown title="Select a database" {...itemProps.dbType}>
         <Form.Dropdown.Item icon="postgres.svg" title="PostgreSQL" value="postgres" />
         <Form.Dropdown.Item icon="mongo.svg" title="MongoDB" value="mongo" />
-        <Form.Dropdown.Item icon="maria.svg" title="MariaDB" value="mariadb" />
+        <Form.Dropdown.Item icon="mariadb.svg" title="MariaDB" value="mariadb" />
         <Form.Dropdown.Item icon="mysql.svg" title="MySQL" value="mysql" />
         <Form.Dropdown.Item icon="redis.svg" title="Redis" value="redis" />
       </Form.Dropdown>
