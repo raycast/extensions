@@ -54,6 +54,11 @@ export default function Command() {
 
       if (data.error) {
         console.error("API Error:", data.error);
+        await showToast({
+          title: "Search failed",
+          message: "API error occurred",
+          style: Toast.Style.Failure,
+        });
         setImages([]);
         return;
       }
