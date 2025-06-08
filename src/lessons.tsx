@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation, List, Icon, Detail } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { WaniKaniClient } from "./api/client";
 import { Subject, Assignment } from "./types/wanikani";
@@ -138,7 +139,11 @@ function LessonView({ sessions }: LessonViewProps) {
     if (currentIndex < sessions.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      quizSessions.sort(() => Math.random() - 0.5);
+      // Fisher-Yates shuffle for better randomization
+      for (let i = quizSessions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [quizSessions[i], quizSessions[j]] = [quizSessions[j], quizSessions[i]];
+      }
       push(<LessonQuiz sessions={quizSessions} />);
     }
   };
@@ -209,7 +214,7 @@ function LessonQuiz({ sessions }: LessonQuizProps) {
 
   async function handleSubmit() {
     if (!answer.trim()) {
-      showToast({ style: Toast.Style.Failure, title: "Please enter an answer" });
+      showFailureToast("Please enter an answer");
       return;
     }
 

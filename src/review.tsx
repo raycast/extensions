@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation, List, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { WaniKaniClient } from "./api/client";
 import { ReviewSession } from "./types/wanikani";
@@ -127,7 +128,7 @@ interface ReviewScreenProps {
 }
 
 function ReviewScreen({ sessions, startIndex }: ReviewScreenProps) {
-  const [currentIndex] = useState(startIndex);
+  const [currentIndex, setCurrentIndex] = useState(startIndex);
   const { push, pop } = useNavigation();
 
   const currentSession = sessions[currentIndex];
@@ -195,17 +196,6 @@ function ReviewScreen({ sessions, startIndex }: ReviewScreenProps) {
     }
   }
 
-  // Directly show the answer form instead of Detail view
-  return (
-    <AnswerForm
-      session={currentSession}
-      onSubmit={handleSubmit}
-      isCorrect={false}
-      correctAnswers={getAcceptedAnswers()}
-      progress={progress}
-    />
-  );
-
   async function handleSubmit(userAnswer: string) {
     const normalizedAnswer = userAnswer.trim().toLowerCase();
     let correct = false;
@@ -249,6 +239,17 @@ function ReviewScreen({ sessions, startIndex }: ReviewScreenProps) {
       await submitAllReviews();
     }
   }
+
+  // Directly show the answer form instead of Detail view
+  return (
+    <AnswerForm
+      session={currentSession}
+      onSubmit={handleSubmit}
+      isCorrect={false}
+      correctAnswers={getAcceptedAnswers()}
+      progress={progress}
+    />
+  );
 }
 
 interface AnswerFormProps {
@@ -267,7 +268,7 @@ function AnswerForm({ session, onSubmit, correctAnswers, progress }: AnswerFormP
 
   async function handleSubmit() {
     if (!answer.trim()) {
-      showToast({ style: Toast.Style.Failure, title: "Please enter an answer" });
+      showFailureToast("Please enter an answer");
       return;
     }
 
