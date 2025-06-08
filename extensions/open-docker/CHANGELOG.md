@@ -1,6 +1,6 @@
 # Open Docker Changelog
 
-## [1.0.0] - 2025-06-08
+## [Features] - 2025-06-08
 
 - Installation Check: Added a check to ensure Docker Desktop is installed before running, providing a clear error message if it's not found.
 - Desktop Switching Fix: Implemented a two-step AppleScript (reopen then activate) to reliably focus the Docker Dashboard window, even when it's on a different macOS Desktop/Space.
