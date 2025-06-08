@@ -90,7 +90,7 @@ export default function Command() {
     >
       {images.map((image, index) => (
         <Grid.Item
-          key={index}
+          key={image.link}
           content={image.link}
           actions={
             <ActionPanel>
