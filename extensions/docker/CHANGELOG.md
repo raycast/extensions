@@ -1,5 +1,9 @@
 # Docker Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Added action to Stop and Remove Container if it is running.
+
 ## [Improvement] - 2025-03-12
 
 - Show project icon in green if all containers are running.
