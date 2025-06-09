@@ -49,7 +49,7 @@
 </div>
 
 <div align="center">
-  <img src="assets/demo.gif" alt="Demo" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"/>
+  <img src="media/demo.gif" alt="Demo" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"/>
 </div>
 
 <div align="center">

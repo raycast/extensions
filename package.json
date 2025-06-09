@@ -74,27 +74,27 @@
   "access": "public",
   "screenshots": [
     {
-      "path": "assets/screenshots/main-view.png",
+      "path": "metadata/main-view.png",
       "title": "Main Server List View"
     },
     {
-      "path": "assets/screenshots/add-server-view.png",
+      "path": "metadata/add-server-view.png",
       "title": "Add New MCP Server"
     },
     {
-      "path": "assets/screenshots/view-server.png",
+      "path": "metadata/view-server.png",
       "title": "Server Details and Testing"
     },
     {
-      "path": "assets/screenshots/list-server-view.png",
+      "path": "metadata/list-server-view.png",
       "title": "Browse All Servers"
     },
     {
-      "path": "assets/screenshots/edit-raw-config.png",
+      "path": "metadata/edit-raw-config.png",
       "title": "Raw Configuration Editor"
     },
     {
-      "path": "assets/screenshots/server-help.png",
+      "path": "metadata/server-help.png",
       "title": "Configuration Help and Examples"
     }
   ],
