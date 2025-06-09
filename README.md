@@ -92,18 +92,23 @@ Raycast Store:
 3. Click Install
 
 Manual:
+
 ```bash
 git clone https://github.com/rmncldyo/raycast-mcp-server-manager.git
 ```
+
 ```bash
 cd raycast-mcp-server-manager
 ```
+
 ```bash
 npm install
 ```
+
 ```bash
 npm run build
 ```
+
 ```bash
 npm run dev
 ```
@@ -127,11 +132,13 @@ Type `MCP` in Raycast:
 ## Editor Support
 
 ### `Cursor`
+
 - **Transports**: `stdio`, `SSE`
-- **Config**: 
+- **Config**:
   - Global: `~/.cursor/mcp.json`
   - Workspace: `.cursor/mcp.json`
 - **Configuration Example**:
+
   ```json
   {
     "mcpServers": {
@@ -145,6 +152,7 @@ Type `MCP` in Raycast:
     }
   }
   ```
+
 - **Features**:
   - Automatic process management for stdio servers
   - Environment variable support for authentication
@@ -160,11 +168,13 @@ Type `MCP` in Raycast:
   - Tool usage requires approval by default (can be set to auto-run)
 
 ### `VS Code`
+
 - **Transports**: `stdio`, `SSE`, `HTTP`
-- **Config**: 
+- **Config**:
   - User: `~/Library/Application Support/Code/User/settings.json`
   - Workspace: `.vscode/mcp.json` or `.vscode/settings.json`
 - **Configuration Example**:
+
   ```json
   {
     "inputs": [
@@ -187,6 +197,7 @@ Type `MCP` in Raycast:
     }
   }
   ```
+
 - **Features**:
   - Secure input management for secrets and API keys
   - Support for environment files via `envFile`
@@ -205,11 +216,13 @@ Type `MCP` in Raycast:
   - Includes built-in troubleshooting and logging
 
 ### `Windsurf`
+
 - **Transports**: `stdio`, `/sse`
-- **Config**: 
+- **Config**:
   - Global: `~/.codeium/windsurf/mcp_config.json`
   - Workspace: `.windsurf/mcp.json`
 - **Configuration Example**:
+
   ```json
   {
     "mcpServers": {
@@ -223,6 +236,7 @@ Type `MCP` in Raycast:
     }
   }
   ```
+
 - **Features**:
   - Plugin Store integration for easy server management
   - Support for both stdio and SSE transport types
@@ -242,6 +256,7 @@ Type `MCP` in Raycast:
 ## Transport Types
 
 ### `stdio`
+
 Local process execution. Command + args + environment variables.
 
 ```json
@@ -255,6 +270,7 @@ Local process execution. Command + args + environment variables.
 ```
 
 ### `SSE` (Server-Sent Events)
+
 Remote `HTTP` connection with event streaming.
 
 ```json
@@ -266,7 +282,9 @@ Remote `HTTP` connection with event streaming.
 ```
 
 ### `SSE (Windsurf)` (`/sse`)
+
 `Windsurf`'s custom `SSE` implementation with these key differences:
+
 - Uses `/sse` as the transport type (*instead of `sse`*)
 - Requires `serverUrl` parameter (not `url`)
 - URL must end with `/sse`
@@ -280,6 +298,7 @@ Remote `HTTP` connection with event streaming.
 ```
 
 ### `HTTP`
+
 Standard `HTTP` request/response.
 
 ```json
@@ -323,6 +342,7 @@ Don't rely on this if you're editing configs directly. You break it, you own it.
 Code works but could be *much* cleaner. PRs welcome.
 
 **Needs work:**
+
 - Refactoring (it's messy)
 - Bug fixes
 - New editor support
@@ -337,6 +357,6 @@ MIT License - see [LICENSE](LICENSE)
 
 ---
 
-  <div align="center">
-    <a style="text-decoration: none; color: #000; cursor: pointer;" href="https://www.rmncldyo.com/" target="_blank"alt="RMNCLDYO">Made with ❤️ by RMNCLDYO</a>
-  </div>
+<div align="center">
+  <a style="text-decoration: none; color: #000; cursor: pointer;" href="https://rmncldyo.com/" target="_blank" alt="RMNCLDYO">Made with ❤️ by RMNCLDYO</a>
+</div>
