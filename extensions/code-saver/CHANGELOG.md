@@ -1,5 +1,8 @@
 # code-saver Changelog
 
+## [Minor Change] - {PR_MERGE_DATE}
+- Make sure we can download `better-sqlite3-multiple-ciphers` as needed.
+
 ## [Minor Change] - 2023-11-08
 - Add encryption for sqlite data store.
 
