@@ -38,7 +38,7 @@
     "eslint": "^9.28.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
-    "web3bio-profile-kit": "^0.1.6"
+    "web3bio-profile-kit": "^0.1.7"
   },
   "scripts": {
     "build": "ray build -e dist",
