@@ -62,7 +62,7 @@ export default async () => {
     const selectedFinderWindow = await getSelectedFinderWindow();
     await open(selectedFinderWindow, traeApplication);
     return;
-  } catch (error: any) {
+  } catch {
     await showToast({
       style: Toast.Style.Failure,
       title: "No Finder items or window selected",
