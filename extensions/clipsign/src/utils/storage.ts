@@ -31,7 +31,7 @@ export async function saveSignature(
     //  render to PNG and convert to image type
     if (signature.type === "text" && signature.content) {
       const fontName = signature.font || "GreatVibes-Regular";
-      const fontsDir = path.join(process.cwd(), "assets", "fonts");
+      const fontsDir = path.join(__dirname, "assets", "fonts");
       const fontFile =
         fontName === "Pacifico-Regular"
           ? path.join(fontsDir, "Pacifico-Regular.ttf")
