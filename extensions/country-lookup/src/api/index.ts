@@ -8,7 +8,7 @@ export function getData() {
   const [countries, setCountries] = useCachedState<Country[]>("countries", []);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
-  
+
   const data = json as unknown as Country[];
   useEffect(() => {
     setIsLoading(true);
@@ -17,7 +17,7 @@ export function getData() {
     } catch {
       setError(true);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }, [data, setCountries]);
 

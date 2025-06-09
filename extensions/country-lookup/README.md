@@ -7,6 +7,6 @@ Quickly lookup country data by querying local copy of [restcountries.com](https:
 - Country name (E.g.: Norway)
 - Country code (E.g.: GB)
 - Capital (E.g.: Berlin)
-- Dialup code (E.g.: +54)
+- Dialing code (E.g.: +54)
 
 > 🚀 Works Offline
