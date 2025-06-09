@@ -1,6 +1,6 @@
 import { Clipboard, closeMainWindow, LocalStorage, showToast, Toast } from "@raycast/api";
 
-const STORGAE_LAST_EXECUTION_KEY = "StorageLastExecution";
+const STORAGE_LAST_EXECUTION_KEY = "StorageLastExecution";
 const STORAGE_ITEM_KEY = "StorageItem";
 const STORAGE_LIST_KEY = "StorageList";
 const STORAGE_INDEX_KEY = "StorageIndex";
@@ -18,7 +18,7 @@ export default async function Command() {
     return;
   }
 
-  await LocalStorage.setItem(STORGAE_LAST_EXECUTION_KEY, currentTime.toString());
+  await LocalStorage.setItem(STORAGE_LAST_EXECUTION_KEY, currentTime.toString());
 
   const latestClipboardItem = await Clipboard.readText();
 
@@ -45,7 +45,7 @@ export default async function Command() {
 }
 
 async function getDebounce(currentTime: number): Promise<boolean> {
-  const lastExecutionTimeString = await LocalStorage.getItem<string>(STORGAE_LAST_EXECUTION_KEY);
+  const lastExecutionTimeString = await LocalStorage.getItem<string>(STORAGE_LAST_EXECUTION_KEY);
   const lastExecutionTime = lastExecutionTimeString ? parseInt(lastExecutionTimeString) : 0;
 
   return lastExecutionTime != undefined && currentTime - lastExecutionTime < DEBOUNCE_TIME_MS;
