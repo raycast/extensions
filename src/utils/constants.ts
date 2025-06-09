@@ -31,6 +31,8 @@ const getHomePath = (relativePath: string): string => {
   return join(homedir(), relativePath);
 };
 
+export const WINDSURF_MAX_TOOLS = 100;
+
 export const EDITOR_CONFIGS: Record<EditorType, EditorConfig> = {
   cursor: {
     id: "cursor",
@@ -61,7 +63,7 @@ export const EDITOR_CONFIGS: Record<EditorType, EditorConfig> = {
     },
     configFileName: "mcp_config.json",
     supportsInputs: false,
-    maxTools: 100,
+    maxTools: WINDSURF_MAX_TOOLS,
     specificFeatures: {
       toolsEnabled: true,
       isOfficialPlugin: true,
@@ -136,7 +138,7 @@ export const VALIDATION_RULES = {
     URL: 2048,
     ENV_VAR_VALUE: 1000,
   },
-  WINDSURF_MAX_TOOLS: 100,
+  WINDSURF_MAX_TOOLS: WINDSURF_MAX_TOOLS,
 } as const;
 
 export const DEFAULT_SERVER_VALUES = {
@@ -144,7 +146,7 @@ export const DEFAULT_SERVER_VALUES = {
     // Note: Cursor does not support server-level specific configuration options
   },
   windsurf: {
-    maxTools: 100,
+    maxTools: WINDSURF_MAX_TOOLS,
     toolsEnabled: true,
     isOfficialPlugin: false,
   },
