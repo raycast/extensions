@@ -36,7 +36,10 @@ export function ActionOnWorkflow(props: {
       onAction={async () => {
         const actionVerb = workflow.active ? "Deactivating" : "Activating";
         const actionPast = workflow.active ? "deactivated" : "activated";
-        const toast = await showToast({ style: Toast.Style.Animated, title: `${actionVerb} workflow...` });
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: `${actionVerb} workflow...`,
+        });
         try {
           await activateWorkflowAPI(String(workflow.id), !workflow.active);
           setRefresh(Date.now());

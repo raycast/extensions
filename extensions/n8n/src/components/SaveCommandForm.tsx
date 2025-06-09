@@ -26,7 +26,10 @@ export default function SaveCommandForm(props: SaveCommandFormProps) {
 
   async function handleSubmit(values: { name: string }) {
     if (!values.name || values.name.trim().length === 0) {
-      await showToast({ style: Toast.Style.Failure, title: "Name is required" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Name is required",
+      });
       return;
     }
 
@@ -39,7 +42,10 @@ export default function SaveCommandForm(props: SaveCommandFormProps) {
       body: body || "",
     };
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Saving command..." });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Saving command...",
+    });
 
     try {
       await addSavedCommand(commandData);

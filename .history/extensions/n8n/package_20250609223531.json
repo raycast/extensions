@@ -5,10 +5,10 @@
   "title": "N8n",
   "description": "Search, manage, and trigger n8n workflows and webhooks.",
   "icon": "n8n.png",
-  "author": "gaa23",
+  "author": "koinzhang",
   "contributors": [
-    "koinzhang",
-    "xmok"
+    "xmok",
+    "gaa23"
   ],
   "categories": [
     "Applications",

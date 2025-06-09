@@ -20,7 +20,11 @@ export default function RunSavedCommand() {
       setSavedCommands(commands);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load saved commands");
-      await showToast({ style: Toast.Style.Failure, title: "Error", message: error || "Could not load commands" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: error || "Could not load commands",
+      });
     } finally {
       setLoading(false);
     }
@@ -31,7 +35,10 @@ export default function RunSavedCommand() {
   }, [fetchCommands]);
 
   async function handleRunCommand(command: SavedCommand) {
-    const toast = await showToast({ style: Toast.Style.Animated, title: `Running "${command.name}"...` });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Running "${command.name}"...`,
+    });
     try {
       // Parse headers back into object
       const headers = command.headers ? JSON.parse(command.headers) : undefined; // Assuming headers were stored as JSON string
@@ -65,7 +72,10 @@ export default function RunSavedCommand() {
         title: "Delete",
         style: Alert.ActionStyle.Destructive,
         onAction: async () => {
-          const toast = await showToast({ style: Toast.Style.Animated, title: `Deleting "${command.name}"...` });
+          const toast = await showToast({
+            style: Toast.Style.Animated,
+            title: `Deleting "${command.name}"...`,
+          });
           try {
             await deleteSavedCommand(command.id);
             toast.style = Toast.Style.Success;

@@ -65,7 +65,10 @@ export default function WebhookTriggerForm(props: WebhookTriggerFormProps) {
     // Construct final URL with query params state
     const finalUrl = queryParams ? `${webhookBaseUrl}?${queryParams}` : webhookBaseUrl;
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Sending webhook..." });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Sending webhook...",
+    });
 
     try {
       // Pass parsed headers and conditional body state

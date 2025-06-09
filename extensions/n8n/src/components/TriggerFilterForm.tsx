@@ -106,10 +106,16 @@ export default function TriggerFilterForm() {
               try {
                 await LocalStorage.removeItem(TRIGGER_FILTERS_KEY);
                 setSelectedTagNames([]); // Clear state as well
-                await showToast({ style: Toast.Style.Success, title: "Filters Cleared" });
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Filters Cleared",
+                });
                 pop();
               } catch (error) {
-                await showToast({ style: Toast.Style.Failure, title: "Failed to clear filters" });
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Failed to clear filters",
+                });
               }
             }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}

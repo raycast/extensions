@@ -51,7 +51,10 @@ async function fetchN8nApi<T>(
       let errorBody = "Unknown error";
       try {
         // Try to parse error details from n8n response
-        const errorJson = (await response.json()) as { message?: string; error?: string };
+        const errorJson = (await response.json()) as {
+          message?: string;
+          error?: string;
+        };
         errorBody = errorJson.message || errorJson.error || JSON.stringify(errorJson) || "Unknown error";
       } catch (parseError) {
         // Fallback if parsing fails
