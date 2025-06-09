@@ -26,10 +26,16 @@ import {
 } from "./types/mcpServer";
 import { getEditorConfig, SUCCESS_MESSAGES } from "./utils/constants";
 import { EditServerForm } from "./edit-mcp-server";
-import { RawConfigEditForm, RawConfigHelpScreen } from "./components/RawConfigEditor";
+import {
+  RawConfigEditForm,
+  RawConfigHelpScreen,
+} from "./components/RawConfigEditor";
 import { readFile } from "fs/promises";
 import { existsSync } from "fs";
-import { isProtectedServer, validateLockedServersPresent } from "./utils/protectedServers";
+import {
+  isProtectedServer,
+  validateLockedServersPresent,
+} from "./utils/protectedServers";
 
 interface ServerDetailsArguments {
   editorType: EditorType;
@@ -37,10 +43,14 @@ interface ServerDetailsArguments {
   configType?: "global" | "workspace" | "user";
 }
 
-export default function Command({ arguments: args }: LaunchProps<{ arguments: ServerDetailsArguments }>) {
+export default function Command({
+  arguments: args,
+}: LaunchProps<{ arguments: ServerDetailsArguments }>) {
   const [server, setServer] = useState<MCPServerWithMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [testResult, setTestResult] = useState<ConnectionTestResult | null>(null);
+  const [testResult, setTestResult] = useState<ConnectionTestResult | null>(
+    null,
+  );
   const [editorManager] = useState(() => new EditorManager());
   const [connectionTestService] = useState(() => new ConnectionTestService());
   const [isProtected, setIsProtected] = useState(false);
@@ -75,11 +85,15 @@ export default function Command({ arguments: args }: LaunchProps<{ arguments: Se
 
       const [protectedStatus, unlockedServers] = await Promise.all([
         isProtectedServer(targetServer.config.name, targetServer.editor),
-        import("./utils/protectedServers").then((m) => m.getUnlockedServers(targetServer.editor)),
+        import("./utils/protectedServers").then((m) =>
+          m.getUnlockedServers(targetServer.editor),
+        ),
       ]);
 
       setIsProtected(protectedStatus);
-      setIsUnlocked(!protectedStatus || unlockedServers.includes(targetServer.config.name));
+      setIsUnlocked(
+        !protectedStatus || unlockedServers.includes(targetServer.config.name),
+      );
     } catch (error) {
       console.error("Failed to load server details:", error);
       await showToast({
@@ -105,13 +119,19 @@ export default function Command({ arguments: args }: LaunchProps<{ arguments: Se
     }
 
     const currentServers = await editorManager.readAllServers();
-    const currentEditorServers = currentServers.filter((s) => s.editor === server.editor);
+    const currentEditorServers = currentServers.filter(
+      (s) => s.editor === server.editor,
+    );
     const currentServerNames = currentEditorServers.map((s) => s.config.name);
     const remainingServerNames = currentEditorServers
       .filter((s) => s.config.name !== server.config.name)
       .map((s) => s.config.name);
 
-    const validation = await validateLockedServersPresent(remainingServerNames, server.editor, currentServerNames);
+    const validation = await validateLockedServersPresent(
+      remainingServerNames,
+      server.editor,
+      currentServerNames,
+    );
     if (!validation.isValid) {
       await showToast({
         style: Toast.Style.Failure,
@@ -135,7 +155,11 @@ export default function Command({ arguments: args }: LaunchProps<{ arguments: Se
 
     if (confirmed) {
       try {
-        await editorManager.deleteServer(server.editor, server.config.name, server.source);
+        await editorManager.deleteServer(
+          server.editor,
+          server.config.name,
+          server.source,
+        );
 
         await showToast({
           style: Toast.Style.Success,
@@ -156,7 +180,9 @@ export default function Command({ arguments: args }: LaunchProps<{ arguments: Se
   async function testConnection() {
     if (!server) return;
 
-    const testDescription = connectionTestService.getTestDescription(server.config);
+    const testDescription = connectionTestService.getTestDescription(
+      server.config,
+    );
 
     await showToast({
       style: Toast.Style.Animated,
@@ -192,7 +218,9 @@ export default function Command({ arguments: args }: LaunchProps<{ arguments: Se
   }
 
   if (isLoading) {
-    return <Detail isLoading={true} navigationTitle="Loading Server Details..." />;
+    return (
+      <Detail isLoading={true} navigationTitle="Loading Server Details..." />
+    );
   }
 
   if (!server) {
@@ -222,10 +250,18 @@ ${JSON.stringify(config, null, 2)}
 
   const getTestResultDisplay = () => {
     if (!testResult) {
-      return { text: "Not tested", icon: Icon.QuestionMark, color: Color.SecondaryText };
+      return {
+        text: "Not tested",
+        icon: Icon.QuestionMark,
+        color: Color.SecondaryText,
+      };
     }
     if (testResult.success) {
-      return { text: `Success (${testResult.responseTime}ms)`, icon: Icon.CheckCircle, color: Color.Green };
+      return {
+        text: `Success (${testResult.responseTime}ms)`,
+        icon: Icon.CheckCircle,
+        color: Color.Green,
+      };
     } else {
       return { text: "Failed", icon: Icon.XMarkCircle, color: Color.Red };
     }
@@ -265,23 +301,36 @@ ${JSON.stringify(config, null, 2)}
           />
           <Detail.Metadata.Separator />
 
-          <Detail.Metadata.Label title="Transport" text={config.transport?.toUpperCase() || "Unknown"} />
+          <Detail.Metadata.Label
+            title="Transport"
+            text={config.transport?.toUpperCase() || "Unknown"}
+          />
 
           {config.transport === "stdio" && (
             <>
               <Detail.Metadata.Label
                 title="Command"
-                text={(config as StdioTransportConfig & BaseMCPServerConfig).command || "Not specified"}
+                text={
+                  (config as StdioTransportConfig & BaseMCPServerConfig)
+                    .command || "Not specified"
+                }
               />
               {(config as StdioTransportConfig & BaseMCPServerConfig).args &&
-                (config as StdioTransportConfig & BaseMCPServerConfig).args!.length > 0 && (
+                (config as StdioTransportConfig & BaseMCPServerConfig).args!
+                  .length > 0 && (
                   <>
                     <Detail.Metadata.Label
                       title="Arguments"
                       text={`${(config as StdioTransportConfig & BaseMCPServerConfig).args!.length} argument${(config as StdioTransportConfig & BaseMCPServerConfig).args!.length !== 1 ? "s" : ""}`}
                     />
-                    {(config as StdioTransportConfig & BaseMCPServerConfig).args!.map((arg, index) => (
-                      <Detail.Metadata.Label key={index} title={`  [${index}]`} text={arg} />
+                    {(
+                      config as StdioTransportConfig & BaseMCPServerConfig
+                    ).args!.map((arg, index) => (
+                      <Detail.Metadata.Label
+                        key={index}
+                        title={`  [${index}]`}
+                        text={arg}
+                      />
                     ))}
                   </>
                 )}
@@ -291,40 +340,59 @@ ${JSON.stringify(config, null, 2)}
           {config.transport === "sse" && (
             <Detail.Metadata.Label
               title="URL"
-              text={(config as SSETransportConfig & BaseMCPServerConfig).url || "Not specified"}
+              text={
+                (config as SSETransportConfig & BaseMCPServerConfig).url ||
+                "Not specified"
+              }
             />
           )}
 
           {config.transport === "http" && (
             <Detail.Metadata.Label
               title="URL"
-              text={(config as HTTPTransportConfig & BaseMCPServerConfig).url || "Not specified"}
+              text={
+                (config as HTTPTransportConfig & BaseMCPServerConfig).url ||
+                "Not specified"
+              }
             />
           )}
 
           {config.transport === "/sse" && (
             <Detail.Metadata.Label
               title="Server URL"
-              text={(config as WindsurfSSETransportConfig & BaseMCPServerConfig).serverUrl || "Not specified"}
+              text={
+                (config as WindsurfSSETransportConfig & BaseMCPServerConfig)
+                  .serverUrl || "Not specified"
+              }
             />
           )}
 
           {(config.description ||
             (config.transport === "stdio" &&
               (config as StdioTransportConfig & BaseMCPServerConfig).env &&
-              Object.keys((config as StdioTransportConfig & BaseMCPServerConfig).env!).length > 0) ||
+              Object.keys(
+                (config as StdioTransportConfig & BaseMCPServerConfig).env!,
+              ).length > 0) ||
             (server.editor === "vscode" &&
               ((config as VSCodeMCPServerConfig).envFile ||
-                ((config as VSCodeMCPServerConfig).roots && (config as VSCodeMCPServerConfig).roots!.length > 0)))) && (
+                ((config as VSCodeMCPServerConfig).roots &&
+                  (config as VSCodeMCPServerConfig).roots!.length > 0)))) && (
             <Detail.Metadata.Separator />
           )}
 
-          {config.description && <Detail.Metadata.Label title="Description" text={config.description} />}
+          {config.description && (
+            <Detail.Metadata.Label
+              title="Description"
+              text={config.description}
+            />
+          )}
 
           {(() => {
             if (config.transport !== "stdio") return null;
-            const stdioConfig = config as StdioTransportConfig & BaseMCPServerConfig;
-            if (!stdioConfig.env || Object.keys(stdioConfig.env).length === 0) return null;
+            const stdioConfig = config as StdioTransportConfig &
+              BaseMCPServerConfig;
+            if (!stdioConfig.env || Object.keys(stdioConfig.env).length === 0)
+              return null;
 
             return (
               <>
@@ -335,10 +403,17 @@ ${JSON.stringify(config, null, 2)}
                 {Object.entries(stdioConfig.env)
                   .slice(0, 3)
                   .map(([key, value]) => (
-                    <Detail.Metadata.Label key={key} title={key} text={String(value)} />
+                    <Detail.Metadata.Label
+                      key={key}
+                      title={key}
+                      text={String(value)}
+                    />
                   ))}
                 {Object.keys(stdioConfig.env).length > 3 && (
-                  <Detail.Metadata.Label title="..." text={`${Object.keys(stdioConfig.env).length - 3} more`} />
+                  <Detail.Metadata.Label
+                    title="..."
+                    text={`${Object.keys(stdioConfig.env).length - 3} more`}
+                  />
                 )}
               </>
             );
@@ -347,14 +422,18 @@ ${JSON.stringify(config, null, 2)}
           {server.editor === "vscode" && (
             <>
               {(config as VSCodeMCPServerConfig).envFile && (
-                <Detail.Metadata.Label title="Environment File" text={(config as VSCodeMCPServerConfig).envFile} />
-              )}
-              {(config as VSCodeMCPServerConfig).roots && (config as VSCodeMCPServerConfig).roots!.length > 0 && (
                 <Detail.Metadata.Label
-                  title="Root Paths"
-                  text={`${(config as VSCodeMCPServerConfig).roots!.length} path${(config as VSCodeMCPServerConfig).roots!.length !== 1 ? "s" : ""}`}
+                  title="Environment File"
+                  text={(config as VSCodeMCPServerConfig).envFile}
                 />
               )}
+              {(config as VSCodeMCPServerConfig).roots &&
+                (config as VSCodeMCPServerConfig).roots!.length > 0 && (
+                  <Detail.Metadata.Label
+                    title="Root Paths"
+                    text={`${(config as VSCodeMCPServerConfig).roots!.length} path${(config as VSCodeMCPServerConfig).roots!.length !== 1 ? "s" : ""}`}
+                  />
+                )}
             </>
           )}
 
@@ -370,9 +449,20 @@ ${JSON.stringify(config, null, 2)}
 
           {testResult && (
             <>
-              <Detail.Metadata.Label title="Test Message" text={testResult.message} />
-              <Detail.Metadata.Label title="Test Time" text={testResult.timestamp.toLocaleString()} />
-              {testResult.error && <Detail.Metadata.Label title="Error Details" text={testResult.error} />}
+              <Detail.Metadata.Label
+                title="Test Message"
+                text={testResult.message}
+              />
+              <Detail.Metadata.Label
+                title="Test Time"
+                text={testResult.timestamp.toLocaleString()}
+              />
+              {testResult.error && (
+                <Detail.Metadata.Label
+                  title="Error Details"
+                  text={testResult.error}
+                />
+              )}
             </>
           )}
         </Detail.Metadata>
@@ -399,7 +489,9 @@ ${JSON.stringify(config, null, 2)}
                   <EditServerForm
                     editorType={server.editor}
                     serverName={server.config.name}
-                    configType={server.source as "global" | "workspace" | "user"}
+                    configType={
+                      server.source as "global" | "workspace" | "user"
+                    }
                     onComplete={loadServerDetails}
                   />
                 }
@@ -555,7 +647,9 @@ function EditRawConfigWrapper({
     }
   }
 
-  async function saveConfigContent(newContent: string): Promise<{ success: boolean; formattedContent: string }> {
+  async function saveConfigContent(
+    newContent: string,
+  ): Promise<{ success: boolean; formattedContent: string }> {
     try {
       if (!configPath) {
         await showToast({
@@ -577,13 +671,18 @@ function EditRawConfigWrapper({
       let finalContent = formattedContent;
       if (editorType === "vscode" && configType === "user") {
         try {
-          const existingContent = existsSync(configPath) ? await readFile(configPath, "utf-8") : "{}";
+          const existingContent = existsSync(configPath)
+            ? await readFile(configPath, "utf-8")
+            : "{}";
           const existingData = JSON.parse(existingContent);
           const newMcpData = JSON.parse(formattedContent);
           const fullSettings = { ...existingData, mcp: newMcpData };
           finalContent = JSON.stringify(fullSettings, null, 2);
         } catch (error) {
-          console.warn("Could not merge MCP section into settings.json, saving as-is:", error);
+          console.warn(
+            "Could not merge MCP section into settings.json, saving as-is:",
+            error,
+          );
         }
       }
 
@@ -615,7 +714,10 @@ function EditRawConfigWrapper({
     }
   }
 
-  function getEmptyConfigStructure(editorType: EditorType, configType: string): object {
+  function getEmptyConfigStructure(
+    editorType: EditorType,
+    configType: string,
+  ): object {
     switch (editorType) {
       case "cursor":
         return { mcpServers: {} };

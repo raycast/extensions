@@ -57,8 +57,14 @@ export default function Command() {
 
   async function toggleServerLock(server: MCPServerWithMetadata) {
     try {
-      const isCurrentlyProtected = await isProtectedServer(server.config.name, server.editor);
-      const isCurrentlyUnlocked = await isServerUnlocked(server.config.name, server.editor);
+      const isCurrentlyProtected = await isProtectedServer(
+        server.config.name,
+        server.editor,
+      );
+      const isCurrentlyUnlocked = await isServerUnlocked(
+        server.config.name,
+        server.editor,
+      );
       const isCurrentlyLocked = isCurrentlyProtected && !isCurrentlyUnlocked;
 
       if (isCurrentlyLocked) {
@@ -93,7 +99,10 @@ export default function Command() {
     }
   }
 
-  const filteredServers = editorFilter === "all" ? servers : servers.filter((server) => server.editor === editorFilter);
+  const filteredServers =
+    editorFilter === "all"
+      ? servers
+      : servers.filter((server) => server.editor === editorFilter);
 
   const serversByEditor = filteredServers.reduce(
     (acc, server) => {
@@ -107,7 +116,10 @@ export default function Command() {
   );
 
   async function handleRemoveServer(server: MCPServerWithMetadata) {
-    const isProtected = await isProtectedServer(server.config.name, server.editor);
+    const isProtected = await isProtectedServer(
+      server.config.name,
+      server.editor,
+    );
 
     if (isProtected) {
       await showToast({
@@ -119,13 +131,19 @@ export default function Command() {
     }
 
     const allServers = await editorManager.readAllServers();
-    const currentEditorServers = allServers.filter((s) => s.editor === server.editor);
+    const currentEditorServers = allServers.filter(
+      (s) => s.editor === server.editor,
+    );
     const currentServerNames = currentEditorServers.map((s) => s.config.name);
     const remainingServerNames = currentEditorServers
       .filter((s) => s.config.name !== server.config.name)
       .map((s) => s.config.name);
 
-    const validation = await validateLockedServersPresent(remainingServerNames, server.editor, currentServerNames);
+    const validation = await validateLockedServersPresent(
+      remainingServerNames,
+      server.editor,
+      currentServerNames,
+    );
     if (!validation.isValid) {
       await showToast({
         style: Toast.Style.Failure,
@@ -149,7 +167,11 @@ export default function Command() {
 
     if (confirmed) {
       try {
-        await editorManager.deleteServer(server.editor, server.config.name, server.source);
+        await editorManager.deleteServer(
+          server.editor,
+          server.config.name,
+          server.source,
+        );
 
         await showToast({
           style: Toast.Style.Success,
@@ -183,21 +205,34 @@ export default function Command() {
     }
   };
 
-  function ServerItem({ server }: { server: MCPServerWithMetadata & { isProtected?: boolean; isUnlocked?: boolean } }) {
+  function ServerItem({
+    server,
+  }: {
+    server: MCPServerWithMetadata & {
+      isProtected?: boolean;
+      isUnlocked?: boolean;
+    };
+  }) {
     const [isProtected, setIsProtected] = useState(server.isProtected || false);
     const [isUnlocked, setIsUnlocked] = useState(server.isUnlocked || false);
 
     useEffect(() => {
       async function loadProtectionState() {
         try {
-          const [isServerProtected, isServerUnlockedResult] = await Promise.all([
-            isProtectedServer(server.config.name, server.editor),
-            isServerUnlocked(server.config.name, server.editor),
-          ]);
+          const [isServerProtected, isServerUnlockedResult] = await Promise.all(
+            [
+              isProtectedServer(server.config.name, server.editor),
+              isServerUnlocked(server.config.name, server.editor),
+            ],
+          );
           setIsProtected(isServerProtected);
           setIsUnlocked(isServerUnlockedResult);
         } catch (error) {
-          console.error("Failed to load protection state for server:", server.config.name, error);
+          console.error(
+            "Failed to load protection state for server:",
+            server.config.name,
+            error,
+          );
         }
       }
       loadProtectionState();
@@ -246,7 +281,8 @@ export default function Command() {
           text: "Protected",
           icon: Icon.Lock,
           color: Color.SecondaryText,
-          tooltip: "This server is protected from removal. Click unlock to modify.",
+          tooltip:
+            "This server is protected from removal. Click unlock to modify.",
         }
       : null;
 
@@ -316,7 +352,10 @@ export default function Command() {
                   arguments={{
                     editorType: server.editor,
                     serverName: server.config.name,
-                    configType: server.source as "global" | "workspace" | "user",
+                    configType: server.source as
+                      | "global"
+                      | "workspace"
+                      | "user",
                   }}
                   launchType={LaunchType.UserInitiated}
                 />
@@ -349,7 +388,13 @@ export default function Command() {
           <List.Dropdown.Section title="Editors">
             {editorManager.getAvailableEditors().map((editor) => {
               const config = getEditorConfig(editor);
-              return <List.Dropdown.Item key={editor} title={config.displayName} value={editor} />;
+              return (
+                <List.Dropdown.Item
+                  key={editor}
+                  title={config.displayName}
+                  value={editor}
+                />
+              );
             })}
           </List.Dropdown.Section>
         </List.Dropdown>
@@ -383,13 +428,19 @@ export default function Command() {
                 subtitle={`${editorServers.length} server${editorServers.length !== 1 ? "s" : ""}`}
               >
                 {editorServers.map((server) => (
-                  <ServerItem key={`${server.editor}-${server.config.name}-${server.source}`} server={server} />
+                  <ServerItem
+                    key={`${server.editor}-${server.config.name}-${server.source}`}
+                    server={server}
+                  />
                 ))}
               </List.Section>
             );
           })
         : filteredServers.map((server) => (
-            <ServerItem key={`${server.editor}-${server.config.name}-${server.source}`} server={server} />
+            <ServerItem
+              key={`${server.editor}-${server.config.name}-${server.source}`}
+              server={server}
+            />
           ))}
     </List>
   );
@@ -398,7 +449,10 @@ export default function Command() {
 function getServerCommand(server: MCPServerWithMetadata): string {
   if (server.config.transport === "stdio") {
     return (server.config as { command?: string }).command || "";
-  } else if (server.config.transport === "sse" || server.config.transport === "http") {
+  } else if (
+    server.config.transport === "sse" ||
+    server.config.transport === "http"
+  ) {
     return (server.config as { url?: string }).url || "";
   } else if (server.config.transport === "/sse") {
     return (server.config as { serverUrl?: string }).serverUrl || "";

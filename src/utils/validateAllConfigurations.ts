@@ -40,13 +40,17 @@ export async function validateAllConfigurations() {
         });
 
         if (result.errors.length > 3) {
-          resultMessages.push(`   • ... and ${result.errors.length - 3} more errors`);
+          resultMessages.push(
+            `   • ... and ${result.errors.length - 3} more errors`,
+          );
         }
       }
     }
 
     if (totalErrors === 0) {
-      await showHUD(`All configurations valid!\n${validEditors}/${totalEditors} editors validated successfully`);
+      await showHUD(
+        `All configurations valid!\n${validEditors}/${totalEditors} editors validated successfully`,
+      );
     } else {
       const summary = `Validation failed!\n${totalErrors} error${totalErrors !== 1 ? "s" : ""} found across ${totalEditors - validEditors} editor${totalEditors - validEditors !== 1 ? "s" : ""}`;
 

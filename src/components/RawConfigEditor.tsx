@@ -18,7 +18,10 @@ import { existsSync } from "fs";
 import { EditorType } from "../types/mcpServer";
 import { EditorManager } from "../services/EditorManager";
 import { getEditorConfig } from "../utils/constants";
-import { validateJSONStructure, validateMCPServerConfig } from "../utils/validation";
+import {
+  validateJSONStructure,
+  validateMCPServerConfig,
+} from "../utils/validation";
 
 interface RawConfigEditorProps {
   editorType: EditorType;
@@ -34,12 +37,19 @@ interface ValidationState {
   serverErrors: { [serverName: string]: string[] };
 }
 
-export function RawConfigEditor({ editorType, configType }: RawConfigEditorProps) {
+export function RawConfigEditor({
+  editorType,
+  configType,
+}: RawConfigEditorProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [configContent, setConfigContent] = useState<string>("");
   const [configPath, setConfigPath] = useState<string>("");
-  const [availableConfigTypes, setAvailableConfigTypes] = useState<("global" | "workspace" | "user")[]>([]);
-  const [selectedConfigType, setSelectedConfigType] = useState<"global" | "workspace" | "user">(configType || "global");
+  const [availableConfigTypes, setAvailableConfigTypes] = useState<
+    ("global" | "workspace" | "user")[]
+  >([]);
+  const [selectedConfigType, setSelectedConfigType] = useState<
+    "global" | "workspace" | "user"
+  >(configType || "global");
   const [editorManager] = useState(() => new EditorManager());
 
   const editorConfig = getEditorConfig(editorType);
@@ -66,7 +76,10 @@ export function RawConfigEditor({ editorType, configType }: RawConfigEditorProps
     if (!configType && types.length > 0) {
       let defaultType = types[0];
       if (editorType === "vscode") {
-        if (types.includes("workspace") && service.isConfigTypeAvailable("workspace")) {
+        if (
+          types.includes("workspace") &&
+          service.isConfigTypeAvailable("workspace")
+        ) {
           defaultType = "workspace";
         } else if (types.includes("user")) {
           defaultType = "user";
@@ -125,7 +138,10 @@ export function RawConfigEditor({ editorType, configType }: RawConfigEditorProps
       setConfigPath(path);
 
       if (!existsSync(path)) {
-        const emptyConfig = getEmptyConfigStructure(editorType, selectedConfigType);
+        const emptyConfig = getEmptyConfigStructure(
+          editorType,
+          selectedConfigType,
+        );
         setConfigContent(JSON.stringify(emptyConfig, null, 2));
 
         await showToast({
@@ -138,7 +154,10 @@ export function RawConfigEditor({ editorType, configType }: RawConfigEditorProps
 
       const content = await readFile(path, "utf-8");
 
-      if (editorType === "vscode" && (selectedConfigType === "user" || selectedConfigType === "global")) {
+      if (
+        editorType === "vscode" &&
+        (selectedConfigType === "user" || selectedConfigType === "global")
+      ) {
         try {
           const { isValid, data } = validateJSONStructure(content);
           if (isValid && data && typeof data === "object") {
@@ -191,14 +210,18 @@ export function RawConfigEditor({ editorType, configType }: RawConfigEditorProps
         await showToast({
           style: Toast.Style.Failure,
           title: "Invalid JSON Syntax",
-          message: validationResult.errors[0] || "The configuration contains invalid JSON",
+          message:
+            validationResult.errors[0] ||
+            "The configuration contains invalid JSON",
         });
         return { success: false, formattedContent: newContent };
       }
 
       if (!validationResult.schemaValid) {
         const errorCount = validationResult.errors.length;
-        const serverErrorCount = Object.keys(validationResult.serverErrors).length;
+        const serverErrorCount = Object.keys(
+          validationResult.serverErrors,
+        ).length;
 
         let message = "";
         if (validationResult.errors.length > 0) {
@@ -230,19 +253,37 @@ export function RawConfigEditor({ editorType, configType }: RawConfigEditorProps
       await mkdir(dir, { recursive: true });
 
       let finalContent = formattedContent;
-      if (editorType === "vscode" && (selectedConfigType === "user" || selectedConfigType === "global")) {
+      if (
+        editorType === "vscode" &&
+        (selectedConfigType === "user" || selectedConfigType === "global")
+      ) {
         try {
-          const existingContent = existsSync(configPath) ? await readFile(configPath, "utf-8") : "{}";
-          const { isValid: existingValid, data: existingData } = validateJSONStructure(existingContent);
+          const existingContent = existsSync(configPath)
+            ? await readFile(configPath, "utf-8")
+            : "{}";
+          const { isValid: existingValid, data: existingData } =
+            validateJSONStructure(existingContent);
 
-          const { isValid: newValid, data: newMcpData } = validateJSONStructure(formattedContent);
+          const { isValid: newValid, data: newMcpData } =
+            validateJSONStructure(formattedContent);
 
-          if (existingValid && newValid && existingData && typeof existingData === "object") {
-            const fullSettings = { ...(existingData as object), mcp: newMcpData };
+          if (
+            existingValid &&
+            newValid &&
+            existingData &&
+            typeof existingData === "object"
+          ) {
+            const fullSettings = {
+              ...(existingData as object),
+              mcp: newMcpData,
+            };
             finalContent = JSON.stringify(fullSettings, null, 2);
           }
         } catch (error) {
-          console.warn("Could not merge MCP section into settings.json, saving as-is:", error);
+          console.warn(
+            "Could not merge MCP section into settings.json, saving as-is:",
+            error,
+          );
         }
       }
 
@@ -297,40 +338,64 @@ export function RawConfigEditor({ editorType, configType }: RawConfigEditorProps
         validationConfigType = "user";
       }
 
-      const structureValidation = service.validateConfigStructure(validationData, validationConfigType);
+      const structureValidation = service.validateConfigStructure(
+        validationData,
+        validationConfigType,
+      );
 
       if (!structureValidation.isValid) {
         result.errors.push(...structureValidation.errors.map((e) => e.message));
       }
 
-      if (structureValidation.warnings && structureValidation.warnings.length > 0) {
-        result.warnings.push(...structureValidation.warnings.map((w) => w.message));
+      if (
+        structureValidation.warnings &&
+        structureValidation.warnings.length > 0
+      ) {
+        result.warnings.push(
+          ...structureValidation.warnings.map((w) => w.message),
+        );
       }
 
       result.schemaValid = structureValidation.isValid;
 
       if (structureValidation.isValid) {
-        const servers = service.parseConfigData(validationData, validationConfigType);
+        const servers = service.parseConfigData(
+          validationData,
+          validationConfigType,
+        );
 
         servers.forEach((serverWithMetadata) => {
-          const serverValidation = validateMCPServerConfig(serverWithMetadata.config, editorType);
+          const serverValidation = validateMCPServerConfig(
+            serverWithMetadata.config,
+            editorType,
+          );
           if (!serverValidation.isValid) {
-            const serverName = serverWithMetadata.config.name || "Unnamed Server";
-            result.serverErrors[serverName] = serverValidation.errors.map((e) => e.message);
+            const serverName =
+              serverWithMetadata.config.name || "Unnamed Server";
+            result.serverErrors[serverName] = serverValidation.errors.map(
+              (e) => e.message,
+            );
             result.schemaValid = false;
           }
         });
       }
 
-      result.isValid = result.jsonSyntaxValid && result.schemaValid && Object.keys(result.serverErrors).length === 0;
+      result.isValid =
+        result.jsonSyntaxValid &&
+        result.schemaValid &&
+        Object.keys(result.serverErrors).length === 0;
     } catch (error) {
-      result.errors.push(error instanceof Error ? error.message : "Schema validation failed");
+      result.errors.push(
+        error instanceof Error ? error.message : "Schema validation failed",
+      );
     }
 
     return result;
   }
 
-  function handleConfigTypeChange(newConfigType: "global" | "workspace" | "user") {
+  function handleConfigTypeChange(
+    newConfigType: "global" | "workspace" | "user",
+  ) {
     setSelectedConfigType(newConfigType);
   }
 
@@ -345,8 +410,15 @@ export function RawConfigEditor({ editorType, configType }: RawConfigEditorProps
       return { icon: Icon.XMarkCircle, text: "Invalid JSON", color: Color.Red };
     }
 
-    if (!validation.schemaValid || Object.keys(validation.serverErrors).length > 0) {
-      return { icon: Icon.XMarkCircle, text: "Schema errors", color: Color.Red };
+    if (
+      !validation.schemaValid ||
+      Object.keys(validation.serverErrors).length > 0
+    ) {
+      return {
+        icon: Icon.XMarkCircle,
+        text: "Schema errors",
+        color: Color.Red,
+      };
     }
 
     if (validation.warnings.length > 0) {
@@ -370,15 +442,25 @@ ${configContent}
       navigationTitle={`${editorConfig.displayName} Raw Config`}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Editor" text={editorConfig.displayName} icon={editorConfig.icon} />
+          <Detail.Metadata.Label
+            title="Editor"
+            text={editorConfig.displayName}
+            icon={editorConfig.icon}
+          />
           <Detail.Metadata.Label
             title="Config Type"
             text={
-              editorType === "vscode" && selectedConfigType === "user" ? "User (MCP section only)" : selectedConfigType
+              editorType === "vscode" && selectedConfigType === "user"
+                ? "User (MCP section only)"
+                : selectedConfigType
             }
           />
           {configPath ? (
-            <Detail.Metadata.Link title="File Name" text={basename(configPath)} target={`file://${configPath}`} />
+            <Detail.Metadata.Link
+              title="File Name"
+              text={basename(configPath)}
+              target={`file://${configPath}`}
+            />
           ) : (
             <Detail.Metadata.Label title="File Name" text="Not available" />
           )}
@@ -392,9 +474,20 @@ ${configContent}
             icon={validationStatus.icon}
           />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Supported Transports" text={editorConfig.supportedTransports.join(", ")} />
-          <Detail.Metadata.Label title="Supports Inputs" text={editorConfig.supportsInputs ? "Yes" : "No"} />
-          {editorConfig.maxTools && <Detail.Metadata.Label title="Max Tools" text={editorConfig.maxTools.toString()} />}
+          <Detail.Metadata.Label
+            title="Supported Transports"
+            text={editorConfig.supportedTransports.join(", ")}
+          />
+          <Detail.Metadata.Label
+            title="Supports Inputs"
+            text={editorConfig.supportsInputs ? "Yes" : "No"}
+          />
+          {editorConfig.maxTools && (
+            <Detail.Metadata.Label
+              title="Max Tools"
+              text={editorConfig.maxTools.toString()}
+            />
+          )}
         </Detail.Metadata>
       }
       actions={
@@ -427,7 +520,12 @@ ${configContent}
             <Action.Push
               title="View Examples & Help"
               icon={Icon.QuestionMarkCircle}
-              target={<RawConfigHelpScreen editorType={editorType} configType={selectedConfigType} />}
+              target={
+                <RawConfigHelpScreen
+                  editorType={editorType}
+                  configType={selectedConfigType}
+                />
+              }
               shortcut={{ modifiers: ["cmd"], key: "h" }}
             />
           </ActionPanel.Section>
@@ -438,7 +536,9 @@ ${configContent}
                 <Action
                   key={type}
                   title={`Switch to ${type}`}
-                  icon={type === selectedConfigType ? Icon.CheckCircle : Icon.Circle}
+                  icon={
+                    type === selectedConfigType ? Icon.CheckCircle : Icon.Circle
+                  }
                   onAction={() => handleConfigTypeChange(type)}
                 />
               ))}
@@ -534,19 +634,48 @@ ${getEditorGuidance(editorType)}
           <Detail.Metadata.Label title="Mode" text="Help & Examples" />
           <Detail.Metadata.Separator />
 
-          <Detail.Metadata.Label title="Example Type" text="Context7 (Demo)" icon={Icon.MagnifyingGlass} />
-          <Detail.Metadata.Label title="Remote Pattern" text="Hosted service URL" icon={Icon.Globe} />
-          <Detail.Metadata.Label title="Local Pattern" text="NPX command execution" icon={Icon.Terminal} />
+          <Detail.Metadata.Label
+            title="Example Type"
+            text="Context7 (Demo)"
+            icon={Icon.MagnifyingGlass}
+          />
+          <Detail.Metadata.Label
+            title="Remote Pattern"
+            text="Hosted service URL"
+            icon={Icon.Globe}
+          />
+          <Detail.Metadata.Label
+            title="Local Pattern"
+            text="NPX command execution"
+            icon={Icon.Terminal}
+          />
           <Detail.Metadata.Separator />
 
-          <Detail.Metadata.Label title="Supported Transports" text={editorConfig.supportedTransports.join(", ")} />
-          <Detail.Metadata.Label title="Supports Inputs" text={editorConfig.supportsInputs ? "Yes" : "No"} />
-          {editorConfig.maxTools && <Detail.Metadata.Label title="Max Tools" text={editorConfig.maxTools.toString()} />}
+          <Detail.Metadata.Label
+            title="Supported Transports"
+            text={editorConfig.supportedTransports.join(", ")}
+          />
+          <Detail.Metadata.Label
+            title="Supports Inputs"
+            text={editorConfig.supportsInputs ? "Yes" : "No"}
+          />
+          {editorConfig.maxTools && (
+            <Detail.Metadata.Label
+              title="Max Tools"
+              text={editorConfig.maxTools.toString()}
+            />
+          )}
 
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="MCP Concepts" text="Remote vs Local" />
-          <Detail.Metadata.Label title="Configuration" text="Commands, Args, Env" />
-          <Detail.Metadata.Label title="Transport Types" text="stdio, sse, http" />
+          <Detail.Metadata.Label
+            title="Configuration"
+            text="Commands, Args, Env"
+          />
+          <Detail.Metadata.Label
+            title="Transport Types"
+            text="stdio, sse, http"
+          />
         </Detail.Metadata>
       }
       actions={
@@ -613,7 +742,9 @@ export function RawConfigEditForm({
   editorType: EditorType;
   configType: "global" | "workspace" | "user";
   initialContent: string;
-  onSave: (content: string) => Promise<{ success: boolean; formattedContent: string }>;
+  onSave: (
+    content: string,
+  ) => Promise<{ success: boolean; formattedContent: string }>;
 }) {
   const [content, setContent] = useState(initialContent);
   const [validationState, setValidationState] = useState<ValidationState>({
@@ -665,14 +796,22 @@ export function RawConfigEditForm({
 
     try {
       const service = editorManager.getService(editorType);
-      const structureValidation = service.validateConfigStructure(data, configType);
+      const structureValidation = service.validateConfigStructure(
+        data,
+        configType,
+      );
 
       if (!structureValidation.isValid) {
         result.errors.push(...structureValidation.errors.map((e) => e.message));
       }
 
-      if (structureValidation.warnings && structureValidation.warnings.length > 0) {
-        result.warnings.push(...structureValidation.warnings.map((w) => w.message));
+      if (
+        structureValidation.warnings &&
+        structureValidation.warnings.length > 0
+      ) {
+        result.warnings.push(
+          ...structureValidation.warnings.map((w) => w.message),
+        );
       }
 
       result.schemaValid = structureValidation.isValid;
@@ -681,18 +820,29 @@ export function RawConfigEditForm({
         const servers = service.parseConfigData(data, configType);
 
         servers.forEach((serverWithMetadata) => {
-          const serverValidation = validateMCPServerConfig(serverWithMetadata.config, editorType);
+          const serverValidation = validateMCPServerConfig(
+            serverWithMetadata.config,
+            editorType,
+          );
           if (!serverValidation.isValid) {
-            const serverName = serverWithMetadata.config.name || "Unnamed Server";
-            result.serverErrors[serverName] = serverValidation.errors.map((e) => e.message);
+            const serverName =
+              serverWithMetadata.config.name || "Unnamed Server";
+            result.serverErrors[serverName] = serverValidation.errors.map(
+              (e) => e.message,
+            );
             result.schemaValid = false;
           }
         });
       }
 
-      result.isValid = result.jsonSyntaxValid && result.schemaValid && Object.keys(result.serverErrors).length === 0;
+      result.isValid =
+        result.jsonSyntaxValid &&
+        result.schemaValid &&
+        Object.keys(result.serverErrors).length === 0;
     } catch (error) {
-      result.errors.push(error instanceof Error ? error.message : "Schema validation failed");
+      result.errors.push(
+        error instanceof Error ? error.message : "Schema validation failed",
+      );
     }
 
     return result;
@@ -725,7 +875,8 @@ export function RawConfigEditForm({
   async function handleRestore() {
     const confirmed = await confirmAlert({
       title: "Restore to Original",
-      message: "Are you sure you want to restore the original content? Your changes will be lost.",
+      message:
+        "Are you sure you want to restore the original content? Your changes will be lost.",
       primaryAction: {
         title: "Restore",
         style: Alert.ActionStyle.Destructive,
@@ -745,9 +896,15 @@ export function RawConfigEditForm({
           <ActionPanel.Section>
             <Action.SubmitForm
               title="Save Configuration"
-              icon={validationState.isValid ? Icon.CheckCircle : Icon.XMarkCircle}
+              icon={
+                validationState.isValid ? Icon.CheckCircle : Icon.XMarkCircle
+              }
               onSubmit={handleSubmit}
-              shortcut={validationState.isValid ? { modifiers: ["cmd"], key: "s" } : undefined}
+              shortcut={
+                validationState.isValid
+                  ? { modifiers: ["cmd"], key: "s" }
+                  : undefined
+              }
             />
             <Action
               title="Restore Original"
@@ -762,7 +919,12 @@ export function RawConfigEditForm({
             <Action.Push
               title="View Examples & Help"
               icon={Icon.QuestionMarkCircle}
-              target={<RawConfigHelpScreen editorType={editorType} configType={configType} />}
+              target={
+                <RawConfigHelpScreen
+                  editorType={editorType}
+                  configType={configType}
+                />
+              }
               shortcut={{ modifiers: ["cmd"], key: "h" }}
             />
           </ActionPanel.Section>
@@ -800,7 +962,11 @@ export function RawConfigEditForm({
     >
       <Form.TextArea
         id="content"
-        title={editorType === "vscode" && configType === "user" ? "MCP Configuration" : "Raw Configuration"}
+        title={
+          editorType === "vscode" && configType === "user"
+            ? "MCP Configuration"
+            : "Raw Configuration"
+        }
         placeholder={
           editorType === "vscode" && configType === "user"
             ? 'Enter MCP section content (e.g., { "servers": {}, "inputs": [] })...'
@@ -809,13 +975,20 @@ export function RawConfigEditForm({
         value={content}
         onChange={setContent}
         enableMarkdown={false}
-        error={!validationState.isValid ? "Configuration contains validation errors" : undefined}
+        error={
+          !validationState.isValid
+            ? "Configuration contains validation errors"
+            : undefined
+        }
       />
     </Form>
   );
 }
 
-function getRemoteConfigExample(editorType: EditorType, configType?: "global" | "workspace" | "user"): string {
+function getRemoteConfigExample(
+  editorType: EditorType,
+  configType?: "global" | "workspace" | "user",
+): string {
   switch (editorType) {
     case "cursor":
       return `"context7": {
@@ -854,7 +1027,10 @@ function getRemoteConfigExample(editorType: EditorType, configType?: "global" | 
   }
 }
 
-function getLocalConfigExample(editorType: EditorType, configType?: "global" | "workspace" | "user"): string {
+function getLocalConfigExample(
+  editorType: EditorType,
+  configType?: "global" | "workspace" | "user",
+): string {
   switch (editorType) {
     case "cursor":
       return `"context7": {
@@ -903,7 +1079,10 @@ function getLocalConfigExample(editorType: EditorType, configType?: "global" | "
   }
 }
 
-function getSchemaExampleJson(editorType: EditorType, configType?: "global" | "workspace" | "user"): string {
+function getSchemaExampleJson(
+  editorType: EditorType,
+  configType?: "global" | "workspace" | "user",
+): string {
   switch (editorType) {
     case "cursor":
       return `{
@@ -980,7 +1159,10 @@ function getSchemaExampleJson(editorType: EditorType, configType?: "global" | "w
   }
 }
 
-function getEmptyConfigStructure(editorType: EditorType, configType?: string): object {
+function getEmptyConfigStructure(
+  editorType: EditorType,
+  configType?: string,
+): object {
   switch (editorType) {
     case "cursor":
       return { mcpServers: {} };

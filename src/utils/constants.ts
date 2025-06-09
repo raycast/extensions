@@ -47,7 +47,8 @@ export const EDITOR_CONFIGS: Record<EditorType, EditorConfig> = {
     specificFeatures: {
       // Note: Cursor does not support server-level specific configuration options
     },
-    description: "AI-powered code editor with MCP support for stdio and SSE transports",
+    description:
+      "AI-powered code editor with MCP support for stdio and SSE transports",
   },
   windsurf: {
     id: "windsurf",
@@ -65,7 +66,8 @@ export const EDITOR_CONFIGS: Record<EditorType, EditorConfig> = {
       toolsEnabled: true,
       isOfficialPlugin: true,
     },
-    description: "Codeium's AI editor with Claude Desktop compatible MCP configuration",
+    description:
+      "Codeium's AI editor with Claude Desktop compatible MCP configuration",
   },
   vscode: {
     id: "vscode",
@@ -83,7 +85,8 @@ export const EDITOR_CONFIGS: Record<EditorType, EditorConfig> = {
       envFile: true,
       roots: true,
     },
-    description: "Microsoft's Visual Studio Code with comprehensive MCP support including HTTP transport",
+    description:
+      "Microsoft's Visual Studio Code with comprehensive MCP support including HTTP transport",
   },
 };
 
@@ -108,8 +111,12 @@ export function getAllEditorTypes(): EditorType[] {
   return Object.keys(EDITOR_CONFIGS) as EditorType[];
 }
 
-export function getEditorsWithTransport(transport: TransportType): EditorConfig[] {
-  return Object.values(EDITOR_CONFIGS).filter((config) => config.supportedTransports.includes(transport));
+export function getEditorsWithTransport(
+  transport: TransportType,
+): EditorConfig[] {
+  return Object.values(EDITOR_CONFIGS).filter((config) =>
+    config.supportedTransports.includes(transport),
+  );
 }
 export const VALIDATION_RULES = {
   ENV_VAR_KEY_PATTERN: /^[A-Z0-9_]+$/,

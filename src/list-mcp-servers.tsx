@@ -20,7 +20,11 @@ import { EditServerForm } from "./edit-mcp-server";
 import { validateAllConfigurations } from "./utils/validateAllConfigurations";
 import ServerDetails from "./server-details";
 import TestServerConnection from "./test-server-connection";
-import { unlockServer, lockServer, isDefaultProtectedServer } from "./utils/protectedServers";
+import {
+  unlockServer,
+  lockServer,
+  isDefaultProtectedServer,
+} from "./utils/protectedServers";
 
 type EditorFilter = "all" | EditorType;
 
@@ -44,7 +48,9 @@ export default function Command() {
       setIsLoading(true);
       const allServers = await editorManager.readAllServers();
 
-      const { isProtectedServer, isServerUnlocked } = await import("./utils/protectedServers");
+      const { isProtectedServer, isServerUnlocked } = await import(
+        "./utils/protectedServers"
+      );
       const serversWithProtection = await Promise.all(
         allServers.map(async (server) => {
           try {
@@ -54,7 +60,10 @@ export default function Command() {
             ]);
             return { ...server, isProtected, isUnlocked };
           } catch (error) {
-            console.error(`Failed to load protection status for ${server.config.name}:`, error);
+            console.error(
+              `Failed to load protection status for ${server.config.name}:`,
+              error,
+            );
             return { ...server, isProtected: false, isUnlocked: false };
           }
         }),
@@ -73,7 +82,10 @@ export default function Command() {
     }
   }
 
-  const filteredServers = editorFilter === "all" ? servers : servers.filter((server) => server.editor === editorFilter);
+  const filteredServers =
+    editorFilter === "all"
+      ? servers
+      : servers.filter((server) => server.editor === editorFilter);
 
   const serversByEditor = servers.reduce(
     (acc, server) => {
@@ -90,11 +102,17 @@ export default function Command() {
     try {
       const wasDisabled = server.config.disabled;
 
-      await editorManager.toggleServer(server.editor, server.config.name, server.source);
+      await editorManager.toggleServer(
+        server.editor,
+        server.config.name,
+        server.source,
+      );
 
       await showToast({
         style: Toast.Style.Success,
-        title: wasDisabled ? SUCCESS_MESSAGES.SERVER_ENABLED : SUCCESS_MESSAGES.SERVER_DISABLED,
+        title: wasDisabled
+          ? SUCCESS_MESSAGES.SERVER_ENABLED
+          : SUCCESS_MESSAGES.SERVER_DISABLED,
       });
 
       await loadServers();
@@ -123,7 +141,11 @@ export default function Command() {
 
     if (confirmed) {
       try {
-        await editorManager.deleteServer(server.editor, server.config.name, server.source);
+        await editorManager.deleteServer(
+          server.editor,
+          server.config.name,
+          server.source,
+        );
         await showToast({
           style: Toast.Style.Success,
           title: SUCCESS_MESSAGES.SERVER_DELETED,
@@ -142,17 +164,27 @@ export default function Command() {
 
   async function toggleServerLock(server: MCPServerWithMetadata) {
     try {
-      const { isProtectedServer, isServerUnlocked } = await import("./utils/protectedServers");
+      const { isProtectedServer, isServerUnlocked } = await import(
+        "./utils/protectedServers"
+      );
 
-      const isCurrentlyProtected = await isProtectedServer(server.config.name, server.editor);
-      const isCurrentlyUnlocked = await isServerUnlocked(server.config.name, server.editor);
+      const isCurrentlyProtected = await isProtectedServer(
+        server.config.name,
+        server.editor,
+      );
+      const isCurrentlyUnlocked = await isServerUnlocked(
+        server.config.name,
+        server.editor,
+      );
       const isCurrentlyLocked = isCurrentlyProtected && !isCurrentlyUnlocked;
 
       if (isCurrentlyLocked) {
         if (isDefaultProtectedServer(server.config.name)) {
           await unlockServer(server.config.name, server.editor);
         } else {
-          const { unlockUserLockedServer } = await import("./utils/protectedServers");
+          const { unlockUserLockedServer } = await import(
+            "./utils/protectedServers"
+          );
           await unlockUserLockedServer(server.config.name, server.editor);
         }
         await showToast({
@@ -182,7 +214,9 @@ export default function Command() {
   }
 
   async function testConnection(server: MCPServerWithMetadata) {
-    const testDescription = connectionTestService.getTestDescription(server.config);
+    const testDescription = connectionTestService.getTestDescription(
+      server.config,
+    );
 
     await showToast({
       style: Toast.Style.Animated,
@@ -221,7 +255,11 @@ export default function Command() {
   const list = (
     <List
       isLoading={isLoading}
-      navigationTitle={editorFilter === "all" ? undefined : `${getEditorConfig(editorFilter).displayName} Servers`}
+      navigationTitle={
+        editorFilter === "all"
+          ? undefined
+          : `${getEditorConfig(editorFilter).displayName} Servers`
+      }
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by Editor"
@@ -232,7 +270,13 @@ export default function Command() {
           <List.Dropdown.Section title="Editors">
             {editorManager.getAvailableEditors().map((editor) => {
               const config = getEditorConfig(editor);
-              return <List.Dropdown.Item key={editor} title={config.displayName} value={editor} />;
+              return (
+                <List.Dropdown.Item
+                  key={editor}
+                  title={config.displayName}
+                  value={editor}
+                />
+              );
             })}
           </List.Dropdown.Section>
         </List.Dropdown>
@@ -305,26 +349,31 @@ export default function Command() {
             />
           ))}
 
-      {(editorFilter === "all" ? servers : filteredServers).length === 0 && !isLoading && (
-        <List.EmptyView
-          icon={Icon.Gear}
-          title={
-            editorFilter === "all"
-              ? "No MCP Servers Found"
-              : `No ${getEditorConfig(editorFilter).displayName} Servers Found`
-          }
-          description={
-            editorFilter === "all"
-              ? "Add your first MCP server to get started"
-              : `Add your first ${getEditorConfig(editorFilter).displayName} MCP server to get started`
-          }
-          actions={
-            <ActionPanel>
-              <Action.Push title="Add Server" icon={Icon.Plus} target={<AddServerForm />} />
-            </ActionPanel>
-          }
-        />
-      )}
+      {(editorFilter === "all" ? servers : filteredServers).length === 0 &&
+        !isLoading && (
+          <List.EmptyView
+            icon={Icon.Gear}
+            title={
+              editorFilter === "all"
+                ? "No MCP Servers Found"
+                : `No ${getEditorConfig(editorFilter).displayName} Servers Found`
+            }
+            description={
+              editorFilter === "all"
+                ? "Add your first MCP server to get started"
+                : `Add your first ${getEditorConfig(editorFilter).displayName} MCP server to get started`
+            }
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Add Server"
+                  icon={Icon.Plus}
+                  target={<AddServerForm />}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
     </List>
   );
 
@@ -340,7 +389,10 @@ function ServerListItem({
   onRefresh,
   protectionRefreshKey,
 }: {
-  server: MCPServerWithMetadata & { isProtected?: boolean; isUnlocked?: boolean };
+  server: MCPServerWithMetadata & {
+    isProtected?: boolean;
+    isUnlocked?: boolean;
+  };
   onToggle: () => void;
   onDelete: () => void;
   onTest: () => void;
@@ -354,7 +406,9 @@ function ServerListItem({
   useEffect(() => {
     async function loadProtectionState() {
       try {
-        const { isProtectedServer, isServerUnlocked } = await import("./utils/protectedServers");
+        const { isProtectedServer, isServerUnlocked } = await import(
+          "./utils/protectedServers"
+        );
         const [isServerProtected, isServerUnlockedResult] = await Promise.all([
           isProtectedServer(server.config.name, server.editor),
           isServerUnlocked(server.config.name, server.editor),
@@ -362,7 +416,11 @@ function ServerListItem({
         setIsProtected(isServerProtected);
         setIsUnlocked(isServerUnlockedResult);
       } catch (error) {
-        console.error("Failed to load protection state for server:", server.config.name, error);
+        console.error(
+          "Failed to load protection state for server:",
+          server.config.name,
+          error,
+        );
       }
     }
     loadProtectionState();
@@ -422,7 +480,8 @@ function ServerListItem({
         text: "Protected",
         icon: Icon.Lock,
         color: Color.SecondaryText,
-        tooltip: "This server is protected from editing. Click unlock to modify.",
+        tooltip:
+          "This server is protected from editing. Click unlock to modify.",
       });
     }
 
@@ -471,7 +530,10 @@ function ServerListItem({
                   arguments={{
                     editorType: server.editor,
                     serverName: server.config.name,
-                    configType: server.source as "global" | "workspace" | "user",
+                    configType: server.source as
+                      | "global"
+                      | "workspace"
+                      | "user",
                   }}
                   launchType={LaunchType.UserInitiated}
                 />
@@ -500,7 +562,9 @@ function ServerListItem({
             )}
             {!isLocked && server.editor !== "cursor" && (
               <Action
-                title={server.config.disabled ? "Enable Server" : "Disable Server"}
+                title={
+                  server.config.disabled ? "Enable Server" : "Disable Server"
+                }
                 icon={server.config.disabled ? Icon.Play : Icon.Pause}
                 onAction={onToggle}
                 shortcut={{ modifiers: ["cmd"], key: "t" }}

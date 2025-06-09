@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, useNavigation, Icon } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  useNavigation,
+  Icon,
+} from "@raycast/api";
 import { EditorManager } from "./services/EditorManager";
 import { EditorType, MCPServerConfig, VSCodeInput } from "./types/mcpServer";
 import { getEditorConfig, SUCCESS_MESSAGES } from "./utils/constants";
@@ -38,7 +46,9 @@ function VSCodeInputForm({
   setIsPassword: (value: boolean) => void;
   existingInputs: VSCodeInput[];
 }) {
-  const isDuplicate = existingInputs.some((input) => input.id === inputId.trim());
+  const isDuplicate = existingInputs.some(
+    (input) => input.id === inputId.trim(),
+  );
 
   return (
     <>
@@ -49,7 +59,11 @@ function VSCodeInputForm({
         onChange={setInputId}
         placeholder="api-key"
         info="Unique identifier for this input (lowercase with hyphens)"
-        error={isDuplicate ? `Input with ID "${inputId.trim()}" already exists` : undefined}
+        error={
+          isDuplicate
+            ? `Input with ID "${inputId.trim()}" already exists`
+            : undefined
+        }
       />
 
       <Form.TextField
@@ -93,8 +107,12 @@ export default function Command() {
     return "stdio";
   };
 
-  const [selectedTransport, setSelectedTransport] = useState<"stdio" | "sse" | "/sse" | "http">(getInitialTransport());
-  const [selectedConfigType, setSelectedConfigType] = useState<"workspace" | "user">("user");
+  const [selectedTransport, setSelectedTransport] = useState<
+    "stdio" | "sse" | "/sse" | "http"
+  >(getInitialTransport());
+  const [selectedConfigType, setSelectedConfigType] = useState<
+    "workspace" | "user"
+  >("user");
   const [editorManager] = useState(() => new EditorManager());
   const [workspaceInputs, setWorkspaceInputs] = useState<VSCodeInput[]>([]);
   const [userInputs, setUserInputs] = useState<VSCodeInput[]>([]);
@@ -117,7 +135,11 @@ export default function Command() {
       const currentServerNames = currentServers.map((s) => s.config.name);
       const updatedServerNames = [...currentServerNames, serverConfig.name];
 
-      const validation = await validateLockedServersPresent(updatedServerNames, selectedEditor, currentServerNames);
+      const validation = await validateLockedServersPresent(
+        updatedServerNames,
+        selectedEditor,
+        currentServerNames,
+      );
       if (!validation.isValid) {
         await showToast({
           style: Toast.Style.Failure,
@@ -128,7 +150,11 @@ export default function Command() {
       }
 
       if (selectedEditor === "vscode") {
-        await editorManager.addServer(selectedEditor, serverConfig, selectedConfigType);
+        await editorManager.addServer(
+          selectedEditor,
+          serverConfig,
+          selectedConfigType,
+        );
       } else {
         await editorManager.addServer(selectedEditor, serverConfig);
       }
@@ -159,7 +185,9 @@ export default function Command() {
       try {
         const parsed = JSON.parse(input);
         if (Array.isArray(parsed)) {
-          return parsed.map((arg) => String(arg)).filter((arg) => arg.length > 0);
+          return parsed
+            .map((arg) => String(arg))
+            .filter((arg) => arg.length > 0);
         }
       } catch {
         // Note: Fall through to other parsing methods
@@ -204,7 +232,9 @@ export default function Command() {
       ...(selectedEditor === "vscode" && { type: selectedTransport }),
     };
 
-    console.log(`Building ${selectedEditor} server config with transport ${selectedTransport}`);
+    console.log(
+      `Building ${selectedEditor} server config with transport ${selectedTransport}`,
+    );
 
     if (selectedTransport === "stdio") {
       return {
@@ -259,7 +289,9 @@ export default function Command() {
     }
   }
 
-  function parseEnvironmentVariables(envString: string): Record<string, string> | undefined {
+  function parseEnvironmentVariables(
+    envString: string,
+  ): Record<string, string> | undefined {
     if (!envString.trim()) return undefined;
 
     const env: Record<string, string> = {};
@@ -279,7 +311,10 @@ export default function Command() {
     return Object.keys(env).length > 0 ? env : undefined;
   }
 
-  function getAvailableTransports(): Array<{ label: string; value: "stdio" | "sse" | "/sse" | "http" }> {
+  function getAvailableTransports(): Array<{
+    label: string;
+    value: "stdio" | "sse" | "/sse" | "http";
+  }> {
     const editorConfig = getEditorConfig(selectedEditor);
     return editorConfig.supportedTransports.map((transport) => ({
       label:
@@ -302,24 +337,53 @@ export default function Command() {
     switch (selectedEditor) {
       case "cursor":
         defaultTransport =
-          (availableTransports.find((t) => t.value === "sse")?.value as "stdio" | "sse" | "/sse" | "http") ||
-          (availableTransports[0]?.value as "stdio" | "sse" | "/sse" | "http") ||
+          (availableTransports.find((t) => t.value === "sse")?.value as
+            | "stdio"
+            | "sse"
+            | "/sse"
+            | "http") ||
+          (availableTransports[0]?.value as
+            | "stdio"
+            | "sse"
+            | "/sse"
+            | "http") ||
           "stdio";
         break;
       case "windsurf":
         defaultTransport =
-          (availableTransports.find((t) => t.value === "/sse")?.value as "stdio" | "sse" | "/sse" | "http") ||
-          (availableTransports[0]?.value as "stdio" | "sse" | "/sse" | "http") ||
+          (availableTransports.find((t) => t.value === "/sse")?.value as
+            | "stdio"
+            | "sse"
+            | "/sse"
+            | "http") ||
+          (availableTransports[0]?.value as
+            | "stdio"
+            | "sse"
+            | "/sse"
+            | "http") ||
           "stdio";
         break;
       case "vscode":
         defaultTransport =
-          (availableTransports.find((t) => t.value === "sse")?.value as "stdio" | "sse" | "/sse" | "http") ||
-          (availableTransports[0]?.value as "stdio" | "sse" | "/sse" | "http") ||
+          (availableTransports.find((t) => t.value === "sse")?.value as
+            | "stdio"
+            | "sse"
+            | "/sse"
+            | "http") ||
+          (availableTransports[0]?.value as
+            | "stdio"
+            | "sse"
+            | "/sse"
+            | "http") ||
           "stdio";
         break;
       default:
-        defaultTransport = (availableTransports[0]?.value as "stdio" | "sse" | "/sse" | "http") || "stdio";
+        defaultTransport =
+          (availableTransports[0]?.value as
+            | "stdio"
+            | "sse"
+            | "/sse"
+            | "http") || "stdio";
     }
 
     setSelectedTransport(defaultTransport);
@@ -333,7 +397,9 @@ export default function Command() {
 
   async function loadVSCodeInputs() {
     try {
-      const vscodeService = editorManager.getService("vscode") as VSCodeEditorService;
+      const vscodeService = editorManager.getService(
+        "vscode",
+      ) as VSCodeEditorService;
       const [workspaceInputsData, userInputsData] = await Promise.all([
         vscodeService.readInputs("workspace"),
         vscodeService.readInputs("user"),
@@ -345,13 +411,21 @@ export default function Command() {
     }
   }
 
-  async function addVSCodeInput(input: VSCodeInput, configType: "workspace" | "user") {
+  async function addVSCodeInput(
+    input: VSCodeInput,
+    configType: "workspace" | "user",
+  ) {
     try {
-      const vscodeService = editorManager.getService("vscode") as VSCodeEditorService;
-      const currentInputs = configType === "workspace" ? workspaceInputs : userInputs;
+      const vscodeService = editorManager.getService(
+        "vscode",
+      ) as VSCodeEditorService;
+      const currentInputs =
+        configType === "workspace" ? workspaceInputs : userInputs;
 
       if (currentInputs.some((existing) => existing.id === input.id)) {
-        throw new Error(`Input with ID "${input.id}" already exists in ${configType} configuration`);
+        throw new Error(
+          `Input with ID "${input.id}" already exists in ${configType} configuration`,
+        );
       }
 
       const updatedInputs = [...currentInputs, input];
@@ -377,11 +451,19 @@ export default function Command() {
     }
   }
 
-  async function removeVSCodeInput(inputId: string, configType: "workspace" | "user") {
+  async function removeVSCodeInput(
+    inputId: string,
+    configType: "workspace" | "user",
+  ) {
     try {
-      const vscodeService = editorManager.getService("vscode") as VSCodeEditorService;
-      const currentInputs = configType === "workspace" ? workspaceInputs : userInputs;
-      const updatedInputs = currentInputs.filter((input) => input.id !== inputId);
+      const vscodeService = editorManager.getService(
+        "vscode",
+      ) as VSCodeEditorService;
+      const currentInputs =
+        configType === "workspace" ? workspaceInputs : userInputs;
+      const updatedInputs = currentInputs.filter(
+        (input) => input.id !== inputId,
+      );
 
       await vscodeService.writeInputs(updatedInputs, configType);
 
@@ -408,7 +490,8 @@ export default function Command() {
   function renderVSCodeInputManagement() {
     if (selectedEditor !== "vscode") return null;
 
-    const currentInputs = selectedConfigType === "workspace" ? workspaceInputs : userInputs;
+    const currentInputs =
+      selectedConfigType === "workspace" ? workspaceInputs : userInputs;
 
     return (
       <>
@@ -419,16 +502,26 @@ export default function Command() {
           id="inputConfigType"
           title="Input Configuration Level"
           value={selectedConfigType}
-          onChange={(newValue) => setSelectedConfigType(newValue as "workspace" | "user")}
+          onChange={(newValue) =>
+            setSelectedConfigType(newValue as "workspace" | "user")
+          }
           info="Choose whether to manage inputs at workspace or user level"
         >
-          <Form.Dropdown.Item value="workspace" title="Workspace (.vscode/mcp.json)" />
-          <Form.Dropdown.Item value="user" title="User Settings (settings.json)" />
+          <Form.Dropdown.Item
+            value="workspace"
+            title="Workspace (.vscode/mcp.json)"
+          />
+          <Form.Dropdown.Item
+            value="user"
+            title="User Settings (settings.json)"
+          />
         </Form.Dropdown>
 
         {currentInputs.length > 0 && (
           <>
-            <Form.Description text={`Current ${selectedConfigType} inputs (${currentInputs.length}):`} />
+            <Form.Description
+              text={`Current ${selectedConfigType} inputs (${currentInputs.length}):`}
+            />
             {currentInputs.map((input) => (
               <Form.Description
                 key={input.id}
@@ -463,7 +556,10 @@ export default function Command() {
               <>
                 <Form.Description text="Remove Existing Inputs:" />
                 {currentInputs.map((input) => (
-                  <Form.Description key={`remove-${input.id}`} text={`${input.id} - ${input.description}`} />
+                  <Form.Description
+                    key={`remove-${input.id}`}
+                    text={`${input.id} - ${input.description}`}
+                  />
                 ))}
               </>
             )}
@@ -509,14 +605,22 @@ export default function Command() {
                 shortcut={{ modifiers: ["cmd"], key: "i" }}
               />
 
-              {(selectedConfigType === "workspace" ? workspaceInputs : userInputs).length > 0 &&
-                (selectedConfigType === "workspace" ? workspaceInputs : userInputs).map((input) => (
+              {(selectedConfigType === "workspace"
+                ? workspaceInputs
+                : userInputs
+              ).length > 0 &&
+                (selectedConfigType === "workspace"
+                  ? workspaceInputs
+                  : userInputs
+                ).map((input) => (
                   <Action
                     key={`remove-${input.id}`}
                     title={`Remove "${input.id}"`}
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    onAction={() => removeVSCodeInput(input.id, selectedConfigType)}
+                    onAction={() =>
+                      removeVSCodeInput(input.id, selectedConfigType)
+                    }
                   />
                 ))}
             </ActionPanel.Section>
@@ -532,7 +636,14 @@ export default function Command() {
       >
         {editorManager.getAvailableEditors().map((editor) => {
           const config = getEditorConfig(editor);
-          return <Form.Dropdown.Item key={editor} value={editor} title={config.displayName} icon={config.icon} />;
+          return (
+            <Form.Dropdown.Item
+              key={editor}
+              value={editor}
+              title={config.displayName}
+              icon={config.icon}
+            />
+          );
         })}
       </Form.Dropdown>
 
@@ -568,14 +679,24 @@ export default function Command() {
         title="Transport Type"
         value={(() => {
           const availableTransports = getAvailableTransports();
-          const currentTransportIsValid = availableTransports.some((t) => t.value === selectedTransport);
-          return currentTransportIsValid ? selectedTransport : availableTransports[0]?.value || "stdio";
+          const currentTransportIsValid = availableTransports.some(
+            (t) => t.value === selectedTransport,
+          );
+          return currentTransportIsValid
+            ? selectedTransport
+            : availableTransports[0]?.value || "stdio";
         })()}
-        onChange={(newValue) => setSelectedTransport(newValue as "stdio" | "sse" | "/sse" | "http")}
+        onChange={(newValue) =>
+          setSelectedTransport(newValue as "stdio" | "sse" | "/sse" | "http")
+        }
         info="Method used to communicate with the server"
       >
         {getAvailableTransports().map((transport) => (
-          <Form.Dropdown.Item key={transport.value} value={transport.value} title={transport.label} />
+          <Form.Dropdown.Item
+            key={transport.value}
+            value={transport.value}
+            title={transport.label}
+          />
         ))}
       </Form.Dropdown>
 
@@ -639,11 +760,19 @@ export default function Command() {
             id="configType"
             title="Configuration Type"
             value={selectedConfigType}
-            onChange={(newValue) => setSelectedConfigType(newValue as "workspace" | "user")}
+            onChange={(newValue) =>
+              setSelectedConfigType(newValue as "workspace" | "user")
+            }
             info="Where to save this server configuration"
           >
-            <Form.Dropdown.Item value="user" title="User Settings (settings.json)" />
-            <Form.Dropdown.Item value="workspace" title="Workspace Settings (.vscode/settings.json)" />
+            <Form.Dropdown.Item
+              value="user"
+              title="User Settings (settings.json)"
+            />
+            <Form.Dropdown.Item
+              value="workspace"
+              title="Workspace Settings (.vscode/settings.json)"
+            />
           </Form.Dropdown>
 
           {selectedTransport === "stdio" && (

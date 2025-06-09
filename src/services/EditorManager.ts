@@ -101,14 +101,20 @@ export class EditorManager {
     const validation = service.validateServerConfig(serverConfig);
 
     if (!validation.isValid) {
-      throw new Error(`Server configuration is invalid: ${validation.errors.map((e) => e.message).join(", ")}`);
+      throw new Error(
+        `Server configuration is invalid: ${validation.errors.map((e) => e.message).join(", ")}`,
+      );
     }
 
     const existingServers = await service.readConfig(configType);
 
-    const duplicateServer = existingServers.find((s) => s.config.name === serverConfig.name);
+    const duplicateServer = existingServers.find(
+      (s) => s.config.name === serverConfig.name,
+    );
     if (duplicateServer) {
-      throw new Error(`A server with name "${serverConfig.name}" already exists`);
+      throw new Error(
+        `A server with name "${serverConfig.name}" already exists`,
+      );
     }
 
     const newServer: MCPServerWithMetadata = {
@@ -132,22 +138,29 @@ export class EditorManager {
     const validation = service.validateServerConfig(updatedConfig);
 
     if (!validation.isValid) {
-      throw new Error(`Server configuration is invalid: ${validation.errors.map((e) => e.message).join(", ")}`);
+      throw new Error(
+        `Server configuration is invalid: ${validation.errors.map((e) => e.message).join(", ")}`,
+      );
     }
 
     const existingServers = await service.readConfig(configType);
 
-    const serverIndex = existingServers.findIndex((s) => s.config.name === serverName);
+    const serverIndex = existingServers.findIndex(
+      (s) => s.config.name === serverName,
+    );
     if (serverIndex === -1) {
       throw new Error(`Server "${serverName}" not found`);
     }
 
     if (updatedConfig.name !== serverName) {
       const duplicateServer = existingServers.find(
-        (s, index) => index !== serverIndex && s.config.name === updatedConfig.name,
+        (s, index) =>
+          index !== serverIndex && s.config.name === updatedConfig.name,
       );
       if (duplicateServer) {
-        throw new Error(`A server with name "${updatedConfig.name}" already exists`);
+        throw new Error(
+          `A server with name "${updatedConfig.name}" already exists`,
+        );
       }
     }
 
@@ -165,7 +178,9 @@ export class EditorManager {
 
     const existingServers = await service.readConfig(configType);
 
-    const serverIndex = existingServers.findIndex((s) => s.config.name === serverName);
+    const serverIndex = existingServers.findIndex(
+      (s) => s.config.name === serverName,
+    );
     if (serverIndex === -1) {
       throw new Error(`Server "${serverName}" not found`);
     }
@@ -194,7 +209,9 @@ export class EditorManager {
     await service.writeConfig(existingServers, configType);
   }
 
-  async validateAllConfigurations(): Promise<Map<EditorType, ValidationResult>> {
+  async validateAllConfigurations(): Promise<
+    Map<EditorType, ValidationResult>
+  > {
     const results = new Map<EditorType, ValidationResult>();
 
     for (const [editorType, service] of this.services) {
@@ -254,8 +271,10 @@ export class EditorManager {
       const config = server.config;
       return (
         config.name.toLowerCase().includes(lowercaseQuery) ||
-        (config.description && config.description.toLowerCase().includes(lowercaseQuery)) ||
-        ("command" in config && config.command.toLowerCase().includes(lowercaseQuery)) ||
+        (config.description &&
+          config.description.toLowerCase().includes(lowercaseQuery)) ||
+        ("command" in config &&
+          config.command.toLowerCase().includes(lowercaseQuery)) ||
         ("url" in config && config.url.toLowerCase().includes(lowercaseQuery))
       );
     });

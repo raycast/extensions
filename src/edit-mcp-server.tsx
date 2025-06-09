@@ -1,5 +1,14 @@
 import { useState, useEffect } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, useNavigation, LaunchProps, Icon } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  useNavigation,
+  LaunchProps,
+  Icon,
+} from "@raycast/api";
 import { RawConfigHelpScreen } from "./components/RawConfigEditor";
 import { EditorManager } from "./services/EditorManager";
 import {
@@ -42,7 +51,9 @@ function VSCodeInputFormEdit({
   setIsPassword: (value: boolean) => void;
   existingInputs: VSCodeInput[];
 }) {
-  const isDuplicate = existingInputs.some((input) => input.id === inputId.trim());
+  const isDuplicate = existingInputs.some(
+    (input) => input.id === inputId.trim(),
+  );
 
   return (
     <>
@@ -53,7 +64,11 @@ function VSCodeInputFormEdit({
         onChange={setInputId}
         placeholder="api-key"
         info="Unique identifier for this input (lowercase with hyphens)"
-        error={isDuplicate ? `Input with ID "${inputId.trim()}" already exists` : undefined}
+        error={
+          isDuplicate
+            ? `Input with ID "${inputId.trim()}" already exists`
+            : undefined
+        }
       />
 
       <Form.TextField
@@ -97,24 +112,34 @@ export function EditServerForm({
   onComplete?: () => void;
 }) {
   const [editorManager] = useState(() => new EditorManager());
-  const [serverConfig, setServerConfig] = useState<MCPServerWithMetadata | null>(null);
-  const [formValues, setFormValues] = useState<Record<string, string | boolean | number | undefined>>({});
+  const [serverConfig, setServerConfig] =
+    useState<MCPServerWithMetadata | null>(null);
+  const [formValues, setFormValues] = useState<
+    Record<string, string | boolean | number | undefined>
+  >({});
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedConfigType, setSelectedConfigType] = useState<"workspace" | "user">("user");
+  const [selectedConfigType, setSelectedConfigType] = useState<
+    "workspace" | "user"
+  >("user");
   const [workspaceInputs, setWorkspaceInputs] = useState<VSCodeInput[]>([]);
   const [userInputs, setUserInputs] = useState<VSCodeInput[]>([]);
   const [showInputManagement, setShowInputManagement] = useState(false);
   const [newInputId, setNewInputId] = useState("");
   const [newInputDescription, setNewInputDescription] = useState("");
   const [newInputIsPassword, setNewInputIsPassword] = useState(false);
-  const [selectedTransport, setSelectedTransport] = useState<"stdio" | "sse" | "/sse" | "http">("stdio");
+  const [selectedTransport, setSelectedTransport] = useState<
+    "stdio" | "sse" | "/sse" | "http"
+  >("stdio");
   const { pop } = useNavigation();
 
   useEffect(() => {
     async function loadServerConfig() {
       try {
         setIsLoading(true);
-        const servers = await editorManager.readServersFromEditor(editorType, configType);
+        const servers = await editorManager.readServersFromEditor(
+          editorType,
+          configType,
+        );
         const server = servers.find((s) => s.config.name === serverName);
 
         if (!server) {
@@ -123,7 +148,9 @@ export function EditServerForm({
 
         setServerConfig(server);
 
-        setSelectedTransport(server.config.transport as "stdio" | "sse" | "/sse" | "http");
+        setSelectedTransport(
+          server.config.transport as "stdio" | "sse" | "/sse" | "http",
+        );
 
         const initialValues = convertServerConfigToFormValues(server.config);
         setFormValues(initialValues);
@@ -151,7 +178,9 @@ export function EditServerForm({
 
   async function loadVSCodeInputs() {
     try {
-      const vscodeService = editorManager.getService("vscode") as VSCodeEditorService;
+      const vscodeService = editorManager.getService(
+        "vscode",
+      ) as VSCodeEditorService;
       const [workspaceInputsData, userInputsData] = await Promise.all([
         vscodeService.readInputs("workspace"),
         vscodeService.readInputs("user"),
@@ -163,13 +192,21 @@ export function EditServerForm({
     }
   }
 
-  async function addVSCodeInput(input: VSCodeInput, configType: "workspace" | "user") {
+  async function addVSCodeInput(
+    input: VSCodeInput,
+    configType: "workspace" | "user",
+  ) {
     try {
-      const vscodeService = editorManager.getService("vscode") as VSCodeEditorService;
-      const currentInputs = configType === "workspace" ? workspaceInputs : userInputs;
+      const vscodeService = editorManager.getService(
+        "vscode",
+      ) as VSCodeEditorService;
+      const currentInputs =
+        configType === "workspace" ? workspaceInputs : userInputs;
 
       if (currentInputs.some((existing) => existing.id === input.id)) {
-        throw new Error(`Input with ID "${input.id}" already exists in ${configType} configuration`);
+        throw new Error(
+          `Input with ID "${input.id}" already exists in ${configType} configuration`,
+        );
       }
 
       const updatedInputs = [...currentInputs, input];
@@ -195,11 +232,19 @@ export function EditServerForm({
     }
   }
 
-  async function removeVSCodeInput(inputId: string, configType: "workspace" | "user") {
+  async function removeVSCodeInput(
+    inputId: string,
+    configType: "workspace" | "user",
+  ) {
     try {
-      const vscodeService = editorManager.getService("vscode") as VSCodeEditorService;
-      const currentInputs = configType === "workspace" ? workspaceInputs : userInputs;
-      const updatedInputs = currentInputs.filter((input) => input.id !== inputId);
+      const vscodeService = editorManager.getService(
+        "vscode",
+      ) as VSCodeEditorService;
+      const currentInputs =
+        configType === "workspace" ? workspaceInputs : userInputs;
+      const updatedInputs = currentInputs.filter(
+        (input) => input.id !== inputId,
+      );
 
       await vscodeService.writeInputs(updatedInputs, configType);
 
@@ -251,10 +296,12 @@ export function EditServerForm({
             .join("\n")
         : "";
     } else if (config.transport === "sse" || config.transport === "http") {
-      const urlConfig = config as (SSETransportConfig | HTTPTransportConfig) & BaseMCPServerConfig;
+      const urlConfig = config as (SSETransportConfig | HTTPTransportConfig) &
+        BaseMCPServerConfig;
       values.url = urlConfig.url || "";
     } else if (config.transport === "/sse") {
-      const windsurfSSEConfig = config as WindsurfSSETransportConfig & BaseMCPServerConfig;
+      const windsurfSSEConfig = config as WindsurfSSETransportConfig &
+        BaseMCPServerConfig;
       values.serverUrl = windsurfSSEConfig.serverUrl || "";
     }
 
@@ -272,10 +319,14 @@ export function EditServerForm({
   ): MCPServerConfig {
     const baseConfig = {
       name: typeof values.name === "string" ? values.name.trim() : "",
-      description: typeof values.description === "string" ? values.description.trim() || undefined : undefined,
+      description:
+        typeof values.description === "string"
+          ? values.description.trim() || undefined
+          : undefined,
 
       ...(editorType !== "cursor" && {
-        disabled: typeof values.disabled === "boolean" ? values.disabled : false,
+        disabled:
+          typeof values.disabled === "boolean" ? values.disabled : false,
       }),
       transport: selectedTransport as TransportType,
     };
@@ -284,7 +335,8 @@ export function EditServerForm({
       const config = {
         ...baseConfig,
         transport: "stdio" as const,
-        command: typeof values.command === "string" ? values.command.trim() : "",
+        command:
+          typeof values.command === "string" ? values.command.trim() : "",
         args:
           typeof values.args === "string" && values.args.trim()
             ? values.args
@@ -292,13 +344,19 @@ export function EditServerForm({
                 .map((arg: string) => arg.trim())
                 .filter((arg: string) => arg.length > 0)
             : undefined,
-        env: typeof values.env === "string" ? parseEnvironmentVariables(values.env) : undefined,
+        env:
+          typeof values.env === "string"
+            ? parseEnvironmentVariables(values.env)
+            : undefined,
       };
 
       if (editorType === "vscode") {
         return {
           ...config,
-          envFile: typeof values.envFile === "string" ? values.envFile.trim() || undefined : undefined,
+          envFile:
+            typeof values.envFile === "string"
+              ? values.envFile.trim() || undefined
+              : undefined,
           roots:
             typeof values.roots === "string" && values.roots.trim()
               ? values.roots
@@ -320,14 +378,18 @@ export function EditServerForm({
       return {
         ...baseConfig,
         transport: "/sse" as const,
-        serverUrl: typeof values.serverUrl === "string" ? values.serverUrl.trim() : "",
+        serverUrl:
+          typeof values.serverUrl === "string" ? values.serverUrl.trim() : "",
       };
     } else {
       return {
         ...baseConfig,
         transport: "http" as const,
         url: typeof values.url === "string" ? values.url.trim() : "",
-        envFile: typeof values.envFile === "string" ? values.envFile.trim() || undefined : undefined,
+        envFile:
+          typeof values.envFile === "string"
+            ? values.envFile.trim() || undefined
+            : undefined,
         roots:
           typeof values.roots === "string" && values.roots.trim()
             ? values.roots
@@ -339,7 +401,9 @@ export function EditServerForm({
     }
   }
 
-  function parseEnvironmentVariables(envString: string): Record<string, string> | undefined {
+  function parseEnvironmentVariables(
+    envString: string,
+  ): Record<string, string> | undefined {
     if (!envString?.trim()) return undefined;
 
     const env: Record<string, string> = {};
@@ -359,7 +423,10 @@ export function EditServerForm({
     return Object.keys(env).length > 0 ? env : undefined;
   }
 
-  function getAvailableTransports(): Array<{ label: string; value: "stdio" | "sse" | "/sse" | "http" }> {
+  function getAvailableTransports(): Array<{
+    label: string;
+    value: "stdio" | "sse" | "/sse" | "http";
+  }> {
     const editorConfig = getEditorConfig(editorType);
     return editorConfig.supportedTransports.map((transport) => ({
       label:
@@ -377,7 +444,8 @@ export function EditServerForm({
   function renderVSCodeInputManagement() {
     if (editorType !== "vscode") return null;
 
-    const currentInputs = selectedConfigType === "workspace" ? workspaceInputs : userInputs;
+    const currentInputs =
+      selectedConfigType === "workspace" ? workspaceInputs : userInputs;
 
     return (
       <>
@@ -388,16 +456,26 @@ export function EditServerForm({
           id="inputConfigType"
           title="Input Configuration Level"
           value={selectedConfigType}
-          onChange={(newValue) => setSelectedConfigType(newValue as "workspace" | "user")}
+          onChange={(newValue) =>
+            setSelectedConfigType(newValue as "workspace" | "user")
+          }
           info="Choose whether to manage inputs at workspace or user level"
         >
-          <Form.Dropdown.Item value="workspace" title="Workspace (.vscode/mcp.json)" />
-          <Form.Dropdown.Item value="user" title="User Settings (settings.json)" />
+          <Form.Dropdown.Item
+            value="workspace"
+            title="Workspace (.vscode/mcp.json)"
+          />
+          <Form.Dropdown.Item
+            value="user"
+            title="User Settings (settings.json)"
+          />
         </Form.Dropdown>
 
         {currentInputs.length > 0 && (
           <>
-            <Form.Description text={`Current ${selectedConfigType} inputs (${currentInputs.length}):`} />
+            <Form.Description
+              text={`Current ${selectedConfigType} inputs (${currentInputs.length}):`}
+            />
             {currentInputs.map((input) => (
               <Form.Description
                 key={input.id}
@@ -435,7 +513,9 @@ export function EditServerForm({
     );
   }
 
-  async function handleSubmit(values: Record<string, string | boolean | number | undefined>) {
+  async function handleSubmit(
+    values: Record<string, string | boolean | number | undefined>,
+  ) {
     if (!serverConfig) return;
 
     try {
@@ -446,10 +526,16 @@ export function EditServerForm({
       const updatedConfig = convertFormValuesToServerConfig(values);
 
       const currentServers = await editorManager.readAllServers();
-      const currentServerNames = currentServers.filter((s) => s.config.name !== serverName).map((s) => s.config.name);
+      const currentServerNames = currentServers
+        .filter((s) => s.config.name !== serverName)
+        .map((s) => s.config.name);
       const updatedServerNames = [...currentServerNames, updatedConfig.name];
 
-      const validation = await validateLockedServersPresent(updatedServerNames, editorType, currentServerNames);
+      const validation = await validateLockedServersPresent(
+        updatedServerNames,
+        editorType,
+        currentServerNames,
+      );
       if (!validation.isValid) {
         await showToast({
           style: Toast.Style.Failure,
@@ -459,7 +545,12 @@ export function EditServerForm({
         return;
       }
 
-      await editorManager.updateServer(editorType, serverName, updatedConfig, configType);
+      await editorManager.updateServer(
+        editorType,
+        serverName,
+        updatedConfig,
+        configType,
+      );
 
       await showToast({
         style: Toast.Style.Success,
@@ -503,10 +594,19 @@ export function EditServerForm({
           <Action.Push
             title="View Configuration Help"
             icon={Icon.QuestionMarkCircle}
-            target={<RawConfigHelpScreen editorType={editorType} configType={selectedConfigType} />}
+            target={
+              <RawConfigHelpScreen
+                editorType={editorType}
+                configType={selectedConfigType}
+              />
+            }
             shortcut={{ modifiers: ["cmd"], key: "h" }}
           />
-          <Action title="Cancel" onAction={pop} shortcut={{ modifiers: ["cmd"], key: "." }} />
+          <Action
+            title="Cancel"
+            onAction={pop}
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+          />
 
           {editorType === "vscode" && showInputManagement && (
             <ActionPanel.Section title="Input Management">
@@ -536,14 +636,22 @@ export function EditServerForm({
                 shortcut={{ modifiers: ["cmd"], key: "i" }}
               />
 
-              {(selectedConfigType === "workspace" ? workspaceInputs : userInputs).length > 0 &&
-                (selectedConfigType === "workspace" ? workspaceInputs : userInputs).map((input) => (
+              {(selectedConfigType === "workspace"
+                ? workspaceInputs
+                : userInputs
+              ).length > 0 &&
+                (selectedConfigType === "workspace"
+                  ? workspaceInputs
+                  : userInputs
+                ).map((input) => (
                   <Action
                     key={`remove-${input.id}`}
                     title={`Remove "${input.id}"`}
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    onAction={() => removeVSCodeInput(input.id, selectedConfigType)}
+                    onAction={() =>
+                      removeVSCodeInput(input.id, selectedConfigType)
+                    }
                   />
                 ))}
             </ActionPanel.Section>
@@ -557,7 +665,9 @@ export function EditServerForm({
         placeholder="context7"
         info="Unique identifier for this MCP server"
         value={formValues.name as string}
-        onChange={(value) => setFormValues((prev) => ({ ...prev, name: value }))}
+        onChange={(value) =>
+          setFormValues((prev) => ({ ...prev, name: value }))
+        }
       />
 
       <Form.TextArea
@@ -566,7 +676,9 @@ export function EditServerForm({
         placeholder="Up-to-date code docs for any prompt."
         info="Optional description of what this server does"
         value={formValues.description as string}
-        onChange={(value) => setFormValues((prev) => ({ ...prev, description: value }))}
+        onChange={(value) =>
+          setFormValues((prev) => ({ ...prev, description: value }))
+        }
       />
 
       {editorType !== "cursor" && (
@@ -576,7 +688,9 @@ export function EditServerForm({
           label="Temporarily disable this server"
           info="The server will be configured but not active"
           value={formValues.disabled as boolean}
-          onChange={(value) => setFormValues((prev) => ({ ...prev, disabled: value }))}
+          onChange={(value) =>
+            setFormValues((prev) => ({ ...prev, disabled: value }))
+          }
         />
       )}
 
@@ -598,10 +712,16 @@ export function EditServerForm({
         title="Transport Type"
         info="Method used to communicate with the server"
         value={selectedTransport || "stdio"}
-        onChange={(newValue) => setSelectedTransport(newValue as "stdio" | "sse" | "/sse" | "http")}
+        onChange={(newValue) =>
+          setSelectedTransport(newValue as "stdio" | "sse" | "/sse" | "http")
+        }
       >
         {getAvailableTransports().map((transport) => (
-          <Form.Dropdown.Item key={transport.value} value={transport.value} title={transport.label} />
+          <Form.Dropdown.Item
+            key={transport.value}
+            value={transport.value}
+            title={transport.label}
+          />
         ))}
       </Form.Dropdown>
 
@@ -613,7 +733,9 @@ export function EditServerForm({
             placeholder="python -m my_mcp_server"
             info="The command to execute to start the server"
             value={formValues.command as string}
-            onChange={(value) => setFormValues((prev) => ({ ...prev, command: value }))}
+            onChange={(value) =>
+              setFormValues((prev) => ({ ...prev, command: value }))
+            }
           />
 
           <Form.TextArea
@@ -622,7 +744,9 @@ export function EditServerForm({
             placeholder="--port&#10;8000&#10;--verbose"
             info="Command line arguments (one per line)"
             value={formValues.args as string}
-            onChange={(value) => setFormValues((prev) => ({ ...prev, args: value }))}
+            onChange={(value) =>
+              setFormValues((prev) => ({ ...prev, args: value }))
+            }
           />
 
           <Form.TextArea
@@ -631,7 +755,9 @@ export function EditServerForm({
             placeholder="API_KEY=your_key&#10;DEBUG=true"
             info="Environment variables in KEY=VALUE format (one per line)"
             value={formValues.env as string}
-            onChange={(value) => setFormValues((prev) => ({ ...prev, env: value }))}
+            onChange={(value) =>
+              setFormValues((prev) => ({ ...prev, env: value }))
+            }
           />
         </>
       )}
@@ -643,7 +769,9 @@ export function EditServerForm({
           placeholder="https://mcp.context7.com/mcp"
           info="The remote endpoint URL for the server"
           value={formValues.url as string}
-          onChange={(value) => setFormValues((prev) => ({ ...prev, url: value }))}
+          onChange={(value) =>
+            setFormValues((prev) => ({ ...prev, url: value }))
+          }
         />
       )}
 
@@ -654,7 +782,9 @@ export function EditServerForm({
           placeholder="https://mcp.context7.com/sse"
           info="The SSE endpoint URL for the server (Windsurf format)"
           value={formValues.serverUrl as string}
-          onChange={(value) => setFormValues((prev) => ({ ...prev, serverUrl: value }))}
+          onChange={(value) =>
+            setFormValues((prev) => ({ ...prev, serverUrl: value }))
+          }
         />
       )}
 
@@ -665,7 +795,9 @@ export function EditServerForm({
           placeholder="http://localhost:8000"
           info="The HTTP endpoint URL for the server"
           value={formValues.url as string}
-          onChange={(value) => setFormValues((prev) => ({ ...prev, url: value }))}
+          onChange={(value) =>
+            setFormValues((prev) => ({ ...prev, url: value }))
+          }
         />
       )}
 
@@ -682,7 +814,9 @@ export function EditServerForm({
               placeholder=".env"
               info="Path to environment file for loading variables"
               value={formValues.envFile as string}
-              onChange={(value) => setFormValues((prev) => ({ ...prev, envFile: value }))}
+              onChange={(value) =>
+                setFormValues((prev) => ({ ...prev, envFile: value }))
+              }
             />
           )}
 
@@ -693,7 +827,9 @@ export function EditServerForm({
               placeholder="/path/to/project&#10;/another/path"
               info="Root paths for the server (one per line)"
               value={formValues.roots as string}
-              onChange={(value) => setFormValues((prev) => ({ ...prev, roots: value }))}
+              onChange={(value) =>
+                setFormValues((prev) => ({ ...prev, roots: value }))
+              }
             />
           )}
         </>
@@ -704,8 +840,16 @@ export function EditServerForm({
   );
 }
 
-export default function Command(props: LaunchProps<{ arguments: EditServerArgs }>) {
+export default function Command(
+  props: LaunchProps<{ arguments: EditServerArgs }>,
+) {
   const { editorType, serverName, configType = "global" } = props.arguments;
 
-  return <EditServerForm editorType={editorType} serverName={serverName} configType={configType} />;
+  return (
+    <EditServerForm
+      editorType={editorType}
+      serverName={serverName}
+      configType={configType}
+    />
+  );
 }

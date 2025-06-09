@@ -21,7 +21,11 @@ import ServerDetails from "./server-details";
 import ListServers from "./list-mcp-servers";
 import TestServerConnection from "./test-server-connection";
 import { validateAllConfigurations } from "./utils/validateAllConfigurations";
-import { unlockServer, lockServer, isDefaultProtectedServer } from "./utils/protectedServers";
+import {
+  unlockServer,
+  lockServer,
+  isDefaultProtectedServer,
+} from "./utils/protectedServers";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -46,7 +50,9 @@ export default function Command() {
       setIsLoading(true);
       const allServers = await editorManager.readAllServers();
 
-      const { isProtectedServer, isServerUnlocked } = await import("./utils/protectedServers");
+      const { isProtectedServer, isServerUnlocked } = await import(
+        "./utils/protectedServers"
+      );
       const serversWithProtection = await Promise.all(
         allServers.map(async (server) => {
           try {
@@ -56,7 +62,11 @@ export default function Command() {
             ]);
             return { ...server, isProtected, isUnlocked };
           } catch (error) {
-            console.error("Failed to load protection status for server:", server.config.name, error);
+            console.error(
+              "Failed to load protection status for server:",
+              server.config.name,
+              error,
+            );
             return { ...server, isProtected: false, isUnlocked: false };
           }
         }),
@@ -75,11 +85,17 @@ export default function Command() {
     try {
       const wasDisabled = server.config.disabled;
 
-      await editorManager.toggleServer(server.editor, server.config.name, server.source);
+      await editorManager.toggleServer(
+        server.editor,
+        server.config.name,
+        server.source,
+      );
 
       await showToast({
         style: Toast.Style.Success,
-        title: wasDisabled ? SUCCESS_MESSAGES.SERVER_ENABLED : SUCCESS_MESSAGES.SERVER_DISABLED,
+        title: wasDisabled
+          ? SUCCESS_MESSAGES.SERVER_ENABLED
+          : SUCCESS_MESSAGES.SERVER_DISABLED,
       });
 
       await loadServers();
@@ -108,7 +124,11 @@ export default function Command() {
 
     if (confirmed) {
       try {
-        await editorManager.deleteServer(server.editor, server.config.name, server.source);
+        await editorManager.deleteServer(
+          server.editor,
+          server.config.name,
+          server.source,
+        );
         await showToast({
           style: Toast.Style.Success,
           title: SUCCESS_MESSAGES.SERVER_DELETED,
@@ -125,19 +145,34 @@ export default function Command() {
     }
   }
 
-  async function toggleServerLock(server: MCPServerWithMetadata & { isProtected?: boolean; isUnlocked?: boolean }) {
+  async function toggleServerLock(
+    server: MCPServerWithMetadata & {
+      isProtected?: boolean;
+      isUnlocked?: boolean;
+    },
+  ) {
     try {
-      const { isProtectedServer, isServerUnlocked } = await import("./utils/protectedServers");
+      const { isProtectedServer, isServerUnlocked } = await import(
+        "./utils/protectedServers"
+      );
 
-      const isCurrentlyProtected = await isProtectedServer(server.config.name, server.editor);
-      const isCurrentlyUnlocked = await isServerUnlocked(server.config.name, server.editor);
+      const isCurrentlyProtected = await isProtectedServer(
+        server.config.name,
+        server.editor,
+      );
+      const isCurrentlyUnlocked = await isServerUnlocked(
+        server.config.name,
+        server.editor,
+      );
       const isCurrentlyLocked = isCurrentlyProtected && !isCurrentlyUnlocked;
 
       if (isCurrentlyLocked) {
         if (isDefaultProtectedServer(server.config.name)) {
           await unlockServer(server.config.name, server.editor);
         } else {
-          const { unlockUserLockedServer } = await import("./utils/protectedServers");
+          const { unlockUserLockedServer } = await import(
+            "./utils/protectedServers"
+          );
           await unlockUserLockedServer(server.config.name, server.editor);
         }
         await showToast({
@@ -167,7 +202,9 @@ export default function Command() {
   }
 
   async function testConnection(server: MCPServerWithMetadata) {
-    const testDescription = connectionTestService.getTestDescription(server.config);
+    const testDescription = connectionTestService.getTestDescription(
+      server.config,
+    );
 
     await showToast({
       style: Toast.Style.Animated,
@@ -211,21 +248,34 @@ export default function Command() {
 
     if (
       config.name.toLowerCase().includes(query) ||
-      (config.description && config.description.toLowerCase().includes(query)) ||
+      (config.description &&
+        config.description.toLowerCase().includes(query)) ||
       (config.transport && config.transport.toLowerCase().includes(query)) ||
       server.editor.toLowerCase().includes(query)
     ) {
       return true;
     }
 
-    if ("url" in config && config.url && config.url.toLowerCase().includes(query)) {
+    if (
+      "url" in config &&
+      config.url &&
+      config.url.toLowerCase().includes(query)
+    ) {
       return true;
     }
-    if ("serverUrl" in config && config.serverUrl && config.serverUrl.toLowerCase().includes(query)) {
+    if (
+      "serverUrl" in config &&
+      config.serverUrl &&
+      config.serverUrl.toLowerCase().includes(query)
+    ) {
       return true;
     }
 
-    if ("command" in config && config.command && config.command.toLowerCase().includes(query)) {
+    if (
+      "command" in config &&
+      config.command &&
+      config.command.toLowerCase().includes(query)
+    ) {
       return true;
     }
     if ("args" in config && config.args && Array.isArray(config.args)) {
@@ -238,14 +288,20 @@ export default function Command() {
       const envEntries = Object.entries(config.env);
       if (
         envEntries.some(
-          ([key, value]) => key.toLowerCase().includes(query) || String(value).toLowerCase().includes(query),
+          ([key, value]) =>
+            key.toLowerCase().includes(query) ||
+            String(value).toLowerCase().includes(query),
         )
       ) {
         return true;
       }
     }
 
-    if ("envFile" in config && config.envFile && config.envFile.toLowerCase().includes(query)) {
+    if (
+      "envFile" in config &&
+      config.envFile &&
+      config.envFile.toLowerCase().includes(query)
+    ) {
       return true;
     }
     if ("roots" in config && config.roots && Array.isArray(config.roots)) {
@@ -254,11 +310,17 @@ export default function Command() {
       }
     }
 
-    if ("headers" in config && config.headers && typeof config.headers === "object") {
+    if (
+      "headers" in config &&
+      config.headers &&
+      typeof config.headers === "object"
+    ) {
       const headerEntries = Object.entries(config.headers);
       if (
         headerEntries.some(
-          ([key, value]) => key.toLowerCase().includes(query) || String(value).toLowerCase().includes(query),
+          ([key, value]) =>
+            key.toLowerCase().includes(query) ||
+            String(value).toLowerCase().includes(query),
         )
       ) {
         return true;
@@ -365,8 +427,16 @@ export default function Command() {
           description="Type to search across all your MCP servers"
           actions={
             <ActionPanel>
-              <Action.Push title="Add Server" icon={Icon.Plus} target={<AddServerForm />} />
-              <Action.Push title="View All Servers" icon={Icon.List} target={<ListServers />} />
+              <Action.Push
+                title="Add Server"
+                icon={Icon.Plus}
+                target={<AddServerForm />}
+              />
+              <Action.Push
+                title="View All Servers"
+                icon={Icon.List}
+                target={<ListServers />}
+              />
             </ActionPanel>
           }
         />
@@ -384,7 +454,10 @@ function SearchResultItem({
   onRefresh,
   protectionRefreshKey,
 }: {
-  server: MCPServerWithMetadata & { isProtected?: boolean; isUnlocked?: boolean };
+  server: MCPServerWithMetadata & {
+    isProtected?: boolean;
+    isUnlocked?: boolean;
+  };
   onToggle: () => void;
   onDelete: () => void;
   onTest: () => void;
@@ -401,7 +474,9 @@ function SearchResultItem({
   useEffect(() => {
     async function loadProtectionState() {
       try {
-        const { isProtectedServer, isServerUnlocked } = await import("./utils/protectedServers");
+        const { isProtectedServer, isServerUnlocked } = await import(
+          "./utils/protectedServers"
+        );
         const [isServerProtected, isServerUnlockedResult] = await Promise.all([
           isProtectedServer(server.config.name, server.editor),
           isServerUnlocked(server.config.name, server.editor),
@@ -411,7 +486,11 @@ function SearchResultItem({
           isUnlocked: isServerUnlockedResult,
         });
       } catch (error) {
-        console.error("Failed to load protection state for server:", server.config.name, error);
+        console.error(
+          "Failed to load protection state for server:",
+          server.config.name,
+          error,
+        );
       }
     }
     loadProtectionState();
@@ -472,7 +551,8 @@ function SearchResultItem({
         text: "Protected",
         icon: Icon.Lock,
         color: Color.SecondaryText,
-        tooltip: "This server is protected from editing. Click unlock to modify.",
+        tooltip:
+          "This server is protected from editing. Click unlock to modify.",
       });
     }
 
@@ -528,7 +608,10 @@ function SearchResultItem({
                   arguments={{
                     editorType: server.editor,
                     serverName: server.config.name,
-                    configType: server.source as "global" | "workspace" | "user",
+                    configType: server.source as
+                      | "global"
+                      | "workspace"
+                      | "user",
                   }}
                   launchType={LaunchType.UserInitiated}
                 />
@@ -549,7 +632,9 @@ function SearchResultItem({
                   <EditServerForm
                     editorType={server.editor}
                     serverName={server.config.name}
-                    configType={server.source as "global" | "workspace" | "user"}
+                    configType={
+                      server.source as "global" | "workspace" | "user"
+                    }
                     onComplete={onRefresh}
                   />
                 }
@@ -557,7 +642,9 @@ function SearchResultItem({
             )}
             {!isLocked && server.editor !== "cursor" && (
               <Action
-                title={server.config.disabled ? "Enable Server" : "Disable Server"}
+                title={
+                  server.config.disabled ? "Enable Server" : "Disable Server"
+                }
                 icon={server.config.disabled ? Icon.Play : Icon.Pause}
                 onAction={onToggle}
                 shortcut={{ modifiers: ["cmd"], key: "t" }}

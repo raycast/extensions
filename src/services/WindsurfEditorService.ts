@@ -10,8 +10,16 @@ import {
   WindsurfConfigFile,
   TransportType,
 } from "../types/mcpServer";
-import { EDITOR_CONFIGS, DEFAULT_SERVER_VALUES, ERROR_CODES, VALIDATION_RULES } from "../utils/constants";
-import { validateMCPServerConfig, validateJSONStructure } from "../utils/validation";
+import {
+  EDITOR_CONFIGS,
+  DEFAULT_SERVER_VALUES,
+  ERROR_CODES,
+  VALIDATION_RULES,
+} from "../utils/constants";
+import {
+  validateMCPServerConfig,
+  validateJSONStructure,
+} from "../utils/validation";
 import { existsSync } from "fs";
 
 export class WindsurfEditorService extends BaseEditorService {
@@ -19,9 +27,13 @@ export class WindsurfEditorService extends BaseEditorService {
     super(EDITOR_CONFIGS.windsurf);
   }
 
-  async readConfig(configType: "global" | "workspace" | "user" = "global"): Promise<MCPServerWithMetadata[]> {
+  async readConfig(
+    configType: "global" | "workspace" | "user" = "global",
+  ): Promise<MCPServerWithMetadata[]> {
     if (configType !== "global") {
-      throw new Error(`Windsurf only supports global configuration. Received: ${configType}`);
+      throw new Error(
+        `Windsurf only supports global configuration. Received: ${configType}`,
+      );
     }
 
     const configPath = this.getConfigPath(configType);
@@ -31,13 +43,19 @@ export class WindsurfEditorService extends BaseEditorService {
 
     try {
       if (!existsSync(configPath)) {
-        console.log(`Windsurf config file not found at ${configPath}, creating empty configuration`);
+        console.log(
+          `Windsurf config file not found at ${configPath}, creating empty configuration`,
+        );
 
         const dir = dirname(configPath);
         await mkdir(dir, { recursive: true });
 
         const emptyConfig = { mcpServers: {} };
-        await writeFile(configPath, JSON.stringify(emptyConfig, null, 2), "utf-8");
+        await writeFile(
+          configPath,
+          JSON.stringify(emptyConfig, null, 2),
+          "utf-8",
+        );
 
         return [];
       }
@@ -45,7 +63,9 @@ export class WindsurfEditorService extends BaseEditorService {
       const fileContent = await readFile(configPath, "utf-8");
 
       if (!fileContent.trim()) {
-        console.log(`Windsurf config file is empty at ${configPath}, returning empty configuration`);
+        console.log(
+          `Windsurf config file is empty at ${configPath}, returning empty configuration`,
+        );
         return [];
       }
 
@@ -69,7 +89,9 @@ export class WindsurfEditorService extends BaseEditorService {
     configType: "global" | "workspace" | "user" = "global",
   ): Promise<void> {
     if (configType !== "global") {
-      throw new Error(`Windsurf only supports global configuration. Received: ${configType}`);
+      throw new Error(
+        `Windsurf only supports global configuration. Received: ${configType}`,
+      );
     }
 
     const configPath = this.getConfigPath(configType);
@@ -81,7 +103,9 @@ export class WindsurfEditorService extends BaseEditorService {
       const dir = dirname(configPath);
       await mkdir(dir, { recursive: true });
 
-      const windsurfServers = servers.filter((server) => server.editor === "windsurf");
+      const windsurfServers = servers.filter(
+        (server) => server.editor === "windsurf",
+      );
 
       const configData = this.serializeConfigData(windsurfServers, configType);
 
@@ -144,8 +168,14 @@ export class WindsurfEditorService extends BaseEditorService {
             required: true,
             defaultValue: existingConfig?.transport || "stdio",
             options: [
-              { label: "Standard I/O (stdio) - [Local Server]", value: "stdio" },
-              { label: "Server-Sent Events (/sse) - [Remote Server]", value: "/sse" },
+              {
+                label: "Standard I/O (stdio) - [Local Server]",
+                value: "stdio",
+              },
+              {
+                label: "Server-Sent Events (/sse) - [Remote Server]",
+                value: "/sse",
+              },
             ],
           },
         ],
@@ -166,7 +196,10 @@ export class WindsurfEditorService extends BaseEditorService {
             placeholder: "npx -y @modelcontextprotocol/server-filesystem",
             description: "Command to execute the MCP server",
             required: true,
-            defaultValue: "command" in (existingConfig || {}) ? (existingConfig as { command?: string })?.command : "",
+            defaultValue:
+              "command" in (existingConfig || {})
+                ? (existingConfig as { command?: string })?.command
+                : "",
             validation: {
               maxLength: VALIDATION_RULES.MAX_LENGTHS.COMMAND,
             },
@@ -178,17 +211,23 @@ export class WindsurfEditorService extends BaseEditorService {
             placeholder: "/path/to/directory\n--verbose",
             description: "Command line arguments (one per line)",
             defaultValue:
-              "args" in (existingConfig || {}) ? (existingConfig as { args?: string[] })?.args?.join("\n") : "",
+              "args" in (existingConfig || {})
+                ? (existingConfig as { args?: string[] })?.args?.join("\n")
+                : "",
           },
           {
             id: "env",
             type: "textarea",
             label: "Environment Variables",
             placeholder: "API_KEY=your-api-key\nDEBUG=true",
-            description: "Environment variables in KEY=value format (one per line)",
+            description:
+              "Environment variables in KEY=value format (one per line)",
             defaultValue:
               "env" in (existingConfig || {})
-                ? Object.entries((existingConfig as { env?: Record<string, string> })?.env || {})
+                ? Object.entries(
+                    (existingConfig as { env?: Record<string, string> })?.env ||
+                      {},
+                  )
                     .map(([k, v]) => `${k}=${v}`)
                     .join("\n")
                 : "",
@@ -208,7 +247,9 @@ export class WindsurfEditorService extends BaseEditorService {
             description: "URL for the SSE MCP server",
             required: true,
             defaultValue:
-              "serverUrl" in (existingConfig || {}) ? (existingConfig as { serverUrl?: string })?.serverUrl : "",
+              "serverUrl" in (existingConfig || {})
+                ? (existingConfig as { serverUrl?: string })?.serverUrl
+                : "",
             validation: {
               maxLength: VALIDATION_RULES.MAX_LENGTHS.URL,
             },
@@ -220,7 +261,10 @@ export class WindsurfEditorService extends BaseEditorService {
     return sections;
   }
 
-  parseConfigData(rawData: unknown, _configType: "global" | "workspace" | "user" = "global"): MCPServerWithMetadata[] {
+  parseConfigData(
+    rawData: unknown,
+    _configType: "global" | "workspace" | "user" = "global",
+  ): MCPServerWithMetadata[] {
     void _configType;
     if (!rawData || typeof rawData !== "object") {
       return [];
@@ -230,7 +274,10 @@ export class WindsurfEditorService extends BaseEditorService {
 
     const typedRawData = rawData as Record<string, unknown>;
     let serverData = rawData;
-    if (typedRawData.mcpServers && typeof typedRawData.mcpServers === "object") {
+    if (
+      typedRawData.mcpServers &&
+      typeof typedRawData.mcpServers === "object"
+    ) {
       serverData = typedRawData.mcpServers;
     }
 
@@ -281,7 +328,11 @@ export class WindsurfEditorService extends BaseEditorService {
         let windsurfConfig: WindsurfMCPServerConfig;
 
         if (config.transport === "stdio") {
-          const stdioConfig = config as { command?: string; args?: string[]; env?: Record<string, string> };
+          const stdioConfig = config as {
+            command?: string;
+            args?: string[];
+            env?: Record<string, string>;
+          };
           windsurfConfig = {
             name: config.name,
             transport: "stdio",
@@ -313,7 +364,9 @@ export class WindsurfEditorService extends BaseEditorService {
     return { mcpServers } as WindsurfConfigFile;
   }
 
-  getConfigPath(configType: "global" | "workspace" | "user" = "global"): string | null {
+  getConfigPath(
+    configType: "global" | "workspace" | "user" = "global",
+  ): string | null {
     if (configType !== "global") {
       return null;
     }
@@ -346,7 +399,11 @@ export class WindsurfEditorService extends BaseEditorService {
 
     if (!configData || typeof configData !== "object") {
       errors.push(
-        this.createValidationError("structure", "Configuration must be an object", ERROR_CODES.SCHEMA_VALIDATION),
+        this.createValidationError(
+          "structure",
+          "Configuration must be an object",
+          ERROR_CODES.SCHEMA_VALIDATION,
+        ),
       );
       return { isValid: false, errors };
     }

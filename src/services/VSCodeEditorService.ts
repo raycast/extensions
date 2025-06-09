@@ -12,8 +12,15 @@ import {
   VSCodeInput,
   TransportType,
 } from "../types/mcpServer";
-import { EDITOR_CONFIGS, ERROR_CODES, VALIDATION_RULES } from "../utils/constants";
-import { validateMCPServerConfig, validateJSONStructure } from "../utils/validation";
+import {
+  EDITOR_CONFIGS,
+  ERROR_CODES,
+  VALIDATION_RULES,
+} from "../utils/constants";
+import {
+  validateMCPServerConfig,
+  validateJSONStructure,
+} from "../utils/validation";
 import { existsSync } from "fs";
 
 const loggedMessages = new Set<string>();
@@ -30,14 +37,18 @@ export class VSCodeEditorService extends BaseEditorService {
     super(EDITOR_CONFIGS.vscode);
   }
 
-  async readConfig(configType: "global" | "workspace" | "user" = "user"): Promise<MCPServerWithMetadata[]> {
+  async readConfig(
+    configType: "global" | "workspace" | "user" = "user",
+  ): Promise<MCPServerWithMetadata[]> {
     if (configType === "global") {
       configType = "user";
     }
 
     const configPath = this.getConfigPath(configType);
     if (!configPath) {
-      throw new Error(`Could not determine VS Code config path for ${configType}`);
+      throw new Error(
+        `Could not determine VS Code config path for ${configType}`,
+      );
     }
 
     try {
@@ -47,14 +58,23 @@ export class VSCodeEditorService extends BaseEditorService {
           const isValidWorkspace = this.isValidWorkspaceContext(dir);
 
           if (isValidWorkspace) {
-            console.log(`VS Code workspace config file not found at ${configPath}, creating empty configuration`);
+            console.log(
+              `VS Code workspace config file not found at ${configPath}, creating empty configuration`,
+            );
 
             try {
               await mkdir(dir, { recursive: true });
               const emptyConfig = { servers: {} };
-              await writeFile(configPath, JSON.stringify(emptyConfig, null, 2), "utf-8");
+              await writeFile(
+                configPath,
+                JSON.stringify(emptyConfig, null, 2),
+                "utf-8",
+              );
             } catch (error) {
-              console.warn(`Could not create VS Code workspace config at ${configPath}:`, error);
+              console.warn(
+                `Could not create VS Code workspace config at ${configPath}:`,
+                error,
+              );
             }
           } else {
             logOnce(
@@ -73,7 +93,9 @@ export class VSCodeEditorService extends BaseEditorService {
       const fileContent = await readFile(configPath, "utf-8");
 
       if (!fileContent.trim()) {
-        console.log(`VS Code config file is empty at ${configPath}, returning empty configuration`);
+        console.log(
+          `VS Code config file is empty at ${configPath}, returning empty configuration`,
+        );
         return [];
       }
 
@@ -161,8 +183,14 @@ export class VSCodeEditorService extends BaseEditorService {
             required: true,
             defaultValue: existingConfig?.transport || "http",
             options: [
-              { label: "Standard I/O (stdio) - [Local Server]", value: "stdio" },
-              { label: "Server-Sent Events (SSE) - [Remote Server]", value: "sse" },
+              {
+                label: "Standard I/O (stdio) - [Local Server]",
+                value: "stdio",
+              },
+              {
+                label: "Server-Sent Events (SSE) - [Remote Server]",
+                value: "sse",
+              },
               { label: "HTTP - [Remote Server]", value: "http" },
             ],
           },
@@ -186,19 +214,23 @@ export class VSCodeEditorService extends BaseEditorService {
             label: "Root Paths (JSON array)",
             placeholder: '[".", "src/"]',
             description: "JSON array of root paths for the server",
-            defaultValue: vscodeConfig?.roots ? JSON.stringify(vscodeConfig.roots) : "",
+            defaultValue: vscodeConfig?.roots
+              ? JSON.stringify(vscodeConfig.roots)
+              : "",
           },
         ],
       },
       {
         title: "Input Definitions",
-        description: "Define secure inputs that VS Code will prompt for at runtime",
+        description:
+          "Define secure inputs that VS Code will prompt for at runtime",
         fields: [
           {
             id: "inputs",
             type: "textarea",
             label: "Inputs (JSON array)",
-            placeholder: '[{"id": "api_key", "type": "promptString", "description": "API Key", "password": true}]',
+            placeholder:
+              '[{"id": "api_key", "type": "promptString", "description": "API Key", "password": true}]',
             description: "JSON array of input definitions for secure prompting",
             defaultValue: "",
           },
@@ -207,7 +239,10 @@ export class VSCodeEditorService extends BaseEditorService {
     ];
   }
 
-  parseConfigData(rawData: unknown, configType: "workspace" | "user"): MCPServerWithMetadata[] {
+  parseConfigData(
+    rawData: unknown,
+    configType: "workspace" | "user",
+  ): MCPServerWithMetadata[] {
     if (!rawData || typeof rawData !== "object") {
       return [];
     }
@@ -217,7 +252,9 @@ export class VSCodeEditorService extends BaseEditorService {
     if (configType === "workspace") {
       const workspaceConfig = rawData as VSCodeWorkspaceConfig;
       if (workspaceConfig.servers) {
-        for (const [serverName, serverConfig] of Object.entries(workspaceConfig.servers)) {
+        for (const [serverName, serverConfig] of Object.entries(
+          workspaceConfig.servers,
+        )) {
           const rawConfig = serverConfig as unknown as Record<string, unknown>;
           let transport = rawConfig.transport as string;
           if (!transport) {
@@ -247,7 +284,9 @@ export class VSCodeEditorService extends BaseEditorService {
     } else if (configType === "user") {
       const userSettings = rawData as VSCodeUserSettings;
       if (userSettings.mcp?.servers) {
-        for (const [serverName, serverConfig] of Object.entries(userSettings.mcp.servers)) {
+        for (const [serverName, serverConfig] of Object.entries(
+          userSettings.mcp.servers,
+        )) {
           const rawConfig = serverConfig as unknown as Record<string, unknown>;
           let transport = rawConfig.transport as string;
           if (!transport) {
@@ -283,7 +322,9 @@ export class VSCodeEditorService extends BaseEditorService {
     servers: MCPServerWithMetadata[],
     configType: "workspace" | "user",
   ): VSCodeWorkspaceConfig | VSCodeUserSettings {
-    const vscodeServers = servers.filter((server) => server.editor === "vscode");
+    const vscodeServers = servers.filter(
+      (server) => server.editor === "vscode",
+    );
 
     if (configType === "workspace") {
       const config: VSCodeWorkspaceConfig = {
@@ -314,7 +355,9 @@ export class VSCodeEditorService extends BaseEditorService {
     }
   }
 
-  getConfigPath(configType: "global" | "workspace" | "user" = "user"): string | null {
+  getConfigPath(
+    configType: "global" | "workspace" | "user" = "user",
+  ): string | null {
     if (configType === "workspace") {
       return this.editorConfig.configPaths.workspace || null;
     } else if (configType === "user") {
@@ -350,12 +393,19 @@ export class VSCodeEditorService extends BaseEditorService {
     };
   }
 
-  validateConfigStructure(configData: unknown, configType: "workspace" | "user"): ValidationResult {
+  validateConfigStructure(
+    configData: unknown,
+    configType: "workspace" | "user",
+  ): ValidationResult {
     const errors: ValidationError[] = [];
 
     if (!configData || typeof configData !== "object") {
       errors.push(
-        this.createValidationError("structure", "Configuration must be an object", ERROR_CODES.SCHEMA_VALIDATION),
+        this.createValidationError(
+          "structure",
+          "Configuration must be an object",
+          ERROR_CODES.SCHEMA_VALIDATION,
+        ),
       );
       return { isValid: false, errors };
     }
@@ -374,7 +424,13 @@ export class VSCodeEditorService extends BaseEditorService {
       }
 
       if (data.inputs && !Array.isArray(data.inputs)) {
-        errors.push(this.createValidationError("inputs", "Inputs must be an array", ERROR_CODES.SCHEMA_VALIDATION));
+        errors.push(
+          this.createValidationError(
+            "inputs",
+            "Inputs must be an array",
+            ERROR_CODES.SCHEMA_VALIDATION,
+          ),
+        );
       }
     } else if (configType === "user") {
       if (data.mcp && typeof data.mcp === "object") {
@@ -431,7 +487,10 @@ export class VSCodeEditorService extends BaseEditorService {
 
       return newMcpConfig;
     } catch (error) {
-      console.warn("Could not read existing user settings, using new config only:", error);
+      console.warn(
+        "Could not read existing user settings, using new config only:",
+        error,
+      );
       return newMcpConfig;
     }
   }
@@ -446,18 +505,28 @@ export class VSCodeEditorService extends BaseEditorService {
 
     const configPath = this.getConfigPath(configType);
     if (!configPath) {
-      throw new Error(`Could not determine VS Code config path for ${configType}`);
+      throw new Error(
+        `Could not determine VS Code config path for ${configType}`,
+      );
     }
 
     try {
       const dir = dirname(configPath);
       await mkdir(dir, { recursive: true });
-      const vscodeServers = servers.filter((server) => server.editor === "vscode" && server.source === configType);
+      const vscodeServers = servers.filter(
+        (server) => server.editor === "vscode" && server.source === configType,
+      );
 
-      let configData = this.serializeConfigData(vscodeServers, configType as "workspace" | "user");
+      let configData = this.serializeConfigData(
+        vscodeServers,
+        configType as "workspace" | "user",
+      );
 
       if (configType === "user") {
-        configData = await this.mergeWithExistingUserSettings(configData as VSCodeUserSettings, configPath);
+        configData = await this.mergeWithExistingUserSettings(
+          configData as VSCodeUserSettings,
+          configPath,
+        );
       }
 
       await writeFile(configPath, JSON.stringify(configData, null, 2), "utf-8");
@@ -500,13 +569,19 @@ export class VSCodeEditorService extends BaseEditorService {
       "composer.json",
     ];
 
-    return projectIndicators.some((indicator) => existsSync(`${parentDir}/${indicator}`));
+    return projectIndicators.some((indicator) =>
+      existsSync(`${parentDir}/${indicator}`),
+    );
   }
 
-  async readInputs(configType: "workspace" | "user" = "user"): Promise<VSCodeInput[]> {
+  async readInputs(
+    configType: "workspace" | "user" = "user",
+  ): Promise<VSCodeInput[]> {
     const configPath = this.getConfigPath(configType);
     if (!configPath) {
-      throw new Error(`Could not determine VS Code config path for ${configType}`);
+      throw new Error(
+        `Could not determine VS Code config path for ${configType}`,
+      );
     }
 
     try {
@@ -523,9 +598,16 @@ export class VSCodeEditorService extends BaseEditorService {
             try {
               await mkdir(dir, { recursive: true });
               const emptyConfig = { servers: {} };
-              await writeFile(configPath, JSON.stringify(emptyConfig, null, 2), "utf-8");
+              await writeFile(
+                configPath,
+                JSON.stringify(emptyConfig, null, 2),
+                "utf-8",
+              );
             } catch (error) {
-              console.warn(`Could not create VS Code workspace config at ${configPath}:`, error);
+              console.warn(
+                `Could not create VS Code workspace config at ${configPath}:`,
+                error,
+              );
             }
           } else {
             logOnce(
@@ -544,7 +626,9 @@ export class VSCodeEditorService extends BaseEditorService {
       const fileContent = await readFile(configPath, "utf-8");
 
       if (!fileContent.trim()) {
-        console.log(`VS Code config file is empty at ${configPath}, returning empty inputs`);
+        console.log(
+          `VS Code config file is empty at ${configPath}, returning empty inputs`,
+        );
         return [];
       }
 
@@ -569,10 +653,15 @@ export class VSCodeEditorService extends BaseEditorService {
     }
   }
 
-  async writeInputs(inputs: VSCodeInput[], configType: "workspace" | "user" = "user"): Promise<void> {
+  async writeInputs(
+    inputs: VSCodeInput[],
+    configType: "workspace" | "user" = "user",
+  ): Promise<void> {
     const configPath = this.getConfigPath(configType);
     if (!configPath) {
-      throw new Error(`Could not determine VS Code config path for ${configType}`);
+      throw new Error(
+        `Could not determine VS Code config path for ${configType}`,
+      );
     }
 
     try {

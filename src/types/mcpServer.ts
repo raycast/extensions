@@ -37,9 +37,14 @@ export interface HTTPTransportConfig {
   headers?: Record<string, string>;
 }
 
-export type TransportConfig = StdioTransportConfig | SSETransportConfig | HTTPTransportConfig;
+export type TransportConfig =
+  | StdioTransportConfig
+  | SSETransportConfig
+  | HTTPTransportConfig;
 
-export type WindsurfTransportConfig = StdioTransportConfig | WindsurfSSETransportConfig;
+export type WindsurfTransportConfig =
+  | StdioTransportConfig
+  | WindsurfSSETransportConfig;
 
 export interface VSCodeInput {
   id: string;
@@ -59,13 +64,22 @@ export interface VSCodeSpecificConfig {
   roots?: string[];
 }
 
-export type CursorMCPServerConfig = BaseMCPServerConfig & TransportConfig & CursorSpecificConfig;
+export type CursorMCPServerConfig = BaseMCPServerConfig &
+  TransportConfig &
+  CursorSpecificConfig;
 
-export type WindsurfMCPServerConfig = BaseMCPServerConfig & WindsurfTransportConfig & WindsurfSpecificConfig;
+export type WindsurfMCPServerConfig = BaseMCPServerConfig &
+  WindsurfTransportConfig &
+  WindsurfSpecificConfig;
 
-export type VSCodeMCPServerConfig = BaseMCPServerConfig & TransportConfig & VSCodeSpecificConfig;
+export type VSCodeMCPServerConfig = BaseMCPServerConfig &
+  TransportConfig &
+  VSCodeSpecificConfig;
 
-export type MCPServerConfig = CursorMCPServerConfig | WindsurfMCPServerConfig | VSCodeMCPServerConfig;
+export type MCPServerConfig =
+  | CursorMCPServerConfig
+  | WindsurfMCPServerConfig
+  | VSCodeMCPServerConfig;
 
 export interface CursorConfigFile {
   mcpServers: Record<string, CursorMCPServerConfig>;

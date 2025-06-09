@@ -1,8 +1,21 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, Icon, List, Color, showToast, Toast, Detail } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  Color,
+  showToast,
+  Toast,
+  Detail,
+} from "@raycast/api";
 import { EditorManager } from "./services/EditorManager";
 import { ConnectionTestService } from "./services/ConnectionTestService";
-import { MCPServerWithMetadata, EditorType, ConnectionTestResult } from "./types/mcpServer";
+import {
+  MCPServerWithMetadata,
+  EditorType,
+  ConnectionTestResult,
+} from "./types/mcpServer";
 import { getEditorConfig } from "./utils/constants";
 
 export default function Command() {
@@ -11,7 +24,9 @@ export default function Command() {
   const [editorFilter, setEditorFilter] = useState<"all" | EditorType>("all");
   const [editorManager] = useState(() => new EditorManager());
   const [connectionTestService] = useState(() => new ConnectionTestService());
-  const [testResults, setTestResults] = useState<Map<string, ConnectionTestResult>>(new Map());
+  const [testResults, setTestResults] = useState<
+    Map<string, ConnectionTestResult>
+  >(new Map());
 
   useEffect(() => {
     loadServers();
@@ -34,11 +49,16 @@ export default function Command() {
     }
   }
 
-  const filteredServers = editorFilter === "all" ? servers : servers.filter((server) => server.editor === editorFilter);
+  const filteredServers =
+    editorFilter === "all"
+      ? servers
+      : servers.filter((server) => server.editor === editorFilter);
 
   async function testSingleConnection(server: MCPServerWithMetadata) {
     const serverKey = `${server.editor}-${server.config.name}`;
-    const testDescription = connectionTestService.getTestDescription(server.config);
+    const testDescription = connectionTestService.getTestDescription(
+      server.config,
+    );
 
     await showToast({
       style: Toast.Style.Animated,
@@ -88,7 +108,9 @@ export default function Command() {
       const serverKey = `${server.editor}-${server.config.name}`;
 
       try {
-        const result = await connectionTestService.testConnection(server.config);
+        const result = await connectionTestService.testConnection(
+          server.config,
+        );
         setTestResults((prev) => new Map(prev.set(serverKey, result)));
 
         if (result.success) {
@@ -119,7 +141,11 @@ export default function Command() {
     const result = testResults.get(serverKey);
 
     if (!result) {
-      return { icon: Icon.Minus, color: Color.SecondaryText, text: "Not tested" };
+      return {
+        icon: Icon.Minus,
+        color: Color.SecondaryText,
+        text: "Not tested",
+      };
     }
 
     if (result.success) {
@@ -160,13 +186,21 @@ export default function Command() {
         <List.Dropdown
           tooltip="Filter by Editor"
           value={editorFilter}
-          onChange={(newValue) => setEditorFilter(newValue as "all" | EditorType)}
+          onChange={(newValue) =>
+            setEditorFilter(newValue as "all" | EditorType)
+          }
         >
           <List.Dropdown.Item title="All Editors" value="all" />
           <List.Dropdown.Section title="Editors">
             {editorManager.getAvailableEditors().map((editor) => {
               const config = getEditorConfig(editor);
-              return <List.Dropdown.Item key={editor} title={config.displayName} value={editor} />;
+              return (
+                <List.Dropdown.Item
+                  key={editor}
+                  title={config.displayName}
+                  value={editor}
+                />
+              );
             })}
           </List.Dropdown.Section>
         </List.Dropdown>
@@ -206,7 +240,9 @@ export default function Command() {
             key={serverKey}
             icon={{
               source: transportIcon,
-              tintColor: server.config.disabled ? Color.SecondaryText : Color.PrimaryText,
+              tintColor: server.config.disabled
+                ? Color.SecondaryText
+                : Color.PrimaryText,
             }}
             title={server.config.name}
             subtitle={`${editorConfig.displayName} • ${server.config.transport?.toUpperCase() || "Unknown"}`}
@@ -232,7 +268,9 @@ export default function Command() {
                     <Action.Push
                       title="View Test Details"
                       icon={Icon.Eye}
-                      target={<TestResultDetail server={server} result={result} />}
+                      target={
+                        <TestResultDetail server={server} result={result} />
+                      }
                       shortcut={{ modifiers: ["cmd"], key: "d" }}
                     />
                   )}
@@ -261,7 +299,9 @@ export default function Command() {
                   />
                   <Action.CopyToClipboard
                     title="Copy Test Command"
-                    content={connectionTestService.getTestDescription(server.config)}
+                    content={connectionTestService.getTestDescription(
+                      server.config,
+                    )}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                 </ActionPanel.Section>
@@ -282,7 +322,13 @@ export default function Command() {
   );
 }
 
-function TestResultDetail({ server, result }: { server: MCPServerWithMetadata; result: ConnectionTestResult }) {
+function TestResultDetail({
+  server,
+  result,
+}: {
+  server: MCPServerWithMetadata;
+  result: ConnectionTestResult;
+}) {
   const editorConfig = getEditorConfig(server.editor);
 
   const markdown = `
@@ -314,7 +360,11 @@ ${JSON.stringify(server.config, null, 2)}
       navigationTitle={`Test Results: ${server.config.name}`}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Results" content={markdown} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CopyToClipboard
+            title="Copy Results"
+            content={markdown}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
           <Action.CopyToClipboard
             title="Copy Error"
             content={result.error || "No error"}

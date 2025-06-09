@@ -1,4 +1,9 @@
-import { MCPServerConfig, ValidationResult, MCPServerWithMetadata, EditorType } from "../types/mcpServer";
+import {
+  MCPServerConfig,
+  ValidationResult,
+  MCPServerWithMetadata,
+  EditorType,
+} from "../types/mcpServer";
 import { EditorConfig } from "../utils/constants";
 
 export interface ServerFormField {
@@ -34,27 +39,51 @@ export abstract class BaseEditorService {
     this.editorType = editorConfig.id;
   }
 
-  abstract readConfig(configType?: "global" | "workspace" | "user"): Promise<MCPServerWithMetadata[]>;
+  abstract readConfig(
+    configType?: "global" | "workspace" | "user",
+  ): Promise<MCPServerWithMetadata[]>;
 
-  abstract writeConfig(servers: MCPServerWithMetadata[], configType?: "global" | "workspace" | "user"): Promise<void>;
+  abstract writeConfig(
+    servers: MCPServerWithMetadata[],
+    configType?: "global" | "workspace" | "user",
+  ): Promise<void>;
 
-  abstract validateServerConfig(serverConfig: MCPServerConfig): ValidationResult;
+  abstract validateServerConfig(
+    serverConfig: MCPServerConfig,
+  ): ValidationResult;
 
-  abstract getFormSections(existingConfig?: MCPServerConfig): ServerFormSection[];
+  abstract getFormSections(
+    existingConfig?: MCPServerConfig,
+  ): ServerFormSection[];
 
-  abstract parseConfigData(rawData: unknown, configType?: "global" | "workspace" | "user"): MCPServerWithMetadata[];
+  abstract parseConfigData(
+    rawData: unknown,
+    configType?: "global" | "workspace" | "user",
+  ): MCPServerWithMetadata[];
 
-  abstract serializeConfigData(servers: MCPServerWithMetadata[], configType?: "global" | "workspace" | "user"): unknown;
+  abstract serializeConfigData(
+    servers: MCPServerWithMetadata[],
+    configType?: "global" | "workspace" | "user",
+  ): unknown;
 
-  abstract getConfigPath(configType?: "global" | "workspace" | "user"): string | null;
+  abstract getConfigPath(
+    configType?: "global" | "workspace" | "user",
+  ): string | null;
 
-  abstract supportsConfigType(configType: "global" | "workspace" | "user"): boolean;
+  abstract supportsConfigType(
+    configType: "global" | "workspace" | "user",
+  ): boolean;
 
-  abstract isConfigTypeAvailable(configType: "global" | "workspace" | "user"): boolean;
+  abstract isConfigTypeAvailable(
+    configType: "global" | "workspace" | "user",
+  ): boolean;
 
   abstract getDefaultServerConfig(): Partial<MCPServerConfig>;
 
-  abstract validateConfigStructure(configData: unknown, configType?: "global" | "workspace" | "user"): ValidationResult;
+  abstract validateConfigStructure(
+    configData: unknown,
+    configType?: "global" | "workspace" | "user",
+  ): ValidationResult;
 
   getSupportedTransports() {
     return this.editorConfig.supportedTransports;
@@ -77,14 +106,24 @@ export abstract class BaseEditorService {
   }
 
   protected isTransportSupported(transport: string): boolean {
-    return this.editorConfig.supportedTransports.includes(transport as "stdio" | "sse" | "/sse" | "http");
+    return this.editorConfig.supportedTransports.includes(
+      transport as "stdio" | "sse" | "/sse" | "http",
+    );
   }
 
-  protected createValidationError(field: string, message: string, code: string) {
+  protected createValidationError(
+    field: string,
+    message: string,
+    code: string,
+  ) {
     return { field, message, code };
   }
 
-  protected createValidationWarning(field: string, message: string, code: string) {
+  protected createValidationWarning(
+    field: string,
+    message: string,
+    code: string,
+  ) {
     return { field, message, code };
   }
 }

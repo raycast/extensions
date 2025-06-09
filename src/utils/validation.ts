@@ -12,16 +12,31 @@ import {
 } from "../types/mcpServer";
 import { VALIDATION_RULES, ERROR_CODES } from "./constants";
 
-export function validateMCPServerConfig(config: MCPServerConfig, editorType: EditorType): ValidationResult {
+export function validateMCPServerConfig(
+  config: MCPServerConfig,
+  editorType: EditorType,
+): ValidationResult {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
 
   if (!config.name || config.name.trim() === "") {
-    errors.push(createError("name", "Server name is required", ERROR_CODES.REQUIRED_FIELD));
+    errors.push(
+      createError(
+        "name",
+        "Server name is required",
+        ERROR_CODES.REQUIRED_FIELD,
+      ),
+    );
   }
 
   if (!config.transport) {
-    errors.push(createError("transport", "Transport type is required", ERROR_CODES.REQUIRED_FIELD));
+    errors.push(
+      createError(
+        "transport",
+        "Transport type is required",
+        ERROR_CODES.REQUIRED_FIELD,
+      ),
+    );
   }
 
   if (config.name && !VALIDATION_RULES.SERVER_NAME_PATTERN.test(config.name)) {
@@ -34,7 +49,10 @@ export function validateMCPServerConfig(config: MCPServerConfig, editorType: Edi
     );
   }
 
-  if (config.name && config.name.length > VALIDATION_RULES.MAX_LENGTHS.SERVER_NAME) {
+  if (
+    config.name &&
+    config.name.length > VALIDATION_RULES.MAX_LENGTHS.SERVER_NAME
+  ) {
     errors.push(
       createError(
         "name",
@@ -44,7 +62,10 @@ export function validateMCPServerConfig(config: MCPServerConfig, editorType: Edi
     );
   }
 
-  if (config.description && config.description.length > VALIDATION_RULES.MAX_LENGTHS.DESCRIPTION) {
+  if (
+    config.description &&
+    config.description.length > VALIDATION_RULES.MAX_LENGTHS.DESCRIPTION
+  ) {
     errors.push(
       createError(
         "description",
@@ -72,7 +93,10 @@ export function validateMCPServerConfig(config: MCPServerConfig, editorType: Edi
   };
 }
 
-export function validateTransportConfig(config: MCPServerConfig, editorType: EditorType): ValidationError[] {
+export function validateTransportConfig(
+  config: MCPServerConfig,
+  editorType: EditorType,
+): ValidationError[] {
   const errors: ValidationError[] = [];
 
   switch (config.transport) {
@@ -87,7 +111,13 @@ export function validateTransportConfig(config: MCPServerConfig, editorType: Edi
       errors.push(...validateHTTPConfig(config, editorType));
       break;
     default:
-      errors.push(createError("transport", "Invalid transport type", ERROR_CODES.INVALID_TRANSPORT));
+      errors.push(
+        createError(
+          "transport",
+          "Invalid transport type",
+          ERROR_CODES.INVALID_TRANSPORT,
+        ),
+      );
   }
 
   return errors;
@@ -98,10 +128,19 @@ function validateStdioConfig(config: MCPServerConfig): ValidationError[] {
 
   if ("command" in config) {
     if (!config.command || config.command.trim() === "") {
-      errors.push(createError("command", "Command is required for stdio transport", ERROR_CODES.REQUIRED_FIELD));
+      errors.push(
+        createError(
+          "command",
+          "Command is required for stdio transport",
+          ERROR_CODES.REQUIRED_FIELD,
+        ),
+      );
     }
 
-    if (config.command && config.command.length > VALIDATION_RULES.MAX_LENGTHS.COMMAND) {
+    if (
+      config.command &&
+      config.command.length > VALIDATION_RULES.MAX_LENGTHS.COMMAND
+    ) {
       errors.push(
         createError(
           "command",
@@ -111,12 +150,27 @@ function validateStdioConfig(config: MCPServerConfig): ValidationError[] {
       );
     }
 
-    if (config.command && (!("args" in config) || !config.args || config.args.length === 0)) {
+    if (
+      config.command &&
+      (!("args" in config) || !config.args || config.args.length === 0)
+    ) {
       const command = config.command.toLowerCase().trim();
 
-      const commandsNeedingArgs = ["npx", "node", "python", "python3", "pip", "npm", "docker"];
+      const commandsNeedingArgs = [
+        "npx",
+        "node",
+        "python",
+        "python3",
+        "pip",
+        "npm",
+        "docker",
+      ];
 
-      if (commandsNeedingArgs.some((cmd) => command === cmd || command.endsWith(cmd))) {
+      if (
+        commandsNeedingArgs.some(
+          (cmd) => command === cmd || command.endsWith(cmd),
+        )
+      ) {
         errors.push(
           createError(
             "args",
@@ -127,28 +181,53 @@ function validateStdioConfig(config: MCPServerConfig): ValidationError[] {
       }
     }
   } else {
-    errors.push(createError("command", "Command is required for stdio transport", ERROR_CODES.REQUIRED_FIELD));
+    errors.push(
+      createError(
+        "command",
+        "Command is required for stdio transport",
+        ERROR_CODES.REQUIRED_FIELD,
+      ),
+    );
   }
 
   return errors;
 }
 
-function validateSSEConfig(config: MCPServerConfig, editorType?: EditorType): ValidationError[] {
+function validateSSEConfig(
+  config: MCPServerConfig,
+  editorType?: EditorType,
+): ValidationError[] {
   const errors: ValidationError[] = [];
 
   if (editorType === "windsurf" && config.transport === "/sse") {
     if ("serverUrl" in config) {
       if (!config.serverUrl || config.serverUrl.trim() === "") {
         errors.push(
-          createError("serverUrl", "Server URL is required for Windsurf SSE transport", ERROR_CODES.REQUIRED_FIELD),
+          createError(
+            "serverUrl",
+            "Server URL is required for Windsurf SSE transport",
+            ERROR_CODES.REQUIRED_FIELD,
+          ),
         );
       }
 
-      if (config.serverUrl && !VALIDATION_RULES.URL_PATTERNS.SSE.test(config.serverUrl)) {
-        errors.push(createError("serverUrl", "Invalid server URL format for SSE transport", ERROR_CODES.INVALID_URL));
+      if (
+        config.serverUrl &&
+        !VALIDATION_RULES.URL_PATTERNS.SSE.test(config.serverUrl)
+      ) {
+        errors.push(
+          createError(
+            "serverUrl",
+            "Invalid server URL format for SSE transport",
+            ERROR_CODES.INVALID_URL,
+          ),
+        );
       }
 
-      if (config.serverUrl && config.serverUrl.length > VALIDATION_RULES.MAX_LENGTHS.URL) {
+      if (
+        config.serverUrl &&
+        config.serverUrl.length > VALIDATION_RULES.MAX_LENGTHS.URL
+      ) {
         errors.push(
           createError(
             "serverUrl",
@@ -159,17 +238,33 @@ function validateSSEConfig(config: MCPServerConfig, editorType?: EditorType): Va
       }
     } else {
       errors.push(
-        createError("serverUrl", "Server URL is required for Windsurf SSE transport", ERROR_CODES.REQUIRED_FIELD),
+        createError(
+          "serverUrl",
+          "Server URL is required for Windsurf SSE transport",
+          ERROR_CODES.REQUIRED_FIELD,
+        ),
       );
     }
   } else {
     if ("url" in config) {
       if (!config.url || config.url.trim() === "") {
-        errors.push(createError("url", "URL is required for SSE transport", ERROR_CODES.REQUIRED_FIELD));
+        errors.push(
+          createError(
+            "url",
+            "URL is required for SSE transport",
+            ERROR_CODES.REQUIRED_FIELD,
+          ),
+        );
       }
 
       if (config.url && !VALIDATION_RULES.URL_PATTERNS.SSE.test(config.url)) {
-        errors.push(createError("url", "Invalid URL format for SSE transport", ERROR_CODES.INVALID_URL));
+        errors.push(
+          createError(
+            "url",
+            "Invalid URL format for SSE transport",
+            ERROR_CODES.INVALID_URL,
+          ),
+        );
       }
 
       if (config.url && config.url.length > VALIDATION_RULES.MAX_LENGTHS.URL) {
@@ -182,30 +277,55 @@ function validateSSEConfig(config: MCPServerConfig, editorType?: EditorType): Va
         );
       }
     } else {
-      errors.push(createError("url", "URL is required for SSE transport", ERROR_CODES.REQUIRED_FIELD));
+      errors.push(
+        createError(
+          "url",
+          "URL is required for SSE transport",
+          ERROR_CODES.REQUIRED_FIELD,
+        ),
+      );
     }
   }
 
   return errors;
 }
 
-function validateHTTPConfig(config: MCPServerConfig, editorType: EditorType): ValidationError[] {
+function validateHTTPConfig(
+  config: MCPServerConfig,
+  editorType: EditorType,
+): ValidationError[] {
   const errors: ValidationError[] = [];
 
   if (editorType !== "vscode") {
     errors.push(
-      createError("transport", `HTTP transport is not supported by ${editorType}`, ERROR_CODES.INVALID_TRANSPORT),
+      createError(
+        "transport",
+        `HTTP transport is not supported by ${editorType}`,
+        ERROR_CODES.INVALID_TRANSPORT,
+      ),
     );
     return errors;
   }
 
   if ("url" in config) {
     if (!config.url || config.url.trim() === "") {
-      errors.push(createError("url", "URL is required for HTTP transport", ERROR_CODES.REQUIRED_FIELD));
+      errors.push(
+        createError(
+          "url",
+          "URL is required for HTTP transport",
+          ERROR_CODES.REQUIRED_FIELD,
+        ),
+      );
     }
 
     if (config.url && !VALIDATION_RULES.URL_PATTERNS.HTTP.test(config.url)) {
-      errors.push(createError("url", "Invalid URL format for HTTP transport", ERROR_CODES.INVALID_URL));
+      errors.push(
+        createError(
+          "url",
+          "Invalid URL format for HTTP transport",
+          ERROR_CODES.INVALID_URL,
+        ),
+      );
     }
 
     if (config.url && config.url.length > VALIDATION_RULES.MAX_LENGTHS.URL) {
@@ -218,13 +338,21 @@ function validateHTTPConfig(config: MCPServerConfig, editorType: EditorType): Va
       );
     }
   } else {
-    errors.push(createError("url", "URL is required for HTTP transport", ERROR_CODES.REQUIRED_FIELD));
+    errors.push(
+      createError(
+        "url",
+        "URL is required for HTTP transport",
+        ERROR_CODES.REQUIRED_FIELD,
+      ),
+    );
   }
 
   return errors;
 }
 
-export function validateEnvironmentVariables(env: EnvironmentVariable): ValidationError[] {
+export function validateEnvironmentVariables(
+  env: EnvironmentVariable,
+): ValidationError[] {
   const errors: ValidationError[] = [];
 
   Object.entries(env).forEach(([key, value]) => {
@@ -251,7 +379,10 @@ export function validateEnvironmentVariables(env: EnvironmentVariable): Validati
 
   return errors;
 }
-function validateEditorSpecificConfig(config: MCPServerConfig, editorType: EditorType): ValidationError[] {
+function validateEditorSpecificConfig(
+  config: MCPServerConfig,
+  editorType: EditorType,
+): ValidationError[] {
   const errors: ValidationError[] = [];
 
   switch (editorType) {
@@ -259,11 +390,24 @@ function validateEditorSpecificConfig(config: MCPServerConfig, editorType: Edito
       break;
 
     case "windsurf":
-      if ("maxTools" in config && config.maxTools !== undefined && config.maxTools !== null) {
-        const maxTools = typeof config.maxTools === "number" ? config.maxTools : Number(config.maxTools);
+      if (
+        "maxTools" in config &&
+        config.maxTools !== undefined &&
+        config.maxTools !== null
+      ) {
+        const maxTools =
+          typeof config.maxTools === "number"
+            ? config.maxTools
+            : Number(config.maxTools);
 
         if (isNaN(maxTools)) {
-          errors.push(createError("maxTools", "Maximum tools must be a valid number", ERROR_CODES.INVALID_FORMAT));
+          errors.push(
+            createError(
+              "maxTools",
+              "Maximum tools must be a valid number",
+              ERROR_CODES.INVALID_FORMAT,
+            ),
+          );
         } else {
           if (maxTools > VALIDATION_RULES.WINDSURF_MAX_TOOLS) {
             errors.push(
@@ -275,7 +419,13 @@ function validateEditorSpecificConfig(config: MCPServerConfig, editorType: Edito
             );
           }
           if (maxTools < 1) {
-            errors.push(createError("maxTools", "Maximum tools must be at least 1", ERROR_CODES.INVALID_FORMAT));
+            errors.push(
+              createError(
+                "maxTools",
+                "Maximum tools must be at least 1",
+                ERROR_CODES.INVALID_FORMAT,
+              ),
+            );
           }
         }
       }
@@ -296,15 +446,33 @@ export function validateVSCodeInputs(inputs: VSCodeInput[]): ValidationError[] {
     const prefix = `inputs[${index}]`;
 
     if (!input.id || input.id.trim() === "") {
-      errors.push(createError(`${prefix}.id`, "Input ID is required", ERROR_CODES.REQUIRED_FIELD));
+      errors.push(
+        createError(
+          `${prefix}.id`,
+          "Input ID is required",
+          ERROR_CODES.REQUIRED_FIELD,
+        ),
+      );
     }
 
     if (!input.description || input.description.trim() === "") {
-      errors.push(createError(`${prefix}.description`, "Input description is required", ERROR_CODES.REQUIRED_FIELD));
+      errors.push(
+        createError(
+          `${prefix}.description`,
+          "Input description is required",
+          ERROR_CODES.REQUIRED_FIELD,
+        ),
+      );
     }
 
     if (input.id && seenIds.has(input.id)) {
-      errors.push(createError(`${prefix}.id`, `Duplicate input ID: ${input.id}`, ERROR_CODES.DUPLICATE_SERVER_NAME));
+      errors.push(
+        createError(
+          `${prefix}.id`,
+          `Duplicate input ID: ${input.id}`,
+          ERROR_CODES.DUPLICATE_SERVER_NAME,
+        ),
+      );
     } else if (input.id) {
       seenIds.add(input.id);
     }
@@ -320,14 +488,24 @@ export function validateVSCodeInputs(inputs: VSCodeInput[]): ValidationError[] {
     }
 
     if (input.type && input.type !== "promptString") {
-      errors.push(createError(`${prefix}.type`, "Input type must be 'promptString'", ERROR_CODES.INVALID_FORMAT));
+      errors.push(
+        createError(
+          `${prefix}.type`,
+          "Input type must be 'promptString'",
+          ERROR_CODES.INVALID_FORMAT,
+        ),
+      );
     }
   });
 
   return errors;
 }
 
-export function validateJSONStructure(jsonString: string): { isValid: boolean; data?: unknown; error?: string } {
+export function validateJSONStructure(jsonString: string): {
+  isValid: boolean;
+  data?: unknown;
+  error?: string;
+} {
   try {
     const data = JSON.parse(jsonString);
     return { isValid: true, data };
@@ -352,7 +530,11 @@ export function validateServerNameUniqueness(
   });
 }
 
-function createError(field: string, message: string, code: string): ValidationError {
+function createError(
+  field: string,
+  message: string,
+  code: string,
+): ValidationError {
   return { field, message, code };
 }
 
@@ -372,7 +554,9 @@ export function extractVSCodeInputReferences(
   const references: VSCodeInputReference[] = [];
 
   function scanValue(value: string, fieldPath: string): void {
-    const matches = value.match(VALIDATION_RULES.VSCODE_VARIABLE_PATTERNS.INPUT_VAR);
+    const matches = value.match(
+      VALIDATION_RULES.VSCODE_VARIABLE_PATTERNS.INPUT_VAR,
+    );
     if (matches) {
       matches.forEach((match) => {
         const inputId = match.replace(/\$\{input:([^}]+)\}/, "$1");
@@ -421,7 +605,10 @@ export function validateVSCodeInputReferences(
   const vscodeServers = servers.filter((server) => server.editor === "vscode");
 
   vscodeServers.forEach((server) => {
-    const references = extractVSCodeInputReferences(server.config, server.config.name);
+    const references = extractVSCodeInputReferences(
+      server.config,
+      server.config.name,
+    );
 
     references.forEach((ref) => {
       referencedInputIds.add(ref.inputId);
@@ -441,7 +628,9 @@ export function validateVSCodeInputReferences(
   const unreferencedInputs = definedInputs
     .filter((input) => !referencedInputIds.has(input.id))
     .map((input) => input.id);
-  const missingInputs = Array.from(referencedInputIds).filter((id) => !definedInputIds.has(id));
+  const missingInputs = Array.from(referencedInputIds).filter(
+    (id) => !definedInputIds.has(id),
+  );
 
   return {
     isValid: errors.length === 0,

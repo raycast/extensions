@@ -28,7 +28,9 @@ export class ConnectionTestService {
         case "http":
           return await this.testHTTPConnection(config as HTTPTransportConfig);
         default:
-          throw new Error(`Unsupported transport type: ${(config as { transport: string }).transport}`);
+          throw new Error(
+            `Unsupported transport type: ${(config as { transport: string }).transport}`,
+          );
       }
     } catch (error) {
       return {
@@ -41,7 +43,9 @@ export class ConnectionTestService {
     }
   }
 
-  private async testStdioConnection(config: StdioTransportConfig): Promise<ConnectionTestResult> {
+  private async testStdioConnection(
+    config: StdioTransportConfig,
+  ): Promise<ConnectionTestResult> {
     const startTime = Date.now();
 
     return new Promise((resolve) => {
@@ -82,7 +86,9 @@ export class ConnectionTestService {
           processStarted = true;
 
           try {
-            child.stdin.write('{"jsonrpc": "2.0", "method": "initialize", "id": 1, "params": {}}\n');
+            child.stdin.write(
+              '{"jsonrpc": "2.0", "method": "initialize", "id": 1, "params": {}}\n',
+            );
             child.stdin.end();
           } catch (error) {
             console.warn("Could not write to process stdin:", error);
@@ -147,7 +153,9 @@ export class ConnectionTestService {
     });
   }
 
-  private async testSSEConnection(config: SSETransportConfig): Promise<ConnectionTestResult> {
+  private async testSSEConnection(
+    config: SSETransportConfig,
+  ): Promise<ConnectionTestResult> {
     const startTime = Date.now();
 
     try {
@@ -340,7 +348,9 @@ export class ConnectionTestService {
     }
   }
 
-  private async testHTTPConnection(config: HTTPTransportConfig): Promise<ConnectionTestResult> {
+  private async testHTTPConnection(
+    config: HTTPTransportConfig,
+  ): Promise<ConnectionTestResult> {
     const startTime = Date.now();
 
     try {
@@ -398,7 +408,8 @@ export class ConnectionTestService {
         } else if (response.status === 405) {
           return {
             success: true,
-            message: "HTTP server is reachable (GET method not allowed, but server responds)",
+            message:
+              "HTTP server is reachable (GET method not allowed, but server responds)",
             responseTime: Date.now() - startTime,
             timestamp: new Date(),
           };
