@@ -27,6 +27,7 @@ import {
 import { getEditorConfig, SUCCESS_MESSAGES } from "./utils/constants";
 import { VSCodeEditorService } from "./services/VSCodeEditorService";
 import { validateLockedServersPresent } from "./utils/protectedServers";
+import { getTransportType } from "./utils/transportUtils";
 
 interface EditServerArgs {
   editorType: EditorType;
@@ -149,7 +150,7 @@ export function EditServerForm({
         setServerConfig(server);
 
         setSelectedTransport(
-          server.config.transport as "stdio" | "sse" | "/sse" | "http",
+          getTransportType(server.config) as "stdio" | "sse" | "/sse" | "http",
         );
 
         const initialValues = convertServerConfigToFormValues(server.config);
@@ -275,7 +276,7 @@ export function EditServerForm({
       name: config.name || "",
       description: config.description || "",
       disabled: config.disabled ?? false,
-      transport: config.transport || "stdio",
+      transport: getTransportType(config) || "stdio",
     };
 
     values.command = "";
@@ -286,7 +287,7 @@ export function EditServerForm({
     values.envFile = "";
     values.roots = "";
 
-    if (config.transport === "stdio") {
+    if (getTransportType(config) === "stdio") {
       const stdioConfig = config as StdioTransportConfig & BaseMCPServerConfig;
       values.command = stdioConfig.command || "";
       values.args = stdioConfig.args ? stdioConfig.args.join("\n") : "";
@@ -295,11 +296,14 @@ export function EditServerForm({
             .map(([k, v]) => `${k}=${v}`)
             .join("\n")
         : "";
-    } else if (config.transport === "sse" || config.transport === "http") {
+    } else if (
+      getTransportType(config) === "sse" ||
+      getTransportType(config) === "http"
+    ) {
       const urlConfig = config as (SSETransportConfig | HTTPTransportConfig) &
         BaseMCPServerConfig;
       values.url = urlConfig.url || "";
-    } else if (config.transport === "/sse") {
+    } else if (getTransportType(config) === "/sse") {
       const windsurfSSEConfig = config as WindsurfSSETransportConfig &
         BaseMCPServerConfig;
       values.serverUrl = windsurfSSEConfig.serverUrl || "";
@@ -331,8 +335,90 @@ export function EditServerForm({
       transport: selectedTransport as TransportType,
     };
 
-    if (selectedTransport === "stdio") {
-      const config = {
+    if (editorType === "vscode") {
+      if (selectedTransport === "stdio") {
+        return {
+          ...baseConfig,
+          type: "stdio" as const,
+          command:
+            typeof values.command === "string" ? values.command.trim() : "",
+          args:
+            typeof values.args === "string" && values.args.trim()
+              ? values.args
+                  .split("\n")
+                  .map((arg: string) => arg.trim())
+                  .filter((arg: string) => arg.length > 0)
+              : undefined,
+          env:
+            typeof values.env === "string"
+              ? parseEnvironmentVariables(values.env)
+              : undefined,
+          envFile:
+            "envFile" in values &&
+            typeof values.envFile === "string" &&
+            values.envFile.trim()
+              ? values.envFile.trim()
+              : undefined,
+          roots:
+            typeof values.roots === "string" && values.roots.trim()
+              ? values.roots
+                  .split("\n")
+                  .map((root: string) => root.trim())
+                  .filter((root: string) => root.length > 0)
+              : undefined,
+        };
+      } else if (selectedTransport === "sse") {
+        return {
+          ...baseConfig,
+          type: "sse" as const,
+          url: typeof values.url === "string" ? values.url.trim() : "",
+          envFile:
+            "envFile" in values &&
+            typeof values.envFile === "string" &&
+            values.envFile.trim()
+              ? values.envFile.trim()
+              : undefined,
+          roots:
+            typeof values.roots === "string" && values.roots.trim()
+              ? values.roots
+                  .split("\n")
+                  .map((root: string) => root.trim())
+                  .filter((root: string) => root.length > 0)
+              : undefined,
+        };
+      } else if (selectedTransport === "/sse") {
+        return {
+          ...baseConfig,
+          transport: "/sse" as const,
+          serverUrl:
+            typeof values.serverUrl === "string" ? values.serverUrl.trim() : "",
+        };
+      } else {
+        return {
+          ...baseConfig,
+          type: "http" as const,
+          url: typeof values.url === "string" ? values.url.trim() : "",
+          envFile:
+            "envFile" in values &&
+            typeof values.envFile === "string" &&
+            values.envFile.trim()
+              ? values.envFile.trim()
+              : undefined,
+          roots:
+            typeof values.roots === "string" && values.roots.trim()
+              ? values.roots
+                  .split("\n")
+                  .map((root: string) => root.trim())
+                  .filter((root: string) => root.length > 0)
+              : undefined,
+          headers:
+            typeof values.headers === "string" && values.headers.trim()
+              ? parseHeaders(values.headers)
+              : undefined,
+        };
+      }
+    } else if (selectedTransport === "stdio") {
+      return {
         ...baseConfig,
         transport: "stdio" as const,
         command:
@@ -349,25 +435,6 @@ export function EditServerForm({
             ? parseEnvironmentVariables(values.env)
             : undefined,
       };
-
-      if (editorType === "vscode") {
-        return {
-          ...config,
-          envFile:
-            typeof values.envFile === "string"
-              ? values.envFile.trim() || undefined
-              : undefined,
-          roots:
-            typeof values.roots === "string" && values.roots.trim()
-              ? values.roots
-                  .split("\n")
-                  .map((root: string) => root.trim())
-                  .filter((root: string) => root.length > 0)
-              : undefined,
-        };
-      }
-
-      return config;
     } else if (selectedTransport === "sse") {
       return {
         ...baseConfig,
@@ -386,17 +453,6 @@ export function EditServerForm({
         ...baseConfig,
         transport: "http" as const,
         url: typeof values.url === "string" ? values.url.trim() : "",
-        envFile:
-          typeof values.envFile === "string"
-            ? values.envFile.trim() || undefined
-            : undefined,
-        roots:
-          typeof values.roots === "string" && values.roots.trim()
-            ? values.roots
-                .split("\n")
-                .map((root: string) => root.trim())
-                .filter((root: string) => root.length > 0)
-            : undefined,
       };
     }
   }
@@ -404,23 +460,48 @@ export function EditServerForm({
   function parseEnvironmentVariables(
     envString: string,
   ): Record<string, string> | undefined {
-    if (!envString?.trim()) return undefined;
+    if (!envString.trim()) return undefined;
 
     const env: Record<string, string> = {};
     const lines = envString.split("\n");
 
     for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed && trimmed.includes("=")) {
-        const [key, ...valueParts] = trimmed.split("=");
-        const value = valueParts.join("=");
-        if (key.trim() && value.trim()) {
-          env[key.trim()] = value.trim();
-        }
+      const trimmedLine = line.trim();
+      if (!trimmedLine) continue;
+
+      const equalIndex = trimmedLine.indexOf("=");
+      if (equalIndex === -1) continue;
+
+      const key = trimmedLine.substring(0, equalIndex).trim();
+      const value = trimmedLine.substring(equalIndex + 1).trim();
+
+      if (key) {
+        env[key] = value;
       }
     }
 
     return Object.keys(env).length > 0 ? env : undefined;
+  }
+
+  function parseHeaders(
+    headersString: string,
+  ): Record<string, string> | undefined {
+    if (!headersString.trim()) return undefined;
+
+    try {
+      const headers = JSON.parse(headersString.trim());
+      if (
+        typeof headers === "object" &&
+        headers !== null &&
+        !Array.isArray(headers)
+      ) {
+        return headers;
+      }
+    } catch {
+      // Note: Fall through to other parsing methods
+    }
+
+    return undefined;
   }
 
   function getAvailableTransports(): Array<{

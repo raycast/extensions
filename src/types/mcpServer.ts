@@ -5,9 +5,16 @@ export type WindsurfTransportType = "stdio" | "/sse";
 export interface EnvironmentVariable {
   [key: string]: string;
 }
+
 export interface BaseMCPServerConfig {
   name: string;
   transport: TransportType;
+  description?: string;
+  disabled?: boolean;
+}
+
+export interface VSCodeBaseMCPServerConfig {
+  name: string;
   description?: string;
   disabled?: boolean;
 }
@@ -37,6 +44,25 @@ export interface HTTPTransportConfig {
   headers?: Record<string, string>;
 }
 
+export interface VSCodeStdioTransportConfig {
+  type: "stdio";
+  command: string;
+  args?: string[];
+  env?: EnvironmentVariable;
+}
+
+export interface VSCodeSSETransportConfig {
+  type: "sse";
+  url: string;
+  headers?: Record<string, string>;
+}
+
+export interface VSCodeHTTPTransportConfig {
+  type: "http";
+  url: string;
+  headers?: Record<string, string>;
+}
+
 export type TransportConfig =
   | StdioTransportConfig
   | SSETransportConfig
@@ -46,12 +72,10 @@ export type WindsurfTransportConfig =
   | StdioTransportConfig
   | WindsurfSSETransportConfig;
 
-export interface VSCodeInput {
-  id: string;
-  type: "promptString";
-  description: string;
-  password?: boolean;
-}
+export type VSCodeTransportConfig =
+  | VSCodeStdioTransportConfig
+  | VSCodeSSETransportConfig
+  | VSCodeHTTPTransportConfig;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CursorSpecificConfig {}
@@ -72,8 +96,8 @@ export type WindsurfMCPServerConfig = BaseMCPServerConfig &
   WindsurfTransportConfig &
   WindsurfSpecificConfig;
 
-export type VSCodeMCPServerConfig = BaseMCPServerConfig &
-  TransportConfig &
+export type VSCodeMCPServerConfig = VSCodeBaseMCPServerConfig &
+  VSCodeTransportConfig &
   VSCodeSpecificConfig;
 
 export type MCPServerConfig =
@@ -88,6 +112,7 @@ export interface CursorConfigFile {
 export interface WindsurfConfigFile {
   mcpServers: Record<string, WindsurfMCPServerConfig>;
 }
+
 export interface VSCodeWorkspaceConfig {
   servers: Record<string, VSCodeMCPServerConfig>;
   inputs?: VSCodeInput[];
@@ -144,6 +169,13 @@ export interface MCPServerWithMetadata {
   source: "workspace" | "user" | "global";
   status?: MCPServerStatus;
   lastTestResult?: ConnectionTestResult;
+}
+
+export interface VSCodeInput {
+  id: string;
+  type: "promptString";
+  description: string;
+  password?: boolean;
 }
 
 export interface VSCodeInputReference {

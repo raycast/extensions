@@ -36,6 +36,7 @@ import {
   isProtectedServer,
   validateLockedServersPresent,
 } from "./utils/protectedServers";
+import { getTransportType } from "./utils/transportUtils";
 
 interface ServerDetailsArguments {
   editorType: EditorType;
@@ -234,6 +235,7 @@ export default function Command({
 
   const editorConfig = getEditorConfig(server.editor);
   const config = server.config;
+  const transportType = getTransportType(config);
 
   const markdown = `\`\`\`json
 ${JSON.stringify(config, null, 2)}
@@ -303,10 +305,10 @@ ${JSON.stringify(config, null, 2)}
 
           <Detail.Metadata.Label
             title="Transport"
-            text={config.transport?.toUpperCase() || "Unknown"}
+            text={transportType.toUpperCase() || "Unknown"}
           />
 
-          {config.transport === "stdio" && (
+          {transportType === "stdio" && (
             <>
               <Detail.Metadata.Label
                 title="Command"
@@ -337,7 +339,7 @@ ${JSON.stringify(config, null, 2)}
             </>
           )}
 
-          {config.transport === "sse" && (
+          {transportType === "sse" && (
             <Detail.Metadata.Label
               title="URL"
               text={
@@ -347,7 +349,7 @@ ${JSON.stringify(config, null, 2)}
             />
           )}
 
-          {config.transport === "http" && (
+          {transportType === "http" && (
             <Detail.Metadata.Label
               title="URL"
               text={
@@ -357,7 +359,7 @@ ${JSON.stringify(config, null, 2)}
             />
           )}
 
-          {config.transport === "/sse" && (
+          {transportType === "/sse" && (
             <Detail.Metadata.Label
               title="Server URL"
               text={
@@ -368,7 +370,7 @@ ${JSON.stringify(config, null, 2)}
           )}
 
           {(config.description ||
-            (config.transport === "stdio" &&
+            (transportType === "stdio" &&
               (config as StdioTransportConfig & BaseMCPServerConfig).env &&
               Object.keys(
                 (config as StdioTransportConfig & BaseMCPServerConfig).env!,
@@ -388,7 +390,7 @@ ${JSON.stringify(config, null, 2)}
           )}
 
           {(() => {
-            if (config.transport !== "stdio") return null;
+            if (transportType !== "stdio") return null;
             const stdioConfig = config as StdioTransportConfig &
               BaseMCPServerConfig;
             if (!stdioConfig.env || Object.keys(stdioConfig.env).length === 0)

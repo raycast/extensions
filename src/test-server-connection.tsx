@@ -1,22 +1,23 @@
-import { useState, useEffect } from "react";
 import {
+  List,
   ActionPanel,
   Action,
   Icon,
-  List,
   Color,
   showToast,
   Toast,
   Detail,
 } from "@raycast/api";
-import { EditorManager } from "./services/EditorManager";
-import { ConnectionTestService } from "./services/ConnectionTestService";
+import { useState, useEffect } from "react";
 import {
   MCPServerWithMetadata,
   EditorType,
   ConnectionTestResult,
 } from "./types/mcpServer";
 import { getEditorConfig } from "./utils/constants";
+import { getTransportType } from "./utils/transportUtils";
+import { EditorManager } from "./services/EditorManager";
+import { ConnectionTestService } from "./services/ConnectionTestService";
 
 export default function Command() {
   const [servers, setServers] = useState<MCPServerWithMetadata[]>([]);
@@ -27,6 +28,7 @@ export default function Command() {
   const [testResults, setTestResults] = useState<
     Map<string, ConnectionTestResult>
   >(new Map());
+  const [testingServers, setTestingServers] = useState(new Set<string>());
 
   useEffect(() => {
     loadServers();
@@ -49,22 +51,14 @@ export default function Command() {
     }
   }
 
-  const filteredServers =
-    editorFilter === "all"
-      ? servers
-      : servers.filter((server) => server.editor === editorFilter);
+  const filteredServers = servers.filter((server) => {
+    if (editorFilter === "all") return true;
+    return server.editor === editorFilter;
+  });
 
   async function testSingleConnection(server: MCPServerWithMetadata) {
     const serverKey = `${server.editor}-${server.config.name}`;
-    const testDescription = connectionTestService.getTestDescription(
-      server.config,
-    );
-
-    await showToast({
-      style: Toast.Style.Animated,
-      title: "Testing connection...",
-      message: testDescription,
-    });
+    setTestingServers((prev) => new Set(prev).add(serverKey));
 
     try {
       const result = await connectionTestService.testConnection(server.config);
@@ -90,6 +84,12 @@ export default function Command() {
         style: Toast.Style.Failure,
         title: "Connection test failed",
         message: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setTestingServers((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(serverKey);
+        return newSet;
       });
     }
   }
@@ -140,11 +140,21 @@ export default function Command() {
     const serverKey = `${server.editor}-${server.config.name}`;
     const result = testResults.get(serverKey);
 
+    if (testingServers.has(serverKey)) {
+      return {
+        icon: Icon.CircleProgress,
+        color: Color.Blue,
+        text: "Testing...",
+        type: "testing" as const,
+      };
+    }
+
     if (!result) {
       return {
-        icon: Icon.Minus,
+        icon: Icon.QuestionMarkCircle,
         color: Color.SecondaryText,
         text: "Not tested",
+        type: "idle" as const,
       };
     }
 
@@ -153,29 +163,21 @@ export default function Command() {
         icon: Icon.CheckCircle,
         color: Color.Green,
         text: `Success (${result.responseTime}ms)`,
-      };
-    } else {
-      return {
-        icon: Icon.XMarkCircle,
-        color: Color.Red,
-        text: "Failed",
+        type: "success" as const,
       };
     }
+
+    return {
+      icon: Icon.XMarkCircle,
+      color: Color.Red,
+      text: "Failed",
+      type: "error" as const,
+    };
   }
 
-  function getTransportIcon(transport: string | undefined) {
-    switch (transport) {
-      case "stdio":
-        return Icon.Terminal;
-      case "sse":
-      case "/sse":
-        return Icon.Globe;
-      case "http":
-        return Icon.Network;
-      default:
-        return Icon.QuestionMark;
-    }
-  }
+  const handleEditorFilterChange = (editor: EditorType | "all") => {
+    setEditorFilter(editor);
+  };
 
   return (
     <List
@@ -187,7 +189,7 @@ export default function Command() {
           tooltip="Filter by Editor"
           value={editorFilter}
           onChange={(newValue) =>
-            setEditorFilter(newValue as "all" | EditorType)
+            handleEditorFilterChange(newValue as "all" | EditorType)
           }
         >
           <List.Dropdown.Item title="All Editors" value="all" />
@@ -230,22 +232,21 @@ export default function Command() {
     >
       {filteredServers.map((server) => {
         const editorConfig = getEditorConfig(server.editor);
-        const transportIcon = getTransportIcon(server.config.transport);
+        const transportType = getTransportType(server.config);
         const status = getResultStatus(server);
         const serverKey = `${server.editor}-${server.config.name}`;
         const result = testResults.get(serverKey);
 
         return (
           <List.Item
-            key={serverKey}
+            key={`${server.editor}-${server.config.name}`}
             icon={{
-              source: transportIcon,
-              tintColor: server.config.disabled
-                ? Color.SecondaryText
-                : Color.PrimaryText,
+              source: editorConfig.icon,
+              tintColor:
+                status.type === "error" ? Color.Red : Color.PrimaryText,
             }}
             title={server.config.name}
-            subtitle={`${editorConfig.displayName} • ${server.config.transport?.toUpperCase() || "Unknown"}`}
+            subtitle={`${editorConfig.displayName} • ${transportType.toUpperCase()}`}
             accessories={[
               {
                 icon: {
@@ -337,7 +338,7 @@ function TestResultDetail({
 ## Server Information
 - **Name:** ${server.config.name}
 - **Editor:** ${editorConfig.displayName}
-- **Transport:** ${server.config.transport?.toUpperCase() || "Unknown"}
+- **Transport:** ${getTransportType(server.config).toUpperCase() || "Unknown"}
 - **Status:** ${server.config.disabled ? "Disabled" : "Enabled"}
 
 ## Test Results

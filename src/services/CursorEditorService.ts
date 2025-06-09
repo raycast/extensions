@@ -23,6 +23,7 @@ import {
   validateMCPServerConfig,
   validateJSONStructure,
 } from "../utils/validation";
+import { getTransportType, inferTransport } from "../utils/transportUtils";
 import { existsSync } from "fs";
 
 export class CursorEditorService extends BaseEditorService {
@@ -124,11 +125,12 @@ export class CursorEditorService extends BaseEditorService {
   validateServerConfig(serverConfig: MCPServerConfig): ValidationResult {
     const result = validateMCPServerConfig(serverConfig, "cursor");
 
-    if (!this.isTransportSupported(serverConfig.transport)) {
+    const transportType = getTransportType(serverConfig);
+    if (!this.isTransportSupported(transportType)) {
       result.errors.push(
         this.createValidationError(
           "transport",
-          `Transport '${serverConfig.transport}' is not supported by Cursor`,
+          `Transport '${transportType}' is not supported by Cursor`,
           ERROR_CODES.INVALID_TRANSPORT,
         ),
       );
@@ -186,7 +188,9 @@ export class CursorEditorService extends BaseEditorService {
             label: "Transport Type",
             description: "Method used to communicate with the server",
             required: true,
-            defaultValue: existingConfig?.transport || "stdio",
+            defaultValue: existingConfig
+              ? getTransportType(existingConfig)
+              : "stdio",
             options: [
               {
                 label: "Standard I/O (stdio) - [Local Server]",
@@ -221,16 +225,7 @@ export class CursorEditorService extends BaseEditorService {
         try {
           const rawConfig = serverConfig as Record<string, unknown>;
 
-          let transport = rawConfig.transport as string;
-          if (!transport) {
-            if ("url" in rawConfig) {
-              transport = "sse";
-            } else if ("command" in rawConfig) {
-              transport = "stdio";
-            } else {
-              transport = "stdio";
-            }
-          }
+          const transport = inferTransport(rawConfig);
 
           const config = {
             name: serverName,
@@ -353,16 +348,7 @@ export class CursorEditorService extends BaseEditorService {
 
       const rawConfig = serverConfig as Record<string, unknown>;
 
-      let transport = rawConfig.transport as string;
-      if (!transport) {
-        if ("url" in rawConfig) {
-          transport = "sse";
-        } else if ("command" in rawConfig) {
-          transport = "stdio";
-        } else {
-          transport = "stdio";
-        }
-      }
+      const transport = inferTransport(rawConfig);
 
       const config = {
         name: serverName,

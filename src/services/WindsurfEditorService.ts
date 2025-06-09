@@ -20,6 +20,7 @@ import {
   validateMCPServerConfig,
   validateJSONStructure,
 } from "../utils/validation";
+import { getTransportType, inferTransport } from "../utils/transportUtils";
 import { existsSync } from "fs";
 
 export class WindsurfEditorService extends BaseEditorService {
@@ -121,11 +122,12 @@ export class WindsurfEditorService extends BaseEditorService {
   validateServerConfig(serverConfig: MCPServerConfig): ValidationResult {
     const result = validateMCPServerConfig(serverConfig, "windsurf");
 
-    if (!this.isTransportSupported(serverConfig.transport)) {
+    const transportType = getTransportType(serverConfig);
+    if (!this.isTransportSupported(transportType)) {
       result.errors.push(
         this.createValidationError(
           "transport",
-          `Transport '${serverConfig.transport}' is not supported by Windsurf`,
+          `Transport '${transportType}' is not supported by Windsurf`,
           ERROR_CODES.INVALID_TRANSPORT,
         ),
       );
@@ -166,7 +168,9 @@ export class WindsurfEditorService extends BaseEditorService {
             label: "Transport Type",
             description: "Method used to communicate with the server",
             required: true,
-            defaultValue: existingConfig?.transport || "stdio",
+            defaultValue: existingConfig
+              ? getTransportType(existingConfig)
+              : "stdio",
             options: [
               {
                 label: "Standard I/O (stdio) - [Local Server]",
@@ -182,7 +186,9 @@ export class WindsurfEditorService extends BaseEditorService {
       },
     ];
 
-    const transport = existingConfig?.transport || "stdio";
+    const transport = existingConfig
+      ? getTransportType(existingConfig)
+      : "stdio";
 
     if (transport === "stdio") {
       sections.push({
@@ -284,21 +290,12 @@ export class WindsurfEditorService extends BaseEditorService {
     for (const [serverName, serverConfig] of Object.entries(serverData)) {
       if (typeof serverConfig === "object" && serverConfig !== null) {
         const rawConfig = serverConfig as Record<string, unknown>;
-        let transport = rawConfig.transport as string;
-        if (!transport) {
-          if ("serverUrl" in rawConfig) {
-            transport = "/sse";
-          } else if ("command" in rawConfig) {
-            transport = "stdio";
-          } else {
-            transport = "stdio";
-          }
-        }
+        const transportType = inferTransport(rawConfig);
 
         const config = {
           ...rawConfig,
           name: serverName,
-          transport: transport as TransportType,
+          transport: transportType as TransportType,
           disabled: (rawConfig.disabled as boolean) ?? false,
         } as WindsurfMCPServerConfig;
 
@@ -327,7 +324,8 @@ export class WindsurfEditorService extends BaseEditorService {
 
         let windsurfConfig: WindsurfMCPServerConfig;
 
-        if (config.transport === "stdio") {
+        const transportType = getTransportType(config);
+        if (transportType === "stdio") {
           const stdioConfig = config as {
             command?: string;
             args?: string[];
@@ -342,7 +340,7 @@ export class WindsurfEditorService extends BaseEditorService {
             ...(config.description && { description: config.description }),
             ...(config.disabled && { disabled: config.disabled }),
           };
-        } else if (config.transport === "/sse") {
+        } else if (transportType === "/sse") {
           const sseConfig = config as { serverUrl?: string };
           windsurfConfig = {
             name: config.name,

@@ -24,6 +24,7 @@ import {
   isDefaultProtectedServer,
   isServerUnlocked,
 } from "./utils/protectedServers";
+import { getTransportType } from "./utils/transportUtils";
 
 type EditorFilter = "all" | EditorType;
 
@@ -274,7 +275,7 @@ export default function Command() {
       }
     };
 
-    const transportIcon = getTransportIcon(server.config.transport);
+    const transportIcon = getTransportIcon(getTransportType(server.config));
     const statusDisplay = getStatusDisplay();
     const protectionStatus = isLocked
       ? {
@@ -323,7 +324,7 @@ export default function Command() {
               ]
             : []),
           {
-            text: server.config.transport?.toUpperCase() || "UNKNOWN",
+            text: getTransportType(server.config).toUpperCase() || "UNKNOWN",
             icon: {
               source: transportIcon,
               tintColor: Color.SecondaryText,
@@ -447,14 +448,13 @@ export default function Command() {
 }
 
 function getServerCommand(server: MCPServerWithMetadata): string {
-  if (server.config.transport === "stdio") {
+  const transportType = getTransportType(server.config);
+
+  if (transportType === "stdio") {
     return (server.config as { command?: string }).command || "";
-  } else if (
-    server.config.transport === "sse" ||
-    server.config.transport === "http"
-  ) {
+  } else if (transportType === "sse" || transportType === "http") {
     return (server.config as { url?: string }).url || "";
-  } else if (server.config.transport === "/sse") {
+  } else if (transportType === "/sse") {
     return (server.config as { serverUrl?: string }).serverUrl || "";
   }
   return "";

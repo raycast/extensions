@@ -37,6 +37,28 @@ interface ValidationState {
   serverErrors: { [serverName: string]: string[] };
 }
 
+function transformWindsurfConfig(data: unknown): unknown {
+  if (!data || typeof data !== "object") {
+    return data;
+  }
+
+  const transformed = { ...data } as Record<string, unknown>;
+  const servers = (transformed.mcpServers || {}) as Record<string, unknown>;
+
+  for (const [, serverConfig] of Object.entries(servers)) {
+    if (typeof serverConfig === "object" && serverConfig !== null) {
+      const config = serverConfig as Record<string, unknown>;
+
+      if (config.url && !config.serverUrl) {
+        config.serverUrl = config.url;
+        delete config.url;
+      }
+    }
+  }
+
+  return transformed;
+}
+
 export function RawConfigEditor({
   editorType,
   configType,
@@ -199,7 +221,13 @@ export function RawConfigEditor({
       let formattedContent = newContent;
       try {
         const parsedJson = JSON.parse(newContent);
-        formattedContent = JSON.stringify(parsedJson, null, 2);
+
+        const transformedJson =
+          editorType === "windsurf"
+            ? transformWindsurfConfig(parsedJson)
+            : parsedJson;
+
+        formattedContent = JSON.stringify(transformedJson, null, 2);
       } catch {
         // Note: We'll catch any JSON syntax errors in validation below
       }
@@ -333,8 +361,12 @@ export function RawConfigEditor({
       let validationData = data;
       let validationConfigType = selectedConfigType;
 
+      if (editorType === "windsurf") {
+        validationData = transformWindsurfConfig(data);
+      }
+
       if (editorType === "vscode" && selectedConfigType === "user") {
-        validationData = { mcp: data };
+        validationData = { mcp: validationData };
         validationConfigType = "user";
       }
 
@@ -796,8 +828,12 @@ export function RawConfigEditForm({
 
     try {
       const service = editorManager.getService(editorType);
+
+      const validationData =
+        editorType === "windsurf" ? transformWindsurfConfig(data) : data;
+
       const structureValidation = service.validateConfigStructure(
-        data,
+        validationData,
         configType,
       );
 
@@ -817,7 +853,7 @@ export function RawConfigEditForm({
       result.schemaValid = structureValidation.isValid;
 
       if (structureValidation.isValid) {
-        const servers = service.parseConfigData(data, configType);
+        const servers = service.parseConfigData(validationData, configType);
 
         servers.forEach((serverWithMetadata) => {
           const serverValidation = validateMCPServerConfig(

@@ -25,6 +25,7 @@ import {
   lockServer,
   isDefaultProtectedServer,
 } from "./utils/protectedServers";
+import { getTransportType } from "./utils/transportUtils";
 
 type EditorFilter = "all" | EditorType;
 
@@ -500,6 +501,12 @@ function ServerListItem({
       title={server.config.name}
       subtitle={server.config.description || undefined}
       accessories={[
+        {
+          text: getTransportType(server.config).toUpperCase() || "UNKNOWN",
+          icon: {
+            source: getTransportIcon(getTransportType(server.config) || ""),
+          },
+        },
         ...statusDisplays.map((status) => ({
           text: {
             value: status.text,
@@ -511,13 +518,6 @@ function ServerListItem({
           },
           tooltip: status.tooltip,
         })),
-        {
-          text: server.config.transport?.toUpperCase() || "UNKNOWN",
-          icon: {
-            source: getTransportIcon(server.config.transport || ""),
-            tintColor: Color.SecondaryText,
-          },
-        },
       ]}
       actions={
         <ActionPanel>

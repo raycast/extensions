@@ -10,7 +10,6 @@ import {
   VSCodeWorkspaceConfig,
   VSCodeUserSettings,
   VSCodeInput,
-  TransportType,
 } from "../types/mcpServer";
 import {
   EDITOR_CONFIGS,
@@ -21,6 +20,7 @@ import {
   validateMCPServerConfig,
   validateJSONStructure,
 } from "../utils/validation";
+import { getTransportType, inferTransport } from "../utils/transportUtils";
 import { existsSync } from "fs";
 
 const loggedMessages = new Set<string>();
@@ -116,11 +116,12 @@ export class VSCodeEditorService extends BaseEditorService {
 
   validateServerConfig(serverConfig: MCPServerConfig): ValidationResult {
     const result = validateMCPServerConfig(serverConfig, "vscode");
-    if (!this.isTransportSupported(serverConfig.transport)) {
+    const transportType = getTransportType(serverConfig);
+    if (!this.isTransportSupported(transportType)) {
       result.errors.push(
         this.createValidationError(
           "transport",
-          `Transport '${serverConfig.transport}' is not supported by VS Code`,
+          `Transport '${transportType}' is not supported by VS Code`,
           ERROR_CODES.INVALID_TRANSPORT,
         ),
       );
@@ -181,7 +182,9 @@ export class VSCodeEditorService extends BaseEditorService {
             label: "Transport Type",
             description: "Method used to communicate with the server",
             required: true,
-            defaultValue: existingConfig?.transport || "http",
+            defaultValue: existingConfig
+              ? getTransportType(existingConfig)
+              : "http",
             options: [
               {
                 label: "Standard I/O (stdio) - [Local Server]",
@@ -256,21 +259,12 @@ export class VSCodeEditorService extends BaseEditorService {
           workspaceConfig.servers,
         )) {
           const rawConfig = serverConfig as unknown as Record<string, unknown>;
-          let transport = rawConfig.transport as string;
-          if (!transport) {
-            if ("url" in rawConfig) {
-              transport = "sse";
-            } else if ("command" in rawConfig) {
-              transport = "stdio";
-            } else {
-              transport = "stdio";
-            }
-          }
+          const transport = inferTransport(rawConfig);
 
           const config = {
             ...serverConfig,
             name: serverName,
-            transport: transport as TransportType,
+            transport,
             disabled: serverConfig.disabled ?? false,
           } as MCPServerConfig;
 
@@ -288,21 +282,12 @@ export class VSCodeEditorService extends BaseEditorService {
           userSettings.mcp.servers,
         )) {
           const rawConfig = serverConfig as unknown as Record<string, unknown>;
-          let transport = rawConfig.transport as string;
-          if (!transport) {
-            if ("url" in rawConfig) {
-              transport = "sse";
-            } else if ("command" in rawConfig) {
-              transport = "stdio";
-            } else {
-              transport = "stdio";
-            }
-          }
+          const transport = inferTransport(rawConfig);
 
           const config = {
             ...serverConfig,
             name: serverName,
-            transport: transport as TransportType,
+            transport,
             disabled: serverConfig.disabled ?? false,
           } as MCPServerConfig;
 
@@ -388,8 +373,11 @@ export class VSCodeEditorService extends BaseEditorService {
 
   getDefaultServerConfig(): Partial<VSCodeMCPServerConfig> {
     return {
-      transport: "http",
-      disabled: false,
+      type: "http" as const,
+      url: "https://api.example.com/mcp",
+      headers: {
+        Authorization: "Bearer your-api-key",
+      },
     };
   }
 

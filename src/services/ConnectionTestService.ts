@@ -6,6 +6,7 @@ import {
   SSETransportConfig,
   HTTPTransportConfig,
 } from "../types/mcpServer";
+import { getTransportType } from "../utils/transportUtils";
 
 export class ConnectionTestService {
   private readonly DEFAULT_TIMEOUT = 10000;
@@ -16,7 +17,8 @@ export class ConnectionTestService {
     const startTime = Date.now();
 
     try {
-      switch (config.transport) {
+      const transportType = getTransportType(config);
+      switch (transportType) {
         case "stdio":
           return await this.testStdioConnection(config as StdioTransportConfig);
         case "sse":
@@ -449,7 +451,8 @@ export class ConnectionTestService {
   }
 
   getTestDescription(config: MCPServerConfig): string {
-    switch (config.transport) {
+    const transportType = getTransportType(config);
+    switch (transportType) {
       case "stdio": {
         const stdioConfig = config as StdioTransportConfig;
         let fullCommand = stdioConfig.command;

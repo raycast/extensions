@@ -1,16 +1,17 @@
 import {
   MCPServerConfig,
+  EditorType,
   ValidationResult,
   ValidationError,
   ValidationWarning,
-  EditorType,
-  EnvironmentVariable,
   VSCodeInput,
   VSCodeInputReference,
   VSCodeInputValidationResult,
   MCPServerWithMetadata,
+  EnvironmentVariable,
 } from "../types/mcpServer";
 import { VALIDATION_RULES, ERROR_CODES } from "./constants";
+import { getTransportType } from "./transportUtils";
 
 export function validateMCPServerConfig(
   config: MCPServerConfig,
@@ -29,7 +30,9 @@ export function validateMCPServerConfig(
     );
   }
 
-  if (!config.transport) {
+  const transportType = getTransportType(config);
+
+  if (!transportType) {
     errors.push(
       createError(
         "transport",
@@ -99,7 +102,9 @@ export function validateTransportConfig(
 ): ValidationError[] {
   const errors: ValidationError[] = [];
 
-  switch (config.transport) {
+  const transportType = getTransportType(config);
+
+  switch (transportType) {
     case "stdio":
       errors.push(...validateStdioConfig(config));
       break;
@@ -199,7 +204,7 @@ function validateSSEConfig(
 ): ValidationError[] {
   const errors: ValidationError[] = [];
 
-  if (editorType === "windsurf" && config.transport === "/sse") {
+  if (editorType === "windsurf" && getTransportType(config) === "/sse") {
     if ("serverUrl" in config) {
       if (!config.serverUrl || config.serverUrl.trim() === "") {
         errors.push(
@@ -366,7 +371,10 @@ export function validateEnvironmentVariables(
       );
     }
 
-    if (value && value.length > VALIDATION_RULES.MAX_LENGTHS.ENV_VAR_VALUE) {
+    if (
+      typeof value === "string" &&
+      value.length > VALIDATION_RULES.MAX_LENGTHS.ENV_VAR_VALUE
+    ) {
       errors.push(
         createError(
           `env.${key}`,

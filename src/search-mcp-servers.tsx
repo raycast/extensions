@@ -26,6 +26,7 @@ import {
   lockServer,
   isDefaultProtectedServer,
 } from "./utils/protectedServers";
+import { getTransportType } from "./utils/transportUtils";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -245,56 +246,46 @@ export default function Command() {
 
     const query = searchText.toLowerCase();
     const config = server.config;
+    const transportType = getTransportType(config);
 
     if (
       config.name.toLowerCase().includes(query) ||
       (config.description &&
         config.description.toLowerCase().includes(query)) ||
-      (config.transport && config.transport.toLowerCase().includes(query)) ||
-      server.editor.toLowerCase().includes(query)
+      (transportType && transportType.toLowerCase().includes(query)) ||
+      ("command" in config &&
+        config.command &&
+        config.command.toLowerCase().includes(query)) ||
+      ("url" in config &&
+        config.url &&
+        config.url.toLowerCase().includes(query)) ||
+      ("serverUrl" in config &&
+        config.serverUrl &&
+        config.serverUrl.toLowerCase().includes(query))
     ) {
       return true;
     }
 
     if (
-      "url" in config &&
-      config.url &&
-      config.url.toLowerCase().includes(query)
-    ) {
-      return true;
-    }
-    if (
-      "serverUrl" in config &&
-      config.serverUrl &&
-      config.serverUrl.toLowerCase().includes(query)
+      "args" in config &&
+      config.args &&
+      Array.isArray(config.args) &&
+      config.args.some((arg) => arg.toLowerCase().includes(query))
     ) {
       return true;
     }
 
     if (
-      "command" in config &&
-      config.command &&
-      config.command.toLowerCase().includes(query)
+      "env" in config &&
+      config.env &&
+      typeof config.env === "object" &&
+      Object.entries(config.env).some(
+        ([key, value]) =>
+          key.toLowerCase().includes(query) ||
+          String(value).toLowerCase().includes(query),
+      )
     ) {
       return true;
-    }
-    if ("args" in config && config.args && Array.isArray(config.args)) {
-      if (config.args.some((arg) => arg.toLowerCase().includes(query))) {
-        return true;
-      }
-    }
-
-    if ("env" in config && config.env && typeof config.env === "object") {
-      const envEntries = Object.entries(config.env);
-      if (
-        envEntries.some(
-          ([key, value]) =>
-            key.toLowerCase().includes(query) ||
-            String(value).toLowerCase().includes(query),
-        )
-      ) {
-        return true;
-      }
     }
 
     if (
@@ -313,18 +304,14 @@ export default function Command() {
     if (
       "headers" in config &&
       config.headers &&
-      typeof config.headers === "object"
+      typeof config.headers === "object" &&
+      Object.entries(config.headers).some(
+        ([key, value]) =>
+          key.toLowerCase().includes(query) ||
+          String(value).toLowerCase().includes(query),
+      )
     ) {
-      const headerEntries = Object.entries(config.headers);
-      if (
-        headerEntries.some(
-          ([key, value]) =>
-            key.toLowerCase().includes(query) ||
-            String(value).toLowerCase().includes(query),
-        )
-      ) {
-        return true;
-      }
+      return true;
     }
 
     if (server.source && server.source.toLowerCase().includes(query)) {
@@ -590,9 +577,9 @@ function SearchResultItem({
           tooltip: status.tooltip,
         })),
         {
-          text: server.config.transport?.toUpperCase() || "UNKNOWN",
+          text: getTransportType(server.config).toUpperCase() || "UNKNOWN",
           icon: {
-            source: getTransportIcon(server.config.transport || ""),
+            source: getTransportIcon(getTransportType(server.config) || ""),
             tintColor: Color.SecondaryText,
           },
         },

@@ -9,7 +9,13 @@ import {
   Icon,
 } from "@raycast/api";
 import { EditorManager } from "./services/EditorManager";
-import { EditorType, MCPServerConfig, VSCodeInput } from "./types/mcpServer";
+import {
+  EditorType,
+  MCPServerConfig,
+  VSCodeMCPServerConfig,
+  VSCodeInput,
+  TransportType,
+} from "./types/mcpServer";
 import { getEditorConfig, SUCCESS_MESSAGES } from "./utils/constants";
 import { VSCodeEditorService } from "./services/VSCodeEditorService";
 import { validateLockedServersPresent } from "./utils/protectedServers";
@@ -19,7 +25,7 @@ type FormValues = {
   name: string;
   description: string;
   disabled: boolean;
-  transport: "stdio" | "sse" | "/sse" | "http";
+  transport: TransportType;
   command: string;
   args: string;
   url: string;
@@ -27,6 +33,7 @@ type FormValues = {
   env: string;
   envFile: string;
   roots: string;
+  headers: string;
 };
 
 function VSCodeInputForm({
@@ -98,7 +105,7 @@ function VSCodeInputForm({
 export default function Command() {
   const [selectedEditor, setSelectedEditor] = useState<EditorType>("cursor");
 
-  const getInitialTransport = (): "stdio" | "sse" | "/sse" | "http" => {
+  const getInitialTransport = (): TransportType => {
     const editorConfig = getEditorConfig("cursor");
     const supportedTransports = editorConfig.supportedTransports;
 
@@ -107,9 +114,9 @@ export default function Command() {
     return "stdio";
   };
 
-  const [selectedTransport, setSelectedTransport] = useState<
-    "stdio" | "sse" | "/sse" | "http"
-  >(getInitialTransport());
+  const [selectedTransport, setSelectedTransport] = useState<TransportType>(
+    getInitialTransport(),
+  );
   const [selectedConfigType, setSelectedConfigType] = useState<
     "workspace" | "user"
   >("user");
@@ -224,68 +231,111 @@ export default function Command() {
   function buildServerConfig(values: FormValues): MCPServerConfig {
     const baseConfig = {
       name: values.name.trim(),
-      description: values.description.trim() || undefined,
-
+      description: values.description?.trim() || undefined,
       ...(selectedEditor !== "cursor" && { disabled: values.disabled }),
-      transport: selectedTransport,
-
-      ...(selectedEditor === "vscode" && { type: selectedTransport }),
     };
 
     console.log(
       `Building ${selectedEditor} server config with transport ${selectedTransport}`,
     );
+    console.log("Form values:", values);
 
-    if (selectedTransport === "stdio") {
-      return {
-        ...baseConfig,
-        transport: "stdio" as const,
-        command: values.command.trim(),
-        args: parseArguments(values.args),
-        env: parseEnvironmentVariables(values.env),
-
-        ...(selectedEditor === "vscode" && {
-          envFile: values.envFile.trim() || undefined,
-        }),
-      };
-    } else if (selectedTransport === "sse") {
-      return {
-        ...baseConfig,
-        transport: "sse" as const,
-        url: values.url.trim(),
-      };
-    } else if (selectedTransport === "/sse") {
-      return {
-        ...baseConfig,
-        transport: "/sse" as const,
-        serverUrl: values.serverUrl.trim(),
-
-        ...(selectedEditor === "vscode" && {
-          envFile: values.envFile.trim() || undefined,
-          roots: values.roots.trim()
+    if (selectedEditor === "vscode") {
+      if (selectedTransport === "stdio") {
+        if (!values.command) {
+          throw new Error("Command is required for stdio transport");
+        }
+        return {
+          ...baseConfig,
+          type: "stdio" as const,
+          command: values.command.trim(),
+          args: values.args ? parseArguments(values.args) : undefined,
+          env: values.env ? parseEnvironmentVariables(values.env) : undefined,
+          envFile: values.envFile?.trim() || undefined,
+        } as VSCodeMCPServerConfig;
+      } else if (selectedTransport === "sse") {
+        if (!values.url) {
+          throw new Error("URL is required for SSE transport");
+        }
+        return {
+          ...baseConfig,
+          type: "sse" as const,
+          url: values.url.trim(),
+          headers: values.headers?.trim()
+            ? JSON.parse(values.headers.trim())
+            : undefined,
+          envFile: values.envFile?.trim() || undefined,
+          roots: values.roots?.trim()
             ? values.roots
                 .split("\n")
                 .map((root) => root.trim())
                 .filter((root) => root.length > 0)
             : undefined,
-        }),
-      } as MCPServerConfig;
+        } as VSCodeMCPServerConfig;
+      } else if (selectedTransport === "http") {
+        if (!values.url) {
+          throw new Error("URL is required for HTTP transport");
+        }
+        return {
+          ...baseConfig,
+          type: "http" as const,
+          url: values.url.trim(),
+          headers: values.headers?.trim()
+            ? JSON.parse(values.headers.trim())
+            : undefined,
+          envFile: values.envFile?.trim() || undefined,
+          roots: values.roots?.trim()
+            ? values.roots
+                .split("\n")
+                .map((root) => root.trim())
+                .filter((root) => root.length > 0)
+            : undefined,
+        } as VSCodeMCPServerConfig;
+      } else {
+        throw new Error(
+          `Unsupported transport type for VS Code: ${selectedTransport}`,
+        );
+      }
     } else {
-      return {
-        ...baseConfig,
-        transport: "http" as const,
-        url: values.url.trim(),
-
-        ...(selectedEditor === "vscode" && {
-          envFile: values.envFile.trim() || undefined,
-          roots: values.roots.trim()
-            ? values.roots
-                .split("\n")
-                .map((root) => root.trim())
-                .filter((root) => root.length > 0)
-            : undefined,
-        }),
-      } as MCPServerConfig;
+      if (selectedTransport === "stdio") {
+        if (!values.command) {
+          throw new Error("Command is required for stdio transport");
+        }
+        return {
+          ...baseConfig,
+          transport: "stdio" as const,
+          command: values.command.trim(),
+          args: values.args ? parseArguments(values.args) : undefined,
+          env: values.env ? parseEnvironmentVariables(values.env) : undefined,
+        };
+      } else if (selectedTransport === "sse") {
+        if (!values.url) {
+          throw new Error("URL is required for SSE transport");
+        }
+        return {
+          ...baseConfig,
+          transport: "sse" as const,
+          url: values.url.trim(),
+        };
+      } else if (selectedTransport === "/sse") {
+        if (!values.serverUrl) {
+          throw new Error("Server URL is required for Windsurf SSE transport");
+        }
+        return {
+          ...baseConfig,
+          transport: "/sse" as const,
+          serverUrl: values.serverUrl.trim(),
+        };
+      } else {
+        if (!values.url) {
+          throw new Error("URL is required for HTTP transport");
+        }
+        return {
+          ...baseConfig,
+          transport: "http" as const,
+          url: values.url.trim(),
+        } as MCPServerConfig;
+      }
     }
   }
 
@@ -313,7 +363,7 @@ export default function Command() {
 
   function getAvailableTransports(): Array<{
     label: string;
-    value: "stdio" | "sse" | "/sse" | "http";
+    value: TransportType;
   }> {
     const editorConfig = getEditorConfig(selectedEditor);
     return editorConfig.supportedTransports.map((transport) => ({
@@ -325,65 +375,36 @@ export default function Command() {
             : transport === "/sse"
               ? "Server-Sent Events (SSE) - [Remote Server]"
               : "HTTP - [Remote Server]",
-      value: transport as "stdio" | "sse" | "/sse" | "http",
+      value: transport as TransportType,
     }));
   }
 
   useEffect(() => {
     const availableTransports = getAvailableTransports();
 
-    let defaultTransport: "stdio" | "sse" | "/sse" | "http";
+    let defaultTransport: TransportType;
 
     switch (selectedEditor) {
       case "cursor":
         defaultTransport =
-          (availableTransports.find((t) => t.value === "sse")?.value as
-            | "stdio"
-            | "sse"
-            | "/sse"
-            | "http") ||
-          (availableTransports[0]?.value as
-            | "stdio"
-            | "sse"
-            | "/sse"
-            | "http") ||
-          "stdio";
-        break;
-      case "windsurf":
-        defaultTransport =
-          (availableTransports.find((t) => t.value === "/sse")?.value as
-            | "stdio"
-            | "sse"
-            | "/sse"
-            | "http") ||
-          (availableTransports[0]?.value as
-            | "stdio"
-            | "sse"
-            | "/sse"
-            | "http") ||
-          "stdio";
+          (availableTransports.find((t) => t.value === "sse")
+            ?.value as TransportType) || "sse";
         break;
       case "vscode":
         defaultTransport =
-          (availableTransports.find((t) => t.value === "sse")?.value as
-            | "stdio"
-            | "sse"
-            | "/sse"
-            | "http") ||
-          (availableTransports[0]?.value as
-            | "stdio"
-            | "sse"
-            | "/sse"
-            | "http") ||
-          "stdio";
+          (availableTransports.find((t) => t.value === "http")
+            ?.value as TransportType) || "http";
+        break;
+      case "windsurf":
+        defaultTransport =
+          (availableTransports.find((t) => t.value === "/sse")
+            ?.value as TransportType) || "/sse";
         break;
       default:
         defaultTransport =
-          (availableTransports[0]?.value as
-            | "stdio"
-            | "sse"
-            | "/sse"
-            | "http") || "stdio";
+          (availableTransports.find((t) => t.value === "stdio")
+            ?.value as TransportType) || "stdio";
+        break;
     }
 
     setSelectedTransport(defaultTransport);
@@ -686,9 +707,7 @@ export default function Command() {
             ? selectedTransport
             : availableTransports[0]?.value || "stdio";
         })()}
-        onChange={(newValue) =>
-          setSelectedTransport(newValue as "stdio" | "sse" | "/sse" | "http")
-        }
+        onChange={(newValue) => setSelectedTransport(newValue as TransportType)}
         info="Method used to communicate with the server"
       >
         {getAvailableTransports().map((transport) => (
@@ -708,19 +727,23 @@ export default function Command() {
             placeholder="python -m my_mcp_server"
             info="The command to execute to start the server"
           />
-
           <Form.TextArea
             id="args"
             title="Arguments"
-            placeholder="--port&#10;8000&#10;--verbose"
-            info="Command line arguments (JSON array, comma-separated, or one per line)"
+            placeholder="-p 8080 --verbose"
+            info="Arguments to pass to the command (JSON array, comma-separated, or one per line)"
           />
-
           <Form.TextArea
             id="env"
             title="Environment Variables"
-            placeholder="API_KEY=your_key&#10;DEBUG=true"
-            info="Environment variables in KEY=VALUE format (one per line)"
+            placeholder="API_KEY=your_key"
+            info="Environment variables in KEY=value format (one per line)"
+          />
+          <Form.TextField
+            id="envFile"
+            title="Environment File"
+            placeholder=".env"
+            info="Path to environment file for loading variables"
           />
         </>
       )}
@@ -763,28 +786,22 @@ export default function Command() {
             onChange={(newValue) =>
               setSelectedConfigType(newValue as "workspace" | "user")
             }
-            info="Where to save this server configuration"
+            info="Where to save the server configuration"
           >
-            <Form.Dropdown.Item
-              value="user"
-              title="User Settings (settings.json)"
-            />
-            <Form.Dropdown.Item
-              value="workspace"
-              title="Workspace Settings (.vscode/settings.json)"
-            />
+            <Form.Dropdown.Item value="user" title="User Settings" />
+            <Form.Dropdown.Item value="workspace" title="Workspace Settings" />
           </Form.Dropdown>
 
-          {selectedTransport === "stdio" && (
-            <Form.TextField
-              id="envFile"
-              title="Environment File"
-              placeholder=".env"
-              info="Path to environment file for loading variables"
-            />
-          )}
+          <Form.TextField
+            id="envFile"
+            title="Environment File"
+            placeholder=".env"
+            info="Path to environment file for loading variables"
+          />
 
-          {(selectedTransport === "stdio" || selectedTransport === "http") && (
+          {(selectedTransport === "stdio" ||
+            selectedTransport === "http" ||
+            selectedTransport === "sse") && (
             <Form.TextArea
               id="roots"
               title="Root Paths"
@@ -794,6 +811,16 @@ export default function Command() {
           )}
         </>
       )}
+
+      {selectedEditor === "vscode" &&
+        (selectedTransport === "sse" || selectedTransport === "http") && (
+          <Form.TextArea
+            id="headers"
+            title="Headers"
+            placeholder='{"Authorization": "Bearer your_token"}'
+            info="HTTP headers in JSON format"
+          />
+        )}
 
       {renderVSCodeInputManagement()}
     </Form>
