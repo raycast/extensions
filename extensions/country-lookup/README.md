@@ -1,6 +1,6 @@
-# Country
+# Country Lookup
 
-Quickly lookup country data by querying [restcountries.com](https://restcountries.com)
+Quickly lookup country data by querying local copy of [restcountries.com](https://restcountries.com).
 
 ### You can search by
 
@@ -8,3 +8,5 @@ Quickly lookup country data by querying [restcountries.com](https://restcountrie
 - Country code (E.g.: GB)
 - Capital (E.g.: Berlin)
 - Dialup code (E.g.: +54)
+
+> 🚀 Works Offline

@@ -1,5 +1,10 @@
 # Country Changelog
 
+## [Offline Support] - {PR_MERGE_DATE}
+
+- The countries data is now stored locally allowing offline access (the API no longer returns all data)
+- Modernize extension to use latest Raycast config
+
 ## [Updates] - 2024-06-17
 
 - Updated dependencies, rewritten cached state of countries
