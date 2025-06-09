@@ -1,6 +1,6 @@
 # bmrks Changelog
 
-## [Improvement] - 2025-06-09
+## [Improvement] - {PR_MERGE_DATE}
 
 - Added feature to manage groups: create and delete group.
 
