@@ -8,21 +8,68 @@ enum KeyCode: CGKeyCode {
 
 class EventHandler {
   var isLocked = true
+  var supportPath: String
+  var stateFile: String
+  var timer: Timer?
 
-  init() {}
+  init(supportPath: String) {
+    self.supportPath = supportPath
+    self.stateFile = "\(supportPath)/keyboard-lock-state.txt"
+  }
 
   func scheduleTimer(duration: Int?) {
     guard let duration = duration else { return }
-    let timer = Timer(timeInterval: TimeInterval(duration), repeats: false) { _ in
-      let message = "Timer expired ⏱️\n"
-      if let data = message.data(using: .utf8) {
-        FileHandle.standardError.write(data)
+    
+    // Write initial state to file
+    writeState(duration: duration, timeLeft: duration)
+    
+    // Invalidate existing timer if any
+    timer?.invalidate()
+    
+    timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+      // Read current state
+      let (currentDuration, currentTimeLeft) = self.readState()
+      
+      if currentTimeLeft <= 0 {
+        // Timer expired
+        self.writeState(duration: 0, timeLeft: 0)
+        self.timer?.invalidate()
+        self.timer = nil
+        let message = "Timer expired ⏱️\n"
+        if let data = message.data(using: .utf8) {
+          FileHandle.standardError.write(data)
+        }
+        CFRunLoopStop(CFRunLoopGetCurrent())
+        return
       }
-
-      CFRunLoopStop(CFRunLoopGetCurrent())
+      
+      // Update time left
+      self.writeState(duration: currentDuration, timeLeft: currentTimeLeft - 1)
     }
+  }
 
-    RunLoop.current.add(timer, forMode: .common)
+  func writeState(duration: Int, timeLeft: Int) {
+    let content = "\(duration)\n\(timeLeft)"
+    do {
+      try content.write(toFile: stateFile, atomically: true, encoding: .utf8)
+    } catch {
+      print("Error writing state: \(error)")
+    }
+  }
+
+  func readState() -> (duration: Int, timeLeft: Int) {
+    do {
+      let content = try String(contentsOfFile: stateFile, encoding: .utf8)
+      let lines = content.components(separatedBy: .newlines)
+      if lines.count >= 2 {
+        let duration = Int(lines[0]) ?? 0
+        let timeLeft = Int(lines[1]) ?? 0
+        return (duration, timeLeft)
+      }
+    } catch {
+      print("Error reading state: \(error)")
+    }
+    return (0, 0)
   }
 
   func run() {
@@ -67,10 +114,13 @@ class EventHandler {
     }
     let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
     let controlFlag = event.flags.contains(.maskControl)
-    let eventType = type == .keyDown ? "pressed" : "released"
 
     if controlFlag, keyCode == KeyCode.u.rawValue {
       isLocked = false
+      // Clear the state file when manually unlocked
+      writeState(duration: 0, timeLeft: 0)
+      timer?.invalidate()
+      timer = nil
       return Unmanaged.passRetained(event)
     }
 
@@ -89,13 +139,24 @@ func globalKeyEventHandler(
   return mySelf.handleKeyEvent(proxy: proxy, type: type, event: event)
 }
 
-@raycast func handler(duration: Int?) {
-  let handler = EventHandler()
+@raycast func handler(duration: Int?, supportPath: String?) {
+  let path = supportPath ?? ""
+  let handler = EventHandler(supportPath: path)
   handler.scheduleTimer(duration: duration ?? 15)
   handler.run()
 }
 
-@raycast func stopHandler() {
+@raycast func stopHandler(supportPath: String?) {
+  let path = supportPath ?? ""
+  let stateFile = "\(path)/keyboard-lock-state.txt"
+  
+  // Clear the state file
+  do {
+    try "0\n0".write(toFile: stateFile, atomically: true, encoding: .utf8)
+  } catch {
+    print("Error clearing state: \(error)")
+  }
+  
   // Create a key down event for 'u' key with control modifier
   let keyDownEvent = CGEvent(keyboardEventSource: nil, virtualKey: KeyCode.u.rawValue, keyDown: true)
   keyDownEvent?.flags = .maskControl
@@ -107,4 +168,16 @@ func globalKeyEventHandler(
   let keyUpEvent = CGEvent(keyboardEventSource: nil, virtualKey: KeyCode.u.rawValue, keyDown: false)
   keyUpEvent?.flags = .maskControl
   keyUpEvent?.post(tap: .cghidEventTap)
+}
+
+@raycast func getState(supportPath: String?) -> String {
+  let path = supportPath ?? ""
+  let stateFile = "\(path)/keyboard-lock-state.txt"
+  
+  do {
+    let content = try String(contentsOfFile: stateFile, encoding: .utf8)
+    return content
+  } catch {
+    return "0\n0"
+  }
 }
