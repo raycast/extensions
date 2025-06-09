@@ -10,6 +10,7 @@ import {
   ValidationError,
   ValidationWarning,
 } from "../types/mcpServer";
+import { showFailureToast } from "@raycast/utils";
 
 export class EditorManager {
   private services: Map<EditorType, BaseEditorService> = new Map();
@@ -52,7 +53,17 @@ export class EditorManager {
               const workspaceServers = await service.readConfig("workspace");
               allServers.push(...workspaceServers);
             } catch (error) {
-              console.warn(`Failed to read VS Code workspace servers:`, error);
+              if (
+                error instanceof Error &&
+                error.message.includes("No VS Code workspace found")
+              ) {
+                // This is expected, not an error
+              } else {
+                showFailureToast("Failed to read VS Code workspace servers", {
+                  message:
+                    error instanceof Error ? error.message : String(error),
+                });
+              }
             }
           }
 
@@ -60,14 +71,18 @@ export class EditorManager {
             const userServers = await service.readConfig("user");
             allServers.push(...userServers);
           } catch (error) {
-            console.warn(`Failed to read VS Code user servers:`, error);
+            showFailureToast("Failed to read VS Code user servers", {
+              message: error instanceof Error ? error.message : String(error),
+            });
           }
         } else {
           const servers = await service.readConfig();
           allServers.push(...servers);
         }
       } catch (error) {
-        console.warn(`Failed to read servers from ${editorType}:`, error);
+        showFailureToast(`Failed to read servers from ${editorType}`, {
+          message: error instanceof Error ? error.message : String(error),
+        });
       }
     }
 

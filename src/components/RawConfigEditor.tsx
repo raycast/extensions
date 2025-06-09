@@ -12,6 +12,7 @@ import {
   useNavigation,
   Color,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { dirname, basename } from "path";
 import { existsSync } from "fs";
@@ -308,9 +309,9 @@ export function RawConfigEditor({
             finalContent = JSON.stringify(fullSettings, null, 2);
           }
         } catch (error) {
-          console.warn(
-            "Could not merge MCP section into settings.json, saving as-is:",
-            error,
+          showFailureToast(
+            `Failed to save ${editorType === "vscode" ? "VS Code" : "Cursor"} config`,
+            { message: error instanceof Error ? error.message : String(error) },
           );
         }
       }

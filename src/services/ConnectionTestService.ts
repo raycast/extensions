@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import { showFailureToast } from "@raycast/utils";
 import {
   MCPServerConfig,
   ConnectionTestResult,
@@ -93,7 +94,9 @@ export class ConnectionTestService {
             );
             child.stdin.end();
           } catch (error) {
-            console.warn("Could not write to process stdin:", error);
+            showFailureToast("Could not write to process stdin", {
+              message: error instanceof Error ? error.message : String(error),
+            });
           }
 
           setTimeout(() => {

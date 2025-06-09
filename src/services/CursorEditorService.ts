@@ -25,6 +25,7 @@ import {
 } from "../utils/validation";
 import { getTransportType, inferTransport } from "../utils/transportUtils";
 import { existsSync } from "fs";
+import { showFailureToast } from "@raycast/utils";
 
 export class CursorEditorService extends BaseEditorService {
   constructor() {
@@ -239,7 +240,9 @@ export class CursorEditorService extends BaseEditorService {
             source: configType,
           });
         } catch (error) {
-          console.warn(`Failed to parse Cursor server '${serverName}':`, error);
+          showFailureToast(`Failed to parse Cursor server '${serverName}'`, {
+            message: error instanceof Error ? error.message : String(error),
+          });
         }
       },
     );

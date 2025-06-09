@@ -22,6 +22,7 @@ import {
 } from "../utils/validation";
 import { getTransportType, inferTransport } from "../utils/transportUtils";
 import { existsSync } from "fs";
+import { showFailureToast } from "@raycast/utils";
 
 const loggedMessages = new Set<string>();
 
@@ -71,9 +72,12 @@ export class VSCodeEditorService extends BaseEditorService {
                 "utf-8",
               );
             } catch (error) {
-              console.warn(
-                `Could not create VS Code workspace config at ${configPath}:`,
-                error,
+              showFailureToast(
+                `Failed to create VS Code workspace config at ${configPath}`,
+                {
+                  message:
+                    error instanceof Error ? error.message : String(error),
+                },
               );
             }
           } else {
@@ -475,10 +479,10 @@ export class VSCodeEditorService extends BaseEditorService {
 
       return newMcpConfig;
     } catch (error) {
-      console.warn(
-        "Could not read existing user settings, using new config only:",
-        error,
-      );
+      showFailureToast("Failed to merge with existing VS Code settings", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      // Return the original settings if merge fails
       return newMcpConfig;
     }
   }
@@ -592,9 +596,12 @@ export class VSCodeEditorService extends BaseEditorService {
                 "utf-8",
               );
             } catch (error) {
-              console.warn(
-                `Could not create VS Code workspace config at ${configPath}:`,
-                error,
+              showFailureToast(
+                `Failed to create VS Code workspace config at ${configPath}`,
+                {
+                  message:
+                    error instanceof Error ? error.message : String(error),
+                },
               );
             }
           } else {

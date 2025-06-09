@@ -11,6 +11,7 @@ import {
   confirmAlert,
   Alert,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { EditorManager } from "./services/EditorManager";
 import { ConnectionTestService } from "./services/ConnectionTestService";
 import {
@@ -681,10 +682,11 @@ function EditRawConfigWrapper({
           const fullSettings = { ...existingData, mcp: newMcpData };
           finalContent = JSON.stringify(fullSettings, null, 2);
         } catch (error) {
-          console.warn(
-            "Could not merge MCP section into settings.json, saving as-is:",
-            error,
+          showFailureToast(
+            `Failed to save ${editorType === "vscode" ? "VS Code" : "Cursor"} config`,
+            { message: error instanceof Error ? error.message : String(error) },
           );
+          throw error;
         }
       }
 
