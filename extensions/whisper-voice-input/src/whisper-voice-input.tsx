@@ -1,7 +1,9 @@
-import { spawn } from "child_process";
+import { exec } from "child_process";
+import { promisify } from "util";
 import { showToast, Toast, showHUD } from "@raycast/api";
 import { join } from "path";
-import { readFileSync } from "fs";
+
+const execAsync = promisify(exec);
 
 export default async function Command() {
   try {
@@ -9,36 +11,16 @@ export default async function Command() {
     await showHUD("🎙️ Recording...");
 
     const scriptPath = join(__dirname, "assets/whisper-voice-input.sh");
-    const scriptContent = readFileSync(scriptPath, "utf-8");
 
-    // Execute the shell script using spawn for greater reliability
-    await new Promise<void>((resolve, reject) => {
-      const child = spawn("/bin/bash");
+    // Execute the shell script and handle both stdout and stderr
+    const { stdout, stderr } = await execAsync(`bash "${scriptPath}"`);
 
-      let stderr = "";
+    // Log stdout for debugging purposes
+    console.log("Script output:", stdout);
 
-      child.stderr.on("data", (data) => {
-        stderr += data.toString();
-      });
-
-      child.on("close", (code) => {
-        if (code !== 0) {
-          // The script exited with an error.
-          return reject(new Error(stderr));
-        }
-        // The script succeeded.
-        resolve();
-      });
-
-      child.on("error", (err) => {
-        // Failed to spawn the process
-        reject(err);
-      });
-
-      // Write the script content to the bash process and close its input
-      child.stdin.write(scriptContent);
-      child.stdin.end();
-    });
+    if (stderr) {
+      throw new Error(stderr);
+    }
 
     // Show success notification
     await showHUD("✅ Transcribed and pasted!");
