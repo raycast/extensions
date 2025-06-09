@@ -122,10 +122,10 @@ export default function Command() {
 
       // Next 7 days window
       const nextWeek = new Date(now);
-      nextWeek.setDate(now.getDate() + 7);
-      nextWeek.setHours(23, 59, 59, 999);
+      nextWeek.setDate(now.getDate() + 8);
+      nextWeek.setHours(0, 0, 0, 0);
 
-      if (date <= nextWeek) {
+      if (date < nextWeek) {
         return date.toLocaleDateString(undefined, { weekday: "long" });
       }
 
