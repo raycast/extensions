@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Console command] 2025-01-23
+- Add AWS Audit Manager service to console command
+- Fix Amazon Bedrock service details (previously had incorrect AWS Audit Manager information)
+
 ## [Console command] 2025-05-23
 - Fix full URLs (e.g. `https://quicksight.aws.amazon.com`) routing correctly to the console
 
