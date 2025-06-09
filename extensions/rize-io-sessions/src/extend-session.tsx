@@ -42,28 +42,7 @@ export default function ExtendSessionCommand() {
   const [selectedDuration, setSelectedDuration] = useState("1800"); // Default to 30 minutes
 
   const extendSession = async () => {
-    let preferences: Preferences;
-    try {
-      preferences = getPreferenceValues<Preferences>();
-    } catch (_error) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const error = _error;
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "API Key Missing",
-        message: "Please set up your Rize.io API key in Raycast Preferences",
-      });
-      return;
-    }
-
-    if (!preferences.apiKey) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "API Key Required",
-        message: "Please set up your Rize.io API key in Raycast Preferences",
-      });
-      return;
-    }
+    const preferences = getPreferenceValues<Preferences>();
 
     try {
       // Find the selected duration option

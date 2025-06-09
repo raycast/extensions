@@ -92,19 +92,7 @@ export default function StartSessionCommand() {
   }, [selectedType]);
 
   const startSession = async () => {
-    let preferences: Preferences;
-    try {
-      preferences = getPreferenceValues<Preferences>();
-    } catch (_error) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const error = _error;
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "API Key Missing",
-        message: "Please set up your Rize.io API key in Raycast Preferences",
-      });
-      return;
-    }
+    const preferences = getPreferenceValues<Preferences>();
 
     if (!preferences.apiKey) {
       await showToast({

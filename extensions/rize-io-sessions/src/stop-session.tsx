@@ -21,24 +21,10 @@ interface GraphQLResponse<T> {
   errors?: GraphQLError[];
 }
 
-interface Preferences {
-  apiKey: string;
-}
-
 export default async function Command() {
   try {
     // Retrieve preferences
     const preferences = getPreferenceValues<Preferences>();
-
-    // Validate API key
-    if (!preferences.apiKey) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "API Key Required",
-        message: "Please set up your Rize.io API key in Raycast Preferences",
-      });
-      return;
-    }
 
     // Check current session
     const currentSessionResponse = await axios.post(
