@@ -95,7 +95,7 @@ export default function Command(
 
   const checkName = (name: string | undefined) => {
     console.log("Checking name:", name);
-    if (!name) {
+    if (!name || !name.trim()) {
       setNameError("Automation name cannot be empty");
       return;
     }
@@ -207,8 +207,6 @@ export default function Command(
         <Form.Separator />
         {values.map(
           (value, index) => (
-            console.log("index", value, index),
-            (
               <Form.TextField
                 id={`link-${index}`}
                 value={value}
@@ -219,7 +217,6 @@ export default function Command(
                 placeholder="https://google.com/search?q=Raycast"
                 key={index}
               />
-            )
           ),
         )}
       </Form>

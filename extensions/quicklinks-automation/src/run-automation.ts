@@ -10,10 +10,6 @@ export default async function Command(props: { arguments: AutomationArguments })
       console.log("Automation run successfully");
     })
     .catch((error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error Running Automation",
-        message: error.message || "An error occurred while running the automation.",
-      });
+      showFailureToast(error, { title: "Error Running Automation" });
     });
 }
