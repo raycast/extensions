@@ -1,10 +1,14 @@
-import { Action, ActionPanel, Grid } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Grid, Keyboard, PreferenceValues } from "@raycast/api";
 import { hex } from "color-convert";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import colors from "tailwindcss/colors";
 import { capitalize } from "lodash";
 import { useEffect, useState } from "react";
+
+import { extendArray } from "./utils/move-to-front-extension";
+
+extendArray();
 
 const hiddenColors = [
   "inherit",
@@ -19,9 +23,12 @@ const hiddenColors = [
   "blueGray",
 ];
 
+const preferences = getPreferenceValues();
+
 export default function SearchColors() {
   const [searchText, setSearchText] = useState("");
   const [filteredColors, filterColors] = useState(Object.entries(colors));
+
   useEffect(() => {
     // If there's no search text, show all colors
     if (!searchText) {
@@ -69,48 +76,114 @@ export default function SearchColors() {
                   value as string,
                   (value as string).replace("#", ""),
                 ]}
-                actions={
-                  <ActionPanel>
-                    <ActionPanel.Section>
-                      <Action.CopyToClipboard
-                        title="Copy HEX"
-                        content={value as string}
-                        shortcut={{ modifiers: ["cmd"], key: "h" }}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy RGB"
-                        content={`rgb(${hex.rgb(value as string).join(", ")})`}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy HSL"
-                        content={`hsl(${hex.hsl(value as string).join(", ")})`}
-                        shortcut={{ modifiers: ["cmd"], key: "s" }}
-                      />
-                    </ActionPanel.Section>
-                    <ActionPanel.Section>
-                      <Action.CopyToClipboard
-                        title="Copy Background Class"
-                        content={`bg-${name}-${shade}`}
-                        shortcut={{ modifiers: ["cmd", "opt"], key: "b" }}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy Text Class"
-                        content={`text-${name}-${shade}`}
-                        shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy Border Class"
-                        content={`border-${name}-${shade}`}
-                        shortcut={{ modifiers: ["cmd", "opt"], key: "o" }}
-                      />
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
+                actions={<Actions preferences={preferences} name={name} shade={shade} value={value as string} />}
               />
             ))}
           </Grid.Section>
         ))}
     </Grid>
+  );
+}
+
+function Actions({
+  preferences,
+  name,
+  shade,
+  value,
+}: {
+  preferences: PreferenceValues;
+  name: string;
+  shade: string;
+  value: string;
+}) {
+  const sections = [
+    {
+      actions: [
+        {
+          id: "bg-class",
+          title: "Copy Background Class",
+          content: `bg-${name}-${shade}`,
+          shortcut: { modifiers: ["cmd", "opt"], key: "b" } as Keyboard.Shortcut,
+        },
+        {
+          id: "text-class",
+          title: "Copy Text Class",
+          content: `text-${name}-${shade}`,
+          shortcut: { modifiers: ["cmd", "opt"], key: "t" } as Keyboard.Shortcut,
+        },
+        {
+          id: "border-class",
+          title: "Copy Border Class",
+          content: `border-${name}-${shade}`,
+          shortcut: { modifiers: ["cmd", "opt"], key: "o" } as Keyboard.Shortcut,
+        },
+        {
+          id: "shadow-class",
+          title: "Copy Shadow Class",
+          content: `shadow-${name}-${shade}`,
+          shortcut: { modifiers: ["cmd", "opt"], key: "a" } as Keyboard.Shortcut,
+        },
+        {
+          id: "ring-class",
+          title: "Copy Ring Class",
+          content: `ring-${name}-${shade}`,
+          shortcut: { modifiers: ["cmd", "opt"], key: "i" } as Keyboard.Shortcut,
+        },
+        {
+          id: "outline-class",
+          title: "Copy Outline Class",
+          content: `outline-${name}-${shade}`,
+          shortcut: { modifiers: ["cmd", "opt"], key: "u" } as Keyboard.Shortcut,
+        },
+      ],
+    },
+    {
+      actions: [
+        {
+          id: "value-hex",
+          title: "Copy Hex Value",
+          content: value,
+          shortcut: { modifiers: ["cmd", "opt"], key: "h" } as Keyboard.Shortcut,
+        },
+        {
+          id: "value-rgb",
+          title: "Copy RGB Value",
+          content: `rgb(${hex.rgb(value)})`,
+          shortcut: { modifiers: ["cmd", "opt"], key: "r" } as Keyboard.Shortcut,
+        },
+        {
+          id: "value-hsl",
+          title: "Copy HSL Value",
+          content: `hsl(${hex.hsl(value)})`,
+          shortcut: { modifiers: ["cmd", "opt"], key: "s" } as Keyboard.Shortcut,
+        },
+      ],
+    },
+  ]
+    .map((section) => {
+      return {
+        ...section,
+        actions: section.actions.moveFirstMatchToFront((action) => action.id === preferences.defaultAction),
+      };
+    })
+    .moveFirstMatchToFront((section) => section.actions.some((action) => action.id === preferences.defaultAction));
+
+  return (
+    <ActionPanel>
+      {sections.map((section, index) => {
+        return (
+          <ActionPanel.Section key={`section-${index}`}>
+            {section.actions.map((action) => (
+              <Action.CopyToClipboard
+                key={`${action.id}-action`}
+                title={action.title}
+                content={action.content}
+                shortcut={action.shortcut}
+              />
+            ))}
+          </ActionPanel.Section>
+        );
+      })}
+    </ActionPanel>
   );
 }
