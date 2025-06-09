@@ -1,3 +1,0 @@
-# Exa
-
-AI-powered search

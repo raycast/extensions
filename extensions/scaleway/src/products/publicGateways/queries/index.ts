@@ -1,1 +1,0 @@
-export { useAllZonesGatewaysQuery } from './useGatewaysQuery'

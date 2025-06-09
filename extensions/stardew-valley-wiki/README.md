@@ -1,1 +1,0 @@
-# StardewValley Wiki

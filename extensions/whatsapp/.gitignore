@@ -1,9 +1,0 @@
-
-raycast-env.d.ts
-
-.raycast-swift-build
-.swiftpm
-compiled_raycast_swift
-
-# dependencies
-/node_modules

@@ -1,1 +1,0 @@
-export { useAllRegionHostingsQuery } from './useHostingsQuery'
