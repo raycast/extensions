@@ -63,7 +63,7 @@ function CreateBookmark({ user }: { user: User }) {
         });
 
         if (res.error) {
-          await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: "res.error.message" });
+          await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: res.error.message });
           return;
         }
       } else {
@@ -74,7 +74,7 @@ function CreateBookmark({ user }: { user: User }) {
         });
 
         if (res.error) {
-          await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: "res.error.message" });
+          await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: res.error.message });
           return;
         }
       }

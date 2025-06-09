@@ -10,7 +10,8 @@
   "icon": "icon.png",
   "author": "rauno",
   "contributors": [
-    "peduarte"
+    "peduarte",
+    "almoce"
   ],
   "license": "MIT",
   "commands": [
@@ -24,6 +25,12 @@
       "name": "search-bookmarks",
       "title": "Search Bookmarks",
       "description": "Search your bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "manage-groups",
+      "title": "Manage Groups",
+      "description": "Manage groups of bookmarks",
       "mode": "view"
     }
   ],
