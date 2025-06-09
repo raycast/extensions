@@ -2,6 +2,8 @@
 
 A Raycast extension that records audio, transcribes it using whisper-cpp, and pastes the transcribed text back into your active application.
 
+[![Whisper Voice Input Demo](https://img.youtube.com/vi/C_h3kMNlO6o/maxresdefault.jpg)](https://www.youtube.com/watch?v=C_h3kMNlO6o)
+
 ---
 
 ## ⚡️ Requirements
@@ -95,6 +97,8 @@ A Raycast extension that records audio, transcribes it using whisper-cpp, and pa
    - Record audio for the specified duration
    - Transcribe the audio using whisper-cpp
    - Paste the transcribed text back into your active application
+
+📺 Watch the demo on YouTube: [Whisper Voice Input Demo](https://youtu.be/C_h3kMNlO6o?si=EVAk0pVZsIC5Ib0B)
 
 ---
 
