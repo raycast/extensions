@@ -30,13 +30,13 @@ Editing `JSON` configs manually is tedious and error-prone. This gives you forms
 - CRUD operations for MCP server configs across editors
 - Search and filter servers
 - Connection testing with timeout handling
-- Basic protection against deleting critical servers (UI only - raw config editing bypasses this)
+- Basic protection against deleting critical servers (*UI only - raw config editing bypasses this*)
 - Transport support: `stdio`, `SSE`, `HTTP`
 
 ## Supported editors
 
 - **`Cursor`**: `stdio`, `SSE`
-- **`VS Code`**: `stdio`, `SSE`, `HTTP` (includes input management for secrets)
+- **`VS Code`**: `stdio`, `SSE`, `HTTP` (*includes input management for secrets)
 - **`Windsurf`**: `stdio`, `/sse`
 
 ## Installation
@@ -72,7 +72,7 @@ npm run dev
 
 ## Usage
 
-Type "MCP" in `Raycast`:
+Type 'MCP' in Raycast:
 
 - **List MCP Servers** - View all servers
 - **Add MCP Server** - Create new server config
@@ -135,7 +135,10 @@ Standard `HTTP` request/response.
 ```
 
 ### `SSE (Windsurf)` (`/sse`)
-`Windsurf`'s custom `SSE` implementation. *The url is expected to end with `/sse`.*
+`Windsurf`'s custom `SSE` implementation with these key differences:
+- Uses `/sse` as the transport type (*instead of `sse`*)
+- Requires `serverUrl` parameter (not `url`)
+- URL must end with `/sse`
 
 ```json
 {
@@ -144,6 +147,8 @@ Standard `HTTP` request/response.
   "serverUrl": "https://api.example.com/sse"
 }
 ```
+
+> **Note**: When adding a server through the MCP Server Manager, these differences are handled automatically based on the selected editor.
 
 ## Server Protection
 
@@ -187,7 +192,7 @@ Don't rely on this if you're editing configs directly. You break it, you own it.
 
 ## Troubleshooting
 
-- **Extension not loading:** Check `Raycast` version ≥`1.50.0`, restart `Raycast`
+- **Extension not loading:** Check Raycast version ≥`1.50.0`, restart Raycast
 - **Servers missing:** Verify config files exist, check `JSON` syntax, verify permissions
 - **Connection failures:** Test server accessibility, verify commands work, check environment variables
 
@@ -195,7 +200,7 @@ Don't rely on this if you're editing configs directly. You break it, you own it.
 
 ## Contributing
 
-Code works but could be cleaner. PRs welcome.
+Code works but could be *much* cleaner. PRs welcome.
 
 **Needs work:**
 - Refactoring (it's messy)
@@ -204,7 +209,7 @@ Code works but could be cleaner. PRs welcome.
 - Error handling
 - Tests
 
-Fork, fix, PR. No bureaucracy.
+Fork, fix, PR.
 
 ## License
 
