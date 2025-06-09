@@ -12,9 +12,9 @@ export function ManageGroups({ user }: { user: User }) {
 
   async function delte(id: string, name: string) {
     const confirm = await confirmAlert({
-      title: "Confirm to Delete?",
+      title: `Delete ${name}?`,
       primaryAction: {
-        title: name,
+        title: "Confirm",
         style: Alert.ActionStyle.Destructive,
       },
     });
