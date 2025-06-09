@@ -12,11 +12,8 @@ export default async function Command() {
 
     const scriptPath = join(__dirname, "assets/whisper-voice-input.sh");
 
-    // Execute the shell script and handle both stdout and stderr
-    const { stdout, stderr } = await execAsync(`bash "${scriptPath}"`);
-
-    // Log stdout for debugging purposes
-    console.log("Script output:", stdout);
+    // Execute the shell script and handle stderr
+    const { stderr } = await execAsync(`bash "${scriptPath}"`);
 
     if (stderr) {
       throw new Error(stderr);
