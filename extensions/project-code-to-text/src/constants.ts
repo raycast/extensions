@@ -403,6 +403,8 @@ export const ALWAYS_TEXT_EXTENSIONS: readonly string[] = [
   ".gp", // Gnuplot script
   ".psd1",
   ".psm1", // PowerShell module files
+  ".trigger", // Salesforce Apex Trigger
+  ".cls", // Salesforce Apex Class
 ];
 
 /**
@@ -490,6 +492,8 @@ export const LANGUAGE_EXTENSION_MAP: Readonly<Record<string, string>> = {
   ".ada": "ada",
   ".vb": "vbnet",
   ".pde": "processing",
+  ".trigger": "apex", // Salesforce Apex Trigger
+  ".cls": "apex", // Salesforce Apex Class
   license: "text",
   readme: "markdown",
   contributing: "markdown",
