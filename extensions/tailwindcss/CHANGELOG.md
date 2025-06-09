@@ -1,6 +1,6 @@
 # Tailwind CSS Changelog
 
-## [Add default action preference for Search Colors] - 2025-06-09
+## [Add default action preference for Search Colors] - {PR_MERGE_DATE}
 - Add preference to configure the default action when selecting a color
 - Add more copy-to-clipboard actions
 

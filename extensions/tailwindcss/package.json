@@ -100,7 +100,7 @@
           "description": "Action to perform when pressing enter",
           "type": "dropdown",
           "required": false,
-          "default": "selector",
+          "default": "color-name",
           "data": [
             {
               "title": "Copy color name",
