@@ -3,7 +3,7 @@
   "name": "open-in-trae",
   "title": "Open in Trae",
   "description": "Open current Finder directory, selected folder or file in Trae.",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "haroldao",
   "license": "MIT",
   "commands": [
