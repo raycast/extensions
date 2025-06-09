@@ -10,7 +10,7 @@ import { Action, ActionPanel, Form, List, Toast, showToast, useNavigation, confi
 export function ManageGroups({ user }: { user: User }) {
   const { data: groups, isLoading: isLoadingGroups, revalidate } = useGroups(user);
 
-  async function delte(id: string, name: string) {
+  async function doDelete(id: string, name: string) {
     const confirm = await confirmAlert({
       title: `Delete ${name}?`,
       primaryAction: {
@@ -46,7 +46,7 @@ export function ManageGroups({ user }: { user: User }) {
                   title="Create New Group"
                   target={<CreateGroup user={user} groups={groups} revalidate={revalidate} />}
                 />
-                <Action title="Delete Group" onAction={() => delte(group.id, group.name)} />
+                <Action title="Delete Group" onAction={() => doDelete(group.id, group.name)} />
               </ActionPanel>
             }
           />
@@ -97,7 +97,7 @@ function CreateGroup({ user, groups, revalidate }: { user: User; groups: Group[]
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit Name" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Group" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
