@@ -1,7 +1,7 @@
-<div align="center">
+<div align="center" style="line-height: 1.5;">
   <h1>MCP Server Manager</h1>
   
-  <div align="center">
+  <div align="center" class="badge-container" style="display: inline-block; line-height: 0;">
     <a href="https://raycast.com/" target="_blank" rel="noopener noreferrer" title="Raycast" aria-label="Raycast" style="text-decoration: none; cursor: pointer;">
       <img src="https://img.shields.io/badge/Raycast-FF6363?style=for-the-badge&logo=raycast&logoColor=white" alt="Raycast">
     </a>
@@ -16,7 +16,7 @@
     </a>
   </div>
   
-  <div align="center">
+  <div align="center" class="badge-container" style="display: inline-block; line-height: 0; margin: 8px 0;">
     <a href="https://www.cursor.com/" target="_blank" rel="noopener noreferrer" title="Cursor" aria-label="Cursor" style="text-decoration: none; cursor: pointer;">
       <img alt="Cursor" src="https://img.shields.io/badge/1.0%2B-%23cccccc?style=for-the-badge&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAUSSURBVHgB1VdLLKRZFD71l%2FdbGIw3CwSDsPBI2iNiQUYYVhZ2NiQSMwmLiQgxPSymExIyGQsbkViQmAVmSCdCZiISEYIFiXcw7S2IR9Vfc77bfeVXlOqq7kX3SW7u%2F%2F917z3f%2Bc7jniL6ikVpbm5WeNbx0JOdopDtAoVKR0fH66CgoPvY2Nj74uLi9g9n6chGsRWAUldXlzM0NGQ0GAwNCwsLys7Ojv7k5OSn0tJSY2pq6vdkIxsfC0DJz8%2F3GxwcfBcdHf12Y2ODLi4ulPPzczIajXR8fKzwIF9f3z9LSkpOwsPDfT%2F2bAdrinmovb29b%2B%2Fv77PZWoVnur29pdPTUzGbTCYCEDc3N6zXXV5eeiUkJBwlJib%2BPTo6WiTPsBUAfKlra2urDwsL%2B%2FXo6EjHlOugHOP6%2BppYEd3d3QkA%2BIZ3vV5POp0O3xR%2BLmQ2jLzm57Gxsd%2F4PKMlReair6mp%2BS43N3eeLVaZYgU0YzAIYTWUHR4ewg00Pj5OXl5e5OrqSn5%2BfmJ2cnIiBwcHCUj18PBQVldXXy0vL%2F%2FD55ssAmClLhUVFWv7%2B%2FvBqqoKxbCQn4VyjJubG6GYA4%2Burq6IA5EURRHKnJ2diZWRi4sLOTo6im%2BSFQx2087ExEQ0qzLQcxIfH1%2Fb2tpqgrBy0%2BcWdofJ39%2F%2FR63OR5Hq6empzszMUFFRkaAWln8Ogcu2t7epu7ubgoODVYsAIAgsUNnX1yeArK2tCTfYI3AZx5EAwIqpp6fniVGPsgC%2BhK%2FgZwj82dTUJJ77%2B%2Fsf1lgTAD44OBAzYgBzWVkZ6gRqxqO1T06DAhlsiHgMvIONlpaWBwWWBMG5t7f3aA1Y3draEpn0RJ%2F5hw95LJRioxxIrbm5OUpOTqaRkZEnVKI2gG4AxxlS3N3dkV0iLZ%2BLqWcBYGhTD4VGPgcEBFBnZycyhjY3Nx%2F8fHZ2JuiWItN3enqavL29SdYScxAWAUDkJu1mHIxn%2BLOqqkpYLBXjN%2B1AgaqsrBQGYC%2BGuRscngOAONAWIa1r4I6QkBABAP6WyiQAKdhfX18vqiNY0jL7IgAol9lgTieyIikpSViENfCvZEUreEfaDQwMCPoRP1pmLQIAlRKAFgQOTElJEcrwDXUCM0quBKAFgb3cG4hyLN0nWX0RgNYFAAPq4uLixAUjFnMkawECgLlyCNzEd4rI%2Ba6uLgoMDHww6MUglIqxCNGemZkplOMblMsBy0ArmNAygIHvw8PD5OPjQ1FRUaL8pqeni%2F5BBqJFBhihgsORYrAegnctODnLyJcHShaQkqGhoQ8VE79zX0Dl5eXU3t6OwFVeAvB7bW1tw%2Fr6eigqoGxAQKl0j3QRmNCmpgSLPgGUy35AM1S%2Biv%2FjWPrDogsmJycNWVlZEfPz8znZ2dni5kI0c%2FcrKEUWoPWCW%2BB%2FzFr%2Fw3qsQ3ZgYD3PakxMDM3OzmawW0O5TF8%2FMposi56v5gY%2B4BeueApYQLmV9QEswPqCggLBEN53d3e1HRHufhPfps1s1Gt63wk9uUSs9fGioWQgf7FLCrjcKuiCAEJGdF5ennATLiDJDFuOwPg3IiLiFVlpSq3drWJjRkZGYXV19TeRkZGXoBQWSt8CBACAcnYPXHbW2Nj4LSvP0Z5hLwApppWVlRO%2BCb25sfwBWYJmU%2FZ73CMKPy8tLRVyifbjZuadNcWfIuKv2dTU1Bvu%2Bw1Mvbq4uPiG7Pxr9imCQqBLS0tzJPv%2BY34Z8j8fF3DHYdiJRQAAAABJRU5ErkJggg%3D%3D&label=cursor&labelColor=%23cccccc&color=%23000000&link=https%3A%2F%2Fwww.cursor.com%2Fen">
     </a>
@@ -28,7 +28,7 @@
     </a>
   </div>
   
-  <div align="center">
+  <div align="center" class="badge-container" style="display: inline-block; line-height: 0;">
     <a href="https://react.dev/" target="_blank" rel="noopener noreferrer" title="React" aria-label="React" style="text-decoration: none; cursor: pointer;">
       <img src="https://img.shields.io/badge/React-19+-61DAFB?style=for-the-badge&logo=react&logoColor=white&labelColor=20232A" alt="React 19+">
     </a>
@@ -40,6 +40,17 @@
     </a>
   </div>
 </div>
+
+<style>
+  .badge-container a {
+    text-decoration: none !important;
+    border-bottom: none !important;
+  }
+  .badge-container a:hover {
+    text-decoration: none !important;
+    border-bottom: none !important;
+  }
+</style>
 
 <div align="center" style="margin-bottom: 1.5rem; margin-top: 1.5rem;">
   <p style="font-size: 1rem; font-weight: bold;">A Raycast extension for managing MCP <span style="font-style: italic;">(Model Context Protocol)</span> servers across editors.</p>
@@ -262,17 +273,6 @@ Remote `HTTP` connection with event streaming.
 }
 ```
 
-### `HTTP`
-Standard `HTTP` request/response.
-
-```json
-{
-  "name": "api-service",
-  "transport": "http",
-  "url": "http://localhost:8000/mcp"
-}
-```
-
 ### `SSE (Windsurf)` (`/sse`)
 `Windsurf`'s custom `SSE` implementation with these key differences:
 - Uses `/sse` as the transport type (*instead of `sse`*)
@@ -284,6 +284,17 @@ Standard `HTTP` request/response.
   "name": "windsurf-service",
   "transport": "/sse",
   "serverUrl": "https://api.example.com/sse"
+}
+```
+
+### `HTTP`
+Standard `HTTP` request/response.
+
+```json
+{
+  "name": "api-service",
+  "transport": "http",
+  "url": "http://localhost:8000/mcp"
 }
 ```
 
@@ -306,28 +317,6 @@ Don't rely on this if you're editing configs directly. You break it, you own it.
 | `Cursor` | `~/.cursor/mcp.json` | `.cursor/mcp.json` |
 | `VS Code` | `~/Library/Application Support/Code/User/settings.json` | `.vscode/settings.json` |
 | `Windsurf` | `~/.windsurf/mcp.json` | `.windsurf/mcp.json` |
-
----
-
-`VS Code` input management example:
-
-```json
-{
-  "inputs": [{
-    "id": "api-key", 
-    "type": "promptString", 
-    "description": "API Key", 
-    "password": true
-  }],
-  "servers": {
-    "secure-server": {
-      "command": "python",
-      "args": ["-m", "server"],
-      "env": {"API_KEY": "${input:api-key}"}
-    }
-  }
-}
-```
 
 ## Troubleshooting
 
