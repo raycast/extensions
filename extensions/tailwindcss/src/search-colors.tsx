@@ -100,6 +100,12 @@ function Actions({
     {
       actions: [
         {
+          id: "color-name",
+          title: "Copy color name",
+          content: `${name}-${shade}`,
+          shortcut: { modifiers: ["cmd", "opt"], key: "n" } as Keyboard.Shortcut,
+        },
+        {
           id: "bg-class",
           title: "Copy Background Class",
           content: `bg-${name}-${shade}`,

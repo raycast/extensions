@@ -103,6 +103,10 @@
           "default": "selector",
           "data": [
             {
+              "title": "Copy color name",
+              "value": "color-name"
+            },
+            {
               "title": "Copy HEX",
               "value": "value-hex"
             },
@@ -111,7 +115,7 @@
               "value": "value-rgb"
             },
             {
-              "title": "Copy Class Name",
+              "title": "Copy HSL",
               "value": "value-hsl"
             },
             {
