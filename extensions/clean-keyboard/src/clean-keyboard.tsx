@@ -46,7 +46,7 @@ const durations: Duration[] = [
   },
   {
     display: "Forever",
-    seconds: Infinity,
+    seconds: -1,
     icon: "🤯",
   },
 ];
@@ -70,7 +70,7 @@ export default function Command() {
         const fileDuration = parseInt(lines[0], 10);
         const fileTimeLeft = parseInt(lines[1], 10);
 
-        if (fileTimeLeft > 0) {
+        if (fileTimeLeft > 0 || fileTimeLeft === -1) {
           setTimeLeft(fileTimeLeft);
           setIsRunning(true);
 
@@ -134,12 +134,17 @@ export default function Command() {
   }
 
   if (isRunning) {
+    const isForever = timeLeft === -1;
+    const title = isForever
+      ? "Cleaning keyboard forever…"
+      : `Cleaning keyboard${timeLeft ? ` for ${timeLeft} seconds…` : ""}`;
+
     return (
       <List>
         <List.EmptyView
           icon={icon ?? "🧼"}
           description="Press ⌃ + U at any time to unlock the keyboard."
-          title={`Cleaning keyboard${timeLeft ? ` for ${timeLeft} seconds…` : ""}`}
+          title={title}
           actions={
             <ActionPanel>
               <Action title={"Back"} onAction={() => setIsRunning(false)} />

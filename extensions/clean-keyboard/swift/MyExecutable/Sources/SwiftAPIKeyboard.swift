@@ -26,6 +26,12 @@ class EventHandler {
     // Invalidate existing timer if any
     timer?.invalidate()
     
+    // For "Forever" (duration == -1), don't create a countdown timer
+    if duration == -1 {
+      // Just keep the state file updated with -1 for both duration and timeLeft
+      return
+    }
+    
     timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
       // Read current state
       let (currentDuration, currentTimeLeft) = self.readState()
