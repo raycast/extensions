@@ -2,7 +2,10 @@
   "name": "n8n",
   "title": "n8n",
   "description": "Raycast extension for n8n workflow automation.",
-  "author": "gregoryhadley",
+  "author": "pernielsentikaer",
+  "contributors": [
+    "gregoryhadley"
+  ],
   "categories": ["Productivity", "Developer Tools"],
   "main": "src/search-workflows-api.tsx",
   "commands": [
