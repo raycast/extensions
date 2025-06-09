@@ -34,7 +34,14 @@ export function ManageGroups({ user }: { user: User }) {
   }
 
   return (
-    <List isLoading={isLoadingGroups}>
+    <List isLoading={isLoadingGroups} actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Create New Group"
+                  target={<CreateGroup user={user} groups={groups} revalidate={revalidate} />}
+                />
+              </ActionPanel>
+            }>
       {groups?.map((group) => {
         return (
           <List.Item
@@ -42,10 +49,6 @@ export function ManageGroups({ user }: { user: User }) {
             title={group.name}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Create New Group"
-                  target={<CreateGroup user={user} groups={groups} revalidate={revalidate} />}
-                />
                 <Action title="Delete Group" onAction={() => doDelete(group.id, group.name)} />
               </ActionPanel>
             }
