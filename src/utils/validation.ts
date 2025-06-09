@@ -470,7 +470,7 @@ export function validateVSCodeInputs(inputs: VSCodeInput[]): ValidationError[] {
         createError(
           `${prefix}.id`,
           `Duplicate input ID: ${input.id}`,
-          ERROR_CODES.DUPLICATE_SERVER_NAME,
+          ERROR_CODES.DUPLICATE_INPUT_ID,
         ),
       );
     } else if (input.id) {
