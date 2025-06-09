@@ -1,6 +1,7 @@
 {
   "$schema": "https://raycast.com/schemas/extension.json",
   "name": "mcp-server-manager",
+  "version": "1.0.0",
   "title": "MCP Server Manager",
   "description": "Manage Model Context Protocol (MCP) servers for AI editors like Cursor, Windsurf, and VS Code",
   "icon": "extension-icon.png",
