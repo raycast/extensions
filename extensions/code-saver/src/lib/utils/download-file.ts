@@ -1,4 +1,3 @@
-import Fs from "fs";
 import Https from "https";
 import tar from "tar-stream";
 import zlib from "zlib";
@@ -22,7 +21,7 @@ export async function DownloadFile(url: string, targetFile: string): Promise<voi
       }
 
       // save the file to disk
-      const fileWriter = Fs.createWriteStream(targetFile).on("finish", () => {
+      const fileWriter = fs.createWriteStream(targetFile).on("finish", () => {
         console.log("DownloadFile finish: ", targetFile);
         resolve();
       });
