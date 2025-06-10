@@ -32,7 +32,7 @@ export default async function tool(input: InputVmIds): Promise<string | void> {
     /* Check Errors */
     if (ticket instanceof Error) {
       if (!output) output = "Error running the following tasks:";
-      output += `* ${ticket}`;
+      output += `\n* ${ticket}`;
       errorCounter += 1;
       continue;
     }
