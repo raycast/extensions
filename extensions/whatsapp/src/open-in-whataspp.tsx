@@ -21,7 +21,7 @@ export default function Command() {
         }
         showToast({ style: Toast.Style.Animated, title: "Fetching contacts..." });
       } catch (err) {
-        console.error("Error loading contacts:", err);
+        showFailureToast(err, { title: "Failed to load contacts" });
       }
     }
 
