@@ -38,43 +38,58 @@ const preferredAppsNames = {
   "com.microsoft.VSCode.app.insiders": "Visual Studio Code Insiders",
 };
 
+// Simple cache to prevent duplicate calls in development
+let appCache: { data: App[]; timestamp: number } | null = null;
+const CACHE_DURATION = 5000; // 5 seconds
+
 async function fetchApps(): Promise<App[]> {
+  // Check cache first to prevent duplicate calls in React strict mode
+  if (appCache && Date.now() - appCache.timestamp < CACHE_DURATION) {
+    return appCache.data;
+  }
   try {
-    // Get all installed applications from Raycast API
-    const installedApps = await getApplications();
-    const appMap = new Map<string, Application>();
+    // Run both operations in parallel for better performance
+    const [installedAppsResult, runningProcessesResult] = await Promise.all([
+      // Get all installed applications from Raycast API
+      getApplications(),
+
+      // Get running processes with their bundle IDs (optimized AppleScript)
+      execSync(
+        `osascript -e '
+        tell application "System Events"
+          set appList to {}
+          repeat with proc in (every process whose background only is false)  
+            try
+              set procBundle to bundle identifier of proc
+              if procBundle is not missing value and procBundle is not "" then
+                set end of appList to procBundle
+              end if
+            end try
+          end repeat
+          return appList
+        end tell
+      '`,
+        {
+          encoding: "utf8",
+          timeout: 8000, // Reduced timeout
+        },
+      ),
+    ]);
 
     // Create a map of bundle IDs to applications for quick lookup
-    installedApps.forEach((app) => {
+    const appMap = new Map<string, Application>();
+    installedAppsResult.forEach((app) => {
       if (app.bundleId) {
         appMap.set(app.bundleId, app);
       }
     });
-    // Get running processes with their bundle IDs
-    const processScript = `
-      tell application "System Events"
-        set appList to {}
-        repeat with proc in (every process whose background only is false)  
-          try
-            set procBundle to bundle identifier of proc
-            if procBundle is not missing value and procBundle is not "" then
-              set end of appList to procBundle
-            end if
-          end try
-        end repeat
-        return appList
-      end tell
-    `;
 
-    const result = execSync(`osascript -e '${processScript.replace(/'/g, "\\'")}'`, {
-      encoding: "utf8",
-      timeout: 10000,
-    });
-
-    const runningBundleIds = result
+    const runningBundleIds = runningProcessesResult
       .trim()
       .split(", ")
-      .map((id) => id.trim());
+      .map((id) => id.trim())
+      .filter((id) => id && id !== "");
+
     const apps: App[] = [];
     let uniqueCounter = 0;
 
@@ -83,6 +98,7 @@ async function fetchApps(): Promise<App[]> {
       if (!bundleId) continue;
 
       const installedApp = appMap.get(bundleId);
+
       // Regular app - use information from getApplications
       if (installedApp) {
         apps.push({
@@ -104,7 +120,15 @@ async function fetchApps(): Promise<App[]> {
       "com.apple.controlcenter",
     ];
 
-    return apps.filter((app) => !systemApps.includes(app.bundleId));
+    const filteredApps = apps.filter((app) => !systemApps.includes(app.bundleId));
+
+    // Cache the results
+    appCache = {
+      data: filteredApps,
+      timestamp: Date.now(),
+    };
+
+    return filteredApps;
   } catch (error) {
     console.error("Failed to fetch apps:", error);
     throw new Error("Failed to fetch running applications. Please ensure accessibility permissions are granted.");
@@ -211,6 +235,8 @@ export default function Command() {
     }
 
     setSelected(new Set());
+    // Clear cache before revalidating for fresh data
+    appCache = null;
     await revalidate();
 
     if (errors.length === 0) {
@@ -243,6 +269,7 @@ export default function Command() {
   if (isLoading) {
     return <List isLoading={true} searchBarPlaceholder="Loading applications..." />;
   }
+
   if (apps.length === 0) {
     return (
       <List>
