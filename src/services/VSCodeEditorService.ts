@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from "fs/promises";
-import { dirname } from "path";
+import { dirname, normalize } from "path";
+import os from "os";
 import { BaseEditorService, ServerFormSection } from "./BaseEditorService";
 import {
   MCPServerConfig,
@@ -531,17 +532,27 @@ export class VSCodeEditorService extends BaseEditorService {
   }
 
   public isValidWorkspaceContext(vscodeDir: string): boolean {
-    const normalizedPath = vscodeDir.toLowerCase();
+    const rawNormalized = normalize(vscodeDir);
+    const posixPath = rawNormalized.replace(/\\\\+/g, "/").toLowerCase();
 
+    const unixDisallowed = ["/system/", "/usr/", "/bin/", "/etc/"];
+    const windowsDisallowed = [
+      "/windows/",
+      "/program files/",
+      "/program files (x86)/",
+    ];
     if (
-      normalizedPath.includes("/system/") ||
-      normalizedPath.includes("/usr/") ||
-      normalizedPath.includes("/bin/") ||
-      normalizedPath.includes("/etc/") ||
-      normalizedPath === "/.vscode" ||
-      normalizedPath === process.env.HOME + "/.vscode" ||
-      vscodeDir === ".vscode"
+      unixDisallowed.some((p) => posixPath.includes(p)) ||
+      windowsDisallowed.some((p) => posixPath.includes(p))
     ) {
+      return false;
+    }
+
+    const homeDir = os.homedir();
+    const homeNormalized = normalize(homeDir)
+      .replace(/\\\\+/g, "/")
+      .toLowerCase();
+    if (posixPath === `${homeNormalized}/.vscode` || vscodeDir === ".vscode") {
       return false;
     }
 
