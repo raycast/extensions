@@ -11,8 +11,7 @@ export default function Command() {
         await refreshContacts();
         await showToast({ style: Toast.Style.Success, title: "Contacts refreshed and cached!" });
       } catch (error) {
-        await showToast({ style: Toast.Style.Failure, title: "Failed to refresh contacts" });
-        console.error(error);
+        await showFailureToast(error, { title: "Failed to refresh contacts" });
       }
     }
 
