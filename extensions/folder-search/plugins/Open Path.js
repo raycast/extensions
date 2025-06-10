@@ -2,7 +2,7 @@
 exports.FolderSearchPlugin = {
   // the title of the action as shown
   // in the Actions Menu in Raycast.
-  title: 'Open Alt',
+  title: 'Open Path',
 
   // the desired keyboard shortcut in the same
   // format as with Raycast's API but with only
