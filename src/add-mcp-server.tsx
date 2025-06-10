@@ -16,6 +16,7 @@ import {
   VSCodeInput,
   TransportType,
 } from "./types/mcpServer";
+import { showFailureToast } from "@raycast/utils";
 import { getEditorConfig, SUCCESS_MESSAGES } from "./utils/constants";
 import { VSCodeEditorService } from "./services/VSCodeEditorService";
 import { validateLockedServersPresent } from "./utils/protectedServers";
@@ -175,11 +176,7 @@ export default function Command() {
       pop();
     } catch (error) {
       console.error("Failed to add server:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to add server",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      showFailureToast(error, { title: "Failed to add server" });
     }
   }
 
