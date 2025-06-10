@@ -1,6 +1,6 @@
 # HubSpot Changelog
 
-## [Copy Contact Properties] - {PR_MERGE_DATE}
+## [Copy Contact Properties] - 2025-06-10
 
 - You can now `copy` some properties of a Contact through new "Copy to Clipboard..." submenu (ref: [Issue #19583](https://github.com/raycast/extensions/issues/19583))
 - Add placeholder to AccessToken Preference
