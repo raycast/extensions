@@ -1,6 +1,6 @@
 # Application Manager Changelog
 
-## [Initial Release] - 2024-01-15
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Features
 - View all running GUI applications on macOS
