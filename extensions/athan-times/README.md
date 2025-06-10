@@ -1,8 +1,8 @@
-# Athan Times
+# Prayer Times
 
 [![Icon](https://i.postimg.cc/FH8nxF3q/Icon-100.png "Icon")](https://i.postimg.cc/FH8nxF3q/Icon-100.png "Icon")
 
-An extension to show Islamic prayer times (Athan Times).
+An extension to show Islamic prayer times (Prayer Times).
 
 For quite some time, I wanted to develop an extension for Raycast. At the same time, I also wanted to learn TypeScript. so I hit two birds with one stone 😗!
 

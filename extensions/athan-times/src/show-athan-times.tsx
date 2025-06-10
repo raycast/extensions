@@ -109,7 +109,7 @@ function LocationForm() {
       actions={
         <ActionPanel>
           <Action.Push
-            title="Show Athan Times"
+            title="Show Prayer Times"
             target={<AthanTimes selectedCountry={selectedCountry} selectedCity={selectedCity} />}
           />
           <Action
@@ -227,7 +227,7 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
 
       try {
         setLoadingTimes(true);
-        console.log("Fetching Athan times for:", { selectedCountry, selectedCity });
+        console.log("Fetching Prayer times for:", { selectedCountry, selectedCity });
 
         const response = await fetch(
           `https://api.aladhan.com/v1/timingsByCity?country=${selectedCountry.name}&city=${selectedCity}`,
@@ -239,13 +239,13 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
 
         showToast({
           style: Toast.Style.Success,
-          title: "Athan times loaded successfully",
+          title: "Prayer times loaded successfully",
         });
       } catch (error) {
-        console.error("Failed to fetch athan times : ", error);
+        console.error("Failed to fetch prayer times : ", error);
         showToast({
           style: Toast.Style.Failure,
-          title: "Failed to fetch athan times",
+          title: "Failed to fetch prayer times",
           message: error instanceof Error ? error.message : "Unknown Error",
         });
       } finally {
@@ -260,17 +260,17 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
       style: Toast.Style.Animated,
       title: "Loading...",
     });
-    return <List isLoading={true} navigationTitle="Loading Athan Times..." />;
+    return <List isLoading={true} navigationTitle="Loading Prayer Times..." />;
   }
 
   if (!athanTimes) {
     showToast({
       style: Toast.Style.Failure,
-      title: "No Athan Times Available",
+      title: "No Prayer Times Available",
     });
     return (
-      <List navigationTitle="Athan Times">
-        <List.EmptyView title="No Athan Times Available" description="Please select a country and city first" />
+      <List navigationTitle="Prayer Times">
+        <List.EmptyView title="No Prayer Times Available" description="Please select a country and city first" />
       </List>
     );
   }
@@ -303,7 +303,7 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
 
   return (
     <List
-      navigationTitle={`Athan Times - ${selectedCountry?.name}, ${selectedCity}`}
+      navigationTitle={`Prayer Times - ${selectedCountry?.name}, ${selectedCity}`}
       searchBarAccessory={
         <List.Dropdown
           id="hoursSystem"
@@ -570,7 +570,7 @@ export default function Command() {
       }
     >
       <List.EmptyView
-        title="Welcome to Athan Times"
+        title="Welcome to Prayer Times"
         icon={{ source: "Icon-100.png" }}
         description="Please select a country and city to get started"
       />
