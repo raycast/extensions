@@ -1,4 +1,15 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  confirmAlert,
+  Alert,
+  getApplications,
+  Application,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { execSync } from "child_process";
 import { useState } from "react";
@@ -6,27 +17,35 @@ import { useState } from "react";
 interface App {
   name: string;
   bundleId: string;
-  iconPath?: string;
+  path: string;
+  uniqueId: string;
+  windowId?: number;
+  isWebApp?: boolean;
+  windowTitle?: string;
 }
 
 async function fetchApps(): Promise<App[]> {
   try {
-    const script = `
+    // Get all installed applications from Raycast API
+    const installedApps = await getApplications();
+    const appMap = new Map<string, Application>();
+
+    // Create a map of bundle IDs to applications for quick lookup
+    installedApps.forEach((app) => {
+      if (app.bundleId) {
+        appMap.set(app.bundleId, app);
+      }
+    });
+
+    // Get running processes with their bundle IDs
+    const processScript = `
       tell application "System Events"
         set appList to {}
         repeat with proc in (get processes whose (visible is true) and (background only is false))
           try
-            set procName to name of proc
             set procBundle to bundle identifier of proc
             if procBundle is not missing value and procBundle is not "" then
-              -- Get the application file path for icon
-              try
-                set appFile to file of proc
-                set appPath to POSIX path of appFile
-                set end of appList to (procName & "|||" & procBundle & "|||" & appPath)
-              on error
-                set end of appList to (procName & "|||" & procBundle & "|||")
-              end try
+              set end of appList to procBundle
             end if
           end try
         end repeat
@@ -34,28 +53,158 @@ async function fetchApps(): Promise<App[]> {
       end tell
     `;
 
-    const result = execSync(`osascript -e '${script.replace(/'/g, "\\'")}'`, {
+    const result = execSync(`osascript -e '${processScript.replace(/'/g, "\\'")}'`, {
       encoding: "utf8",
       timeout: 10000,
     });
 
-    const lines = result.trim().split(", ");
+    const runningBundleIds = result
+      .trim()
+      .split(", ")
+      .map((id) => id.trim());
     const apps: App[] = [];
+    let uniqueCounter = 0;
 
-    for (const line of lines) {
-      const parts = line.split("|||");
-      if (parts.length >= 2) {
-        const [name, bundleId, appPath] = parts;
+    // Process each running bundle ID
+    for (const bundleId of runningBundleIds) {
+      if (!bundleId) continue;
+
+      const installedApp = appMap.get(bundleId);
+
+      // Check if this is a web browser that might have PWAs
+      const isWebBrowser =
+        bundleId.includes("Safari") ||
+        bundleId.includes("Chrome") ||
+        bundleId.includes("Edge") ||
+        bundleId.includes("Firefox") ||
+        bundleId.includes("Arc") ||
+        bundleId.includes("webkit");
+
+      if (isWebBrowser) {
+        // For web browsers, get individual windows/tabs as separate apps
+        try {
+          const windowScript = `
+            tell application "System Events"
+              set proc to first process whose bundle identifier is "${bundleId}"
+              set windowData to ""
+              try
+                repeat with w in (get windows of proc)
+                  try
+                    set windowTitle to name of w
+                    set windowId to id of w
+                    if windowTitle is not "" and windowTitle is not missing value then
+                      if windowData is not "" then
+                        set windowData to windowData & "¦¦¦WINDOW_SEPARATOR¦¦¦"
+                      end if
+                      set windowData to windowData & windowTitle & "¦¦¦TITLE_ID_SEPARATOR¦¦¦" & windowId
+                    end if
+                  end try
+                end repeat
+              end try
+              return windowData
+            end tell
+          `;
+
+          const windowResult = execSync(`osascript -e '${windowScript.replace(/'/g, "\\'")}'`, {
+            encoding: "utf8",
+            timeout: 5000,
+          });
+
+          const windowData = windowResult.trim();
+          let hasValidWindows = false;
+
+          if (windowData && windowData !== "") {
+            const windowEntries = windowData.split("¦¦¦WINDOW_SEPARATOR¦¦¦");
+
+            for (const windowEntry of windowEntries) {
+              if (windowEntry.trim()) {
+                const [windowTitle, windowIdStr] = windowEntry.split("¦¦¦TITLE_ID_SEPARATOR¦¦¦");
+                if (windowTitle && windowTitle.trim() !== "") {
+                  let cleanTitle = windowTitle.trim();
+
+                  // Clean up browser suffixes
+                  cleanTitle = cleanTitle.replace(/ - Google Chrome$/, "");
+                  cleanTitle = cleanTitle.replace(/ - Microsoft Edge$/, "");
+                  cleanTitle = cleanTitle.replace(/ - Safari$/, "");
+                  cleanTitle = cleanTitle.replace(/ - Firefox$/, "");
+                  cleanTitle = cleanTitle.replace(/ - Arc$/, "");
+                  cleanTitle = cleanTitle.replace(/ - Brave$/, "");
+
+                  // Skip empty titles or common browser titles
+                  if (
+                    cleanTitle &&
+                    !cleanTitle.includes("New Tab") &&
+                    !cleanTitle.includes("about:blank") &&
+                    !cleanTitle.includes("chrome://") &&
+                    !cleanTitle.includes("edge://") &&
+                    !cleanTitle.includes("about:") &&
+                    cleanTitle !== "Chrome" &&
+                    cleanTitle !== "Safari" &&
+                    cleanTitle !== "Edge" &&
+                    cleanTitle !== "Firefox" &&
+                    cleanTitle !== "Arc" &&
+                    cleanTitle !== "Brave"
+                  ) {
+                    hasValidWindows = true;
+                    apps.push({
+                      name: cleanTitle,
+                      bundleId: bundleId,
+                      path: installedApp?.path || "",
+                      uniqueId: `${bundleId}_window_${uniqueCounter++}`,
+                      windowId: windowIdStr ? parseInt(windowIdStr.trim()) : undefined,
+                      isWebApp: true,
+                      windowTitle: cleanTitle,
+                    });
+                  }
+                }
+              }
+            }
+          }
+
+          // If no valid windows found, add the browser itself
+          if (!hasValidWindows && installedApp) {
+            apps.push({
+              name: installedApp.name,
+              bundleId: bundleId,
+              path: installedApp.path,
+              uniqueId: `${bundleId}_${uniqueCounter++}`,
+              isWebApp: false,
+            });
+          }
+        } catch (error) {
+          console.warn(`Failed to get windows for ${bundleId}:`, error);
+          // Fallback to the browser app itself
+          if (installedApp) {
+            apps.push({
+              name: installedApp.name,
+              bundleId: bundleId,
+              path: installedApp.path,
+              uniqueId: `${bundleId}_${uniqueCounter++}`,
+              isWebApp: false,
+            });
+          }
+        }
+      } else if (installedApp) {
+        // Regular app - use information from getApplications
         apps.push({
-          name: name.trim(),
-          bundleId: bundleId.trim(),
-          iconPath: appPath?.trim(),
+          name: installedApp.name,
+          bundleId: bundleId,
+          path: installedApp.path,
+          uniqueId: `${bundleId}_${uniqueCounter++}`,
+          isWebApp: false,
         });
       }
     }
 
     // Filter out system apps for safety
-    const systemApps = ["com.apple.finder", "com.apple.dock", "com.apple.systemuiserver"];
+    const systemApps = [
+      "com.apple.finder",
+      "com.apple.dock",
+      "com.apple.systemuiserver",
+      "com.apple.WindowManager",
+      "com.apple.controlcenter",
+    ];
+
     return apps.filter((app) => !systemApps.includes(app.bundleId));
   } catch (error) {
     console.error("Failed to fetch apps:", error);
@@ -63,12 +212,37 @@ async function fetchApps(): Promise<App[]> {
   }
 }
 
-async function quitApp(bundleId: string): Promise<void> {
+async function quitApp(app: App): Promise<void> {
   try {
-    const script = `tell application id "${bundleId}" to quit saving yes`;
-    execSync(`osascript -e '${script}'`, { timeout: 5000 });
+    if (app.isWebApp && app.windowId) {
+      // Close specific window for web apps
+      const titleToMatch = app.windowTitle || app.name;
+      const script = `
+        tell application "System Events"
+          set proc to first process whose bundle identifier is "${app.bundleId}"
+          try
+            set targetWindow to first window of proc whose id is ${app.windowId}
+            click button 1 of targetWindow
+          on error
+            -- Fallback to closing any window with matching title
+            try
+              set targetWindow to first window of proc whose name contains "${titleToMatch.replace(/"/g, '\\"')}"
+              click button 1 of targetWindow
+            on error
+              -- Final fallback - quit the entire app if no other windows
+              tell application id "${app.bundleId}" to quit saving yes
+            end try
+          end try
+        end tell
+      `;
+      execSync(`osascript -e '${script.replace(/'/g, "\\'")}'`, { timeout: 5000 });
+    } else {
+      // Quit entire app for regular apps
+      const script = `tell application id "${app.bundleId}" to quit saving yes`;
+      execSync(`osascript -e '${script}'`, { timeout: 5000 });
+    }
   } catch (error) {
-    console.error(`Failed to quit app ${bundleId}:`, error);
+    console.error(`Failed to quit app ${app.bundleId}:`, error);
     throw error;
   }
 }
@@ -86,13 +260,13 @@ export default function Command() {
     keepPreviousData: true,
   });
 
-  const toggleSelection = (bundleId: string) => {
+  const toggleSelection = (uniqueId: string) => {
     setSelected((prev) => {
       const newSelected = new Set(prev);
-      if (newSelected.has(bundleId)) {
-        newSelected.delete(bundleId);
+      if (newSelected.has(uniqueId)) {
+        newSelected.delete(uniqueId);
       } else {
-        newSelected.add(bundleId);
+        newSelected.add(uniqueId);
       }
       return newSelected;
     });
@@ -108,7 +282,7 @@ export default function Command() {
       return;
     }
 
-    const selectedApps = apps.filter((app) => selected.has(app.bundleId));
+    const selectedApps = apps.filter((app) => selected.has(app.uniqueId));
     const appNames = selectedApps.map((app) => app.name).join(", ");
 
     const confirmed = await confirmAlert({
@@ -132,7 +306,7 @@ export default function Command() {
 
     for (const app of selectedApps) {
       try {
-        await quitApp(app.bundleId);
+        await quitApp(app);
         successCount++;
       } catch {
         errors.push(app.name);
@@ -188,13 +362,14 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search running applications..." isShowingDetail={false}>
       {apps.map((app) => {
-        const isSelected = selected.has(app.bundleId);
+        const isSelected = selected.has(app.uniqueId);
 
         return (
           <List.Item
-            key={app.bundleId}
-            icon={{ fileIcon: app.iconPath || Icon.Desktop }}
+            key={app.uniqueId}
+            icon={{ fileIcon: app.path || Icon.Desktop }}
             title={app.name}
+            subtitle={app.isWebApp ? "Web App" : undefined}
             accessories={isSelected ? [{ icon: Icon.CheckCircle, tooltip: "Selected" }] : [{ icon: Icon.Circle }]}
             actions={
               <ActionPanel>
@@ -202,7 +377,7 @@ export default function Command() {
                   title={isSelected ? "Unselect App" : "Select App"}
                   icon={isSelected ? Icon.Circle : Icon.CheckCircle}
                   shortcut={{ modifiers: [], key: "space" }}
-                  onAction={() => toggleSelection(app.bundleId)}
+                  onAction={() => toggleSelection(app.uniqueId)}
                 />
                 <Action
                   title="Quit Selected Apps"
