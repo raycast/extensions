@@ -17,6 +17,7 @@ export default function FetchGlucoseData() {
   const [glucoseData, setGlucoseData] = useState<GlucoseData[]>([]);
   const [loadingState, setLoadingState] = useState(LoadingState.Loading);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [retries, setRetries] = useState(0);
   const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
@@ -24,7 +25,6 @@ export default function FetchGlucoseData() {
   }, []);
 
   const fetchData = async () => {
-    let retries = 0;
     try {
       let sessionId = await LocalStorage.getItem<string>("sessionId");
 
@@ -61,9 +61,10 @@ export default function FetchGlucoseData() {
 
       setGlucoseData(response.data);
       setLoadingState(LoadingState.Success);
+      setRetries(0); // Reset retries on success
     } catch (error) {
       if (retries < 2) {
-        retries++;
+        setRetries((prev) => prev + 1);
         const sessionId = await authenticateWithDexcom(
           preferences.accountName,
           preferences.password,
@@ -78,6 +79,7 @@ export default function FetchGlucoseData() {
         });
         setLoadingState(LoadingState.Error);
         setErrorMessage(String(error));
+        setRetries(0); // Reset retries after max attempts
       }
     }
   };
