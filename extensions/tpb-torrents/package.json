@@ -1,16 +1,20 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tpb-torrents",
-  "title": "Tpb Torrents",
-  "description": "TPB Torrent is a peer-to-peer file-sharing extension that provides magnet links for torrents, allowing users to download and share digital content.",
+  "title": "TPB Torrent Search",
+  "description": "Search and browse torrents with instant results and convenient magnet link access.",
   "icon": "extension-icon.png",
   "author": "alorse",
   "license": "MIT",
+  "categories": [
+    "Fun",
+    "Media"
+  ],
   "commands": [
     {
       "name": "search-torrent",
-      "title": "Search Torrent",
-      "description": "Search torrents from the most popular P2P platform.",
+      "title": "Search Torrents",
+      "description": "Find movies, TV shows, music, software and more from the most popular P2P platform.",
       "mode": "view"
     }
   ],

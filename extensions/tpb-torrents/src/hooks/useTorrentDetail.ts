@@ -35,7 +35,7 @@ export const useTorrentDetail = (torrentId: string): UseTorrentDetailResult => {
           throw new Error(`HTTP ${response.status}: Failed to fetch torrent details`);
         }
 
-        const data = await response.json();
+        const data = (await response.json()) as TorrentDetail;
         setTorrentDetail(data);
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") {

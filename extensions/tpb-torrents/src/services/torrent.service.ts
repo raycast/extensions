@@ -22,7 +22,7 @@ class TorrentAPIService {
       }
 
       const data = await response.json();
-      return data;
+      return data as T;
     } catch (error) {
       if (error instanceof APIError) {
         throw error;
