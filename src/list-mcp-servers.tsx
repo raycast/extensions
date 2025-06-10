@@ -243,7 +243,13 @@ export default function Command() {
         });
       }
 
-      server.lastTestResult = result;
+      setServers((prev) =>
+        prev.map((s) =>
+          s.config.name === server.config.name && s.editor === server.editor
+            ? { ...s, lastTestResult: result }
+            : s
+        )
+      );
     } catch (error) {
       console.error("Connection test error:", error);
       await showToast({
