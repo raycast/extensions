@@ -21,7 +21,7 @@ import { DEFAULT_MAX_FILE_SIZE_BYTES, MIN_MAX_FILE_SIZE_MB, MAX_MAX_FILE_SIZE_MB
 // If GenerationConfig is only defined in types.ts and used by FileProcessorConfig,
 // then it's fine. If it was meant to be used here, we need to ensure it is.
 // For now, assuming FileProcessorConfig is sufficient for this file.
-import type { FileProcessorConfig } from "./types";
+import type { FileProcessorConfig, FinderSelectionInfo } from "./types";
 
 /**
  * Props passed by Raycast when the command is launched.
@@ -39,6 +39,10 @@ interface AppState {
   finderSelectedPath: string | null; // Path initially detected from Finder, if any.
   pickerSelectedPath: string | null; // Path selected by the user via FilePicker.
   projectDirectory: string | null; // The confirmed project directory to process.
+  finderSelectionInfo: FinderSelectionInfo | null; // Information about Finder selection for scope choice
+  processOnlySelectedFiles: boolean; // Whether to process only selected files or entire directory
+  selectedFilePaths: string[]; // Paths of files to process when processOnlySelectedFiles is true
+  useDirectoryInsteadOfFiles: boolean; // If true, use directory even if files are selected
   outputFileName: string;
   maxFileSizeMbString: string;
   includeAiInstructions: boolean;
@@ -66,6 +70,10 @@ const INITIAL_STATE: AppState = {
   finderSelectedPath: null,
   pickerSelectedPath: null,
   projectDirectory: null,
+  finderSelectionInfo: null,
+  processOnlySelectedFiles: false,
+  selectedFilePaths: [],
+  useDirectoryInsteadOfFiles: false,
   outputFileName: "project_code.txt",
   maxFileSizeMbString: (DEFAULT_MAX_FILE_SIZE_BYTES / 1024 / 1024).toString(),
   includeAiInstructions: true, // AI instructions are included by default.
@@ -79,6 +87,79 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
   const [state, setState] = useState<AppState>(INITIAL_STATE);
 
   /**
+   * Analyzes Finder selection and returns information for UI decision making.
+   * Determines available options and suggested paths.
+   */
+  const analyzeFinderSelection = async (finderItems: Array<{ path: string }>): Promise<FinderSelectionInfo | null> => {
+    if (finderItems.length === 0) return null;
+
+    const paths = finderItems.map((item) => item.path);
+    const pathStats = await Promise.all(
+      paths.map(async (p) => {
+        try {
+          const stats = await fs.stat(p);
+          return { path: p, isDirectory: stats.isDirectory() };
+        } catch {
+          return { path: p, isDirectory: false };
+        }
+      }),
+    );
+
+    const directories = pathStats.filter((item) => item.isDirectory);
+    const files = pathStats.filter((item) => !item.isDirectory);
+
+    let suggestedDirectory: string;
+    let directoryName: string | undefined;
+
+    if (directories.length > 0) {
+      // If we have directories, use the first one
+      suggestedDirectory = directories[0].path;
+      directoryName = path.basename(suggestedDirectory);
+    } else if (files.length > 0) {
+      // Find common parent directory for files
+      if (files.length === 1) {
+        suggestedDirectory = path.dirname(files[0].path);
+      } else {
+        // Find common parent directory for multiple files
+        const parentDirs = files.map((f) => path.dirname(f.path));
+        let commonParent = parentDirs[0];
+
+        for (let i = 1; i < parentDirs.length; i++) {
+          // Split paths into segments for proper comparison
+          const currentSegments = parentDirs[i].split(path.sep);
+          const commonSegments = commonParent.split(path.sep);
+
+          const minSegments = Math.min(currentSegments.length, commonSegments.length);
+          const sharedSegments: string[] = [];
+
+          for (let j = 0; j < minSegments; j++) {
+            if (currentSegments[j] === commonSegments[j]) {
+              sharedSegments.push(currentSegments[j]);
+            } else {
+              break;
+            }
+          }
+
+          commonParent = sharedSegments.join(path.sep);
+        }
+
+        suggestedDirectory = commonParent || path.dirname(files[0].path);
+      }
+    } else {
+      return null;
+    }
+
+    return {
+      hasFiles: files.length > 0,
+      hasDirectories: directories.length > 0,
+      selectedFiles: files.map((f) => f.path),
+      suggestedDirectory,
+      fileNames: files.map((f) => path.basename(f.path)),
+      directoryName,
+    };
+  };
+
+  /**
    * Effect to check for an active Finder selection when the command launches.
    * This runs once on component mount.
    */
@@ -88,20 +169,31 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
       try {
         const finderItems = await getSelectedFinderItems();
         if (finderItems.length > 0) {
-          const firstItemPath = finderItems[0].path;
-          const stats = await fs.stat(firstItemPath); // Verify the path and get its type.
-          if (stats.isDirectory()) {
-            setState((prev) => ({
-              ...prev,
-              finderSelectedPath: firstItemPath,
-              pickerSelectedPath: null,
-              formErrors: {},
-            }));
-            console.log("Initial Finder selection (directory):", firstItemPath);
-            return; // Successfully found and set Finder path.
-          } else {
-            console.log("Initial Finder selection (not a directory):", firstItemPath);
+          console.log(
+            `Found ${finderItems.length} Finder selection(s):`,
+            finderItems.map((i) => i.path),
+          );
+
+          const selectionInfo = await analyzeFinderSelection(finderItems);
+          if (selectionInfo) {
+            // Verify the suggested directory is actually a directory
+            const stats = await fs.stat(selectionInfo.suggestedDirectory);
+            if (stats.isDirectory()) {
+              setState((prev) => ({
+                ...prev,
+                finderSelectedPath: selectionInfo.suggestedDirectory,
+                finderSelectionInfo: selectionInfo,
+                pickerSelectedPath: null,
+                formErrors: {},
+              }));
+              console.log("Analyzed Finder selection:", selectionInfo);
+              // Update processing mode after state is set
+              setTimeout(() => updateProcessingMode(), 0);
+              return; // Successfully found and set Finder path.
+            }
           }
+
+          console.log("Could not determine suitable directory from Finder selection");
         } else {
           console.log("No initial Finder selection (empty array returned).");
         }
@@ -157,12 +249,16 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
       }
 
       const dirName = path.basename(dirPath);
+
+      // Always go to configuration step now
+      const nextStep = "configureGeneration";
+
       setState((prev) => ({
         ...prev,
         isLoading: false,
         projectDirectory: dirPath,
         outputFileName: sanitizeFileName(`${dirName}_project_code.txt`),
-        currentStep: "configureGeneration",
+        currentStep: nextStep,
         formErrors: {},
       }));
     } catch (e) {
@@ -179,6 +275,20 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
         message: `Could not access path: ${errorMessage}`,
       });
     }
+  }, []);
+
+  /**
+   * Updates the processing mode based on user selection.
+   */
+  const updateProcessingMode = useCallback(() => {
+    setState((prev) => {
+      const shouldUseFiles = Boolean(prev.finderSelectionInfo?.hasFiles && !prev.useDirectoryInsteadOfFiles);
+      return {
+        ...prev,
+        processOnlySelectedFiles: shouldUseFiles,
+        selectedFilePaths: shouldUseFiles ? prev.finderSelectionInfo?.selectedFiles || [] : [],
+      };
+    });
   }, []);
 
   /**
@@ -266,6 +376,8 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
       projectDirectory: state.projectDirectory,
       maxFileSizeBytes: parseFloat(state.maxFileSizeMbString) * 1024 * 1024,
       includeAiInstructions: state.includeAiInstructions,
+      processOnlySelectedFiles: state.processOnlySelectedFiles,
+      selectedFilePaths: state.selectedFilePaths,
     };
 
     try {
@@ -349,6 +461,74 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
         }
       >
         <Form.Description text="Select the project directory for code generation." />
+
+        {/* Show selected files if any */}
+        {state.finderSelectionInfo?.hasFiles && state.finderSelectionInfo.fileNames.length > 0 && (
+          <>
+            <Form.Description
+              title="Selected Files"
+              text={`Found ${state.finderSelectionInfo.fileNames.length} selected file${state.finderSelectionInfo.fileNames.length === 1 ? "" : "s"}:`}
+            />
+            <Form.TagPicker
+              id="selectedFiles"
+              title="Files to Process"
+              value={
+                state.useDirectoryInsteadOfFiles
+                  ? [state.finderSelectionInfo.suggestedDirectory]
+                  : state.finderSelectionInfo.selectedFiles
+              }
+              onChange={(newFiles) => {
+                if (state.useDirectoryInsteadOfFiles) {
+                  // Don't allow changing the directory selection when in directory mode
+                  return;
+                }
+                setState((prev) => {
+                  const updatedSelectionInfo = prev.finderSelectionInfo
+                    ? {
+                        ...prev.finderSelectionInfo,
+                        selectedFiles: newFiles,
+                      }
+                    : null;
+                  return {
+                    ...prev,
+                    finderSelectionInfo: updatedSelectionInfo,
+                    selectedFilePaths: newFiles,
+                  };
+                });
+                updateProcessingMode();
+              }}
+            >
+              {state.useDirectoryInsteadOfFiles ? (
+                <Form.TagPicker.Item
+                  key={state.finderSelectionInfo.suggestedDirectory}
+                  value={state.finderSelectionInfo.suggestedDirectory}
+                  title={`📁 ${path.basename(state.finderSelectionInfo.suggestedDirectory)}`}
+                />
+              ) : (
+                state.finderSelectionInfo.selectedFiles.map((filePath, index) => (
+                  <Form.TagPicker.Item
+                    key={filePath}
+                    value={filePath}
+                    title={state.finderSelectionInfo?.fileNames[index] || path.basename(filePath)}
+                  />
+                ))
+              )}
+            </Form.TagPicker>
+
+            <Form.Checkbox
+              id="useDirectoryInsteadOfFiles"
+              label={`Process entire directory instead (${path.basename(state.finderSelectionInfo.suggestedDirectory)})`}
+              value={state.useDirectoryInsteadOfFiles}
+              onChange={(newValue) => {
+                setState((prev) => ({ ...prev, useDirectoryInsteadOfFiles: newValue }));
+                updateProcessingMode();
+              }}
+              info="Check this to process the entire parent directory instead of just the selected files"
+            />
+            <Form.Separator />
+          </>
+        )}
+
         <Form.FilePicker
           id="projectDirectoryField" // This ID connects the field to the form submission values.
           title="Project Directory"
@@ -393,8 +573,9 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
                   ...prev,
                   currentStep: "selectDirectory",
                   projectDirectory: null,
-                  pickerSelectedPath: null, // Clear picker path when going back.
-                  formErrors: {}, // Clear all errors.
+                  finderSelectionInfo: null,
+                  pickerSelectedPath: null,
+                  formErrors: {},
                 }));
               }}
               shortcut={{ modifiers: ["cmd"], key: "b" }}
@@ -403,6 +584,10 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
         }
       >
         <Form.Description text={`Selected Project: ${state.projectDirectory}`} />
+        {state.processOnlySelectedFiles && (
+          <Form.Description text={`Processing Mode: Selected files only (${state.selectedFilePaths.length} files)`} />
+        )}
+        {!state.processOnlySelectedFiles && <Form.Description text="Processing Mode: Entire directory" />}
         <Form.Separator />
         <Form.TextField
           id="outputFileName"
