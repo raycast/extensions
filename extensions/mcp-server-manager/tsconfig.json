@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": ["src/**/*", "raycast-env.d.ts", "raycast-templates/ai.tsx", "raycast-templates/blank.ts", "raycast-templates/menu-bar-extra.tsx", "raycast-templates/run-script.ts", "raycast-templates/show-detail.tsx", "raycast-templates/show-grid.tsx", "raycast-templates/show-list-and-detail.tsx", "raycast-templates/show-list.tsx", "raycast-templates/show-typehead-results.tsx", "raycast-templates/submit-form.tsx", "raycast-templates/blank-tool.ts", "raycast-templates/tool-with-confirmation.ts"],
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "commonjs",
+    "target": "ES2023",
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true
+  }
+}
