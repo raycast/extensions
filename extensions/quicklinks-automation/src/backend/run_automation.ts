@@ -17,7 +17,7 @@ const runAutomation = async (automation: string) => {
 
   for (const link of quicklinks) {
     await open(link);
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Wait for 1 second before opening the next link
+    await new Promise((resolve) => setTimeout(resolve, 500)); // Wait for 500 ms before opening the next link
   }
 
   return;

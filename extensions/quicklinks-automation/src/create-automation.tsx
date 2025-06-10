@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, LaunchProps, LocalStorage, popToRoot, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { AutomationFormValues } from "./types/types";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command(
   props: LaunchProps<{ arguments: AutomationFormValues; draftValues: AutomationFormValues }>,
@@ -135,16 +136,20 @@ export default function Command(
   };
 
   const handleSubmit = async (links: AutomationFormValues) => {
-    if (previousValues && previousValues.name) {
-      await LocalStorage.removeItem(previousValues.name);
+    try {
+      if (previousValues && previousValues.name) {
+        await LocalStorage.removeItem(previousValues.name);
+      }
+      await LocalStorage.setItem(links.name, JSON.stringify({ description: links.description, values: values }));
+      popToRoot();
+      showToast({
+        style: Toast.Style.Success,
+        title: "Yay!",
+        message: `New automation created`,
+      });
+    } catch (error) {
+      showFailureToast(error, { title: "Error creating the automation" });
     }
-    await LocalStorage.setItem(links.name, JSON.stringify({ description: links.description, values: values }));
-    popToRoot();
-    showToast({
-      style: Toast.Style.Success,
-      title: "Yay!",
-      message: `New automation created`,
-    });
   };
 
   return (

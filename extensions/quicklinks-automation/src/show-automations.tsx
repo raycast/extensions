@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { AutomationFormValues } from "./types/types";
+import { showFailureToast } from "@raycast/utils";
 
 interface Automation {
   [automationName: string]: { description: string; values: Array<string> };
@@ -15,7 +16,7 @@ export default function Command() {
       name: automationName,
       description: automations[automationName].description || "",
     };
-    automations[automationName].values.map((value: string, index: number) => {
+    automations[automationName].values.forEach((value: string, index: number) => {
       result[`link-${index + 1}`] = value;
     });
     return result;
@@ -46,7 +47,7 @@ export default function Command() {
 
   useEffect(() => {
     fetchAutomations().catch((error) => {
-      console.error("Error fetching automations:", error);
+      showFailureToast(error, { title: "Error fetching existing automations" });
     });
   }, []);
 
@@ -77,24 +78,32 @@ export default function Command() {
               <Action
                 title="Run Automation"
                 icon={Icon.Rocket}
-                onAction={async () =>
-                  await launchCommand({
-                    name: "run-automation",
-                    type: LaunchType.UserInitiated,
-                    arguments: { automationName: automation_name },
-                  })
-                }
+                onAction={async () => {
+                  try {
+                    await launchCommand({
+                      name: "run-automation",
+                      type: LaunchType.UserInitiated,
+                      arguments: { automationName: automation_name },
+                    });
+                  } catch (error) {
+                    showFailureToast(error, { title: "Failed to launch run-automation command" });
+                  }
+                }}
               />
               <Action
                 title="Edit Automation"
                 icon={Icon.Pencil}
-                onAction={async () =>
-                  await launchCommand({
-                    name: "create-automation",
-                    type: LaunchType.UserInitiated,
-                    arguments: { ...generateArguments(automation_name) },
-                  })
-                }
+                onAction={async () => {
+                  try {
+                    await launchCommand({
+                      name: "create-automation",
+                      type: LaunchType.UserInitiated,
+                      arguments: { ...generateArguments(automation_name) },
+                    });
+                  } catch (error) {
+                    showFailureToast(error, { title: "Failed to launch create-automation command" });
+                  }
+                }}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
               <Action
