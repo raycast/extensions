@@ -13,7 +13,8 @@
   "contributors": [
     "thomas",
     "pernielsentikaer",
-    "xilopaint"
+    "xilopaint",
+    "ftonato"
   ],
   "license": "MIT",
   "commands": [
@@ -78,7 +79,7 @@
     }
   ],
   "dependencies": {
-    "@mendable/firecrawl-js": "^1.18.3-beta.1",
+    "@mendable/firecrawl-js": "^1.25.5",
     "@raycast/api": "^1.91.2",
     "@raycast/utils": "^1.17.0"
   },

@@ -8,7 +8,10 @@ export type Input = {
 export default async function (input: Input) {
   const { url } = input;
 
-  const scrapeResult = await firecrawl.scrapeUrl(url);
+  const scrapeResult = await firecrawl.scrapeUrl(url, {
+    // @ts-expect-error integration property is not defined in ScrapeParams type
+    integration: "raycast",
+  });
 
   if (!scrapeResult.success) {
     throw new Error(scrapeResult.error ?? "Failed to scrape webpage");

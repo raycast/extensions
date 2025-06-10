@@ -12,6 +12,8 @@ export default async function (input: Input) {
 
   const extractResult = await firecrawl.extract(urls, {
     prompt: userPrompt ?? "Extract the main content from the webpage",
+    // @ts-expect-error integration property is not defined in ExtractParams type
+    integration: "raycast",
   });
 
   if (!extractResult.success) {
