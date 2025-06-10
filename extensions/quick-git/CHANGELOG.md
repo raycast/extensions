@@ -1,6 +1,6 @@
 # Quick Git Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-06-10
 
 Select a git repository and display a list of changed files, along with some information about the current branch.
 
