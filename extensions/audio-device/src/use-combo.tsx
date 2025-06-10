@@ -1,4 +1,5 @@
-import { closeMainWindow, getPreferenceValues, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, popToRoot, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   getInputDevices,
   getOutputDevices,
@@ -28,12 +29,12 @@ export default async function Combo() {
     const outputDevice = outputDevices.find((d) => d.name === outputName);
 
     if (!inputDevice) {
-      showToast(Toast.Style.Failure, "Error", `Input device "${inputName}" not found`);
+      showFailureToast(new Error(`Input device "${inputName}" not found`));
       return;
     }
 
     if (!outputDevice) {
-      showToast(Toast.Style.Failure, "Error", `Output device "${outputName}" not found`);
+      showFailureToast(new Error(`Output device "${outputName}" not found`));
       return;
     }
 
@@ -48,6 +49,6 @@ export default async function Combo() {
     showHUD(`${comboName} in use`);
   } catch (error) {
     console.error(error);
-    showToast(Toast.Style.Failure, "Error", "Failed to switch devices");
+    showFailureToast(error, { title: "Failed to switch devices" });
   }
 }

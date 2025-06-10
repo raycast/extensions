@@ -58,6 +58,7 @@
       "subtitle": "Audio Device",
       "description": "Switch to the first input/output device combination",
       "mode": "no-view",
+      "disabledByDefault": true,
       "preferences": [
         {
           "name": "comboName",
@@ -91,6 +92,7 @@
       "subtitle": "Audio Device",
       "description": "Switch to the second input/output device combination",
       "mode": "no-view",
+      "disabledByDefault": true,
       "preferences": [
         {
           "name": "comboName",
@@ -124,6 +126,7 @@
       "subtitle": "Audio Device",
       "description": "Switch to the third input/output device combination",
       "mode": "no-view",
+      "disabledByDefault": true,
       "preferences": [
         {
           "name": "comboName",
