@@ -27,7 +27,7 @@
   "commands": [
     {
       "name": "show-prayer-times",
-      "title": "Show Prayer (Athan) Times",
+      "title": "Show Prayer (athan) Times",
       "description": "Display the prayer times",
       "keywords": [
         "Athan",
