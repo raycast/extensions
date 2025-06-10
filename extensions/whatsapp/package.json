@@ -12,24 +12,17 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "open-chat",
-      "title": "Open Chat",
-      "subtitle": "WhatsApp",
-      "description": "Open quickly added WhatsApp chats",
+      "name": "open-in-whataspp",
+      "title": "Open In WhatsApp",
+      "subtitle": "Open any contact in whatsapp",
+      "description": "Open any contact in whatsapp by searching for their name or phone number.It autosaves the contacts in the background.",
       "mode": "view"
     },
-    {
-      "name": "add-chat",
-      "title": "Add Chat",
-      "subtitle": "WhatsApp",
-      "description": "Add WhatsApp chats to open them later",
-      "mode": "view"
-    },
-    {
-      "name": "add-existing-group",
-      "title": "Add Existing Group",
-      "subtitle": "WhatsApp",
-      "description": "Add existing WhatsApp groups to open them later",
+    { 
+      "name": "refresh",
+      "title": "Refresh Contacts",
+      "subtitle": "Refresh contacts",
+      "description": "Refresh contacts",
       "mode": "view"
     }
   ],
@@ -139,11 +132,9 @@
     "Productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.19.0",
-    "fromnow": "^3.0.1",
-    "nanoid": "^4.0.1",
-    "phone": "^3.1.35"
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^1.17.0",
+    "run-applescript": "^7.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
