@@ -1,19 +1,21 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kick",
-  "title": "Kick - App Manager",
-  "description": "List and quit running GUI applications on macOS with multi-selection support",
+  "title": "Application Manager",
+  "description": "Quickly view and quit running GUI applications with multi-selection support",
   "icon": "extension-icon.png",
   "author": "sidkhuntia",
   "categories": [
-    "System"
+    "System",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "kick",
-      "title": "Kick Apps",
-      "description": "List and quit running GUI applications",
+      "title": "Manage Running Apps",
+      "subtitle": "Application Manager",
+      "description": "View and quit running GUI applications",
       "mode": "view"
     }
   ],

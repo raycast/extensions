@@ -129,8 +129,7 @@ async function fetchApps(): Promise<App[]> {
     };
 
     return filteredApps;
-  } catch (error) {
-    console.error("Failed to fetch apps:", error);
+  } catch {
     throw new Error("Failed to fetch running applications. Please ensure accessibility permissions are granted.");
   }
 }
@@ -251,14 +250,21 @@ export default function Command() {
 
   if (error) {
     return (
-      <List>
+      <List searchBarPlaceholder="Search running applications...">
         <List.EmptyView
           icon={Icon.ExclamationMark}
-          title="Error Loading Apps"
-          description={error.message}
+          title="Failed to Load Applications"
+          description={error.message || "Please ensure accessibility permissions are granted in System Preferences"}
           actions={
             <ActionPanel>
-              <Action title="Retry" onAction={revalidate} icon={Icon.ArrowClockwise} />
+              <Action
+                title="Retry"
+                onAction={() => {
+                  appCache = null;
+                  revalidate();
+                }}
+                icon={Icon.ArrowClockwise}
+              />
             </ActionPanel>
           }
         />
@@ -267,16 +273,28 @@ export default function Command() {
   }
 
   if (isLoading) {
-    return <List isLoading={true} searchBarPlaceholder="Loading applications..." />;
+    return <List isLoading={true} searchBarPlaceholder="Search running applications..." />;
   }
 
   if (apps.length === 0) {
     return (
-      <List>
+      <List searchBarPlaceholder="Search running applications...">
         <List.EmptyView
           icon={Icon.ComputerChip}
-          title="No GUI Applications Running"
-          description="No visible applications are currently running"
+          title="No Applications Running"
+          description="No visible GUI applications are currently running on your Mac"
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh App List"
+                icon={Icon.ArrowClockwise}
+                onAction={() => {
+                  appCache = null;
+                  revalidate();
+                }}
+              />
+            </ActionPanel>
+          }
         />
       </List>
     );
@@ -293,11 +311,15 @@ export default function Command() {
             icon={{ fileIcon: app.path || Icon.Desktop }}
             title={app.name}
             subtitle={app.isWebApp ? "Web App" : undefined}
-            accessories={isSelected ? [{ icon: Icon.CheckCircle, tooltip: "Selected" }] : [{ icon: Icon.Circle }]}
+            accessories={
+              isSelected
+                ? [{ icon: Icon.CheckCircle, tooltip: "Selected for quitting" }]
+                : [{ icon: Icon.Circle, tooltip: "Not selected" }]
+            }
             actions={
               <ActionPanel>
                 <Action
-                  title={isSelected ? "Unselect App" : "Select App"}
+                  title={isSelected ? "Deselect App" : "Select App"}
                   icon={isSelected ? Icon.Circle : Icon.CheckCircle}
                   shortcut={{ modifiers: [], key: "space" }}
                   onAction={() => toggleSelection(app.uniqueId)}
@@ -311,10 +333,30 @@ export default function Command() {
                 />
                 <ActionPanel.Section>
                   <Action
-                    title="Refresh List"
+                    title="Select All Apps"
+                    icon={Icon.CheckCircle}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                    onAction={() => {
+                      const allIds = new Set(apps.map((app) => app.uniqueId));
+                      setSelected(allIds);
+                    }}
+                  />
+                  <Action
+                    title="Deselect All Apps"
+                    icon={Icon.Circle}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                    onAction={() => setSelected(new Set())}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action
+                    title="Refresh App List"
                     icon={Icon.ArrowClockwise}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    onAction={revalidate}
+                    onAction={() => {
+                      appCache = null;
+                      revalidate();
+                    }}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
