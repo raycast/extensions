@@ -15,10 +15,8 @@ export function buildStatusParts(
     statusParts.push(StatusDisplay.cursorManaged);
   } else if (server.config.disabled === true) {
     statusParts.push(StatusDisplay.disabled);
-  } else if (server.config.disabled === false) {
-    statusParts.push(StatusDisplay.enabled);
   } else {
-    statusParts.push(StatusDisplay.unknown);
+    statusParts.push(StatusDisplay.enabled);
   }
 
   if (isProtected && isLocked) {
