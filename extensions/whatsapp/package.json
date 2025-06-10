@@ -12,7 +12,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "open-in-whataspp",
+      "name": "open-in-whatsapp",
       "title": "Open In WhatsApp",
       "subtitle": "Open any contact in whatsapp",
       "description": "Open any contact in whatsapp by searching for their name or phone number.It autosaves the contacts in the background.",
