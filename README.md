@@ -327,7 +327,7 @@ Don't rely on this if you're editing configs directly. You break it, you own it.
 |--------|--------|-----------|
 | `Cursor` | `~/.cursor/mcp.json` | `.cursor/mcp.json` |
 | `VS Code` | `~/Library/Application Support/Code/User/settings.json` | `.vscode/settings.json` |
-| `Windsurf` | `~/.windsurf/mcp.json` | `.windsurf/mcp.json` |
+| `Windsurf` | `~/.codeium/windsurf/mcp_config.json` | `.windsurf/mcp.json` |
 
 ## Troubleshooting
 
