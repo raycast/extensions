@@ -1,9 +1,24 @@
-import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { config } from "./config";
 import { formatTime } from "./utils/hoursSystem";
-import { Country, City, AthanTimings, AthanResponse, GeoNamesResponse } from "./types/types";
+import {
+  Country,
+  City,
+  AthanTimings,
+  AthanResponse,
+  GeoNamesResponse,
+} from "./types/types";
 
 type DailyAthanTimes = {
   date: string;
@@ -38,15 +53,20 @@ function LocationForm() {
       try {
         console.log("Start Fetching countries...");
 
-        const response = await fetch("https://api.countrystatecity.in/v1/countries/", {
-          headers: {
-            // Country State City API Key, I know it is not secure, I did not find a way to hide the API Key in Raycast Extension 😕
-            "X-CSCAPI-KEY": config.countryStateCityApiKey,
+        const response = await fetch(
+          "https://api.countrystatecity.in/v1/countries/",
+          {
+            headers: {
+              // Country State City API Key, I know it is not secure, I did not find a way to hide the API Key in Raycast Extension 😕
+              "X-CSCAPI-KEY": config.countryStateCityApiKey,
+            },
           },
-        });
+        );
         const data = (await response.json()) as Country[];
 
-        const filteredCountries = data.filter((country) => country.iso2 !== "IL");
+        const filteredCountries = data.filter(
+          (country) => country.iso2 !== "IL",
+        );
 
         console.log("Countries fetched : ", data.length);
         setCountries(filteredCountries);
@@ -97,7 +117,8 @@ function LocationForm() {
     fetchCities();
   }, [selectedCountry]);
 
-  const isLoading = isLoadingCountry || isLoadingCity || loadingCities || !countries;
+  const isLoading =
+    isLoadingCountry || isLoadingCity || loadingCities || !countries;
 
   return (
     <Form
@@ -109,7 +130,12 @@ function LocationForm() {
             title="Show 14-Day Prayer Times"
             onAction={() => {
               if (selectedCountry && selectedCity) {
-                push(<FourteenDaysAthanTimes selectedCountry={selectedCountry} selectedCity={selectedCity} />);
+                push(
+                  <FourteenDaysAthanTimes
+                    selectedCountry={selectedCountry}
+                    selectedCity={selectedCity}
+                  />,
+                );
               } else {
                 showToast({
                   style: Toast.Style.Failure,
@@ -149,30 +175,52 @@ function LocationForm() {
         <Form.Dropdown.Item title="Select a country..." value="" />
         {countries?.map((country) => {
           return (
-            <Form.Dropdown.Item key={country.iso2} value={country.iso2} title={country.name} icon={country.emoji} />
+            <Form.Dropdown.Item
+              key={country.iso2}
+              value={country.iso2}
+              title={country.name}
+              icon={country.emoji}
+            />
           );
         })}
       </Form.Dropdown>
 
       {selectedCountry && (
-        <Form.Dropdown id="city" title="city" value={selectedCity || ""} onChange={setSelectedCity}>
+        <Form.Dropdown
+          id="city"
+          title="city"
+          value={selectedCity || ""}
+          onChange={setSelectedCity}
+        >
           <Form.Dropdown.Item title="Select a city..." value="" />
           {cities?.map((city) => {
             return (
-              <Form.Dropdown.Item key={`${selectedCountry.iso2}-${city.name}`} value={city.name} title={city.name} />
+              <Form.Dropdown.Item
+                key={`${selectedCountry.iso2}-${city.name}`}
+                value={city.name}
+                title={city.name}
+              />
             );
           })}
         </Form.Dropdown>
       )}
 
       {selectedCountry && (
-        <Form.Description text={`Selected: ${selectedCountry.name}${selectedCity ? `, ${selectedCity}` : ""}`} />
+        <Form.Description
+          text={`Selected: ${selectedCountry.name}${selectedCity ? `, ${selectedCity}` : ""}`}
+        />
       )}
     </Form>
   );
 }
 
-function FourteenDaysAthanTimes({ selectedCountry, selectedCity }: { selectedCountry: Country; selectedCity: string }) {
+function FourteenDaysAthanTimes({
+  selectedCountry,
+  selectedCity,
+}: {
+  selectedCountry: Country;
+  selectedCity: string;
+}) {
   const [dailyAthanTimes, setDailyAthanTimes] = useState<DailyAthanTimes[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -184,8 +232,14 @@ function FourteenDaysAthanTimes({ selectedCountry, selectedCity }: { selectedCou
     isLoading: isLoadingHoursSystem,
   } = useLocalStorage<string>("hoursSystem", "24");
 
-  const { setValue: setSelectedCountry } = useLocalStorage<Country | undefined>("selectedCountry", undefined);
-  const { setValue: setSelectedCity } = useLocalStorage<string | undefined>("selectedCity", undefined);
+  const { setValue: setSelectedCountry } = useLocalStorage<Country | undefined>(
+    "selectedCountry",
+    undefined,
+  );
+  const { setValue: setSelectedCity } = useLocalStorage<string | undefined>(
+    "selectedCity",
+    undefined,
+  );
 
   async function clearSavedLocation() {
     try {
@@ -256,7 +310,10 @@ function FourteenDaysAthanTimes({ selectedCountry, selectedCity }: { selectedCou
               await new Promise((resolve) => setTimeout(resolve, 200));
             }
           } catch (dayError) {
-            console.error(`Failed to fetch prayer times for ${dateString}:`, dayError);
+            console.error(
+              `Failed to fetch prayer times for ${dateString}:`,
+              dayError,
+            );
             // Continue with other days even if one fails
           }
         }
@@ -283,13 +340,18 @@ function FourteenDaysAthanTimes({ selectedCountry, selectedCity }: { selectedCou
   }, [selectedCountry, selectedCity]);
 
   if (loading) {
-    return <List isLoading={true} navigationTitle="Loading 14-Day Prayer Times..." />;
+    return (
+      <List isLoading={true} navigationTitle="Loading 14-Day Prayer Times..." />
+    );
   }
 
   if (dailyAthanTimes.length === 0) {
     return (
       <List navigationTitle="14-Day Prayer Times">
-        <List.EmptyView title="No Prayer Times Available" description="Failed to load prayer times" />
+        <List.EmptyView
+          title="No Prayer Times Available"
+          description="Failed to load prayer times"
+        />
       </List>
     );
   }
@@ -320,7 +382,11 @@ function FourteenDaysAthanTimes({ selectedCountry, selectedCity }: { selectedCou
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Settings">
-            <Action title="Change Location" onAction={clearSavedLocation} icon={Icon.Map} />
+            <Action
+              title="Change Location"
+              onAction={clearSavedLocation}
+              icon={Icon.Map}
+            />
             <Action.OpenInBrowser
               title="I Have an Issue!"
               url="https://iabdullah.dev/en/athan-times-form"
@@ -358,7 +424,10 @@ function FourteenDaysAthanTimes({ selectedCountry, selectedCity }: { selectedCou
                   <List.Item.Detail.Metadata.Label
                     title="Dhuhr (الظهر)"
                     icon={Icon.Sun}
-                    text={formatTime(dayData.timings.Dhuhr, hoursSystem || "24")}
+                    text={formatTime(
+                      dayData.timings.Dhuhr,
+                      hoursSystem || "24",
+                    )}
                   />
 
                   <List.Item.Detail.Metadata.Label
@@ -370,7 +439,10 @@ function FourteenDaysAthanTimes({ selectedCountry, selectedCity }: { selectedCou
                   <List.Item.Detail.Metadata.Label
                     title="Maghrib - Sunset (المغرب)"
                     icon={Icon.MoonUp}
-                    text={formatTime(dayData.timings.Maghrib, hoursSystem || "24")}
+                    text={formatTime(
+                      dayData.timings.Maghrib,
+                      hoursSystem || "24",
+                    )}
                   />
 
                   <List.Item.Detail.Metadata.Label
@@ -386,25 +458,37 @@ function FourteenDaysAthanTimes({ selectedCountry, selectedCity }: { selectedCou
                   <List.Item.Detail.Metadata.Label
                     title="Sunrise (الشروق)"
                     icon={Icon.Sunrise}
-                    text={formatTime(dayData.timings.Sunrise, hoursSystem || "24")}
+                    text={formatTime(
+                      dayData.timings.Sunrise,
+                      hoursSystem || "24",
+                    )}
                   />
 
                   <List.Item.Detail.Metadata.Label
                     title="First third (الثلث الأول من الليل)"
                     icon={Icon.StackedBars1}
-                    text={formatTime(dayData.timings.Firstthird, hoursSystem || "24")}
+                    text={formatTime(
+                      dayData.timings.Firstthird,
+                      hoursSystem || "24",
+                    )}
                   />
 
                   <List.Item.Detail.Metadata.Label
                     title="Midnight (منتصف الليل)"
                     icon={Icon.CircleProgress50}
-                    text={formatTime(dayData.timings.Midnight, hoursSystem || "24")}
+                    text={formatTime(
+                      dayData.timings.Midnight,
+                      hoursSystem || "24",
+                    )}
                   />
 
                   <List.Item.Detail.Metadata.Label
                     title="Last third (الثلث الأخير من الليل)"
                     icon={Icon.StackedBars3}
-                    text={formatTime(dayData.timings.Lastthird, hoursSystem || "24")}
+                    text={formatTime(
+                      dayData.timings.Lastthird,
+                      hoursSystem || "24",
+                    )}
                   />
                 </List.Item.Detail.Metadata>
               }
@@ -412,7 +496,11 @@ function FourteenDaysAthanTimes({ selectedCountry, selectedCity }: { selectedCou
           }
           actions={
             <ActionPanel>
-              <Action title="Change Location" onAction={clearSavedLocation} icon={Icon.Map} />
+              <Action
+                title="Change Location"
+                onAction={clearSavedLocation}
+                icon={Icon.Map}
+              />
               <Action.OpenInBrowser
                 title="There Is an Issue!"
                 url="https://iabdullah.dev/en/athan-times-form"
@@ -434,11 +522,12 @@ function FourteenDaysAthanTimes({ selectedCountry, selectedCity }: { selectedCou
 }
 
 export default function Command() {
-  const { value: savedCountry, isLoading: isLoadingCountry } = useLocalStorage<Country | undefined>(
-    "selectedCountry",
-    undefined,
-  );
-  const { value: savedCity, isLoading: isLoadingCity } = useLocalStorage<string | undefined>("selectedCity", undefined);
+  const { value: savedCountry, isLoading: isLoadingCountry } = useLocalStorage<
+    Country | undefined
+  >("selectedCountry", undefined);
+  const { value: savedCity, isLoading: isLoadingCity } = useLocalStorage<
+    string | undefined
+  >("selectedCity", undefined);
 
   if (isLoadingCountry || isLoadingCity) {
     return <List isLoading={true} navigationTitle="Loading..." />;
@@ -448,5 +537,10 @@ export default function Command() {
     return <LocationForm />;
   }
 
-  return <FourteenDaysAthanTimes selectedCountry={savedCountry} selectedCity={savedCity} />;
+  return (
+    <FourteenDaysAthanTimes
+      selectedCountry={savedCountry}
+      selectedCity={savedCity}
+    />
+  );
 }

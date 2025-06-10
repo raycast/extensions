@@ -42,7 +42,8 @@ export function getNextPrayer(athanTimes: AthanTimings): NextPrayerInfo {
   }
 
   const fajrTomorrow = prayerTimesInMinutes[0];
-  const minutesUntilTomorrow = 24 * 60 - currentTimeInMinutes + fajrTomorrow.timeInMinutes;
+  const minutesUntilTomorrow =
+    24 * 60 - currentTimeInMinutes + fajrTomorrow.timeInMinutes;
 
   return {
     name: fajrTomorrow.name,
@@ -74,7 +75,8 @@ export function calculateRemainingTime(nextPrayer: NextPrayerInfo): number {
   const currentSecond = now.getSeconds();
 
   // Convert current time to total minutes (with seconds as decimal)
-  const currentTimeInMinutes = currentHour * 60 + currentMinute + currentSecond / 60;
+  const currentTimeInMinutes =
+    currentHour * 60 + currentMinute + currentSecond / 60;
 
   const [hours, minutes] = nextPrayer.time.split(":").map(Number);
   const prayerTimeInMinutes = hours * 60 + minutes;

@@ -1,10 +1,31 @@
-import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { config } from "./config";
 import { formatTime } from "./utils/hoursSystem";
-import { City, Country, UserSelection, AthanResponse, AthanTimings, GeoNamesResponse } from "./types/types";
-import { calculateRemainingTime, formatTimeRemaining, getNextPrayer } from "./utils/prayerUtils";
+import {
+  City,
+  Country,
+  UserSelection,
+  AthanResponse,
+  AthanTimings,
+  GeoNamesResponse,
+} from "./types/types";
+import {
+  calculateRemainingTime,
+  formatTimeRemaining,
+  getNextPrayer,
+} from "./utils/prayerUtils";
 
 function LocationForm() {
   // Countries
@@ -31,15 +52,20 @@ function LocationForm() {
       try {
         console.log("Start Fetching countries...");
 
-        const response = await fetch("https://api.countrystatecity.in/v1/countries/", {
-          headers: {
-            // Country State City API Key, I know it is not secure, I did not find a way to hide the API Key in Raycast Extension 😕
-            "X-CSCAPI-KEY": config.countryStateCityApiKey,
+        const response = await fetch(
+          "https://api.countrystatecity.in/v1/countries/",
+          {
+            headers: {
+              // Country State City API Key, I know it is not secure, I did not find a way to hide the API Key in Raycast Extension 😕
+              "X-CSCAPI-KEY": config.countryStateCityApiKey,
+            },
           },
-        });
+        );
         const data = (await response.json()) as Country[];
 
-        const filteredCountries = data.filter((country) => country.iso2 !== "IL");
+        const filteredCountries = data.filter(
+          (country) => country.iso2 !== "IL",
+        );
 
         console.log("Countries fetched : ", data.length);
         setCountries(filteredCountries);
@@ -100,7 +126,8 @@ function LocationForm() {
     fetchCities();
   }, [selectedCountry]);
 
-  const isLoading = isLoadingCountry || isLoadingCity || loadingCities || !countries;
+  const isLoading =
+    isLoadingCountry || isLoadingCity || loadingCities || !countries;
 
   return (
     <Form
@@ -110,7 +137,12 @@ function LocationForm() {
         <ActionPanel>
           <Action.Push
             title="Show Prayer Times"
-            target={<AthanTimes selectedCountry={selectedCountry} selectedCity={selectedCity} />}
+            target={
+              <AthanTimes
+                selectedCountry={selectedCountry}
+                selectedCity={selectedCity}
+              />
+            }
           />
           <Action
             title="Clear Saved Data"
@@ -143,24 +175,40 @@ function LocationForm() {
         <Form.Dropdown.Item title="Select a country..." value="" />
         {countries?.map((country) => {
           return (
-            <Form.Dropdown.Item key={country.iso2} value={country.iso2} title={country.name} icon={country.emoji} />
+            <Form.Dropdown.Item
+              key={country.iso2}
+              value={country.iso2}
+              title={country.name}
+              icon={country.emoji}
+            />
           );
         })}
       </Form.Dropdown>
 
       {selectedCountry && (
-        <Form.Dropdown id="city" title="city" value={selectedCity || ""} onChange={setSelectedCity}>
+        <Form.Dropdown
+          id="city"
+          title="city"
+          value={selectedCity || ""}
+          onChange={setSelectedCity}
+        >
           <Form.Dropdown.Item title="Select a city..." value="" />
           {cities?.map((city) => {
             return (
-              <Form.Dropdown.Item key={`${selectedCountry.iso2}-${city.name}`} value={city.name} title={city.name} />
+              <Form.Dropdown.Item
+                key={`${selectedCountry.iso2}-${city.name}`}
+                value={city.name}
+                title={city.name}
+              />
             );
           })}
         </Form.Dropdown>
       )}
 
       {selectedCountry && (
-        <Form.Description text={`Selected: ${selectedCountry.name}${selectedCity ? `, ${selectedCity}` : ""}`} />
+        <Form.Description
+          text={`Selected: ${selectedCountry.name}${selectedCity ? `, ${selectedCity}` : ""}`}
+        />
       )}
     </Form>
   );
@@ -179,8 +227,14 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
     isLoading: isLoadingHoursSystem,
   } = useLocalStorage<string>("hoursSystem", "24");
 
-  const { setValue: setSelectedCountry } = useLocalStorage<Country | undefined>("selectedCountry", undefined);
-  const { setValue: setSelectedCity } = useLocalStorage<string | undefined>("selectedCity", undefined);
+  const { setValue: setSelectedCountry } = useLocalStorage<Country | undefined>(
+    "selectedCountry",
+    undefined,
+  );
+  const { setValue: setSelectedCity } = useLocalStorage<string | undefined>(
+    "selectedCity",
+    undefined,
+  );
 
   const nextPrayer = athanTimes ? getNextPrayer(athanTimes) : null;
 
@@ -221,13 +275,19 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
   useEffect(() => {
     async function getAthanTimes() {
       if (!selectedCountry || !selectedCity) {
-        console.log("Missing country or city :", { selectedCountry, selectedCity });
+        console.log("Missing country or city :", {
+          selectedCountry,
+          selectedCity,
+        });
         return;
       }
 
       try {
         setLoadingTimes(true);
-        console.log("Fetching Prayer times for:", { selectedCountry, selectedCity });
+        console.log("Fetching Prayer times for:", {
+          selectedCountry,
+          selectedCity,
+        });
 
         const response = await fetch(
           `https://api.aladhan.com/v1/timingsByCity?country=${selectedCountry.name}&city=${selectedCity}`,
@@ -270,7 +330,10 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
     });
     return (
       <List navigationTitle="Prayer Times">
-        <List.EmptyView title="No Prayer Times Available" description="Please select a country and city first" />
+        <List.EmptyView
+          title="No Prayer Times Available"
+          description="Please select a country and city first"
+        />
       </List>
     );
   }
@@ -278,7 +341,11 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
   const getPrayerAccessories = (prayerName: string, prayerTime: string) => {
     const accessories = [];
 
-    if (nextPrayer && nextPrayer.name === prayerName && nextPrayer.isWithinHour) {
+    if (
+      nextPrayer &&
+      nextPrayer.name === prayerName &&
+      nextPrayer.isWithinHour
+    ) {
       accessories.push({
         tag: {
           value: "Next",
@@ -328,7 +395,11 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Settings">
-            <Action title="Change Location" onAction={clearSavedLocation} icon={Icon.Map} />
+            <Action
+              title="Change Location"
+              onAction={clearSavedLocation}
+              icon={Icon.Map}
+            />
             <Action.OpenInBrowser
               title="I Have an Issue!"
               url="https://iabdullah.dev/en/athan-times-form"
@@ -352,7 +423,11 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
           accessories={getPrayerAccessories("Fajr", athanTimes.Fajr)}
           actions={
             <ActionPanel>
-              <Action title="Change Location" onAction={clearSavedLocation} icon={Icon.Map} />
+              <Action
+                title="Change Location"
+                onAction={clearSavedLocation}
+                icon={Icon.Map}
+              />
               <Action.OpenInBrowser
                 title="There Is an Issue!"
                 url="https://iabdullah.dev/en/athan-times-form"
@@ -374,7 +449,11 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
           accessories={getPrayerAccessories("Dhuhr", athanTimes.Dhuhr)}
           actions={
             <ActionPanel>
-              <Action title="Change Location" onAction={clearSavedLocation} icon={Icon.Map} />
+              <Action
+                title="Change Location"
+                onAction={clearSavedLocation}
+                icon={Icon.Map}
+              />
               <Action.OpenInBrowser
                 title="There Is an Issue!"
                 url="https://iabdullah.dev/en/athan-times-form"
@@ -396,7 +475,11 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
           accessories={getPrayerAccessories("Asr", athanTimes.Asr)}
           actions={
             <ActionPanel>
-              <Action title="Change Location" onAction={clearSavedLocation} icon={Icon.Map} />
+              <Action
+                title="Change Location"
+                onAction={clearSavedLocation}
+                icon={Icon.Map}
+              />
               <Action.OpenInBrowser
                 title="There Is an Issue!"
                 url="https://iabdullah.dev/en/athan-times-form"
@@ -418,7 +501,11 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
           accessories={getPrayerAccessories("Maghrib", athanTimes.Maghrib)}
           actions={
             <ActionPanel>
-              <Action title="Change Location" onAction={clearSavedLocation} icon={Icon.Map} />
+              <Action
+                title="Change Location"
+                onAction={clearSavedLocation}
+                icon={Icon.Map}
+              />
               <Action.OpenInBrowser
                 title="There Is an Issue!"
                 url="https://iabdullah.dev/en/athan-times-form"
@@ -440,7 +527,11 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
           accessories={getPrayerAccessories("Isha", athanTimes.Isha)}
           actions={
             <ActionPanel>
-              <Action title="Change Location" onAction={clearSavedLocation} icon={Icon.Map} />
+              <Action
+                title="Change Location"
+                onAction={clearSavedLocation}
+                icon={Icon.Map}
+              />
               <Action.OpenInBrowser
                 title="There Is an Issue!"
                 url="https://iabdullah.dev/en/athan-times-form"
@@ -465,7 +556,11 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
           accessories={getPrayerAccessories("Sunrise", athanTimes.Sunrise)}
           actions={
             <ActionPanel>
-              <Action title="Change Location" onAction={clearSavedLocation} icon={Icon.Map} />
+              <Action
+                title="Change Location"
+                onAction={clearSavedLocation}
+                icon={Icon.Map}
+              />
               <Action.OpenInBrowser
                 title="There Is an Issue!"
                 url="https://iabdullah.dev/en/athan-times-form"
@@ -485,10 +580,17 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
         <List.Item
           title="First third (الثلث الأول من الليل)"
           icon={Icon.StackedBars1}
-          accessories={getPrayerAccessories("Firstthird", athanTimes.Firstthird)}
+          accessories={getPrayerAccessories(
+            "Firstthird",
+            athanTimes.Firstthird,
+          )}
           actions={
             <ActionPanel>
-              <Action title="Change Location" onAction={clearSavedLocation} icon={Icon.Map} />
+              <Action
+                title="Change Location"
+                onAction={clearSavedLocation}
+                icon={Icon.Map}
+              />
               <Action.OpenInBrowser
                 title="There Is an Issue!"
                 url="https://iabdullah.dev/en/athan-times-form"
@@ -510,7 +612,11 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
           accessories={getPrayerAccessories("Midnight", athanTimes.Midnight)}
           actions={
             <ActionPanel>
-              <Action title="Change Location" onAction={clearSavedLocation} icon={Icon.Map} />
+              <Action
+                title="Change Location"
+                onAction={clearSavedLocation}
+                icon={Icon.Map}
+              />
               <Action.OpenInBrowser
                 title="There Is an Issue!"
                 url="https://iabdullah.dev/en/athan-times-form"
@@ -532,7 +638,11 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
           accessories={getPrayerAccessories("Lastthird", athanTimes.Lastthird)}
           actions={
             <ActionPanel>
-              <Action title="Change Location" onAction={clearSavedLocation} icon={Icon.Map} />
+              <Action
+                title="Change Location"
+                onAction={clearSavedLocation}
+                icon={Icon.Map}
+              />
               <Action.OpenInBrowser
                 title="There Is an Issue!"
                 url="https://iabdullah.dev/en/athan-times-form"
@@ -554,11 +664,19 @@ function AthanTimes({ selectedCountry, selectedCity }: UserSelection) {
 }
 
 export default function Command() {
-  const { value: savedCountry } = useLocalStorage<Country | undefined>("selectedCountry", undefined);
-  const { value: savedCity } = useLocalStorage<string | undefined>("selectedCity", undefined);
+  const { value: savedCountry } = useLocalStorage<Country | undefined>(
+    "selectedCountry",
+    undefined,
+  );
+  const { value: savedCity } = useLocalStorage<string | undefined>(
+    "selectedCity",
+    undefined,
+  );
 
   if (savedCountry && savedCity) {
-    return <AthanTimes selectedCountry={savedCountry} selectedCity={savedCity} />;
+    return (
+      <AthanTimes selectedCountry={savedCountry} selectedCity={savedCity} />
+    );
   }
 
   return (
