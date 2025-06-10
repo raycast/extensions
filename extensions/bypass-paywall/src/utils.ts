@@ -48,17 +48,19 @@ async function getActiveBrowserInfo(): Promise<{ name: string; engine: BrowserIn
 
 export async function getCurrentTabURL(): Promise<string> {
   const browserInfo = await getActiveBrowserInfo();
+  // Escape quotes in browser name to prevent script injection
+  const escapedBrowserName = browserInfo.name.replace(/"/g, '""');
 
   let script = "";
   if (browserInfo.engine === "webkit") {
-    script = `tell application "${browserInfo.name}" to return URL of current tab of front window`;
+    script = `tell application "${escapedBrowserName}" to return URL of current tab of front window`;
   } else if (browserInfo.engine === "chromium") {
     // Most Chromium-based browsers use a similar script
-    script = `tell application "${browserInfo.name}" to return URL of active tab of front window`;
+    script = `tell application "${escapedBrowserName}" to return URL of active tab of front window`;
   } else if (browserInfo.engine === "gecko") {
     // Firefox (Gecko) requires a workaround using clipboard
     script = `
-      tell application "${browserInfo.name}"
+      tell application "${escapedBrowserName}"
         activate
       end tell
       tell application "System Events"
@@ -83,8 +85,10 @@ export async function getCurrentTabURL(): Promise<string> {
 
 export async function openURL(url: string): Promise<void> {
   const browserInfo = await getActiveBrowserInfo();
-  // The open location script is generally the same for all supported browsers
-  const script = `tell application "${browserInfo.name}" to open location "${url}"`;
+  // Escape quotes in URL and browser name to prevent script injection
+  const escapedUrl = url.replace(/"/g, '""');
+  const escapedBrowserName = browserInfo.name.replace(/"/g, '""');
+  const script = `tell application "${escapedBrowserName}" to open location "${escapedUrl}"`;
 
   try {
     await runAppleScript(script);

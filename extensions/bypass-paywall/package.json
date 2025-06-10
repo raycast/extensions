@@ -12,16 +12,16 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "bypass-for-current-tab",
-      "title": "Bypass for Current Tab",
-      "subtitle": "Paywall",
+      "name": "bypass-from-current-tab",
+      "title": "Bypass from Current Tab",
+      "subtitle": "Paywalls",
       "description": "Bypass the paywall from the URL in your active browser tab.",
       "mode": "no-view"
     },
     {
       "name": "bypass-from-clipboard",
       "title": "Bypass from Clipboard",
-      "subtitle": "Paywall",
+      "subtitle": "Paywalls",
       "description": "Bypass the paywall from a clipboard URL.",
       "mode": "no-view"
     }

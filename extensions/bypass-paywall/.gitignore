@@ -3,6 +3,14 @@
 # dependencies
 /node_modules
 
+# build output
+/dist
+
+# environment files
+.env
+.env.local
+.env.*.local
+
 # Raycast specific files
 raycast-env.d.ts
 
