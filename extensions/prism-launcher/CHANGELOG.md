@@ -1,5 +1,10 @@
 # Prism Launcher Changelog
 
+## [New Additions] - 2025-06-10
+
+- Extend readme with new features
+- Change extension-icon to match the new Launcher icon
+
 ## [New Additions] - 2025-06-04
 
 - Add 'Open Minecraft Folder in Finder' action to quickly access the Minecraft folder
