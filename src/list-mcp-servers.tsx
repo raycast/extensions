@@ -247,8 +247,8 @@ export default function Command() {
         prev.map((s) =>
           s.config.name === server.config.name && s.editor === server.editor
             ? { ...s, lastTestResult: result }
-            : s
-        )
+            : s,
+        ),
       );
     } catch (error) {
       console.error("Connection test error:", error);
