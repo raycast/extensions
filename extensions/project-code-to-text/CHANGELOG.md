@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-06-10
 
 ### Added
 - Individual file selection with removable tag interface for processing specific files from Finder
