@@ -24,6 +24,20 @@ interface App {
   windowTitle?: string;
 }
 
+const preferredAppsNames = {
+  "com.google.Chrome": "Google Chrome",
+  "com.apple.Safari": "Safari",
+  "com.microsoft.Edge": "Microsoft Edge",
+  "com.google.Chrome.app": "Google Chrome",
+  "com.microsoft.VSCode": "Visual Studio Code",
+  "com.microsoft.VSCodeInsiders": "Visual Studio Code Insiders",
+  "com.microsoft.VSCode.app": "Visual Studio Code",
+  "com.microsoft.VSCodeInsiders.app": "Visual Studio Code Insiders",
+  "com.microsoft.VSCode.app.nightly": "Visual Studio Code Nightly",
+  "com.microsoft.VSCodeInsiders.app.nightly": "Visual Studio Code Insiders Nightly",
+  "com.microsoft.VSCode.app.insiders": "Visual Studio Code Insiders",
+};
+
 async function fetchApps(): Promise<App[]> {
   try {
     // Get all installed applications from Raycast API
@@ -36,12 +50,11 @@ async function fetchApps(): Promise<App[]> {
         appMap.set(app.bundleId, app);
       }
     });
-
     // Get running processes with their bundle IDs
     const processScript = `
       tell application "System Events"
         set appList to {}
-        repeat with proc in (get processes whose (visible is true) and (background only is false))
+        repeat with proc in (every process whose background only is false)  
           try
             set procBundle to bundle identifier of proc
             if procBundle is not missing value and procBundle is not "" then
@@ -70,124 +83,10 @@ async function fetchApps(): Promise<App[]> {
       if (!bundleId) continue;
 
       const installedApp = appMap.get(bundleId);
-
-      // Check if this is a web browser that might have PWAs
-      const isWebBrowser =
-        bundleId.includes("Safari") ||
-        bundleId.includes("Chrome") ||
-        bundleId.includes("Edge") ||
-        bundleId.includes("Firefox") ||
-        bundleId.includes("Arc") ||
-        bundleId.includes("webkit");
-
-      if (isWebBrowser) {
-        // For web browsers, get individual windows/tabs as separate apps
-        try {
-          const windowScript = `
-            tell application "System Events"
-              set proc to first process whose bundle identifier is "${bundleId}"
-              set windowData to ""
-              try
-                repeat with w in (get windows of proc)
-                  try
-                    set windowTitle to name of w
-                    set windowId to id of w
-                    if windowTitle is not "" and windowTitle is not missing value then
-                      if windowData is not "" then
-                        set windowData to windowData & "¦¦¦WINDOW_SEPARATOR¦¦¦"
-                      end if
-                      set windowData to windowData & windowTitle & "¦¦¦TITLE_ID_SEPARATOR¦¦¦" & windowId
-                    end if
-                  end try
-                end repeat
-              end try
-              return windowData
-            end tell
-          `;
-
-          const windowResult = execSync(`osascript -e '${windowScript.replace(/'/g, "\\'")}'`, {
-            encoding: "utf8",
-            timeout: 5000,
-          });
-
-          const windowData = windowResult.trim();
-          let hasValidWindows = false;
-
-          if (windowData && windowData !== "") {
-            const windowEntries = windowData.split("¦¦¦WINDOW_SEPARATOR¦¦¦");
-
-            for (const windowEntry of windowEntries) {
-              if (windowEntry.trim()) {
-                const [windowTitle, windowIdStr] = windowEntry.split("¦¦¦TITLE_ID_SEPARATOR¦¦¦");
-                if (windowTitle && windowTitle.trim() !== "") {
-                  let cleanTitle = windowTitle.trim();
-
-                  // Clean up browser suffixes
-                  cleanTitle = cleanTitle.replace(/ - Google Chrome$/, "");
-                  cleanTitle = cleanTitle.replace(/ - Microsoft Edge$/, "");
-                  cleanTitle = cleanTitle.replace(/ - Safari$/, "");
-                  cleanTitle = cleanTitle.replace(/ - Firefox$/, "");
-                  cleanTitle = cleanTitle.replace(/ - Arc$/, "");
-                  cleanTitle = cleanTitle.replace(/ - Brave$/, "");
-
-                  // Skip empty titles or common browser titles
-                  if (
-                    cleanTitle &&
-                    !cleanTitle.includes("New Tab") &&
-                    !cleanTitle.includes("about:blank") &&
-                    !cleanTitle.includes("chrome://") &&
-                    !cleanTitle.includes("edge://") &&
-                    !cleanTitle.includes("about:") &&
-                    cleanTitle !== "Chrome" &&
-                    cleanTitle !== "Safari" &&
-                    cleanTitle !== "Edge" &&
-                    cleanTitle !== "Firefox" &&
-                    cleanTitle !== "Arc" &&
-                    cleanTitle !== "Brave"
-                  ) {
-                    hasValidWindows = true;
-                    apps.push({
-                      name: cleanTitle,
-                      bundleId: bundleId,
-                      path: installedApp?.path || "",
-                      uniqueId: `${bundleId}_window_${uniqueCounter++}`,
-                      windowId: windowIdStr ? parseInt(windowIdStr.trim()) : undefined,
-                      isWebApp: true,
-                      windowTitle: cleanTitle,
-                    });
-                  }
-                }
-              }
-            }
-          }
-
-          // If no valid windows found, add the browser itself
-          if (!hasValidWindows && installedApp) {
-            apps.push({
-              name: installedApp.name,
-              bundleId: bundleId,
-              path: installedApp.path,
-              uniqueId: `${bundleId}_${uniqueCounter++}`,
-              isWebApp: false,
-            });
-          }
-        } catch (error) {
-          console.warn(`Failed to get windows for ${bundleId}:`, error);
-          // Fallback to the browser app itself
-          if (installedApp) {
-            apps.push({
-              name: installedApp.name,
-              bundleId: bundleId,
-              path: installedApp.path,
-              uniqueId: `${bundleId}_${uniqueCounter++}`,
-              isWebApp: false,
-            });
-          }
-        }
-      } else if (installedApp) {
-        // Regular app - use information from getApplications
+      // Regular app - use information from getApplications
+      if (installedApp) {
         apps.push({
-          name: installedApp.name,
+          name: preferredAppsNames[bundleId as keyof typeof preferredAppsNames] || installedApp.name,
           bundleId: bundleId,
           path: installedApp.path,
           uniqueId: `${bundleId}_${uniqueCounter++}`,
@@ -249,7 +148,6 @@ async function quitApp(app: App): Promise<void> {
 
 export default function Command() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
-
   const {
     data: apps = [],
     error,
@@ -259,7 +157,6 @@ export default function Command() {
     initialData: [],
     keepPreviousData: true,
   });
-
   const toggleSelection = (uniqueId: string) => {
     setSelected((prev) => {
       const newSelected = new Set(prev);
@@ -346,7 +243,6 @@ export default function Command() {
   if (isLoading) {
     return <List isLoading={true} searchBarPlaceholder="Loading applications..." />;
   }
-
   if (apps.length === 0) {
     return (
       <List>
