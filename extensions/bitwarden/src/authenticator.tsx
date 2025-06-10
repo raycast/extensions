@@ -52,7 +52,7 @@ function AuthenticatorList() {
   const vault = useVaultContext();
   const { data: activeTabUrl, isLoading: isActiveTabLoading } = useActiveTab();
 
-  const vaultItems = useMemo(() => vault.items.filter((item) => item.login?.totp), [vault.items]);
+  const vaultItems = vault.items.filter((item) => item.login?.totp);
   const { setSearchText, filteredItems } = useVaultSearch(vaultItems);
 
   const itemMatches = useMemo(() => {
@@ -285,11 +285,17 @@ const authenticator = {
       if (totp === SENSITIVE_VALUE_PLACEHOLDER) return Loading(new Error("Loading..."));
       if (!totp) return Err(new Error("No TOTP found"));
 
-      return authenticator.getGenerator(totp);
+      const [generator, error] = authenticator.getGenerator(totp);
+      if (error) return Err(error);
+
+      const [testGenerate, testGenerateError] = tryCatch(() => generator.generate());
+      if (testGenerateError || !testGenerate) return Err(new Error("Failed to initialize"));
+
+      return Ok(generator);
     }, [item, canGenerate]);
 
-    const [code, setCode] = useState(() => (!error ? generator.generate() : null));
-    const [time, setTime] = useState(() => (!error ? Math.ceil(generator.remaining() / 1000) : null));
+    const [code, setCode] = useState<string | null>(null);
+    const [time, setTime] = useState<number | null>(null);
 
     useEffect(() => {
       if (error) return;

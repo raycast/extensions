@@ -19,30 +19,31 @@ export default async function command(props: PickColorCommandLaunchProps) {
 
     addToHistory(pickedColor);
 
-    const hex = getFormattedColor(pickedColor);
-    if (!hex) {
+    const hex = getFormattedColor(pickedColor, "hex");
+    const formattedColor = getFormattedColor(pickedColor);
+    if (!formattedColor) {
       throw new Error("Failed to format color");
     }
 
     if (props.launchContext?.callbackLaunchOptions) {
       if (props.launchContext?.copyToClipboard) {
-        await Clipboard.copy(hex);
+        await Clipboard.copy(formattedColor);
       }
 
       try {
-        await callbackLaunchCommand(props.launchContext.callbackLaunchOptions, { hex });
+        await callbackLaunchCommand(props.launchContext.callbackLaunchOptions, { hex, formattedColor });
       } catch (e) {
         await showFailureToast(e);
       }
     } else {
-      await Clipboard.copy(hex);
+      await Clipboard.copy(formattedColor);
       if (showColorName) {
-        const colors = colorNamer(hex);
+        const colors = colorNamer(formattedColor);
         const colorsByDistance = getColorByProximity(colors);
         const firstColorName = colorsByDistance[0]?.name;
-        await showHUD(`Copied color ${hex} (${firstColorName}) to clipboard`);
+        await showHUD(`Copied color ${formattedColor} (${firstColorName}) to clipboard`);
       } else {
-        await showHUD(`Copied color ${hex} to clipboard`);
+        await showHUD(`Copied color ${formattedColor} to clipboard`);
       }
     }
 

@@ -125,56 +125,61 @@ export default function () {
 
                                             <List.Item.Detail.Metadata.Separator />
 
-                                            <List.Item.Detail.Metadata.Label title="Departure - Scheduled" text={depTimeOriginal.format(timeFormat)} />
                                             <List.Item.Detail.Metadata.Label
-                                                title="Departure - Actual"
+                                                title="Departure - Scheduled (Actual)"
                                                 text={(() => {
-                                                    if (depTimeActual === null) return '-'
+                                                    if (depTimeActual === null) return depTimeOriginal.format(timeFormat)
+                                                    const scheduled = depTimeOriginal.format(timeFormat)
+                                                    const actual = depTimeActual.format(timeFormat)
                                                     return {
-                                                        value: formatRelativeTime(depTimeOriginal, depTimeActual),
+                                                        value: `${scheduled} (${actual})`,
                                                         color: depTimeActual > depTimeOriginal ? Color.Red : Color.Green,
                                                     }
                                                 })()}
                                             />
-                                            <List.Item.Detail.Metadata.Label title="Departure Terminal" text={flight.depTerminal ?? '-'} />
-                                            <List.Item.Detail.Metadata.Label title="Departure Gate" text={flight.depGate ?? '-'} />
-
                                             <List.Item.Detail.Metadata.Label
-                                                title="Arrival - Scheduled"
+                                                title="Departure Terminal/Gate"
                                                 text={(() => {
-                                                    if (arrTimeOriginal === null) return '-'
-                                                    return formatRelativeTime(depTimeOriginal, arrTimeOriginal)
+                                                    const terminal = flight.depTerminal ?? ''
+                                                    const gate = flight.depGate ?? ''
+                                                    if (!terminal && !gate) return '-'
+                                                    return `${terminal || '-'} / ${gate || '-'}`
                                                 })()}
                                             />
+
                                             <List.Item.Detail.Metadata.Label
-                                                title="Arrival - Actual"
+                                                title="Arrival - Scheduled (Actual)"
                                                 text={(() => {
-                                                    if (arrTimeActual === null) return '-'
-                                                    if (arrTimeOriginal === null) return formatRelativeTime(depTimeOriginal, arrTimeActual)
+                                                    if (arrTimeOriginal === null) return '-'
+                                                    if (arrTimeActual === null) return formatRelativeTime(depTimeOriginal, arrTimeOriginal)
+                                                    const scheduled = formatRelativeTime(depTimeOriginal, arrTimeOriginal)
+                                                    const actual = formatRelativeTime(depTimeOriginal, arrTimeActual)
                                                     return {
-                                                        value: formatRelativeTime(depTimeOriginal, arrTimeActual),
+                                                        value: `${scheduled} (${actual})`,
                                                         color: arrTimeActual > arrTimeOriginal ? Color.Red : Color.Green,
                                                     }
                                                 })()}
                                             />
-                                            <List.Item.Detail.Metadata.Label title="Arrival Terminal" text={flight.arrTerminal ?? '-'} />
-                                            <List.Item.Detail.Metadata.Label title="Arrival Gate" text={flight.arrGate ?? '-'} />
+                                            <List.Item.Detail.Metadata.Label
+                                                title="Arrival Terminal/Gate"
+                                                text={(() => {
+                                                    const terminal = flight.arrTerminal ?? ''
+                                                    const gate = flight.arrGate ?? ''
+                                                    if (!terminal && !gate) return '-'
+                                                    return `${terminal || '-'} / ${gate || '-'}`
+                                                })()}
+                                            />
                                             <List.Item.Detail.Metadata.Label title="Arrival Baggage Belt" text={flight.arrBaggageBelt ?? '-'} />
 
                                             <List.Item.Detail.Metadata.Label
-                                                title="Duration - Scheduled"
+                                                title="Duration - Scheduled (Actual)"
                                                 text={(() => {
                                                     if (durationOriginal === null) return '-'
-                                                    return `${Math.floor(durationOriginal / 60)}h ${durationOriginal % 60}m`
-                                                })()}
-                                            />
-                                            <List.Item.Detail.Metadata.Label
-                                                title="Duration - Actual"
-                                                text={(() => {
-                                                    if (durationActual === null) return '-'
-                                                    if (durationOriginal === null) return `${Math.floor(durationActual / 60)}h ${durationActual % 60}m`
+                                                    if (durationActual === null) return `${Math.floor(durationOriginal / 60)}h ${durationOriginal % 60}m`
+                                                    const scheduled = `${Math.floor(durationOriginal / 60)}h ${durationOriginal % 60}m`
+                                                    const actual = `${Math.floor(durationActual / 60)}h ${durationActual % 60}m`
                                                     return {
-                                                        value: `${Math.floor(durationActual / 60)}h ${durationActual % 60}m`,
+                                                        value: `${scheduled} (${actual})`,
                                                         color: durationActual > durationOriginal ? Color.Red : Color.Green,
                                                     }
                                                 })()}
@@ -206,5 +211,5 @@ export default function () {
 function formatRelativeTime(original: Dayjs, final: Dayjs) {
     const diff = final.startOf('day').diff(original.startOf('day'), 'day')
     if (diff === 0) return final.format(timeFormat)
-    return `${final.format(timeFormat)} (+${diff})`
+    return `${final.format(timeFormat)} +${diff}`
 }

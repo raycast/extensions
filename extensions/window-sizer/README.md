@@ -1,29 +1,40 @@
 <div align="center">
-  <img src="assets/screenshot.png" alt="window-sizer">
+  <img width=128 src="assets/icons/key-icon.png" alt="icon">
 </div>
-&nbsp;
 
-# Window Sizer
+<h1 align="center">Window Sizer</h1>
+<p align="center">Resize the focused window to pixel-perfect presets</p>
 
-Resize the focused window to pixel-perfect presets.
+![window sizer commands](metadata/window-sizer-1.png)
+
+<br>
 
 ## Features
 
-- Quickly resize windows to predefined sizes
-- Create and save custom window sizes
+### Resize Window
+
+- Quickly resize a window to predefined sizes
+- Add and save custom window sizes
 - Star your frequently used window sizes
 - Maximize window
 - Restore previous window size
 - Get current window size
-- An extra way to save and apply a favorite window size
 
-## Usage
+![resize window](metadata/window-sizer-2.png)
+![add custom sizes](metadata/window-sizer-3.png)
+![list actions](metadata/window-sizer-4.png)
+![other options](metadata/window-sizer-5.png)
 
-Search for the following command in Raycast:
+<p align="center">-</p>
 
-- `Window Sizer` - Find all commands
-- `Resize Window` - Open the window size selector
-- `Apply Favorite Size` - Apply a favorite window size directly (Configure in command settings first)
+### Apply favorite size
+
+To use this feature, set your favorite size in the command settings.
+
+![apply favorite size](assets/screenshots/apply-fav-size-1.png)
+![favorite size settings](assets/screenshots/apply-fav-size-2.png)
+
+<br>
 
 ## Shortcuts
 
@@ -31,7 +42,9 @@ Search for the following command in Raycast:
 - `⇧ ⌘ S` - Unstar window size
 - `⌘ D` - Delete custom window size
 
+<br>
+
 ## Notes
 
-- To resize windows, please allow Raycast to control your Mac under System Settings → Privacy & Security → Accessibility
+- To resize windows, please allow Raycast to control your Mac under `System Settings` → `Privacy & Security` → `Accessibility`
 - Some applications may restrict window resizing

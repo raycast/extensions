@@ -1,0 +1,4 @@
+node_modules/
+src/config.local.ts
+raycast-env.d.ts
+.DS_Store

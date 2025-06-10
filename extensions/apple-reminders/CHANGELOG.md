@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [✨ Add option to show list name in menu bar reminders] - 2025-06-04
+
+- Add an option that allows users to choose whether to display the list name next to each reminder’s name in the menu bar.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Add new "Upcoming" grouping option] - 2025-02-10
