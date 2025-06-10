@@ -1,5 +1,5 @@
 # Copee
-![](metadata/copee-1.png)
+![](./metadata/copee-1.png)
 
 Copee provides three commands:
 
