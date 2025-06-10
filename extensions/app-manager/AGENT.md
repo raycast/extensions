@@ -9,7 +9,7 @@
 
 ## Architecture
 - **Type**: Raycast extension for macOS application management
-- **Structure**: Single-command extension with one main view (`src/kick.tsx`)
+- **Structure**: Single-command extension with one main view (`src/manage-running-apps.tsx`)
 - **Core Features**: Lists GUI apps via AppleScript, supports multi-selection and batch quitting
 - **Dependencies**: @raycast/api, @raycast/utils, React hooks
 
