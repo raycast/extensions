@@ -15,7 +15,7 @@ export const confirmation: Tool.Confirmation<InputVmGuestTasks> = async (input) 
   /* Get VMs Info */
   const vmsInfo = await Promise.all(
     input.tasks.map(async (task): Promise<OutputVmInfo> => {
-      const info = await GetVmInfo(servers!, task.vm).catch((e) => {
+      const info = await GetVmInfo(servers, task.vm).catch((e) => {
         console.error(e);
         return task.vm;
       });
