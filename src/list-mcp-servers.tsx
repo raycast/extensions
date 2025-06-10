@@ -4,7 +4,6 @@ import {
   Action,
   Icon,
   List,
-  Color,
   showToast,
   Toast,
   confirmAlert,
@@ -26,6 +25,8 @@ import {
   isDefaultProtectedServer,
 } from "./utils/protectedServers";
 import { getTransportType } from "./utils/transportUtils";
+import { getTransportIcon } from "./utils/transportDisplay";
+import { buildStatusParts } from "./utils/statusHelpers";
 
 type EditorFilter = "all" | EditorType;
 
@@ -429,67 +430,11 @@ function ServerListItem({
 
   const isLocked = isProtected && !isUnlocked;
 
-  const getTransportIcon = (transport: string) => {
-    switch (transport) {
-      case "stdio":
-        return Icon.Terminal;
-      case "sse":
-      case "/sse":
-        return Icon.Globe;
-      case "http":
-        return Icon.Network;
-      default:
-        return Icon.Gear;
-    }
-  };
-
-  const getStatusDisplay = () => {
-    const statusParts = [];
-
-    if (server.editor === "cursor") {
-      statusParts.push({
-        text: "Enabled",
-        icon: Icon.CheckCircle,
-        color: Color.Green,
-        tooltip: "Server state is managed through Cursor's MCP settings",
-      });
-    } else if (server.config.disabled === true) {
-      statusParts.push({
-        text: "Disabled",
-        icon: Icon.XMarkCircle,
-        color: Color.Red,
-        tooltip: "Server is disabled",
-      });
-    } else if (server.config.disabled === false) {
-      statusParts.push({
-        text: "Enabled",
-        icon: Icon.CheckCircle,
-        color: Color.Green,
-        tooltip: "Server is enabled",
-      });
-    } else {
-      statusParts.push({
-        text: "Enabled",
-        icon: Icon.CheckCircle,
-        color: Color.Green,
-        tooltip: "Server status unknown",
-      });
-    }
-
-    if (isProtected && isLocked) {
-      statusParts.push({
-        text: "Protected",
-        icon: Icon.Lock,
-        color: Color.SecondaryText,
-        tooltip:
-          "This server is protected from editing. Click unlock to modify.",
-      });
-    }
-
-    return statusParts;
-  };
-
-  const statusDisplays = getStatusDisplay();
+  const statusDisplays = buildStatusParts({
+    ...server,
+    isProtected,
+    isUnlocked,
+  });
   const primaryStatus = statusDisplays[0];
 
   return (

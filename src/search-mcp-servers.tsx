@@ -27,6 +27,8 @@ import {
   isDefaultProtectedServer,
 } from "./utils/protectedServers";
 import { getTransportType } from "./utils/transportUtils";
+import { getTransportIcon } from "./utils/transportDisplay";
+import { buildStatusParts } from "./utils/statusHelpers";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -484,69 +486,11 @@ function SearchResultItem({
   }, [server.config.name, server.editor, protectionRefreshKey]);
 
   const { isProtected, isUnlocked } = protectionState;
-  const isLocked = isProtected && !isUnlocked;
-
-  const getTransportIcon = (transport: string) => {
-    switch (transport) {
-      case "stdio":
-        return Icon.Terminal;
-      case "sse":
-      case "/sse":
-        return Icon.Globe;
-      case "http":
-        return Icon.Network;
-      default:
-        return Icon.Gear;
-    }
-  };
-
-  const getStatusDisplay = () => {
-    const statusParts = [];
-
-    if (server.editor === "cursor") {
-      statusParts.push({
-        text: "Enabled",
-        icon: Icon.CheckCircle,
-        color: Color.Green,
-        tooltip: "Server state is managed through Cursor's MCP settings",
-      });
-    } else if (server.config.disabled === true) {
-      statusParts.push({
-        text: "Disabled",
-        icon: Icon.XMarkCircle,
-        color: Color.Red,
-        tooltip: "Server is disabled",
-      });
-    } else if (server.config.disabled === false) {
-      statusParts.push({
-        text: "Enabled",
-        icon: Icon.CheckCircle,
-        color: Color.Green,
-        tooltip: "Server is enabled",
-      });
-    } else {
-      statusParts.push({
-        text: "Enabled",
-        icon: Icon.CheckCircle,
-        color: Color.Green,
-        tooltip: "Server status unknown",
-      });
-    }
-
-    if (isProtected && isLocked) {
-      statusParts.push({
-        text: "Protected",
-        icon: Icon.Lock,
-        color: Color.SecondaryText,
-        tooltip:
-          "This server is protected from editing. Click unlock to modify.",
-      });
-    }
-
-    return statusParts;
-  };
-
-  const statusDisplays = getStatusDisplay();
+  const statusDisplays = buildStatusParts({
+    ...server,
+    isProtected,
+    isUnlocked,
+  });
   const primaryStatus = statusDisplays[0];
 
   return (
@@ -606,37 +550,41 @@ function SearchResultItem({
               shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
             <Action
-              title={isLocked ? "Unlock Server" : "Lock Server"}
-              icon={isLocked ? Icon.LockUnlocked : Icon.Lock}
+              title={
+                isProtected && !isUnlocked ? "Unlock Server" : "Lock Server"
+              }
+              icon={isProtected && !isUnlocked ? Icon.LockUnlocked : Icon.Lock}
               onAction={onToggleLock}
               shortcut={{ modifiers: ["cmd"], key: "u" }}
             />
-            {!isLocked && (
-              <Action.Push
-                title="Edit Server"
-                icon={Icon.Pencil}
-                target={
-                  <EditServerForm
-                    editorType={server.editor}
-                    serverName={server.config.name}
-                    configType={
-                      server.source as "global" | "workspace" | "user"
-                    }
-                    onComplete={onRefresh}
-                  />
-                }
-              />
-            )}
-            {!isLocked && server.editor !== "cursor" && (
-              <Action
-                title={
-                  server.config.disabled ? "Enable Server" : "Disable Server"
-                }
-                icon={server.config.disabled ? Icon.Play : Icon.Pause}
-                onAction={onToggle}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
-              />
-            )}
+            {!isProtected ||
+              (isUnlocked && (
+                <Action.Push
+                  title="Edit Server"
+                  icon={Icon.Pencil}
+                  target={
+                    <EditServerForm
+                      editorType={server.editor}
+                      serverName={server.config.name}
+                      configType={
+                        server.source as "global" | "workspace" | "user"
+                      }
+                      onComplete={onRefresh}
+                    />
+                  }
+                />
+              ))}
+            {!isProtected ||
+              (isUnlocked && server.editor !== "cursor" && (
+                <Action
+                  title={
+                    server.config.disabled ? "Enable Server" : "Disable Server"
+                  }
+                  icon={server.config.disabled ? Icon.Play : Icon.Pause}
+                  onAction={onToggle}
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
+                />
+              ))}
             <Action
               title="Test Connection"
               icon={Icon.Network}
@@ -714,15 +662,16 @@ function SearchResultItem({
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            {!isLocked && (
-              <Action
-                title="Delete Server"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                onAction={onDelete}
-                shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-              />
-            )}
+            {!isProtected ||
+              (isUnlocked && (
+                <Action
+                  title="Delete Server"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={onDelete}
+                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                />
+              ))}
           </ActionPanel.Section>
         </ActionPanel>
       }
