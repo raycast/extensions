@@ -1,8 +1,6 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
-
-## [Unreleased] - {PR_MERGE_DATE}
+## [Update] - {PR_MERGE_DATE}
 
 ### Added
 - Individual file selection with removable tag interface for processing specific files from Finder
