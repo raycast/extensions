@@ -1,6 +1,6 @@
 # Docker Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-06-10
 
 - Added action to Stop and Remove Container if it is running.
 
