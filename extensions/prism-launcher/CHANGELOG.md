@@ -1,6 +1,6 @@
 # Prism Launcher Changelog
 
-## [New Additions] - {PR_MERGE_DATE}
+## [New Additions] - 2025-06-10
 
 - Extend readme with new features
 - Change extension-icon to match the new Launcher icon
