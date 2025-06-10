@@ -1,5 +1,15 @@
 # Cloudflare Changelog
 
+## [DNS Record Enhancements] - 2025-06-03
+
+- Add DNS Records:
+    - A
+    - AAAA
+    - TXT
+- Delete any DNS Record
+- Improve error handling function so it shows the proper error message
+- Modernize extension to use latest Raycast config
+
 ## [Cache Enhancements] - 2024-12-06
 
 - `Action` to `openExtensionPreferences` on invalid token error

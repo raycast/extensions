@@ -3,9 +3,17 @@ import { DockerState } from './docker';
 import { containerName, formatContainerDetailMarkdown } from './docker/container';
 import { formatContainerError } from './docker/error';
 import { withToast } from './ui/toast';
+
 export default function ContainerDetail({ docker, containerId }: { docker: DockerState; containerId: string }) {
-  const { isLoading, containerInfo, startContainer, restartContainer, stopContainer, removeContainer } =
-    docker.useContainerInfo(containerId);
+  const {
+    isLoading,
+    containerInfo,
+    startContainer,
+    restartContainer,
+    stopContainer,
+    removeContainer,
+    stopAndRemoveContainer,
+  } = docker.useContainerInfo(containerId);
   const { pop } = useNavigation();
 
   return (
@@ -88,7 +96,7 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
             />
           )}
 
-          {containerInfo !== undefined && (
+          {containerInfo?.State.Running === false && (
             <Action
               title="Remove Container"
               icon={Icon.Trash}
@@ -100,6 +108,23 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
                   pop();
                 },
                 onSuccess: () => `Container ${containerName(containerInfo)} removed`,
+                onFailure: (error) => formatContainerError(error, containerInfo),
+              })}
+            />
+          )}
+
+          {containerInfo?.State.Running === true && (
+            <Action
+              title="Stop and Remove Container"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              onAction={withToast({
+                action: async () => {
+                  await stopAndRemoveContainer(containerInfo);
+                  pop();
+                },
+                onSuccess: () => `Container ${containerName(containerInfo)} stopped and removed`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
             />

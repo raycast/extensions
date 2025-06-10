@@ -1,5 +1,11 @@
 # Brand Icons Changelog
 
+## [Routine Maintenance] - 2025-06-04
+
+- Use local vendor instead of simple-icons/sdk
+- Add compatibility with Simple Icons v15
+- Bump all dependencies to the latest
+
 ## [Fixes] - 2025-02-28
 
 - Fix a long prompt issue

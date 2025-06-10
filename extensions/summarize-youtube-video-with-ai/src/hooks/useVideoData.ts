@@ -17,7 +17,7 @@ export function useVideoData(videoURL: string | null | undefined) {
         showToast({
           style: Toast.Style.Failure,
           title: ALERT.title,
-          message: "Error fetching video data: " + error.message,
+          message: `Error fetching video data: ${error.message}`,
         });
       });
     getVideoTranscript(videoURL)
@@ -26,7 +26,7 @@ export function useVideoData(videoURL: string | null | undefined) {
         showToast({
           style: Toast.Style.Failure,
           title: ALERT.title,
-          message: "Error fetching video transcript: " + error.message,
+          message: `Error fetching video transcript: ${error.message}`,
         });
       });
   }, [videoURL]);

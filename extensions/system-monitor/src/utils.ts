@@ -61,13 +61,20 @@ export const openActivityMonitorAppleScript = (radioButtonNumber?: number | null
   return `
   tell application "Activity Monitor"
     activate
-    tell application "System Events"
-      tell process "Activity Monitor"
-        tell window 1
-          tell group 1 of toolbar 1
-            tell radio group 1
-              click radio button ${radioButtonNumber}
-            end tell
+  end tell
+
+  tell application "System Events"
+    repeat until exists (window 1 of process "Activity Monitor")
+      delay 0.1
+    end repeat
+
+    set frontmost of process "Activity Monitor" to true
+
+    tell process "Activity Monitor"
+      tell window 1
+        tell group 1 of toolbar 1
+          tell radio group 1
+            click radio button ${radioButtonNumber}
           end tell
         end tell
       end tell

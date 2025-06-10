@@ -1,6 +1,7 @@
 import { Detail, List, Icon, Action, ActionPanel } from "@raycast/api";
 import getTransactions from "../utils/getTransactions";
 import sportInfo from "../utils/getSportInfo";
+import TeamDetail from "../views/teamDetail";
 
 interface DayItems {
   title: string;
@@ -42,9 +43,10 @@ export default function DisplayTransactions() {
         accessories={[{ icon: Icon.Switch }]}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser
-              title={`View ${transaction?.team?.displayName ?? "Unknown"} Details on ESPN"`}
-              url={`${transaction?.team.links[0]?.href ?? `https://www.espn.com/${currentLeague}`}`}
+            <Action.Push
+              title={`View ${transaction?.team?.displayName ?? "Team"} Details`}
+              icon={Icon.List}
+              target={<TeamDetail teamId={transaction?.team?.id ?? ""} />}
             />
             <Action
               title="Refresh"
