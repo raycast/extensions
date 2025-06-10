@@ -175,6 +175,28 @@ export type ActorAvatarUrlArgs = {
   size?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
+/** The connection type for Actor. */
+export type ActorConnection = {
+  __typename?: "ActorConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<ActorEdge>>>;
+  /** A list of nodes. */
+  nodes?: Maybe<Array<Maybe<Actor>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"]["output"];
+};
+
+/** An edge in a connection. */
+export type ActorEdge = {
+  __typename?: "ActorEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"]["output"];
+  /** The item at the end of the edge. */
+  node?: Maybe<Actor>;
+};
+
 /** Location information for an actor */
 export type ActorLocation = {
   __typename?: "ActorLocation";
@@ -550,7 +572,7 @@ export type AddPullRequestReviewThreadInput = {
   /** The line of the blob to which the thread refers, required for line-level threads. The end of the line range for multi-line comments. */
   line?: InputMaybe<Scalars["Int"]["input"]>;
   /** Path to the file being commented on. */
-  path: Scalars["String"]["input"];
+  path?: InputMaybe<Scalars["String"]["input"]>;
   /** The node ID of the pull request reviewing */
   pullRequestId?: InputMaybe<Scalars["ID"]["input"]>;
   /** The Node ID of the review to modify. */
@@ -757,30 +779,6 @@ export type AnnouncementBanner = {
   message?: Maybe<Scalars["String"]["output"]>;
 };
 
-/** Represents an announcement banner. */
-export type AnnouncementBannerI = {
-  /**
-   * The text of the announcement
-   * @deprecated The individual `announcementX` fields do not follow our standard GraphQL patterns. Use the `announcementBanner` object instead. Removal on 2025-04-01 UTC.
-   */
-  announcement?: Maybe<Scalars["String"]["output"]>;
-  /**
-   * The date the announcement was created
-   * @deprecated The individual `announcementX` fields do not follow our standard GraphQL patterns. Use the `announcementBanner` object instead. Removal on 2025-04-01 UTC.
-   */
-  announcementCreatedAt?: Maybe<Scalars["DateTime"]["output"]>;
-  /**
-   * The expiration date of the announcement, if any
-   * @deprecated The individual `announcementX` fields do not follow our standard GraphQL patterns. Use the `announcementBanner` object instead. Removal on 2025-04-01 UTC.
-   */
-  announcementExpiresAt?: Maybe<Scalars["DateTime"]["output"]>;
-  /**
-   * Whether the announcement can be dismissed by the user
-   * @deprecated The individual `announcementX` fields do not follow our standard GraphQL patterns. Use the `announcementBanner` object instead. Removal on 2025-04-01 UTC.
-   */
-  announcementUserDismissible?: Maybe<Scalars["Boolean"]["output"]>;
-};
-
 /** A GitHub App. */
 export type App = Node & {
   __typename?: "App";
@@ -900,8 +898,20 @@ export type ArchiveRepositoryPayload = {
 
 /** An object that can have users assigned to it. */
 export type Assignable = {
+  /** A list of actors assigned to this object. */
+  assignedActors: AssigneeConnection;
   /** A list of Users assigned to this object. */
   assignees: UserConnection;
+  /** A list of suggested actors to assign to this object */
+  suggestedActors: AssigneeConnection;
+};
+
+/** An object that can have users assigned to it. */
+export type AssignableAssignedActorsArgs = {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
 /** An object that can have users assigned to it. */
@@ -910,6 +920,15 @@ export type AssignableAssigneesArgs = {
   before?: InputMaybe<Scalars["String"]["input"]>;
   first?: InputMaybe<Scalars["Int"]["input"]>;
   last?: InputMaybe<Scalars["Int"]["input"]>;
+};
+
+/** An object that can have users assigned to it. */
+export type AssignableSuggestedActorsArgs = {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
+  query?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 /** Represents an 'assigned' event on any assignable object. */
@@ -935,33 +954,94 @@ export type AssignedEvent = Node & {
 /** Types that can be assigned to issues. */
 export type Assignee = Bot | Mannequin | Organization | User;
 
+/** The connection type for Assignee. */
+export type AssigneeConnection = {
+  __typename?: "AssigneeConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<AssigneeEdge>>>;
+  /** A list of nodes. */
+  nodes?: Maybe<Array<Maybe<Assignee>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"]["output"];
+};
+
+/** An edge in a connection. */
+export type AssigneeEdge = {
+  __typename?: "AssigneeEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"]["output"];
+  /** The item at the end of the edge. */
+  node?: Maybe<Assignee>;
+};
+
 /** An entry in the audit log. */
 export type AuditEntry = {
-  /** The action name */
+  /**
+   * The action name
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   action: Scalars["String"]["output"];
-  /** The user who initiated the action */
+  /**
+   * The user who initiated the action
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   actor?: Maybe<AuditEntryActor>;
-  /** The IP address of the actor */
+  /**
+   * The IP address of the actor
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   actorIp?: Maybe<Scalars["String"]["output"]>;
-  /** A readable representation of the actor's location */
+  /**
+   * A readable representation of the actor's location
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   actorLocation?: Maybe<ActorLocation>;
-  /** The username of the user who initiated the action */
+  /**
+   * The username of the user who initiated the action
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   actorLogin?: Maybe<Scalars["String"]["output"]>;
-  /** The HTTP path for the actor. */
+  /**
+   * The HTTP path for the actor.
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-  /** The HTTP URL for the actor. */
+  /**
+   * The HTTP URL for the actor.
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   actorUrl?: Maybe<Scalars["URI"]["output"]>;
-  /** The time the action was initiated */
+  /**
+   * The time the action was initiated
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   createdAt: Scalars["PreciseDateTime"]["output"];
-  /** The corresponding operation type for the action */
+  /**
+   * The corresponding operation type for the action
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   operationType?: Maybe<OperationType>;
-  /** The user affected by the action */
+  /**
+   * The user affected by the action
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   user?: Maybe<User>;
-  /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+  /**
+   * For actions involving two users, the actor is the initiator and the user is the affected user.
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   userLogin?: Maybe<Scalars["String"]["output"]>;
-  /** The HTTP path for the user. */
+  /**
+   * The HTTP path for the user.
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-  /** The HTTP URL for the user. */
+  /**
+   * The HTTP URL for the user.
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   userUrl?: Maybe<Scalars["URI"]["output"]>;
 };
 
@@ -1225,6 +1305,9 @@ export type Bot = Actor &
 export type BotAvatarUrlArgs = {
   size?: InputMaybe<Scalars["Int"]["input"]>;
 };
+
+/** Used when either Bot or User are accepted. */
+export type BotOrUser = Bot | User;
 
 /** Types which can be actors for `BranchActorAllowance` objects. */
 export type BranchActorAllowanceActor = App | Team | User;
@@ -3851,7 +3934,7 @@ export type CreateIpAllowListEntryPayload = {
 
 /** Autogenerated input type of CreateIssue */
 export type CreateIssueInput = {
-  /** The Node ID for the user assignee for this issue. */
+  /** The Node ID of assignees for this issue. */
   assigneeIds?: InputMaybe<Array<Scalars["ID"]["input"]>>;
   /** The body for the issue description. */
   body?: InputMaybe<Scalars["String"]["input"]>;
@@ -3894,15 +3977,6 @@ export type CreateIssueTypeInput = {
   description?: InputMaybe<Scalars["String"]["input"]>;
   /** Whether or not the issue type is enabled on the org level */
   isEnabled: Scalars["Boolean"]["input"];
-  /**
-   * Whether or not the issue type is restricted to issues in private repositories
-   *
-   * **Upcoming Change on 2025-04-01 UTC**
-   * **Description:** `isPrivate` will be removed.
-   * **Reason:** Private issue types are being deprecated and can no longer be created.
-   *
-   */
-  isPrivate?: InputMaybe<Scalars["Boolean"]["input"]>;
   /** Name of the new issue type */
   name: Scalars["String"]["input"];
   /** The ID for the organization on which the issue type is created */
@@ -5321,6 +5395,8 @@ export type DependencyGraphDependency = {
   packageManager?: Maybe<Scalars["String"]["output"]>;
   /** The name of the package in the canonical form used by the package manager. */
   packageName: Scalars["String"]["output"];
+  /** Public preview: The dependency package URL */
+  packageUrl?: Maybe<Scalars["URI"]["output"]>;
   /** Public preview: The relationship of the dependency. Can be direct, transitive, or unknown */
   relationship: Scalars["String"]["output"];
   /** The repository containing the package */
@@ -6514,10 +6590,10 @@ export type DraftPullRequestReviewComment = {
 export type DraftPullRequestReviewThread = {
   /** Body of the comment to leave. */
   body: Scalars["String"]["input"];
-  /** The line of the blob to which the thread refers. The end of the line range for multi-line comments. */
-  line: Scalars["Int"]["input"];
-  /** Path to the file being commented on. */
-  path: Scalars["String"]["input"];
+  /** The line of the blob to which the thread refers. The end of the line range for multi-line comments. Required if not using positioning. */
+  line?: InputMaybe<Scalars["Int"]["input"]>;
+  /** Path to the file being commented on. Required if not using positioning. */
+  path?: InputMaybe<Scalars["String"]["input"]>;
   /** The side of the diff on which the line resides. For multi-line comments, this is the side for the end of the line range. */
   side?: InputMaybe<DiffSide>;
   /** The first line of the range to which the comment refers. */
@@ -6586,80 +6662,59 @@ export type EnqueuePullRequestPayload = {
 };
 
 /** An account to manage multiple organizations with consolidated policy and billing. */
-export type Enterprise = AnnouncementBannerI &
-  Node & {
-    __typename?: "Enterprise";
-    /**
-     * The text of the announcement
-     * @deprecated The individual `announcementX` fields do not follow our standard GraphQL patterns. Use the `announcementBanner` object instead. Removal on 2025-04-01 UTC.
-     */
-    announcement?: Maybe<Scalars["String"]["output"]>;
-    /** The announcement banner set on this enterprise, if any. Only visible to members of the enterprise. */
-    announcementBanner?: Maybe<AnnouncementBanner>;
-    /**
-     * The date the announcement was created
-     * @deprecated The individual `announcementX` fields do not follow our standard GraphQL patterns. Use the `announcementBanner` object instead. Removal on 2025-04-01 UTC.
-     */
-    announcementCreatedAt?: Maybe<Scalars["DateTime"]["output"]>;
-    /**
-     * The expiration date of the announcement, if any
-     * @deprecated The individual `announcementX` fields do not follow our standard GraphQL patterns. Use the `announcementBanner` object instead. Removal on 2025-04-01 UTC.
-     */
-    announcementExpiresAt?: Maybe<Scalars["DateTime"]["output"]>;
-    /**
-     * Whether the announcement can be dismissed by the user
-     * @deprecated The individual `announcementX` fields do not follow our standard GraphQL patterns. Use the `announcementBanner` object instead. Removal on 2025-04-01 UTC.
-     */
-    announcementUserDismissible?: Maybe<Scalars["Boolean"]["output"]>;
-    /** A URL pointing to the enterprise's public avatar. */
-    avatarUrl: Scalars["URI"]["output"];
-    /** The enterprise's billing email. */
-    billingEmail?: Maybe<Scalars["String"]["output"]>;
-    /** Enterprise billing information visible to enterprise billing managers. */
-    billingInfo?: Maybe<EnterpriseBillingInfo>;
-    /** Identifies the date and time when the object was created. */
-    createdAt: Scalars["DateTime"]["output"];
-    /** Identifies the primary key from the database. */
-    databaseId?: Maybe<Scalars["Int"]["output"]>;
-    /** The description of the enterprise. */
-    description?: Maybe<Scalars["String"]["output"]>;
-    /** The description of the enterprise as HTML. */
-    descriptionHTML: Scalars["HTML"]["output"];
-    /** The Node ID of the Enterprise object */
-    id: Scalars["ID"]["output"];
-    /** The location of the enterprise. */
-    location?: Maybe<Scalars["String"]["output"]>;
-    /** A list of users who are members of this enterprise. */
-    members: EnterpriseMemberConnection;
-    /** The name of the enterprise. */
-    name: Scalars["String"]["output"];
-    /** A list of organizations that belong to this enterprise. */
-    organizations: OrganizationConnection;
-    /** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
-    ownerInfo?: Maybe<EnterpriseOwnerInfo>;
-    /** The raw content of the enterprise README. */
-    readme?: Maybe<Scalars["String"]["output"]>;
-    /** The content of the enterprise README as HTML. */
-    readmeHTML: Scalars["HTML"]["output"];
-    /** The HTTP path for this enterprise. */
-    resourcePath: Scalars["URI"]["output"];
-    /** Returns a single ruleset from the current enterprise by ID. */
-    ruleset?: Maybe<RepositoryRuleset>;
-    /** A list of rulesets for this enterprise. */
-    rulesets?: Maybe<RepositoryRulesetConnection>;
-    /** The URL-friendly identifier for the enterprise. */
-    slug: Scalars["String"]["output"];
-    /** Identifies the date and time when the object was last updated. */
-    updatedAt: Scalars["DateTime"]["output"];
-    /** The HTTP URL for this enterprise. */
-    url: Scalars["URI"]["output"];
-    /** A list of repositories that belong to users. Only available for enterprises with Enterprise Managed Users. */
-    userNamespaceRepositories: UserNamespaceRepositoryConnection;
-    /** Is the current viewer an admin of this enterprise? */
-    viewerIsAdmin: Scalars["Boolean"]["output"];
-    /** The URL of the enterprise website. */
-    websiteUrl?: Maybe<Scalars["URI"]["output"]>;
-  };
+export type Enterprise = Node & {
+  __typename?: "Enterprise";
+  /** The announcement banner set on this enterprise, if any. Only visible to members of the enterprise. */
+  announcementBanner?: Maybe<AnnouncementBanner>;
+  /** A URL pointing to the enterprise's public avatar. */
+  avatarUrl: Scalars["URI"]["output"];
+  /** The enterprise's billing email. */
+  billingEmail?: Maybe<Scalars["String"]["output"]>;
+  /** Enterprise billing information visible to enterprise billing managers. */
+  billingInfo?: Maybe<EnterpriseBillingInfo>;
+  /** Identifies the date and time when the object was created. */
+  createdAt: Scalars["DateTime"]["output"];
+  /** Identifies the primary key from the database. */
+  databaseId?: Maybe<Scalars["Int"]["output"]>;
+  /** The description of the enterprise. */
+  description?: Maybe<Scalars["String"]["output"]>;
+  /** The description of the enterprise as HTML. */
+  descriptionHTML: Scalars["HTML"]["output"];
+  /** The Node ID of the Enterprise object */
+  id: Scalars["ID"]["output"];
+  /** The location of the enterprise. */
+  location?: Maybe<Scalars["String"]["output"]>;
+  /** A list of users who are members of this enterprise. */
+  members: EnterpriseMemberConnection;
+  /** The name of the enterprise. */
+  name: Scalars["String"]["output"];
+  /** A list of organizations that belong to this enterprise. */
+  organizations: OrganizationConnection;
+  /** Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope. */
+  ownerInfo?: Maybe<EnterpriseOwnerInfo>;
+  /** The raw content of the enterprise README. */
+  readme?: Maybe<Scalars["String"]["output"]>;
+  /** The content of the enterprise README as HTML. */
+  readmeHTML: Scalars["HTML"]["output"];
+  /** The HTTP path for this enterprise. */
+  resourcePath: Scalars["URI"]["output"];
+  /** Returns a single ruleset from the current enterprise by ID. */
+  ruleset?: Maybe<RepositoryRuleset>;
+  /** A list of rulesets for this enterprise. */
+  rulesets?: Maybe<RepositoryRulesetConnection>;
+  /** The URL-friendly identifier for the enterprise. */
+  slug: Scalars["String"]["output"];
+  /** Identifies the date and time when the object was last updated. */
+  updatedAt: Scalars["DateTime"]["output"];
+  /** The HTTP URL for this enterprise. */
+  url: Scalars["URI"]["output"];
+  /** A list of repositories that belong to users. Only available for enterprises with Enterprise Managed Users. */
+  userNamespaceRepositories: UserNamespaceRepositoryConnection;
+  /** Is the current viewer an admin of this enterprise? */
+  viewerIsAdmin: Scalars["Boolean"]["output"];
+  /** The URL of the enterprise website. */
+  websiteUrl?: Maybe<Scalars["URI"]["output"]>;
+};
 
 /** An account to manage multiple organizations with consolidated policy and billing. */
 export type EnterpriseAvatarUrlArgs = {
@@ -9115,6 +9170,8 @@ export type Issue = Assignable &
     __typename?: "Issue";
     /** Reason that the conversation was locked. */
     activeLockReason?: Maybe<LockReason>;
+    /** A list of actors assigned to this object. */
+    assignedActors: AssigneeConnection;
     /** A list of Users assigned to this object. */
     assignees: UserConnection;
     /** The actor who authored the comment. */
@@ -9206,6 +9263,8 @@ export type Issue = Assignable &
     subIssues: IssueConnection;
     /** Summary of the state of an issue's sub-issues */
     subIssuesSummary: SubIssuesSummary;
+    /** A list of suggested actors to assign to this object */
+    suggestedActors: AssigneeConnection;
     /**
      * A list of events, comments, commits, etc. associated with the issue.
      * @deprecated `timeline` will be removed Use Issue.timelineItems instead. Removal on 2020-10-01 UTC.
@@ -9254,6 +9313,14 @@ export type Issue = Assignable &
     /** Identifies the viewer's thread subscription status. */
     viewerThreadSubscriptionStatus?: Maybe<ThreadSubscriptionState>;
   };
+
+/** An Issue is a place to discuss ideas, enhancements, tasks, and bugs for a project. */
+export type IssueAssignedActorsArgs = {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
+};
 
 /** An Issue is a place to discuss ideas, enhancements, tasks, and bugs for a project. */
 export type IssueAssigneesArgs = {
@@ -9368,6 +9435,15 @@ export type IssueSubIssuesArgs = {
   before?: InputMaybe<Scalars["String"]["input"]>;
   first?: InputMaybe<Scalars["Int"]["input"]>;
   last?: InputMaybe<Scalars["Int"]["input"]>;
+};
+
+/** An Issue is a place to discuss ideas, enhancements, tasks, and bugs for a project. */
+export type IssueSuggestedActorsArgs = {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
+  query?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 /** An Issue is a place to discuss ideas, enhancements, tasks, and bugs for a project. */
@@ -9619,6 +9695,8 @@ export type IssueFilters = {
   since?: InputMaybe<Scalars["DateTime"]["input"]>;
   /** List issues filtered by the list of states given. */
   states?: InputMaybe<Array<IssueState>>;
+  /** List issues filtered by the type given, only supported by searches on repositories. */
+  type?: InputMaybe<Scalars["String"]["input"]>;
   /** List issues subscribed to by viewer. */
   viewerSubscribed?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
@@ -10827,21 +10905,45 @@ export type MembersCanDeleteReposClearAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "MembersCanDeleteReposClearAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The HTTP path for this enterprise. */
     enterpriseResourcePath?: Maybe<Scalars["URI"]["output"]>;
@@ -10851,23 +10953,50 @@ export type MembersCanDeleteReposClearAuditEntry = AuditEntry &
     enterpriseUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The Node ID of the MembersCanDeleteReposClearAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -10877,21 +11006,45 @@ export type MembersCanDeleteReposDisableAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "MembersCanDeleteReposDisableAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The HTTP path for this enterprise. */
     enterpriseResourcePath?: Maybe<Scalars["URI"]["output"]>;
@@ -10901,23 +11054,50 @@ export type MembersCanDeleteReposDisableAuditEntry = AuditEntry &
     enterpriseUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The Node ID of the MembersCanDeleteReposDisableAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -10927,21 +11107,45 @@ export type MembersCanDeleteReposEnableAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "MembersCanDeleteReposEnableAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The HTTP path for this enterprise. */
     enterpriseResourcePath?: Maybe<Scalars["URI"]["output"]>;
@@ -10951,23 +11155,50 @@ export type MembersCanDeleteReposEnableAuditEntry = AuditEntry &
     enterpriseUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The Node ID of the MembersCanDeleteReposEnableAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -11363,6 +11594,8 @@ export type Milestone = Closable &
     closed: Scalars["Boolean"]["output"];
     /** Identifies the date and time when the object was closed. */
     closedAt?: Maybe<Scalars["DateTime"]["output"]>;
+    /** Identifies the number of closed issues associated with the milestone. */
+    closedIssueCount: Scalars["Int"]["output"];
     /** Identifies the date and time when the object was created. */
     createdAt: Scalars["DateTime"]["output"];
     /** Identifies the actor who created the milestone. */
@@ -11379,6 +11612,8 @@ export type Milestone = Closable &
     issues: IssueConnection;
     /** Identifies the number of the milestone. */
     number: Scalars["Int"]["output"];
+    /** Identifies the number of open issues associated with the milestone. */
+    openIssueCount: Scalars["Int"]["output"];
     /** Identifies the percentage complete for the milestone */
     progressPercentage: Scalars["Float"]["output"];
     /** A list of pull requests associated with the milestone. */
@@ -11988,6 +12223,8 @@ export type Mutation = {
   reopenPullRequest?: Maybe<ReopenPullRequestPayload>;
   /** Reorder a pinned repository environment */
   reorderEnvironment?: Maybe<ReorderEnvironmentPayload>;
+  /** Replaces all actors for assignable object. */
+  replaceActorsForAssignable?: Maybe<ReplaceActorsForAssignablePayload>;
   /** Reprioritizes a sub-issue to a different position in the parent list. */
   reprioritizeSubIssue?: Maybe<ReprioritizeSubIssuePayload>;
   /** Set review requests on a pull request. */
@@ -12984,6 +13221,11 @@ export type MutationReorderEnvironmentArgs = {
 };
 
 /** The root query for implementing GraphQL mutations. */
+export type MutationReplaceActorsForAssignableArgs = {
+  input: ReplaceActorsForAssignableInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
 export type MutationReprioritizeSubIssueArgs = {
   input: ReprioritizeSubIssueInput;
 };
@@ -13535,25 +13777,55 @@ export type OauthApplicationCreateAuditEntry = AuditEntry &
   OauthApplicationAuditEntryData &
   OrganizationAuditEntryData & {
     __typename?: "OauthApplicationCreateAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The application URL of the OAuth application. */
+    /**
+     * The application URL of the OAuth application.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     applicationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The callback URL of the OAuth application. */
+    /**
+     * The callback URL of the OAuth application.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     callbackUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OauthApplicationCreateAuditEntry object */
     id: Scalars["ID"]["output"];
@@ -13563,27 +13835,60 @@ export type OauthApplicationCreateAuditEntry = AuditEntry &
     oauthApplicationResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the OAuth application */
     oauthApplicationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The rate limit of the OAuth application. */
+    /**
+     * The rate limit of the OAuth application.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     rateLimit?: Maybe<Scalars["Int"]["output"]>;
-    /** The state of the OAuth application. */
+    /**
+     * The state of the OAuth application.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     state?: Maybe<OauthApplicationCreateAuditEntryState>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -13628,43 +13933,97 @@ export type OrgAddBillingManagerAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgAddBillingManagerAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgAddBillingManagerAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The email address used to invite a billing manager for the organization. */
+    /**
+     * The email address used to invite a billing manager for the organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     invitationEmail?: Maybe<Scalars["String"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -13673,43 +14032,97 @@ export type OrgAddMemberAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgAddMemberAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgAddMemberAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The permission level of the member added to the organization. */
+    /**
+     * The permission level of the member added to the organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     permission?: Maybe<OrgAddMemberAuditEntryPermission>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -13726,49 +14139,112 @@ export type OrgBlockUserAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgBlockUserAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The blocked user. */
+    /**
+     * The blocked user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     blockedUser?: Maybe<User>;
-    /** The username of the blocked user. */
+    /**
+     * The username of the blocked user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     blockedUserName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the blocked user. */
+    /**
+     * The HTTP path for the blocked user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     blockedUserResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the blocked user. */
+    /**
+     * The HTTP URL for the blocked user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     blockedUserUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgBlockUserAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -13777,41 +14253,92 @@ export type OrgConfigDisableCollaboratorsOnlyAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgConfigDisableCollaboratorsOnlyAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgConfigDisableCollaboratorsOnlyAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -13820,41 +14347,92 @@ export type OrgConfigEnableCollaboratorsOnlyAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgConfigEnableCollaboratorsOnlyAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgConfigEnableCollaboratorsOnlyAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -13863,43 +14441,97 @@ export type OrgCreateAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgCreateAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The billing plan for the Organization. */
+    /**
+     * The billing plan for the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     billingPlan?: Maybe<OrgCreateAuditEntryBillingPlan>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgCreateAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -13922,41 +14554,92 @@ export type OrgDisableOauthAppRestrictionsAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgDisableOauthAppRestrictionsAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgDisableOauthAppRestrictionsAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -13965,49 +14648,112 @@ export type OrgDisableSamlAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgDisableSamlAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
-    /** The SAML provider's digest algorithm URL. */
+    /**
+     * The SAML provider's digest algorithm URL.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     digestMethodUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The Node ID of the OrgDisableSamlAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The SAML provider's issuer URL. */
+    /**
+     * The SAML provider's issuer URL.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     issuerUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The SAML provider's signature algorithm URL. */
+    /**
+     * The SAML provider's signature algorithm URL.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     signatureMethodUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The SAML provider's single sign-on URL. */
+    /**
+     * The SAML provider's single sign-on URL.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     singleSignOnUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14016,41 +14762,92 @@ export type OrgDisableTwoFactorRequirementAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgDisableTwoFactorRequirementAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgDisableTwoFactorRequirementAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14059,41 +14856,92 @@ export type OrgEnableOauthAppRestrictionsAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgEnableOauthAppRestrictionsAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgEnableOauthAppRestrictionsAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14102,49 +14950,112 @@ export type OrgEnableSamlAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgEnableSamlAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
-    /** The SAML provider's digest algorithm URL. */
+    /**
+     * The SAML provider's digest algorithm URL.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     digestMethodUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The Node ID of the OrgEnableSamlAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The SAML provider's issuer URL. */
+    /**
+     * The SAML provider's issuer URL.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     issuerUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The SAML provider's signature algorithm URL. */
+    /**
+     * The SAML provider's signature algorithm URL.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     signatureMethodUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The SAML provider's single sign-on URL. */
+    /**
+     * The SAML provider's single sign-on URL.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     singleSignOnUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14153,41 +15064,92 @@ export type OrgEnableTwoFactorRequirementAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgEnableTwoFactorRequirementAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgEnableTwoFactorRequirementAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14210,45 +15172,102 @@ export type OrgInviteMemberAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgInviteMemberAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
-    /** The email address of the organization invitation. */
+    /**
+     * The email address of the organization invitation.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     email?: Maybe<Scalars["String"]["output"]>;
     /** The Node ID of the OrgInviteMemberAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The organization invitation. */
+    /**
+     * The organization invitation.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationInvitation?: Maybe<OrganizationInvitation>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14258,21 +15277,45 @@ export type OrgInviteToBusinessAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgInviteToBusinessAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The HTTP path for this enterprise. */
     enterpriseResourcePath?: Maybe<Scalars["URI"]["output"]>;
@@ -14282,23 +15325,50 @@ export type OrgInviteToBusinessAuditEntry = AuditEntry &
     enterpriseUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The Node ID of the OrgInviteToBusinessAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14308,21 +15378,45 @@ export type OrgOauthAppAccessApprovedAuditEntry = AuditEntry &
   OauthApplicationAuditEntryData &
   OrganizationAuditEntryData & {
     __typename?: "OrgOauthAppAccessApprovedAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgOauthAppAccessApprovedAuditEntry object */
     id: Scalars["ID"]["output"];
@@ -14332,23 +15426,50 @@ export type OrgOauthAppAccessApprovedAuditEntry = AuditEntry &
     oauthApplicationResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the OAuth application */
     oauthApplicationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14358,21 +15479,45 @@ export type OrgOauthAppAccessBlockedAuditEntry = AuditEntry &
   OauthApplicationAuditEntryData &
   OrganizationAuditEntryData & {
     __typename?: "OrgOauthAppAccessBlockedAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgOauthAppAccessBlockedAuditEntry object */
     id: Scalars["ID"]["output"];
@@ -14382,23 +15527,50 @@ export type OrgOauthAppAccessBlockedAuditEntry = AuditEntry &
     oauthApplicationResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the OAuth application */
     oauthApplicationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14408,21 +15580,45 @@ export type OrgOauthAppAccessDeniedAuditEntry = AuditEntry &
   OauthApplicationAuditEntryData &
   OrganizationAuditEntryData & {
     __typename?: "OrgOauthAppAccessDeniedAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgOauthAppAccessDeniedAuditEntry object */
     id: Scalars["ID"]["output"];
@@ -14432,23 +15628,50 @@ export type OrgOauthAppAccessDeniedAuditEntry = AuditEntry &
     oauthApplicationResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the OAuth application */
     oauthApplicationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14458,21 +15681,45 @@ export type OrgOauthAppAccessRequestedAuditEntry = AuditEntry &
   OauthApplicationAuditEntryData &
   OrganizationAuditEntryData & {
     __typename?: "OrgOauthAppAccessRequestedAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgOauthAppAccessRequestedAuditEntry object */
     id: Scalars["ID"]["output"];
@@ -14482,23 +15729,50 @@ export type OrgOauthAppAccessRequestedAuditEntry = AuditEntry &
     oauthApplicationResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the OAuth application */
     oauthApplicationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14508,21 +15782,45 @@ export type OrgOauthAppAccessUnblockedAuditEntry = AuditEntry &
   OauthApplicationAuditEntryData &
   OrganizationAuditEntryData & {
     __typename?: "OrgOauthAppAccessUnblockedAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgOauthAppAccessUnblockedAuditEntry object */
     id: Scalars["ID"]["output"];
@@ -14532,23 +15830,50 @@ export type OrgOauthAppAccessUnblockedAuditEntry = AuditEntry &
     oauthApplicationResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the OAuth application */
     oauthApplicationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14557,43 +15882,97 @@ export type OrgRemoveBillingManagerAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgRemoveBillingManagerAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgRemoveBillingManagerAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The reason for the billing manager being removed. */
+    /**
+     * The reason for the billing manager being removed.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     reason?: Maybe<OrgRemoveBillingManagerAuditEntryReason>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14612,45 +15991,102 @@ export type OrgRemoveMemberAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgRemoveMemberAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgRemoveMemberAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The types of membership the member has with the organization. */
+    /**
+     * The types of membership the member has with the organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     membershipTypes?: Maybe<Array<OrgRemoveMemberAuditEntryMembershipType>>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The reason for the member being removed. */
+    /**
+     * The reason for the member being removed.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     reason?: Maybe<OrgRemoveMemberAuditEntryReason>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14689,45 +16125,102 @@ export type OrgRemoveOutsideCollaboratorAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgRemoveOutsideCollaboratorAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgRemoveOutsideCollaboratorAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The types of membership the outside collaborator has with the organization. */
+    /**
+     * The types of membership the outside collaborator has with the organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     membershipTypes?: Maybe<Array<OrgRemoveOutsideCollaboratorAuditEntryMembershipType>>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The reason for the outside collaborator being removed from the Organization. */
+    /**
+     * The reason for the outside collaborator being removed from the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     reason?: Maybe<OrgRemoveOutsideCollaboratorAuditEntryReason>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14754,55 +16247,127 @@ export type OrgRestoreMemberAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgRestoreMemberAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgRestoreMemberAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The number of custom email routings for the restored member. */
+    /**
+     * The number of custom email routings for the restored member.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     restoredCustomEmailRoutingsCount?: Maybe<Scalars["Int"]["output"]>;
-    /** The number of issue assignments for the restored member. */
+    /**
+     * The number of issue assignments for the restored member.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     restoredIssueAssignmentsCount?: Maybe<Scalars["Int"]["output"]>;
-    /** Restored organization membership objects. */
+    /**
+     * Restored organization membership objects.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     restoredMemberships?: Maybe<Array<OrgRestoreMemberAuditEntryMembership>>;
-    /** The number of restored memberships. */
+    /**
+     * The number of restored memberships.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     restoredMembershipsCount?: Maybe<Scalars["Int"]["output"]>;
-    /** The number of repositories of the restored member. */
+    /**
+     * The number of repositories of the restored member.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     restoredRepositoriesCount?: Maybe<Scalars["Int"]["output"]>;
-    /** The number of starred repositories for the restored member. */
+    /**
+     * The number of starred repositories for the restored member.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     restoredRepositoryStarsCount?: Maybe<Scalars["Int"]["output"]>;
-    /** The number of watched repositories for the restored member. */
+    /**
+     * The number of watched repositories for the restored member.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     restoredRepositoryWatchesCount?: Maybe<Scalars["Int"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14815,13 +16380,25 @@ export type OrgRestoreMemberAuditEntryMembership =
 /** Metadata for an organization membership for org.restore_member actions */
 export type OrgRestoreMemberMembershipOrganizationAuditEntryData = OrganizationAuditEntryData & {
   __typename?: "OrgRestoreMemberMembershipOrganizationAuditEntryData";
-  /** The Organization associated with the Audit Entry. */
+  /**
+   * The Organization associated with the Audit Entry.
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   organization?: Maybe<Organization>;
-  /** The name of the Organization. */
+  /**
+   * The name of the Organization.
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   organizationName?: Maybe<Scalars["String"]["output"]>;
-  /** The HTTP path for the organization */
+  /**
+   * The HTTP path for the organization
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-  /** The HTTP URL for the organization */
+  /**
+   * The HTTP URL for the organization
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   organizationUrl?: Maybe<Scalars["URI"]["output"]>;
 };
 
@@ -14856,49 +16433,112 @@ export type OrgUnblockUserAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgUnblockUserAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user being unblocked by the organization. */
+    /**
+     * The user being unblocked by the organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     blockedUser?: Maybe<User>;
-    /** The username of the blocked user. */
+    /**
+     * The username of the blocked user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     blockedUserName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the blocked user. */
+    /**
+     * The HTTP path for the blocked user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     blockedUserResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the blocked user. */
+    /**
+     * The HTTP URL for the blocked user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     blockedUserUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgUnblockUserAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14907,45 +16547,102 @@ export type OrgUpdateDefaultRepositoryPermissionAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgUpdateDefaultRepositoryPermissionAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgUpdateDefaultRepositoryPermissionAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The new base repository permission level for the organization. */
+    /**
+     * The new base repository permission level for the organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     permission?: Maybe<OrgUpdateDefaultRepositoryPermissionAuditEntryPermission>;
-    /** The former base repository permission level for the organization. */
+    /**
+     * The former base repository permission level for the organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     permissionWas?: Maybe<OrgUpdateDefaultRepositoryPermissionAuditEntryPermission>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -14966,45 +16663,102 @@ export type OrgUpdateMemberAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgUpdateMemberAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgUpdateMemberAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The new member permission level for the organization. */
+    /**
+     * The new member permission level for the organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     permission?: Maybe<OrgUpdateMemberAuditEntryPermission>;
-    /** The former member permission level for the organization. */
+    /**
+     * The former member permission level for the organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     permissionWas?: Maybe<OrgUpdateMemberAuditEntryPermission>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -15021,45 +16775,102 @@ export type OrgUpdateMemberRepositoryCreationPermissionAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgUpdateMemberRepositoryCreationPermissionAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** Can members create repositories in the organization. */
+    /**
+     * Can members create repositories in the organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     canCreateRepositories?: Maybe<Scalars["Boolean"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgUpdateMemberRepositoryCreationPermissionAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The permission for visibility level of repositories for this organization. */
+    /**
+     * The permission for visibility level of repositories for this organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     visibility?: Maybe<OrgUpdateMemberRepositoryCreationPermissionAuditEntryVisibility>;
   };
 
@@ -15088,49 +16899,102 @@ export type OrgUpdateMemberRepositoryInvitationPermissionAuditEntry = AuditEntry
   Node &
   OrganizationAuditEntryData & {
     __typename?: "OrgUpdateMemberRepositoryInvitationPermissionAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** Can outside collaborators be invited to repositories in the organization. */
+    /**
+     * Can outside collaborators be invited to repositories in the organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     canInviteOutsideCollaboratorsToRepositories?: Maybe<Scalars["Boolean"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the OrgUpdateMemberRepositoryInvitationPermissionAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
 /** An account on GitHub, with one or more owners, that has repositories, members and teams. */
 export type Organization = Actor &
-  AnnouncementBannerI &
   MemberStatusable &
   Node &
   PackageOwner &
@@ -15144,33 +17008,16 @@ export type Organization = Actor &
   Sponsorable &
   UniformResourceLocatable & {
     __typename?: "Organization";
-    /**
-     * The text of the announcement
-     * @deprecated The individual `announcementX` fields do not follow our standard GraphQL patterns. Use the `announcementBanner` object instead. Removal on 2025-04-01 UTC.
-     */
-    announcement?: Maybe<Scalars["String"]["output"]>;
     /** The announcement banner set on this organization, if any. Only visible to members of the organization's enterprise. */
     announcementBanner?: Maybe<AnnouncementBanner>;
-    /**
-     * The date the announcement was created
-     * @deprecated The individual `announcementX` fields do not follow our standard GraphQL patterns. Use the `announcementBanner` object instead. Removal on 2025-04-01 UTC.
-     */
-    announcementCreatedAt?: Maybe<Scalars["DateTime"]["output"]>;
-    /**
-     * The expiration date of the announcement, if any
-     * @deprecated The individual `announcementX` fields do not follow our standard GraphQL patterns. Use the `announcementBanner` object instead. Removal on 2025-04-01 UTC.
-     */
-    announcementExpiresAt?: Maybe<Scalars["DateTime"]["output"]>;
-    /**
-     * Whether the announcement can be dismissed by the user
-     * @deprecated The individual `announcementX` fields do not follow our standard GraphQL patterns. Use the `announcementBanner` object instead. Removal on 2025-04-01 UTC.
-     */
-    announcementUserDismissible?: Maybe<Scalars["Boolean"]["output"]>;
     /** Determine if this repository owner has any items that can be pinned to their profile. */
     anyPinnableItems: Scalars["Boolean"]["output"];
     /** Identifies the date and time when the organization was archived. */
     archivedAt?: Maybe<Scalars["DateTime"]["output"]>;
-    /** Audit log entries of the organization */
+    /**
+     * Audit log entries of the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     auditLog: OrganizationAuditEntryConnection;
     /** A URL pointing to the organization's public avatar. */
     avatarUrl: Scalars["URI"]["output"];
@@ -15781,13 +17628,25 @@ export type OrganizationAuditEntryConnection = {
 
 /** Metadata for an audit entry with action org.* */
 export type OrganizationAuditEntryData = {
-  /** The Organization associated with the Audit Entry. */
+  /**
+   * The Organization associated with the Audit Entry.
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   organization?: Maybe<Organization>;
-  /** The name of the Organization. */
+  /**
+   * The name of the Organization.
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   organizationName?: Maybe<Scalars["String"]["output"]>;
-  /** The HTTP path for the organization */
+  /**
+   * The HTTP path for the organization
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-  /** The HTTP URL for the organization */
+  /**
+   * The HTTP URL for the organization
+   * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+   */
   organizationUrl?: Maybe<Scalars["URI"]["output"]>;
 };
 
@@ -16741,21 +18600,45 @@ export type PrivateRepositoryForkingDisableAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "PrivateRepositoryForkingDisableAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The HTTP path for this enterprise. */
     enterpriseResourcePath?: Maybe<Scalars["URI"]["output"]>;
@@ -16765,15 +18648,30 @@ export type PrivateRepositoryForkingDisableAuditEntry = AuditEntry &
     enterpriseUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The Node ID of the PrivateRepositoryForkingDisableAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -16783,13 +18681,25 @@ export type PrivateRepositoryForkingDisableAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -16800,21 +18710,45 @@ export type PrivateRepositoryForkingEnableAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "PrivateRepositoryForkingEnableAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The HTTP path for this enterprise. */
     enterpriseResourcePath?: Maybe<Scalars["URI"]["output"]>;
@@ -16824,15 +18758,30 @@ export type PrivateRepositoryForkingEnableAuditEntry = AuditEntry &
     enterpriseUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The Node ID of the PrivateRepositoryForkingEnableAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -16842,13 +18791,25 @@ export type PrivateRepositoryForkingEnableAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -18901,6 +20862,8 @@ export type PullRequest = Assignable &
     activeLockReason?: Maybe<LockReason>;
     /** The number of additions in this pull request. */
     additions: Scalars["Int"]["output"];
+    /** A list of actors assigned to this object. */
+    assignedActors: AssigneeConnection;
     /** A list of Users assigned to this object. */
     assignees: UserConnection;
     /** The actor who authored the comment. */
@@ -19059,6 +21022,8 @@ export type PullRequest = Assignable &
     state: PullRequestState;
     /** Check and Status rollup information for the PR's head ref. */
     statusCheckRollup?: Maybe<StatusCheckRollup>;
+    /** A list of suggested actors to assign to this object */
+    suggestedActors: AssigneeConnection;
     /** A list of reviewer suggestions based on commit history and past review comments. */
     suggestedReviewers: Array<Maybe<SuggestedReviewer>>;
     /**
@@ -19125,6 +21090,14 @@ export type PullRequest = Assignable &
     /** Identifies if the viewer is watching, not watching, or ignoring the subscribable entity. */
     viewerSubscription?: Maybe<SubscriptionState>;
   };
+
+/** A repository pull request. */
+export type PullRequestAssignedActorsArgs = {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
+};
 
 /** A repository pull request. */
 export type PullRequestAssigneesArgs = {
@@ -19276,6 +21249,15 @@ export type PullRequestReviewsArgs = {
   first?: InputMaybe<Scalars["Int"]["input"]>;
   last?: InputMaybe<Scalars["Int"]["input"]>;
   states?: InputMaybe<Array<PullRequestReviewState>>;
+};
+
+/** A repository pull request. */
+export type PullRequestSuggestedActorsArgs = {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
+  query?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 /** A repository pull request. */
@@ -19508,7 +21490,7 @@ export type PullRequestParameters = {
   __typename?: "PullRequestParameters";
   /** Array of allowed merge methods. Allowed values include `merge`, `squash`, and `rebase`. At least one option must be enabled. */
   allowedMergeMethods?: Maybe<Array<PullRequestAllowedMergeMethods>>;
-  /** This field is in beta and subject to change. Automatically request review from Copilot for new pull requests, if the author has access to Copilot code review. */
+  /** Automatically request review from Copilot for new pull requests, if the author has access to Copilot code review. */
   automaticCopilotCodeReviewEnabled: Scalars["Boolean"]["output"];
   /** New, reviewable commits pushed will dismiss previous pull request review approvals. */
   dismissStaleReviewsOnPush: Scalars["Boolean"]["output"];
@@ -19526,7 +21508,7 @@ export type PullRequestParameters = {
 export type PullRequestParametersInput = {
   /** Array of allowed merge methods. Allowed values include `merge`, `squash`, and `rebase`. At least one option must be enabled. */
   allowedMergeMethods?: InputMaybe<Array<PullRequestAllowedMergeMethods>>;
-  /** This argument is in beta and subject to change. Automatically request review from Copilot for new pull requests, if the author has access to Copilot code review. */
+  /** Automatically request review from Copilot for new pull requests, if the author has access to Copilot code review. */
   automaticCopilotCodeReviewEnabled?: InputMaybe<Scalars["Boolean"]["input"]>;
   /** New, reviewable commits pushed will dismiss previous pull request review approvals. */
   dismissStaleReviewsOnPush: Scalars["Boolean"]["input"];
@@ -21668,39 +23650,97 @@ export type ReorderEnvironmentPayload = {
   environment?: Maybe<Environment>;
 };
 
+/** Autogenerated input type of ReplaceActorsForAssignable */
+export type ReplaceActorsForAssignableInput = {
+  /** The ids of the actors to replace the existing assignees. */
+  actorIds: Array<Scalars["ID"]["input"]>;
+  /** The id of the assignable object to replace the assignees for. */
+  assignableId: Scalars["ID"]["input"];
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+/** Autogenerated return type of ReplaceActorsForAssignable. */
+export type ReplaceActorsForAssignablePayload = {
+  __typename?: "ReplaceActorsForAssignablePayload";
+  /** The item that was assigned. */
+  assignable?: Maybe<Assignable>;
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]["output"]>;
+};
+
 /** Audit log entry for a repo.access event. */
 export type RepoAccessAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoAccessAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoAccessAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -21710,15 +23750,30 @@ export type RepoAccessAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The visibility of the repository */
+    /**
+     * The visibility of the repository
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     visibility?: Maybe<RepoAccessAuditEntryVisibility>;
   };
 
@@ -21738,33 +23793,72 @@ export type RepoAddMemberAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoAddMemberAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoAddMemberAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -21774,15 +23868,30 @@ export type RepoAddMemberAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The visibility of the repository */
+    /**
+     * The visibility of the repository
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     visibility?: Maybe<RepoAddMemberAuditEntryVisibility>;
   };
 
@@ -21803,33 +23912,72 @@ export type RepoAddTopicAuditEntry = AuditEntry &
   RepositoryAuditEntryData &
   TopicAuditEntryData & {
     __typename?: "RepoAddTopicAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoAddTopicAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -21843,13 +23991,25 @@ export type RepoAddTopicAuditEntry = AuditEntry &
     topic?: Maybe<Topic>;
     /** The name of the topic added to the repository */
     topicName?: Maybe<Scalars["String"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -21859,33 +24019,72 @@ export type RepoArchivedAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoArchivedAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoArchivedAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -21895,15 +24094,30 @@ export type RepoArchivedAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The visibility of the repository */
+    /**
+     * The visibility of the repository
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     visibility?: Maybe<RepoArchivedAuditEntryVisibility>;
   };
 
@@ -21923,37 +24137,82 @@ export type RepoChangeMergeSettingAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoChangeMergeSettingAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoChangeMergeSettingAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** Whether the change was to enable (true) or disable (false) the merge type */
+    /**
+     * Whether the change was to enable (true) or disable (false) the merge type
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     isEnabled?: Maybe<Scalars["Boolean"]["output"]>;
-    /** The merge method affected by the change */
+    /**
+     * The merge method affected by the change
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     mergeType?: Maybe<RepoChangeMergeSettingAuditEntryMergeType>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -21963,13 +24222,25 @@ export type RepoChangeMergeSettingAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -21989,33 +24260,72 @@ export type RepoConfigDisableAnonymousGitAccessAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoConfigDisableAnonymousGitAccessAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoConfigDisableAnonymousGitAccessAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22025,13 +24335,25 @@ export type RepoConfigDisableAnonymousGitAccessAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -22041,33 +24363,72 @@ export type RepoConfigDisableCollaboratorsOnlyAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoConfigDisableCollaboratorsOnlyAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoConfigDisableCollaboratorsOnlyAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22077,13 +24438,25 @@ export type RepoConfigDisableCollaboratorsOnlyAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -22093,33 +24466,72 @@ export type RepoConfigDisableContributorsOnlyAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoConfigDisableContributorsOnlyAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoConfigDisableContributorsOnlyAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22129,13 +24541,25 @@ export type RepoConfigDisableContributorsOnlyAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -22145,33 +24569,72 @@ export type RepoConfigDisableSockpuppetDisallowedAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoConfigDisableSockpuppetDisallowedAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoConfigDisableSockpuppetDisallowedAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22181,13 +24644,25 @@ export type RepoConfigDisableSockpuppetDisallowedAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -22197,33 +24672,72 @@ export type RepoConfigEnableAnonymousGitAccessAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoConfigEnableAnonymousGitAccessAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoConfigEnableAnonymousGitAccessAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22233,13 +24747,25 @@ export type RepoConfigEnableAnonymousGitAccessAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -22249,33 +24775,72 @@ export type RepoConfigEnableCollaboratorsOnlyAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoConfigEnableCollaboratorsOnlyAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoConfigEnableCollaboratorsOnlyAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22285,13 +24850,25 @@ export type RepoConfigEnableCollaboratorsOnlyAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -22301,33 +24878,72 @@ export type RepoConfigEnableContributorsOnlyAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoConfigEnableContributorsOnlyAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoConfigEnableContributorsOnlyAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22337,13 +24953,25 @@ export type RepoConfigEnableContributorsOnlyAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -22353,33 +24981,72 @@ export type RepoConfigEnableSockpuppetDisallowedAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoConfigEnableSockpuppetDisallowedAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoConfigEnableSockpuppetDisallowedAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22389,13 +25056,25 @@ export type RepoConfigEnableSockpuppetDisallowedAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -22405,33 +25084,72 @@ export type RepoConfigLockAnonymousGitAccessAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoConfigLockAnonymousGitAccessAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoConfigLockAnonymousGitAccessAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22441,13 +25159,25 @@ export type RepoConfigLockAnonymousGitAccessAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -22457,33 +25187,72 @@ export type RepoConfigUnlockAnonymousGitAccessAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoConfigUnlockAnonymousGitAccessAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoConfigUnlockAnonymousGitAccessAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22493,13 +25262,25 @@ export type RepoConfigUnlockAnonymousGitAccessAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -22509,37 +25290,82 @@ export type RepoCreateAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoCreateAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
-    /** The name of the parent repository for this forked repository. */
+    /**
+     * The name of the parent repository for this forked repository.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     forkParentName?: Maybe<Scalars["String"]["output"]>;
-    /** The name of the root repository for this network. */
+    /**
+     * The name of the root repository for this network.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     forkSourceName?: Maybe<Scalars["String"]["output"]>;
     /** The Node ID of the RepoCreateAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22549,15 +25375,30 @@ export type RepoCreateAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The visibility of the repository */
+    /**
+     * The visibility of the repository
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     visibility?: Maybe<RepoCreateAuditEntryVisibility>;
   };
 
@@ -22577,33 +25418,72 @@ export type RepoDestroyAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoDestroyAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoDestroyAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22613,15 +25493,30 @@ export type RepoDestroyAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The visibility of the repository */
+    /**
+     * The visibility of the repository
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     visibility?: Maybe<RepoDestroyAuditEntryVisibility>;
   };
 
@@ -22641,33 +25536,72 @@ export type RepoRemoveMemberAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   RepositoryAuditEntryData & {
     __typename?: "RepoRemoveMemberAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoRemoveMemberAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22677,15 +25611,30 @@ export type RepoRemoveMemberAuditEntry = AuditEntry &
     repositoryResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for the repository */
     repositoryUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The visibility of the repository */
+    /**
+     * The visibility of the repository
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     visibility?: Maybe<RepoRemoveMemberAuditEntryVisibility>;
   };
 
@@ -22706,33 +25655,72 @@ export type RepoRemoveTopicAuditEntry = AuditEntry &
   RepositoryAuditEntryData &
   TopicAuditEntryData & {
     __typename?: "RepoRemoveTopicAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the RepoRemoveTopicAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -22746,13 +25734,25 @@ export type RepoRemoveTopicAuditEntry = AuditEntry &
     topic?: Maybe<Topic>;
     /** The name of the topic added to the repository */
     topicName?: Maybe<Scalars["String"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -23022,6 +26022,8 @@ export type Repository = Node &
     stargazers: StargazerConnection;
     /** Returns a list of all submodules in this repository parsed from the .gitmodules file as of the default branch's HEAD commit. */
     submodules: SubmoduleConnection;
+    /** A list of suggested actors that can be attributed to content in this repository. */
+    suggestedActors: ActorConnection;
     /** Temporary authentication token for cloning this repository. */
     tempCloneToken?: Maybe<Scalars["String"]["output"]>;
     /** The repository from which this repository was generated, if any. */
@@ -23465,6 +26467,17 @@ export type RepositorySubmodulesArgs = {
   before?: InputMaybe<Scalars["String"]["input"]>;
   first?: InputMaybe<Scalars["Int"]["input"]>;
   last?: InputMaybe<Scalars["Int"]["input"]>;
+};
+
+/** A repository contains the content for a project. */
+export type RepositorySuggestedActorsArgs = {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  capabilities: Array<RepositorySuggestedActorFilter>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
+  loginNames?: InputMaybe<Scalars["String"]["input"]>;
+  query?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 /** A repository contains the content for a project. */
@@ -24370,6 +27383,14 @@ export enum RepositoryRulesetTarget {
   Tag = "TAG",
 }
 
+/** The possible filters for suggested actors in a repository */
+export enum RepositorySuggestedActorFilter {
+  /** Actors that can be assigned to issues and pull requests */
+  CanBeAssigned = "CAN_BE_ASSIGNED",
+  /** Actors that can be the author of issues and pull requests */
+  CanBeAuthor = "CAN_BE_AUTHOR",
+}
+
 /** A repository-topic connects a repository to a topic. */
 export type RepositoryTopic = Node &
   UniformResourceLocatable & {
@@ -24422,21 +27443,45 @@ export type RepositoryVisibilityChangeDisableAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "RepositoryVisibilityChangeDisableAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The HTTP path for this enterprise. */
     enterpriseResourcePath?: Maybe<Scalars["URI"]["output"]>;
@@ -24446,23 +27491,50 @@ export type RepositoryVisibilityChangeDisableAuditEntry = AuditEntry &
     enterpriseUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The Node ID of the RepositoryVisibilityChangeDisableAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -24472,21 +27544,45 @@ export type RepositoryVisibilityChangeEnableAuditEntry = AuditEntry &
   Node &
   OrganizationAuditEntryData & {
     __typename?: "RepositoryVisibilityChangeEnableAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The HTTP path for this enterprise. */
     enterpriseResourcePath?: Maybe<Scalars["URI"]["output"]>;
@@ -24496,23 +27592,50 @@ export type RepositoryVisibilityChangeEnableAuditEntry = AuditEntry &
     enterpriseUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The Node ID of the RepositoryVisibilityChangeEnableAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -27701,35 +30824,77 @@ export type TeamAddMemberAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   TeamAuditEntryData & {
     __typename?: "TeamAddMemberAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the TeamAddMemberAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** Whether the team was mapped to an LDAP Group. */
+    /**
+     * Whether the team was mapped to an LDAP Group.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     isLdapMapped?: Maybe<Scalars["Boolean"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The team associated with the action */
     team?: Maybe<Team>;
@@ -27739,13 +30904,25 @@ export type TeamAddMemberAuditEntry = AuditEntry &
     teamResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for this team */
     teamUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -27756,35 +30933,77 @@ export type TeamAddRepositoryAuditEntry = AuditEntry &
   RepositoryAuditEntryData &
   TeamAuditEntryData & {
     __typename?: "TeamAddRepositoryAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the TeamAddRepositoryAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** Whether the team was mapped to an LDAP Group. */
+    /**
+     * Whether the team was mapped to an LDAP Group.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     isLdapMapped?: Maybe<Scalars["Boolean"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -27802,13 +31021,25 @@ export type TeamAddRepositoryAuditEntry = AuditEntry &
     teamResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for this team */
     teamUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -27830,51 +31061,117 @@ export type TeamChangeParentTeamAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   TeamAuditEntryData & {
     __typename?: "TeamChangeParentTeamAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the TeamChangeParentTeamAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** Whether the team was mapped to an LDAP Group. */
+    /**
+     * Whether the team was mapped to an LDAP Group.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     isLdapMapped?: Maybe<Scalars["Boolean"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The new parent team. */
+    /**
+     * The new parent team.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     parentTeam?: Maybe<Team>;
-    /** The name of the new parent team */
+    /**
+     * The name of the new parent team
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     parentTeamName?: Maybe<Scalars["String"]["output"]>;
-    /** The name of the former parent team */
+    /**
+     * The name of the former parent team
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     parentTeamNameWas?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the parent team */
+    /**
+     * The HTTP path for the parent team
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     parentTeamResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the parent team */
+    /**
+     * The HTTP URL for the parent team
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     parentTeamUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The former parent team. */
+    /**
+     * The former parent team.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     parentTeamWas?: Maybe<Team>;
-    /** The HTTP path for the previous parent team */
+    /**
+     * The HTTP path for the previous parent team
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     parentTeamWasResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the previous parent team */
+    /**
+     * The HTTP URL for the previous parent team
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     parentTeamWasUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The team associated with the action */
     team?: Maybe<Team>;
@@ -27884,13 +31181,25 @@ export type TeamChangeParentTeamAuditEntry = AuditEntry &
     teamResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for this team */
     teamUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -28337,35 +31646,77 @@ export type TeamRemoveMemberAuditEntry = AuditEntry &
   OrganizationAuditEntryData &
   TeamAuditEntryData & {
     __typename?: "TeamRemoveMemberAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the TeamRemoveMemberAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** Whether the team was mapped to an LDAP Group. */
+    /**
+     * Whether the team was mapped to an LDAP Group.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     isLdapMapped?: Maybe<Scalars["Boolean"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The team associated with the action */
     team?: Maybe<Team>;
@@ -28375,13 +31726,25 @@ export type TeamRemoveMemberAuditEntry = AuditEntry &
     teamResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for this team */
     teamUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -28392,35 +31755,77 @@ export type TeamRemoveRepositoryAuditEntry = AuditEntry &
   RepositoryAuditEntryData &
   TeamAuditEntryData & {
     __typename?: "TeamRemoveRepositoryAuditEntry";
-    /** The action name */
+    /**
+     * The action name
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     action: Scalars["String"]["output"];
-    /** The user who initiated the action */
+    /**
+     * The user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actor?: Maybe<AuditEntryActor>;
-    /** The IP address of the actor */
+    /**
+     * The IP address of the actor
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorIp?: Maybe<Scalars["String"]["output"]>;
-    /** A readable representation of the actor's location */
+    /**
+     * A readable representation of the actor's location
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLocation?: Maybe<ActorLocation>;
-    /** The username of the user who initiated the action */
+    /**
+     * The username of the user who initiated the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the actor. */
+    /**
+     * The HTTP path for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the actor. */
+    /**
+     * The HTTP URL for the actor.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     actorUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The time the action was initiated */
+    /**
+     * The time the action was initiated
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     createdAt: Scalars["PreciseDateTime"]["output"];
     /** The Node ID of the TeamRemoveRepositoryAuditEntry object */
     id: Scalars["ID"]["output"];
-    /** Whether the team was mapped to an LDAP Group. */
+    /**
+     * Whether the team was mapped to an LDAP Group.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     isLdapMapped?: Maybe<Scalars["Boolean"]["output"]>;
-    /** The corresponding operation type for the action */
+    /**
+     * The corresponding operation type for the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     operationType?: Maybe<OperationType>;
-    /** The Organization associated with the Audit Entry. */
+    /**
+     * The Organization associated with the Audit Entry.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organization?: Maybe<Organization>;
-    /** The name of the Organization. */
+    /**
+     * The name of the Organization.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationName?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the organization */
+    /**
+     * The HTTP path for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the organization */
+    /**
+     * The HTTP URL for the organization
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     organizationUrl?: Maybe<Scalars["URI"]["output"]>;
     /** The repository associated with the action */
     repository?: Maybe<Repository>;
@@ -28438,13 +31843,25 @@ export type TeamRemoveRepositoryAuditEntry = AuditEntry &
     teamResourcePath?: Maybe<Scalars["URI"]["output"]>;
     /** The HTTP URL for this team */
     teamUrl?: Maybe<Scalars["URI"]["output"]>;
-    /** The user affected by the action */
+    /**
+     * The user affected by the action
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     user?: Maybe<User>;
-    /** For actions involving two users, the actor is the initiator and the user is the affected user. */
+    /**
+     * For actions involving two users, the actor is the initiator and the user is the affected user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userLogin?: Maybe<Scalars["String"]["output"]>;
-    /** The HTTP path for the user. */
+    /**
+     * The HTTP path for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userResourcePath?: Maybe<Scalars["URI"]["output"]>;
-    /** The HTTP URL for the user. */
+    /**
+     * The HTTP URL for the user.
+     * @deprecated The GraphQL audit-log is deprecated. Please use the REST API instead. Removal on 2026-04-01 UTC.
+     */
     userUrl?: Maybe<Scalars["URI"]["output"]>;
   };
 
@@ -29936,15 +33353,6 @@ export type UpdateIssueTypeInput = {
   description?: InputMaybe<Scalars["String"]["input"]>;
   /** Whether or not the issue type is enabled for the organization */
   isEnabled?: InputMaybe<Scalars["Boolean"]["input"]>;
-  /**
-   * Whether or not the issue type is restricted to issues in private repositories
-   *
-   * **Upcoming Change on 2025-04-01 UTC**
-   * **Description:** `isPrivate` will be removed.
-   * **Reason:** Private issue types are being deprecated and can no longer be created.
-   *
-   */
-  isPrivate?: InputMaybe<Scalars["Boolean"]["input"]>;
   /** The ID of the issue type to update */
   issueTypeId: Scalars["ID"]["input"];
   /** The name of the issue type */

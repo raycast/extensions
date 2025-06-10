@@ -13,7 +13,7 @@ async function getConvertedColor(text: string, format: ColorFormatType) {
   try {
     const convertedColor = getFormattedColor(text, format);
     return convertedColor;
-  } catch (error) {
+  } catch {
     await showToast({
       style: Toast.Style.Failure,
       title: "Conversion failed",

@@ -130,8 +130,15 @@ export default function Command() {
                     }}
                   />
                   <Action
+                    title={instance.favorite ? "Remove from Favorites" : "Add to Favorites"}
+                    icon={instance.favorite ? Icon.StarDisabled : Icon.Star}
+                    onAction={() => toggleFavorite(instance.id)}
+                    shortcut={Keyboard.Shortcut.Common.Pin}
+                  />
+                  <Action
                     title="Open Instance Window"
                     icon={"app-window-list-16"}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
                     onAction={async () => {
                       child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --show "${instance.id}"`);
                       await closeMainWindow({
@@ -141,10 +148,21 @@ export default function Command() {
                     }}
                   />
                   <Action
-                    title={instance.favorite ? "Remove from Favorites" : "Add to Favorites"}
-                    icon={instance.favorite ? Icon.StarDisabled : Icon.Star}
-                    onAction={() => toggleFavorite(instance.id)}
-                    shortcut={Keyboard.Shortcut.Common.Pin}
+                    title="Open Minecraft Folder in Finder"
+                    icon={Icon.Finder}
+                    shortcut={{ modifiers: ["shift", "cmd"], key: "o" }}
+                    onAction={async () => {
+                      const minecraftPath = path.join(instancesPath, instance.id, "minecraft");
+                      if (await fs.pathExists(minecraftPath)) {
+                        child_process.exec(`open "${minecraftPath}"`);
+                      } else {
+                        child_process.exec(`open "${path.join(instancesPath, instance.id, ".minecraft")}"`);
+                      }
+                      await closeMainWindow({
+                        popToRootType: PopToRootType.Immediate,
+                        clearRootSearch: true,
+                      });
+                    }}
                   />
                 </ActionPanel>
               }
