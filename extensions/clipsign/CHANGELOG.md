@@ -1,3 +1,3 @@
 # ClipSign Changelog
 
-## [Initial release] - {PR_MERGE_DATE}
+## [Initial release] - 2025-06-10
