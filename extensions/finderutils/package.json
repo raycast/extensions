@@ -30,7 +30,7 @@
     {
       "name": "closeAfterCreation",
       "title": "Close Raycast Creation",
-      "description": "Will close Raycast after creating the file (if successful). This will still show that the file was created and it's path.",
+      "description": "Will close Raycast after creating the file (if successful). This will still show that the file was created and its path.",
       "type": "checkbox",
       "required": true,
       "default": true,
