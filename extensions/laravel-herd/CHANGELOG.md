@@ -1,6 +1,6 @@
 # Laravel Herd Changelog
 
-## Bugfix - {PR_MERGE_DATE}
+## Bugfix - 2025-06-11
 - Fixes a bug where »Open in IDE« was not working in some cases. #19610
 
 
