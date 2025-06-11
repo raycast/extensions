@@ -1,6 +1,6 @@
 # ChatGPT Quick Actions Changelog
 
-## [Models Update and Consolidation] - {PR_MERGE_DATE}
+## [Models Update and Consolidation] - 2025-06-11
 
 - Add latest OpenAI models: GPT-4.1, GPT-4.1 mini, GPT-4.1 nano, o1, o1-mini, o1-pro, o3, o3-mini, o4-mini
 - Remove obsolete models: GPT-3.5 Turbo, GPT-4, GPT-4 Turbo
