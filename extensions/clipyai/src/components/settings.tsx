@@ -15,6 +15,7 @@ import { useCallback, useEffect, useState } from "react";
 import { HotKey } from "../types";
 import { ICONS } from "../constants";
 import { DEFAULT_HOTKEYS } from "../hotkeys";
+import { showFailureToast } from "@raycast/utils";
 
 // Function to save preferences
 async function savePreferences(hotkeys: HotKey[]) {
@@ -59,8 +60,7 @@ function HotkeyForm({ hotkey, onSave }: { hotkey?: HotKey; onSave: (hotkey: HotK
 
   const handleSubmit = (values: { title: string; subtitle: string; prompt: string; icon: Icon }) => {
     if (!values.title.trim() || !values.subtitle.trim() || !values.prompt.trim()) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Missing Fields",
         message: "Please fill in all required fields",
       });
@@ -152,8 +152,7 @@ export function HotkeysSettingsView({
         }
       } catch (error) {
         console.error("Failed to save hotkeys:", error);
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Error",
           message: "Failed to save hotkeys",
         });

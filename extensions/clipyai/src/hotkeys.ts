@@ -15,7 +15,7 @@ export const DEFAULT_HOTKEYS: HotKey[] = [
     title: "Casual Reply",
     subtitle: "Generate a casual reply",
     prompt:
-      "Generate a casual and concise reply to this message and match the tone of the conversatoin (Just provide the response):",
+      "Generate a casual and concise reply to this message and match the tone of the conversation (Just provide the response):",
     icon: Icon.Reply,
   },
   {

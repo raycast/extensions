@@ -22,6 +22,7 @@ import { ResultView } from "./components/ResultView";
 import { DEFAULT_CONFIG } from "./constants";
 import { DEFAULT_HOTKEYS } from "./hotkeys";
 import fs from "fs";
+import { showFailureToast } from "@raycast/utils";
 
 // Utility function to check if model supports vision
 function isVisionModel(model: string): boolean {
@@ -201,8 +202,7 @@ function ChatInputForm({ onSubmit }: { onSubmit: (input: string) => Promise<void
 
   const handleSubmit = async (values: { message: string }) => {
     if (!values.message.trim()) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Empty Message",
         message: "Please enter a message",
       });
@@ -214,8 +214,7 @@ function ChatInputForm({ onSubmit }: { onSubmit: (input: string) => Promise<void
       await onSubmit(values.message);
       pop();
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Error",
         message: error instanceof Error ? error.message : "Failed to send message",
       });
@@ -313,8 +312,7 @@ export function ChatView({ initialMessages }: { initialMessages: ChatMessage[] }
           title: "Response received",
         });
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Error",
           message: error instanceof Error ? error.message : "Failed to get AI response",
         });
@@ -520,8 +518,7 @@ function MainMenu() {
           title: "Response generated",
         });
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Error",
           message: error instanceof Error ? error.message : "Failed to process request",
         });
@@ -571,8 +568,7 @@ function MainMenu() {
         title: "Chat started",
       });
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Error",
         message: error instanceof Error ? error.message : "Failed to start chat",
       });

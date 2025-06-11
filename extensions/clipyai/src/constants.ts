@@ -1,5 +1,6 @@
 import { Icon } from "@raycast/api";
 
+// Default values for openAi API call
 export const DEFAULT_CONFIG = {
   temperature: 0.7,
   model: "gpt-4o",
