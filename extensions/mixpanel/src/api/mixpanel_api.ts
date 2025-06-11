@@ -1,18 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
-import Preferences from "../model/preferences";
 import MixpanelUser, { parseUser } from "../model/user";
+import { API_HEADERS, BASE_URL } from "../model/api";
 
 export default async function findUsers(data: string): Promise<MixpanelUser[]> {
-  const prefs = getPreferenceValues<Preferences>();
-  const token = Buffer.from(`${prefs.service_account}:${prefs.service_account_secret}`).toString("base64");
+  const { project_id } = getPreferenceValues<Preferences.Index>();
   const options = {
     method: "POST",
-    headers: {
-      accept: "application/json",
-      "content-type": "application/x-www-form-urlencoded",
-      authorization: `Basic ${token}`,
-    },
+    headers: API_HEADERS,
     body: new URLSearchParams({
       output_properties:
         '["$distinct_id", "name", "$email", "$ae_first_app_open_date","$android_app_version", "$ios_app_release","$last_seen"]',
@@ -20,11 +14,10 @@ export default async function findUsers(data: string): Promise<MixpanelUser[]> {
     }),
   };
 
-  const result = await fetch(`https://eu.mixpanel.com/api/2.0/engage?project_id=${prefs.project_id}`, options)
-    .then((response) => response.json())
-    .catch((err) => console.error(err));
-
   try {
+  const result = await fetch(`${BASE_URL}/api/2.0/engage?project_id=${project_id}`, options)
+    .then((response) => response.json());
+
     return (result as { results: any[] }).results?.map(parseUser) ?? [];
   } catch (err) {
     console.error(`Failed to parse users: ${err}`);

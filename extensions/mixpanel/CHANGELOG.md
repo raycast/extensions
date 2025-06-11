@@ -1,4 +1,10 @@
-# mixpanel Changelog
+# Mixpanel Changelog
+
+## [Support All Server Regions] - {PR_MERGE_DATE}
+
+- modernize
+- pref pklaceholder
+- region prefg
 
 ## [Initial Version] - 2023-02-23
 

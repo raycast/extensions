@@ -1,27 +1,24 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, openCommandPreferences } from "@raycast/api";
-import { useState } from "react";
-import Preferences, { arePreferencesValid } from "./model/preferences";
+import { Action, ActionPanel, Detail, Icon, openCommandPreferences } from "@raycast/api";
+import { arePreferencesValid } from "./model/preferences";
 import SearchByEmail from "./pages/search_user";
+import { usePromise } from "@raycast/utils";
 
 export default function Command() {
-  const [isValid, setIsValid] = useState(arePreferencesValid(getPreferenceValues<Preferences>()));
-
+  const { isLoading, data: isValid, revalidate } = usePromise(arePreferencesValid);
+  
   async function updateExtensionSettings() {
     await openCommandPreferences();
-    const prefs = getPreferenceValues<Preferences>();
-    if (arePreferencesValid(prefs)) {
-      setIsValid(true);
-    }
+    revalidate();
   }
 
-  return isValid ? (
+  return isLoading ? <Detail isLoading markdown="Checking" /> : isValid ? (
     <SearchByEmail />
   ) : (
     <Detail
       markdown="# Extension settings are not valid"
       actions={
         <ActionPanel>
-          <Action title="Open settings" onAction={updateExtensionSettings} />
+          <Action icon={Icon.Gear} title="Open Settings" onAction={updateExtensionSettings} />
         </ActionPanel>
       }
     />

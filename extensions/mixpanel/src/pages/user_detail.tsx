@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
 import dayjs from "dayjs";
 import relativetime from "dayjs/plugin/relativeTime";
-import Preferences from "../model/preferences";
 import MixpanelUser from "../model/user";
 
 export default function UserDetail(props: { user: MixpanelUser }) {

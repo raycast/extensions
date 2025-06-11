@@ -1,4 +1,4 @@
-# mixpanel
+# Mixpanel
 
 This extension lets your find a user from your Mixpanel dashboard.
 

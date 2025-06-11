@@ -1,11 +1,20 @@
-export default interface Preferences {
-  project_id: string | undefined;
-  service_account: string | undefined;
-  service_account_secret: string | undefined;
-}
+import { getPreferenceValues } from "@raycast/api";
+import { API_HEADERS, BASE_URL } from "./api";
 
-export function arePreferencesValid(prefs: Preferences): boolean {
-  return (
-    prefs.project_id !== undefined && prefs.service_account !== undefined && prefs.service_account_secret !== undefined
-  );
+export async function arePreferencesValid() {
+  const { project_id } = getPreferenceValues<Preferences.Index>();
+  try {
+    const options = {
+    method: "POST",
+    headers: API_HEADERS,
+    body: new URLSearchParams({
+      output_properties:
+        '["$distinct_id", "$email"]'
+    })}
+    const response = await fetch(`${BASE_URL}/api/2.0/engage?project_id=${project_id}&limit=1`, options);
+    if (!response.ok) throw new Error();
+    return true;
+  } catch {
+    return false;
+  }
 }
