@@ -29,9 +29,7 @@ export default async function Command() {
       message: "Voice input processed successfully",
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error occurred";
-
+    await showFailureToast(error, { title: "Could not process voice input" });
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
