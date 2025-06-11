@@ -13,7 +13,7 @@
     {
       "name": "whisper-voice-input",
       "title": "Record and Transcribe",
-      "subtitle": "Whisper Voice Input",
+      "subtitle": "Record audio and transcribe it using Whisper",
       "description": "Record audio and transcribe it using Whisper",
       "mode": "no-view",
       "script": "src/whisper-voice-input.tsx"
