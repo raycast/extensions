@@ -1,0 +1,26 @@
+import { Icon } from "@raycast/api";
+
+export const DEFAULT_CONFIG = {
+  temperature: 0.7,
+  model: "gpt-4o",
+  maxTokens: 1000,
+};
+
+export const ICONS = [
+  { title: "Dot", value: Icon.Dot },
+  { title: "Reply", value: Icon.Reply },
+  { title: "Document", value: Icon.Document },
+  { title: "Question Mark", value: Icon.QuestionMark },
+  { title: "Pencil", value: Icon.Pencil },
+  { title: "Globe", value: Icon.Globe },
+  { title: "Code", value: Icon.Code },
+  { title: "Calendar", value: Icon.Calendar },
+  { title: "Envelope", value: Icon.Envelope },
+  { title: "Hammer", value: Icon.Hammer },
+  { title: "Star", value: Icon.Star },
+  { title: "Heart", value: Icon.Heart },
+  { title: "Bolt", value: Icon.Bolt },
+  { title: "Eye", value: Icon.Eye },
+  { title: "MagnifyingGlass", value: Icon.MagnifyingGlass },
+  { title: "Text", value: Icon.Text },
+];
