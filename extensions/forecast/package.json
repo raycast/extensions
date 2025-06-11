@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "forecast",
+  "title": "Forecast",
+  "description": "Show your Forcast schedule across days and people",
+  "icon": "forecast.png",
+  "author": "chrisrowe",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Schedule",
+      "description": "Show your Forecast schedule across days and people.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Personal Access Token",
+      "description": "Harvest Token",
+      "required": true,
+      "link": "https://id.getharvest.com/developers",
+      "type": "textfield"
+    },
+    {
+      "name": "accountId",
+      "title": "Forecast Account ID",
+      "required": true,
+      "description": "Found in the URL when you're logged in to Forecast. https://forecastapp.com/5551234 (5551234 is the account ID)",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.1",
+    "dayjs": "^1.11.13",
+    "forecast-promise": "^1.2.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "24.0.0",
+    "@types/react": "19.1.8",
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simplygoodwork/raycast-forecast.git"
+  },
+  "keywords": [
+    "raycast",
+    "forecast"
+  ],
+  "bugs": {
+    "url": "https://github.com/simplygoodwork/raycast-forecast/issues"
+  },
+  "homepage": "https://github.com/simplygoodwork/raycast-forecast#readme"
+}
