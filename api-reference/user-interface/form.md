@@ -1189,7 +1189,7 @@ export default function Command() {
 | id<mark style="color:red;">*</mark> | ID of the form item.  Make sure to assign each form item a unique id. | <code>string</code> | - |
 | allowMultipleSelection | Indicates whether the user can select multiple items or only one. | <code>boolean</code> | - |
 | autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
-| canChooseDirectories | Indicates whether it's possible to choose a directory. | <code>boolean</code> | - |
+| canChooseDirectories | Indicates whether it's possible to choose a directory.  Note: On Windows, this property is ignored if `canChooseFiles` is set to `true`. | <code>boolean</code> | - |
 | canChooseFiles | Indicates whether it's possible to choose a file. | <code>boolean</code> | - |
 | defaultValue | The default value of the item.  Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering.    If you're using `storeValue` and configured it as `true` then the stored value will be set.    If you configure `value` at the same time with `defaultValue`, the `value` will be set instead of `defaultValue`. | <code>string[]</code> | - |
 | error | An optional error message to show the form item validation issues.  If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
