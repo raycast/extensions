@@ -11,14 +11,15 @@
     "Saafo",
     "erics118",
     "xilopaint",
-    "validate"
+    "validate",
+    "dead_hikikomori"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Kill Process",
-      "description": "Lists all running processes, ordered by CPU or memory usage and allows killing one",
+      "description": "Lists all running processes, ordered by CPU or memory usage and allows (force) killing one",
       "mode": "view"
     }
   ],
@@ -30,8 +31,8 @@
     },
     {
       "name": "kill-process",
-      "title": "Kill Process",
-      "description": "Terminates a process by its exact name or PID"
+      "title": "(Force) Kill Process",
+      "description": "Terminates a process by its exact name or PID (Force kill requires enabling sudo authentication with touchID: https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28)"
     }
   ],
   "ai": {

@@ -1,4 +1,4 @@
-import { showToast, Toast, AI, environment } from '@raycast/api';
+import { showToast, Toast } from '@raycast/api';
 import { useState } from 'react';
 import { nanoid } from 'nanoid';
 import { CalendarEvent } from './types';
@@ -36,20 +36,18 @@ export function useCalendar() {
       if (query.length === 0) {
         setResults([]);
       } else {
-        const preprocessedQuery = preprocessQuery(query);
-
-        const parsedEvent = Sherlock.parse(preprocessedQuery);
-
         let location = '';
         try {
-          if (environment.canAccess(AI)) {
-            location = await AI.ask(
-              `Extract only the location from this event text, or return an empty string don't need quote if no location is found: "${query}"`,
-            );
-          }
+          const match = query.match(/@(?:\(([^)]+)\)|([^@\s]+))/);
+          location = match?.[1] || match?.[2] || '';
         } catch (error) {
           location = '';
         }
+        query = query.replace(/@(?:\(([^)]+)\)|([^@\s]+))/, '');
+
+        const preprocessedQuery = preprocessQuery(query);
+
+        const parsedEvent = Sherlock.parse(preprocessedQuery);
 
         const event: CalendarEvent = {
           ...parsedEvent,

@@ -25,24 +25,36 @@ export function countToken(content: string) {
   return encode(content).length;
 }
 
-export function estimatePrice(prompt_token: number, output_token: number, model: string) {
-  // price is per 1M tokens in dollars, but we are measuring in cents. Hence the denominator is 10,000
-  // from : https://openai.com/api/pricing/
+// Prices are per 1M tokens in dollars, converted to cents
+export function estimatePrice(input_token: number, output_token: number, model: string) {
   let price = 0;
-  if (model == "gpt-3.5-turbo") {
-    price = (prompt_token * 0.5 + output_token * 1.5) / 10000;
-  } else if (model == "gpt-4-turbo") {
-    price = (prompt_token * 10.0 + output_token * 30.0) / 10000;
-  } else if (model == "gpt-4") {
-    price = (prompt_token * 30.0 + output_token * 60.0) / 10000;
+
+  if (model == "gpt-4o") {
+    price = (input_token * 5 + output_token * 15) / 1000000;
   } else if (model == "gpt-4o-mini") {
-    price = (prompt_token * 0.15 + output_token * 0.6) / 10000;
-  } else if (model == "gpt-4o") {
-    price = (prompt_token * 5.0 + output_token * 15.0) / 10000;
+    price = (input_token * 0.15 + output_token * 0.6) / 1000000;
+  } else if (model == "gpt-4.1") {
+    price = (input_token * 30 + output_token * 60) / 1000000;
+  } else if (model == "gpt-4.1-mini") {
+    price = (input_token * 3 + output_token * 6) / 1000000;
+  } else if (model == "gpt-4.1-nano") {
+    price = (input_token * 0.3 + output_token * 0.6) / 1000000;
+  } else if (model == "o1") {
+    price = (input_token * 15 + output_token * 60) / 1000000;
+  } else if (model == "o1-mini") {
+    price = (input_token * 3 + output_token * 12) / 1000000;
+  } else if (model == "o1-pro") {
+    price = (input_token * 60 + output_token * 240) / 1000000;
+  } else if (model == "o3") {
+    price = (input_token * 40 + output_token * 160) / 1000000;
+  } else if (model == "o3-mini") {
+    price = (input_token * 1 + output_token * 4) / 1000000;
+  } else if (model == "o4-mini") {
+    price = (input_token * 0.5 + output_token * 2) / 1000000;
   } else {
     return -1;
   }
-  return naiveRound(price, 3);
+  return naiveRound(price, 5);
 }
 
 export async function runAppleScriptSilently(appleScript: string) {
