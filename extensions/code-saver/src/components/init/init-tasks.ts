@@ -41,6 +41,8 @@ export const downloadDependency: InitTaskFunc = async () => {
     console.log("DownloadFile finish: ", tmpFile);
 
     await ExtractAndRewrite(tmpFile, "build/Release/better_sqlite3.node", SqliteBindingPath);
+    // remove tmp file
+    await async_fs.unlink(tmpFile);
   } catch (exc) {
     const errMarkdown = `# Failed to download dependency.
 The following steps may help to recover:

@@ -81,7 +81,7 @@ function httpJsonGet(url: string): Promise<any> {
       (response) => {
         const code = response.statusCode ?? 0;
         let data = "";
-        if (code < 200 || code >= 300) {
+        if (code >= 400) {
           return reject(new Error(response.statusMessage));
         }
 
