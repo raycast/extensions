@@ -169,6 +169,8 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 | Anthropic_Claude_Sonnet           | Enhanced Claude model for complex tasks and visual reasoning.                          |
 | Anthropic_Claude_Sonnet_3.7       | Anthropic's most intelligent model.                                                    |
 | Anthropic_Claude_Opus             | Anthropic's model for complex tasks with exceptional fluency.                          |
+| Anthropic_Claude_4_Sonnet         | Anthropic's most intelligent model.                                                    |
+| Anthropic_Claude_4_Opus           | Anthropic's model for complex tasks with exceptional fluency.                          |
 | Perplexity_Sonar                  | Fast Perplexity model with integrated search capabilities.                             |
 | Perplexity_Sonar_Pro              | Advanced Perplexity model for complex queries with search integration.                 |
 | Perplexity_Sonar_Reasoning        | Fast reasoning model powered by DeepSeek R1.                                           |
@@ -176,10 +178,10 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 | Llama4_Scout                      | Advanced 17B parameter multimodal model with 16 experts.                               |
 | Llama3.3_70B                      | Meta's state-of-the-art model for reasoning and general knowledge.                     |
 | Llama3.1_8B                       | Fast, instruction-optimized open-source model.                                         |
-| Llama3_70B                        | Capable open-source LLM for text-related tasks.                                        |
 | Llama3.1_405B                     | Meta's flagship model with advanced capabilities across multiple domains.              |
 | Mistral_Nemo                      | Small, Apache-licensed model built with NVIDIA.                                        |
 | Mistral_Large                     | Top-tier reasoning model with strong multilingual support.                             |
+| Mistral_Medium                    | A powerful, cost-effective, frontier-class multimodal model.                           |
 | Mistral_Small                     | Latest enterprise-grade small model with improved reasoning.                           |
 | Mistral_Codestral                 | Specialized model for code-related tasks and testing.                                  |
 | DeepSeek_R1_Distill_Llama_3.3_70B | Fine-tuned Llama model with enhanced reasoning capabilities.                           |
@@ -197,9 +199,9 @@ If a model isn't available to the user, Raycast will fallback to a similar one:
 
 - `AI.Model.OpenAI_GPT4`, `AI.Model["OpenAI_GPT4-turbo"]`, and `AI.Model.OpenAI_GPT4o` -> `AI.Model["OpenAI_GPT4o-mini"]`
 - `AI.Model.OpenAI_o1` -> `AI.Model["OpenAI_GPT4o-mini"]`
-- `AI.Model.Anthropic_Claude_Opus`, `AI.Model.Anthropic_Claude_Sonnet`, and `AI.Model["Anthropic_Claude_Sonnet_3.7"]` -> `AI.Model.Anthropic_Claude_Haiku`
+- `AI.Model.Anthropic_Claude_Opus`, `AI.Model.Anthropic_Claude_Sonnet`, `AI.Model["Anthropic_Claude_Sonnet_3.7"]`, `AI.Model.Anthropic_Claude_4_Sonnet`, and `AI.Model.Anthropic_Claude_4_Opus` -> `AI.Model.Anthropic_Claude_Haiku`
 - `AI.Model.Perplexity_Sonar_Pro` -> `AI.Model.Perplexity_Sonar`
-- `AI.Model.Mistral_Large` -> `AI.Model.Mistral_Nemo`
+- `AI.Model.Mistral_Large` and `AI.Model.Mistral_Medium` -> `AI.Model.Mistral_Nemo`
 - `AI.Model["Llama3.1_405B"]` -> `AI.Model["Llama3.3_70B"]`
 - `AI.Model.DeepSeek_R1` -> `AI.Model["DeepSeek_R1_Distill_Llama_3.3_70B"]`
 - `AI.Model.xAI_Grok_2` -> `AI.Model["OpenAI_GPT4o-mini"]`
