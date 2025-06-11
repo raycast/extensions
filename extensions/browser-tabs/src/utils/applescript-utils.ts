@@ -10,7 +10,7 @@ export const getBrowserSetup = async () => {
     // get browser applications
     const allOpenUrlApps = await getApplications(TEST_URL);
     const browsers = allOpenUrlApps.filter(
-      (browser) => !unsupportedBrowsers.some((unsupported) => browser.name.includes(unsupported)),
+      (browser) => !unsupportedBrowsers.some((unsupported) => browser.name.includes(unsupported)) && browser.bundleId,
     );
     // get setup
     const localStorage = await LocalStorage.getItem<string>(CacheKey.BrowserSetup);
