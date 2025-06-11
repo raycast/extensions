@@ -1,6 +1,6 @@
 # Folder Search Changelog
 
-## [Development & Error Handling Improvements] - {PR_MERGE_DATE}
+## [Development & Error Handling Improvements] - 2025-06-11
 
 ### Development & Logging Improvements
 - **improved** Logging configuration now uses `environment.isDevelopment` for automatic development/production detection instead of hardcoded boolean
