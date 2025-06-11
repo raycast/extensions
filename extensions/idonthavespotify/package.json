@@ -5,6 +5,9 @@
   "description": "Effortlessly convert Spotify links to your preferred streaming service",
   "version": "1.0.0",
   "author": "sjdonado",
+  "pastContributors": [
+    "tom_constantine"
+  ],
   "icon": "icon.png",
   "categories": [
     "Media"
