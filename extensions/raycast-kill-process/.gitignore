@@ -1,0 +1,7 @@
+/node_modules
+.DS_Store
+.idea
+bun.lock
+yarn.lock
+package-lock.json
+raycast-env.d.ts
