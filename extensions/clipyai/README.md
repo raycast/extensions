@@ -1,3 +1,5 @@
+![ClipyAi](./assets/ClipyAi.png)
+
 # ClipyAI
 
 A powerful Raycast extension that brings AI-powered clipboard enhancement to your workflow. ClipyAI seamlessly integrates with OpenAI's GPT models to help you process both text and images directly from your clipboard.
