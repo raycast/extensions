@@ -9,7 +9,7 @@ import { preferences } from "../helpers/preferences";
  * @see https://developer.atlassian.com/server/bitbucket/rest/v805/api-group-repository/#api-api-latest-repos-get
  */
 export async function getRepositories(key: string, start = 0, repositories = []): Promise<any[]> {
-  const data = (await fetch(`${preferences.baseURL}/rest/api/latest/repos?start=${start}`, {
+  const data = (await fetch(`${preferences.baseURL}/rest/api/latest/repos?start=${start}&limit=200`, {
     headers: {
       Authorization: `Bearer ${preferences.token}`,
       "Content-Type": "application/json",
