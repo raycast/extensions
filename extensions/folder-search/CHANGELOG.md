@@ -1,5 +1,39 @@
 # Folder Search Changelog
 
+## [Development & Error Handling Improvements] - 2025-06-11
+
+### Development & Logging Improvements
+- **improved** Logging configuration now uses `environment.isDevelopment` for automatic development/production detection instead of hardcoded boolean
+- **centralized** Logging configuration in `useFolderSearch.tsx` as the main orchestrator hook for better organization and visibility
+- **improved** Development experience with automatic logging that enables in development mode and disables in production builds
+- **maintained** Comprehensive debug logging for plugin loading, cache operations, and pin management while ensuring clean production builds
+
+### Error Handling Improvements
+- **standardized** Error handling across the codebase by replacing inconsistent `console.error` calls with `showFailureToast` for better user experience
+- **enhanced** Plugin error handling with user-friendly error messages while maintaining debug logging for developers
+- **enhanced** Move operations error handling with clear user feedback when operations fail
+
+### TypeScript & Code Quality Fixes
+- **fixed** TypeScript errors: corrected `toggleResultPinnedStatus` function calls to use single parameter (result only) instead of two
+- **fixed** TypeScript errors: resolved `selectedItemId` type issues by handling null values with `|| undefined`
+
+### Cache & Storage Improvements
+- **moved** code to use standard Raycast Cache / Localstorage
+- **migrated** Pinned Folders to use localstorage
+
+### Bug Fixes & Performance
+- **removed** a lot of code that was causing unnecessary issues with flickering and fallback
+- **tested** the fallback issues and they appear fixed now, due to removing debouncing and some other code
+- **fixed** search results not showing when there are more than max results
+
+These Bugs should be resolved:
+https://github.com/raycast/extensions/issues/19574
+https://github.com/raycast/extensions/issues/19187
+https://github.com/raycast/extensions/issues/19006
+
+### Plugin Improvements
+- **fixed** some bugs with the plugins, added a new plugin to the plugin folder
+
 ## [Fixes & Improvements] - 2025-05-28
 - **fixed** ESLint configuration migration from deprecated `.eslintrc.json` to new flat config format (`eslint.config.js`) for ESLint v9+ compatibility
 - **added** Pin/Unpin functionality to the "Move to a Folder" command for consistent folder management across both search and move operations

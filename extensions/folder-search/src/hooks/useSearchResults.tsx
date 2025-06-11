@@ -4,7 +4,6 @@ import { getPreferenceValues } from "@raycast/api";
 import { SpotlightSearchResult, SpotlightSearchPreferences } from "../types";
 import { log, shouldShowPath, lastUsedSort, matchesSearchQuery } from "../utils";
 import { searchSpotlight } from "../search-spotlight";
-import { useSearchDebounce } from "./useSearchDebounce";
 
 interface UseSearchResultsProps {
   initialText?: string;
@@ -20,60 +19,47 @@ export function useSearchResults({
   searchScope = "",
   pinnedResults = [],
 }: UseSearchResultsProps = {}) {
+  const [searchText, setSearchText] = useState<string>(initialText);
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
 
   const abortable = useRef<AbortController>(new AbortController());
 
-  // Use the debounce hook
-  const { searchText, debouncedText, setSearchText } = useSearchDebounce({
-    initialText,
-    onDebounced: (text) => handleDebouncedSearch(text),
-  });
-
-  // Handle debounced search text changes
-  const handleDebouncedSearch = useCallback(
-    (text: string) => {
-      if (searchScope === "pinned") {
-        log("debug", "useSearchResults", "Filtering pinned results", {
-          searchText: text,
-          pinnedCount: pinnedResults.length,
-        });
-
-        setResults(pinnedResults.filter((pin) => matchesSearchQuery(pin.kMDItemFSName, text)));
-        setIsQuerying(false);
-        setHasSearched(true);
-      } else if (text) {
-        log("debug", "useSearchResults", "Starting search", {
-          searchText: text,
-          searchScope,
-        });
-        performSearch(text, searchScope);
-      } else {
-        // Clear results if search text is empty
-        log("debug", "useSearchResults", "Clearing results - no search text", {
-          searchScope,
-        });
-        setIsQuerying(false);
-        setResults([]);
-        setHasSearched(false);
-      }
-    },
-    [searchScope, pinnedResults],
-  );
-
-  // Re-apply filtering when pinned results change
+  // Handle search text changes
   useEffect(() => {
-    if (searchScope === "pinned" && debouncedText) {
-      log("debug", "useSearchResults", "Re-filtering pinned results after change", {
-        searchText: debouncedText,
+    if (searchScope === "pinned") {
+      log("debug", "useSearchResults", "Filtering pinned results", {
+        searchText,
         pinnedCount: pinnedResults.length,
       });
 
-      setResults(pinnedResults.filter((pin) => matchesSearchQuery(pin.kMDItemFSName, debouncedText)));
+      setResults(pinnedResults.filter((pin) => matchesSearchQuery(pin.kMDItemFSName, searchText)));
+      setIsQuerying(false);
+      setHasSearched(true);
+    } else if (searchText) {
+      log("debug", "useSearchResults", "Starting search", {
+        searchText,
+        searchScope,
+      });
+      performSearch(searchText, searchScope);
+    } else {
+      // Clear results if search text is empty
+      log("debug", "useSearchResults", "Clearing results - no search text", {
+        searchScope,
+      });
+      setIsQuerying(false);
+      setResults([]);
+      setHasSearched(false);
     }
-  }, [pinnedResults, searchScope, debouncedText]);
+  }, [searchText, searchScope]);
+
+  // Separate effect for pinned results filtering when in pinned scope
+  useEffect(() => {
+    if (searchScope === "pinned") {
+      setResults(pinnedResults.filter((pin) => matchesSearchQuery(pin.kMDItemFSName, searchText)));
+    }
+  }, [pinnedResults, searchScope, searchText]);
 
   // Perform spotlight search
   const performSearch = useCallback(async (search: string, scope: string) => {
@@ -93,9 +79,9 @@ export function useSearchResults({
       // Create a new abort controller
       abortable.current = new AbortController();
 
-      // Start showing spinner
+      // Start showing spinner but keep existing results visible
       setIsQuerying(true);
-      setResults([]);
+      // Don't clear results immediately - let them stay visible during search
 
       // Perform the search
       const searchResults = await searchSpotlight(search, scope as "pinned" | "user" | "all", abortable);
