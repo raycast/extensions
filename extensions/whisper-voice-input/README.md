@@ -29,14 +29,6 @@ A Raycast extension that records audio, transcribes it using whisper-cpp, and pa
 
 ## 🚀 Installation
 
-### Option 1: Install from Raycast Store (Coming Soon)
-1. Open Raycast
-2. Go to Extensions
-3. Search for "Whisper Voice Input"
-4. Click Install
-
-### Option 2: Manual Installation
-
 1. **Install Raycast** if you haven't already:  
    [Download Raycast](https://www.raycast.com/)
 
@@ -61,30 +53,11 @@ A Raycast extension that records audio, transcribes it using whisper-cpp, and pa
      https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large.bin
    ```
 
-4. **Clone this repository:**
-   ```bash
-   git clone https://github.com/fantasybz/whisper-voice-input.git
-   cd whisper-voice-input
-   ```
-
-5. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-6. **Build the extension:**
-   ```bash
-   npm run build
-   ```
-
-7. **Load the extension in Raycast:**
+4. **Install from Raycast Store**
    - Open Raycast
    - Go to Extensions
-   - Click the "+" button
-   - Select "Import Extension"
-   - Choose the project root directory (not `dist`)
-
-8. **Grant Accessibility permissions for Raycast** (required for cliclick & AppleScript)
+   - Search for "Whisper Voice Input"
+   - Click Install
 
 ---
 
@@ -106,7 +79,7 @@ A Raycast extension that records audio, transcribes it using whisper-cpp, and pa
 
 The shell script (`assets/whisper-voice-input.sh`) supports the following parameters:
 - `-d`: Recording duration in seconds (default: 5)
-- `-l`: Language code (default: "zh")
+- `-l`: Language code (default: "en")
 - `-m`: Path to model file (default: "~/whisper-models/ggml-medium.bin")
 - `-t`: Temporary directory
 - `-s`: Sender bundle ID
@@ -130,17 +103,7 @@ Edit `assets/whisper-voice-input.sh` directly.
 
 ## 🧑‍💻 Development
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start development mode:
-   ```bash
-   npm run dev
-   ```
-4. Make changes to the code
-5. Test your changes in Raycast
+This extension is distributed via the Raycast Store. For development or contributions, please fork the repository on GitHub and follow the contribution guidelines in the repository.
 
 ---
 
@@ -166,6 +129,24 @@ Edit `assets/whisper-voice-input.sh` directly.
 
 - **Audio device issues:**  
   If recording fails, check your microphone permissions and that the correct input device is selected.
+
+---
+
+## 🔍 Error Handling & User Guidance
+
+- **External Dependencies:**  
+  This extension relies on external tools (`ffmpeg`, `whisper-cpp`, `terminal-notifier`, `cliclick`). If you encounter errors, ensure these are installed and accessible in your PATH.  
+  - For Apple Silicon Macs, check `/opt/homebrew/bin/`.  
+  - For Intel Macs, check `/usr/local/bin/`.
+
+- **Whisper Model Issues:**  
+  Ensure the Whisper model file is correctly downloaded and placed in `~/whisper-models/`. If transcription fails, verify the model file integrity and permissions.
+
+- **Permission Issues:**  
+  If the extension fails to record audio or paste text, verify that Raycast has the necessary permissions (microphone and accessibility).
+
+- **Logs and Debugging:**  
+  Check the Raycast logs for detailed error messages. If issues persist, consider enabling verbose logging in the extension settings.
 
 ---
 
