@@ -8,7 +8,7 @@ import { FormValidation, useForm } from "@raycast/utils";
 dayjs.extend(relatimeTime);
 
 export default function Policies() {
-  const { isLoading, data: policies = [], pagination, revalidate, error } = useKeygenPaginated<Policy>("policies");
+  const { isLoading, data: policies, pagination, revalidate, error } = useKeygenPaginated<Policy>("policies");
 
   return (
     <List isLoading={isLoading} isShowingDetail pagination={pagination}>
@@ -144,6 +144,33 @@ function NewPolicy({ onNew }: { onNew: () => void }) {
       },
     },
   });
+
+  const DURATIONS = {
+    86400: "1 Day",
+    172800: "2 Days",
+    259200: "3 Days",
+    345600: "4 Days",
+    432000: "5 Days",
+    604800: "1 Week",
+    1209600: "2 Weeks",
+    1814400: "3 Weeks",
+    2419200: "4 Weeks",
+    3024000: "5 Weeks",
+    2592000: "1 Month",
+    2678400: "31 Days",
+    2764800: "32 Days",
+    5184000: "2 Months",
+    7776000: "3 Months",
+    10368000: "4 Months",
+    12960000: "5 Months",
+    15552000: "6 Months",
+    23328000: "9 Months",
+    34186698: "13 Months",
+    31536000: "1 Year",
+    63072000: "2 Years",
+    94608000: "3 Years",
+  };
+
   return (
     <Form
       isLoading={isLoading}
@@ -161,29 +188,9 @@ function NewPolicy({ onNew }: { onNew: () => void }) {
         {...itemProps.duration}
       >
         <Form.Dropdown.Item title="Unlimited" value="" />
-        <Form.Dropdown.Item title="1 Day" value="86400" />
-        <Form.Dropdown.Item title="2 Days" value="172800" />
-        <Form.Dropdown.Item title="3 Days" value="259200" />
-        <Form.Dropdown.Item title="4 Days" value="345600" />
-        <Form.Dropdown.Item title="5 Days" value="432000" />
-        <Form.Dropdown.Item title="1 Week" value="604800" />
-        <Form.Dropdown.Item title="2 Weeks" value="1209600" />
-        <Form.Dropdown.Item title="3 Weeks" value="1814400" />
-        <Form.Dropdown.Item title="4 Weeks" value="2419200" />
-        <Form.Dropdown.Item title="5 Weeks" value="3024000" />
-        <Form.Dropdown.Item title="1 Month" value="2592000" />
-        <Form.Dropdown.Item title="31 Days" value="2678400" />
-        <Form.Dropdown.Item title="32 Days" value="2764800" />
-        <Form.Dropdown.Item title="2 Months" value="5184000" />
-        <Form.Dropdown.Item title="3 Months" value="7776000" />
-        <Form.Dropdown.Item title="4 Months" value="10368000" />
-        <Form.Dropdown.Item title="5 Months" value="12960000" />
-        <Form.Dropdown.Item title="6 Months" value="15552000" />
-        <Form.Dropdown.Item title="9 Months" value="23328000" />
-        <Form.Dropdown.Item title="13 Months" value="34186698" />
-        <Form.Dropdown.Item title="1 Year" value="31536000" />
-        <Form.Dropdown.Item title="2 Years" value="63072000" />
-        <Form.Dropdown.Item title="3 Years" value="94608000" />
+        {Object.entries(DURATIONS).map(([value, title]) => (
+          <Form.Dropdown.Item key={value} title={title} value={value} />
+        ))}
       </Form.Dropdown>
       <Form.Checkbox
         label="Floating"

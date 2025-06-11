@@ -25,9 +25,9 @@ This is a Raycast extension for [Keygen](https://keygen.sh/) - Open, enterprise-
 
     Keygen has different token types:
         
-    - For best results: use an **Admin** Token,
-    - If you are concerned about security, use an **Environment** Token,
-    - If you only want to view your _Licenses_, you can use a a **Product** Token
+    - For best results: use an **Admin** Token (`admin-xxxx...xxxx`),
+    - If you are concerned about security, use an **Environment** Token (`env-xxxx...xxxx`),
+    - If you only want to view your _Licenses_, you can use a a **Product** Token (`prod-xxxx...xxxx`)
 
     To generate an **Admin** Token, `refer` to [API Tokens - API Reference - Documentation - Keygen](https://keygen.sh/docs/api/tokens/#tokens-generate) and `make` a request similar to the one below
 

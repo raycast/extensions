@@ -8,7 +8,7 @@ import { FormValidation, useForm } from "@raycast/utils";
 dayjs.extend(relatimeTime);
 
 export default function Licenses() {
-  const { isLoading, data: licenses = [], pagination, revalidate, error } = useKeygenPaginated<License>("licenses");
+  const { isLoading, data: licenses, pagination, revalidate, error } = useKeygenPaginated<License>("licenses");
 
   return (
     <List isLoading={isLoading} isShowingDetail pagination={pagination}>
