@@ -1,6 +1,6 @@
 # code-saver Changelog
 
-## [Minor Change] - {PR_MERGE_DATE}
+## [Minor Change] - 2025-06-11
 - Make sure we can download `better-sqlite3-multiple-ciphers` as needed.
 
 ## [Minor Change] - 2023-11-08
