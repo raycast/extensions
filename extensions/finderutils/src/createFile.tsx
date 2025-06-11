@@ -53,7 +53,7 @@ export default async (props: LaunchProps<{ arguments: { filename: string } }>) =
             clearRootSearch: true,
           });
         } else {
-          await showHUD("✅ File created", { popToRootType: PopToRootType.Immediate });
+          await showHUD("✅ File created", { clearRootSearch: true });
         }
       } else {
         if (printSaveDirectory === true) {
