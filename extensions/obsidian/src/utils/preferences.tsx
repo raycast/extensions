@@ -54,3 +54,7 @@ export interface appendTaskPreferences {
   silent?: boolean;
   creationDate?: boolean;
 }
+
+export interface DailyNotePreferences {
+  vaultName?: string;
+}

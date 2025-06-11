@@ -16,7 +16,8 @@
     "adamadamsmusic",
     "fservais",
     "psychomane",
-    "denis_ufimtsev"
+    "denis_ufimtsev",
+    "theherk"
   ],
   "license": "MIT",
   "preferences": [
@@ -326,7 +327,16 @@
       "title": "Daily Note",
       "subtitle": "Obsidian",
       "description": "Open daily note in Obsidian. Will create new daily note when it doesn't exist yet.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "vaultName",
+          "type": "textfield",
+          "title": "Name of Obsidian vault where note is",
+          "required": false,
+          "description": "Name of Obsidian vault where note is. If not given, a selector is presented."
+        }
+      ]
     },
     {
       "name": "createNoteCommand",

@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Open Daily from Specified Vault] - {PR_MERGE_DATE}
+
+- Add new preference for the daily command allowing the opening from a specified vault if given.
+
 ## [Bug fixes] - 2025-06-10
 
 - Fixes a bug, which create a tagged note a wrong way. Changes an order of properties block and note text
