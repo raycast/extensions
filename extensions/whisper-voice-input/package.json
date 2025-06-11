@@ -1,0 +1,44 @@
+{
+  "name": "whisper-voice-input",
+  "type": "module",
+  "title": "Whisper Voice Input",
+  "description": "Record audio and transcribe it using OpenAI's Whisper model",
+  "icon": "assets/icon.png",
+  "author": "kochi_chuang",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "whisper-voice-input",
+      "title": "Record and Transcribe",
+      "subtitle": "Whisper Voice Input",
+      "description": "Record audio and transcribe it using Whisper",
+      "mode": "no-view",
+      "script": "src/whisper-voice-input.tsx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
+    "@types/node": "^20.11.24",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "assets": [
+    "assets/whisper-voice-input.sh"
+  ]
+}
