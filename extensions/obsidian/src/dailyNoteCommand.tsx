@@ -1,5 +1,5 @@
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, open, popToRoot } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 import { getObsidianTarget, ObsidianTargetType } from "./utils/utils";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
@@ -14,17 +14,19 @@ export default function Command() {
   const { vaultName } = getPreferenceValues<DailyNotePreferences>();
   const [isOpening, setIsOpening] = useState(false);
 
+  const [vaultsWithPlugin, vaultsWithoutPlugin] = useMemo(() => {
+    if (!ready || vaults.length === 0) return [[], []];
+    return vaultPluginCheck(vaults, "obsidian-advanced-uri");
+  }, [ready, vaults]);
+
   // Handle automatic opening for single vault or specified vault
   useEffect(() => {
     if (!ready || isOpening) return;
-    if (vaults.length === 0) return;
-
-    const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
+    if (vaults.length === 0 || vaultsWithPlugin.length === 0) return;
 
     if (vaultsWithoutPlugin.length > 0) {
       vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin);
     }
-    if (vaultsWithPlugin.length === 0) return;
 
     const selectedVault = vaultName && vaultsWithPlugin.find((vault) => vault.name === vaultName);
 
@@ -38,7 +40,7 @@ export default function Command() {
       popToRoot();
       closeMainWindow();
     }
-  }, [ready, vaults, vaultName, isOpening]);
+  }, [ready, vaults, vaultName, isOpening, vaultsWithPlugin, vaultsWithoutPlugin]);
 
   if (!ready) {
     return <List isLoading={true}></List>;
@@ -46,14 +48,10 @@ export default function Command() {
     return <NoVaultFoundMessage />;
   }
 
-  const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
-
-  if (vaultsWithoutPlugin.length > 0) {
-    vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin);
-  }
   if (vaultsWithPlugin.length === 0) {
     return <AdvancedURIPluginNotInstalled />;
   }
+
   if (vaultName && !vaultsWithPlugin.some((v) => v.name === vaultName)) {
     return <AdvancedURIPluginNotInstalled vaultName={vaultName} />;
   }
@@ -61,8 +59,8 @@ export default function Command() {
   // Only show the vault selection list if we have multiple vaults and no specific vault configured
   if (!vaultName && vaultsWithPlugin.length > 1) {
     return (
-      <List isLoading={vaultsWithPlugin === undefined}>
-        {vaultsWithPlugin?.map((vault) => (
+      <List>
+        {vaultsWithPlugin.map((vault) => (
           <List.Item
             title={vault.name}
             key={vault.key}
@@ -80,5 +78,5 @@ export default function Command() {
     );
   }
 
-  return <List isLoading={true}></List>;
+  return null;
 }
