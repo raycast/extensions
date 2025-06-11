@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-06-11
 
 - Added combo commands to simultaneously change input and output device
 
