@@ -1,6 +1,6 @@
 # Browser Tabs Changelog
 
-## [Fix Duplicated Tab Issue & Remove TeX Live Utility (Not Browser)]
+## [Fix Duplicated Tab Issue & Remove TeX Live Utility (Not Browser)] - {PR_MERGE_DATE}
 * Added a `bundleId` check when filtering open apps to exclude non-app-bundle processes (e.g., Edge aliases without a bundleId)
 * Added `TeX` to the `unsupportedBrowsers` list, as it's not a browser app (this list may expand over time)
 
