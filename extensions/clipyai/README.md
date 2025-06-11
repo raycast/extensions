@@ -1,4 +1,4 @@
-![ClipyAi](./assets/ClipyAi.png)
+![ClipyAi](./metadata//ClipyAi.png)
 
 # ClipyAI
 
@@ -13,7 +13,6 @@ A powerful Raycast extension that brings AI-powered clipboard enhancement to you
 - 💬 **Interactive Chat**: Start conversations with your clipboard content
 - 🎨 **Beautiful UI**: Clean and intuitive Raycast interface
 - 🔄 **Real-time Processing**: Instant clipboard content analysis
-- 🎯 **Context-Aware**: Maintains conversation history for better responses
 
 ## Requirements
 
@@ -81,62 +80,52 @@ Customize quick actions with your own:
 - Save frequently used prompts as quick actions
 - Use history to track and reuse successful prompts
 
-## Roadmap
+## Screenshots
 
-### Upcoming Features
+### Quick Actions Menu
+![Quick Action](./metadata/Quick%20Actions%20Menu.png)
+Shows all the quick actions and provide easy access to them.
 
-1. **Advanced AI Features**
+### Quick Action
+![Quick Actions](./metadata/Quick%20Action.png)
+Displays action details, character count, word count, and available operations for the current clipboard content.
 
-   - Multiple model support (Claude, Gemini)
-   - Custom system prompts per hotkey
-   - Function calling support
+### Expand Chat
+![Expand Chat](./metadata/Expand%20Chat.png)
+Expand the quick action to full chat for further queried or updates.
 
-2. **Enhanced Clipboard**
+### Chat Interface
+![Chat Interface](./metadata/Chat.png)
+Shows the chat interface with message count, character count, and real-time status indicators. 
 
-   - Multiple clipboard history
-   - Rich text support
-   - Code syntax highlighting
-   - Table data handling
+### History View
+![History](./metadata/History.png)
+View and manage your action history with detailed timestamps and results.
 
-3. **Workflow Integration**
+### Settings and Configuration
+![Settings](./metadata/Quick%20Actions%20Settings.png)
+Customize your quick actions with titles, prompts, and icons.
 
-   - Custom workflow creation
-   - Action chaining
-   - Batch processing
-   - Scheduled actions
+## Shortcuts
 
-4. **Quality Improvements**
-   - Response streaming
-   - Offline mode support
-   - Better error recovery
-   - Performance optimization
+### Global Shortcuts
+- `⌘ + Space` - Open Raycast (default Raycast shortcut)
+- Type `clipyai` to access the extension
 
-### Future Plans
+### In Hotkeys/Quick Actions Settings (Manage Hotkeys)
+- Access from: Main Menu `⌘ + K` > Manage Hotkeys
+- `⌘ + R` - Reset hotkeys to defaults
+- `⌘ + Enter` - Delete a hotkey
+- `Enter` - Edit a hotkey
+- `⌘ + K` > `Add Hotkey` - to add a new hotkey
 
-1. **Development Tools**
+### In Chat View
+- `Enter` - To type the message
+- `⌘ + Enter` - Send message in Message Menu
+- `⌘ + Enter` - Copy Last Response in Chat Menu
+- Access from: Main Menu > Start Chat
 
-   - Code review assistance
-   - Documentation generation
-   - Git commit messages
-   - PR descriptions
-
-2. **Content Creation**
-
-   - Image generation
-   - Text-to-speech
-   - Translation services
-   - Grammar checking
-
-3. **Productivity**
-   - Calendar integration
-   - Task creation
-   - Email drafting
-   - Meeting summarization
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-MIT
+### In Quick Actions
+- `Enter` - Copy The Response
+- `⌘ + Enter` - Expand To Chat
+- Access from: Main Menu > Select the quick action
