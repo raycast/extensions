@@ -1,6 +1,6 @@
 # Web3.bio Raycast Changelog
 
-## [✨ Enhancements] - {PR_MERGE_DATE}
+## [✨ Enhancements] - 2025-06-11
 
 - Enhanced platform support by adding Basenames, Linea domains and more
 - Imported new Profile Kit to have updated platform descriptions
