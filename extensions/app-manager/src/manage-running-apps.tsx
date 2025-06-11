@@ -10,7 +10,7 @@ import {
   getApplications,
   Application,
 } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, runAppleScript } from "@raycast/utils";
 import { execSync } from "child_process";
 import { useState } from "react";
 
@@ -54,8 +54,8 @@ async function fetchApps(): Promise<App[]> {
       getApplications(),
 
       // Get running processes with their bundle IDs (optimized AppleScript)
-      execSync(
-        `osascript -e '
+      runAppleScript(
+        `
         tell application "System Events"
           set appList to {}
           repeat with proc in (every process whose background only is false)  
@@ -68,11 +68,7 @@ async function fetchApps(): Promise<App[]> {
           end repeat
           return appList
         end tell
-      '`,
-        {
-          encoding: "utf8",
-          timeout: 8000, // Reduced timeout
-        },
+      `,
       ),
     ]);
 
@@ -194,9 +190,7 @@ export default function Command() {
 
   const quitSelectedApps = async () => {
     if (selected.size === 0) {
-      await showFailureToast("No apps selected", {
-        title: "Please select apps to quit first",
-      });
+      await showFailureToast("No apps selected", { title: "Please select apps to quit first" });
       return;
     }
 
