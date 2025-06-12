@@ -52,37 +52,31 @@ export function useSitesState() {
   }
 
   async function openInIDE(site: Site): Promise<void> {
-    await closeMainWindow();
     await showHUD("Opening IDE for " + site.site);
     await rescue(() => Herd.Sites.openInIDE(site), "Could not open IDE.");
   }
 
   async function openInBrowser(site: Site): Promise<void> {
-    await closeMainWindow();
     await showHUD(`Opening ${site.site} in Browser...`);
     await rescue(() => Herd.Sites.openInBrowser(site), "Could not open Site in Browser.");
   }
 
   async function openDatabase(site: Site): Promise<void> {
-    await closeMainWindow();
     await showHUD(`Opening ${site.site} database...`);
     await rescue(() => Herd.Sites.openDatabase(site), "Could not open Database for Site.");
   }
 
   async function openLogs(site: Site): Promise<void> {
-    await closeMainWindow();
     await showHUD(`Opening Log Viewer for ${site.site}...`);
     await rescue(() => Herd.Sites.openLogs(site.path), "Could not open Log Viewer for Site.");
   }
 
   async function openTerminal(site: Site): Promise<void> {
-    await closeMainWindow();
     await showHUD(`Opening Terminal for ${site.site}...`);
     await rescue(() => Herd.ExternalApps.openTerminal(site.path), "Could not open Terminal for Site.");
   }
 
   async function openTinker(site: Site): Promise<void> {
-    await closeMainWindow();
     await showHUD(`Opening Tinker for ${site.site}...`);
     await rescue(() => Herd.ExternalApps.openTinker(site.path), "Could not open Tinker for Site.");
   }
