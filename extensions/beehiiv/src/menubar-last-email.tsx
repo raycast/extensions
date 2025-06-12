@@ -50,9 +50,10 @@ export default function LastEmailStatsMenuBar() {
       }
 
       const data = await response.json();
-      const fetchedPost = (data.data as Post[])
-        .filter((p) => p.platform === "email" || p.platform === "both")
-        .sort((a, b) => b.publish_date - a.publish_date)[0] || null;
+      const fetchedPost =
+        (data.data as Post[])
+          .filter((p) => p.platform === "email" || p.platform === "both")
+          .sort((a, b) => b.publish_date - a.publish_date)[0] || null;
       setPost(fetchedPost);
     } catch (e) {
       console.error("Error fetching last email stats:", e);
@@ -71,19 +72,16 @@ export default function LastEmailStatsMenuBar() {
 
   const emailStats = post?.stats?.email;
 
-  const title = emailStats
-    ? `${post?.title}: ${emailStats.unique_opens}/${emailStats.recipients}`
-    : "Beehiiv";
+  const title = emailStats ? `${post?.title}: ${emailStats.unique_opens}/${emailStats.recipients}` : "Beehiiv";
 
   return (
-    <MenuBarExtra icon={Icon.Envelope} isLoading={isLoading} title={title} tooltip={post?.title || "Beehiiv Last Email"}>
-      {error && (
-        <MenuBarExtra.Item
-          title={`Error: ${error}`}
-          icon={Icon.Warning}
-          onAction={openExtensionPreferences}
-        />
-      )}
+    <MenuBarExtra
+      icon={Icon.Envelope}
+      isLoading={isLoading}
+      title={title}
+      tooltip={post?.title || "Beehiiv Last Email"}
+    >
+      {error && <MenuBarExtra.Item title={`Error: ${error}`} icon={Icon.Warning} onAction={openExtensionPreferences} />}
 
       {post && emailStats && (
         <>
@@ -103,9 +101,7 @@ export default function LastEmailStatsMenuBar() {
         </>
       )}
 
-      {!post && !error && !isLoading && (
-        <MenuBarExtra.Item title="No emails found" />
-      )}
+      {!post && !error && !isLoading && <MenuBarExtra.Item title="No emails found" />}
     </MenuBarExtra>
   );
-} 
+}

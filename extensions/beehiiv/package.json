@@ -1,17 +1,18 @@
 {
   "name": "beehiiv",
-  "title": "beehiiv",
+  "title": "Beehiiv",
   "description": "Integrate beehiiv with Raycast, allowing you to search for posts, check statistics, show subscribers count in the menu bar, and more.",
   "icon": "beehiiv.png",
   "author": "damian_zachwieja",
   "categories": [
-    "Web", "Applications"
+    "Web",
+    "Applications"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "search-subscribers",
-      "title": "Search Subscribers", 
+      "title": "Search Subscribers",
       "description": "Search and browse through your publication's subscriber list. View subscriber details and open profiles in beehiiv.",
       "mode": "view"
     },
@@ -58,20 +59,20 @@
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "eslint": "^7.32.0",
     "@types/node": "~16.10.0",
     "@types/node-fetch": "^2.6.12",
     "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint",
+    "lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
   }
 }

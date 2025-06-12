@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Detail, getPreferenceValues, showToast, Toast, Icon, Cache } from "@raycast/api";
+import { ActionPanel, Action, List, getPreferenceValues, Icon, Cache } from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
 import fetch from "node-fetch";
 
@@ -36,33 +36,34 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [selectedSubId, setSelectedSubId] = useState<string | null>(null);
-  const [lastFetchedDetails, setLastFetchedDetails] = useState<{ [key:string]: number }>({});
+  const [lastFetchedDetails, setLastFetchedDetails] = useState<{ [key: string]: number }>({});
   const fetchInProgressRef = useRef<string | null>(null);
-  
-  const filteredSubscriptions = subscriptions.filter((subscription) =>
-    subscription.email.toLowerCase().includes(searchText.toLowerCase()) ||
-    `${subscription.first_name} ${subscription.last_name}`.toLowerCase().includes(searchText.toLowerCase())
+
+  const filteredSubscriptions = subscriptions.filter(
+    (subscription) =>
+      subscription.email.toLowerCase().includes(searchText.toLowerCase()) ||
+      `${subscription.first_name} ${subscription.last_name}`.toLowerCase().includes(searchText.toLowerCase())
   );
 
   let isRunning = false;
   const startReloading = async () => {
-    const cachedSubscriptions = JSON.parse(await cache.get("beehiivSubscriptions") || "[]");
-    if(cachedSubscriptions) {
+    const cachedSubscriptions = JSON.parse((await cache.get("beehiivSubscriptions")) || "[]");
+    if (cachedSubscriptions) {
       setSubscriptions(cachedSubscriptions);
     }
-    if(isRunning) return;
+    if (isRunning) return;
     isRunning = true;
     fetchSubscriptions();
-  }
+  };
 
   const clearCache = async () => {
     cache.clear();
-  }
+  };
 
   const fetchSubscriptions = async (page: number = 1, allSubscriptions: Subscription[] = []) => {
     setIsLoading(true);
     try {
-      console.info("PAGE: " + page)
+      console.info("PAGE: " + page);
       const response = await fetch(
         `https://api.beehiiv.com/v2/publications/${preferences.publicationId}/subscriptions?limit=100&page=${page}&order_by=created&direction=desc&expand[]=stats`,
         {
@@ -71,21 +72,23 @@ export default function Command() {
           },
         }
       );
-  
+
       if (!response.ok) {
         console.error(response);
         throw new Error("Failed to fetch subscriptions");
       }
-  
+
       const data = await response.json();
       const fetchedSubscriptions = data.data as Subscription[];
-  
+
       // stop fetching when we reach a subscriber already in cache (by created timestamp)
-      const cachedSubscriptions: Subscription[] = JSON.parse(await cache.get("beehiivSubscriptions") || "[]");
-      const foundExisting = fetchedSubscriptions.some(sub => cachedSubscriptions.some(cached => cached.created === sub.created));
-  
+      const cachedSubscriptions: Subscription[] = JSON.parse((await cache.get("beehiivSubscriptions")) || "[]");
+      const foundExisting = fetchedSubscriptions.some((sub) =>
+        cachedSubscriptions.some((cached) => cached.created === sub.created)
+      );
+
       allSubscriptions = [...allSubscriptions, ...fetchedSubscriptions];
-  
+
       if (page < data.total_pages && !foundExisting) {
         fetchSubscriptions(page + 1, allSubscriptions);
       } else {
@@ -99,11 +102,11 @@ export default function Command() {
       setIsLoading(false);
     }
   };
-  
+
   // Fetch fresh details for a single subscription
   const fetchSubscriptionDetails = async (subId: string) => {
     try {
-      console.info("Fetching subscription details for: " + subId)
+      console.info("Fetching subscription details for: " + subId);
       if (fetchInProgressRef.current === subId) return;
       const now = Date.now();
       const last = lastFetchedDetails[subId] || 0;
@@ -123,7 +126,7 @@ export default function Command() {
       setSubscriptions((current) => current.map((s) => (s.id === subId ? { ...s, ...updatedSub } : s)));
 
       // update cache
-      const cached: Subscription[] = JSON.parse(await cache.get("beehiivSubscriptions") || "[]");
+      const cached: Subscription[] = JSON.parse((await cache.get("beehiivSubscriptions")) || "[]");
       const updatedCache = cached.map((s) => (s.id === subId ? { ...s, ...updatedSub } : s));
       await cache.set("beehiivSubscriptions", JSON.stringify(updatedCache));
 
@@ -138,7 +141,7 @@ export default function Command() {
   useEffect(() => {
     startReloading();
   }, []);
-  
+
   useEffect(() => {
     if (selectedSubId) {
       fetchSubscriptionDetails(selectedSubId);
@@ -147,8 +150,8 @@ export default function Command() {
 
   function SubscriptionListItem({ subscription }: { subscription: Subscription }) {
     const parseDate = (date: number) => {
-      if(date) {
-        return new Date(date * 1000).toLocaleString()
+      if (date) {
+        return new Date(date * 1000).toLocaleString();
       } else {
         return "-";
       }
@@ -156,11 +159,9 @@ export default function Command() {
 
     return (
       <List.Item
-        title={subscription.email}  
+        title={subscription.email}
         id={subscription.id}
-        accessories={[
-          { icon: subscription.status === "active" ? Icon.CheckCircle : Icon.Circle },
-        ]}
+        accessories={[{ icon: subscription.status === "active" ? Icon.CheckCircle : Icon.Circle }]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
@@ -181,12 +182,36 @@ export default function Command() {
           <List.Item.Detail
             metadata={
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="E-mail Address" text={subscription.email} icon={Icon.AtSymbol} />
-                <List.Item.Detail.Metadata.Label title="Status" text={subscription.status} icon={subscription.status === "active" ? Icon.CheckCircle : Icon.Circle} />
-                <List.Item.Detail.Metadata.Label title="Subscribed Date" text={parseDate(subscription.created)} icon={Icon.Calendar} />
-                <List.Item.Detail.Metadata.Label title="UTM Source" text={subscription.utm_source || "-"} icon={Icon.Link} />
-                <List.Item.Detail.Metadata.Label title="UTM Medium" text={subscription.utm_medium || "-"} icon={Icon.Link} />
-                <List.Item.Detail.Metadata.Label title="UTM Campaign" text={subscription.utm_campaign || "-"} icon={Icon.Link} />
+                <List.Item.Detail.Metadata.Label
+                  title="E-mail Address"
+                  text={subscription.email}
+                  icon={Icon.AtSymbol}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="Status"
+                  text={subscription.status}
+                  icon={subscription.status === "active" ? Icon.CheckCircle : Icon.Circle}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="Subscribed Date"
+                  text={parseDate(subscription.created)}
+                  icon={Icon.Calendar}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="UTM Source"
+                  text={subscription.utm_source || "-"}
+                  icon={Icon.Link}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="UTM Medium"
+                  text={subscription.utm_medium || "-"}
+                  icon={Icon.Link}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="UTM Campaign"
+                  text={subscription.utm_campaign || "-"}
+                  icon={Icon.Link}
+                />
               </List.Item.Detail.Metadata>
             }
           />
