@@ -17,7 +17,8 @@ Uses Raycast to search through Linking bookmarks.
 
 ## Notice
 
-The Linkding API key and server URL from your Linkding instance are needed to use this extension.
+- The Linkding API key and server URL from your Linkding instance are needed to use this extension.
+- Due to Firefox's lack of scripting support, automatically getting the URL from the current Firefox tab is not supported.
 
 ## Planned Features
 
