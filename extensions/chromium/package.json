@@ -5,6 +5,7 @@
   "description": "Search open tabs, bookmarks in Chromium.",
   "icon": "image.png",
   "author": "bellwood0523",
+  "categories": ["Applications", "Web"],
   "license": "MIT",
   "commands": [
     {
