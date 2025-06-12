@@ -13,18 +13,21 @@
     {
       "name": "search-subscribers",
       "title": "Search Subscribers",
+      "subtitle": "Beehiiv",
       "description": "Search and browse through your publication's subscriber list. View subscriber details and open profiles in beehiiv.",
       "mode": "view"
     },
     {
       "name": "search-posts",
       "title": "Search Posts",
+      "subtitle": "Beehiiv",
       "description": "Search across all your posts, view analytics, copy links and open posts in beehiiv.",
       "mode": "view"
     },
     {
       "name": "menubar-count-subscribers",
       "title": "Menu Bar Subscribers Count",
+      "subtitle": "Beehiiv",
       "description": "Display your current subscriber count in the menu bar. Updates hourly to keep you informed.",
       "mode": "menu-bar",
       "interval": "1h"
@@ -32,6 +35,7 @@
     {
       "name": "menubar-last-email",
       "title": "Menu Bar Last Email Stats",
+      "subtitle": "Beehiiv",
       "description": "Show performance metrics for your most recent email campaign right in the menu bar. Updates every 30 minutes.",
       "mode": "menu-bar",
       "interval": "30m"
@@ -72,7 +76,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint --fix",
+    "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   }
 }
