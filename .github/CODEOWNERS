@@ -234,7 +234,7 @@
 /extensions/charming-chatgpt                                        @KittenYang
 /extensions/chatgo                                                  @chuyun
 /extensions/chatgpt                                                 @abielzulio @erodactyl @pernielsentikaer @shichongrui @timolins @cruelmoney @abielzulio @abielzulio @k8scat @Nauxscript @aeither @leeonfield @husniadil @luckykong @SmileMachine @iamEvanYT @aleksey925
-/extensions/chatgpt-quick-actions                                   @alanzchen @one-data-cookie @JonathanAquino
+/extensions/chatgpt-quick-actions                                   @alanzchen @one-data-cookie @JonathanAquino @drewbabel
 /extensions/chatgpt3-prompt                                         @denizyoldas @pernielsentikaer @husniadil
 /extensions/chatwith                                                @rafalzawadzki
 /extensions/cheatsheets                                             @Destiner @jdoconnor
@@ -243,6 +243,7 @@
 /extensions/checksum                                                @Ek2100 @pernielsentikaer
 /extensions/cheetah                                                 @RongleCat
 /extensions/chess-com                                               @joshfarrant @tomassliz
+/extensions/chhoto                                                  @paranoidPhantom
 /extensions/china-ip-address                                        @ErlichLiu
 /extensions/chinese-character                                       @koinzhang
 /extensions/chinese-lottery                                         @elonwoo @pernielsentikaer
@@ -595,7 +596,7 @@
 /extensions/finnish-dictionary                                      @albertoxamin
 /extensions/fip                                                     @louison
 /extensions/firebase-import-export                                  @mguyard
-/extensions/firecrawl                                               @KELiON @thomaspaulmann @pernielsentikaer @xilopaint
+/extensions/firecrawl                                               @KELiON @thomaspaulmann @pernielsentikaer @xilopaint @ftonato
 /extensions/fisher                                                  @MatheusChein
 /extensions/fix-language                                            @hiiamtin
 /extensions/fix-link-embeds                                         @eggsy
@@ -1658,7 +1659,7 @@
 /extensions/sf-symbols-search                                       @peteschaffner @xilopaint
 /extensions/shadcn-svelte                                           @selemondev
 /extensions/shadcn-ui                                               @luisFilipePT @WilliamWelsh @Olivier-OG @ridemountainpig @Siddharth-2382
-/extensions/shadcn-vue                                              @selemondev
+/extensions/shadcn-vue                                              @selemondev @ridemountainpig
 /extensions/shakespearify                                           @Binary-Bytes
 /extensions/share-my-code                                           @jairaume
 /extensions/shell                                                   @KELiON @emiara @kevinm6 @MohamedK1 @AnirudhG07 @pernielsentikaer
@@ -2086,7 +2087,7 @@
 /extensions/wordle                                                  @chrisalxlng
 /extensions/wordpress-docs                                          @tillkruss @KevinBatdorf
 /extensions/wordpress-icon-finder                                   @javierarce
-/extensions/wordpress-plugins                                       @edmundcwm
+/extensions/wordpress-plugins                                       @edmundcwm @xmok
 /extensions/wordreference                                           @Nass30
 /extensions/work-time-countdown                                     @thomaspaulmann @pernielsentikaer @aalhaif @krsntn
 /extensions/workflowy-inbox                                         @cameronapak
@@ -2115,6 +2116,7 @@
 /extensions/year-in-progress                                        @thomaspaulmann @anothertempore @akshykhade @teemusuvinen
 /extensions/yield-calculator                                        @Decryptu
 /extensions/yoink                                                   @koinzhang
+/extensions/yomicast                                                @matchai
 /extensions/yopass                                                  @ricoberger
 /extensions/you-com-search                                          @smian1
 /extensions/youdao-translate                                        @tiancheng92
