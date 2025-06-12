@@ -4,7 +4,7 @@
 
 Initial version code
 
-## [Implement new features] - {PR_MERGE_DATE}
+## [Implement new features] - 2025-06-12
 
 Make it possible to create files in the Desktop
 
