@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, getPreferenceValues, Icon, Cache, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, getPreferenceValues, Icon, Cache } from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
 import fetch from "node-fetch";
 
@@ -38,8 +38,6 @@ export default function Command() {
   const [selectedSubId, setSelectedSubId] = useState<string | null>(null);
   const [lastFetchedDetails, setLastFetchedDetails] = useState<{ [key: string]: number }>({});
   const fetchInProgressRef = useRef<string | null>(null);
-  // Track whether a background reload is currently running to avoid concurrent executions
-  const [isRunning, setIsRunning] = useState(false);
 
   const filteredSubscriptions = subscriptions.filter(
     (subscription) =>
@@ -47,13 +45,14 @@ export default function Command() {
       `${subscription.first_name} ${subscription.last_name}`.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  let isRunning = false;
   const startReloading = async () => {
     const cachedSubscriptions = JSON.parse((await cache.get("beehiivSubscriptions")) || "[]");
     if (cachedSubscriptions) {
       setSubscriptions(cachedSubscriptions);
     }
     if (isRunning) return;
-    setIsRunning(true);
+    isRunning = true;
     fetchSubscriptions();
   };
 
@@ -61,61 +60,46 @@ export default function Command() {
     cache.clear();
   };
 
-  const fetchSubscriptions = async () => {
+  const fetchSubscriptions = async (page: number = 1, allSubscriptions: Subscription[] = []) => {
     setIsLoading(true);
     try {
-      const cachedSubscriptions: Subscription[] = JSON.parse((await cache.get("beehiivSubscriptions")) || "[]");
-
-      let page = 1;
-      let totalPages = 1;
-      let allSubscriptions: Subscription[] = [];
-      let stop = false;
-
-      while (!stop) {
-        console.info("PAGE: " + page);
-        const response = await fetch(
-          `https://api.beehiiv.com/v2/publications/${preferences.publicationId}/subscriptions?limit=100&page=${page}&order_by=created&direction=desc&expand[]=stats`,
-          {
-            headers: {
-              Authorization: `Bearer ${preferences.apiKey}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fetch subscriptions",
-            message: `${response.status} ${response.statusText}`,
-          });
-          throw new Error("Failed to fetch subscriptions");
+      console.info("PAGE: " + page);
+      const response = await fetch(
+        `https://api.beehiiv.com/v2/publications/${preferences.publicationId}/subscriptions?limit=100&page=${page}&order_by=created&direction=desc&expand[]=stats`,
+        {
+          headers: {
+            Authorization: `Bearer ${preferences.apiKey}`,
+          },
         }
+      );
 
-        const data = await response.json();
-        const fetchedSubscriptions = data.data as Subscription[];
-        totalPages = data.total_pages ?? page; // fallback in case API doesn't return
-
-        const foundExisting = fetchedSubscriptions.some((sub) =>
-          cachedSubscriptions.some((cached) => cached.created === sub.created)
-        );
-
-        allSubscriptions = [...allSubscriptions, ...fetchedSubscriptions];
-
-        // stop if we've processed all pages OR encountered cached item
-        if (page >= totalPages || foundExisting) {
-          stop = true;
-        } else {
-          page += 1;
-        }
+      if (!response.ok) {
+        console.error(response);
+        throw new Error("Failed to fetch subscriptions");
       }
 
-      setSubscriptions(allSubscriptions);
-      await cache.set("beehiivSubscriptions", JSON.stringify(allSubscriptions));
+      const data = await response.json();
+      const fetchedSubscriptions = data.data as Subscription[];
+
+      // stop fetching when we reach a subscriber already in cache (by created timestamp)
+      const cachedSubscriptions: Subscription[] = JSON.parse((await cache.get("beehiivSubscriptions")) || "[]");
+      const foundExisting = fetchedSubscriptions.some((sub) =>
+        cachedSubscriptions.some((cached) => cached.created === sub.created)
+      );
+
+      allSubscriptions = [...allSubscriptions, ...fetchedSubscriptions];
+
+      if (page < data.total_pages && !foundExisting) {
+        fetchSubscriptions(page + 1, allSubscriptions);
+      } else {
+        isRunning = false;
+        setSubscriptions(allSubscriptions);
+        setIsLoading(false);
+        await cache.set("beehiivSubscriptions", JSON.stringify(allSubscriptions));
+      }
     } catch (error) {
       console.error("Error fetching subscriptions:", error);
-    } finally {
       setIsLoading(false);
-      setIsRunning(false);
     }
   };
 

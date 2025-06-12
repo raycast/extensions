@@ -222,8 +222,6 @@ export default function PostList() {
           return "Draft";
         case "archived":
           return "Archived";
-        default:
-          return status;
       }
     };
     const markdown = `![Thumbnail](${post.thumbnail_url})`;
