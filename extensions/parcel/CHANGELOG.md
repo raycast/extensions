@@ -1,6 +1,6 @@
 # Parcel Changelog
 
-## [Expected Delivery Date Formatting Overhaul] - {PR_MERGE_DATE}
+## [Expected Delivery Date Formatting Overhaul] - 2025-06-12
 
 - Delivery windows now show the full time range when available (e.g., "12 Jun 10:45 – 12:45"), so you know exactly when to expect your package.
 - Times are shown when provided by the carrier, making delivery info more precise.
