@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { exec } from "child_process";
 import DiskSection from "./DiskSection";
@@ -6,20 +6,17 @@ import { showFailureToast } from "@raycast/utils";
 
 export default function ListDisks(): JSX.Element {
   const [disks, setDisks] = useState<DiskSection[]>([]);
-  const [showingDetail, setShowingDetail] = useState(false);
+  const [showingDetail, setShowingDetail] = useState({ show: false, detail: 0 });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
     process.env.PATH = `${process.env.PATH}:/usr/sbin:/usr/bin/`;
-    process.env.USER = process.env.USER || "";
+    process.env.USER = "root";
     fetchDisks("Init");
   }, []);
 
-  // DiskUpdate (Dont show Toast) or Refresh
-  /**
-   * Update the DiskSections. Only do a quick refresh on DiskUpdate
-   * @param One of the annotated types to choose the style of update
-   */
+  // DiskUpdate (Don't show Toast) or Refresh
   async function updateDiskSections(update: "DiskUpdate" | "DiskRefresh" | "Init" | "Refresh") {
     setIsLoading(true);
 
@@ -43,9 +40,7 @@ export default function ListDisks(): JSX.Element {
     const sectionStrings = diskOutput.match(sectionRegex) ?? [];
     const newDiskSections: DiskSection[] = sectionStrings.map(DiskSection.createFromString);
 
-    // Check if disks are the same
-    // NOTE: This is a simple comparison that checks if the length of disks are the same.
-    // You might need to implement a deeper comparison depending on the structure of DiskSection.
+    // Check if disks are the same (simple length comparison)
     const areDisksTheSame = disks.length === newDiskSections.length;
 
     if (!areDisksTheSame || update === "Refresh" || update === "DiskRefresh") {
@@ -70,8 +65,7 @@ export default function ListDisks(): JSX.Element {
   }
 
   /**
-   *
-   * @param update "DiskUpdate", "DiskRefresh", "Refresh", "Init"
+   * Fetch disks with the provided update type.
    */
   function fetchDisks(update: "Init" | "DiskUpdate" | "DiskRefresh" | "Refresh") {
     try {
@@ -83,9 +77,7 @@ export default function ListDisks(): JSX.Element {
   }
 
   /**
-   * Helper
-   * @param command
-   * @returns
+   * Helper to execute a disk command.
    */
   async function execDiskCommand(command: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -99,30 +91,61 @@ export default function ListDisks(): JSX.Element {
     });
   }
 
+  // Handler for dropdown filter changes
+  function handleFilterChange(newValue: string) {
+    setFilter(newValue);
+  }
+
   return (
-    <List isShowingDetail={showingDetail} isLoading={isLoading}>
-      {/* Iterating over each DiskSection object in the disks array */}
+    <List
+      isShowingDetail={showingDetail.show}
+      isLoading={isLoading}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter Disks" onChange={handleFilterChange} value={filter}>
+          <List.Dropdown.Item title="All" value="all" />
+          <List.Dropdown.Item title="Internal" value="internal" />
+          <List.Dropdown.Item title="External" value="external" />
+        </List.Dropdown>
+      }
+    >
       {disks.map((diskSection, index) => {
+        const filteredDisks = diskSection.disks.filter((disk) => {
+          if (filter === "all") return true;
+          if (disk.internal === null) return true;
+          if (filter === "internal") return disk.internal === true;
+          if (filter === "external") return disk.internal === false;
+          return true;
+        });
+
+        if (filteredDisks.length === 0) {
+          return null;
+        }
         return (
           <List.Section key={index} title={diskSection.sectionName}>
-            {/* Iterating over each disk in each section*/}
-            {diskSection.disks.map((disk, diskIndex) => {
+            {filteredDisks.map((disk, diskIndex) => {
               return (
                 <List.Item
                   key={diskIndex}
                   title={disk.number + ": " + disk.identifier}
-                  subtitle={disk.name + disk.getFormattedSize()}
-                  accessories={[{ tag: { value: disk.type } }, disk.getMountStatusAccessory()]}
-                  detail={showingDetail ? <List.Item.Detail metadata={disk.getDetails()} /> : null}
+                  subtitle={disk.name /*+ disk.getFormattedSize()*/}
+                  accessories={[{ tag: { value: disk.type } }, disk.getSizeAccessory(), disk.getMountStatusAccessory()]}
+                  detail={
+                    showingDetail ? (
+                      <List.Item.Detail
+                        metadata={showingDetail.detail == 1 ? disk.getDetailsPlist() : disk.getDetails()}
+                      />
+                    ) : null
+                  }
                   keywords={[disk.name, disk.mountStatus]}
                   actions={
                     <ActionPanel>
                       <Action.CopyToClipboard content={disk.identifier} />
                       <Action
-                        title={"Toggle Detail"}
+                        title="Toggle Detail"
                         icon={Icon.Sidebar}
-                        onAction={() => setShowingDetail(!showingDetail)}
+                        onAction={() => setShowingDetail({ show: !showingDetail.show, detail: 0 })}
                       />
+                      {/* fetchDisks as the callback function */}
                       {disk.getActions(fetchDisks).map((action, index) => (
                         <Action
                           key={index}
@@ -139,6 +162,12 @@ export default function ListDisks(): JSX.Element {
                         shortcut={{ modifiers: ["cmd"], key: "r" }}
                         onAction={() => fetchDisks("Refresh")}
                         icon={Icon.RotateAntiClockwise}
+                      />
+                      <Action
+                        title="Toggle Detail Alt"
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                        icon={Icon.Sidebar}
+                        onAction={() => setShowingDetail({ show: !showingDetail.show, detail: 1 })}
                       />
                     </ActionPanel>
                   }
