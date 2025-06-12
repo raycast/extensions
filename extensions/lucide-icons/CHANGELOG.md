@@ -1,5 +1,10 @@
 # Lucide Icons Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added the preference to select the primary action to use.
+- Added the action to paste SVG.
+
 ## [Update] - 2025-04-15
 
 - Add the preference to copy icon name in Pascal Case.
