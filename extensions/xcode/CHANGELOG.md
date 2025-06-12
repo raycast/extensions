@@ -1,5 +1,8 @@
 # Xcode Changelog
 
+## [Add Delete Simulator Action] - {PR_MERGE_DATE}
+- Add an action in the "Manage Simulators" command to delete a given simulator.
+
 ## [Fix open URL] -  2025-04-25
 - Fix the open URL in Simulator command to support URLs with query parameters.
 

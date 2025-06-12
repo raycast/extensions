@@ -1,11 +1,11 @@
-import { XcodeSimulator } from "../../models/xcode-simulator/xcode-simulator.model";
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List } from "@raycast/api";
 import { XcodeSimulatorState } from "../../models/xcode-simulator/xcode-simulator-state.model";
-import { operationWithUserFeedback } from "../../shared/operation-with-user-feedback";
+import { XcodeSimulator } from "../../models/xcode-simulator/xcode-simulator.model";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
+import { operationWithUserFeedback } from "../../shared/operation-with-user-feedback";
+import { XcodeSimulatorApplicationList } from "../xcode-simulator-application-list/xcode-simulator-application-list.component";
 import { XcodeSimulatorOpenUrlForm } from "./xcode-simulator-open-url-form.component";
 import { XcodeSimulatorRenameForm } from "./xcode-simulator-rename-form.component";
-import { XcodeSimulatorApplicationList } from "../xcode-simulator-application-list/xcode-simulator-application-list.component";
 import { XcodeSimulatorSendPushNotificationForm } from "./xcode-simulator-send-push-notification-form.component";
 
 /**
@@ -107,6 +107,35 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
             title="Rename"
             shortcut={Keyboard.Shortcut.Common.Edit}
             target={<XcodeSimulatorRenameForm simulator={props.simulator} onRename={props.revalidate} />}
+          />
+          <Action
+            title="Delete"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            onAction={async () => {
+              const alertOptions: Alert.Options = {
+                icon: Icon.Trash,
+                title: "Delete",
+                message: `Are you sure you want to delete the ${props.simulator.name} ${props.simulator.udid} simulator?`,
+                primaryAction: {
+                  title: "Delete",
+                  style: Alert.ActionStyle.Destructive,
+                },
+              };
+              if (!(await confirmAlert(alertOptions))) {
+                return;
+              }
+              operationWithUserFeedback(
+                "Deleting Simulator...",
+                `${props.simulator.name} ${props.simulator.udid} simulator has been deleted`,
+                "Error Deleting runtime",
+                async () => {
+                  await XcodeSimulatorService.deleteSimulatorByUdid(props.simulator.udid)
+                  props.revalidate();
+                }
+              );
+            }}
           />
         </ActionPanel>
       }

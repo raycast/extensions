@@ -1,17 +1,17 @@
-import { XcodeSimulator } from "../models/xcode-simulator/xcode-simulator.model";
-import { execAsync } from "../shared/exec-async";
-import { XcodeSimulatorGroup } from "../models/xcode-simulator/xcode-simulator-group.model";
-import { XcodeSimulatorState } from "../models/xcode-simulator/xcode-simulator-state.model";
 import { XcodeSimulatorAppAction } from "../models/xcode-simulator/xcode-simulator-app-action.model";
 import { XcodeSimulatorAppPrivacyAction } from "../models/xcode-simulator/xcode-simulator-app-privacy-action.model";
 import { XcodeSimulatorAppPrivacyServiceType } from "../models/xcode-simulator/xcode-simulator-app-privacy-service-type.model";
-import { groupBy } from "../shared/group-by";
-import { XcodeService } from "./xcode.service";
+import { XcodeSimulatorGroup } from "../models/xcode-simulator/xcode-simulator-group.model";
 import {
   XcodeSimulatorOpenUrlError,
   XcodeSimulatorOpenUrlErrorReason,
 } from "../models/xcode-simulator/xcode-simulator-open-url-error.model";
 import { XcodeSimulatorStateFilter } from "../models/xcode-simulator/xcode-simulator-state-filter.model";
+import { XcodeSimulatorState } from "../models/xcode-simulator/xcode-simulator-state.model";
+import { XcodeSimulator } from "../models/xcode-simulator/xcode-simulator.model";
+import { execAsync } from "../shared/exec-async";
+import { groupBy } from "../shared/group-by";
+import { XcodeService } from "./xcode.service";
 
 /**
  * XcodeSimulatorService
@@ -246,5 +246,14 @@ export class XcodeSimulatorService {
    */
   static async triggerIcloudSync(xcodeSimulator: XcodeSimulator): Promise<void> {
     return execAsync(`xcrun simctl icloud_sync ${xcodeSimulator.udid}`).then();
+  }
+
+  /**
+   * Delete a specific Simulator by UDID
+   * @param udid The UDID of the Simulator to delete
+   * @returns A promise that resolves when the Simulator is deleted  
+  */
+  static deleteSimulatorByUdid(udid: string): Promise<void> {
+    return execAsync(`xcrun simctl delete ${udid}`).then();
   }
 }
