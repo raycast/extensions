@@ -251,8 +251,8 @@ export class XcodeSimulatorService {
   /**
    * Delete a specific Simulator by UDID
    * @param udid The UDID of the Simulator to delete
-   * @returns A promise that resolves when the Simulator is deleted  
-  */
+   * @returns A promise that resolves when the Simulator is deleted
+   */
   static deleteSimulatorByUdid(udid: string): Promise<void> {
     return execAsync(`xcrun simctl delete ${udid}`).then();
   }

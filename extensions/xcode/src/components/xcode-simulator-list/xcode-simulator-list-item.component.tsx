@@ -129,9 +129,9 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
               operationWithUserFeedback(
                 "Deleting Simulator...",
                 `${props.simulator.name} ${props.simulator.udid} simulator has been deleted`,
-                "Error Deleting runtime",
+                "Error deleting simulator",
                 async () => {
-                  await XcodeSimulatorService.deleteSimulatorByUdid(props.simulator.udid)
+                  await XcodeSimulatorService.deleteSimulatorByUdid(props.simulator.udid);
                   props.revalidate();
                 }
               );
