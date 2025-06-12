@@ -37,7 +37,7 @@ export default function Command() {
     initializeSlugCache();
   }, []);
 
-  const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
+  const { handleSubmit, itemProps, setValue, setValidationError } = useForm<FormValues>({
     validation: {
       url: (value) => {
         const result = urlValidation.format(value);
@@ -89,7 +89,11 @@ export default function Command() {
           <Action
             title="Generate Random Slug"
             icon={Icon.Wand}
-            onAction={() => setValue("slug", generateRandomSlug())}
+            onAction={() => {
+              const newSlug = generateRandomSlug();
+              setValue("slug", newSlug);
+              setValidationError("slug", undefined);
+            }}
             shortcut={{ modifiers: ["cmd"], key: "g" }}
           />
         </ActionPanel>
