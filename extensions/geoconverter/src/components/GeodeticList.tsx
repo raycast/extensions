@@ -37,8 +37,12 @@ proj4.defs([
 ]);
 
 function convertToGeodetic(x: number, y: number, sourceEPSG: string): { latitude: number; longitude: number } {
-  const [lon, lat] = proj4(sourceEPSG, "EPSG:4326", [x, y]);
-  return { latitude: lat, longitude: lon };
+  try {
+    const [lon, lat] = proj4(sourceEPSG, "EPSG:4326", [x, y]);
+    return { latitude: lat, longitude: lon };
+  } catch (error) {
+    throw new Error(`Failed to convert coordinates: ${error}`);
+  }
 }
 
 export default function GeodeticList({ projectionType, x, y }: GeodeticListProps) {
