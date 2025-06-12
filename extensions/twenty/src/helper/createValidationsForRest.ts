@@ -7,7 +7,6 @@ export function createValidationsForRest(rest: DataModelWithFields["fields"]): a
     switch (field.type) {
       case "TEXT":
       case "FULL_NAME": {
-        acc[field.name] = (value) => {};
         break;
       }
       case "LINKS": {
