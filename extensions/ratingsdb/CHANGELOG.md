@@ -1,6 +1,6 @@
 # RatingsDB Changelog
 
-## [Fix Search Authentication Errors] - {PR_MERGE_DATE}
+## [Fix Search Authentication Errors] - 2025-06-12
 
 - Fixed 401 authentication errors when searching for titles
 - Added proper validation for missing or empty API keys
