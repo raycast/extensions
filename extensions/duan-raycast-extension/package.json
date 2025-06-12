@@ -75,7 +75,7 @@
     },
     {
       "name": "slugLength",
-      "type": "textfield",
+      "type": "number",
       "required": false,
       "title": "Slug Length",
       "description": "Length of generated random slugs",
