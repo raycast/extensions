@@ -24,44 +24,46 @@ export default function Command() {
       await LocalStorage.removeItem("timerEnd");
       await LocalStorage.removeItem("pid");
 
-      //   await closeMainWindow({ clearRootSearch: true });
-
       const input = values["input"].split(" "); // seperate strings into the parts
       const instruction = values["instruction"];
+
+      let timer = 0;
+
+      let err = "";
+      // try catch for input validation and parsing
 
       const numbers = input.filter((string) => {
         return !isNaN(Number(string));
       });
 
       if (numbers.length <= 0) {
-        await showFailureToast("Missing Time");
-        return;
+        err = "Missing Time";
       }
 
       const units = input.filter((string) => {
         return isNaN(Number(string));
       });
 
-      let timer = 0;
-
-      numbers.forEach((value, index) => {
+      numbers.forEach(async (value, index) => {
         const number = Number(value);
         if (units[index]) {
-          if (units[index].startsWith("sec")) {
+          if (units[index].toLowerCase().startsWith("sec")) {
             timer += number; // seconds
-          }
-          if (units[index].startsWith("min")) {
+          } else if (units[index].toLowerCase().startsWith("min")) {
             timer += number * 60; // minutes -> seconds
+          } else if (units[index].toLowerCase().startsWith("h")) {
+            timer += number * 60 * 60; // hours -> seconds
+          } else {
+            err = "Timer is missing units";
           }
         } else {
           timer += number * 60; // defaults to minutes
         }
       });
 
-      if (timer >= 120 * 60) {
-        // greater than two hours
-        await showFailureToast("Timer greater than 2 hours");
-        return;
+      if (timer > 15 * 60 * 60) {
+        // greater than 15 hours
+        err = "Timer greater than 15 hours";
       }
       /* 
             the apple script uses seconds for the delay
@@ -69,7 +71,11 @@ export default function Command() {
       */
 
       if (!allowedInstructions.includes(instruction)) {
-        await showFailureToast("Invalid instruction");
+        err = "Invalid instruction";
+      }
+
+      if (err) {
+        await showFailureToast(err);
         return;
       }
 
@@ -95,7 +101,7 @@ export default function Command() {
       /* 
             Right now the command works and it delays for the time period specified
             The processRef is used to get the PID of the background task so that we can kill it if we need to
-        */
+      */
 
       await LocalStorage.setItem("timerEnd", Date.now() + Number(timer) * 1000); // using millisecond
       if (processRef.pid) await LocalStorage.setItem("pid", processRef.pid); // store pid in LocalStorage
@@ -125,10 +131,8 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Set Time Here" {...itemProps.input} />
-      <Form.Description
-        text={`You can write it as "<minute> min/minutes <second> sec/seconds". If you only want one unit, just use minutes or seconds on their own.`}
-      />
+      <Form.TextField title="Set Time Here" {...itemProps.input} placeholder="<h/hours> <min/minutes> <sec/seconds>" />
+      <Form.Description text={`If you only want one unit, just use on their own. The maximum time is 15 hours`} />
       <Form.Dropdown title="Instruction" {...itemProps.instruction}>
         <Form.Dropdown.Item value="shut down" title="Shut down PC" />
         <Form.Dropdown.Item value="restart" title="Restart PC" />
