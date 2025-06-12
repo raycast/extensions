@@ -11,6 +11,7 @@
     {
       "name": "geodetic-to-projected",
       "title": "Convert to Projected",
+      "subtitle": "Coordinate Converter",
       "description": "Convert latitude and longitude coordinates to projected coordinate systems",
       "mode": "view"
     },
