@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "todoist-done-list",
+  "title": "Todoist - Done List",
+  "description": "Done List is a simple extension that shows your completed Todoist tasks for the day, so you can focus on what you've accomplished, not what you have left.",
+  "icon": "done-list-icon.png",
+  "author": "pjtat5",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "done-list",
+      "title": "Done List",
+      "subtitle": "See your completed tasks for the day",
+      "description": "Shows your completed Todoist tasks for the day",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "todoistApiToken",
+      "title": "Todoist API Token",
+      "description": "Your Todoist API token (found in Todoist Settings > Integrations > API token)",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "enableDailyTaskTarget",
+      "title": "Enable Daily Task Target",
+      "label": "Enable Tasks Target",
+      "description": "Show progress towards daily task completion target",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "dailyTaskTarget",
+      "title": "Daily Task Target",
+      "label": "Tasks",
+      "description": "Number of tasks you aim to complete each day",
+      "type": "textfield",
+      "default": "5",
+      "required": false,
+      "minimum": 1,
+      "maximum": 100
+    },
+    {
+      "name": "enableDailyPointsTarget",
+      "title": "Enable Daily Points Target",
+      "label": "Enable Points Target",
+      "description": "Show progress towards daily points completion target",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "pointsKeyword",
+      "title": "Points Keyword",
+      "description": "The keyword to look for in labels to identify points (e.g., 'Points:')",
+      "type": "textfield",
+      "default": "Points:",
+      "required": false
+    },
+    {
+      "name": "dailyPointsTarget",
+      "title": "Daily Points Target",
+      "label": "Points",
+      "description": "Your target number of points to complete each day",
+      "type": "textfield",
+      "default": "10",
+      "required": false,
+      "minimum": 1,
+      "maximum": 500
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
