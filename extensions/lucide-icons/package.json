@@ -27,7 +27,7 @@
           "name": "primaryAction",
           "type": "dropdown",
           "required": false,
-          "title": "Primary action",
+          "title": "Primary Action",
           "description": "Primary action to use",
           "default": "copy-name",
           "data": [
