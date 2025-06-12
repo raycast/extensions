@@ -5,7 +5,13 @@ const slugCache = new Cache();
 
 export const getUsedSlugs = (): string[] => {
   const cached = slugCache.get(CACHE_KEY);
-  return cached ? JSON.parse(cached) : [];
+  if (!cached) return [];
+  
+  try {
+    return JSON.parse(cached);
+  } catch {
+    return [];
+  }
 };
 
 export const setUsedSlugs = (slugs: string[]) => {
