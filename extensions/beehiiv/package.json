@@ -63,13 +63,11 @@
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "eslint": "^7.32.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "eslint": "^8.57.0",
     "@types/node": "~16.10.0",
     "@types/node-fetch": "^2.6.12",
     "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^8.34.0",
-    "@typescript-eslint/parser": "^8.34.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
