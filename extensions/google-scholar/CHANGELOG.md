@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.0] - {PR_MERGE_DATE}
+## [2.0.0] - 2025-06-12
 
 ### 🚨 BREAKING CHANGES - Major Redesign for Compliance
 
