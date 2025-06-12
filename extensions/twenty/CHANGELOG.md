@@ -1,6 +1,6 @@
 # Twenty Changelog
 
-## [Field Improvements] - {PR_MERGE_DATE}
+## [Field Improvements] - 2025-06-12
 
 - Required fields simplified: Only the primary field is required
 - Automatic defaults: All optional fields use predefined default values if left empty
