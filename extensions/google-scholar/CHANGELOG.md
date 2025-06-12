@@ -10,7 +10,6 @@ This version represents a complete architectural overhaul to ensure long-term su
 - **Smart conditional year filtering** - Year range fields only appear when sorting by relevance
 - **Enhanced search validation** - Better error messages and form validation
 - **Improved search history** - Cleaner display of recent searches with better formatting
-- **Professional documentation** - Comprehensive README with usage examples and technical details
 
 ### 🔄 Changed
 - **Complete removal of web scraping** - Now uses official Google Scholar URLs instead of parsing HTML
