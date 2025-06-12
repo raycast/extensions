@@ -1,6 +1,6 @@
 # Lucide Icons Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-06-12
 
 - Added the preference to select the primary action to use.
 - Added the action to paste SVG.
