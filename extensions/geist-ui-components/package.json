@@ -1,19 +1,27 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "geist-ui-components",
-  "title": "Geist Ui Components",
-  "description": "This extension provides links to components in Geist UI Documentation",
+  "title": "Geist UI Components & Hooks",
+  "description": "This extension provides links to components & hooks in Geist UI Documentation",
   "icon": "command-icon.png",
   "author": "RahulatRaycast",
+  "contributors": ["xmok"],
   "categories": [
-    "Design Tools"
+    "Design Tools",
+    "Developer Tools"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "geist-ui-components",
-      "title": "Geist Ui Components",
+      "title": "Components",
       "description": "Finds components in Geist UI Documentation",
+      "mode": "view"
+    },
+    {
+      "name": "geist-ui-hooks",
+      "title": "Hooks",
+      "description": "Finds hooks in Geist UI Documentation",
       "mode": "view"
     }
   ],
