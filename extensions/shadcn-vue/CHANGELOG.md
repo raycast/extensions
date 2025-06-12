@@ -1,6 +1,6 @@
 # Shadcn/vue Changelog
 
-## [🩹 Fixes] - {PR_MERGE_DATE}
+## [🩹 Fixes] - 2025-06-12
 
 - Update Shadcn Vue icon path in the README.md file
 - Components API url
