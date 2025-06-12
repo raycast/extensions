@@ -2,7 +2,7 @@
 	"$schema": "https://www.raycast.com/schemas/extension.json",
 	"name": "mixpanel",
 	"title": "Mixpanel",
-	"description": "Collection of handful handles for mixpanel",
+	"description": "Collection of handful handles for Mixpanel",
 	"icon": "extension_icon.png",
 	"author": "iamsmaso",
 	"contributors": [
@@ -63,7 +63,7 @@
 				},
 				{
 					"label": "Service account secret",
-					"type": "textfield",
+					"type": "password",
 					"title": "Service account secret",
 					"name": "service_account_secret",
 					"description": "Service account secret",

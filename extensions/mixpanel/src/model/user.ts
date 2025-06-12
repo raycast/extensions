@@ -21,7 +21,7 @@ export default interface MixpanelUser {
 }
 
 /**
- * Parses an user starting by the data returned by mixpanel api
+ * Parses a user starting by the data returned by Mixpanel API
  * @param data the json containing all the data relating to an user
  * @returns The user
  */

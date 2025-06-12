@@ -1,6 +1,6 @@
 # Mixpanel
 
-This extension lets your find a user from your Mixpanel dashboard.
+This extension lets your find a user from your Mixpanel Dashboard.
 
 To authenticate you, you need:
 

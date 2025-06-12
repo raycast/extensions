@@ -9,16 +9,16 @@ export default function SearchByEmail() {
   const [isLoading, setIsLoading] = useState(false);
   const { push } = useNavigation();
 
-  const { handleSubmit, itemProps } = useForm<{ email_field: string }>({
+  const { handleSubmit, itemProps } = useForm<{ query: string }>({
     async onSubmit(values) {
-      const query = values.email_field;
+      const { query } = values;
 
       setIsLoading(true);
       try {
         const users = await findUsers(query);
         if (!users.length) throw new Error("No results");
         if (users.length > 1) push(<UserList users={users} />);
-        else if (users.length == 1) push(<UserDetail user={users[0]} />);
+        else push(<UserDetail user={users[0]} />);
       } catch (error) {
         await showFailureToast(error, { title: `No users found with "${query}"` });
       } finally {
@@ -26,7 +26,7 @@ export default function SearchByEmail() {
       }
     },
     validation: {
-      email_field: FormValidation.Required,
+      query: FormValidation.Required,
     },
   });
 
@@ -45,7 +45,7 @@ export default function SearchByEmail() {
         title="Email or Name"
         placeholder="john OR john@doe.invalid"
         info="Search a user by email or name"
-        {...itemProps.email_field}
+        {...itemProps.query}
       />
     </Form>
   );
