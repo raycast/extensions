@@ -17,12 +17,14 @@
     {
       "name": "geist-ui-components",
       "title": "Components",
+      "subtitle": "Geist UI Components & Hooks",
       "description": "Finds components in Geist UI Documentation",
       "mode": "view"
     },
     {
       "name": "geist-ui-hooks",
       "title": "Hooks",
+      "subtitle": "Geist UI Components & Hooks",
       "description": "Finds hooks in Geist UI Documentation",
       "mode": "view"
     }

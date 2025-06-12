@@ -18,7 +18,7 @@ const HOOKS: { [section: string]: { [title: string]: string } } = {
     useTheme: "use-theme",
     useCurrentState: "use-current-state",
     useScale: "use-scale",
-    useClaass: "use-claass",
+    useClass: "use-class",
   },
 };
 
