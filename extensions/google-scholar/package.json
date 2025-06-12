@@ -18,9 +18,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.77.0",
-    "@raycast/utils": "^1.17.0",
-    "axios": "^1.6.2",
-    "cheerio": "^1.0.0-rc.12"
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
