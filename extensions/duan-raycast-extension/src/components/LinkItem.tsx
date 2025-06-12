@@ -1,7 +1,6 @@
 import { List, ActionPanel, Action, Icon, confirmAlert, Alert, Keyboard, Color } from "@raycast/api";
 import { getPreferenceValues } from "@raycast/api";
 import type { Link } from "../types";
-import type { Preferences } from "../types";
 import { LinkDetail } from "./LinkDetail";
 import { deleteLink } from "../services/api";
 

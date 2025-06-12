@@ -12,10 +12,10 @@ export const validateUrlFormat = (value: string | undefined): ValidationResult =
         message: "A valid URL starting with http:// or https:// is required",
       };
     }
-  } catch (e) {
+  } catch {
     return {
       isValid: false,
-      message: `Invalid URL: ${e}`,
+      message: "Invalid URL",
     };
   }
   return { isValid: true };
