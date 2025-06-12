@@ -1,7 +1,7 @@
 # Todoist Changelog
 
-## [Add task priority mapping for Todoist API]
- - Add priority mapping function in order to match the priority set by the user and the priority set in the backend.
+## [Add task priority mapping for Todoist API] - 2025-06-12
+ - Add a priority mapping function to ensure the user-selected priority aligns with the priority value used in the backend.
 
 ## [Use confetti when completing tasks] - 2025-05-28
 - Add option to use the Raycast confetti command when completing tasks. 
