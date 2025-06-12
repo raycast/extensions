@@ -663,7 +663,7 @@
     "remove-markdown": "^0.6.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.0",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/lodash": "^4.17.16",
     "@types/mime": "^4.0.0",
     "@types/node": "^22.14.0",
