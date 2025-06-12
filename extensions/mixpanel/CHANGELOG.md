@@ -2,9 +2,12 @@
 
 ## [Support All Server Regions] - {PR_MERGE_DATE}
 
-- modernize
-- pref pklaceholder
-- region prefg
+- Update logo
+- Add "Server Region" Preference
+- Missing properties show "N/A" instead of being empty
+- Better Error Handling
+- Add placeholders to all Preferences
+- Modernize extension to use latest Raycast config
 
 ## [Initial Version] - 2023-02-23
 

@@ -3,7 +3,7 @@
 	"name": "mixpanel",
 	"title": "Mixpanel",
 	"description": "Collection of handful handles for mixpanel",
-	"icon": "mixpanel_logo.png",
+	"icon": "extension_icon.png",
 	"author": "iamsmaso",
 	"contributors": [
 		"xmok"
