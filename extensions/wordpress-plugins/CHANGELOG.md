@@ -1,6 +1,6 @@
 # WordPress Plugin Search Changelog
 
-## [Implement Pagination] - {PR_MERGE_DATE}
+## [Implement Pagination] - 2025-06-12
 - Paginate to view beyond the first 23 results
 - Add shortcut `cmd + s` to Download Actions
 - Add Download Action to main view for quick access
