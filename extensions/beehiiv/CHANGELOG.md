@@ -1,3 +1,3 @@
 # beehiiv Changelog
 
-## [Initial Version] - 2025-06-12
+## [Initial Version] - {PR_MERGE_DATE}
