@@ -1,23 +1,25 @@
-import { List } from "@raycast/api";
-import { BranchInfo } from "../../utils/branch.js";
 import { useMemo } from "react";
+import { List } from "@raycast/api";
+import type { BranchInfo } from "../../utils/branch.js";
+import { useRepo } from "../../hooks/useRepo.js";
 
 interface Props {
-  repo?: string;
   branch?: BranchInfo;
 }
 
-export function GitStatusEmpty({ branch, repo }: Props) {
+export function GitStatusEmpty({ branch }: Props) {
+  const { value } = useRepo();
+
   const title = useMemo(() => {
-    if (repo && branch) {
+    if (value && branch) {
       return `On branch ${branch.name}`;
     }
 
     return "Please select a repo";
-  }, [branch, repo]);
+  }, [branch, value]);
 
   const description = useMemo(() => {
-    if (!repo || !branch) {
+    if (!value || !branch) {
       return;
     }
 
@@ -39,7 +41,7 @@ export function GitStatusEmpty({ branch, repo }: Props) {
     }
 
     return "Nothing to commit, working tree clean";
-  }, [branch, repo]);
+  }, [branch, value]);
 
   return <List.EmptyView title={title} description={description} />;
 }

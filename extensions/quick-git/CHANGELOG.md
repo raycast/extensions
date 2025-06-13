@@ -1,5 +1,12 @@
 # Quick Git Changelog
 
+## [Diffs and deletes] - {PR_MERGE_DATE}
+
+- Allow unmerged branches to be deleted
+- Show and hide diffs for changed files
+- Add `Open With…` action
+- Various under the hood changes
+
 ## [Initial Version] - 2025-06-10
 
 Select a git repository and display a list of changed files, along with some information about the current branch.
