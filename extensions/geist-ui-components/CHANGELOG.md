@@ -1,6 +1,6 @@
 # Geist UI Components & Hooks Changelog
 
-## [Add Hooks] - {PR_MERGE_DATE}
+## [Add Hooks] - 2025-06-13
 
 - Retitle extension to "Geist UI Components & Hooks"
 - Add command for hooks
