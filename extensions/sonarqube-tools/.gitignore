@@ -1,0 +1,35 @@
+# Dependencies
+node_modules
+
+# Build / Distribution
+dist/
+build/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# IDE specific files
+.idea/
+.vscode/
+*.sublime-*
+.history/
+.windsurf/
