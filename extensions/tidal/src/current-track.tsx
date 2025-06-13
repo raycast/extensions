@@ -16,7 +16,7 @@ export default function CurrentTrackCommand() {
 
   const handleCommand = async (action: string) => {
     await sendCommand(action);
-    setTimeout(fetchTrack, 200);
+    setTimeout(fetchTrack, 2000);
   };
 
   useEffect(() => {

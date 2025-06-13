@@ -5,6 +5,7 @@ import {
   environment,
   launchCommand,
   LaunchType,
+  open,
   getPreferenceValues,
   openExtensionPreferences,
 } from "@raycast/api";
@@ -511,7 +512,7 @@ export const refreshData = async (): Promise<{
       serverStatus: "connected",
     };
   } catch (error) {
-    log(`Refresh error: ${error}`, "error");
+    log(`Refresh error: ${error} (is the server down??)`, "error");
     return {
       track: {
         title: "Connection Error",
@@ -563,10 +564,10 @@ export const editPreferencesCmd = async () => {
 
 export const showDocsCmd = async () => {
   try {
-    await launchCommand({ name: "docs", type: LaunchType.UserInitiated });
+    await open("https://github.com/Ek2100/tidal/blob/main/raycast/README.md");
   } catch (error) {
     log(`Failed to open documentation: ${error}`, "error");
-    await showToast({ style: Toast.Style.Failure, title: "Failed to Documentation" });
+    await showToast({ style: Toast.Style.Failure, title: "Failed to Open Documentation" });
   }
 };
 
