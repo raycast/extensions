@@ -2,9 +2,9 @@ import { Icon } from "@raycast/api";
 
 // Default values for openAi API call
 export const DEFAULT_CONFIG = {
-  temperature: 0.7,
-  model: "gpt-4o",
-  maxTokens: 1000,
+  temperature: 0.7, // Default temperature for GPT to keep it fairly creaive
+  model: "gpt-4o", // Default model for the openai
+  maxTokens: 1000, // Default max tokens for the openai
 };
 
 export const ICONS = [
