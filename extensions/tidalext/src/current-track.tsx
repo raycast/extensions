@@ -98,7 +98,7 @@ export default function CurrentTrackCommand() {
 
         <List.Item
           title={`Shuffle: ${track.isShuffled ? "On" : "Off"}`}
-          icon={{ source: Icon.Shuffle, tintColor: track.isShuffled ? Color.Green : Color.Secondary }}
+          icon={{ source: Icon.Shuffle, tintColor: track.isShuffled ? Color.Green : Color.SecondaryText }}
           actions={
             <ActionPanel>
               <Action title="Toggle Shuffle" onAction={() => handleCommand("toggleShuffle")} />
@@ -108,7 +108,7 @@ export default function CurrentTrackCommand() {
 
         <List.Item
           title={`Repeat: ${track.repeatMode.charAt(0).toUpperCase() + track.repeatMode.slice(1)}`}
-          icon={{ source: Icon.Repeat, tintColor: track.repeatMode !== "off" ? Color.Green : Color.Secondary }}
+          icon={{ source: Icon.Repeat, tintColor: track.repeatMode !== "off" ? Color.Green : Color.SecondaryText }}
           actions={
             <ActionPanel>
               <Action title="Toggle Repeat" onAction={() => handleCommand("toggleRepeat")} />

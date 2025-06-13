@@ -345,8 +345,11 @@ export const getCurrentTrack = async (): Promise<Track | null> => {
     });
 
     if (response.ok) {
-      const data = await response.json();
-      return data.status === "no-data" ? null : data;
+      const data = (await response.json()) as Track | { status: string };
+      if ("status" in data && data.status === "no-data") {
+        return null;
+      }
+      return data as Track;
     }
     if (response.status === 401 || response.status === 403) {
       log("Authentication failed when getting current track.", "error");
@@ -402,7 +405,7 @@ export const getServerStatus = async (): Promise<ServerStatus | null> => {
     });
 
     if (response.ok) {
-      return await response.json();
+      return (await response.json()) as ServerStatus;
     }
     return null;
   } catch (error) {
@@ -668,7 +671,7 @@ export const startServer = async (): Promise<boolean> => {
       signal: AbortSignal.timeout(500),
     });
     if (healthResponse.ok) {
-      const healthData = await healthResponse.json();
+      const healthData = (await healthResponse.json()) as HealthStatusResponse;
       log(`Server already healthy on port 3049 (PID: ${healthData.pid}).`);
       await showHUD(`✅ Server already running (PID: ${healthData.pid})`);
       if (!existsSync(pidPath) || readFileSync(pidPath, "utf8").trim() !== String(healthData.pid)) {
@@ -709,7 +712,7 @@ export const startServer = async (): Promise<boolean> => {
         signal: AbortSignal.timeout(1000),
       });
       if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as HealthStatusResponse;
         log(`Server started successfully (PID: ${data.pid}).`);
         await showHUD(`✅ Server started (PID: ${data.pid})`);
         return true;
@@ -751,7 +754,7 @@ export const stopServer = async (): Promise<boolean> => {
         signal: AbortSignal.timeout(500),
       });
       if (healthResponse.ok) {
-        const data: HealthStatusResponse = await healthResponse.json();
+        const data = (await healthResponse.json()) as HealthStatusResponse;
         if (data && typeof data.pid === "number") {
           return data.pid;
         }
@@ -902,6 +905,3 @@ export const getMenubarTitle = (hasRealData: boolean, currentTrack: Track, serve
       return "Offline";
   }
 };
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}

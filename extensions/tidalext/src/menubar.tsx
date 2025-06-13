@@ -39,7 +39,7 @@ export default function Command() {
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleRefreshData = useCallback(async () => {
-    const result = await refreshData(hasRealData);
+    const result = await refreshData();
     setCurrentTrack(result.track);
     setHasRealData(result.hasRealData);
     setServerStatus(result.serverStatus);
@@ -58,7 +58,7 @@ export default function Command() {
 
   useEffect(() => {
     handleRefreshData();
-    refreshIntervalRef.current = setInterval(handleRefreshData, 10000);
+    refreshIntervalRef.current = setInterval(handleRefreshData, 5000);
 
     return () => {
       if (refreshIntervalRef.current) {
