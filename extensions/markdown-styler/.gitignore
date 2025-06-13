@@ -1,0 +1,64 @@
+# Node.js / Raycast 项目 .gitignore
+
+# 依赖目录
+node_modules/
+.pnpm-store/
+
+# 构建输出
+dist/
+build/
+.raycast-swift-build/
+
+# 环境变量
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# 编辑器配置
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# macOS系统文件
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# 日志文件
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 临时文件
+tmp/
+temp/
+
+# 类型检查缓存
+.tsbuildinfo
+*.tsbuildinfo
+
+# 覆盖率报告
+coverage/
+
+# 测试快照
+__snapshots__/
+
+# 调试文件
+.inspect
+
+# 构建工具锁文件
+# 如果你想与团队共享锁文件，取消下面的注释
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml 
