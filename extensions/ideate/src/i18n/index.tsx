@@ -9,4 +9,5 @@ const translations: Record<string, Translation> = {
   // 添加更多语言只需在此处添加，无需修改其他文件
 };
 
-export { translations, Translation };
+export { translations }; // 导出值
+export type { Translation }; // 导出类型
