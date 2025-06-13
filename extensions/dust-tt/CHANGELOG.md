@@ -1,5 +1,9 @@
 # Dust.tt Changelog
 
+## [feature] - 2025-06-13
+
+- Move Oauth connexion flow from Auth0 to WorkOS.
+
 ## [fixes] - 2025-05-05
 
 - Fix again the listing of agents.
