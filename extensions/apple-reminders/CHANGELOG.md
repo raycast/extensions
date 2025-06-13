@@ -1,5 +1,10 @@
 # Apple Reminders Changelog
 
+## [Add Creation Date option for sorting] - 2025-06-13
+
+- Retrieve the Creation Date from the EventKit API
+- Add an option to sort reminders by Creation Date, as this is available in the native app
+
 ## [✨ Add option to show list name in menu bar reminders] - 2025-06-04
 
 - Add an option that allows users to choose whether to display the list name next to each reminder’s name in the menu bar.
