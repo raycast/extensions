@@ -1,6 +1,6 @@
 <div align="center">
   <img
-    src="https://github.com/raycast/extensions/blob/main/extensions/shadcn-vue/assets/shadcn-vue-icon.png"
+    src="https://github.com/raycast/extensions/blob/main/extensions/shadcn-vue/assets/shadcn-vue-icon.png?raw=true"
     width="50"
   />
 
