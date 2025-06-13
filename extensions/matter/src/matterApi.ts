@@ -68,13 +68,19 @@ async function bookmarkUrl(url: string) {
   };
 
   const response = await fetch(apiUrl, options);
+  let detail = "";
   let raw = "";
   try {
-    await response.json();
+    const json = await response.json();
+    if (json && typeof json === "object" && "detail" in json) {
+      detail = typeof json.detail === "string" ? json.detail : JSON.stringify(json.detail);
+    }
+    raw = JSON.stringify(json);
   } catch {
     raw = await response.text();
   }
   return {
+    detail,
     raw,
     status: response.status,
   };
