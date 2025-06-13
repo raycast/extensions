@@ -1,6 +1,6 @@
 # Hookmark Changelog
 
-## [Bookmark Properties Encoding] - {PR_MERGE_DATE}
+## [Bookmark Properties Encoding] - 2025-06-13
 
 - Fix incorrect encoding of bookmark properties
 
