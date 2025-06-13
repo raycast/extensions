@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Console command] - {PR_MERGE_DATE}
+## [Console command] - 2025-06-13
 - Add AWS Audit Manager service to console command
 - Fix Amazon Bedrock service details (previously had incorrect AWS Audit Manager information)
 
