@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ideate",
+  "title": "Ideate",
+  "description": "Create a project folder, initialize it, and open with your IDE.",
+  "version": "1.0.0",
+  "icon": "bulb.png",
+  "author": "Felix",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "description": "Choose a saved preset and create a project",
+      "mode": "view"
+    },
+    {
+      "name": "add-init-preset",
+      "title": "Add Preset",
+      "description": "Add a reusable project preset",
+      "mode": "view"
+    },
+    {
+      "name": "manage-presets",
+      "title": "Manage Presets",
+      "description": "View, edit and delete your project presets",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language",
+      "description": "Select your preferred language",
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "简体中文",
+          "value": "zh-CN"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.1",
+    "ray": "^0.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
