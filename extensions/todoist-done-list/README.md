@@ -4,6 +4,12 @@ A simple extension that shows your completed Todoist tasks for the day, so you c
 
 While Todoist is great at managing your tasks, it doesn't make it easy to review what you've actually completed. Your completed tasks are hidden behind several clicks, and there's no simple way to see your daily accomplishments at a glance. Even the official Todoist extension for Raycast only shows active tasks - there's no way to see what you've completed. This extension fills that gap by providing a dedicated view of your completed tasks, helping you track your progress and celebrate your achievements.
 
+![Demo](assets/done-list-demo.gif)
+
+## Why Done List?
+
+Sometimes we focus too much on what's left to do, rather than appreciating what we've already accomplished. This extension helps you see what you've done today by showing your completed tasks and celebrating when you hit your daily targets.
+
 ## Features
 
 - **Daily View**: See all tasks you've completed today, organized by project
@@ -38,11 +44,7 @@ While Todoist is great at managing your tasks, it doesn't make it easy to review
 ## Task Organization
 
 - Tasks are grouped by project
-- Project headers show: "ProjectName (X tasks | Y points)"
-- Tasks show priority indicators and story points (if enabled)
+- Tasks are organized by priority
+- Tasks show priority indicators and points (if enabled)
+- Task targets and points targets will display per project when enabled
 - Click any task to open it in Todoist app or browser
-- High priority tasks appear first within each project
-
-## Why Done List?
-
-Sometimes we focus too much on what's left to do, rather than appreciating what we've already accomplished. This extension helps you see what you've done today by showing your completed tasks and celebrating when you hit your daily targets.

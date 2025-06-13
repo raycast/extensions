@@ -1,6 +1,7 @@
-import { List, Toast, showToast, Color, Icon, Action, ActionPanel } from "@raycast/api";
+import { List, Color, Icon, Action, ActionPanel } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ACHIEVEMENT_QUOTES } from "./constants/quotes";
 
 interface Preferences {
@@ -205,8 +206,7 @@ export default function Command() {
 
         setTasksByProject(grouped);
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "Failed to fetch tasks",
           message: error instanceof Error ? error.message : "Unknown error occurred",
         });
@@ -216,7 +216,7 @@ export default function Command() {
     }
 
     fetchCompletedTasks();
-  }, []);
+  }, [preferences]);
 
   return (
     <List

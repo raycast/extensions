@@ -4,7 +4,7 @@
   "title": "Todoist - Done List",
   "description": "Done List is a simple extension that shows your completed Todoist tasks for the day, so you can focus on what you've accomplished, not what you have left.",
   "icon": "done-list-icon.png",
-  "author": "pjtat5",
+  "author": "thomaslombart",
   "license": "MIT",
   "commands": [
     {

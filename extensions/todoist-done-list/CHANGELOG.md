@@ -1,3 +1,3 @@
 # ToDoIst - Enough Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Done List] - {PR_MERGE_DATE}
