@@ -28,7 +28,7 @@
       "title": "Active Incidents",
       "subtitle": "Incident.io",
       "description": "Displays live incidents from Incident.io.",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
       "interval": "1m"
     },
     {
