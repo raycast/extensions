@@ -9,8 +9,7 @@
   "commands": [
     {
       "name": "open-docker",
-      "title": "Open Docker",
-      "subtitle": "Open Docker Desktop",
+      "title": "Open Docker Desktop",
       "description": "Opens the Docker Desktop dashboard window.",
       "mode": "no-view"
     }
