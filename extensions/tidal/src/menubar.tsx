@@ -43,7 +43,6 @@ export default function Command() {
     setCurrentTrack(result.track);
     setHasRealData(result.hasRealData);
     setServerStatus(result.serverStatus);
-
     if (result.serverStatus === "connected") {
       setLastUpdate(new Date());
       const status = await getServerStatus();
@@ -54,7 +53,7 @@ export default function Command() {
       setLastUpdate(null);
       setServerUptime(0);
     }
-  }, [hasRealData]);
+  }, []);
 
   useEffect(() => {
     handleRefreshData();
@@ -200,19 +199,16 @@ export default function Command() {
             />
           )}
 
+          <MenuBarExtra.Item title="View Server Status Details" icon={Icon.BarChart} onAction={showServerStatusCmd} />
+          <MenuBarExtra.Item title="Launch Extension Preferences" icon={Icon.Gear} onAction={editPreferencesCmd} />
+
           {serverStatus === "connected" && lastUpdate && (
             <MenuBarExtra.Item title={`Last Updated: ${lastUpdate.toLocaleTimeString()}`} icon={Icon.Clock} />
           )}
           {serverStatus === "connected" && serverUptime > 0 && (
             <MenuBarExtra.Item title={`Uptime: ${formatUptime(serverUptime)}`} icon={Icon.Hourglass} />
           )}
-
-          <MenuBarExtra.Item title="View Server Status Details" icon={Icon.BarChart} onAction={showServerStatusCmd} />
-          <MenuBarExtra.Item title="Launch Extension Preferences" icon={Icon.Gear} onAction={editPreferencesCmd} />
         </MenuBarExtra.Submenu>
-        {serverStatus === "connected" && lastUpdate && (
-          <MenuBarExtra.Item title={`Last Updated: ${lastUpdate.toLocaleTimeString()}`} icon={Icon.Clock} />
-        )}
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

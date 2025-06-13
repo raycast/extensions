@@ -1,5 +1,3 @@
-"use client";
-
 import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getCurrentTrack, sendCommand, type Track } from "./lib/utils";
