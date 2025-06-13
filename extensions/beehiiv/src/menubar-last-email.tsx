@@ -50,7 +50,7 @@ export default function LastEmailStatsMenuBar() {
       }
 
       const data = await response.json();
-      const now = Math.floor(Date.now() / 1000); 
+      const now = Math.floor(Date.now() / 1000);
       const fetchedPost =
         (data.data as Post[])
           .filter((p) => (p.platform === "email" || p.platform === "both") && p.publish_date <= now)
