@@ -1,6 +1,6 @@
 # Hue Changelog
 
-## [Update HTTPS support] - {PR_MERGE_DATE}
+## [Update HTTPS support] - 2025-06-13
 
 - Add CA Certificate
 - Fix bridge ID matching
