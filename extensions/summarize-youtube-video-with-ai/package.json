@@ -4,7 +4,7 @@
   "title": "Summarize YouTube Videos with AI",
   "description": "Summarize any YouTube Video with AI. Choose between Raycast, OpenAI or Anthropic. You have to either be a Raycast Pro Member or have an OpenAI/Anthropic API Key.",
   "icon": "extension_icon.png",
-  "author": "iKasch",
+  "author": "kom",
   "contributors": [
     "bl1nk"
   ],
@@ -396,25 +396,32 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "summarizeVideoHistory",
+      "title": "Summarize Video History",
+      "description": "View your summary history.",
+      "mode": "view",
+      "arguments": []
     }
   ],
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.33.1",
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.17.0",
+    "@anthropic-ai/sdk": "^0.52.0",
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
     "node-fetch": "^3.3.2",
-    "openai": "^4.77.0",
+    "openai": "^5.1.0",
     "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.29",
+    "@types/react": "^19.1.6",
+    "eslint": "^9.28.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
     "ytdl-core": "^4.11.5"
   },
   "scripts": {

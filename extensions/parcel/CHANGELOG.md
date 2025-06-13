@@ -1,6 +1,17 @@
 # Parcel Changelog
 
-## [Added ISO 8601 Date Support] - {PR-MERGE-DATE}
+## [Expected Delivery Date Formatting Overhaul] - 2025-06-12
+
+- Delivery windows now show the full time range when available (e.g., "12 Jun 10:45 – 12:45"), so you know exactly when to expect your package.
+- Times are shown when provided by the carrier, making delivery info more precise.
+- Dates are now easier to read: you'll see "Today", "Tomorrow", weekday names, or a simple date, depending on when your package is due.
+
+## [Enhanced Date Format Support] - 2025-06-03
+
+- Added support for more date formats in delivery tracking, including dates with day names
+- Improved handling of various international date formats for better compatibility with carrier APIs
+
+## [Added ISO 8601 Date Support] - 2025-05-30
 
 - Added support for ISO 8601 date format (YYYY-MM-DD HH:mm:ss) in delivery date parsing
 - Improved date format handling for better compatibility with various carrier APIs

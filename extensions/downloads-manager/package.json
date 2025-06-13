@@ -9,7 +9,8 @@
     "ron-myers",
     "Kimcha",
     "ridemountainpig",
-    "nagauta"
+    "nagauta",
+    "dead_hikikomori"
   ],
   "categories": [
     "Productivity",
@@ -80,6 +81,12 @@
       "title": "Show Latest Download",
       "description": "Show the last downloaded file or folder in Finder",
       "mode": "no-view"
+    },
+    {
+      "name": "delete-latest-download",
+      "title": "Delete Latest Download",
+      "description": "Delete the last downloaded file or folder",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -115,6 +122,25 @@
         {
           "title": "Birth Time",
           "value": "birthTime"
+        }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "name": "deletionBehavior",
+      "label": "Deletion Behavior",
+      "title": "Deletion Behavior",
+      "description": "Whether to trash or permanently delete",
+      "required": false,
+      "default": "trash",
+      "data": [
+        {
+          "title": "Trash",
+          "value": "trash"
+        },
+        {
+          "title": "Permanently Delete",
+          "value": "permaDel"
         }
       ]
     }
