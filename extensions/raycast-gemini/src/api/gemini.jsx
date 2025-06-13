@@ -16,6 +16,7 @@ import fs from "fs";
 import Gemini from "gemini-ai";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
+import { getSafetySettings } from "./safetySettings";
 import { useCommandHistory } from "./useCommandHistory";
 
 export default (props, { context = undefined, allowPaste = false, useSelected = false, buffer = [] }) => {
@@ -69,22 +70,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
           }
         },
         data: data ?? buffer,
-        safetySettings: [
-          // Derogatory: Negative or harmful comments targeting identity and/or protected attributes
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-
-          // Toxic: Content that is rude, disrespectful, or profane
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-
-          // Sexual: Contains references to sexual acts or other lewd content
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-
-          // Violent: Describes scenarios depicting violence against an individual or group
-          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-
-          // Dangerous: Promotes, facilitates, or encourages harmful acts
-          { category: "HARM_CATEGORY_DANGEROUS", threshold: "BLOCK_NONE" },
-        ],
+        safetySettings: getSafetySettings(),
       });
       setMarkdown(response);
       setLastResponse(response);

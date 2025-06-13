@@ -2,7 +2,8 @@
 
 ## [Add Safety Settings] - {PR_MERGE_DATE}
 
-- 🛡️ Set BLOCK_NONE as the query safety checking parameter in case of frequent policy blocking.
+- 🛡️ Now users can set their safety filtering options as they need.
+- 🐛 Fix a bug in AI chat
 
 ## [New Model] - 2025-05-14
 

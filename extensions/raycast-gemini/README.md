@@ -10,6 +10,8 @@ Use the powerful new Google Gemini Pro models from the comfort of Raycast.
 
 You're all good to go!
 
-## Safety and Agreement
+## Safety Settings
 
-**ATTENTION**: Now (2025-05-19, Mon) this extension using "**BLOCK_NONE**" for default API call. If you use this extension, you agree to this setting. And opensource contributors are not responsible for any issues caused by this setting.
+You can set the safety settings from the extension's configuration page. The default is set to "BLOCK_ONLY_HIGH". Please adjust this setting according to your needs.
+
+**You agree that you are an adult and that the risks are your own when using this extension.**
