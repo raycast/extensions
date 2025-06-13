@@ -1,6 +1,6 @@
 # Incident.io Changelog
 
-## [v0.0.3] - {PR_MERGE_DATE}
+## [v0.0.3] - 2025-06-13
 
 - Add AI-powered incident search functionality
 
