@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Add Creation Date option for sorting] - {PR_MERGE_DATE}
+## [Add Creation Date option for sorting] - 2025-06-13
 
 - Retrieve the Creation Date from the EventKit API
 - Add an option to sort reminders by Creation Date, as this is available in the native app
