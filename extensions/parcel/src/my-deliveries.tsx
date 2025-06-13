@@ -36,32 +36,28 @@ export default function Command() {
     "EEEE, d MMMM", // Day name and date (e.g. "Saturday, 31 May")
   ];
 
-  // Calculate days until delivery
+  /**
+   * Calculate the number of days until the expected delivery date.
+   *
+   * @param delivery Delivery object
+   * @returns Number of days until delivery, or null if date is missing
+   */
   const getDaysUntilDelivery = (delivery: Delivery): number | null => {
     if (!delivery.date_expected) return null;
-
     const deliveryDate = new Date(delivery.date_expected);
     const today = new Date();
-
-    // Reset time portion for accurate day calculation
     deliveryDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
-
     const diffTime = deliveryDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    return diffDays;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
-  // Format delivery time in a readable way
-  const formatDeliveryTime = (daysUntil: number | null): string => {
-    if (daysUntil === null) return "";
-
-    if (daysUntil < 0) return `(${Math.abs(daysUntil)} day${Math.abs(daysUntil) !== 1 ? "s" : ""} ago)`;
-    if (daysUntil === 0) return "(Today)";
-    return `(in ${daysUntil} day${daysUntil !== 1 ? "s" : ""})`;
-  };
-
+  /**
+   * Try to parse a date string using a set of known formats.
+   *
+   * @param dateString The date string to parse
+   * @returns Date object if valid, otherwise null
+   */
   const parseDate = (dateString: string): Date | null => {
     for (const fmt of DATE_FORMATS) {
       const date = parse(dateString, fmt, new Date());
@@ -70,70 +66,123 @@ export default function Command() {
     return null;
   };
 
-  // Format date in a more readable way: "Feb 26, 2025"
-  const formatFriendlyDate = (dateString: string | undefined | null): string => {
-    if (!dateString || dateString === UNKNOWN_DATE_PLACEHOLDER || !/\d/.test(dateString)) return "Not available";
-
-    const date = parseDate(dateString);
-    if (!date) {
-      console.error(`All supported date formats failed for: ${dateString}`);
-      return dateString;
-    }
-
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  // Format tracking history dates in a compact format: "Feb 26, 14:30"
+  /**
+   * Format a date string as 'Feb 26, 14:30'.
+   *
+   * @param dateString The date string to format
+   * @returns Formatted date and time or 'Not available' if invalid
+   */
   const formatCompactDate = (dateString: string | undefined | null): string => {
     if (!dateString || dateString === UNKNOWN_DATE_PLACEHOLDER || !/\d/.test(dateString)) return "Not available";
-
     const date = parseDate(dateString);
     if (!date) {
       console.error(`All supported date formats failed for: ${dateString}`);
       return dateString;
     }
-
-    // Create compact date portion: "Feb 26"
     const dateFormatted = date.toLocaleDateString(undefined, {
       month: "short",
       day: "numeric",
     });
-
-    // Create 24-hour time format: "14:30"
     const timeFormatted = date.toLocaleTimeString(undefined, {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
     });
-
     return `${dateFormatted}, ${timeFormatted}`;
   };
 
-  // Generate full detail markdown including tracking history
-  const generateDetailMarkdown = (delivery: Delivery, daysUntil: number | null): string => {
-    const packageName = delivery.description || `From ${delivery.carrier_code.toUpperCase()}`;
-    const deliveryDate = delivery.date_expected
-      ? `${formatFriendlyDate(delivery.date_expected)} ${formatDeliveryTime(daysUntil)}`
-      : "Not available";
+  /**
+   * Format the expected delivery date/range for display.
+   *
+   * Rules:
+   * - If the delivery is today, show: 'Today' (plus time if not 00:00)
+   * - If the delivery is tomorrow, show: 'Tomorrow' (plus time if not 00:00)
+   * - If within the next 7 days, show: 'Weekday' (plus time if not 00:00)
+   * - Otherwise, show: 'DD Mon' (plus year if not current year, plus time if not 00:00)
+   * - For ranges, show: 'StartLabel [StartTime] – EndLabel [EndTime]'
+   * - If the time is exactly 00:00, omit it.
+   *
+   * @param delivery Delivery object with date_expected and optional date_expected_end
+   * @returns Formatted string for expected delivery
+   */
+  const formatExpectedDelivery = (delivery: Delivery): string => {
+    if (!delivery.date_expected) return "Not available";
+    const start = parseDate(delivery.date_expected);
+    const end = delivery.date_expected_end ? parseDate(delivery.date_expected_end) : null;
+    if (!start) return "Not available";
 
-    // Generate package details section without header
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+
+    // Helper to get label for a date
+    function getLabel(date: Date): string {
+      if (date.toDateString() === now.toDateString()) return "Today";
+      if (date.toDateString() === tomorrow.toDateString()) return "Tomorrow";
+
+      // Next 7 days window
+      const nextWeek = new Date(now);
+      nextWeek.setDate(now.getDate() + 8);
+      nextWeek.setHours(0, 0, 0, 0);
+
+      if (date < nextWeek) {
+        return date.toLocaleDateString(undefined, { weekday: "long" });
+      }
+
+      const showYear = date.getFullYear() !== now.getFullYear();
+      return date.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        ...(showYear ? { year: "numeric" } : {}),
+      });
+    }
+
+    // Helper to get time string if not 00:00
+    function getTime(date: Date): string {
+      if (date.getHours() === 0 && date.getMinutes() === 0) return "";
+      return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false });
+    }
+
+    const startLabel = getLabel(start);
+    const startTime = getTime(start);
+    let result = startLabel;
+    if (startTime) result += ` ${startTime}`;
+
+    if (end) {
+      const endLabel = getLabel(end);
+      const endTime = getTime(end);
+      if (startLabel === endLabel) {
+        // Same day: '12 Jun 10:45 – 12:45'
+        if (endTime) {
+          result += ` – ${endTime}`;
+        }
+      } else {
+        // Different days: '12 Jun 10:45 – 13 Jun 12:45'
+        result += ` – ${endLabel}`;
+        if (endTime) result += ` ${endTime}`;
+      }
+    }
+    return result;
+  };
+
+  /**
+   * Generate a markdown string with full delivery details and tracking history.
+   *
+   * @param delivery Delivery object
+   * @returns Markdown string for detail view
+   */
+  const generateDetailMarkdown = (delivery: Delivery): string => {
+    const packageName = delivery.description || `From ${delivery.carrier_code.toUpperCase()}`;
+    const deliveryDate = formatExpectedDelivery(delivery);
     let markdown = `**Package**: ${packageName}\n\n`;
     markdown += `**Expected Delivery**: ${deliveryDate}\n\n`;
     markdown += `**Status**: ${STATUS_DESCRIPTIONS[delivery.status_code]}\n\n`;
     markdown += `**Carrier**: ${delivery.carrier_code.toUpperCase()}\n\n`;
     markdown += `**Tracking Number**: ${delivery.tracking_number}\n\n`;
-
     if (delivery.extra_information) {
       markdown += `**Additional Info**: ${delivery.extra_information}\n\n`;
     }
-
-    // Generate tracking history section with simpler header
     markdown += `### History\n\n`;
-
     if (!delivery.events || delivery.events.length === 0) {
       markdown += "No tracking information available\n";
     } else {
@@ -144,7 +193,6 @@ export default function Command() {
         markdown += `${icon} **${dateStr}** ${eventText}\n\n`;
       });
     }
-
     return markdown;
   };
 
@@ -247,7 +295,7 @@ export default function Command() {
                     : null,
                 ].filter(Boolean) as List.Item.Accessory[]
               }
-              detail={<List.Item.Detail markdown={generateDetailMarkdown(delivery, daysUntil)} />}
+              detail={<List.Item.Detail markdown={generateDetailMarkdown(delivery)} />}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser
