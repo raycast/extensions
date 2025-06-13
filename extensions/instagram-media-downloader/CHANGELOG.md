@@ -2,7 +2,8 @@
 
 ## [New Commands] - {PR_MERGE_DATE}
 
-- Added two new commands for downloading stories and highlighting stories.
+- Added command for downloading Instagram stories.
+- Added command for downloading Instagram highlight stories.
 
 ## [Update] - 2025-05-23
 
