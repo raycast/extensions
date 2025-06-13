@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useSpaces } from "../hooks/useSpaces";
 import { SpaceFolders } from "./SpaceFolders";
+import { OpenInClickUpAction } from "../components/OpenInClickUpAction";
 
 function TeamSpaces({ teamId, teamName }: { teamId: string; teamName: string }) {
   const { isLoading, spaces } = useSpaces(teamId);
@@ -19,6 +20,7 @@ function TeamSpaces({ teamId, teamName }: { teamId: string; teamName: string }) 
                   title="Folders Page"
                   target={<SpaceFolders spaceId={space?.id} spaceName={space?.name} />}
                 />
+                <OpenInClickUpAction route={`${teamId}/v/o/s/${space.id}`} />
               </ActionPanel>
             }
           />

@@ -1,5 +1,11 @@
 # ClickUp Changelog
 
+## [Create Task Without Priority] - {PR_MERGE_DATE}
+
+- Add "Open in ClickUp" Action to many views allowing you to open the relevant item in Browser
+- Change Priority Icons in "Capture" to Flags to match Clickup UI
+- Allow creatinng a task with no priority (ref: [Issue #19782](https://github.com/raycast/extensions/issues/19782))
+
 ## [Optionally Select Status In Capture] - 2025-05-23
 
 - you can now select a status in "Quick Capture" command (statuses are fetched from the ListId you enter in Preferences) (ref: [Issue #19331](https://github.com/raycast/extensions/issues/19331))

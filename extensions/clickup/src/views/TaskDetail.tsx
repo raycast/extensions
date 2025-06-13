@@ -1,5 +1,5 @@
 import { TaskItem } from "../types/tasks.dt";
-import { Detail, OpenInBrowserAction, ActionPanel } from "@raycast/api";
+import { Detail, ActionPanel, Action } from "@raycast/api";
 
 function TaskDetail({ task }: { task: TaskItem }) {
   return task ? (
@@ -8,7 +8,7 @@ function TaskDetail({ task }: { task: TaskItem }) {
       markdown={task.description}
       actions={
         <ActionPanel title="Task Actions">
-          <OpenInBrowserAction url={task.url} />
+          <Action.OpenInBrowser url={task.url} />
         </ActionPanel>
       }
     />
