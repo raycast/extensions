@@ -471,8 +471,7 @@ function MainMenu() {
   const executeHotkey = useCallback(
     async (hotkey: HotKey) => {
       if (!preferences.apiKey?.trim()) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "API Key Required",
           message: "Please set your OpenAI API key in preferences",
         });
@@ -481,8 +480,7 @@ function MainMenu() {
       }
 
       if (clipboardData.type === "empty") {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "No Content",
           message: "No text or image found in clipboard",
         });
@@ -531,8 +529,7 @@ function MainMenu() {
 
   const startChat = useCallback(async () => {
     if (!preferences.apiKey?.trim()) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "API Key Required",
         message: "Please set your OpenAI API key in preferences",
       });
@@ -541,8 +538,7 @@ function MainMenu() {
     }
 
     if (clipboardData.type === "empty") {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "No Content",
         message: "No text or image found in clipboard",
       });
