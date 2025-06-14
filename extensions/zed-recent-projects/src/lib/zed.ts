@@ -1,3 +1,5 @@
+import { preferences } from "@raycast/api";
+
 export type ZedBuild = Preferences["build"];
 export type ZedBundleId = "dev.zed.Zed" | "dev.zed.Zed-Preview";
 
@@ -16,5 +18,6 @@ export function getZedBundleId(build: ZedBuild): ZedBundleId {
 }
 
 export function getZedDbName(build: ZedBuild): string {
+  if (preferences.useDevSqlite) return "0-dev";
   return ZedDbNameMapping[build];
 }
