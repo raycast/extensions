@@ -150,11 +150,7 @@ export function ModelBreakdown({ models, isLoading, error, settingsActions }: Mo
             icon={Icon.Clipboard}
             onAction={() => copyToClipboard(getCcusageCommand(), "Copied ccusage command to clipboard")}
           />
-          <Action
-            title="Open Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           {settingsActions}
           <ActionPanel.Section>
             <Action.OpenInBrowser

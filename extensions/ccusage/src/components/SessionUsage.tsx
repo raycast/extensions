@@ -110,11 +110,7 @@ export function SessionUsage({ sessions, isLoading, error, settingsActions }: Se
             icon={Icon.Clipboard}
             onAction={() => copyToClipboard(getCcusageCommand(), "Copied ccusage command to clipboard")}
           />
-          <Action
-            title="Open Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           {settingsActions}
           <ActionPanel.Section>
             <Action.OpenInBrowser title="View Session Data" url="https://claude.ai/code" icon={Icon.Clock} />

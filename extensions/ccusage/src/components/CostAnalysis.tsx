@@ -161,11 +161,7 @@ export function CostAnalysis({ totalUsage, dailyUsage, models, isLoading, error,
             icon={Icon.Clipboard}
             onAction={() => copyToClipboard(getCcusageCommand(), "Copied ccusage command to clipboard")}
           />
-          <Action
-            title="Open Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           {settingsActions}
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Claude Pricing" url="https://www.anthropic.com/pricing" icon={Icon.Coins} />

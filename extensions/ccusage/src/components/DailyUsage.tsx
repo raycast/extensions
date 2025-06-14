@@ -99,11 +99,7 @@ export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: Da
             icon={Icon.Clipboard}
             onAction={() => copyToClipboard(getCcusageCommand(), "Copied ccusage command to clipboard")}
           />
-          <Action
-            title="Open Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           {settingsActions}
           <ActionPanel.Section>
             <Action.OpenInBrowser
