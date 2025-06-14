@@ -255,6 +255,59 @@ async function processDirectoryRecursive(options: ProcessDirectoryOptions): Prom
 }
 
 /**
+ * Processes only specific selected files instead of entire directory structure.
+ * @param config Configuration with selected file paths.
+ * @param onProgress Optional callback for reporting progress.
+ * @returns A promise that resolves to an array of ProjectEntry objects for selected files.
+ */
+async function processSelectedFiles(
+  config: FileProcessorConfig,
+  onProgress?: (progress: { message: string; details?: string }) => void,
+): Promise<ProjectEntry[]> {
+  const { projectDirectory, selectedFilePaths = [], maxFileSizeBytes } = config;
+  const projectRoot = path.resolve(projectDirectory);
+  const entries: ProjectEntry[] = [];
+
+  const progressCallback = (message: string, details?: string) => {
+    if (onProgress) onProgress({ message, details });
+  };
+
+  for (let i = 0; i < selectedFilePaths.length; i++) {
+    const filePath = selectedFilePaths[i];
+    progressCallback(`Processing selected file ${i + 1}/${selectedFilePaths.length}`, path.basename(filePath));
+
+    try {
+      const stats = await fs.stat(filePath);
+      if (stats.isFile()) {
+        const relativePath = path.relative(projectRoot, filePath);
+        const fileLanguage = getFileLanguage(filePath);
+        const fileContent = await readFileContent(filePath, stats, maxFileSizeBytes);
+
+        entries.push({
+          name: path.basename(filePath),
+          type: "file",
+          path: relativePath,
+          size: stats.size,
+          language: fileLanguage,
+          content: fileContent,
+        });
+      }
+    } catch (error) {
+      console.error(`Error processing selected file ${filePath}:`, (error as Error).message);
+      // Add an entry indicating the error
+      entries.push({
+        name: path.basename(filePath),
+        type: "file",
+        path: path.relative(projectRoot, filePath),
+        content: `[Error reading file: ${(error as Error).message}]`,
+      });
+    }
+  }
+
+  return entries;
+}
+
+/**
  * Generates a single string containing the project's code structure and file contents.
  * @param config Configuration object for generation, including AI instruction preference.
  * @param onProgress Optional callback for reporting progress during processing.
@@ -264,55 +317,66 @@ export async function generateProjectCodeString(
   config: FileProcessorConfig,
   onProgress?: (progress: { message: string; details?: string }) => void,
 ): Promise<string> {
-  const { projectDirectory, maxFileSizeBytes, includeAiInstructions } = config;
+  const { projectDirectory, maxFileSizeBytes, includeAiInstructions, processOnlySelectedFiles, selectedFilePaths } =
+    config;
   const projectRoot = path.resolve(projectDirectory);
 
   const progressCallback = (message: string, details?: string) => {
     if (onProgress) onProgress({ message, details });
   };
 
-  progressCallback("Loading ignore rules...");
-  const { filter: ignoreFilter, gitignoreUsed } = await loadIgnoreFilter(projectRoot);
-
-  progressCallback("Scanning project files...");
-
-  // Initialize safety limits
-  const safetyLimits = {
-    maxFiles: SAFETY_LIMITS.MAX_FILES,
-    maxScanTimeMs: SAFETY_LIMITS.MAX_SCAN_TIME_MS,
-    maxTotalSizeBytes: SAFETY_LIMITS.MAX_TOTAL_SIZE_BYTES,
-    startTime: Date.now(),
-    filesProcessed: 0,
-    totalSize: 0,
-  };
-
   let projectStructure: ProjectEntry[];
-  try {
-    projectStructure = await processDirectoryRecursive({
-      projectRoot,
-      currentPath: projectRoot,
-      ignoreFilter,
-      maxFileSizeBytes,
-      safetyLimits,
-      onProgress: (progressUpdate) => {
-        if (safetyLimits.filesProcessed >= SAFETY_LIMITS.FILES_WARNING_THRESHOLD) {
-          progressCallback(
-            "Scanning (large project)",
-            `${progressUpdate.scannedPath} (${safetyLimits.filesProcessed} files)`,
-          );
-        } else {
-          progressCallback("Scanning", progressUpdate.scannedPath);
-        }
-      },
-    });
-  } catch (error) {
-    const errorMessage = (error as Error).message;
-    if (errorMessage.includes("limit exceeded")) {
-      throw new Error(
-        `Project too large: ${errorMessage}. Consider using .gitignore or processing a smaller directory.`,
-      );
+  let gitignoreUsed = false;
+
+  if (processOnlySelectedFiles && selectedFilePaths && selectedFilePaths.length > 0) {
+    // Process only selected files
+    progressCallback("Processing selected files...");
+    projectStructure = await processSelectedFiles(config, onProgress);
+  } else {
+    // Process entire directory structure
+    progressCallback("Loading ignore rules...");
+    const ignoreResult = await loadIgnoreFilter(projectRoot);
+    gitignoreUsed = ignoreResult.gitignoreUsed;
+
+    progressCallback("Scanning project files...");
+
+    // Initialize safety limits
+    const safetyLimits = {
+      maxFiles: SAFETY_LIMITS.MAX_FILES,
+      maxScanTimeMs: SAFETY_LIMITS.MAX_SCAN_TIME_MS,
+      maxTotalSizeBytes: SAFETY_LIMITS.MAX_TOTAL_SIZE_BYTES,
+      startTime: Date.now(),
+      filesProcessed: 0,
+      totalSize: 0,
+    };
+
+    try {
+      projectStructure = await processDirectoryRecursive({
+        projectRoot,
+        currentPath: projectRoot,
+        ignoreFilter: ignoreResult.filter,
+        maxFileSizeBytes,
+        safetyLimits,
+        onProgress: (progressUpdate) => {
+          if (safetyLimits.filesProcessed >= SAFETY_LIMITS.FILES_WARNING_THRESHOLD) {
+            progressCallback(
+              "Scanning (large project)",
+              `${progressUpdate.scannedPath} (${safetyLimits.filesProcessed} files)`,
+            );
+          } else {
+            progressCallback("Scanning", progressUpdate.scannedPath);
+          }
+        },
+      });
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      if (errorMessage.includes("limit exceeded")) {
+        throw new Error(
+          `Project too large: ${errorMessage}. Consider using .gitignore or processing a smaller directory.`,
+        );
+      }
+      throw error;
     }
-    throw error;
   }
 
   progressCallback("Formatting output...");
@@ -326,6 +390,10 @@ export async function generateProjectCodeString(
   output += "<metadata>\n";
   output += `  Date created: ${new Date().toISOString()}\n`;
   output += `  Project root: ${projectRoot}\n`;
+  output += `  Processing mode: ${processOnlySelectedFiles ? "Selected files only" : "Entire directory"}\n`;
+  if (processOnlySelectedFiles && selectedFilePaths) {
+    output += `  Selected files: ${selectedFilePaths.length}\n`;
+  }
   output += `  Max file size for content: ${bytesToMB(maxFileSizeBytes).toFixed(2)} MB\n`;
   output += `  .gitignore used: ${gitignoreUsed ? "Yes" : "No"}\n`;
   output += `  AI instructions included: ${includeAiInstructions ? "Yes" : "No"}\n`;

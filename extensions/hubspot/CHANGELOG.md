@@ -1,5 +1,11 @@
 # HubSpot Changelog
 
+## [Copy Contact Properties] - 2025-06-10
+
+- You can now `copy` some properties of a Contact through new "Copy to Clipboard..." submenu (ref: [Issue #19583](https://github.com/raycast/extensions/issues/19583))
+- Add placeholder to AccessToken Preference
+- Modernize extension to use latest Raycast config
+
 ## [Updates] - 2025-03-12
 - Added option in settings to choose custom company properties to display in company search
 - Added option to choose how to format said properties, eg currency, percentage

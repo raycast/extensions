@@ -17,3 +17,16 @@ export const priorities = [
   { name: "Priority 3", value: 2, color: Color.Blue, keywords: ["p3"], icon: "priority.svg" },
   { name: "Priority 4", value: 1, color: Color.SecondaryText, keywords: ["p4"], icon: "priority-outlined.svg" },
 ];
+
+export function mapPriority(priority?: number): 1 | 2 | 3 | 4 | undefined {
+  const priorityMap: Record<number, 1 | 2 | 3 | 4> = {
+    1: 4,
+    2: 3,
+    3: 2,
+    4: 1,
+  };
+
+  return priority !== undefined && Object.prototype.hasOwnProperty.call(priorityMap, priority)
+    ? priorityMap[priority]
+    : undefined;
+}
