@@ -1,11 +1,10 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import createDeepLink from "./helpers/createDeepLink";
+import QuicklinkActions from "./components/QuicklinkActions";
 import getList from "./helpers/getList";
 import moveItem from "./helpers/moveItem";
 import removeItem from "./helpers/removeItem";
 import updateItem from "./helpers/updateItem";
-import { App } from "./models";
 
 export default function ApplicationsList() {
   const { data: list, isLoading, revalidate } = usePromise(getList);
@@ -58,74 +57,108 @@ export default function ApplicationsList() {
     await revalidate();
   }
 
+  async function handleBlankRemove(index: number) {
+    await removeItem(index).catch((error) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to remove blank entry",
+        message: error instanceof Error ? error.message : `${error}`,
+      });
+    });
+
+    await revalidate();
+  }
+
   return (
     <List isLoading={isLoading}>
       <List.EmptyView
         title="No applications found"
         description='Use the "Add application" command to populate this list.'
       />
-      {list?.map((item, index) => (
-        <List.Item
-          key={item.path}
-          title={`${index + 1}. ${item.name}`}
-          subtitle={item.isSticky ? "⭐" : undefined}
-          actions={
-            <ActionPanel>
-              <Action.Open title="Open" application={item.name} target={item.path} />
-              <Action.CreateQuicklink quicklink={{ link: createDeepLink(index + 1) }} />
-              <Action
-                icon={Icon.ArrowUp}
-                title="Move to Top"
-                onAction={() => handleAppMove(index, "first")}
-                shortcut={{
-                  modifiers: ["cmd"],
-                  key: "t",
-                }}
-              />
-              <Action
-                icon={Icon.ArrowDown}
-                title="Move to Bottom"
-                onAction={() => handleAppMove(index, "last")}
-                shortcut={{
-                  modifiers: ["cmd"],
-                  key: "b",
-                }}
-              />
-              {item.isSticky ? (
+      {list?.map((item, index) =>
+        item ? (
+          <List.Item
+            key={`${index}-${item.path}`}
+            title={`${index + 1}. ${item.name}`}
+            subtitle={item.isSticky ? "⭐" : undefined}
+            actions={
+              <ActionPanel>
+                <Action.Open title="Open" application={item.name} target={item.path} />
                 <Action
-                  icon={Icon.StarDisabled}
-                  title="Unstick"
+                  icon={Icon.ArrowUp}
+                  title="Move to Top"
+                  onAction={() => handleAppMove(index, "first")}
                   shortcut={{
                     modifiers: ["cmd"],
-                    key: "s",
+                    key: "t",
                   }}
-                  onAction={() => handleAppUnstick(index)}
                 />
-              ) : (
                 <Action
-                  icon={Icon.Star}
-                  title="Sticky"
-                  onAction={() => handleAppStick(index)}
+                  icon={Icon.ArrowDown}
+                  title="Move to Bottom"
+                  onAction={() => handleAppMove(index, "last")}
                   shortcut={{
                     modifiers: ["cmd"],
-                    key: "s",
+                    key: "b",
                   }}
                 />
-              )}
-              <Action
-                icon={Icon.Trash}
-                title="Remove"
-                style={Action.Style.Destructive}
-                onAction={() => handleAppRemove(index)}
-                shortcut={{
-                  modifiers: ["cmd"],
-                  key: "delete",
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+                {item.isSticky ? (
+                  <Action
+                    icon={Icon.StarDisabled}
+                    title="Unstick"
+                    shortcut={{
+                      modifiers: ["cmd"],
+                      key: "s",
+                    }}
+                    onAction={() => handleAppUnstick(index)}
+                  />
+                ) : (
+                  <Action
+                    icon={Icon.Star}
+                    title="Sticky"
+                    onAction={() => handleAppStick(index)}
+                    shortcut={{
+                      modifiers: ["cmd"],
+                      key: "s",
+                    }}
+                  />
+                )}
+                <Action
+                  icon={Icon.Trash}
+                  title="Remove"
+                  style={Action.Style.Destructive}
+                  onAction={() => handleAppRemove(index)}
+                  shortcut={{
+                    modifiers: ["cmd"],
+                    key: "d",
+                  }}
+                />
+                <QuicklinkActions index={index} />
+              </ActionPanel>
+            }
+          />
+        ) : (
+          <List.Item
+            key={`empty-${index}`}
+            title={`${index + 1}.`}
+            actions={
+              <ActionPanel>
+                <Action
+                  icon={Icon.Trash}
+                  title="Remove"
+                  style={Action.Style.Destructive}
+                  onAction={() => handleBlankRemove(index)}
+                  shortcut={{
+                    modifiers: ["cmd"],
+                    key: "d",
+                  }}
+                />
+                <QuicklinkActions index={index} />
+              </ActionPanel>
+            }
+          />
+        )
+      )}
     </List>
   );
 }
