@@ -70,7 +70,7 @@ export function SessionUsage({ sessions, isLoading, error, settingsActions }: Se
         {efficiency.mostEfficientModel && (
           <List.Item.Detail.Metadata.Label
             title="Most Efficient Model"
-            text={efficiency.mostEfficientModel || "Unknown Model"}
+            text={efficiency.mostEfficientModel}
           />
         )}
         <List.Item.Detail.Metadata.Separator />
