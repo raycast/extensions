@@ -1,6 +1,5 @@
 import { showToast, Toast, Clipboard } from "@raycast/api";
 import { bookmarkUrl } from "./matterApi";
-import { showFailureToast } from "@raycast/utils";
 
 function isValidUrl(url: string) {
   try {
@@ -13,23 +12,32 @@ function isValidUrl(url: string) {
 
 export default async function main() {
   const clipboard = (await Clipboard.readText()) ?? "";
+  let result: { success: boolean; message: string; error?: string } = {
+    success: false,
+    message: "",
+  };
+
   if (!clipboard || !isValidUrl(clipboard)) {
-    await showToast(Toast.Style.Failure, "No valid URL in clipboard");
-    return;
+    result = { success: false, message: "No valid URL in clipboard" };
+  } else {
+    try {
+      const res = await bookmarkUrl(clipboard);
+      if (res.status && res.status >= 200 && res.status < 300) {
+        result = { success: true, message: "Bookmarked!" };
+      } else if (res.detail === "Given token not valid for any token type") {
+        result = { success: false, message: "Token not valid", error: "Please check your token in preferences" };
+      } else {
+        const errorMsg = res.detail || res.raw || JSON.stringify(res);
+        result = { success: false, message: "Error", error: errorMsg };
+      }
+    } catch (e) {
+      result = { success: false, message: "Error", error: String(e) };
+    }
   }
 
-  await showToast(Toast.Style.Animated, "Bookmarking URL...");
-  try {
-    const res = await bookmarkUrl(clipboard);
-    if (res.status && res.status >= 200 && res.status < 300) {
-      await showToast(Toast.Style.Success, "Bookmarked!", clipboard);
-    } else if (res.detail === "Given token not valid for any token type") {
-      await showToast(Toast.Style.Failure, "Token not valid", "Please check your token in preferences");
-    } else {
-      const errorMsg = res.detail || res.raw || JSON.stringify(res);
-      await showToast(Toast.Style.Failure, "Error", errorMsg);
-    }
-  } catch (e) {
-    showFailureToast(e, { title: "Error" });
+  if (result.success) {
+    await showToast(Toast.Style.Success, result.message, clipboard);
+  } else {
+    await showToast(Toast.Style.Failure, result.message, result.error);
   }
 }
