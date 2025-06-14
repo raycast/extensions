@@ -1,4 +1,5 @@
-import { ActionPanel, Action, List, showToast, Toast, useNavigation, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, List, useNavigation, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { LoanInputs, PAYMENT_OPTIONS } from "../helpers/types";
 import { calculateLoan } from "../helpers/utils";
 
@@ -76,11 +77,7 @@ export default function ResultsView({ inputs }: ResultsViewProps) {
       </List>
     );
   } catch {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Calculation Error",
-      message: "Please check your input values",
-    });
+    showFailureToast(new Error("Calculation failed"), { title: "Calculation Error" });
 
     return (
       <List navigationTitle="Error">
