@@ -1,38 +1,101 @@
 import fs from "fs";
-import util from "util";
-import { exec } from "child_process";
+import os from "os";
+import { LocalStorage, environment } from "@raycast/api";
+import { execPromise } from "../utils/exec";
+// @ts-ignore
+import * as ffmpegStatic from "./ffmpeg-static";
 
-const execPromise = util.promisify(exec);
-
-export async function isFFmpegInstalled(): Promise<boolean> {
+export async function findFFmpegPath(): Promise<string | null> {
   try {
-    const ffmpegPath = "/usr/local/bin/ffmpeg";
-    const altPath = "/opt/homebrew/bin/ffmpeg";
-    const exists = fs.existsSync(ffmpegPath) || fs.existsSync(altPath);
-
-    if (!exists) {
-      // Try checking with which command as fallback
-      const { stdout } = await execPromise("which ffmpeg");
-      return stdout.trim().length > 0;
+    // Check stored ffmpeg path first
+    const storedPath = await LocalStorage.getItem("ffmpeg-path");
+    if (storedPath && typeof storedPath === "string" && fs.existsSync(storedPath)) {
+      return storedPath;
     }
 
-    return true;
+    // Check common system installation paths directly
+    const platform = os.platform();
+    const commonPaths = [];
+
+    if (platform === "darwin") {
+      // macOS common paths
+      commonPaths.push("/usr/local/bin/ffmpeg", "/opt/homebrew/bin/ffmpeg", "/usr/bin/ffmpeg", "/opt/local/bin/ffmpeg");
+    } else if (platform === "win32") {
+      // Windows common paths
+      commonPaths.push(
+        "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe",
+        "C:\\Program Files (x86)\\ffmpeg\\bin\\ffmpeg.exe",
+        "C:\\ffmpeg\\bin\\ffmpeg.exe",
+      );
+    } else {
+      // Linux & else common paths
+      commonPaths.push("/usr/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/snap/bin/ffmpeg", "/opt/ffmpeg/bin/ffmpeg");
+    }
+
+    // Check if any of the common paths exist
+    for (const path of commonPaths) {
+      if (fs.existsSync(path)) {
+        // Store the found path for future use
+        await LocalStorage.setItem("ffmpeg-path", path);
+        return path;
+      }
+    }
+
+    return null;
   } catch (error) {
-    console.error("Error checking FFmpeg installation:", error);
-    return false;
+    console.error("Error finding FFmpeg:", error);
+    return null;
   }
 }
 
-export async function getFFmpegPath(): Promise<string> {
-  const ffmpegPath = "/usr/local/bin/ffmpeg";
-  const altPath = "/opt/homebrew/bin/ffmpeg";
+export async function installFFmpegBinary(): Promise<void> {
+  try {
+    const downloadDir = environment.supportPath;
 
-  if (fs.existsSync(ffmpegPath)) return ffmpegPath;
-  if (fs.existsSync(altPath)) return altPath;
+    // Ensure the download directory exists
+    if (!fs.existsSync(downloadDir)) {
+      fs.mkdirSync(downloadDir, { recursive: true });
+    }
 
-  throw new Error("FFmpeg not found. Please install it using Homebrew: brew install ffmpeg");
-}
+    console.log(`Download dir set to: ${downloadDir}`);
 
-export async function downloadFFmpeg(): Promise<void> {
-  await execPromise("/opt/homebrew/bin/brew install ffmpeg");
+    // Get the expected binary path for the custom download directory
+    const ffmpegPath = ffmpegStatic.getBinaryPath(downloadDir);
+
+    console.log(`FFmpeg static returned path: ${ffmpegPath}`);
+
+    if (!ffmpegPath) {
+      throw new Error("FFmpeg installer did not provide a valid path for this platform");
+    }
+
+    // Check if the binary exists at the returned path
+    if (!fs.existsSync(ffmpegPath)) {
+      // If binary doesn't exist, run the install process
+      console.log("FFmpeg binary not found, running install process...");
+
+      // Use the installBinary function from ffmpeg-static
+      await ffmpegStatic.installBinary(downloadDir);
+    }
+
+    // Check again after potential install
+    if (!fs.existsSync(ffmpegPath)) {
+      throw new Error(`FFmpeg binary not found at expected path: ${ffmpegPath}`);
+    }
+
+    // Make it executable
+    fs.chmodSync(ffmpegPath, 0o755);
+
+    // Verify the binary works
+    const { stdout } = await execPromise(`"${ffmpegPath}" -version`);
+    if (!stdout.includes("ffmpeg version")) {
+      throw new Error("FFmpeg binary installation verification failed");
+    }
+
+    // Store the path
+    await LocalStorage.setItem("ffmpeg-path", ffmpegPath);
+    console.log(`FFmpeg successfully installed to: ${ffmpegPath}`);
+  } catch (error) {
+    console.error("Error installing FFmpeg:", error);
+    throw error;
+  }
 }

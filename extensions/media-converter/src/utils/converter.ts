@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import os from "os";
-import { getFFmpegPath } from "./ffmpeg";
+import { findFFmpegPath } from "./ffmpeg";
 import { execPromise } from "./exec";
 
 export const INPUT_VIDEO_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".webm"] as const;
@@ -108,7 +108,7 @@ export async function convertMedia(
           }
         }
         // FFmpeg for all other image formats
-        const ffmpegPath = await getFFmpegPath();
+        const ffmpegPath = await findFFmpegPath();
         let ffmpegCmd = `"${ffmpegPath}" -i "${processedInputPath}"`;
 
         switch (currentOutputFormat) {
@@ -173,7 +173,7 @@ export async function convertMedia(
     const currentOutputFormat = outputFormat as (typeof OUTPUT_AUDIO_EXTENSIONS)[number];
 
     const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
-    const ffmpegPath = await getFFmpegPath();
+    const ffmpegPath = await findFFmpegPath();
     let command = `"${ffmpegPath}" -i "${filePath}"`;
 
     switch (currentOutputFormat) {
@@ -203,7 +203,7 @@ export async function convertMedia(
     const currentOutputFormat = outputFormat as (typeof OUTPUT_VIDEO_EXTENSIONS)[number];
 
     const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
-    const ffmpegPath = await getFFmpegPath();
+    const ffmpegPath = await findFFmpegPath();
     let command = `"${ffmpegPath}" -i "${filePath}"`;
 
     switch (currentOutputFormat) {

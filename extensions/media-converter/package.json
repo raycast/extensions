@@ -80,8 +80,11 @@
     ]
   },
   "dependencies": {
+    "@derhuerst/http-basic": "^8.2.0",
     "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.17.0"
+    "env-paths": "^2.2.0",
+    "https-proxy-agent": "^5.0.0",
+    "progress": "^2.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
