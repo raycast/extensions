@@ -561,7 +561,8 @@ const Command: React.FC = () => {
               actions={
                 <ActionPanel>
                   <Action
-                    title="Refresh Ip and Location"
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title="Refresh IP and Location"
                     icon={Icon.RotateClockwise}
                     onAction={async () => {
                       await showToast(
