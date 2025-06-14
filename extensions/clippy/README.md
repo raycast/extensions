@@ -1,3 +1,5 @@
+# Clippy
+
 Companion utility for [Clippy](https://www.clippy.run) — the simplest way to capture and organize your links in Notion.
 
 ## Commands
