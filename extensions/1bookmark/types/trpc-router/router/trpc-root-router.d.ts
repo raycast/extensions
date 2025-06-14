@@ -424,6 +424,8 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 description?: string | undefined;
                 name?: string | undefined;
                 image?: string | undefined;
+                myNickname?: string | undefined;
+                myImage?: string | undefined;
             };
             output: void;
         }>;
@@ -489,12 +491,6 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
             };
             output: void;
         }>;
-        lastVerifiedEmail: import("@trpc/server").TRPCQueryProcedure<{
-            input: {
-                spaceId: string;
-            };
-            output: any;
-        }>;
         listMemberAuthPolicies: import("@trpc/server").TRPCQueryProcedure<{
             input: {
                 spaceId: string;
@@ -523,6 +519,19 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 authCheckInterval: string;
             };
             output: void;
+        }>;
+        checkMySessionToPassAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                policyToAdd?: {
+                    emailPattern: string;
+                    authCheckInterval: string;
+                } | undefined;
+                policyToRemove?: {
+                    emailPattern: string;
+                } | undefined;
+            };
+            output: boolean;
         }>;
     }>;
     tag: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
@@ -643,7 +652,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
     }, {
         create: import("@trpc/server").TRPCMutationProcedure<{
             input: {
-                type: "APP_OPEN" | "LOGIN" | "LOGOUT" | "BOOKMARK_OPEN" | "BOOKMARK_COPY" | "BOOKMARK_CREATED" | "BOOKMARK_UPDATED" | "BOOKMARK_DELETED" | "BOOKMARK_IMPORTED_FROM_BROWSER" | "SUBSCRIBE_TAG" | "UNSUBSCRIBE_TAG" | "TAG_CREATED" | "TAG_UPDATED" | "TAG_DELETED" | "SPACE_CREATED" | "SPACE_UPDATED" | "SPACE_DELETED" | "SPACE_MEMBER_INVITED" | "SPACE_MEMBER_JOINED" | "SPACE_MEMBER_LEFT" | "SPACE_MEMBER_REMOVED" | "SPACE_MEMBER_ROLE_CHANGED" | "SPACE_PLAN_CHANGED" | "SPACE_MEMBER_AUTH_CODE_SENT" | "SPACE_MEMBER_AUTH_CODE_VERIFIED" | "SPACE_MEMBER_AUTH_POLICY_CREATED" | "SPACE_MEMBER_AUTH_POLICY_DELETED" | "SPACE_MEMBER_AUTH_POLICY_UPDATED";
+                type: "BOOKMARK_OPEN" | "BOOKMARK_COPY";
                 spaceId: string;
                 data: Record<string, string>;
             };

@@ -26,6 +26,7 @@ export const getFinderPath = async () => {
   try {
     return await runAppleScript(scriptFinderPath);
   } catch (e) {
+    console.error(e);
     return "Finder not running";
   }
 };
@@ -35,6 +36,7 @@ export const checkIsFile = (path: string) => {
     const stat = fse.lstatSync(path);
     return stat.isFile();
   } catch (e) {
+    console.error(e);
     return false;
   }
 };
@@ -51,6 +53,7 @@ export const getSelectedFile = async () => {
     });
     return selectedFile;
   } catch (e) {
+    console.error(e);
     return selectedFile;
   }
 };
@@ -76,9 +79,7 @@ export async function createNewFileWithText(
   fileContent = "",
   fileName = "",
 ) {
-  isEmpty(fileName)
-    ? (fileName = buildFileName(saveDirectory, "Untitled", fileExtension))
-    : (fileName = buildFileName(saveDirectory, fileName, fileExtension));
+  fileName = buildFileName(saveDirectory, fileName, fileExtension);
   const filePath = saveDirectory + fileName;
   fse.writeFileSync(filePath, fileContent);
   return { fileName: fileName, filePath: filePath };

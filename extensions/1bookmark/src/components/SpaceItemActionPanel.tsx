@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Icon,
-  Keyboard,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { SpaceMembersView } from "../views/SpaceMembersView";
 import { NewSpaceForm } from "../views/NewSpaceForm";
 import { SpaceTagsView } from "../views/SpaceTagsView";
@@ -26,8 +16,6 @@ export const SpaceItemActionPanel = (props: {
   type: "PERSONAL" | "TEAM";
 }) => {
   const { spaceId, refetch, type, enabled, authenticated, toggleSpace } = props;
-
-  const { pop } = useNavigation();
 
   const leave = trpc.space.leave.useMutation();
   const handleLeave = async () => {
@@ -63,7 +51,7 @@ export const SpaceItemActionPanel = (props: {
         <Action.Push
           title="Re-authenticate"
           icon={Icon.Lock}
-          target={<SpaceAuthForm spaceId={spaceId} refetch={() => pop()} />}
+          target={<SpaceAuthForm spaceId={spaceId} needPop />}
           onPop={refetch}
         />
         <Action

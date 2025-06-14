@@ -34,6 +34,10 @@ export function NewFileHereListLayout(props: {
       <List.Section title={"Template"}>
         {!isLoading &&
           templateFiles.map((template, index) => {
+            let tooltip = template.name + "." + template.extension;
+            if (template.name.startsWith(".")) {
+              tooltip = template.name;
+            }
             return (
               <List.Item
                 id={template.path}
@@ -41,7 +45,7 @@ export function NewFileHereListLayout(props: {
                 keywords={[template.extension]}
                 detail={<List.Item.Detail markdown={`${getDetail(template)}`} />}
                 icon={isImage(parse(template.path).ext) ? { source: template.path } : { fileIcon: template.path }}
-                title={{ value: template.name, tooltip: template.name + "." + template.extension }}
+                title={{ value: template.name, tooltip: tooltip }}
                 subtitle={template.extension.toUpperCase()}
                 quickLook={{ path: template.path, name: template.name }}
                 actions={

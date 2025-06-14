@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { getProperties } from "../api";
 import { apiLimit } from "../utils/constant";
 
-export function useProperties(spaceId: string) {
+export function useProperties(spaceId: string, config?: { execute: boolean }) {
   const { data, error, isLoading, mutate, pagination } = useCachedPromise(
     (spaceId: string) => async (options: { page: number }) => {
       const offset = options.page * apiLimit;
@@ -17,7 +17,7 @@ export function useProperties(spaceId: string) {
     [spaceId],
     {
       keepPreviousData: true,
-      execute: !!spaceId,
+      execute: !!spaceId && config?.execute !== false,
     },
   );
 

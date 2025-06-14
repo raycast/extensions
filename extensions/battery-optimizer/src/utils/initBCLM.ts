@@ -41,8 +41,8 @@ export async function confirmAlertBrew(): Promise<boolean> {
 
   if (!bclmExists && !customPathValid) {
     const userConfirmed = await confirmAlert({
-      title: "Whether to install bclm?",
-      message: "The bclm executable was not found. Would you like to install it from GitHub?",
+      title: "Install bclm?",
+      message: "The bclm executable was not found. Would you like to show it on GitHub?",
       primaryAction: {
         title: "Open GitHub",
         onAction: async () => {

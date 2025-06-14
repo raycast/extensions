@@ -1,5 +1,19 @@
 # Prism Launcher Changelog
 
+## [New Additions] - 2025-06-10
+
+- Extend readme with new features
+- Change extension-icon to match the new Launcher icon
+
+## [New Additions] - 2025-06-04
+
+- Add 'Open Minecraft Folder in Finder' action to quickly access the Minecraft folder
+
+## [New Additions] - 2025-05-23
+
+- Add favorites functionality for instances
+- Sort instances alphabetically
+
 ## [New Additions] - 2025-05-22
 
 - Add 'Open Instance Window' action to control instance settings or install content
