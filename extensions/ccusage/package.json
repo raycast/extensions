@@ -13,12 +13,14 @@
     {
       "name": "ccusage",
       "title": "Claude Code Usage",
+      "subtitle": "ccusage",
       "description": "Monitor Claude Code usage with real-time tracking",
       "mode": "view"
     },
     {
       "name": "menubar-ccusage",
       "title": "Claude Code Usage in Menu Bar",
+      "subtitle": "ccusage",
       "description": "Show Claude Code usage in menu bar",
       "mode": "menu-bar"
     }
