@@ -84,6 +84,14 @@ The extension handles various Node.js installation scenarios:
 - Global npm/yarn installations
 - System paths
 
+### Date Processing with `date -I`
+
+The extension uses `date -I` command via `useCurrentDate` hook for simplified date handling:
+
+- System-native current date retrieval without timezone complexity
+- Eliminates need for user timezone configuration
+- Automatic local time zone detection through OS
+
 ### Error Handling Strategy
 
 - Functions return `null` on failure rather than throwing exceptions

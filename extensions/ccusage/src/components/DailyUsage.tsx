@@ -1,12 +1,7 @@
-import { List, Icon, ActionPanel, Action, Color, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
-import { DailyUsageData, Preferences } from "../types/usage-types";
-import {
-  formatTokens,
-  formatCost,
-  formatDateWithTimezone,
-  getTokenEfficiency,
-  getCostPerMTok,
-} from "../utils/data-formatter";
+import { List, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
+import { DailyUsageData } from "../types/usage-types";
+import { formatTokens, formatCost, getTokenEfficiency, getCostPerMTok } from "../utils/data-formatter";
+import { useCurrentDate } from "../hooks/use-current-date";
 import { ReactNode } from "react";
 
 type DailyUsageProps = {
@@ -17,7 +12,7 @@ type DailyUsageProps = {
 };
 
 export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: DailyUsageProps) {
-  const preferences = getPreferenceValues<Preferences>();
+  const { data: currentDate } = useCurrentDate();
   const getTrendIcon = (): Icon => {
     return Icon.Calendar;
   };
@@ -41,7 +36,7 @@ export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: Da
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Status" text="No usage recorded for today" icon={Icon.Calendar} />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Date" text={new Date().toLocaleDateString()} />
+          <List.Item.Detail.Metadata.Label title="Date" text={currentDate || "Loading..."} />
         </List.Item.Detail.Metadata>
       );
     }
@@ -51,11 +46,7 @@ export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: Da
 
     return (
       <List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label
-          title="Date"
-          text={formatDateWithTimezone(dailyUsage.date, preferences.timezone)}
-          icon={Icon.Calendar}
-        />
+        <List.Item.Detail.Metadata.Label title="Date" text={dailyUsage.date} icon={Icon.Calendar} />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Token Usage" />

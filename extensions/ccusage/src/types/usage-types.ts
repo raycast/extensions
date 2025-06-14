@@ -117,7 +117,6 @@ export const UsageStatsSchema = z.object({
 export const PreferencesSchema = z.object({
   runtimeType: z.enum(["npx", "bunx", "pnpm", "deno"]).default("npx"),
   customRuntimePath: z.string().optional(),
-  timezone: z.string().default("UTC"),
 });
 
 // Export types inferred from schemas

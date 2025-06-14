@@ -1,7 +1,8 @@
-import { List, Icon, ActionPanel, Action, getPreferenceValues, openExtensionPreferences, Color } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, openExtensionPreferences, Color } from "@raycast/api";
 import { ReactNode } from "react";
-import { SessionData, Preferences } from "../types/usage-types";
-import { formatTokens, formatCost, formatRelativeTimeWithTimezone } from "../utils/data-formatter";
+import { SessionData } from "../types/usage-types";
+import { formatTokens, formatCost } from "../utils/data-formatter";
+import { formatDistanceToNow } from "date-fns";
 import {
   calculateAverageSessionCost,
   calculateAverageSessionTokens,
@@ -19,7 +20,6 @@ type SessionUsageProps = {
 };
 
 export function SessionUsage({ sessions, isLoading, error, settingsActions }: SessionUsageProps) {
-  const preferences = getPreferenceValues<Preferences>();
   const getDetailMetadata = (): ReactNode => {
     if (error) {
       return (
@@ -77,7 +77,7 @@ export function SessionUsage({ sessions, isLoading, error, settingsActions }: Se
           <List.Item.Detail.Metadata.Label
             key={session.sessionId || index}
             title={session.sessionId}
-            text={`${formatTokens(session.totalTokens)} • ${formatCost(session.cost)} • ${formatRelativeTimeWithTimezone(session.startTime || session.lastActivity, preferences.timezone)}`}
+            text={`${formatTokens(session.totalTokens)} • ${formatCost(session.cost)} • ${formatDistanceToNow(new Date(session.startTime || session.lastActivity), { addSuffix: true })}`}
           />
         ))}
       </List.Item.Detail.Metadata>
