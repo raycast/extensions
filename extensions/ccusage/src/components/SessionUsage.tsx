@@ -68,10 +68,7 @@ export function SessionUsage({ sessions, isLoading, error, settingsActions }: Se
           text={`$${efficiency.averageCostPerOutput.toFixed(6)}`}
         />
         {efficiency.mostEfficientModel && (
-          <List.Item.Detail.Metadata.Label
-            title="Most Efficient Model"
-            text={efficiency.mostEfficientModel}
-          />
+          <List.Item.Detail.Metadata.Label title="Most Efficient Model" text={efficiency.mostEfficientModel} />
         )}
         <List.Item.Detail.Metadata.Separator />
 
