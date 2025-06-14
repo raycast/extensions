@@ -1,0 +1,156 @@
+🛠 Refactor Guide
+
+“NotebookLM × Raycast” 코드베이스를 안전하게 갈아엎는 이유와 방법
+
+⸻
+
+1. 왜 고쳐야 하나?
+
+문제	증상	영향
+React 규칙 위반	훅(getNotebooksFromArc)을 일반 함수(getNotebooks) 내부에서 호출	- StrictMode·테스트·리로드 시 무조건 경고 또는 크래시
+관심사 뒤섞임	UI 레이어에서 브라우저 탭을 만들고 AppleScript 실행	유지보수·테스트 난이도 급상승, 다른 브라우저 지원 거의 불가
+중복·레이어 누락	browserAction.ts, 여러 훅, AppleScript 호출 위치가 여기저기 흩어짐	어디가 데이터 소스인지 찾기 어려움
+확장성 제로	Chrome/Safari 대응을 시작하려면 UI를 죄다 뜯어야 함	새 기능이 기획되면 매번 대공사
+
+목표
+	1.	서비스(데이터/탭 제어) ↔︎ UI(상태/렌더링) 완전 분리
+	2.	브라우저별 어댑터만 교체하면 UI는 그대로 사용
+	3.	테스트·StrictMode·동시 개발 환경에서 안전하게 동작
+
+⸻
+
+2. 새 구조 한눈에
+
+┌─ React UI ──────────────────────────────┐
+│ show-notebook.tsx  (컴포넌트)          │
+│ useNotebooks.ts    (커스텀 훅)          │
+└┬───────────────────────────────────────┘
+ │  INotebookService (포트 / 인터페이스)
+┌┴───────────────────────────────────────┐
+│ ArcNotebookService   ChromeNotebook…  │ ◀─── 브라우저 어댑터
+└────────────────────────────────────────┘
+
+	•	INotebookService – 탭 열기‧닫기·목록 조회·요약 조회를 정의
+	•	ArcNotebookService – AppleScript 호출 및 JSON 파싱 담당
+	•	useNotebooks – 로딩·리프레시·에러 상태만 관리 (훅 규칙 100% 준수)
+	•	쇼 노트북 컴포넌트 – 훅만 사용, 탭/스크립트와는 절연
+
+⸻
+
+3. 진행 순서 & 체크리스트
+
+단계 1~5 는 코드 추가만, 6·7·8·10·11 에서 실제 동작이 바뀝니다.
+매 단계 후 반드시 npm run lint && npm run typecheck && npm test && ray run 로 확인하세요.
+
+#	작업	주요 파일	빌드 영향
+1	INotebookService 인터페이스 추가	services/notebook/INotebookService.ts	❌
+2	ArcNotebookService 1차 구현 (openTab·closeTab·list)	services/notebook/ArcNotebookService.ts	❌
+3	서비스 팩토리 생성	services/notebook/factory.ts	❌
+4	useNotebooks 훅 초안 (list only)	hooks/useNotebooks.ts	❌
+5	(선택) 훅 단위 테스트 모킹	__tests__/…	❌
+6	show-notebook 컴포넌트 → useNotebooks 적용	show-notebook.tsx	✅
+7	useNotebooks 에 tabId·closeTab 추가 → 컴포넌트 반영	hooks/useNotebooks.ts	✅
+8	getNotebooks 호출 전면 제거	여러 컴포넌트	✅
+9	browserAction.ts 축소 (export 유지)	hooks/browserAction.ts	❌
+10	AppleScript 부수효과를 ArcNotebookService로 완전 이전	hooks/browser/arc.ts, services/...	✅
+11	browserAction.ts 삭제 + import 경로 교체	전역	✅
+12	dead-code, eslint fix	전역	❌
+13	README / 문서 업데이트	README.md	❌
+
+
+⸻
+
+4. 세부 작업 가이드
+
+4-1. 인터페이스 & 서비스
+
+// services/notebook/INotebookService.ts
+export interface INotebookService {
+  openTab(): Promise<string | null>;
+  closeTab(tabId: string): Promise<null>;
+  list(): Promise<Notebook[]>;
+  summary(tabId: string, noteId: string, srcId: string): Promise<Summary>;
+}
+
+// services/notebook/ArcNotebookService.ts
+export class ArcNotebookService implements INotebookService {
+  async openTab()   { return await makeNotebookLMTab(); }
+  async closeTab(id){ await runAppleScriptActionOnTab(id, "close"); return null; }
+  async list()      { const raw = await fetchData(await this.openTab()); return formatNotebook(raw).notebooks; }
+  async summary(t,n,s){ return await fetchSummaryfromArc(t,n,s); }
+}
+
+4-2. 훅
+
+// hooks/useNotebooks.ts
+export function useNotebooks() {
+  const [isLoading,setLoading]=useState(true);
+  const [notebooks,setNotebooks]=useState<Notebook[]>([]);
+  const tabIdRef=useRef<string|null>(null);
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    try{
+      if(!tabIdRef.current) tabIdRef.current=await notebookService.openTab();
+      setNotebooks(await notebookService.list());
+    }finally{ setLoading(false); }
+  },[]);
+
+  useEffect(()=>{ load(); },[load]);
+
+  return {
+    tabId: tabIdRef.current,
+    notebooks,
+    isLoading,
+    refresh: load,
+    closeTab: async()=>{ if(tabIdRef.current) await notebookService.closeTab(tabIdRef.current); }
+  };
+}
+
+4-3. 컴포넌트 교체
+
+// show-notebook.tsx
+const { tabId, notebooks, isLoading, refresh, closeTab } = useNotebooks();
+
+	•	useEffect 내에서 closeTab() 호출
+	•	refreshContent → refresh 변경
+
+⸻
+
+5. Git 브랜치 & 커밋 전략
+	1.	기능별 브랜치
+
+git checkout -b feat/notebook-service
+# 단계 1~3
+git commit -m "feat(core): introduce notebook service architecture"
+
+
+	2.	컴파일·런타임 통과 보증
+	•	각 커밋 전에 npm run build (Raycast는 ray build)
+	•	최소 1개의 스모크 테스트 실행
+	3.	PR 단위
+	•	1~5번 묶어 ‘infra’ PR → 머지
+	•	6~8번 묶어 ‘UI migration’ PR
+	•	10~11번 ‘service cut-over’ PR
+문제가 생기면 PR 단위로 롤백 가능
+	4.	릴리즈 태그
+	•	UI 마이그레이션 완료 시 vX.Y.0-beta1
+	•	browserAction 제거 완료 시 vX.Y.0 정식
+
+⸻
+
+6. FAQ
+
+질문	답변
+기존 getNotebooksFromArc는 지우나요?	AppleScript 호출만 걷어내고 파싱 전용 함수 로 남깁니다. 훗날 CLI 등에서 재사용 가능.
+Chrome/Safari 지원은?	ChromeNotebookService, SafariNotebookService만 구현하면 UI 무변경으로 동작.
+리팩터 도중 빌드 깨지면?	단계 체크리스트를 건너뛴 것. 커밋 전에 git stash && git checkout HEAD~1 로 되돌아가 확인하세요.
+
+
+⸻
+
+7. 끝으로
+
+이번 리팩터는 “관심사 분리” 와 “앞으로의 확장성·안정성” 을 위한 필수 작업입니다.
+☑️ 작은 커밋 ☑️ 테스트 우선 ☑️ 주석 & PR 설명 세 원칙만 지키면 안전하게 완료할 수 있습니다.
+질문·이슈는 #dev-notebook-refactor 슬랙 채널에 바로 올려 주세요. Happy hacking! 🎉
