@@ -1,3 +1,3 @@
 # Clippy Changelog
 
-## [Initial Version] - 2025-06-08
+## [Initial Version] - {PR_MERGE_DATE}
