@@ -13,13 +13,6 @@ export const getRecentSessions = (sessions: SessionData[], limit: number = 10): 
   ).slice(0, limit);
 };
 
-export const getUsageIntensity = (tokens: number): "Low" | "Medium" | "High" | "Very High" => {
-  if (tokens < 10000) return "Low";
-  if (tokens < 50000) return "Medium";
-  if (tokens < 100000) return "High";
-  return "Very High";
-};
-
 export const calculateAverageSessionCost = (sessions: SessionData[]): number => {
   if (sessions.length === 0) return 0;
   return meanBy(sessions, (session) => session.cost);

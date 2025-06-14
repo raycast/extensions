@@ -7,7 +7,6 @@ import {
   getTokenEfficiency,
   getCostPerMTok,
 } from "../utils/data-formatter";
-import { getUsageIntensity } from "../utils/usage-calculator";
 import { ReactNode } from "react";
 
 type DailyUsageProps = {
@@ -19,40 +18,12 @@ type DailyUsageProps = {
 
 export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: DailyUsageProps) {
   const preferences = getPreferenceValues<Preferences>();
-  const getTrendIcon = (usage: DailyUsageData | null): Icon => {
-    if (!usage) return Icon.Calendar;
-
-    const intensity = getUsageIntensity(usage.totalTokens);
-    switch (intensity) {
-      case "Low":
-        return Icon.Circle;
-      case "Medium":
-        return Icon.CircleProgress25;
-      case "High":
-        return Icon.CircleProgress75;
-      case "Very High":
-        return Icon.CircleProgress100;
-      default:
-        return Icon.Calendar;
-    }
+  const getTrendIcon = (): Icon => {
+    return Icon.Calendar;
   };
 
-  const getTrendColor = (usage: DailyUsageData | null): Color => {
-    if (!usage) return Color.SecondaryText;
-
-    const intensity = getUsageIntensity(usage.totalTokens);
-    switch (intensity) {
-      case "Low":
-        return Color.Green;
-      case "Medium":
-        return Color.Yellow;
-      case "High":
-        return Color.Orange;
-      case "Very High":
-        return Color.Red;
-      default:
-        return Color.SecondaryText;
-    }
+  const getTrendColor = (): Color => {
+    return Color.SecondaryText;
   };
 
   const getDetailMetadata = (): ReactNode => {
@@ -77,7 +48,6 @@ export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: Da
 
     const efficiency = getTokenEfficiency(dailyUsage.inputTokens, dailyUsage.outputTokens);
     const costPerMTok = getCostPerMTok(dailyUsage.cost, dailyUsage.totalTokens);
-    const intensity = getUsageIntensity(dailyUsage.totalTokens);
 
     return (
       <List.Item.Detail.Metadata>
@@ -101,11 +71,6 @@ export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: Da
 
         <List.Item.Detail.Metadata.Label title="Efficiency Metrics" />
         <List.Item.Detail.Metadata.Label title="Output/Input Ratio" text={efficiency} />
-        <List.Item.Detail.Metadata.Label
-          title="Usage Intensity"
-          text={intensity}
-          icon={{ source: getTrendIcon(dailyUsage), tintColor: getTrendColor(dailyUsage) }}
-        />
       </List.Item.Detail.Metadata>
     );
   };
@@ -126,7 +91,7 @@ export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: Da
     <List.Item
       id="daily"
       title="Today"
-      icon={{ source: getTrendIcon(dailyUsage), tintColor: getTrendColor(dailyUsage) }}
+      icon={{ source: getTrendIcon(), tintColor: getTrendColor() }}
       accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
