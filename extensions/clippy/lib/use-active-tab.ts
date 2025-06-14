@@ -48,6 +48,6 @@ const supportedBrowsers = Object.keys(getActiveTabByBrowser);
 
 function extractUrl(string: string) {
   const url = string.trim();
-
-  return url;
+  // Handle AppleScript array format like "{https://example.com}"
+  return url.replace(/^{|}$/g, '');
 }

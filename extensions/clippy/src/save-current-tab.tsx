@@ -6,30 +6,14 @@ import { saveLink } from "../lib/api";
 import { API_URL } from "../lib/api-url";
 import { authorize } from "../lib/oauth";
 import { useAuth } from "../lib/use-auth";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 function SaveCurrentTab() {
   const activeTab = useActiveTab();
   const { data: userData, isLoading: authLoading } = useAuth();
-  const [hasChecked, setHasChecked] = useState(false);
 
   useEffect(() => {
-    // Only start the timer after authentication is complete
     if (authLoading || !userData) {
-      return;
-    }
-
-    // Wait a moment for the hook to complete its initial check
-    const timer = setTimeout(() => {
-      setHasChecked(true);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [authLoading, userData]);
-
-  useEffect(() => {
-    // Don't do anything until auth is complete and we've given the hook time to check
-    if (authLoading || !userData || !hasChecked) {
       return;
     }
 
@@ -69,7 +53,7 @@ function SaveCurrentTab() {
         showFailureToast(error, { title: "Link save failed" });
       }
     })();
-  }, [activeTab, hasChecked, authLoading, userData]);
+  }, [activeTab, authLoading, userData]);
 
   return null;
 }

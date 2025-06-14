@@ -292,7 +292,7 @@ export async function testConnection(
     });
 
     if (!response.ok) {
-      await response.json().catch(() => ({}));
+      response.json().catch(() => ({}));
 
       let errorMessage = "Connection test failed";
       if (response.status === 401) {
