@@ -70,7 +70,33 @@ export interface GenerationConfig {
 }
 
 /**
+ * Information about Finder selection for UI decision making.
+ */
+export interface FinderSelectionInfo {
+  /** Available options based on the selection */
+  hasFiles: boolean;
+  hasDirectories: boolean;
+  /** Paths of selected files */
+  selectedFiles: string[];
+  /** Suggested directory path (parent of files or selected directory) */
+  suggestedDirectory: string;
+  /** Display names for UI */
+  fileNames: string[];
+  directoryName?: string;
+}
+
+/**
+ * Enhanced configuration for project code generation with file-specific options.
+ */
+export interface EnhancedGenerationConfig extends GenerationConfig {
+  /** Whether to process only specific files instead of entire directory */
+  processOnlySelectedFiles?: boolean;
+  /** List of specific file paths to process (when processOnlySelectedFiles is true) */
+  selectedFilePaths?: string[];
+}
+
+/**
  * Configuration specifically for the core file processing logic,
  * omitting outputFileName as it's primarily for UI/path construction.
  */
-export type FileProcessorConfig = Omit<GenerationConfig, "outputFileName">;
+export type FileProcessorConfig = Omit<EnhancedGenerationConfig, "outputFileName">;

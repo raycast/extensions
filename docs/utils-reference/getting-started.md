@@ -16,6 +16,16 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v2.0.0
+
+- The library can now be tree-shaken, reducing its size considerably.
+- When using `usePromise` and mutating the data with an optimistic update before it is fetched, the current fetch will be aborted to avoid a race condition.
+- Add a new [`runPowerShellScript`](./functions/runPowerShellScript.md) function.
+
+### v1.19.1
+
+- Fixed an issue where arguments weren't passed to `withCache`.
+
 ### v1.19.0
 
 - Add a new [`withCache`](./functions/withCache.md) function.

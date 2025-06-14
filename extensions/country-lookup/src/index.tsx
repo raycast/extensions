@@ -17,12 +17,12 @@ export default function Command() {
 
   return (
     <List
-      isLoading={(!data && !error) || isLoading}
+      isLoading={isLoading}
       searchBarPlaceholder="Search for name, country code, capital or dialup code"
       isShowingDetail
     >
       <List.EmptyView icon={{ source: "noview.png" }} title="No Results" />
-      {(data || []).map((entry) => (
+      {data.map((entry) => (
         <CountryListItem
           key={entry.cca2}
           country={entry}
