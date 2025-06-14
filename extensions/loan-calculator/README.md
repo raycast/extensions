@@ -23,7 +23,7 @@ A comprehensive loan calculator extension for Raycast that helps you calculate l
 ### Payment Frequencies
 - Daily
 - Weekly
-- Half-Monthly
+- Semi-Monthly
 - Monthly
 - Quarterly
 - Semi-Annually

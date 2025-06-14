@@ -7,7 +7,6 @@ export function getFrequencyPerYear(frequency: CompoundFrequency | PaymentFreque
     case "weekly":
       return 52;
     case "semi-monthly":
-    case "half-monthly":
       return 24;
     case "monthly":
       return 12;
@@ -72,7 +71,7 @@ export function calculateLoan(inputs: LoanInputs): CalculationResult {
     return {
       totalPayments: principal,
       totalInterest: 0,
-      monthlyPayment: payment,
+      paymentAmount: payment,
       schedule,
     };
   }
@@ -111,7 +110,7 @@ export function calculateLoan(inputs: LoanInputs): CalculationResult {
   return {
     totalPayments: totalPaid,
     totalInterest: totalInterestPaid,
-    monthlyPayment: payment,
+    paymentAmount: payment,
     schedule,
   };
 }

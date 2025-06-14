@@ -48,7 +48,7 @@ export default function ResultsView({ inputs }: ResultsViewProps) {
           />
           <List.Item
             title={`${paymentFreqText.replace("Every ", "")} Payment`}
-            subtitle={formatCurrency(result.monthlyPayment)}
+            subtitle={formatCurrency(result.paymentAmount)}
             icon="💳"
           />
         </List.Section>
