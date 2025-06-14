@@ -485,6 +485,7 @@ const Command: React.FC = () => {
               <ActionPanel.Section>
                 <Action.OpenInBrowser
                   url="https://www.mozilla.org/en-US/products/vpn/download/"
+                  // eslint-disable-next-line @raycast/prefer-title-case
                   title="Download Mozilla VPN"
                 />
               </ActionPanel.Section>

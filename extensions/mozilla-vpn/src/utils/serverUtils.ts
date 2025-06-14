@@ -82,7 +82,11 @@ export const fetchServerLocations = (): Promise<CountryLocation[]> => {
 const isValidServerName = (serverName: string): boolean => {
   // Allow alphanumeric characters, dots, hyphens, underscores, and spaces
   // Adjust this regex based on what Mozilla VPN actually accepts
-  return /^[a-zA-Z0-9.\-_ ]+$/.test(serverName) && serverName.length > 0 && serverName.length < 100;
+  return (
+    /^[a-zA-Z0-9.\-_ ]+$/.test(serverName) &&
+    serverName.length > 0 &&
+    serverName.length < 100
+  );
 };
 
 // Select a specific server

@@ -85,6 +85,7 @@ const CheckLogin: React.FC<CheckLoginProps> = ({ onBack }) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
+            {/* eslint-disable-next-line @raycast/prefer-title-case */}
             <Action title="Open Mozilla VPN" onAction={openMozillaVPNApp} />
           </ActionPanel.Section>
 
