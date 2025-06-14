@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import { List, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { ModelUsage } from "../types/usage-types";
-import { formatTokens, formatCost, getCostPerMTok } from "../utils/data-formatter";
+import { formatTokens, formatCost, getCostPerMTok, copyToClipboard, getCcusageCommand } from "../utils/data-formatter";
 import { getTopModels } from "../utils/usage-calculator";
 import { groupModelsByTier } from "../utils/model-utils";
 
@@ -145,27 +145,25 @@ export function ModelBreakdown({ models, isLoading, error, settingsActions }: Mo
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
-          {error && (
-            <Action
-              title="Open Preferences"
-              icon={Icon.Gear}
-              onAction={openExtensionPreferences}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-            />
-          )}
-          {settingsActions}
+          <Action
+            title="Copy Ccusage Command"
+            icon={Icon.Clipboard}
+            onAction={() => copyToClipboard(getCcusageCommand(), "Copied ccusage command to clipboard")}
+          />
           <Action
             title="Open Preferences"
             icon={Icon.Gear}
             onAction={openExtensionPreferences}
-            shortcut={{ modifiers: ["cmd"], key: "," }}
           />
-          <Action.OpenInBrowser
-            title="Claude Model Comparison"
-            url="https://docs.anthropic.com/claude/docs/models-overview"
-            icon={Icon.Book}
-          />
-          <Action.OpenInBrowser title="Claude Pricing" url="https://www.anthropic.com/pricing" icon={Icon.Coins} />
+          {settingsActions}
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              title="Claude Model Comparison"
+              url="https://docs.anthropic.com/claude/docs/models-overview"
+              icon={Icon.Book}
+            />
+            <Action.OpenInBrowser title="Claude Pricing" url="https://www.anthropic.com/pricing" icon={Icon.Coins} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

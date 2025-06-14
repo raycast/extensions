@@ -1,8 +1,23 @@
 import { useExec } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
 import { cpus } from "os";
-import { UsageStats, CCUsageOutput, DailyUsageData, SessionData } from "../types/usage-types";
+import { DailyUsageData, SessionData, ModelUsage } from "../types/usage-types";
 import { getRecentSessions, calculateModelUsage } from "../utils/usage-calculator";
+
+// Local type definitions for this hook
+type UsageStats = {
+  todayUsage: DailyUsageData | null;
+  totalUsage: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    cost: number;
+  } | null;
+  recentSessions: SessionData[];
+  topModels: ModelUsage[];
+  isLoading: boolean;
+  error?: string;
+};
 
 const getEnhancedNodePaths = (): string => {
   const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
@@ -52,7 +67,8 @@ const useTotalUsage = (
 
   if (rawData && !error) {
     try {
-      const parsed: CCUsageOutput = JSON.parse(rawData);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const parsed = JSON.parse(rawData) as any;
 
       if (parsed.totals) {
         data = {
@@ -88,11 +104,13 @@ const useDailyUsage = (
 
   if (rawData && !error) {
     try {
-      const parsed: CCUsageOutput = JSON.parse(rawData);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const parsed = JSON.parse(rawData) as any;
       const today = new Date().toISOString().split("T")[0];
 
       if (parsed.daily && parsed.daily.length > 0) {
-        const todayEntry = parsed.daily.find((d) => d.date === today);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const todayEntry = parsed.daily.find((d: any) => d.date === today);
         if (todayEntry) {
           data = {
             ...todayEntry,
@@ -132,10 +150,12 @@ const useSessionUsage = (
 
   if (rawData && !error) {
     try {
-      const parsed: CCUsageOutput = JSON.parse(rawData);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const parsed = JSON.parse(rawData) as any;
       const sessions = parsed.sessions || [];
 
-      data = sessions.map((session) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      data = sessions.map((session: any) => {
         // Extract model from modelBreakdowns (ccusage actual structure)
         const primaryModel = session.modelBreakdowns?.[0]?.modelName || session.modelsUsed?.[0] || "unknown";
 

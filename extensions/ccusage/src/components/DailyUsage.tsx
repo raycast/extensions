@@ -1,6 +1,13 @@
 import { List, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { DailyUsageData } from "../types/usage-types";
-import { formatTokens, formatCost, getTokenEfficiency, getCostPerMTok } from "../utils/data-formatter";
+import {
+  formatTokens,
+  formatCost,
+  getTokenEfficiency,
+  getCostPerMTok,
+  copyToClipboard,
+  getCcusageCommand,
+} from "../utils/data-formatter";
 import { useCurrentDate } from "../hooks/use-current-date";
 import { ReactNode } from "react";
 
@@ -87,26 +94,24 @@ export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: Da
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
-          {error && (
-            <Action
-              title="Open Preferences"
-              icon={Icon.Gear}
-              onAction={openExtensionPreferences}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-            />
-          )}
-          {settingsActions}
+          <Action
+            title="Copy Ccusage Command"
+            icon={Icon.Clipboard}
+            onAction={() => copyToClipboard(getCcusageCommand(), "Copied ccusage command to clipboard")}
+          />
           <Action
             title="Open Preferences"
             icon={Icon.Gear}
             onAction={openExtensionPreferences}
-            shortcut={{ modifiers: ["cmd"], key: "," }}
           />
-          <Action.OpenInBrowser
-            title="View Ccusage Repository"
-            url="https://github.com/ryoppippi/ccusage"
-            icon={Icon.Code}
-          />
+          {settingsActions}
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              title="View Ccusage Repository"
+              url="https://github.com/ryoppippi/ccusage"
+              icon={Icon.Code}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

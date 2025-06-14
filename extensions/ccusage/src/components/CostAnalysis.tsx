@@ -1,7 +1,7 @@
 import { List, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { ReactNode } from "react";
 import { DailyUsageData, ModelUsage } from "../types/usage-types";
-import { formatTokens, formatCost, getCostPerMTok } from "../utils/data-formatter";
+import { formatTokens, formatCost, getCostPerMTok, copyToClipboard, getCcusageCommand } from "../utils/data-formatter";
 
 // Display limits for cost and token breakdowns
 const MAX_COST_MODELS_DISPLAY = 5;
@@ -156,27 +156,25 @@ export function CostAnalysis({ totalUsage, dailyUsage, models, isLoading, error,
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
-          {error && (
-            <Action
-              title="Open Preferences"
-              icon={Icon.Gear}
-              onAction={openExtensionPreferences}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-            />
-          )}
-          {settingsActions}
+          <Action
+            title="Copy Ccusage Command"
+            icon={Icon.Clipboard}
+            onAction={() => copyToClipboard(getCcusageCommand(), "Copied ccusage command to clipboard")}
+          />
           <Action
             title="Open Preferences"
             icon={Icon.Gear}
             onAction={openExtensionPreferences}
-            shortcut={{ modifiers: ["cmd"], key: "," }}
           />
-          <Action.OpenInBrowser title="Claude Pricing" url="https://www.anthropic.com/pricing" icon={Icon.Coins} />
-          <Action.OpenInBrowser
-            title="Usage Guidelines"
-            url="https://docs.anthropic.com/claude/docs/usage-guidelines"
-            icon={Icon.Book}
-          />
+          {settingsActions}
+          <ActionPanel.Section>
+            <Action.OpenInBrowser title="Claude Pricing" url="https://www.anthropic.com/pricing" icon={Icon.Coins} />
+            <Action.OpenInBrowser
+              title="Usage Guidelines"
+              url="https://docs.anthropic.com/claude/docs/usage-guidelines"
+              icon={Icon.Book}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
