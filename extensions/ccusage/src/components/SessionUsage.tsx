@@ -8,6 +8,9 @@ import {
   calculateEfficiencyMetrics,
 } from "../utils/usage-calculator";
 
+// Display limit for latest sessions
+const MAX_SESSIONS_DISPLAY = 5;
+
 type SessionUsageProps = {
   sessions: SessionData[];
   isLoading: boolean;
@@ -73,7 +76,7 @@ export function SessionUsage({ sessions, isLoading, error, settingsActions }: Se
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Latest Sessions" />
-        {sessions.slice(0, 5).map((session, index) => (
+        {sessions.slice(0, MAX_SESSIONS_DISPLAY).map((session, index) => (
           <List.Item.Detail.Metadata.Label
             key={session.sessionId || index}
             title={session.sessionId}
