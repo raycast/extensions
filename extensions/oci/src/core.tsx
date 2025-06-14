@@ -1,11 +1,12 @@
 /* eslint-disable @raycast/prefer-title-case */
-import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { getFavicon, showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
-import common = require("oci-common");
+import * as common from "oci-common";
 import * as core from "oci-core";
 import { Instance } from "oci-core/lib/model";
 import { mapObjectToMarkdownTable } from "./utils";
 import { InstanceActionRequest } from "oci-core/lib/request";
+import OpenInOCI from "./open-in-oci";
 
 const onError = (error: Error) => {
   const err = error.message as string | common.OciError;
@@ -19,11 +20,11 @@ export default function CheckProvider() {
     const provider = new common.ConfigFileAuthenticationDetailsProvider();
     if (!provider) return <Detail isLoading />;
     return <Core provider={provider} />;
-  } catch (error) {
+  } catch {
     return (
       <Detail
         navigationTitle="Oracle Cloud - Provider Error"
-        markdown={`## Error: \n\n Can't load the default config from \`~/.oci/config\` or \`~/.oraclebmc/config\` because it does not exists or it's not a file. For more info about config file and how to get required information, see https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm for more info on OCI configuration files. \n\n > TIP: Check extension README!`}
+        markdown={`## Error: \n\n Can't load the default config from \`~/.oci/config\` or \`~/.oraclebmc/config\` because it does not exist or it's not a file. For more info about config file and how to get required information, see https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm for more info on OCI configuration files. \n\n > TIP: Check extension README!`}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
@@ -75,15 +76,31 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
     }
   }
 
+  async function confirmAndTerminate(instance: Instance) {
+    const options: Alert.Options = {
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      title: "Terminate instance",
+      message: `Do you want to permanently delete instance "${instance.displayName || instance.id}"?`,
+      primaryAction: {
+        title: "Terminate",
+        style: Alert.ActionStyle.Destructive,
+      },
+    };
+
+    if (await confirmAlert(options)) doInstanceAction(instance, "TERMINATE");
+  }
+
   async function doInstanceAction(instance: Instance, action: InstanceActionRequest["action"]) {
     const toast = await showToast(Toast.Style.Animated, action, instance.displayName ?? "");
     try {
       const computeClient = new core.ComputeClient({ authenticationDetailsProvider: provider });
       await mutate(
-        computeClient.instanceAction({
-          instanceId: instance.id,
-          action,
-        }),
+        action !== "TERMINATE"
+          ? computeClient.instanceAction({
+              instanceId: instance.id,
+              action,
+            })
+          : computeClient.terminateInstance({ instanceId: instance.id }),
       );
       toast.style = Toast.Style.Success;
       toast.title = `${action} ✅`;
@@ -148,6 +165,7 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
                   title="View VNIC Attachments"
                   target={<ListInstanceVnicAttachments instanceId={instance.id} provider={provider} />}
                 />
+                <OpenInOCI route={`instances/${instance.id}`} />
                 <ActionPanel.Section>
                   {instance.lifecycleState === Instance.LifecycleState.Running && (
                     <>
@@ -157,6 +175,16 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
                   )}
                   {instance.lifecycleState === Instance.LifecycleState.Stopped && (
                     <Action icon={Icon.Play} title="Start" onAction={() => doInstanceAction(instance, "START")} />
+                  )}
+                  {![Instance.LifecycleState.Terminated, Instance.LifecycleState.Terminating].includes(
+                    instance.lifecycleState,
+                  ) && (
+                    <Action
+                      icon={Icon.Trash}
+                      title="Terminate"
+                      onAction={() => confirmAndTerminate(instance)}
+                      style={Action.Style.Destructive}
+                    />
                   )}
                 </ActionPanel.Section>
               </ActionPanel>

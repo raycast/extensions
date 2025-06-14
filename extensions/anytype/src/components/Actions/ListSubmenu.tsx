@@ -3,6 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { addObjectsToList } from "../../api";
 import { useSearch } from "../../hooks";
+import { AddObjectsToListRequest } from "../../models";
 import { bundledTypeKeys } from "../../utils";
 
 interface ListSubmenuProps {
@@ -11,14 +12,18 @@ interface ListSubmenuProps {
 }
 
 export function ListSubmenu({ spaceId, objectId }: ListSubmenuProps) {
-  const [load, setLoad] = useState(false);
-  const { objects: lists, isLoadingObjects } = useSearch(spaceId, "", [bundledTypeKeys.collection], { execute: load });
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const { objects: lists, isLoadingObjects } = useSearch(spaceId, searchText, [bundledTypeKeys.collection], {
+    execute: isOpen,
+  });
   const filteredLists = lists.filter((list) => list.id !== objectId);
 
   async function handleAddToList(listId: string) {
     await showToast({ style: Toast.Style.Animated, title: `Adding to list…` });
     try {
-      await addObjectsToList(spaceId, listId, [objectId]);
+      const request: AddObjectsToListRequest = { objects: [objectId] };
+      await addObjectsToList(spaceId, listId, request);
       await showToast({ style: Toast.Style.Success, title: "Added to list" });
     } catch (error) {
       await showFailureToast(error, { title: "Failed to add to list" });
@@ -30,15 +35,14 @@ export function ListSubmenu({ spaceId, objectId }: ListSubmenuProps) {
       icon={Icon.PlusTopRightSquare}
       title="Add to List"
       shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-      onOpen={() => setLoad(true)}
+      onOpen={() => setIsOpen(true)}
+      isLoading={isLoadingObjects}
+      onSearchTextChange={setSearchText}
+      throttle={true}
     >
-      {filteredLists.length === 0 && isLoadingObjects ? (
-        <Action title="Loading…" />
-      ) : (
-        filteredLists.map((list) => (
-          <Action key={list.id} title={list.name} icon={list.icon} onAction={() => handleAddToList(list.id)} />
-        ))
-      )}
+      {filteredLists.map((list) => (
+        <Action key={list.id} title={list.name} icon={list.icon} onAction={() => handleAddToList(list.id)} />
+      ))}
     </ActionPanel.Submenu>
   );
 }

@@ -1,4 +1,4 @@
-import { closeMainWindow, getPreferenceValues, popToRoot, Clipboard } from "@raycast/api";
+import { Clipboard, closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { SEARCH_ENGINE } from "../constants";
 import { Preferences, Tab } from "../interfaces";
@@ -18,6 +18,7 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
     end repeat
     tell application "System Events"
       ${getNewTabShortcut()}
+      delay 0.1
       keystroke "a" using {command down}
       key code 51
       keystroke "v" using {command down}
@@ -42,6 +43,7 @@ export async function openHistoryTab(url: string): Promise<boolean | string> {
       end repeat
       tell application "System Events"
         ${getNewTabShortcut()}
+        delay 0.1
         keystroke "a" using {command down}
         key code 51
         keystroke "v" using {command down}

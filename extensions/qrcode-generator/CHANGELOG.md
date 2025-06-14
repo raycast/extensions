@@ -1,5 +1,11 @@
 # QR Code Generator Changelog
 
+## [Improved User Experience] - 2025-05-30
+
+- Added success toast notification when generating QR code from clipboard
+- Adjusted clipboard-generated QR code height to 355px to prevent overflow and scrolling in Raycast window
+- Refactored QRCodeView component with configurable height parameter
+
 ## [Added SVG Support] - 2025-05-14
 
 - Added support for generating QR codes in SVG format

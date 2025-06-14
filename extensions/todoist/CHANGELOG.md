@@ -1,5 +1,11 @@
 # Todoist Changelog
 
+## [Add task priority mapping for Todoist API] - 2025-06-12
+ - Add a priority mapping function to ensure the user-selected priority aligns with the priority value used in the backend.
+
+## [Use confetti when completing tasks] - 2025-05-28
+- Add option to use the Raycast confetti command when completing tasks. 
+
 ## [Automatically create labels on quick add command] - 2025-05-09
 
 - Add option to automatically crete labels in the quick add command

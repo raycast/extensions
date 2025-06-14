@@ -216,10 +216,11 @@ export function ResolutionList({
                 {showDeleteAction && resolution.isCustom && (
                   <Action
                     title="Delete Custom Size"
+                    style={Action.Style.Destructive}
                     icon={{
                       source: ICON_PATHS.clear,
                       fallback: Icon.Trash,
-                      tintColor: Color.PrimaryText,
+                      tintColor: Color.Red,
                     }}
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                     onAction={async () => {

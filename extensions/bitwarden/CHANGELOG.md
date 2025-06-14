@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2025-06-05
+
+- Fix attempt for authenticator "TypeError: t is not a function" error
+
 ## [New Preference] - 2025-04-09
 
 - Add primary action preference for authenticator command

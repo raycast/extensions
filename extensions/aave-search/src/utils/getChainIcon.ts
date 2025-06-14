@@ -17,6 +17,7 @@ const chainIdToName: Record<number, string> = {
   5000: "mantle",
   1666600000: "harmonyone",
   146: "sonic",
+  1868: "soneium",
 };
 
 const chainNameToIcon: Record<string, string> = {
@@ -38,6 +39,7 @@ const chainNameToIcon: Record<string, string> = {
   mantle: "mantle.svg",
   harmonyone: "harmonyone.svg",
   sonic: "sonic.svg",
+  soneium: "soneium.svg",
 };
 
 export function getChainIcon(chainId: number): string {

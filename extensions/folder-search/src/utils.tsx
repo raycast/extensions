@@ -16,11 +16,7 @@ import * as yup from "yup";
 import path from "path";
 import os from "os";
 import { SpotlightSearchPreferences, SpotlightSearchResult } from "./types";
-
-// Logging configuration
-const LOG_ENABLED = true; // Set to true to enable all logging
-const LOG_LEVEL: "debug" | "error" = "error"; // Set to "debug" for verbose logging or "error" for less noise
-const LOG_CACHE_OPERATIONS = false; // Set to true to log detailed cache operations
+import { LOG_ENABLED, LOG_LEVEL, LOG_CACHE_OPERATIONS } from "./hooks/useFolderSearch";
 
 // Create a plugins cache instance with namespace
 const pluginsCache = new Cache({
@@ -67,6 +63,33 @@ const getPluginPathsFromCache = () => {
         });
       }
       return null;
+    }
+
+    // Check if plugins directory has been modified since cache was created
+    try {
+      const { pluginsFolder } = getPreferenceValues<SpotlightSearchPreferences>();
+      if (pluginsFolder) {
+        const normalizedPath = pluginsFolder.replace(/\/$/, "").replace(/^~/, os.homedir());
+        const dirStats = fs.statSync(normalizedPath);
+        const dirModTime = dirStats.mtime.getTime();
+
+        if (dirModTime > timestamp) {
+          if (LOG_CACHE_OPERATIONS) {
+            log("debug", "getPluginPathsFromCache", "Plugins directory modified since cache, invalidating", {
+              cacheTime: new Date(timestamp).toISOString(),
+              dirModTime: new Date(dirModTime).toISOString(),
+            });
+          }
+          return null;
+        }
+      }
+    } catch (error) {
+      // If we can't check the directory, just use the cache
+      if (LOG_CACHE_OPERATIONS) {
+        log("debug", "getPluginPathsFromCache", "Could not check plugins directory modification time", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
     }
 
     // Get plugin paths from cache
@@ -132,7 +155,10 @@ const pluginSchema = yup
     title: yup.string().required(),
     icon: yup.string().required(),
     shortcut: PluginShortcutSchema.required(),
-    appleScript: yup.object().required(),
+    appleScript: yup
+      .mixed()
+      .required()
+      .test("is-function", "appleScript must be a function", (value) => typeof value === "function"),
   })
   .required()
   .strict()
@@ -254,6 +280,18 @@ export const loadPlugins = async (callerId?: string) => {
   return validPlugins;
 };
 
+/**
+ * Check if a folder matches a search query by filtering special characters and comparing case-insensitively
+ */
+export const matchesSearchQuery = (folderName: string, searchQuery: string): boolean => {
+  if (!searchQuery) return true;
+
+  const cleanQuery = searchQuery.replace(/[[|\]]/gi, "").toLocaleLowerCase();
+  const cleanFolderName = folderName.toLocaleLowerCase();
+
+  return cleanFolderName.includes(cleanQuery);
+};
+
 export const safeSearchScope = (searchScope: string | undefined) => {
   return searchScope === "" ? undefined : searchScope;
 };
@@ -310,17 +348,6 @@ export const lastUsedSort = (a: SpotlightSearchResult, b: SpotlightSearchResult)
   return new Date(safeB).getTime() - new Date(safeA).getTime();
 };
 
-export const fixDoubleConcat = (text: string): string => {
-  const regex = /^(.+)\1$/; // Matches a string followed by the same string again
-
-  if (regex.test(text)) {
-    const originalText = text.replace(regex, "$1");
-    return originalText;
-  }
-
-  return text;
-};
-
 const CLOUD_STORAGE_PATHS = [
   // iCloud Drive
   `${userHomeDir}/Library/Mobile Documents/com~apple~CloudDocs`,
@@ -328,9 +355,10 @@ const CLOUD_STORAGE_PATHS = [
   `${userHomeDir}/Library/CloudStorage/Dropbox`,
   // Google Drive
   `${userHomeDir}/Library/CloudStorage/GoogleDrive`,
-  // OneDrive
-  `${userHomeDir}/Library/CloudStorage/OneDrive-Personal`,
-  `${userHomeDir}/Library/CloudStorage/OneDrive-Microsoft`,
+  // OneDrive (dynamic tenant name)
+  `${userHomeDir}/Library/CloudStorage/OneDrive`,
+  // Synology Drive (dynamic server name)
+  `${userHomeDir}/Library/CloudStorage/SynologyDrive`,
 ];
 
 export function isCloudStoragePath(path: string): boolean {
@@ -364,7 +392,7 @@ export function formatDate(dateString: string | undefined | null): string {
       dateStyle: "full",
       timeStyle: "short",
     }).format(date);
-  } catch (e) {
+  } catch {
     return "-";
   }
 }
@@ -372,9 +400,8 @@ export function formatDate(dateString: string | undefined | null): string {
 // Logging utility
 export const log = (level: "debug" | "error", component: string, message: string, data?: Record<string, unknown>) => {
   if (!LOG_ENABLED) return;
-
   // Skip debug messages when log level is set to error only
-  if (level === "debug" && LOG_LEVEL === "error") return;
+  if (level === "debug" && LOG_LEVEL !== "debug") return;
 
   const timestamp = new Date().toISOString();
   const logData = {
@@ -438,3 +465,31 @@ export function logDiagnostics(component: string, message: string) {
 
   log("debug", component, "=".repeat(50));
 }
+
+export function fixDoubleConcat(text: string): string {
+  if (!text || text.length < 2) return text;
+
+  const halfLength = Math.floor(text.length / 2);
+  const firstHalf = text.substring(0, halfLength);
+  const secondHalf = text.substring(halfLength);
+
+  // If the string is duplicated, use only the first half
+  if (text.length % 2 === 0 && firstHalf === secondHalf) {
+    return firstHalf;
+  }
+
+  return text;
+}
+
+// Function to manually clear the plugin cache (useful when new plugins are added)
+export const clearPluginCache = () => {
+  try {
+    pluginsCache.remove(PLUGINS_CACHE_KEY);
+    pluginsCache.remove(PLUGINS_CACHE_TIMESTAMP_KEY);
+    log("debug", "clearPluginCache", "Plugin cache cleared manually");
+  } catch (error) {
+    log("error", "clearPluginCache", "Error clearing plugin cache", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
