@@ -15,22 +15,6 @@
       "mode": "no-view"
     }
   ],
-  "preferences": [
-    {
-      "name": "TraeVariant",
-      "description": "Trae variant to open the selected finder into.",
-      "type": "dropdown",
-      "title": "Trae Variant",
-      "required": false,
-      "default": "com.trae.app",
-      "data": [
-        {
-          "title": "Trae",
-          "value": "com.trae.app"
-        }
-      ]
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^1.17.0"
