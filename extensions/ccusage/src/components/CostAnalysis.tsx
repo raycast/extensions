@@ -3,6 +3,10 @@ import { ReactNode } from "react";
 import { DailyUsageData, ModelUsage } from "../types/usage-types";
 import { formatTokens, formatCost, getCostPerMTok } from "../utils/data-formatter";
 
+// Display limits for cost and token breakdowns
+const MAX_COST_MODELS_DISPLAY = 5;
+const MAX_TOKEN_MODELS_DISPLAY = 3;
+
 type CostAnalysisProps = {
   totalUsage: { inputTokens: number; outputTokens: number; totalTokens: number; cost: number } | null;
   dailyUsage: DailyUsageData | null;
@@ -104,7 +108,7 @@ export function CostAnalysis({ totalUsage, dailyUsage, models, isLoading, error,
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Cost by Model" />
-        {costBreakdown.breakdown.slice(0, 5).map((model, index) => (
+        {costBreakdown.breakdown.slice(0, MAX_COST_MODELS_DISPLAY).map((model, index) => (
           <List.Item.Detail.Metadata.Label
             key={`cost-${model.model || "unknown"}-${index}`}
             title={model.model || "Unknown Model"}
@@ -117,7 +121,7 @@ export function CostAnalysis({ totalUsage, dailyUsage, models, isLoading, error,
           <>
             <List.Item.Detail.Metadata.Separator />
             <List.Item.Detail.Metadata.Label title="Token Distribution" />
-            {tokenBreakdown.breakdown.slice(0, 3).map((model, index) => (
+            {tokenBreakdown.breakdown.slice(0, MAX_TOKEN_MODELS_DISPLAY).map((model, index) => (
               <List.Item.Detail.Metadata.Label
                 key={`token-${model.model || "unknown"}-${index}`}
                 title={model.model || "Unknown Model"}
