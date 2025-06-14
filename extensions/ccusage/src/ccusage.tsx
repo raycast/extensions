@@ -1,5 +1,5 @@
 import { List, getPreferenceValues } from "@raycast/api";
-import { useUsageStats, useccusageAvailability } from "./hooks/use-usage-data";
+import { useUsageStats, useCcusageAvailability } from "./hooks/use-usage-data";
 import { DailyUsage } from "./components/DailyUsage";
 import { SessionUsage } from "./components/SessionUsage";
 import { CostAnalysis } from "./components/CostAnalysis";
@@ -14,7 +14,7 @@ export default function ccusage() {
   const preferences = getPreferenceValues<Preferences>();
 
   // All hooks must be called at the top level
-  const { isAvailable, isLoading: availabilityLoading } = useccusageAvailability();
+  const { isAvailable, isLoading: availabilityLoading } = useCcusageAvailability();
   const stats = useUsageStats();
 
   // Check ccusage availability

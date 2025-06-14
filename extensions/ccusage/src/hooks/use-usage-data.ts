@@ -186,7 +186,7 @@ export function useUsageStats(refreshInterval: number = 5000): UsageStats & { re
   };
 }
 
-export function useccusageAvailability() {
+export function useCcusageAvailability() {
   const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "--help"], execOptions);
 
   return {

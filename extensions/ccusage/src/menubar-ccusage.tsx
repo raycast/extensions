@@ -1,6 +1,6 @@
 import { MenuBarExtra, Icon, Color, open, openExtensionPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useccusageAvailability } from "./hooks/use-usage-data";
+import { useCcusageAvailability } from "./hooks/use-usage-data";
 import { formatCost, formatTokensAsMTok } from "./utils/data-formatter";
 import { execSync } from "child_process";
 import { cpus } from "os";
@@ -82,7 +82,7 @@ const processUsageData = (data: ParsedData, type: "daily" | "monthly" | "total")
 
 export default function MenuBarccusage() {
   // Check ccusage availability
-  const { isAvailable, isLoading: availabilityLoading } = useccusageAvailability();
+  const { isAvailable, isLoading: availabilityLoading } = useCcusageAvailability();
 
   // Get usage data with usePromise (system-monitor style)
   const { data: usageData, isLoading: usageLoading } = usePromise(async () => {
