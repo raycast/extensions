@@ -1,5 +1,9 @@
 #  Zed Recent Projects Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Add `useDevSqlite` preference option
+
 ## [Fixes] - 2025-04-03
 
 - Show Git branch label based on extension preferences
