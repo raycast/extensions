@@ -27,37 +27,37 @@
   ],
   "preferences": [
     {
-      "name": "runtimeType",
+      "name": "defaultView",
       "type": "dropdown",
       "required": false,
-      "title": "JavaScript Runtime",
-      "description": "Choose the runtime to execute ccusage commands",
-      "default": "npx",
+      "title": "Default View",
+      "description": "Choose the default section to display when opening the extension",
+      "default": "today",
       "data": [
         {
-          "title": "npx (Node Package Execute)",
-          "value": "npx"
+          "title": "Today Usage",
+          "value": "today"
         },
         {
-          "title": "bunx (Bun Package Execute)",
-          "value": "bunx"
+          "title": "Session Usage",
+          "value": "session"
         },
         {
-          "title": "pnpm dlx (PNPM Package Execute)",
-          "value": "pnpm"
+          "title": "Cost Analysis",
+          "value": "cost"
         },
         {
-          "title": "deno run (Deno Runtime)",
-          "value": "deno"
+          "title": "Model Breakdown",
+          "value": "model"
         }
       ]
     },
     {
-      "name": "customRuntimePath",
+      "name": "customNpxPath",
       "type": "textfield",
       "required": false,
-      "title": "Custom Runtime Path",
-      "description": "Override the default runtime path (optional)",
+      "title": "Custom npx Path",
+      "description": "Override the default npx path if needed (optional)",
       "placeholder": "e.g., /usr/local/bin/npx"
     }
   ],

@@ -77,12 +77,13 @@ export type DailyUsageData = z.infer<typeof DailyUsageDataSchema>;
 
 ### Enhanced PATH Configuration
 
-The extension handles various Node.js installation scenarios:
+The extension handles various Node.js installation scenarios to ensure npx availability:
 
 - Homebrew (Apple Silicon vs Intel)
 - Node Version Managers (nvm, fnm, n, volta)
 - Global npm/yarn installations
 - System paths
+- Custom npx path override through preferences
 
 ### Date Processing with `date -I`
 
@@ -106,7 +107,7 @@ Each major UI section is a focused component:
 - `SessionUsage`: Recent sessions with model-specific icons  
 - `CostAnalysis`: Cost breakdown and projections with inline calculations
 - `ModelBreakdown`: Model-wise usage analysis with tier grouping
-- `RuntimeSetup`: Initial configuration for ccusage command execution
+- `ErrorState`: Initial configuration guidance for ccusage setup
 
 ## Modern Dependencies
 
@@ -132,22 +133,22 @@ The extension requires the `ccusage` npm package available via `npx ccusage@late
 src/
 ├── ccusage.tsx              # Main command entry point
 ├── menubar-ccusage.tsx      # Menu bar command entry point
+├── preferences.ts           # Centralized preference management
 ├── components/              # UI components
 │   ├── DailyUsage.tsx
 │   ├── SessionUsage.tsx
 │   ├── CostAnalysis.tsx
 │   ├── ModelBreakdown.tsx
-│   └── RuntimeSetup.tsx
+│   └── ErrorState.tsx
 ├── hooks/
-│   └── use-usage-data.ts    # Data fetching hooks
+│   ├── use-usage-data.ts    # Data fetching hooks
+│   └── use-current-date.ts  # Current date hook with `date -I`
 ├── types/
-│   ├── usage-types.ts       # Zod schemas + inferred types
-│   └── runtime-types.ts     # Runtime configuration types
+│   └── usage-types.ts       # Zod schemas + inferred types
 └── utils/
-    ├── ccusage-integration.ts  # CLI command execution
-    ├── data-formatter.ts       # Pure formatting functions
-    ├── usage-calculator.ts     # Pure calculation functions
-    └── runtime-settings.ts     # LocalStorage management
+    ├── data-formatter.ts    # Pure formatting functions
+    ├── model-utils.ts       # Model-specific utility functions
+    └── usage-calculator.ts  # Pure calculation functions
 ```
 
 ## Development Guidelines
@@ -189,14 +190,14 @@ if (!data) {
 - **Inline Calculations**: Simple operations computed inline rather than abstracted
 - **Minimal Abstractions**: Avoid over-engineering for maintainability
 
-## Runtime Configuration
+## Preference System
 
-The extension includes a runtime settings system that allows users to configure different JavaScript runtimes:
+The extension includes a simplified preference system for user customization:
 
-- **Supported Runtimes**: npx, bunx, pnpm dlx, deno run
-- **Custom Paths**: Override default runtime paths if needed  
-- **Initial Setup**: First-run configuration ensures proper ccusage integration
-- **LocalStorage**: Settings persisted locally using Raycast's LocalStorage API
+- **Default View**: Choose which section appears first (Today Usage, Session History, Cost Analysis, Model Breakdown)
+- **Custom npx Path**: Override default npx path for non-standard Node.js installations
+- **Centralized Management**: All preferences handled through `src/preferences.ts` module
+- **Raycast Integration**: Uses `getPreferenceValues` from `@raycast/api` for type-safe access
 
 ## Code Quality Practices
 

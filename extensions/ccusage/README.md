@@ -13,13 +13,13 @@
 
 Monitor your Claude Code usage with comprehensive real-time statistics:
 
-- **Daily Usage**: Track input/output tokens and costs for today with visual intensity indicators
+- **Today Usage**: Track input/output tokens and costs for today with visual intensity indicators
 - **Session History**: View recent usage sessions with model-specific breakdown and icons
 - **Cost Analysis**: Detailed cost tracking with monthly projections and spending insights
 - **Model Statistics**: Usage analytics by Claude model (Opus, Sonnet, Haiku) with tier grouping
 - **Menu Bar Integration**: Quick access to usage stats directly from your system menu bar
-- **Runtime Flexibility**: Support for multiple JavaScript runtimes (npx, bunx, pnpm, deno)
-- **Timezone Support**: Customizable timezone settings for accurate date display
+- **Default View Preference**: Choose which section to display first when opening the extension
+- **Custom npx Path**: Support for custom npx installations and non-standard Node.js setups
 
 ## Screenshots
 
@@ -29,21 +29,26 @@ Monitor your Claude Code usage with comprehensive real-time statistics:
 
 ## Requirements
 
-This extension requires the [ccusage](https://github.com/ryoppippi/ccusage) CLI tool to function properly. The extension will automatically attempt to install and run ccusage using your preferred JavaScript runtime.
+This extension requires the [ccusage](https://github.com/ryoppippi/ccusage) CLI tool to function properly. The extension automatically installs and runs ccusage using **npx** (Node Package Execute).
 
-### Supported Runtimes
+### System Requirements
 
-- **npx** (Node Package Execute) - Default
-- **bunx** (Bun Package Execute)
-- **pnpm dlx** (PNPM Package Execute)
-- **deno run** (Deno Runtime)
+- **Node.js** with npm/npx installed
+- **Claude Code** usage history (the extension reads local ccusage data)
+- **Internet connection** for downloading ccusage when first run
 
 ## Setup
 
 1. Install the extension from the Raycast Store
-2. Open the extension - it will guide you through the initial setup
-3. Configure your preferred JavaScript runtime in preferences if needed
-4. The extension will automatically fetch your Claude Code usage data
+2. Open the extension - it will automatically download ccusage using npx
+3. The extension will immediately start displaying your Claude Code usage data
+
+### Configuration (Optional)
+
+- **Default View**: Set which section appears first (Today Usage, Session History, Cost Analysis, or Model Breakdown)
+- **Custom npx Path**: If npx is installed in a non-standard location, specify the full path to npx
+
+Access preferences with **Cmd+Shift+,** when the extension is open.
 
 ## Important Notes
 

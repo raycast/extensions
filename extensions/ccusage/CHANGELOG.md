@@ -8,5 +8,5 @@
 - Cost analysis and projections
 - Model-wise usage statistics
 - Menu bar integration for quick access
-- Configurable JavaScript runtime support (npx, bunx, pnpm, deno)
+- npx-based execution with custom path configuration support
 - Integration with ccusage CLI tool for data fetching

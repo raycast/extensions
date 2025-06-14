@@ -14,42 +14,23 @@ The ccusage command cannot be executed. The Raycast extension is unable to retri
 
 ## Solution
 
-### 1. ⚙️ Configure JavaScript Runtime in Preferences
+### 1. 🔧 Configure Custom npx Path (if needed)
+If the automatic path detection doesn't work, you can set a custom npx path in preferences.
+
 Press **Cmd+Shift+,** or use the action below to open extension preferences.
 
-Select one of the following JavaScript runtimes:
-- **npx** (Recommended) - Node.js package runner
-- **pnpm dlx** - pnpm package runner  
-- **bunx** - Bun package runner
-- **deno run** - Deno runtime
-
-### 2. 🔧 Configure Custom Path (if needed)
-If the automatic path detection doesn't work, you can set a custom path in preferences.
-
-To find the correct path for your runtime, run these commands in Terminal:
+To find the correct npx path, run this command in Terminal:
 
 \`\`\`bash
-# For npx
+# Find npx location  
 which npx
 # Example output: /usr/local/bin/npx
-
-# For pnpm
-which pnpm
-# Example output: /opt/homebrew/bin/pnpm
-
-# For bunx  
-which bunx
-# Example output: /Users/username/.bun/bin/bunx
-
-# For deno
-which deno
-# Example output: /opt/homebrew/bin/deno
 \`\`\`
 
-Copy the output path and paste it into the "Custom Runtime Path" field in preferences.
+Copy the output path and paste it into the "Custom npx Path" field in preferences.
 
-### 3. 🔄 Verify ccusage Access
-The extension will automatically use the configured runtime to execute:
+### 2. 🔄 Verify ccusage Access
+The extension will automatically execute:
 \`npx ccusage@latest --json\`
 
 ## 📚 Help & Resources

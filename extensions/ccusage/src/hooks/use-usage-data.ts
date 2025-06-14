@@ -3,6 +3,7 @@ import { useInterval } from "usehooks-ts";
 import { cpus } from "os";
 import { DailyUsageData, SessionData, ModelUsage } from "../types/usage-types";
 import { getRecentSessions, calculateModelUsage } from "../utils/usage-calculator";
+import { preferences } from "../preferences";
 
 // Local type definitions for this hook
 type UsageStats = {
@@ -61,7 +62,13 @@ const useTotalUsage = (
   error: Error | undefined;
   revalidate: () => void;
 } => {
-  const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "--json"], execOptions);
+  const npxCommand = preferences.customNpxPath || "npx";
+  const {
+    data: rawData,
+    isLoading,
+    error,
+    revalidate,
+  } = useExec(npxCommand, ["ccusage@latest", "--json"], execOptions);
 
   let data: { inputTokens: number; outputTokens: number; totalTokens: number; cost: number } | null = null;
 
@@ -93,12 +100,13 @@ const useTotalUsage = (
 const useDailyUsage = (
   refreshInterval: number = 10000,
 ): { data: DailyUsageData | null; isLoading: boolean; error: Error | undefined; revalidate: () => void } => {
+  const npxCommand = preferences.customNpxPath || "npx";
   const {
     data: rawData,
     isLoading,
     error,
     revalidate,
-  } = useExec("npx", ["ccusage@latest", "daily", "--json"], execOptions);
+  } = useExec(npxCommand, ["ccusage@latest", "daily", "--json"], execOptions);
 
   let data: DailyUsageData | null = null;
 
@@ -139,12 +147,13 @@ const useDailyUsage = (
 const useSessionUsage = (
   refreshInterval: number = 15000,
 ): { data: SessionData[]; isLoading: boolean; error: Error | undefined; revalidate: () => void } => {
+  const npxCommand = preferences.customNpxPath || "npx";
   const {
     data: rawData,
     isLoading,
     error,
     revalidate,
-  } = useExec("npx", ["ccusage@latest", "session", "--json"], execOptions);
+  } = useExec(npxCommand, ["ccusage@latest", "session", "--json"], execOptions);
 
   let data: SessionData[] = [];
 
@@ -207,7 +216,13 @@ export function useUsageStats(refreshInterval: number = 5000): UsageStats & { re
 }
 
 export function useCcusageAvailability() {
-  const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "--help"], execOptions);
+  const npxCommand = preferences.customNpxPath || "npx";
+  const {
+    data: rawData,
+    isLoading,
+    error,
+    revalidate,
+  } = useExec(npxCommand, ["ccusage@latest", "--help"], execOptions);
 
   return {
     isAvailable: !error && rawData !== undefined,

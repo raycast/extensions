@@ -1,18 +1,13 @@
-import { List, getPreferenceValues } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useUsageStats, useCcusageAvailability } from "./hooks/use-usage-data";
 import { DailyUsage } from "./components/DailyUsage";
 import { SessionUsage } from "./components/SessionUsage";
 import { CostAnalysis } from "./components/CostAnalysis";
 import { ModelBreakdown } from "./components/ModelBreakdown";
 import { ErrorState } from "./components/ErrorState";
-
-type Preferences = {
-  defaultView: string;
-};
+import { preferences } from "./preferences";
 
 export default function ccusage() {
-  const preferences = getPreferenceValues<Preferences>();
-
   // All hooks must be called at the top level
   const { isAvailable, isLoading: availabilityLoading } = useCcusageAvailability();
   const stats = useUsageStats();
@@ -26,7 +21,7 @@ export default function ccusage() {
     return <ErrorState />;
   }
 
-  const selectedItemId = preferences.defaultView || "daily";
+  const selectedItemId = preferences.defaultView || "today";
 
   const settingsActions = null;
 

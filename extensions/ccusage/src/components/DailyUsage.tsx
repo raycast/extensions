@@ -87,7 +87,7 @@ export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: Da
 
   return (
     <List.Item
-      id="daily"
+      id="today"
       title="Today"
       icon={{ source: getTrendIcon(), tintColor: getTrendColor() }}
       accessories={getAccessories()}
