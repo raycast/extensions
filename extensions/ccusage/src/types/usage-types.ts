@@ -8,7 +8,7 @@ const DailyUsageDataSchema = z.object({
   cacheCreationTokens: z.number().optional(),
   cacheReadTokens: z.number().optional(),
   totalTokens: z.number(),
-  totalCost: z.number().optional(),
+  totalCost: z.number(),
   cost: z.number(), // For compatibility, derived from totalCost
 });
 
