@@ -1,9 +1,6 @@
-import { Toast, getApplications, getPreferenceValues, getSelectedFinderItems, open, showToast } from "@raycast/api";
+import { getApplications, getSelectedFinderItems, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
-
-interface OpenTraePreferences {
-  TraeVariant: string;
-}
 
 /**
  * Gets the selected Finder window.
@@ -23,26 +20,19 @@ const getSelectedFinderWindow = (): Promise<string> => {
   end if
  `;
   return new Promise((resolve, reject) => {
-    const child = exec(`osascript -e '${appleScript}'`, (error, stdout, stderr) => {
+    exec(`osascript -e '${appleScript}'`, (error, stdout, stderr) => {
       if (error || stderr) reject(Error("Could not get the selected Finder window"));
       resolve(stdout.trim());
-    });
-
-    child.on("close", () => {
-      child.kill();
     });
   });
 };
 
 export default async () => {
-  const preferences = getPreferenceValues<OpenTraePreferences>();
   const applications = await getApplications();
-  const traeApplication = applications.find((app) => app.bundleId === preferences.TraeVariant);
+  const traeApplication = applications.find((app) => app.bundleId === "com.trae.app");
 
   if (!traeApplication) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Trae is not installed",
+    await showFailureToast("Trae is not installed", {
       primaryAction: {
         title: "Install Trae",
         onAction: () => open("https://www.trae.ai/"),
@@ -63,9 +53,6 @@ export default async () => {
     await open(selectedFinderWindow, traeApplication);
     return;
   } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "No Finder items or window selected",
-    });
+    await showFailureToast("No Finder items or window selected");
   }
 };
