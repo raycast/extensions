@@ -171,13 +171,17 @@ private func getActiveWindowData() -> (
   )
 }
 
-// Retrieve all screens and their resolution info
+private func isLaunchedByRaycast() -> Bool {
+  let env = ProcessInfo.processInfo.environment
+  return env.keys.contains(where: { $0.hasPrefix("RAYCAST_") })
+}
+
 @raycast func getScreensInfo() -> [String] {
-  let screens = NSScreen.screens
-  guard !screens.isEmpty else {
-    return ["Error"]
+  guard isLaunchedByRaycast() else {
+    return ["Error: This command must be run from Raycast"]
   }
 
+  let screens = NSScreen.screens
   var results: [String] = []
   for (index, screen) in screens.enumerated() {
     results.append(getScreenInfoString(screenIndex: index, screen: screen))

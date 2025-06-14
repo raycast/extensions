@@ -34,6 +34,10 @@ export function NewFileHereGridLayout(props: {
       />
       <Grid.Section title={"Template"}>
         {templateFiles.map((template, index) => {
+          let tooltip = template.name + "." + template.extension;
+          if (template.name.startsWith(".")) {
+            tooltip = template.name;
+          }
           return (
             <Grid.Item
               id={template.path}
@@ -41,7 +45,7 @@ export function NewFileHereGridLayout(props: {
               keywords={[template.extension]}
               content={{
                 value: isImage(parse(template.path).ext) ? { source: template.path } : { fileIcon: template.path },
-                tooltip: template.name + "." + template.extension,
+                tooltip: tooltip,
               }}
               title={template.name}
               quickLook={{ path: template.path, name: template.name }}

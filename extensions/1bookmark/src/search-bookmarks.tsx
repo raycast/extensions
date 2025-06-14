@@ -93,7 +93,7 @@ export function Body() {
   }
 
   if (unauthenticatedSpaceId) {
-    return <SpaceAuthFormBody spaceId={unauthenticatedSpaceId} refetch={() => refetch()} />;
+    return <SpaceAuthFormBody spaceId={unauthenticatedSpaceId} refetch={refetch} />;
   }
 
   if (!data) {

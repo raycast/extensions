@@ -5,13 +5,13 @@ import { apiEndpoints, apiFetch } from "../../utils";
 export async function updateProperty(
   spaceId: string,
   propertyId: string,
-  data: UpdatePropertyRequest,
+  request: UpdatePropertyRequest,
 ): Promise<{ property: Property }> {
   const { url, method } = apiEndpoints.updateProperty(spaceId, propertyId);
 
   const response = await apiFetch<{ property: RawProperty }>(url, {
     method: method,
-    body: JSON.stringify(data),
+    body: JSON.stringify(request),
   });
 
   return { property: mapProperty(response.payload.property) };

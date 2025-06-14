@@ -1,5 +1,6 @@
 import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { TrelloResultModel } from "./trelloResponse.model";
+import { JSX } from "react";
 
 interface TodoListItemProps {
   result: TrelloResultModel;
