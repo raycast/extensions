@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, useNavigation, getPreferenceValues } from "@raycast/api";
 import { LoanInputs, PAYMENT_OPTIONS } from "../helpers/types";
 import { calculateLoan } from "../helpers/utils";
 
@@ -6,8 +6,14 @@ interface ResultsViewProps {
   inputs: LoanInputs;
 }
 
+interface Preferences {
+  currencySymbol: string;
+}
+
 export default function ResultsView({ inputs }: ResultsViewProps) {
   const { pop } = useNavigation();
+  const preferences = getPreferenceValues<Preferences>();
+  const currencySymbol = preferences.currencySymbol || "$";
 
   const processedInputs: LoanInputs = {
     loanAmount: inputs.loanAmount || "10000",
@@ -18,6 +24,14 @@ export default function ResultsView({ inputs }: ResultsViewProps) {
     payBack: inputs.payBack || "monthly",
   };
 
+  // Helper function to format currency
+  const formatCurrency = (amount: number): string => {
+    return `${currencySymbol}${amount.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  };
+
   try {
     const result = calculateLoan(processedInputs);
     const paymentFreqText = PAYMENT_OPTIONS.find((opt) => opt.value === processedInputs.payBack)?.title || "Monthly";
@@ -25,19 +39,15 @@ export default function ResultsView({ inputs }: ResultsViewProps) {
     return (
       <List navigationTitle="Loan Calculation Results">
         <List.Section title="Overview">
-          <List.Item
-            title="Total Payments"
-            subtitle={`$${result.totalPayments.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-            icon="💰"
-          />
+          <List.Item title="Total Payments" subtitle={formatCurrency(result.totalPayments)} icon="💰" />
           <List.Item
             title="Total Interest"
-            subtitle={`$${result.totalInterest.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${((result.totalInterest / result.totalPayments) * 100).toFixed(1)}% of total)`}
+            subtitle={`${formatCurrency(result.totalInterest)} (${((result.totalInterest / result.totalPayments) * 100).toFixed(1)}% of total)`}
             icon="📈"
           />
           <List.Item
             title={`${paymentFreqText.replace("Every ", "")} Payment`}
-            subtitle={`$${result.monthlyPayment.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            subtitle={formatCurrency(result.monthlyPayment)}
             icon="💳"
           />
         </List.Section>
@@ -47,16 +57,16 @@ export default function ResultsView({ inputs }: ResultsViewProps) {
             <List.Item
               key={index}
               title={`Payment ${payment.period}`}
-              subtitle={`$${payment.payment.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              subtitle={formatCurrency(payment.payment)}
               accessories={[
                 {
-                  text: `Principal: $${payment.principal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                  text: `Principal: ${formatCurrency(payment.principal)}`,
                 },
                 {
-                  text: `Interest: $${payment.interest.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                  text: `Interest: ${formatCurrency(payment.interest)}`,
                 },
                 {
-                  text: `Balance: $${payment.balance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                  text: `Balance: ${formatCurrency(payment.balance)}`,
                 },
               ]}
               icon="📅"

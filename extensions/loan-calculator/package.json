@@ -16,6 +16,58 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "currencySymbol",
+      "type": "dropdown",
+      "required": false,
+      "title": "Currency Symbol",
+      "description": "Select the currency symbol to display in calculations",
+      "default": "$",
+      "data": [
+        {
+          "title": "US Dollar ($)",
+          "value": "$"
+        },
+        {
+          "title": "Euro (€)",
+          "value": "€"
+        },
+        {
+          "title": "British Pound (£)",
+          "value": "£"
+        },
+        {
+          "title": "Japanese Yen (¥)",
+          "value": "JPY¥"
+        },
+        {
+          "title": "Chinese Yuan (¥)",
+          "value": "¥"
+        },
+        {
+          "title": "Canadian Dollar (C$)",
+          "value": "C$"
+        },
+        {
+          "title": "Australian Dollar (A$)",
+          "value": "A$"
+        },
+        {
+          "title": "Swiss Franc (CHF)",
+          "value": "CHF"
+        },
+        {
+          "title": "Indian Rupee (₹)",
+          "value": "₹"
+        },
+        {
+          "title": "Korean Won (₩)",
+          "value": "₩"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.100.0",
     "@raycast/utils": "^1.17.0"

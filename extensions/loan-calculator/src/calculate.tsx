@@ -1,9 +1,16 @@
-import { ActionPanel, Action, Form } from "@raycast/api";
 import { useState } from "react";
+import { Form, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 import { LoanInputs, CompoundFrequency, PaymentFrequency, COMPOUND_OPTIONS, PAYMENT_OPTIONS } from "./helpers/types";
 import ResultsView from "./components/ResultsView";
 
+interface Preferences {
+  currencySymbol: string;
+}
+
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
+  const currencySymbol = preferences.currencySymbol || "$";
+
   const [loanAmount, setLoanAmount] = useState<string>("");
   const [loanTermYears, setLoanTermYears] = useState<string>("");
   const [loanTermMonths, setLoanTermMonths] = useState<string>("");
@@ -34,7 +41,7 @@ export default function Command() {
     <Form navigationTitle="Loan Calculator" actions={Actions}>
       <Form.TextField
         id="loanAmount"
-        title="Loan Amount ($)"
+        title={`Loan Amount (${currencySymbol})`}
         placeholder="10000"
         value={loanAmount}
         onChange={setLoanAmount}
