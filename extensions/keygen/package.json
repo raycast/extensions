@@ -28,12 +28,14 @@
     {
       "name": "licenses",
       "title": "Licenses",
+      "subtitle": "Keygen",
       "description": "List Licenses and Create new ones",
       "mode": "view"
     },
     {
       "name": "policies",
       "title": "Policies",
+      "subtitle": "Keygen",
       "description": "List Policies and Create new ones",
       "mode": "view"
     }

@@ -42,7 +42,7 @@ export default function Licenses() {
                     <List.Item.Detail.Metadata.Label title="Attributes" />
                     <List.Item.Detail.Metadata.Label title="Name" text={license.attributes.name || "--"} />
                     <List.Item.Detail.Metadata.Label title="Key" text={license.attributes.key} />
-                    {/* exopr */}
+                    {/* expiration */}
                     <List.Item.Detail.Metadata.TagList title="Status">
                       <List.Item.Detail.Metadata.TagList.Item text={license.attributes.status} />
                     </List.Item.Detail.Metadata.TagList>
@@ -69,7 +69,7 @@ export default function Licenses() {
                       title="Last Validation"
                       text={license.attributes.lastValidated?.toString() || "--"}
                     />
-                    {/* vlid */}
+                    {/* valid */}
                     <List.Item.Detail.Metadata.Label
                       title="Last Check-Out"
                       text={license.attributes.lastCheckOut?.toString() || "--"}

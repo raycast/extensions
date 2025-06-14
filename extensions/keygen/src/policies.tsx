@@ -61,11 +61,11 @@ export default function Policies() {
                       <List.Item.Detail.Metadata.TagList.Item text={policy.attributes.transferStrategy} />
                     </List.Item.Detail.Metadata.TagList>
 
-                    <List.Item.Detail.Metadata.Label title="" text="Machine Requirements" />
-                    <List.Item.Detail.Metadata.Label title="" text="Usage Requirements" />
-                    <List.Item.Detail.Metadata.Label title="" text="Scope Requirements" />
-                    <List.Item.Detail.Metadata.Label title="" text="Permissions" />
-                    <List.Item.Detail.Metadata.Label title="" text="Advanced" />
+                    {/* <List.Item.Detail.Metadata.Label title="Machine Requirements" text="" />
+                    <List.Item.Detail.Metadata.Label title="Usage Requirements" text="" />
+                    <List.Item.Detail.Metadata.Label title="Scope Requirements" text="" />
+                    <List.Item.Detail.Metadata.Label title="Permissions" text="" />
+                    <List.Item.Detail.Metadata.Label title="Advanced" text="" /> */}
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -140,7 +140,7 @@ function NewPolicy({ onNew }: { onNew: () => void }) {
     validation: {
       name: FormValidation.Required,
       maxMachines(value) {
-        if (value && !Number(value)) return "The item must be a number";
+        if (value && (!Number(value) || Number(value) <= 0)) return "The item must be a positive number";
       },
     },
   });
