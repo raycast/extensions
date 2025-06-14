@@ -7,15 +7,17 @@ import { showFailureToast } from "@raycast/utils";
 import { ParseResult } from "./types";
 
 export function parseUrl(url: string): ParseResult | undefined {
+  const trimmed = (url || "").trim();
+  if (!trimmed) return undefined;
   try {
-    const { href, protocol, hostname, port, origin, hash, pathname: path, searchParams: queries } = new URL(url);
+    const { href, protocol, hostname, port, origin, hash, pathname: path, searchParams: queries } = new URL(trimmed);
     return {
       href,
-      protocol,
+      protocol: protocol.replace(/:$/, ""),
       hostname,
       port,
       origin,
-      hash,
+      hash: hash.replace(/^#/, ""),
       path: decodeURIComponent(path),
       query: Object.fromEntries(queries),
     };
@@ -25,8 +27,13 @@ export function parseUrl(url: string): ParseResult | undefined {
   }
 }
 
-export function buildUrl({ protocol, hostname, path, query, hash }: ParseResult) {
-  const urlParts = [protocol ? protocol + "//" : "", hostname || "", path || "/"];
+export function buildUrl({ protocol, hostname, port, path, query, hash }: ParseResult) {
+  const urlParts = [
+    protocol ? protocol.replace(/:$/, "") + "://" : "",
+    hostname || "",
+    port ? `:${port}` : "",
+    path ? encodeURI(path) : "/",
+  ];
   const queryStr = Object.entries(query || {})
     .filter(([k]) => k)
     .map(([k, v]) => {
@@ -39,16 +46,16 @@ export function buildUrl({ protocol, hostname, path, query, hash }: ParseResult)
     urlParts.push("?" + queryStr);
   }
   if (hash) {
-    urlParts.push(hash);
+    urlParts.push("#" + hash.replace(/^#/, ""));
   }
   return urlParts.join("");
 }
 
 export function renderQrMarkdown(qr: string, url?: string) {
-  const size = "320";
+  const size = "330";
   return (
-    `<img src="${qr}" width="${size}" height="${size}" />` +
-    (url ? `\nFull URL ↓: \n\n \`\`\`\n${url}\n\`\`\`` + `\n - length: ${url.length}` : "")
+    `![qrcode](${qr}?raycast-height=${size})\n` +
+    (url ? `\nFull URL(length: ${url.length}) ↓: \n\n \`\`\`\n${url}\n\`\`\`` : "")
   );
 }
 

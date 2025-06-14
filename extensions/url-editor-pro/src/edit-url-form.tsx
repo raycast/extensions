@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, Icon, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { QrDetail, buildUrl, parseUrl } from "./url-editor-pro";
+import { QrDetail, buildUrl, parseUrl } from "./utils";
 import { ParseResult } from "./types";
 import { showFailureToast } from "@raycast/utils";
 
@@ -166,7 +166,22 @@ export function EditUrlForm({ url, onSave }: { url: ParseResult; onSave: (parsed
       />
 
       <Form.TextField id="path" title="Path" value={fields.path || ""} onChange={(v) => handleFieldChange("path", v)} />
-      <Form.TextField id="hash" title="Hash" value={fields.hash || ""} onChange={(v) => handleFieldChange("hash", v)} />
+      {fields.hash ? (
+        <Form.TextField
+          id="hash"
+          title="Hash"
+          value={fields.hash || ""}
+          onChange={(v) => handleFieldChange("hash", v)}
+        />
+      ) : null}
+      {fields.port ? (
+        <Form.TextField
+          id="port"
+          title="Port"
+          value={fields.port || ""}
+          onChange={(v) => handleFieldChange("port", v)}
+        />
+      ) : null}
       {/* Query Params */}
       {fields.query &&
         Object.entries(fields.query).map(([k, v]) => (

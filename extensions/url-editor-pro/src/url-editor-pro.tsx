@@ -4,7 +4,7 @@ import { getFavicon, useCachedState } from "@raycast/utils";
 import QRCode from "qrcode";
 import { EditUrlForm } from "./edit-url-form";
 import { ParseResult } from "./types";
-import { QrDetail, parseUrl, isURLLike, buildUrl, renderQrMarkdown } from "./utils";
+import { isURLLike, renderQrMarkdown } from "./utils";
 
 function getItemId(item: ParseResult) {
   return item.href + "#$#" + item.alias;
@@ -221,5 +221,3 @@ export default function Command() {
     </List>
   );
 }
-
-export { QrDetail, buildUrl, parseUrl };
