@@ -10,8 +10,8 @@ import { App } from "./models";
 export default function ApplicationsList() {
   const { data: list, isLoading, revalidate } = usePromise(getList);
 
-  async function handleAppMove(app: App, position: "first" | "last") {
-    await moveItem(app, position).catch((error) => {
+  async function handleAppMove(index: number, position: "first" | "last") {
+    await moveItem(index, position).catch((error) => {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to move application",
@@ -22,8 +22,8 @@ export default function ApplicationsList() {
     await revalidate();
   }
 
-  async function handleAppRemove(app: App) {
-    await removeItem(app).catch((error) => {
+  async function handleAppRemove(index: number) {
+    await removeItem(index).catch((error) => {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to remove application",
@@ -34,8 +34,8 @@ export default function ApplicationsList() {
     await revalidate();
   }
 
-  async function handleAppStick(app: App) {
-    await updateItem(app, { isSticky: true }).catch((error) => {
+  async function handleAppStick(index: number) {
+    await updateItem(index, { isSticky: true }).catch((error) => {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to stick application",
@@ -46,8 +46,8 @@ export default function ApplicationsList() {
     await revalidate();
   }
 
-  async function handleAppUnstick(app: App) {
-    await updateItem(app, { isSticky: false }).catch((error) => {
+  async function handleAppUnstick(index: number) {
+    await updateItem(index, { isSticky: false }).catch((error) => {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to unstick application",
@@ -76,7 +76,7 @@ export default function ApplicationsList() {
               <Action
                 icon={Icon.ArrowUp}
                 title="Move to Top"
-                onAction={() => handleAppMove(item, "first")}
+                onAction={() => handleAppMove(index, "first")}
                 shortcut={{
                   modifiers: ["cmd"],
                   key: "t",
@@ -85,7 +85,7 @@ export default function ApplicationsList() {
               <Action
                 icon={Icon.ArrowDown}
                 title="Move to Bottom"
-                onAction={() => handleAppMove(item, "last")}
+                onAction={() => handleAppMove(index, "last")}
                 shortcut={{
                   modifiers: ["cmd"],
                   key: "b",
@@ -99,13 +99,13 @@ export default function ApplicationsList() {
                     modifiers: ["cmd"],
                     key: "s",
                   }}
-                  onAction={() => handleAppUnstick(item)}
+                  onAction={() => handleAppUnstick(index)}
                 />
               ) : (
                 <Action
                   icon={Icon.Star}
                   title="Sticky"
-                  onAction={() => handleAppStick(item)}
+                  onAction={() => handleAppStick(index)}
                   shortcut={{
                     modifiers: ["cmd"],
                     key: "s",
@@ -116,7 +116,7 @@ export default function ApplicationsList() {
                 icon={Icon.Trash}
                 title="Remove"
                 style={Action.Style.Destructive}
-                onAction={() => handleAppRemove(item)}
+                onAction={() => handleAppRemove(index)}
                 shortcut={{
                   modifiers: ["cmd"],
                   key: "delete",
