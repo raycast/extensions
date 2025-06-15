@@ -10,28 +10,32 @@ const execAsync = promisify(exec);
 
 export async function openInWindsurf(filePath: string): Promise<boolean> {
   try {
+    // Normalize and validate the path
+    const normalizedPath = path.normalize(filePath);
+
     // Check if path exists
-    if (!fs.existsSync(filePath)) {
+    if (!fs.existsSync(normalizedPath)) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Path not found",
-        message: `The path "${filePath}" does not exist`,
+        message: `The path "${normalizedPath}" does not exist`,
       });
       return false;
     }
 
     // Determine if it's a file or folder
-    const stats = fs.statSync(filePath);
+    const stats = fs.statSync(normalizedPath);
     const isDirectory = stats.isDirectory();
 
-    // Open in Windsurf
-    await execAsync(`open -a "Windsurf" "${filePath}"`);
+    // Open in Windsurf with proper shell escaping
+    const escapedPath = normalizedPath.replace(/'/g, "'\"'\"'");
+    await execAsync(`open -a "Windsurf" '${escapedPath}'`);
 
     // Only save folders to recent projects (not files)
     if (isDirectory) {
       const project: WindsurfProject = {
-        name: path.basename(filePath),
-        path: filePath,
+        name: path.basename(normalizedPath),
+        path: normalizedPath,
         lastOpened: new Date(),
         type: "folder",
       };

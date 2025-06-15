@@ -9,6 +9,7 @@ import {
   Clipboard,
   getSelectedFinderItems,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { loadWindsurfProjects, removeWindsurfProject, saveWindsurfProject } from "./utils/storage";
 import { openInWindsurf, formatRelativeTime } from "./utils/windsurf";
@@ -40,11 +41,7 @@ export default function WindsurfProjects() {
       setProjects(existingProjects);
     } catch (error) {
       console.error("Error loading projects:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load projects",
-        message: "Could not load Windsurf projects",
-      });
+      await showFailureToast(error, { title: "Failed to load projects" });
     } finally {
       setIsLoading(false);
     }
@@ -69,11 +66,7 @@ export default function WindsurfProjects() {
       });
     } catch (error) {
       console.error("Error removing project:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to remove project",
-        message: "Could not remove project from list",
-      });
+      await showFailureToast(error, { title: "Failed to remove project" });
     }
   }
 
@@ -100,11 +93,7 @@ export default function WindsurfProjects() {
                 return;
               }
               console.error("Error selecting folder:", error);
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Failed to select folder",
-                message: "Could not open folder selector",
-              });
+              await showFailureToast(error, { title: "Failed to select folder" });
               resolve();
               return;
             }
@@ -135,11 +124,7 @@ export default function WindsurfProjects() {
       await addProjectFromPath(selectedPaths[0]);
     } catch (error) {
       console.error("Error in handleAddProject:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to add project",
-        message: "Could not add project",
-      });
+      await showFailureToast(error, { title: "Failed to add project" });
     }
   }
 
@@ -175,11 +160,7 @@ export default function WindsurfProjects() {
       });
     } catch (fileError) {
       console.error("Error adding project:", fileError);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to add project",
-        message: "Could not add selected folder to projects",
-      });
+      await showFailureToast(fileError, { title: "Failed to add project" });
     }
   }
 

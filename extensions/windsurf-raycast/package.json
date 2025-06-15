@@ -4,7 +4,7 @@
   "title": "Windsurf Extension",
   "description": "Quick Raycast actions for Windsurf: open files/folders in Windsurf and manage Windsurf projects.",
   "icon": "./extension-icon.png",
-  "author": "vikas_bansal",
+  "author": "vikas-bansal",
   "license": "MIT",
   "version": "1.0.0",
   "repository": {
@@ -12,7 +12,7 @@
     "url": "https://github.com/vikasbnsl/windsurf-raycast"
   },
   "engines": {
-    "node": ">=20.15.1"
+    "node": ">=18.0.0"
   },
   "commands": [
     {

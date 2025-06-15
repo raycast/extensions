@@ -30,10 +30,7 @@ A Raycast extension that provides quick access to Windsurf IDE functionality.
 
 ## Installation
 
-1. Clone this repository
-2. Run `npm install` to install dependencies
-3. Run `npm run dev` to start development mode
-4. Use `npm run build` to build for production
+Install the extension from the [Raycast Store](https://raycast.com/store).
 
 ## Usage
 
@@ -59,25 +56,6 @@ A Raycast extension that provides quick access to Windsurf IDE functionality.
 3. If no Finder selection, it will open a folder picker dialog
 4. Select a folder to add it to your projects list
 5. **Note**: Only folders can be added as projects
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Start development mode
-npm run dev
-
-# Build for production
-npm run build
-
-# Lint code
-npm run lint
-
-# Fix linting issues
-npm run fix-lint
-```
 
 ## License
 
