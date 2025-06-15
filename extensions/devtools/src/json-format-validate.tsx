@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
 
 export default function Command() {
