@@ -11,6 +11,7 @@ import { ensureValidUrl } from "../lib/ensure-valid-url";
 function SaveNewLink() {
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit() {
     if (!url.trim()) {
@@ -24,19 +25,8 @@ function SaveNewLink() {
     }
 
     const validUrl = ensureValidUrl(url.trim());
+    setIsLoading(true);
 
-    // Optimistic update - immediately show success and close
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Link saved!",
-      message: validUrl,
-    });
-
-    // Clear form and go back to root immediately
-    setUrl("");
-    await popToRoot();
-
-    // Save in background
     try {
       const token = await authorize();
       const result = await saveLink({
@@ -48,9 +38,19 @@ function SaveNewLink() {
       if (!result.success) {
         throw new Error(result.error || "Please try again");
       }
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Link saved!",
+        message: validUrl,
+      });
+
+      setUrl("");
+      await popToRoot();
     } catch (error) {
-      // Show failure toast so user knows it failed and can retry
       showFailureToast(error, { title: "Link save failed" });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -61,6 +61,7 @@ function SaveNewLink() {
           <Action.SubmitForm title="Save Link" onSubmit={handleSubmit} />
         </ActionPanel>
       }
+      isLoading={isLoading}
     >
       <Form.TextField
         id="url"

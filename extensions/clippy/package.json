@@ -16,7 +16,7 @@
       "title": "Save Current Tab",
       "subtitle": "Clippy",
       "description": "Save the current browser tab to Clippy",
-      "mode": "view"
+      "mode": "no-view"
     },
     {
       "name": "save-new-link",

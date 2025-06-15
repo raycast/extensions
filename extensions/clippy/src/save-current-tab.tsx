@@ -1,63 +1,53 @@
-import { showToast, Toast, popToRoot } from "@raycast/api";
+import { showToast, Toast, closeMainWindow } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import AuthenticatedView from "./components/authenticated-view";
-import { useActiveTab } from "../lib/use-active-tab";
+import { getActiveTab } from "../lib/use-active-tab";
 import { saveLink } from "../lib/api";
 import { API_URL } from "../lib/api-url";
 import { authorize } from "../lib/oauth";
-import { useAuth } from "../lib/use-auth";
-import { useEffect } from "react";
 
-function SaveCurrentTab() {
-  const activeTab = useActiveTab();
-  const { data: userData, isLoading: authLoading } = useAuth();
+export default async function Command() {
+  let loadingToast: Toast | null = null;
 
-  useEffect(() => {
-    if (authLoading || !userData) {
-      return;
-    }
+  try {
+    const activeTab = await getActiveTab();
 
     if (!activeTab) {
-      // Show error and close immediately
-      showFailureToast(new Error("Please open a browser tab and try again"), { title: "No active tab found" }).then(
-        () => popToRoot(),
-      );
+      await showFailureToast(new Error("Please open a browser tab and try again"), { title: "No active tab found" });
       return;
     }
 
-    (async () => {
-      try {
-        // Show immediate success toast and close view
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Link saved!",
-          message: activeTab,
-        });
+    // Show loading toast
+    loadingToast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Saving link...",
+    });
 
-        // Close the view immediately
-        await popToRoot();
+    const token = await authorize();
+    const result = await saveLink({
+      url: activeTab,
+      token,
+      apiUrl: API_URL,
+    });
 
-        // Save in background after closing
-        const token = await authorize();
-        const result = await saveLink({
-          url: activeTab,
-          token,
-          apiUrl: API_URL,
-        });
+    if (!result.success) {
+      throw new Error(result.error || "Please try again");
+    }
 
-        if (!result.success) {
-          throw new Error(result.error || "Please try again");
-        }
-      } catch (error) {
-        // Show a subtle error notification
-        showFailureToast(error, { title: "Link save failed" });
-      }
-    })();
-  }, [activeTab, authLoading, userData]);
+    // Hide loading toast and show success
+    loadingToast.hide();
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Link saved!",
+      message: activeTab,
+    });
 
-  return null;
-}
-
-export default function Command() {
-  return <AuthenticatedView component={SaveCurrentTab} />;
+    // Wait 300ms then close Raycast UI
+    setTimeout(() => closeMainWindow(), 500);
+  } catch (error) {
+    // Hide loading toast if it exists
+    if (loadingToast) {
+      loadingToast.hide();
+    }
+    await showFailureToast(error, { title: "Link save failed" });
+  }
 }

@@ -6,25 +6,28 @@ export function useActiveTab() {
 
   React.useEffect(() => {
     (async () => {
-      const activeWindow = await getActiveWindow();
-
-      if (!supportedBrowsers.some((browser) => browser === activeWindow)) {
-        return;
-      }
-
-      const activeTab = await getActiveTabByBrowser[activeWindow as Browser]();
-
-      if (!activeTab) {
-        return;
-      }
-
-      const url = extractUrl(activeTab);
-
+      const url = await getActiveTab();
       setActiveTab(url);
     })();
   }, [setActiveTab]);
 
   return activeTab;
+}
+
+export async function getActiveTab(): Promise<string | null> {
+  const activeWindow = await getActiveWindow();
+
+  if (!supportedBrowsers.some((browser) => browser === activeWindow)) {
+    return null;
+  }
+
+  const activeTab = await getActiveTabByBrowser[activeWindow as Browser]();
+
+  if (!activeTab) {
+    return null;
+  }
+
+  return extractUrl(activeTab);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
