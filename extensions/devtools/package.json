@@ -69,6 +69,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^2.0.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
