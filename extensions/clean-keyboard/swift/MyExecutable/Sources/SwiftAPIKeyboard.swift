@@ -1,9 +1,10 @@
 import CoreGraphics
 import Foundation
 import RaycastSwiftMacros
+import AppKit
 
 enum KeyCode: CGKeyCode {
-  case u = 0x20
+  case u = 0x20  // This is actually space, not 'u'
 }
 
 class EventHandler {
@@ -12,10 +13,10 @@ class EventHandler {
   var stateFile: String
   var timer: Timer?
 
-  init(supportPath: String) {
-    self.supportPath = supportPath
-    self.stateFile = "\(supportPath)/keyboard-lock-state.txt"
-  }
+init(supportPath: String) {
+  self.supportPath = supportPath
+  self.stateFile = "\(supportPath)/keyboard-lock-state.txt"
+}
 
   func scheduleTimer(duration: Int?) {
     guard let duration = duration else { return }
@@ -41,11 +42,8 @@ class EventHandler {
         self.writeState(duration: 0, timeLeft: 0)
         self.timer?.invalidate()
         self.timer = nil
-        let message = "Timer expired ⏱️\n"
-        if let data = message.data(using: .utf8) {
-          FileHandle.standardError.write(data)
-        }
         CFRunLoopStop(CFRunLoopGetCurrent())
+        self.openRaycastDeeplink()
         return
       }
       
@@ -127,10 +125,19 @@ class EventHandler {
       writeState(duration: 0, timeLeft: 0)
       timer?.invalidate()
       timer = nil
+      self.openRaycastDeeplink()
+      CFRunLoopStop(CFRunLoopGetCurrent())
       return Unmanaged.passRetained(event)
     }
 
     return isLocked ? nil : Unmanaged.passRetained(event)
+  }
+
+  func openRaycastDeeplink() {
+    let deeplink = "raycast://"
+    if let url = URL(string: deeplink) {
+      NSWorkspace.shared.open(url)
+    }
   }
 }
 
@@ -176,14 +183,28 @@ func globalKeyEventHandler(
   keyUpEvent?.post(tap: .cghidEventTap)
 }
 
-@raycast func getState(supportPath: String?) -> String {
+@raycast func getState(supportPath: String?) async -> State? {
   let path = supportPath ?? ""
   let stateFile = "\(path)/keyboard-lock-state.txt"
   
   do {
     let content = try String(contentsOfFile: stateFile, encoding: .utf8)
-    return content
+      
+      let lines = content.components(separatedBy: .newlines)
+      if lines.count >= 2 {
+        let duration = Int(lines[0]) ?? 0
+        let timeLeft = Int(lines[1]) ?? 0
+        return State(timeLeft: timeLeft, duration: duration)
+      }
+
+    return nil
   } catch {
-    return "0\n0"
+    return nil
   }
 }
+
+struct State: Encodable {
+  let timeLeft: Int
+  let duration: Int
+}
+

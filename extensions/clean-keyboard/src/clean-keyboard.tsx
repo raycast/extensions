@@ -1,7 +1,11 @@
 import { Action, ActionPanel, Icon, List, Toast, environment } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { handler, stopHandler, getState } from "swift:../swift/MyExecutable";
+import { handler, getState } from "swift:../swift/MyExecutable";
 
+type State = {
+  timeLeft: number;
+  duration: number;
+} | null;
 interface Duration {
   display: string;
   seconds: number;
@@ -64,25 +68,20 @@ export default function Command() {
 
   const loadStateFromFile = async () => {
     try {
-      const stateContent = await getState(environment.supportPath);
-      const lines = stateContent.trim().split("\n");
-      if (lines.length >= 2) {
-        const fileDuration = parseInt(lines[0], 10);
-        const fileTimeLeft = parseInt(lines[1], 10);
+      const state: State = await getState(environment.supportPath);
+      const { duration, timeLeft } = state || { timeLeft: 0, duration: 0 };
+      if (timeLeft > 0 || timeLeft === -1) {
+        setTimeLeft(timeLeft);
+        setIsRunning(true);
 
-        if (fileTimeLeft > 0 || fileTimeLeft === -1) {
-          setTimeLeft(fileTimeLeft);
-          setIsRunning(true);
-
-          // Find the corresponding icon
-          const durationObj = durations.find((d) => d.seconds === fileDuration);
-          setIcon(durationObj?.icon || "🧼");
-        } else {
-          // State file shows no active lock
-          setIsRunning(false);
-          setTimeLeft(null);
-          setIcon(null);
-        }
+        // Find the corresponding icon
+        const durationObj = durations.find((d) => d.seconds === duration);
+        setIcon(durationObj?.icon || "🧼");
+      } else {
+        // State file shows no active lock
+        setIsRunning(false);
+        setTimeLeft(null);
+        setIcon(null);
       }
     } catch (error) {
       console.error("Error loading state from file:", error);
@@ -115,7 +114,6 @@ export default function Command() {
   }, [isRunning, timeLeft]);
 
   const unlockKeyboard = async () => {
-    await stopHandler(environment.supportPath);
     setIsRunning(false);
     setTimeLeft(null);
     setIcon(null);
