@@ -13,6 +13,10 @@ export function useStremioApi(baseUrl: string) {
     return `https://v3-cinemeta.strem.io/catalog/${type}/all/search=${encodeURIComponent(query)}.json`;
   };
 
+  const getTrendingUrl = (type: MediaType): string => {
+    return `https://v3-cinemeta.strem.io/catalog/${type}/top.json`;
+  }
+
   const useSearch = (mediaType: MediaType, searchText: string) => {
     return useFetch<Media[]>(searchText.length > 0 ? getSearchUrl(mediaType, searchText) : "", {
       parseResponse: parseSearchResponse,
@@ -21,6 +25,17 @@ export function useStremioApi(baseUrl: string) {
         console.error("Search error:", error);
       },
       execute: searchText.length > 0,
+    });
+  };
+
+  const useTrending = (mediaType: MediaType) => {
+    return useFetch<Media[]>(getTrendingUrl(mediaType), {
+      parseResponse: parseSearchResponse,
+      onError: (error) => {
+        showFailureToast({ style: Toast.Style.Failure, title: "Failed to load trending", message: String(error) });
+        console.error("Trending error:", error);
+      },
+      execute: Boolean(mediaType),
     });
   };
 
@@ -68,6 +83,7 @@ export function useStremioApi(baseUrl: string) {
     useSearch,
     useSeriesDetails,
     useStreams,
+    useTrending,
   };
 }
 

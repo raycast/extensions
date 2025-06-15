@@ -58,6 +58,8 @@ export default function Command() {
 
   // API calls
   const { data: searchResults, isLoading: isLoadingSearch } = api.useSearch(mediaType, searchText);
+  const { data: trendingMedia, isLoading: isLoadingTrending } = api.useTrending(mediaType);
+
   const isUsingAddon = !!baseUrl && baseUrl.trim() !== "";
 
   // Load last search type from storage
@@ -139,8 +141,9 @@ export default function Command() {
       searchText={searchText}
       searchResults={searchResults || []}
       recentMedia={storage.recentMedia}
+      trendingMedia={trendingMedia || []}
       isUsingAddon={isUsingAddon}
-      isLoading={isLoadingSearch}
+      isLoading={isLoadingSearch || isLoadingTrending}
       getWatchedCount={storage.getWatchedCount}
       onSearchTextChange={(text) => setSearchText(text)}
       onMediaTypeChange={handleMediaTypeChange}
@@ -227,7 +230,6 @@ function StreamsView({
   streamingApps: Application[];
 }) {
   const { data: streamData, isLoading: isLoadingStreams } = api.useStreams(media, episode || null);
-
   return (
     <StreamList
       streams={streamData}
