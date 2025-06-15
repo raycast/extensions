@@ -25,7 +25,15 @@
       "title": "Translate Japanese",
       "subtitle": "Jisho",
       "description": "Search Jisho.org for Japanese translations",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Enter Japanese text to translate",
+          "required": false
+        }
+      ]
     },
     {
       "name": "history",
