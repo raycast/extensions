@@ -18,15 +18,19 @@ import { StreamList } from "./components/StreamList";
 import { EpisodeList } from "./components/EpisodeList";
 import { SearchResults } from "./components/SearchResults";
 import { usePromise } from "@raycast/utils";
+import { TermsAcknowledgement, useTermsAcceptance } from "./components/TermsAcknowledgement";
 
 export default function Command() {
   const [mediaType, setMediaType] = useState<MediaType>("movie");
   const [searchText, setSearchText] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState<boolean | null>(null);
   const { push } = useNavigation();
 
   // Load preferences
   const preferences = getPreferenceValues<Preferences>();
   const { baseUrl } = preferences;
+
+  const { checkTermsAccepted } = useTermsAcceptance();
 
   const streamingAppsFromPreferences = useMemo(() => {
     return preferences.streamingApps
@@ -62,11 +66,16 @@ export default function Command() {
 
   const isUsingAddon = !!baseUrl && baseUrl.trim() !== "";
 
-  // Load last search type from storage
+  // Check terms acceptance on mount
   useEffect(() => {
     (async () => {
-      const lastType = await storage.loadLastSearchType();
-      setMediaType(lastType);
+      const accepted = await checkTermsAccepted();
+      setTermsAccepted(accepted);
+
+      if (accepted) {
+        const lastType = await storage.loadLastSearchType();
+        setMediaType(lastType);
+      }
     })();
   }, []);
 
@@ -133,6 +142,25 @@ export default function Command() {
       },
     });
   };
+
+  const handleTermsAccept = () => {
+    setTermsAccepted(true);
+    // Load the last search type after accepting terms
+    (async () => {
+      const lastType = await storage.loadLastSearchType();
+      setMediaType(lastType);
+    })();
+  };
+
+  // Show terms if not accepted
+  if (termsAccepted === null) {
+    // Loading state
+    return null;
+  }
+
+  if (!termsAccepted) {
+    return <TermsAcknowledgement onAccept={handleTermsAccept} />;
+  }
 
   // Main search view
   return (

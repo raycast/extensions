@@ -9,6 +9,7 @@ const STORAGE_KEYS = {
   EPISODE_SELECTIONS: "episode_selections",
   WATCHED_EPISODES: "watched_episodes",
   LAST_SEARCH_TYPE: "last_search_type",
+  TERMS_ACCEPTED: "terms_accepted",
 };
 
 export function useLocalStorage() {
@@ -36,6 +37,32 @@ export function useLocalStorage() {
       await LocalStorage.setItem(STORAGE_KEYS.LAST_SEARCH_TYPE, type);
     } catch (error) {
       console.error("Failed to save last search type:", error);
+    }
+  };
+
+  const checkTermsAccepted = async (): Promise<boolean> => {
+    try {
+      const accepted = await LocalStorage.getItem<string>(STORAGE_KEYS.TERMS_ACCEPTED);
+      return accepted === "true";
+    } catch {
+      return false;
+    }
+  };
+
+  const saveTermsAcceptance = async (): Promise<void> => {
+    try {
+      await LocalStorage.setItem(STORAGE_KEYS.TERMS_ACCEPTED, "true");
+    } catch (error) {
+      console.error("Failed to save terms acceptance:", error);
+      throw error;
+    }
+  };
+
+  const resetTermsAcceptance = async (): Promise<void> => {
+    try {
+      await LocalStorage.removeItem(STORAGE_KEYS.TERMS_ACCEPTED);
+    } catch (error) {
+      console.error("Failed to reset terms acceptance:", error);
     }
   };
 
@@ -227,7 +254,7 @@ export function useLocalStorage() {
 
   const getWatchedCount = (seriesId: string, season?: number): number => {
     return watchedEpisodes.filter(
-      (watched) => watched.seriesId === seriesId && (season !== undefined ? watched.season === season : true), // Changed from just `season` to `season !== undefined`
+      (watched) => watched.seriesId === seriesId && (season !== undefined ? watched.season === season : true),
     ).length;
   };
 
@@ -275,5 +302,8 @@ export function useLocalStorage() {
     removeFromRecent,
     clearRecentItems,
     clearWatchHistory,
+    checkTermsAccepted,
+    saveTermsAcceptance,
+    resetTermsAcceptance,
   };
 }
