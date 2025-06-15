@@ -37,9 +37,7 @@ export function SearchResults({
   onConfigure,
 }: SearchResultsProps) {
   // Filter recent media by current media type
-  const filteredRecentMedia = recentMedia
-    .filter((media) => media.type === mediaType)
-    .slice(0, 10);
+  const filteredRecentMedia = recentMedia.filter((media) => media.type === mediaType).slice(0, 10);
 
   const getMediaTypeToggle = () => {
     return mediaType === "movie" ? "Switch to TV Shows" : "Switch to Movies";
@@ -48,38 +46,6 @@ export function SearchResults({
   const handleMediaTypeToggle = () => {
     onMediaTypeChange(mediaType === "movie" ? "series" : "movie");
   };
-
-  const MediaListItem = ({ media, keyPrefix = "", isRecent = false }: {
-    media: any;
-    keyPrefix?: string;
-    isRecent?: boolean;
-  }) => {
-    const watchedCount = media.type === "series" ? getWatchedCount(media.id) : 0;
-    const typeLabel = media.type === "movie" ? "Movie" : "TV Series";
-
-    const subtitle = isRecent
-      ? `${typeLabel} • ${media.releaseInfo} • ${new Date(media.lastAccessedAt).toLocaleDateString()}`
-      : `${typeLabel} • ${media.releaseInfo}`;
-
-    const accessories = [
-      ...(isRecent ? [{ text: "Recent", icon: "🕒" }] : []),
-      ...(media.type === "series" && watchedCount > 0
-        ? [{ text: `${watchedCount} watched`, icon: "✅" }]
-        : []),
-    ];
-
-    return (
-      <List.Item
-        key={keyPrefix ? `${keyPrefix}-${media.id}` : media.id}
-        title={media.name}
-        subtitle={subtitle}
-        icon={media.poster}
-        accessories={accessories}
-        actions={<MediaActions media={media} isRecent={isRecent} />}
-      />
-    );
-  };
-
 
   function MediaActions({ media, isRecent }: { media: Media | RecentMedia; isRecent?: boolean }) {
     return (
@@ -143,29 +109,76 @@ export function SearchResults({
         </ActionPanel>
       }
     >
+      {/* Show recent items when not searching */}
       {searchText.length === 0 && filteredRecentMedia.length > 0 && (
         <List.Section title="Recent" subtitle={`${filteredRecentMedia.length} items`}>
-          {filteredRecentMedia.map((media) => (
-            <MediaListItem key={`recent-${media.id}`} media={media} keyPrefix="recent" isRecent />
-          ))}
+          {filteredRecentMedia.map((media) => {
+            const watchedCount = media.type === "series" ? getWatchedCount(media.id) : 0;
+
+            return (
+              <List.Item
+                key={`recent-${media.id}`}
+                title={media.name}
+                subtitle={`${media.type === "movie" ? "Movie" : "TV Series"} • ${media.releaseInfo} • ${new Date(media.lastAccessedAt).toLocaleDateString()}`}
+                icon={media.poster}
+                accessories={[
+                  { text: "Recent", icon: "🕒" },
+                  ...(media.type === "series" && watchedCount > 0
+                    ? [{ text: `${watchedCount} watched`, icon: "✅" }]
+                    : []),
+                ]}
+                actions={<MediaActions media={media} isRecent />}
+              />
+            );
+          })}
         </List.Section>
       )}
 
       {/* Show trending items under recents */}
       {searchText.length === 0 && trendingMedia !== undefined && (
         <List.Section title="Trending" subtitle="Top trending items">
-          {trendingMedia.map((media) => (
-            <MediaListItem key={`trending-${media.id}`} media={media} keyPrefix="trending" />
-          ))}
+          {trendingMedia.map((media) => {
+            const watchedCount = media.type === "series" ? getWatchedCount(media.id) : 0;
+
+            return (
+              <List.Item
+                key={`trending-${media.id}`}
+                title={media.name}
+                subtitle={`${media.type === "movie" ? "Movie" : "TV Series"} • ${media.releaseInfo}`}
+                icon={media.poster}
+                accessories={[
+                  ...(media.type === "series" && watchedCount > 0
+                    ? [{ text: `${watchedCount} watched`, icon: "✅" }]
+                    : []),
+                ]}
+                actions={<MediaActions media={media} />}
+              />
+            );
+          })}
         </List.Section>
       )}
 
       {/* Show search results */}
       {searchText.length > 0 && (
         <List.Section title="Results" subtitle={searchResults.length ? `${searchResults.length} found` : "0 found"}>
-          {searchResults.map((media) => (
-            <MediaListItem key={media.id} media={media} />
-          ))}
+          {searchResults.map((media) => {
+            const watchedCount = media.type === "series" ? getWatchedCount(media.id) : 0;
+
+            return (
+              <List.Item
+                key={media.id}
+                title={media.name}
+                subtitle={`${media.type === "movie" ? "Movie" : "TV Series"} • ${media.releaseInfo}`}
+                icon={media.poster}
+                accessories={[
+                  ...(media.type === "series" && watchedCount > 0
+                    ? [{ text: `${watchedCount} watched`, icon: "✅" }]
+                    : []),
+                ]}
+                actions={<MediaActions media={media} />}
+              />
+            );
+          })}
         </List.Section>
       )}
 

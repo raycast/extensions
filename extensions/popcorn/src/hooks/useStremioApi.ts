@@ -1,5 +1,5 @@
 import { showFailureToast, useFetch } from "@raycast/utils";
-import { showToast, Toast } from "@raycast/api";
+import { Toast } from "@raycast/api";
 import { Media, Episode, Stream, MediaType, SearchResponse, SeriesDetailResponse, StreamResponse } from "../types";
 
 export function useStremioApi(baseUrl: string) {
@@ -15,7 +15,7 @@ export function useStremioApi(baseUrl: string) {
 
   const getTrendingUrl = (type: MediaType): string => {
     return `https://v3-cinemeta.strem.io/catalog/${type}/top.json`;
-  }
+  };
 
   const useSearch = (mediaType: MediaType, searchText: string) => {
     return useFetch<Media[]>(searchText.length > 0 ? getSearchUrl(mediaType, searchText) : "", {
@@ -45,7 +45,11 @@ export function useStremioApi(baseUrl: string) {
       {
         parseResponse: parseSeriesResponse,
         onError: (error) => {
-          showFailureToast({ style: Toast.Style.Failure, title: "Failed to load series details", message: String(error) });
+          showFailureToast({
+            style: Toast.Style.Failure,
+            title: "Failed to load series details",
+            message: String(error),
+          });
         },
         execute: media !== null && media.type === "series" && !selectedEpisode,
       },
@@ -89,11 +93,11 @@ export function useStremioApi(baseUrl: string) {
 
 // Parse functions
 async function parseSearchResponse(response: Response): Promise<Media[]> {
-  if (!response.ok) {  
-    throw new Error(response.statusText);  
-  }  
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
 
-  const json = (await response.json()) as SearchResponse;  
+  const json = (await response.json()) as SearchResponse;
 
   return json.metas.map((meta) => ({
     id: meta.id,
