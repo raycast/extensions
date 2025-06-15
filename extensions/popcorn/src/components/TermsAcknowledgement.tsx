@@ -63,13 +63,6 @@ This extension is designed to help you discover and organize media content. Plea
             title="Accept & Continue"
             icon={Icon.Checkmark}
             onAction={handleAccept}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-            shortcut={{ modifiers: ["cmd"], key: "," }}
           />
         </ActionPanel>
       }
