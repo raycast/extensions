@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { WindsurfProject } from "./types";
 
 const STORAGE_KEY = "windsurf-projects";
@@ -15,6 +16,7 @@ export async function loadWindsurfProjects(): Promise<WindsurfProject[]> {
     }
   } catch (error) {
     console.error("Error loading Windsurf projects:", error);
+    await showFailureToast(error, { title: "Failed to load projects" });
   }
   return [];
 }
@@ -35,6 +37,8 @@ export async function saveWindsurfProject(project: WindsurfProject): Promise<voi
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(limitedProjects));
   } catch (error) {
     console.error("Error saving Windsurf project:", error);
+    await showFailureToast(error, { title: "Failed to save project" });
+    throw error; // Re-throw to allow caller to handle
   }
 }
 
@@ -45,5 +49,7 @@ export async function removeWindsurfProject(path: string): Promise<void> {
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(filteredProjects));
   } catch (error) {
     console.error("Error removing Windsurf project:", error);
+    await showFailureToast(error, { title: "Failed to remove project" });
+    throw error; // Re-throw to allow caller to handle
   }
 }
