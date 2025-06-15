@@ -28,26 +28,37 @@ export default function Command(props: LaunchProps) {
           return;
         }
 
-        // First try to get selected text
-        const selectedText = await getSelectedText();
-        if (selectedText && selectedText.trim()) {
-          setInitialText(selectedText.trim());
-          search(selectedText.trim());
-          return;
+        // Try to get selected text
+        try {
+          const selectedText = await getSelectedText();
+          if (selectedText?.trim()) {
+            setInitialText(selectedText.trim());
+            search(selectedText.trim());
+            return;
+          }
+        } catch (error) {
+          console.error("Failed to get selected text:", error);
+          // Continue to clipboard fallback
         }
 
-        // Fallback to clipboard content
-        const clipboardText = await Clipboard.readText();
-        if (clipboardText && clipboardText.trim()) {
-          setInitialText(clipboardText.trim());
-          search(clipboardText.trim());
+        // Try clipboard content as fallback
+        try {
+          const clipboardText = await Clipboard.readText();
+          if (clipboardText?.trim()) {
+            setInitialText(clipboardText.trim());
+            search(clipboardText.trim());
+            return;
+          }
+        } catch (error) {
+          console.error("Failed to read clipboard:", error);
+          throw new Error("Could not access clipboard content");
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        const errorMessage = error instanceof Error ? error.message : "Failed to initialize search";
         setError(errorMessage);
         await showToast({
           style: Toast.Style.Failure,
-          title: "Error",
+          title: "Failed to initialize search",
           message: errorMessage,
         });
       }
@@ -77,7 +88,7 @@ export default function Command(props: LaunchProps) {
       isLoading={state.isLoading}
       searchText={searchText}
       onSearchTextChange={handleSearchChange}
-      searchBarPlaceholder="Search..."
+      searchBarPlaceholder="Search Japanese words, kanji, or English..."
       throttle
     >
       {error ? (
