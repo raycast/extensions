@@ -1,5 +1,10 @@
 # Jisho Changelog
 
+## [Feature] - 2025-06-15
+
+- Added a feature that automatically searches highlighted text or text from the clipboard.
+
+
 ## [Fix] - 2023-07-11
 
 - Fixed a bug where results were not fetched due to no User-Agent being set as a result of Jisho API changes.
