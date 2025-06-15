@@ -1,5 +1,11 @@
 # SolusVM 2 Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- resend member invite
+- remooe memeber
+- placeholder in api prerference
+
 ## [Initial Version] - 2025-05-30
 
 - View Projects
