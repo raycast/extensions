@@ -1,0 +1,33 @@
+Name,Status,Health,Priority,Type,Category,Due Date,Created time,Days since created
+Pack for trip,To Do,3,Urgent,,Personal,,"May 14, 2025 9:24 AM",31
+"Buy flight back from Europe ",To Do,3,Urgent,Task,Personal,"May 9, 2025","May 6, 2025 8:57 AM",39
+Sift through LU mail pile,To Do,3,Urgent,Task,Personal,,"April 14, 2025 8:53 PM",61
+Ramp up on RA journey mapping exercise,To Do,4,High,Task,Work,"May 16, 2025","May 15, 2025 1:50 PM",30
+Get more dish soap,To Do,4,High,Task,Personal,"May 10, 2025","May 6, 2025 8:57 AM",39
+Figure out where we’re doing screen recording in analytics,To Do,4,High,Task,Work,"April 30, 2025","April 29, 2025 11:30 AM",46
+Fix address error in METUS screener,To Do,4,High,Task,Work,"April 24, 2025","April 23, 2025 11:13 AM",52
+Pick up dry cleaning,To Do,4,High,Task,Personal,,"April 14, 2025 7:10 PM",61
+Get suit tailored,To Do,4,High,Task,Personal,,"April 14, 2025 7:10 PM",61
+Review Boulder County opportunity,To Do,6,Medium,Task,Work,,"May 7, 2025 9:29 AM",38
+"Check in on, and make decision about, whether and how to support SGIP",To Do,6,Medium,Task,Work,,"May 1, 2025 3:04 PM",44
+Build outdoor work/coffee counter on upper deck,To Do,6,Medium,Project,Personal,,"April 14, 2025 7:24 PM",61
+Write Marc’s card,To Do,8,,,,,"May 17, 2025 6:21 PM",28
+Organize options for improving form fields/sections UX,To Do,8,,,Work,,"May 7, 2025 11:14 AM",38
+Build potting station,To Do,8,Low,Project,Personal,,"April 14, 2025 7:24 PM",61
+Fix double click issue on forms,Completed,30,Urgent,Task,Work,"April 23, 2025","April 23, 2025 11:14 AM",52
+Catch up on all of simi’s pings,Completed,30,Urgent,Task,Work,,"April 22, 2025 8:57 AM",53
+"Figure out why new additional docs page is failing on submission, coordinate with Ben and Richard",Completed,30,Urgent,Task,Work,,"April 22, 2025 7:45 AM",54
+Buy Claudine's imac,Completed,30,Urgent,Task,Personal,,"April 14, 2025 8:53 PM",61
+Create shared slack channel with ES,Completed,30,Urgent,Task,Work,,"April 14, 2025 7:25 PM",61
+Log bug when you cancel one doc then update the file you meant to upload,Completed,30,Urgent,Task,Work,"April 19, 2025","April 14, 2025 7:25 PM",61
+Ship update to contractor page,Completed,43,High,Task,Work,"May 6, 2025","May 6, 2025 8:52 AM",39
+Review will’s notes on AI powered claims,Completed,43,High,Task,Work,"April 30, 2025","April 29, 2025 12:35 PM",46
+Start planning jobs v3 roadmap,Completed,43,High,Task,Work,,"April 29, 2025 11:30 AM",46
+Prep AI talk,Completed,43,High,Task,Work,"May 1, 2025","April 29, 2025 11:30 AM",46
+Buy flights to London,Completed,43,High,Task,Personal,,"April 14, 2025 8:54 PM",61
+Get the settings page shipped with Santi,Completed,56,Medium,Task,Work,"April 30, 2025","April 29, 2025 12:35 PM",46
+Remove extractable fields from mass save prepay form,Completed,56,Medium,Task,Work,"April 30, 2025","April 29, 2025 11:28 AM",46
+Answer Lydia,Completed,77,,,Work,,"April 29, 2025 12:35 PM",46
+Make loom of jobs v3 for team feedback,Completed,77,,,Work,,"April 29, 2025 11:28 AM",46
+Test form submission on ben's branch and get it merged,Triage,77,,,,,"April 24, 2025 2:42 PM",51
+Set up macro keyboard,Completed,77,Low,Project,Personal,"April 23, 2025","April 14, 2025 7:23 PM",61

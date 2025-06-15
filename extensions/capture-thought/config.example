@@ -1,0 +1,12 @@
+# Server Configuration
+PORT=3000
+
+# OpenAI API Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Notion API Configuration
+NOTION_TOKEN=your_notion_integration_token_here
+NOTION_DATABASE_ID=your_notion_database_id_here
+
+# Optional: Server URL for deployment
+SERVER_URL=http://localhost:3000 

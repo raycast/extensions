@@ -1,0 +1,71 @@
+{
+  "name": "capture-thought",
+  "title": "Capture Thought",
+  "description": "Capture and classify thoughts with AI, store in Notion, and retrieve priorities",
+  "icon": "brain.png",
+  "author": "adrian_del_balso",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Server URL",
+      "description": "URL of the Capture Thought backend server",
+      "type": "textfield",
+      "required": true,
+      "default": "http://localhost:3000",
+      "placeholder": "http://localhost:3000"
+    }
+  ],
+  "commands": [
+    {
+      "name": "capture-thought",
+      "title": "Capture Thought",
+      "description": "Capture thought from clipboard, selection, or dictation - classify with AI and store in Notion",
+      "mode": "view"
+    },
+    {
+      "name": "top-work-priorities",
+      "title": "Top Work Priorities",
+      "description": "Show top 3 work priorities sorted by health score",
+      "mode": "view"
+    },
+    {
+      "name": "top-life-priorities",
+      "title": "Top Life Priorities",
+      "description": "Show top 3 personal priorities sorted by health score",
+      "mode": "view"
+    },
+    {
+      "name": "top-priorities-all",
+      "title": "Top Priorities (All)",
+      "description": "Show top 3 priorities across all categories sorted by health score",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.1",
+    "@raycast/utils": "^1.12.3",
+    "axios": "^1.6.5",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.10.6",
+    "@types/react": "^18.2.46",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
