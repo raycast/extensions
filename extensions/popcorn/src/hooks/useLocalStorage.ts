@@ -1,6 +1,7 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { RecentMedia, WatchedEpisode, Media, Episode } from "../types";
+import { showFailureToast } from "@raycast/utils";
 
 const STORAGE_KEYS = {
   RECENT_MEDIA: "recent_media",
@@ -22,7 +23,7 @@ export function useLocalStorage() {
 
   const loadLastSearchType = async (): Promise<Media["type"]> => {
     try {
-      const stored = await LocalStorage.getItem<string>("last_search_type");
+      const stored = await LocalStorage.getItem<string>(STORAGE_KEYS.LAST_SEARCH_TYPE);
       return stored === "series" ? "series" : "movie";
     } catch (error) {
       console.error("Failed to load last search type:", error);
@@ -32,7 +33,7 @@ export function useLocalStorage() {
 
   const saveLastSearchType = async (type: Media["type"]) => {
     try {
-      await LocalStorage.setItem("last_search_type", type);
+      await LocalStorage.setItem(STORAGE_KEYS.LAST_SEARCH_TYPE, type);
     } catch (error) {
       console.error("Failed to save last search type:", error);
     }
@@ -133,7 +134,7 @@ export function useLocalStorage() {
       });
     } catch (error) {
       console.error("Failed to save watched episode:", error);
-      showToast({
+      showFailureToast({
         style: Toast.Style.Failure,
         title: "Failed to mark as watched",
       });
@@ -191,7 +192,7 @@ export function useLocalStorage() {
       });
     } catch (error) {
       console.error("Failed to mark season as watched:", error);
-      showToast({
+      showFailureToast({
         style: Toast.Style.Failure,
         title: "Failed to mark season as watched",
       });

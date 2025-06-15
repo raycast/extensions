@@ -1,4 +1,4 @@
-import { useFetch } from "@raycast/utils";
+import { showFailureToast, useFetch } from "@raycast/utils";
 import { showToast, Toast } from "@raycast/api";
 import { Media, Episode, Stream, MediaType, SearchResponse, SeriesDetailResponse, StreamResponse } from "../types";
 
@@ -17,7 +17,7 @@ export function useStremioApi(baseUrl: string) {
     return useFetch<Media[]>(searchText.length > 0 ? getSearchUrl(mediaType, searchText) : "", {
       parseResponse: parseSearchResponse,
       onError: (error) => {
-        showToast({ style: Toast.Style.Failure, title: "Failed to search", message: String(error) });
+        showFailureToast({ style: Toast.Style.Failure, title: "Failed to search", message: String(error) });
         console.error("Search error:", error);
       },
       execute: searchText.length > 0,
@@ -30,7 +30,7 @@ export function useStremioApi(baseUrl: string) {
       {
         parseResponse: parseSeriesResponse,
         onError: (error) => {
-          showToast({ style: Toast.Style.Failure, title: "Failed to load series details", message: String(error) });
+          showFailureToast({ style: Toast.Style.Failure, title: "Failed to load series details", message: String(error) });
         },
         execute: media !== null && media.type === "series" && !selectedEpisode,
       },
@@ -57,7 +57,7 @@ export function useStremioApi(baseUrl: string) {
     return useFetch<Stream[]>(streamUrl, {
       parseResponse: parseStreamResponse,
       onError: (error) => {
-        showToast({ style: Toast.Style.Failure, title: "Failed to load streams", message: String(error) });
+        showFailureToast({ style: Toast.Style.Failure, title: "Failed to load streams", message: String(error) });
       },
       // Simplified execute condition
       execute: Boolean(streamUrl && media && (media.type === "movie" || episode)),
@@ -73,11 +73,11 @@ export function useStremioApi(baseUrl: string) {
 
 // Parse functions
 async function parseSearchResponse(response: Response): Promise<Media[]> {
-  const json = (await response.json()) as SearchResponse;
+  if (!response.ok) {  
+    throw new Error(response.statusText);  
+  }  
 
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
+  const json = (await response.json()) as SearchResponse;  
 
   return json.metas.map((meta) => ({
     id: meta.id,

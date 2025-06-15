@@ -10,7 +10,7 @@
     {
       "name": "search-streams",
       "title": "Search for Streams",
-      "description": "Search for Movies and TV shows",
+      "description": "Search for Movies and TV shows using the Stremio API",
       "mode": "view",
       "subtitle": "Search for Movies and TV shows",
       "keywords": ["stremio", "stream", "movie", "tv", "real debrid", "rd"],

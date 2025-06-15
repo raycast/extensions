@@ -36,7 +36,7 @@ export function SearchResults({
 }: SearchResultsProps) {
   // Filter recent media by current media type
   const filteredRecentMedia = recentMedia
-    .filter((media) => (mediaType === "movie" ? media.type === "movie" : media.type === "series"))
+    .filter((media) => media.type === mediaType)
     .slice(0, 10);
 
   const getMediaTypeToggle = () => {
