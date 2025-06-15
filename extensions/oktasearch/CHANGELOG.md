@@ -1,6 +1,6 @@
 # OktaSearch Changelog
 
-## Improved searching - {PR_MERGE_DATE}
+## [Improved searching] - {PR_MERGE_DATE}
 
 - Searching people can now handle the full name (first and last name)
 - Search now looks for applications
