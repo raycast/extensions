@@ -34,7 +34,7 @@
     {
       "name": "deploy-configs",
       "title": "Deploy Configs",
-      "subtitle": "Deploys config files to local",
+      "subtitle": "Deploys Config Files to Local",
       "description": "Deploys repo config to local machine",
       "mode": "no-view"
     },
