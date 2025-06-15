@@ -11,7 +11,7 @@ export interface DotFile {
 }
 
 interface Preferences {
-    repoPath: string;
+  repoPath: string;
 }
 
 const preferences = getPreferenceValues<Preferences>();
@@ -20,9 +20,9 @@ const REPO_DIR = preferences.repoPath;
 const CONFIG_DIR = REPO_DIR ? join(REPO_DIR, "config") : "";
 
 export function validatePreferences(): void {
-    if (!preferences.repoPath) {
-        throw new Error("Please set the repoPath in preferences");
-    }
+  if (!preferences.repoPath) {
+    throw new Error("Please set the repoPath in preferences");
+  }
 }
 
 function createDotFile(homeRelative: string, repoRelative: string): DotFile {
