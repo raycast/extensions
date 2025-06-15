@@ -1,5 +1,5 @@
 # DotMate Changelog
 
-## [Initial Version] - 2025-06-10
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Added initial release
