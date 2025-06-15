@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
 
 function encodeBase64(str: string): string {
