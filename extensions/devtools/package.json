@@ -1,0 +1,92 @@
+{
+  "name": "devtools",
+  "title": "Developer Tools",
+  "description": "A collection of useful developer tools including Markdown Preview, JSON formatting, JWT debugging, and more",
+  "icon": "icon_devtools.png",
+  "author": "huytran",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "unix-time-converter",
+      "title": "Unix Time Converter",
+      "subtitle": "DevTools",
+      "description": "Convert between Unix time and human-readable dates",
+      "mode": "view"
+    },
+    {
+      "name": "json-format-validate",
+      "title": "Json Format/Validate",
+      "subtitle": "DevTools",
+      "description": "Format and validate JSON input",
+      "mode": "view"
+    },
+    {
+      "name": "jwt-debugger",
+      "title": "Jwt Debugger",
+      "subtitle": "DevTools",
+      "description": "Decode and inspect JWT tokens",
+      "mode": "view"
+    },
+    {
+      "name": "random-string-generator",
+      "title": "Random String Generator",
+      "subtitle": "DevTools",
+      "description": "Generate random strings with custom options",
+      "mode": "view"
+    },
+    {
+      "name": "uuid-generator",
+      "title": "Uuid Generator",
+      "subtitle": "DevTools",
+      "description": "Generate UUID v4 and v7",
+      "mode": "view"
+    },
+    {
+      "name": "base64-encode-decode",
+      "title": "Base64 Encode/Decode",
+      "subtitle": "DevTools",
+      "description": "Encode or decode Base64 strings",
+      "mode": "view"
+    },
+    {
+      "name": "markdown-preview",
+      "title": "Markdown Preview",
+      "subtitle": "DevTools",
+      "description": "Preview and edit markdown in real-time",
+      "mode": "view"
+    },
+    {
+      "name": "password-generator",
+      "title": "Generate Password",
+      "subtitle": "DevTools",
+      "description": "Generate secure passwords with custom options",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^20.11.19",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
