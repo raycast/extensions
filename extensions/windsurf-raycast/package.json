@@ -11,6 +11,9 @@
     "type": "git",
     "url": "https://github.com/vikasbnsl/windsurf-raycast"
   },
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "commands": [
     {
       "name": "open-with-windsurf",
