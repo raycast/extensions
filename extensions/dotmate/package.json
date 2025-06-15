@@ -27,7 +27,7 @@
     {
       "name": "collect-configs",
       "title": "Collect Configs",
-      "subtitle": "Collects config files in repo",
+      "subtitle": "Collects Config Files in Repo",
       "description": "Backup local config files to repo",
       "mode": "no-view"
     },
