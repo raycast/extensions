@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dify",
+  "title": "Dify",
+  "version": "1.0.0",
+  "description": "Access, manage and interact with your Dify AI applications directly within Raycast.",
+  "icon": "extension-logo.png",
+  "author": "lysonober",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "list-dify",
+      "title": "List Dify",
+      "description": "Helps you list and manage all Dify apps saved in Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "add-dify",
+      "title": "Add Dify",
+      "description": "Add a new Dify application with API endpoint and key to Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "ask-dify",
+      "title": "Send to Dify",
+      "description": "Send queries to your Dify applications and get intelligent responses",
+      "mode": "view"
+    },
+    {
+      "name": "ask-dify-history",
+      "title": "View History",
+      "description": "View and manage your conversation history with Dify applications",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-dify-apps",
+      "title": "Dify Apps Finder",
+      "description": "List and search for your Dify applications using natural language. Examples: 'Show all my Dify apps', 'Find an app called ChatGPT', 'Do I have an app named Assistant?'"
+    },
+    {
+      "name": "explain-dify-app",
+      "title": "Dify App Explainer",
+      "description": "Get detailed explanations of your Dify applications including capabilities, input requirements, and usage examples. Examples: 'Explain how to use ChatGPT app', 'Tell me about my Assistant app', 'What inputs does my Text Generator app need?'"
+    },
+    {
+      "name": "ask-dify",
+      "title": "Dify Query Tool",
+      "description": "Send queries to your Dify applications with intelligent app selection and parameter validation. You need to use Tool:list-dify-apps first or based on the chat history to find the appropriate app, and then you use the api endpoint, key, and inputs description of that app and user's input to generate the right api call input."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.1",
+    "@types/node-fetch": "^2.6.12",
+    "date-fns": "^4.1.0",
+    "node-fetch": "^2.6.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "npx @raycast/api build",
+    "dev": "npx @raycast/api develop",
+    "fix-lint": "npx @raycast/api lint --fix",
+    "lint": "npx @raycast/api lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "evals": "npx @raycast/api evals"
+  }
+}
