@@ -19,7 +19,7 @@
     },
     {
       "name": "json-format-validate",
-      "title": "Json Format/Validate",
+      "title": "JSON Format/Validate",
       "subtitle": "DevTools",
       "description": "Format and validate JSON input",
       "mode": "view"
