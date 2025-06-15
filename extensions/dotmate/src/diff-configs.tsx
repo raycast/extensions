@@ -1,5 +1,6 @@
 import { Detail } from "@raycast/api";
 import { existsSync, readFileSync } from "fs";
+import { useState, useEffect } from "react";
 import { DOTFILES } from "./dotfiles";
 
 function createSideBySideDiff(
@@ -109,7 +110,15 @@ function escapeMarkdown(text: string): string {
 }
 
 export default function Command() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [markdown, setMarkdown] = useState<string>("");
+
+  useEffect(() => {
+    generateDiffMarkdown();
+  }, []);
+
   const generateDiffMarkdown = () => {
+    setIsLoading(true);
     let markdown = "# 🔍 Dotfiles Differences\n\n";
     let foundAnyDifferences = false;
 
@@ -151,7 +160,7 @@ export default function Command() {
         }
       } catch (error) {
         markdown += `## ❌ Error comparing ${dotfile.name}\n\n`;
-        markdown += `Error: ${error}\n\n`;
+        markdown += `Error: ${error instanceof Error ? error.message : String(error)}\n\n`;
         markdown += "---\n\n";
       }
     }
@@ -162,8 +171,9 @@ export default function Command() {
         "> All your dotfiles are perfectly in sync between your repo and home directory. 🎉\n";
     }
 
-    return markdown;
+    setMarkdown(markdown);
+    setIsLoading(false);
   };
 
-  return <Detail markdown={generateDiffMarkdown()} />;
+  return <Detail markdown={markdown} isLoading={isLoading} />;
 }
