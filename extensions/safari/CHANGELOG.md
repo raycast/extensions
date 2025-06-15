@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Fix for `Search Tabs` command: allows the components that display the tab list to re-render when device data changes.
+
 ## [Update] - 2025-05-19
 
 - Added a command to close all other tabs, leaving the current tab open.
