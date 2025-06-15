@@ -85,9 +85,9 @@ The extension handles various Node.js installation scenarios to ensure npx avail
 - System paths
 - Custom npx path override through preferences
 
-### Date Processing with `date -I`
+### Date Processing with `date +%Y-%m-%d`
 
-The extension uses `date -I` command via `useCurrentDate` hook for simplified date handling:
+The extension uses `date +%Y-%m-%d` command via `useCurrentDate` hook for simplified date handling:
 
 - System-native current date retrieval without timezone complexity
 - Eliminates need for user timezone configuration
