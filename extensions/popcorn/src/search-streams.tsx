@@ -5,6 +5,7 @@ import {
   confirmAlert,
   getApplications,
   getPreferenceValues,
+  List,
   openCommandPreferences,
   showToast,
   Toast,
@@ -155,7 +156,7 @@ export default function Command() {
   // Show terms if not accepted
   if (termsAccepted === null) {
     // Loading state
-    return null;
+    return <List isLoading={true} />;
   }
 
   if (!termsAccepted) {
