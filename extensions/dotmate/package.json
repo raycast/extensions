@@ -41,7 +41,7 @@
     {
       "name": "diff-configs",
       "title": "Diff Configs",
-      "subtitle": "Displays diffs among config",
+      "subtitle": "Displays Diffs Among Config",
       "description": "Displays diffs between local and repo paths",
       "mode": "view"
     },
