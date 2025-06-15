@@ -1,7 +1,7 @@
 # Claude Code Usage (ccusage)
 
 <div align="center">
-  <img src="assets/extension-icon.png" alt="Claude Code Usage Icon" width="128" height="128">
+  <img src="https://github.com/user-attachments/assets/4ae63a5c-3064-4050-8077-45b508dcc4ff" alt="Claude Code Usage Icon" width="128" height="128">
   
   A Raycast extension that provides real-time monitoring of Claude Code usage statistics using the [ccusage](https://github.com/ryoppippi/ccusage) CLI tool.
   
@@ -58,7 +58,7 @@ Access preferences with **Cmd+Shift+,** when the extension is open.
 
 ## Support
 
-If you encounter any issues or have suggestions, please [create an issue](https://github.com/nyatinte/raycast-ccusage/issues) in the repository.
+If you encounter any issues or have suggestions, please [create an issue](https://github.com/raycast/extensions/issues) in the repository.
 
 ## Credits
 
