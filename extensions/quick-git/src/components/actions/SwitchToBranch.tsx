@@ -8,9 +8,9 @@ interface Props {
 }
 
 export function SwitchToBranch({ branch, checkBranches }: Props) {
-  const { value } = useRepo();
+  const repo = useRepo();
   const { revalidate } = useExec("git", ["switch", branch], {
-    cwd: value,
+    cwd: repo,
     execute: false,
     onData: () => {
       checkBranches();

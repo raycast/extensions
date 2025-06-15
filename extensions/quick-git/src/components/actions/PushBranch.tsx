@@ -1,16 +1,14 @@
 import { Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useExec } from "@raycast/utils";
 import { useRepo } from "../../hooks/useRepo.js";
+import { useCheckStatus } from "../../hooks/useCheckStatus.js";
 
-interface Props {
-  checkStatus: () => void;
-}
-
-export function PushBranch({ checkStatus }: Props) {
-  const { value } = useRepo();
+export function PushBranch() {
+  const repo = useRepo();
+  const checkStatus = useCheckStatus();
 
   const { revalidate: forcePush } = useExec("git", ["push", "--force-with-lease"], {
-    cwd: value,
+    cwd: repo,
     execute: false,
     onWillExecute: () => {
       showToast({ title: "Pushing branch", style: Toast.Style.Animated });
@@ -25,7 +23,7 @@ export function PushBranch({ checkStatus }: Props) {
   });
 
   const { revalidate } = useExec("git", ["push"], {
-    cwd: value,
+    cwd: repo,
     execute: false,
     onWillExecute: () => {
       showToast({ title: "Pushing branch", style: Toast.Style.Animated });

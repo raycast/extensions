@@ -1,15 +1,13 @@
 import { Action, Icon, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useExec } from "@raycast/utils";
 import { useRepo } from "../../hooks/useRepo.js";
+import { useCheckStatus } from "../../hooks/useCheckStatus.js";
 
-interface Props {
-  checkStatus: () => void;
-}
-
-export function FetchBranch({ checkStatus }: Props) {
-  const { value } = useRepo();
+export function FetchBranch() {
+  const repo = useRepo();
+  const checkStatus = useCheckStatus();
   const { revalidate } = useExec("git", ["fetch"], {
-    cwd: value,
+    cwd: repo,
     execute: false,
     onWillExecute: () => {
       showToast({ title: "Fetching repo data", style: Toast.Style.Animated });

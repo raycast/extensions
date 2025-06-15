@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useExec, useForm } from "@raycast/utils";
-import { useRepo } from "../hooks/useRepo.js";
+import { useRepoStorage } from "../hooks/useRepo.js";
 
 interface Props {
   checkStatus: () => void;
 }
 
 export function GitCommit({ checkStatus }: Props) {
-  const { value } = useRepo();
+  const repo = useRepoStorage();
   const { pop } = useNavigation();
   const [commitMsg, setCommitMsg] = useState("");
   const { revalidate } = useExec("git", ["commit", "-m", commitMsg], {
-    cwd: value,
+    cwd: repo.value,
     execute: false,
     onData: () => {
       checkStatus();

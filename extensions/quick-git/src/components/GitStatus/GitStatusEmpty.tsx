@@ -8,18 +8,18 @@ interface Props {
 }
 
 export function GitStatusEmpty({ branch }: Props) {
-  const { value } = useRepo();
+  const repo = useRepo();
 
   const title = useMemo(() => {
-    if (value && branch) {
+    if (repo && branch) {
       return `On branch ${branch.name}`;
     }
 
     return "Please select a repo";
-  }, [branch, value]);
+  }, [branch, repo]);
 
   const description = useMemo(() => {
-    if (!value || !branch) {
+    if (!repo || !branch) {
       return;
     }
 
@@ -41,7 +41,7 @@ export function GitStatusEmpty({ branch }: Props) {
     }
 
     return "Nothing to commit, working tree clean";
-  }, [branch, value]);
+  }, [branch, repo]);
 
   return <List.EmptyView title={title} description={description} />;
 }

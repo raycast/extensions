@@ -1,15 +1,13 @@
 import { Action, Icon, showToast } from "@raycast/api";
 import { showFailureToast, useExec } from "@raycast/utils";
 import { useRepo } from "../../hooks/useRepo.js";
+import { useCheckStatus } from "../../hooks/useCheckStatus.js";
 
-interface Props {
-  checkStatus: () => void;
-}
-
-export function StashAllFiles({ checkStatus }: Props) {
-  const { value } = useRepo();
+export function StashAllFiles() {
+  const repo = useRepo();
+  const checkStatus = useCheckStatus();
   const { revalidate } = useExec("git", ["stash"], {
-    cwd: value,
+    cwd: repo,
     execute: false,
     onData: () => {
       checkStatus();

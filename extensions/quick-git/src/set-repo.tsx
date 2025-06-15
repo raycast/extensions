@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Form, Icon, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
-import { useRepo } from "./hooks/useRepo.js";
+import { useRepoStorage } from "./hooks/useRepo.js";
 
 export default function Command() {
-  const repo = useRepo();
+  const repo = useRepoStorage();
 
   const { handleSubmit, itemProps } = useForm({
     onSubmit({ newRepo }: { newRepo: string[] }) {

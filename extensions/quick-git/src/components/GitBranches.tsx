@@ -1,19 +1,20 @@
+import { useMemo } from "react";
 import { ActionPanel, List } from "@raycast/api";
 import { showFailureToast, useExec } from "@raycast/utils";
-import { useRepo } from "../hooks/useRepo.js";
+import { Providers } from "./Providers.js";
 import { GitBranchItem } from "./GitBranches/GitBranchItem.js";
 import { CreateNewBranch } from "./actions/CreateNewBranch.js";
 import { SwitchToLastBranch } from "./actions/SwitchToLastBranch.js";
-import { useMemo } from "react";
+import { useRepoStorage } from "../hooks/useRepo.js";
 
 interface Props {
   checkStatus: () => void;
 }
 
 export function GitBranches({ checkStatus }: Props) {
-  const { value } = useRepo();
+  const repo = useRepoStorage();
   const { data, isLoading, revalidate } = useExec("git", ["branch", "--sort=-committerdate"], {
-    cwd: value,
+    cwd: repo.value,
     parseOutput: ({ stdout }) => {
       return stdout.split("\n");
     },
@@ -37,18 +38,20 @@ export function GitBranches({ checkStatus }: Props) {
   }, [data, revalidate]);
 
   return (
-    <List
-      searchBarPlaceholder="Search branches…"
-      navigationTitle="Change Branches"
-      isLoading={isLoading}
-      actions={
-        <ActionPanel>
-          <CreateNewBranch checkBranches={revalidate} />
-          <SwitchToLastBranch checkBranches={revalidate} />
-        </ActionPanel>
-      }
-    >
-      {branchItems}
-    </List>
+    <Providers repo={repo.value} checkStatus={checkStatus}>
+      <List
+        searchBarPlaceholder="Search branches…"
+        navigationTitle="Change Branches"
+        isLoading={isLoading}
+        actions={
+          <ActionPanel>
+            <CreateNewBranch checkBranches={revalidate} />
+            <SwitchToLastBranch checkBranches={revalidate} />
+          </ActionPanel>
+        }
+      >
+        {branchItems}
+      </List>
+    </Providers>
   );
 }

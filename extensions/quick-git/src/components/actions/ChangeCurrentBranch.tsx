@@ -1,11 +1,9 @@
 import { Action, Icon } from "@raycast/api";
 import { GitBranches } from "../GitBranches.js";
+import { useCheckStatus } from "../../hooks/useCheckStatus.js";
 
-interface Props {
-  checkStatus: () => void;
-}
-
-export function ChangeCurrentBranch({ checkStatus }: Props) {
+export function ChangeCurrentBranch() {
+  const checkStatus = useCheckStatus();
   return (
     <Action.Push
       title="Change Current Branch"

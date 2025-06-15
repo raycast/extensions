@@ -9,23 +9,22 @@ interface Props {
 
 export function OpenFile({ fileName }: PropsWithChildren<Props>) {
   const [appIcon, setAppIcon] = useState<Image.ImageLike>();
-  const { value } = useRepo();
-  const filePath = useMemo(() => join(value ?? "", fileName), [fileName, value]);
+  const repo = useRepo();
+  const filePath = useMemo(() => join(repo ?? "", fileName), [fileName, repo]);
 
   useEffect(() => {
-    if (!value) return;
     getDefaultApplication(filePath)
       .then((app) => {
         setAppIcon({ fileIcon: app.path });
       })
-      .catch();
-  }, [filePath, value]);
+      .catch(() => {
+        // Quietly catch any error and fallback to the default image
+      });
+  }, [filePath, repo]);
 
   return (
     <>
-      {appIcon ? (
-        <Action.Open title="Open File" icon={appIcon} target={filePath} shortcut={Keyboard.Shortcut.Common.Open} />
-      ) : null}
+      <Action.Open title="Open File" icon={appIcon} target={filePath} shortcut={Keyboard.Shortcut.Common.Open} />
       <Action.OpenWith
         title="Open File"
         icon={Icon.Finder}

@@ -19,25 +19,13 @@ interface Props {
   isCommittedFile: boolean;
   isShowingDiff: boolean;
   fileName: string;
-  checkStatus: () => void;
   updateDiff: (data: string) => void;
 }
 
-export function GitStatusItemActions({
-  isNotStaged,
-  isCommittedFile,
-  isShowingDiff,
-  fileName,
-  checkStatus,
-  updateDiff,
-}: Props) {
+export function GitStatusItemActions({ isNotStaged, isCommittedFile, isShowingDiff, fileName, updateDiff }: Props) {
   const mainAction = useMemo(() => {
-    return isNotStaged ? (
-      <AddFile fileName={fileName} checkStatus={checkStatus} />
-    ) : (
-      <UnstageFile fileName={fileName} checkStatus={checkStatus} />
-    );
-  }, [checkStatus, fileName, isNotStaged]);
+    return isNotStaged ? <AddFile fileName={fileName} /> : <UnstageFile fileName={fileName} />;
+  }, [fileName, isNotStaged]);
 
   const restoreFile = useMemo(() => {
     if (!isNotStaged || !isCommittedFile) {
@@ -47,28 +35,28 @@ export function GitStatusItemActions({
     return (
       <>
         <FileDiff fileName={fileName} updateDiff={updateDiff} isShowingDiff={isShowingDiff} />
-        <RestoreFile fileName={fileName} checkStatus={checkStatus} />
+        <RestoreFile fileName={fileName} />
       </>
     );
-  }, [checkStatus, fileName, isCommittedFile, isNotStaged, isShowingDiff, updateDiff]);
+  }, [fileName, isCommittedFile, isNotStaged, isShowingDiff, updateDiff]);
 
   return (
     <ActionPanel>
       <ActionPanel.Section>
         {mainAction}
-        <CommitMessage checkStatus={checkStatus} />
+        <CommitMessage />
         {restoreFile}
       </ActionPanel.Section>
 
-      <ChangeCurrentBranch checkStatus={checkStatus} />
+      <ChangeCurrentBranch />
 
       <ActionPanel.Section title="Bulk Actions">
-        <AddAllFiles checkStatus={checkStatus} />
-        <UnstageAllFiles checkStatus={checkStatus} />
-        <StashAllFiles checkStatus={checkStatus} />
+        <AddAllFiles />
+        <UnstageAllFiles />
+        <StashAllFiles />
       </ActionPanel.Section>
 
-      <RemoteGitActions checkStatus={checkStatus} />
+      <RemoteGitActions />
 
       <ActionPanel.Section title="Utilities">
         <SetRepo />

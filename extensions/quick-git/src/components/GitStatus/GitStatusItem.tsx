@@ -8,10 +8,9 @@ import { GitStatusItemActions } from "./GitStatusItemActions.js";
 interface Props {
   branch: BranchInfo;
   status: StatusInfo;
-  checkStatus: () => void;
 }
 
-export function GitStatusItem({ status, branch, checkStatus }: Props) {
+export function GitStatusItem({ status, branch }: Props) {
   const [diff, setDiff] = useState("");
   const isNotStaged = useMemo(() => {
     return status.staged === "." || status.staged === "?";
@@ -38,7 +37,6 @@ export function GitStatusItem({ status, branch, checkStatus }: Props) {
           isCommittedFile={isCommittedFile}
           isShowingDiff={!!diff}
           fileName={status.fileName}
-          checkStatus={checkStatus}
           updateDiff={setDiff}
         />
       }
