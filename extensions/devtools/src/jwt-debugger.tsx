@@ -12,11 +12,7 @@ function decodeJWT(token: string): { header: JWTPayload; payload: JWTPayload } |
     const payload = JSON.parse(atob(payloadB64.padEnd(payloadB64.length + ((4 - (payloadB64.length % 4)) % 4), "=")));
     return { header, payload };
   } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid JWT",
-      message: "Could not decode the token",
-    });
+    showFailureToast(error, { title: "Invalid JWT" });
     return null;
   }
 }
