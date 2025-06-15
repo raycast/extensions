@@ -2,7 +2,11 @@ import { Detail } from "@raycast/api";
 import { existsSync, readFileSync } from "fs";
 import { DOTFILES } from "./dotfiles";
 
-function createSideBySideDiff(repoContent: string, homeContent: string, fileName: string): string {
+function createSideBySideDiff(
+  repoContent: string,
+  homeContent: string,
+  fileName: string,
+): string {
   const repoLines = repoContent.split("\n");
   const homeLines = homeContent.split("\n");
 
@@ -133,7 +137,11 @@ export default function Command() {
         if (repoContent !== homeContent) {
           foundAnyDifferences = true;
           markdown += "*Side-by-side comparison of your dotfiles*\n\n";
-          const diffOutput = createSideBySideDiff(repoContent, homeContent, dotfile.name);
+          const diffOutput = createSideBySideDiff(
+            repoContent,
+            homeContent,
+            dotfile.name,
+          );
           if (diffOutput) {
             markdown += `> **📍 File paths:**\n`;
             markdown += `> 🏠 \`${dotfile.homePath}\`\n`;
@@ -150,7 +158,8 @@ export default function Command() {
 
     if (!foundAnyDifferences) {
       markdown += "## **✅ No differences found!**\n>\n";
-      markdown += "> All your dotfiles are perfectly in sync between your repo and home directory. 🎉\n";
+      markdown +=
+        "> All your dotfiles are perfectly in sync between your repo and home directory. 🎉\n";
     }
 
     return markdown;

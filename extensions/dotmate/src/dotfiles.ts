@@ -50,7 +50,10 @@ export const DOTFILES: DotFile[] = [
   // ghostty
   createDotFile(".config/ghostty/config", "ghostty/config"),
   // vscode
-  createDotFile("Library/Application Support/Code/User/settings.json", "vscode/settings.json"),
+  createDotFile(
+    "Library/Application Support/Code/User/settings.json",
+    "vscode/settings.json",
+  ),
   // zed
   createDotFile(".config/zed/settings.json", "zed/settings.json"),
   // ruff
