@@ -28,7 +28,7 @@ export default function ccusage() {
   return (
     <List isLoading={stats.isLoading} selectedItemId={selectedItemId} isShowingDetail>
       <DailyUsage
-        dailyUsage={stats.todayUsage}
+        dailyUsage={stats.todayUsage ?? null}
         isLoading={stats.isLoading}
         error={stats.error}
         settingsActions={settingsActions}
@@ -40,8 +40,8 @@ export default function ccusage() {
         settingsActions={settingsActions}
       />
       <CostAnalysis
-        totalUsage={stats.totalUsage}
-        dailyUsage={stats.todayUsage}
+        totalUsage={stats.totalUsage ?? null}
+        dailyUsage={stats.todayUsage ?? null}
         models={stats.topModels}
         isLoading={stats.isLoading}
         error={stats.error}

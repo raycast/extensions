@@ -15,7 +15,7 @@ export const getRecentSessions = (sessions: SessionData[], limit: number = 10): 
 
 export const calculateAverageSessionCost = (sessions: SessionData[]): number => {
   if (sessions.length === 0) return 0;
-  return meanBy(sessions, (session) => session.cost);
+  return meanBy(sessions, (session) => session.cost || session.totalCost);
 };
 
 export const calculateAverageSessionTokens = (sessions: SessionData[]): number => {
@@ -31,7 +31,7 @@ export const calculateModelUsage = (sessions: SessionData[]): ModelUsage[] => {
     inputTokens: sumBy(modelSessions, (session) => session.inputTokens || 0),
     outputTokens: sumBy(modelSessions, (session) => session.outputTokens || 0),
     totalTokens: sumBy(modelSessions, (session) => session.totalTokens || 0),
-    cost: sumBy(modelSessions, (session) => session.cost || 0),
+    cost: sumBy(modelSessions, (session) => session.cost || session.totalCost || 0),
     sessionCount: modelSessions.length,
   }));
 
@@ -55,7 +55,7 @@ export const calculateEfficiencyMetrics = (
 
   const totalInputTokens = sumBy(sessions, (s) => s.inputTokens);
   const totalOutputTokens = sumBy(sessions, (s) => s.outputTokens);
-  const totalCost = sumBy(sessions, (s) => s.cost);
+  const totalCost = sumBy(sessions, (s) => s.cost || s.totalCost);
 
   const averageInputOutputRatio = totalInputTokens > 0 ? totalOutputTokens / totalInputTokens : 0;
   const averageCostPerOutput = totalOutputTokens > 0 ? totalCost / totalOutputTokens : 0;
@@ -65,7 +65,7 @@ export const calculateEfficiencyMetrics = (
 
   const modelEfficiencies = Object.entries(sessionsByModel)
     .map(([model, modelSessions]) => {
-      const totalModelCost = sumBy(modelSessions, (s) => s.cost);
+      const totalModelCost = sumBy(modelSessions, (s) => s.cost || s.totalCost);
       const totalModelOutput = sumBy(modelSessions, (s) => s.outputTokens);
 
       return {

@@ -1,50 +1,30 @@
 import { useExec } from "@raycast/utils";
-import { useInterval } from "usehooks-ts";
-import { cpus } from "os";
-import { DailyUsageData, SessionData, ModelUsage } from "../types/usage-types";
+import {
+  DailyUsageData,
+  MonthlyUsageData,
+  SessionData,
+  ModelUsage,
+  TotalUsageData,
+  TotalUsageResponseSchema,
+  DailyUsageResponseSchema,
+  MonthlyUsageResponseSchema,
+  SessionUsageResponseSchema,
+} from "../types/usage-types";
 import { getRecentSessions, calculateModelUsage } from "../utils/usage-calculator";
 import { preferences } from "../preferences";
+import { getEnhancedNodePaths } from "../utils/node-path-resolver";
 
-// Local type definitions for this hook
 type UsageStats = {
-  todayUsage: DailyUsageData | null;
-  totalUsage: {
-    inputTokens: number;
-    outputTokens: number;
-    totalTokens: number;
-    cost: number;
-  } | null;
+  todayUsage: DailyUsageData | undefined;
+  monthlyUsage: MonthlyUsageData | undefined;
+  totalUsage: TotalUsageData | undefined;
   recentSessions: SessionData[];
   topModels: ModelUsage[];
   isLoading: boolean;
   error?: string;
 };
 
-const getEnhancedNodePaths = (): string => {
-  const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
-
-  const platformPaths = isAppleSilicon
-    ? ["/opt/homebrew/bin", "/opt/homebrew/lib/node_modules/.bin"]
-    : ["/usr/local/bin", "/usr/local/lib/node_modules/.bin"];
-
-  const versionManagerPaths = [
-    `${process.env.HOME}/.nvm/versions/node/*/bin`,
-    `${process.env.HOME}/.fnm/node-versions/*/installation/bin`,
-    `${process.env.HOME}/.n/bin`,
-    `${process.env.HOME}/.volta/bin`,
-  ];
-
-  const systemPaths = ["/usr/bin", "/bin", `${process.env.HOME}/.npm/bin`, `${process.env.HOME}/.yarn/bin`];
-
-  const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
-
-  return allPaths.filter((path) => path).join(":");
-};
-
-const execOptions = {
-  shell: false,
-  timeout: 30000,
-  cwd: process.env.HOME,
+const getExecOptions = () => ({
   env: {
     ...process.env,
     PATH: getEnhancedNodePaths(),
@@ -52,182 +32,270 @@ const execOptions = {
     FNM_DIR: process.env.FNM_DIR || `${process.env.HOME}/.fnm`,
     npm_config_prefix: process.env.npm_config_prefix || `${process.env.HOME}/.npm-global`,
   },
-};
+  timeout: 30000,
+  cwd: process.env.HOME,
+});
 
-const useTotalUsage = (
-  refreshInterval: number = 30000,
-): {
-  data: { inputTokens: number; outputTokens: number; totalTokens: number; cost: number } | null;
-  isLoading: boolean;
-  error: Error | undefined;
-  revalidate: () => void;
-} => {
+const useTotalUsage = () => {
   const npxCommand = preferences.customNpxPath || "npx";
-  const {
-    data: rawData,
-    isLoading,
-    error,
-    revalidate,
-  } = useExec(npxCommand, ["ccusage@latest", "--json"], execOptions);
 
-  let data: { inputTokens: number; outputTokens: number; totalTokens: number; cost: number } | null = null;
-
-  if (rawData && !error) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const parsed = JSON.parse(rawData) as any;
-
-      if (parsed.totals) {
-        data = {
-          inputTokens: parsed.totals.inputTokens || 0,
-          outputTokens: parsed.totals.outputTokens || 0,
-          totalTokens: parsed.totals.totalTokens || 0,
-          cost: parsed.totals.totalCost || 0,
-        };
+  return useExec<TotalUsageData>(npxCommand, ["ccusage@latest", "--json"], {
+    ...getExecOptions(),
+    parseOutput: ({ stdout }) => {
+      if (!stdout) {
+        throw new Error("No output received from ccusage command");
       }
-    } catch (parseError) {
-      console.error("Failed to parse total usage:", parseError);
-    }
-  }
 
-  useInterval(() => {
-    revalidate();
-  }, refreshInterval);
+      try {
+        const jsonData = JSON.parse(stdout.toString());
+        const parseResult = TotalUsageResponseSchema.safeParse(jsonData);
 
-  return { data, isLoading, error, revalidate };
-};
-
-const useDailyUsage = (
-  refreshInterval: number = 10000,
-): { data: DailyUsageData | null; isLoading: boolean; error: Error | undefined; revalidate: () => void } => {
-  const npxCommand = preferences.customNpxPath || "npx";
-  const {
-    data: rawData,
-    isLoading,
-    error,
-    revalidate,
-  } = useExec(npxCommand, ["ccusage@latest", "daily", "--json"], execOptions);
-
-  let data: DailyUsageData | null = null;
-
-  if (rawData && !error) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const parsed = JSON.parse(rawData) as any;
-      const today = new Date().toISOString().split("T")[0];
-
-      if (parsed.daily && parsed.daily.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const todayEntry = parsed.daily.find((d: any) => d.date === today);
-        if (todayEntry) {
-          data = {
-            ...todayEntry,
-            cost: todayEntry.totalCost || todayEntry.cost || 0,
-          };
-        } else {
-          const latest = parsed.daily[parsed.daily.length - 1];
-          data = {
-            ...latest,
-            cost: latest.totalCost || latest.cost || 0,
-          };
+        if (!parseResult.success) {
+          throw new Error(`Invalid total usage data format: ${parseResult.error.message}`);
         }
-      }
-    } catch (parseError) {
-      console.error("Failed to parse daily usage:", parseError);
-    }
-  }
-
-  useInterval(() => {
-    revalidate();
-  }, refreshInterval);
-
-  return { data, isLoading, error, revalidate };
-};
-
-const useSessionUsage = (
-  refreshInterval: number = 15000,
-): { data: SessionData[]; isLoading: boolean; error: Error | undefined; revalidate: () => void } => {
-  const npxCommand = preferences.customNpxPath || "npx";
-  const {
-    data: rawData,
-    isLoading,
-    error,
-    revalidate,
-  } = useExec(npxCommand, ["ccusage@latest", "session", "--json"], execOptions);
-
-  let data: SessionData[] = [];
-
-  if (rawData && !error) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const parsed = JSON.parse(rawData) as any;
-      const sessions = parsed.sessions || [];
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data = sessions.map((session: any) => {
-        // Extract model from modelBreakdowns (ccusage actual structure)
-        const primaryModel = session.modelBreakdowns?.[0]?.modelName || session.modelsUsed?.[0] || "unknown";
-
-        // Use sessionId as project name directly
-        const projectName = session.sessionId || "Unknown Project";
 
         return {
-          ...session,
-          cost: session.totalCost || session.cost || 0,
-          startTime: session.lastActivity,
-          model: primaryModel,
-          projectName: projectName,
+          inputTokens: parseResult.data.totals.inputTokens,
+          outputTokens: parseResult.data.totals.outputTokens,
+          cacheCreationTokens: parseResult.data.totals.cacheCreationTokens,
+          cacheReadTokens: parseResult.data.totals.cacheReadTokens,
+          totalTokens: parseResult.data.totals.totalTokens,
+          totalCost: parseResult.data.totals.totalCost,
+          cost: parseResult.data.totals.totalCost,
         };
-      });
-    } catch (parseError) {
-      console.error("Failed to parse session usage:", parseError);
-    }
-  }
-
-  useInterval(() => {
-    revalidate();
-  }, refreshInterval);
-
-  return { data, isLoading, error, revalidate };
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          throw new Error(`Failed to parse JSON response: ${error.message}`);
+        }
+        throw error;
+      }
+    },
+    keepPreviousData: true,
+    failureToastOptions: {
+      title: "Failed to fetch total usage data",
+      primaryAction: {
+        title: "Retry",
+        onAction: (toast) => {
+          toast.hide();
+        },
+      },
+    },
+  });
 };
 
-export function useUsageStats(refreshInterval: number = 5000): UsageStats & { revalidate: () => void } {
-  const totalUsage = useTotalUsage(refreshInterval);
-  const dailyUsage = useDailyUsage(refreshInterval);
-  const sessionUsage = useSessionUsage(refreshInterval);
+const useDailyUsage = () => {
+  const npxCommand = preferences.customNpxPath || "npx";
+
+  return useExec<DailyUsageData>(npxCommand, ["ccusage@latest", "daily", "--json"], {
+    ...getExecOptions(),
+    parseOutput: ({ stdout }) => {
+      if (!stdout) {
+        throw new Error("No output received from ccusage daily command");
+      }
+
+      try {
+        const jsonData = JSON.parse(stdout.toString());
+        const parseResult = DailyUsageResponseSchema.safeParse(jsonData);
+
+        if (!parseResult.success) {
+          throw new Error(`Invalid daily usage data format: ${parseResult.error.message}`);
+        }
+
+        if (parseResult.data.daily.length === 0) {
+          throw new Error("No daily usage data available");
+        }
+
+        const today = new Date().toISOString().split("T")[0];
+        const todayEntry = parseResult.data.daily.find((entry) => entry.date === today);
+
+        if (todayEntry) {
+          return {
+            ...todayEntry,
+            cost: todayEntry.totalCost,
+          };
+        }
+
+        const latest = parseResult.data.daily[parseResult.data.daily.length - 1];
+        return {
+          ...latest,
+          cost: latest.totalCost,
+        };
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          throw new Error(`Failed to parse JSON response: ${error.message}`);
+        }
+        throw error;
+      }
+    },
+    keepPreviousData: true,
+    failureToastOptions: {
+      title: "Failed to fetch daily usage data",
+      primaryAction: {
+        title: "Retry",
+        onAction: (toast) => {
+          toast.hide();
+        },
+      },
+    },
+  });
+};
+
+const useMonthlyUsage = () => {
+  const npxCommand = preferences.customNpxPath || "npx";
+
+  return useExec<MonthlyUsageData>(npxCommand, ["ccusage@latest", "monthly", "--json"], {
+    ...getExecOptions(),
+    parseOutput: ({ stdout }) => {
+      if (!stdout) {
+        throw new Error("No output received from ccusage monthly command");
+      }
+
+      try {
+        const jsonData = JSON.parse(stdout.toString());
+        const parseResult = MonthlyUsageResponseSchema.safeParse(jsonData);
+
+        if (!parseResult.success) {
+          throw new Error(`Invalid monthly usage data format: ${parseResult.error.message}`);
+        }
+
+        if (parseResult.data.monthly.length === 0) {
+          throw new Error("No monthly usage data available");
+        }
+
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const currentMonthEntry = parseResult.data.monthly.find((entry) => entry.month === currentMonth);
+
+        if (currentMonthEntry) {
+          return {
+            ...currentMonthEntry,
+            cost: currentMonthEntry.totalCost,
+          };
+        }
+
+        const latest = parseResult.data.monthly[parseResult.data.monthly.length - 1];
+        return {
+          ...latest,
+          cost: latest.totalCost,
+        };
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          throw new Error(`Failed to parse JSON response: ${error.message}`);
+        }
+        throw error;
+      }
+    },
+    keepPreviousData: true,
+    failureToastOptions: {
+      title: "Failed to fetch monthly usage data",
+      primaryAction: {
+        title: "Retry",
+        onAction: (toast) => {
+          toast.hide();
+        },
+      },
+    },
+  });
+};
+
+const useSessionUsage = () => {
+  const npxCommand = preferences.customNpxPath || "npx";
+
+  return useExec<SessionData[]>(npxCommand, ["ccusage@latest", "session", "--json"], {
+    ...getExecOptions(),
+    parseOutput: ({ stdout }) => {
+      if (!stdout) return [];
+
+      try {
+        const jsonData = JSON.parse(stdout.toString());
+        const parseResult = SessionUsageResponseSchema.safeParse(jsonData);
+
+        if (!parseResult.success) {
+          throw new Error(`Invalid session usage data format: ${parseResult.error.message}`);
+        }
+
+        return parseResult.data.sessions.map((session) => {
+          const primaryModel = session.modelBreakdowns?.[0]?.modelName || session.modelsUsed?.[0] || "unknown";
+          const projectName = session.sessionId || "Unknown Project";
+
+          return {
+            ...session,
+            cost: session.totalCost,
+            startTime: session.lastActivity,
+            model: primaryModel,
+            projectName: projectName,
+          };
+        });
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          throw new Error(`Failed to parse JSON response: ${error.message}`);
+        }
+        throw error;
+      }
+    },
+    keepPreviousData: true,
+    failureToastOptions: {
+      title: "Failed to fetch session usage data",
+      primaryAction: {
+        title: "Retry",
+        onAction: (toast) => {
+          toast.hide();
+        },
+      },
+    },
+  });
+};
+
+export const useUsageStats = (): UsageStats & { revalidate: () => void } => {
+  const totalUsageHook = useTotalUsage();
+  const dailyUsageHook = useDailyUsage();
+  const monthlyUsageHook = useMonthlyUsage();
+  const sessionUsageHook = useSessionUsage();
+
+  const isLoading =
+    totalUsageHook.isLoading || dailyUsageHook.isLoading || monthlyUsageHook.isLoading || sessionUsageHook.isLoading;
+  const error = totalUsageHook.error || dailyUsageHook.error || monthlyUsageHook.error || sessionUsageHook.error;
+
+  const recentSessions = getRecentSessions(sessionUsageHook.data || [], 5);
+  const topModels = calculateModelUsage(sessionUsageHook.data || []);
 
   const stats: UsageStats = {
-    todayUsage: dailyUsage.data,
-    totalUsage: totalUsage.data,
-    recentSessions: sessionUsage.data ? getRecentSessions(sessionUsage.data, 5) : [],
-    topModels: sessionUsage.data ? calculateModelUsage(sessionUsage.data) : [],
-    isLoading: totalUsage.isLoading || dailyUsage.isLoading || sessionUsage.isLoading,
-    error: totalUsage.error?.message || dailyUsage.error?.message || sessionUsage.error?.message,
+    todayUsage: dailyUsageHook.data,
+    monthlyUsage: monthlyUsageHook.data,
+    totalUsage: totalUsageHook.data,
+    recentSessions,
+    topModels,
+    isLoading,
+    error: error?.message,
   };
 
   return {
     ...stats,
     revalidate: () => {
-      totalUsage.revalidate();
-      dailyUsage.revalidate();
-      sessionUsage.revalidate();
+      totalUsageHook.revalidate();
+      dailyUsageHook.revalidate();
+      monthlyUsageHook.revalidate();
+      sessionUsageHook.revalidate();
     },
   };
-}
+};
 
-export function useCcusageAvailability() {
+export const useCcusageAvailability = () => {
   const npxCommand = preferences.customNpxPath || "npx";
-  const {
-    data: rawData,
-    isLoading,
-    error,
-    revalidate,
-  } = useExec(npxCommand, ["ccusage@latest", "--help"], execOptions);
+
+  const { data, isLoading, error, revalidate } = useExec<boolean>(npxCommand, ["ccusage@latest", "--help"], {
+    ...getExecOptions(),
+    parseOutput: () => true, // If command succeeds, ccusage is available
+    keepPreviousData: true,
+    failureToastOptions: {
+      title: "Failed to check ccusage availability",
+      message: "ccusage command is not available. Please check installation.",
+    },
+  });
 
   return {
-    isAvailable: !error && rawData !== undefined,
+    isAvailable: data === true && !error,
     isLoading,
     error,
     revalidate,
   };
-}
+};
