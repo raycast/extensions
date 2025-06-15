@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 
-export const CheckStatusContext = createContext(() => {
-  console.error("Cannot check status: no function was passed into to context");
+export const CheckStatusContext = createContext<() => void>(() => {
+  throw Error("Cannot check status: CheckStatusContext was not initialized");
 });
 
 export function useCheckStatus() {

@@ -31,7 +31,7 @@ export function DeleteBranch({ branch, checkBranches }: Props) {
       showFailureToast(error, {
         title: `Could not delete ${branch}`,
         primaryAction: {
-          title: "Confirm delete?",
+          title: "Force Delete Branch?",
           onAction: hardDeleteBranch,
         },
       });

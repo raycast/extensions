@@ -13,7 +13,7 @@ interface Props {
 
 export function GitBranches({ checkStatus }: Props) {
   const repo = useRepoStorage();
-  const { data, isLoading, revalidate } = useExec("git", ["branch", "--sort=-committerdate"], {
+  const { data, isLoading, revalidate } = useExec("git", ["branch", "--sort=-committerdate", "--no-color"], {
     cwd: repo.value,
     parseOutput: ({ stdout }) => {
       return stdout.split("\n");

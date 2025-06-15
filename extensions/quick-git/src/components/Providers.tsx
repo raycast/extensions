@@ -10,7 +10,7 @@ interface Props {
 export function Providers({ repo, checkStatus, children }: PropsWithChildren<Props>) {
   return (
     <RepoContext value={repo ?? ""}>
-      <CheckStatusContext.Provider value={checkStatus}>{children}</CheckStatusContext.Provider>
+      <CheckStatusContext value={checkStatus}>{children}</CheckStatusContext>
     </RepoContext>
   );
 }

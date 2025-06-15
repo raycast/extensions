@@ -37,7 +37,7 @@ export function PushBranch() {
         title: "Could not push this branch",
         primaryAction: {
           onAction: forcePush,
-          title: "Force push branch",
+          title: "Force Push Branch?",
         },
       });
     },
