@@ -12,6 +12,14 @@ export default function Command(props: LaunchProps) {
   const [error, setError] = useState<string | null>(null);
   const { state, setSearchText: search, searchText } = useSearch(initialText);
 
+  // Add cleanup effect to clear search on exit
+  useEffect(() => {
+    return () => {
+      search("");
+      setInitialText("");
+    };
+  }, []);
+
   useEffect(() => {
     async function getInitialSearchText() {
       try {
