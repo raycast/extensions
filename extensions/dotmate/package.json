@@ -48,7 +48,7 @@
     {
       "name": "show-status",
       "title": "Show Status",
-      "subtitle": "Displays status between configs",
+      "subtitle": "Displays Status Between Configs",
       "description": "Shows similar or different files between local and repo",
       "mode": "view"
     }
