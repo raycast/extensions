@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ActionPanel, Action, Form, Detail, useNavigation } from "@raycast/api";
 
 function MarkdownPreview({ markdown, onBack }: { markdown: string; onBack: () => void }) {

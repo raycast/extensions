@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ActionPanel, Action, Form } from "@raycast/api";
 import { v4 as uuidv4, v7 as uuidv7 } from "uuid";
 
