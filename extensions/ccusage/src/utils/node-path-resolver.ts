@@ -69,7 +69,11 @@ export const getEnhancedNodePaths = (): string => {
 
   const versionManagerPaths = resolveVersionManagerPaths();
 
-  const systemPaths = ["/usr/bin", "/bin", `${process.env.HOME}/.npm/bin`, `${process.env.HOME}/.yarn/bin`];
+  const systemPaths = ["/usr/bin", "/bin"];
+
+  if (process.env.HOME) {
+    systemPaths.push(`${process.env.HOME}/.npm/bin`, `${process.env.HOME}/.yarn/bin`);
+  }
 
   const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
 
