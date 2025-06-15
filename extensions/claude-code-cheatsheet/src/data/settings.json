@@ -1,0 +1,52 @@
+{
+  "id": "settings",
+  "title": "Settings",
+  "description": "Configure Claude Code with global and project-level settings in a `settings.json` file.",
+  "commands": [
+    {
+      "id": "settings-permissions",
+      "name": "permissions",
+      "description": "A list of explicitly allowed or denied tools and commands. Use this to create a safe, restricted environment or block sensitive operations.",
+      "usage": "\"permissions\": {\n  \"allow\": [\"Bash(npm run lint)\"],\n  \"deny\": [\"Bash(curl:*)\"]\n}",
+      "example": "{\n  \"permissions\": {\n    \"allow\": [\n      \"Bash(npm run test:*)\"\n    ],\n    \"deny\": [\n      \"Bash(rm *)\"\n    ]\n  }\n}",
+      "category": "settings",
+      "tags": ["permissions", "security", "allow", "deny"]
+    },
+    {
+      "id": "settings-env",
+      "name": "env",
+      "description": "A map of environment variables that will be automatically applied to every session.",
+      "usage": "\"env\": {\n  \"MY_CUSTOM_VAR\": \"value\"\n}",
+      "example": "{\n  \"env\": {\n    \"CLAUDE_CODE_ENABLE_TELEMETRY\": \"1\",\n    \"OTEL_METRICS_EXPORTER\": \"otlp\"\n  }\n}",
+      "category": "settings",
+      "tags": ["environment", "variables", "session"]
+    },
+    {
+      "id": "settings-api-key-helper",
+      "name": "apiKeyHelper",
+      "description": "Specifies a path to a custom script that generates and returns authentication values, for dynamic or temporary credentials.",
+      "usage": "\"apiKeyHelper\": \"/bin/generate_temp_api_key.sh\"",
+      "example": "{\n  \"apiKeyHelper\": \"/path/to/your/key-gen-script.sh\"\n}",
+      "category": "settings",
+      "tags": ["auth", "script", "credentials"]
+    },
+    {
+      "id": "settings-cleanup-period",
+      "name": "cleanupPeriodDays",
+      "description": "Sets the retention period in days for chat transcripts before they are automatically deleted (default: 30).",
+      "usage": "\"cleanupPeriodDays\": 20",
+      "example": "{\n  \"cleanupPeriodDays\": 90\n}",
+      "category": "settings",
+      "tags": ["cleanup", "retention", "history"]
+    },
+    {
+      "id": "settings-include-coauthored-by",
+      "name": "includeCoAuthoredBy",
+      "description": "If false, prevents Claude from adding a 'Co-Authored-By' byline in git commits (default: true).",
+      "usage": "\"includeCoAuthoredBy\": false",
+      "example": "{\n  \"includeCoAuthoredBy\": false\n}",
+      "category": "settings",
+      "tags": ["git", "commits", "author"]
+    }
+  ]
+}

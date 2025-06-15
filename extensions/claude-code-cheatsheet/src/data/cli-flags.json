@@ -1,0 +1,172 @@
+{
+  "id": "flag",
+  "title": "CLI Flags & Options",
+  "description": "Command-line flags and options available in Claude Code",
+  "commands": [
+    {
+      "id": "print-flag",
+      "name": "--print, -p",
+      "description": "Prints the response directly to the console and exits, rather than entering the interactive REPL mode.",
+      "usage": "claude --print \"<query>\"",
+      "example": "claude --print \"Explain this file structure\"",
+      "category": "flag",
+      "tags": ["non-interactive", "one-shot", "print"]
+    },
+    {
+      "id": "output-format",
+      "name": "--output-format",
+      "description": "Specifies the output format for responses. Options are 'text' (default), 'json', or 'stream-json'.",
+      "usage": "claude --output-format <format>",
+      "example": "claude --output-format json \"Analyze this API response\"",
+      "category": "flag",
+      "tags": ["output", "format", "json"]
+    },
+    {
+      "id": "verbose",
+      "name": "--verbose",
+      "description": "Enables verbose logging, showing detailed turn-by-turn output, which is useful for debugging conversations.",
+      "usage": "claude --verbose",
+      "example": "claude --verbose \"Explain with debug information\"",
+      "category": "flag",
+      "tags": ["verbose", "debug", "detailed"]
+    },
+    {
+      "id": "debug",
+      "name": "--debug, -d",
+      "description": "Enables debug mode, providing extensive logging for troubleshooting and development.",
+      "usage": "claude --debug",
+      "example": "claude --debug \"analyze this code\"",
+      "category": "flag",
+      "tags": ["debug", "verbose", "troubleshooting"]
+    },
+    {
+      "id": "input-format",
+      "name": "--input-format",
+      "description": "Specifies the input format for piped data. Only works with --print. Options: 'text' (default) or 'stream-json'.",
+      "usage": "claude --input-format <format>",
+      "example": "claude --input-format stream-json --print \"query\"",
+      "category": "flag",
+      "tags": ["input", "format", "stream-json"]
+    },
+    {
+      "id": "mcp-debug",
+      "name": "--mcp-debug",
+      "description": "Enables MCP debug mode. This flag is deprecated; please use the more general --debug flag instead.",
+      "usage": "claude --mcp-debug",
+      "example": "claude --mcp-debug",
+      "category": "flag",
+      "deprecated": true,
+      "alternative": "--debug",
+      "tags": ["MCP", "debug", "deprecated"]
+    },
+    {
+      "id": "mcp-config",
+      "name": "--mcp-config",
+      "description": "Loads MCP server configurations from a specified JSON file or a raw JSON string.",
+      "usage": "claude --mcp-config <file or string>",
+      "example": "claude --mcp-config ./mcp-servers.json",
+      "category": "flag",
+      "tags": ["MCP", "config", "servers", "JSON"]
+    },
+    {
+      "id": "resume-flag",
+      "name": "--resume, -r",
+      "description": "Resumes a conversation. Provide a session ID or select a conversation interactively to restore its context.",
+      "usage": "claude -r [sessionId]",
+      "example": "claude -r abc123",
+      "category": "flag",
+      "tags": ["resume", "session", "restore"]
+    },
+    {
+      "id": "continue-flag",
+      "name": "--continue, -c",
+      "description": "Continues the most recent conversation from your session history, making it easy to pick up where you left off.",
+      "usage": "claude --continue",
+      "example": "claude -c",
+      "category": "flag",
+      "tags": ["continue", "latest", "conversation"]
+    },
+    {
+      "id": "dangerously-skip-permissions",
+      "name": "--dangerously-skip-permissions",
+      "description": "Bypasses all permission prompts for tool usage, allowing Claude to execute commands without explicit approval. Use with extreme caution, as it can lead to unintended system modifications or data access. Ideal for trusted, automated workflows.",
+      "usage": "claude --dangerously-skip-permissions",
+      "example": "claude --dangerously-skip-permissions \"fix bugs\"",
+      "category": "flag",
+      "warning": true,
+      "tags": ["dangerous", "permissions", "skip", "bypass"]
+    },
+    {
+      "id": "allowed-tools",
+      "name": "--allowedTools",
+      "description": "Specifies a comma-separated list of tools that Claude is permitted to use during the session.",
+      "usage": "claude --allowedTools <tools>",
+      "example": "claude --allowedTools bash,read,write",
+      "category": "flag",
+      "tags": ["tools", "allowed", "restriction", "permissions"]
+    },
+    {
+      "id": "disallowed-tools",
+      "name": "--disallowedTools",
+      "description": "Specifies a comma-separated list of tools that Claude is blocked from using during the session.",
+      "usage": "claude --disallowedTools <tools>",
+      "example": "claude --disallowedTools bash,edit",
+      "category": "flag",
+      "tags": ["tools", "disallowed", "restriction", "permissions"]
+    },
+    {
+      "id": "add-dir",
+      "name": "--add-dir",
+      "description": "Adds additional working directories for Claude to access, expanding its context beyond the current directory.",
+      "usage": "claude --add-dir <directory>",
+      "example": "claude --add-dir ../apps ../lib",
+      "category": "flag",
+      "tags": ["directory", "working", "additional", "multiple"]
+    },
+    {
+      "id": "model",
+      "name": "--model",
+      "description": "Sets the specific AI model to be used for the current session, overriding the default configuration.",
+      "usage": "claude --model <model-name>",
+      "example": "claude --model claude-sonnet-4-20250514",
+      "category": "flag",
+      "tags": ["model", "selection", "AI"]
+    },
+    {
+      "id": "version",
+      "name": "--version, -v",
+      "description": "Outputs the current version number of your installed Claude Code CLI.",
+      "usage": "claude --version",
+      "example": "claude --version",
+      "category": "flag",
+      "tags": ["version", "info"]
+    },
+    {
+      "id": "help",
+      "name": "--help, -h",
+      "description": "Displays comprehensive help information for a command or the CLI in general.",
+      "usage": "claude --help",
+      "example": "claude --help",
+      "category": "flag",
+      "tags": ["help", "documentation"]
+    },
+    {
+      "id": "max-turns",
+      "name": "--max-turns",
+      "description": "Limits the number of agentic turns Claude can take in non-interactive mode to prevent infinite loops.",
+      "usage": "claude -p --max-turns <number> \"<query>\"",
+      "example": "claude -p --max-turns 3 \"Refactor this code\"",
+      "category": "flag",
+      "tags": ["limit", "turns", "agentic", "non-interactive"]
+    },
+    {
+      "id": "permission-prompt-tool",
+      "name": "--permission-prompt-tool",
+      "description": "Specifies an MCP tool to handle permission prompts in non-interactive mode, enabling automated workflows.",
+      "usage": "claude -p --permission-prompt-tool <tool> \"<query>\"",
+      "example": "claude -p --permission-prompt-tool mcp_auth_tool \"Deploy to production\"",
+      "category": "flag",
+      "tags": ["permissions", "prompt", "tool", "mcp", "non-interactive"]
+    }
+  ]
+}

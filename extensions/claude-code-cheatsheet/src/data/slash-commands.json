@@ -1,0 +1,160 @@
+{
+  "id": "slash",
+  "title": "Slash Commands",
+  "description": "Slash commands available in Claude Code",
+  "commands": [
+    {
+      "id": "bug",
+      "name": "/bug",
+      "description": "Initiates a bug report workflow, helping you to capture and submit issues you encounter.",
+      "usage": "/bug",
+      "example": "/bug",
+      "category": "slash",
+      "tags": ["bug", "report", "issue"]
+    },
+    {
+      "id": "clear",
+      "name": "/clear",
+      "description": "Clears the current conversation history from the REPL, providing a fresh start.",
+      "usage": "/clear",
+      "example": "/clear",
+      "category": "slash",
+      "tags": ["clear", "history", "delete"]
+    },
+    {
+      "id": "compact",
+      "name": "/compact",
+      "description": "Compacts the conversation history, summarizing previous turns to save tokens and refocus the context.",
+      "usage": "/compact",
+      "example": "/compact",
+      "category": "slash",
+      "tags": ["compact", "summarize", "compress"]
+    },
+    {
+      "id": "config",
+      "name": "/config",
+      "description": "Opens an interactive session to show and modify your local and global configuration settings.",
+      "usage": "/config",
+      "example": "/config",
+      "category": "slash",
+      "tags": ["settings", "configuration", "modify"]
+    },
+    {
+      "id": "cost",
+      "name": "/cost",
+      "description": "Displays token usage statistics for the current session, helping you track API costs.",
+      "usage": "/cost",
+      "example": "/cost",
+      "category": "slash",
+      "tags": ["cost", "statistics", "tokens"]
+    },
+    {
+      "id": "help",
+      "name": "/help",
+      "description": "Shows a help message with a list of available slash commands and their functions.",
+      "usage": "/help",
+      "example": "/help",
+      "category": "slash",
+      "tags": ["help", "support", "documentation"]
+    },
+    {
+      "id": "init",
+      "name": "/init",
+      "description": "Initializes a new `CLAUDE.md` file in your project, documenting the codebase to provide better context to Claude.",
+      "usage": "/init",
+      "example": "/init",
+      "category": "slash",
+      "tags": ["initialize", "project", "start", "CLAUDE.md", "documentation"]
+    },
+    {
+      "id": "login",
+      "name": "/login",
+      "description": "Starts the authentication process to sign you in with your Anthropic account.",
+      "usage": "/login",
+      "example": "/login",
+      "category": "slash",
+      "tags": ["login", "switch", "authentication", "account", "sign-in"]
+    },
+    {
+      "id": "logout",
+      "name": "/logout",
+      "description": "Signs you out from your current Anthropic account in the CLI.",
+      "usage": "/logout",
+      "example": "/logout",
+      "category": "slash",
+      "tags": ["logout", "sign out", "exit", "account"]
+    },
+    {
+      "id": "memory",
+      "name": "/memory",
+      "description": "Opens the `CLAUDE.md` file in your editor, allowing you to view or modify Claude's contextual memory for your project.",
+      "usage": "/memory",
+      "example": "/memory",
+      "category": "slash",
+      "tags": ["memory", "edit", "CLAUDE.md"]
+    },
+    {
+      "id": "pr_comments",
+      "name": "/pr_comments",
+      "description": "Fetches and displays comments from a specified GitHub pull request, bringing review feedback into your terminal.",
+      "usage": "/pr_comments",
+      "example": "/pr_comments",
+      "category": "slash",
+      "tags": ["PR", "comments", "review", "GitHub", "pull request"]
+    },
+    {
+      "id": "review",
+      "name": "/review",
+      "description": "Requests a code review from Claude for the files you've specified or staged in git.",
+      "usage": "/review",
+      "example": "/review",
+      "category": "slash",
+      "tags": ["review", "code", "check"]
+    },
+    {
+      "id": "terminal-setup",
+      "name": "/terminal-setup",
+      "description": "Installs terminal enhancements, such as enabling Shift+Enter for multi-line input without sending.",
+      "usage": "/terminal-setup",
+      "example": "/terminal-setup",
+      "category": "slash",
+      "tags": ["setup", "key binding", "terminal", "enhancements", "keybindings"]
+    },
+    {
+      "id": "vim",
+      "name": "/vim",
+      "description": "Enables or disables Vim keybindings within the interactive REPL for modal editing.",
+      "usage": "/vim",
+      "example": "/vim",
+      "category": "slash",
+      "tags": ["Vim", "mode", "enable"]
+    },
+    {
+      "id": "model",
+      "name": "/model",
+      "description": "Allows you to view or change the AI model being used for the current session.",
+      "usage": "/model",
+      "example": "/model",
+      "category": "slash",
+      "tags": ["model", "change", "AI", "configuration"]
+    },
+    {
+      "id": "exit",
+      "name": "/exit",
+      "description": "Exits the Claude Code REPL session and returns you to your regular shell prompt.",
+      "usage": "/exit",
+      "example": "/exit",
+      "category": "slash",
+      "tags": ["exit", "quit", "REPL"]
+    },
+    {
+      "id": "status",
+      "name": "/status",
+      "description": "Shows a comprehensive status of the Claude Code CLI, including version, model, account info, and API connectivity.",
+      "usage": "/status",
+      "example": "/status",
+      "category": "slash",
+      "tags": ["status", "account", "system", "version", "connectivity", "diagnostics"]
+    }
+  ]
+}
