@@ -11,7 +11,7 @@ A Raycast extension that uses the Stremio API to search for movies and TV shows 
 ## Features
 
 - 🎬 Search for movies and TV series
-- 📈 Shows trending media
+- 📈 Displays trending media
 - ⚙️ Stremio addon support
 - 🔗 Stream directly into IINA, VLC, or any app of choice
 - ✅ Mark TV episodes as watched
