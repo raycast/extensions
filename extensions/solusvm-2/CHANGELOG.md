@@ -2,6 +2,8 @@
 
 ## [] - {PR_MERGE_DATE}
 
+- snapshtos
+- reinstaall serer
 - resend member invite
 - remooe memeber
 - placeholder in api prerference
