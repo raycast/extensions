@@ -4,7 +4,7 @@ import { RemoteGitActions } from "./RemoteGitActions.js";
 import { AddFile } from "../actions/AddFile.js";
 import { UnstageFile } from "../actions/UnstageFile.js";
 import { CommitMessage } from "../actions/CommitMessage.js";
-import { RestoreFile } from "../actions/RestoreFile.js";
+import { ResetFile } from "../actions/ResetFile.js";
 import { ChangeCurrentBranch } from "../actions/ChangeCurrentBranch.js";
 import { SetRepo } from "../actions/SetRepo.js";
 import { CopyFilename } from "../actions/CopyFilename.js";
@@ -13,6 +13,7 @@ import { AddAllFiles } from "../actions/AddAllFiles.js";
 import { UnstageAllFiles } from "../actions/UnstageAllFiles.js";
 import { StashAllFiles } from "../actions/StashAllFiles.js";
 import { FileDiff } from "../actions/FileDiff.js";
+import { ResetAllUnstagedFiles } from "../actions/ResetAllFiles.js";
 
 interface Props {
   isNotStaged: boolean;
@@ -35,7 +36,7 @@ export function GitStatusItemActions({ isNotStaged, isCommittedFile, isShowingDi
     return (
       <>
         <FileDiff fileName={fileName} updateDiff={updateDiff} isShowingDiff={isShowingDiff} />
-        <RestoreFile fileName={fileName} />
+        <ResetFile fileName={fileName} />
       </>
     );
   }, [fileName, isCommittedFile, isNotStaged, isShowingDiff, updateDiff]);
@@ -53,6 +54,7 @@ export function GitStatusItemActions({ isNotStaged, isCommittedFile, isShowingDi
       <ActionPanel.Section title="Bulk Actions">
         <AddAllFiles />
         <UnstageAllFiles />
+        <ResetAllUnstagedFiles />
         <StashAllFiles />
       </ActionPanel.Section>
 
