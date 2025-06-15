@@ -54,10 +54,6 @@ export default async function main() {
 
     await showHUD(`🎉 ${message}`);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Deployment failed",
-      message: String(error),
-    });
+    await showFailureToast(error, { title: "Deployment failed" });
   }
 }
