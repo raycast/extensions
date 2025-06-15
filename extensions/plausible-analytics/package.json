@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "plausible-analytics",
+  "title": "Plausible Analytics",
+  "description": "Get a quick, brief overview of your Plausible Analytics data.",
+  "icon": "command-icon.png",
+  "author": "thebrokenfinger",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open Plausible Analytics",
+      "description": "Open an overview of your Plausible Analytics data",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Plausible API key.",
+      "placeholder": "Find at https://plausible.io/settings#api-keys"
+    },
+    {
+      "name": "hostedDomain",
+      "type": "textfield",
+      "required": false,
+      "title": "Self-hosted domain",
+      "description": "Your URL to access Plausible",
+      "placeholder": "https://my-plausible-instance.com"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

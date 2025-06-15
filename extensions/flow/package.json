@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flow",
+  "title": "Flow Timer",
+  "description": "Control Flow application timer",
+  "icon": "flow.png",
+  "author": "vimtor",
+  "contributors": [
+    "tyuichis"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "subtitle": "Flow",
+      "description": "Resume current timer",
+      "keywords": [
+        "start",
+        "play"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "pause-timer",
+      "title": "Pause Timer",
+      "subtitle": "Flow",
+      "description": "Pause current timer",
+      "keywords": [
+        "stop"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "skip-session",
+      "title": "Skip Session",
+      "subtitle": "Flow",
+      "description": "Skip current session",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-next-break",
+      "title": "Start Next Break",
+      "subtitle": "Flow",
+      "description": "Start the next break",
+      "mode": "no-view"
+    },
+    {
+      "name": "hide-timer",
+      "title": "Hide Timer",
+      "subtitle": "Flow",
+      "description": "Hide visible timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-timer",
+      "title": "Show Timer",
+      "subtitle": "Flow",
+      "description": "Show current timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "reset-timer",
+      "title": "Reset Timer",
+      "subtitle": "Flow",
+      "description": "Reset current timer",
+      "keywords": [
+        "reset",
+        "restart"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "quit-flow",
+      "title": "Quit Flow",
+      "description": "Quit Flow application",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-next-focus",
+      "title": "Start Next Focus",
+      "subtitle": "Flow",
+      "description": "Start the next focus session",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-session-title",
+      "title": "Set Session Title",
+      "description": "Set the session title for Flow",
+      "subtitle": "Flow",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Enter session title",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.50.0",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.5.1",
+    "react-devtools": "^5.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

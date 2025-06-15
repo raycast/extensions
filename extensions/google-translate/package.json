@@ -1,0 +1,999 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "translate",
+  "title": "Google Translate",
+  "description": "Simple translation using Google Translate",
+  "icon": "google-translate.png",
+  "author": "gebeto",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "contributors": [
+    "FezVrasta",
+    "ickas",
+    "metakirby5",
+    "AlanHuang",
+    "nirtamir2",
+    "pernielsentikaer",
+    "rasitayaz",
+    "popalay",
+    "litomore",
+    "ChanningKuo"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate",
+      "subtitle": "Google Translate",
+      "description": "Simple translation via Google Translate",
+      "mode": "view"
+    },
+    {
+      "name": "translate-form",
+      "title": "Translate Form",
+      "subtitle": "Google Translate",
+      "description": "Simple translation via Google Translate",
+      "mode": "view"
+    },
+    {
+      "name": "quick-translate",
+      "title": "Quick Translate",
+      "subtitle": "Google Translate",
+      "description": "Quickly translate to multiple languages",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "lang1",
+      "title": "Primary Language",
+      "description": "Preferred language to translate from",
+      "required": true,
+      "type": "dropdown",
+      "default": "auto",
+      "data": [
+        {
+          "title": "🌐 Auto-detect",
+          "value": "auto"
+        },
+        {
+          "title": "🇿🇦 Afrikaans",
+          "value": "af"
+        },
+        {
+          "title": "🇦🇱 Albanian",
+          "value": "sq"
+        },
+        {
+          "title": "Amharic",
+          "value": "am"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "🇦🇲 Armenian",
+          "value": "hy"
+        },
+        {
+          "title": "🇦🇿 Azerbaijani",
+          "value": "az"
+        },
+        {
+          "title": "Basque",
+          "value": "eu"
+        },
+        {
+          "title": "🇧🇾 Belarusian",
+          "value": "be"
+        },
+        {
+          "title": "Bengali",
+          "value": "bn"
+        },
+        {
+          "title": "🇧🇦 Bosnian",
+          "value": "bs"
+        },
+        {
+          "title": "🇧🇬 Bulgarian",
+          "value": "bg"
+        },
+        {
+          "title": "Catalan",
+          "value": "ca"
+        },
+        {
+          "title": "Cebuano",
+          "value": "ceb"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-CN"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "zh-TW"
+        },
+        {
+          "title": "Corsican",
+          "value": "co"
+        },
+        {
+          "title": "🇭🇷 Croatian",
+          "value": "hr"
+        },
+        {
+          "title": "🇨🇿 Czech",
+          "value": "cs"
+        },
+        {
+          "title": "🇩🇰 Danish",
+          "value": "da"
+        },
+        {
+          "title": "🇳🇱 Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "🇬🇧 English",
+          "value": "en"
+        },
+        {
+          "title": "Esperanto",
+          "value": "eo"
+        },
+        {
+          "title": "🇪🇪 Estonian",
+          "value": "et"
+        },
+        {
+          "title": "🇫🇮 Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "fr"
+        },
+        {
+          "title": "Frisian",
+          "value": "fy"
+        },
+        {
+          "title": "Galician",
+          "value": "gl"
+        },
+        {
+          "title": "🇬🇪 Georgian",
+          "value": "ka"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "de"
+        },
+        {
+          "title": "🇬🇷 Greek",
+          "value": "el"
+        },
+        {
+          "title": "Gujarati",
+          "value": "gu"
+        },
+        {
+          "title": "🇭🇹 Haitian Creole",
+          "value": "ht"
+        },
+        {
+          "title": "Hausa",
+          "value": "ha"
+        },
+        {
+          "title": "🌺 Hawaiian",
+          "value": "haw"
+        },
+        {
+          "title": "🇮🇱 Hebrew",
+          "value": "iw"
+        },
+        {
+          "title": "🇮🇳 Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Hmong",
+          "value": "hmn"
+        },
+        {
+          "title": "🇭🇺 Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "🇮🇸 Icelandic",
+          "value": "is"
+        },
+        {
+          "title": "Igbo",
+          "value": "ig"
+        },
+        {
+          "title": "🇮🇩 Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "🇮🇪 Irish",
+          "value": "ga"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "it"
+        },
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Javanese",
+          "value": "jv"
+        },
+        {
+          "title": "Kannada",
+          "value": "kn"
+        },
+        {
+          "title": "🇰🇿 Kazakh",
+          "value": "kk"
+        },
+        {
+          "title": "Khmer",
+          "value": "km"
+        },
+        {
+          "title": "Kinyarwanda",
+          "value": "rw"
+        },
+        {
+          "title": "🇰🇷 Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Kurdish",
+          "value": "ku"
+        },
+        {
+          "title": "Kyrgyz",
+          "value": "ky"
+        },
+        {
+          "title": "Lao",
+          "value": "lo"
+        },
+        {
+          "title": "🇱🇻 Latvian",
+          "value": "lv"
+        },
+        {
+          "title": "🇱🇹 Lithuanian",
+          "value": "lt"
+        },
+        {
+          "title": "🇱🇺 Luxembourgish",
+          "value": "lb"
+        },
+        {
+          "title": "🇲🇰 Macedonian",
+          "value": "mk"
+        },
+        {
+          "title": "Malagasy",
+          "value": "mg"
+        },
+        {
+          "title": "🇲🇾 Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Malayalam",
+          "value": "ml"
+        },
+        {
+          "title": "🇲🇹 Maltese",
+          "value": "mt"
+        },
+        {
+          "title": "🇳🇿 Maori",
+          "value": "mi"
+        },
+        {
+          "title": "Marathi",
+          "value": "mr"
+        },
+        {
+          "title": "🇲🇳 Mongolian",
+          "value": "mn"
+        },
+        {
+          "title": "🇲🇲 Myanmar (Burmese)",
+          "value": "my"
+        },
+        {
+          "title": "🇳🇵 Nepali",
+          "value": "ne"
+        },
+        {
+          "title": "🇳🇴 Norwegian",
+          "value": "no"
+        },
+        {
+          "title": "Nyanja (Chichewa)",
+          "value": "ny"
+        },
+        {
+          "title": "Odia (Oriya)",
+          "value": "or"
+        },
+        {
+          "title": "Pashto",
+          "value": "ps"
+        },
+        {
+          "title": "🇮🇷 Persian",
+          "value": "fa"
+        },
+        {
+          "title": "🇵🇱 Polish",
+          "value": "pl"
+        },
+        {
+          "title": "🇵🇹 Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "🇮🇳 Punjabi",
+          "value": "pa"
+        },
+        {
+          "title": "🇷🇴 Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Samoan",
+          "value": "sm"
+        },
+        {
+          "title": "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scots Gaelic",
+          "value": "gd"
+        },
+        {
+          "title": "🇷🇸 Serbian",
+          "value": "sr"
+        },
+        {
+          "title": "Sesotho",
+          "value": "st"
+        },
+        {
+          "title": "Shona",
+          "value": "sn"
+        },
+        {
+          "title": "Sindhi",
+          "value": "sd"
+        },
+        {
+          "title": "Sinhala (Sinhalese)",
+          "value": "si"
+        },
+        {
+          "title": "🇸🇰 Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "🇸🇮 Slovenian",
+          "value": "sl"
+        },
+        {
+          "title": "🇸🇴 Somali",
+          "value": "so"
+        },
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "es"
+        },
+        {
+          "title": "🇸🇩 Sundanese",
+          "value": "su"
+        },
+        {
+          "title": "Swahili",
+          "value": "sw"
+        },
+        {
+          "title": "🇸🇪 Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "🇵🇭 Tagalog (Filipino)",
+          "value": "tl"
+        },
+        {
+          "title": "Tajik",
+          "value": "tg"
+        },
+        {
+          "title": "Tamil",
+          "value": "ta"
+        },
+        {
+          "title": "Tatar",
+          "value": "tt"
+        },
+        {
+          "title": "Telugu",
+          "value": "te"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "🇹🇷 Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "🇹🇲 Turkmen",
+          "value": "tk"
+        },
+        {
+          "title": "🇺🇦 Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Urdu",
+          "value": "ur"
+        },
+        {
+          "title": "Uyghur",
+          "value": "ug"
+        },
+        {
+          "title": "Uzbek",
+          "value": "uz"
+        },
+        {
+          "title": "🇻🇳 Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welsh",
+          "value": "cy"
+        },
+        {
+          "title": "Xhosa",
+          "value": "xh"
+        },
+        {
+          "title": "🇮🇱 Yiddish",
+          "value": "yi"
+        },
+        {
+          "title": "Yoruba",
+          "value": "yo"
+        },
+        {
+          "title": "Zulu",
+          "value": "zu"
+        }
+      ]
+    },
+    {
+      "name": "lang2",
+      "title": "Secondary Language",
+      "description": "Preferred language to translate to",
+      "required": true,
+      "type": "dropdown",
+      "default": "de",
+      "data": [
+        {
+          "title": "🇿🇦 Afrikaans",
+          "value": "af"
+        },
+        {
+          "title": "🇦🇱 Albanian",
+          "value": "sq"
+        },
+        {
+          "title": "Amharic",
+          "value": "am"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "🇦🇲 Armenian",
+          "value": "hy"
+        },
+        {
+          "title": "🇦🇿 Azerbaijani",
+          "value": "az"
+        },
+        {
+          "title": "Basque",
+          "value": "eu"
+        },
+        {
+          "title": "🇧🇾 Belarusian",
+          "value": "be"
+        },
+        {
+          "title": "Bengali",
+          "value": "bn"
+        },
+        {
+          "title": "🇧🇦 Bosnian",
+          "value": "bs"
+        },
+        {
+          "title": "🇧🇬 Bulgarian",
+          "value": "bg"
+        },
+        {
+          "title": "Catalan",
+          "value": "ca"
+        },
+        {
+          "title": "Cebuano",
+          "value": "ceb"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-CN"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "zh-TW"
+        },
+        {
+          "title": "Corsican",
+          "value": "co"
+        },
+        {
+          "title": "🇭🇷 Croatian",
+          "value": "hr"
+        },
+        {
+          "title": "🇨🇿 Czech",
+          "value": "cs"
+        },
+        {
+          "title": "🇩🇰 Danish",
+          "value": "da"
+        },
+        {
+          "title": "🇳🇱 Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "🇬🇧 English",
+          "value": "en"
+        },
+        {
+          "title": "Esperanto",
+          "value": "eo"
+        },
+        {
+          "title": "🇪🇪 Estonian",
+          "value": "et"
+        },
+        {
+          "title": "🇫🇮 Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "fr"
+        },
+        {
+          "title": "Frisian",
+          "value": "fy"
+        },
+        {
+          "title": "Galician",
+          "value": "gl"
+        },
+        {
+          "title": "🇬🇪 Georgian",
+          "value": "ka"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "de"
+        },
+        {
+          "title": "🇬🇷 Greek",
+          "value": "el"
+        },
+        {
+          "title": "Gujarati",
+          "value": "gu"
+        },
+        {
+          "title": "🇭🇹 Haitian Creole",
+          "value": "ht"
+        },
+        {
+          "title": "Hausa",
+          "value": "ha"
+        },
+        {
+          "title": "🌺 Hawaiian",
+          "value": "haw"
+        },
+        {
+          "title": "🇮🇱 Hebrew",
+          "value": "iw"
+        },
+        {
+          "title": "🇮🇳 Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Hmong",
+          "value": "hmn"
+        },
+        {
+          "title": "🇭🇺 Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "🇮🇸 Icelandic",
+          "value": "is"
+        },
+        {
+          "title": "Igbo",
+          "value": "ig"
+        },
+        {
+          "title": "🇮🇩 Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "🇮🇪 Irish",
+          "value": "ga"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "it"
+        },
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Javanese",
+          "value": "jv"
+        },
+        {
+          "title": "Kannada",
+          "value": "kn"
+        },
+        {
+          "title": "🇰🇿 Kazakh",
+          "value": "kk"
+        },
+        {
+          "title": "Khmer",
+          "value": "km"
+        },
+        {
+          "title": "Kinyarwanda",
+          "value": "rw"
+        },
+        {
+          "title": "🇰🇷 Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Kurdish",
+          "value": "ku"
+        },
+        {
+          "title": "Kyrgyz",
+          "value": "ky"
+        },
+        {
+          "title": "Lao",
+          "value": "lo"
+        },
+        {
+          "title": "🇱🇻 Latvian",
+          "value": "lv"
+        },
+        {
+          "title": "🏛 Latin",
+          "value": "la"
+        },
+        {
+          "title": "🇱🇹 Lithuanian",
+          "value": "lt"
+        },
+        {
+          "title": "🇱🇺 Luxembourgish",
+          "value": "lb"
+        },
+        {
+          "title": "🇲🇰 Macedonian",
+          "value": "mk"
+        },
+        {
+          "title": "Malagasy",
+          "value": "mg"
+        },
+        {
+          "title": "🇲🇾 Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Malayalam",
+          "value": "ml"
+        },
+        {
+          "title": "🇲🇹 Maltese",
+          "value": "mt"
+        },
+        {
+          "title": "🇳🇿 Maori",
+          "value": "mi"
+        },
+        {
+          "title": "Marathi",
+          "value": "mr"
+        },
+        {
+          "title": "🇲🇳 Mongolian",
+          "value": "mn"
+        },
+        {
+          "title": "🇲🇲 Myanmar (Burmese)",
+          "value": "my"
+        },
+        {
+          "title": "🇳🇵 Nepali",
+          "value": "ne"
+        },
+        {
+          "title": "🇳🇴 Norwegian",
+          "value": "no"
+        },
+        {
+          "title": "Nyanja (Chichewa)",
+          "value": "ny"
+        },
+        {
+          "title": "Odia (Oriya)",
+          "value": "or"
+        },
+        {
+          "title": "Pashto",
+          "value": "ps"
+        },
+        {
+          "title": "🇮🇷 Persian",
+          "value": "fa"
+        },
+        {
+          "title": "🇵🇱 Polish",
+          "value": "pl"
+        },
+        {
+          "title": "🇵🇹 Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "🇮🇳 Punjabi",
+          "value": "pa"
+        },
+        {
+          "title": "🇷🇴 Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Samoan",
+          "value": "sm"
+        },
+        {
+          "title": "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scots Gaelic",
+          "value": "gd"
+        },
+        {
+          "title": "🇷🇸 Serbian",
+          "value": "sr"
+        },
+        {
+          "title": "Sesotho",
+          "value": "st"
+        },
+        {
+          "title": "Shona",
+          "value": "sn"
+        },
+        {
+          "title": "Sindhi",
+          "value": "sd"
+        },
+        {
+          "title": "Sinhala (Sinhalese)",
+          "value": "si"
+        },
+        {
+          "title": "🇸🇰 Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "🇸🇮 Slovenian",
+          "value": "sl"
+        },
+        {
+          "title": "🇸🇴 Somali",
+          "value": "so"
+        },
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "es"
+        },
+        {
+          "title": "🇸🇩 Sundanese",
+          "value": "su"
+        },
+        {
+          "title": "Swahili",
+          "value": "sw"
+        },
+        {
+          "title": "🇸🇪 Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "🇵🇭 Tagalog (Filipino)",
+          "value": "tl"
+        },
+        {
+          "title": "Tajik",
+          "value": "tg"
+        },
+        {
+          "title": "Tamil",
+          "value": "ta"
+        },
+        {
+          "title": "Tatar",
+          "value": "tt"
+        },
+        {
+          "title": "Telugu",
+          "value": "te"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "🇹🇷 Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "🇹🇲 Turkmen",
+          "value": "tk"
+        },
+        {
+          "title": "🇺🇦 Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Urdu",
+          "value": "ur"
+        },
+        {
+          "title": "Uyghur",
+          "value": "ug"
+        },
+        {
+          "title": "Uzbek",
+          "value": "uz"
+        },
+        {
+          "title": "🇻🇳 Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welsh",
+          "value": "cy"
+        },
+        {
+          "title": "Xhosa",
+          "value": "xh"
+        },
+        {
+          "title": "🇮🇱 Yiddish",
+          "value": "yi"
+        },
+        {
+          "title": "Yoruba",
+          "value": "yo"
+        },
+        {
+          "title": "Zulu",
+          "value": "zu"
+        }
+      ]
+    },
+    {
+      "name": "autoInput",
+      "title": "Autofill Input",
+      "label": "Automatically fill input with selected text.",
+      "description": "When enabled, selected text from the foremost app will be automatically filled in the input field.",
+      "required": false,
+      "type": "checkbox",
+      "default": true
+    },
+    {
+      "name": "defaultAction",
+      "title": "Default Action",
+      "description": "The default action to take when translating.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to App",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "proxy",
+      "title": "HTTP Proxy URL",
+      "description": "HTTP proxy URL to use for translation requests (e.g. http://proxy.example.com:8080)",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "undici": "^5.12.0",
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.16",
+    "google-tts-api": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.0.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

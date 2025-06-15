@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "distraction-tracker",
+  "title": "Distraction Tracker",
+  "description": "Track your distractions and get indistractable. This extension is inspired by Nir Eyal's book indistractable.",
+  "icon": "extension-icon.png",
+  "author": "danieldeichfuss",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "track-distraction",
+      "title": "Track Distraction",
+      "description": "Write down what triggered your distraction, what discomfort preceded the distraction. This will help you to get to the root cause of your distractions and get back in control.",
+      "mode": "view"
+    },
+    {
+      "name": "list-distractions",
+      "title": "List Distractions",
+      "description": "List your tracked distractions and see what triggers you to go off course and help you understand yourself better.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

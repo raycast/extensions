@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "monobank",
+  "title": "monobank",
+  "description": "View currency rates and all your accounts in monobank.",
+  "icon": "command-icon.png",
+  "author": "danulqua",
+  "categories": [
+    "Finance"
+  ],
+  "keywords": [
+    "mono",
+    "bank",
+    "currency",
+    "money",
+    "cards",
+    "jars"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "rates",
+      "title": "Show Currency Rates",
+      "subtitle": "monobank",
+      "description": "Currency rates in monobank.",
+      "mode": "view"
+    },
+    {
+      "name": "accounts",
+      "title": "Show Accounts",
+      "subtitle": "monobank",
+      "description": "All your accounts in monobank.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "token",
+          "type": "password",
+          "title": "Access Token",
+          "description": "Your monobank Access Token",
+          "placeholder": "Enter Your Access Token",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.1",
+    "@raycast/utils": "^1.9.0",
+    "axios": "^1.8.4",
+    "currency-codes": "^2.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions"
+  }
+}

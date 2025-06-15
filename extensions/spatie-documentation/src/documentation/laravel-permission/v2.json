@@ -1,0 +1,106 @@
+{
+  "OVERVIEW": [
+    {
+      "title": "Introduction",
+      "url": "https://spatie.be/docs/laravel-permission/v2/introduction"
+    },
+    {
+      "title": "Support Us",
+      "url": "https://spatie.be/docs/laravel-permission/v2/support-us"
+    },
+    {
+      "title": "Prerequisites",
+      "url": "https://spatie.be/docs/laravel-permission/v2/prerequisites"
+    },
+    {
+      "title": "Installation in Laravel",
+      "url": "https://spatie.be/docs/laravel-permission/v2/installation-laravel"
+    },
+    {
+      "title": "Installation in Lumen",
+      "url": "https://spatie.be/docs/laravel-permission/v2/installation-lumen"
+    },
+    {
+      "title": "Upgrading",
+      "url": "https://spatie.be/docs/laravel-permission/v2/upgrading"
+    },
+    {
+      "title": "Questions and issues",
+      "url": "https://spatie.be/docs/laravel-permission/v2/questions-issues"
+    },
+    {
+      "title": "Changelog",
+      "url": "https://spatie.be/docs/laravel-permission/v2/changelog"
+    },
+    {
+      "title": "About us",
+      "url": "https://spatie.be/docs/laravel-permission/v2/about-us"
+    }
+  ],
+  "BASIC USAGE": [
+    {
+      "title": "Basic Usage",
+      "url": "https://spatie.be/docs/laravel-permission/v2/basic-usage/basic-usage"
+    },
+    {
+      "title": "Direct Permissions",
+      "url": "https://spatie.be/docs/laravel-permission/v2/basic-usage/direct-permissions"
+    },
+    {
+      "title": "Using Permissions via Roles",
+      "url": "https://spatie.be/docs/laravel-permission/v2/basic-usage/role-permissions"
+    },
+    {
+      "title": "Blade Directive",
+      "url": "https://spatie.be/docs/laravel-permission/v2/basic-usage/blade-directives"
+    },
+    {
+      "title": "Defining Super-Admin",
+      "url": "https://spatie.be/docs/laravel-permission/v2/basic-usage/super-admin"
+    },
+    {
+      "title": "Using Multiple Guards",
+      "url": "https://spatie.be/docs/laravel-permission/v2/basic-usage/multiple-guards"
+    },
+    {
+      "title": "Using Artisan Commands",
+      "url": "https://spatie.be/docs/laravel-permission/v2/basic-usage/artisan"
+    },
+    {
+      "title": "Using a Middleware",
+      "url": "https://spatie.be/docs/laravel-permission/v2/basic-usage/middleware"
+    }
+  ],
+  "BEST PRACTICES": [
+    {
+      "title": "Roles vs Permissions",
+      "url": "https://spatie.be/docs/laravel-permission/v2/best-practices/roles-vs-permissions"
+    },
+    {
+      "title": "Using Policies",
+      "url": "https://spatie.be/docs/laravel-permission/v2/best-practices/using-policies"
+    }
+  ],
+  "ADVANCED USAGE": [
+    {
+      "title": "Unit Testing",
+      "url": "https://spatie.be/docs/laravel-permission/v2/advanced-usage/unit-testing"
+    },
+    {
+      "title": "Database Seeding",
+      "url": "https://spatie.be/docs/laravel-permission/v2/advanced-usage/seeding"
+    },
+    {
+      "title": "Extending",
+      "url": "https://spatie.be/docs/laravel-permission/v2/advanced-usage/extending"
+    },
+    {
+      "title": "Cache",
+      "url": "https://spatie.be/docs/laravel-permission/v2/advanced-usage/cache"
+    },
+    {
+      "title": "Extending PhpStorm",
+      "url": "https://spatie.be/docs/laravel-permission/v2/advanced-usage/phpstorm"
+    }
+  ]
+}

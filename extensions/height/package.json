@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "height",
+  "title": "Height",
+  "description": "Search, create and manage tasks and lists in Height directly from Raycast.",
+  "icon": "height-app.png",
+  "author": "teziovsky",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search_lists",
+      "title": "Search Lists",
+      "subtitle": "Height",
+      "description": "Search lists by name with filter by specific type.",
+      "mode": "view"
+    },
+    {
+      "name": "create_list",
+      "title": "Create List",
+      "subtitle": "Height",
+      "description": "Create new list with specific type, hue and icon.",
+      "mode": "view"
+    },
+    {
+      "name": "search_tasks",
+      "title": "Search Tasks",
+      "subtitle": "Height",
+      "description": "Search tasks by name with filter by specific list.",
+      "mode": "view"
+    },
+    {
+      "name": "create_task",
+      "title": "Create Task",
+      "subtitle": "Height",
+      "description": "Create and assign new tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "assigned_tasks",
+      "title": "Assigned Tasks",
+      "subtitle": "Height",
+      "description": "Show all tasks that are assigned to someone.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiResultsLimit",
+      "title": "API Results Limit",
+      "description": "Limit the number of results returned by the API.",
+      "type": "dropdown",
+      "required": false,
+      "default": "100",
+      "data": [
+        {
+          "title": "100",
+          "value": "100"
+        },
+        {
+          "title": "200",
+          "value": "200"
+        },
+        {
+          "title": "300",
+          "value": "300"
+        },
+        {
+          "title": "400",
+          "value": "400"
+        },
+        {
+          "title": "500",
+          "value": "500"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.4",
+    "date-fns": "^3.3.1",
+    "lodash-es": "^4.17.21",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/lodash-es": "^4.17.12",
+    "@types/node": "20.11.19",
+    "@types/react": "18.2.55",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

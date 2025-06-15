@@ -1,0 +1,51 @@
+import { personalAccessToken } from "../preferences";
+import { Codespace } from "../types";
+import { default as nodeFetch } from "node-fetch";
+import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
+
+const handleRename = async ({
+  codespace,
+  name,
+}: {
+  codespace: Codespace;
+  name: string;
+}) => {
+  const toast = await showToast({
+    title: `Renaming to ${name}...`,
+    style: Toast.Style.Animated,
+  });
+  try {
+    const response = await nodeFetch(`${codespace.url}`, {
+      method: "PATCH",
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${personalAccessToken}`,
+      },
+      body: JSON.stringify({
+        display_name: name,
+      }),
+    });
+    if (response.status !== 200) {
+      const data = (await response.json()) as {
+        message: string;
+        documentation_url: string;
+      };
+      toast.style = Toast.Style.Failure;
+      toast.title = data.message;
+      toast.primaryAction = {
+        title: "Copy link to docs",
+        onAction: () => {
+          Clipboard.copy(data.documentation_url);
+        },
+      };
+    } else {
+      await toast.hide();
+      await showHUD("Name successfully changed");
+    }
+  } catch (error) {
+    console.log(error);
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to change name";
+  }
+};
+export default handleRename;

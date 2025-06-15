@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-search",
+  "title": "Google Search",
+  "description": "Google search with autosuggestions",
+  "icon": "command-icon.png",
+  "author": "mblode",
+  "contributors": [
+    "VBenny42",
+    "ridemountainpig",
+    "jlokos"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Google Search",
+      "description": "Google search with autosuggestions",
+      "mode": "view"
+    },
+    {
+      "name": "searchSelectText",
+      "title": "Google Search Selected Text",
+      "description": "Google search with selected text",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rememberSearchHistory",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Remember Search History",
+      "description": "Enable this checkbox to locally store Google search history."
+    },
+    {
+      "name": "useClipboardFallback",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Use Clipboard Fallback",
+      "description": "When no text is selected, fall back to using clipboard content for search."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "iconv-lite": "^0.6.3",
+    "nanoid": "^4.0.0",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

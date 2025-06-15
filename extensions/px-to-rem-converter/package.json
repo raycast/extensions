@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "px-to-rem-converter",
+  "title": "PX to Rem Converter",
+  "description": "Conversions between PX and REM",
+  "icon": "icon.png",
+  "author": "raulanatol",
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Convert PX to REM",
+      "description": "Conversions between PX and REM",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "basePixel",
+          "type": "textfield",
+          "required": false,
+          "title": "Base PX Value",
+          "description": "The conversion will be calculated based on this property. Default 16px",
+          "placeholder": "16"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.32.1"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.0",
+    "@types/react": "17.0.28",
+    "@typescript-eslint/eslint-plugin": "5.0.0",
+    "@typescript-eslint/parser": "5.0.0",
+    "eslint": "7.32.0",
+    "eslint-config-prettier": "8.3.0",
+    "prettier": "2.5.1",
+    "react-devtools": "4.19.2",
+    "typescript": "4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

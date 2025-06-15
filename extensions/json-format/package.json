@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "json-format",
+  "title": "Format JSON",
+  "description": "Formats a JSON file with a selected indentation. If the JSON is stringified, it will be parsed before formatting.",
+  "icon": "command-icon.png",
+  "author": "destiner",
+  "contributors": [
+    "Aayush9029",
+    "devlos",
+    "lachero",
+    "alexs",
+    "stelo",
+    "duranbe",
+    "nigelang",
+    "cl1107",
+    "andy_fase",
+    "kricsleo"
+  ],
+  "categories": [
+    "Data",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "formatClipboard",
+      "title": "Format Clipboard JSON",
+      "description": "Formats a JSON/JS Object string stored in clipboard and copies/pastes it back",
+      "mode": "no-view"
+    },
+    {
+      "name": "formatSelection",
+      "title": "Format Selected JSON",
+      "description": "Formats a JSON/JS Object string selected in the foremost editor and copies/pastes it back",
+      "mode": "no-view"
+    },
+    {
+      "name": "formatSelectionAndShow",
+      "title": "Format Selected JSON and Show",
+      "description": "Formats a JSON/JS Object string selected in the foremost editor and shows it in the viewer",
+      "mode": "view"
+    },
+    {
+      "name": "index",
+      "title": "Format JSON",
+      "description": "Formats a JSON/JS Object",
+      "mode": "view"
+    },
+    {
+      "name": "formatJsonLines",
+      "title": "Format Array of JSON to JSONLines",
+      "description": "Formats an array of JSON/JS Object to JSONLines",
+      "mode": "view"
+    },
+    {
+      "name": "formatToJsonValue",
+      "title": "Format Text into Valid JSON Value",
+      "description": "Formats text into a valid JSON value with double quotes and escapes",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "default": false,
+      "description": "Paste the formatted JSON to an active app",
+      "label": "Automatically paste the formatted JSON",
+      "name": "autopaste",
+      "required": false,
+      "title": "Auto Paste",
+      "type": "checkbox"
+    },
+    {
+      "data": [
+        {
+          "title": "Tab",
+          "value": "tab"
+        },
+        {
+          "title": "Spaces: 2",
+          "value": "2"
+        },
+        {
+          "title": "Spaces: 4",
+          "value": "4"
+        },
+        {
+          "title": "Spaces: 8",
+          "value": "8"
+        }
+      ],
+      "description": "Output file indentation",
+      "default": "tab",
+      "name": "indent",
+      "required": false,
+      "title": "Indentation",
+      "type": "dropdown"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.5",
+    "js-beautify": "^1.15.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/js-beautify": "^1.14.3",
+    "@types/node": "^22.5.0",
+    "@types/react": "^18.3.4",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}

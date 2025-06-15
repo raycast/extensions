@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "inbox-ai",
+  "title": "Inbox AI",
+  "description": "Trigger Inbox AI Actions",
+  "icon": "inbox-ai-icon.png",
+  "author": "dreetje",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "screenshot",
+      "title": "Take Screenshot",
+      "subtitle": "Inbox AI",
+      "description": "Trigger an action with screenshot input",
+      "mode": "view"
+    },
+    {
+      "name": "audio",
+      "title": "Record Audio",
+      "subtitle": "Inbox AI",
+      "description": "Trigger an action with audio input",
+      "mode": "view"
+    },
+    {
+      "name": "queue_selected_text",
+      "title": "Attach Selected Text",
+      "subtitle": "Inbox AI",
+      "description": "Queue an action with selected text",
+      "mode": "view"
+    },
+    {
+      "name": "queue_browser_content",
+      "title": "Attach Browser Content",
+      "subtitle": "Inbox AI",
+      "description": "Queue an action with browser content",
+      "mode": "view"
+    },
+    {
+      "name": "execute",
+      "title": "Execute",
+      "subtitle": "Inbox AI",
+      "description": "Execute an action with form input",
+      "mode": "view"
+    },
+    {
+      "name": "execute_selected_text",
+      "title": "Execute with Selected Text",
+      "subtitle": "Inbox AI",
+      "description": "Trigger an action with selected text",
+      "mode": "view"
+    },
+    {
+      "name": "execute_browser_content",
+      "title": "Execute with Browser Content",
+      "subtitle": "Inbox AI",
+      "description": "Trigger an action with browser content",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0",
+    "plist": "^3.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/plist": "^3.0.5",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

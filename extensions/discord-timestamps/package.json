@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "discord-timestamps",
+  "title": "Discord Timestamps",
+  "description": "Generate a Discord timestamp",
+  "icon": "command-icon.png",
+  "author": "theshadowdev",
+  "contributors": [
+    "feyli",
+    "hrueger"
+  ],
+  "categories": [
+    "Communication",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "timestamp",
+      "title": "Generate Discord Timestamp",
+      "description": "Generate a Discord timestamp",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ],
+      "default": "copy",
+      "description": "Set the default action",
+      "name": "defaultAction",
+      "required": false,
+      "title": "Default Action",
+      "type": "dropdown"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

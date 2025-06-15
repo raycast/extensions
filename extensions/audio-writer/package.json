@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "audio-writer",
+  "title": "Audio Writer",
+  "description": "Transcribe it, refine it and structure it for you ✨",
+  "icon": "audiowriter.png",
+  "author": "pradeepb28",
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-recording",
+      "title": "Start Recording",
+      "subtitle": "Audio Writer",
+      "description": "Voice to text transcript",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-my-transcripts",
+      "title": "Show My Transcripts",
+      "subtitle": "Audio Writer",
+      "description": "It shows list of transcripts in Audio Writer app.",
+      "mode": "no-view"
+    },
+    {
+      "name": "import-audio",
+      "title": "Import Audio To Transcribe",
+      "subtitle": "Audio Writer",
+      "description": "Import audio file from file browser to transcribe.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.0",
+    "open": "^10.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
