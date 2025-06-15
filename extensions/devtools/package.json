@@ -40,7 +40,7 @@
     },
     {
       "name": "uuid-generator",
-      "title": "Uuid Generator",
+      "title": "UUID Generator",
       "subtitle": "DevTools",
       "description": "Generate UUID v4 and v7",
       "mode": "view"
