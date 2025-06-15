@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Detail, LocalStorage, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { /* Detail ,*/ LocalStorage, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 import { findFFmpegPath } from "./utils/ffmpeg";
 import { HelloPage } from "./components/HelloPage";

@@ -58,7 +58,7 @@ export function Installation({ onInstallComplete, detectedFFmpegPath, lostFFmpeg
       showToast({
         style: Toast.Style.Failure,
         title: "Invalid FFmpeg binary",
-        message: "Could not execute the specified file as FFmpeg",
+        message: `Could not execute the specified file as FFmpeg: ${error}`,
       });
       return;
     }
@@ -77,11 +77,15 @@ export function Installation({ onInstallComplete, detectedFFmpegPath, lostFFmpeg
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Installing FFmpeg...",
-      message: "This may take a moment",
+      message: "0%",
     });
 
     try {
-      await installFFmpegBinary();
+      await installFFmpegBinary((progress: number) => {
+        // Update toast message with progress percentage
+        toast.message = `${progress}%`;
+      });
+
       await toast.hide();
       await showToast({ style: Toast.Style.Success, title: "FFmpeg installed successfully" });
       onInstallComplete();
@@ -104,12 +108,14 @@ export function Installation({ onInstallComplete, detectedFFmpegPath, lostFFmpeg
         <ActionPanel>
           {detectedFFmpegPath && (
             <Action
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Use Detected FFmpeg"
               onAction={handleDetectedPath}
               shortcut={{ modifiers: [], key: "return" }}
             />
           )}
           <Action
+            // eslint-disable-next-line @raycast/prefer-title-case
             title={isInstalling ? "Installing..." : "Auto-Install FFmpeg"}
             onAction={handleAutoInstall}
             shortcut={{ modifiers: detectedFFmpegPath ? ["cmd"] : [], key: "return" }}

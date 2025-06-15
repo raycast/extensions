@@ -2,7 +2,6 @@ import fs from "fs";
 import os from "os";
 import { LocalStorage, environment } from "@raycast/api";
 import { execPromise } from "../utils/exec";
-// @ts-ignore
 import * as ffmpegStatic from "./ffmpeg-static";
 
 export async function findFFmpegPath(): Promise<string | null> {
@@ -48,7 +47,7 @@ export async function findFFmpegPath(): Promise<string | null> {
   }
 }
 
-export async function installFFmpegBinary(): Promise<void> {
+export async function installFFmpegBinary(onProgress?: (progress: number) => void): Promise<void> {
   try {
     const downloadDir = environment.supportPath;
 
@@ -73,8 +72,8 @@ export async function installFFmpegBinary(): Promise<void> {
       // If binary doesn't exist, run the install process
       console.log("FFmpeg binary not found, running install process...");
 
-      // Use the installBinary function from ffmpeg-static
-      await ffmpegStatic.installBinary(downloadDir);
+      // Use the installBinary function from ffmpeg-static with progress callback
+      await ffmpegStatic.installBinary(downloadDir, onProgress);
     }
 
     // Check again after potential install
