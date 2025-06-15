@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ActionPanel, Action, Form } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 interface JWTPayload {
   [key: string]: unknown;
