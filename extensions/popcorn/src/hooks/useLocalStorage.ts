@@ -1,0 +1,278 @@
+import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { useState, useEffect } from "react";
+import { RecentMedia, WatchedEpisode, Media, Episode } from "../types";
+
+const STORAGE_KEYS = {
+  RECENT_MEDIA: "recent_media",
+  SEASON_SELECTIONS: "season_selections",
+  EPISODE_SELECTIONS: "episode_selections",
+  WATCHED_EPISODES: "watched_episodes",
+  LAST_SEARCH_TYPE: "last_search_type",
+};
+
+export function useLocalStorage() {
+  const [recentMedia, setRecentMedia] = useState<RecentMedia[]>([]);
+  const [watchedEpisodes, setWatchedEpisodes] = useState<WatchedEpisode[]>([]);
+
+  useEffect(() => {
+    loadLastSearchType();
+    loadRecentMedia();
+    loadWatchedEpisodes();
+  }, []);
+
+  const loadLastSearchType = async (): Promise<Media["type"]> => {
+    try {
+      const stored = await LocalStorage.getItem<string>("last_search_type");
+      return stored === "series" ? "series" : "movie";
+    } catch (error) {
+      console.error("Failed to load last search type:", error);
+      return "movie";
+    }
+  };
+
+  const saveLastSearchType = async (type: Media["type"]) => {
+    try {
+      await LocalStorage.setItem("last_search_type", type);
+    } catch (error) {
+      console.error("Failed to save last search type:", error);
+    }
+  };
+
+  const loadRecentMedia = async () => {
+    try {
+      const stored = await LocalStorage.getItem<string>(STORAGE_KEYS.RECENT_MEDIA);
+      if (stored) {
+        const parsed: RecentMedia[] = JSON.parse(stored);
+        setRecentMedia(
+          parsed.sort((a, b) => new Date(b.lastAccessedAt).getTime() - new Date(a.lastAccessedAt).getTime()),
+        );
+      }
+    } catch (error) {
+      console.error("Failed to load recent media:", error);
+    }
+  };
+
+  const loadWatchedEpisodes = async () => {
+    try {
+      const stored = await LocalStorage.getItem<string>(STORAGE_KEYS.WATCHED_EPISODES);
+      if (stored) {
+        const parsed: WatchedEpisode[] = JSON.parse(stored);
+        setWatchedEpisodes(parsed);
+      }
+    } catch (error) {
+      console.error("Failed to load watched episodes:", error);
+    }
+  };
+
+  const saveRecentMedia = async (media: Media) => {
+    try {
+      const existing = await LocalStorage.getItem<string>(STORAGE_KEYS.RECENT_MEDIA);
+      let recentList: RecentMedia[] = existing ? JSON.parse(existing) : [];
+
+      recentList = recentList.filter((item) => item.id !== media.id);
+
+      const recentMedia: RecentMedia = {
+        ...media,
+        lastAccessedAt: new Date().toISOString(),
+      };
+      recentList.unshift(recentMedia);
+      recentList = recentList.slice(0, 20);
+
+      await LocalStorage.setItem(STORAGE_KEYS.RECENT_MEDIA, JSON.stringify(recentList));
+      setRecentMedia(recentList);
+    } catch (error) {
+      console.error("Failed to save recent media:", error);
+    }
+  };
+
+  const saveSeasonSelection = async (mediaId: string, season: number) => {
+    try {
+      const existing = await LocalStorage.getItem<string>(STORAGE_KEYS.SEASON_SELECTIONS);
+      const selections: Record<string, number> = existing ? JSON.parse(existing) : {};
+      selections[mediaId] = season;
+      await LocalStorage.setItem(STORAGE_KEYS.SEASON_SELECTIONS, JSON.stringify(selections));
+    } catch (error) {
+      console.error("Failed to save season selection:", error);
+    }
+  };
+
+  const saveEpisodeSelection = async (mediaId: string, episodeId: string) => {
+    try {
+      const existing = await LocalStorage.getItem<string>(STORAGE_KEYS.EPISODE_SELECTIONS);
+      const selections: Record<string, string> = existing ? JSON.parse(existing) : {};
+      selections[mediaId] = episodeId;
+      await LocalStorage.setItem(STORAGE_KEYS.EPISODE_SELECTIONS, JSON.stringify(selections));
+    } catch (error) {
+      console.error("Failed to save episode selection:", error);
+    }
+  };
+
+  const markEpisodeAsWatched = async (episode: Episode, seriesId: string) => {
+    try {
+      const existing = await LocalStorage.getItem<string>(STORAGE_KEYS.WATCHED_EPISODES);
+      let watchedList: WatchedEpisode[] = existing ? JSON.parse(existing) : [];
+
+      watchedList = watchedList.filter((item) => item.episodeId !== episode.id);
+
+      const watchedEpisode: WatchedEpisode = {
+        episodeId: episode.id,
+        watchedAt: new Date().toISOString(),
+        seriesId: seriesId,
+        season: episode.season,
+        episode: episode.number,
+      };
+      watchedList.push(watchedEpisode);
+
+      await LocalStorage.setItem(STORAGE_KEYS.WATCHED_EPISODES, JSON.stringify(watchedList));
+      setWatchedEpisodes(watchedList);
+
+      showToast({
+        style: Toast.Style.Success,
+        title: "Marked as watched",
+        message: `${episode.name}`,
+      });
+    } catch (error) {
+      console.error("Failed to save watched episode:", error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to mark as watched",
+      });
+    }
+  };
+
+  const markEpisodeAsUnwatched = async (episode: Episode) => {
+    try {
+      const existing = await LocalStorage.getItem<string>(STORAGE_KEYS.WATCHED_EPISODES);
+      let watchedList: WatchedEpisode[] = existing ? JSON.parse(existing) : [];
+
+      watchedList = watchedList.filter((item) => item.episodeId !== episode.id);
+
+      await LocalStorage.setItem(STORAGE_KEYS.WATCHED_EPISODES, JSON.stringify(watchedList));
+      setWatchedEpisodes(watchedList);
+
+      showToast({
+        style: Toast.Style.Success,
+        title: "Marked as unwatched",
+        message: `${episode.name}`,
+      });
+    } catch (error) {
+      console.error("Failed to remove watched episode:", error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to mark as unwatched",
+      });
+    }
+  };
+
+  const markSeasonAsWatched = async (season: number, episodes: Episode[], seriesId: string) => {
+    try {
+      const existing = await LocalStorage.getItem<string>(STORAGE_KEYS.WATCHED_EPISODES);
+      let watchedList: WatchedEpisode[] = existing ? JSON.parse(existing) : [];
+
+      watchedList = watchedList.filter((item) => !(item.seriesId === seriesId && item.season === season));
+
+      const newWatchedEpisodes: WatchedEpisode[] = episodes.map((episode) => ({
+        episodeId: episode.id,
+        watchedAt: new Date().toISOString(),
+        seriesId: seriesId,
+        season: episode.season,
+        episode: episode.number,
+      }));
+
+      watchedList.push(...newWatchedEpisodes);
+
+      await LocalStorage.setItem(STORAGE_KEYS.WATCHED_EPISODES, JSON.stringify(watchedList));
+      setWatchedEpisodes(watchedList);
+
+      showToast({
+        style: Toast.Style.Success,
+        title: "Season marked as watched",
+        message: `Season ${season} (${episodes.length} episodes)`,
+      });
+    } catch (error) {
+      console.error("Failed to mark season as watched:", error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to mark season as watched",
+      });
+    }
+  };
+
+  const loadSeasonSelection = async (mediaId: string): Promise<number | null> => {
+    try {
+      const existing = await LocalStorage.getItem<string>(STORAGE_KEYS.SEASON_SELECTIONS);
+      const selections: Record<string, number> = existing ? JSON.parse(existing) : {};
+      return selections[mediaId] || null;
+    } catch (error) {
+      console.error("Failed to load season selection:", error);
+      return null;
+    }
+  };
+
+  const loadEpisodeSelection = async (mediaId: string): Promise<string | null> => {
+    try {
+      const existing = await LocalStorage.getItem<string>(STORAGE_KEYS.EPISODE_SELECTIONS);
+      const selections: Record<string, string> = existing ? JSON.parse(existing) : {};
+      return selections[mediaId] || null;
+    } catch (error) {
+      console.error("Failed to load episode selection:", error);
+      return null;
+    }
+  };
+
+  const isEpisodeWatched = (episodeId: string): boolean => {
+    return watchedEpisodes.some((watched) => watched.episodeId === episodeId);
+  };
+
+  const getWatchedCount = (seriesId: string, season?: number): number => {
+    return watchedEpisodes.filter(
+      (watched) => watched.seriesId === seriesId && (season !== undefined ? watched.season === season : true), // Changed from just `season` to `season !== undefined`
+    ).length;
+  };
+
+  const removeFromRecent = async (mediaId: string) => {
+    try {
+      const existing = await LocalStorage.getItem<string>(STORAGE_KEYS.RECENT_MEDIA);
+      let recentList: RecentMedia[] = existing ? JSON.parse(existing) : [];
+
+      recentList = recentList.filter((item) => item.id !== mediaId);
+
+      await LocalStorage.setItem(STORAGE_KEYS.RECENT_MEDIA, JSON.stringify(recentList));
+      setRecentMedia(recentList);
+    } catch (error) {
+      console.error("Failed to remove from recent:", error);
+    }
+  };
+
+  const clearRecentItems = async () => {
+    await LocalStorage.removeItem(STORAGE_KEYS.RECENT_MEDIA);
+    await LocalStorage.removeItem(STORAGE_KEYS.SEASON_SELECTIONS);
+    await LocalStorage.removeItem(STORAGE_KEYS.EPISODE_SELECTIONS);
+    setRecentMedia([]);
+  };
+
+  const clearWatchHistory = async () => {
+    await LocalStorage.removeItem(STORAGE_KEYS.WATCHED_EPISODES);
+    setWatchedEpisodes([]);
+  };
+
+  return {
+    loadLastSearchType,
+    saveLastSearchType,
+    recentMedia,
+    watchedEpisodes,
+    saveRecentMedia,
+    saveSeasonSelection,
+    saveEpisodeSelection,
+    markEpisodeAsWatched,
+    markEpisodeAsUnwatched,
+    markSeasonAsWatched,
+    loadSeasonSelection,
+    loadEpisodeSelection,
+    isEpisodeWatched,
+    getWatchedCount,
+    removeFromRecent,
+    clearRecentItems,
+    clearWatchHistory,
+  };
+}
