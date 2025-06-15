@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
 interface TermsAcknowledgementProps {
@@ -59,11 +59,7 @@ This extension is designed to help you discover and organize media content. Plea
       markdown={termsMarkdown}
       actions={
         <ActionPanel>
-          <Action
-            title="Accept & Continue"
-            icon={Icon.Checkmark}
-            onAction={handleAccept}
-          />
+          <Action title="Accept & Continue" icon={Icon.Checkmark} onAction={handleAccept} />
         </ActionPanel>
       }
     />
