@@ -44,27 +44,24 @@
 					]
 				},
 				{
-					"label": "Project id",
 					"type": "textfield",
-					"title": "Project id",
+					"title": "Project ID",
 					"name": "project_id",
 					"description": "Mixpanel project id",
 					"required": true,
 					"placeholder": "0000000"
 				},
 				{
-					"label": "Service account",
 					"type": "textfield",
-					"title": "Service account",
+					"title": "Service Account",
 					"name": "service_account",
 					"description": "Service account username",
 					"required": true,
 					"placeholder": "X.xxxxxx.xx-service-account"
 				},
 				{
-					"label": "Service account secret",
 					"type": "password",
-					"title": "Service account secret",
+					"title": "Service Account Secret",
 					"name": "service_account_secret",
 					"description": "Service account secret",
 					"required": true,
