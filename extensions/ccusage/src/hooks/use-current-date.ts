@@ -5,7 +5,7 @@ export const useCurrentDate = (): {
   isLoading: boolean;
   error: Error | undefined;
 } => {
-  const { data: rawData, isLoading, error } = useExec("date", ["-I"]);
+  const { data: rawData, isLoading, error } = useExec("date", ["+%Y-%m-%d"]);
 
   let data: string | null = null;
 
