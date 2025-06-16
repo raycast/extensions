@@ -70,7 +70,7 @@ export type Server = {
 export type SshKeyResource = {
   id: number;
   name: string;
-}
+};
 
 export type ISOImageResource = {
   id: number;
@@ -87,11 +87,11 @@ type IconResource = {
   icon: IconResource;
   url: string;
   type: "os" | "application";
-}
+};
 type OsImageVersionResource = {
   id: number;
   version: string;
-}
+};
 export type OsImageResource = {
   id: number;
   name: string;
@@ -99,7 +99,7 @@ export type OsImageResource = {
   versions: OsImageVersionResource[];
   is_default: boolean;
   is_visible: boolean;
-}
+};
 
 export type SnapshotResource = {
   id: number;
@@ -107,7 +107,7 @@ export type SnapshotResource = {
   size: number;
   status: string;
   created_at: string;
-}
+};
 
 export type ApplicationResource = Exclude<OsImageResource, "versions">;
 

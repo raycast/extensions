@@ -1,12 +1,16 @@
 # SolusVM 2 Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Snapshots, Member Invites, Reinstall Server] - {PR_MERGE_DATE}
 
-- snapshtos
-- reinstaall serer
-- resend member invite
-- remooe memeber
-- placeholder in api prerference
+- In Servers:
+    - Reinstall Server (**Application** or **Operating System**)
+    - View Snapshots
+        - Create Snapshot
+        - Remove Snapshot
+- In Members:
+    - Invite Member
+        - Resend Invite
+    - Remove Member
 
 ## [Initial Version] - 2025-05-30
 
