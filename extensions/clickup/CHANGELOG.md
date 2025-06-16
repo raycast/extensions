@@ -1,6 +1,6 @@
 # ClickUp Changelog
 
-## [Create Task Without Priority] - {PR_MERGE_DATE}
+## [Create Task Without Priority] - 2025-06-16
 
 - Add "Open in ClickUp" Action to many views allowing you to open the relevant item in Browser
 - Change Priority Icons in "Capture" to Flags to match ClickUp UI
