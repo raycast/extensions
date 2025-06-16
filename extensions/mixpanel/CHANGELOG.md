@@ -1,6 +1,6 @@
 # Mixpanel Changelog
 
-## [Support All Server Regions] - {PR_MERGE_DATE}
+## [Support All Server Regions] - 2025-06-16
 
 - Update logo
 - Add "Server Region" **Preference** allowing to choose from EU, India, Standard
