@@ -91,7 +91,7 @@ export function StreamList({
                   <Action.Open
                     title={`Open in ${defaultStreamingApp.name}`}
                     target={stream.url}
-                    application={defaultStreamingApp}
+                    application={defaultStreamingApp.path}
                     icon={Icon.Play}
                   />
                   {streamingAppsArray.map((app: Application) => (
@@ -99,7 +99,7 @@ export function StreamList({
                       key={`${app.bundleId}`}
                       title={`Open in ${app.name}`}
                       target={stream.url}
-                      application={`${app.bundleId}`}
+                      application={`${app.path}`}
                       icon={Icon.Play}
                     />
                   ))}
