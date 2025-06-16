@@ -250,6 +250,7 @@
 /extensions/chinese-numbers                                         @raffeyang
 /extensions/choose-a-license                                        @sandypockets @Aayush9029
 /extensions/chords-and-tabs                                         @BossElijah
+/extensions/chronometer                                             @mandrade2
 /extensions/chuck-norris-facts                                      @jorgecortesdev
 /extensions/cider                                                   @feyli
 /extensions/cidr                                                    @Yansongsongsong
@@ -818,6 +819,7 @@
 /extensions/image-diff-checker                                      @yasuhiro-yamamoto
 /extensions/image-flow                                              @godruoyi
 /extensions/image-host                                              @SuleymanEfe
+/extensions/image-search                                            @talhabalaj
 /extensions/image-to-ascii                                          @ridemountainpig
 /extensions/image-wallet                                            @ibll
 /extensions/imagekit-uploader                                       @ludafa
