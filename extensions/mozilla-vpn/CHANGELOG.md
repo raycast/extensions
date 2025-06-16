@@ -1,6 +1,6 @@
 # Mozilla VPN Connect Changelog
 
-## [Icon Fix] - {PR_MERGE_DATE}
+## [Icon Fix] - 2025-06-16
 - Icon was named incorrectly
 - Fixed a possible vulnerability
 - updated Changelog
