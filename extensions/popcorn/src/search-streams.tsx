@@ -184,7 +184,6 @@ export default function Command() {
     />
   );
 }
-
 function EpisodesView({
   media,
   api,
@@ -208,6 +207,9 @@ function EpisodesView({
       if (lastSeason) {
         setSelectedSeason(lastSeason.toString());
       }
+
+      const watchedFilter = await storage.loadWatchedFilter();
+      setShowWatchedFilter(watchedFilter);
     })();
   }, []);
 
@@ -221,6 +223,11 @@ function EpisodesView({
     if (season !== "all") {
       await storage.saveSeasonSelection(media.id, parseInt(season));
     }
+  };
+
+  const handleWatchedFilterChange = async (filter: "all" | "watched" | "unwatched") => {
+    setShowWatchedFilter(filter);
+    await storage.saveWatchedFilter(filter);
   };
 
   return (
@@ -238,7 +245,7 @@ function EpisodesView({
       markSeasonAsWatched={storage.markSeasonAsWatched}
       onEpisodeSelect={handleEpisodeSelection}
       onSeasonChange={handleSeasonChange}
-      onWatchedFilterChange={setShowWatchedFilter}
+      onWatchedFilterChange={handleWatchedFilterChange}
       onConfigure={() => openCommandPreferences()}
     />
   );

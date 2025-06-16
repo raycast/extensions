@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   WATCHED_EPISODES: "watched_episodes",
   LAST_SEARCH_TYPE: "last_search_type",
   TERMS_ACCEPTED: "terms_accepted",
+  WATCHED_FILTER: "watched_filter",
 };
 
 export function useLocalStorage() {
@@ -226,6 +227,24 @@ export function useLocalStorage() {
     }
   };
 
+  const loadWatchedFilter = async (): Promise<"all" | "watched" | "unwatched"> => {
+    try {
+      const stored = await LocalStorage.getItem<string>(STORAGE_KEYS.WATCHED_FILTER);
+      return (stored as "all" | "watched" | "unwatched") || "all";
+    } catch (error) {
+      console.error("Failed to load watched filter:", error);
+      return "all";
+    }
+  };
+
+  const saveWatchedFilter = async (filter: "all" | "watched" | "unwatched") => {
+    try {
+      await LocalStorage.setItem(STORAGE_KEYS.WATCHED_FILTER, filter);
+    } catch (error) {
+      console.error("Failed to save watched filter:", error);
+    }
+  };
+
   const loadSeasonSelection = async (mediaId: string): Promise<number | null> => {
     try {
       const existing = await LocalStorage.getItem<string>(STORAGE_KEYS.SEASON_SELECTIONS);
@@ -295,6 +314,8 @@ export function useLocalStorage() {
     markEpisodeAsWatched,
     markEpisodeAsUnwatched,
     markSeasonAsWatched,
+    loadWatchedFilter,
+    saveWatchedFilter,
     loadSeasonSelection,
     loadEpisodeSelection,
     isEpisodeWatched,
