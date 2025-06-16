@@ -14,7 +14,6 @@
     {
       "name": "download-instagram-media",
       "title": "Download Instagram Media",
-      "subtitle": "Download post and reels",
       "description": "Download Instagram post and reels with URL",
       "mode": "no-view",
       "arguments": [
@@ -30,7 +29,6 @@
     {
       "name": "download-instagram-story",
       "title": "Download Instagram Story",
-      "subtitle": "Download story",
       "description": "Download Instagram story with URL",
       "mode": "no-view",
       "arguments": [
@@ -46,7 +44,6 @@
     {
       "name": "download-instagram-highlight-story",
       "title": "Download Instagram Highlight Story",
-      "subtitle": "Download highlight story",
       "description": "Download Instagram highlight story with URL",
       "mode": "view",
       "arguments": [
