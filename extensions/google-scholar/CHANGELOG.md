@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.1] - {PR_MERGE_DATE}
+## [2.0.1] - 2025-06-16
 
 Add new images for metadata and remove old ones
 
