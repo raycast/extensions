@@ -1,8 +1,9 @@
-import { confirmAlert, getSelectedFinderItems, showToast, Toast, open, showHUD } from "@raycast/api";
+import { confirmAlert, getSelectedFinderItems, showToast, Toast, open, showHUD, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import fse from "fs-extra";
 import { log } from "./utils";
+import { SpotlightSearchPreferences } from "./types";
 
 export async function moveFinderItems(
   destinationFolder: string,
@@ -12,6 +13,9 @@ export async function moveFinderItems(
       destinationFolder,
       timestamp: new Date().toISOString(),
     });
+
+    // Get preferences
+    const { openFolderAfterMove } = getPreferenceValues<SpotlightSearchPreferences>();
 
     // Try to get selected items - this will throw if Finder isn't frontmost
     let selectedItems;
@@ -154,6 +158,21 @@ export async function moveFinderItems(
       log("debug", "moveFinderItems", "Success HUD shown", {
         timestamp: new Date().toISOString(),
       });
+
+      // Only open the folder if the preference is enabled
+      if (openFolderAfterMove) {
+        log("debug", "moveFinderItems", "Opening destination folder", {
+          destinationFolder,
+          timestamp: new Date().toISOString(),
+        });
+        open(destinationFolder);
+      } else {
+        log("debug", "moveFinderItems", "Skipping folder open due to preference", {
+          destinationFolder,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
       return { success: true, movedCount, skippedCount };
     }
 
