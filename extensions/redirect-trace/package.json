@@ -32,11 +32,12 @@
     },
     {
       "name": "timeout",
-      "type": "textfield",
+      "type": "number",
       "required": false,
       "title": "Timeout (ms)",
       "description": "Request timeout in milliseconds",
-      "default": "5000"
+      "default": "5000",
+      "minimum": 1000
     }
   ],
   "dependencies": {
