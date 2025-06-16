@@ -2,7 +2,9 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
-- Fix for `Search Tabs` command: allows the components that display the tab list to re-render when device data changes.
+- Fixes for `Search Tabs` command:
+  - allows the components that display the tab list to re-render when device data changes.
+  - allows the obtention of the local tabs even when the `areRemoteTabsUsed` ("iCloud devices" option) is set to `false`.
 
 ## [Update] - 2025-05-19
 

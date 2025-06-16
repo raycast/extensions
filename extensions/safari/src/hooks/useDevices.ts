@@ -86,6 +86,8 @@ export default function useDevices() {
 
       setDevices([localDevice, ...remoteDevices]);
       permissionView.current = remoteTabs.permissionView || null;
+    } else {
+      setDevices([localDevice]);
     }
   }, [localTabs.data, remoteTabs.data, deviceName]);
 
