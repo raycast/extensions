@@ -3,7 +3,7 @@
   "name": "redirect-trace",
   "title": "Redirect Trace",
   "description": "Developer tool to trace URL redirects and analyze redirect chains. Perfect for debugging, SEO analysis, and checking shortened URLs.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "icon": "extension-icon.png",
   "author": "nurkamol",
   "categories": [
