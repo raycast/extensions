@@ -1,0 +1,24 @@
+# run app in dev mode
+run:
+  npm run dev
+# install project and dependiencies
+install:
+  npm i
+
+alias i := install
+
+# build project 
+build: 
+  npm run build
+
+# run lint for project
+lint: 
+  npm run lint
+
+# run lint with --fix parameter
+fix:
+  npm run lint --fix
+
+# publishes extension to store
+publish:
+  npm run publish
