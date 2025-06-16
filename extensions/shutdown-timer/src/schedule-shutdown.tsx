@@ -36,20 +36,27 @@ export default function Command() {
         return !isNaN(Number(string));
       });
 
+      const units = input.map((string) => {
+        if (/\d/.test(string)) {
+          const match = string.match(/\d+/);
+          if (match) {
+            numbers.push(match[0]);
+            console.log(string.replace(/\d+/, ""));
+          }
+        }
+        return string.replace(/\d+/, "");
+      });
       if (numbers.length <= 0) {
         err = "Missing Time";
       }
 
-      const units = input.filter((string) => {
-        return isNaN(Number(string));
-      });
-
+      console.log(numbers, units);
       numbers.forEach(async (value, index) => {
         const number = Number(value);
         if (units[index]) {
-          if (units[index].toLowerCase().startsWith("sec")) {
+          if (units[index].toLowerCase().startsWith("s")) {
             timer += number; // seconds
-          } else if (units[index].toLowerCase().startsWith("min")) {
+          } else if (units[index].toLowerCase().startsWith("m")) {
             timer += number * 60; // minutes -> seconds
           } else if (units[index].toLowerCase().startsWith("h")) {
             timer += number * 60 * 60; // hours -> seconds
@@ -131,7 +138,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Set Time Here" {...itemProps.input} placeholder="<h/hours> <min/minutes> <sec/seconds>" />
+      <Form.TextField title="Set Time Here" {...itemProps.input} placeholder="<h/hours> <m/minutes> <s/seconds>" />
       <Form.Description text={`If you only want one unit, just use on their own. The maximum time is 15 hours`} />
       <Form.Dropdown title="Instruction" {...itemProps.instruction}>
         <Form.Dropdown.Item value="shut down" title="Shut down PC" />
