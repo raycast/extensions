@@ -49,7 +49,6 @@ export default function ViewAlertsCommand(props: ViewAlertsCommandProps = {}) {
 
   // Store current filter state locally within this instance
   const [filterLines] = useState<string[] | undefined>(initialFilterLines); // Keep initial line filter
-  const [filterActive] = useState<boolean>(true); // Use initial active filter
 
   // Callback to fetch and update CACHE with RAW data
   const loadAlerts = useCallback(
