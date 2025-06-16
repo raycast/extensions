@@ -13,8 +13,16 @@ export default function ContainerList(props: { projectFilter?: string }) {
   const dockerState = useDocker(docker);
   const { useContainers } = dockerState;
 
-  const { containers, isLoading, error, startContainer, restartContainer, stopContainer, removeContainer } =
-    useContainers();
+  const {
+    containers,
+    isLoading,
+    error,
+    startContainer,
+    restartContainer,
+    stopContainer,
+    removeContainer,
+    stopAndRemoveContainer,
+  } = useContainers();
 
   if (error) {
     return <ErrorDetail error={error} />;
@@ -87,17 +95,32 @@ export default function ContainerList(props: { projectFilter?: string }) {
                   shortcut={{ modifiers: ['cmd'], key: 'i' }}
                   target={<ContainerDetail docker={dockerState} containerId={containerInfo.Id} />}
                 />
-                <Action
-                  title="Remove Container"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  shortcut={Keyboard.Shortcut.Common.Remove}
-                  onAction={withToast({
-                    action: () => removeContainer(containerInfo),
-                    onSuccess: () => `Container ${cName} removed`,
-                    onFailure: (error) => formatContainerError(error, containerInfo),
-                  })}
-                />
+                {!isContainerRunning(containerInfo) && (
+                  <Action
+                    title="Remove Container"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    onAction={withToast({
+                      action: () => removeContainer(containerInfo),
+                      onSuccess: () => `Container ${cName} removed`,
+                      onFailure: (error) => formatContainerError(error, containerInfo),
+                    })}
+                  />
+                )}
+                {isContainerRunning(containerInfo) && (
+                  <Action
+                    title="Stop and Remove Container"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    onAction={withToast({
+                      action: () => stopAndRemoveContainer(containerInfo),
+                      onSuccess: () => `Container ${cName} stopped and removed`,
+                      onFailure: (error) => formatContainerError(error, containerInfo),
+                    })}
+                  />
+                )}
               </ActionPanel>
             }
           />

@@ -1,5 +1,10 @@
 # HetrixTools Changelog
 
+## [View Status Pages] - 2025-06-11
+
+- New "Status Pages" command shows you status pages with basic info
+- Modernize extension to use latest Raycast config
+
 ## [View Contact Lists] - 2025-01-26
 
 - New "View Contact Lists" command shows you contact lists with basic info
