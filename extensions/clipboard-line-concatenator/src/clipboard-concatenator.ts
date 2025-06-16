@@ -15,7 +15,7 @@ export default async function Command(props: { arguments: Arguments }) {
   }
 
   let clipboardText: string | undefined;
-  
+
   try {
     clipboardText = await Clipboard.readText();
   } catch (error) {
@@ -26,19 +26,19 @@ export default async function Command(props: { arguments: Arguments }) {
     });
     return;
   }
-  
+
   if (!clipboardText) {
     return;
   }
-  
+
   const lines = clipboardText.split("\n");
-  
+
   const modifiedLines = lines.map((line) => prefix + line + suffix);
-  
+
   const modifiedText = modifiedLines.join("\n");
-  
+
   await Clipboard.copy(modifiedText);
-  
+
   await showToast({
     style: Toast.Style.Success,
     title: "Text appended to clipboard content",
