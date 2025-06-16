@@ -1,3 +1,3 @@
-# Clipboard Line Appender Changelog
+# Clipboard Concatenator
 
 ## [Initial Version] - {PR_MERGE_DATE}

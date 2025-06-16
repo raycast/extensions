@@ -1,3 +1,3 @@
-# Clipboard Line Appender
+# Clipboard Concatenator
 
-Appends or prepends a character to each line of the current clipboard entry.
+Concatenates text by appending or prepending a character to EACH line of the current clipboard entry.
