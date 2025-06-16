@@ -141,7 +141,7 @@ function SearchListItem({ refreshModels, searchResult }: { refreshModels: () => 
             <Action.CopyToClipboard
               title="Copy Model URL"
               content={url}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
             {searchResult.hugging_face_id && (
               <Action.OpenInBrowser
