@@ -1,6 +1,6 @@
 # Xcode Changelog
 
-## [AI Tools & Improved Search Recent Projects] - {PR_MERGE_DATE}
+## [AI Tools & Improved Search Recent Projects] - 2025-06-16
 
 - Added AI tools to search for your recent Xcode projects, Swift packages, boot and shutdown simulators, and more.
 - Improved the "Search Recent Projects" command to sort the most recent projects by their last usage.
