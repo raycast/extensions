@@ -29,13 +29,15 @@ export function ArcTabList(props: { notebookService: NotebookService; notebook: 
 
   useEffect(() => {
     const unsubLoading = notebookService.subscribe("loading", (data) => {
-      if (data.scope === "tabList") {
+      if (data && "scope" in data && data.scope === "tabList" && "status" in data) {
         setLoading(data.status);
       }
     });
 
-    const unsubTabList = notebookService.subscribe("tabListUpdated", (updatedTabList: TabList) => {
-      setTabList(updatedTabList);
+    const unsubTabList = notebookService.subscribe("tabListUpdated", (data) => {
+      if (data && "tabList" in data) {
+        setTabList(data.tabList as TabList);
+      }
     });
 
     return () => {
@@ -156,13 +158,15 @@ export function OthersTabList(props: { notebookService: NotebookService; noteboo
 
   useEffect(() => {
     const unsubLoading = notebookService.subscribe("loading", (data) => {
-      if (data.scope === "tabList") {
+      if (data && "scope" in data && data.scope === "tabList" && "status" in data) {
         setLoading(data.status);
       }
     });
 
-    const unsubTabList = notebookService.subscribe("tabListUpdated", (updatedTabList: TabList) => {
-      setTabList(updatedTabList);
+    const unsubTabList = notebookService.subscribe("tabListUpdated", (data) => {
+      if (data && "tabList" in data) {
+        setTabList(data.tabList as TabList);
+      }
     });
 
     return () => {

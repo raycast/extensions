@@ -13,13 +13,13 @@ export function SourceDetail({ summaryService, source }: { summaryService: Summa
 
   useEffect(() => {
     const unsubLoading = summaryService.subscribe("loading", (data) => {
-      if (data.scope === "detail" && data.sourceId === source.id) {
+      if (data && "scope" in data && data.scope === "detail" && data.sourceId === source.id) {
         setLoading(data.status);
       }
     });
 
     const unsubSummary = summaryService.subscribe("summaryUpdated", (data) => {
-      if (data.sourceId === source.id) {
+      if (data && "sourceId" in data && data.sourceId === source.id && "content" in data) {
         setSummary(data.content);
       }
     });
