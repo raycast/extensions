@@ -52,12 +52,6 @@
       "mode": "view"
     },
     {
-      "name": "users",
-      "title": "Users",
-      "description": "",
-      "mode": "view"
-    },
-    {
       "name": "websites",
       "title": "Websites",
       "description": "",
@@ -65,24 +59,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.73.2",
-    "@raycast/utils": "^1.15.0",
-    "@umami/api-client": "^0.64.0",
-    "isomorphic-fetch": "^3.0.0"
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.0",
+    "@umami/api-client": "^0.79.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.3.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -2,56 +2,67 @@ import { Action, ActionPanel, Alert, Color, Form, Icon, List, confirmAlert } fro
 import { umami } from "./lib/umami";
 import useUmami from "./lib/useUmami";
 import { AddWebsiteFormValues, UmamiWebsite } from "./lib/types";
-import { FormValidation, getFavicon, useForm } from "@raycast/utils";
+import { FormValidation, getFavicon, useCachedPromise, useForm } from "@raycast/utils";
 import { useState } from "react";
+import WithUmami from "./components/WithUmami";
 
-export default function Websites() {
-    const { isLoading, data } = useUmami<UmamiWebsite[]>(umami.getWebsites());
+export default function Main() {
+return <WithUmami>
+        <Websites />
+    </WithUmami>
+}
+    
+function Websites() {
+    const { isLoading, data: websites = [] } = useCachedPromise(async () => {
+        const {ok,error, data} = await umami.getWebsites();
+        if (!ok) throw new Error(error);
+        return data?.data;
+    })
 
     const [del, setDel] = useState("");
     const { isLoading: isDeleting, data: deleteData, revalidate: deleteWebsite } = useUmami(umami.deleteWebsite(del), { execute: false })
 
-    async function confirmAndDelete(website: UmamiWebsite) {
-        const options: Alert.Options = {
-            icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
-            title: `Delete ${website.name}?`,
-            message: `All website data will be deleted.`,
-            primaryAction: {
-                title: 'Delete',
-                style: Alert.ActionStyle.Destructive,
-                onAction: async () => {
-                    setDel(website.id);
-                    await deleteWebsite();
-                    // try {
-                    //     setIsDeleting(true);
-                    //     await showToast({
-                    //     title: `Deleting ${record.type} record`,
-                    //     style: Toast.Style.Animated,
-                    //     });
-                    //     await api.deleteDNSRecord(domain.id, record.id);
-                    //     await showToast({
-                    //     title: `Deleted ${record.type} record`,
-                    //     });
-                    //     revalidate();
-                    // } catch (e) {
-                    //     handleNetworkError(e);
-                    // } finally {
-                    //     setIsDeleting(false);
-                    // }
-                },
-            },
-        };
-        await confirmAlert(options);
-    }
+    // async function confirmAndDelete(website: UmamiWebsite) {
+    //     const options: Alert.Options = {
+    //         icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
+    //         title: `Delete ${website.name}?`,
+    //         message: `All website data will be deleted.`,
+    //         primaryAction: {
+    //             title: 'Delete',
+    //             style: Alert.ActionStyle.Destructive,
+    //             onAction: async () => {
+    //                 setDel(website.id);
+    //                 await deleteWebsite();
+    //                 // try {
+    //                 //     setIsDeleting(true);
+    //                 //     await showToast({
+    //                 //     title: `Deleting ${record.type} record`,
+    //                 //     style: Toast.Style.Animated,
+    //                 //     });
+    //                 //     await api.deleteDNSRecord(domain.id, record.id);
+    //                 //     await showToast({
+    //                 //     title: `Deleted ${record.type} record`,
+    //                 //     });
+    //                 //     revalidate();
+    //                 // } catch (e) {
+    //                 //     handleNetworkError(e);
+    //                 // } finally {
+    //                 //     setIsDeleting(false);
+    //                 // }
+    //             },
+    //         },
+    //     };
+    //     await confirmAlert(options);
+    // }
 
     return <List isLoading={isLoading}>
-        {data && !data.length && <List.EmptyView title="Add your website to get started." icon="placeholder.png" actions={<ActionPanel>
+        {websites && !websites.length && <List.EmptyView title="Add your website to get started." icon="placeholder.png" actions={<ActionPanel>
             <Action.Push title="Add Website" icon={Icon.Plus} target={<AddWebsite />} />
         </ActionPanel>} />}
-        {data?.map(website => <List.Item key={website.id} title={website.name} subtitle={website.domain} accessories={[
-            { date: website.updatedAt ? new Date(website.updatedAt) : undefined }
-        ]} icon={getFavicon(website.domain)} actions={<ActionPanel>
-            <Action title="Delete Website" icon={Icon.DeleteDocument} style={Action.Style.Destructive} onAction={() => confirmAndDelete(website)} />
+        {websites.map(website => <List.Item key={website.id} icon={getFavicon(`https://${website.domain}`)} title={website.name} subtitle={website.domain} accessories={[
+            // { date: website.updatedAt ? new Date(website.updatedAt) : undefined }
+        ]} actions={<ActionPanel>
+            {/* <Action title="Delete Website" icon={Icon.DeleteDocument} style={Action.Style.Destructive} onAction={() => confirmAndDelete(website)} /> */}
             <Action.Push title="Add Website" icon={Icon.Plus} target={<AddWebsite />} />
         </ActionPanel>} />)}
     </List>

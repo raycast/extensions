@@ -1,4 +1,3 @@
-require("isomorphic-fetch");
 import { getPreferenceValues } from "@raycast/api";
 import { getClient } from "@umami/api-client";
 
