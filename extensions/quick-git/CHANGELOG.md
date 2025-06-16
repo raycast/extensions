@@ -1,6 +1,6 @@
 # Quick Git Changelog
 
-## [Diffs and deletes] - {PR_MERGE_DATE}
+## [Diffs and deletes] - 2025-06-16
 
 View the diff for a file that you have changed, and make it easier to delete and push branches.
 
