@@ -1,4 +1,12 @@
-import { confirmAlert, getSelectedFinderItems, showToast, Toast, open, showHUD, getPreferenceValues } from "@raycast/api";
+import {
+  confirmAlert,
+  getSelectedFinderItems,
+  showToast,
+  Toast,
+  open,
+  showHUD,
+  getPreferenceValues,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import fse from "fs-extra";
