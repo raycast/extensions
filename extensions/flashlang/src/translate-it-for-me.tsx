@@ -246,7 +246,11 @@ export default function TranslateItForMe() {
               />
             </ActionPanel>
           }
-          detail={<List.Item.Detail markdown={`> ${item.vocabulary}` + `\n ${history[item.vocabulary] || ""}`} />}
+          detail={
+            <List.Item.Detail
+              markdown={`> ${item.vocabulary}\n\n${history[item.vocabulary] || "*Press Enter to translate*"}`}
+            />
+          }
         />
       );
     },
