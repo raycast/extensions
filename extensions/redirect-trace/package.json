@@ -22,11 +22,13 @@
   "preferences": [
     {
       "name": "maxRedirects",
-      "type": "textfield",
+      "type": "number",
       "required": false,
       "title": "Max Redirects",
       "description": "Maximum number of redirects to follow",
-      "default": "10"
+      "default": "10",
+      "minimum": 1,
+      "maximum": 50
     },
     {
       "name": "timeout",
