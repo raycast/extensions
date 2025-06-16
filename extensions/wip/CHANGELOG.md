@@ -1,6 +1,6 @@
 # WIP Changelog
 
-## [Improved authentication error handling] - {PR_MERGE_DATE}
+## [Improved authentication error handling] - 2025-06-16
 
 - Improve authentication error handling
 
