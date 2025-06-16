@@ -60,8 +60,8 @@ export function DeleteSource({
                         title: "Delete",
                         style: Alert.ActionStyle.Destructive,
                         onAction: async () => {
+                          notebookService.delSources(selectedSources);
                           pop();
-                          await notebookService.delSources(selectedSources);
                         },
                       },
                     });

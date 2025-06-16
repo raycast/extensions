@@ -45,9 +45,9 @@ export default function Command() {
   return (
     <List isLoading={isLoading} navigationTitle={`NotebookLM (${notebooks.length}/50)`}>
       {notebooks.length > 0 ? (
-        notebooks.map((notebook: Notebook, index: number) => (
+        notebooks.map((notebook: Notebook) => (
           <List.Item
-            key={index}
+            key={notebook.id}
             icon={notebook.icon}
             title={{ value: notebook.title || "Untitled Notebook", tooltip: notebook.created_at }}
             accessories={[

@@ -59,8 +59,8 @@ export function DeleteNotebook({ notebookService }: { notebookService: NotebookS
                         title: "Delete",
                         style: Alert.ActionStyle.Destructive,
                         onAction: async () => {
+                          notebookService.delNotebooks(selectedNotebooks);
                           pop();
-                          await notebookService.delNotebooks(selectedNotebooks);
                         },
                       },
                     });

@@ -31,6 +31,8 @@ export class ArcBrowserDriver implements IBrowserDriver {
             try
               set notebookLMTabID to id of active tab of front window
               set gotID to true
+            on error
+              delay 0.1
             end try
           end repeat
           

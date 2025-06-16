@@ -7,7 +7,7 @@ let driverInstance: IBrowserDriver | null = null;
 let notebookServiceInstance: NotebookService | null = null;
 let summaryServiceInstance: SummaryService | null = null;
 
-const BroswerList = {
+const BrowserDriverList = {
   Arc: ArcBrowserDriver,
 };
 
@@ -15,10 +15,10 @@ function getDriver(): IBrowserDriver {
   if (driverInstance) {
     return driverInstance;
   }
-  if (BrowserList[Browser]) {
-    driverInstance = new BroswerList[Browser]();
+  if (BrowserList[Browser] && BrowserDriverList[Browser]) {
+    driverInstance = new BrowserDriverList[Browser]();
   } else {
-    driverInstance = new BroswerList["Arc"]();
+    driverInstance = new BrowserDriverList["Arc"]();
   }
   return driverInstance;
 }

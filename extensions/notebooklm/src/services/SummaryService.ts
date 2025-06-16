@@ -117,5 +117,6 @@ export class SummaryService {
   public async deleteOne(notebookId: string, sourceId: string): Promise<void> {
     await deleteSummary(notebookId, sourceId);
     delete this.summarys[sourceId];
+    this.emit("summaryUpdated", { sourceId, content: "" });
   }
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notebooklm",
-  "title": "Notebooklm",
+  "title": "NotebookLM",
   "description": "Raycast Extension to manage NotebookLM",
   "icon": "icon.png",
   "author": "j8n17",
@@ -21,7 +21,7 @@
     {
       "name": "show-notebooks",
       "title": "Show Notebooks",
-      "description": "Create and manage your notebooks with Arc Browser",
+      "description": "Create and manage your notebooks with Browser",
       "mode": "view"
     }
   ],

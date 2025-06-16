@@ -148,7 +148,6 @@ export class NotebookService {
       if (!notebookId) {
         const newNotebook = await this.driver.createNewNotebook(tab);
         notebookId = JSON.parse(JSON.parse(newNotebook)[0][0][2])[2];
-        console.log(notebookId);
       }
       await this.driver.uploadTabs(tab, tabList, notebookId!);
     });
@@ -176,11 +175,13 @@ export class NotebookService {
         const notebook = this.notebooks.find((nb) => nb.id === id);
         if (notebook) {
           if (notebook.owned === Ownership.Owner) {
-            return id;
+            return true;
           } else {
             notOwnerNotebookIds.push(id);
+            return false;
           }
         }
+        return false;
       });
 
       // Delete owner notebooks

@@ -39,10 +39,10 @@ export function SourceView(props: {
 
   return (
     <List isLoading={isLoading} isShowingDetail={sources.length > 0} navigationTitle={formatNavigationTitle(notebook)}>
-      {sources.map((source, index) => {
+      {sources.map((source) => {
         return (
           <List.Item
-            key={index}
+            key={source.id}
             icon={source.metadata.icon}
             title={source.title || "Untitled Source"}
             detail={<SourceDetail summaryService={summaryService} source={source} />}

@@ -1,4 +1,4 @@
 # NotebookLM Changelog
 
-## [Initial Version] - {Jun 14, 2025}
+## [Initial Version] - {PR_MERGE_DATE}
 See the notebooks with Arc!

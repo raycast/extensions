@@ -45,9 +45,8 @@ function PasteText(props: { notebookService: NotebookService; notebook: Notebook
           <Action.SubmitForm
             title="Submit"
             onSubmit={async (values) => {
-              pop();
               notebookService.addPasteText(values.text, notebook?.id);
-              // console.log(await notebookService.getNewSourceId())
+              pop();
             }}
           />
         </ActionPanel>

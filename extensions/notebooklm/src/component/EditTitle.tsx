@@ -14,8 +14,8 @@ export function EditNotebookTitle(props: { notebookService: NotebookService; not
           <Action.SubmitForm
             title="Save"
             onSubmit={async (values) => {
+              notebookService.editNotebookTitle(notebook.id, values.title);
               pop();
-              await notebookService.editNotebookTitle(notebook.id, values.title);
             }}
           />
         </ActionPanel>
@@ -38,8 +38,8 @@ export function EditSourceTitle(props: { notebookService: NotebookService; sourc
           <Action.SubmitForm
             title="Save"
             onSubmit={async (values) => {
+              notebookService.editSourceTitle(source.id, values.title);
               pop();
-              await notebookService.editSourceTitle(source.id, values.title);
             }}
           />
         </ActionPanel>
