@@ -11,9 +11,6 @@
     "type": "git",
     "url": "https://github.com/vikasbnsl/windsurf-raycast"
   },
-  "engines": {
-    "node": ">=22.14.0"
-  },
   "commands": [
     {
       "name": "open-with-windsurf",
@@ -36,11 +33,11 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
+    "@types/node": "^20.11.19",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build",
