@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, showToast, Toast, Detail, environment } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { formatDistanceToNow, format } from "date-fns";
 import { fetchAlerts } from "./utils/api";
 import { ProcessedServiceAlert } from "./types";
@@ -66,12 +67,12 @@ export default function ViewAlertsCommand(props: ViewAlertsCommandProps = {}) {
         console.error("Failed to fetch alerts:", err);
         const message = err instanceof Error ? err.message : "Could not load service alerts.";
         setError(message); // Set error state
-        showToast({ style: Toast.Style.Failure, title: "Error Loading Alerts", message: message });
+        showFailureToast(err, { title: "Error Loading Alerts" });
       } finally {
         setIsLoading(false);
       }
     },
-    [filterLines, filterActive], // Dependencies
+    [filterLines], // Dependencies
   );
 
   // Effect to load initially or if cache stale

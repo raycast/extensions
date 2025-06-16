@@ -4,7 +4,7 @@ export interface Station {
   name: string;
   latitude?: number; // Optional, as provided by wrapper
   longitude?: number; // Optional, as provided by wrapper
-  system?: string; // System identifier (e.g., "LIRR", "SUBWAY", "MNR")
+  system?: FilterableSystem; // System identifier (e.g., "LIRR", "SUBWAY", "MNR")
   lines?: string[]; // Array of route short names
   borough?: string; // Borough station is located in
   accessibilityStatus: string; // Accessibility status of the station

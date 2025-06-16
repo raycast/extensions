@@ -73,8 +73,7 @@
   "dependencies": {
     "@raycast/api": "^1.94.4",
     "@raycast/utils": "^1.17.0",
-    "date-fns": "^4.1.0",
-    "dotenv": "^16.5.0"
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

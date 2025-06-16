@@ -3,7 +3,11 @@ import { ProcessedDeparture } from "../types";
 import { formatDepartureTime } from "../utils/dateUtils";
 
 export function DepartureDetails({ departure }: { departure: ProcessedDeparture }) {
-  const statusColor = departure.status.toLowerCase().includes("delay") ? Color.Yellow : Color.Green;
+  const statusColor = departure.status.toLowerCase().includes("cancel")
+    ? Color.Red
+    : departure.status.toLowerCase().includes("delay")
+      ? Color.Yellow
+      : Color.Green;
   const routeColor = departure.routeColor ? `#${departure.routeColor}` : Color.PrimaryText;
   const trackColor = departure.track ? Color.Blue : Color.SecondaryText;
 

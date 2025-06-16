@@ -1,5 +1,6 @@
 // src/hooks/useFavorites.ts
 import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 
 const FAVORITES_KEY = "favoriteStationIds";
@@ -19,7 +20,7 @@ export function useFavorites() {
         }
       } catch (error) {
         if (isMounted) {
-          console.error("Failed to load favorites:", error);
+          showFailureToast(error, { title: "Failed to load favorites" });
           setFavoriteIds(new Set()); // Default to empty set on error
         }
       } finally {
@@ -40,7 +41,7 @@ export function useFavorites() {
     try {
       await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(ids)));
     } catch (error) {
-      console.error("Failed to save favorites:", error);
+      showFailureToast(error, { title: "Failed to save favorites" });
     }
   }, []);
 

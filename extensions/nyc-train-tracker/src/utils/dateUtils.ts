@@ -17,5 +17,7 @@ export function formatDepartureTime(time: Date | null): string {
 export const getCopyContent = (dep: ProcessedDeparture): string => {
   const timeString = dep.departureTime ? format(dep.departureTime, "h:mm a") : "N/A";
   const trackString = dep.track ? ` from Track ${dep.track}` : "";
-  return `Train to ${dep.destination} (${dep.routeLongName || dep.routeShortName}) departing ${timeString}${trackString}. Status: ${dep.status}`;
+  const routeName = dep.routeLongName || dep.routeShortName;
+  const routeString = routeName ? ` (${routeName})` : "";
+  return `Train to ${dep.destination}${routeString} departing ${timeString}${trackString}. Status: ${dep.status}`;
 };

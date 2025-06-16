@@ -25,7 +25,7 @@ interface StationDeparturesProps {
 }
 
 function getStatusAccessory(status: string): List.Item.Accessory {
-  const lowerStatus = status?.toLowerCase?.() || "";
+  const lowerStatus = status.toLowerCase() || "";
   if (lowerStatus.includes("delay")) {
     return { text: status, icon: { source: Icon.Clock, tintColor: Color.Yellow } };
   }
@@ -176,7 +176,7 @@ export default function StationDepartures({ station }: StationDeparturesProps) {
                           ? [
                               {
                                 tag: {
-                                  value: dep.system === "SUBWAY" ? dep.routeLongName : dep.routeLongName,
+                                  value: dep.routeLongName,
                                   color: {
                                     light: dep.routeColor ? `#${dep.routeColor}` : Color.SecondaryText,
                                     dark: dep.routeColor ? `#${dep.routeColor}` : Color.SecondaryText,
@@ -335,7 +335,7 @@ export default function StationDepartures({ station }: StationDeparturesProps) {
                           <Action
                             title="Refresh Departures"
                             icon={Icon.ArrowClockwise}
-                            onAction={() => handleRefresh()}
+                            onAction={handleRefresh}
                             shortcut={{ modifiers: ["cmd"], key: "r" }}
                           />
                           <Action.Push

@@ -4,11 +4,11 @@ The NYC Train Tracker extension allows you to look up train departures and servi
 
 | Description                                                   | Preview                                                                            |
 | ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Searching for stations                                        | ![screenshot: searching stations](./metadata/nyc-train-tracker-1.png)              |
-| Filtering by transit system                                   | ![screenshot: filtering by transit system](./metadata/nyc-train-tracker-2.png)     |
-| Viewing upcoming departures                                   | ![screenshot: viewing upcoming departures](./metadata/nyc-train-tracker-3.png)     |
-| Viewing service alerts                                        | ![screenshot: viewing service alerts](./metadata/nyc-train-tracker-4.png)          |
-| Support for Long Island Railroad and Manhattan North Railroad | ![screenshot: viewing LIRR and MNR departures](./metadata/nyc-train-tracker-5.png) |
+| Searching for stations                                        | ![screenshot: searching stations](./media/nyc-train-tracker-1.png)              |
+| Filtering by transit system                                   | ![screenshot: filtering by transit system](./media/nyc-train-tracker-2.png)     |
+| Viewing upcoming departures                                   | ![screenshot: viewing upcoming departures](./media/nyc-train-tracker-3.png)     |
+| Viewing service alerts                                        | ![screenshot: viewing service alerts](./media/nyc-train-tracker-4.png)          |
+| Support for Long Island Railroad and Metro-North Railroad | ![screenshot: viewing LIRR and MNR departures](./media/nyc-train-tracker-5.png) |
 
 ---
 

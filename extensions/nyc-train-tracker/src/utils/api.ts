@@ -29,7 +29,6 @@ function isErrorResponse(data: unknown): data is ErrorResponse {
     "error" in candidate &&
     candidate.error !== null &&
     typeof candidate.error === "object" &&
-    candidate.error !== null &&
     "message" in (candidate.error as Record<string, unknown>) &&
     typeof (candidate.error as Record<string, unknown>).message === "string"
   );
@@ -121,13 +120,16 @@ export async function fetchDepartures(
   if (!stationId) return [];
 
   let endpoint = `/departures/${stationId}`;
-  // Append limitMinutes if provided and valid
+
+  const params = new URLSearchParams();
   if (limitMinutes && limitMinutes > 0) {
-    endpoint += `?limitMinutes=${limitMinutes}`;
+    params.append("limitMinutes", limitMinutes.toString());
   }
   if (source) {
-    endpoint += `&source=${source}`;
+    params.append("source", source);
   }
+  const queryString = params.toString();
+  endpoint += queryString ? `?${queryString}` : "";
 
   const rawDepartures = await fetchFromWrapper<Departure[]>(endpoint);
 
