@@ -1,6 +1,6 @@
 # Matter Changelog
 
-## [Automatic URL Bookmarking] - {PR_MERGE_DATE}
+## [Automatic URL Bookmarking] - 2025-06-16
 
 - Added automatic URL bookmarking command: instantly bookmarks a URL from your clipboard
 
