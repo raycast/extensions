@@ -678,7 +678,7 @@ ${redirectChain.error ? `\nError: ${redirectChain.error}` : ""}`}
               }
             />
             <List.Item
-              icon={Icon.Target}
+              icon={Icon.Compass}
               title="Final Destination"
               subtitle={getUrlPreview(redirectChain.finalUrl).display}
               accessories={[
@@ -792,7 +792,7 @@ ${redirectChain.error ? `\nError: ${redirectChain.error}` : ""}`}
                       />
                       <Action
                         title="Compare Urls"
-                        icon={Icon.ArrowLeftAndRightArrowRight}
+                        icon={Icon.TwoArrowsClockwise}
                         onAction={() => {
                           showToast(
                             Toast.Style.Success,
