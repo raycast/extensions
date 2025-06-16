@@ -1,8 +1,8 @@
 import { Command, ThinkingKeyword } from "../types";
 
 /**
- * itemがCommand型であるかを判定する型ガード関数
- * thinkingカテゴリはThinkingKeywordとして扱いため、除外する
+ * Type guard function to determine if an item is of Command type
+ * Excludes thinking category as it is treated as ThinkingKeyword
  */
 export const isCommand = (item: Command | ThinkingKeyword): item is Command => {
   return "category" in item && item.category !== "thinking";

@@ -68,7 +68,7 @@ export function CommandDetail({ command, thinkingKeyword }: CommandDetailProps) 
 
     // Tags
     if (command.tags && command.tags.length > 0) {
-      sections.push(`## Tags\n${command.tags.map((tag) => `- ${tag}`).join("\n")}`);
+      sections.push(`## Tags\n${command.tags.map(tag => `- ${tag}`).join("\n")}`);
     }
 
     return sections.join("\n\n");

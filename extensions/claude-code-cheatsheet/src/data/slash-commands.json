@@ -10,7 +10,7 @@
       "usage": "/bug",
       "example": "/bug",
       "category": "slash",
-      "tags": ["bug", "report", "issue"]
+      "tags": ["bug", "issue", "report"]
     },
     {
       "id": "clear",
@@ -19,16 +19,16 @@
       "usage": "/clear",
       "example": "/clear",
       "category": "slash",
-      "tags": ["clear", "history", "delete"]
+      "tags": ["clear", "delete", "history"]
     },
     {
       "id": "compact",
       "name": "/compact",
-      "description": "Compacts the conversation history, summarizing previous turns to save tokens and refocus the context.",
-      "usage": "/compact",
-      "example": "/compact",
+      "description": "Compact conversation with optional focus instructions to summarize previous turns and save tokens.",
+      "usage": "/compact [instructions]",
+      "example": "/compact focus on bug fixes",
       "category": "slash",
-      "tags": ["compact", "summarize", "compress"]
+      "tags": ["compact", "compress", "focus", "summarize"]
     },
     {
       "id": "config",
@@ -37,7 +37,7 @@
       "usage": "/config",
       "example": "/config",
       "category": "slash",
-      "tags": ["settings", "configuration", "modify"]
+      "tags": ["configuration", "modify", "settings"]
     },
     {
       "id": "cost",
@@ -49,13 +49,31 @@
       "tags": ["cost", "statistics", "tokens"]
     },
     {
+      "id": "doctor",
+      "name": "/doctor",
+      "description": "Checks the health of your Claude Code installation and provides diagnostic information.",
+      "usage": "/doctor",
+      "example": "/doctor",
+      "category": "slash",
+      "tags": ["check", "diagnostics", "doctor", "health"]
+    },
+    {
       "id": "help",
       "name": "/help",
       "description": "Shows a help message with a list of available slash commands and their functions.",
       "usage": "/help",
       "example": "/help",
       "category": "slash",
-      "tags": ["help", "support", "documentation"]
+      "tags": ["documentation", "help", "support"]
+    },
+    {
+      "id": "ide",
+      "name": "/ide",
+      "description": "Manage IDE integrations and show status of connected development environments.",
+      "usage": "/ide",
+      "example": "/ide",
+      "category": "slash",
+      "tags": ["development", "IDE", "integration", "status"]
     },
     {
       "id": "init",
@@ -64,7 +82,16 @@
       "usage": "/init",
       "example": "/init",
       "category": "slash",
-      "tags": ["initialize", "project", "start", "CLAUDE.md", "documentation"]
+      "tags": ["CLAUDE.md", "documentation", "initialize", "project", "start"]
+    },
+    {
+      "id": "install-github-app",
+      "name": "/install-github-app",
+      "description": "Set up Claude GitHub Actions for a repository to enable automated workflows.",
+      "usage": "/install-github-app",
+      "example": "/install-github-app",
+      "category": "slash",
+      "tags": ["Actions", "automation", "GitHub", "repository", "setup"]
     },
     {
       "id": "login",
@@ -73,7 +100,7 @@
       "usage": "/login",
       "example": "/login",
       "category": "slash",
-      "tags": ["login", "switch", "authentication", "account", "sign-in"]
+      "tags": ["account", "authentication", "login", "sign-in", "switch"]
     },
     {
       "id": "logout",
@@ -82,7 +109,16 @@
       "usage": "/logout",
       "example": "/logout",
       "category": "slash",
-      "tags": ["logout", "sign out", "exit", "account"]
+      "tags": ["account", "exit", "logout", "sign out"]
+    },
+    {
+      "id": "mcp",
+      "name": "/mcp",
+      "description": "Show MCP server connection status and manage Model Context Protocol integrations.",
+      "usage": "/mcp",
+      "example": "/mcp",
+      "category": "slash",
+      "tags": ["connection", "MCP", "protocol", "server", "status"]
     },
     {
       "id": "memory",
@@ -91,7 +127,7 @@
       "usage": "/memory",
       "example": "/memory",
       "category": "slash",
-      "tags": ["memory", "edit", "CLAUDE.md"]
+      "tags": ["CLAUDE.md", "edit", "memory"]
     },
     {
       "id": "pr_comments",
@@ -100,16 +136,34 @@
       "usage": "/pr_comments",
       "example": "/pr_comments",
       "category": "slash",
-      "tags": ["PR", "comments", "review", "GitHub", "pull request"]
+      "tags": ["comments", "GitHub", "PR", "pull request", "review"]
+    },
+    {
+      "id": "permissions",
+      "name": "/permissions",
+      "description": "Manage allow & deny tool permission rules for controlling which tools Claude can access.",
+      "usage": "/permissions",
+      "example": "/permissions",
+      "category": "slash",
+      "tags": ["access", "allowed-tools", "control", "deny", "permissions", "rules"]
     },
     {
       "id": "review",
       "name": "/review",
-      "description": "Requests a code review from Claude for the files you've specified or staged in git.",
+      "description": "Reviews a pull request and provides feedback on the proposed changes.",
       "usage": "/review",
       "example": "/review",
       "category": "slash",
-      "tags": ["review", "code", "check"]
+      "tags": ["check", "code", "review"]
+    },
+    {
+      "id": "release-notes",
+      "name": "/release-notes",
+      "description": "View release notes for Claude Code updates and new features.",
+      "usage": "/release-notes",
+      "example": "/release-notes",
+      "category": "slash",
+      "tags": ["changelog", "notes", "release", "updates", "version"]
     },
     {
       "id": "terminal-setup",
@@ -118,7 +172,16 @@
       "usage": "/terminal-setup",
       "example": "/terminal-setup",
       "category": "slash",
-      "tags": ["setup", "key binding", "terminal", "enhancements", "keybindings"]
+      "tags": ["enhancements", "key binding", "keybindings", "setup", "terminal"]
+    },
+    {
+      "id": "upgrade",
+      "name": "/upgrade",
+      "description": "Upgrade to Max for higher rate limits and more Opus access.",
+      "usage": "/upgrade",
+      "example": "/upgrade",
+      "category": "slash",
+      "tags": ["Max", "Opus", "rate limits", "subscription", "upgrade"]
     },
     {
       "id": "vim",
@@ -127,7 +190,7 @@
       "usage": "/vim",
       "example": "/vim",
       "category": "slash",
-      "tags": ["Vim", "mode", "enable"]
+      "tags": ["enable", "mode", "Vim"]
     },
     {
       "id": "model",
@@ -136,7 +199,7 @@
       "usage": "/model",
       "example": "/model",
       "category": "slash",
-      "tags": ["model", "change", "AI", "configuration"]
+      "tags": ["AI", "change", "configuration", "model"]
     },
     {
       "id": "exit",
@@ -154,7 +217,7 @@
       "usage": "/status",
       "example": "/status",
       "category": "slash",
-      "tags": ["status", "account", "system", "version", "connectivity", "diagnostics"]
+      "tags": ["account", "connectivity", "diagnostics", "status", "system", "version"]
     }
   ]
 }

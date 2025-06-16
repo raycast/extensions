@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { List, Action, ActionPanel, Icon } from "@raycast/api";
 import { Command, CategoryType, Section, ThinkingKeyword } from "../types";
 import { cheatsheetData } from "../data";
@@ -8,7 +8,7 @@ import { CommandDetail } from "./CommandDetail";
 import { getBadgeProps } from "./Badge";
 import { isCommand } from "../utils";
 
-const categoryList = SECTION_ORDER.map((id) => ({
+const categoryList = SECTION_ORDER.map(id => ({
   id,
   title: CATEGORIES[id],
   // Placeholder for adding icons in the future
@@ -18,17 +18,27 @@ const categoryList = SECTION_ORDER.map((id) => ({
 export function CommandList() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>("all");
   const [searchText, setSearchText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { copyToClipboard } = useCopyToClipboard();
+
+  // Handle loading state for search/filter operations
+  useEffect(() => {
+    if (searchText || selectedCategory !== "all") {
+      setIsLoading(true);
+      const timer = setTimeout(() => setIsLoading(false), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [searchText, selectedCategory]);
 
   const filteredSections = useMemo(() => {
     let sections: Section[] = cheatsheetData.sections;
 
     // 1. Filter by category
     if (selectedCategory !== "all") {
-      sections = sections.filter((s) => s.id === selectedCategory);
+      sections = sections.filter(s => s.id === selectedCategory);
     }
 
-    // 2. Filter by search text
+    // 2. Return early if no search text
     if (!searchText) {
       return sections;
     }
@@ -37,16 +47,16 @@ export function CommandList() {
     const searchLower = searchText.toLowerCase();
 
     return sections
-      .map((section) => {
+      .map(section => {
         const filteredCommands = (section.commands || []).filter(
-          (command) =>
+          command =>
             command.name.toLowerCase().includes(searchLower) ||
             command.description.toLowerCase().includes(searchLower) ||
-            (command.tags && command.tags.some((tag) => tag.toLowerCase().includes(searchLower)))
+            (command.tags && command.tags.some(tag => tag.toLowerCase().includes(searchLower)))
         );
 
         const filteredThinkingKeywords = (section.thinkingKeywords || []).filter(
-          (keyword) =>
+          keyword =>
             keyword.keyword.toLowerCase().includes(searchLower) ||
             keyword.description.toLowerCase().includes(searchLower) ||
             keyword.budget.toLowerCase().includes(searchLower)
@@ -59,7 +69,7 @@ export function CommandList() {
         };
       })
       .filter(
-        (section) =>
+        section =>
           (section.commands && section.commands.length > 0) ||
           (section.thinkingKeywords && section.thinkingKeywords.length > 0)
       );
@@ -166,7 +176,7 @@ export function CommandList() {
 
     // Tags
     if (command.tags && command.tags.length > 0) {
-      sections.push(`## Tags\n${command.tags.map((tag) => `- ${tag}`).join("\n")}`);
+      sections.push(`## Tags\n${command.tags.map(tag => `- ${tag}`).join("\n")}`);
     }
 
     return sections.join("\n\n");
@@ -290,23 +300,24 @@ export function CommandList() {
 
   return (
     <List
+      isLoading={isLoading}
       searchBarPlaceholder="Search commands, options, or keywords..."
       onSearchTextChange={setSearchText}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Category"
           value={selectedCategory}
-          onChange={(v) => setSelectedCategory(v as CategoryType)}
+          onChange={v => setSelectedCategory(v as CategoryType)}
         >
           <List.Dropdown.Item title="All Categories" value="all" />
-          {categoryList.map((category) => (
+          {categoryList.map(category => (
             <List.Dropdown.Item key={category.id} title={category.title} value={category.id} />
           ))}
         </List.Dropdown>
       }
     >
       {filteredSections.length > 0 ? (
-        filteredSections.map((section) => (
+        filteredSections.map(section => (
           <List.Section key={section.id} title={section.title}>
             {(section.commands || []).map(renderItem)}
             {(section.thinkingKeywords || []).map(renderItem)}

@@ -25,7 +25,7 @@ const sectionMap: Record<CategoryType, Section> = {
   } as Section, // 'all' is a placeholder section with safe default values
 };
 
-const orderedSections = SECTION_ORDER.map((id) => sectionMap[id]);
+const orderedSections = SECTION_ORDER.map(id => sectionMap[id]);
 
 export const cheatsheetData: CheatsheetData = {
   sections: orderedSections,

@@ -10,7 +10,7 @@
       "usage": "claude",
       "example": "claude",
       "category": "basic",
-      "tags": ["interactive", "REPL", "basic"]
+      "tags": ["basic", "interactive", "REPL"]
     },
     {
       "id": "claude-query",
@@ -19,7 +19,7 @@
       "usage": "claude \"<initial-prompt>\"",
       "example": "claude \"Please review this code\"",
       "category": "basic",
-      "tags": ["interactive", "prompt", "initial"]
+      "tags": ["initial", "interactive", "prompt"]
     },
     {
       "id": "claude-print",
@@ -28,7 +28,7 @@
       "usage": "claude -p \"<query>\"",
       "example": "claude -p \"Please explain this function\"",
       "category": "basic",
-      "tags": ["one-shot", "non-interactive", "print"]
+      "tags": ["non-interactive", "one-shot", "print"]
     },
     {
       "id": "claude-continue",
@@ -37,7 +37,7 @@
       "usage": "claude -c",
       "example": "claude -c",
       "category": "basic",
-      "tags": ["continue", "resume", "conversation", "latest"]
+      "tags": ["continue", "conversation", "latest", "resume"]
     },
     {
       "id": "claude-config",
@@ -45,8 +45,10 @@
       "description": "Manage local and global configuration settings. Allows you to customize aspects like the UI theme, default model, and other operational parameters. For example, to set the theme to dark globally, use 'claude config set -g theme dark'.",
       "usage": "claude config",
       "example": "claude config set -g theme dark",
+      "deprecated": true,
+      "alternative": "Use settings.json configuration file instead",
       "category": "basic",
-      "tags": ["config", "management", "settings"]
+      "tags": ["config", "deprecated", "management", "settings"]
     },
     {
       "id": "claude-update",
@@ -55,7 +57,7 @@
       "usage": "claude update",
       "example": "claude update",
       "category": "basic",
-      "tags": ["update", "upgrade", "latest", "maintenance"]
+      "tags": ["latest", "maintenance", "update", "upgrade"]
     },
     {
       "id": "claude-mcp",
@@ -64,7 +66,7 @@
       "usage": "claude mcp",
       "example": "claude mcp",
       "category": "basic",
-      "tags": ["MCP", "server", "configuration", "protocol"]
+      "tags": ["configuration", "MCP", "protocol", "server"]
     },
     {
       "id": "claude-migrate-installer",
@@ -73,7 +75,7 @@
       "usage": "claude migrate-installer",
       "example": "claude migrate-installer",
       "category": "basic",
-      "tags": ["migration", "installation", "npm", "local"]
+      "tags": ["installation", "local", "migration", "npm"]
     },
     {
       "id": "claude-doctor",
@@ -82,7 +84,7 @@
       "usage": "claude doctor",
       "example": "claude doctor",
       "category": "basic",
-      "tags": ["diagnosis", "check", "status", "health"]
+      "tags": ["check", "diagnosis", "health", "status"]
     },
     {
       "id": "claude-pipe",
@@ -91,7 +93,7 @@
       "usage": "command | claude -p \"<query>\"",
       "example": "cat logs.txt | claude -p \"analyze these errors\"",
       "category": "basic",
-      "tags": ["pipe", "input", "stream", "integration"]
+      "tags": ["input", "integration", "pipe", "stream"]
     },
     {
       "id": "claude-continue-print",
@@ -100,7 +102,7 @@
       "usage": "claude -c -p \"<query>\"",
       "example": "claude -c -p \"Check for type errors\"",
       "category": "basic",
-      "tags": ["continue", "sdk", "non-interactive"]
+      "tags": ["continue", "non-interactive", "sdk"]
     },
     {
       "id": "claude-resume-session",
@@ -109,7 +111,7 @@
       "usage": "claude -r \"<session-id>\" \"<query>\"",
       "example": "claude -r \"ab-cde-123\" \"Finish writing this function\"",
       "category": "basic",
-      "tags": ["resume", "session", "id"]
+      "tags": ["id", "resume", "session"]
     }
   ]
 }

@@ -17,6 +17,15 @@ A comprehensive, interactive cheatsheet for the Claude Code CLI. Instantly acces
 
 - **Claude Code Cheatsheet:** The main command to browse and search through all available items.
 
+## Deprecated Commands & Flags
+
+The following commands and flags are no longer recommended and may be removed in future versions. Please migrate to their suggested alternatives.
+
+| Deprecated | Recommended Alternative | Notes |
+|------------|------------------------|-------|
+| `claude config` | Use the `settings.json` configuration file | Manage local & global settings via the configuration file |
+| `--mcp-debug` | `--debug` | The MCP-specific debug flag has been consolidated into the general `--debug` flag |
+
 ## License
 
 MIT License

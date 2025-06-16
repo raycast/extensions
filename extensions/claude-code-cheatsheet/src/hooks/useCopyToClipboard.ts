@@ -1,4 +1,5 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useState } from "react";
 
 interface UseCopyToClipboardReturn {
@@ -20,9 +21,7 @@ export function useCopyToClipboard(): UseCopyToClipboardReturn {
         message: message || `"${text}" copied to clipboard`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Copy Failed",
+      await showFailureToast("Copy Failed", {
         message: "Failed to copy to clipboard",
       });
       console.error("Copy to clipboard failed:", error);
