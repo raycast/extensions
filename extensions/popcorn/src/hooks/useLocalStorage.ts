@@ -1,5 +1,5 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { RecentMedia, WatchedEpisode, Media, Episode } from "../types";
 import { showFailureToast } from "@raycast/utils";
 

@@ -1,6 +1,7 @@
 import { ActionPanel, Action, List } from "@raycast/api";
 import { Media, Episode, WatchedEpisode } from "../types";
 import { Icon } from "@raycast/api";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 interface EpisodeListProps {
   media: Media;
@@ -8,12 +9,6 @@ interface EpisodeListProps {
   selectedSeason: string;
   showWatchedFilter: "all" | "watched" | "unwatched";
   isLoading: boolean;
-  isEpisodeWatched: (episodeId: string) => boolean;
-  getWatchedCount: (seriesId: string, season?: number) => number;
-  watchedEpisodes: WatchedEpisode[];
-  markEpisodeAsWatched: (episode: Episode, seriesId: string) => void;
-  markEpisodeAsUnwatched: (episode: Episode) => void;
-  markSeasonAsWatched: (season: number, episodes: Episode[], seriesId: string) => void;
   onEpisodeSelect: (episode: Episode) => void;
   onSeasonChange: (season: string) => void;
   onWatchedFilterChange: (filter: "all" | "watched" | "unwatched") => void;
@@ -26,12 +21,6 @@ export function EpisodeList({
   selectedSeason,
   showWatchedFilter,
   isLoading,
-  isEpisodeWatched,
-  getWatchedCount,
-  watchedEpisodes,
-  markEpisodeAsWatched,
-  markEpisodeAsUnwatched,
-  markSeasonAsWatched,
   onEpisodeSelect,
   onSeasonChange,
   onWatchedFilterChange,
@@ -47,6 +36,15 @@ export function EpisodeList({
     },
     {} as Record<number, Episode[]>,
   );
+
+  const { 
+    isEpisodeWatched, 
+    markEpisodeAsWatched, 
+    markSeasonAsWatched, 
+    markEpisodeAsUnwatched, 
+    getWatchedCount, 
+    watchedEpisodes 
+  } = useLocalStorage();
 
   // Get seasons for dropdown
   const seasons = Object.keys(episodesBySeason).sort((a, b) => Number(a) - Number(b));
@@ -208,12 +206,7 @@ export function EpisodeList({
                             )}
                           </>
                         )}
-                        <Action
-                          title={getFilterToggleTitle()}
-                          onAction={handleFilterToggle}
-                          icon={getFilterIcon()}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-                        />
+                        <Action title={getFilterToggleTitle()} onAction={handleFilterToggle} icon={getFilterIcon()} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
                         <Action title="Configure" onAction={onConfigure} icon={Icon.Gear} />
                       </ActionPanel>
                     }

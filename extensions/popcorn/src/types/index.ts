@@ -1,8 +1,11 @@
+import { Application } from "@raycast/api";
+
 export type MediaType = "movie" | "series";
 
 export interface Preferences {
   baseUrl: string;
-  streamingApps: string;
+  alternativeStreamingApps: string;
+  defaultStreamingApp: Application;
 }
 
 export interface Media {

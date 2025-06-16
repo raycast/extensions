@@ -7,6 +7,7 @@ interface StreamListProps {
   media: Media | null;
   episode?: Episode | null;
   isLoading: boolean;
+  defaultStreamingApp: Application;
   streamingAppsArray: Application[];
   isEpisodeWatched?: (episodeId: string) => boolean;
   markEpisodeAsWatched?: (episode: Episode, seriesId: string) => void;
@@ -20,6 +21,7 @@ export function StreamList({
   episode,
   isLoading,
   isEpisodeWatched,
+  defaultStreamingApp,
   streamingAppsArray,
   markEpisodeAsWatched,
   markEpisodeAsUnwatched,
@@ -86,6 +88,12 @@ export function StreamList({
               }
               actions={
                 <ActionPanel>
+                  <Action.Open
+                    title={`Open in ${defaultStreamingApp.name}`}
+                    target={stream.url}
+                    application={defaultStreamingApp}
+                    icon={Icon.Play}
+                  />
                   {streamingAppsArray.map((app: Application) => (
                     <Action.Open
                       key={`${app.bundleId}`}

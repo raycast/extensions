@@ -1,15 +1,14 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { MediaType, Media, RecentMedia } from "../types";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 interface SearchResultsProps {
   mediaType: MediaType;
   searchText: string;
   searchResults: Media[];
-  recentMedia: RecentMedia[];
   trendingMedia: Media[] | undefined;
   isLoading: boolean;
   isUsingAddon: boolean;
-  getWatchedCount: (seriesId: string, season?: number) => number;
   onSearchTextChange: (text: string) => void;
   onMediaTypeChange: (type: MediaType) => void;
   onMediaSelect: (media: Media) => void;
@@ -24,10 +23,8 @@ export function SearchResults({
   searchText,
   searchResults,
   isUsingAddon,
-  recentMedia,
   trendingMedia,
   isLoading,
-  getWatchedCount,
   onSearchTextChange,
   onMediaTypeChange,
   onMediaSelect,
@@ -36,6 +33,11 @@ export function SearchResults({
   onClearWatchHistory,
   onConfigure,
 }: SearchResultsProps) {
+
+  const { 
+    getWatchedCount,
+    recentMedia
+  } = useLocalStorage();
   // Filter recent media by current media type
   const filteredRecentMedia = recentMedia.filter((media) => media.type === mediaType).slice(0, 10);
 
