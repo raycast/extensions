@@ -155,18 +155,6 @@ export async function moveFinderItems(
     }
 
     if (movedCount > 0) {
-      log("debug", "moveFinderItems", "Showing success HUD", {
-        movedCount,
-        skippedCount,
-        timestamp: new Date().toISOString(),
-      });
-      await showHUD(
-        `Moved ${movedCount} ${movedCount === 1 ? "file" : "files"} to ${path.basename(destinationFolder)}`,
-      );
-      log("debug", "moveFinderItems", "Success HUD shown", {
-        timestamp: new Date().toISOString(),
-      });
-
       // Only open the folder if the preference is enabled
       if (openFolderAfterMove) {
         log("debug", "moveFinderItems", "Opening destination folder", {
@@ -180,6 +168,18 @@ export async function moveFinderItems(
           timestamp: new Date().toISOString(),
         });
       }
+
+      log("debug", "moveFinderItems", "Showing success HUD", {
+        movedCount,
+        skippedCount,
+        timestamp: new Date().toISOString(),
+      });
+      await showHUD(
+        `Moved ${movedCount} ${movedCount === 1 ? "file" : "files"} to ${path.basename(destinationFolder)}`,
+      );
+      log("debug", "moveFinderItems", "Success HUD shown", {
+        timestamp: new Date().toISOString(),
+      });
 
       return { success: true, movedCount, skippedCount };
     }

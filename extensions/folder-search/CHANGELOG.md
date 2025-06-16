@@ -4,8 +4,8 @@ All notable changes to this extension will be documented in this file.
 
 ## [Enhanements] - {PR_MERGE_DATE}
 
-- Added "Open Folder After Move" preference to control whether destination folders open automatically after moving files. When disabled, files will be moved without opening the folder, keeping your workflow uninterrupted. Default is enabled
-- Added drag and drop support for results list
+- - **enhanced** Added "Open Folder After Move" preference to control whether destination folders open automatically after moving files. When disabled, files will be moved without opening the folder, keeping your workflow uninterrupted. Default is enabled
+- - **enhanced** Added drag and drop support for results list
 
 ## [Development & Error Handling Improvements] - 2025-06-11
 
