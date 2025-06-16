@@ -14,6 +14,7 @@ If you run into any issues, please verify the following:
 ## Granola Commands
 - `New Note` command - which starts a new note and recording immediately in Granola
 - `Search Notes` command - which allows you to view your notes in a list, view their details (including transcript), copy their links, or copy their contents as HTML or Markdown
+- `Browse Folders` command - which lets you navigate your folders and view notes within them
 - `AI Notes` AI command - which allows you to use Raycast AI on top of Granola and other AI extensions
 
 ## Developer Notes / Privacy

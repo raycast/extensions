@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import useDocPages from "../../hooks/useDocPages";
+import { OpenInClickUpAction } from "../../components/OpenInClickUpAction";
 
 export function ListDocPages({ workspaceId, docId, docName }: { workspaceId: string; docId: string; docName: string }) {
   const { isLoading, pages } = useDocPages(workspaceId, docId);
@@ -17,8 +18,19 @@ export function ListDocPages({ workspaceId, docId, docName }: { workspaceId: str
                 <Action.Push
                   icon={Icon.Eye}
                   title="View Page"
-                  target={<Detail navigationTitle={page.name} markdown={`# ${page.name} \n\n ${page.content}`} />}
+                  target={
+                    <Detail
+                      navigationTitle={page.name}
+                      markdown={`# ${page.name} \n\n ${page.content}`}
+                      actions={
+                        <ActionPanel>
+                          <OpenInClickUpAction route={`${workspaceId}/v/dc/${docId}/${page.id}`} />
+                        </ActionPanel>
+                      }
+                    />
+                  }
                 />
+                <OpenInClickUpAction route={`${workspaceId}/v/dc/${docId}/${page.id}`} />
               </ActionPanel>
             }
           />

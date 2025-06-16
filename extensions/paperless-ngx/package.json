@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "damdam",
   "contributors": [
-    "igor_brikin"
+    "igor_brikin",
+    "csigritz"
   ],
   "categories": [
     "Productivity",
@@ -69,6 +70,24 @@
       "default": false,
       "required": true,
       "label": "Enable Grid View"
+    },
+    {
+      "name": "showCorrespondentInSubtitle",
+      "title": "Show Correspondent",
+      "description": "Show Correspondent in Search Results",
+      "type": "checkbox",
+      "default": true,
+      "required": true,
+      "label": "Show Correspondent in Search Results"
+    },
+    {
+      "name": "showDateInSubtitle",
+      "title": "Show Date",
+      "description": "Show Date in Search Results",
+      "type": "checkbox",
+      "default": false,
+      "required": true,
+      "label": "Show Date in Search Results"
     },
     {
       "name": "dateFormat",

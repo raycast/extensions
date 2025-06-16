@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+  open,
+  getPreferenceValues,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { Fragment } from "react";
 
@@ -60,6 +71,7 @@ export default function TaskActions({
   quickLinkView,
 }: TaskActionsProps) {
   const { pop } = useNavigation();
+  const { useConfetti } = getPreferenceValues<Preferences>();
 
   const { focusedTask, focusTask, unfocusTask } = useFocusedTask();
 
@@ -85,6 +97,13 @@ export default function TaskActions({
       }
     } catch (error) {
       await showFailureToast(error, { title: "Unable to complete task" });
+    }
+    if (useConfetti) {
+      try {
+        await open("raycast://extensions/raycast/raycast/confetti");
+      } catch (error) {
+        await showFailureToast(error, { title: "Unable to show celebration" });
+      }
     }
   }
 

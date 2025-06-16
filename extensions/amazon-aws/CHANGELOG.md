@@ -1,6 +1,13 @@
 # Amazon AWS Changelog
 
-## [Console command] 2025-04-25
+## [Console command] - 2025-06-13
+- Add AWS Audit Manager service to console command
+- Fix Amazon Bedrock service details (previously had incorrect AWS Audit Manager information)
+
+## [Console command] - 2025-05-23
+- Fix full URLs (e.g. `https://quicksight.aws.amazon.com`) routing correctly to the console
+
+## [Console command] - 2025-04-25
 - Update WAF & Shield path to '/wafv2/homev2/home' for WAFv2 migration
 - Update AWS Firewall Manager path to '/wafv2/fmsv2/home' for Firewall Manager v2
 - Add common abbreviations 'cfn' for CloudFormation and 'sfn' for Step Functions

@@ -17,7 +17,8 @@
     "xilopaint",
     "ridemountainpig",
     "teemu_suvinen",
-    "juan_saldana"
+    "juan_saldana",
+    "andreaselia"
   ],
   "license": "MIT",
   "commands": [
@@ -418,6 +419,14 @@
       "default": false,
       "label": "Open notes in separate windows by default",
       "description": "Pressing ⏎ will open notes in separate windows by default",
+      "required": false
+    },
+    {
+      "name": "maxQueryResults",
+      "title": "Maximum Query Results",
+      "type": "textfield",
+      "default": "250",
+      "description": "The maximum number of notes to query for search and AI tool calling",
       "required": false
     }
   ],

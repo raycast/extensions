@@ -58,6 +58,7 @@ ${usages.map((usage) => `${usage.description}: ${usage.usage}/${isInfinity(usage
           {configuration && (
             <Action.Push
               icon={Icon.Pencil}
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Update cPanel Account Password"
               target={<UpdatePassword username={configuration.user} />}
             />

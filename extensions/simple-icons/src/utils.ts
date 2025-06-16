@@ -20,7 +20,7 @@ import { useAI } from "@raycast/utils";
 import { Searcher } from "fast-fuzzy";
 import got, { Progress } from "got";
 import spawn from "nano-spawn";
-import { getIconSlug } from "simple-icons/sdk";
+import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { IconData, JsDelivrNpmResponse, LaunchContext, Release } from "./types.js";
 
 const cache = new Cache();
@@ -90,7 +90,14 @@ export const cacheAssetPack = async (version: string) => {
 export const loadCachedJson = async (version: string) => {
   const [major] = version.split(".");
   const isNewFormat = Number(major) >= 14;
-  const jsonPath = join(environment.assetsPath, "pack", `simple-icons-${version}`, "_data", "simple-icons.json");
+  const isNewDataFolder = Number(major) >= 15;
+  const jsonPath = join(
+    environment.assetsPath,
+    "pack",
+    `simple-icons-${version}`,
+    isNewDataFolder ? "data" : "_data",
+    "simple-icons.json",
+  );
   const jsonFile = await readFile(jsonPath, "utf8");
   const json = JSON.parse(jsonFile);
   const icons = isNewFormat ? (json as IconData[]) : (json.icons as IconData[]);

@@ -1,56 +1,37 @@
-import { List } from "@raycast/api";
 import { Resolution } from "../types";
 import { ResolutionList } from "./ResolutionList";
-import { OptionsList } from "./OptionsList";
 
 interface CustomResolutionsListProps {
   customResolutions: Resolution[];
-  predefinedResolutions: Resolution[];
-  onDeleteCustomResolution: (resolution: Resolution) => Promise<void>;
   onResizeWindow: (width: number, height: number) => Promise<void>;
-  onRestorePreviousSize: () => Promise<void>;
-  onGetCurrentWindowSize: () => Promise<void>;
-  onAddCustomResolution: () => Promise<void>;
-  onMaximizeWindow: () => Promise<void>;
-  isLoading?: boolean;
+  onDeleteResolution: (resolution: Resolution) => Promise<void>;
+  onToggleStar: (resolution: Resolution) => Promise<void>;
+  selectedItemId?: string | null | undefined;
+  starredResolutions: Resolution[];
 }
 
-/**
- * CustomResolutionsList component displays both custom and predefined resolutions
- */
 export function CustomResolutionsList({
   customResolutions,
-  predefinedResolutions,
-  onDeleteCustomResolution,
   onResizeWindow,
-  onRestorePreviousSize,
-  onGetCurrentWindowSize,
-  onAddCustomResolution,
-  onMaximizeWindow,
-  isLoading = false,
+  onDeleteResolution,
+  onToggleStar,
+  selectedItemId,
+  starredResolutions,
 }: CustomResolutionsListProps) {
+  if (customResolutions.length === 0) {
+    return null;
+  }
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search for sizes and commands..." navigationTitle="Window Sizer">
-      <ResolutionList
-        resolutions={customResolutions}
-        onResizeWindow={onResizeWindow}
-        sectionTitle="Custom Sizes"
-        showDeleteAction
-        onDeleteResolution={onDeleteCustomResolution}
-      />
-
-      <ResolutionList
-        resolutions={predefinedResolutions}
-        onResizeWindow={onResizeWindow}
-        sectionTitle="Default Sizes"
-      />
-
-      <OptionsList
-        onRestorePreviousSize={onRestorePreviousSize}
-        onGetCurrentWindowSize={onGetCurrentWindowSize}
-        onAddCustomResolution={onAddCustomResolution}
-        onMaximizeWindow={onMaximizeWindow}
-      />
-    </List>
+    <ResolutionList
+      resolutions={customResolutions}
+      onResizeWindow={onResizeWindow}
+      sectionTitle="Custom Sizes"
+      showDeleteAction
+      onDeleteResolution={onDeleteResolution}
+      onToggleStar={onToggleStar}
+      selectedItemId={selectedItemId}
+      starredResolutions={starredResolutions}
+    />
   );
 }
