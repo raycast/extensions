@@ -314,7 +314,11 @@ export class ArcBrowserDriver implements IBrowserDriver {
   }
 
   public async uploadPasteText(tab: NotebookLMTab, notebookId: string, text: string): Promise<string> {
-    const arg = [[[null, ["Pasted Text", text], null, 2, null, null, null, null, null, null, 1]], notebookId, [2]];
+    const arg = [
+      [[null, ["Pasted Text", JSON.stringify(text).slice(1, -1)], null, 2, null, null, null, null, null, null, 1]],
+      notebookId,
+      [2],
+    ];
     return await this.requestToNotebookLM(tab, "izAoDd", [arg]);
   }
 
