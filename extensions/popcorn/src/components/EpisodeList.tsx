@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List } from "@raycast/api";
-import { Media, Episode, WatchedEpisode } from "../types";
+import { Media, Episode } from "../types";
 import { Icon } from "@raycast/api";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
@@ -37,13 +37,13 @@ export function EpisodeList({
     {} as Record<number, Episode[]>,
   );
 
-  const { 
-    isEpisodeWatched, 
-    markEpisodeAsWatched, 
-    markSeasonAsWatched, 
-    markEpisodeAsUnwatched, 
-    getWatchedCount, 
-    watchedEpisodes 
+  const {
+    isEpisodeWatched,
+    markEpisodeAsWatched,
+    markSeasonAsWatched,
+    markEpisodeAsUnwatched,
+    getWatchedCount,
+    watchedEpisodes,
   } = useLocalStorage();
 
   // Get seasons for dropdown
@@ -206,7 +206,12 @@ export function EpisodeList({
                             )}
                           </>
                         )}
-                        <Action title={getFilterToggleTitle()} onAction={handleFilterToggle} icon={getFilterIcon()} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+                        <Action
+                          title={getFilterToggleTitle()}
+                          onAction={handleFilterToggle}
+                          icon={getFilterIcon()}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                        />
                         <Action title="Configure" onAction={onConfigure} icon={Icon.Gear} />
                       </ActionPanel>
                     }

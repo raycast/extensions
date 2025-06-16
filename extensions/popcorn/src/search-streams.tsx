@@ -36,10 +36,10 @@ export default function Command() {
   const streamingAppsFromPreferences = useMemo(() => {
     return preferences.alternativeStreamingApps
       ? preferences.alternativeStreamingApps
-        .toLowerCase()
-        .split(",")
-        .map((app: string) => app.trim())
-        .filter((app: string) => app.length > 0)
+          .toLowerCase()
+          .split(",")
+          .map((app: string) => app.trim())
+          .filter((app: string) => app.length > 0)
       : ["iina", "vlc"];
   }, [preferences.alternativeStreamingApps]);
 
@@ -92,10 +92,26 @@ export default function Command() {
 
     if (media.type === "movie") {
       // Push streams view for movies
-      push(<StreamsView media={media} api={api} storage={storage} defaultStreamingApp={preferences.defaultStreamingApp} streamingApps={streamingApps} />);
+      push(
+        <StreamsView
+          media={media}
+          api={api}
+          storage={storage}
+          defaultStreamingApp={preferences.defaultStreamingApp}
+          streamingApps={streamingApps}
+        />,
+      );
     } else {
       // Push episodes view for series
-      push(<EpisodesView media={media} api={api} storage={storage} defaultStreamingApp={preferences.defaultStreamingApp} streamingApps={streamingApps} />);
+      push(
+        <EpisodesView
+          media={media}
+          api={api}
+          storage={storage}
+          defaultStreamingApp={preferences.defaultStreamingApp}
+          streamingApps={streamingApps}
+        />,
+      );
     }
   };
 
@@ -215,7 +231,16 @@ function EpisodesView({
 
   const handleEpisodeSelection = async (episode: Episode) => {
     await storage.saveEpisodeSelection(media.id, episode.id);
-    push(<StreamsView media={media} episode={episode} api={api} storage={storage} defaultStreamingApp={defaultStreamingApp} streamingApps={streamingApps} />);
+    push(
+      <StreamsView
+        media={media}
+        episode={episode}
+        api={api}
+        storage={storage}
+        defaultStreamingApp={defaultStreamingApp}
+        streamingApps={streamingApps}
+      />,
+    );
   };
 
   const handleSeasonChange = async (season: string) => {

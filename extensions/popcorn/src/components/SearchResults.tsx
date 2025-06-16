@@ -33,11 +33,7 @@ export function SearchResults({
   onClearWatchHistory,
   onConfigure,
 }: SearchResultsProps) {
-
-  const { 
-    getWatchedCount,
-    recentMedia
-  } = useLocalStorage();
+  const { getWatchedCount, recentMedia } = useLocalStorage();
   // Filter recent media by current media type
   const filteredRecentMedia = recentMedia.filter((media) => media.type === mediaType).slice(0, 10);
 
