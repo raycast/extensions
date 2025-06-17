@@ -160,7 +160,7 @@
 /extensions/binge-clock                                             @Aayush9029
 /extensions/bintools                                                @Frostplexx @bestemic
 /extensions/bitbucket                                               @Lp-Francois @esarmstrong @itsrifat @skuio @arpitdalal
-/extensions/bitbucket-search-self-hosted                            @yuercl
+/extensions/bitbucket-search-self-hosted                            @yuercl @psychopasss
 /extensions/bitcoin-price                                           @futantan
 /extensions/bitfinex                                                @Yukaii
 /extensions/bitly-url-shortener                                     @blessanm86
@@ -250,6 +250,7 @@
 /extensions/chinese-numbers                                         @raffeyang
 /extensions/choose-a-license                                        @sandypockets @Aayush9029
 /extensions/chords-and-tabs                                         @BossElijah
+/extensions/chronometer                                             @mandrade2
 /extensions/chuck-norris-facts                                      @jorgecortesdev
 /extensions/cider                                                   @feyli
 /extensions/cidr                                                    @Yansongsongsong
@@ -643,6 +644,7 @@
 /extensions/gather                                                  @yannglt
 /extensions/geist-ui-components                                     @Rahuls-Coding @xmok
 /extensions/genius-lyrics                                           @TKDKid1000 @johnstclair @Rayn322
+/extensions/geoconverter                                            @kylinwowo
 /extensions/geohash-encode-decode                                   @alrico88
 /extensions/geoping                                                 @Chiroyce1
 /extensions/gerrit-code-review                                      @vkhitrin
@@ -818,6 +820,7 @@
 /extensions/image-diff-checker                                      @yasuhiro-yamamoto
 /extensions/image-flow                                              @godruoyi
 /extensions/image-host                                              @SuleymanEfe
+/extensions/image-search                                            @talhabalaj
 /extensions/image-to-ascii                                          @ridemountainpig
 /extensions/image-wallet                                            @ibll
 /extensions/imagekit-uploader                                       @ludafa
@@ -910,6 +913,7 @@
 /extensions/keyboard-shortcut-sequences                             @SKaplanOfficial
 /extensions/keyboard-win-mac-switch                                 @fab-uleuh
 /extensions/keychain-password-gen                                   @breadone @one-data-cookie
+/extensions/keygen                                                  @xmok
 /extensions/kill-node-modules                                       @NicolasMontone @M-Subhan1
 /extensions/kill-process                                            @rolandleth @crazyones110 @zhenpewu @Saafo @erics118 @xilopaint @validatedev @nmder
 /extensions/kimai                                                   @marinsokol
@@ -1051,7 +1055,7 @@
 /extensions/mastodon                                                @Sevichecc @Sevichecc @pernielsentikaer @LitoMore
 /extensions/mastodon-search                                         @daveverwer
 /extensions/material-icons                                          @creasty @201549BL @3llomi
-/extensions/matter                                                  @cernezan @xmok
+/extensions/matter                                                  @cernezan @xmok @MaicolBen
 /extensions/mattermost                                              @Ernest0-Production @xmok
 /extensions/maven-central-repository                                @koinzhang
 /extensions/mayar                                                   @moerdowo
@@ -1101,7 +1105,7 @@
 /extensions/mistral                                                 @colinlienard
 /extensions/mite                                                    @paoloricciuti @ramsaysewell
 /extensions/mittwald                                                @danieldeichfuss
-/extensions/mixpanel                                                @smsimone
+/extensions/mixpanel                                                @smsimone @xmok
 /extensions/mlb-scores                                              @jso8910 @RobErskine
 /extensions/mldocs                                                  @sadanand-singh
 /extensions/mochi                                                   @kawamataryo
@@ -1222,6 +1226,7 @@
 /extensions/numpad                                                  @paulovictor237
 /extensions/nusmods                                                 @wxiaoyun
 /extensions/nuxt                                                    @HugoRCD
+/extensions/nyc-train-tracker                                       @kcole93
 /extensions/nzbget                                                  @wyattjoh
 /extensions/oblique-strategies                                      @dnnsmnstrr
 /extensions/obs-clippings                                           @trevware
@@ -1391,6 +1396,7 @@
 /extensions/pollen-count                                            @h16nning
 /extensions/polymarket                                              @0xOsprey @dKloecker
 /extensions/pomodoro                                                @KELiON @pernielsentikaer @brodelp @susonthapa @mikikiv @MartinGonzalez @Nathanjms @cchalop1 @haydencbarnes @j3lte @LitoMore @ridemountainpig @mepearso
+/extensions/popcorn                                                 @martipops
 /extensions/popicons                                                @lucaschultz
 /extensions/porkbun                                                 @xmok @djpowers
 /extensions/port-manager                                            @lucaschultz @Sheraff @ridemountainpig @pernielsentikaer
@@ -1679,6 +1685,7 @@
 /extensions/shortcuts-search                                        @solomkinmv
 /extensions/shottr                                                  @jfernandogt
 /extensions/shroud-email                                            @xmok
+/extensions/shutdown-timer                                          @WhosMadeer
 /extensions/signal                                                  @leeraymond78
 /extensions/silent-mention                                          @peduarte
 /extensions/simctl                                                  @noppefoxwolf @xmok
@@ -1991,6 +1998,7 @@
 /extensions/uptime-kuma                                             @MarlBurroW @pernielsentikaer @xmok
 /extensions/uptime-robot                                            @xmok
 /extensions/urban-dictionary                                        @pernielsentikaer @zhenpewu @xilopaint
+/extensions/url-editor-pro                                          @CoyoteWaltz
 /extensions/url-parse                                               @YES-Lee @pernielsentikaer
 /extensions/url-shortener                                           @Visual-Studio-Coder
 /extensions/url-tools                                               @neo773 @xmok
