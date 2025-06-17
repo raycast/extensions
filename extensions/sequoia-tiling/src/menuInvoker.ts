@@ -18,7 +18,11 @@ export async function invokeMenu(menuItemName: string, sub?: SubMenu) {
         : undefined;
 
   if (!menuItemName) {
-    await showToast({ style: Toast.Style.Animated, title: "Menu name not set" });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Menu Item Label missing",
+      message: "Set it in Command Preferences.",
+    });
     return;
   }
 
