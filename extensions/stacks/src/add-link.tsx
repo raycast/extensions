@@ -143,7 +143,6 @@ Your token is stored securely and only used to communicate with the Stacks API.
         onChange={setUrl}
         info="Enter the URL you want to save to Stacks"
         error={error && error.includes("URL") ? error : undefined}
-        required
       />
 
       {error && !error.includes("API token") && !error.includes("URL") && (
