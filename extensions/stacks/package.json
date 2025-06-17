@@ -62,8 +62,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.2",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
     "@types/node-fetch": "^2.6.12",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
@@ -72,7 +72,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.3.12",
+    "@types/react": "18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
