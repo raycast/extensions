@@ -7,8 +7,8 @@ import {
   popToRoot,
 } from "@raycast/api";
 import { useForm, showFailureToast } from "@raycast/utils";
-import { useState } from "react";
-import { insertTerm } from "./data-store";
+import { useState, useEffect } from "react";
+import { insertTerm, checkTermExists } from "./data-store";
 
 interface InsertTermProps {
   onInsert: () => void;
@@ -22,8 +22,12 @@ interface FormValues {
 
 export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [existingTerm, setExistingTerm] = useState<{
+    term: string;
+    definition: string;
+  } | null>(null);
 
-  const { handleSubmit, itemProps } = useForm<FormValues>({
+  const { handleSubmit, itemProps, values, setValue } = useForm<FormValues>({
     onSubmit(values: FormValues) {
       _handleSubmit(values);
     },
@@ -41,7 +45,33 @@ export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
         return undefined;
       },
     },
+    initialValues: {
+      term: initialTerm || "",
+      definition: "",
+    },
   });
+
+  useEffect(() => {
+    const checkExisting = async () => {
+      if (values.term?.trim()) {
+        const existing = await checkTermExists(values.term.trim());
+        setExistingTerm(
+          existing
+            ? { term: existing.term, definition: existing.definition }
+            : null,
+        );
+
+        if (existing && !values.definition) {
+          setValue("definition", existing.definition);
+        }
+      } else {
+        setExistingTerm(null);
+      }
+    };
+
+    const timeoutId = setTimeout(checkExisting, 300);
+    return () => clearTimeout(timeoutId);
+  }, [values.term, values.definition, setValue]);
 
   async function _handleSubmit(values: FormValues) {
     setIsLoading(true);
@@ -50,10 +80,18 @@ export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
         term: values.term,
         definition: values.definition.replace(/\n/g, "  \n"),
       });
+
+      const isUpdate = existingTerm !== null;
       await showToast({
         style: Toast.Style.Success,
-        title: "Term inserted successfully",
+        title: isUpdate
+          ? "Term updated successfully"
+          : "Term inserted successfully",
+        message: isUpdate
+          ? `Updated "${values.term}"`
+          : `Added "${values.term}"`,
       });
+
       if (onInsert) {
         onInsert();
       } else {
@@ -71,7 +109,10 @@ export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Insert Term" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title={existingTerm ? "Update Term" : "Insert Term"}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
@@ -80,9 +121,9 @@ export default function InsertTerm({ onInsert, initialTerm }: InsertTermProps) {
         id="term"
         title="Term"
         placeholder="Enter the term"
-        defaultValue={initialTerm}
         autoFocus
       />
+
       <Form.TextArea
         {...itemProps.definition}
         id="definition"

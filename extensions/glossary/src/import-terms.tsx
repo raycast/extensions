@@ -37,12 +37,27 @@ export default function ImportTerms() {
         return { term, definition };
       });
 
-      await importTerms(terms);
+      const importedTerms = await importTerms(terms);
+
+      // Count how many were new vs updated
+      const newTermsCount = importedTerms.filter(
+        (term) => term.createdAt === term.updatedAt,
+      ).length;
+      const updatedTermsCount = importedTerms.length - newTermsCount;
+
+      let message = `Imported ${importedTerms.length} terms`;
+      if (newTermsCount > 0 && updatedTermsCount > 0) {
+        message = `Added ${newTermsCount} new terms and updated ${updatedTermsCount} existing terms`;
+      } else if (newTermsCount > 0) {
+        message = `Added ${newTermsCount} new terms`;
+      } else if (updatedTermsCount > 0) {
+        message = `Updated ${updatedTermsCount} existing terms`;
+      }
 
       await showToast({
         style: Toast.Style.Success,
         title: "Terms imported successfully",
-        message: `Imported ${terms.length} terms`,
+        message: message,
       });
 
       popToRoot();
@@ -62,7 +77,7 @@ export default function ImportTerms() {
         </ActionPanel>
       }
     >
-      <Form.Description text="Enter terms in CSV format. Each line should have a term and definition separated by a comma." />
+      <Form.Description text="Enter terms in CSV format: one term and definition per line, separated by a comma. Matching terms will be updated" />
       <Form.TextArea
         id="csvContent"
         title="CSV Content"

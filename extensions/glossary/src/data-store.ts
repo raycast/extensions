@@ -21,18 +21,49 @@ export async function insertTerm(
   term: Omit<GlossaryTerm, "id" | "createdAt" | "updatedAt">,
 ): Promise<GlossaryTerm> {
   const terms = await getTerms();
-  const newTerm: GlossaryTerm = {
-    ...term,
-    id: generateId(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
 
-  await LocalStorage.setItem(
-    "glossary-terms",
-    JSON.stringify([...terms, newTerm]),
+  // Check if term already exists (case-insensitive)
+  const existingTerm = terms.find(
+    (t) => t.term.toLowerCase() === term.term.toLowerCase(),
   );
-  return newTerm;
+
+  if (existingTerm) {
+    // Update existing term
+    const updatedTerm: GlossaryTerm = {
+      ...existingTerm,
+      definition: term.definition,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const updatedTerms = terms.map((t) =>
+      t.id === existingTerm.id ? updatedTerm : t,
+    );
+    await LocalStorage.setItem("glossary-terms", JSON.stringify(updatedTerms));
+    return updatedTerm;
+  } else {
+    // Create new term
+    const newTerm: GlossaryTerm = {
+      ...term,
+      id: generateId(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await LocalStorage.setItem(
+      "glossary-terms",
+      JSON.stringify([...terms, newTerm]),
+    );
+    return newTerm;
+  }
+}
+
+export async function checkTermExists(
+  termName: string,
+): Promise<GlossaryTerm | null> {
+  const terms = await getTerms();
+  return (
+    terms.find((t) => t.term.toLowerCase() === termName.toLowerCase()) || null
+  );
 }
 
 export async function searchTerms(
@@ -61,18 +92,50 @@ export async function importTerms(
   terms: Omit<GlossaryTerm, "id" | "createdAt" | "updatedAt">[],
 ): Promise<GlossaryTerm[]> {
   const existingTerms = await getTerms();
-  const newTerms: GlossaryTerm[] = terms.map((term) => ({
-    ...term,
-    id: generateId(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }));
 
-  await LocalStorage.setItem(
-    "glossary-terms",
-    JSON.stringify([...existingTerms, ...newTerms]),
-  );
-  return newTerms;
+  // Create a map of existing terms by term name for quick lookup
+  const existingTermsMap = new Map<string, GlossaryTerm>();
+  existingTerms.forEach((term) => {
+    existingTermsMap.set(term.term.toLowerCase(), term);
+  });
+
+  const importedTerms: GlossaryTerm[] = [];
+  const updatedTerms: GlossaryTerm[] = [];
+
+  terms.forEach((term) => {
+    const existingTerm = existingTermsMap.get(term.term.toLowerCase());
+
+    if (existingTerm) {
+      // Update existing term
+      const updatedTerm: GlossaryTerm = {
+        ...existingTerm,
+        definition: term.definition,
+        updatedAt: new Date().toISOString(),
+      };
+      updatedTerms.push(updatedTerm);
+    } else {
+      // Create new term
+      const newTerm: GlossaryTerm = {
+        ...term,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      importedTerms.push(newTerm);
+    }
+  });
+
+  // Combine existing terms (excluding those that were updated), updated terms, and new terms
+  const finalTerms = [
+    ...existingTerms.filter(
+      (term) => !updatedTerms.some((updated) => updated.id === term.id),
+    ),
+    ...updatedTerms,
+    ...importedTerms,
+  ];
+
+  await LocalStorage.setItem("glossary-terms", JSON.stringify(finalTerms));
+  return [...updatedTerms, ...importedTerms];
 }
 
 export async function updateTerm(
