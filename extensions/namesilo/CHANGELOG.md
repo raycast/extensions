@@ -1,7 +1,8 @@
 # NameSilo Changelog
 
-## [View Contact Profiles] - {PR_MERGE_DATE}
+## [View Contact Profiles + View & Configure Forwards] - {PR_MERGE_DATE}
 
+- View and Configure Email Forwards
 - View Contact Profiles in your account
 - Modernize to use latest Raycast config (+ remove `cross-fetch`)
 

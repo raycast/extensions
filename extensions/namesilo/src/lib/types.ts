@@ -45,6 +45,15 @@ export type AddDNSRecord = {
   rrttl: string;
 };
 
+export type EmailForward = {
+  email: string;
+  forwards_to: string;
+};
+export type ConfigurEmailForward = {
+  email: string;
+  forward1: string;
+};
+
 export type WhoisInfo = {
   domain: string;
   registered: string;
