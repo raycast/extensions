@@ -8,6 +8,7 @@ import {
   Toast,
   Alert,
   confirmAlert,
+  pasteText,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
@@ -17,6 +18,7 @@ import {
   deleteTerm,
   deleteAllTerms,
 } from "./data-store";
+import { getPreferences, getFormattedContent } from "./preferences-store";
 import EditTerm from "./edit-term";
 import InsertTerm from "./insert-term";
 
@@ -40,6 +42,7 @@ export default function SearchGlossary(props: LaunchProps) {
   const [terms, setTerms] = useState<GlossaryTerm[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState<SortOrder>("a-z");
+  const [preferences] = useState(getPreferences());
 
   const { pop } = useNavigation();
 
@@ -76,6 +79,210 @@ export default function SearchGlossary(props: LaunchProps) {
   useEffect(() => {
     void search();
   }, [search]);
+
+  const getActionPanel = (term: GlossaryTerm) => {
+    const primaryContent = getFormattedContent(
+      term.term,
+      term.definition,
+      preferences.primaryActionTarget,
+    );
+    const isPrimaryCopy = preferences.primaryAction === "copy";
+    const targetLabel =
+      preferences.primaryActionTarget === "both"
+        ? "Term and Definition"
+        : preferences.primaryActionTarget;
+
+    return (
+      <ActionPanel>
+        {/* Primary Action */}
+        {isPrimaryCopy ? (
+          <Action.CopyToClipboard
+            title={`Copy ${targetLabel}`}
+            content={primaryContent}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
+            onCopy={async () => {
+              await showToast({
+                style: Toast.Style.Success,
+                title: "Copied to clipboard",
+                message:
+                  preferences.primaryActionTarget === "both"
+                    ? `${term.term} and definition copied`
+                    : `${targetLabel} copied`,
+              });
+            }}
+          />
+        ) : (
+          <Action
+            title={`Paste ${targetLabel}`}
+            icon={Icon.Document}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
+            onAction={async () => {
+              try {
+                await pasteText(primaryContent);
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Pasted to active app",
+                  message:
+                    preferences.primaryActionTarget === "both"
+                      ? `${term.term} and definition pasted`
+                      : `${targetLabel} pasted`,
+                });
+              } catch (error) {
+                showFailureToast(error, {
+                  title: "Failed to paste",
+                });
+              }
+            }}
+          />
+        )}
+
+        {/* Secondary Actions */}
+        <Action.CopyToClipboard
+          title="Copy Definition"
+          content={term.definition}
+          shortcut={{ modifiers: ["cmd"], key: "d" }}
+        />
+
+        <Action.CopyToClipboard
+          title="Copy Term"
+          content={term.term}
+          shortcut={{ modifiers: ["cmd"], key: "t" }}
+        />
+
+        <Action
+          title="Paste Definition"
+          icon={Icon.Document}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          onAction={async () => {
+            try {
+              await pasteText(term.definition);
+              await showToast({
+                style: Toast.Style.Success,
+                title: "Definition pasted",
+              });
+            } catch (error) {
+              showFailureToast(error, {
+                title: "Failed to paste definition",
+              });
+            }
+          }}
+        />
+
+        <Action
+          title="Paste Term"
+          icon={Icon.Document}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+          onAction={async () => {
+            try {
+              await pasteText(term.term);
+              await showToast({
+                style: Toast.Style.Success,
+                title: "Term pasted",
+              });
+            } catch (error) {
+              showFailureToast(error, {
+                title: "Failed to paste term",
+              });
+            }
+          }}
+        />
+
+        <Action.Push
+          title="Edit Term"
+          target={
+            <EditTerm
+              term={term}
+              onEdit={() => {
+                pop();
+                search();
+              }}
+            />
+          }
+          icon={Icon.Pencil}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+        />
+
+        <Action.Push
+          title="Insert Term"
+          target={
+            <InsertTerm
+              onInsert={() => {
+                pop();
+                search();
+              }}
+              initialTerm={searchText}
+            />
+          }
+          icon={Icon.Text}
+          shortcut={{ modifiers: ["cmd"], key: "i" }}
+        />
+
+        <Action
+          title="Delete Term"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+          onAction={async () => {
+            const confirmed = await confirmAlert({
+              title: "Delete Term",
+              message: `Are you sure you want to delete "${term.term}"?`,
+              primaryAction: {
+                title: "Delete",
+                style: Alert.ActionStyle.Destructive,
+              },
+            });
+
+            if (confirmed) {
+              try {
+                await deleteTerm(term.id);
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Term deleted successfully",
+                });
+                search();
+              } catch (error) {
+                showFailureToast(error, {
+                  title: "Failed to delete term",
+                });
+              }
+            }
+          }}
+        />
+
+        <Action
+          title="Delete All Terms"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+          onAction={async () => {
+            const confirmed = await confirmAlert({
+              title: "Delete All Terms",
+              message: `Are you sure you want to delete all ${terms.length} terms? This action cannot be undone.`,
+              primaryAction: {
+                title: "Delete All",
+                style: Alert.ActionStyle.Destructive,
+              },
+            });
+
+            if (confirmed) {
+              try {
+                await deleteAllTerms();
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "All terms deleted successfully",
+                });
+                search();
+              } catch (error) {
+                showFailureToast(error, {
+                  title: "Failed to delete all terms",
+                });
+              }
+            }
+          }}
+        />
+      </ActionPanel>
+    );
+  };
 
   return (
     <List
@@ -137,110 +344,7 @@ export default function SearchGlossary(props: LaunchProps) {
                 markdown={`# ${term.term}\n\n${term.definition}`}
               />
             }
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Definition"
-                  content={term.definition}
-                />
-
-                <Action.CopyToClipboard
-                  title="Copy Term"
-                  content={term.term}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
-                />
-                <Action.Push
-                  title="Edit Term"
-                  target={
-                    <EditTerm
-                      term={term}
-                      onEdit={() => {
-                        pop();
-                        search();
-                      }}
-                    />
-                  }
-                  icon={Icon.Pencil}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
-                />
-                <Action.Push
-                  title="Insert Term"
-                  target={
-                    <InsertTerm
-                      onInsert={() => {
-                        pop();
-                        search();
-                      }}
-                      initialTerm={searchText}
-                    />
-                  }
-                  icon={Icon.Text}
-                  shortcut={{ modifiers: ["cmd"], key: "i" }}
-                />
-                <Action
-                  title="Delete Term"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                  onAction={async () => {
-                    const confirmed = await confirmAlert({
-                      title: "Delete Term",
-                      message: `Are you sure you want to delete "${term.term}"?`,
-                      primaryAction: {
-                        title: "Delete",
-                        style: Alert.ActionStyle.Destructive,
-                      },
-                    });
-
-                    if (confirmed) {
-                      try {
-                        await deleteTerm(term.id);
-                        await showToast({
-                          style: Toast.Style.Success,
-                          title: "Term deleted successfully",
-                        });
-                        search();
-                      } catch (error) {
-                        showFailureToast(error, {
-                          title: "Failed to delete term",
-                        });
-                      }
-                    }
-                  }}
-                />
-                <Action
-                  title="Delete All Terms"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-                  onAction={async () => {
-                    const confirmed = await confirmAlert({
-                      title: "Delete All Terms",
-                      message: `Are you sure you want to delete all ${terms.length} terms? This action cannot be undone.`,
-                      primaryAction: {
-                        title: "Delete All",
-                        style: Alert.ActionStyle.Destructive,
-                      },
-                    });
-
-                    if (confirmed) {
-                      try {
-                        await deleteAllTerms();
-                        await showToast({
-                          style: Toast.Style.Success,
-                          title: "All terms deleted successfully",
-                        });
-                        search();
-                      } catch (error) {
-                        showFailureToast(error, {
-                          title: "Failed to delete all terms",
-                        });
-                      }
-                    }
-                  }}
-                />
-              </ActionPanel>
-            }
+            actions={getActionPanel(term)}
           />
         ))
       )}

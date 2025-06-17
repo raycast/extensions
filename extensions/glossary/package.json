@@ -10,6 +10,56 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": true,
+      "title": "Primary Action",
+      "description": "Choose the primary action when selecting a term",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "primaryActionTarget",
+      "type": "dropdown",
+      "required": true,
+      "title": "Primary Action Target",
+      "description": "What should be copied/pasted by default",
+      "default": "definition",
+      "data": [
+        {
+          "title": "Definition",
+          "value": "definition"
+        },
+        {
+          "title": "Term",
+          "value": "term"
+        },
+        {
+          "title": "Term and Definition",
+          "value": "both"
+        }
+      ]
+    },
+    {
+      "name": "pasteFormat",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Paste Format",
+      "description": "Define custom format for pasting. Use {term} and {definition} as placeholders. Leave empty to use default format.",
+      "placeholder": "{term}: {definition}"
+    }
+  ],
   "commands": [
     {
       "name": "search-in-the-glossary",
