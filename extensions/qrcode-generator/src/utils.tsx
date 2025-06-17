@@ -43,8 +43,8 @@ export async function generateQRCode(options: { URL?: string; format?: "png" | "
   }
 }
 
-export function QRCodeView({ qrData }: { qrData: string }) {
-  return <Detail isLoading={!qrData} markdown={`![qrcode](${qrData}?raycast-height=350)`} />;
+export function QRCodeView({ qrData, height }: { qrData: string; height: number }) {
+  return <Detail isLoading={!qrData} markdown={`![qrcode](${qrData}?raycast-height=${height})`} />;
 }
 
 export const getQRCodePath = (qrcodeUrl: string, format: "png" | "svg" = "png") => {

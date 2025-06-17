@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Add repository filtering] - 2025-06-05
+
+- my-issues, my-pull-requests and menu counterparts can now specify repositories to include / exclude
+
 ## [Filter recently closed PRs by last update date] - 2025-04-16
 
 - Fixed a bug where active pull requests could be hidden: the `updated` filter is now only applied to closed PRs, so all active PRs are always shown in `My Pull Requests`.
