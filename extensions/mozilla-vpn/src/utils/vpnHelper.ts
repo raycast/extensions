@@ -2,7 +2,7 @@ import fs from 'fs';
 
 export const MOZILLA_VPN_PATH = '/Applications/Mozilla VPN.app';
 
-export const isMozillaVpnInstalled = (): boolean => {
+export const isMozillaVPNInstalled = (): boolean => {
   try {
     return fs.existsSync(MOZILLA_VPN_PATH);
   } catch (error) {

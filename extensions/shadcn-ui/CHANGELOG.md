@@ -1,5 +1,10 @@
 # shadcn/ui Changelog
 
+## [Fix search examples and components commands] - 2025-06-05
+
+- Fix "search components" command by removing dependency on the deprecated /api endpoint and fetching data directly from GitHub
+- Fix "search examples" command by updating the GitHub examples path in configuration to match the latest shadcn/ui repo structure
+
 ## [Update shadcn/ui add component command] - 2024-09-11
 
 - Updated Add Component command from `npx shadcn-ui@latest add {component}` to `npx shadcn@latest add {component}`
