@@ -34,10 +34,13 @@ const DetailPassword = ({
               return;
             }
 
-            toast.style = Toast.Style.Success;
-            toast.title = "Password retrieved successfully ✅";
-            setPassword(password.trim());
-            setIsLoading(false);
+            // Trigger open raycast app
+            exec("open /Applications/Raycast.app", () => {
+              toast.style = Toast.Style.Success;
+              toast.title = "Password retrieved successfully ✅";
+              setPassword(password.trim());
+              setIsLoading(false);
+            });
           },
         );
       }
