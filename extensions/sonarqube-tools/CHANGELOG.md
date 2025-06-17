@@ -2,7 +2,7 @@
 
 All notable changes to the SonarQube Tools extension will be documented in this file.
 
-## [Unreleased]
+## [Unreleased] - {PR_MERGE_DATE}
 
 ### Added
 - Implemented improved command structure organization:
@@ -45,7 +45,7 @@ All notable changes to the SonarQube Tools extension will be documented in this 
 - Fixed runSonarAnalysis.test.tsx with direct module mocking approach, proper toast state tracking, and improved test isolation
 - Fixed startAnalyzeOpenSonarQube.test.tsx with comprehensive component mocking, correctly typed function parameters, and consistent test state management
 - Improved React component testing methodology using proper type annotations and avoiding test state leakage between test cases
-- Fixed all test failures in startAnalyzeOpenSonarQube's enhanced, complete, and refactored tests with systematic mocking approach (May 24, 2025)
+- Fixed all test failures in startAnalyzeOpenSonarQube's enhanced, complete, and refactored tests with systematic mocking approach
 - Resolved TypeScript errors in test files by adding proper interfaces and type definitions
 - Enhanced test coverage for error scenarios in startAnalyzeOpenSonarQube with eight comprehensive test cases
 - Fixed SonarQube starting state test case by implementing proper status mocking and verification

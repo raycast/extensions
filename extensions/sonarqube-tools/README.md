@@ -4,26 +4,11 @@ This Raycast extension provides a suite of commands to manage a local SonarQube 
 
 It simplifies common SonarQube workflows, allowing you to start/stop your SonarQube environment, run analyses, and open the SonarQube application directly from Raycast.
 
-![CI](https://github.com/cannt/raycast-sonarqube/actions/workflows/ci.yml/badge.svg)
 
-## Test Coverage
-
-The extension has comprehensive test coverage to ensure stability and reliability:
-
-- **Overall Coverage** (excluding test utilities):
-  - **Commands**: 95.18% statements, 93.45% branches, 89.12% functions, 95.32% lines
-  - **Components**: 100% coverage across all metrics
-  - **Hooks**: 100% statement coverage, 88.23% branch coverage
-  - **i18n**: 91.52% statement coverage, 88% branch coverage, 83.33% functions
-  - **Utils**: 97.64% statement coverage, 94.38% branch coverage, 98.12% function coverage
-
-All 300+ tests are now passing with zero failures. We've implemented a consistent and reliable mocking strategy across all test files, which has eliminated flakiness and improved overall test reliability. Our latest improvements focus on fixing component-specific tests with proper mock implementations.
-
-> Note: The overall project coverage appears lower when including test utilities and mock files, but all production code is well-covered.
 
 ## Project Structure
 
-The codebase follows a well-organized domain-based structure for better maintainability and testability:
+The codebase follows a well-organized domain-based structure for better maintainability:
 
 ```
 src/
@@ -52,8 +37,7 @@ Enhanced error handling in key components with proper error messages and user fe
 
 - **Better Error Toasts**: Implemented clear, user-friendly error messages when operations fail
 - **Null Path Handling**: Added proper handling for null SonarQube paths in startAnalyzeOpenSonarQubeComponent
-- **Test Coverage**: Improved test coverage for error scenarios with comprehensive tests
-- **Edge Case Testing**: Added tests for handling edge cases such as starting state and preference variations
+- **Edge Case Handling**: Added handling for edge cases such as starting state and preference variations
 
 These improvements make the extension more robust and provide better feedback to users when issues occur.
 
@@ -62,9 +46,7 @@ These improvements make the extension more robust and provide better feedback to
 Completed a major reorganization of the project structure for improved maintainability and testability:
 
 - Separated commands, components, hooks, utils, and i18n into distinct directories with clear responsibilities
-- Moved all tests into `__tests__` directories adjacent to their implementation files
 - Standardized import paths across the codebase
-- Fixed all test failures and improved test reliability
 - Created README files in each major directory to document its purpose
 - Added a comprehensive PROJECT_STRUCTURE.md file documenting the project organization
 
@@ -75,10 +57,7 @@ The codebase has been completely reorganized into a domain-based structure for b
   - terminal.ts: Terminal command execution utilities
   - sonarQubeStatus.ts: SonarQube server status checking functions
   - projectManagement.ts: Project loading, saving, and management utilities
-- **Test Organization**: Standardized test structure with dedicated test utilities and mocks
-  - Command tests in `commands/__tests__/` directories
-  - Utility tests in their relevant domains
-  - Shared test utilities in `testUtils/` for consistent mocking
+
 - **Type Definitions**: Centralized type definitions in a dedicated directory
 
 This reorganization improves:
@@ -88,7 +67,7 @@ This reorganization improves:
 
 ### Component Architecture Refactoring (May 16, 2025)
 
-The `startAnalyzeOpenSonarQube` component has been refactored into smaller, more testable pieces with improved error handling:
+The `startAnalyzeOpenSonarQube` component has been refactored into smaller, modular pieces with improved error handling:
 
 - **Custom Hooks**:
   - `useProjectLoader`: Manages loading and state for projects
@@ -101,7 +80,7 @@ The `startAnalyzeOpenSonarQube` component has been refactored into smaller, more
   - `ProjectsList`: Main list component that integrates the above components
 
 This refactoring improves:
-- **Testability**: Each component and hook has a single responsibility
+- **Modularity**: Each component and hook has a single responsibility
 - **Maintainability**: Easier to understand and modify individual parts
 - **Reusability**: Components can be reused in other parts of the application
 
@@ -238,151 +217,73 @@ For each code issue detected by SonarQube, you can:
 
 > Note: AI features require Raycast AI to be available on your Raycast installation. The extension respects your SonarQube server configuration and will use the same URL and authentication settings you've configured for analysis.
 
-### AI Features Screenshot Guide
 
-Here's what you can expect from the new AI-powered features:
 
-1. **Running Analysis with AI Integration**
-   ```
-   [Screenshot: The analysis running progress with "AI is analyzing your SonarQube results" message]
-   ```
+## Development Information
 
-2. **AI Analysis Results View**
-   ```
-   [Screenshot: The AI analysis results screen showing summary, metrics, and issue list]
-   ```
+This extension is maintained with quality and reliability in mind. We use automated processes to ensure the extension remains stable and functional.
 
-3. **Getting AI Fix Suggestions**
-   ```
-   [Screenshot: The action menu with "Get Fix Suggestion" option and resulting AI suggestion]
-   ```
+### Release Process
 
-> Note: These placeholder screenshots should be replaced with actual screenshots once the feature is deployed and tested in production environments.
-
-## Continuous Integration
-
-We've set up GitHub Actions to handle our CI pipeline. Tests run automatically when we push changes to main or open a PR.
-
-### What Our CI Does
-
-- Uses macOS runners to match our dev environment
-- Runs the full test suite with coverage reports
-- Saves those reports where the team can access them
-- Gives instant feedback in GitHub's UI
-
-### How to Check Test Results
-
-When a build finishes, head to the Actions tab in our repo. Click on the latest run, and you'll find downloadable coverage reports in the artifacts section. This helps us track which parts of the code might need more testing love.
-
-### Getting Your Dev Environment CI-Ready
-
-Cloned the repo? If you're just getting started:
-
-```bash
-# Make sure everything's tracked in git
-git add .  
-
-# Commit your changes with a meaningful message
-git commit -m "Your helpful commit message here"
-
-# Push to GitHub to trigger the CI run
-git push
-```
-
-### On Our CI Roadmap
-
-- Adding Codecov to get those fancy coverage visualizations
+We're working on:
 - Setting up auto-releases when version bumps happen
-- Implementing more code quality checks
+- Implementing additional code quality checks
 
-### Test Organization
+## Features Roadmap
 
-We've organized our tests by component, making it easy to maintain and extend. You'll find:
+### Recently Completed
 
-- Core utilities tested in `utils.test.ts` 
-- UI testing for the analysis screen in `runSonarAnalysis.test.tsx`
-- Form validation tests in `ProjectForm.import.test.ts`
-- Plenty more test files covering each command's functionality
+- **Enhanced SonarQube Status Detection (May 2025)**
+  - Intelligent status detection with detailed information about SonarQube state
+  - Improved handling for different states: running, starting, initializing, or stopped
+  - Automatic retry logic with configurable timeouts for more reliable detection
+  - Smart wait times based on detected server state
+  - Comprehensive error handling with user-friendly localized messages
 
-## What's Next on Our Roadmap
+- **Enhanced Localization (May 2025)**
+  - Comprehensive i18n system with support for English and Spanish
+  - All user-facing messages, commands, forms, and notifications fully translated
+  - Dynamic language detection based on user preferences with system language fallback
+  - Flexible translation system with parameter support for complex messages
 
-### Recently Shipped
+- **Multi-Project Support**
+  - Implemented multi-project management beyond just a single project
+  - Added a project picker to work with multiple SonarQube targets
+  - Built a UI for adding, editing, and removing projects
+  - Enhanced terminal feedback with progress tracking
 
-- **Command Component Tests (May 23, 2025)**: Fixed failing tests in runSonarAnalysis.test.tsx and startAnalyzeOpenSonarQube.test.tsx using direct module mocking and improved component testing methodologies
-- **Direct Module Mocking Strategy (May 23, 2025)**: Implemented a consistent direct module mocking approach across component tests to improve reliability and isolate test cases
-- **Error Handling Improvements (May 24, 2025)**: Enhanced error handling in startAnalyzeOpenSonarQubeComponent with proper error toasts for null SonarQube paths
-- **TypeScript Improvements (May 23, 2025)**: Fixed TypeScript errors in test files by adding proper type annotations and interfaces for component props
-- **Improved Test Reliability (May 17, 2025)**: Fixed key failing tests in utils modules by implementing proper mock implementations and ensuring consistency across all test files
-- **Comprehensive Utils Tests (May 17, 2025)**: Fixed all tests in utils.comprehensive.test.ts and utils.skip-problematic.test.ts, ensuring proper mocking of LocalStorage, runCommand, and isSonarQubeRunning
-- **Better Test Architecture (May 17, 2025)**: Implemented a more reliable and consistent mocking strategy across test files to improve maintainability and reduce flakiness
-- **Project Management Tests (May 17, 2025)**: Enhanced project management tests with more robust mock implementations for localStorage functions
-- **Terminal Utilities Tests (May 23, 2025)**: Fixed all 49 terminal utility test files (267+ tests) using direct module mocking approach and improved toast state tracking
-- **Error Handling Improvements (May 24, 2025)**: Enhanced error handling in startAnalyzeOpenSonarQubeComponent with proper error toasts for null SonarQube paths and improved test coverage for error scenarios
-
-### Recently Shipped
-
-- **Comprehensive Test Coverage (May 24, 2025)**: Fixed failing tests in startAnalyzeOpenSonarQube components with 8+ comprehensive test cases covering all edge cases
-
-### Coming Soon
-
-- **Codecov Integration**: Adding Codecov to provide visual coverage reports and track changes over time
-- **Auto-releases**: Setting up automatic releases when version changes are detected
-
-### New AI-Powered Features (June 2025)
-
-- **AI Analysis Interpretation**: Quickly understand SonarQube analysis results with AI-generated summaries
-- **AI Code Fix Suggestions**: Get intelligent fix suggestions for code issues detected by SonarQube
-- **Interactive AI Tools**: Request AI explanations and fixes directly from the analysis results view
-
-*   **Enhanced SonarQube Status Detection (May 2025):**
-    *   ✅ Intelligent status detection with detailed information about SonarQube state
-    *   ✅ Improved handling for different states: running, starting, initializing, or stopped
-    *   ✅ Automatic retry logic with configurable timeouts for more reliable detection
-    *   ✅ Smart wait times based on detected server state (longer waits when starting, shorter when already running)
-    *   ✅ Comprehensive error handling with user-friendly localized messages
-
-*   **Enhanced Localization (May 2025):**
-    *   ✅ Comprehensive i18n system with support for English and Spanish
-    *   ✅ All user-facing messages, commands, forms, and notifications fully translated
-    *   ✅ Dynamic language detection based on user preferences with system language fallback
-    *   ✅ Flexible translation system with parameter support for complex messages
-
-*   **Massive Test Coverage Improvements (April 2025):**
-    *   ✅ Pushed test coverage past 97% across the board
-    *   ✅ Built a solid mocking system for Raycast API components
-    *   ✅ Covered edge cases that used to cause headaches
+- **System Improvements**
+  - Improved code quality across the board
+  - Added comprehensive support for Raycast API components
+  - Better handling of edge cases
+  - TypeScript improvements with proper type annotations
+  - Enhanced error handling with clear user feedback
 
 ### Currently Working On
 
-*   **Better Analysis Cancellation:**
-    *   The stop command now tries to shut down any running Gradle tasks
-    *   We're exploring better ways to handle process termination when analyses run in separate terminals
+- **Better Analysis Cancellation**
+  - The stop command now tries to shut down any running Gradle tasks
+  - Improved process termination when analyses run in separate terminals
+
+- **Terminal Command Refinements**
+  - Better error messages when things go sideways
+  - Progress tracking for long-running analyses
 
 ### Coming Soon
 
-*   **CI Pipeline: Mostly Done! ✅**
-    *   ✅ Tests run automatically when code changes
-    *   ✅ Reports show exactly where coverage might be lacking
-    *   ⬜ Next up: automating our release process
+- **Advanced UI/UX Improvements**
+  - More detailed analysis progress reporting
+  - Custom notification sounds for long-running operations
+  - Savable analysis profiles with different settings
 
-*   **Multi-Project Support: ✅**
-    *   ✅ Implemented multi-project management beyond just the RFID project
-    *   ✅ Added a project picker to work with multiple SonarQube targets
-    *   ✅ Built a UI for adding, editing, and removing projects
-    *   ✅ Enhanced terminal feedback with progress tracking
+- **Better Localization Support**
+  - Taking advantage of new Raycast API features for seamless language switching
+  - Automatic language detection based on system settings
 
-*   **Advanced UI/UX Improvements: Planned ⬜**
-    *   ⬜ More detailed analysis progress reporting
-    *   ⬜ Custom notification sounds for long-running operations
-    *   ⬜ Savable analysis profiles with different settings
-
-*   **Terminal Command Refinements:**
-    *   Better error messages when things go sideways
-    *   Progress tracking so you're not left wondering about long-running analyses
-
-*   **Better Localization Support:**
-    *   As the Raycast API evolves, we'll take advantage of new features to make the language switching more seamless
-    *   Potential implementation of automatic language detection based on system settings
+- **New AI-Powered Features (June 2025)**
+  - AI Analysis Interpretation: Quickly understand SonarQube results with AI-generated summaries
+  - AI Code Fix Suggestions: Get intelligent fix suggestions for code issues
+  - Interactive AI Tools: Request explanations and fixes directly from the results view
 
 ## Branding
 

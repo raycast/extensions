@@ -22,15 +22,6 @@ declare module "@raycast/api" {
 
   // Support both function signatures for showToast
   interface ShowToastFunction {
-    (options: ToastOptions): Toast;
-    (title: string): Toast;
-  }
-
-  // Redefine showToast with both supported signatures
-  const showToast: ShowToastFunction;
-
-  // Support both function signatures for showToast
-  interface ShowToastFunction {
     (options: ToastOptions): Promise<Toast>;
     (style: Toast.Style, title: string, message?: string): Promise<Toast>;
   }

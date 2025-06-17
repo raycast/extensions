@@ -26,12 +26,14 @@ export function mockExecAsyncFailure(error: string = "Command failed") {
 export const mockRunCommand = jest
   .fn()
   .mockImplementation(async (command: string, success: (value: string) => void) => {
-    return { success: true, message: success };
+    success("Command executed successfully");
+    return { success: true, message: "Command executed successfully" };
   });
 
 // Mock for runInNewTerminal function
 export const mockRunInNewTerminal = jest
   .fn()
   .mockImplementation(async (commands: string[], success: (value: string) => void) => {
-    return { success: true, message: success };
+    success("Commands executed successfully");
+    return { success: true, message: "Commands executed successfully" };
   });

@@ -1,104 +1,59 @@
 /**
- * Translation utility for SonarQube Tools extension
+ * Simple translation utility per Raycast guidelines
  *
- * Provides English-only translation functionality as per Raycast Store guidelines
+ * Raycast does not support localization and only supports US English.
+ * This module provides direct string access while keeping the API
+ * compatible with existing code to minimize changes.
  */
 
 import { en } from "./translations/index";
 
-// English only as per Raycast guidelines
-export type Language = "en";
-
-// Translation dictionary (English only)
-const translations = {
-  en,
-};
-
-// Always return English as per Raycast guidelines
-export function getLanguage(): Language {
-  return "en";
-}
-
 /**
- * Translate a key to the current language
+ * Simplified translation function that only supports English
+ * but maintains compatibility with the existing codebase
  *
- * @param key The translation key to lookup
+ * @param key The translation key to lookup (dot notation for nested keys)
  * @param params Optional parameters to substitute in the translation
- * @returns The translated string or the key if translation not found
+ * @returns The translated string or the key itself if not found
  */
 export function t(key: string, params?: Record<string, string>): string {
-  const lang = getLanguage();
-  let translated = key;
-
   try {
-    // Get the translation from the dictionary
-    const translationObj = translations[lang];
     const keyParts = key.split(".");
-
     // Navigate the nested translation object
-    let current: Record<string, unknown> = translationObj as Record<string, unknown>;
+    let current = en as Record<string, unknown>;
+    let result: unknown = current;
+
     for (const part of keyParts) {
       if (current && typeof current === "object" && part in current) {
+        result = current[part];
         current = current[part] as Record<string, unknown>;
       } else {
-        // Key not found in this language
-        current = null as unknown as Record<string, unknown>;
-        break;
+        return key; // Key not found, return the original key
       }
     }
 
-    if (current && typeof current === "string") {
-      translated = current;
+    if (typeof result === "string") {
+      let translated = result;
 
-      // Replace any parameters
+      // Handle parameter replacement if needed
       if (params) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        Object.entries(params).forEach(([key, value]) => {
-          translated = translated.replace(new RegExp(`{{${key}}}`, "g"), value);
+        Object.entries(params).forEach(([paramKey, value]) => {
+          translated = translated.replace(new RegExp(`{{${paramKey}}}`, "g"), value);
         });
       }
-    } else if (lang !== "en") {
-      // Try English as fallback if not already using it
-      const enTranslation = translations.en;
-      let fallback: Record<string, unknown> = enTranslation as Record<string, unknown>;
 
-      for (const part of keyParts) {
-        if (fallback && typeof fallback === "object" && part in fallback) {
-          fallback = fallback[part] as Record<string, unknown>;
-        } else {
-          fallback = null as unknown as Record<string, unknown>;
-          break;
-        }
-      }
-
-      if (fallback && typeof fallback === "string") {
-        translated = fallback;
-
-        // Replace any parameters in the fallback
-        if (params) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          Object.entries(params).forEach(([key, value]) => {
-            translated = translated.replace(new RegExp(`{{${key}}}`, "g"), value);
-          });
-        }
-      }
+      return translated;
     }
-  } catch (error) {
-    console.error(`Error translating key: ${key}`, error);
-  }
 
-  return translated;
+    return key; // If result is not a string, return the original key
+  } catch (error) {
+    console.error(`Error in translation lookup: ${key}`, error);
+    return key;
+  }
 }
 
-// Shorthand alias - use the same reference to the function, not just the same functionality
+// Shorthand alias for compatibility with existing code
 export const __ = t;
 
-// Create a simple object with all our functions
-const i18n = {
-  t,
-  __,
-  getLanguage,
-};
-
-// Export directly for simplicity in module compatibility
-export default i18n;
+// Export for module compatibility
+export default { t, __ };

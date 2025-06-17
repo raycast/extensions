@@ -1,15 +1,15 @@
-import { useState } from "react";
 import { ActionPanel, Action, List, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useProjectLoader } from "../../hooks/useProjectLoader";
 import { __ } from "../../i18n";
 import { Project, saveProject, deleteProject } from "../../utils/projectManagement";
+import { ProjectForm } from "../ProjectForm";
 
 /**
  * ProjectManager - Component for managing SonarQube projects
  */
 export function ProjectManager() {
-  const { projects, isLoading, error } = useProjectLoader();
-  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+  const { projects, isLoading, error, refreshProjects } = useProjectLoader();
   const navigation = useNavigation();
 
   // Function to handle project save
@@ -25,13 +25,9 @@ export function ProjectManager() {
         title: __("projects.form.saveSuccess"),
       });
       // Trigger refresh of project list
-      setRefreshTrigger((prev) => prev + 1);
+      refreshProjects();
     } catch (err) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: __("projects.form.saveError"),
-        message: String(err),
-      });
+      showFailureToast(err, { title: __("projects.form.saveError") });
     }
   };
 
@@ -44,13 +40,9 @@ export function ProjectManager() {
         title: __("projects.form.deleteSuccess"),
       });
       // Trigger refresh of project list
-      setRefreshTrigger((prev) => prev + 1);
+      refreshProjects();
     } catch (err) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: __("projects.form.deleteError"),
-        message: String(err),
-      });
+      showFailureToast(err, { title: __("projects.form.deleteError") });
     }
   };
 
@@ -64,11 +56,7 @@ export function ProjectManager() {
           icon={Icon.Warning}
           actions={
             <ActionPanel>
-              <Action
-                title={__("common.retry")}
-                onAction={() => setRefreshTrigger((prev) => prev + 1)}
-                icon={Icon.RotateClockwise}
-              />
+              <Action title={__("common.retry")} onAction={() => refreshProjects()} icon={Icon.RotateClockwise} />
             </ActionPanel>
           }
         />
@@ -81,8 +69,8 @@ export function ProjectManager() {
     const FormWrapper = () => {
       const handleSubmit = (values: { name: string; path: string }) => {
         handleSaveProject(values);
-        // Refresh trigger will cause component to reload with new data
-        setRefreshTrigger((prev) => prev + 1);
+        // Refresh projects to reload data
+        refreshProjects();
       };
 
       return <ProjectForm onSubmit={handleSubmit} />;
@@ -97,8 +85,8 @@ export function ProjectManager() {
     const FormWrapper = () => {
       const handleSubmit = (values: { name: string; path: string }) => {
         handleSaveProject(values, project.id);
-        // Refresh trigger will cause component to reload with new data
-        setRefreshTrigger((prev) => prev + 1);
+        // Refresh projects to reload data
+        refreshProjects();
       };
 
       return <ProjectForm project={project} onSubmit={handleSubmit} />;
@@ -108,12 +96,7 @@ export function ProjectManager() {
   };
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder={__("commands.runSonarAnalysis.searchPlaceholder")}
-      // Force refresh when the trigger changes
-      key={`project-list-${refreshTrigger}`}
-    >
+    <List isLoading={isLoading} searchBarPlaceholder={__("commands.runSonarAnalysis.searchPlaceholder")}>
       {/* Projects section */}
       <List.Section title={__("projects.management.title")}>
         {projects.length > 0 ? (
@@ -169,6 +152,3 @@ export function ProjectManager() {
     </List>
   );
 }
-
-// Import ProjectForm component
-import { ProjectForm } from "../ProjectForm";
