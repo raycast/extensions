@@ -1,0 +1,165 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "look-up",
+  "title": "Look Up",
+  "description": "Instantly transform your text into your preferred language. Select, translate, and experience your words in Arabic, Spanish, French, and many more languages with a single command.",
+  "icon": "extension-icon.png",
+  "author": "mohammad_taleb",
+  "keywords": [
+    "translate",
+    "language",
+    "translation",
+    "multilingual",
+    "text",
+    "utility"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "commands": [
+    {
+      "name": "look-up",
+      "title": "Look Up",
+      "subtitle": "Translate selected text",
+      "description": "Translate selected text to your preferred language",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "targetLanguage",
+          "title": "Target Language",
+          "description": "The language to translate text into",
+          "type": "dropdown",
+          "required": true,
+          "default": "ar",
+          "data": [
+            {
+              "title": "Arabic",
+              "value": "ar"
+            },
+            {
+              "title": "Spanish",
+              "value": "es"
+            },
+            {
+              "title": "French",
+              "value": "fr"
+            },
+            {
+              "title": "German",
+              "value": "de"
+            },
+            {
+              "title": "Chinese",
+              "value": "zh"
+            },
+            {
+              "title": "Japanese",
+              "value": "ja"
+            },
+            {
+              "title": "Russian",
+              "value": "ru"
+            },
+            {
+              "title": "Italian",
+              "value": "it"
+            },
+            {
+              "title": "Portuguese",
+              "value": "pt"
+            },
+            {
+              "title": "Korean",
+              "value": "ko"
+            }
+          ]
+        },
+        {
+          "name": "sourceLanguage",
+          "title": "Source Language",
+          "description": "The source language of text (default: auto-detect)",
+          "type": "dropdown",
+          "required": false,
+          "default": "auto",
+          "data": [
+            {
+              "title": "Auto-detect",
+              "value": "auto"
+            },
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "Arabic",
+              "value": "ar"
+            },
+            {
+              "title": "Spanish",
+              "value": "es"
+            },
+            {
+              "title": "French",
+              "value": "fr"
+            },
+            {
+              "title": "German",
+              "value": "de"
+            },
+            {
+              "title": "Chinese",
+              "value": "zh"
+            },
+            {
+              "title": "Japanese",
+              "value": "ja"
+            },
+            {
+              "title": "Russian",
+              "value": "ru"
+            },
+            {
+              "title": "Italian",
+              "value": "it"
+            },
+            {
+              "title": "Portuguese",
+              "value": "pt"
+            },
+            {
+              "title": "Korean",
+              "value": "ko"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^1.17.0",
+    "@types/node-fetch": "^2.6.12",
+    "node-fetch": "^2.7.0",
+    "translate": "^3.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
