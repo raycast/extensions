@@ -24,10 +24,9 @@
     {
       "name": "find-departures",
       "title": "Find Train Departures",
-      "subtitle": "MTA, LIRR, and Metro-North",
+      "subtitle": "NYC Train Tracker",
       "description": "Search for NYC train departures from MTA, LIRR, and Metro-North stations.",
       "mode": "view",
-      "main": "src/find-departures.tsx",
       "preferences": [
         {
           "name": "defaultDepartureWindow",
