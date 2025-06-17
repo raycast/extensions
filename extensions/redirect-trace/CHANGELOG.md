@@ -17,7 +17,7 @@
 - Secure request handling with proper headers
 - Comprehensive tracking parameter removal
 
-## [1.0.0] - 2025-06-17
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of RedirectTrace extension
