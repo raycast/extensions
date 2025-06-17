@@ -2,6 +2,7 @@
 
 ## [Bug Fix] - {PR_MERGE_DATE}
 - Fixed major bug for streams not loading correctly
+- Added more addon support
 
 ## [Initial Release] - 2025-06-17
 
