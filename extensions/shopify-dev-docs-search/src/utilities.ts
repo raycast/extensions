@@ -39,5 +39,5 @@ export function formatBreadcrumbs(breadcrumb?: string, contentCategory?: string)
   const formattedParts = relevantParts.map((part) => toTitleCase(part));
 
   // Join with > and prefix with content_category
-  return `${contentCategory || ""} > ${formattedParts.join(" > ")}`;
+  return contentCategory ? `${contentCategory} > ${formattedParts.join(" > ")}` : formattedParts.join(" > ");
 }
