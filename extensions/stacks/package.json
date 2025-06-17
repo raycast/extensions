@@ -13,15 +13,15 @@
   "commands": [
     {
       "name": "search-resources",
-      "title": "Search Resources",
-      "subtitle": "Stacks",
+      "title": "Search Stacks",
+      "subtitle": "BetterStacks",
       "description": "Search your saved resources with grid or list view",
       "mode": "view"
     },
     {
       "name": "add-link",
       "title": "Add Link",
-      "subtitle": "Stacks",
+      "subtitle": "BetterStacks",
       "description": "Add a new link to your Stacks workspace",
       "mode": "view",
       "arguments": [

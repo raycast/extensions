@@ -14,7 +14,8 @@ import {
   Image,
   getPreferenceValues,
 } from "@raycast/api";
-import { executeQuery } from "./utils/graphql";
+import { showFailureToast } from "@raycast/utils";
+import { executeQuery, Preferences } from "./utils/graphql";
 
 // GraphQL query to fetch resources (links)
 const FETCH_RESOURCES_QUERY = `
@@ -102,11 +103,6 @@ interface Resource {
     profile_image_url?: string;
     username?: string;
   };
-}
-
-interface Preferences {
-  gqlToken: string;
-  viewType: "grid" | "list";
 }
 
 // Function to get icon based on resource type
@@ -258,11 +254,7 @@ export default function Command() {
       setError(errorMessage);
 
       // Show error toast
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error fetching resources",
-        message: errorMessage,
-      });
+      await showFailureToast(errorMessage, { title: "Error fetching resources" });
     } finally {
       setIsLoading(false);
     }
@@ -422,9 +414,9 @@ Your token is stored securely and only used to communicate with the Stacks API.
         }}
       >
         {resources.length > 0 ? (
-          resources.map((resource, index) => (
+          resources.map((resource) => (
             <List.Item
-              key={`${resource.id}-${index}`}
+              key={resource.id}
               icon={
                 resource.favicon_url
                   ? {

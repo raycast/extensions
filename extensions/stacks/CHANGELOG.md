@@ -3,18 +3,11 @@
 ## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
-- Search through your saved Stacks resources with grid and list views
-- Add new links to your Stacks workspace with URL validation
-- Configurable view preferences (Grid/List)
-- Real-time search and filtering
-- Quick actions: Open in browser, copy URL, refresh data
-- Secure API token authentication via preferences
-- Support for URL arguments in Add Link command
-- Keyboard shortcuts for improved workflow
-
-### Features
-- **Search Resources**: Browse and search your saved resources
-- **Add Link**: Quickly save new URLs to your Stacks collection  
-- **Grid/List Views**: Choose your preferred display format
-- **Quick Actions**: Open, copy, and manage your resources efficiently
-- **Secure Authentication**: Uses Raycast's built-in preferences for API tokens
+- **Search Stacks**: Browse and search through saved resources with grid and list views
+- **Add Link**: Quickly save new URLs to your Stacks workspace with URL validation
+- **Multiple View Modes**: Switch between Grid and List display formats
+- **Real-time Search**: Filter resources with instant search functionality
+- **Quick Actions**: Open in browser, copy URL, refresh data, and more
+- **Secure Authentication**: Uses Raycast's built-in preferences for API token storage
+- **URL Arguments**: Support for URL arguments in Add Link command for quick workflow
+- **Keyboard Shortcuts**: Enhanced productivity with keyboard shortcuts
