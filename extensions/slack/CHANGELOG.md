@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Fix search messages from specific user] - {PR_MERGE_DATE}
+
+- Fix search messages from specific user (using `from:<@${user.id}>` instead of `from:${user.name}`)
+
 ## [Fix Emoji Search Missing Scope Error] - 2025-05-28
 
 - Add missing `emoji:read` scope to fix "missing_scope" error when using Search Emojis command
