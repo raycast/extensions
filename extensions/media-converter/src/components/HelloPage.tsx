@@ -1,4 +1,4 @@
-import { Detail, Action, ActionPanel } from "@raycast/api";
+import { Detail, Action, ActionPanel, Icon } from "@raycast/api";
 import { LocalStorage } from "@raycast/api";
 
 export function HelloPage({ onContinue }: { onContinue: () => void }) {
@@ -29,6 +29,7 @@ Enjoy using the converter!
         <ActionPanel>
           <Action
             title="Continue"
+            icon={Icon.Checkmark}
             onAction={async () => {
               await LocalStorage.setItem("hasSeenHelloPage", "true");
               onContinue();

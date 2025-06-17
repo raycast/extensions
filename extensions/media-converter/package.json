@@ -11,7 +11,9 @@
     "sacha_crispin"
   ],
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Design Tools",
+    "Media"
   ],
   "license": "MIT",
   "commands": [

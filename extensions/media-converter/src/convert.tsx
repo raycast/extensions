@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { /* Detail ,*/ LocalStorage, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { /* Detail,*/ /* environment, */ LocalStorage, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 import { findFFmpegPath } from "./utils/ffmpeg";
 import { HelloPage } from "./components/HelloPage";
@@ -11,7 +11,6 @@ export default function Command() {
   const [initialFinderFiles, setInitialFinderFiles] = useState<string[] | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [showInstallation, setShowInstallation] = useState(false);
-  const [detectedFFmpegPath, setDetectedFFmpegPath] = useState<string | null>(null);
   const [ffmpegLostMessage, setFFmpegLostMessage] = useState<string | null>(null);
 
   // Check FFmpeg installation in the background
@@ -41,16 +40,38 @@ export default function Command() {
 
         // No stored path, check for system FFmpeg
         const foundPath = await findFFmpegPath();
-        setDetectedFFmpegPath(foundPath);
+        // FFmpeg found on system - determine if we should show success toast
+        const hasSeenHelloPageBefore = await LocalStorage.getItem("hasSeenHelloPage");
+        const isFirstTimeSetup = hasSeenHelloPageBefore;
 
         if (!foundPath) {
-          // No FFmpeg found anywhere
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "FFmpeg required",
-            message: "FFmpeg is required for media conversion. Please install it.",
-          });
+          // No FFmpeg found anywhere - check if this is first-time setup
+
+          // Only show failure toast if this isn't the first time setup
+          if (!isFirstTimeSetup) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "FFmpeg required",
+              message: "FFmpeg is required for media conversion. Please install it.",
+            });
+          }
           setShowInstallation(true);
+        } else {
+          const hadLostFFmpeg = ffmpegLostMessage !== null;
+
+          // Show success toast if:
+          // 1. First time setup and FFmpeg was found, OR
+          // 2. Previously had FFmpeg that was lost, but system FFmpeg was found
+          if (isFirstTimeSetup || hadLostFFmpeg) {
+            await showToast({
+              style: Toast.Style.Success,
+              title: "FFmpeg found",
+              message: `FFmpeg detected at: ${foundPath}`,
+            });
+          }
+
+          // Store the found path for future use
+          await LocalStorage.setItem("ffmpeg-path", foundPath);
         }
       } catch (error) {
         console.error("Error checking FFmpeg:", error);
@@ -75,6 +96,7 @@ export default function Command() {
       try {
         const seen = await LocalStorage.getItem("hasSeenHelloPage");
         setHasSeenHelloPage(seen === "true");
+        // setHasSeenHelloPage(seen === !environment.isDevelopment); // In dev mode, always show the HelloPage
 
         try {
           const finderItems = await getSelectedFinderItems();
@@ -101,13 +123,7 @@ export default function Command() {
 
   // Show installation if we've determined FFmpeg is missing
   if (showInstallation) {
-    return (
-      <Installation
-        onInstallComplete={() => setShowInstallation(false)}
-        detectedFFmpegPath={detectedFFmpegPath}
-        lostFFmpegMessage={ffmpegLostMessage}
-      />
-    );
+    return <Installation onInstallComplete={() => setShowInstallation(false)} lostFFmpegMessage={ffmpegLostMessage} />;
   }
 
   // Show loading only while we're still loading initial data

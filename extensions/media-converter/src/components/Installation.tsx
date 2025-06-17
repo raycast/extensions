@@ -1,30 +1,17 @@
 import { useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, LocalStorage } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, Icon, Detail } from "@raycast/api";
 import fs from "fs";
 import { installFFmpegBinary } from "../utils/ffmpeg";
 import { execPromise } from "../utils/exec";
 
 interface InstallationProps {
   onInstallComplete: () => void;
-  detectedFFmpegPath?: string | null;
   lostFFmpegMessage?: string | null;
 }
 
-export function Installation({ onInstallComplete, detectedFFmpegPath, lostFFmpegMessage }: InstallationProps) {
+export function Installation({ onInstallComplete, lostFFmpegMessage }: InstallationProps) {
   const [customPath, setCustomPath] = useState("");
   const [isInstalling, setIsInstalling] = useState(false);
-
-  const handleDetectedPath = async () => {
-    if (!detectedFFmpegPath) return;
-
-    try {
-      await LocalStorage.setItem("ffmpeg-path", detectedFFmpegPath);
-      showToast({ style: Toast.Style.Success, title: "FFmpeg path saved" });
-      onInstallComplete();
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Failed to save FFmpeg path", message: String(error) });
-    }
-  };
 
   const handleCustomPath = async () => {
     if (!customPath.trim()) {
@@ -103,67 +90,69 @@ export function Installation({ onInstallComplete, detectedFFmpegPath, lostFFmpeg
   };
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          {detectedFFmpegPath && (
-            <Action
-              // eslint-disable-next-line @raycast/prefer-title-case
-              title="Use Detected FFmpeg"
-              onAction={handleDetectedPath}
-              shortcut={{ modifiers: [], key: "return" }}
-            />
-          )}
-          <Action
-            // eslint-disable-next-line @raycast/prefer-title-case
-            title={isInstalling ? "Installing..." : "Auto-Install FFmpeg"}
-            onAction={handleAutoInstall}
-            shortcut={{ modifiers: detectedFFmpegPath ? ["cmd"] : [], key: "return" }}
-          />
-          <Action
-            title="Use Custom Path"
-            onAction={handleCustomPath}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text="FFmpeg is required to convert media files. Choose an installation option below:" />
-
-      {lostFFmpegMessage && (
-        <>
-          <Form.Separator />
-          <Form.Description text={`⚠️ ${lostFFmpegMessage}`} />
-        </>
-      )}
-
-      {detectedFFmpegPath ? (
-        <>
-          <Form.Separator />
-          <Form.Description text={`✅ FFmpeg detected at: ${detectedFFmpegPath}`} />
-          <Form.Description text="Click 'Use Detected FFmpeg' to use this installation." />
-        </>
-      ) : (
-        <>
-          <Form.Separator />
-          <Form.Description text="❌ FFmpeg not found in common system locations. This is expected for most users." />
-        </>
-      )}
-
-      <Form.Separator />
-
-      <Form.TextField
-        id="customPath"
-        title="Custom FFmpeg Path"
-        placeholder="/path/to/your/ffmpeg"
-        value={customPath}
-        onChange={setCustomPath}
-        info="If you have FFmpeg installed at a custom location, enter the full path here"
+    <>
+      {/* TODO: Detail doesn't render at all?? */}
+      <Detail
+        markdown={`
+      # TEST MARKDOWN
+            `}
       />
+      <Form
+        isLoading={isInstalling}
+        actions={
+          <ActionPanel>
+            {customPath.trim() ? (
+              <>
+                <Action title="Use Custom Path" onAction={handleCustomPath} icon={Icon.Folder} />
+                <Action
+                  // eslint-disable-next-line @raycast/prefer-title-case
+                  title={isInstalling ? "Installing..." : "Auto-Install FFmpeg"}
+                  onAction={handleAutoInstall}
+                  icon={Icon.Download}
+                />
+              </>
+            ) : (
+              <>
+                <Action
+                  // eslint-disable-next-line @raycast/prefer-title-case
+                  title={isInstalling ? "Installing..." : "Auto-Install FFmpeg"}
+                  onAction={handleAutoInstall}
+                  icon={Icon.Download}
+                />
+                <Action title="Use Custom Path" onAction={handleCustomPath} icon={Icon.Folder} />
+              </>
+            )}
+          </ActionPanel>
+        }
+      >
+        <Form.Description text="FFmpeg is required to convert media files. Choose an installation option below:" />
 
-      <Form.Separator />
+        {lostFFmpegMessage && (
+          <>
+            <Form.Separator />
+            <Form.Description text={`⚠️ ${lostFFmpegMessage}`} />
+          </>
+        )}
 
-      <Form.Description text="Or click 'Auto-Install FFmpeg' to download and install FFmpeg automatically." />
-    </Form>
+        {/* <Form.Separator />
+
+      <Form.Description text="We searched at common system locations for FFmpeg and didn't find it. Don't worry, this is expected for most users." /> */}
+
+        <Form.Separator />
+
+        <Form.TextField
+          id="customPath"
+          title="Custom FFmpeg Path"
+          placeholder="/path/to/your/ffmpeg"
+          value={customPath}
+          onChange={setCustomPath}
+          info={`If you have FFmpeg installed at a custom location, enter the full path here. To find the path, run \`${process.platform === "win32" ? "where ffmpeg" : "which ffmpeg"}\` in your terminal.`}
+        />
+
+        <Form.Separator />
+
+        <Form.Description text="Or click 'Auto-Install FFmpeg' to download and install FFmpeg automatically." />
+      </Form>
+    </>
   );
 }
