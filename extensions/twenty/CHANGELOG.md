@@ -1,5 +1,10 @@
 # Twenty Changelog
 
+## [Field Improvements] - 2025-06-12
+
+- Required fields simplified: Only the primary field is required
+- Automatic defaults: All optional fields use predefined default values if left empty
+
 ## [Maintenance] - 2025-02-12
 
 - Cleanup unused `.github` files

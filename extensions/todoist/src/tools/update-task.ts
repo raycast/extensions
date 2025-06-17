@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 import { sync_token, syncRequest } from "../api";
-import { priorities } from "../helpers/priorities";
+import { priorities, mapPriority } from "../helpers/priorities";
 import { withTodoistApi } from "../helpers/withTodoistApi";
 
 type Input = {
@@ -84,7 +84,7 @@ type Input = {
    */
   deadline?: { date: string };
   /**
-   * The priority of the task (1-4, where 4 is very urgent and 1 is natural)
+   * The priority of the task (1-4, where 1 is highest priotiy and 4 is the lowest priority).
    */
   priority?: number;
   /**
@@ -112,6 +112,7 @@ type Input = {
 };
 
 export default withTodoistApi(async function (input: Input) {
+  input.priority = mapPriority(input.priority);
   return syncRequest({
     sync_token,
     resource_types: ["items"],
@@ -162,7 +163,7 @@ export const confirmation = withTodoistApi(
       info.push({ name: "New Deadline", value: deadline.date });
     }
     if (priority) {
-      const priorityInfo = priorities.find((p) => p.value == priority);
+      const priorityInfo = priorities.find((p) => p.value == mapPriority(priority));
       info.push({ name: "New Priority", value: priorityInfo?.name || `Priority ${priority}` });
     }
     if (collapsed !== undefined) {
