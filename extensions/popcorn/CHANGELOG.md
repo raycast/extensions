@@ -1,5 +1,8 @@
 # Popcorn Raycast Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+- Fixed major bug for streams not loading correctly
+
 ## [Initial Release] - 2025-06-17
 
 - 🎬 Search for movies and TV series

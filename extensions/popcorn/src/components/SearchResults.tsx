@@ -72,7 +72,6 @@ export function SearchResults({
             />
           </>
         )}
-        <Action title="Configure" onAction={onConfigure} icon={Icon.Gear} />
       </ActionPanel>
     );
   }
@@ -101,7 +100,6 @@ export function SearchResults({
             shortcut={{ modifiers: ["cmd"], key: "e" }}
             icon={Icon.Switch}
           />
-          <Action title="Configure" onAction={onConfigure} icon={Icon.Gear} />
           <Action title="Clear Recent Items" onAction={onClearRecent} style={Action.Style.Destructive} />
           <Action title="Clear Watch History" onAction={onClearWatchHistory} style={Action.Style.Destructive} />
         </ActionPanel>

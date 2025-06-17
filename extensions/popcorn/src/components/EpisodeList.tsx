@@ -104,11 +104,6 @@ export function EpisodeList({
         </List.Dropdown>
       }
       isShowingDetail
-      actions={
-        <ActionPanel>
-          <Action title="Configure" onAction={onConfigure} icon={Icon.Gear} />
-        </ActionPanel>
-      }
     >
       {seasonsToShow.map((season) => {
         const seasonEpisodes = filterEpisodes(episodesBySeason[Number(season)]);
@@ -212,7 +207,6 @@ export function EpisodeList({
                           icon={getFilterIcon()}
                           shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                         />
-                        <Action title="Configure" onAction={onConfigure} icon={Icon.Gear} />
                       </ActionPanel>
                     }
                   />

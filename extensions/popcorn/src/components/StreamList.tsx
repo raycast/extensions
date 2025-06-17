@@ -80,7 +80,6 @@ export function StreamList({
               icon={watched ? Icon.EyeDisabled : Icon.Eye}
             />
           )}
-          <Action title="Configure" onAction={onConfigure} icon={Icon.Gear} />
         </ActionPanel>
       }
     >
@@ -88,9 +87,9 @@ export function StreamList({
         <List.EmptyView title="No Streams Available" description="There are no streams available for this media." />
       ) : (
         <List.Section title="Available Streams" subtitle={`${streams.length} streams`}>
-          {streams.map((stream, index) => (
+          {streams.map((stream) => (
             <List.Item
-              key={index}
+              key={stream.url}
               title={stream.title || "Unknown"}
               subtitle={extractQualityFromTitle(stream.title)}
               accessories={[{ text: extractSizeFromTitle(stream.title) }]}
@@ -148,7 +147,6 @@ export function StreamList({
                       icon={watched ? Icon.EyeDisabled : Icon.Eye}
                     />
                   )}
-                  <Action title="Configure" onAction={onConfigure} icon={Icon.Gear} />
                 </ActionPanel>
               }
             />

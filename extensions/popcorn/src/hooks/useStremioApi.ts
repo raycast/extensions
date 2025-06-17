@@ -111,11 +111,10 @@ async function parseSearchResponse(response: Response): Promise<Media[]> {
 }
 
 async function parseSeriesResponse(response: Response): Promise<Episode[]> {
-  const json = (await response.json()) as SeriesDetailResponse;
-
   if (!response.ok) {
     throw new Error(response.statusText);
   }
+  const json = (await response.json()) as SeriesDetailResponse;
 
   return json.meta.videos.map((video) => ({
     id: video.id,
