@@ -1,6 +1,6 @@
 # Popcorn Raycast Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-06-17
 
 - 🎬 Search for movies and TV series
 - ⚙️ Stremio addon support
