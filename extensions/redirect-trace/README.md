@@ -1,3 +1,3 @@
-# Redirect Trace - URL Chain Inspector
+# Redirect Trace
 
 A powerful URL redirect tracer for Raycast that helps you see where links really lead before clicking them. Like wheregoes.com for Raycast.
