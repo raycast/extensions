@@ -49,7 +49,7 @@ export function SearchResults({
     return (
       <ActionPanel>
         {isUsingAddon ? <Action title="Show Streams" onAction={() => onMediaSelect(media)} icon={Icon.Link} /> : null}
-        <Action.OpenInBrowser title="Open IMDB Page" url={`https://www.imdb.com/title/${media.imdb_id}`} />
+        <Action.OpenInBrowser title="Open Imdb Page" url={`https://www.imdb.com/title/${media.imdb_id}`} />
         <Action
           title={getMediaTypeToggle()}
           onAction={handleMediaTypeToggle}
@@ -137,7 +137,6 @@ export function SearchResults({
         <List.Section title="Trending" subtitle="Top trending items">
           {trendingMedia.map((media) => {
             const watchedCount = media.type === "series" ? getWatchedCount(media.id) : 0;
-
             return (
               <List.Item
                 key={`trending-${media.id}`}

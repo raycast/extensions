@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Application } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Application, open, Toast, showToast } from "@raycast/api";
 import { Stream, Media, Episode } from "../types";
 import { extractQualityFromTitle, extractSizeFromTitle, extractSourceFromTitle } from "../utils/streamUtils";
 
@@ -34,6 +34,30 @@ export function StreamList({
     : "Unknown";
 
   const watched = episode && isEpisodeWatched ? isEpisodeWatched(episode.id) : false;
+
+  const openInApplication = async (stream: Stream, app: Application) => {
+    console.log(
+      `Opening stream! \nNAME: ${app.name},\nURL: ${stream.url}\nBundle ID: ${app.bundleId}\nPATH: ${app.path}`,
+    );
+    try {
+      await open(stream.url, app);
+    } catch (error) {
+      console.error(`Failed to open stream in ${app.name}:`, error);
+      if (!stream.url) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No Stream URL",
+          message: "You may need an API key to access streams. Check your addon configuration.",
+        });
+        return;
+      }
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Open Stream",
+        message: `Could not open ${stream.url} URL in ${app.name}.`,
+      });
+    }
+  };
 
   return (
     <List
@@ -88,18 +112,16 @@ export function StreamList({
               }
               actions={
                 <ActionPanel>
-                  <Action.Open
+                  <Action
                     title={`Open in ${defaultStreamingApp.name}`}
-                    target={stream.url}
-                    application={defaultStreamingApp.path}
+                    onAction={() => openInApplication(stream, defaultStreamingApp)}
                     icon={Icon.Play}
                   />
                   {streamingAppsArray.map((app: Application) => (
-                    <Action.Open
+                    <Action
                       key={`${app.bundleId}`}
                       title={`Open in ${app.name}`}
-                      target={stream.url}
-                      application={`${app.path}`}
+                      onAction={() => openInApplication(stream, app)}
                       icon={Icon.Play}
                     />
                   ))}

@@ -10,8 +10,9 @@
     {
       "name": "search-streams",
       "title": "Search for Streams",
-      "description": "Search for Movies and TV shows using the Stremio API",
+      "description": "Search for Movies and TV shows",
       "mode": "view",
+      "subtitle": "Search for Movies and TV shows",
       "keywords": ["stremio", "stream", "movie", "tv", "real debrid", "rd"],
       "categories": ["Media"],
       "preferences": [
@@ -24,13 +25,22 @@
           "placeholder": "https://www.example.com/manifest.json"
         },
         {
-          "name": "streamingApps",
+          "name": "defaultStreamingApp",
+          "type": "appPicker",
+          "required": false,
+          "title": "Default Streaming App",
+          "description": "Default Streaming App to use for streaming",
+          "placeholder": "Select a streaming app",
+          "default": "IINA"
+        },
+        {
+          "name": "alternativeStreamingApps",
           "type": "textfield",
           "required": false,
-          "title": "Streaming Apps (comma-separated)",
-          "description": "Custom Streaming Apps (ordered, comma-separated)",
-          "placeholder": "IINA, VLC",
-          "default": "IINA, VLC"
+          "title": "Alternative Streaming Apps (comma-separated)",
+          "description": "Custom Alternative Streaming Apps (ordered, comma-separated)",
+          "placeholder": "VLC, MPV",
+          "default": "VLC"
         }
       ]
     }
