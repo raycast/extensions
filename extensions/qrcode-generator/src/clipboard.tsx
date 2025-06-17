@@ -1,6 +1,6 @@
 import { Clipboard, showToast, Toast, ActionPanel, Action, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { generateQRCode, QRCodeView, getQRCodePath } from "./utils";
+import { generateQRCode, getQRCodePath } from "./utils";
 import fs from "fs";
 
 export default function Command() {
@@ -37,11 +37,7 @@ export default function Command() {
       markdown={`![qrcode](${qrData || ""}?raycast-height=350)`}
       actions={
         <ActionPanel>
-          <Action
-            title="Save to Downloads"
-            onAction={handleSave}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-          />
+          <Action title="Save to Downloads" onAction={handleSave} shortcut={{ modifiers: ["cmd"], key: "s" }} />
         </ActionPanel>
       }
     />
