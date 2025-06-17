@@ -3,6 +3,7 @@ import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import { Browser, BrowserList, Notebook, Ownership } from "./types";
 import { getNotebookService, getSummaryService } from "./services";
 import { SelectSource, EditNotebookTitle, SourceView, DeleteNotebook, BrowserReselect } from "./component";
+import { showFailureToast } from "@raycast/utils";
 
 const notebookService = getNotebookService();
 const summaryService = getSummaryService();
@@ -106,7 +107,11 @@ export default function Command() {
                     title="Refresh Notebooks"
                     icon={Icon.RotateClockwise}
                     onAction={async () => {
-                      await notebookService.getNotebooks();
+                      try {
+                        await notebookService.getNotebooks();
+                      } catch (error) {
+                        showFailureToast(error, { title: "Failed to refresh notebooks" });
+                      }
                     }}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                   />

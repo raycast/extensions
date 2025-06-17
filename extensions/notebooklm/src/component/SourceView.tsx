@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { formatNavigationTitle } from "../utils/transformData";
 import { EditSourceTitle, DeleteSource, SourceDetail, SelectSource } from "./";
 import { NotebookService, SummaryService } from "../services";
+import { showFailureToast } from "@raycast/utils";
 
 export function SourceView(props: {
   notebookService: NotebookService;
@@ -86,7 +87,11 @@ export function SourceView(props: {
                     title="Reload Summary"
                     icon={Icon.RotateClockwise}
                     onAction={async () => {
-                      await notebookService.reloadSummary(notebook.id, source.id);
+                      try {
+                        await notebookService.reloadSummary(notebook.id, source.id);
+                      } catch (error) {
+                        showFailureToast(error, { title: "Failed to reload summary" });
+                      }
                     }}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                   />

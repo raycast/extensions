@@ -18,7 +18,7 @@ function getDriver(): IBrowserDriver {
   if (BrowserList[Browser] && BrowserDriverList[Browser]) {
     driverInstance = new BrowserDriverList[Browser]();
   } else {
-    driverInstance = new BrowserDriverList["Arc"]();
+    driverInstance = new ArcBrowserDriver();
   }
   return driverInstance;
 }

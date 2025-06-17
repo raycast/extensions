@@ -21,6 +21,7 @@
     {
       "name": "show-notebooks",
       "title": "Show Notebooks",
+      "subtitle": "NotebookLM",
       "description": "Create and manage your notebooks with Browser",
       "mode": "view"
     }
