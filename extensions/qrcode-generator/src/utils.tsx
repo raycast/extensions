@@ -18,16 +18,22 @@ export async function generateQRCode(options: { URL?: string; format?: "png" | "
   }
 
   try {
+    let result;
     if (format === "svg") {
       const svg = await QRCode.toString(URL, {
         type: "svg",
         width: SVG_OPTIONS.width,
         color: SVG_OPTIONS.color,
       });
-      return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+      result = `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
     } else {
-      return await QRCode.toDataURL(URL, preview ? QR_OPTIONS_PREVIEW : QR_OPTIONS);
+      result = await QRCode.toDataURL(URL, preview ? QR_OPTIONS_PREVIEW : QR_OPTIONS);
     }
+    await showToast({
+      title: "Generated successfully!",
+      style: Toast.Style.Success,
+    });
+    return result;
   } catch (error) {
     await showFailureToast({
       title: "Error",
@@ -38,7 +44,7 @@ export async function generateQRCode(options: { URL?: string; format?: "png" | "
 }
 
 export function QRCodeView({ qrData }: { qrData: string }) {
-  return <Detail isLoading={!qrData} markdown={`![qrcode](${qrData}?raycast-height=512)`} />;
+  return <Detail isLoading={!qrData} markdown={`![qrcode](${qrData}?raycast-height=350)`} />;
 }
 
 export const getQRCodePath = (qrcodeUrl: string, format: "png" | "svg" = "png") => {
