@@ -87,9 +87,9 @@ export function StreamList({
         <List.EmptyView title="No Streams Available" description="There are no streams available for this media." />
       ) : (
         <List.Section title="Available Streams" subtitle={`${streams.length} streams`}>
-          {streams.map((stream) => (
+          {streams.map((stream, index) => (
             <List.Item
-              key={stream.url}
+              key={index}
               title={stream.title || "Unknown"}
               subtitle={extractQualityFromTitle(stream.title)}
               accessories={[{ text: extractSizeFromTitle(stream.title) }]}
