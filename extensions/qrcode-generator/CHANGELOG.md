@@ -1,6 +1,6 @@
 # QR Code Generator Changelog
 
-## [Added JPEG Support] - 2025-06-03
+## [Added JPEG Support] - {PR_MERGE_DATE}
 - Added support for generating QR codes in JPEG format
 - Updated documentation to reflect new JPEG feature
 - Refactored image format choice in generateQRCode
