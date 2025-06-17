@@ -49,7 +49,7 @@ export type EmailForward = {
   email: string;
   forwards_to: string;
 };
-export type ConfigurEmailForward = {
+export type ConfigureEmailForward = {
   email: string;
   forward1: string;
 };

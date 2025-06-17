@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import useNameSilo from "../hooks/useNameSilo";
-import { ArrOrObjOrNull, type ConfigurEmailForward, EmailForward } from "../types";
+import { ArrOrObjOrNull, type ConfigureEmailForward, EmailForward } from "../types";
 import { parseAsArray } from "../utils/parseAsArray";
 import { useState } from "react";
 import { FormValidation, useForm } from "@raycast/utils";
@@ -23,7 +23,7 @@ export default function EmailForwards({ domain }: { domain: string }) {
               <Action.Push
                 icon={Icon.Plus}
                 title="Configure Email Forward"
-                target={<ConfigurEmailForward domain={domain} onConfigured={revalidate} />}
+                target={<ConfigureEmailForward domain={domain} onConfigured={revalidate} />}
               />
             </ActionPanel>
           }
@@ -41,7 +41,9 @@ export default function EmailForwards({ domain }: { domain: string }) {
                   <Action.Push
                     icon={Icon.Plus}
                     title="Configure Email Forward"
-                    target={<ConfigurEmailForward domain={domain} onConfigured={revalidate} initialForward={address} />}
+                    target={
+                      <ConfigureEmailForward domain={domain} onConfigured={revalidate} initialForward={address} />
+                    }
                   />
                 </ActionPanel>
               }
@@ -53,7 +55,7 @@ export default function EmailForwards({ domain }: { domain: string }) {
   );
 }
 
-function ConfigurEmailForward({
+function ConfigureEmailForward({
   domain,
   onConfigured,
   initialForward,
@@ -64,7 +66,7 @@ function ConfigurEmailForward({
 }) {
   const { pop } = useNavigation();
   const [execute, setExecute] = useState(false);
-  const { itemProps, handleSubmit, values } = useForm<ConfigurEmailForward>({
+  const { itemProps, handleSubmit, values } = useForm<ConfigureEmailForward>({
     onSubmit() {
       setExecute(true);
     },
