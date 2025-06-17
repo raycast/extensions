@@ -1,0 +1,102 @@
+---
+description: Working on Raycast extensions
+globs: 
+alwaysApply: false
+---
+# Motion Raycast Extension Development Guide
+
+## Project Overview
+This is a Raycast extension for managing Motion tasks. The extension provides commands for searching projects, searching tasks, capturing tasks, and creating Obsidian notes.
+
+## Project Structure
+
+### Core Files
+- [package.json](mdc:package.json) - Extension manifest and dependencies
+- [tsconfig.json](mdc:tsconfig.json) - TypeScript configuration
+- [eslint.config.js](mdc:eslint.config.js) - ESLint configuration
+
+### Source Code Organization
+- [src/](mdc:src) - Main source directory containing all commands
+- [src/tools/](mdc:src/tools) - AI tools directory
+- [assets/](mdc:assets) - Static assets like icons
+
+### Commands
+- [src/search-project.tsx](mdc:src/search-project.tsx) - Search through Motion projects
+- [src/search-tasks.tsx](mdc:src/search-tasks.tsx) - Search for Motion tasks
+- [src/capture-motion-task.tsx](mdc:src/capture-motion-task.tsx) - Capture Motion tasks with form interface
+- [src/create-obsidian-note.ts](mdc:src/create-obsidian-note.ts) - Create Obsidian notes for calendar events
+
+### AI Tools
+- [src/tools/create-a-motion-task.ts](mdc:src/tools/create-a-motion-task.ts) - AI tool for creating Motion tasks
+
+## Development Guidelines
+
+### Raycast Extension Patterns
+1. **Command Structure**: Each command should export a default function component
+2. **Form Components**: Use `Form` with `ActionPanel` and `Action.SubmitForm` for data input
+3. **List Components**: Use `List` with `List.Item` for displaying searchable data
+4. **Error Handling**: Always handle errors gracefully with `showToast`
+5. **Loading States**: Use `isLoading` prop on components for async operations
+
+### TypeScript Usage
+- Define proper types for form values and API responses
+- Use strict TypeScript configuration as defined in [tsconfig.json](mdc:tsconfig.json)
+- Import types from `@raycast/api` and `@raycast/utils`
+
+### Code Style
+- Follow the ESLint configuration in [eslint.config.js](mdc:eslint.config.js)
+- Use Prettier for code formatting (config in [motion/.prettierrc](mdc:motion/.prettierrc))
+- Prefer functional components over class components
+
+### Dependencies
+- **Core**: `@raycast/api` for Raycast-specific components and utilities
+- **Utils**: `@raycast/utils` for hooks like `useSQL`, `useFetch`, etc.
+- **Development**: ESLint, Prettier, TypeScript for code quality
+
+## Common Patterns
+
+### Form Handling
+```tsx
+function handleSubmit(values: Values) {
+  console.log(values);
+  showToast({ title: "Submitted form", message: "See logs for submitted values" });
+}
+```
+
+### List with Actions
+```tsx
+<List.Item
+  icon={Icon.Bird}
+  title="Item Title"
+  actions={
+    <ActionPanel>
+      <Action.Push title="Show Details" target={<Detail markdown="# Content" />} />
+    </ActionPanel>
+  }
+/>
+```
+
+### AI Tools Structure
+AI tools should be placed in [src/tools/](mdc:src/tools) and export a default async function.
+
+## Scripts
+- `npm run dev` - Start development mode
+- `npm run build` - Build the extension
+- `npm run lint` - Run ESLint
+- `npm run fix-lint` - Fix ESLint issues
+- `npm run publish` - Publish to Raycast Store
+
+## Best Practices
+1. Handle runtime dependencies gracefully
+2. Show loading indicators for async operations
+3. Implement proper error handling with user-friendly messages
+4. Use TypeScript for type safety
+5. Follow Raycast's design patterns and UI guidelines
+6. Test commands thoroughly before publishing
+
+## Motion Integration
+This extension integrates with Motion (task management app). When implementing new features:
+- Consider Motion's API capabilities and limitations
+- Implement proper authentication if required
+- Handle Motion-specific data structures
+- Provide meaningful error messages for Motion API failures
