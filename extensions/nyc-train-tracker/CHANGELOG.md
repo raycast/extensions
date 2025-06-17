@@ -1,6 +1,6 @@
 # NYC Train Tracker Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-06-17
 
 ### Added
 
