@@ -130,9 +130,17 @@ async function parseSeriesResponse(response: Response): Promise<Episode[]> {
 async function parseStreamResponse(response: Response): Promise<Stream[]> {
   const json = (await response.json()) as StreamResponse;
 
+  if (!json.streams || !Array.isArray(json.streams)) {
+    return [];
+  }
+  const parsedStreams = json.streams.map((stream) => ({
+    ...stream,
+    title: stream.title || stream.description || stream.name || "Unknown Stream Name",
+  }));
+
   if (!response.ok) {
     throw new Error(response.statusText);
   }
 
-  return json.streams || [];
+  return parsedStreams;
 }
