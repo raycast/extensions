@@ -399,7 +399,7 @@ export default function TraceRedirects() {
           if (isUrl && isLong) {
             setClipboardUrl(clipboardText);
             showToast({
-              style: Toast.Style.UserInitiated,
+              style: Toast.Style.Success,
               title: "Long URL detected in clipboard",
               message: `${Math.round(clipboardText.length / 100) / 10}k characters - Use 'Paste Long URL' action`,
             });
@@ -443,7 +443,7 @@ export default function TraceRedirects() {
 
       if (clipboardText.length < 500) {
         showToast({
-          style: Toast.Style.UserInitiated,
+          style: Toast.Style.Success,
           title: "URL detected",
           message: "Pasted directly in search bar",
         });
@@ -454,7 +454,7 @@ export default function TraceRedirects() {
 
       setClipboardUrl(clipboardText);
       showToast({
-        style: Toast.Style.UserInitiated,
+        style: Toast.Style.Success,
         title: "Long URL detected!",
         message: `${Math.round(clipboardText.length / 100) / 10}k characters ready to trace`,
       });
@@ -475,7 +475,7 @@ export default function TraceRedirects() {
         const result = await followRedirects(clipboardUrl);
         setRedirectChain(result);
         showToast({
-          style: Toast.Style.UserInitiated,
+          style: Toast.Style.Success,
           title: "Traced clipboard URL",
           message: `Found ${result.totalRedirects} redirects`,
         });
@@ -738,7 +738,7 @@ ${redirectChain.error ? `\nError: ${redirectChain.error}` : ""}`}
                     icon={Icon.Eye}
                     onAction={() => {
                       showToast({
-                        style: Toast.Style.UserInitiated,
+                        style: Toast.Style.Success,
                         title: "Full URL",
                         message: redirectChain.finalUrl,
                       });
@@ -752,7 +752,7 @@ ${redirectChain.error ? `\nError: ${redirectChain.error}` : ""}`}
                         redirectChain.finalUrl,
                       );
                       showToast({
-                        style: Toast.Style.UserInitiated,
+                        style: Toast.Style.Success,
                         title: "Clean URL",
                         message: cleanUrl,
                       });
@@ -800,7 +800,7 @@ ${redirectChain.error ? `\nError: ${redirectChain.error}` : ""}`}
                         icon={Icon.EyeSlash}
                         onAction={() => {
                           showToast({
-                            style: Toast.Style.UserInitiated,
+                            style: Toast.Style.Success,
                             title: "Clean URL",
                             message: cleanUrl,
                           });
@@ -811,7 +811,7 @@ ${redirectChain.error ? `\nError: ${redirectChain.error}` : ""}`}
                         icon={Icon.TwoArrowsClockwise}
                         onAction={() => {
                           showToast({
-                            style: Toast.Style.UserInitiated,
+                            style: Toast.Style.Success,
                             title: "URL Comparison",
                             message: `Original: ${redirectChain.finalUrl.length} chars\nClean: ${cleanUrl.length} chars\nRemoved: ${redirectChain.finalUrl.length - cleanUrl.length} chars`,
                           });
@@ -895,7 +895,7 @@ Headers: ${JSON.stringify(step.headers, null, 2)}`}
                           icon={Icon.Eye}
                           onAction={() => {
                             showToast({
-                              style: Toast.Style.UserInitiated,
+                              style: Toast.Style.Success,
                               title: "Full URL",
                               message: step.url,
                             });
@@ -908,7 +908,7 @@ Headers: ${JSON.stringify(step.headers, null, 2)}`}
                           onAction={() => {
                             const cleanUrl = cleanTrackingParams(step.url);
                             showToast({
-                              style: Toast.Style.UserInitiated,
+                              style: Toast.Style.Success,
                               title: "Clean URL",
                               message: cleanUrl,
                             });
