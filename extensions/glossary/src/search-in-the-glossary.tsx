@@ -9,7 +9,6 @@ import {
   Alert,
   confirmAlert,
   pasteText,
-  Keyboard,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
@@ -346,110 +345,6 @@ export default function SearchGlossary(props: LaunchProps) {
               />
             }
             actions={getActionPanel(term)}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Definition"
-                  content={term.definition}
-                />
-
-                <Action.CopyToClipboard
-                  title="Copy Term"
-                  content={term.term}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
-                />
-                <Action.Push
-                  title="Edit Term"
-                  target={
-                    <EditTerm
-                      term={term}
-                      onEdit={() => {
-                        pop();
-                        search();
-                      }}
-                    />
-                  }
-                  icon={Icon.Pencil}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
-                />
-                <Action.Push
-                  title="Insert Term"
-                  target={
-                    <InsertTerm
-                      onInsert={() => {
-                        pop();
-                        search();
-                      }}
-                      initialTerm={searchText}
-                    />
-                  }
-                  icon={Icon.Text}
-                  shortcut={{ modifiers: ["cmd"], key: "i" }}
-                />
-                <Action
-                  title="Delete Term"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  shortcut={Keyboard.Shortcut.Common.Remove}
-                  onAction={async () => {
-                    const confirmed = await confirmAlert({
-                      title: "Delete Term",
-                      message: `Are you sure you want to delete "${term.term}"?`,
-                      primaryAction: {
-                        title: "Delete",
-                        style: Alert.ActionStyle.Destructive,
-                      },
-                    });
-
-                    if (confirmed) {
-                      try {
-                        await deleteTerm(term.id);
-                        await showToast({
-                          style: Toast.Style.Success,
-                          title: "Term deleted successfully",
-                        });
-                        search();
-                      } catch (error) {
-                        showFailureToast(error, {
-                          title: "Failed to delete term",
-                        });
-                      }
-                    }
-                  }}
-                />
-                <Action
-                  title="Delete All Terms"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  shortcut={Keyboard.Shortcut.Common.RemoveAll}
-                  onAction={async () => {
-                    const confirmed = await confirmAlert({
-                      title: "Delete All Terms",
-                      message: `Are you sure you want to delete all ${terms.length} terms? This action cannot be undone.`,
-                      primaryAction: {
-                        title: "Delete All",
-                        style: Alert.ActionStyle.Destructive,
-                      },
-                    });
-
-                    if (confirmed) {
-                      try {
-                        await deleteAllTerms();
-                        await showToast({
-                          style: Toast.Style.Success,
-                          title: "All terms deleted successfully",
-                        });
-                        search();
-                      } catch (error) {
-                        showFailureToast(error, {
-                          title: "Failed to delete all terms",
-                        });
-                      }
-                    }
-                  }}
-                />
-              </ActionPanel>
-            }
           />
         ))
       )}
