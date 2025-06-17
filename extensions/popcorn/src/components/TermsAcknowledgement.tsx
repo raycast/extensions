@@ -14,7 +14,7 @@ export function TermsAcknowledgement({ onAccept }: TermsAcknowledgementProps) {
       await storage.saveTermsAcceptance();
       onAccept();
     } catch (error) {
-      showFailureToast(error, { title: "Failed to save terms acceptance:"});
+      showFailureToast(error, { title: "Failed to save terms acceptance:" });
     }
   };
 

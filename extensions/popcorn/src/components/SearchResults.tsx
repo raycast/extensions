@@ -15,7 +15,6 @@ interface SearchResultsProps {
   onRemoveFromRecent: (media: RecentMedia) => void;
   onClearRecent: () => void;
   onClearWatchHistory: () => void;
-  onConfigure: () => void;
 }
 
 export function SearchResults({
@@ -31,7 +30,6 @@ export function SearchResults({
   onRemoveFromRecent,
   onClearRecent,
   onClearWatchHistory,
-  onConfigure,
 }: SearchResultsProps) {
   const { getWatchedCount, recentMedia } = useLocalStorage();
   // Filter recent media by current media type

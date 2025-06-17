@@ -28,7 +28,7 @@ export function useLocalStorage() {
       const stored = await LocalStorage.getItem<string>(STORAGE_KEYS.LAST_SEARCH_TYPE);
       return stored === "series" ? "series" : "movie";
     } catch (error) {
-      showFailureToast(error, { title: "Failed to load last search type:"});
+      showFailureToast(error, { title: "Failed to load last search type:" });
       return "movie";
     }
   };
@@ -37,7 +37,7 @@ export function useLocalStorage() {
     try {
       await LocalStorage.setItem(STORAGE_KEYS.LAST_SEARCH_TYPE, type);
     } catch (error) {
-      showFailureToast(error, { title: "Failed to save last search type:"});
+      showFailureToast(error, { title: "Failed to save last search type:" });
     }
   };
 
@@ -54,7 +54,7 @@ export function useLocalStorage() {
     try {
       await LocalStorage.setItem(STORAGE_KEYS.TERMS_ACCEPTED, "true");
     } catch (error) {
-      showFailureToast(error, { title: "Failed to save terms acceptance:"});
+      showFailureToast(error, { title: "Failed to save terms acceptance:" });
       throw error;
     }
   };
@@ -63,7 +63,7 @@ export function useLocalStorage() {
     try {
       await LocalStorage.removeItem(STORAGE_KEYS.TERMS_ACCEPTED);
     } catch (error) {
-      showFailureToast(error, { title: "Failed to reset terms acceptance:"});
+      showFailureToast(error, { title: "Failed to reset terms acceptance:" });
     }
   };
 
@@ -77,7 +77,7 @@ export function useLocalStorage() {
         );
       }
     } catch (error) {
-      showFailureToast(error, { title: "Failed to load recent media:"});
+      showFailureToast(error, { title: "Failed to load recent media:" });
     }
   };
 
@@ -89,7 +89,7 @@ export function useLocalStorage() {
         setWatchedEpisodes(parsed);
       }
     } catch (error) {
-      showFailureToast(error, { title: "Failed to load watched episodes:"});
+      showFailureToast(error, { title: "Failed to load watched episodes:" });
     }
   };
 
@@ -110,7 +110,7 @@ export function useLocalStorage() {
       await LocalStorage.setItem(STORAGE_KEYS.RECENT_MEDIA, JSON.stringify(recentList));
       setRecentMedia(recentList);
     } catch (error) {
-      showFailureToast(error, { title: "Failed to save recent media:"});
+      showFailureToast(error, { title: "Failed to save recent media:" });
     }
   };
 
@@ -121,7 +121,7 @@ export function useLocalStorage() {
       selections[mediaId] = season;
       await LocalStorage.setItem(STORAGE_KEYS.SEASON_SELECTIONS, JSON.stringify(selections));
     } catch (error) {
-      showFailureToast(error, { title: "Failed to save season selection:"});
+      showFailureToast(error, { title: "Failed to save season selection:" });
     }
   };
 
@@ -132,7 +132,7 @@ export function useLocalStorage() {
       selections[mediaId] = episodeId;
       await LocalStorage.setItem(STORAGE_KEYS.EPISODE_SELECTIONS, JSON.stringify(selections));
     } catch (error) {
-      showFailureToast(error, { title: "Failed to save episode selection:"});
+      showFailureToast(error, { title: "Failed to save episode selection:" });
     }
   };
 
@@ -161,7 +161,7 @@ export function useLocalStorage() {
         message: `${episode.name}`,
       });
     } catch (error) {
-      showFailureToast(error, { title: "Failed to save watched episode:"});
+      showFailureToast(error, { title: "Failed to save watched episode:" });
     }
   };
 
@@ -181,7 +181,7 @@ export function useLocalStorage() {
         message: `${episode.name}`,
       });
     } catch (error) {
-      showFailureToast(error, { title: "Failed to remove watched episode:"});
+      showFailureToast(error, { title: "Failed to remove watched episode:" });
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to mark as unwatched",
@@ -215,7 +215,7 @@ export function useLocalStorage() {
         message: `Season ${season} (${episodes.length} episodes)`,
       });
     } catch (error) {
-      showFailureToast(error, { title: "Failed to mark season as watched:"});
+      showFailureToast(error, { title: "Failed to mark season as watched:" });
       showFailureToast({
         style: Toast.Style.Failure,
         title: "Failed to mark season as watched",
@@ -228,7 +228,7 @@ export function useLocalStorage() {
       const stored = await LocalStorage.getItem<string>(STORAGE_KEYS.WATCHED_FILTER);
       return (stored as "all" | "watched" | "unwatched") || "all";
     } catch (error) {
-      showFailureToast(error, { title: "Failed to load watched filter:"});
+      showFailureToast(error, { title: "Failed to load watched filter:" });
       return "all";
     }
   };
@@ -237,7 +237,7 @@ export function useLocalStorage() {
     try {
       await LocalStorage.setItem(STORAGE_KEYS.WATCHED_FILTER, filter);
     } catch (error) {
-      showFailureToast(error, { title: "Failed to save watched filter:"});
+      showFailureToast(error, { title: "Failed to save watched filter:" });
     }
   };
 
@@ -247,7 +247,7 @@ export function useLocalStorage() {
       const selections: Record<string, number> = existing ? JSON.parse(existing) : {};
       return selections[mediaId] || null;
     } catch (error) {
-      showFailureToast(error, { title: "Failed to load season selection:"});
+      showFailureToast(error, { title: "Failed to load season selection:" });
       return null;
     }
   };
@@ -258,7 +258,7 @@ export function useLocalStorage() {
       const selections: Record<string, string> = existing ? JSON.parse(existing) : {};
       return selections[mediaId] || null;
     } catch (error) {
-      showFailureToast(error, { title: "Failed to load episode selection:"});
+      showFailureToast(error, { title: "Failed to load episode selection:" });
       return null;
     }
   };
@@ -283,7 +283,7 @@ export function useLocalStorage() {
       await LocalStorage.setItem(STORAGE_KEYS.RECENT_MEDIA, JSON.stringify(recentList));
       setRecentMedia(recentList);
     } catch (error) {
-      showFailureToast(error, { title: "Failed to remove from recent:"});
+      showFailureToast(error, { title: "Failed to remove from recent:" });
     }
   };
 

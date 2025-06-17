@@ -6,7 +6,6 @@ import {
   getApplications,
   getPreferenceValues,
   List,
-  openCommandPreferences,
   showToast,
   Toast,
   useNavigation,
@@ -120,10 +119,6 @@ export default function Command() {
     showToast({ style: Toast.Style.Success, title: "Removed from recent" });
   };
 
-  const handleConfigure = () => {
-    openCommandPreferences();
-  };
-
   const handleClearRecent = async () => {
     await confirmAlert({
       title: "Clear Recent Items",
@@ -194,7 +189,6 @@ export default function Command() {
       onRemoveFromRecent={handleRemoveFromRecent}
       onClearRecent={handleClearRecent}
       onClearWatchHistory={handleClearWatchHistory}
-      onConfigure={handleConfigure}
     />
   );
 }
@@ -265,7 +259,6 @@ function EpisodesView({
       onEpisodeSelect={handleEpisodeSelection}
       onSeasonChange={handleSeasonChange}
       onWatchedFilterChange={handleWatchedFilterChange}
-      onConfigure={() => openCommandPreferences()}
     />
   );
 }
@@ -298,7 +291,6 @@ function StreamsView({
       defaultStreamingApp={defaultStreamingApp}
       streamingAppsArray={streamingApps}
       markEpisodeAsUnwatched={storage.markEpisodeAsUnwatched}
-      onConfigure={() => openCommandPreferences()}
     />
   );
 }

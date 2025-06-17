@@ -12,7 +12,6 @@ interface EpisodeListProps {
   onEpisodeSelect: (episode: Episode) => void;
   onSeasonChange: (season: string) => void;
   onWatchedFilterChange: (filter: "all" | "watched" | "unwatched") => void;
-  onConfigure: () => void;
 }
 
 export function EpisodeList({
@@ -24,7 +23,6 @@ export function EpisodeList({
   onEpisodeSelect,
   onSeasonChange,
   onWatchedFilterChange,
-  onConfigure,
 }: EpisodeListProps) {
   // Group episodes by season
   const episodesBySeason = episodes.reduce(
