@@ -27,7 +27,7 @@
   "preferences": [
     {
       "name": "maxRedirects",
-      "type": "textfield",
+      "type": "number",
       "required": false,
       "title": "Max Redirects",
       "description": "Maximum number of redirects to follow",
