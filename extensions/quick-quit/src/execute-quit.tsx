@@ -1,5 +1,5 @@
 import { LocalStorage, showToast, Toast, closeMainWindow } from "@raycast/api";
-import { exec } from "child_process";
+import { runAppleScript } from "@raycast/utils";
 import { Category } from "./types";
 
 interface LaunchProps {
@@ -16,11 +16,7 @@ async function handleQuit(categoryName: string, apps: string[]) {
   });
 
   try {
-    const quitPromises = apps.map((app) => {
-      return new Promise<void>((resolve) => {
-        exec(`osascript -e 'tell application "${app}" to quit'`, () => resolve());
-      });
-    });
+    const quitPromises = apps.map((app) => runAppleScript(`tell application ${JSON.stringify(app)} to quit`));
     await Promise.all(quitPromises);
 
     toast.style = Toast.Style.Success;

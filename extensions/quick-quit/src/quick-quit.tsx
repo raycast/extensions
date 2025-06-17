@@ -1,8 +1,8 @@
 import { ActionPanel, Action, List, Icon, LocalStorage, getApplications, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import React, { useState, useEffect, useCallback } from "react";
 import { getRelevantPrebuiltCategories } from "./utils";
 import { Category } from "./types";
-import { exec } from "child_process";
 
 interface ActiveCategoriesData {
   activeCustomCategories: Category[];
@@ -21,19 +21,13 @@ async function getRunningAppNames(): Promise<Set<string>> {
     return appNames
   `;
 
-  return new Promise((resolve, reject) => {
-    exec(`osascript -e '${appleScript}'`, (error, stdout) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      const names = stdout
-        .trim()
-        .split(", ")
-        .map((name) => name.trim());
-      resolve(new Set(names));
-    });
-  });
+  const output = await runAppleScript(appleScript);
+  const names = output
+    .trim()
+    .split(", ")
+    .map((name) => name.trim());
+
+  return new Set(names);
 }
 
 async function loadActiveCategories(): Promise<ActiveCategoriesData> {
@@ -67,9 +61,16 @@ async function handleQuit(categoryName: string, appsToQuit: string[], onSuccess:
     title: `Quitting ${categoryName} apps...`,
   });
   try {
-    const quitPromises = appsToQuit.map(
-      (app) =>
-        new Promise<void>((resolve) => exec(`osascript -e 'tell application "${app}" to quit'`, () => resolve())),
+    const quitPromises = appsToQuit.map((app) =>
+      runAppleScript(`
+        tell application ${JSON.stringify(app)} to quit
+        delay 0.2
+        tell application "System Events"
+          repeat while (exists (processes where name is ${JSON.stringify(app)}))
+            delay 0.2
+          end repeat
+        end tell
+      `),
     );
     await Promise.all(quitPromises);
     toast.style = Toast.Style.Success;

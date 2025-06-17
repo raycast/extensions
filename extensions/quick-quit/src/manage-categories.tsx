@@ -12,6 +12,7 @@ import {
   open,
   Application, // Import the Application type
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import React, { useState, useEffect, useCallback } from "react";
 import { getRelevantPrebuiltCategories } from "./utils";
 import { Category } from "./types";
@@ -39,11 +40,7 @@ export default function ManageCategoriesCommand() {
       // 2. Save the list of installed apps to our state
       setState({ data: { customCategories, relevantPrebuilt, installedApps }, isLoading: false });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load categories",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
-      });
+      await showFailureToast(error, { title: "Failed to load categories" });
       setState({ isLoading: false });
     }
   }, []);

@@ -71,7 +71,7 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
   // These states will now control the form fields directly
   const [categoryName, setCategoryName] = useState<string>("");
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
-  const [selectedIcon, setSelectedIcon] = useState<string>(EMOJI_ICONS[0]); // ADD THIS LINE
+  const [selectedIcon, setSelectedIcon] = useState<string>("🧑‍💻");
 
   useEffect(() => {
     async function fetchInitialData() {
