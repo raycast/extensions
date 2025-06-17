@@ -30,7 +30,7 @@ export async function generateQRCode(URL: string | undefined, format: "png" | "s
       case "jpeg":
         return await QRCode.toDataURL(URL, JPEG_OPTIONS);
       default:
-        throw new Error("No format selected");
+        throw new Error(`Invalid format: ${format}`);
     }
   } catch (error) {
     await showFailureToast({
