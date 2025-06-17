@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stacks",
   "title": "Stacks",
-  "description": "Transform your digital footprint into personal intelligence",
+  "description": "Search and manage your saved resources from Stacks",
   "icon": "extension-icon.png",
   "author": "sourabh_rathour",
   "categories": [
@@ -13,33 +13,58 @@
   "commands": [
     {
       "name": "search-resources",
-      "title": "Stacks Search",
-      "subtitle": "Grid view of your resources",
-      "description": "Search your saved resources in a grid view",
+      "title": "Search Resources",
+      "subtitle": "Stacks",
+      "description": "Search your saved resources with grid or list view",
       "mode": "view"
     },
     {
-      "name": "search-resources-list",
-      "title": "Stacks Search List",
-      "subtitle": "Detailed list view of your resources",
-      "description": "Search your saved resources in a detailed list view with previews",
-      "mode": "view"
+      "name": "add-link",
+      "title": "Add Link",
+      "subtitle": "Stacks",
+      "description": "Add a new link to your Stacks workspace",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://example.com",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
     {
       "name": "gqlToken",
-      "title": "API Token (Optional)",
-      "description": "Your Stacks API token from the gqlToken cookie. You can also set this up in the extension.",
+      "title": "API Token",
+      "description": "Your Stacks API token from the gqlToken cookie. Get it from betterstacks.com → Developer Tools → Application → Cookies → gqlToken",
       "type": "password",
-      "required": false
+      "required": true
+    },
+    {
+      "name": "viewType",
+      "title": "View Type",
+      "description": "Choose how to display your resources",
+      "type": "dropdown",
+      "required": false,
+      "default": "grid",
+      "data": [
+        {
+          "title": "Grid View",
+          "value": "grid"
+        },
+        {
+          "title": "List View",
+          "value": "list"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.17.0",
     "@types/node-fetch": "^2.6.12",
-    "firebase": "^10.8.0",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
     "node-fetch": "^3.3.2"
