@@ -70,8 +70,23 @@ function parseTOML(content: string): { config?: AppConfig; error?: string } {
 }
 
 export function getConfig(): { config?: AppConfig; error?: string } {
-  const { configPath } = getPreferenceValues();
-  console.log("Config file path as is:", configPath);
+  const { configPath: userConfigPath } = getPreferenceValues();
+  console.log("Config file path as is:", userConfigPath);
+
+  let configPath: string;
+  if (userConfigPath && userConfigPath.trim()) {
+    configPath = userConfigPath.trim();
+  } else {
+    // If no user config path is provided via preferences, try AeroSpace default locations
+    const homePath = path.join(os.homedir(), ".aerospace.toml");
+    const xdgPath = path.join(
+      process.env.XDG_CONFIG_HOME || path.join(os.homedir(), ".config"),
+      "aerospace",
+      "aerospace.toml",
+    );
+
+    configPath = fs.existsSync(homePath) ? homePath : xdgPath;
+  }
 
   const { content, error: readFileError } = readConfigFile(configPath);
   if (readFileError) {
