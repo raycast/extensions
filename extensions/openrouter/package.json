@@ -15,7 +15,7 @@
     {
       "name": "search-openrouter",
       "title": "Search Models",
-      "subtitle": "OpenRouter",
+      "subtitle": "OpenRouter Model Search",
       "description": "Allows for quick searching of OpenRouter's models.",
       "mode": "view"
     }
