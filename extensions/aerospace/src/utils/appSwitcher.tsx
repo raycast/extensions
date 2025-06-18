@@ -43,7 +43,7 @@ export async function getWindows(workspace: string) {
     "--json",
     ...(workspace === "focused" ? ["--workspace", "focused"] : ["--all"]),
     "--format",
-    "%{app-name} %{window-title} %{window-id} %{app-pid} %{workspace} %{app-bundle-id}",
+    "%{app-name} %{window-title} %{window-id} %{app-pid} %{workspace} %{app-bundle-id} %{monitor-name}",
   ];
 
   const aerospaceArr = spawnSync("aerospace", args, {
