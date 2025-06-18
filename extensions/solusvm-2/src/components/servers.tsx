@@ -251,7 +251,7 @@ function ReinstallServer({ projectId, serverId }: { projectId: number; serverId:
         const { os, application, ssh_keys, password } = values;
         const body = {
           ...(values.type === "os" ? { os: +os } : { application: +application }),
-          ...(ssh_keys.length && { ssh_keys: sshKeys.map((ssh) => +ssh.id) }),
+          ...(ssh_keys.length && { ssh_keys: ssh_keys.map((ssh) => +ssh) }),
           ...(values.password && { password }),
         };
         await callApi(`servers/${serverId}/reinstall`, { method: "POST", body });
