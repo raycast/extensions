@@ -1,6 +1,6 @@
 # Folder Search Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-06-18
 
 - **enhanced** Added "Open Folder After Move" preference to control whether destination folders open automatically after moving files. When disabled, files will be moved without opening the folder, keeping your workflow uninterrupted. Default is enabled
 - **enhanced** Added drag and drop support for results list
