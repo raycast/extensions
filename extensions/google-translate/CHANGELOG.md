@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Feature] - 2025-03-31
+## [Feature] - 2025-06-18
 
 - Remove country flags from languages
 - Add all the languages from Google Translate website
