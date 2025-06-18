@@ -24,6 +24,7 @@
     {
       "name": "create-job",
       "title": "Create New Rename Job",
+      "subtitle": "Regex Batch Renamer",
       "description": "Create a new regex-based renaming job",
       "mode": "view"
     }
