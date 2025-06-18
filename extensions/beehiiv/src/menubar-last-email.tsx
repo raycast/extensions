@@ -3,11 +3,6 @@ import { MenuBarExtra, Icon, getPreferenceValues, openExtensionPreferences, open
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 
-interface Preferences {
-  apiKey: string;
-  publicationId: string;
-}
-
 const preferences = getPreferenceValues<Preferences>();
 
 interface PostStats {
