@@ -1,6 +1,6 @@
 # Wifi Password Reveal Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-06-18
 
 - Added Windows support.
 
