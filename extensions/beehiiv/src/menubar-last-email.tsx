@@ -30,7 +30,7 @@ export default function LastEmailStatsMenuBar() {
   const fetchLastEmail = async () => {
     try {
       setIsLoading(true);
-      // Pobieramy najnowszy post z rozwinięciem statystyk
+      // Fetch latest post with stats expansion
       const response = await fetch(
         `https://api.beehiiv.com/v2/publications/${preferences.publicationId}/posts?expand[]=stats&limit=10&status=confirmed&order_by=created&direction=desc`,
         {
