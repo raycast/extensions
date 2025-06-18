@@ -36,7 +36,7 @@ const client = new OAuth.PKCEClient({
 let dustApi: DustAPI | null = null;
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
-const DEFAULT_WORKOS_TOKEN_EXPIRY = 60 * 5; // 1 minutes
+const DEFAULT_WORKOS_TOKEN_EXPIRY = 60 * 5; // 5 minutes
 
 type WorkOSTokenResponse = {
   access_token: string;
