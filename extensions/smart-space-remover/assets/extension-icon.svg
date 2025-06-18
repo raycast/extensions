@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 背景圆形 -->
+    <circle cx="256" cy="256" r="256" fill="#FF6363"/>
+    
+    <!-- 文本线条 -->
+    <path d="M128 256 L384 256" stroke="white" stroke-width="32" stroke-linecap="round"/>
+    <path d="M128 192 L384 192" stroke="white" stroke-width="32" stroke-linecap="round"/>
+    <path d="M128 320 L384 320" stroke="white" stroke-width="32" stroke-linecap="round"/>
+    
+    <!-- 删除符号 -->
+    <path d="M352 160 L384 192 L352 224" stroke="white" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M384 192 L352 224 L384 256" stroke="white" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+</svg> 
