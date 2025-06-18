@@ -61,7 +61,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description text="Post to Microblog" />
+      <Form.Description text="Post to Micro.blog" />
       <Form.TextField id="title" title="Title" placeholder="Optional" />
       <Form.TextArea id="content" title="Content" placeholder="Craft your post" autoFocus={true} />
     </Form>
