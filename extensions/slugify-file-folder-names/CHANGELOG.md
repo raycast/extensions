@@ -1,6 +1,5 @@
 # Slugify File / Folder Names Changelog
 
-## [Initial Version] - 2025-05-30
+## [Updated extension icon] - {PR_MERGE_DATE}
 
-### Changed
-- {PR_MERGE_DATE} Updated extension icon
+## [Initial Version] - 2025-05-30
