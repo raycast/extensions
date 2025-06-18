@@ -1,6 +1,6 @@
-# OpenRouter
+# OpenRouter Model Search
 
-![OpenRouter screenshot](./metadata/openrouter-1.png)
+![OpenRouter Model Search screenshot](./metadata/openrouter-1.png)
 
 Search OpenRouter's AI model catalog.
 
