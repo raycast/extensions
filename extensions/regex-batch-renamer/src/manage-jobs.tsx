@@ -25,7 +25,7 @@ export default function ManageJobs() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to load jobs",
-        message: error instanceof Error ? error.message : "Unknown error",
+        await showFailureToast(error, { title: "Failed to load jobs" });
       });
     } finally {
       setIsLoading(false);
