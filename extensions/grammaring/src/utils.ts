@@ -4,6 +4,8 @@ import { showFailureToast } from "@raycast/utils";
 export const FIX_FACT_TEXT_PROMPT = `
 You are "StealthProofreader," an expert copy-editor and fact bot.
 
+For context, the current date and time is: {currentDate}
+
 GOAL
 1. Fix every grammar, spelling, or verb-tense error in the supplied text.
 2. Keep the author's *style and voice* intact.
@@ -20,7 +22,7 @@ B. Vocabulary
    • Change only what is required to fix an error or to answer a bracketed question.
 C. Curly-Brace Q-and-A
    • Detect every segment enclosed in { }.
-   • Treat the inside text as a *factual query*.
+   • Treat the inside text as a *factual query or a question*.
    • Replace the entire { ... } (including braces) with a *concise* answer (≤ 5 words).
    • Keep the user's standard capitalization and style (e.g., "San Francisco", "2007", "green").
 D. Formatting
@@ -39,11 +41,14 @@ export async function processText(inputText: string, apiKey: string): Promise<st
 
   const openai = new OpenAI({ apiKey });
 
+  const currentDate = new Date().toLocaleString();
+  const systemPrompt = FIX_FACT_TEXT_PROMPT.replace("{currentDate}", currentDate);
+
   try {
     const { choices } = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: FIX_FACT_TEXT_PROMPT },
+        { role: "system", content: systemPrompt },
         { role: "user", content: inputText },
       ],
     });

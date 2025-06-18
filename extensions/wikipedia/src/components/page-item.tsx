@@ -1,15 +1,18 @@
-import { Action, ActionPanel, Icon, List, Grid } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import WikipediaPage from "@/components/wikipedia-page";
 import { getPageData } from "@/utils/api";
 import { toSentenceCase } from "@/utils/formatting";
+import { Locale } from "@/utils/language";
 import { openInBrowser, prefersListView } from "@/utils/preferences";
+import { useRecentArticles } from "@/utils/recents";
 
 const View = prefersListView ? List : Grid;
 
-export function PageItem({ search, title, language }: { search: string; title: string; language: string }) {
+export function PageItem({ search, title, language }: { search: string; title: string; language: Locale }) {
   const { data: page } = useCachedPromise(getPageData, [title, language]);
+  const { clearReadArticles, removeFromReadArticles } = useRecentArticles();
 
   return (
     <View.Item
@@ -24,11 +27,19 @@ export function PageItem({ search, title, language }: { search: string; title: s
             (openInBrowser ? (
               <>
                 <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
-                <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
+                <Action.Push
+                  icon={Icon.Window}
+                  title="Show Details"
+                  target={<WikipediaPage title={title} language={language} />}
+                />
               </>
             ) : (
               <>
-                <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
+                <Action.Push
+                  icon={Icon.Window}
+                  title="Show Details"
+                  target={<WikipediaPage title={title} language={language} />}
+                />
                 <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
               </>
             ))}
@@ -56,6 +67,22 @@ export function PageItem({ search, title, language }: { search: string; title: s
               shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               title="Copy Subtitle"
               content={page?.description ?? ""}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title="Delete Recent Article"
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              icon={Icon.Trash}
+              onAction={() => removeFromReadArticles({ title, language })}
+            />
+            <Action
+              title="Delete All Recent Articles"
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.RemoveAll}
+              icon={Icon.Trash}
+              onAction={clearReadArticles}
             />
           </ActionPanel.Section>
         </ActionPanel>

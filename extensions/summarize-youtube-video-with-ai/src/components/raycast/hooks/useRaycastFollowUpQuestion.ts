@@ -1,8 +1,8 @@
 import { AI, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect } from "react";
 import { FINDING_ANSWER } from "../../../const/toast_messages";
-import { Question } from "../../../hooks/useQuestions";
-import { RaycastPreferences } from "../../../summarizeVideoWithRaycast";
+import type { Question } from "../../../hooks/useQuestions";
+import type { RaycastPreferences } from "../../../summarizeVideoWithRaycast";
 import { generateQuestionId } from "../../../utils/generateQuestionId";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
@@ -23,6 +23,7 @@ export function useRaycastFollowUpQuestion({
   const preferences = getPreferenceValues() as RaycastPreferences;
   const { creativity } = preferences;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `abortController ` in dependencies will lead to an error
   useEffect(() => {
     const handleAdditionalQuestion = async () => {
       if (!question || !transcript) return;
@@ -35,7 +36,7 @@ export function useRaycastFollowUpQuestion({
       });
 
       const answer = AI.ask(getFollowUpQuestionSnippet(question, transcript), {
-        creativity: parseInt(creativity),
+        creativity: Number.parseInt(creativity, 10),
         signal: abortController.signal,
       });
 
@@ -50,14 +51,13 @@ export function useRaycastFollowUpQuestion({
 
       answer.on("data", (data) => {
         toast.show();
-        setQuestions((prevQuestions) =>
-          prevQuestions.map((question) =>
-            question.id === qID ? { ...question, answer: question.answer + data } : question,
-          ),
-        );
+        setQuestions((prevQuestions) => {
+          const updatedQuestions = prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + data } : q));
+          return updatedQuestions;
+        });
       });
 
-      answer.finally(() => {
+      answer.finally(async () => {
         toast.hide();
         setQuestion("");
       });
@@ -70,5 +70,5 @@ export function useRaycastFollowUpQuestion({
     return () => {
       abortController.abort();
     };
-  }, [question, transcript]);
+  }, [question, transcript, creativity, setQuestion, setQuestions]);
 }

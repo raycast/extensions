@@ -12,15 +12,19 @@ This is a Raycast extension for [Oracle Cloud](https://cloud.oracle.com/). With 
 
 2. **Configure**:
 
-    This extension uses the official SDK and needs configuration. Refer to [Developer Resources > Developer Guide > Setup and Prerequisites > SDK and CLI Configuration File](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm#SDK_and_CLI_Configuration_File) to learn where and how your configuration file needs to be set. Once done, the extension will work without further confguration needed.
+    This extension uses the official SDK and needs configuration. Refer to [Developer Resources > Developer Guide > Setup and Prerequisites > SDK and CLI Configuration File](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm#SDK_and_CLI_Configuration_File) to learn where and how your configuration file needs to be set. Once done, the extension will work without further configuration needed.
 
-    For the default method:
+    For a quick method:
     
-    - `Scroll` to the bottom of the page
+    - `Navigate` to "Identity & Security" in OCI "Profile" (Try this link: https://cloud.oracle.com/identity/domains/my-profile)
+    - `Click` on "Tokens and keys"
+    - `Click` "Add API key"
     - `Copy` the "Example Configuration"
-    - `Create` dir: `mkdir ~/.oci`
+    - `View` the configuration file
+    - `Click` "Copy"
+    - `Create` directory: `mkdir ~/.oci`
+    - `Create` file: `~/.oci/config`
     - `Paste` the example contents into the config
-    - `Update` the file with your own details
 
 ## 🗒️ Note
 
@@ -36,7 +40,8 @@ Oracle has strict guidelines on usage of their Brand Assets so this is an altern
 
 Looking for more infra extensions? Try these:
 
-<a title="Install vultr Raycast Extension" href="https://www.raycast.com/xmok/vultr"><img src="https://www.raycast.com/xmok/vultr/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
-<a title="Install hestiacp-admin Raycast Extension" href="https://www.raycast.com/xmok/hestiacp-admin"><img src="https://www.raycast.com/xmok/hestiacp-admin/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install appwrite Raycast Extension" href="https://www.raycast.com/xmok/appwrite"><img src="https://www.raycast.com/xmok/appwrite/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install cyberpanel Raycast Extension" href="https://www.raycast.com/xmok/cyberpanel"><img src="https://www.raycast.com/xmok/cyberpanel/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install hestiacp-admin Raycast Extension" href="https://www.raycast.com/xmok/hestiacp-admin"><img src="https://www.raycast.com/xmok/hestiacp-admin/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install vultr Raycast Extension" href="https://www.raycast.com/xmok/vultr"><img src="https://www.raycast.com/xmok/vultr/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
