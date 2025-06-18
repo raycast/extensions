@@ -1,6 +1,6 @@
 # Zeabur Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-06-18
 
 - Added the manage projects command to manage the projects on Zeabur.
 
