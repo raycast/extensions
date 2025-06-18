@@ -17,6 +17,7 @@
     {
       "name": "run-job",
       "title": "Run Rename Job",
+      "subtitle": "Regex Batch Renamer",
       "description": "Select and run a rename job on selected files/folders",
       "mode": "view"
     },
