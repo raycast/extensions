@@ -1,6 +1,6 @@
 # NameSilo Changelog
 
-## [View Contact Profiles + View & Configure Forwards] - {PR_MERGE_DATE}
+## [View Contact Profiles + View & Configure Forwards] - 2025-06-18
 
 - View and Configure Email Forwards
 - View Contact Profiles in your account
