@@ -1,6 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
-import { fetchGetAllLists, fetchGetSingleList } from "../apis";
-import { List, ListDetails, ApiResponse } from "../types";
+import { fetchGetAllLists, fetchGetSingleListBookmarks } from "../apis";
+import { List, Bookmark, ApiResponse } from "../types";
 
 interface ListWithCount extends List {
   count: number;
@@ -14,12 +14,19 @@ export function useGetAllLists() {
     const listsWithCount = await Promise.all(
       lists.map(async (list: List) => {
         try {
-          const details = (await fetchGetSingleList(list.id)) as ListDetails;
+          // Use fetchGetSingleListBookmarks to get bookmarks for the count
+          const bookmarkData = (await fetchGetSingleListBookmarks(list.id)) as ApiResponse<Bookmark>;
+          const count = bookmarkData.bookmarks?.length || 0;
           return {
             ...list,
-            count: details.bookmarks?.length || 0,
+            count: count,
           };
-        } catch {
+        } catch (e) {
+          // It's good practice to still log the error, but not the full objects unless necessary for debugging
+          console.error(
+            `Error fetching bookmark data for list ${list.id} (${list.name}):`,
+            e instanceof Error ? e.message : e,
+          );
           return { ...list, count: 0 } as ListWithCount;
         }
       }),

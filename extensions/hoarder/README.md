@@ -1,20 +1,21 @@
-# 🚀 Raycast Hoarder
+# 🚀 Raycast Karakeep (Formerly Hoarder)
 
 ![Raycast](https://shields.io/badge/Raycast-black?logo=raycast&style=style=fla)
 ![React](https://shields.io/badge/react-black?logo=react&style=style=fla)
 ![TypeScript](https://shields.io/badge/typescript-black?logo=typescript&style=style=fla)
+![Raycast Extension](https://img.shields.io/raycast/dt/luolei/hoarder?color=f67976&label=Installs&style=style=fla)
 
-A user-friendly Raycast extension that seamlessly integrates with [Hoarder](https://github.com/hoarder-app/hoarder), bringing powerful bookmark management to your fingertips. Quickly save, search, and organize your bookmarks, texts, and images—all through Raycast's intuitive interface.
+A user-friendly Raycast extension that seamlessly integrates with [Karakeep](https://github.com/karakeep-app/karakeep), bringing powerful bookmark management to your fingertips. Quickly save, search, and organize your bookmarks, texts, images and pdf — all through Raycast's intuitive interface.
 
-This extension leverages Hoarder's API to provide a streamlined experience for managing your digital collection, complete with AI-powered tagging and search capabilities.
+This extension leverages hoarder's API to provide a streamlined experience for managing your digital collection, complete with AI-powered tagging and search capabilities.
 
-![Raycast Hoarder Intro](./docs/images/raycast-hoarder-intro.png)
+![Raycast Karakeep Intro](./docs/images/raycast-hoarder-intro.png)
 
 ## 📥 Installation
 
-### Option 1: Raycast Store (Coming Soon)
+### Option 1: Raycast Store (Recommended)
 
-- [ ] Install directly from [Raycast Store: Hoarder Bookmark Manager](https://zuoluo.tv/raycast-hoarder)
+- [ ] Install directly from [Raycast Store: Hoarder](https://www.raycast.com/luolei/hoarder)
 
 ### Option 2: Manual Installation
 
@@ -36,42 +37,42 @@ npm install && npm run dev
 
 ### Additional Conveniences
 
-- **Intuitive Search**: Quickly locate any bookmark or content using the online search feature of Hoarder and the powerful search capabilities of Raycast.
+- **Intuitive Search**: Quickly locate any bookmark or content using the online search feature of hoarder and the powerful search capabilities of Raycast.
 - **One-Click Actions**:Open bookmarks in your browser, copy links, or delete instantly.
 - **Preview Support**: View bookmark details and screenshots without leaving Raycast
 - **Keyboard Navigation**: Fully keyboard-accessible for maximum efficiency
 - **Customizable Display**:Set up your preferred information display for bookmarks
 
-All powered by Hoarder's robust API, bringing your bookmark management right into Raycast's streamlined interface.
+All powered by hoarder's robust API, bringing your bookmark management right into Raycast's streamlined interface.
 
 ## 📑 Prerequisites
 
 Before you begin, ensure you have the following:
 
-- A deployed Hoarder instance (follow the [Hoarder installation guide](https://github.com/hoarder-app/hoarder?tab=readme-ov-file#installation))
-- Hoarder API credentials
+- A deployed Karakeep instance (follow the [Karakeep installation guide](https://docs.karakeep.app/Installation/docker/))
+- Karakeep API credentials
 - Raycast installed on your macOS system
 
-I strongly recommend setting up Hoarder with Docker for easy deployment and management.
+I strongly recommend setting up Karakeep with Docker for easy deployment and management.
 
 Create an API key by visiting `https://your-hoarder-instance.com/settings/api-keys` and clicking the 'New API Key' button.
 
 ## 🚦 Configuration
 
-After installation, set up the extension with your Hoarder instance details:
+After installation, set up the extension with your hoarder instance details:
 
 1. Open Raycast Preferences
 2. Navigate to the Extensions tab
-3. Find "Hoarder" in the list of installed extensions
-4. Enter your Hoarder API URL and authentication credentials
+3. Find "Karakeep" in the list of installed extensions
+4. Enter your Karakeep API URL and authentication credentials
 
-![Raycast Hoarder Configuration](./docs/images/raycast-hoarder-configuration.png)
+![Raycast Karakeep Configuration](./docs/images/raycast-hoarder-configuration.png)
 
 You can also customize the default main operations and the bookmark details you want to display.
 
 ## 🎯 Usage
 
-Here's how to make the most of the Raycast Hoarder extension:
+Here's how to make the most of the Raycast Karakeep extension:
 
 - **View All Bookmarks**: Access your complete bookmark collection
 - **Search Content**: Utilize full-text search across all bookmarked content
@@ -104,7 +105,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## 🙏 Credits
 
-This extension is built on top of the [Hoarder](https://github.com/hoarder-app/hoarder) project. We're grateful for their work in creating such a powerful and flexible bookmarking solution.
+This extension is built on top of the [Karakeep](https://github.com/karakeep-app/karakeep) project. We're grateful for their work in creating such a powerful and flexible bookmarking solution.
 
 Special thanks to [@kdurek](https://github.com/kdurek) for creating the original Raycast Hoarder extension, which laid the foundation for this enhanced version.
 
