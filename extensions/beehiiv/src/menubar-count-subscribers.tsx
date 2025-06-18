@@ -1,11 +1,6 @@
 import { Icon, MenuBarExtra, open, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-interface Preferences {
-  apiKey: string;
-  publicationId: string;
-}
-
 interface SubscriptionResponse {
   total_results: number;
 }
