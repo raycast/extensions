@@ -1,5 +1,10 @@
 # Bitbucket Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Use the npm official registry
+- Bump all dependencies to the latest
+
 ## [Update] - 2025-04-04
 
 - Added the ability to favorite repositories
