@@ -16,6 +16,7 @@ export default function Teams() {
             actions={
               <ActionPanel title="Team Actions">
                 <Action.Push
+                  icon={Icon.Pin}
                   title="Projects Page"
                   target={<TeamSpaces teamId={team?.id ?? ""} teamName={team?.name ?? ""} />}
                 />

@@ -17,6 +17,7 @@ function TeamSpaces({ teamId, teamName }: { teamId: string; teamName: string }) 
             actions={
               <ActionPanel title="Space Actions">
                 <Action.Push
+                  icon={Icon.Folder}
                   title="Folders Page"
                   target={<SpaceFolders spaceId={space.id} spaceName={space?.name} />}
                 />
