@@ -1,6 +1,6 @@
 # Popcorn Raycast Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2025-06-18
 - Fixed major bug for streams not loading correctly
 - Added more addon support
 
