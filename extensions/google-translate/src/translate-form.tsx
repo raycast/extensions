@@ -81,7 +81,7 @@ export default function TranslateForm() {
               onAction={() => {
                 setSelectedLanguageSet({ langFrom: langTo, langTo: [langFrom] });
               }}
-              title={`${toLangObj.name} <-> ${fromLangObj.name} Switch Languages`}
+              title={`${toLangObj.name} <-> ${fromLangObj.name}`}
             />
             <ActionPanel.Submenu shortcut={{ modifiers: ["cmd"], key: "s" }} title="Change Languages">
               <ActionPanel.Submenu shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} title="Change From Language">
