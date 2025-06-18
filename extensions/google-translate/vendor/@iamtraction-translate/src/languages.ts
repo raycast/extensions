@@ -109,7 +109,7 @@ export const languages = {
     "it": "Italian",
     "jam": "Jamaican Patois",
     "ja": "Japanese",
-    "jw": "Javanese",
+    "jv": "Javanese",
     "kac": "Jingpo",
     "kl": "Kalaallisut",
     "kn": "Kannada",
