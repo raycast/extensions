@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aksell-brandguide",
+  "title": "Aksell Brandguide",
+  "description": "Aksell's colors, logos, and other assets quickly available",
+  "icon": "icon.png",
+  "author": "lasse",
+  "version": "1.0.0",
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-brand-guidelines",
+      "title": "Open Brand Guidelines",
+      "description": "Show Aksell's colors, logos, and other assets.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest",
+    "title-case": "^4.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish:ray": "ray publish"
+  }
+}
