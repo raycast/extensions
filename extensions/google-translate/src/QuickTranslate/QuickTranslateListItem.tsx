@@ -1,6 +1,6 @@
 import { ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getLanguageFlag, supportedLanguagesByCode } from "../languages";
+import { supportedLanguagesByCode } from "../languages";
 import { simpleTranslate } from "../simple-translate";
 import { LanguageCodeSet } from "../types";
 import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction, ToggleFullTextAction } from "../actions";
@@ -38,7 +38,7 @@ export function QuickTranslateListItem(props: {
         title={`Translating to ${langTo.name}...`}
         accessories={[
           {
-            text: `${getLanguageFlag(langTo, langTo?.code)}`,
+            text: langTo.name,
             tooltip: `${langFrom.name} -> ${langTo.name}`,
           },
         ]}
@@ -59,7 +59,7 @@ export function QuickTranslateListItem(props: {
       title={result.translatedText}
       accessories={[
         {
-          text: `${getLanguageFlag(langTo, langTo?.code)}`,
+          text: langTo.name,
           tooltip: `${langFrom.name} -> ${langTo.name}`,
         },
       ]}
