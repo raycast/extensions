@@ -1,6 +1,6 @@
 # Dust.tt Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-06-18
 
 - Move Oauth connexion flow from Auth0 to WorkOS.
 
