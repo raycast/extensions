@@ -1,4 +1,9 @@
-#  Akkoma Changelog
+# Akkoma Changelog
+
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Use the npm official registry
+- Bump all dependencies to the latest
 
 ## [Update] - 2023-05-11
 
