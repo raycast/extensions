@@ -1,6 +1,6 @@
 # Find OpenGL Enum Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-06-18
 
 - Use npm official registry
 - Bump all dependencies to the latest
