@@ -161,7 +161,7 @@ npm run fix-lint
 
 ## Changelog
 
-### v1.0.0
+### v1.0.0 - {PR_MERGE_DATE}
 - Initial release
 - Multiple regex jobs support
 - Predefined job templates
