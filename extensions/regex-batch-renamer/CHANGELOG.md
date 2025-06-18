@@ -1,6 +1,6 @@
 # Regex Batch Renamer Changelog
 
-## [1.0.0] - 2024-01-15
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of Regex Batch Renamer extension
