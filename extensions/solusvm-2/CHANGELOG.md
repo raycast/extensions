@@ -1,6 +1,6 @@
 # SolusVM 2 Changelog
 
-## [Snapshots, Member Invites, Reinstall Server] - {PR_MERGE_DATE}
+## [Snapshots, Member Invites, Reinstall Server] - 2025-06-18
 
 - In Servers:
     - Reinstall Server (**Application** or **Operating System**)
