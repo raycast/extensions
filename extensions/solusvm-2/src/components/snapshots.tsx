@@ -14,6 +14,7 @@ import {
 import { API_HEADERS, callApi, generateApiUrl } from "../api";
 import { useFetch, useForm } from "@raycast/utils";
 import { SnapshotResource } from "../types";
+import { useMemo } from "react";
 
 export default function Snapshots({ serverId }: { serverId: number }) {
   const {
@@ -133,6 +134,7 @@ function CreateSnapshot({ serverId, onCreate }: { serverId: number; onCreate: ()
       }
     },
   });
+  const placeholder = useMemo(() => new Date().toISOString(), []);
   return (
     <Form
       actions={
@@ -141,7 +143,7 @@ function CreateSnapshot({ serverId, onCreate }: { serverId: number; onCreate: ()
         </ActionPanel>
       }
     >
-      <Form.TextField title="Name" placeholder={`${new Date().toISOString()}`} {...itemProps.name} />
+      <Form.TextField title="Name" placeholder={placeholder} {...itemProps.name} />
     </Form>
   );
 }
