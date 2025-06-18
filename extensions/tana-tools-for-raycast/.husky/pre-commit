@@ -1,0 +1,8 @@
+# Run ray lint --fix on staged files
+npm run lint -- --fix
+
+# Stage any files that were fixed
+git add -u
+
+# Run lint again to ensure everything passes
+npm run lint

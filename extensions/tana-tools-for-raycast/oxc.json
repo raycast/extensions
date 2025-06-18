@@ -1,0 +1,26 @@
+{
+  "rules": {
+    "correctness": {
+      "no-unused-vars": "error",
+      "no-undef": "error"
+    },
+    "suspicious": {
+      "no-explicit-any": "warn",
+      "no-empty-character-class": "error"
+    },
+    "style": {
+      "prefer-const": "warn"
+    }
+  },
+  "env": {
+    "browser": true,
+    "es2022": true,
+    "node": true
+  },
+  "plugins": ["react", "typescript"],
+  "ignore": [
+    "dist/**",
+    "node_modules/**",
+    "*.d.ts"
+  ]
+}

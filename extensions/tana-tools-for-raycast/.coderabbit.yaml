@@ -1,0 +1,24 @@
+# CodeRabbit Configuration
+# Enable OXC (oxlint) for fast static code analysis
+
+tools:
+  oxc:
+    enabled: true
+    config_file: "oxc.json"  # Use the existing oxc.json configuration
+
+# Additional CodeRabbit settings
+reviews:
+  auto_review:
+    enabled: true
+  
+language_specific:
+  typescript:
+    enabled: true
+
+# Raycast is the single source of truth for formatting
+# No custom prettier config - defer to `ray lint` completely
+formatter:
+  # Disable CodeRabbit's formatter suggestions since Raycast owns the formatting
+  # All code must pass `ray lint` which includes Raycast's own Prettier config
+  enabled: false
+  comment: "This project uses Raycast's built-in `ray lint` as the single source of truth for all formatting. Do not suggest formatting changes - they will be handled by Raycast's tooling."

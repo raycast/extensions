@@ -1,0 +1,11 @@
+# Development tooling that shouldn't be submitted to Raycast
+.husky/
+oxc.json
+.coderabbit.yaml
+CLAUDE.md
+.claude/
+.cursorignore
+.prettierignore
+
+# Keep essential files for extension
+# (everything else gets included by default)
