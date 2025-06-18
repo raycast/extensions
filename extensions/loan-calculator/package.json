@@ -11,7 +11,6 @@
     {
       "name": "calculate",
       "title": "Loan Calculator",
-      "subtitle": "Calculate loan payments",
       "description": "Calculate loan payments with customizable terms and schedules",
       "mode": "view"
     }
