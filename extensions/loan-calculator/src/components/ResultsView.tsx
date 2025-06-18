@@ -7,10 +7,6 @@ interface ResultsViewProps {
   inputs: LoanInputs;
 }
 
-interface Preferences {
-  currencySymbol: string;
-}
-
 export default function ResultsView({ inputs }: ResultsViewProps) {
   const { pop } = useNavigation();
   const preferences = getPreferenceValues<Preferences>();
