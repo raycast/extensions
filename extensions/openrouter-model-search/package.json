@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "openrouter",
+  "name": "openrouter-model-search",
   "title": "OpenRouter Model Search",
   "description": "Search OpenRouter's AI model catalog.",
   "icon": "extension-icon.png",
