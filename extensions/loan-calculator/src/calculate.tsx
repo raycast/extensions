@@ -3,10 +3,6 @@ import { Form, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 import { LoanInputs, CompoundFrequency, PaymentFrequency, COMPOUND_OPTIONS, PAYMENT_OPTIONS } from "./helpers/types";
 import ResultsView from "./components/ResultsView";
 
-interface Preferences {
-  currencySymbol: string;
-}
-
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const currencySymbol = preferences.currencySymbol || "$";
