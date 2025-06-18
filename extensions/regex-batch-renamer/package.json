@@ -11,6 +11,7 @@
     {
       "name": "manage-jobs",
       "title": "Manage Rename Jobs",
+      "subtitle": "Regex Batch Renamer",
       "description": "Create, edit, and manage regex-based renaming jobs",
       "mode": "view"
     },
