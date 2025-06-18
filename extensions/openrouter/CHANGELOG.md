@@ -1,3 +1,3 @@
-# OpenRouter Changelog
+# OpenRouter Model Search Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
