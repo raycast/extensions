@@ -6,6 +6,7 @@ interface Window {
   "app-name": string;
   "window-title"?: string;
   "window-id": number;
+  "monitor-name": string;
   "app-pid": string;
   workspace: string;
   "app-bundle-id": string;
