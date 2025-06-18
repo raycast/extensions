@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-06-18
 - Fix local development crashing without AWS Vault.
 
 ## [Console command] - 2025-06-13
