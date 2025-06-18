@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-06-18
 
 - Real-time Claude Code usage monitoring
 - Daily usage tracking with token and cost breakdown
