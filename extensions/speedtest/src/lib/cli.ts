@@ -2,7 +2,7 @@ import { environment } from "@raycast/api";
 import axios from "axios";
 import fs from "fs";
 import afs from "fs/promises";
-import path from "path/posix";
+import path from "path";
 import { extract as extractTar } from "tar";
 import extractZip from "extract-zip";
 
