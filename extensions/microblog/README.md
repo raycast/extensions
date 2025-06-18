@@ -1,3 +1,3 @@
 # Micro.blog
 
-Post to microblog and your connected crossposting accounts
+Post to Micro.blog and your connected crossposting accounts
