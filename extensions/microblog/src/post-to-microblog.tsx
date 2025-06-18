@@ -1,9 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, showHUD, PopToRootType } from "@raycast/api";
 
-type Preferences = {
-  apiKey: string;
-};
-
 type Values = {
   title: string;
   content: string;
