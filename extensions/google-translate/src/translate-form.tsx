@@ -83,25 +83,13 @@ export default function TranslateForm() {
               }}
               title={`${toLangObj.name} <-> ${fromLangObj.name} Switch Languages`}
             />
-            <ActionPanel.Submenu
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
-              title="Change Languages"
-              icon={fromLangObj.name}
-            >
-              <ActionPanel.Submenu
-                shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-                title="Change From Language"
-                icon={fromLangObj.name}
-              >
+            <ActionPanel.Submenu shortcut={{ modifiers: ["cmd"], key: "s" }} title="Change Languages">
+              <ActionPanel.Submenu shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} title="Change From Language">
                 {languages.map((lang) => (
                   <Action key={lang.code} onAction={() => setLangFrom(lang.code)} title={lang.name} />
                 ))}
               </ActionPanel.Submenu>
-              <ActionPanel.Submenu
-                shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                title="Change To Language"
-                icon={toLangObj.name}
-              >
+              <ActionPanel.Submenu shortcut={{ modifiers: ["cmd", "shift"], key: "t" }} title="Change To Language">
                 {languages.map((lang) => (
                   <Action key={lang.code} onAction={() => setLangTo(lang.code)} title={lang.name} />
                 ))}
