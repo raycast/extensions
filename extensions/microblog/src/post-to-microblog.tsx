@@ -1,4 +1,16 @@
-import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, showHUD, PopToRootType } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  showHUD,
+  PopToRootType,
+  popToRoot,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { useState } from "react";
 
 type Values = {
   title: string;
@@ -7,16 +19,25 @@ type Values = {
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handlePost(values: Values) {
+    const toast = await showToast({
+      title: "Posting to Micro.blog",
+      message: "Please wait...",
+      style: Toast.Style.Animated,
+    });
+
     if (!values.content || values.content.trim() === "") {
-      await showToast({ title: "Error", message: "Content is required", style: Toast.Style.Failure });
+      toast.style = Toast.Style.Failure;
+      toast.message = "Content is required";
       return;
     }
 
     const token = preferences.apiKey;
     if (!token) {
-      await showToast({ title: "Error", message: "API token is required in preferences", style: Toast.Style.Failure });
+      toast.style = Toast.Style.Failure;
+      toast.message = "API token is required in preferences";
       return;
     }
 
@@ -28,6 +49,7 @@ export default function Command() {
     }
 
     try {
+      setIsLoading(true);
       const response = await fetch("https://micro.blog/micropub", {
         method: "POST",
         headers: {
@@ -38,26 +60,29 @@ export default function Command() {
       });
 
       if (response.ok) {
-        await showHUD("Post published to Micro.blog", { popToRootType: PopToRootType.Immediate });
+        await popToRoot({ clearSearchBar: true });
+        toast.title = "Post published to Micro.blog";
+        toast.style = Toast.Style.Success;
+        toast.message = "Post published to Micro.blog";
       } else {
         const errorText = await response.text();
-        await showToast({
-          title: "Failed to post",
-          message: `${response.status} ${response.statusText}: ${errorText}`,
-          style: Toast.Style.Failure,
-        });
+        toast.title = "Failed to post";
+        toast.message = `${response.status} ${response.statusText}: ${errorText}`;
+        toast.style = Toast.Style.Failure;
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      await showToast({ title: "Error", message: message ?? "Unknown error", style: Toast.Style.Failure });
+      await showFailureToast(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handlePost} />
+          <Action.SubmitForm onSubmit={handlePost} title="Post" />
         </ActionPanel>
       }
     >
