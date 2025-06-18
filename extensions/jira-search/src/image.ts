@@ -16,7 +16,7 @@ async function isFile(path: string): Promise<boolean> {
   try {
     const stat = await fs.stat(path)
     return stat.isFile()
-  } catch (err) {
+  } catch {
     return false
   }
 }

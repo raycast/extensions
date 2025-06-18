@@ -1,5 +1,10 @@
 # Jira Search Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Use the npm official registry
+- Bump all dependencies to the latest
+
 ## [Update] - 2023-05-16
 
 - Show board type in board search
@@ -12,6 +17,6 @@
 - Avoid results of older query to override result of latest query in case of racing conditions ([#5217](https://github.com/raycast/extensions/issues/5217))
 - Fixed invalid query when no filter from the dropdown is selected ([#4465](https://github.com/raycast/extensions/issues/4465))
 
-## [Update] - 2023-01-16 
+## [Update] - 2023-01-16
 
- - Added a filter option in the Search Issues page.
+- Added a filter option in the Search Issues page.
