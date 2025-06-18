@@ -16,6 +16,7 @@ export function CommitListItem(props: { commit: Commit; projectID: number }): JS
   const statusIcon: Image.ImageLike | undefined = status?.status
     ? getCIJobStatusIcon(status.status, status.allow_failure)
     : undefined;
+
   return (
     <List.Item
       key={commit.id}

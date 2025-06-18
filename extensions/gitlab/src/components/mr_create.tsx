@@ -220,7 +220,7 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
         ))}
       </Form.TagPicker>
       <Form.Dropdown id="milestone_id" title="Milestone">
-          <Form.Dropdown.Item key={"no_milestone"} value={''} title={'-'} />
+        <Form.Dropdown.Item key={"no_milestone"} value={""} title={"-"} />
         {projectinfo?.milestones?.map((m) => (
           <Form.Dropdown.Item key={m.id} value={m.id.toString()} title={m.title} />
         ))}
