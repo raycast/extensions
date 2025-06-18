@@ -84,7 +84,6 @@ export type ISOImageResource = {
 type IconResource = {
   id: number;
   name: string;
-  icon: IconResource;
   url: string;
   type: "os" | "application";
 };
