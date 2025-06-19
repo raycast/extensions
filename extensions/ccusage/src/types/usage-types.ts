@@ -27,13 +27,7 @@ export type ModelUsage = {
   sessionCount: number;
 };
 
-export type TotalUsageData = {
-  inputTokens: number;
-  outputTokens: number;
-  cacheCreationTokens: number;
-  cacheReadTokens: number;
-  totalTokens: number;
-  totalCost: number;
+export type TotalUsageData = z.infer<typeof TotalUsageResponseSchema>["totals"] & {
   cost: number; // For compatibility, derived from totalCost
 };
 
