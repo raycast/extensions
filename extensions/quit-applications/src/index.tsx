@@ -35,10 +35,16 @@ async function getRunningAppsPaths(): Promise<string[]> {
       end repeat
     end tell
 
-    return appPaths
+    set AppleScript's text item delimiters to "|||"
+    set pathList to appPaths as string
+    set AppleScript's text item delimiters to ""
+    return pathList
   `);
 
-  return result.split(", ").map((appPath: string) => appPath.trim());
+  return result
+    .split("|||")
+    .map((appPath: string) => appPath.trim())
+    .filter((path) => path.length > 0);
 }
 
 function quitApp(app: string) {
@@ -118,6 +124,56 @@ export default function Command({ launchContext }: CommandProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
+  const [selectedApps, setSelectedApps] = useState<Set<string>>(new Set());
+
+  const toggleAppSelection = (appPath: string) => {
+    setSelectedApps((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(appPath)) {
+        newSet.delete(appPath);
+      } else {
+        newSet.add(appPath);
+      }
+      return newSet;
+    });
+  };
+
+  const quitSelectedApps = async () => {
+    const appsToQuit = apps.filter((app) => selectedApps.has(app.path));
+    let successCount = 0;
+
+    for (const app of appsToQuit) {
+      const success = quitAppWithToast(app.name);
+      if (success) {
+        successCount++;
+      }
+    }
+
+    // Remove successfully quit apps from the list
+    setApps((currentApps) => currentApps.filter((app) => !selectedApps.has(app.path)));
+
+    // Clear selections
+    setSelectedApps(new Set());
+
+    showToast({
+      style: Toast.Style.Success,
+      title: `Quit ${successCount} of ${appsToQuit.length} selected apps`,
+    });
+
+    if (searchText) {
+      clearSearchBar();
+    }
+  };
+
+  const selectAllApps = () => {
+    const allAppPaths = new Set(apps.map((app) => app.path));
+    setSelectedApps(allAppPaths);
+  };
+
+  const clearSelection = () => {
+    setSelectedApps(new Set());
+  };
+
   useEffect(() => {
     if (launchContext && launchContext.appName && launchContext.action) {
       const { appName, action } = launchContext;
@@ -209,46 +265,69 @@ export default function Command({ launchContext }: CommandProps) {
                   }
                 }}
               />
+              <Action title="Select All Apps" icon={Icon.CheckCircle} onAction={selectAllApps} />
             </ActionPanel>
           }
         />
       )}
-      {apps.map((app) => (
-        <List.Item
-          title={app.name}
-          key={app.name}
-          id={app.path}
-          icon={{ fileIcon: app.path }}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Quit"
-                onAction={() => {
-                  const success = quitAppWithToast(app.name);
+      {apps.map((app) => {
+        const isSelected = selectedApps.has(app.path);
+        return (
+          <List.Item
+            title={app.name}
+            key={app.name}
+            id={app.path}
+            icon={{ fileIcon: app.path }}
+            accessories={isSelected ? [{ icon: Icon.CheckCircle }] : []}
+            actions={
+              <ActionPanel>
+                <Action title={isSelected ? "Deselect" : "Select"} onAction={() => toggleAppSelection(app.path)} />
+                <Action
+                  title="Quit"
+                  onAction={() => {
+                    const success = quitAppWithToast(app.name);
 
-                  if (success) {
-                    const removedAppIndex = apps.findIndex((a) => a.name === app.name);
-                    setApps((apps) => apps.toSpliced(removedAppIndex, 1));
-                  }
+                    if (success) {
+                      const removedAppIndex = apps.findIndex((a) => a.name === app.name);
+                      setApps((apps) => apps.toSpliced(removedAppIndex, 1));
 
-                  if (searchText) {
-                    clearSearchBar();
-                  }
-                }}
-              />
-              <Action title="Restart" onAction={() => restartAppWithToast(app.name)} />
-              <Action.CreateQuicklink
-                title="Create Quit Quicklink"
-                quicklink={{ link: getQuickLinkForApp(app.name, "quit"), name: `Quit ${app.name}` }}
-              />
-              <Action.CreateQuicklink
-                title="Create Restart Quicklink"
-                quicklink={{ link: getQuickLinkForApp(app.name, "restart"), name: `Restart ${app.name}` }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+                      // Remove from selection if it was selected
+                      setSelectedApps((prev) => {
+                        const newSet = new Set(prev);
+                        newSet.delete(app.path);
+                        return newSet;
+                      });
+                    }
+
+                    if (searchText) {
+                      clearSearchBar();
+                    }
+                  }}
+                />
+                {selectedApps.size > 0 && (
+                  <Action
+                    title="Quit Selected Apps"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                    onAction={quitSelectedApps}
+                  />
+                )}
+                <Action title="Restart" onAction={() => restartAppWithToast(app.name)} />
+                <Action.CreateQuicklink
+                  title="Create Quit Quicklink"
+                  quicklink={{ link: getQuickLinkForApp(app.name, "quit"), name: `Quit ${app.name}` }}
+                />
+                <Action.CreateQuicklink
+                  title="Create Restart Quicklink"
+                  quicklink={{ link: getQuickLinkForApp(app.name, "restart"), name: `Restart ${app.name}` }}
+                />
+                {selectedApps.size > 0 && (
+                  <Action title="Clear All Selections" icon={Icon.XMarkTopRightSquare} onAction={clearSelection} />
+                )}
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
