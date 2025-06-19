@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mouse-auto-clicker",
+  "title": "Mouse Auto Clicker",
+  "version": "1.0.0",
+  "description": "Toggle mouse auto-clicker on and off with customizable click intervals",
+  "icon": "icon.png",
+  "author": "matan_baruch",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-auto-clicker",
+      "title": "Toggle Auto Clicker",
+      "subtitle": "Mouse Auto Clicker",
+      "description": "Start or stop the mouse auto-clicker",
+      "mode": "no-view",
+      "keywords": [
+        "mouse",
+        "click",
+        "auto",
+        "clicker",
+        "toggle",
+        "automation"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clickInterval",
+      "title": "Click Interval (ms)",
+      "description": "Time between clicks in milliseconds",
+      "type": "textfield",
+      "default": "100",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.2",
+    "robotjs": "^0.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
