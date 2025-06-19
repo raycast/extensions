@@ -1,5 +1,9 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v1.0.1] - 2025-06-18
+
+- Housekeep Knip config
+
 ## [Initial Release] - 2025-06-18
 
 - Real-time Claude Code usage monitoring
