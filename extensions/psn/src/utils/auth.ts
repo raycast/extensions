@@ -21,6 +21,7 @@ interface AuthTokens {
 }
 
 const STORAGE_KEY = "psn_auth_tokens";
+const EXPIRATION_BUFFER_MS = 60000;
 
 /**
  * Get stored authentication tokens from local storage
@@ -68,7 +69,7 @@ export async function refreshAuthTokens(refreshToken: string): Promise<AuthToken
     const newTokens: StoredTokens = {
       accessToken: refreshedAuth.accessToken,
       refreshToken: refreshedAuth.refreshToken,
-      expiresAt: Date.now() + refreshedAuth.expiresIn * 1000 - 60000, // 1 minute buffer
+      expiresAt: Date.now() + refreshedAuth.expiresIn * 1000 - EXPIRATION_BUFFER_MS, // 1 minute buffer
     };
     await storeTokens(newTokens);
 

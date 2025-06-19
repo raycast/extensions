@@ -63,15 +63,15 @@ export default function RecentlyTrophy() {
       await showToast({
         style: Toast.Style.Success,
         title: "Trophies loaded",
-        message: `Found ${gamesData.length} recently trophies`,
+        message: `Found ${gamesData.length} recent trophies`,
       });
     } catch (error) {
-      console.error("Error fetching recently trophies:", error);
+      console.error("Error fetching recent trophies:", error);
 
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch trophies",
-        message: "Unable to retrieve your recently trophies. Please try again later.",
+        message: "Unable to retrieve your recent trophies. Please try again later.",
       });
     } finally {
       setIsLoading(false);

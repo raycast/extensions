@@ -63,15 +63,15 @@ export default function RecentlyPlayed() {
       await showToast({
         style: Toast.Style.Success,
         title: "Games loaded",
-        message: `Found ${gamesData.length} recently played games`,
+        message: `Found ${gamesData.length} recent played games`,
       });
     } catch (profileError) {
-      console.error("Error fetching recently played games:", profileError);
+      console.error("Error fetching recent played games:", profileError);
 
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch games",
-        message: "Unable to retrieve your recently played games. Please try again later.",
+        message: "Unable to retrieve your recent played games. Please try again later.",
       });
     } finally {
       setIsLoading(false);
