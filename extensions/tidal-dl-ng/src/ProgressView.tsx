@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Detail, Icon, Keyboard } from "@raycast/api";
+import { ActionPanel, Action, Detail, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { executeStreamingCommand, getTidalCommand } from "./utils";
 
@@ -100,7 +100,7 @@ ${isRunning ? "*Press Cmd+C to cancel*" : ""}
         <Action
           title="Close"
           icon={Icon.XMarkCircle}
-          shortcut={Keyboard.Shortcut.Common.Close}
+          shortcut={{ modifiers: ["cmd"], key: "w" }}
           onAction={() => {
             onCancel?.();
           }}
