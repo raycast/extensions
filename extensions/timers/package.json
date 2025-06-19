@@ -10,7 +10,8 @@
     "pernielsentikaer",
     "lokot0k",
     "mitchwu",
-    "a-laughlin"
+    "a-laughlin",
+    "krsntn"
   ],
   "pastContributors": [
     "marcjulian"
@@ -121,6 +122,12 @@
           "type": "text"
         }
       ]
+    },
+    {
+      "name": "setAlarm",
+      "title": "Set Alarm",
+      "description": "Set an Alarm.",
+      "mode": "view"
     },
     {
       "name": "manageTimers",

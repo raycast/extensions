@@ -1,5 +1,9 @@
 # Timers Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Add "Set Alarm" command to start an alarm
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Chore] - 2025-01-14

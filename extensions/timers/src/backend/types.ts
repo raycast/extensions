@@ -38,6 +38,12 @@ export interface Values {
   selectedSound: string;
 }
 
+export interface AlarmValues {
+  alarm: Date;
+  name: string;
+  selectedSound: string;
+}
+
 export interface CustomTimer {
   name: string;
   timeInSeconds: number;
