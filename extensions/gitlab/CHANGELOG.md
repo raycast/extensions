@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Add label filter on issues menu bar] - 2025-06-19
+
+Add label filter on issues menu bar
+
 ## [Fix] - 2025-05-14
 
 Fixed request loops that caused the extension to crash

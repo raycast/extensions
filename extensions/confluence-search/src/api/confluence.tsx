@@ -66,7 +66,7 @@ interface CqlResponse {
 export async function fetchPopularFeed(site: Site, limit = 25) {
   await apiAuthorize();
   return get(
-    `https://api.atlassian.com/ex/confluence/${site.id}/analytics/rest/cloud/${site.id}/feed/popular?first=${limit}`
+    `https://api.atlassian.com/ex/confluence/${site.id}/analytics/rest/cloud/${site.id}/feed/popular?first=${limit}`,
   );
 }
 

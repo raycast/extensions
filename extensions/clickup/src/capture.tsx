@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon, Color } from "@raycast/api";
 import { ClickUpClient } from "./utils/clickUpClient";
 import { TaskItem } from "./types/tasks.dt";
 import preferences from "./utils/preferences";
@@ -45,9 +45,6 @@ export default function QuickCapture() {
         toast.style = Toast.Style.Failure;
       }
     },
-    initialValues: {
-      priority: "3",
-    },
     validation: {
       name: FormValidation.Required,
     },
@@ -66,11 +63,12 @@ export default function QuickCapture() {
       <Form.Separator />
       <Form.TextArea title="Description" placeholder="Description" {...itemProps.description} />
       <Form.DatePicker title="Due Date" {...itemProps.dueDate} />
-      <Form.Dropdown title="Priority" {...itemProps.priority}>
-        <Form.Dropdown.Item value="1" title="Urgent" icon="🔴" />
-        <Form.Dropdown.Item value="2" title="High" icon="🟠" />
-        <Form.Dropdown.Item value="3" title="Normal" icon="🟡" />
-        <Form.Dropdown.Item value="4" title="Low" icon="🟢" />
+      <Form.Dropdown title="Priority" {...itemProps.priority} storeValue>
+        <Form.Dropdown.Item value="" title="None" icon={Icon.Flag} />
+        <Form.Dropdown.Item value="1" title="Urgent" icon={{ source: Icon.Flag, tintColor: Color.Red }} />
+        <Form.Dropdown.Item value="2" title="High" icon={{ source: Icon.Flag, tintColor: Color.Yellow }} />
+        <Form.Dropdown.Item value="3" title="Normal" icon={{ source: Icon.Flag, tintColor: Color.Blue }} />
+        <Form.Dropdown.Item value="4" title="Low" icon={{ source: Icon.Flag, tintColor: Color.SecondaryText }} />
       </Form.Dropdown>
       <Form.Dropdown title="Status" storeValue {...itemProps.status}>
         {list?.statuses.map((status) => (

@@ -47,9 +47,9 @@ export default function ChatSettingsForm(props: {
   settings: typeof defaultAdvancedSettings;
 }) {
   const { oldData, chats, setCurrentChat, settings } = props;
-  const [contextFields, setContextFields] = useState<{ type: string; source: string; data: string }[]>(
-    [...oldData.contextData] || [],
-  );
+  const [contextFields, setContextFields] = useState<{ type: string; source: string; data: string }[]>([
+    ...oldData.contextData,
+  ]);
   const [stats, setStats] = useState<ChatStatistics>();
   const { pop } = useNavigation();
 
