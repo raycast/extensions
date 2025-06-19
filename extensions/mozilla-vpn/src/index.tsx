@@ -485,6 +485,7 @@ const Command: React.FC = () => {
               <ActionPanel.Section>
                 <Action.OpenInBrowser
                   url="https://www.mozilla.org/en-US/products/vpn/download/"
+                  // eslint-disable-next-line @raycast/prefer-title-case
                   title="Download Mozilla VPN"
                 />
               </ActionPanel.Section>
@@ -561,7 +562,8 @@ const Command: React.FC = () => {
               actions={
                 <ActionPanel>
                   <Action
-                    title="Refresh Ip and Location"
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title="Refresh IP and Location"
                     icon={Icon.RotateClockwise}
                     onAction={async () => {
                       await showToast(

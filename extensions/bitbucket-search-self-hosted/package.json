@@ -5,6 +5,9 @@
   "description": "The extension allow you to quickly access repositories and pull-requests in Bitbucket Server (Self-Hosted)",
   "icon": "bitbucket-logo.png",
   "author": "yuercl",
+  "contributors": [
+    "psychopasss"
+  ],
   "categories": [
     "Developer Tools"
   ],
