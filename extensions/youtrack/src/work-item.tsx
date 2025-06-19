@@ -12,6 +12,8 @@ export function AddWork(props: {
 }) {
   const [issue, setIssue] = useState<IssueExtended | null>(null);
   const { pop } = useNavigation();
+  const emptyWorkItemType = [{ id: "", name: "No type" }];
+
   const { handleSubmit, itemProps } = useForm<WorkItemSubmit>({
     async onSubmit({ comment, date, workTypeId, time }) {
       const toast = await showToast({
@@ -24,6 +26,10 @@ export function AddWork(props: {
         toast.title = "Failed adding work item, missing callback function";
         return;
       }
+
+      const workTypes = issue?.workItemTypes?.length
+        ? [...emptyWorkItemType, ...issue.workItemTypes]
+        : emptyWorkItemType;
 
       const workItem: WorkItem = {
         text: comment,
@@ -79,7 +85,6 @@ export function AddWork(props: {
     return <Detail isLoading />;
   }
 
-  const emptyWorkItemType = [{ id: "", name: "No type" }];
   const workTypes = issue.workItemTypes?.length ? [...emptyWorkItemType, ...issue.workItemTypes] : emptyWorkItemType;
 
   return (
@@ -106,6 +111,7 @@ export function AddWork(props: {
             key={workType.id}
             value={workType.id || ""}
             title={workType.name || `- missing (id: ${workType.id}) -`}
+            keywords={[workType.name || ""]}
           />
         ))}
       </Form.Dropdown>

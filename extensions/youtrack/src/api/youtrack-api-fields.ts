@@ -35,7 +35,6 @@ export const issuesFields = withDefaultFields(issueDefaultFields) satisfies Sche
 
 export const extendedIssuesFields = withDefaultFields([
   ...issueDefaultFields,
-  "description",
   { attachments: ["name", "url"] },
   { reporter: userFields },
   { updater: userFields },

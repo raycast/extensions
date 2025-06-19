@@ -29,6 +29,7 @@ export default async function getUsers(input: Input) {
     return user;
   } catch (error) {
     handleOnCatchError(error, "Error fetching users");
+    throw error;
   }
 }
 

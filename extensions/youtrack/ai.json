@@ -109,7 +109,6 @@
             "shortName": "DEMO"
           }
         ],
-        ],
         "get-self": {
           "$type": "Me",
           "avatarUrl": "/hub/api/rest/avatar/2e7b17f1-4cdc-4d74-8f3e-eea7d928ddb5?s=48",

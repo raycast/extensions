@@ -95,15 +95,16 @@ function IssueDetails(props: {
   instance: string;
 }) {
   const [issue, setIssue] = useState<IssueExtended | null>(null);
+  const { getIssueDetailsCb } = props;
   useEffect(() => {
     async function fetchIssueDetails() {
-      const issue = await props.getIssueDetailsCb();
+      const issue = await getIssueDetailsCb();
       if (issue) {
         setIssue(issue);
       }
     }
     fetchIssueDetails();
-  }, [props]);
+  }, [getIssueDetailsCb]);
 
   if (!issue) {
     return <Detail isLoading />;
@@ -337,15 +338,16 @@ function Actions(props: {
 function CommentDetails(props: { getLastCommentCb: () => Promise<Comment | null>; instance: string; issueId: string }) {
   const [comment, setComment] = useState<Comment | null | undefined>(undefined);
   const { pop } = useNavigation();
+  const { getLastCommentCb } = props;
 
   useEffect(() => {
     async function fetchComment() {
-      const comment = await props.getLastCommentCb();
+      const comment = await getLastCommentCb();
 
       setComment(comment);
     }
     fetchComment();
-  }, [props]);
+  }, [getLastCommentCb]);
 
   if (comment === undefined) {
     return <Detail isLoading />;

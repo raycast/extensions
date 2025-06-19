@@ -35,5 +35,6 @@ export default async function getComments(input: Input) {
     }));
   } catch (error) {
     handleOnCatchError(error, "Error fetching comments");
+    throw error;
   }
 }
