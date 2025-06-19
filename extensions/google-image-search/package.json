@@ -10,7 +10,7 @@
     {
       "name": "google-search-images",
       "file": "google-search-images.tsx",
-      "title": "Google Search Images",
+      "title": "Search Images",
       "description": "Search images using the Google API and download or copy them",
       "mode": "view"
     }

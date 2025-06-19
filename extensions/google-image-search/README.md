@@ -13,6 +13,8 @@ This Raycast extension uses the Google Custom Search API to quickly search for i
    - On the left, choose **Credentials** 
    - Click Create credentials and then select API key
    - Copy the API key and input it in the raycast preferences for this extension
+   
+> "Custom Search JSON API provides 100 search queries per day for free. If you need more, you may sign up for billing in the API Console. Additional requests cost $5 per 1000 queries, up to 10k queries per day."
 
 2. **Custom Search Engine ID**
    - Go to [Google Programmable Search Engine](https://programmablesearchengine.google.com/controlpanel/create)
