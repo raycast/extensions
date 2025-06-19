@@ -1,9 +1,22 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, List, Icon, Color, Image, Detail } from "@raycast/api";
-import { Issue, IssueExtended } from "./interfaces";
-import { isURL, issueStates, removeMarkdownImages } from "./utils";
-import { WorkItem } from "youtrack-rest-client";
+import {
+  Action,
+  ActionPanel,
+  List,
+  Icon,
+  Color,
+  Detail,
+  Image,
+  Toast,
+  showToast,
+  useNavigation,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
+import type { Command, CommandSuggestions, Comment, EnumValue, Issue, IssueExtended, WorkItem } from "./interfaces";
+import { isURL, issueStates, addMarkdownImages, getPriorityFieldValue, formatDate } from "./utils";
 import { AddWork } from "./work-item";
+import { ApplyCommand } from "./apply-command";
 
 const resolvedIcon = { source: Icon.Check, tintColor: Color.Green };
 const openIcon = { source: Icon.Dot };
@@ -13,34 +26,59 @@ export function IssueListItem(props: {
   index: number;
   instance: string;
   resolved: boolean;
-  getIssueDetailsCb: () => Promise<IssueExtended> | null;
-  createWorkItemCb: (workItem: WorkItem) => Promise<WorkItem> | null;
+  getIssueDetailsCb: () => Promise<IssueExtended | void>;
+  createWorkItemCb: (workItem: WorkItem) => Promise<WorkItem | void>;
+  applyCommandCb: (command: Command) => Promise<void>;
+  getCommandSuggestions: (command: string) => Promise<CommandSuggestions>;
+  getLastCommentCb: () => Promise<Comment | null>;
+  deleteIssueCb: () => Promise<void>;
 }) {
   const [state, setState] = useState<{ icon: Image; accessories: List.Item.Accessory[] }>({
     icon: { source: "" },
     accessories: [],
   });
 
+  const priorityFieldValue = getPriorityFieldValue(props.item.customFields);
+  const stateField = props.item.customFields.find((field) => field.name === "State");
+
   useEffect(() => {
     const icon = props.resolved ? resolvedIcon : openIcon;
     const tooltip = props.resolved ? issueStates.ISSUE_RESOLVED : issueStates.ISSUE_OPEN;
-    const accessories = [{ text: props.item.id, tooltip }];
+    const accessories = priorityFieldValue
+      ? [
+          {
+            tag: {
+              value: priorityFieldValue.name[0],
+              color: priorityFieldValue.color?.background ?? "",
+              tooltip: priorityFieldValue.name,
+            },
+          },
+          { text: props.item.id, tooltip },
+        ]
+      : [{ text: props.item.id, tooltip }];
     setState({ icon, accessories });
-  }, [props.item.id, props.resolved]);
+  }, [priorityFieldValue, props.item.id, props.resolved]);
 
   return (
     <List.Item
       icon={state.icon}
       title={props.item.summary}
       keywords={[props.item.id]}
-      subtitle={props.item.date}
+      subtitle={{
+        tooltip: stateField && stateField.value ? (stateField.value as EnumValue).name : "",
+        value: props.item.date,
+      }}
       accessories={state.accessories}
       actions={
         <Actions
           item={props.item}
           instance={props.instance}
           getIssueDetailsCb={props.getIssueDetailsCb}
-          createWorkItemCb={(workItem) => props.createWorkItemCb(workItem)}
+          createWorkItemCb={props.createWorkItemCb}
+          applyCommandCb={props.applyCommandCb}
+          getCommandSuggestions={props.getCommandSuggestions}
+          getLastCommentCb={props.getLastCommentCb}
+          deleteIssueCb={props.deleteIssueCb}
         />
       }
     />
@@ -48,8 +86,11 @@ export function IssueListItem(props: {
 }
 
 function IssueDetails(props: {
-  getIssueDetailsCb: () => Promise<IssueExtended> | null;
-  createWorkItemCb: (workItem: WorkItem) => Promise<WorkItem> | null;
+  getIssueDetailsCb: () => Promise<IssueExtended | void>;
+  createWorkItemCb: (workItem: WorkItem) => Promise<WorkItem | void>;
+  applyCommandCb: (command: Command) => Promise<void>;
+  getCommandSuggestions: (command: string) => Promise<CommandSuggestions>;
+  getLastCommentCb: () => Promise<Comment | null>;
   link: string;
   instance: string;
 }) {
@@ -57,17 +98,28 @@ function IssueDetails(props: {
   useEffect(() => {
     async function fetchIssueDetails() {
       const issue = await props.getIssueDetailsCb();
-      setIssue(issue);
+      if (issue) {
+        setIssue(issue);
+      }
     }
     fetchIssueDetails();
-  }, []);
+  }, [props]);
 
   if (!issue) {
     return <Detail isLoading />;
   }
 
-  //NOTE: images are being removed from the description because youtrack-rest doesn't support them at the moment
-  const issueBody = `## ${issue.summary}\n\n${removeMarkdownImages(issue.description ?? "")}`;
+  const issueBody = `## ${issue.summary}\n\n${addMarkdownImages(issue, props.instance)}`;
+
+  const renderCustomFields = () => {
+    return issue.customFields.map((field) => {
+      if (typeof field.value === "string" || typeof field.value === "number") {
+        return <Detail.Metadata.Label key={field.id} title={field.name} text={String(field.value)} />;
+      }
+      return <Detail.Metadata.Label key={field.id} title={field.name} text={field.value.name} />;
+    });
+  };
+
   return (
     <Detail
       markdown={issueBody}
@@ -75,41 +127,51 @@ function IssueDetails(props: {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Created" text={issue.created} />
-          <Detail.Metadata.Label
-            title="Assignee"
-            text={issue.assignee?.fullName}
-            icon={
-              isURL(issue.assignee?.avatarUrl ?? "")
-                ? issue.assignee?.avatarUrl
-                : `${props.instance}${issue.assignee?.avatarUrl}`
-            }
-          />
-          <Detail.Metadata.Label
-            title="Author"
-            text={issue.reporter?.fullName}
-            icon={
-              isURL(issue.reporter?.avatarUrl ?? "")
-                ? issue.reporter?.avatarUrl
-                : `${props.instance}${issue.reporter?.avatarUrl}`
-            }
-          />
+          {issue.assignee ? (
+            <Detail.Metadata.Label
+              title="Assignee"
+              text={issue.assignee?.fullName}
+              icon={{
+                source: isURL(issue.assignee.avatarUrl ?? "")
+                  ? issue.assignee.avatarUrl
+                  : `${props.instance}${issue.assignee.avatarUrl}`,
+                mask: Image.Mask.RoundedRectangle,
+              }}
+            />
+          ) : null}
+          {issue.reporter ? (
+            <Detail.Metadata.Label
+              title="Author"
+              text={issue.reporter?.fullName}
+              icon={{
+                source: isURL(issue.reporter.avatarUrl ?? "")
+                  ? issue.reporter.avatarUrl
+                  : `${props.instance}${issue.reporter.avatarUrl}`,
+                mask: Image.Mask.RoundedRectangle,
+              }}
+            />
+          ) : null}
           <Detail.Metadata.Label title="Updated" text={issue.date} />
-          <Detail.Metadata.Label
-            title="Updater"
-            text={issue.updater?.fullName}
-            icon={
-              isURL(issue.updater?.avatarUrl ?? "")
-                ? issue.updater?.avatarUrl
-                : `${props.instance}${issue.updater?.avatarUrl}`
-            }
-          />
-          {issue.tags?.length ? (
+          {issue.updater ? (
+            <Detail.Metadata.Label
+              title="Updater"
+              text={issue.updater?.fullName}
+              icon={{
+                source: isURL(issue.updater.avatarUrl ?? "")
+                  ? issue.updater.avatarUrl
+                  : `${props.instance}${issue.updater.avatarUrl}`,
+                mask: Image.Mask.RoundedRectangle,
+              }}
+            />
+          ) : null}
+          {issue.tags.length ? (
             <Detail.Metadata.TagList title="Tags">
               {issue.tags.map((tag) => (
-                <Detail.Metadata.TagList.Item key={tag.id} text={tag.name} />
+                <Detail.Metadata.TagList.Item key={tag.id} text={tag.name} color={tag.color.background} />
               ))}
             </Detail.Metadata.TagList>
           ) : null}
+          {renderCustomFields()}
         </Detail.Metadata>
       }
       actions={
@@ -123,7 +185,7 @@ function IssueDetails(props: {
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             />
             <Action.Push
-              icon={Icon.AppWindowSidebarRight}
+              icon={Icon.Clock}
               title="Add Work"
               shortcut={{ modifiers: ["cmd"], key: "t" }}
               target={
@@ -135,6 +197,33 @@ function IssueDetails(props: {
                 />
               }
             />
+            <Action.Push
+              title="Apply Command"
+              icon={Icon.Terminal}
+              target={
+                <ApplyCommand
+                  link={props.link}
+                  instance={props.instance}
+                  issue={issue}
+                  getIssueDetailsCb={props.getIssueDetailsCb}
+                  applyCommandCb={(command) => props.applyCommandCb(command)}
+                  getCommandSuggestions={(command) => props.getCommandSuggestions(command)}
+                />
+              }
+              shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+            />
+            <Action.Push
+              title="Show Last Comment"
+              icon={Icon.Text}
+              target={
+                <CommentDetails
+                  getLastCommentCb={props.getLastCommentCb}
+                  instance={props.instance}
+                  issueId={issue.id}
+                />
+              }
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -145,52 +234,145 @@ function IssueDetails(props: {
 function Actions(props: {
   item: Issue;
   instance: string;
-  getIssueDetailsCb: () => Promise<IssueExtended> | null;
-  createWorkItemCb: (workItem: WorkItem) => Promise<WorkItem> | null;
+  getIssueDetailsCb: () => Promise<IssueExtended | void>;
+  createWorkItemCb: (workItem: WorkItem) => Promise<WorkItem | void>;
+  applyCommandCb: (command: Command) => Promise<void>;
+  getCommandSuggestions: (command: string) => Promise<CommandSuggestions>;
+  getLastCommentCb: () => Promise<Comment | null>;
+  deleteIssueCb: () => Promise<void>;
 }) {
   const link = `${props.instance}/issue/${props.item.id}`;
   return (
     <ActionPanel title={props.item.summary}>
       <ActionPanel.Section>
-        {link && (
-          <Action.Push
-            icon={Icon.AppWindowSidebarRight}
-            title="Show Details"
-            target={
-              <IssueDetails
-                link={link}
-                instance={props.instance}
-                getIssueDetailsCb={() => props.getIssueDetailsCb()}
-                createWorkItemCb={(workItem) => props.createWorkItemCb(workItem)}
-              />
-            }
-          />
-        )}
-        {link && (
-          <Action.Push
-            icon={Icon.AppWindowSidebarRight}
-            title="Add Work"
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
-            target={
-              <AddWork
-                link={link}
-                instance={props.instance}
-                getIssueDetailsCb={props.getIssueDetailsCb}
-                createWorkItemCb={(workItem) => props.createWorkItemCb(workItem)}
-              />
-            }
-          />
-        )}
-        {link && <Action.CopyToClipboard content={props.item.id} title="Copy ID" />}
-        {link && (
-          <Action.CopyToClipboard
-            content={link}
-            title="Copy Link"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-          />
-        )}
-        {link && <Action.OpenInBrowser url={link} shortcut={{ modifiers: ["opt"], key: "enter" }} />}
+        <Action.Push
+          icon={Icon.AppWindowSidebarRight}
+          title="Show Details"
+          target={
+            <IssueDetails
+              link={link}
+              instance={props.instance}
+              getIssueDetailsCb={() => props.getIssueDetailsCb()}
+              createWorkItemCb={(workItem) => props.createWorkItemCb(workItem)}
+              applyCommandCb={(command) => props.applyCommandCb(command)}
+              getCommandSuggestions={(command) => props.getCommandSuggestions(command)}
+              getLastCommentCb={props.getLastCommentCb}
+            />
+          }
+        />
+
+        <Action.Push
+          icon={Icon.Clock}
+          title="Add Work"
+          shortcut={{ modifiers: ["cmd"], key: "t" }}
+          target={
+            <AddWork
+              link={link}
+              instance={props.instance}
+              getIssueDetailsCb={props.getIssueDetailsCb}
+              createWorkItemCb={(workItem) => props.createWorkItemCb(workItem)}
+            />
+          }
+        />
+
+        <Action.CopyToClipboard content={props.item.id} title="Copy ID" />
+
+        <Action.CopyToClipboard
+          content={link}
+          title="Copy Link"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+        />
+
+        <Action.OpenInBrowser url={link} shortcut={{ modifiers: ["opt"], key: "enter" }} />
+
+        <Action.Push
+          title="Apply Command"
+          icon={Icon.Terminal}
+          target={
+            <ApplyCommand
+              link={link}
+              instance={props.instance}
+              issue={props.item}
+              getIssueDetailsCb={props.getIssueDetailsCb}
+              applyCommandCb={(command) => props.applyCommandCb(command)}
+              getCommandSuggestions={(command) => props.getCommandSuggestions(command)}
+            />
+          }
+          shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+        />
+        <Action.Push
+          title="Show Last Comment"
+          icon={Icon.SpeechBubbleActive}
+          target={
+            <CommentDetails
+              getLastCommentCb={props.getLastCommentCb}
+              instance={props.instance}
+              issueId={props.item.id}
+            />
+          }
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        />
+        <Action
+          title="Delete Issue"
+          style={Action.Style.Destructive}
+          icon={Icon.Trash}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+          onAction={() => {
+            confirmAlert({
+              title: "Delete Issue",
+              message: "Are you sure you want to delete this issue?",
+              primaryAction: {
+                title: "Delete",
+                onAction: props.deleteIssueCb,
+                style: Alert.ActionStyle.Destructive,
+              },
+            });
+          }}
+        />
       </ActionPanel.Section>
     </ActionPanel>
+  );
+}
+
+function CommentDetails(props: { getLastCommentCb: () => Promise<Comment | null>; instance: string; issueId: string }) {
+  const [comment, setComment] = useState<Comment | null | undefined>(undefined);
+  const { pop } = useNavigation();
+
+  useEffect(() => {
+    async function fetchComment() {
+      const comment = await props.getLastCommentCb();
+
+      setComment(comment);
+    }
+    fetchComment();
+  }, [props]);
+
+  if (comment === undefined) {
+    return <Detail isLoading />;
+  }
+
+  if (comment === null) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "No comments yet",
+    });
+    pop();
+    return;
+  }
+
+  return (
+    <Detail
+      markdown={addMarkdownImages(comment, props.instance)}
+      navigationTitle={`By ${comment.author?.fullName} on ${formatDate(comment.created)}`}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard
+            content={`${props.instance}/issue/${props.issueId}#focus=Comments-${comment.id}.0-0`}
+            title="Copy Link"
+          />
+          <Action.OpenInBrowser url={`${props.instance}/issue/${props.issueId}#focus=Comments-${comment.id}.0-0`} />
+        </ActionPanel>
+      }
+    />
   );
 }
