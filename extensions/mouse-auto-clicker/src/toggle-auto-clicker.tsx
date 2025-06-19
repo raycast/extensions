@@ -55,7 +55,7 @@ const isBrewInstalled = async (): Promise<boolean> => {
   // Check common Homebrew installation paths
   const brewPaths = [
     "/opt/homebrew/bin/brew", // Apple Silicon Macs
-    "/usr/local/bin/brew",    // Intel Macs
+    "/usr/local/bin/brew", // Intel Macs
   ];
 
   for (const path of brewPaths) {
@@ -73,7 +73,7 @@ const isCliclickInstalled = async (): Promise<boolean> => {
   // Check common cliclick installation paths (same directories as Homebrew)
   const cliclickPaths = [
     "/opt/homebrew/bin/cliclick", // Apple Silicon Macs
-    "/usr/local/bin/cliclick",    // Intel Macs
+    "/usr/local/bin/cliclick", // Intel Macs
   ];
 
   for (const path of cliclickPaths) {
@@ -90,7 +90,7 @@ const isCliclickInstalled = async (): Promise<boolean> => {
 const getCliclickPath = async (): Promise<string | null> => {
   const cliclickPaths = [
     "/opt/homebrew/bin/cliclick", // Apple Silicon Macs
-    "/usr/local/bin/cliclick",    // Intel Macs
+    "/usr/local/bin/cliclick", // Intel Macs
   ];
 
   for (const path of cliclickPaths) {
@@ -171,8 +171,6 @@ const stopAutoClicker = () => {
   cleanup();
 };
 
-
-
 export default async function Command() {
   try {
     // Check if required dependencies are installed
@@ -194,16 +192,16 @@ export default async function Command() {
         primaryAction: {
           title: "Copy Install Commands",
           onAction: async () => {
-            const commands = !brewInstalled 
+            const commands = !brewInstalled
               ? '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && brew install cliclick'
-              : 'brew install cliclick';
-            
+              : "brew install cliclick";
+
             await showToast({
               style: Toast.Style.Success,
               title: "Commands Copied",
               message: "Paste in Terminal to install",
             });
-            
+
             // Copy to clipboard
             await execAsync(`echo '${commands}' | pbcopy`);
           },
@@ -236,7 +234,7 @@ brew install cliclick
     if (clickerState.isRunning) {
       // Stop the auto clicker
       stopAutoClicker();
-      
+
       await showToast({
         style: Toast.Style.Success,
         title: "Auto Clicker Stopped",
@@ -246,7 +244,7 @@ brew install cliclick
     } else {
       // Start the auto clicker
       startAutoClicker(clickInterval);
-      
+
       await showToast({
         style: Toast.Style.Success,
         title: "Auto Clicker Started",
@@ -285,7 +283,8 @@ brew install cliclick
     await showToast({
       style: Toast.Style.Failure,
       title: "Auto Clicker Error",
-      message: "Failed to toggle auto clicker. Check accessibility permissions.",
+      message:
+        "Failed to toggle auto clicker. Check accessibility permissions.",
     });
   }
 }
