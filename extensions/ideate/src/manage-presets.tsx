@@ -16,11 +16,7 @@ export default function ManagePresets() {
       const loadedPresets = await getPresets();
       setPresets(loadedPresets);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: t.preset.loadFailed,
-        message: String(error),
-      });
+      await showFailureToast(error, { title: t.preset.loadFailed });
     } finally {
       setIsLoading(false);
     }
