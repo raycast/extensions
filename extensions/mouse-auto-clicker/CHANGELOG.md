@@ -1,6 +1,6 @@
 # Mouse Auto Clicker Changelog
 
-## [Initial Release] - 2024-06-19
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 - Toggle command to start/stop mouse auto-clicker
