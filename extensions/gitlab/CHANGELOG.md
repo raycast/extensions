@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Add label filter on issues menu bar] - {PR_MERGE_DATE}
+## [Add label filter on issues menu bar] - 2025-06-19
 
 Add label filter on issues menu bar
 
