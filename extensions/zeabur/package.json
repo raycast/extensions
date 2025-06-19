@@ -27,6 +27,22 @@
       "mode": "view"
     },
     {
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "subtitle": "Zeabur",
+      "description": "Manage Zeabur Projects",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "zeaburToken",
+          "title": "Zeabur Token",
+          "description": "Zeabur Token",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "deploy-project",
       "title": "Deploy Project",
       "subtitle": "Zeabur",
@@ -38,6 +54,7 @@
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.3",
     "archiver": "^7.0.1",
+    "date-fns": "^4.1.0",
     "ignore": "^7.0.4",
     "node-fetch": "^3.3.2"
   },

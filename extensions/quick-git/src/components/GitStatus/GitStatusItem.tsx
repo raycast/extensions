@@ -1,18 +1,17 @@
+import { useMemo, useState } from "react";
 import { Icon, List } from "@raycast/api";
-import { useMemo } from "react";
-import { GitStatusItemActions } from "./GitStatusItemActions.js";
 import type { StatusInfo } from "../../utils/status.js";
-import { BranchInfo } from "../../utils/branch.js";
+import type { BranchInfo } from "../../utils/branch.js";
 import { GitStatusItemDetail } from "./GitStatusItemDetail.js";
+import { GitStatusItemActions } from "./GitStatusItemActions.js";
 
 interface Props {
-  repo: string;
   branch: BranchInfo;
   status: StatusInfo;
-  checkStatus: () => void;
 }
 
-export function GitStatusItem({ repo, status, branch, checkStatus }: Props) {
+export function GitStatusItem({ status, branch }: Props) {
+  const [diff, setDiff] = useState("");
   const isNotStaged = useMemo(() => {
     return status.staged === "." || status.staged === "?";
   }, [status.staged]);
@@ -36,12 +35,12 @@ export function GitStatusItem({ repo, status, branch, checkStatus }: Props) {
         <GitStatusItemActions
           isNotStaged={isNotStaged}
           isCommittedFile={isCommittedFile}
-          repo={repo}
+          isShowingDiff={!!diff}
           fileName={status.fileName}
-          checkStatus={checkStatus}
+          updateDiff={setDiff}
         />
       }
-      detail={<GitStatusItemDetail branch={branch} status={status} />}
+      detail={<GitStatusItemDetail branch={branch} status={status} diff={diff} />}
     />
   );
 }

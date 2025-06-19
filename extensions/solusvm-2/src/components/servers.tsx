@@ -1,18 +1,21 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
   confirmAlert,
   Form,
   Icon,
   List,
+  popToRoot,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { Project, Server } from "../types";
+import { ApplicationResource, OsImageResource, Project, Server, SshKeyResource } from "../types";
 import { FormValidation, MutatePromise, useFetch, useForm } from "@raycast/utils";
 import { API_HEADERS, callApi, generateApiUrl } from "../api";
+import Snapshots from "./snapshots";
 
 export default function Servers({ project }: { project: Project }) {
   const {
@@ -35,11 +38,12 @@ export default function Servers({ project }: { project: Project }) {
   }
 
   const STATUS_MAP: Record<Server["status"], { color: Color.ColorLike; text: string }> = {
-    started: { color: "#80af26", text: "Running" },
-    stopped: { color: "#d02d4b", text: "Stopped" },
+    started: { color: Color.Green, text: "Running" },
+    stopped: { color: Color.Red, text: "Stopped" },
     starting: { color: Color.Yellow, text: "Starting" },
     stopping: { color: Color.Yellow, text: "Stopping" },
     restarting: { color: Color.Orange, text: "Restarting" },
+    reinstalling: { color: Color.Orange, text: "Reinstalling" },
   };
 
   const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
@@ -112,6 +116,7 @@ export default function Servers({ project }: { project: Project }) {
           ]}
           actions={
             <ActionPanel>
+              <Action.Push icon={Icon.Camera} title="View Snapshots" target={<Snapshots serverId={server.id} />} />
               <Action.Push
                 icon={Icon.Pencil}
                 title="Update"
@@ -126,6 +131,11 @@ export default function Servers({ project }: { project: Project }) {
               {server.status === "stopped" && (
                 <Action icon={Icon.Play} title="Start" onAction={() => doServerAction(server, "start")} />
               )}
+              <Action.Push
+                icon={Icon.ArrowClockwise}
+                title="Reinstall Server"
+                target={<ReinstallServer projectId={project.id} serverId={server.id} />}
+              />
             </ActionPanel>
           }
         />
@@ -184,6 +194,139 @@ function UpdateServer({ server, mutate }: { server: Server; mutate: MutatePromis
         {...itemProps.name}
       />
       <Form.TextField title="Description" placeholder="Description" {...itemProps.description} />
+    </Form>
+  );
+}
+
+function ReinstallServer({ projectId, serverId }: { projectId: number; serverId: number }) {
+  const { isLoading: isLoadingOS, data: oses } = useFetch(generateApiUrl("os_images"), {
+    headers: API_HEADERS,
+    mapResult(result: { data: OsImageResource[] }) {
+      return {
+        data: result.data.filter((o) => o.is_visible),
+      };
+    },
+    initialData: [],
+  });
+  const { isLoading: isLoadingApplication, data: applications } = useFetch(generateApiUrl("applications"), {
+    headers: API_HEADERS,
+    mapResult(result: { data: ApplicationResource[] }) {
+      return {
+        data: result.data.filter((a) => a.is_visible),
+      };
+    },
+    initialData: [],
+  });
+  const { isLoading: isLoadingSSHKey, data: sshKeys } = useFetch(generateApiUrl(`projects/${projectId}/ssh_keys`), {
+    headers: API_HEADERS,
+    mapResult(result: { data: SshKeyResource[] }) {
+      return {
+        data: result.data,
+      };
+    },
+    initialData: [],
+  });
+
+  type FormValues = {
+    type: string;
+    os: string;
+    application: string;
+    ssh_keys: string[];
+    password: string;
+  };
+  const { handleSubmit, itemProps, values } = useForm<FormValues>({
+    async onSubmit(values) {
+      const options: Alert.Options = {
+        title: "Reinstall server",
+        message:
+          "Reinstalling your server will power it down and overwrite its disk with the image you select. All previous data on the disk will be lost.",
+        primaryAction: {
+          title: "Reinstall",
+        },
+      };
+      if (!(await confirmAlert(options))) return;
+
+      const toast = await showToast(Toast.Style.Animated, "Reinstalling server", serverId.toString());
+      try {
+        const { os, application, ssh_keys, password } = values;
+        const body = {
+          ...(values.type === "os" ? { os: +os } : { application: +application }),
+          ...(ssh_keys.length && { ssh_keys: ssh_keys.map((ssh) => +ssh) }),
+          ...(values.password && { password }),
+        };
+        await callApi(`servers/${serverId}/reinstall`, { method: "POST", body });
+        toast.style = Toast.Style.Success;
+        toast.title = "Reinstalled";
+        await popToRoot();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could not reinstall";
+        toast.message = `${error}`;
+      }
+    },
+    initialValues: {
+      type: "os",
+      os: oses.find((o) => o.is_default)?.id.toString(),
+      application: applications.find((a) => a.is_default)?.id.toString(),
+    },
+    validation: {
+      os(value) {
+        if (values.type === "os" && !value) return "The item is requireed";
+      },
+      application(value) {
+        if (values.type === "application" && !value) return "The item is requireed";
+      },
+    },
+  });
+
+  return (
+    <Form
+      isLoading={isLoadingOS || isLoadingApplication || isLoadingSSHKey}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.ArrowClockwise} title="Reinstall Server" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown title="Server Type" {...itemProps.type}>
+        <Form.Dropdown.Item title="Operating System" value="os" />
+        <Form.Dropdown.Item title="Applications" value="application" />
+      </Form.Dropdown>
+      {values.type === "os" ? (
+        <Form.Dropdown title="Operating System" {...itemProps.os}>
+          {oses.map((os) => (
+            <Form.Dropdown.Item
+              icon={os.icon.url}
+              key={os.id}
+              title={`${os.name} ${os.versions[0].version}`}
+              value={os.id.toString()}
+            />
+          ))}
+        </Form.Dropdown>
+      ) : (
+        <Form.Dropdown title="Application" {...itemProps.application}>
+          {applications.map((application) => (
+            <Form.Dropdown.Item
+              key={application.id}
+              icon={application.icon.url}
+              title={application.name}
+              value={application.id.toString()}
+            />
+          ))}
+        </Form.Dropdown>
+      )}
+
+      <Form.Separator />
+      <Form.PasswordField
+        title="Operating System Password"
+        placeholder="Leave empty to keep it unchanged"
+        {...itemProps.password}
+      />
+      <Form.TagPicker title="SSH Keys" placeholder="SSH Keys" {...itemProps.ssh_keys}>
+        {sshKeys.map((sshKey) => (
+          <Form.TagPicker.Item key={sshKey.id} icon={Icon.Key} title={sshKey.name} value={sshKey.id.toString()} />
+        ))}
+      </Form.TagPicker>
     </Form>
   );
 }

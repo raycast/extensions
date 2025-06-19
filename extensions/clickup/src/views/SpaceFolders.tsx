@@ -20,7 +20,7 @@ export function SpaceFolders({ spaceId, spaceName }: { spaceId: string; spaceNam
             key={folder.id}
             title={folder.name}
             subtitle={`Total Tasks: ${folder.task_count}`}
-            icon={Icon.Clipboard}
+            icon={Icon.Folder}
             actions={
               <ActionPanel title="Folder Actions">
                 <Action.Push

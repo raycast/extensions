@@ -11,7 +11,14 @@ This is a Raycast extension for [SolusVM](https://solusvm.com/) 2 accounts ([Doc
     - View Servers in your Project
         - Update Server (hostname, description)
         - Start, Stop, Restart Server
+        - Reinstall Server (**Application** or **Operating System**)
+        - View Snapshots
+            - Create Snapshot
+            - Remove Snapshot
     - View Members in your Project
+        - Invite Member
+            - Resend Invite
+        - Remove Member
 - View (custom) ISO Images
 - View Account
     - Update Settings (password)
@@ -41,10 +48,11 @@ This extension is for `SolusVM 2` so instances w/ `SolusVM 1` are incompatible. 
 
 ---
 
-Looking for a different panel? Try these:
+### 👀 Looking for a different panel? Try these:
 
 <a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install cyberpanel Raycast Extension" href="https://www.raycast.com/xmok/cyberpanel"><img src="https://www.raycast.com/xmok/cyberpanel/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install directadmin-reseller Raycast Extension" href="https://www.raycast.com/xmok/directadmin-reseller"><img src="https://www.raycast.com/xmok/directadmin-reseller/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install dokploy Raycast Extension" href="https://www.raycast.com/xmok/dokploy"><img src="https://www.raycast.com/xmok/dokploy/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install hestiacp-admin Raycast Extension" href="https://www.raycast.com/xmok/hestiacp-admin"><img src="https://www.raycast.com/xmok/hestiacp-admin/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install virtualizor-enduser Raycast Extension" href="https://www.raycast.com/xmok/virtualizor-enduser"><img src="https://www.raycast.com/xmok/virtualizor-enduser/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

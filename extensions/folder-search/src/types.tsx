@@ -9,6 +9,7 @@ type SpotlightSearchPreferences = {
   pinned: SpotlightSearchResult[];
   searchScope: string;
   isShowingDetail: boolean;
+  openFolderAfterMove: boolean;
 };
 
 type FolderSearchPlugin = {

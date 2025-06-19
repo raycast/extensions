@@ -1,4 +1,4 @@
-import { OAuth, getPreferenceValues } from "@raycast/api";
+import { OAuth, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import { Todo, User, Project } from "../types";
 import * as crypto from "crypto";
@@ -38,18 +38,41 @@ export async function authorize(): Promise<void> {
   const tokenSet = await client.getTokens();
   if (tokenSet?.accessToken) {
     if (tokenSet.refreshToken && tokenSet.isExpired()) {
-      await client.setTokens(await refreshTokens(tokenSet.refreshToken));
+      try {
+        await client.setTokens(await refreshTokens(tokenSet.refreshToken));
+      } catch (error) {
+        // Refresh failed, clear tokens and start fresh
+        console.log("Token refresh failed, clearing tokens:", error);
+        await client.setTokens({} as OAuth.TokenResponse);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Session expired",
+          message: "Please run the command again to re-authenticate",
+        });
+        return;
+      }
     }
     return;
   }
 
-  const authRequest = await client.authorizationRequest({
-    endpoint: `${oauthUrl}/oauth/authorize`,
-    clientId: clientId,
-    scope: "",
-  });
-  const { authorizationCode } = await client.authorize(authRequest);
-  await client.setTokens(await fetchTokens(authRequest, authorizationCode));
+  try {
+    const authRequest = await client.authorizationRequest({
+      endpoint: `${oauthUrl}/oauth/authorize`,
+      clientId: clientId,
+      scope: "",
+    });
+    const { authorizationCode } = await client.authorize(authRequest);
+    await client.setTokens(await fetchTokens(authRequest, authorizationCode));
+  } catch (error) {
+    // OAuth flow failed, show helpful message
+    console.log("OAuth flow failed:", error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Authentication failed",
+      message: "Please try running the command again",
+    });
+    throw error; // Re-throw so command knows auth failed
+  }
 }
 
 export async function fetchTokens(
@@ -65,7 +88,20 @@ export async function fetchTokens(
 
   const response = await fetch(`${oauthUrl}/oauth/token`, { method: "POST", body: params });
   if (!response.ok) {
-    console.error("fetch tokens error:", await response.text());
+    const errorText = await response.text();
+    console.error("fetch tokens error:", errorText);
+
+    // Parse the error to provide better messaging
+    try {
+      const errorData = JSON.parse(errorText);
+      if (errorData.error === "invalid_grant") {
+        // This usually means the auth code expired or was already used
+        throw new Error("Authorization expired. Please try again.");
+      }
+    } catch (parseError) {
+      // Ignore parse errors, use original error
+    }
+
     throw new Error(response.statusText);
   }
   return (await response.json()) as OAuth.TokenResponse;
@@ -79,8 +115,20 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
 
   const response = await fetch(`${oauthUrl}/oauth/token`, { method: "POST", body: params });
   if (!response.ok) {
+    const errorText = await response.text();
     console.log("oauthUrl:", oauthUrl);
-    console.error("refresh tokens error:", await response.text());
+    console.error("refresh tokens error:", errorText);
+
+    // Parse the error to provide better messaging
+    try {
+      const errorData = JSON.parse(errorText);
+      if (errorData.error === "invalid_grant") {
+        throw new Error("Refresh token expired. Please re-authenticate.");
+      }
+    } catch (parseError) {
+      // Ignore parse errors, use original error
+    }
+
     throw new Error(response.statusText);
   }
 
@@ -89,7 +137,22 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
   return tokenResponse;
 }
 
-// API
+// Simple helper to handle auth errors
+async function handleUnauthorized(): Promise<void> {
+  console.log("Authentication failed, clearing tokens");
+
+  try {
+    await client.setTokens({} as OAuth.TokenResponse);
+  } catch (error) {
+    console.log("Failed to clear tokens:", error);
+  }
+
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Authentication expired",
+    message: "Please run the command again to re-authenticate",
+  });
+}
 
 export async function fetchUser(): Promise<User> {
   const response = await fetch(`${apiUrl}/users/me.json`, {
@@ -98,6 +161,11 @@ export async function fetchUser(): Promise<User> {
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
     },
   });
+
+  if (response.status === 401) {
+    await handleUnauthorized();
+  }
+
   if (!response.ok) {
     console.error("fetch user error:", await response.text(), "URL:", response.url);
     throw new Error(response.statusText);
@@ -119,10 +187,16 @@ export async function fetchStreak(): Promise<StreakResponse> {
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
     },
   });
+
+  if (response.status === 401) {
+    await handleUnauthorized();
+  }
+
   if (!response.ok) {
     console.error("fetch streak error:", await response.text(), "URL:", response.url);
     throw new Error(response.statusText);
   }
+
   return (await response.json()) as StreakResponse;
 }
 
@@ -136,10 +210,16 @@ export async function fetchTodos(searchQuery: string = ""): Promise<Todo[]> {
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
     },
   });
+
+  if (response.status === 401) {
+    await handleUnauthorized();
+  }
+
   if (!response.ok) {
     console.error("fetch items error:", await response.text());
     throw new Error(response.statusText);
   }
+
   const jsonResponse = (await response.json()) as { data: Todo[] };
   return jsonResponse.data;
 }
@@ -151,10 +231,16 @@ export async function fetchProjects(): Promise<Project[]> {
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
     },
   });
+
+  if (response.status === 401) {
+    await handleUnauthorized();
+  }
+
   if (!response.ok) {
     console.error("fetch items error:", await response.text());
     throw new Error(response.statusText);
   }
+
   const jsonResponse = (await response.json()) as { data: Project[] };
   return jsonResponse.data;
 }

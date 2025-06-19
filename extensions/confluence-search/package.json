@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "tbrown",
   "contributors": [
-    "xmok"
+    "xmok",
+    "litomore"
   ],
   "categories": [
     "Productivity",
@@ -107,25 +108,23 @@
     }
   ],
   "dependencies": {
-    "@apollo/client": "^3.6.8",
-    "@raycast/api": "^1.91.0",
-    "@raycast/utils": "^1.18.1",
+    "@apollo/client": "^3.13.8",
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.0",
     "apollo-link-rest": "^0.9.0",
-    "apollo3-cache-persist": "^0.14.0",
-    "async-mutex": "^0.3.2",
+    "apollo3-cache-persist": "^0.15.0",
+    "async-mutex": "^0.5.0",
     "cross-fetch": "^4.1.0",
     "graphql": "^15.0.0",
-    "qs": "^6.11.0",
-    "use-async-effect": "^2.2.6"
+    "qs": "^6.14.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^5.7.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.3",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.29.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build",

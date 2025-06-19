@@ -23,6 +23,7 @@
       "title": "API Token",
       "type": "password",
       "required": true,
+      "placeholder": "ey...XX",
       "description": "API Token from Account"
     }
   ],
@@ -50,8 +51,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.98.5",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

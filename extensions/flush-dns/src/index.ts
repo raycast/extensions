@@ -1,66 +1,142 @@
 import { confirmAlert, showHUD } from "@raycast/api";
-import { SpawnSyncReturns, execSync } from "node:child_process";
+import { execSync } from "node:child_process";
+import { platform } from "node:os";
 
-const isSpawnReturn = (e: unknown): e is SpawnSyncReturns<Buffer> => {
-  return typeof e === "object" && e !== null && "status" in e && "stdout" in e && "stderr" in e;
-};
+type ShellType = string | undefined;
 
-const commands = {
-  mDNSResponder: "sudo /usr/bin/killall -HUP mDNSResponder",
-  dscacheutil: "sudo /usr/bin/dscacheutil -flushcache",
-  mdnsflushcache: "sudo /usr/bin/discoveryutil mdnsflushcache",
-} as const satisfies Record<string, string>;
+interface CommandSet {
+  commands: Record<string, string>;
+  shell: ShellType;
+}
+
+const OS_COMMANDS = {
+  darwin: {
+    commands: {
+      dscacheutil: "/usr/bin/dscacheutil -flushcache",
+      mDNSResponder: "/usr/bin/killall -HUP mDNSResponder",
+      mdnsflushcache: "/usr/bin/discoveryutil mdnsflushcache",
+    },
+    shell: "/bin/bash",
+  },
+  win32: {
+    commands: {
+      ipconfig: "ipconfig /flushdns",
+    },
+    shell: undefined, // Uses cmd.exe by default
+  },
+} as const satisfies Record<string, CommandSet>;
+
+type SupportedPlatform = "darwin" | "win32";
+
+interface Win32Commands {
+  ipconfig: string;
+}
 
 export default async function main() {
-  const osVersion = execSync("sw_vers -productVersion").toString().trim();
+  const osPlatform = platform();
 
-  const runCommands: (keyof typeof commands)[] = [];
-
-  if (osVersion.match(/^1[1-5]/)) {
-    console.log(`OS Version: ${osVersion} parsed as 11-15`);
-    runCommands.push("dscacheutil", "mDNSResponder");
-  } else if (osVersion.match(/^10\.([7-9]|1[1-4])/) || osVersion.match(/^10\.10\.[4-5]/)) {
-    console.log(`OS Version: ${osVersion} parsed as 10.7-9, 10.10.4-5, 10.11-14`);
-    runCommands.push("mDNSResponder");
-  } else if (osVersion.match(/^10\.10\.[0-3]/)) {
-    console.log(`OS Version: ${osVersion} parsed as 10.10.0-3`);
-    runCommands.push("mdnsflushcache");
-  } else if (osVersion.startsWith("10.6")) {
-    console.log(`OS Version: ${osVersion} parsed as 10.6`);
-    runCommands.push("dscacheutil");
-  } else {
-    const flush = await confirmAlert({
-      title: `OS Version ${osVersion} is not supported.`,
-      message: "Would you like to try flushing the DNS cache anyway?",
-      primaryAction: {
-        title: "Flush DNS Cache",
-      },
-      dismissAction: {
-        title: "Cancel",
-      },
-    });
-    if (!flush) return;
-    runCommands.push("dscacheutil", "mDNSResponder");
+  if (!["darwin", "win32"].includes(osPlatform)) {
+    await showHUD("🚫 Unsupported operating system");
+    return;
   }
 
-  const command = runCommands.map((key) => commands[key]).join("; ");
+  const osCommandSet = OS_COMMANDS[osPlatform as SupportedPlatform];
 
-  const osaCommand = `osascript -e 'do shell script "${command}" with administrator privileges'`;
+  let command: string;
+  let shell: ShellType;
 
-  console.log(`Running command: ${osaCommand}`);
+  switch (osPlatform) {
+    case "darwin": {
+      const macResult = await getMacOSCommands(osCommandSet);
+      if (!macResult) return;
 
-  await showHUD("Administrator Privileges Required");
-  try {
-    execSync(osaCommand, { shell: "/bin/bash" });
-    await showHUD("DNS Cache Flushed");
-  } catch (e) {
-    if (isSpawnReturn(e)) {
-      console.error(`Command exited with status ${e.status}`);
-      console.error(`stdout: ${e.stdout.toString()}`);
-      console.error(`stderr: ${e.stderr.toString()}`);
-    } else {
-      console.error(e);
+      command = macResult.command;
+      shell = macResult.shell;
+      break;
     }
-    await showHUD("Error Flushing DNS Cache");
+
+    case "win32": {
+      const { ipconfig } = osCommandSet.commands as Win32Commands;
+      command = ipconfig;
+      shell = osCommandSet.shell;
+      break;
+    }
+
+    default:
+      await showHUD("🚫 Unsupported OS");
+      return;
   }
+
+  console.log(`🚀 Executing DNS flush command: ${command} in shell: ${shell}`);
+
+  try {
+    execSync(command, { shell, stdio: "ignore" });
+    await showHUD("✅ DNS Cache Flushed Successfully");
+  } catch (error) {
+    await handleExecutionError(error, osPlatform);
+  }
+}
+
+async function getMacOSCommands(osCommandSet: CommandSet): Promise<{ command: string; shell: ShellType } | null> {
+  try {
+    const osVersion = execSync("sw_vers -productVersion").toString().trim();
+
+    const versionPatterns: Record<string, string[]> = {
+      "^1[1-5]": ["dscacheutil", "mDNSResponder"],
+      "^10\\.([7-9]|1[1-4])|^10\\.10\\.[4-5]": ["mDNSResponder"],
+      "^10\\.10\\.[0-3]": ["mdnsflushcache"],
+      "^10\\.6": ["dscacheutil"],
+    };
+
+    let matched = false;
+    let runCommands: string[] = [];
+
+    for (const [pattern, cmds] of Object.entries(versionPatterns)) {
+      if (new RegExp(pattern).test(osVersion)) {
+        runCommands = cmds;
+        matched = true;
+        break;
+      }
+    }
+
+    if (!matched) {
+      const confirmed = await confirmAlert({
+        title: `⚠️ OS Version ${osVersion} Not Tested`,
+        message: "Attempt to flush DNS cache anyway?",
+        primaryAction: { title: "Flush DNS" },
+      });
+
+      if (!confirmed) return null;
+      runCommands = ["dscacheutil", "mDNSResponder"];
+    }
+
+    const commandList = runCommands.map((key) => osCommandSet.commands[key]).join("; ");
+    return {
+      command: `osascript -e 'do shell script "${commandList}" with administrator privileges'`,
+      shell: osCommandSet.shell,
+    };
+  } catch (e) {
+    console.error("❌ Error determining macOS version:", e);
+    await showHUD("Failed to determine macOS version");
+    return null;
+  }
+}
+
+async function handleExecutionError(error: unknown, os: string) {
+  let errorMessage = "⚠️ Error flushing DNS cache";
+
+  if (typeof error === "object" && error !== null && "stderr" in error) {
+    const stderr = (error as { stderr?: Buffer }).stderr?.toString() || "";
+    if (stderr) {
+      console.error(".Stderr:", stderr);
+      if (os === "win32" && stderr.includes("The requested operation requires elevation")) {
+        errorMessage = "⚠️ Run Raycast as Administrator";
+      } else {
+        errorMessage = stderr.split("\n")[0].substring(0, 64);
+      }
+    }
+  }
+
+  console.error("💥 Execution failed:", error);
+  await showHUD(errorMessage);
 }

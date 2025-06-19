@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ccusage",
+  "title": "Claude Code Usage (ccusage)",
+  "description": "Monitor Claude Code usage with real-time tracking",
+  "categories": [
+    "Developer Tools"
+  ],
+  "icon": "extension-icon.png",
+  "author": "nyatinte",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ccusage",
+      "title": "Claude Code Usage",
+      "subtitle": "ccusage",
+      "description": "Monitor Claude Code usage with real-time tracking",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-ccusage",
+      "title": "Claude Code Usage in Menu Bar",
+      "subtitle": "ccusage",
+      "description": "Show Claude Code usage in menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultView",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default View",
+      "description": "Choose the default section to display when opening the extension",
+      "default": "today",
+      "data": [
+        {
+          "title": "Today Usage",
+          "value": "today"
+        },
+        {
+          "title": "Session Usage",
+          "value": "session"
+        },
+        {
+          "title": "Cost Analysis",
+          "value": "cost"
+        },
+        {
+          "title": "Model Breakdown",
+          "value": "model"
+        }
+      ]
+    },
+    {
+      "name": "customNpxPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom npx Path",
+      "description": "Override the default npx path if needed (optional)",
+      "placeholder": "e.g., /usr/local/bin/npx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^1.17.0",
+    "ccusage": "^0.6.2",
+    "date-fns": "^4.1.0",
+    "es-toolkit": "^1.39.3",
+    "ts-pattern": "^5.7.1",
+    "usehooks-ts": "^3.1.0",
+    "zod": "^3.25.61"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "knip": "^5.61.2",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "knip": "knip",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

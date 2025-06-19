@@ -1,6 +1,6 @@
 import { Color, List, ActionPanel, Image } from "@raycast/api";
 import { GitLabIcons } from "../../icons";
-import { capitalizeFirstLetter, toDateString } from "../../utils";
+import { capitalizeFirstLetter } from "../../utils";
 import { GitLabOpenInBrowserAction } from "../actions";
 import { getCIJobStatusIcon } from "../jobs";
 import { Commit } from "./list";
@@ -16,6 +16,7 @@ export function CommitListItem(props: { commit: Commit; projectID: number }): JS
   const statusIcon: Image.ImageLike | undefined = status?.status
     ? getCIJobStatusIcon(status.status, status.allow_failure)
     : undefined;
+
   return (
     <List.Item
       key={commit.id}

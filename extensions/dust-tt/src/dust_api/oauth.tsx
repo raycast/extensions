@@ -26,7 +26,7 @@ import { useEffect } from "react";
 import { getUser, getWorkspaceId, setUser } from "../utils";
 
 const client = new OAuth.PKCEClient({
-  redirectMethod: OAuth.RedirectMethod.App,
+  redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Dust",
   providerIcon: "dust.png",
   providerId: "dust",
@@ -36,14 +36,46 @@ const client = new OAuth.PKCEClient({
 let dustApi: DustAPI | null = null;
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
+const DEFAULT_WORKOS_TOKEN_EXPIRY = 60 * 5; // 5 minutes
+
+type WorkOSTokenResponse = {
+  access_token: string;
+  refresh_token: string;
+};
+
+function parseTokenResponse(response: unknown) {
+  if (
+    typeof response === "object" &&
+    response !== null &&
+    "access_token" in response &&
+    "refresh_token" in response &&
+    typeof response.access_token === "string" &&
+    typeof response.refresh_token === "string"
+  ) {
+    const tokenResponse: WorkOSTokenResponse = {
+      access_token: response.access_token,
+      refresh_token: response.refresh_token,
+    };
+    return {
+      ...tokenResponse,
+      expires_in: DEFAULT_WORKOS_TOKEN_EXPIRY,
+    };
+  }
+  throw new Error("Invalid token response format");
+}
 
 const provider = new OAuthService({
   client,
   clientId: preferences.oauthClientID,
-  scope: "offline_access read:user_profile read:conversation create:conversation update:conversation read:agent",
-  authorizeUrl: `${preferences.oauthDomain}/authorize`,
-  tokenUrl: `${preferences.oauthDomain}/oauth/token`,
-  personalAccessToken: preferences.connexionFlow === "apiKey" ? getPreferenceValues().apiKey : undefined,
+  scope: "openid profile email offline_access",
+  authorizeUrl: `${preferences.oauthDomain}/user_management/authorize`,
+  tokenUrl: `${preferences.oauthDomain}/user_management/authenticate`,
+  refreshTokenUrl: `${preferences.oauthDomain}/user_management/authenticate`,
+  personalAccessToken: preferences.connexionFlow === "apiKey" ? preferences.apiKey : undefined,
+  // Raycast OAuthService does not automaticaly parses WorkOS token expiry
+  // we set the expiry manually to the default WorkOS token expiry.
+  tokenResponseParser: parseTokenResponse,
+  tokenRefreshResponseParser: parseTokenResponse,
   onAuthorize(params) {
     dustApi = new DustAPI(
       {
@@ -57,8 +89,7 @@ const provider = new OAuthService({
     );
   },
   extraParameters: {
-    prompt: "consent",
-    audience: preferences.oauthAudience,
+    provider: "authkit",
   },
 });
 

@@ -8,7 +8,6 @@
   "access": "public",
   "author": "thomaslombart",
   "contributors": [
-    "mathieudutour",
     "thomas",
     "peduarte",
     "pernielsentikaer",
@@ -18,6 +17,7 @@
     "joeb"
   ],
   "pastContributors": [
+    "mathieudutour",
     "mil3na"
   ],
   "categories": [
@@ -1579,8 +1579,8 @@
   ],
   "dependencies": {
     "@linear/sdk": "^39.0.0",
-    "@raycast/api": "^1.95.0",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^1.0.0",
     "date-fns": "^4.1.0",
     "file-type": "^20.4.1",
     "lodash": "^4.17.21",
@@ -1605,5 +1605,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

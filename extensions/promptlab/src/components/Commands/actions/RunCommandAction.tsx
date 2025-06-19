@@ -9,14 +9,13 @@ import { AdvancedSettings } from "../../../data/default-advanced-settings";
  * Action to run a command.
  * @param props.command The command to run.
  * @param props.setCommands The function to update the list of installed commands.
- * @returns {JSX.Element} The action component.
  */
 export default function RunCommandAction(props: {
   command: Command | StoreCommand;
   setCommands?: (commands: Command[]) => void;
   settings: AdvancedSettings;
   onCompletion?: (newRun: PLCommandRunProperties) => void;
-}): JSX.Element | null {
+}) {
   const { command, setCommands, settings, onCompletion } = props;
 
   if (!isActionEnabled("RunCommandAction", settings)) {
@@ -54,8 +53,8 @@ export default function RunCommandAction(props: {
             setupConfig: isCommand(command)
               ? command.setupConfig
               : command.setupConfig
-              ? JSON.parse(command.setupConfig)
-              : undefined,
+                ? JSON.parse(command.setupConfig)
+                : undefined,
             useSpeech: isTrueStr(command.useSpeech),
             speakResponse: isTrueStr(command.speakResponse),
           }}

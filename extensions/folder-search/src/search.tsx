@@ -9,11 +9,12 @@ import {
   open,
   Keyboard,
   LaunchProps,
+  getPreferenceValues,
 } from "@raycast/api";
 import React, { useRef } from "react";
 import { folderName, copyFolderToClipboard, maybeMoveResultToTrash, log, logDiagnostics } from "./utils";
 import { runAppleScript } from "run-applescript";
-import { SpotlightSearchResult } from "./types";
+import { SpotlightSearchResult, SpotlightSearchPreferences } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
 import { moveFinderItems } from "./moveUtils";
 import { FolderListSection, Directory } from "./components";
@@ -107,7 +108,11 @@ function Command(props: LaunchProps) {
             try {
               const moveResult = await moveFinderItems(result.path);
               if (moveResult.success) {
-                open(result.path);
+                // Only open the folder if the preference is enabled
+                const { openFolderAfterMove } = getPreferenceValues<SpotlightSearchPreferences>();
+                if (openFolderAfterMove) {
+                  open(result.path);
+                }
                 closeMainWindow();
                 popToRoot({ clearSearchBar: true });
               }

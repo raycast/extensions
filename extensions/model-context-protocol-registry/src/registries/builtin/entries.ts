@@ -190,6 +190,34 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "keboola",
+    title: "Keboola",
+    description:
+      "Keboola MCP Server is an open-source bridge between your Keboola project and modern AI tools. It turns Keboola features—like storage access, SQL transformations, and job triggers—into callable tools for Claude, Cursor, CrewAI, LangChain, Amazon Q, and more.",
+    icon: "keboola.svg",
+    homepage: "https://github.com/keboola/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["mcp-remote", "https://mcp.canary-orion.keboola.dev/sse"],
+    },
+  },
+  {
+    name: "keboola-local",
+    title: "Keboola (Local)",
+    description:
+      "Keboola MCP Server is an open-source bridge between your Keboola project and modern AI tools. It turns Keboola features—like storage access, SQL transformations, and job triggers—into callable tools for Claude, Cursor, CrewAI, LangChain, Amazon Q, and more. This is the local server version.",
+    icon: "keboola.svg",
+    homepage: "https://github.com/keboola/mcp-server",
+    configuration: {
+      command: "uvx",
+      args: ["keboola_mcp_server", "--api-url", "https://connection.YOUR_REGION.keboola.com"],
+      env: {
+        KBC_STORAGE_TOKEN: "your_keboola_storage_token",
+        KBC_WORKSPACE_SCHEMA: "your_workspace_schema",
+      },
+    },
+  },
+  {
     name: "filesystem",
     title: "Filesystem",
     description:

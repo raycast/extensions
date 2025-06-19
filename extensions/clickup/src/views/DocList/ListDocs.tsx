@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import useDocs from "../../hooks/useDocs";
 import { ListDocPages } from "./ListDocPages";
+import { OpenInClickUpAction } from "../../components/OpenInClickUpAction";
 
 export function ListDocs({ workspaceId, workspaceName }: { workspaceId: string; workspaceName: string }) {
   const { isLoading, docs } = useDocs(workspaceId);
@@ -20,6 +21,7 @@ export function ListDocs({ workspaceId, workspaceName }: { workspaceId: string; 
                   title="Doc Pages"
                   target={<ListDocPages workspaceId={workspaceId} docId={doc.id} docName={doc.name} />}
                 />
+                <OpenInClickUpAction route={`${workspaceId}/v/dc/${doc.id}`} />
               </ActionPanel>
             }
           />

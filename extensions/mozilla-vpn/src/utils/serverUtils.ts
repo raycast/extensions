@@ -1,5 +1,5 @@
 // src/utils/serverUtils.ts
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { showToast, Toast } from '@raycast/api';
 
 // Types for server data structure
@@ -62,8 +62,9 @@ export function parseServersOutput(output: string): CountryLocation[] {
 // Get all server locations
 export const fetchServerLocations = (): Promise<CountryLocation[]> => {
   return new Promise((resolve, reject) => {
-    exec(
-      '/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN servers',
+    execFile(
+      '/Applications/Mozilla VPN.app/Contents/MacOS/Mozilla VPN',
+      ['servers'],
       (error, stdout, stderr) => {
         if (error) {
           console.error('Failed to fetch servers:', stderr);
@@ -77,11 +78,32 @@ export const fetchServerLocations = (): Promise<CountryLocation[]> => {
   });
 };
 
+// Validate server name to prevent injection
+const isValidServerName = (serverName: string): boolean => {
+  // Allow alphanumeric characters, dots, hyphens, underscores, and spaces
+  // Adjust this regex based on what Mozilla VPN actually accepts
+  return (
+    /^[a-zA-Z0-9.\-_ ]+$/.test(serverName) &&
+    serverName.length > 0 &&
+    serverName.length < 100
+  );
+};
+
 // Select a specific server
 export const selectServer = (serverName: string): Promise<void> => {
   return new Promise((resolve, reject) => {
-    exec(
-      `/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN select ${serverName}`,
+    // Validate the server name first
+    if (!isValidServerName(serverName)) {
+      const error = new Error('Invalid server name format');
+      console.error('Invalid server name:', serverName);
+      showToast(Toast.Style.Failure, 'Invalid server name');
+      reject(error);
+      return;
+    }
+
+    execFile(
+      '/Applications/Mozilla VPN.app/Contents/MacOS/Mozilla VPN',
+      ['select', serverName],
       async (error, stdout, stderr) => {
         if (error) {
           console.error('Failed to select server:', stderr);

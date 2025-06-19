@@ -37,7 +37,7 @@ export default function useModel(
   const [isLoading, setIsLoading] = useState<boolean>(execute);
   const [attempt, setAttempt] = useState<number>(0);
   const models = useModels();
-  const AIRef = useRef<{ fetch: Promise<Response>; tag: string; forceStop: () => void }>();
+  const AIRef = useRef<{ fetch: Promise<Response>; tag: string; forceStop: () => void }>(undefined);
 
   const preferenceModel: Model = {
     endpoint: preferences.modelEndpoint,
@@ -64,7 +64,6 @@ export default function useModel(
     RAYCAST_AI_REPRESENTATIONS.includes(targetModel.endpoint.toLowerCase() as RaycastAIRepresentation) ||
     targetModel.endpoint == "" ||
     targetModel.apiKey == "N/A";
-  models.isLoading && !modelOverride && preferenceModel.endpoint == "";
 
   const temp = preferences.includeTemperature
     ? parseFloat(temperature) == undefined
@@ -214,6 +213,7 @@ export default function useModel(
         ...useAI(filterString(preferences.promptPrefix + prompt + preferences.promptSuffix, 5000), {
           execute: execute,
           creativity: temp,
+          // @ts-expect-error: To keep the original code
           model: targetModel.endpoint == "Raycast AI 4" ? "gpt-4" : "gpt-3.5-turbo",
         }),
         dataTag: basePrompt + prompt + input,

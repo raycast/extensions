@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./assets/clickup-icon.png" width="150" height="150" />
+    <img src="./assets/logo-v3-clickup-dark.svg" width="300" height="150" />
 </p>
 
 # ClickUp - Tasks & Docs Explorer
@@ -50,5 +50,7 @@ Extension for Raycast to explore your [ClickUp](https://clickup.com/) Tasks & Do
 ## Installing
 
 Make sure Raycast is installed and go to https://www.raycast.com/aparandeh/manage-clickup-tasks.
+
+<a title="Install manage-clickup-tasks Raycast Extension" href="https://www.raycast.com/aparandeh/manage-clickup-tasks"><img src="https://www.raycast.com/aparandeh/manage-clickup-tasks/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 
 > ✨ AI Tools Supported!

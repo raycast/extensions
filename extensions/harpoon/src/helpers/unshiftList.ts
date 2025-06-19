@@ -9,7 +9,7 @@ export default function unshiftList(list: AppList, item: App): number {
   for (let index = list.length - 1; index >= 0; index -= 1) {
     const currentItem = list[index];
 
-    if (currentItem.isSticky) {
+    if (currentItem?.isSticky) {
       stickyItems.unshift([index, currentItem]);
       list.splice(index, 1);
     }

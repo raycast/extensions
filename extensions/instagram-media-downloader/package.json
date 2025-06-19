@@ -14,32 +14,64 @@
     {
       "name": "download-instagram-media",
       "title": "Download Instagram Media",
-      "description": "Download Instagram media with URL",
+      "description": "Download Instagram post and reels with URL",
       "mode": "no-view",
       "arguments": [
         {
           "name": "instagramUrl",
-          "description": "Instagram URL",
+          "description": "Post or reel URL",
           "type": "text",
-          "placeholder": "Instagram URL",
+          "placeholder": "Post or reel URL",
           "required": true
         }
-      ],
-      "preferences": [
+      ]
+    },
+    {
+      "name": "download-instagram-story",
+      "title": "Download Instagram Story",
+      "description": "Download Instagram story with URL",
+      "mode": "no-view",
+      "arguments": [
         {
-          "name": "mediaDownloadPath",
-          "title": "Media Download Path",
-          "description": "Path to save downloaded media",
-          "type": "directory",
-          "required": false
+          "name": "instagramUrl",
+          "description": "Story URL",
+          "type": "text",
+          "placeholder": "Story URL",
+          "required": true
         }
       ]
+    },
+    {
+      "name": "download-instagram-highlight-story",
+      "title": "Download Instagram Highlight Story",
+      "description": "Download Instagram highlight story with URL",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "instagramUrl",
+          "description": "Highlight story URL",
+          "type": "text",
+          "placeholder": "Highlight story URL",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mediaDownloadPath",
+      "title": "Media Download Path",
+      "description": "Path to save downloaded media",
+      "type": "directory",
+      "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.94.3",
     "@raycast/utils": "^1.17.0",
-    "axios": "^1.8.4"
+    "@types/cheerio": "^0.22.35",
+    "axios": "^1.8.4",
+    "cheerio": "^1.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

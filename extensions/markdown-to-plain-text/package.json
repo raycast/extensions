@@ -5,6 +5,9 @@
   "description": "Convert Markdown-formatted text to plain text format for quick viewing and editing.",
   "icon": "command-icon.png",
   "author": "skyline-123",
+  "contributors": [
+    "litomore"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -18,18 +21,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.3",
-    "markdown-it": "^13.0.1",
+    "@raycast/api": "^1.100.2",
+    "markdown-it": "^14.1.0",
     "markdown-it-plain-text": "^0.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/markdown-it": "^12.2.3",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "2.0.4",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "24.0.3",
+    "@types/react": "19.1.8",
+    "eslint": "^9.29.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

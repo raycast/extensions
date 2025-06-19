@@ -12,7 +12,7 @@ const InputPlaceholder: Placeholder = {
     if (input == "") {
       try {
         input = await getSelectedText();
-      } catch (error) {
+      } catch {
         input = "";
       }
     }

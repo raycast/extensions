@@ -1,7 +1,18 @@
-import { Action, ActionPanel, Icon, List, closeMainWindow, popToRoot, open, Keyboard, LaunchProps } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  closeMainWindow,
+  popToRoot,
+  open,
+  Keyboard,
+  LaunchProps,
+  getPreferenceValues,
+} from "@raycast/api";
 import React from "react";
 import { folderName, log } from "./utils";
-import { SpotlightSearchResult } from "./types";
+import { SpotlightSearchResult, SpotlightSearchPreferences } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
 import { moveFinderItems } from "./moveUtils";
 import { FolderListSection, Directory } from "./components";
@@ -44,20 +55,24 @@ function Command(props: LaunchProps) {
     return (
       <ActionPanel title={folderName(result)}>
         <Action
-          title="Move to This Folder"
-          icon={Icon.ArrowRight}
-          shortcut={{ modifiers: ["cmd"], key: "return" }}
+          title="Move Finder Selection"
+          icon={Icon.NewFolder}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onAction={async () => {
             try {
               const moveResult = await moveFinderItems(result.path);
               if (moveResult.success) {
-                open(result.path);
+                // Only open the folder if the preference is enabled
+                const { openFolderAfterMove } = getPreferenceValues<SpotlightSearchPreferences>();
+                if (openFolderAfterMove) {
+                  open(result.path);
+                }
                 closeMainWindow();
                 popToRoot({ clearSearchBar: true });
               }
             } catch (error) {
               // Show error to user with showFailureToast
-              showFailureToast(error, { title: "Could not move to this folder" });
+              showFailureToast(error, { title: "Could not move Finder selection" });
             }
           }}
         />

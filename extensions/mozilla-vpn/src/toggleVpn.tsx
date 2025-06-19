@@ -85,6 +85,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Activate VPN"
               onAction={() =>
                 runCommand(
@@ -100,6 +101,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Deactivate VPN"
               onAction={() =>
                 runCommand(

@@ -87,8 +87,8 @@ ${
         command.minNumFiles == "0"
           ? "N/A"
           : command.acceptedFileExtensions?.length && command.acceptedFileExtensions !== "None"
-          ? command.acceptedFileExtensions
-          : "Any"
+            ? command.acceptedFileExtensions
+            : "Any"
       } |
 | Creativity | ${command.temperature == undefined || command.temperature == "" ? "1.0" : command.temperature} |
 | Record Runs? | ${isTrueStr(command.recordRuns) ? "Yes" : "No"} |
