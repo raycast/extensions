@@ -281,7 +281,6 @@ export default function Command({ launchContext }: CommandProps) {
             accessories={isSelected ? [{ icon: Icon.CheckCircle }] : []}
             actions={
               <ActionPanel>
-                <Action title={isSelected ? "Deselect" : "Select"} onAction={() => toggleAppSelection(app.path)} />
                 <Action
                   title="Quit"
                   onAction={() => {
@@ -304,6 +303,7 @@ export default function Command({ launchContext }: CommandProps) {
                     }
                   }}
                 />
+                <Action title={isSelected ? "Deselect" : "Select"} onAction={() => toggleAppSelection(app.path)} />
                 {selectedApps.size > 0 && (
                   <Action
                     title="Quit Selected Apps"

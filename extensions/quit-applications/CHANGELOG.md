@@ -1,5 +1,12 @@
 # Quit Applications Changelog
 
+## [Enhancement] - 2025-06-19
+
+- Added multi-select functionality with visual checkmarks
+- Added batch quit with `Cmd+Shift+Return` shortcut
+- Fixed parsing for app names containing commas (PWAs)
+- Added select all and clear selection options
+
 ## [Bug fix] - 2025-05-27
 
 - Fixed issue where excluded applications still appeared in the list when multiple windows were open
