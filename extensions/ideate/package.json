@@ -34,24 +34,6 @@
     }
   ],
   "preferences": [
-    {
-      "name": "language",
-      "type": "dropdown",
-      "required": false,
-      "title": "Language",
-      "description": "Select your preferred language",
-      "default": "en",
-      "data": [
-        {
-          "title": "English",
-          "value": "en"
-        },
-        {
-          "title": "简体中文",
-          "value": "zh-CN"
-        }
-      ]
-    }
   ],
   "dependencies": {
     "@raycast/api": "^1.100.0",
