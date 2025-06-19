@@ -26,7 +26,7 @@ export default async function getUsers(input: Input) {
     if (!user) {
       throw new Error("User not found");
     }
-    return users;
+    return user;
   } catch (error) {
     handleOnCatchError(error, "Error fetching users");
   }
