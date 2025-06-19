@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import { IssueListItem } from "./components";
+import { IssueListItem } from "./components/IssueListItem";
 import { getEmptyIssue } from "./utils";
 import type { State, Issue, WorkItem, Command } from "./interfaces";
 import _ from "lodash";

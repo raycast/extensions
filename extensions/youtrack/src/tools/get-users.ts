@@ -10,6 +10,10 @@ type Input = {
   name: string;
 };
 
+function findUserByNameOrLogin(users: User[], input: string) {
+  return users.find(({ fullName, login }) => fullName === input || login === input);
+}
+
 /**
  * Reads users from the cache, or fetches them from YouTrack if not present.
  */
@@ -31,8 +35,4 @@ export default async function getUsers(input: Input) {
     handleOnCatchError(error, "Error fetching users");
     throw error;
   }
-}
-
-function findUserByNameOrLogin(users: User[], input: string) {
-  return users.find(({ fullName, login }) => fullName === input || login === input);
 }
