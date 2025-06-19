@@ -1,6 +1,6 @@
 # ClickUp Changelog
 
-## [Persist Priority on Capture] - {PR_MERGE_DATE}
+## [Persist Priority on Capture] - 2025-06-19
 
 - After creating a task, Raycast remembers the previously selected "Priority" (ref: [Issue #19884](https://github.com/raycast/extensions/issues/19884))
 - Add some missing icons in **Tasks Explorer**
