@@ -1,6 +1,6 @@
 # Quit Applications Changelog
 
-## [Enhancement] - 2025-06-19
+## [Enhancement] - {PR_MERGE_DATE}
 
 - Added multi-select functionality with visual checkmarks
 - Added batch quit with `Cmd+Shift+Return` shortcut
