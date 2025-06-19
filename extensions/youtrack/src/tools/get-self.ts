@@ -11,7 +11,9 @@ export default async function getSelf() {
   try {
     const [user] = await loadCache<User>("youtrack-self-user");
     if (!user) {
-      const user = await api.fetchSelf();
+      const currentUser = await api.fetchSelf();
+      await saveCache("youtrack-self-user", [currentUser]);
+      return currentUser;
       await saveCache("youtrack-self-user", [user]);
     }
     return user;
