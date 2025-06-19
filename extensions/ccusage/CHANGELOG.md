@@ -1,5 +1,10 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v1.0.2] - {PR_MERGE_DATE}
+
+- Cleaned up unused dependencies and exports detection
+- Improved development workflow efficiency
+
 ## [v1.0.1] - 2025-06-18
 
 - Housekeep Knip config
