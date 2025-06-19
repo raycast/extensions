@@ -328,12 +328,12 @@ function ReviewScreen({
     new Set()
   );
 
-  // const formatTimestamp = (timestamp: number): string =>
-  //     new Date(timestamp).toLocaleTimeString("en-US", {
-  //       hour: "2-digit",
-  //       minute: "2-digit",
-  //       second: "2-digit",
-  //     });
+  const formatTimestamp = (timestamp: number): string =>
+    new Date(timestamp).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
 
   function toggleActionSelection(actionId: string) {
     const newSelected = new Set(selectedActions);
@@ -477,9 +477,11 @@ function ReviewScreen({
             <Form.Checkbox
               key={action.id}
               id={action.id}
-              title={`${index + 1}. ${getActionIcon(
+              label={`${index + 1}. ${getActionIcon(
                 action.type
-              )} ${getActionDescription(action)}`}
+              )} ${getActionDescription(action)} • ${formatTimestamp(
+                action.timestamp
+              )}`}
               value={selected}
               onChange={() => toggleActionSelection(action.id)}
             />
