@@ -56,6 +56,10 @@
         {
           "value": "Zed Preview",
           "title": "Zed Preview"
+        },
+        {
+          "value": "Zed Dev",
+          "title": "Zed Dev"
         }
       ]
     },
@@ -67,15 +71,6 @@
       "label": "Show Git Branch",
       "default": true,
       "description": "Display the current Git branch for files and folders in Git repositories"
-    },
-    {
-      "name": "useDevSqlite",
-      "type": "checkbox",
-      "title": "Dev SQLite Data",
-      "required": false,
-      "label": "Use Dev SQLite Data",
-      "default": false,
-      "description": "Use the Zed development SQLite database (useful for those building their own Zed)."
     }
   ],
   "dependencies": {
