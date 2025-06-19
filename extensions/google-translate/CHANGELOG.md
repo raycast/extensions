@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-06-19
 
 - Remove country flags from languages
 - Add all the languages from Google Translate website
