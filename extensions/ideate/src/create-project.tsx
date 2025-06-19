@@ -86,7 +86,6 @@ export default function CreateProject() {
 
       // 关闭命令窗口
       await popToRoot();
-    } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: t.project.failed,
