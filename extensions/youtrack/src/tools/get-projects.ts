@@ -20,8 +20,8 @@ export default async function getProjects(input: Input) {
   try {
     const projects = await loadCache<Project>("youtrack-projects");
     if (!projects.length || !input.project) {
-      const projects = await api.fetchProjects(MAX_PROJECTS);
-      await saveCache("youtrack-projects", projects);
+      const fetchedProjects = await api.fetchProjects(MAX_PROJECTS);
+      await saveCache("youtrack-projects", fetchedProjects);
     } else if (!projects.find(({ shortName }) => shortName === input.project)) {
       const project = await api.fetchProjectById(input.project);
       projects.push(project);
