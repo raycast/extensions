@@ -107,12 +107,8 @@
             "id": "0-0",
             "name": "Demo project",
             "shortName": "DEMO"
-          },
-          {
-            "id": "0-0",
-            "name": "Demo project",
-            "shortName": "DEMO"
           }
+        ],
         ],
         "get-self": {
           "$type": "Me",
