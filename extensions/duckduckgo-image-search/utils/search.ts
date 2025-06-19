@@ -1,14 +1,16 @@
-/* eslint-disable no-constant-condition */
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { decode } from "html-entities";
 
 import {
   DDG_URL,
-  HEADERS,
-  ImageSearchOptions,
   DEFAULT_RETRIES,
   DEFAULT_SLEEP,
+  DEFAULT_TIMEOUT,
+  HEADERS,
+  ImageSearchOptions,
+  OldVQDError,
 } from "./consts";
+import { LocalStorage } from "@raycast/api";
 
 export interface DuckDuckGoImage {
   height: number;
@@ -49,16 +51,28 @@ const VQD_REGEX = /vqd=['"](\d+-\d+(?:-\d+)?)['"]/;
  * Get the VQD of a search query.
  * @param query The query to search
  * @param ia The type(?) of search
- * @param options The options of the HTTP request
+ * @param signal Abort Signal controller
  * @returns The VQD
  */
-async function getVQD(query: string, ia = "web") {
+async function getVQD(query: string, ia = "web", signal?: AbortSignal) {
+  let vqd = await LocalStorage.getItem<string>("vqd");
+  if (vqd) return vqd;
+
   try {
     const response = await axios.get(`https://duckduckgo.com/`, {
       params: { q: query, ia },
+      timeout: DEFAULT_TIMEOUT,
+      signal,
     });
-    return VQD_REGEX.exec(response.data)![1];
-  } catch {
+    vqd = VQD_REGEX.exec(response.data)![1];
+    await LocalStorage.setItem("vqd", vqd);
+    return vqd;
+  } catch (error) {
+    if (error instanceof AxiosError && error.code === "ERR_CANCELED") {
+      console.log("VQD request canceled");
+      return;
+    }
+    console.error("VQD Error!", error);
     throw new Error(`Failed to get the VQD for query "${query}".`);
   }
 }
@@ -70,9 +84,11 @@ function queryString(query: Record<string, string>) {
 async function makeNextFromQuery(
   query: string,
   options: ImageSearchOptions = {},
-): Promise<{ next: string; vqd: string }> {
-  let vqd = options.vqd!;
-  if (!vqd) vqd = await getVQD(query, "web");
+  signal?: AbortSignal,
+): Promise<{ next: string; vqd: string } | undefined> {
+  let vqd: string | undefined = options.vqd!;
+  if (!vqd) vqd = await getVQD(query, "web", signal);
+  if (!vqd) return;
 
   /* istanbul ignore next */
   const filters = [
@@ -82,6 +98,7 @@ async function makeNextFromQuery(
     options.filters?.color ? `color:${options.filters.color}` : "",
     options.filters?.license ? `license:${options.filters.license}` : "",
   ];
+  console.log(filters);
 
   const queryObject: Record<string, string> = {
     l: options.locale || "en-us",
@@ -104,8 +121,19 @@ export async function imageSearch(
   sleep: number = DEFAULT_SLEEP,
   signal?: AbortSignal,
 ): Promise<ImageSearchResult> {
-  const { next, vqd } = await makeNextFromQuery(query, options);
-  return await imageNextSearch(next, vqd, retries, sleep, signal);
+  console.log(`Searching for "${query}"...`);
+  const data = await makeNextFromQuery(query, options, signal);
+  if (!data) return { vqd: "", results: [] };
+  const { next, vqd } = data;
+  try {
+    return await imageNextSearch(next, vqd, retries, sleep, signal);
+  } catch (error) {
+    if (error instanceof OldVQDError) {
+      await LocalStorage.removeItem("vqd");
+      return await imageSearch(query, options, retries, sleep, signal);
+    }
+    throw error;
+  }
 }
 
 export async function imageNextSearch(
@@ -115,47 +143,52 @@ export async function imageNextSearch(
   sleep: number = DEFAULT_SLEEP,
   signal?: AbortSignal,
 ): Promise<ImageSearchResult> {
+  if (!vqd) return { vqd: "", results: [] };
+  console.log(`Searching for "${next}" with VQD "${vqd}"... (retries: ${retries}, sleep: ${sleep}ms)`);
   const reqUrl = DDG_URL + next + `&vqd=${vqd}`;
   let attempt = 0;
   const config: AxiosRequestConfig = {
     headers: HEADERS,
+    timeout: DEFAULT_TIMEOUT,
+    signal,
   };
 
-  if (signal) {
-    config.signal = signal;
-  }
+  let data: DuckDuckGoSearchResponse | null = null;
 
-  try {
-    let data: DuckDuckGoSearchResponse | null = null;
+  while (true) {
+    try {
+      const response = await axios.get(reqUrl, config);
 
-    while (true) {
-      try {
-        const response = await axios.get(reqUrl, config);
-
-        data = response.data as DuckDuckGoSearchResponse;
-        if (!data.results) throw Error("No results");
-        break;
-      } catch (error) {
-        console.error(reqUrl, error);
-        attempt += 1;
-        if (attempt > retries) {
-          throw Error("attempt finished");
+      data = response.data as DuckDuckGoSearchResponse;
+      console.log(data, "results found" + (attempt ? ` (attempt ${attempt})` : ""));
+      break;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.code === "ERR_CANCELED") {
+          console.log("VQD request canceled");
+          return { results: [], vqd };
         }
-        await sleepPromise(sleep);
-        continue;
+        if (error.response?.status === 403) {
+          console.log("OLD VQD, getting new one...");
+          await LocalStorage.removeItem("vqd");
+          throw new OldVQDError();
+        }
       }
+      console.error(reqUrl, error);
+      attempt += 1;
+      if (attempt > retries) {
+        throw Error("attempt finished");
+      }
+      await sleepPromise(sleep);
     }
-    const result: ImageSearchResult = {
-      vqd,
-      results: data.results.map((r) => ({
-        ...r,
-        title: decode(r.title),
-      })),
-    };
-    if (data.next) result.next = data.next;
-    return result;
-  } catch (error) {
-    console.error(error);
-    throw error;
   }
+  const result: ImageSearchResult = {
+    vqd,
+    results: data.results.map((r) => ({
+      ...r,
+      title: decode(r.title),
+    })),
+  };
+  if (data.next) result.next = data.next;
+  return result;
 }

@@ -1,4 +1,5 @@
 export const DDG_URL = "https://duckduckgo.com/";
+// noinspection SpellCheckingInspection
 export const HEADERS = {
   dnt: "1",
   "accept-encoding": "gzip, deflate, sdch",
@@ -9,119 +10,129 @@ export const HEADERS = {
   accept: "application/json, text/javascript, */*; q=0.01",
   referer: "https://duckduckgo.com/",
   authority: "duckduckgo.com",
-};
+} as const;
 export const DEFAULT_RETRIES = 4;
 export const DEFAULT_SLEEP = 2000; // 2 seconds
+export const DEFAULT_TIMEOUT = 3000; // 3 seconds
 
-/** The types of image sizes. */
-export enum ImageSize {
+export type ValueOf<T> = T[keyof T];
+
+/** The types of image size. */
+export const ImageSize: Record<string, string> = {
   /** Any size. */
-  ALL = "",
+  ALL: "",
   /** Small size, less than 200x200. */
-  SMALL = "Small",
+  SMALL: "Small",
   /** Medium size, approx. between 200x200 and 500x500. */
-  MEDIUM = "Medium",
+  MEDIUM: "Medium",
   /** Large size, approx. between 500x500 and 2000x2000. */
-  LARGE = "Large",
+  LARGE: "Large",
   /** Wallpaper size, larger than 1200x1200. */
-  WALLPAPER = "Wallpaper",
-}
+  WALLPAPER: "Wallpaper",
+} as const;
+
+export type ImageSizes = ValueOf<typeof ImageSize>;
 
 /** The types of images. */
-export enum ImageType {
+export const ImageType: Record<string, string> = {
   /** Any images. */
-  ALL = "",
+  ALL: "",
   /** Any regular photos. */
-  PHOTOGRAPH = "photo",
+  PHOTOGRAPH: "photo",
   /** Clip-art. */
-  CLIPART = "clipart",
+  CLIPART: "clipart",
   /** Animated GIFs. */
-  GIF = "gif",
+  GIF: "gif",
   /** Transparent photos. */
-  TRANSPARENT = "transparent",
-}
+  TRANSPARENT: "transparent",
+} as const;
+
+export type ImageTypes = ValueOf<typeof ImageType>;
 
 /** The types of image layouts. */
-export enum ImageLayout {
+export const ImageLayout: Record<string, string> = {
   /** Any size of images. */
-  "Any size" = "",
+  "Any size": "",
   /** Square images. Images may not be exactly square. */
-  Square = "Square",
+  Square: "Square",
   /** Tall images. More height than width. */
-  Tall = "Tall",
+  Tall: "Tall",
   /** Wide images. More width than height. */
-  Wide = "Wide",
-}
+  Wide: "Wide",
+} as const;
 
-/** The types of image colors. */
-export enum ImageColor {
+export type ImageLayouts = ValueOf<typeof ImageLayout>;
+
+/** The types of image color. */
+export const ImageColor: Record<string, string> = {
   /** Any image. */
-  ALL = "",
+  ALL: "",
   /** Any image with color. */
-  COLOR = "color",
-  /** Any monochome images. */
-  BLACK_AND_WHITE = "Monochrome",
+  COLOR: "color",
+  /** Any monochrome images. */
+  BLACK_AND_WHITE: "Monochrome",
   /** Mostly red images. */
-  RED = "Red",
+  RED: "Red",
   /** Mostly orange images. */
-  ORANGE = "Orange",
+  ORANGE: "Orange",
   /** Mostly yellow images. */
-  YELLOW = "Yellow",
+  YELLOW: "Yellow",
   /** Mostly green images. */
-  GREEN = "Green",
+  GREEN: "Green",
   /** Mostly blue images. */
-  BLUE = "Blue",
+  BLUE: "Blue",
   /** Mostly pink images. */
-  PINK = "Pink",
+  PINK: "Pink",
   /** Mostly brown images. */
-  BROWN = "Brown",
+  BROWN: "Brown",
   /** Mostly black images. */
-  BLACK = "Black",
+  BLACK: "Black",
   /** Mostly gray images. */
-  GRAY = "Gray",
+  GRAY: "Gray",
   /** Alias for `GRAY`. */
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-  GREY = "Gray",
+  GREY: "Gray",
   /** Mostly teal images. */
-  TEAL = "Teal",
+  TEAL: "Teal",
   /** Mostly white images. */
-  WHITE = "White",
-}
+  WHITE: "White",
+} as const;
 
-/** The types of image licenses. */
-export enum ImageLicense {
+export type ImageColors = ValueOf<typeof ImageColor>;
+
+/** The types of image license. */
+export const ImageLicense: Record<string, string> = {
   /** Any image license. */
-  ALL = "",
+  ALL: "",
   /** All Creative Commons. */
-  CREATIVE_COMMONS = "Any",
+  CREATIVE_COMMONS: "Any",
   /** Public Domain images. */
-  PUBLIC_DOMAIN = "Public",
+  PUBLIC_DOMAIN: "Public",
   /** Free to share and use. */
-  SHARE = "Share",
+  SHARE: "Share",
   /** Free to share and use commercially. */
-  SHARE_COMMERCIALLY = "ShareCommercially",
+  SHARE_COMMERCIALLY: "ShareCommercially",
   /** Free to modify, share, and use. */
-  MODIFY = "Modify",
+  MODIFY: "Modify",
   /** Free to modify, share, and use commercially. */
-  MODIFY_COMMERCIALLY = "ModifyCommercially",
-}
+  MODIFY_COMMERCIALLY: "ModifyCommercially",
+} as const;
 
-export type ImageLicenses = (typeof ImageLicense)[keyof typeof ImageLicense];
+export type ImageLicenses = ValueOf<typeof ImageLicense>;
 
 export interface ImageSearchOptionsFilters {
   /** The color filter of the images. */
-  color?: ImageColor;
+  color?: ImageColors;
   /** The layout of the images to search. */
-  layout?: ImageLayout;
+  layout?: ImageLayouts;
   /** The size filter of the images to search. */
-  size?: ImageSize;
+  size?: ImageSizes;
   /** The type of the images to search. */
-  type?: ImageType;
+  type?: ImageTypes;
   /** The license of the images to search. */
   license?: ImageLicenses;
 }
 
-/** The options for {@link searchImages}. */
+/** The options for {@link imageSearch}. */
 export interface ImageSearchOptions {
   /** The safe search type of the search. */
   moderate?: boolean;
@@ -134,4 +145,12 @@ export interface ImageSearchOptions {
   vqd?: string;
   /** The filters of the images to search. */
   filters?: ImageSearchOptionsFilters;
+}
+
+// Old VQD Error
+export class OldVQDError extends Error {
+  constructor(message = "Old VQD token") {
+    super(message);
+    this.name = "VqdInvalidError";
+  }
 }

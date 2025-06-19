@@ -1,24 +1,10 @@
-import React from "react";
-import { useRef, useState } from "react";
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  Grid,
-  Image,
-  showHUD,
-  closeMainWindow,
-  PopToRootType,
-} from "@raycast/api";
+import React, { useRef, useState } from "react";
+import { Action, ActionPanel, closeMainWindow, Grid, Icon, Image, PopToRootType, showHUD } from "@raycast/api";
 
 import { useCachedPromise } from "@raycast/utils";
 import { PaginationOptions } from "@raycast/utils/dist/types";
-import {
-  copyImageToClipboard,
-  pasteImage,
-  searchImage,
-} from "../utils/helpers";
-import { ImageLayout } from "../utils/consts";
+import { copyImageToClipboard, pasteImage, searchImage } from "../utils/helpers";
+import { ImageLayout, ImageLayouts } from "../utils/consts";
 import { DuckDuckGoImage } from "../utils/search";
 
 function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
@@ -86,21 +72,24 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
 
 export default function Command() {
   const [query, setQuery] = useState("");
-  const [, setLayout] = useState<string>(ImageLayout["Any size"]);
-  const abortable = useRef<AbortController>();
+  const [layout, setLayout] = useState<ImageLayouts>(ImageLayout["Any size"]);
+  const abortable = useRef<AbortController>(new AbortController());
 
   const { isLoading, data, pagination } = useCachedPromise(
-    (searchText: string) =>
+    (searchText: string, searchLayout: ImageLayouts) =>
       async ({ cursor }: PaginationOptions) => {
+        const signal = abortable.current?.signal;
         const { next, results, vqd } = await searchImage({
           query: searchText,
           cursor,
+          signal: signal,
+          layout: searchLayout,
         });
 
         const hasMore = next !== undefined;
         return { data: results, hasMore, cursor: { next, vqd } };
       },
-    [query],
+    [query.trim(), layout],
     {
       keepPreviousData: true,
       abortable,
@@ -118,11 +107,11 @@ export default function Command() {
         <Grid.Dropdown
           tooltip="Select Image Layout"
           storeValue={true}
-          onChange={(newValue) => setLayout(newValue)}
+          onChange={(newValue) => setLayout(newValue as ImageLayouts)}
         >
           <Grid.Dropdown.Section title="Image layout size">
             {Object.keys(ImageLayout).map((layout) => (
-              <Grid.Dropdown.Item key={layout} title={layout} value={layout} />
+              <Grid.Dropdown.Item key={layout} title={layout} value={ImageLayout[layout]} />
             ))}
           </Grid.Dropdown.Section>
         </Grid.Dropdown>
@@ -130,11 +119,7 @@ export default function Command() {
     >
       {data &&
         data
-          .filter(
-            (item, index, self) =>
-              self.findIndex((t) => t.image_token === item.image_token) ===
-              index,
-          )
+          .filter((item, index, self) => self.findIndex((t) => t.image_token === item.image_token) === index)
           .map((item) => (
             <Grid.Item
               key={item.image_token}

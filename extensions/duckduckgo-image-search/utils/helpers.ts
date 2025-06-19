@@ -4,22 +4,22 @@ import {
   imageNextSearch,
   imageSearch,
   ImageSearchResult,
-} from "../utils/search";
+} from "./search";
 import {
-  HEADERS,
-  ImageLayout,
   DEFAULT_RETRIES,
   DEFAULT_SLEEP,
+  HEADERS,
+  ImageLayouts,
   ImageLicenses,
-} from "../utils/consts";
-import { getCachedImagePath, setCachedImagePath } from "../utils/cache";
+} from "./consts";
+import { getCachedImagePath, setCachedImagePath } from "./cache";
 import axios from "axios";
 import { tmpdir } from "os";
 import fs from "fs";
 import mime from "mime-types";
 
 import path from "path";
-import { getPreferenceValues, showToast, Toast, Clipboard } from "@raycast/api";
+import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 
 export const emptyResult: ImageSearchResult = {
   vqd: "",
@@ -35,7 +35,7 @@ interface SearchImageParams {
   query: string;
   cursor?: Cursor;
   signal?: AbortSignal;
-  layout?: ImageLayout;
+  layout?: ImageLayouts;
 }
 
 export async function searchImage({
@@ -158,6 +158,7 @@ export async function copyImageToClipboard(image: DuckDuckGoImage) {
     style: Toast.Style.Success,
   });
 }
+
 export async function pasteImage(image: DuckDuckGoImage) {
   const file = await downloadImage(image);
   await Clipboard.paste({ file });
