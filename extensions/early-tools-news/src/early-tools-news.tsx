@@ -9,6 +9,7 @@ const feedURLs = [
   "https://feed.informer.com/digests/0SYH5PPNPD/feeder.rss",
   "https://feed.informer.com/digests/PY09VDLVRF/feeder.rss",
   "https://feed.informer.com/digests/OL5GPXO2BT/feeder.rss",
+  "https://feed.informer.com/digests/10ZBTRCKZM/feeder.rss",
 ];
 
 interface StoryItem {
