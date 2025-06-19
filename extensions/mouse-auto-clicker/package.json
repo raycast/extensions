@@ -29,14 +29,13 @@
       "name": "clickInterval",
       "title": "Click Interval (ms)",
       "description": "Time between clicks in milliseconds",
-      "type": "number",
+      "type": "textfield",
       "default": "100",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.2",
-    "robotjs": "^0.6.0"
+    "@raycast/api": "^1.35.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -45,8 +44,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "prettier": "^2.5.1"
   },
   "scripts": {
     "build": "ray build -e dist",
