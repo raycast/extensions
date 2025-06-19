@@ -1,6 +1,6 @@
 # Confluence Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-06-19
 
 - Get rid of `use-async-effect` dependency
 - Use the npm official registry
