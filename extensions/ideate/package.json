@@ -4,8 +4,8 @@
   "title": "Ideate",
   "description": "Create a project folder, initialize it, and open with your IDE.",
   "version": "1.0.0",
-  "icon": "bulb.png",
-  "author": "Felix",
+  "icon": "extension_icon.png",
+  "author": "B9O2",
   "license": "MIT",
   "categories": [
     "Developer Tools"
@@ -14,18 +14,21 @@
     {
       "name": "create-project",
       "title": "Create Project",
+      "icon": "create_project_icon.png",
       "description": "Choose a saved preset and create a project",
       "mode": "view"
     },
     {
       "name": "add-init-preset",
       "title": "Add Preset",
+      "icon": "add_preset_icon.png",
       "description": "Add a reusable project preset",
       "mode": "view"
     },
     {
       "name": "manage-presets",
       "title": "Manage Presets",
+      "icon": "manage_presets_icon.png",
       "description": "View, edit and delete your project presets",
       "mode": "view"
     }
