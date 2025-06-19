@@ -29,7 +29,7 @@
       "name": "clickInterval",
       "title": "Click Interval (ms)",
       "description": "Time between clicks in milliseconds",
-      "type": "textfield",
+      "type": "number",
       "default": "100",
       "required": false
     }
