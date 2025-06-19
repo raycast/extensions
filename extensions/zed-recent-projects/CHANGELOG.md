@@ -2,7 +2,7 @@
 
 ## [Fixes] - {PR_MERGE_DATE}
 
-- Add `useDevSqlite` preference option
+- Add `Zed Dev` app build option
 
 ## [Fixes] - 2025-04-03
 
