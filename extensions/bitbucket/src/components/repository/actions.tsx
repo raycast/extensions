@@ -1,8 +1,9 @@
-import { ActionPanel, Color, Icon, Action } from "@raycast/api";
+import { Color, Icon, Action } from "@raycast/api";
 import { PipelinesList } from "./pipelinesList";
 import { PullRequestsList } from "./pullRequestsList";
 
-export function ShowPipelinesActions(props: { repo: any }): JSX.Element {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function ShowPipelinesActions(props: { repo: any }) {
   return (
     <Action.Push
       title="Show pipelines"
@@ -13,7 +14,8 @@ export function ShowPipelinesActions(props: { repo: any }): JSX.Element {
   );
 }
 
-export function ShowPullRequestsActions(props: { repo: any }): JSX.Element {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function ShowPullRequestsActions(props: { repo: any }) {
   return (
     <Action.Push
       title="Show pull requests"
@@ -24,13 +26,8 @@ export function ShowPullRequestsActions(props: { repo: any }): JSX.Element {
   );
 }
 
-export function GoesToNextPipelinePage({
-  setPageNumber,
-  pageNumber,
-}: {
-  setPageNumber: any;
-  pageNumber: number;
-}): JSX.Element {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function GoesToNextPipelinePage({ setPageNumber, pageNumber }: { setPageNumber: any; pageNumber: number }) {
   return (
     <Action
       title="Goes to next page"
@@ -40,13 +37,8 @@ export function GoesToNextPipelinePage({
   );
 }
 
-export function GoesToPreviousPipelinePage({
-  setPageNumber,
-  pageNumber,
-}: {
-  setPageNumber: any;
-  pageNumber: number;
-}): JSX.Element {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function GoesToPreviousPipelinePage({ setPageNumber, pageNumber }: { setPageNumber: any; pageNumber: number }) {
   return (
     <Action
       title="Goes to previous page"

@@ -9,7 +9,8 @@
     "vineus",
     "henry_fontanier",
     "stang",
-    "sebastien_flory"
+    "sebastien_flory",
+    "adrien_simon"
   ],
   "categories": [
     "Productivity"
@@ -48,17 +49,8 @@
       "type": "textfield",
       "required": false,
       "title": "OAuth client ID (advanced)",
-      "placeholder": "5k7C1Mj9QpoT9DKSDOvdJt8pwC0DkWZR",
-      "default": "5k7C1Mj9QpoT9DKSDOvdJt8pwC0DkWZR"
-    },
-    {
-      "name": "oauthAudience",
-      "description": "Dust api oauth audience (advanced)",
-      "type": "textfield",
-      "required": false,
-      "title": "OAuth audience (advanced)",
-      "placeholder": "https://dust.tt/api/v1",
-      "default": "https://dust.tt/api/v1"
+      "placeholder": "client_01JGCT55T7FVDG9XF74925R1KT",
+      "default": "client_01JGCT55T7FVDG9XF74925R1KT"
     },
     {
       "name": "oauthDomain",
@@ -66,8 +58,8 @@
       "type": "textfield",
       "required": false,
       "title": "OAuth domain (advanced)",
-      "placeholder": "https://dust-tt.us.auth0.com",
-      "default": "https://dust-tt.us.auth0.com"
+      "placeholder": "https://api.workos.com",
+      "default": "https://api.workos.com"
     },
     {
       "name": "apiKey",

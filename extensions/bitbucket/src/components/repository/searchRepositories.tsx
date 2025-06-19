@@ -130,7 +130,7 @@ interface SearchListItemProps {
   onToggleFavorite: () => void;
 }
 
-function SearchListItem({ repo, isFavorite, onToggleFavorite }: SearchListItemProps): JSX.Element {
+function SearchListItem({ repo, isFavorite, onToggleFavorite }: SearchListItemProps) {
   return (
     <List.Item
       title={repo.name}
