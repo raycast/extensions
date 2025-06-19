@@ -35,7 +35,7 @@ View, edit and delete your saved presets from a single interface.
 ## Configuration
 
 In Raycast preferences, you can configure:
-- **Language**: Choose between English and Simplified Chinese
+- **Default IDE**: Set your preferred IDE application for opening projects
 
 ## Privacy
 
