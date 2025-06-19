@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-06-19
 
 - Fixes for `Search Tabs` command:
   - allows the components that display the tab list to re-render when device data changes.
