@@ -84,13 +84,19 @@ export const handleAggregateToSpace = (windowId: number, windowApp: string) => {
         ["-m", "query", "--windows", "--window", windowId.toString()],
         { env: ENV },
       );
-      const currentWin: YabaiWindow = JSON.parse(currentWinResult.stdout);
+      // Ensure stdout is a string before parsing
+      const currentWinStdout =
+        typeof currentWinResult.stdout === "string" ? currentWinResult.stdout : JSON.stringify(currentWinResult.stdout);
+      const currentWin: YabaiWindow = JSON.parse(currentWinStdout);
       const currentSpace = currentWin.space;
       console.log("Current space:", currentSpace);
 
       // Step 2: Query all windows and count those in the current space.
       const allWinsResult = await execFilePromise(YABAI, ["-m", "query", "--windows"], { env: ENV });
-      const allWindows: YabaiWindow[] = JSON.parse(allWinsResult.stdout);
+      // Ensure stdout is a string before parsing
+      const allWinsStdout =
+        typeof allWinsResult.stdout === "string" ? allWinsResult.stdout : JSON.stringify(allWinsResult.stdout);
+      const allWindows: YabaiWindow[] = JSON.parse(allWinsStdout);
       const windowsInCurrentSpace = allWindows.filter((w) => w.space === currentSpace);
       console.log("Windows in current space:", windowsInCurrentSpace.length);
 
@@ -105,7 +111,10 @@ export const handleAggregateToSpace = (windowId: number, windowApp: string) => {
 
       // Step 3: Find an empty space.
       const spacesResult = await execFilePromise(YABAI, ["-m", "query", "--spaces"], { env: ENV });
-      const spaces: YabaiSpace[] = JSON.parse(spacesResult.stdout);
+      // Ensure stdout is a string before parsing
+      const spacesStdout =
+        typeof spacesResult.stdout === "string" ? spacesResult.stdout : JSON.stringify(spacesResult.stdout);
+      const spaces: YabaiSpace[] = JSON.parse(spacesStdout);
       let targetSpace = spaces.find((s) => Array.isArray(s.windows) && s.windows.length === 0);
 
       // Step 4: Create a new space if no empty one is found.
@@ -113,7 +122,12 @@ export const handleAggregateToSpace = (windowId: number, windowApp: string) => {
         const createResult = await execFilePromise(YABAI, ["-m", "space", "--create"], { env: ENV });
         console.log("Space creation output:", createResult.stdout);
         const spacesResultAfter = await execFilePromise(YABAI, ["-m", "query", "--spaces"], { env: ENV });
-        const updatedSpaces: YabaiSpace[] = JSON.parse(spacesResultAfter.stdout);
+        // Ensure stdout is a string before parsing
+        const spacesResultAfterStdout =
+          typeof spacesResultAfter.stdout === "string"
+            ? spacesResultAfter.stdout
+            : JSON.stringify(spacesResultAfter.stdout);
+        const updatedSpaces: YabaiSpace[] = JSON.parse(spacesResultAfterStdout);
         targetSpace = updatedSpaces.find((s) => Array.isArray(s.windows) && s.windows.length === 0);
       }
 
@@ -206,6 +220,45 @@ export const handleCloseEmptySpaces = (windowId: number, onRemove: (id: number) 
     }
   };
 };
+export const handleMoveWindowToDisplay = (windowId: number, windowApp: string, displayIdx: string) => {
+  return async () => {
+    await showToast({ style: Toast.Style.Animated, title: `Moving Window to Display #${displayIdx}...` });
+    try {
+      // Move the window to the specified display
+      const { stderr } = await execFilePromise(YABAI, ["-m", "window", windowId.toString(), "--display", displayIdx], {
+        env: ENV,
+      });
+
+      if (stderr?.trim()) {
+        console.error(`Error moving window ${windowId}: ${stderr.trim()}`);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Yabai Error - Move Window",
+          message: stderr.trim(),
+        });
+      } else {
+        console.log(`Moved window ${windowId} to display ${displayIdx}.`);
+
+        // Focus the window after moving it
+        await execFilePromise(YABAI, ["-m", "window", windowId.toString(), "--focus"], { env: ENV });
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: `Window Moved`,
+          message: `${windowApp} has been moved to display #${displayIdx} and focused.`,
+        });
+      }
+    } catch (error: unknown) {
+      console.error("Move window failed:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Move Window Failed",
+        message: error.message || "An unknown error occurred while moving the window.",
+      });
+    }
+  };
+};
+
 export const handleDisperseWindowsBySpace = (screenIdx: string) => {
   return async () => {
     await showToast({ style: Toast.Style.Animated, title: "Dispersing Windows Across Spaces..." });
@@ -215,15 +268,21 @@ export const handleDisperseWindowsBySpace = (screenIdx: string) => {
         env: ENV,
       });
 
+      // Ensure stdout is a string before parsing
+      const windowsStdout =
+        typeof windowsResult.stdout === "string" ? windowsResult.stdout : JSON.stringify(windowsResult.stdout);
       // Filter out windows in native MacOS fullscreen mode
-      const allWindows = JSON.parse(windowsResult.stdout);
+      const allWindows = JSON.parse(windowsStdout);
       const windows: YabaiWindow[] = allWindows.filter((win: YabaiWindow) => !win["is-native-fullscreen"]);
 
       // Step 2: Query all spaces on the given display
       const spacesResult = await execFilePromise(YABAI, ["-m", "query", "--spaces", "--display", screenIdx], {
         env: ENV,
       });
-      let spaces: YabaiSpace[] = JSON.parse(spacesResult.stdout);
+      // Ensure stdout is a string before parsing
+      const spacesStdout =
+        typeof spacesResult.stdout === "string" ? spacesResult.stdout : JSON.stringify(spacesResult.stdout);
+      let spaces: YabaiSpace[] = JSON.parse(spacesStdout);
 
       // Step 3: Create new spaces if needed so that each window has a space
       const spacesToCreate = windows.length - spaces.length - 1;
@@ -233,7 +292,12 @@ export const handleDisperseWindowsBySpace = (screenIdx: string) => {
         }
         // Re-query spaces after creation
         const updatedSpacesResult = await execFilePromise(YABAI, ["-m", "query", "--spaces"], { env: ENV });
-        spaces = JSON.parse(updatedSpacesResult.stdout);
+        // Ensure stdout is a string before parsing
+        const updatedSpacesStdout =
+          typeof updatedSpacesResult.stdout === "string"
+            ? updatedSpacesResult.stdout
+            : JSON.stringify(updatedSpacesResult.stdout);
+        spaces = JSON.parse(updatedSpacesStdout);
       }
 
       // Step 4: Disperse each window to its corresponding space

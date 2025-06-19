@@ -1,11 +1,44 @@
 // TypeScript
-import { Action, ActionPanel, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, List, LocalStorage, LaunchType } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { ENV, YABAI, YabaiWindow, SortMethod } from "./models";
+import { ENV, YABAI, YabaiWindow, SortMethod, Application } from "./models";
 import { handleAggregateToSpace, handleCloseEmptySpaces, handleCloseWindow, handleFocusWindow } from "./handlers";
-import { DisplayActions } from "./display-actions-yabai";
+import { DisplayActions, MoveWindowToDisplayActions } from "./display-actions-yabai";
 import Fuse from "fuse.js";
+import { existsSync, readdirSync } from "node:fs";
+import * as path from "node:path";
+import { exec } from "node:child_process";
+
+// Function to list applications from standard directories
+function listApplications(): Application[] {
+  const applications: Application[] = [];
+  const appDirectories = [
+    "/Applications",
+    path.join(ENV.HOME, "Applications"),
+    "/System/Applications",
+    "/System/Library/CoreServices",
+  ];
+
+  for (const dir of appDirectories) {
+    if (existsSync(dir)) {
+      try {
+        const files = readdirSync(dir);
+        for (const file of files) {
+          if (file.endsWith(".app")) {
+            const appPath = path.join(dir, file);
+            const appName = file.replace(".app", "");
+            applications.push({ name: appName, path: appPath });
+          }
+        }
+      } catch (error) {
+        console.error(`Error reading directory ${dir}:`, error);
+      }
+    }
+  }
+
+  return applications;
+}
 
 // Custom hook for debounced search
 function useDebounce<T>(value: T, delay: number): T {
@@ -26,13 +59,77 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-export default function Command() {
+export default function Command(props: { launchContext?: { launchType: LaunchType } }) {
   const [usageTimes, setUsageTimes] = useState<Record<string, number>>({});
   const [inputText, setInputText] = useState("");
-  const searchText = useDebounce(inputText, 150); // 150ms debounce delay
+  const searchText = useDebounce(inputText, 30); // Reduced debounce delay for better responsiveness
   const [windows, setWindows] = useState<YabaiWindow[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [sortMethod, setSortMethod] = useState<SortMethod>(SortMethod.RECENTLY_USED);
   const [isSearching, setIsSearching] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
+
+  // Function to remove a window from the local listing after it's closed.
+  const removeWindow = useCallback((id: number) => {
+    setWindows((prevWindows) => prevWindows.filter((w) => w.id !== id));
+  }, []);
+
+  // Function to refresh applications data
+  const refreshApplications = useCallback(async () => {
+    try {
+      const freshApps = listApplications();
+      setApplications(freshApps);
+
+      // Update the cache
+      await LocalStorage.setItem("cachedApplications", JSON.stringify(freshApps));
+      console.log("Updated applications cache");
+    } catch (error) {
+      console.error("Error refreshing applications:", error);
+    }
+  }, []);
+
+  // Function to refresh windows data
+  const refreshWindows = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const { stdout } = await exec(`${YABAI} -m query --windows`, { env: ENV });
+      if (stdout) {
+        // Ensure stdout is a string before parsing
+        const stdoutStr = typeof stdout === "string" ? stdout : JSON.stringify(stdout);
+        try {
+          const parsed = JSON.parse(stdoutStr);
+          const windowsData = Array.isArray(parsed) ? parsed : [];
+          setWindows(windowsData);
+
+          // Update cache with timestamp
+          const cacheData = {
+            windows: windowsData,
+            timestamp: Date.now(),
+          };
+          await LocalStorage.setItem("cachedWindows", JSON.stringify(cacheData));
+          setLastRefreshTime(Date.now());
+          console.log("Updated windows cache");
+        } catch (parseError) {
+          console.error("Error parsing windows data:", parseError, "Raw data:", stdoutStr);
+        }
+      }
+    } catch (error) {
+      console.error("Error refreshing windows:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  // Function to refresh all data
+  const refreshAllData = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([refreshWindows(), refreshApplications()]);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refreshWindows, refreshApplications]);
 
   // Load previous usage times and sort method from local storage when the component mounts.
   useEffect(() => {
@@ -49,7 +146,8 @@ export default function Command() {
       const storedSortMethod = await LocalStorage.getItem<string>("sortMethod");
       if (storedSortMethod) {
         try {
-          setSortMethod(storedSortMethod as SortMethod);
+          const parsedSortMethod = JSON.parse(storedSortMethod);
+          setSortMethod(parsedSortMethod as SortMethod);
         } catch {
           setSortMethod(SortMethod.USAGE);
         }
@@ -64,7 +162,7 @@ export default function Command() {
 
   // Persist sort method in local storage when it changes.
   useEffect(() => {
-    LocalStorage.setItem("sortMethod", sortMethod);
+    LocalStorage.setItem("sortMethod", JSON.stringify(sortMethod));
   }, [sortMethod]);
 
   // Query windows using useExec.
@@ -73,40 +171,150 @@ export default function Command() {
     parseOutput: ({ stdout }) => {
       if (!stdout) return [];
       try {
-        const parsed = JSON.parse(stdout.toString());
+        // Ensure stdout is a string before parsing
+        const stdoutStr = typeof stdout === "string" ? stdout : JSON.stringify(stdout);
+        const parsed = JSON.parse(stdoutStr);
         return Array.isArray(parsed) ? parsed : [];
-      } catch {
+      } catch (parseError) {
+        console.error("Error parsing windows data in useExec:", parseError);
         return [];
       }
     },
     keepPreviousData: false,
   });
 
+  // Load cached windows and handle data changes
   useEffect(() => {
-    console.log("Data changed:", data, isLoading, error);
+    // Load cached windows on mount
+    const loadCachedWindows = async () => {
+      const cachedData = await LocalStorage.getItem<string>("cachedWindows");
+      if (cachedData) {
+        try {
+          const { windows: cachedWindows, timestamp } = JSON.parse(cachedData);
+          if (Array.isArray(cachedWindows) && cachedWindows.length > 0) {
+            setWindows(cachedWindows);
+            setLastRefreshTime(timestamp);
+            console.log("Loaded windows from cache, timestamp:", new Date(timestamp).toLocaleString());
+          }
+        } catch (error) {
+          console.error("Error parsing cached windows:", error);
+        }
+      }
+    };
+
+    loadCachedWindows();
+
+    // Handle data changes from useExec
     if (data !== undefined) {
       setWindows(data);
-    } else if (!isLoading && !error) {
+
+      // Update cache with timestamp
+      const cacheData = {
+        windows: data,
+        timestamp: Date.now(),
+      };
+      LocalStorage.setItem("cachedWindows", JSON.stringify(cacheData));
+      setLastRefreshTime(Date.now());
+      console.log("Updated windows cache from useExec");
+    } else if (!isLoading && !error && !data) {
       setWindows([]);
     }
   }, [data, isLoading, error]);
 
-  // Function to remove a window from the local listing after it's closed.
-  const removeWindow = useCallback((id: number) => {
-    setWindows((prevWindows) => prevWindows.filter((w) => w.id !== id));
-  }, []);
+  // Handle background refresh and launch type
+  useEffect(() => {
+    // Check if we need to refresh based on launch type
+    if (props.launchContext?.launchType === LaunchType.UserInitiated) {
+      // User explicitly launched the extension, refresh data
+      console.log("User initiated launch, refreshing data");
+      refreshAllData();
+    }
 
-  // Create a Fuse instance for fuzzy searching
+    // Check if data is stale (older than 5 minutes)
+    const isDataStale = Date.now() - lastRefreshTime > 5 * 60 * 1000;
+    if (isDataStale && lastRefreshTime > 0) {
+      console.log("Data is stale, refreshing");
+      refreshAllData();
+    }
+
+    // Set up periodic refresh (every 5 minutes)
+    const refreshInterval = setInterval(
+      () => {
+        console.log("Periodic refresh");
+        refreshAllData();
+      },
+      5 * 60 * 1000,
+    );
+
+    return () => {
+      clearInterval(refreshInterval);
+    };
+  }, [props.launchContext, lastRefreshTime, refreshAllData]);
+
+  // Load applications when the component mounts
+  useEffect(() => {
+    const loadApplications = async () => {
+      // Try to load from cache first
+      const cachedApps = await LocalStorage.getItem<string>("cachedApplications");
+      if (cachedApps) {
+        try {
+          const parsedApps = JSON.parse(cachedApps);
+          setApplications(parsedApps);
+          console.log("Loaded applications from cache");
+        } catch (error) {
+          console.error("Error parsing cached applications:", error);
+        }
+      }
+
+      // Then refresh the applications list
+      await refreshApplications();
+    };
+
+    loadApplications();
+  }, [refreshApplications]);
+
+  // Create a Fuse instance for fuzzy searching windows
   const fuse = useMemo(() => {
     if (!Array.isArray(windows) || windows.length === 0) return null;
     return new Fuse(windows, {
-      keys: ["app", "title"],
+      keys: [
+        { name: "title", weight: 2 }, // Give title higher weight
+        { name: "app", weight: 1 },
+      ],
       includeScore: true,
-      threshold: 0.4, // Lower threshold means more strict matching
+      threshold: 0.4, // Lower threshold for stricter matching
       ignoreLocation: true, // Search the entire string, not just from the beginning
       useExtendedSearch: true, // Enable extended search for more powerful queries
+      sortFn: (a, b) => {
+        // Custom sort function to prioritize exact matches
+        if (a.score === b.score) {
+          // If scores are equal, prioritize shorter matches (more precise)
+          return a.item.title.length - b.item.title.length;
+        }
+        return a.score - b.score; // Lower score is better
+      },
     });
   }, [windows]);
+
+  // Create a Fuse instance for fuzzy searching applications
+  const appFuse = useMemo(() => {
+    if (!Array.isArray(applications) || applications.length === 0) return null;
+    return new Fuse(applications, {
+      keys: ["name"],
+      includeScore: true,
+      threshold: 0.3, // Even stricter threshold for applications
+      ignoreLocation: true,
+      useExtendedSearch: true,
+      sortFn: (a, b) => {
+        // Custom sort function to prioritize exact matches
+        if (a.score === b.score) {
+          // If scores are equal, prioritize shorter names (more precise)
+          return a.item.name.length - b.item.name.length;
+        }
+        return a.score - b.score; // Lower score is better
+      },
+    });
+  }, [applications]);
 
   // Set searching state when input text changes
   useEffect(() => {
@@ -125,10 +333,59 @@ export default function Command() {
     if (!fuse) return [];
 
     // Use Fuse.js for fuzzy searching
-    const results = fuse.search(searchText);
-    setIsSearching(false); // Search is complete
-    return results.map((result) => result.item);
+    try {
+      // First try exact match on app name or title
+      const exactMatches = windows.filter(
+        (win) =>
+          win.app.toLowerCase().includes(searchText.toLowerCase()) ||
+          win.title.toLowerCase().includes(searchText.toLowerCase()),
+      );
+
+      // If we have exact matches, prioritize them
+      if (exactMatches.length > 0) {
+        setIsSearching(false);
+        return exactMatches;
+      }
+
+      // Otherwise use fuzzy search
+      const results = fuse.search(searchText);
+      setIsSearching(false); // Search is complete
+      return results.map((result) => result.item);
+    } catch (error) {
+      console.error("Error during search:", error);
+      setIsSearching(false);
+      return windows; // Fallback to all windows on error
+    }
   }, [windows, searchText, fuse]);
+
+  // Filter applications based on the search text using fuzzy search
+  const filteredApplications = useMemo(() => {
+    if (!Array.isArray(applications)) return [];
+    if (!searchText.trim()) return applications; // Return all applications if search text is empty
+
+    if (!appFuse) return [];
+
+    // Use fuzzy search with optimizations
+    try {
+      // First try exact match on app name
+      const exactMatches = applications.filter((app) => app.name.toLowerCase().includes(searchText.toLowerCase()));
+
+      // If we have exact matches, prioritize them
+      if (exactMatches.length > 0) {
+        setIsSearching(false);
+        return exactMatches;
+      }
+
+      // Otherwise use fuzzy search
+      const results = appFuse.search(searchText);
+      setIsSearching(false); // Search is complete
+      return results.map((result) => result.item);
+    } catch (error) {
+      console.error("Error during application search:", error);
+      setIsSearching(false);
+      return applications; // Fallback to all applications on error
+    }
+  }, [applications, searchText, appFuse]);
 
   // Sort windows based on selected sort method.
   const sortedWindows = useMemo(() => {
@@ -175,46 +432,94 @@ export default function Command() {
     });
   }, [filteredWindows, usageTimes, sortMethod]);
 
+  // Always select the first window in the list
+  const firstWindow = useMemo(() => {
+    return sortedWindows.length > 0 ? sortedWindows[0] : undefined;
+  }, [sortedWindows]);
+
   return (
     <List
-      isLoading={isLoading || isSearching}
+      isLoading={isLoading || isSearching || isRefreshing}
       onSearchTextChange={setInputText}
-      searchBarPlaceholder="Search windows..."
+      searchBarPlaceholder="Search windows and applications..."
       filtering={false} // Disable built-in filtering since we're using Fuse.js
       throttle={false} // Disable throttling for more responsive search
-    >
-      <List.Section title="Windows" subtitle={sortedWindows.length.toString()}>
-        {sortedWindows.map((win) => (
-          <List.Item
-            key={win.id}
-            icon={getAppIcon(win)}
-            title={win.app}
-            subtitle={win.title}
-            actions={
-              <WindowActions
-                windowId={win.id}
-                windowApp={win.app}
-                onFocused={(id) =>
-                  setUsageTimes((prev) => ({
-                    ...prev,
-                    [id]: Date.now(),
-                  }))
-                }
-                onRemove={removeWindow}
-                sortMethod={sortMethod}
-                setSortMethod={setSortMethod}
-              />
-            }
+      selectedItemId={firstWindow ? `window-${firstWindow.id}` : undefined} // Select first window by default
+      actions={
+        <ActionPanel>
+          <Action
+            title={isRefreshing ? "Refreshing…" : "Refresh Windows & Apps"}
+            onAction={refreshAllData}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            icon={{ source: "arrow.clockwise" }}
           />
-        ))}
-      </List.Section>
-
-      {!isLoading && sortedWindows.length === 0 && (
-        <List.EmptyView
-          title="No Windows Found"
-          description="Yabai reported no windows, or there was an issue fetching them."
-        />
+        </ActionPanel>
+      }
+    >
+      {sortedWindows.length > 0 && (
+        <List.Section title="Windows" subtitle={sortedWindows.length.toString()}>
+          {sortedWindows.map((win) => (
+            <List.Item
+              key={win.id}
+              id={`window-${win.id}`} // Add id for default selection
+              icon={getAppIcon(win)}
+              title={win.app}
+              subtitle={win.title}
+              actions={
+                <WindowActions
+                  windowId={win.id}
+                  windowApp={win.app}
+                  onFocused={(id) =>
+                    setUsageTimes((prev) => ({
+                      ...prev,
+                      [id]: Date.now(),
+                    }))
+                  }
+                  onRemove={removeWindow}
+                  sortMethod={sortMethod}
+                  setSortMethod={setSortMethod}
+                  onRefresh={refreshAllData}
+                  isRefreshing={isRefreshing}
+                />
+              }
+            />
+          ))}
+        </List.Section>
       )}
+
+      {filteredApplications.length > 0 && (
+        <List.Section title="Applications" subtitle={filteredApplications.length.toString()}>
+          {filteredApplications.map((app) => (
+            <List.Item
+              key={app.path}
+              icon={{ fileIcon: app.path }}
+              title={app.name}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Open Application"
+                    onAction={() => {
+                      exec(`open "${app.path}"`);
+                    }}
+                    shortcut={{ modifiers: [], key: "enter" }}
+                  />
+                  <Action
+                    title={isRefreshing ? "Refreshing…" : "Refresh Windows & Apps"}
+                    onAction={refreshAllData}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    icon={{ source: "arrow.clockwise" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+
+      {!isLoading && sortedWindows.length === 0 && filteredApplications.length === 0 && (
+        <List.EmptyView title="No Windows or Applications Found" description="No windows or applications were found." />
+      )}
+
       {error && (
         <List.EmptyView
           title="Error Fetching Windows"
@@ -233,6 +538,8 @@ function WindowActions({
   onRemove,
   sortMethod,
   setSortMethod,
+  onRefresh,
+  isRefreshing,
 }: {
   windowId: number;
   windowApp: string;
@@ -240,6 +547,8 @@ function WindowActions({
   onRemove: (id: number) => void;
   sortMethod: SortMethod;
   setSortMethod: (method: SortMethod) => void;
+  onRefresh: () => void;
+  isRefreshing: boolean;
 }) {
   return (
     <ActionPanel>
@@ -263,7 +572,16 @@ function WindowActions({
         onAction={handleCloseEmptySpaces(windowId, onRemove)}
         shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
       />
-      <DisplayActions />
+      <Action
+        title={isRefreshing ? "Refreshing…" : "Refresh Windows & Apps"}
+        onAction={onRefresh}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        icon={{ source: "arrow.clockwise" }}
+      />
+      <ActionPanel.Section title="Display Actions">
+        <DisplayActions />
+        <MoveWindowToDisplayActions windowId={windowId} windowApp={windowApp} />
+      </ActionPanel.Section>
       <ActionPanel.Section title="Sorting">
         <Action
           title="Sort by Usage"

@@ -2,6 +2,11 @@ import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import * as os from "node:os";
 
+export interface Application {
+  name: string;
+  path: string;
+}
+
 export interface YabaiWindow {
   id: number;
   pid: number;
