@@ -157,15 +157,6 @@ function SummarizeContentForm() {
     );
   }
 
-  function dropHandler(files: string[]) {
-    if (files.length > 0) {
-      const source = files[0];
-      detectSourceType(source);
-      return source;
-    }
-    return "";
-  }
-
   function getContextIcon(context: string): string {
     switch (context) {
       case "bullet points":
@@ -245,7 +236,6 @@ function SummarizeContentForm() {
           setSourceError(undefined);
           detectSourceType(value);
         }}
-        onDrop={dropHandler}
         info="Enter any URL or file path - Content Core will auto-detect the type"
       />
 

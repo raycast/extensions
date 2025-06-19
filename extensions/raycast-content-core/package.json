@@ -102,20 +102,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.0",
+    "@raycast/api": "1.70.0",
     "@raycast/utils": "^1.12.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27", 
+    "@types/react": "18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "build": "ray build -e dist --skip-types",
-    "build-with-types": "ray build -e dist",
+    "build": "ray build -e dist",
+    "build-no-types": "ray build -e dist --skip-types",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

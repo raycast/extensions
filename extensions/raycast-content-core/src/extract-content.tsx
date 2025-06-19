@@ -102,15 +102,6 @@ function ExtractContentForm() {
     push(<ResultsView result={result} sourceType={sourceType} />);
   }
 
-  function dropHandler(files: string[]) {
-    if (files.length > 0) {
-      const source = files[0];
-      detectSourceType(source);
-      return source;
-    }
-    return "";
-  }
-
   function getSourceTypeIcon(): string {
     switch (detectedType) {
       case "url":
@@ -167,7 +158,6 @@ function ExtractContentForm() {
           setSourceError(undefined);
           detectSourceType(value);
         }}
-        onDrop={dropHandler}
         info="Enter any URL or file path - Content Core will auto-detect the type"
       />
 
