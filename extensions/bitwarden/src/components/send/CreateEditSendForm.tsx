@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Clipboard, Form, Toast, showToast } from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { Send, SendDateOption, SendType } from "~/types/send";
-import { captureException } from "~/utils/development";
 import { SendTypeOptions } from "~/constants/send";
 import { PremiumFeatureError } from "~/utils/errors";
 import { DebuggingBugReportingActionSection } from "~/components/actions";
@@ -120,7 +119,6 @@ export const CreateEditSendForm = ({
       }
       toast.style = Toast.Style.Failure;
       toast.title = `Failed to ${mode === "edit" ? "update" : "create"} Send`;
-      captureException(`Failed to ${mode === "edit" ? "update" : "create"} Send`, error);
     }
   }
 

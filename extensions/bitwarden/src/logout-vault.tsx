@@ -25,7 +25,7 @@ async function logoutVaultCommand() {
       toast.message = "You are not logged in";
       return;
     }
-  } catch (error) {
+  } catch {
     await showToast(Toast.Style.Failure, "Failed to logout from vault");
   }
 
@@ -33,7 +33,7 @@ async function logoutVaultCommand() {
     await SessionStorage.logoutClearSession();
     Cache.clear();
     await showToast(Toast.Style.Success, "Successfully logged out");
-  } catch (error) {
+  } catch {
     await showToast(Toast.Style.Failure, "Failed to logout from vault");
   }
 }

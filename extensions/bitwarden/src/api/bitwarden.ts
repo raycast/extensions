@@ -23,7 +23,6 @@ import { join } from "path";
 import { chmod, rename, rm } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAvailable } from "~/utils/fs";
 import { download } from "~/utils/network";
-import { captureException } from "~/utils/development";
 import { ReceivedSend, Send, SendCreatePayload, SendType } from "~/types/send";
 import { prepareSendPayload } from "~/api/bitwarden.helpers";
 import { Cache } from "~/utils/cache";
@@ -85,6 +84,7 @@ const BinDownloadLogger = (() => {
    or there are no crashes reported with the bin download after some time. */
   const filePath = join(supportPath, `bw-bin-download-error-${Δ}.log`);
   return {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     logError: (error: any) => tryExec(() => writeFileSync(filePath, error?.message ?? "Unexpected error")),
     clearError: () => tryExec(() => unlinkSync(filePath)),
     hasError: () => tryExec(() => existsSync(filePath), false),
@@ -215,8 +215,8 @@ export class Bitwarden {
     try {
       const { error, result } = await this.getVersion();
       if (!error) Cache.set(CACHE_KEYS.CLI_VERSION, result);
-    } catch (error) {
-      captureException("Failed to retrieve and cache cli version", error, { captureToRaycast: true });
+    } catch {
+      // Handle error gracefully
     }
   }
 
@@ -319,7 +319,6 @@ export class Bitwarden {
       const { stdout: result } = await this.exec(["--version"], { resetVaultTimeout: false });
       return { result };
     } catch (execError) {
-      captureException("Failed to get cli version", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -333,7 +332,6 @@ export class Bitwarden {
       await this.callActionListeners("login");
       return { result: undefined };
     } catch (execError) {
-      captureException("Failed to login", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -350,7 +348,6 @@ export class Bitwarden {
       if (!immediate) await this.handlePostLogout(reason);
       return { result: undefined };
     } catch (execError) {
-      captureException("Failed to logout", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -372,7 +369,6 @@ export class Bitwarden {
       if (!immediate) await this.callActionListeners("lock", reason);
       return { result: undefined };
     } catch (execError) {
-      captureException("Failed to lock vault", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -387,7 +383,6 @@ export class Bitwarden {
       await this.callActionListeners("unlock", password, sessionToken);
       return { result: sessionToken };
     } catch (execError) {
-      captureException("Failed to unlock vault", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -399,7 +394,6 @@ export class Bitwarden {
       await this.exec(["sync"], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
-      captureException("Failed to sync vault", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -411,7 +405,6 @@ export class Bitwarden {
       const { stdout } = await this.exec(["get", "item", id], { resetVaultTimeout: true });
       return { result: JSON.parse<Item>(stdout) };
     } catch (execError) {
-      captureException("Failed to get item", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -425,7 +418,6 @@ export class Bitwarden {
       // Filter out items without a name property (they are not displayed in the bitwarden app)
       return { result: items.filter((item: Item) => !!item.name) };
     } catch (execError) {
-      captureException("Failed to list items", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -437,7 +429,6 @@ export class Bitwarden {
       const { stdout } = await this.exec(["list", "folders"], { resetVaultTimeout: true });
       return { result: JSON.parse<Folder[]>(stdout) };
     } catch (execError) {
-      captureException("Failed to list folder", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -456,7 +447,6 @@ export class Bitwarden {
       await this.exec(["create", "folder", encodedFolder], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
-      captureException("Failed to create folder", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -469,7 +459,6 @@ export class Bitwarden {
       const { stdout } = await this.exec(["get", "totp", id], { resetVaultTimeout: true });
       return { result: stdout };
     } catch (execError) {
-      captureException("Failed to get TOTP", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -481,7 +470,6 @@ export class Bitwarden {
       const { stdout } = await this.exec(["status"], { resetVaultTimeout: false });
       return { result: JSON.parse<VaultState>(stdout) };
     } catch (execError) {
-      captureException("Failed to get status", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -494,7 +482,6 @@ export class Bitwarden {
       await this.saveLastVaultStatus("checkLockStatus", "unlocked");
       return "unlocked";
     } catch (error) {
-      captureException("Failed to check lock status", error);
       const errorMessage = (error as ExecaError).stderr;
       if (errorMessage === "Vault is locked.") {
         await this.saveLastVaultStatus("checkLockStatus", "locked");
@@ -505,12 +492,12 @@ export class Bitwarden {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async getTemplate<T = any>(type: string): Promise<MaybeError<T>> {
     try {
       const { stdout } = await this.exec(["get", "template", type], { resetVaultTimeout: true });
       return { result: JSON.parse<T>(stdout) };
     } catch (execError) {
-      captureException("Failed to get template", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -522,7 +509,6 @@ export class Bitwarden {
       const { stdout } = await this.exec(["encode"], { input, resetVaultTimeout: false });
       return { result: stdout };
     } catch (execError) {
-      captureException("Failed to encode", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -540,7 +526,6 @@ export class Bitwarden {
       const { stdout } = await this.exec(["send", "list"], { resetVaultTimeout: true });
       return { result: JSON.parse<Send[]>(stdout) };
     } catch (execError) {
-      captureException("Failed to list sends", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -550,7 +535,7 @@ export class Bitwarden {
   async createSend(values: SendCreatePayload): Promise<MaybeError<Send>> {
     try {
       const { error: templateError, result: template } = await this.getTemplate(
-        values.type === SendType.Text ? "send.text" : "send.file"
+        values.type === SendType.Text ? "send.text" : "send.file",
       );
       if (templateError) throw templateError;
 
@@ -562,7 +547,6 @@ export class Bitwarden {
 
       return { result: JSON.parse<Send>(stdout) };
     } catch (execError) {
-      captureException("Failed to create send", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -577,7 +561,6 @@ export class Bitwarden {
       const { stdout } = await this.exec(["send", "edit", encodedPayload], { resetVaultTimeout: true });
       return { result: JSON.parse<Send>(stdout) };
     } catch (execError) {
-      captureException("Failed to delete send", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -589,7 +572,6 @@ export class Bitwarden {
       await this.exec(["send", "delete", id], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
-      captureException("Failed to delete send", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -601,7 +583,6 @@ export class Bitwarden {
       await this.exec(["send", "remove-password", id], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
-      captureException("Failed to remove send password", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -623,7 +604,6 @@ export class Bitwarden {
       if (/Invalid password/gi.test(errorMessage)) return { error: new SendInvalidPasswordError() };
       if (/Send password/gi.test(errorMessage)) return { error: new SendNeedsPasswordError() };
 
-      captureException("Failed to receive send obj", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -638,7 +618,6 @@ export class Bitwarden {
       const { stdout } = await this.exec(args, { resetVaultTimeout: true, input: password });
       return { result: stdout };
     } catch (execError) {
-      captureException("Failed to receive send", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -669,6 +648,7 @@ export class Bitwarden {
     await this.callActionListeners("logout", reason);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async handleCommonErrors(error: any): Promise<{ error?: ManuallyThrownError }> {
     const errorMessage = (error as ExecaError).stderr;
     if (!errorMessage) return {};
@@ -709,9 +689,10 @@ export class Bitwarden {
     if (listeners && listeners.size > 0) {
       for (const listener of listeners) {
         try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await (listener as any)?.(...args);
-        } catch (error) {
-          captureException(`Error calling bitwarden action listener for ${action}`, error);
+        } catch {
+          // Handle error gracefully
         }
       }
     }

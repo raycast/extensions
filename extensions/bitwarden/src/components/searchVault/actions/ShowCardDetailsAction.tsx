@@ -3,7 +3,6 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { cardBitwardenPageFieldOrderSorter, getCardDetailsCopyValue, getCardDetailsMarkdown } from "~/utils/cards";
-import { captureException } from "~/utils/development";
 import { CARD_KEY_LABEL } from "~/constants/labels";
 import ShowDetailsScreen from "~/components/searchVault/actions/shared/ShowDetailsScreen";
 
@@ -27,12 +26,11 @@ function ShowCardDetailsAction() {
             sorter={cardBitwardenPageFieldOrderSorter}
             getMarkdown={getCardDetailsMarkdown}
             getCopyValue={getCardDetailsCopyValue}
-          />
+          />,
         );
       }
-    } catch (error) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to get card details");
-      captureException("Failed to show card details", error);
     }
   };
 

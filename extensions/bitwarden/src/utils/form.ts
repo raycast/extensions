@@ -19,7 +19,7 @@ export const CustomValidations = {
 export const stringifyBooleanItemProps = <TValue extends string>(
   itemProps: Form.ItemProps<boolean>,
   trueValue: TValue,
-  falseValue: TValue
+  falseValue: TValue,
 ): Form.ItemProps<string> => ({
   ...itemProps,
   defaultValue: itemProps.value ? trueValue : falseValue,
@@ -35,7 +35,7 @@ export const stringifyBooleanItemProps = <TValue extends string>(
 
 type UseFormProps<T extends Form.Values> = Parameters<typeof useForm<T>>[0];
 export const useOnChangeForm = <T extends Form.Values>(
-  props: Omit<UseFormProps<T>, "onSubmit"> & { onChange: UseFormProps<T>["onSubmit"] }
+  props: Omit<UseFormProps<T>, "onSubmit"> & { onChange: UseFormProps<T>["onSubmit"] },
 ) => {
   const form = useForm({ ...props, onSubmit: props.onChange });
   useEffect(() => void form.handleSubmit(form.values), [form.values]);

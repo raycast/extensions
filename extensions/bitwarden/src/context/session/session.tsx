@@ -13,7 +13,6 @@ import {
 } from "~/context/session/utils";
 import { SessionState } from "~/types/session";
 import { Cache } from "~/utils/cache";
-import { captureException } from "~/utils/development";
 import useOnceEffect from "~/utils/hooks/useOnceEffect";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
@@ -38,6 +37,7 @@ export function SessionProvider(props: SessionProviderProps) {
 
   const bitwarden = useBitwarden();
   const [state, dispatch] = useSessionReducer();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pendingActionRef = useRef<Promise<any>>(Promise.resolve());
 
   useOnceEffect(bootstrapSession, bitwarden);
@@ -88,7 +88,6 @@ export function SessionProvider(props: SessionProviderProps) {
       } else {
         pendingActionRef.current = bitwarden.lock({ immediate: true });
         dispatch({ type: "failLoadingSavedState" });
-        captureException("Failed to bootstrap session state", error);
       }
     }
   }
@@ -127,7 +126,7 @@ export function SessionProvider(props: SessionProviderProps) {
       active: !state.isLoading && state.isAuthenticated && !state.isLocked,
       confirmMasterPassword,
     }),
-    [state, confirmMasterPassword]
+    [state, confirmMasterPassword],
   );
 
   if (state.isLoading) return loadingFallback;

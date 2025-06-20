@@ -17,7 +17,7 @@ async function lockVaultCommand() {
     const bitwarden = await new Bitwarden(toast).initialize();
 
     await bitwarden.withSession(token).lock({ reason: VAULT_LOCK_MESSAGES.MANUAL });
-  } catch (error) {
+  } catch {
     await showToast(Toast.Style.Failure, "Failed to lock vault");
   }
 
@@ -27,7 +27,7 @@ async function lockVaultCommand() {
     toast.style = Toast.Style.Success;
     toast.title = "Vault successfully locked";
     toast.message = undefined;
-  } catch (error) {
+  } catch {
     await showToast(Toast.Style.Failure, "Failed to lock vault");
   }
 }

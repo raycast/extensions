@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Remove all sensitive `captureExecptions` usages
+- Bump extension utilities to the latest
+
 ## [Fix] - 2025-06-05
 
 - Fix attempt for authenticator "TypeError: t is not a function" error

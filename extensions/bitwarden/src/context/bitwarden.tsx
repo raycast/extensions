@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useContext, useState } from "react";
+import { JSX, createContext, PropsWithChildren, useContext, useState } from "react";
 import { Bitwarden } from "~/api/bitwarden";
 import { LoadingFallback } from "~/components/LoadingFallback";
 import TroubleshootingGuide from "~/components/TroubleshootingGuide";

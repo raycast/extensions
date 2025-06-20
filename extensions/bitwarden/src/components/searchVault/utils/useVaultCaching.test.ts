@@ -29,7 +29,9 @@ jest.mock("~/utils/hooks/useContentEncryptor", () => ({
 
 jest.mock("~/components/searchVault/utils/caching", () => ({
   ...jest.requireActual("~/components/searchVault/utils/caching"),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   prepareItemsForCache: jest.fn((items: any[]) => items),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   prepareFoldersForCache: jest.fn((folders: any[]) => folders),
 }));
 

@@ -3,7 +3,6 @@ import { prepareFoldersForCache, prepareItemsForCache } from "~/components/searc
 import { CACHE_KEYS } from "~/constants/general";
 import { Folder, Item, Vault } from "~/types/vault";
 import { Cache } from "~/utils/cache";
-import { captureException } from "~/utils/development";
 import { useContentEncryptor } from "~/utils/hooks/useContentEncryptor";
 import useOnceEffect from "~/utils/hooks/useOnceEffect";
 
@@ -26,10 +25,7 @@ function useVaultCaching() {
 
       const decryptedVault = decrypt(cachedEncryptedVault, cachedIv);
       return JSON.parse<Vault>(decryptedVault);
-    } catch (error) {
-      if (!(error instanceof VaultCachingNoEnabledError)) {
-        captureException("Failed to decrypt cached vault", error);
-      }
+    } catch {
       return { items: [], folders: [] };
     }
   };
@@ -45,10 +41,8 @@ function useVaultCaching() {
       const encryptedVault = encrypt(vaultToEncrypt);
       Cache.set(CACHE_KEYS.VAULT, encryptedVault.content);
       Cache.set(CACHE_KEYS.IV, encryptedVault.iv);
-    } catch (error) {
-      if (!(error instanceof VaultCachingNoEnabledError)) {
-        captureException("Failed to cache vault", error);
-      }
+    } catch {
+      // Handle error gracefully
     }
   };
 

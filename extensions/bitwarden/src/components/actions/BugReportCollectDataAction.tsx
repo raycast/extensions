@@ -1,5 +1,4 @@
 import { Action, Clipboard, Icon, Toast, environment, getPreferenceValues, showToast } from "@raycast/api";
-import { captureException } from "~/utils/development";
 import { exec as execWithCallbacks } from "child_process";
 import { promisify } from "util";
 import { cliInfo } from "~/api/bitwarden";
@@ -48,8 +47,7 @@ const tryExec = async (command: string, trimLineBreaks = true) => {
     const response = stdout.trim();
     if (trimLineBreaks) return response.replace(/\n|\r/g, "");
     return response;
-  } catch (error) {
-    captureException(`Failed to execute command: ${command}`, error);
+  } catch {
     return NA;
   }
 };
@@ -64,7 +62,7 @@ const getBwBinInfo = () => {
       return { type: "downloaded", path: cliInfo.path.downloadedBin };
     }
     return { type: "installed", path: cliInfo.path.installedBin };
-  } catch (error) {
+  } catch {
     return { type: NA, path: NA };
   }
 };
@@ -83,7 +81,7 @@ const getHomebrewInfo = async () => {
     const arch = archValue !== NA ? (archValue.includes("/opt/homebrew") ? "arm64" : "x86_64") : NA;
 
     return { arch, version };
-  } catch (error) {
+  } catch {
     return { arch: NA, version: NA };
   }
 };
@@ -129,10 +127,9 @@ function BugReportCollectDataAction() {
       await Clipboard.copy(JSON.stringify(data, null, 2));
       toast.style = Toast.Style.Success;
       toast.title = "Data copied to clipboard";
-    } catch (error) {
+    } catch {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to collect bug report data";
-      captureException("Failed to collect bug report data", error);
     }
   };
 

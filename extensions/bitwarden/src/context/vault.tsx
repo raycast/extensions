@@ -4,7 +4,6 @@ import { useVaultItemPublisher } from "~/components/searchVault/context/vaultLis
 import { useBitwarden } from "~/context/bitwarden";
 import { useSession } from "~/context/session";
 import { Folder, Item, Vault } from "~/types/vault";
-import { captureException } from "~/utils/development";
 import useVaultCaching from "~/components/searchVault/utils/useVaultCaching";
 import { FailedToLoadVaultItemsError, getDisplayableErrorMessage } from "~/utils/errors";
 import useOnceEffect from "~/utils/hooks/useOnceEffect";
@@ -46,12 +45,15 @@ export function VaultProvider(props: VaultProviderProps) {
   const [currentFolderId, setCurrentFolderId] = useCachedState<Nullable<string>>(CACHE_KEYS.CURRENT_FOLDER_ID, null);
   const [state, setState] = useReducer(
     (previous: VaultState, next: Partial<VaultState>) => ({ ...previous, ...next }),
-    { ...getInitialState(fetchOnMount), ...getCachedVault() }
+    { ...getInitialState(fetchOnMount), ...getCachedVault() },
   );
 
-  useOnceEffect(() => {
-    void loadItems();
-  }, fetchOnMount && session.active && session.token);
+  useOnceEffect(
+    () => {
+      void loadItems();
+    },
+    fetchOnMount && session.active && session.token,
+  );
 
   async function loadItems() {
     try {
@@ -76,7 +78,6 @@ export function VaultProvider(props: VaultProviderProps) {
       cacheVault(items, folders);
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to load vault items", getDisplayableErrorMessage(error));
-      captureException("Failed to load vault items", error);
     } finally {
       setState({ isLoading: false });
     }
@@ -118,7 +119,7 @@ export function VaultProvider(props: VaultProviderProps) {
       setCurrentFolder,
       updateState,
     }),
-    [state, session.isLoading, currentFolderId, syncItems, loadItems, setCurrentFolder, updateState]
+    [state, session.isLoading, currentFolderId, syncItems, loadItems, setCurrentFolder, updateState],
   );
 
   return <VaultContext.Provider value={memoizedValue}>{children}</VaultContext.Provider>;

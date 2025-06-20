@@ -5,13 +5,13 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { Item } from "~/types/vault";
-import { captureException } from "~/utils/development";
 import { showCopySuccessMessage } from "~/utils/clipboard";
 
 type Constraint = RecordOfAny;
 
 export type CopyObjectStringFieldsActionsProps<TValue extends Constraint> = {
   selector: (item: Item) => TValue | null | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sorter?: (itemA: [string, any], itemB: [string, any]) => number;
   labelMapper?: (field: keyof TValue) => string;
 };
@@ -35,9 +35,8 @@ function CopyObjectStringFieldsActions<TValue extends Constraint>({
         await Clipboard.copy(value, { transient: getTransientCopyPreference("other") });
         await showCopySuccessMessage(`Copied ${label} to clipboard`);
       }
-    } catch (error) {
+    } catch {
       await showToast(Toast.Style.Failure, `Failed to copy ${field}`);
-      captureException(`Failed to copy ${field}`, error);
     }
   };
 
@@ -64,7 +63,7 @@ function CopyObjectStringFieldsActions<TValue extends Constraint>({
 function getItemObjectEntries<TValue extends Constraint>(
   selectedItem: Item,
   selector: CopyObjectStringFieldsActionsProps<TValue>["selector"],
-  sorter: CopyObjectStringFieldsActionsProps<TValue>["sorter"]
+  sorter: CopyObjectStringFieldsActionsProps<TValue>["sorter"],
 ) {
   const value = selector(selectedItem);
   if (value == null) return null;

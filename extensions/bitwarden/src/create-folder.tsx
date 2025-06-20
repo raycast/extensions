@@ -31,7 +31,7 @@ function CreateFolderComponent() {
         toast.style = Toast.Style.Success;
         toast.title = "Folder created";
         toast.message = formData.name;
-      } catch (error) {
+      } catch {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to create folder";
         toast.message = undefined;

@@ -22,7 +22,7 @@ describe("prepareItemsForCache & prepareFoldersForCache", () => {
     if (amountOfSensitiveValuesInFolders > 0) {
       const amountOfHiddenValuesInCleanFolders = getStringValueCount(
         stringifiedCleanFolders,
-        SENSITIVE_VALUE_PLACEHOLDER
+        SENSITIVE_VALUE_PLACEHOLDER,
       );
       expect(amountOfSensitiveValuesInFolders).toEqual(amountOfHiddenValuesInCleanFolders);
     }
@@ -40,7 +40,7 @@ describe("prepareItemsForCache & prepareFoldersForCache", () => {
 
     const items1 = prepareItemsForCache(getMockItems(itemCount));
     const items1SensitiveCount = getStringValueCount(JSON.stringify(items1), SENSITIVE_VALUE);
-    /* @ts-expect-error */
+    /* @ts-expect-error: _ */
     const items2 = getMockItems(itemCount, { overrideProps: { [newPropertyName]: SENSITIVE_VALUE } });
     const items2PreparedStringified = JSON.stringify(prepareItemsForCache(items2));
 
@@ -53,7 +53,7 @@ describe("prepareItemsForCache & prepareFoldersForCache", () => {
 
     const folders1 = prepareFoldersForCache(getMockFolders(itemCount));
     const folders1SensitiveCount = getStringValueCount(JSON.stringify(folders1), SENSITIVE_VALUE);
-    /* @ts-expect-error */
+    /* @ts-expect-error: _ */
     const folders2 = getMockItems(itemCount, { overrideProps: { [newPropertyName]: SENSITIVE_VALUE } });
     const folders2PreparedStringified = JSON.stringify(prepareItemsForCache(folders2));
 

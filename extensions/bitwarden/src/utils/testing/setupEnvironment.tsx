@@ -37,7 +37,7 @@ jest.mock(
         shouldCacheVaultItems: true,
         windowActionOnCopy: "close",
         primaryAction: "copy",
-      })
+      }),
     ),
     LocalStorage: {
       allItems: jest.fn(),
@@ -525,7 +525,7 @@ jest.mock(
       XmarkCircle: "x-mark-circle-16",
     },
   }),
-  { virtual: true }
+  { virtual: true },
 );
 
 jest.mock(
@@ -550,15 +550,17 @@ jest.mock(
     }),
     useCallback: jest.fn((fn) => fn),
   }),
-  { virtual: true }
+  { virtual: true },
 );
 
 jest.mock("~/utils/cache", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let cache: Record<string, any> = {};
 
   return {
     Cache: {
       get: jest.fn((key: string) => cache[key]),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       set: jest.fn((key: string, value: any) => (cache[key] = value)),
       clear: jest.fn(() => (cache = {})),
       isEmpty: Object.values(cache).length === 0,

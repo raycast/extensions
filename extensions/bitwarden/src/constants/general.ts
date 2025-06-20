@@ -27,6 +27,7 @@ export const VAULT_LOCK_MESSAGES = {
   CLI_UPDATED: "Bitwarden has been updated. Please login again.",
 } as const;
 
+// @ts-expect-error: To keep the original code
 export const SHORTCUT_KEY_SEQUENCE: Keyboard.Shortcut["key"][] = [
   "1",
   "2",

@@ -1,14 +1,15 @@
 import { environment } from "@raycast/api";
 import { getErrorString } from "~/utils/errors";
-import { captureException as captureExceptionRaycast } from "@raycast/api";
 
 type Log = {
   message: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any;
 };
 
 const _exceptions = {
   logs: new Map<Date, Log>(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set: (message: string, error?: any): void => {
     capturedExceptions.logs.set(new Date(), { message, error });
   },
@@ -27,25 +28,7 @@ const _exceptions = {
 
 export const capturedExceptions = Object.freeze(_exceptions);
 
-type CaptureExceptionOptions = {
-  captureToRaycast?: boolean;
-};
-
-export const captureException = (
-  description: string | Falsy | (string | Falsy)[],
-  error: any,
-  options?: CaptureExceptionOptions
-) => {
-  const { captureToRaycast = false } = options ?? {};
-  const desc = Array.isArray(description) ? description.filter(Boolean).join(" ") : description || "Captured exception";
-  capturedExceptions.set(desc, error);
-  if (environment.isDevelopment) {
-    console.error(desc, error);
-  } else if (captureToRaycast) {
-    captureExceptionRaycast(error);
-  }
-};
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const debugLog = (...args: any[]) => {
   if (!environment.isDevelopment) return;
   console.debug(...args);

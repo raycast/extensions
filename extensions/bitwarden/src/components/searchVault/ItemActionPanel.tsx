@@ -93,7 +93,7 @@ const VaultItemActionPanel = () => {
       <DebuggingBugReportingActionSection />
       {environment.isDevelopment && (
         <ActionPanel.Section title="Development">
-          <Action.CopyToClipboard title="Copy item UUID" content={id} />
+          <Action.CopyToClipboard title="Copy Item Uuid" content={id} />
         </ActionPanel.Section>
       )}
     </ActionPanel>

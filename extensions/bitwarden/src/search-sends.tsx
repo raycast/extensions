@@ -13,7 +13,6 @@ import { SessionProvider } from "~/context/session";
 import CreateSendCommand from "~/create-send";
 import { Send, SendType } from "~/types/send";
 import { getFormattedDate } from "~/utils/dates";
-import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 import { useInterval } from "~/utils/hooks/useInterval";
 
@@ -96,10 +95,12 @@ const usePasteActionTitle = () => {
   return currentApplication ? `Paste URL into ${currentApplication}` : "Paste URL";
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Operation = { id: string; execute: () => Promise<any> };
 
 const useOperationQueue = () => {
   const operationQueueRef = useRef<Operation[]>([]);
+  // @ts-expect-error: To keep the original code
   const currentOperationTimeoutRef = useRef<NodeJS.Timeout>();
 
   const processOperations = () => {
@@ -112,6 +113,7 @@ const useOperationQueue = () => {
       } finally {
         operationQueueRef.current.shift();
         clearTimeout(currentOperationTimeoutRef.current);
+        // @ts-expect-error: To keep the original code
         currentOperationTimeoutRef.current = undefined;
         if (operationQueueRef.current.length > 0) {
           processOperations();
@@ -120,6 +122,7 @@ const useOperationQueue = () => {
     }, 1);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const queueOperation = (id: string, execute: () => Promise<any>) => {
     if (!operationQueueRef.current.some((op) => op.id === id)) {
       operationQueueRef.current.push({ id, execute });
@@ -181,6 +184,7 @@ const syncSendsAction = {
   },
   get shortcutLabel(): string {
     return (
+      // @ts-expect-error: To keep the original code
       this.shortcut.modifiers.map((mod) => MODIFIER_TO_LABEL[mod] ?? "").join("") + this.shortcut.key.toUpperCase()
     );
   },
@@ -193,7 +197,7 @@ function SearchSendsCommandContent() {
   const { sends, isFirstLoading, called, refresh: refreshSends, filterByType } = useListSends(bitwarden);
 
   const pasteActionTitle = usePasteActionTitle();
-  const selectedItemIdRef = useRef<string>();
+  const selectedItemIdRef = useRef<string>(undefined);
 
   useInterval(() => onSync(true), { skip: !called });
 
@@ -214,10 +218,9 @@ function SearchSendsCommandContent() {
           toast.style = Toast.Style.Success;
           toast.title = "Sends synced";
         }
-      } catch (error) {
+      } catch {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to sync Sends";
-        captureException(["Failed to sync Sends", isPeriodic && "periodically"], error);
       }
     });
   }
@@ -230,10 +233,9 @@ function SearchSendsCommandContent() {
         await refreshSends();
         toast.style = Toast.Style.Success;
         toast.title = "Send deleted";
-      } catch (error) {
+      } catch {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to delete Send";
-        captureException("Failed to delete Send", error);
       }
     });
   };
@@ -246,10 +248,9 @@ function SearchSendsCommandContent() {
         await refreshSends();
         toast.style = Toast.Style.Success;
         toast.title = "Send password removed";
-      } catch (error) {
+      } catch {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to remove Send password";
-        captureException("Failed to remove Send Password", error);
       }
     });
   };
@@ -272,9 +273,8 @@ function SearchSendsCommandContent() {
           rollbackOnError: true,
           shouldRevalidateAfter: true,
         });
-      } catch (error) {
+      } catch {
         await showToast({ title: "Failed to sync Sends", style: Toast.Style.Failure });
-        captureException("Failed to sync Sends", error);
       }
     });
   };
@@ -301,9 +301,8 @@ function SearchSendsCommandContent() {
           rollbackOnError: true,
           shouldRevalidateAfter: true,
         });
-      } catch (error) {
+      } catch {
         await showToast({ title: "Failed to sync Sends", style: Toast.Style.Failure });
-        captureException("Failed to sync Sends", error);
       }
     });
   };

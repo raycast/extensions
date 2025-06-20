@@ -2,7 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { exec as callbackExec, PromiseWithChild } from "child_process";
 import { promisify } from "util";
-import { captureException, debugLog } from "~/utils/development";
+import { debugLog } from "~/utils/development";
 
 const exec = promisify(callbackExec);
 
@@ -46,13 +46,13 @@ export const checkSystemSleptSinceLastAccess = (lastActivityTime: Date) => {
 
 function getLastSyslog(hours: number, filter: string) {
   return exec(
-    `log show --style syslog --predicate "process == 'loginwindow'" --info --last ${hours}h | grep "${filter}" | tail -n 1`
+    `log show --style syslog --predicate "process == 'loginwindow'" --info --last ${hours}h | grep "${filter}" | tail -n 1`,
   );
 }
 
 export async function checkSystemLogTimeAfter(
   time: Date,
-  getLogEntry: (timeSpanHours: number) => PromiseWithChild<{ stdout: string; stderr: string }>
+  getLogEntry: (timeSpanHours: number) => PromiseWithChild<{ stdout: string; stderr: string }>,
 ): Promise<boolean> {
   const lastScreenLockTime = await getSystemLogTime(getLogEntry);
   if (!lastScreenLockTime) return true; // assume that log was found for improved safety
@@ -68,7 +68,7 @@ const getSystemLogTime_MAX_RETRIES = 5;
 async function getSystemLogTime(
   getLogEntry: (timeSpanHours: number) => PromiseWithChild<{ stdout: string; stderr: string }>,
   timeSpanHours = 1,
-  retryAttempt = 0
+  retryAttempt = 0,
 ): Promise<Date | undefined> {
   try {
     if (retryAttempt > getSystemLogTime_MAX_RETRIES) {
@@ -85,8 +85,7 @@ async function getSystemLogTime(
     if (!logFullDate || logFullDate.toString() === "Invalid Date") return undefined;
 
     return logFullDate;
-  } catch (error) {
-    captureException("Failed to get last screen lock time", error);
+  } catch {
     return undefined;
   }
 }

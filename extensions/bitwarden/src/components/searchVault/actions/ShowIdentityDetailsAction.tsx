@@ -3,7 +3,6 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { IDENTITY_KEY_LABEL } from "~/constants/labels";
-import { captureException } from "~/utils/development";
 import { getIdentityDetailsCopyValue, getIdentityDetailsMarkdown, identityFormOrderSorter } from "~/utils/identity";
 import ShowDetailsScreen from "~/components/searchVault/actions/shared/ShowDetailsScreen";
 
@@ -27,12 +26,11 @@ function ShowIdentityDetailsAction() {
             sorter={identityFormOrderSorter}
             getMarkdown={getIdentityDetailsMarkdown}
             getCopyValue={getIdentityDetailsCopyValue}
-          />
+          />,
         );
       }
-    } catch (error) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to get identity details");
-      captureException("Failed to show identity details", error);
     }
   };
 

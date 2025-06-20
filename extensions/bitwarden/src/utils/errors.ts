@@ -89,12 +89,12 @@ export function tryExec<T, F>(fn: () => T, fallbackValue?: F): T | F | undefined
   }
 }
 
-export function getDisplayableErrorMessage(error: any) {
+export function getDisplayableErrorMessage(error: unknown) {
   if (error instanceof DisplayableError) return error.message;
   return undefined;
 }
 
-export const getErrorString = (error: any): string | undefined => {
+export const getErrorString = (error: unknown): string | undefined => {
   if (!error) return undefined;
   if (typeof error === "string") return error;
   if (error instanceof Error) {
@@ -126,7 +126,8 @@ export function tryCatch<T, E = Error>(fnOrPromise: (() => T) | Promise<T>): May
   if (typeof fnOrPromise === "function") {
     try {
       return Ok(fnOrPromise());
-    } catch (error: any) {
+    } catch (error: unknown) {
+      // @ts-expect-error: To keep the original code
       return Err(error);
     }
   }

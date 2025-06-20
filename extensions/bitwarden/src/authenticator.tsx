@@ -26,7 +26,6 @@ import VaultItemContext, { useSelectedVaultItem } from "~/components/searchVault
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import { showCopySuccessMessage } from "~/utils/clipboard";
-import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
 import { Err, Ok, Result, tryCatch } from "~/utils/errors";
@@ -68,7 +67,7 @@ function AuthenticatorList() {
         }
         return acc;
       },
-      { items: [], tabItems: [] }
+      { items: [], tabItems: [] },
     );
   }, [filteredItems, activeTabUrl]);
 
@@ -191,7 +190,7 @@ function ConfirmAction({ onConfirm }: { onConfirm: () => void }) {
 }
 
 function CopyCodeAction() {
-  const getCode = useGetCodeForAction("copy");
+  const getCode = useGetCodeForAction();
 
   const copy = async () => {
     const code = await getCode();
@@ -206,7 +205,7 @@ function CopyCodeAction() {
 
 function PasteCodeAction() {
   const frontmostAppName = useFrontmostApplicationName();
-  const getCode = useGetCodeForAction("paste");
+  const getCode = useGetCodeForAction();
 
   const paste = async () => {
     const code = await getCode();
@@ -224,7 +223,7 @@ function PasteCodeAction() {
   );
 }
 
-function useGetCodeForAction(action: "copy" | "paste") {
+function useGetCodeForAction() {
   const selectedItem = useSelectedVaultItem();
   const getVaultItem = useGetUpdatedVaultItem();
 
@@ -237,9 +236,8 @@ function useGetCodeForAction(action: "copy" | "paste") {
       if (error) throw error;
 
       return generator.generate();
-    } catch (error) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to get code");
-      captureException(`Failed to ${action} code`, error);
       return undefined;
     }
   };

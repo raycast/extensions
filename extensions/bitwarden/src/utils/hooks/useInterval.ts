@@ -7,6 +7,7 @@ type UseIntervalProps = {
 
 export const useInterval = (task: () => MaybePromise<void>, options?: UseIntervalProps) => {
   const { interval = 60 * 1000, skip = false } = options ?? {};
+  // @ts-expect-error: To keep the original code
   const timerRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {

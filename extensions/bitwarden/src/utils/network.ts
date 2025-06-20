@@ -1,7 +1,6 @@
 import { createWriteStream, unlink } from "fs";
 import http from "http";
 import https from "https";
-import { captureException } from "~/utils/development";
 import { getFileSha256 } from "~/utils/crypto";
 import { waitForFileAvailable } from "~/utils/fs";
 
@@ -82,17 +81,14 @@ export function download(url: string, path: string, options?: DownloadOptions): 
       });
 
       fileStream.on("error", (error) => {
-        captureException(`File stream error while downloading ${url}`, error);
         unlink(path, () => cleanupAndReject(error));
       });
 
       response.on("error", (error) => {
-        captureException(`Response error while downloading ${url}`, error);
         unlink(path, () => cleanupAndReject(error));
       });
 
       request.on("error", (error) => {
-        captureException(`Request error while downloading ${url}`, error);
         unlink(path, () => cleanupAndReject(error));
       });
 

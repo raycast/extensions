@@ -3,7 +3,6 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
-import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 
 function PasteTotpAction() {
@@ -23,10 +22,9 @@ function PasteTotpAction() {
 
       await toast?.hide();
       await Clipboard.paste(totp);
-    } catch (error) {
+    } catch {
       toast.message = "Failed to get TOTP";
       toast.style = Toast.Style.Failure;
-      captureException("Failed to paste TOTP", error);
     }
   };
 

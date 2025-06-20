@@ -11,6 +11,7 @@ export type ShowDetailsScreenProps<TDetails extends Constraint = Constraint> = {
   details: TDetails;
   label: string;
   itemName: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sorter?: (a: string | [string, any], b: string | [string, any]) => number;
   getMarkdown: (itemName: string, details: TDetails) => string;
   getCopyValue: (details: TDetails) => string;

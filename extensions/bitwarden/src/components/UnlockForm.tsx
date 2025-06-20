@@ -4,7 +4,6 @@ import { DebuggingBugReportingActionSection } from "~/components/actions";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { treatError } from "~/utils/debug";
-import { captureException } from "~/utils/development";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
 import { useLocalStorageItem } from "~/utils/localstorage";
 import { getLabelForTimeoutPreference } from "~/utils/preferences";
@@ -48,7 +47,6 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
           } = getUsefulError(error, password);
           await showToast(Toast.Style.Failure, "Failed to log in", displayableError);
           setUnlockError(treatedError);
-          captureException("Failed to log in", error);
           return;
         }
       }
@@ -60,7 +58,6 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
       const { displayableError = "Please check your credentials", treatedError } = getUsefulError(error, password);
       await showToast(Toast.Style.Failure, "Failed to unlock vault", displayableError);
       setUnlockError(treatedError);
-      captureException("Failed to unlock vault", error);
     } finally {
       setLoading(false);
     }

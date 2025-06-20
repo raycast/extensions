@@ -52,6 +52,7 @@ export function getCardDetailsCopyValue(card: Card) {
 
 const CARD_KEY_LABEL_KEYS = Object.keys(CARD_KEY_LABEL);
 /** sorts the fields according to the order they appear on bitwarden's web vault form */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function cardBitwardenPageFieldOrderSorter([a]: string | [string, any], [b]: string | [string, any]) {
   const aIndex = CARD_KEY_LABEL_KEYS.indexOf((Array.isArray(a) ? a[0] : a) as keyof Card);
   const bIndex = CARD_KEY_LABEL_KEYS.indexOf((Array.isArray(b) ? b[0] : b) as keyof Card);

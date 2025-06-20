@@ -9,7 +9,7 @@ export function faviconUrl(url: string): string {
   try {
     const domain = new URL(url).hostname;
     return `https://icons.bitwarden.net/${domain}/icon.png`;
-  } catch (err) {
+  } catch {
     return Icon.Globe;
   }
 }

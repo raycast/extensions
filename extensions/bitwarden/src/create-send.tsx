@@ -57,7 +57,7 @@ const getEditPayload = (send: Send, type: SendType, values: SendFormValues): Sen
 });
 
 const parseDateOptionString = (
-  dateString: string | null
+  dateString: string | null,
 ): { option: SendDateOption | undefined; customDate: Date | null } => {
   if (!dateString) return { option: undefined, customDate: null };
   // TODO: Figure out a reliable way of mapping dates to SendDateOption, right now editing selects custom date options

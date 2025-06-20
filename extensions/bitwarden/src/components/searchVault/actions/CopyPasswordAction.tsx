@@ -3,7 +3,6 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
-import { captureException } from "~/utils/development";
 import { showCopySuccessMessage } from "~/utils/clipboard";
 
 function CopyPasswordAction() {
@@ -19,9 +18,8 @@ function CopyPasswordAction() {
         await Clipboard.copy(password, { transient: getTransientCopyPreference("password") });
         await showCopySuccessMessage("Copied password to clipboard");
       }
-    } catch (error) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to get password");
-      captureException("Failed to copy password", error);
     }
   };
 

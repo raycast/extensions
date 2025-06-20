@@ -4,7 +4,6 @@ import { ITEM_TYPE_TO_ICON_MAP } from "~/constants/general";
 import { ITEM_TYPE_TO_LABEL } from "~/constants/labels";
 import { useFavoritesContext } from "~/context/favorites";
 import { Folder, Item, ItemType, Reprompt } from "~/types/vault";
-import { captureException } from "~/utils/development";
 
 type ListItemAccessory = NonNullable<List.Item.Props["accessories"]>[number];
 export const ITEM_TYPE_TO_ACCESSORY_MAP: Record<ItemType, ListItemAccessory> = {
@@ -64,8 +63,7 @@ export function useItemAccessories(item: Item, folder: Folder | undefined) {
       accessories.push(ITEM_TYPE_TO_ACCESSORY_MAP[item.type]);
 
       return accessories;
-    } catch (error) {
-      captureException("Failed to get item accessories", error);
+    } catch {
       return [];
     }
   }, [favoriteOrder, item.favorite, item.reprompt, item.type, folder?.id, folder?.name]);

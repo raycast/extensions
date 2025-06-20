@@ -23,7 +23,7 @@ export const useSessionReducer = () => {
   return useReducer((state: SessionState, action: SessionReducerActions): SessionState => {
     switch (action.type) {
       case "loadState": {
-        const { type: _, ...actionPayload } = action;
+        const { ...actionPayload } = action;
         return { ...state, ...actionPayload };
       }
       case "lock": {

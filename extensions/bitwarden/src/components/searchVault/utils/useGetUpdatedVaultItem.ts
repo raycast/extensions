@@ -22,14 +22,14 @@ function useGetUpdatedVaultItem() {
   async function getItem<TResult = Item>(
     possiblyCachedItem: Item,
     selector = ((item) => item) as (item: Item) => TResult,
-    loadingMessage?: string
+    loadingMessage?: string,
   ): Promise<TResult> {
     const currentValue = selector(possiblyCachedItem);
     if (!valueHasSensitiveValuePlaceholder(currentValue)) return currentValue;
 
     const toast = loadingMessage ? await showToast(Toast.Style.Animated, loadingMessage) : undefined;
     const value = selector(
-      await Promise.race([waitForItemLoaded(possiblyCachedItem.id), getItemFromVault(possiblyCachedItem.id)])
+      await Promise.race([waitForItemLoaded(possiblyCachedItem.id), getItemFromVault(possiblyCachedItem.id)]),
     );
     await toast?.hide();
 
@@ -39,12 +39,13 @@ function useGetUpdatedVaultItem() {
   return getItem;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function valueHasSensitiveValuePlaceholder(value: any) {
   try {
     if (typeof value === "object") return JSON.stringify(value).includes(SENSITIVE_VALUE_PLACEHOLDER);
     if (typeof value === "string") return value === SENSITIVE_VALUE_PLACEHOLDER;
     return false;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

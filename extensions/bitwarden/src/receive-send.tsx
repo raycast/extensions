@@ -19,7 +19,6 @@ import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
 import { ReceivedFileSend, ReceivedSend, SendType } from "~/types/send";
 import { Cache } from "~/utils/cache";
-import { captureException } from "~/utils/development";
 import { SendInvalidPasswordError, SendNeedsPasswordError } from "~/utils/errors";
 import useOnceEffect from "~/utils/hooks/useOnceEffect";
 
@@ -76,7 +75,7 @@ const stateReducer = (state: State, action: State): State => {
 
 const withOnChangeEffect = <T extends Form.Value>(
   itemProps: Partial<Form.ItemProps<T>> & { id: string },
-  onChange: (value: T) => void
+  onChange: (value: T) => void,
 ) => {
   return {
     ...itemProps,
@@ -153,7 +152,6 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to receive Send";
-        captureException("Failed to receive Send", error);
       }
     }
   };
@@ -169,10 +167,9 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
       toast.style = Toast.Style.Success;
       await showInFinder(savePath);
       await closeMainWindow();
-    } catch (error) {
+    } catch {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to download file";
-      captureException("Failed to download file", error);
     }
   };
 

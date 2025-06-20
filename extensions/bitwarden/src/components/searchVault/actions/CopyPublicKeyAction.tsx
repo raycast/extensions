@@ -3,7 +3,6 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { showCopySuccessMessage } from "~/utils/clipboard";
-import { captureException } from "~/utils/development";
 import { getTransientCopyPreference } from "~/utils/preferences";
 
 function CopyPublicKeyAction() {
@@ -17,15 +16,14 @@ function CopyPublicKeyAction() {
       const publicKey = await getUpdatedVaultItem(
         selectedItem,
         (item) => item.sshKey?.publicKey,
-        "Getting public key..."
+        "Getting public key...",
       );
       if (publicKey) {
         await Clipboard.copy(publicKey, { transient: getTransientCopyPreference("other") });
         await showCopySuccessMessage("Copied public key to clipboard");
       }
-    } catch (error) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to get public key");
-      captureException("Failed to copy public key", error);
     }
   };
 

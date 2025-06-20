@@ -18,7 +18,7 @@ export function VaultActionsSection() {
     try {
       await bitwarden.logout();
       await toast.hide();
-    } catch (error) {
+    } catch {
       toast.title = "Failed to logout";
       toast.style = Toast.Style.Failure;
     }

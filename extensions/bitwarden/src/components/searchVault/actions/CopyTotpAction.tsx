@@ -4,7 +4,6 @@ import { useBitwarden } from "~/context/bitwarden";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
-import { captureException } from "~/utils/development";
 import { showCopySuccessMessage } from "~/utils/clipboard";
 
 function CopyTotpAction() {
@@ -24,10 +23,9 @@ function CopyTotpAction() {
       await toast?.hide();
       await Clipboard.copy(totp, { transient: getTransientCopyPreference("other") });
       await showCopySuccessMessage("Copied code to clipboard");
-    } catch (error) {
+    } catch {
       toast.message = "Failed to get TOTP";
       toast.style = Toast.Style.Failure;
-      captureException("Failed to copy TOTP", error);
     }
   };
 

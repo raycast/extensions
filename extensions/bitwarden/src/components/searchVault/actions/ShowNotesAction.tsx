@@ -3,7 +3,6 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { showCopySuccessMessage } from "~/utils/clipboard";
-import { captureException } from "~/utils/development";
 import { getTransientCopyPreference } from "~/utils/preferences";
 
 function ShowNotesAction() {
@@ -17,9 +16,8 @@ function ShowNotesAction() {
     try {
       const notes = await getUpdatedVaultItem(selectedItem, (item) => item.notes, "Getting notes...");
       if (notes) push(<DetailsScreen itemName={selectedItem.name} notes={notes} />);
-    } catch (error) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to get notes");
-      captureException("Failed to show notes", error);
     }
   };
 

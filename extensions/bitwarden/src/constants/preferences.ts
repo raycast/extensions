@@ -13,7 +13,10 @@ const VAULT_TIMEOUT_OPTIONS = {
   SYSTEM_SLEEP: "-3",
 } as const satisfies Record<string, Preferences["repromptIgnoreDuration"]>;
 
-export const VAULT_TIMEOUT = Object.entries(VAULT_TIMEOUT_OPTIONS).reduce((acc, [key, value]) => {
-  acc[key as keyof typeof VAULT_TIMEOUT_OPTIONS] = parseInt(value);
-  return acc;
-}, {} as Record<keyof typeof VAULT_TIMEOUT_OPTIONS, number>);
+export const VAULT_TIMEOUT = Object.entries(VAULT_TIMEOUT_OPTIONS).reduce(
+  (acc, [key, value]) => {
+    acc[key as keyof typeof VAULT_TIMEOUT_OPTIONS] = parseInt(value);
+    return acc;
+  },
+  {} as Record<keyof typeof VAULT_TIMEOUT_OPTIONS, number>,
+);

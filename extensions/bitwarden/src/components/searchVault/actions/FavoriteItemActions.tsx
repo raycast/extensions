@@ -1,7 +1,6 @@
 import { Action, Icon, Toast, showToast } from "@raycast/api";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { useFavoritesContext } from "~/context/favorites";
-import { captureException } from "~/utils/development";
 
 function FavoriteItemActions() {
   const selectedItem = useSelectedVaultItem();
@@ -13,9 +12,8 @@ function FavoriteItemActions() {
   const handleToggleFavorite = async () => {
     try {
       await toggleFavorite(selectedItem);
-    } catch (error) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to toggle favorite ☹️");
-      captureException("Failed to toggle favorite", error);
     }
   };
 
@@ -25,7 +23,7 @@ function FavoriteItemActions() {
     <>
       {!isBitwardenFavorite && (
         <Action
-          title={isLocalFavorite ? "Remove Favorite" : "Mark As Favorite"}
+          title={isLocalFavorite ? "Remove Favorite" : "Mark as Favorite"}
           onAction={handleToggleFavorite}
           icon={isLocalFavorite ? Icon.StarDisabled : Icon.Star}
           shortcut={{ key: "f", modifiers: ["cmd"] }}
@@ -34,7 +32,7 @@ function FavoriteItemActions() {
       {(isBitwardenFavorite || isLocalFavorite) && (
         <>
           <Action
-            title="Move Favorite Up"
+            title="Move Favorite up"
             onAction={handleMoveFavorite("up")}
             icon={Icon.ArrowUpCircleFilled}
             shortcut={{ key: "arrowUp", modifiers: ["cmd", "shift"] }}

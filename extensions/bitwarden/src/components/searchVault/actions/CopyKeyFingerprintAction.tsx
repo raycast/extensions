@@ -3,7 +3,6 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { showCopySuccessMessage } from "~/utils/clipboard";
-import { captureException } from "~/utils/development";
 import { getTransientCopyPreference } from "~/utils/preferences";
 
 function CopyKeyFingerprintAction() {
@@ -17,15 +16,14 @@ function CopyKeyFingerprintAction() {
       const keyFingerprint = await getUpdatedVaultItem(
         selectedItem,
         (item) => item.sshKey?.keyFingerprint,
-        "Getting key fingerprint..."
+        "Getting key fingerprint...",
       );
       if (keyFingerprint) {
         await Clipboard.copy(keyFingerprint, { transient: getTransientCopyPreference("other") });
         await showCopySuccessMessage("Copied key fingerprint to clipboard");
       }
-    } catch (error) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to get key fingerprint");
-      captureException("Failed to copy key fingerprint", error);
     }
   };
 

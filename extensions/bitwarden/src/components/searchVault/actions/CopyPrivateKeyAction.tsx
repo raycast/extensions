@@ -3,7 +3,6 @@ import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { showCopySuccessMessage } from "~/utils/clipboard";
-import { captureException } from "~/utils/development";
 import { getTransientCopyPreference } from "~/utils/preferences";
 
 function CopyPrivateKeyAction() {
@@ -17,15 +16,14 @@ function CopyPrivateKeyAction() {
       const privateKey = await getUpdatedVaultItem(
         selectedItem,
         (item) => item.sshKey?.privateKey,
-        "Getting private key..."
+        "Getting private key...",
       );
       if (privateKey) {
         await Clipboard.copy(privateKey, { transient: getTransientCopyPreference("other") });
         await showCopySuccessMessage("Copied private key to clipboard");
       }
-    } catch (error) {
+    } catch {
       await showToast(Toast.Style.Failure, "Failed to get private key");
-      captureException("Failed to copy private key", error);
     }
   };
 
