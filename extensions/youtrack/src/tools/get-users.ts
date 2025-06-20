@@ -11,7 +11,7 @@ type Input = {
 };
 
 function findUserByNameOrLoginOrEmail(users: User[], input: string): User | undefined {
-  return users.find((user) => user.fullName === input || user.login === input || user.email === input);
+  return users.find(({ fullName, login, email }) => fullName === input || login === input || email === input);
 }
 
 /**
