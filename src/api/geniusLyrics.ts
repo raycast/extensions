@@ -1,5 +1,21 @@
 import fetch from "node-fetch";
 
+// Rate limiting: track last request time to prevent API blocks
+let lastRequestTime = 0;
+const MIN_REQUEST_INTERVAL = 1000; // 1 second between requests
+
+async function rateLimitedDelay(): Promise<void> {
+  const now = Date.now();
+  const timeSinceLastRequest = now - lastRequestTime;
+
+  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+    const delay = MIN_REQUEST_INTERVAL - timeSinceLastRequest;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+
+  lastRequestTime = Date.now();
+}
+
 export interface GeniusLyricsResult {
   lyrics: string | null;
   url?: string;
@@ -10,6 +26,8 @@ export interface GeniusLyricsResult {
  */
 export async function searchGeniusLyrics(songTitle: string, artistName: string): Promise<GeniusLyricsResult> {
   try {
+    // Apply rate limiting to prevent API blocks
+    await rateLimitedDelay();
     // Clean search terms
     const cleanTitle = songTitle.replace(/[([].+?[)\]]/g, "").trim();
     const cleanArtist = artistName.replace(/[([].+?[)\]]/g, "").trim();
@@ -102,6 +120,8 @@ export async function searchGeniusLyrics(songTitle: string, artistName: string):
 
 async function extractLyricsFromPage(songUrl: string): Promise<GeniusLyricsResult> {
   try {
+    // Apply rate limiting for page fetches too
+    await rateLimitedDelay();
     const lyricsResponse = await fetch(songUrl, {
       headers: {
         "User-Agent":

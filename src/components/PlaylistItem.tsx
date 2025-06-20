@@ -6,7 +6,7 @@ import { PlaylistActionPanel } from "./PlaylistActionPanel";
 type PlaylistItemProps = {
   type: "grid" | "list";
   playlist: SimplifiedPlaylistObject;
-  actions?: React.ReactNode;
+  actions?: React.JSX.Element;
 };
 
 export default function PlaylistItem({ type, playlist, actions }: PlaylistItemProps) {
@@ -26,8 +26,7 @@ export default function PlaylistItem({ type, playlist, actions }: PlaylistItemPr
       subtitle={subtitle}
       content={icon}
       accessories={[{ text: `${playlist?.tracks?.total} songs` }]}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      actions={actions as any}
+      actions={actions}
     />
   );
 }

@@ -5,13 +5,12 @@
     "lib": ["ES2023"],
     "module": "commonjs",
     "target": "ES2022",
-    "strict": false,
+    "strict": true,
+    "skipLibCheck": true,
     "isolatedModules": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true,
-    "noEmit": false
+    "resolveJsonModule": true
   }
 }

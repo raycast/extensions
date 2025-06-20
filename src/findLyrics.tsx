@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
 import { TrackObject } from "./helpers/spotify.api";
@@ -24,7 +25,12 @@ export default function FindLyricsCommand() {
         // Get currently playing track
         const currentlyPlayingData = await getCurrentlyPlaying();
 
-        if (!currentlyPlayingData || !currentlyPlayingData.item) {
+        if (!currentlyPlayingData) {
+          setError("Unable to get playback information from Spotify");
+          return;
+        }
+
+        if (!currentlyPlayingData.item) {
           setError("Nothing is currently playing on Spotify");
           return;
         }
@@ -56,20 +62,23 @@ export default function FindLyricsCommand() {
         // Search for lyrics using our Genius API
         const result = await searchGeniusLyrics(songTitle, artistName);
 
+        if (!result) {
+          setError("Failed to search for lyrics - please try again");
+          return;
+        }
+
         if (result.lyrics && result.lyrics.trim() !== "") {
           setLyrics(result.lyrics);
         } else {
-          setError("Lyrics not found on Genius for this song");
+          setError(
+            `Lyrics not found on Genius for "${songTitle}" by ${artistName}. Try searching for a different version or check the spelling.`,
+          );
         }
       } catch (err: unknown) {
         console.error("Error fetching lyrics:", err);
         const errorMessage = err instanceof Error ? err.message : "Failed to fetch lyrics. Please try again.";
         setError(errorMessage);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: errorMessage,
-        });
+        showFailureToast(err, { title: "Error" });
       } finally {
         setIsLoading(false);
       }

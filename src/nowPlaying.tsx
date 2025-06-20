@@ -88,8 +88,8 @@ function NowPlayingCommand() {
 
   let title = "";
   let markdown;
-  let metadata: React.ReactNode = null;
-  let trackOrEpisodeActions: React.ReactNode = null;
+  let metadata: React.JSX.Element | null = null;
+  let trackOrEpisodeActions: React.JSX.Element | null = null;
 
   if (isTrack) {
     const { album, artists, id: trackId, duration_ms } = item as TrackObject;
@@ -277,15 +277,13 @@ ${description}
   return (
     <Detail
       markdown={markdown}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      metadata={metadata as any}
+      metadata={metadata}
       isLoading={currentlyPlayingIsLoading || playbackStateIsLoading}
       actions={
         <ActionPanel>
           {isPlaying && <PauseAction onPause={() => playbackStateRevalidate()} />}
           {!isPlaying && <PlayAction onPlay={() => playbackStateRevalidate()} />}
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {trackOrEpisodeActions as any}
+          {trackOrEpisodeActions}
           {myPlaylistsData?.items && meData && uri && (
             <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />
           )}
