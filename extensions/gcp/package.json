@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gcp",
+  "title": "Google Cloud Platform",
+  "description": "Browse and manage Google Cloud Platform resources",
+  "icon": "extension-icon.png",
+  "author": "adhn3y",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "compute-instances",
+      "title": "Browse Compute Instances",
+      "subtitle": "Google Cloud Platform",
+      "description": "View and manage Google Compute Engine instances",
+      "mode": "view",
+      "icon": "command-icons/compute-engine.png"
+    },
+    {
+      "name": "cloud-run-services",
+      "title": "Browse Cloud Run Services",
+      "subtitle": "Google Cloud Platform",
+      "description": "View and manage Google Cloud Run services",
+      "mode": "view",
+      "icon": "command-icons/cloud-run.png"
+    },
+    {
+      "name": "storage-buckets",
+      "title": "Browse Storage Buckets",
+      "subtitle": "Google Cloud Platform",
+      "description": "View and manage Google Cloud Storage buckets",
+      "mode": "view",
+      "icon": "command-icons/cloud-storage.png"
+    },
+    {
+      "name": "cloud-functions",
+      "title": "Browse Cloud Functions",
+      "subtitle": "Google Cloud Platform",
+      "description": "View and manage Google Cloud Functions",
+      "mode": "view",
+      "icon": "command-icons/cloud-functions.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "projectId",
+      "type": "textfield",
+      "required": true,
+      "title": "GCP Project ID",
+      "description": "Your Google Cloud Project ID",
+      "placeholder": "my-gcp-project"
+    },
+    {
+      "name": "serviceAccountPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Service Account Key Path",
+      "description": "Path to your service account JSON key file (optional if using ADC)",
+      "placeholder": "/path/to/service-account.json"
+    }
+  ],
+  "dependencies": {
+    "@google-cloud/compute": "^4.7.0",
+    "@google-cloud/functions": "^3.4.0",
+    "@google-cloud/run": "^1.1.0",
+    "@google-cloud/storage": "^7.13.0",
+    "@raycast/api": "^1.99.2",
+    "@raycast/utils": "^1.17.0",
+    "google-auth-library": "^9.14.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
