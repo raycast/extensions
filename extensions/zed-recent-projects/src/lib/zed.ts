@@ -4,11 +4,13 @@ export type ZedBundleId = "dev.zed.Zed" | "dev.zed.Zed-Preview";
 const ZedBundleIdBuildMapping: Record<ZedBuild, ZedBundleId> = {
   Zed: "dev.zed.Zed",
   "Zed Preview": "dev.zed.Zed-Preview",
+  "Zed Dev": "dev.zed.Zed",
 };
 
 const ZedDbNameMapping: Record<ZedBuild, string> = {
   Zed: "0-stable",
   "Zed Preview": "0-preview",
+  "Zed Dev": "0-dev",
 };
 
 export function getZedBundleId(build: ZedBuild): ZedBundleId {
