@@ -11,12 +11,6 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-try {
-  // your redirect tracing logic
-} catch (error) {
-  showFailureToast(error, { title: "Failed to trace redirects" });
-}
-
 interface Preferences {
   maxRedirects: string;
   timeout: string;
@@ -231,7 +225,7 @@ export default function TraceRedirects() {
     try {
       const urlObj = new URL(url);
       return {
-        display: `${urlObj.hostname}${urlObj.pathname}${urlObj.search ? "?" + urlObj.search.substring(1, 20) + (urlObj.search.length > 21 ? "..." : "") : ""}`,
+        display: `${urlObj.protocol}//${urlObj.hostname}${urlObj.pathname}${urlObj.search ? "?" + urlObj.search.substring(1, 20) + (urlObj.search.length > 21 ? "..." : "") : ""}`,
         full: url,
       };
     } catch {
@@ -480,11 +474,7 @@ export default function TraceRedirects() {
           message: `Found ${result.totalRedirects} redirects`,
         });
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error tracing clipboard URL",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        showFailureToast(error, { title: "Error tracing clipboard URL" });
       } finally {
         setIsLoading(false);
       }
@@ -504,11 +494,7 @@ export default function TraceRedirects() {
         const result = await followRedirects(searchText);
         setRedirectChain(result);
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error tracing redirects",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
+        showFailureToast(error, { title: "Error tracing redirects" });
       } finally {
         setIsLoading(false);
       }
