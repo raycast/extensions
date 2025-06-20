@@ -8,7 +8,8 @@
   "contributors": [
     "AmmarCodes",
     "thewinger",
-    "LightQuantum"
+    "LightQuantum",
+    "wohfab"
   ],
   "categories": [
     "Productivity",
@@ -20,11 +21,11 @@
     {
       "name": "configPath",
       "type": "textfield",
-      "placeholder": "path/to/config",
-      "default": "~/.aerospace.toml",
-      "title": "Config File",
+      "placeholder": "Leave empty to use AeroSpace's default discovery",
+      "default": "",
+      "title": "Custom Config File Path",
       "required": false,
-      "description": "Specify the config file path for aerospace"
+      "description": "Override AeroSpace's default config discovery. Leave empty to use native discovery: ~/.aerospace.toml, then ${XDG_CONFIG_HOME}/aerospace/aerospace.toml"
     }
   ],
   "commands": [
