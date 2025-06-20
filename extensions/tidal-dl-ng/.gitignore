@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Production
+dist/
+
+# Misc
+.DS_Store
+*.log
+npm-debug.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Raycast
+.build/

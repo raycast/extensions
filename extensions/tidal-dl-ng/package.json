@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tidal-dl-ng",
+  "title": "Tidal Downloader",
+  "description": "Download Tidal tracks, albums, and playlists using tidal-dl-ng locally or on remote servers via SSH",
+  "icon": "icon.png",
+  "author": "user",
+  "categories": [
+    "Media",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dl",
+      "title": "Download from URL",
+      "subtitle": "Tidal Downloader",
+      "description": "Download a Tidal track, album, or playlist from URL",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Tidal URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "dl-favorites",
+      "title": "Download Favorites",
+      "subtitle": "Tidal Downloader",
+      "description": "Download your favorite tracks, albums, or playlists",
+      "mode": "view"
+    },
+    {
+      "name": "config",
+      "title": "Configuration",
+      "subtitle": "Tidal Downloader",
+      "description": "View and edit tidal-dl-ng configuration",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "executionMode",
+      "type": "dropdown",
+      "required": true,
+      "title": "Execution Mode",
+      "description": "Run tidal-dl-ng locally or on a remote server via SSH",
+      "default": "local",
+      "data": [
+        {
+          "title": "Local",
+          "value": "local"
+        },
+        {
+          "title": "Remote (SSH)",
+          "value": "remote"
+        }
+      ]
+    },
+    {
+      "name": "remoteHost",
+      "type": "textfield",
+      "required": false,
+      "title": "Remote Host",
+      "description": "SSH server hostname or IP address",
+      "placeholder": "192.168.77.247"
+    },
+    {
+      "name": "remotePort",
+      "type": "textfield",
+      "required": false,
+      "title": "SSH Port",
+      "description": "SSH server port",
+      "default": "22",
+      "placeholder": "22"
+    },
+    {
+      "name": "remoteUser",
+      "type": "textfield",
+      "required": false,
+      "title": "SSH Username",
+      "description": "Username for SSH connection",
+      "placeholder": "username"
+    },
+    {
+      "name": "sshKeyPath",
+      "type": "file",
+      "required": false,
+      "title": "SSH Key Path",
+      "description": "Path to SSH private key file",
+      "placeholder": "~/.ssh/id_rsa"
+    },
+    {
+      "name": "sshPassword",
+      "type": "password",
+      "required": false,
+      "title": "SSH Password",
+      "description": "Password for SSH connection (if not using key)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.12",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.9.4",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
