@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flashlang",
+  "title": "Flashlang",
+  "description": "Learn a language with AI model and make vocabulary you searched into flash cards.",
+  "icon": "flashlang-brand-icon.png",
+  "author": "moojing",
+  "categories": [
+    "Communication",
+    "Productivity",
+    "Applications",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "translate-it-for-me",
+      "title": "Translate It for Me",
+      "description": "Translate text you input and view your translation history",
+      "mode": "view",
+      "alias": "flashlang"
+    },
+    {
+      "name": "language-setting",
+      "title": "Language Setting",
+      "description": "Set your learning language and native language",
+      "mode": "view"
+    },
+    {
+      "name": "review-flashcards",
+      "title": "Review Flashcards",
+      "description": "Review your flashcards",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "translate-the-vocabulary",
+      "title": "Translate the Vocabulary",
+      "description": "Translate the vocabulary you input based on the language setting you've set."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "source",
+      "type": "dropdown",
+      "title": "Preferred Source",
+      "description": "Choose a preferred text source. If no text is selected, clipboard is used.",
+      "data": [
+        {
+          "title": "Selected",
+          "value": "selected"
+        },
+        {
+          "title": "Clipboard",
+          "value": "clipboard"
+        }
+      ],
+      "default": "selected",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@cospired/i18n-iso-languages": "^4.2.0",
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0",
+    "@types/fuzzy-search": "^2.1.5",
+    "fuzzy-search": "^3.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.12",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
