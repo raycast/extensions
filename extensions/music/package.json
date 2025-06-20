@@ -50,6 +50,13 @@
           "value": "25"
         }
       ]
+    },
+    {
+      "type": "checkbox",
+      "required": false,
+      "name": "disableHUD",
+      "description": "Disable HUD notifications",
+      "label": "Disable HUD"
     }
   ],
   "commands": [
