@@ -1,0 +1,140 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "motion",
+  "title": "Motion",
+  "description": "Manage Motion tasks directly from Raycast with powerful commands for capturing, searching, and organizing your work",
+  "icon": "motion-extension-icon.png",
+  "author": "edmundmiller",
+  "license": "MIT",
+  "keywords": [
+    "motion",
+    "tasks",
+    "productivity",
+    "project management",
+    "calendar",
+    "scheduling",
+    "task management",
+    "workflow"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "search-project",
+      "title": "Search Project",
+      "description": "Search through Motion projects",
+      "mode": "view"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Search for Motion tasks",
+      "mode": "view"
+    },
+    {
+      "name": "capture-motion-task",
+      "title": "Capture Motion Task",
+      "description": "Captures a Motion Task like option+space but better",
+      "mode": "view"
+    },
+    {
+      "name": "list-workspaces-projects",
+      "title": "List Workspaces & Projects",
+      "description": "View all workspaces and projects with their IDs for setting up preferences",
+      "mode": "view"
+    },
+    {
+      "name": "quick-task-status",
+      "title": "Quick Task Status",
+      "description": "Quickly update task statuses with keyboard shortcuts",
+      "mode": "view"
+    },
+    {
+      "name": "new-tasks-today",
+      "title": "New Tasks for Today",
+      "description": "View all tasks created today",
+      "mode": "view"
+    }
+  ],
+  "tools": [],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Motion API Key",
+      "description": "Your Motion API key from https://app.usemotion.com/settings/api"
+    },
+    {
+      "name": "defaultWorkspaceId",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Workspace ID",
+      "description": "Default workspace ID for new tasks (optional - will use first workspace if not set)"
+    },
+    {
+      "name": "defaultProjectId",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Project ID",
+      "description": "Default project ID for new tasks (optional)"
+    },
+    {
+      "name": "defaultPriority",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Priority",
+      "description": "Default priority for new tasks",
+      "default": "MEDIUM",
+      "data": [
+        {
+          "title": "🔴 ASAP",
+          "value": "ASAP"
+        },
+        {
+          "title": "🟠 High",
+          "value": "HIGH"
+        },
+        {
+          "title": "🟡 Medium",
+          "value": "MEDIUM"
+        },
+        {
+          "title": "🔵 Low",
+          "value": "LOW"
+        }
+      ]
+    },
+    {
+      "name": "defaultDuration",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Duration (minutes)",
+      "description": "Default duration for new tasks in minutes (e.g., 30, 60, 120)",
+      "placeholder": "30"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "3.5.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
