@@ -1,5 +1,9 @@
 # Video Downloader Changelog
 
+## [Features] - {PR_MERGE_DATE}
+
+- Implement a feature to import browser cookies, enabling the download of age-restricted YouTube videos.
+
 ## [Chore] - 2025-03-10
 
 - Rename extension folder and handle to `video-downloader`
