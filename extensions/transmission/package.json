@@ -14,7 +14,8 @@
   "contributors": [
     "danpalmer",
     "j3lte",
-    "zhangjiepro"
+    "zhangjiepro",
+    "moonkyu_song"
   ],
   "commands": [
     {
@@ -170,7 +171,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.71.3",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.14.0",
     "bitfield": "^4.2.0",
     "bytes": "^3.1.2",
@@ -182,23 +183,23 @@
     "pretty-bytes": "^6.1.1",
     "ramda": "^0.29.1",
     "raycast-toolkit": "^1.0.6",
-    "react-dom": "^18.2.0",
     "react-use": "^17.5.0",
-    "swr": "^1.2.2",
+    "swr": "^2.3.3",
     "transmission-promise": "^1.1.7",
     "ts-enum-util": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/expand-tilde": "^2.0.2",
-    "@types/node": "^20.8.10",
+    "@types/node": "^22.13.10",
     "@types/ramda": "^0.29.12",
-    "@types/react": "^18.2.27",
-    "@types/react-dom": "^18.2.18",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
-    "react": "^18.2.0",
-    "react-devtools": "^4.28.0",
+    "react": "^19.0.0",
+    "react-devtools": "^6.1.1",
+    "react-dom": "^19.0.0",
     "typescript": "^5.4.2"
   },
   "scripts": {
