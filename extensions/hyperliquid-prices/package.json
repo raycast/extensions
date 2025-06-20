@@ -1,0 +1,44 @@
+{
+  "name": "hyperliquid-prices",
+  "title": "Hyperliquid Prices",
+  "displayName": "Hyperliquid Prices",
+  "description": "Check HYPE and BTC prices from Hyperliquid API",
+  "icon": "assets/command-icon.png",
+  "version": "1.0.0",
+  "author": "erlin",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-prices",
+      "title": "Hype & Btc Price",
+      "description": "Fetch Hyperliquid mids",
+      "mode": "view",
+      "entrypoint": "src/check-prices.tsx",
+      "disableChildrenOnLoad": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "5.3.3"
+  },
+  "engines": {
+    "node": ">=18",
+    "npm": ">=7"
+  }
+} 
