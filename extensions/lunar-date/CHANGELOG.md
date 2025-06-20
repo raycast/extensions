@@ -1,6 +1,6 @@
 # Lunar Date Changelog
 
-## [Initial Release] - 2025-01-09
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 
