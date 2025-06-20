@@ -1,5 +1,10 @@
 # Google Gemini Changelog
 
+## [Add Safety Settings] - {PR_MERGE_DATE}
+
+- 🛡️ Now users can set their safety filtering options as they need.
+- 🐛 Fix a bug in AI chat
+
 ## [New Model] - 2025-05-14
 
 - 🆕 New Model: Gemini 2.5 Pro Preview 0506
