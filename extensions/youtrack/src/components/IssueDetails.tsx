@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Detail, Icon, Image } from "@raycast/api";
 import type { Command, CommandSuggestions, Comment, IssueExtended, WorkItem } from "../interfaces";
-import { isURL, addMarkdownImages } from "../utils";
+import { addMarkdownImages } from "../utils";
 import { AddWork } from "../work-item";
 import { ApplyCommand } from "../apply-command";
 import { CommentDetails } from "./CommentDetails";
@@ -54,9 +54,7 @@ export function IssueDetails(props: {
               title="Assignee"
               text={issue.assignee?.fullName}
               icon={{
-                source: isURL(issue.assignee.avatarUrl ?? "")
-                  ? issue.assignee.avatarUrl
-                  : `${props.instance}${issue.assignee.avatarUrl}`,
+                source: issue.assignee.avatarUrl,
                 mask: Image.Mask.RoundedRectangle,
               }}
             />
@@ -66,9 +64,7 @@ export function IssueDetails(props: {
               title="Author"
               text={issue.reporter?.fullName}
               icon={{
-                source: isURL(issue.reporter.avatarUrl ?? "")
-                  ? issue.reporter.avatarUrl
-                  : `${props.instance}${issue.reporter.avatarUrl}`,
+                source: issue.reporter.avatarUrl,
                 mask: Image.Mask.RoundedRectangle,
               }}
             />
@@ -79,9 +75,7 @@ export function IssueDetails(props: {
               title="Updater"
               text={issue.updater?.fullName}
               icon={{
-                source: isURL(issue.updater.avatarUrl ?? "")
-                  ? issue.updater.avatarUrl
-                  : `${props.instance}${issue.updater.avatarUrl}`,
+                source: issue.updater.avatarUrl,
                 mask: Image.Mask.RoundedRectangle,
               }}
             />
