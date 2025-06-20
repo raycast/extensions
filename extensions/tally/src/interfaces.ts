@@ -24,6 +24,32 @@ export interface Workspace {
     invites: Invite[];
 }
 
+interface Question {
+    id: string;
+    title: string;
+}
+type Value = string | number | boolean | object;
+interface TallyResponse {
+    questionId: string;
+    answer: Value | Value[];
+}
+interface Submission {
+    id: string;
+    responses: TallyResponse[];
+}
+export interface SubmissionResult {
+    page: number;
+  limit: number;
+  hasMore: boolean;
+    totalNumberOfSubmissionsPerFilter: {
+    all: number;
+    completed: number;
+    partial: number;
+  }
+  questions: Question[];
+  submissions: Submission[];
+}
+
 export interface PaginatedResult<T> {
     items: T[];
     page: number;
