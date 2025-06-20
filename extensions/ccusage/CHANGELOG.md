@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [v1.0.2] - {PR_MERGE_DATE}
+## [v1.0.2] - 2025-06-20
 
 - Cleaned up unused dependencies and exports detection
 - Improved development workflow efficiency
