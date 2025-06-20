@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Fix] - 2025-06-20
+## [Fix] - {PR_MERGE_DATE}
 
 - Fixed proxy for doubleWayTranslate
 
