@@ -93,6 +93,8 @@ export interface EnhancedGenerationConfig extends GenerationConfig {
   processOnlySelectedFiles?: boolean;
   /** List of specific file paths to process (when processOnlySelectedFiles is true) */
   selectedFilePaths?: string[];
+  /** List of custom ignore patterns */
+  additionalIgnorePatterns?: string;
 }
 
 /**

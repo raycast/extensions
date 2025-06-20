@@ -27,9 +27,14 @@ import { Stats } from "fs";
  */
 async function loadIgnoreFilter(
   projectRoot: string,
+  additionalIgnorePatterns?: string[],
 ): Promise<{ filter: ReturnType<typeof ignore>; gitignoreUsed: boolean }> {
   // Start with hardcoded base ignore patterns
   const ig = ignore().add(HARDCODED_BASE_IGNORE_PATTERNS as string[]);
+
+  if (additionalIgnorePatterns) {
+    ig.add(additionalIgnorePatterns as string[]);
+  }
 
   const gitignorePath = path.join(projectRoot, ".gitignore");
   let gitignoreUsed = false;
@@ -317,8 +322,14 @@ export async function generateProjectCodeString(
   config: FileProcessorConfig,
   onProgress?: (progress: { message: string; details?: string }) => void,
 ): Promise<string> {
-  const { projectDirectory, maxFileSizeBytes, includeAiInstructions, processOnlySelectedFiles, selectedFilePaths } =
-    config;
+  const {
+    projectDirectory,
+    maxFileSizeBytes,
+    additionalIgnorePatterns,
+    includeAiInstructions,
+    processOnlySelectedFiles,
+    selectedFilePaths,
+  } = config;
   const projectRoot = path.resolve(projectDirectory);
 
   const progressCallback = (message: string, details?: string) => {
@@ -335,7 +346,10 @@ export async function generateProjectCodeString(
   } else {
     // Process entire directory structure
     progressCallback("Loading ignore rules...");
-    const ignoreResult = await loadIgnoreFilter(projectRoot);
+    const ignoreResult = await loadIgnoreFilter(
+      projectRoot,
+      additionalIgnorePatterns?.split(",").map((pattern) => pattern.trim()),
+    );
     gitignoreUsed = ignoreResult.gitignoreUsed;
 
     progressCallback("Scanning project files...");

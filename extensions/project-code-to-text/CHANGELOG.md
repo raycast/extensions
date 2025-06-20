@@ -1,5 +1,10 @@
 # Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+### Added
+- An additional field for ignore patterns has been added to the form. Users can specify extra ignore patterns, separated by commas.
+
 ## [Update] - 2025-06-10
 
 ### Added
