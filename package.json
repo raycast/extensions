@@ -37,7 +37,8 @@
     "viethung0823",
     "eyal_levy",
     "jonasengelmann",
-    "vmrjnvc"
+    "vmrjnvc",
+    "karthik_manikandan"
   ],
   "pastContributors": [
     "bkeys818"
@@ -372,6 +373,13 @@
       "disabledByDefault": true
     },
     {
+      "name": "findLyrics",
+      "title": "Find Lyrics",
+      "subtitle": "Spotify",
+      "description": "Search for lyrics of the currently playing song using Genius API.",
+      "mode": "view"
+    },
+    {
       "name": "replay",
       "title": "Replay",
       "subtitle": "Spotify",
@@ -524,13 +532,16 @@
     "@raycast/api": "^1.87.0",
     "@raycast/utils": "^1.16.2",
     "@types/async-retry": "^1.4.9",
+    "@types/cheerio": "^0.22.35",
     "async-retry": "^1.3.3",
+    "cheerio": "^1.1.0",
     "node-fetch": "^3.3.2",
     "oazapfts": "^4.10.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.14.10",
+    "@types/node-fetch": "^2.6.12",
     "@types/react": "^18.3.3",
     "eslint": "^8.53.0",
     "prettier": "^3.4.2",
