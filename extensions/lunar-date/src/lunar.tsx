@@ -449,11 +449,7 @@ export default function LunarDateConverter() {
         message: text,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to copy",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to copy" });
     }
   }
 
