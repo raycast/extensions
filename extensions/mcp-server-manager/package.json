@@ -1,0 +1,127 @@
+{
+  "$schema": "https://raycast.com/schemas/extension.json",
+  "name": "mcp-server-manager",
+  "version": "1.0.0",
+  "title": "MCP Server Manager",
+  "description": "Manage Model Context Protocol (MCP) servers for AI editors like Cursor, Windsurf, and VS Code",
+  "icon": "extension-icon.png",
+  "author": "rmncldyo",
+  "license": "MIT",
+  "homepage": "https://github.com/rmncldyo/raycast-mcp-server-manager#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rmncldyo/raycast-mcp-server-manager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rmncldyo/raycast-mcp-server-manager/issues"
+  },
+  "keywords": [
+    "raycast",
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "server",
+    "management",
+    "cursor",
+    "vscode",
+    "windsurf",
+    "developer-tools"
+  ],
+  "commands": [
+    {
+      "name": "list-mcp-servers",
+      "title": "List MCP Servers",
+      "subtitle": "MCP Server Manager",
+      "description": "View and manage MCP servers across editors",
+      "mode": "view"
+    },
+    {
+      "name": "add-mcp-server",
+      "title": "Add MCP Server",
+      "subtitle": "MCP Server Manager",
+      "description": "Add a new MCP server configuration",
+      "mode": "view"
+    },
+    {
+      "name": "search-mcp-servers",
+      "title": "Search MCP Servers",
+      "subtitle": "MCP Server Manager",
+      "description": "Search MCP servers across all editors",
+      "mode": "view"
+    },
+    {
+      "name": "remove-mcp-server",
+      "title": "Remove MCP Server",
+      "subtitle": "MCP Server Manager",
+      "description": "Remove MCP server configurations",
+      "mode": "view"
+    },
+    {
+      "name": "view-raw-configs",
+      "title": "View Raw Configs",
+      "subtitle": "MCP Server Manager",
+      "description": "View and edit raw MCP configuration files",
+      "mode": "view"
+    }
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "access": "public",
+  "screenshots": [
+    {
+      "path": "metadata/main-view.png",
+      "title": "Main Server List View"
+    },
+    {
+      "path": "metadata/add-server-view.png",
+      "title": "Add New MCP Server"
+    },
+    {
+      "path": "metadata/view-server.png",
+      "title": "Server Details and Testing"
+    },
+    {
+      "path": "metadata/list-server-view.png",
+      "title": "Browse All Servers"
+    },
+    {
+      "path": "metadata/edit-raw-config.png",
+      "title": "Raw Configuration Editor"
+    },
+    {
+      "path": "metadata/server-help.png",
+      "title": "Configuration Help and Examples"
+    }
+  ],
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/sponsors/rmncldyo"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.15.26",
+    "@types/react": "19.1.6",
+    "eslint": "^9.27.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "tsc": "npx tsc --noEmit",
+    "test-and-run": "ray lint --fix && npx tsc --noEmit && ray build && ray develop",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
