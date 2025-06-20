@@ -109,7 +109,7 @@ async function searchIssues(query: string, filter?: IssueFilter): Promise<Result
   const result = await jiraFetchObject<Issues>(
     "/rest/api/3/search",
     { jql, fields },
-    { 400: ErrorText("Invalid Query", "Unknown project, issue type or assignee") }
+    { 400: ErrorText("Invalid Query", "Unknown project, issue type or assignee") },
   )
   const mapResult = async (issue: Issue): Promise<ResultItem> => ({
     id: issue.id,
@@ -151,6 +151,6 @@ export default function SearchIssueCommand() {
         { name: "My Issues in Open sprints", value: "myIssuesInOpenSprints" },
       ],
     },
-    openIssueKey
+    openIssueKey,
   )
 }

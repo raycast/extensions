@@ -1,12 +1,4 @@
 {
   "printWidth": 120,
-  "singleQuote": false,
-  "importOrder": [
-    "<THIRD_PARTY_MODULES>",
-    "^@raycast/(.*)$",
-    "^@/(.*)$",
-    "^[./]"
-  ],
-  "importOrderSeparation": true,
-  "importOrderSortSpecifiers": true
+  "singleQuote": false
 }
