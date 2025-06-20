@@ -41,10 +41,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Switch
   return (
     <List isLoading={windows.length === 0} navigationTitle={navigationTitle}>
       {Object.entries(groupedByWorkspace).map(([workspaceName, group]) => (
-        <List.Section
-          key={workspaceName}
-          title={`Workspace ${workspaceName} - ${group.monitor}`}
-        >
+        <List.Section key={workspaceName} title={`Workspace ${workspaceName} - ${group.monitor}`}>
           {group.windows.map((window) => (
             <List.Item
               key={window["window-id"]}
