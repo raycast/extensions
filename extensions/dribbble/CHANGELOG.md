@@ -1,5 +1,9 @@
 # Dribbble Changelog
 
+## [Deprecate] - {PR_MERGE_DATE}
+
+Deprecate extension 😔
+
 ## [Pagination] - 2024-03-22
 
 Added pagination
