@@ -94,27 +94,27 @@ export default function FindLyricsCommand() {
       .join("\n\n")}`;
   };
 
-  const actions = [];
-
-  if (lyrics) {
-    actions.push(
-      React.createElement(Action.CopyToClipboard, {
-        title: "Copy Lyrics",
-        content: lyrics,
-        shortcut: { modifiers: ["cmd"], key: "c" },
-      }),
-      React.createElement(Action.CopyToClipboard, {
-        title: "Copy Song Info",
-        content: `${songInfo?.title} by ${songInfo?.artist}`,
-        shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-      }),
-    );
-  }
-
-  return React.createElement(Detail, {
-    isLoading: isLoading,
-    markdown: markdown(),
-    navigationTitle: songInfo ? `${songInfo.title} - ${songInfo.artist}` : "Find Lyrics",
-    actions: React.createElement(ActionPanel, {}, ...actions),
-  });
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdown()}
+      navigationTitle={songInfo ? `${songInfo.title} - ${songInfo.artist}` : "Find Lyrics"}
+      actions={
+        lyrics ? (
+          <ActionPanel>
+            <Action.CopyToClipboard
+              title="Copy Lyrics"
+              content={lyrics}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+            <Action.CopyToClipboard
+              title="Copy Song Info"
+              content={`${songInfo?.title} by ${songInfo?.artist}`}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+          </ActionPanel>
+        ) : undefined
+      }
+    />
+  );
 }

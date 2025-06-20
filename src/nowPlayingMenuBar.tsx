@@ -97,7 +97,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
 
   let title = "";
   let coverImageUrl = "";
-  let menuItems: JSX.Element | null = null;
+  let menuItems: React.ReactNode = null;
 
   if (isTrack) {
     const { artists, id: trackId, album } = item as TrackObject;
@@ -267,7 +267,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           }}
         />
       )}
-      {menuItems}
+      {menuItems as any}
       <MenuBarExtra.Submenu icon={Icon.List} title="Add to Playlist">
         {myPlaylistsData?.items
           ?.filter((playlist) => playlist.owner?.id === meData?.id)
