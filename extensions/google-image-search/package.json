@@ -6,12 +6,24 @@
   "icon": "extension-icon.png",
   "author": "krod12",
   "license": "MIT",
+  "categories": [
+    "Media"
+  ],
   "commands": [
     {
       "name": "google-search-images",
       "file": "google-search-images.tsx",
       "title": "Search Images",
+      "subtitle": "Google Images",
       "description": "Search images using the Google API and download or copy them",
+      "mode": "view"
+    },
+    {
+      "name": "favorite-images",
+      "file": "favorite-images.tsx",
+      "title": "Favorite Images",
+      "subtitle": "Google Images",
+      "description": "View and manage your favorite images",
       "mode": "view"
     }
   ],

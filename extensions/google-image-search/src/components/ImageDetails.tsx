@@ -4,7 +4,6 @@ import { ImageActionPanel } from "./ImageActionPanel";
 
 type ImageDetailsProps = {
   item: GoogleImageResult;
-  mutate?: () => Promise<void>;
 };
 
 export function ImageDetails(props: ImageDetailsProps) {
@@ -33,9 +32,25 @@ export function ImageDetails(props: ImageDetailsProps) {
 
 // Helper function to render markdown for image details
 function renderImageMarkdownDetails(item: GoogleImageResult): string {
+  // Check if the link is from Instagram
+  const isInstagramLink = item.link.includes("instagram.com") || item.image.contextLink.includes("instagram.com");
+
+  if (isInstagramLink) {
+    // For Instagram, provide a markdown link instead of embedding the image directly
+    return `
+
+### Instagram Image
+*Instagram images cannot be displayed directly due to embedding restrictions*
+
+[View Original Instagram Image](${item.link}) 
+
+`;
+  }
+
+  // For non-Instagram images, use the standard markdown image syntax
   return `
 
-![${item.title}](${item.link})
+![${item.title}](${item.link.startsWith("http:") ? item.link.replace("http:", "https:") : item.link})
 
 `;
 }

@@ -66,4 +66,5 @@ export interface ImageActionPanelProps {
   result: GoogleImageResult;
   detail?: boolean;
   searchText?: string;
+  onFavoriteToggle?: () => Promise<void>;
 }

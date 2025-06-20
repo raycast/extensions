@@ -74,7 +74,7 @@ export function useGoogleImageSearch({ term, limit = 8, viewType = "all" }: Sear
 
         // Check if there are more results
         const totalResults = responseData.searchInformation?.totalResults
-          ? parseInt(responseData.searchInformation.totalResults, 8)
+          ? parseInt(responseData.searchInformation.totalResults, 10)
           : 0;
 
         const moreAvailable =
