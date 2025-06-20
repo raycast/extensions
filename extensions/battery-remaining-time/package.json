@@ -1,0 +1,43 @@
+{
+    "name": "battery-remaining-time",
+    "title": "Battery Remaining Time",
+    "description": "Shows remaining battery time directly in your menu bar with compact formatting. Click for detailed battery health, cycle count, temperature, and charging status information.",
+    "icon": "icon.png",
+    "author": "ataberk",
+    "categories": [
+        "System"
+    ],
+    "license": "MIT",
+    "version": "1.0.0",
+    "main": "dist/battery-status.js",
+    "commands": [
+        {
+            "name": "battery-status",
+            "title": "Battery Remaining Time",
+            "description": "Display battery time remaining in menu bar (e.g., ⚡2h15, 🔋45m) with detailed battery health and status information",
+            "mode": "menu-bar",
+            "interval": "30s"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.99.4",
+        "@raycast/utils": "^1.19.1"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.29.0",
+        "@types/node": "20.8.10",
+        "@types/react": "18.3.3",
+        "@typescript-eslint/eslint-plugin": "^8.21.0",
+        "@typescript-eslint/parser": "^8.21.0",
+        "eslint": "^9.17.0",
+        "prettier": "^3.4.2",
+        "typescript": "5.4.5"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}
