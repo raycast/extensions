@@ -19,9 +19,9 @@
       "mode": "view"
     },
     {
-      "name": "favorite-images",
-      "file": "favorite-images.tsx",
-      "title": "Favorite Images",
+      "name": "view-favorite-images",
+      "file": "view-favorite-images.tsx",
+      "title": "View Favorite Images",
       "subtitle": "Google Images",
       "description": "View and manage your favorite images",
       "mode": "view"
