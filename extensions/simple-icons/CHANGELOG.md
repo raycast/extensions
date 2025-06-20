@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Routine Maintenance] - {PR_MERGE_DATE}
+## [Routine Maintenance] - 2025-06-20
 
 - We reached 3300+ icons!
 - Update extension icon to liquid glass style
