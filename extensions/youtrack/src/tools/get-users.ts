@@ -7,11 +7,11 @@ type Input = {
   /**
    * The user username or name
    */
-  name: string;
+  name?: string;
 };
 
-function findUserByNameOrLogin(users: User[], input: string) {
-  return users.find(({ fullName, login }) => fullName === input || login === input);
+function findUserByNameOrLoginOrEmail(users: User[], input: string): User | undefined {
+  return users.find((user) => user.fullName === input || user.login === input || user.email === input);
 }
 
 /**
@@ -26,10 +26,16 @@ export default async function getUsers(input: Input) {
       await saveCache("youtrack-users", fetchedUsers);
       users = users.concat(fetchedUsers);
     }
-    const user = findUserByNameOrLogin(users, input.name);
+
+    if (!input.name) {
+      return users;
+    }
+
+    const user = findUserByNameOrLoginOrEmail(users, input.name);
     if (!user) {
       throw new Error("User not found");
     }
+
     return user;
   } catch (error) {
     handleOnCatchError(error, "Error fetching users");
