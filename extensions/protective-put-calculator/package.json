@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "protective-put-calculator",
+  "title": "Protective Put Calculator",
+  "description": "Calculate protective put positions for earnings plays with strict loss caps",
+  "icon": "command-icon.png",
+  "author": "alankyshum",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "calculate-protective-put",
+      "title": "Calculate Protective Put",
+      "description": "Calculate protective put strategy for stocks with loss cap",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ticker",
+          "placeholder": "AAPL",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "stopLoss",
+          "placeholder": "150.00",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "maxLoss",
+          "placeholder": "500",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "defaultMaxLoss",
+          "title": "Default Maximum Loss",
+          "description": "Default maximum loss amount in dollars",
+          "type": "textfield",
+          "default": "500",
+          "required": false
+        },
+        {
+          "name": "defaultHoldingPeriod",
+          "title": "Default Holding Period",
+          "description": "Default holding period (1w, 2w, 1m)",
+          "type": "dropdown",
+          "default": "2w",
+          "required": false,
+          "data": [
+            {
+              "title": "1 Week",
+              "value": "1w"
+            },
+            {
+              "title": "2 Weeks",
+              "value": "2w"
+            },
+            {
+              "title": "1 Month",
+              "value": "1m"
+            }
+          ]
+        },
+        {
+          "name": "alphaVantageApiKey",
+          "title": "Alpha Vantage API Key",
+          "description": "Your Alpha Vantage API key for real options data. Required for extension to work. Get free key at https://www.alphavantage.co/support/#api-key",
+          "type": "password",
+          "required": true,
+          "placeholder": "your_alpha_vantage_api_key_here"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "axios": "^1.6.8",
+    "date-fns": "^3.6.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/jest": "^29.5.0",
+    "eslint": "^8.51.0",
+    "jest": "^29.5.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "volta": {
+    "node": "24.2.0"
+  }
+}
