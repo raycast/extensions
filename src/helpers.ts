@@ -12,7 +12,7 @@ function getPreferredBrowser() {
 
 export async function getMeetTab(): Promise<string> {
   const openTabs = await BrowserExtension.getTabs();
-  const meetTab = openTabs.find((tab) => tab.url.includes("meet.google.com"));
+  const meetTab = openTabs.find((tab: BrowserExtension.Tab) => tab.url.includes("meet.google.com"));
 
   if (meetTab?.url.includes("/new")) {
     await new Promise((r) => setTimeout(r, 500));
