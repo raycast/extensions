@@ -2,26 +2,42 @@ import { Color, Icon, Image, Keyboard, List, Toast, confirmAlert, showToast } fr
 import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import * as sudo from "sudo-prompt";
+import plist from "plist";
+import { JSX } from "react";
 
 export default class Disk {
   number: number;
   identifier: string;
-  size: string;
+  size: { sizeInt: number | null; sizeStr: string };
+  freeCapacity: { sizeInt: number; sizeStr: string } | { sizeInt: null; sizeStr: null }; // Volumes/Partitions Only
+  usedCapacity: { sizeInt: number; sizeStr: string } | { sizeInt: null; sizeStr: null };
+  volumeSize: { sizeInt: number; sizeStr: string } | { sizeInt: null; sizeStr: null };
   name: string;
-  details: string;
+  details: plist.PlistObject;
+  detailsOld: string;
   mountStatus: string;
   type: string;
+  isTimedOut: boolean;
   isWhole: boolean;
+  internal: boolean | null;
   mountPoint: string | null;
+  fileSystem: string | null;
 
   constructor(number: number, type: string, identifier: string, name: string, size: string) {
     this.number = number;
     this.identifier = identifier;
     this.name = name;
-    this.size = size;
+    this.size = { sizeStr: size, sizeInt: null };
+    this.freeCapacity = { sizeInt: null, sizeStr: null };
+    this.usedCapacity = { sizeInt: null, sizeStr: null };
+    this.volumeSize = { sizeInt: null, sizeStr: null };
     this.type = type;
+    this.internal = null;
+    this.isTimedOut = false;
+    this.fileSystem = null;
     this.mountPoint = null;
-    this.details = "Initializing...";
+    this.details = { status: "Initializing..." };
+    this.detailsOld = "Initializing...";
     this.mountStatus = "Initializing...";
     this.isWhole = false;
   }
@@ -107,7 +123,10 @@ export default class Disk {
 
   async showDetailCustomTerminal() {
     const command = `diskutil info ${this.identifier}`;
+    await this.openCommandInTerminal(command);
+  }
 
+  async openCommandInTerminal(command: string) {
     // Execute AppleScript to open a new Terminal window and run the command
     const fullCommand = `
       osascript -e 'tell application "Terminal"
@@ -122,7 +141,7 @@ export default class Disk {
       style: Toast.Style.Animated,
       title: `Opening new terminal...`,
     });
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // delay
+    await new Promise((resolve) => setTimeout(resolve, 690)); // delay
     showToast({
       style: Toast.Style.Success,
       title: `Opened new terminal`,
@@ -150,6 +169,12 @@ export default class Disk {
       style: Toast.Style.Animated,
       title: `Ejecting ${this.identifier}`,
     });
+
+    if (this.internal) {
+      showFailureToast("Internal drives cannot be ejected", { title: "Can't eject internal drives" });
+      return;
+    }
+
     try {
       await Disk.execCommand(`diskutil eject "${this.identifier}"`);
       await showToast({
@@ -159,10 +184,6 @@ export default class Disk {
     } catch (error) {
       showFailureToast(`${error} Only external drives or disk images can be ejected`, { title: "Ejection Error" });
     }
-  }
-
-  isDetailsTimedOut(): boolean {
-    return this.details.includes("ERROR: Initialization Timed Out");
   }
 
   async handleMountAction(isMount: boolean) {
@@ -188,15 +209,20 @@ export default class Disk {
     try {
       return await Disk.execCommand(command);
     } catch (error) {
-      // Try with sudo
-      if (
-        (String(error).includes("kDAReturnNotPermitted") || String(error).includes("supported")) &&
-        (await confirmAlert({ title: "Try with sudo?" }))
-      ) {
-        return this.tryCommandWithSudo(command);
-      } else {
-        throw error;
+      const errStr = String(error);
+      const needsSudo = errStr.includes("kDAReturnNotPermitted") || errStr.includes("supported");
+      if (needsSudo && (await confirmAlert({ title: "Try with sudo?" }))) {
+        try {
+          return await this.tryCommandWithSudo(command);
+        } catch (sudoError) {
+          showFailureToast(sudoError, { title: "Sudo Error" });
+          if (await confirmAlert({ title: "Didn't work either. Try manually in terminal?" })) {
+            await this.openCommandInTerminal(command);
+          }
+          throw sudoError;
+        }
       }
+      throw error;
     }
   }
 
@@ -220,114 +246,253 @@ export default class Disk {
 
   async init(): Promise<void> {
     try {
-      const detailsPromise = this.fetchDetails();
-      const timeoutPromise = new Promise((resolve) => {
+      const detailsPromise: Promise<string> = Disk.execCommand(`diskutil info -plist ${this.identifier}`);
+      const detailsPlainPromise: Promise<string> = Disk.execCommand(`diskutil info ${this.identifier}`);
+      const timeoutPromise: Promise<string> = new Promise((resolve: (value: string) => void) => {
         setTimeout(() => {
-          //accept
           resolve("ERROR: Initialization Timed Out " + this.identifier);
-        }, 5000); // 5 seconds timeout
+        }, 5000);
       });
+      // Load both the plain text and plist versions of the disk details in parallel
+      const [detailsOldValue, rawDetails]: [string, string] = await Promise.all([
+        Promise.race([detailsPlainPromise, timeoutPromise]),
+        Promise.race([detailsPromise, timeoutPromise]),
+      ]);
+      this.detailsOld = String(detailsOldValue);
 
-      this.details = String(await Promise.race([detailsPromise, timeoutPromise]));
+      if (String(rawDetails).includes("ERROR: Initialization Timed Out")) {
+        this.isTimedOut = true;
+        return;
+      }
 
-      this.initMountStatus();
+      this.details = plist.parse(rawDetails) as plist.PlistObject;
+
       this.initDetails();
     } catch (error) {
-      this.details = "Error initializing: " + error;
+      this.details = { error: String(error) };
+      this.detailsOld = "ERROR: " + error;
     }
   }
 
-  async fetchDetails(): Promise<string> {
-    return Disk.execCommand("diskutil info " + this.identifier);
+  async fetchPlistDetails(): Promise<string> {
+    //return Disk.execCommand("diskutil info " + this.identifier);
+    return Disk.execCommand(`diskutil info -plist ${this.identifier}`);
   }
 
-  initMountStatus() {
-    const mountStatusRegex = /Mounted:\s+([^\n]+)/;
-    const match = this.details.match(mountStatusRegex);
-    const isWhole = this.details.match(/Whole.+Yes/);
-    const isApfsContainer = this.name.includes("Container");
-
-    if (this.isDetailsTimedOut()) {
-      this.mountStatus = "Timed Out";
-      return;
-    }
-
-    if (isWhole) {
+  chooseMountStatus(): string {
+    if (this.isTimedOut) return "Timed Out";
+    if (this.details.WholeDisk) {
       this.isWhole = true;
-      this.mountStatus = "Whole";
-      return;
+      return "Whole";
     }
-
-    if (!match) {
-      this.mountStatus = "Inaccessible";
-      return;
-    }
-
-    if (isApfsContainer) {
-      this.mountStatus = "Container";
-      return;
-    }
-
-    switch (match[1].trim()) {
-      case "Yes":
-        this.mountStatus = "Mounted";
-        break;
-      case "No":
-        this.mountStatus = "Unmounted";
-        break;
-      default:
-        this.mountStatus = "Unmountable";
-    }
+    if ((this.details.Content as string).includes("Apple_APFS")) return "Container";
+    return this.details.MountPoint ? "Mounted" : "Unmounted";
   }
 
   initDetails() {
-    const mountPointRegex = /Mount Point:(.*?(\/.*))/;
-    const match = this.details.match(mountPointRegex);
+    this.mountStatus = this.chooseMountStatus();
+    this.mountPoint = this.details.MountPoint ? (this.details.MountPoint as string) : null;
+    this.internal = typeof this.details.Internal === "boolean" ? this.details.Internal : null;
+    this.fileSystem = this.details.FilesystemName ? (this.details.FilesystemName as string) : null;
+    this.initSizes();
+  }
 
-    if (match && match[2]) {
-      this.mountPoint = `${match[2].trim()}`;
-    } else {
-      this.mountPoint = null;
+  initSizes() {
+    if (this.mountStatus === "Whole" || this.mountStatus === "Container") {
+      this.size.sizeInt = this.details.Size as number;
+      this.freeCapacity.sizeInt = this.details.FreeSpace as number;
     }
+
+    if (this.fileSystem?.toUpperCase() === "APFS") {
+      this.freeCapacity.sizeInt = this.details.APFSContainerFree ? (this.details.APFSContainerFree as number) : null;
+      this.volumeSize.sizeInt = this.details.APFSContainerSize ? (this.details.APFSContainerSize as number) : null;
+      this.usedCapacity.sizeInt = this.details.CapacityInUse ? (this.details.CapacityInUse as number) : null;
+    } else {
+      this.freeCapacity.sizeInt = this.details.FreeSpace ? (this.details.FreeSpace as number) : null;
+      this.volumeSize.sizeInt = this.details.VolumeSize ? (this.details.VolumeSize as number) : null;
+      this.usedCapacity.sizeInt =
+        this.volumeSize.sizeInt && this.freeCapacity.sizeInt
+          ? this.volumeSize.sizeInt - this.freeCapacity.sizeInt
+          : null;
+    }
+
+    this.size.sizeStr = this.size.sizeInt ? this.byteToSuffix(this.size.sizeInt) : this.size.sizeStr;
+    this.freeCapacity.sizeStr = this.freeCapacity.sizeInt ? this.byteToSuffix(this.freeCapacity.sizeInt) : null;
+    this.volumeSize.sizeStr = this.volumeSize.sizeInt ? this.byteToSuffix(this.volumeSize.sizeInt) : null;
+    this.usedCapacity.sizeStr = this.usedCapacity.sizeInt ? this.byteToSuffix(this.usedCapacity.sizeInt) : null;
+  }
+
+  byteToSuffix(byte: number): string {
+    const units = ["B", "KB", "MB", "GB", "TB", "PB"];
+    let i = 0;
+    while (byte >= 1000 && i < units.length) {
+      byte /= 1000;
+      i++;
+    }
+    return `${byte.toFixed(2)} ${units[i]}`;
   }
 
   getMountStatusAccessory() {
-    let color;
+    const colors: Record<string, Color> = {
+      Mounted: Color.Green,
+      Unmounted: Color.Red,
+      Unmountable: Color.Orange,
+      Whole: Color.Purple,
+      Container: Color.Blue,
+    };
 
-    switch (this.mountStatus) {
-      case "Mounted":
-        color = Color.Green;
-        break;
-      case "Unmounted":
-        color = Color.Red;
-        break;
-      case "Unmountable":
-        color = Color.Orange;
-        break;
-      case "Whole":
-        color = Color.Purple;
-        break;
-      case "Container":
-        color = Color.Blue;
-        break;
-      default:
-        color = Color.Magenta;
-    }
-
+    const color = colors[this.mountStatus] || Color.Magenta;
     return { tag: { value: this.mountStatus, color } };
   }
 
+  getSizeAccessory() {
+    const colors: Record<string, Color> = {
+      95: Color.Red,
+      75: Color.Orange,
+      50: Color.Yellow,
+      25: Color.Green,
+      1: Color.Green,
+      0: Color.Green,
+    };
+
+    if (this.isWhole) {
+      return { tag: { value: this.size.sizeStr, color: Color.Purple } };
+    }
+    if (this.mountStatus === "Container") {
+      return { tag: { value: this.size.sizeStr, color: Color.Blue } };
+    }
+
+    if (!this.usedCapacity.sizeInt || !this.freeCapacity.sizeInt) {
+      return { tag: { value: this.size.sizeStr, color: Color.Magenta } };
+    }
+
+    // Calculate used percentage based on total volume size
+    //const totalSize = this.volumeSize.sizeInt || this.size.sizeInt;
+    const totalSize = (this.freeCapacity.sizeInt ?? 0) + (this.usedCapacity.sizeInt ?? 0);
+    const percentage = this.usedCapacity.sizeInt && totalSize ? (this.usedCapacity.sizeInt / totalSize) * 100 : 0;
+    const color =
+      Object.entries(colors)
+        .sort((a, b) => parseInt(b[0]) - parseInt(a[0])) // Sort thresholds from highest to lowest
+        .find(([threshold]) => percentage >= parseInt(threshold))?.[1] || Color.Magenta;
+
+    const usedPercent = percentage.toFixed(0);
+
+    const totalSizeStr = this.volumeSize.sizeStr || this.size.sizeStr || "N/A";
+    const usedStr = this.usedCapacity.sizeStr || "N/A";
+    const freeStr = this.freeCapacity.sizeStr || "N/A";
+
+    // Alternatives to test out
+    const capacityString = `${usedPercent}% ▲ ${usedStr} ▽ ${freeStr} ● ${totalSizeStr}`;
+    const capacityString2 = `${usedPercent}% ▲ ${usedStr} ▽ ${freeStr}`;
+    const capacityString3 = `${usedPercent}% ▲ ${usedStr}`;
+
+    // Deprecated
+    return {
+      tag: {
+        value: capacityString2,
+        color,
+      },
+    };
+  }
+
+  /**
+   * Deprecated
+   * @returns
+   */
   getFormattedSize() {
     const spaceCount = 50 - (this.name.length + this.identifier.length);
     const spaces = "\u00A0".repeat(spaceCount); // Use non-breaking space character for fixed-width spacing
-    const formattedSize = `${spaces}${this.size}`;
+    const formattedSize = `${spaces}${this.size.sizeStr}`;
     return formattedSize;
   }
 
-  getDetails(): JSX.Element {
-    const data = this.parseTextToDict(this.details);
+  /**
+   * @param data Recursively parsing the nested Plist Object when reading from diskutil info -plist
+   * @param indent NestLevel
+   * @param isArrayChild Is child of an array
+   * @returns The nested metadata as JSX element
+   */
+  renderMetadata(data: any, indent = 0, isArrayChild = false): JSX.Element[] {
+    if (Array.isArray(data)) {
+      // If this array is nested inside a dict (isArrayChild true), simply flatten it without an index label.
+      if (isArrayChild) {
+        return data.flatMap((item) => this.renderMetadata(item, indent, true));
+      } else {
+        return data.flatMap((item, index) => [
+          <List.Item.Detail.Metadata.Label key={`${index}-label`} title={`${"-".repeat(indent)}[${index}]`} text="" />,
+          ...this.renderMetadata(item, indent + 1),
+        ]);
+      }
+    } else if (data && typeof data === "object") {
+      return Object.entries(data).flatMap(([key, value]) => {
+        if (value && typeof value === "object") {
+          if (Array.isArray(value)) {
+            return [
+              <List.Item.Detail.Metadata.Label
+                key={`${key}-label`}
+                title={`${"|".repeat(indent * 5)}${key}`}
+                text=""
+              />,
+              ...this.renderMetadata(value, indent + 1, true),
+            ];
+          } else {
+            // When the value is an object, show the key and then flatten the object with an extra row.
+            return [
+              <List.Item.Detail.Metadata.Label
+                key={`${key}-label`}
+                title={`${" ".repeat(indent * 2)}${" |".repeat(indent)} ${key}`}
+                text=""
+              />,
+              ...this.renderMetadata(value, indent + 1),
+            ];
+          }
+        }
+        // If the value is a primitive, show the key and value (default)
+        return (
+          <List.Item.Detail.Metadata.Label
+            key={key}
+            title={`${" ".repeat(indent * 2)}${" |".repeat(indent * 1)} ${key}`}
+            text={String(value)}
+          />
+        );
+      });
+    }
+    return [];
+  }
+  getDetailsPlistSummary() {
+    const dash = "—";
+    const summary = [
+      { key: "Disk Identifier", value: this.identifier },
+      { key: "Disk Name", value: this.name },
+      { key: "Disk Type", value: this.type },
+      { key: "Status", value: this.mountStatus },
+      { key: "Mount Point", value: this.mountPoint ?? dash },
+      { key: "File System", value: this.fileSystem ?? dash },
+      { key: "Size", value: this.size.sizeStr ?? dash },
+      { key: "Free Capacity", value: this.freeCapacity.sizeStr ?? dash },
+      { key: "Used Capacity", value: this.usedCapacity.sizeStr ?? dash },
+      { key: "Total Capacity", value: this.volumeSize.sizeStr ?? dash },
+    ];
+
+    return summary.map(({ key, value }) => <List.Item.Detail.Metadata.Label key={key} title={key} text={value} />);
+  }
+
+  getDetailsPlist(): JSX.Element {
     return (
       <List.Item.Detail.Metadata>
+        {this.getDetailsPlistSummary()}
+        <List.Item.Detail.Metadata.Separator />
+        {this.renderMetadata(this.details)}
+      </List.Item.Detail.Metadata>
+    );
+  }
+
+  getDetails(): JSX.Element {
+    const data = this.parseTextToDict(this.detailsOld);
+    return (
+      <List.Item.Detail.Metadata>
+        {this.getDetailsPlistSummary()}
+        <List.Item.Detail.Metadata.Separator />
         {data.flatMap(([key, value], index) => [
           <List.Item.Detail.Metadata.Label key={`${key}-${index}`} title={key} text={value || undefined} />,
           value === null ? <List.Item.Detail.Metadata.Separator key={`separator-${index}`} /> : null,
@@ -342,12 +507,12 @@ export default class Disk {
 
     for (const match of text.matchAll(regex)) {
       if (match[1] && match[2]) {
-        // this is a key-value pair
+        // for normal key-value pairs
         const key = match[1].trim();
         const value = match[2].trim();
         results.push([key, value]);
       } else if (match[3]) {
-        // this is a heading
+        // for headings
         results.push([match[3].trim(), null]);
       }
     }
@@ -375,7 +540,7 @@ export default class Disk {
 
       sudo.exec(command, options, (error, stdout) => {
         if (error) {
-          reject(error);
+          reject();
         } else {
           resolve(stdout?.toString() || ""); // convert stdout to string
         }
@@ -383,8 +548,14 @@ export default class Disk {
     });
   }
 
+  /**
+   * Takes in the row string from the diskutil list command and returns a Disk object with the parsed data
+   * @param string
+   * @returns
+   */
   static createFromString(string: string): Disk | null {
     string = string.replace(/⁨|⁩/g, "");
+    // Captures info from eg
     const regex = /^ +(\d+):(.{27}) (.{21}.*?)([\\+|\d].+B)(.+)$/gm;
     const matches = string.matchAll(regex);
     const disks: Disk[] = [];
