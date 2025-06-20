@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, showInFinder, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import {
   convertMedia,
@@ -8,7 +8,6 @@ import {
   OUTPUT_IMAGE_EXTENSIONS,
   OUTPUT_ALL_EXTENSIONS,
 } from "../utils/converter";
-import { execPromise } from "../utils/exec";
 
 export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }) {
   const [selectedFileType, setSelectedFileType] = useState<"video" | "image" | "audio" | null>(null);
@@ -17,10 +16,14 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
   // TODO: Proper type for quality setting? Maybe split the quality setting into a union type for each format?
   // Currently represents 0-100 in steps of 5 (as strings) for jpg heic avif webp, "lossless" for webp, "lzw" or "deflate" for tiff, "png-24" or "png-8" for png
   const [currentQualitySetting, setCurrentQualitySetting] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (initialFiles && initialFiles.length > 0) {
       handleFileSelect(initialFiles);
+    } else {
+      // TODO: fix this
+      setIsLoading(false);
     }
   }, [initialFiles]);
 
@@ -66,6 +69,18 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
 
       setCurrentFiles(processedFiles);
       setSelectedFileType(primaryFileType);
+
+      // Initialize output format with default value based on file type
+      if (primaryFileType === "image") {
+        setOutputFormat(".jpg");
+        setCurrentQualitySetting("80");
+      } else if (primaryFileType === "audio") {
+        setOutputFormat(".mp3");
+        setCurrentQualitySetting("");
+      } else if (primaryFileType === "video") {
+        setOutputFormat(".mp4");
+        setCurrentQualitySetting("");
+      }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -75,18 +90,12 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       setCurrentFiles([]);
       setSelectedFileType(null);
     }
+
+    setIsLoading(false);
   };
 
   const handleSubmit = async () => {
-    if (!currentFiles || currentFiles.length === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No files selected",
-        message: "Please select at least one file to convert",
-      });
-      return;
-    }
-
+    setIsLoading(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
       // TODO: When converting video, we could show the progress percentage. This would require to find a solution when multiple files are being converted.
@@ -113,12 +122,12 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         await showToast({
           style: Toast.Style.Success,
           title: "File converted successfully!",
-          message: "Press ⌘O to open the converted file",
+          message: "⌘O to open the file",
           primaryAction: {
             title: "Open File",
             shortcut: { modifiers: ["cmd"], key: "o" },
             onAction: () => {
-              execPromise(`open "${outputPath}"`);
+              showInFinder(outputPath);
             },
           },
         });
@@ -127,13 +136,17 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         await showToast({ style: Toast.Style.Failure, title: "Conversion failed", message: String(error) });
       }
     }
+    setIsLoading(false);
   };
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Convert" onSubmit={handleSubmit} />
+          {currentFiles && currentFiles.length > 0 && selectedFileType && (
+            <Action.SubmitForm title="Convert" onSubmit={handleSubmit} icon={Icon.NewDocument} />
+          )}
         </ActionPanel>
       }
     >
@@ -150,7 +163,9 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         <Form.Dropdown
           id="format"
           title="Select output format"
-          defaultValue={selectedFileType === "image" ? ".jpg" : selectedFileType === "audio" ? ".mp3" : ".mp4"}
+          value={
+            outputFormat || (selectedFileType === "image" ? ".jpg" : selectedFileType === "audio" ? ".mp3" : ".mp4")
+          }
           onChange={(newFormat) => {
             setOutputFormat(newFormat as (typeof OUTPUT_ALL_EXTENSIONS)[number]);
           }}
@@ -183,7 +198,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
             <Form.Dropdown
               id="qualitySetting"
               title={`Select quality`}
-              defaultValue={outputFormat === ".png" ? "png-24" : "80"}
+              value={currentQualitySetting}
               onChange={setCurrentQualitySetting}
             >
               {outputFormat === ".png" && (

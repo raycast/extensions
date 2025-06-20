@@ -8,10 +8,19 @@ import {
   INPUT_AUDIO_EXTENSIONS,
   INPUT_VIDEO_EXTENSIONS,
 } from "../utils/converter";
-import { isFFmpegInstalled } from "../utils/ffmpeg";
-import { getFullPath } from "../utils/get-full-path";
+import { findFFmpegPath } from "../utils/ffmpeg";
 import { Tool } from "@raycast/api";
 import path from "path";
+import os from "os";
+import fs from "fs";
+
+async function getFullPath(inputPath: string) {
+  const fullPath = path.resolve(path.normalize(inputPath.replace(/^~/, os.homedir())));
+  if (!fs.existsSync(fullPath)) {
+    throw new Error(`The file does not exist at ${fullPath}`);
+  }
+  return fullPath;
+}
 
 function getMediaType(filePath: string): "image" | "audio" | "video" | null {
   const extension = path.extname(filePath).toLowerCase();
@@ -50,7 +59,7 @@ type Input = {
 };
 
 export default async function ConvertMedia({ inputPath, outputFileType, quality }: Input) {
-  const installed = await isFFmpegInstalled();
+  const installed = await findFFmpegPath();
   if (!installed) {
     return {
       type: "error",
