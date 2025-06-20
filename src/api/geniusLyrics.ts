@@ -149,7 +149,7 @@ async function extractLyricsFromPage(songUrl: string): Promise<GeniusLyricsResul
     }
 
     // Method 2: Look for Lyrics__Container class (React component)
-    if (!lyrics || lyrics.length < 50) {
+    if (!lyrics || lyrics.length < 20) {
       const reactLyricsRegex = /<div[^>]*class="[^"]*Lyrics__Container[^"]*"[^>]*>(.*?)<\/div>/gs;
       const reactMatches = [...lyricsHtml.matchAll(reactLyricsRegex)];
 
@@ -159,7 +159,7 @@ async function extractLyricsFromPage(songUrl: string): Promise<GeniusLyricsResul
     }
 
     // Method 3: Look for JSON data in script tags
-    if (!lyrics || lyrics.length < 50) {
+    if (!lyrics || lyrics.length < 20) {
       const jsonDataRegex = /window\.__PRELOADED_STATE__\s*=\s*({.*?});/s;
       const jsonMatch = lyricsHtml.match(jsonDataRegex);
 
@@ -179,7 +179,7 @@ async function extractLyricsFromPage(songUrl: string): Promise<GeniusLyricsResul
           ];
 
           for (const path of possiblePaths) {
-            if (path && typeof path === "string" && path.length > 50) {
+            if (path && typeof path === "string" && path.length > 10) {
               lyrics = path;
 
               break;
@@ -192,7 +192,7 @@ async function extractLyricsFromPage(songUrl: string): Promise<GeniusLyricsResul
     }
 
     // Method 4: Generic lyrics class search
-    if (!lyrics || lyrics.length < 50) {
+    if (!lyrics || lyrics.length < 20) {
       const genericLyricsRegex = /<div[^>]*class="[^"]*lyrics[^"]*"[^>]*>(.*?)<\/div>/gis;
       const genericMatches = [...lyricsHtml.matchAll(genericLyricsRegex)];
 
@@ -203,10 +203,12 @@ async function extractLyricsFromPage(songUrl: string): Promise<GeniusLyricsResul
 
     // Clean up the lyrics while preserving structure
     if (lyrics && lyrics.length > 20) {
-      // First, let's preserve the raw structure and be more careful with cleaning
+      // Preserve the raw structure and be more careful with cleaning
       lyrics = lyrics
-        // Convert HTML line breaks to actual line breaks
-        .replace(/<br\s*\/?>/gi, "\n")
+        // Convert HTML line breaks to actual line breaks - preserve verse structure
+        .replace(/<br\s*\/?>\s*<br\s*\/?>/gi, "\n\n") // Double br tags = verse break
+        .replace(/<br\s*\/?>/gi, "\n") // Single br tag = line break
+        .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n") // Paragraph breaks = verse breaks
         .replace(/<\/p>/gi, "\n")
         .replace(/<p[^>]*>/gi, "")
         // Remove specific HTML tags but keep content
@@ -220,28 +222,26 @@ async function extractLyricsFromPage(songUrl: string): Promise<GeniusLyricsResul
         .replace(/&#x27;/g, "'")
         .replace(/&nbsp;/g, " ")
         .replace(/&#39;/g, "'")
-        // Clean up spacing but preserve line structure
+        // Clean up spacing but preserve verse structure
         .replace(/[ \t]+/g, " ") // Multiple spaces to single space
         .replace(/\n[ \t]+/g, "\n") // Remove leading spaces on lines
         .replace(/[ \t]+\n/g, "\n") // Remove trailing spaces on lines
+        .replace(/\n{5,}/g, "\n\n\n") // Limit excessive line breaks
         .trim();
 
-      // Only proceed with section formatting if we have substantial content
-      if (lyrics.length > 100) {
-        // Format section headers properly - be more inclusive
-        lyrics = lyrics
-          // Match any text in brackets that looks like a section header
-          .replace(/(\[[A-Za-z][^\]]*\])/g, "\n\n$1\n")
-          // Handle producer tags in parentheses
-          .replace(/(\([^)]*(?:produced|prod|feat|ft)[^)]*\))/gi, "\n$1\n")
-          // Clean up excessive line breaks
-          .replace(/\n{4,}/g, "\n\n\n")
-          .replace(/^\n+/, "") // Remove leading line breaks
-          .replace(/\n+$/, "") // Remove trailing line breaks
-          .trim();
-      }
+      // Format section headers and clean up - apply to all lyrics regardless of length
+      lyrics = lyrics
+        // Match any text in brackets that looks like a section header
+        .replace(/(\[[A-Za-z][^\]]*\])/g, "\n\n$1\n")
+        // Handle producer tags in parentheses
+        .replace(/(\([^)]*(?:produced|prod|feat|ft)[^)]*\))/gi, "\n$1\n")
+        // Clean up excessive line breaks but preserve song structure
+        .replace(/\n{4,}/g, "\n\n\n")
+        .replace(/^\n+/, "") // Remove leading line breaks
+        .replace(/\n+$/, "") // Remove trailing line breaks
+        .trim();
 
-      if (lyrics.length > 20) {
+      if (lyrics.length > 5) {
         return { lyrics, url: songUrl };
       }
     }

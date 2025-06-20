@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Action, ActionPanel, Detail } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
 import { TrackObject } from "./helpers/spotify.api";
-import { searchGeniusLyrics } from "./api/geniusLyrics";
+
+// Import genius-lyrics with fallback
+let GeniusClient: any;
+try {
+  const Genius = require("genius-lyrics");
+  GeniusClient = Genius.Client || Genius.default?.Client || Genius;
+} catch (error) {
+  console.error("Failed to import genius-lyrics:", error);
+}
 
 // Component to show lyrics for the currently playing song
 export default function FindLyricsCommand() {
@@ -14,7 +21,7 @@ export default function FindLyricsCommand() {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    const fetchLyrics = async () => {
+    const fetchCurrentSongLyrics = async () => {
       try {
         setIsLoading(true);
         setError("");
@@ -59,32 +66,59 @@ export default function FindLyricsCommand() {
           album: track.album?.name,
         });
 
-        // Search for lyrics using our Genius API
-        const result = await searchGeniusLyrics(songTitle, artistName);
+        // Now fetch lyrics using the exact same logic from search-lyrics.tsx
+        let lyricsFound = false;
 
-        if (!result) {
-          setError("Failed to search for lyrics - please try again");
-          return;
+        // Try Genius first
+        try {
+          console.log(`🔍 Searching Genius for: "${songTitle}" by "${artistName}"`);
+          if (GeniusClient) {
+            const client = new GeniusClient();
+            const searchResults = await client.songs.search(`${songTitle} ${artistName}`);
+            
+            if (searchResults && searchResults.length > 0) {
+              // Find the best match (exact title match preferred)
+              let bestMatch = searchResults[0];
+              for (const result of searchResults) {
+                if (result.title.toLowerCase() === songTitle.toLowerCase() && 
+                    result.artist.name.toLowerCase() === artistName.toLowerCase()) {
+                  bestMatch = result;
+                  break;
+                }
+              }
+              
+              console.log(`🎯 Found match: "${bestMatch.title}" by "${bestMatch.artist.name}"`);
+              const lyricsText = await bestMatch.lyrics();
+              if (lyricsText && lyricsText.trim() !== "") {
+                setLyrics(lyricsText);
+                lyricsFound = true;
+                console.log("✅ Using Genius lyrics from search");
+              }
+            }
+          }
+        } catch (geniusError) {
+          console.log("Genius lyrics not available, trying alternatives...", geniusError);
         }
 
-        if (result.lyrics && result.lyrics.trim() !== "") {
-          setLyrics(result.lyrics);
-        } else {
-          setError(
-            `Lyrics not found on Genius for "${songTitle}" by ${artistName}. Try searching for a different version or check the spelling.`,
-          );
+        // If Genius fails, show simple error
+        if (!lyricsFound) {
+          setError(`Oops! Lyrics not available for "${songTitle}" by ${artistName}`);
         }
-      } catch (err: unknown) {
+
+      } catch (err: any) {
         console.error("Error fetching lyrics:", err);
-        const errorMessage = err instanceof Error ? err.message : "Failed to fetch lyrics. Please try again.";
-        setError(errorMessage);
-        showFailureToast(err, { title: "Error" });
+        setError(err.message || "Failed to fetch lyrics. Please try again.");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: err.message || "Failed to fetch lyrics",
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchLyrics();
+    fetchCurrentSongLyrics();
   }, []);
 
   const markdown = () => {
@@ -96,11 +130,14 @@ export default function FindLyricsCommand() {
       return `# Loading lyrics for "${songInfo?.title || "current song"}"\n\nPlease wait while we fetch the lyrics...`;
     }
 
-    return `# ${songInfo?.title}\n\n**Artist:** ${songInfo?.artist}\n\n${songInfo?.album ? `**Album:** ${songInfo.album}\n\n` : ""}---\n\n${lyrics
-      .split("\n")
+    // Format lyrics EXACTLY like search-lyrics.tsx
+    const formattedLyrics = lyrics
+      .split('\n')
       .map((line: string) => line.trim())
       .filter((line: string) => line.length > 0)
-      .join("\n\n")}`;
+      .join('\n\n'); // Each line gets double line breaks for proper verse spacing
+
+    return `# ${songInfo?.title}\n\n**Artist:** ${songInfo?.artist}\n\n${songInfo?.album ? `**Album:** ${songInfo.album}\n\n` : ""}---\n\n${formattedLyrics}`;
   };
 
   return (
@@ -109,13 +146,22 @@ export default function FindLyricsCommand() {
       markdown={markdown()}
       navigationTitle={songInfo ? `${songInfo.title} - ${songInfo.artist}` : "Find Lyrics"}
       actions={
-        lyrics ? (
+        songInfo ? (
           <ActionPanel>
-            <Action.CopyToClipboard title="Copy Lyrics" content={lyrics} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-            <Action.CopyToClipboard
-              title="Copy Song Info"
-              content={`${songInfo?.title} by ${songInfo?.artist}`}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            {lyrics && (
+              <>
+                <Action.CopyToClipboard title="Copy Lyrics" content={lyrics} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+                <Action.CopyToClipboard
+                  title="Copy Song Info"
+                  content={`${songInfo.title} by ${songInfo.artist}`}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
+              </>
+            )}
+            <Action.OpenInBrowser
+              title="Search Web for Lyrics"
+              url={`https://www.google.com/search?q=${encodeURIComponent(`${songInfo.title} ${songInfo.artist} lyrics`)}`}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
             />
           </ActionPanel>
         ) : undefined
@@ -123,3 +169,5 @@ export default function FindLyricsCommand() {
     />
   );
 }
+
+
