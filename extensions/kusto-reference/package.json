@@ -15,6 +15,7 @@
     {
       "name": "search",
       "title": "Find Kql Command",
+      "subtitle": "Kusto Reference",
       "description": "Show the details of a KQL command",
       "mode": "view",
       "arguments": [
