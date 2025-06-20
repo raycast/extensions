@@ -277,12 +277,14 @@ ${description}
   return (
     <Detail
       markdown={markdown}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       metadata={metadata as any}
       isLoading={currentlyPlayingIsLoading || playbackStateIsLoading}
       actions={
         <ActionPanel>
           {isPlaying && <PauseAction onPause={() => playbackStateRevalidate()} />}
           {!isPlaying && <PlayAction onPlay={() => playbackStateRevalidate()} />}
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {trackOrEpisodeActions as any}
           {myPlaylistsData?.items && meData && uri && (
             <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />

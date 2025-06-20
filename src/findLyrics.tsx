@@ -102,11 +102,7 @@ export default function FindLyricsCommand() {
       actions={
         lyrics ? (
           <ActionPanel>
-            <Action.CopyToClipboard
-              title="Copy Lyrics"
-              content={lyrics}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
+            <Action.CopyToClipboard title="Copy Lyrics" content={lyrics} shortcut={{ modifiers: ["cmd"], key: "c" }} />
             <Action.CopyToClipboard
               title="Copy Song Info"
               content={`${songInfo?.title} by ${songInfo?.artist}`}

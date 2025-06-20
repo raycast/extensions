@@ -267,6 +267,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           }}
         />
       )}
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {menuItems as any}
       <MenuBarExtra.Submenu icon={Icon.List} title="Add to Playlist">
         {myPlaylistsData?.items
