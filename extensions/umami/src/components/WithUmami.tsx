@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, openExtensionPreferences } from "@raycast/api";
+import { Detail, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { FC, PropsWithChildren } from "react";
 import { IS_CLOUD, umami } from "../lib/umami";

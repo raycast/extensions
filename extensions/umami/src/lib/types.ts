@@ -21,12 +21,12 @@ export type UmamiWebsite = {
       id: string;
       name: string;
       domain: string;
-      shareId: string | null,
-      resetAt: null,
-      websiteId: string;
-      createdAt: string;
-      updatedAt: string | null;
-      deletedAt: string | null;
+    //   shareId: string | null,
+    //   resetAt: null,
+    //   websiteId: string;
+    //   createdAt: string;
+    //   updatedAt: string | null;
+    //   deletedAt: string | null;
 }
 
 // type UmamiPagedData<T> = {

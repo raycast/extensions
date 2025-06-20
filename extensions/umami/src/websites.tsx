@@ -1,17 +1,18 @@
-import { Action, ActionPanel, Alert, Color, Form, Icon, List, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Form, Grid, Icon, List, confirmAlert } from "@raycast/api";
 import { umami } from "./lib/umami";
 import useUmami from "./lib/useUmami";
 import { AddWebsiteFormValues, UmamiWebsite } from "./lib/types";
 import { FormValidation, getFavicon, useCachedPromise, useForm } from "@raycast/utils";
 import { useState } from "react";
 import WithUmami from "./components/WithUmami";
+import { UmamiApiClient } from "@umami/api-client";
 
 export default function Main() {
 return <WithUmami>
         <Websites />
     </WithUmami>
 }
-    
+
 function Websites() {
     const { isLoading, data: websites = [] } = useCachedPromise(async () => {
         const {ok,error, data} = await umami.getWebsites();
@@ -62,10 +63,27 @@ function Websites() {
         {websites.map(website => <List.Item key={website.id} icon={getFavicon(`https://${website.domain}`)} title={website.name} subtitle={website.domain} accessories={[
             // { date: website.updatedAt ? new Date(website.updatedAt) : undefined }
         ]} actions={<ActionPanel>
+            <Action.Push icon={Icon.ArrowRight} title="View Details" target={<WebsiteDetails website={website} />} />
             {/* <Action title="Delete Website" icon={Icon.DeleteDocument} style={Action.Style.Destructive} onAction={() => confirmAndDelete(website)} /> */}
             <Action.Push title="Add Website" icon={Icon.Plus} target={<AddWebsite />} />
         </ActionPanel>} />)}
     </List>
+}
+
+function WebsiteDetails({website}: {website: UmamiWebsite}) {
+    const {isLoading, data: stats} = useCachedPromise(async() => {
+        const endAt = Date.now();
+        const pastDate = new Date();
+        pastDate.setDate(pastDate.getDate() - 1); // 1 day ago
+        const startAt = pastDate.getTime();
+
+        const {ok,error, data} = await umami.getWebsiteStats(website.id, { startAt, endAt });
+        if (!ok) throw new Error(error);
+        return data;
+    })
+    return <Grid isLoading={isLoading}>
+        <Grid.Item title={stats?.pageviews.value.toString()} subtitle="Views" content={Color.Red} />
+    </Grid>
 }
 
 function AddWebsite() {
