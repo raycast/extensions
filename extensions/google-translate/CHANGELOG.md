@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Fix] - 2025-06-20
+
+- Fixed proxy for doubleWayTranslate
+
 ## [Maintenance] - 2025-06-19
 
 - Remove country flags from languages

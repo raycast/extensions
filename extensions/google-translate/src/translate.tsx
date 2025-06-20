@@ -143,7 +143,7 @@ export default function Translate(): ReactElement {
       {selectedLanguageSet.langTo.length === 1 ? (
         <DoubleWayTranslateItem
           value={debouncedValue}
-          selectedLanguageSet={selectedLanguageSet}
+          selectedLanguageSet={{ langFrom: selectedLanguageSet.langFrom, langTo: selectedLanguageSet.langTo, proxy }}
           toggleShowingDetail={() => setIsShowingDetail(!isShowingDetail)}
         />
       ) : (
