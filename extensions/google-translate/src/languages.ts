@@ -1,4 +1,4 @@
-import { languages as _languages } from "../vendor/@iamtraction-translate/src/languages";
+import { languages as _languages } from "./vendor/@iamtraction-translate/src/languages";
 
 export type LanguageCode = keyof typeof _languages;
 export type LanguageName = (typeof _languages)[LanguageCode];

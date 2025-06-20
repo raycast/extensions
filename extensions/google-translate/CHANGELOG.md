@@ -1,5 +1,10 @@
 # Google Translate Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Fix incorrect language code mapping logic
+- Move vendor folder to the project src directory
+
 ## [Maintenance] - 2025-06-19
 
 - Remove country flags from languages
