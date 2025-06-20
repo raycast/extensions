@@ -3,6 +3,7 @@
 ## [Fix] - {PR_MERGE_DATE}
 
 - Fixed proxy for doubleWayTranslate
+- Add proxy for TTS
 
 ## [Maintenance] - 2025-06-19
 
