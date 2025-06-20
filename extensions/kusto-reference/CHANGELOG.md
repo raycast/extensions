@@ -1,6 +1,6 @@
 # Kusto Reference Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-06-20
 
 ### Added
 - Initial release of Kusto Reference extension
