@@ -103,7 +103,7 @@
           "default": "color-name",
           "data": [
             {
-              "title": "Copy color name",
+              "title": "Copy Color Name",
               "value": "color-name"
             },
             {
@@ -119,27 +119,27 @@
               "value": "value-hsl"
             },
             {
-              "title": "Copy background class",
+              "title": "Copy Background Class",
               "value": "bg-class"
             },
             {
-              "title": "Copy text class",
+              "title": "Copy Text Class",
               "value": "text-class"
             },
             {
-              "title": "Copy border class",
+              "title": "Copy Border Class",
               "value": "border-class"
             },
             {
-              "title": "Copy shadow class",
+              "title": "Copy Shadow Class",
               "value": "shadow-class"
             },
             {
-              "title": "Copy ring class",
+              "title": "Copy Ring Class",
               "value": "ring-class"
             },
             {
-              "title": "Copy outline class",
+              "title": "Copy Outline Class",
               "value": "outline-class"
             }
           ]

@@ -6,9 +6,7 @@ import colors from "tailwindcss/colors";
 import { capitalize } from "lodash";
 import { useEffect, useState } from "react";
 
-import { extendArray } from "./utils/move-to-front-extension";
-
-extendArray();
+import { moveFirstMatchToFront } from "./utils/move-to-front-extension";
 
 const hiddenColors = [
   "inherit",
@@ -96,7 +94,7 @@ function Actions({
   shade: string;
   value: string;
 }) {
-  const sections = [
+  let sections = [
     {
       actions: [
         {
@@ -165,14 +163,16 @@ function Actions({
         },
       ],
     },
-  ]
-    .map((section) => {
-      return {
-        ...section,
-        actions: section.actions.moveFirstMatchToFront((action) => action.id === preferences.defaultAction),
-      };
-    })
-    .moveFirstMatchToFront((section) => section.actions.some((action) => action.id === preferences.defaultAction));
+  ].map((section) => {
+    return {
+      ...section,
+      actions: moveFirstMatchToFront(section.actions, (action) => action.id === preferences.defaultAction),
+    };
+  });
+
+  sections = moveFirstMatchToFront(sections, (section) =>
+    section.actions.some((action) => action.id === preferences.defaultAction),
+  );
 
   return (
     <ActionPanel>
