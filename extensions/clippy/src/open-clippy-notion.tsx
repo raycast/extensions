@@ -29,10 +29,10 @@ export default async function Command() {
     let token = await authorize();
 
     let userData = await fetchUserData(token);
-    let notionDatabaseId = userData.user?.notion_reading_list_db_id;
+    let notionDatabaseUrl = userData.user?.notion_database_url;
 
     // If no Notion database ID, offer to re-authenticate to get fresh data
-    if (!notionDatabaseId) {
+    if (!notionDatabaseUrl) {
       const shouldReAuth = await confirmAlert({
         title: "Notion Database Not Found",
         message:
@@ -65,10 +65,10 @@ export default async function Command() {
       await clearAuthentication();
       token = await authorize();
       userData = await fetchUserData(token);
-      notionDatabaseId = userData.user?.notion_reading_list_db_id;
+      notionDatabaseUrl = userData.user?.notion_database_url;
 
       // Check again after re-auth
-      if (!notionDatabaseId) {
+      if (!notionDatabaseUrl) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Notion database still not configured",
@@ -78,9 +78,7 @@ export default async function Command() {
       }
     }
 
-    // Open the Notion database using notion:// protocol
-    const notionUrl = `notion://${notionDatabaseId}`;
-    await open(notionUrl);
+    await open(notionDatabaseUrl);
 
     await showToast({
       style: Toast.Style.Success,

@@ -25,14 +25,18 @@ function ViewReadingList() {
   const { data, error, isLoading } = useCachedPromise(
     async () => {
       const token = await authorize();
-      const result = await fetchRecentLinks({ token, apiUrl: API_URL });
+      const result = await fetchRecentLinks({
+        token,
+        apiUrl: API_URL,
+        limit: 10,
+        unreadOnly: true,
+      });
 
       if (!result.success) {
         throw new Error(result.error || "Failed to fetch links");
       }
 
-      // Filter to only show unread links
-      return (result.links || []).filter((link) => !link.isRead);
+      return result.links || [];
     },
     [],
     {

@@ -102,12 +102,20 @@ interface RecentLinksResponse {
 export async function fetchRecentLinks({
   token,
   apiUrl,
+  limit = 10,
+  unreadOnly = false,
 }: {
   token: string;
   apiUrl: string;
+  limit?: number;
+  unreadOnly?: boolean;
 }): Promise<RecentLinksResponse> {
   try {
-    const response = await fetch(`${apiUrl}/api/links/recent`, {
+    const params = new URLSearchParams({
+      limit: limit.toString(),
+      ...(unreadOnly && { read: "false" }),
+    });
+    const response = await fetch(`${apiUrl}/api/links/recent?${params}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
