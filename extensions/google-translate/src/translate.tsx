@@ -24,10 +24,7 @@ const DoubleWayTranslateItem: React.FC<{
   });
 
   if (isLoading) {
-    return  <List.EmptyView
-    icon={Icon.Hourglass}
-    title="Translating..."
-    />
+    return <List.EmptyView icon={Icon.Hourglass} title="Translating..." />;
   }
 
   return (
