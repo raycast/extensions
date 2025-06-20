@@ -7,7 +7,7 @@ import * as child_process from "child_process";
 import { existsSync, writeFileSync, unlinkSync } from "fs";
 import { LanguageCode } from "./languages";
 import { LanguageCodeSet } from "./types";
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 export const AUTO_DETECT = "auto";
 
@@ -110,7 +110,7 @@ export async function doubleWayTranslate(text: string, options: LanguageCodeSet)
   }
 }
 
-export async function playTTS(text: string, langTo: string, proxy?: string){
+export async function playTTS(text: string, langTo: string, proxy?: string) {
   const audioUrl = googleTTS.getAudioUrl(text, {
     lang: langTo,
     slow: false,
@@ -131,7 +131,7 @@ export async function playTTS(text: string, langTo: string, proxy?: string){
   // The options object for https.get. If 'agent' is undefined, it won't be included,
   // and https.get will use the default agent.
   const requestOptions: https.RequestOptions = {
-    agent: agent
+    agent: agent,
   };
 
   https.get(audioUrl, requestOptions, (response) => {
@@ -141,25 +141,27 @@ export async function playTTS(text: string, langTo: string, proxy?: string){
       chunks.push(chunk);
     });
 
-    response.on("end", () => {
-      const audioData = Buffer.concat(chunks);
+    response
+      .on("end", () => {
+        const audioData = Buffer.concat(chunks);
 
-      const tempFilePath = path.join(os.tmpdir(), "translation.mp3");
-      writeFileSync(tempFilePath, audioData);
+        const tempFilePath = path.join(os.tmpdir(), "translation.mp3");
+        writeFileSync(tempFilePath, audioData);
 
-      // Play the audio file using afplay
-      const afplayProcess = child_process.spawn("afplay", [tempFilePath]);
+        // Play the audio file using afplay
+        const afplayProcess = child_process.spawn("afplay", [tempFilePath]);
 
-      afplayProcess.on("exit", (code) => {
-        if (code !== 0) {
-          console.error(`Error playing audio: afplay exited with code ${code}`);
-        }
-        if (existsSync(tempFilePath)) {
-          unlinkSync(tempFilePath);
-        }
+        afplayProcess.on("exit", (code) => {
+          if (code !== 0) {
+            console.error(`Error playing audio: afplay exited with code ${code}`);
+          }
+          if (existsSync(tempFilePath)) {
+            unlinkSync(tempFilePath);
+          }
+        });
+      })
+      .on("error", (error) => {
+        console.error("Error downloading audio:", error);
       });
-    }).on("error", (error) => {
-      console.error("Error downloading audio:", error);
-    });
   });
 }
