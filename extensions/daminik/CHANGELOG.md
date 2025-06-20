@@ -1,5 +1,9 @@
 # Daminik Changelog
 
+## [Enter "URL" Instead of "Slug"] - {PR_MERGE_DATE}
+
+- Daminik Hosted instance is now disabled so a self-hosted instance w/ slug is required in **Preferences**
+
 ## [Add `Copy` Action] - 2025-03-13
 
 - New `Action` copies **Public URL** to Clipboard for easier sharing
