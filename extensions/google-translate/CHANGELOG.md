@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix uppercase ISO language codes (fix Chinese and some other languages)
+
 ## [Maintenance] - 2025-06-19
 
 - Remove country flags from languages
