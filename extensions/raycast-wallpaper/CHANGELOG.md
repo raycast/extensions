@@ -1,5 +1,10 @@
 # Raycast Wallpaper Changelog
 
+## [More Auto Switch Interval] - {PR_MERGE_DATE}
+
+- Auto Switch Raycast Wallpaper command supports more intervals
+- Set Raycast Wallpaper command respects the system appearance
+
 ## [Respect system appearance] - 2025-04-30
 
 - Support to set whether the wallpaper is Light or Dark appearance wallpaper.
