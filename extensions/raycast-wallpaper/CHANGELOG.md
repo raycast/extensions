@@ -4,6 +4,7 @@
 
 - Auto Switch Raycast Wallpaper command supports more intervals
 - Set Raycast Wallpaper command respects the system appearance
+- Optimize extension icons for macOS Tahoe
 
 ## [Respect system appearance] - 2025-04-30
 
