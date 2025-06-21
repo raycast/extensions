@@ -1,13 +1,13 @@
 import { ActionPanel, List } from "@raycast/api";
 import React, { Dispatch, SetStateAction } from "react";
-import { CountdownDate, LifeProgress } from "../types/types";
+import { CountdownDate, LifeProgressType } from "../types/types";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import { ActionAddCountdownDate, ActionRemoveCountdownDate } from "./action-countdown-date";
 
 export function LifeProgressListItem(props: {
   index: number;
   lifeProgressesLength: number;
-  lifeProgress: LifeProgress;
+  lifeProgress: LifeProgressType;
   countdownDates: CountdownDate[];
   setRefresh: Dispatch<SetStateAction<number>>;
 }) {
