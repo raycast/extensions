@@ -5,8 +5,6 @@
   "description": "Save links to your Clipmate account",
   "icon": "clipmate.png",
   "author": "clipmate.ai",
-  "owner": "clipmate.ai",
-  "access": "public",
   "categories": [
     "Productivity"
   ],
