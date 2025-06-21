@@ -198,6 +198,10 @@
             {
               "title": "List",
               "value": "List"
+            },
+            {
+              "title": "Form",
+              "value": "Form"
             }
           ]
         },
@@ -339,7 +343,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.99.2",
+    "@raycast/api": "^1.100.2",
     "fs-extra": "^11.3.0",
     "run-applescript": "^7.0.0",
     "xlsx": "^0.18.5",
@@ -348,8 +352,8 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.15.3",
-    "@types/react": "19.1.2",
+    "@types/node": "24.0.3",
+    "@types/react": "19.1.8",
     "eslint": "^9.25.1",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3"

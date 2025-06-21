@@ -33,12 +33,14 @@ export function ActionNewTemplateFileHere(props: {
       />
       <Action.Push
         title="New File with Details"
+        shortcut={{ modifiers: ["cmd"], key: "n" }}
         icon={Icon.NewDocument}
         target={
           <NewFileWithDetails
             newFileType={{ section: "Template", index: index }}
             templateFiles={templateFiles}
             folder={folder}
+            isLoading={false}
           />
         }
       />

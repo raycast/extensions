@@ -1,5 +1,9 @@
 # Easy New File Changelog
 
+## [Form Layout] - {PR_MERGE_DATE}
+
+- New File with Template command now supports Form layout
+
 ## [Create Dot Files] - 2025-05-23
 
 - New File Now command support Dot file type

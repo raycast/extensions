@@ -9,6 +9,7 @@ import { NewFileHereListLayout } from "./components/new-file-here-list-layout";
 import { NewFileHereGridLayout } from "./components/new-file-here-grid-layout";
 import { rtfPreContent } from "./utils/constants";
 import { createdAction, layout } from "./types/preferences";
+import NewFileWithDetails from "./new-file-with-details";
 
 export default function NewFileWithTemplate() {
   const [refresh, setRefresh] = useState<number>(0);
@@ -17,24 +18,37 @@ export default function NewFileWithTemplate() {
 
   //hooks
   const { folder, templateFiles, isLoading } = getTemplateFile(refresh);
-
-  return layout === "List" ? (
-    <NewFileHereListLayout
-      navigationTitle={navigationTitle}
-      isLoading={isLoading}
-      templateFiles={templateFiles}
-      folder={folder}
-      setRefresh={setRefresh}
-    />
-  ) : (
-    <NewFileHereGridLayout
-      navigationTitle={navigationTitle}
-      isLoading={isLoading}
-      templateFiles={templateFiles}
-      folder={folder}
-      setRefresh={setRefresh}
-    />
-  );
+  switch (layout) {
+    case "List":
+      return (
+        <NewFileHereListLayout
+          navigationTitle={navigationTitle}
+          isLoading={isLoading}
+          templateFiles={templateFiles}
+          folder={folder}
+          setRefresh={setRefresh}
+        />
+      );
+    case "Form":
+      return (
+        <NewFileWithDetails
+          newFileType={{ section: templateFiles.length > 0 ? "Template" : "Document", index: 0 }}
+          templateFiles={templateFiles}
+          folder={folder}
+          isLoading={isLoading}
+        />
+      );
+    default:
+      return (
+        <NewFileHereGridLayout
+          navigationTitle={navigationTitle}
+          isLoading={isLoading}
+          templateFiles={templateFiles}
+          folder={folder}
+          setRefresh={setRefresh}
+        />
+      );
+  }
 }
 
 export function buildFileName(path: string, name: string, extension: string) {

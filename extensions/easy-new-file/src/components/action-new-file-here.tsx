@@ -37,7 +37,14 @@ export function ActionNewFileHere(props: {
         title="New File with Details"
         shortcut={{ modifiers: ["cmd"], key: "n" }}
         icon={Icon.NewDocument}
-        target={<NewFileWithDetails newFileType={newFileType} templateFiles={templateFiles} folder={folder} />}
+        target={
+          <NewFileWithDetails
+            newFileType={newFileType}
+            templateFiles={templateFiles}
+            folder={folder}
+            isLoading={false}
+          />
+        }
       />
       {folder !== "Desktop" && (
         <Action
