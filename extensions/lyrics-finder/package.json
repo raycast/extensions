@@ -12,14 +12,37 @@
   "commands": [
     {
       "name": "search-lyrics",
-      "title": "Lyrics",
+      "title": "Lyrics Finder",
       "description": "Search for song lyrics with autocomplete suggestions",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "geniusApiKey",
+      "title": "Genius API Key",
+      "description": "Get your API key from https://genius.com/api-clients",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "spotifyClientId",
+      "title": "Spotify Client ID",
+      "description": "Get your credentials from https://developer.spotify.com/dashboard",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "spotifyClientSecret",
+      "title": "Spotify Client Secret",
+      "description": "Get your credentials from https://developer.spotify.com/dashboard",
+      "type": "password",
+      "required": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.83.2",
-    "@types/react-dom": "^18.3.7",
+    "@raycast/utils": "^2.0.1",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0-rc.12",
     "genius-lyrics": "^4.4.7",
@@ -29,6 +52,7 @@
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
     "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"

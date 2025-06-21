@@ -1,15 +1,25 @@
 // @ts-nocheck
 import React, { useState, useEffect } from "react";
-import { Action, ActionPanel, Detail, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, List, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import SpotifyWebApi from "spotify-web-api-node";
 
 // Import genius-lyrics
 import { Client as GeniusClient } from "genius-lyrics";
 
+interface Preferences {
+  geniusApiKey?: string;
+  spotifyClientId: string;
+  spotifyClientSecret: string;
+}
+
+// Get user preferences
+const preferences = getPreferenceValues<Preferences>();
+
 // Spotify API configuration
 const spotifyApi = new SpotifyWebApi({
-  clientId: "1ccb4f5713f8424986d613b49e337a73",
-  clientSecret: "e941a3e941aa4e4d98b686c72e9d223e",
+  clientId: preferences.spotifyClientId,
+  clientSecret: preferences.spotifyClientSecret,
 });
 
 let spotifyTokenExpiry = 0;
@@ -340,9 +350,7 @@ export default function SearchLyrics() {
                   artistMap.set(artistName, {
                     id: artistId.toString(),
                     name: artistName,
-                    url:
-                      song.artist.url ||
-                      `https://genius.com/artists/${artistName.replace(/\s+/g, "-")}`,
+                    url: song.artist.url || `https://genius.com/artists/${artistName.replace(/\s+/g, "-")}`,
                     thumbnail: song.artist.image_url || song.thumbnail || "👨‍🎤",
                     fullArtist: song.artist,
                   });
@@ -362,9 +370,7 @@ export default function SearchLyrics() {
             console.log(`🎵 Getting top tracks and new releases for: ${selectedArtist.name}`);
 
             // Try Spotify first for artist's top tracks and new releases
-            const spotifyTracksAndReleases = await getSpotifyArtistTopTracksAndNewReleases(
-              selectedArtist.id
-            );
+            const spotifyTracksAndReleases = await getSpotifyArtistTopTracksAndNewReleases(selectedArtist.id);
             if (spotifyTracksAndReleases.length > 0) {
               searchResults = spotifyTracksAndReleases;
               console.log(
@@ -410,8 +416,7 @@ export default function SearchLyrics() {
                   const client = new GeniusClient();
                   const searches = await client.songs.search(selectedArtist.name);
                   const artistSongs = searches.filter(
-                    (song: any) =>
-                      song.artist.name.toLowerCase() === selectedArtist.name.toLowerCase()
+                    (song: any) => song.artist.name.toLowerCase() === selectedArtist.name.toLowerCase()
                   );
 
                   searchResults = artistSongs.slice(0, 100).map((song: any) => ({
@@ -437,11 +442,7 @@ export default function SearchLyrics() {
         console.error("Search error:", error);
         setSongs([]);
         setArtists([]);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Search Error",
-          message: `Failed to search for ${searchMode}s. Please try again.`,
-        });
+        showFailureToast("Search Error", `Failed to search for ${searchMode}s. Please try again.`);
       } finally {
         setIsLoading(false);
       }
@@ -532,9 +533,7 @@ export default function SearchLyrics() {
           title: artist.name,
           subtitle: subtitle.length > 0 ? subtitle.join(" • ") : "Artist",
           icon: artist.thumbnail || "👨‍🎤",
-          accessories: [
-            ...(artist.followers ? [{ text: `${(artist.followers / 1000000).toFixed(1)}M` }] : []),
-          ],
+          accessories: [...(artist.followers ? [{ text: `${(artist.followers / 1000000).toFixed(1)}M` }] : [])],
           actions: React.createElement(
             ActionPanel as any,
             {},
@@ -699,7 +698,7 @@ function LyricsView({ song, onBack }: { song: Song; onBack: () => void }) {
             // For Spotify songs or when Genius object is not available, search Genius by title/artist
             console.log(`🔍 Searching Genius for: "${song.title}" by "${song.artist.name}"`);
             if (GeniusClient) {
-              const client = new GeniusClient();
+              const client = preferences.geniusApiKey ? new GeniusClient(preferences.geniusApiKey) : new GeniusClient();
               const searchResults = await client.songs.search(`${song.title} ${song.artist.name}`);
 
               if (searchResults && searchResults.length > 0) {
@@ -743,11 +742,7 @@ function LyricsView({ song, onBack }: { song: Song; onBack: () => void }) {
       } catch (err: any) {
         console.error("Error fetching lyrics:", err);
         setError(err.message || "Failed to fetch lyrics. Please try again.");
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: err.message || "Failed to fetch lyrics",
-        });
+        showFailureToast("Error", err.message || "Failed to fetch lyrics");
       } finally {
         setIsLoading(false);
       }
