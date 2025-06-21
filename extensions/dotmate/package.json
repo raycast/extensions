@@ -25,22 +25,29 @@
   ],
   "commands": [
     {
-      "name": "collect-configs",
-      "title": "Collect Configs",
-      "subtitle": "Collects Config Files in Repo",
+      "name": "show-commands",
+      "title": "Dotmate",
+      "subtitle": "List and Run Available Commands",
+      "description": "Displays all available commands that can be run",
+      "mode": "view"
+    },
+    {
+      "name": "backup-configs",
+      "title": "Backup Configs",
+      "subtitle": "Backup Config Files in Repo",
       "description": "Backup local config files to repo",
       "mode": "no-view"
     },
     {
-      "name": "deploy-configs",
-      "title": "Deploy Configs",
-      "subtitle": "Deploys Config Files to Local",
-      "description": "Deploys repo config to local machine",
+      "name": "restore-configs",
+      "title": "Restore Configs",
+      "subtitle": "Restore Config Files to Local",
+      "description": "Restore repo config to local machine",
       "mode": "no-view"
     },
     {
-      "name": "diff-configs",
-      "title": "Diff Configs",
+      "name": "show-diffs",
+      "title": "Show Diffs",
       "subtitle": "Displays Diffs Among Config",
       "description": "Displays diffs between local and repo paths",
       "mode": "view"
