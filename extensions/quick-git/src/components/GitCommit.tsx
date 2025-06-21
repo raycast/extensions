@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useExec, useForm } from "@raycast/utils";
+import { useRepoStorage } from "../hooks/useRepo.js";
 
 interface Props {
-  repo: string;
   checkStatus: () => void;
 }
 
-export const GitCommit = ({ repo, checkStatus }: Props) => {
+export function GitCommit({ checkStatus }: Props) {
+  const repo = useRepoStorage();
   const { pop } = useNavigation();
   const [commitMsg, setCommitMsg] = useState("");
-  const { revalidate: commit } = useExec("git", ["commit", "-m", commitMsg], {
-    cwd: repo,
+  const { revalidate } = useExec("git", ["commit", "-m", commitMsg], {
+    cwd: repo.value,
     execute: false,
     onData: () => {
       checkStatus();
@@ -23,7 +24,7 @@ export const GitCommit = ({ repo, checkStatus }: Props) => {
     },
   });
   const { handleSubmit, itemProps } = useForm({
-    onSubmit: commit,
+    onSubmit: revalidate,
     validation: {
       commitMsg: FormValidation.Required,
     },
@@ -47,4 +48,4 @@ export const GitCommit = ({ repo, checkStatus }: Props) => {
       />
     </Form>
   );
-};
+}

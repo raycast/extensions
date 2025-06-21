@@ -81,10 +81,11 @@ const CheckLogin: React.FC<CheckLoginProps> = ({ onBack }) => {
     <List.EmptyView
       title="Mozilla VPN Login Required"
       description="Please log in using the Mozilla VPN application. Press Enter to open the app."
-      icon="Icon.ExclamationMark"
+      icon={Icon.ExclamationMark}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
+            {/* eslint-disable-next-line @raycast/prefer-title-case */}
             <Action title="Open Mozilla VPN" onAction={openMozillaVPNApp} />
           </ActionPanel.Section>
 
