@@ -38,11 +38,11 @@ export default async function Command() {
     const enableCopyToClipboard = preferences.enableCopyToClipboard || false;
 
     // Get the selected text from any active application
-    const selectedText = await getSelectedText().catch(error => {
+    const selectedText = await getSelectedText().catch((error) => {
       console.error("Error getting selected text:", error);
       return "";
     });
-    
+
     if (!selectedText || selectedText.trim().length === 0) {
       await showExtendedHUD("No text selected. Please select text to translate.", 2000);
       return;
@@ -53,7 +53,7 @@ export default async function Command() {
     // Use unofficial Google Translate API
     const response = await fetch(
       `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLanguage}&tl=${targetLanguage}&dt=t&q=${encodeURIComponent(selectedText)}`,
-    ).catch(error => {
+    ).catch((error) => {
       console.error("Network error during translation:", error);
       throw new Error("Network error. Please check your internet connection.");
     });
@@ -62,14 +62,14 @@ export default async function Command() {
       throw new Error(`Translation API error: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json().catch(error => {
+    const data = await response.json().catch((error) => {
       console.error("Error parsing translation response:", error);
       throw new Error("Failed to parse translation response");
     });
 
     if (data && data[0] && data[0][0] && data[0][0][0]) {
       const result = data[0][0][0];
-      
+
       // Copy to clipboard if enabled
       if (enableCopyToClipboard) {
         await Clipboard.copy(result);
