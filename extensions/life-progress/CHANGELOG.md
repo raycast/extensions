@@ -1,5 +1,10 @@
 # Life Progress Changelog
 
+## [Menubar Command] - {PR_MERGE_DATE}
+
+- Add a new command to show life progress in the menu bar
+- Optimize extension icons for macOS Tahoe
+
 ## [Refactor extension] - 2024-09-30
 
 - Refactor extension to simplify the code and logic
