@@ -1,12 +1,9 @@
 import { existsSync, readFileSync, copyFileSync, mkdirSync } from "fs";
 import { dirname } from "path";
 import { DotFile } from "./dotfiles";
+import { LaunchType, launchCommand } from "@raycast/api";
 
-export type OperationResult =
-  | "success"
-  | "skip_missing"
-  | "skip_identical"
-  | "error";
+export type OperationResult = "success" | "skip_missing" | "skip_identical" | "error";
 
 export function filesAreIdentical(path1: string, path2: string): boolean {
   try {
@@ -50,4 +47,12 @@ export function getFileStatus(dotfile: DotFile): string {
   } else {
     return "❌"; // Missing everywhere
   }
+}
+
+export function runCommand(commandName: string): void {
+  // Launch a command within the same extension
+  launchCommand({
+    name: commandName,
+    type: LaunchType.UserInitiated,
+  });
 }
