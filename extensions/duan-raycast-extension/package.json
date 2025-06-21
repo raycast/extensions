@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "duan-raycast-extension",
+  "title": "Duan: Shorten and Manage Links",
+  "description": "Shorten and manage links with your own domain, powered by Cloudflare Workers and D1 database.",
+  "icon": "extension-icon.png",
+  "author": "insv23",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "shorten-link",
+      "title": "Shorten Link",
+      "subtitle": "Create a new short link",
+      "description": "Shorten link with your own domain.",
+      "mode": "view"
+    },
+    {
+      "name": "list-links",
+      "title": "List Links",
+      "subtitle": "List all your shortened links",
+      "description": "View and manage your shortened links.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.96.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "host",
+      "type": "textfield",
+      "required": true,
+      "title": "API Host",
+      "description": "Enter the API host URL",
+      "placeholder": "https://your-domain.com (*.workers.dev not works)",
+      "default": ""
+    },
+    {
+      "name": "token",
+      "type": "textfield",
+      "required": true,
+      "title": "API Token",
+      "description": "Enter your API token",
+      "placeholder": "Enter your duan API_TOKEN",
+      "default": ""
+    },
+    {
+      "name": "slugChars",
+      "type": "textfield",
+      "required": false,
+      "title": "Slug Characters",
+      "description": "Characters to use when generating random slugs",
+      "placeholder": "Enter characters to use for slug generation",
+      "default": "abcdefghijkmnpqrstuvwxy23456789"
+    },
+    {
+      "name": "slugLength",
+      "type": "textfield",
+      "required": false,
+      "title": "Slug Length",
+      "description": "Length of generated random slugs",
+      "placeholder": "Enter a number",
+      "default": "4"
+    }
+  ]
+}
