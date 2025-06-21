@@ -7,7 +7,8 @@
   "author": "vitoorgomes",
   "contributors": [
     "hughlaw",
-    "iwex"
+    "iwex",
+    "tim_gailey"
   ],
   "license": "MIT",
   "commands": [
@@ -15,15 +16,22 @@
       "name": "default-profile",
       "title": "Create Meet",
       "subtitle": "Google Meet",
-      "description": "Creates a new meeting room with your default browser and copy the link to your clipboard.",
+      "description": "Creates a new meeting room with your default browser and copies the link to your clipboard.",
       "mode": "no-view"
     },
     {
       "name": "manual-profile",
       "title": "Create Meet with Specified Profile",
       "subtitle": "Google Meet",
-      "description": "Creates a new meeting room with your default browser and copy the link to your clipboard.",
+      "description": "Creates a new meeting room with your default browser and copies the link to your clipboard.",
       "mode": "view"
+    },
+    {
+      "name": "default-profile-and-refocus",
+      "title": "Create Meet and Refocus",
+      "subtitle": "Google Meet",
+      "description": "Creates a new meeting room with your default browser, copies the link, and refocuses the browser.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -36,26 +44,29 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.1",
-    "@raycast/utils": "^1.9.0",
-    "run-applescript": "^6.1.0"
+    "@raycast/api": "latest",
+    "@raycast/utils": "latest",
+    "run-applescript": "latest"
   },
   "devDependencies": {
-    "@types/node": "~18.8.5",
-    "@types/react": "^18.2.17",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.8.8",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.9.5"
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "eslint": "latest",
+    "eslint-config-prettier": "latest",
+    "globals": "latest",
+    "prettier": "latest",
+    "react-devtools": "latest",
+    "typescript": "latest",
+    "typescript-eslint": "^8.34.1"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

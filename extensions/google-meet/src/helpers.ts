@@ -1,13 +1,13 @@
-import { getPreferenceValues, open } from "@raycast/api";
+import { getPreferenceValues, open, environment, BrowserExtension } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import {
   getOpenedBrowserScript,
   getOpenedUrlForArc,
   getOpenedUrlForFirefox,
   getOpenedUrlsScript,
+  getSwitchToPreviousAppScript,
+  SupportedBrowsers,
 } from "./utils/scripts";
-
-import type { SupportedBrowsers } from "./utils/scripts";
 
 const openMeetTabUrl = "https://meet.google.com/new";
 
@@ -37,7 +37,7 @@ async function getOpenTabs(): Promise<string> {
   return await runAppleScript(getOpenedUrlsScript(browserName));
 }
 
-export async function getOpenedBrowser() {
+export async function getOpenedBrowser(): Promise<SupportedBrowsers> {
   const preferredBrowser = getPreferredBrowser();
 
   if (preferredBrowser?.name) {
@@ -47,32 +47,53 @@ export async function getOpenedBrowser() {
   return (await runAppleScript(getOpenedBrowserScript)) as SupportedBrowsers;
 }
 
-/**
- * This needs be a recursive function because at first meet URL is not generated
- * but it depends on the browser to generate the correct URL, since it would not
- * be optimal to time it (setTimeout or something like that) because it's not possible
- * to guess if it would take a long time or not to generate the correct URL, being
- * recursive works pretty ok, since it's not a big workload to process.
- */
-export async function getMeetTab(): Promise<string> {
+async function poll<T>(fn: () => Promise<T | undefined>, retries = 10, delay = 500): Promise<T> {
+  for (let i = 0; i < retries; i++) {
+    const result = await fn();
+    if (result) {
+      return result;
+    }
+    await new Promise((r) => setTimeout(r, delay));
+  }
+  throw new Error("Could not get Google Meet URL after multiple attempts.");
+}
+
+async function findMeetUrlWithAppleScript(): Promise<string | undefined> {
   const activeUrls = await getOpenTabs();
   const meetTab = activeUrls.split(",").find((url) => url.includes("meet.google.com"));
 
-  if (meetTab?.includes("/new")) {
-    return await getMeetTab();
+  if (meetTab && !meetTab.includes("/new")) {
+    return meetTab;
   }
+}
 
-  return meetTab as string;
+async function findMeetUrlWithBrowserExtension(): Promise<string | undefined> {
+  const tabs = await BrowserExtension.getTabs();
+  const meetTab = tabs.find((tab) => tab.url.includes("meet.google.com"));
+
+  if (meetTab && !meetTab.url.includes("/new")) {
+    return meetTab.url;
+  }
+}
+
+export async function getMeetTab(): Promise<string> {
+  if (environment.canAccess(BrowserExtension)) {
+    return poll(findMeetUrlWithBrowserExtension);
+  } else {
+    return poll(findMeetUrlWithAppleScript);
+  }
 }
 
 export async function openMeetTabDefaultProfile(): Promise<void> {
   const preferredBrowser = getPreferredBrowser();
-
   await open(openMeetTabUrl, preferredBrowser?.name);
 }
 
 export async function openMeetTabSelectedProfile(profile: string): Promise<void> {
   const preferredBrowser = getPreferredBrowser();
-
   await open(`${openMeetTabUrl}?authuser=${profile}`, preferredBrowser?.name);
+}
+
+export async function switchToPreviousApp() {
+  return await runAppleScript(getSwitchToPreviousAppScript());
 }

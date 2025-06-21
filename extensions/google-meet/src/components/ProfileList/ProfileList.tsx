@@ -14,7 +14,7 @@ export const ProfileList: FC = () => {
 
       await Clipboard.copy(meetTab.split("?")[0]);
       await showHUD("Copied meet link to clipboard");
-    } catch (err) {
+    } catch (_err) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't copy to clipboard",
@@ -31,7 +31,7 @@ export const ProfileList: FC = () => {
         title: "Profile removed!",
       });
     },
-    [onRemoveItem]
+    [onRemoveItem],
   );
 
   return (
