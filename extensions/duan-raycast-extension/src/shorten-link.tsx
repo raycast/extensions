@@ -85,7 +85,7 @@ export default function Command() {
       enableDrafts
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Short Link" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Short Link" icon={Icon.Plus} onSubmit={handleSubmit} />
           <Action
             title="Generate Random Slug"
             icon={Icon.Wand}
