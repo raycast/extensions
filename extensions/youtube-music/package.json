@@ -62,6 +62,7 @@
       "subtitle": "YouTube Music",
       "description": "Shows the currently playing track information with controls.",
       "mode": "view",
+      "required": true,
       "preferences": [
         {
           "name": "renderInterval",
