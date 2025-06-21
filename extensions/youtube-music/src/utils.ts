@@ -157,11 +157,8 @@ async function openRelevantYoutube() {
   if (urlPreference === "youtube") {
     url = YoutubeUrl.Youtube;
     message = "Opening YouTube...";
-  } else if (urlPreference === "both") {
-    // Default to YouTube Music, but could be made smarter if needed
-    url = YoutubeUrl.Music;
-    message = "Opening YouTube Music...";
   }
+  // For 'both' and 'music' cases, default to YouTube Music
 
   await showHUD(message);
   await open(url, browser.name.toLowerCase());
