@@ -19,12 +19,12 @@ export function useCacheHelpers() {
 
       setProfiles((prevState) => [...prevState, profile]);
     },
-    [profiles, setProfiles]
+    [profiles, setProfiles],
   );
 
   const onRemoveItem = useCallback(
     (emailToDelete: string) => setProfiles((prevState) => prevState.filter(({ email }) => email !== emailToDelete)),
-    [setProfiles]
+    [setProfiles],
   );
 
   return {

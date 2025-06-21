@@ -17,7 +17,7 @@ export const ProfileForm = ({ onFinish }: ProfileFormProps) => {
           style: Toast.Style.Success,
           title: "Profile created!",
         });
-      } catch (err) {
+      } catch (_err) {
         showToast({
           style: Toast.Style.Failure,
           title: "Profile already exists!",

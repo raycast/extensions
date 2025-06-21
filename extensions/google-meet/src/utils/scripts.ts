@@ -6,6 +6,16 @@
  * @returns Google Meet url i.e `https://meet.google.com/pen-adzt-swz`
  */
 export function getOpenedUrlsScript(browserName: SupportedBrowsers): string {
+  if (browserName.includes("Chrome") || browserName.includes("Brave") || browserName.includes("Edge")) {
+    return `
+      tell application "${browserName}"
+        tell active tab of front window
+          return execute javascript "document.URL"
+        end tell
+      end tell
+    `;
+  }
+
   return `
     tell application "${browserName}"
       set currentTab to active tab of front window
@@ -91,3 +101,11 @@ export const getOpenedBrowserScript = `
 `;
 
 export type SupportedBrowsers = (typeof supportedBrowsers)[number];
+
+export function getSwitchToPreviousAppScript() {
+  return `
+    tell application "System Events"
+      keystroke tab using {command down}
+    end tell
+  `;
+}
