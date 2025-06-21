@@ -1,5 +1,8 @@
 # YouTube Music Changelog
 
+## [Now Playing View] - 2025-06-21
+- Added: Now Playing View - YoutubeMusic only
+
 ## [New Command and Fix] - 2025-04-28
 
 - Fixed: Like command no longer removes like when song is already liked
