@@ -1,31 +1,8 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
-import { getAvatarIcon, useFetch } from "@raycast/utils";
+import { getAvatarIcon, useCachedPromise } from "@raycast/utils";
+import { type Card, getQuestions } from "./lib/api";
 
 const preferences = getPreferenceValues<Preferences.SearchQuestions>();
-
-interface Card {
-  id: number;
-  name: string;
-  description: string | null;
-  created_at: string;
-  updated_at: string;
-  archived: boolean;
-  view_count: number;
-  display: "bar" | "table" | "scalar" | "line" | "pie" | (string & Record<string, never>);
-  creator: {
-    email: string;
-    first_name: string;
-    last_login: string;
-    is_qbnewb: boolean;
-    is_superuser: boolean;
-    id: number;
-    last_name: string;
-    date_joined: string;
-    common_name: string;
-  };
-}
-
-const endpoint = new URL("/api/card", preferences.instanceUrl);
 
 function getQuestionIcon(card: Card): Icon {
   switch (card.display) {
@@ -45,13 +22,7 @@ function getQuestionIcon(card: Card): Icon {
 }
 
 export default function SearchQuestions() {
-  const { data: cards, isLoading } = useFetch<Card[]>(endpoint.toString(), {
-    method: "GET",
-    headers: {
-      accept: "application/json",
-      "x-api-key": preferences.apiToken,
-    },
-  });
+  const { data: cards, isLoading } = useCachedPromise(getQuestions);
 
   return (
     <List searchBarPlaceholder="Search questions..." isLoading={isLoading}>
@@ -75,6 +46,9 @@ export default function SearchQuestions() {
                   icon: getQuestionIcon(card),
                 }}
               />
+              <ActionPanel.Section>
+                <Action.CopyToClipboard title="Copy ID" content={card.id.toString()} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
