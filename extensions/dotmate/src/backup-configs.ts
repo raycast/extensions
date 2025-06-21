@@ -3,14 +3,14 @@ import { existsSync } from "fs";
 import { DOTFILES } from "./dotfiles";
 import { filesAreIdentical, copyFile, OperationResult } from "./utils";
 
-function deployDotfile(dotfile: (typeof DOTFILES)[0]): OperationResult {
-  if (!existsSync(dotfile.repoPath)) {
-    console.log(`⚠️  Skipping ${dotfile.name} (doesn't exist in repo)`);
+function backupDotfile(dotfile: (typeof DOTFILES)[0]): OperationResult {
+  if (!existsSync(dotfile.homePath)) {
+    console.log(`⚠️  Skipping ${dotfile.name} (doesn't exist in home)`);
     return "skip_missing";
   }
 
-  // Check if files are identical
-  if (existsSync(dotfile.homePath)) {
+  if (existsSync(dotfile.repoPath)) {
+    // Check if files are identical
     if (filesAreIdentical(dotfile.repoPath, dotfile.homePath)) {
       console.log(`⏭️  Skipping ${dotfile.name} (files are identical)`);
       return "skip_identical";
@@ -18,11 +18,11 @@ function deployDotfile(dotfile: (typeof DOTFILES)[0]): OperationResult {
   }
 
   try {
-    copyFile(dotfile.repoPath, dotfile.homePath);
-    console.log(`✅ ${dotfile.name} → ${dotfile.homePath}`);
+    copyFile(dotfile.homePath, dotfile.repoPath);
+    console.log(`✅ ${dotfile.homePath} → ${dotfile.name}`);
     return "success";
   } catch (error) {
-    console.log(`❌ Failed to deploy ${dotfile.name}: ${error}`);
+    console.log(`❌ Failed to backup ${dotfile.name}: ${error}`);
     return "error";
   }
 }
@@ -31,17 +31,17 @@ export default async function main() {
   try {
     await showToast({
       style: Toast.Style.Animated,
-      title: "Deploying dotfiles...",
-      message: "Copying from repo to home directory",
+      title: "Backing up dotfiles...",
+      message: "Backing up from home directory to repo",
     });
 
-    console.log("🚀 Deploying dotfiles from repo -> home directory...");
+    console.log("📦 Backing up dotfiles from home directory -> repo...");
 
     let successCount = 0;
     let skipCount = 0;
 
     for (const dotfile of DOTFILES) {
-      const result = deployDotfile(dotfile);
+      const result = backupDotfile(dotfile);
       if (result === "success") {
         successCount++;
       } else if (result === "skip_missing" || result === "skip_identical") {
@@ -49,14 +49,14 @@ export default async function main() {
       }
     }
 
-    const message = `Deployment complete! ${successCount} files deployed, ${skipCount} skipped.`;
+    const message = `Backup complete! ${successCount} files backed up, ${skipCount} skipped.`;
     console.log(`🎉 ${message}`);
 
     await showHUD(`🎉 ${message}`);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Deployment failed",
+      title: "Backup failed",
       message: String(error),
     });
   }
