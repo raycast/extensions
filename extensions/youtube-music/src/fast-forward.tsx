@@ -1,7 +1,7 @@
 import { Toast, closeMainWindow, getPreferenceValues, openExtensionPreferences, showToast } from "@raycast/api";
 import { runJSInYouTubeMusicTab } from "./utils";
 
-export default async () => {
+export default async (closeWindow = true) => {
   const secValue = getPreferenceValues<{ "ff-rew-seconds": string }>()["ff-rew-seconds"];
   if (secValue === "" || Number.isNaN(parseInt(secValue, 10))) {
     showToast({
@@ -18,6 +18,8 @@ export default async () => {
   const seconds = parseInt(secValue, 10);
   if (await runJSInYouTubeMusicTab(`document.querySelector('video').currentTime += ${seconds};`)) {
     // allow ability to find particular spot
-    setTimeout(closeMainWindow, 500);
+    if (closeWindow) {
+      setTimeout(closeMainWindow, 500);
+    }
   }
 };

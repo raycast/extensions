@@ -57,6 +57,22 @@
   ],
   "commands": [
     {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "subtitle": "YouTube Music",
+      "description": "Shows the currently playing track information with controls.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "renderInterval",
+          "title": "Now Playing Refresh Interval (ms)",
+          "description": "Interval in milliseconds for refreshing the Now Playing panel.",
+          "type": "textfield",
+          "default": "500"
+        }
+      ]
+    },
+    {
       "name": "play-pause",
       "title": "Toggle Play/Pause",
       "subtitle": "YouTube Music",

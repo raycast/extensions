@@ -1,4 +1,4 @@
-import { Application, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Application, Toast, getPreferenceValues, open, showHUD, showToast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 type SupportedBrowsers = "Safari" | "Chrome" | "YouTube Music" | "Microsoft Edge";
@@ -73,10 +73,16 @@ export async function runJSInYouTubeMusicTab(code: string): Promise<string | fal
     `);
 
     if (result === "false") {
-      await showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "No matching YouTube tab found",
         message: "Check your browser and URL preference in settings.",
+        primaryAction: {
+          title: "Open YouTube Music",
+          onAction: (t: Toast) => {
+            openRelevantYoutube();
+          },
+        },
       });
       return false;
     }
@@ -115,3 +121,44 @@ export const goToChapter = {
     previousChapter?.querySelector('a')?.click();
   })();`,
 };
+
+/**
+ * Resizes YouTube/YouTube Music thumbnail URLs to specified dimensions.
+ * @param imageUrl - The original image URL
+ * @param width - Desired width
+ * @param height - Desired height
+ * @returns The resized image URL
+ */
+export function resizeYouTubeThumbnail(imageUrl: string | undefined, width: number, height: number): string | undefined {
+  if (!imageUrl) return undefined;
+  
+  // Replace existing width-height patterns with new dimensions
+  return imageUrl.replace(/w\d+-h\d+/g, `w${width}-h${height}`);
+}
+
+enum YoutubeUrl {
+  Music = "https://music.youtube.com",
+  Youtube = "https://www.youtube.com",
+}
+
+/**
+ * Opens the relevant YouTube or YouTube Music website in the user's preferred browser.
+ */
+async function openRelevantYoutube() {
+  const preferences = getPreferenceValues<Preferences>();
+  const { browser, urlPreference } = preferences;
+
+  let url = YoutubeUrl.Music;
+  let message = "Opening YouTube Music...";
+  if (urlPreference === "youtube") {
+    url = YoutubeUrl.Youtube;
+    message = "Opening YouTube...";
+  } else if (urlPreference === "both") {
+    // Default to YouTube Music, but could be made smarter if needed
+    url = YoutubeUrl.Music;
+    message = "Opening YouTube Music...";
+  }
+
+  await showHUD(message);
+  await open(url, browser.name.toLowerCase());
+}
