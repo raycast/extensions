@@ -79,7 +79,7 @@ export async function runJSInYouTubeMusicTab(code: string): Promise<string | fal
         message: "Check your browser and URL preference in settings.",
         primaryAction: {
           title: "Open YouTube Music",
-          onAction: (t: Toast) => {
+          onAction: () => {
             openRelevantYoutube();
           },
         },
