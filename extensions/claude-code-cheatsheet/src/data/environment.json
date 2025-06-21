@@ -234,6 +234,14 @@
       "usage": "export MCP_TOOL_TIMEOUT=\"60000\"",
       "category": "environment",
       "tags": ["mcp", "timeout", "tool"]
+    },
+    {
+      "id": "env-max-mcp-output-tokens",
+      "name": "MAX_MCP_OUTPUT_TOKENS",
+      "description": "Maximum number of tokens allowed in MCP tool responses (default: 25000).",
+      "usage": "export MAX_MCP_OUTPUT_TOKENS=\"25000\"",
+      "category": "environment",
+      "tags": ["limit", "mcp", "tokens"]
     }
   ]
 }

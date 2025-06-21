@@ -1,5 +1,6 @@
 .cursor/
 docs/
+_docs/
 .coderabbit.yaml
 .claude/
 CLAUDE.md

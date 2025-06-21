@@ -4,6 +4,15 @@
   "description": "Slash commands available in Claude Code",
   "commands": [
     {
+      "id": "add-dir",
+      "name": "/add-dir",
+      "description": "Add additional working directories to the current Claude Code session for broader project context.",
+      "usage": "/add-dir",
+      "example": "/add-dir",
+      "category": "slash",
+      "tags": ["directory", "project", "workspace"]
+    },
+    {
       "id": "bug",
       "name": "/bug",
       "description": "Initiates a bug report workflow, helping you to capture and submit issues you encounter.",
