@@ -3,7 +3,11 @@ import { dirname } from "path";
 import { DotFile } from "./dotfiles";
 import { LaunchType, launchCommand } from "@raycast/api";
 
-export type OperationResult = "success" | "skip_missing" | "skip_identical" | "error";
+export type OperationResult =
+  | "success"
+  | "skip_missing"
+  | "skip_identical"
+  | "error";
 
 export function filesAreIdentical(path1: string, path2: string): boolean {
   try {
