@@ -2,6 +2,8 @@ import { Detail, List, Color, Icon, Action, ActionPanel } from "@raycast/api";
 import getScoresAndSchedule from "../utils/getSchedule";
 import sportInfo from "../utils/getSportInfo";
 import getCountryCode from "../utils/getF1RaceFlag";
+import Plays from "../views/playbyplay";
+import TeamDetail from "../views/teamDetail";
 
 interface DayItems {
   title: string;
@@ -168,6 +170,40 @@ export default function DisplayScoresAndSchedule() {
         }
         actions={
           <ActionPanel>
+            {currentLeague !== "f1" &&
+              currentSport !== "soccer" &&
+              game?.competitions?.[0]?.status?.type?.state === "in" && (
+                <Action.Push title="View Play by Play" icon={Icon.Stopwatch} target={<Plays gameId={game.id} />} />
+              )}
+
+            {currentLeague !== "f1" &&
+              currentSport !== "soccer" &&
+              game?.competitions?.[0]?.status?.type?.state === "post" && (
+                <>
+                  <Action.Push title="View Play by Play" icon={Icon.Stopwatch} target={<Plays gameId={game.id} />} />
+                </>
+              )}
+
+            {currentLeague !== "f1" && (
+              <>
+                <Action.OpenInBrowser
+                  title="View Game Details on ESPN"
+                  url={`${game?.links?.[0]?.href ?? `https://www.espn.com/${currentLeague}`}`}
+                />
+
+                <Action.Push
+                  title={`View ${game?.competitions?.[0]?.competitors?.[1]?.team?.displayName ?? "Away"} Team Details`}
+                  icon={Icon.List}
+                  target={<TeamDetail teamId={game?.competitions?.[0]?.competitors?.[1]?.team?.id ?? ""} />}
+                />
+                <Action.Push
+                  title={`View ${game?.competitions?.[0]?.competitors?.[0]?.team?.displayName ?? "Home"} Team Details`}
+                  icon={Icon.List}
+                  target={<TeamDetail teamId={game?.competitions?.[0]?.competitors?.[0]?.team?.id ?? ""} />}
+                />
+              </>
+            )}
+
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
@@ -175,42 +211,15 @@ export default function DisplayScoresAndSchedule() {
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />
 
-            {currentLeague !== "f1" ? (
-              <>
-                <Action.OpenInBrowser
-                  title="View Game Details on ESPN"
-                  url={`${game?.links?.[0]?.href ?? `https://www.espn.com/${currentLeague}`}`}
-                />
-
-                {game?.competitions?.[0]?.competitors?.[1]?.team.links?.length > 0 && (
-                  <Action.OpenInBrowser
-                    title={`View ${game?.competitions?.[0]?.competitors?.[1]?.team?.displayName ?? "Away"} Team Details`}
-                    url={
-                      game?.competitions?.[0]?.competitors?.[1]?.team?.links?.[0]?.href ??
-                      `https://www.espn.com/${currentLeague}`
-                    }
-                  />
-                )}
-
-                {game.competitions?.[0]?.competitors?.[0]?.team?.links?.length > 0 && (
-                  <Action.OpenInBrowser
-                    title={`View ${game?.competitions?.[0]?.competitors?.[0]?.team?.displayName ?? "Home"} Team Details`}
-                    url={
-                      game?.competitions?.[0]?.competitors?.[0]?.team?.links?.[0]?.href ??
-                      `https://www.espn.com/${currentLeague}`
-                    }
-                  />
-                )}
-              </>
-            ) : (
+            {currentLeague === "f1" && (
               <>
                 <Action.OpenInBrowser
                   title="View Race Details on ESPN"
-                  url={`${game?.links?.[0].href ?? `https://www.espn.com/${currentLeague}`}`}
+                  url={`${game?.links?.[0]?.href ?? `https://www.espn.com/${currentLeague}`}`}
                 />
                 <Action.OpenInBrowser
                   title="View Circuit Details on ESPN"
-                  url={`${game?.links?.[2].href ?? `https://www.espn.com/${currentLeague}`}`}
+                  url={`${game?.links?.[2]?.href ?? `https://www.espn.com/${currentLeague}`}`}
                 />
               </>
             )}
