@@ -18,10 +18,11 @@ A powerful Raycast extension for managing your dotfiles with ease. Keep your con
 
 ## Features
 
-- **Collect Configs**: Backup your local configuration files to your dotfiles repository
-- **Deploy Configs**: Restore configuration files from your repository to your local machine
-- **Diff Configs**: View differences between local and repository configurations
+- **Dotmate**: List and run all available commands
+- **Backup Configs**: Backup your local configuration files to your dotfiles repository
+- **Restore Configs**: Restore configuration files from your repository to your local machine
 - **Show Status**: Check the synchronization status of your dotfiles
+- **Show Diffs**: View differences between local and repository configurations
 
 ## Installation
 
@@ -71,11 +72,11 @@ your-dotfiles-repo/
 
 ## Commands
 
-### 🔄 Collect Configs
+### 🔄 Backup Configs
 
 Backs up your local configuration files to your dotfiles repository.
 
-**Usage**: Open Raycast → Type "Collect configs" → Press Enter
+**Usage**: Open Raycast → Type "Backup Configs" → Press Enter
 
 **What it does**:
 
@@ -84,11 +85,11 @@ Backs up your local configuration files to your dotfiles repository.
 - Skips files that are already identical between local and repository
 - Shows a summary of operations performed
 
-### 📥 Deploy Configs
+### 📥 Restore Configs
 
 Restores configuration files from your dotfiles repository to your local machine.
 
-**Usage**: Open Raycast → Type "Deploy configs" → Press Enter
+**Usage**: Open Raycast → Type "Restore Configs" → Press Enter
 
 **What it does**:
 
@@ -98,11 +99,11 @@ Restores configuration files from your dotfiles repository to your local machine
 - Skips files that are already identical between repository and local
 - Shows a summary of operations performed
 
-### 🔍 Diff Configs
+### 🔍 Show Diffs
 
 View differences between your local configuration files and those in your repository.
 
-**Usage**: Open Raycast → Type "Diff configs" → Press Enter
+**Usage**: Open Raycast → Type "Show Diffs" → Press Enter
 
 **What it shows**:
 
@@ -115,7 +116,7 @@ View differences between your local configuration files and those in your reposi
 
 Check the synchronization status of all your dotfiles.
 
-**Usage**: Open Raycast → Type "Show status" → Press Enter
+**Usage**: Open Raycast → Type "Show Status" → Press Enter
 
 **What it shows**:
 
@@ -161,15 +162,15 @@ DotMate currently manages these configuration files:
 
 1. Make changes to your local configuration files
 2. Run **Show Status** to see what's changed
-3. Run **Diff Configs** to review the differences
-4. Run **Collect Configs** to backup changes to your repository
+3. Run **Show Diffs** to review the differences
+4. Run **Backup Configs** to backup changes to your repository
 5. Commit and push changes to your version control system
 
 When setting up a new machine:
 
 1. Clone your dotfiles repository
 2. Configure DotMate with the repository path
-3. Run **Deploy Configs** to restore all your configurations
+3. Run **Restore Configs** to restore all your configurations
 
 ## License
 
