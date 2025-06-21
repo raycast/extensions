@@ -111,11 +111,7 @@ export default function FindLyricsCommand() {
         console.error("Error fetching lyrics:", err);
         const errorMessage = err instanceof Error ? err.message : "Failed to fetch lyrics. Please try again.";
         setError(errorMessage);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: errorMessage,
-        });
+        showFailureToast(err, { title: "Error" });
       } finally {
         setIsLoading(false);
       }
