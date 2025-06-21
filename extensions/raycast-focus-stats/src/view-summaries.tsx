@@ -6,6 +6,7 @@ import { JSX, useState, useMemo } from "react";
 import { DateDropdown } from "./components/date-dropdown";
 import { usePromise } from "@raycast/utils";
 import { durationString, sessionString } from "./utils";
+import { InitWrapper } from "./components/init/init-wrapper";
 
 export default function Command() {
   const [date, setDate] = useState<Date>(new Date());
@@ -26,26 +27,43 @@ export default function Command() {
     return Object.entries(summary).sort(([goalA], [goalB]) => goalA.localeCompare(goalB));
   }, [sessions]);
 
+  // When date changes, update the date on the component's state, causing a
+  // re-render and the recalculation of the `sessions` and `entries` variable.
   const onDateChange = (date: Date) => setDate(date);
 
-  const { isLoading } = usePromise(
-    async (date: Date) => {
-      setSessions(getSessionsByDate(date));
-    },
-    [date],
-  );
-
   return (
-    <List isLoading={isLoading} isShowingDetail searchBarAccessory={<DateDropdown onDateChange={onDateChange} />}>
-      {/* Summary of all sessions for the day. */}
-      {sessions.length > 0 && <SummaryListItem title={"Summary"} sessions={sessions} displayGoal={true} />}
+    <InitWrapper
+      children={(initialized) => {
+        const { isLoading } = usePromise(
+          async (date: Date) => {
+            setSessions(getSessionsByDate(date));
+          },
+          [date],
+          // Only execute the function inside `usePromise` when `initialized` is
+          // true. This prevents the component from trying to fetch the sessions
+          // from the database, before even checking if the database has been
+          // initialized and migrations run.
+          { execute: initialized },
+        );
 
-      <List.Section title="Breakdown">
-        {entries.map(([goal, sessions], index) => (
-          <SummaryListItem key={index} title={goal} sessions={sessions} />
-        ))}
-      </List.Section>
-    </List>
+        return (
+          <List
+            isLoading={!initialized || isLoading}
+            isShowingDetail
+            searchBarAccessory={<DateDropdown onDateChange={onDateChange} />}
+          >
+            {/* Summary of all sessions for the day. */}
+            {sessions.length > 0 && <SummaryListItem title={"Summary"} sessions={sessions} displayGoal={true} />}
+
+            <List.Section title="Breakdown">
+              {entries.map(([goal, sessions]) => (
+                <SummaryListItem key={goal} title={goal} sessions={sessions} />
+              ))}
+            </List.Section>
+          </List>
+        );
+      }}
+    />
   );
 }
 
@@ -75,7 +93,7 @@ type SummaryListItemProps = {
  */
 function SummaryListItem(props: SummaryListItemProps): JSX.Element {
   const { title, sessions, displayGoal = false } = props;
-  const totalDuration = sessions.reduce((acc, session) => acc + (session.duration || 0), 0);
+  const totalDuration = sessions.reduce((acc, session) => acc + (session.duration ?? 0), 0);
 
   return (
     <List.Item

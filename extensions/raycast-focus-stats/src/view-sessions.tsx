@@ -9,12 +9,12 @@ import { InitWrapper } from "./components/init/init-wrapper";
 import { durationString } from "./utils";
 
 const SessionListItem = ({ session }: { session: Session }) => {
-  const { goal, start, duration } = session;
+  const { id, goal, start, duration } = session;
   const subtitle = formatTime(start);
 
   return (
     <List.Item
-      key={subtitle}
+      key={id}
       title={goal || ""}
       subtitle={subtitle}
       accessories={[{ tag: { value: durationString(duration || 0), color: Color.Green } }]}
@@ -26,22 +26,31 @@ export default function Command() {
   const [date, setDate] = useState<Date>(new Date());
   const [sessions, setSessions] = useState<Session[]>([]);
 
-  const { isLoading } = usePromise(
-    async (date: Date) => {
-      setSessions(getSessionsByDate(date));
-    },
-    [date],
-  );
-
   // When date changes, update the date on the component's state, causing a
   // re-render and the recalculation of the `sessions` variable.
   const onDateChange = (date: Date) => setDate(date);
 
   return (
-    <InitWrapper>
-      <List isLoading={isLoading} searchBarAccessory={<DateDropdown onDateChange={onDateChange} />}>
-        {sessions?.map((session, index) => <SessionListItem key={index} session={session} />)}
-      </List>
-    </InitWrapper>
+    <InitWrapper
+      children={(initialized) => {
+        const { isLoading } = usePromise(
+          async (date: Date) => {
+            setSessions(getSessionsByDate(date));
+          },
+          [date],
+          // Only execute the function inside `usePromise` when `initialized` is
+          // true. This prevents the component from trying to fetch the sessions
+          // from the database, before even checking if the database has been
+          // initialized and migrations run.
+          { execute: initialized },
+        );
+
+        return (
+          <List isLoading={!initialized || isLoading} searchBarAccessory={<DateDropdown onDateChange={onDateChange} />}>
+            {sessions?.map((session, index) => <SessionListItem key={index} session={session} />)}
+          </List>
+        );
+      }}
+    />
   );
 }

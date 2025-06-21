@@ -25,7 +25,7 @@
     {
       "name": "sync-sessions",
       "title": "Sync Sessions",
-      "description": "Updates the data regarding the focus sessions. Enable 'Background Refresh' for this command to ensure that this information is automatically fetch every 30 seconds.",
+      "description": "Updates the data regarding the focus sessions. Enable 'Background Refresh' for this command to ensure that this information is automatically fetch every 5 minutes.",
       "mode": "no-view",
       "interval": "5m"
     }
@@ -33,7 +33,6 @@
   "dependencies": {
     "@raycast/api": "^1.97.1",
     "@raycast/utils": "^1.17.0",
-    "better-sqlite3": "^11.10.0",
     "better-sqlite3-multiple-ciphers": "^11.10.0",
     "drizzle-orm": "^0.43.1",
     "tar-stream": "^3.1.7"

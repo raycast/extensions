@@ -41,7 +41,7 @@ export function DateDropdown({ onDateChange }: { onDateChange: (newDate: Date) =
   return (
     <List.Dropdown tooltip="Select Date" onChange={onChange}>
       {dates.map((date) => (
-        <List.Dropdown.Item key={date.getDate()} title={formatDate(date)} value={date.toISOString()} />
+        <List.Dropdown.Item key={date.toISOString()} title={formatDate(date)} value={date.toISOString()} />
       ))}
     </List.Dropdown>
   );

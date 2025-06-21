@@ -44,7 +44,7 @@ export async function extractAndRewrite(tarball: string, targetFile: string, dst
     const chunks: Uint8Array[] = [];
 
     extract.on("entry", function (header, stream, next) {
-      if (header.name == targetFile) {
+      if (header.name === targetFile) {
         stream.on("data", function (chunk) {
           chunks.push(chunk);
         });

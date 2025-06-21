@@ -1,12 +1,21 @@
 import type { Event, Session } from "./types";
 import { createSession, getCurrentSession, removeCurrentSession, saveSession, setCurrentSession } from "./sessions";
 import { getEvents } from "./events";
+import { ensureInitialized } from "./lib/init/tasks";
 
 /*
  * The "Refresh Data" command is responsible for refreshing the data related to
  * the focus sessions in the background.
  */
 export default async function Command() {
+  // Ensure the extension is properly initialized before proceeding
+  const initialized = await ensureInitialized();
+
+  if (!initialized) {
+    console.error("Failed to initialize extension. Aborting sync.");
+    return;
+  }
+
   // List of events that the refresh command was able to pick up from MacOS's
   // System Log.
   const events: Event[] = getEvents();
@@ -34,7 +43,7 @@ export default async function Command() {
       }
 
       const session: Session = { ...cachedSession, duration: event.duration };
-      saveSession(session);
+      await saveSession(session);
       removeCurrentSession();
     }
   }

@@ -1,9 +1,13 @@
 import { FC } from "react";
-import { downloadBinding, migrateDatabase } from "../../lib/init/tasks";
-import { getDatabase } from "../../lib/db";
+import { ensureInitialized } from "../../lib/init/tasks";
+import { usePromise } from "@raycast/utils";
 
 export interface InitWrapperProps {
-  children: React.ReactNode;
+  /**
+   * Render function that receives the initialization status
+   * @param initialized - Boolean indicating whether the database initialization was successful and the database is ready to be used
+   */
+  children: (initialized: boolean) => React.ReactNode;
 }
 
 /*
@@ -18,9 +22,13 @@ export interface InitWrapperProps {
  * should be wrapped in this component.
  */
 export const InitWrapper: FC<InitWrapperProps> = ({ children }) => {
-  downloadBinding();
-  getDatabase();
-  migrateDatabase();
+  const { isLoading, error } = usePromise(ensureInitialized, []);
 
-  return children;
+  if (error) {
+    console.error("Initialization failed:", error);
+    return null;
+  }
+
+  const initialized = !isLoading && !error;
+  return <>{children(initialized)}</>;
 };

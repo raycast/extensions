@@ -5,6 +5,11 @@
  */
 export type Session = {
   /**
+   * The session's identifier in the database.
+   */
+  id: number;
+
+  /**
    * The specific aim or objective for this session.
    */
   goal: string;

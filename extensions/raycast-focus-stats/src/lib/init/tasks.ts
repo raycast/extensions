@@ -39,7 +39,7 @@ export const downloadBinding = async () => {
     await downloadFile(downloadLink, downloadPath);
     await extractAndRewrite(downloadPath, "build/Release/better_sqlite3.node", SQLiteBindingPath);
   } catch (exception) {
-    console.error("Failed to download better-sqlite3 biding.", exception);
+    console.error("Failed to download better-sqlite3 binding.", exception);
   }
 };
 
@@ -56,3 +56,19 @@ export async function migrateDatabase() {
     console.error("Failed to run database migrations...", exception);
   }
 }
+
+/*
+ * Ensures the extension is fully initialized by running all necessary setup tasks.
+ * Returns true if initialization was successful, false otherwise.
+ */
+export const ensureInitialized = async (): Promise<boolean> => {
+  try {
+    await downloadBinding();
+    getDatabase();
+    await migrateDatabase();
+    return true;
+  } catch (error) {
+    console.error("Failed to initialize extension:", error);
+    return false;
+  }
+};
