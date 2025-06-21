@@ -14,4 +14,4 @@ export default async function dislikeUndislikeButton() {
   `;
 
   await runJSInYouTubeMusicTab(script);
-} 
+}

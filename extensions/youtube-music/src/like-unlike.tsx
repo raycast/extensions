@@ -13,5 +13,5 @@ export default async function likeButton() {
     })()
   `;
 
-    await runJSInYouTubeMusicTab(script);
-} 
+  await runJSInYouTubeMusicTab(script);
+}

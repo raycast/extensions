@@ -86,7 +86,7 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [noTabFound, setNoTabFound] = useState(false);
-  const preferences = getPreferenceValues<{ "ff-rew-seconds": string, renderInterval: string }>();
+  const preferences = getPreferenceValues<{ "ff-rew-seconds": string; renderInterval: string }>();
   const skipSeconds = parseInt(preferences["ff-rew-seconds"]);
   const nowPlayingRenderInterval = parseInt(preferences.renderInterval);
 
@@ -128,7 +128,6 @@ export default function Command() {
   // Update coverUrl to fit the detail view
   const coverUrl = resizeYouTubeThumbnail(songInfo.coverUrl, 350, 350);
   const markdown = coverUrl ? `![Album Cover](${coverUrl})` : undefined;
-  
 
   return (
     <Detail
@@ -136,12 +135,20 @@ export default function Command() {
       navigationTitle={songInfo.isPlaying ? "Now Playing ▶️" : "Paused ⏸️"}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title={"Title"} icon={Icon.Music} text={(songInfo.isLiked ? "👍 " : "") +songInfo.title} />
+          <Detail.Metadata.Label
+            title={"Title"}
+            icon={Icon.Music}
+            text={(songInfo.isLiked ? "👍 " : "") + songInfo.title}
+          />
           <Detail.Metadata.Label title="Artist" text={songInfo.artist} icon={Icon.Person} />
           <Detail.Metadata.Label title="Album" text={songInfo.album} icon={Icon.Music} />
           {songInfo.year && <Detail.Metadata.Label title="Year" text={songInfo.year} icon={Icon.Calendar} />}
-          <Detail.Metadata.Label title="Duration" text={`${songInfo.currentTime} / ${songInfo.duration}`} icon={Icon.Clock} />
-          <Detail.Metadata.Label title="Volume" text={`${songInfo.volume || '0'}%`} icon={getVolumeIcon(songInfo)} />
+          <Detail.Metadata.Label
+            title="Duration"
+            text={`${songInfo.currentTime} / ${songInfo.duration}`}
+            icon={Icon.Clock}
+          />
+          <Detail.Metadata.Label title="Volume" text={`${songInfo.volume || "0"}%`} icon={getVolumeIcon(songInfo)} />
         </Detail.Metadata>
       }
       actions={
@@ -171,7 +178,7 @@ export default function Command() {
               }}
             />
           </ActionPanel.Section>
-          
+
           <ActionPanel.Section title="Seek">
             <Action
               title={`${skipSeconds}s Forward`}
@@ -190,7 +197,7 @@ export default function Command() {
               }}
             />
           </ActionPanel.Section>
-          
+
           <ActionPanel.Section title="Volume">
             <Action
               title={songInfo.isMuted ? "Unmute" : "Mute"}
@@ -217,7 +224,7 @@ export default function Command() {
               }}
             />
           </ActionPanel.Section>
-          
+
           <ActionPanel.Section title="Reactions">
             <Action
               title={songInfo.isLiked ? "Unlike" : "Like"}
@@ -240,10 +247,10 @@ export default function Command() {
       }
     />
   );
-} 
+}
 
 function getVolumeIcon(songInfo: SongInfo) {
-  const volume = parseInt(songInfo.volume || '0');
+  const volume = parseInt(songInfo.volume || "0");
   if (volume === 0) {
     return Icon.SpeakerOff;
   } else if (volume <= 33) {

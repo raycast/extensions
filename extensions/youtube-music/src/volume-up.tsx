@@ -20,4 +20,4 @@ export default async (closeWindow = true, volumeStep = 10) => {
       return await closeMainWindow();
     }
   }
-}; 
+};

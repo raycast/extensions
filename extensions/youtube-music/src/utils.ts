@@ -129,9 +129,13 @@ export const goToChapter = {
  * @param height - Desired height
  * @returns The resized image URL
  */
-export function resizeYouTubeThumbnail(imageUrl: string | undefined, width: number, height: number): string | undefined {
+export function resizeYouTubeThumbnail(
+  imageUrl: string | undefined,
+  width: number,
+  height: number
+): string | undefined {
   if (!imageUrl) return undefined;
-  
+
   // Replace existing width-height patterns with new dimensions
   return imageUrl.replace(/w\d+-h\d+/g, `w${width}-h${height}`);
 }
