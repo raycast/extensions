@@ -1,6 +1,6 @@
 # Quick Notes Changelog
 
-## Added `Open Note` action to open with default markdown app - {PR_MERGE_DATE}
+## Added `Open Note` action to open note with default markdown app - {PR_MERGE_DATE}
 
 - `Open Note` action that opens the note in default markdown app
 
