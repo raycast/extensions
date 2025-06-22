@@ -1,9 +1,20 @@
 import _ from "lodash";
-import { ActionPanel, Action, List, Form, useNavigation, showToast, Toast, open, Icon } from "@raycast/api";
-import { useLocalStorage, useCachedState } from "@raycast/utils";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Form,
+  useNavigation,
+  showToast,
+  Toast,
+  open,
+  Icon,
+  getSelectedText,
+} from "@raycast/api";
+import { useLocalStorage, useCachedState, showFailureToast } from "@raycast/utils";
 
 import { useEffect, useState, useCallback } from "react";
-import { translate, TranslatedText } from "./shared-packages/translate";
+import { translate, TranslatedText, getTranslatedSentence } from "./shared-packages/translate";
 import {
   SourceLangKeys,
   TargetLangKeys,
@@ -200,24 +211,43 @@ function LanguagesDropdown() {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [translatedText, setTranslatedText] = useState<TranslatedText | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { languageSets } = useSavedLangSets();
   const isAuthenticated = useIsAuthenticated();
   const [jwt] = useCachedState<string>("jwt", "");
   const [authProvider] = useCachedState<string>("authProvider", "");
   const [userId] = useCachedState<string>("userId", "");
+  const [autoPasteSelectedText, setAutoPasteSelectedText] = useCachedState<boolean>("autoPasteSelectedText", false);
   const selected = _.find(languageSets, { selected: true });
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        if (autoPasteSelectedText) {
+          const text = await getSelectedText();
+          setSearchText(text || "");
+        }
+      } catch (err) {
+        showFailureToast(err, { title: "Could not get selected text" });
+        if (autoPasteSelectedText) setSearchText("");
+      }
+    })();
+  }, [autoPasteSelectedText]);
 
   const debouncedTranslate = useCallback(
     _.debounce(async (text: string) => {
       try {
+        setIsLoading(true);
         if (!selected?.sourceLangKey || !selected?.targetLangKey)
           return showToast({ title: "Please select source and target languages", style: Toast.Style.Failure });
 
         const res = await translate(selected?.sourceLangKey, selected?.targetLangKey, text);
         setTranslatedText(res);
       } catch (err) {
-        showToast({ title: "Error translating text", style: Toast.Style.Failure });
+        showFailureToast(err, { title: "Error translating text" });
         console.error("error translating", err);
+      } finally {
+        setIsLoading(false);
       }
     }, 1000),
     [selected?.sourceLangKey, selected?.targetLangKey],
@@ -226,6 +256,7 @@ export default function Command() {
   useEffect(() => {
     void (async () => {
       if (searchText.length === 0) {
+        setTranslatedText(null);
         return;
       }
       await debouncedTranslate(searchText);
@@ -262,6 +293,15 @@ export default function Command() {
     }
   };
 
+  const autoPasteAction = (
+    <Action
+      icon={Icon.ArrowRightCircleFilled}
+      title={`Auto Paste Selected Text - ${autoPasteSelectedText ? "ON" : "OFF"}`}
+      onAction={() => setAutoPasteSelectedText(!autoPasteSelectedText)}
+      shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
+    />
+  );
+
   const itemActions = (
     <ActionPanel>
       {isAuthenticated ? (
@@ -280,13 +320,20 @@ export default function Command() {
           />
         </>
       )}
+      {autoPasteAction}
     </ActionPanel>
   );
 
+  const translatedSentence = translatedText?.translation?.sentences
+    ? getTranslatedSentence(translatedText?.translation?.sentences)
+    : "";
+  // const translation = _.get(translatedText, "translation.sentences[0].orig", "");
   return (
     <List
+      searchText={searchText}
+      isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Enter text to translate..."
+      searchBarPlaceholder={"Type to translate..."}
       searchBarAccessory={<LanguagesDropdown />}
       throttle
       actions={
@@ -312,20 +359,25 @@ export default function Command() {
               <Action.OpenInBrowser icon={Icon.Globe} url={`${config.lpURL}/learn`} title="Learn & Repeat" />
             </>
           ) : null}
+          {autoPasteAction}
         </ActionPanel>
       }
     >
-      <List.Section title="Results" subtitle={`${_.get(translatedText, "translation.sentences[0].orig", "")}`}>
-        {translatedText?.translation?.dict
-          ? _.map(translatedText?.translation?.dict, (pos) => (
-              <SearchListItem key={pos.pos} searchResult={pos} actions={itemActions} />
+      {isLoading ? (
+        <List.EmptyView key="loading" title="Loading your Translation..." />
+      ) : !translatedSentence || searchText.length === 0 ? (
+        <List.EmptyView key="no-translation-found" title="No Translation Found" />
+      ) : (
+        <List.Section key="results" title="Results" subtitle={translatedSentence?.trans ?? ""}>
+          {translatedText?.translation?.dict ? (
+            _.map(translatedText?.translation?.dict, (pos, i) => (
+              <SearchListItem key={pos.pos ?? i} searchResult={pos} actions={itemActions} />
             ))
-          : translatedText?.translation?.sentences
-            ? _.map(translatedText?.translation.sentences, (sentence) => (
-                <List.Item title={sentence.trans ?? ""} key={sentence?.trans} actions={itemActions} />
-              ))
-            : null}
-      </List.Section>
+          ) : (
+            <List.Item title={translatedSentence?.trans ?? ""} key={0} actions={itemActions} />
+          )}
+        </List.Section>
+      )}
     </List>
   );
 }
@@ -353,3 +405,5 @@ function SearchListItem({ searchResult, actions }: { searchResult: Pos; actions:
     />
   );
 }
+
+export { Command };

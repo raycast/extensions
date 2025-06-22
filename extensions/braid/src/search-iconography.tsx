@@ -1,9 +1,8 @@
-import { Action, ActionPanel, Grid, Keyboard } from "@raycast/api";
-import fs from "fs";
-import path from "path";
-import { useState } from "react";
+import { Action, ActionPanel, Detail, Grid, Keyboard } from "@raycast/api";
+import { useMemo, useState } from "react";
 import { useFetch } from "@raycast/utils";
 import * as ts from "typescript";
+import { useIcons } from "./useIcons";
 
 const iconsKeywordsUrl =
   "https://raw.githubusercontent.com/seek-oss/braid-design-system/refs/heads/master/site/src/App/routes/foundations/iconography/iconsKeywords.ts";
@@ -23,11 +22,13 @@ function extractArrayValue(node: ts.Node): string[] {
 const getIconDataString = (svgContent: string) => `data:image/svg+xml;base64,${btoa(svgContent)}`;
 
 export default function Command() {
-  const { isLoading, data: iconsKeywordsFile } = useFetch(iconsKeywordsUrl);
+  const { isLoading, data: iconsKeywordsFile, error: iconsKeywordsError } = useFetch(iconsKeywordsUrl);
 
-  let iconsKeywords: Record<string, string[]> = {};
+  const iconsKeywords: Record<string, string[]> = useMemo(() => {
+    if (isLoading || !iconsKeywordsFile) {
+      return {};
+    }
 
-  if (!isLoading && iconsKeywordsFile) {
     const sourceFile = ts.createSourceFile(
       "iconsKeywords.ts",
       iconsKeywordsFile as string,
@@ -52,7 +53,7 @@ export default function Command() {
       throw new Error("iconsKeywords not found");
     }
 
-    iconsKeywords = Object.fromEntries(
+    return Object.fromEntries(
       iconsKeywordsParsed.initializer.properties.map((prop) => [
         prop.name?.getText(sourceFile),
         // Todo - resolve type issue
@@ -60,7 +61,9 @@ export default function Command() {
         extractArrayValue(prop.initializer),
       ]),
     );
-  }
+  }, [iconsKeywordsFile, isLoading]);
+
+  const { svgFiles: iconSvgs, isLoading: isLoadingSvgs, error: errorSvgs } = useIcons();
 
   const [selectedItem, setSelectedItem] = useState<string>(Object.keys(iconsKeywords)[0]);
 
@@ -77,29 +80,26 @@ export default function Command() {
     },
   };
 
+  if (iconsKeywordsError) {
+    return <Detail markdown={`Error loading icons keywords: ${iconsKeywordsError.message}`} />;
+  }
+
+  if (errorSvgs) {
+    return <Detail markdown={`Error loading icons: ${errorSvgs.message}`} />;
+  }
+
   return (
     <Grid
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingSvgs}
       columns={8}
       inset={Grid.Inset.Large}
       searchBarPlaceholder="Search Braid Iconography"
       navigationTitle={selectedItem === "Error" ? "Search Iconography" : `Search Iconography - ${selectedItem}`}
       onSelectionChange={(itemId) => setSelectedItem(itemId || fallbackIcon.name)}
     >
-      {Object.entries(iconsKeywords).map(([name, keywords]) => {
-        const displayName = name.replace("Icon", "");
+      {iconSvgs?.map(({ iconName: name, content, darkContent }) => {
+        const displayName = name.replace(/^Icon/, "");
         const url = `https://seek-oss.github.io/braid-design-system/components/${name}`;
-
-        let svgContentLight = "";
-        let svgContentDark = "";
-
-        try {
-          svgContentLight = fs.readFileSync(path.join(__dirname, `/assets/icons/${displayName}-light.svg`), "utf-8");
-          svgContentDark = fs.readFileSync(path.join(__dirname, `/assets/icons/${displayName}-dark.svg`), "utf-8");
-        } catch (error) {
-          console.error("Error reading icon file", error);
-          return null;
-        }
 
         return (
           <Grid.Item
@@ -108,13 +108,13 @@ export default function Command() {
             content={{
               value: {
                 source: {
-                  light: getIconDataString(svgContentLight),
-                  dark: getIconDataString(svgContentDark),
+                  light: getIconDataString(content),
+                  dark: getIconDataString(darkContent),
                 },
               },
               tooltip: name,
             }}
-            keywords={[name, displayName, ...keywords]}
+            keywords={[name, displayName, ...(iconsKeywords[name] ?? [])]}
             actions={
               <ActionPanel>
                 {/* eslint-disable-next-line @raycast/prefer-title-case */}

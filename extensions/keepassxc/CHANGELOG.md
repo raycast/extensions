@@ -1,5 +1,38 @@
 # KeePassXC Extension Changelog
 
+## [1.6.0] - 2025-04-07
+
+### Added
+
+- Optional favicon support for the user interface.
+- New image with favicons.
+
+### Fixed
+
+- Better descriptions for the preferences.
+
+## [1.5.6] - 2025-03-12
+
+### Fixed
+
+- Use a raw.githubusercontent.com link for the KeePassXC image in the README.
+
+## [1.5.5] - 2025-03-12
+
+### Changed
+
+- Use a global info message about security when the database is locked.
+- Update screenshot about the database being locked.
+- Use more explicit error messages when unable to execute the `keepassxc-cli` command.
+
+### Fixed
+
+- Use a blob link for the KeePassXC image in the README.
+
+### Removed
+
+- The test guide.
+
 ## [1.5.4] - 2025-02-10
 
 ### Fixed
@@ -99,4 +132,4 @@
 
 ### Added
 
-- Add support for Key File protected database file.
+- Initial release.

@@ -43,14 +43,11 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; dispatch: Dispat
   };
 
   const setPathValue = (path: string) => {
-    console.log("Set path value: " + path);
     setPath(path);
     setValue("openToPath", path);
   };
 
   useEffect(() => {
-    console.log("Use effect");
-    console.log(org);
     async function getSectionList() {
       const storedOrgs = await loadOrgs();
       const sects = new Set<string>();
@@ -71,7 +68,6 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; dispatch: Dispat
           : org.openToPath
             ? CUSTOM_KEY
             : HOME_PATH;
-      console.log(`Opening to path: ${pathToOpen}`);
       setPathValue(pathToOpen);
     }
     setValue("color", org.color ?? DEFAULT_COLOR);
@@ -99,7 +95,6 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; dispatch: Dispat
       if (values.customPath) {
         updatedOrg.openToPath = values.customPath;
       }
-      console.log(updatedOrg);
       dispatch({
         type: OrgListReducerType.UPDATE_ORG,
         updatedOrg: updatedOrg,
@@ -139,6 +134,21 @@ export function DeveloperOrgDetails(props: { org: DeveloperOrg; dispatch: Dispat
       <Form.Description title="Org URL" text={org.instanceUrl} />
       <Form.Description title="Username" text={org.username} />
       <Form.Description title="Org Alias" text={org.alias} />
+      {org.expirationDate && (
+        <Form.Description
+          title="Expiration Date"
+          text={(() => {
+            const [year, month, day] = org.expirationDate.split("-").map(Number);
+            const date = new Date(year, month - 1, day); // month is 0-based in JS
+            return date.toLocaleDateString(undefined, {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            });
+          })()}
+        />
+      )}
       <Form.TextField
         title={ORG_LABEL_LABEL}
         {...itemProps.label}

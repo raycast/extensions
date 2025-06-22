@@ -1,26 +1,91 @@
 import { z } from "zod";
+export declare const translationSchema: z.ZodOptional<
+  z.ZodObject<
+    {
+      trans: z.ZodString;
+      orig: z.ZodString;
+      backend: z.ZodNumber;
+    },
+    "strip",
+    z.ZodTypeAny,
+    {
+      trans: string;
+      orig: string;
+      backend: number;
+    },
+    {
+      trans: string;
+      orig: string;
+      backend: number;
+    }
+  >
+>;
+export declare const translitSchema: z.ZodOptional<
+  z.ZodObject<
+    {
+      translit: z.ZodOptional<z.ZodString>;
+      src_translit: z.ZodOptional<z.ZodString>;
+    },
+    "strip",
+    z.ZodTypeAny,
+    {
+      translit?: string | undefined;
+      src_translit?: string | undefined;
+    },
+    {
+      translit?: string | undefined;
+      src_translit?: string | undefined;
+    }
+  >
+>;
 export declare const googleTranslationSchema: z.ZodObject<
   {
     sentences: z.ZodOptional<
       z.ZodArray<
-        z.ZodObject<
-          {
-            trans: z.ZodString;
-            orig: z.ZodString;
-            backend: z.ZodNumber;
-          },
-          "strip",
-          z.ZodTypeAny,
-          {
-            trans: string;
-            orig: string;
-            backend: number;
-          },
-          {
-            trans: string;
-            orig: string;
-            backend: number;
-          }
+        z.ZodOptional<
+          z.ZodUnion<
+            [
+              z.ZodOptional<
+                z.ZodObject<
+                  {
+                    trans: z.ZodString;
+                    orig: z.ZodString;
+                    backend: z.ZodNumber;
+                  },
+                  "strip",
+                  z.ZodTypeAny,
+                  {
+                    trans: string;
+                    orig: string;
+                    backend: number;
+                  },
+                  {
+                    trans: string;
+                    orig: string;
+                    backend: number;
+                  }
+                >
+              >,
+              z.ZodOptional<
+                z.ZodObject<
+                  {
+                    translit: z.ZodOptional<z.ZodString>;
+                    src_translit: z.ZodOptional<z.ZodString>;
+                  },
+                  "strip",
+                  z.ZodTypeAny,
+                  {
+                    translit?: string | undefined;
+                    src_translit?: string | undefined;
+                  },
+                  {
+                    translit?: string | undefined;
+                    src_translit?: string | undefined;
+                  }
+                >
+              >,
+            ]
+          >
         >,
         "many"
       >
@@ -114,11 +179,18 @@ export declare const googleTranslationSchema: z.ZodObject<
   {
     spell: Record<string, unknown>;
     sentences?:
-      | {
-          trans: string;
-          orig: string;
-          backend: number;
-        }[]
+      | (
+          | {
+              trans: string;
+              orig: string;
+              backend: number;
+            }
+          | {
+              translit?: string | undefined;
+              src_translit?: string | undefined;
+            }
+          | undefined
+        )[]
       | undefined;
     dict?:
       | {
@@ -146,11 +218,18 @@ export declare const googleTranslationSchema: z.ZodObject<
   {
     spell: Record<string, unknown>;
     sentences?:
-      | {
-          trans: string;
-          orig: string;
-          backend: number;
-        }[]
+      | (
+          | {
+              trans: string;
+              orig: string;
+              backend: number;
+            }
+          | {
+              translit?: string | undefined;
+              src_translit?: string | undefined;
+            }
+          | undefined
+        )[]
       | undefined;
     dict?:
       | {

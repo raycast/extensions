@@ -33,7 +33,10 @@
     "vlasischar",
     "javalangruntimeexception",
     "shyaka",
-    "sushichan044"
+    "sushichan044",
+    "luarmr",
+    "nicolas-marien",
+    "iontea"
   ],
   "categories": [
     "Developer Tools",
@@ -817,8 +820,38 @@
       "required": false,
       "title": "Advanced",
       "default": true,
-      "label": "PRs include team review requets",
+      "label": "PRs include team review requests",
       "description": "Include PRs where your team's review was requested as well as your own."
+    },
+    {
+      "name": "repositoryFilterMode",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "title": "Repository Filter Mode",
+      "description": "How to filter repositories",
+      "data": [
+        {
+          "title": "All Repositories",
+          "value": "all"
+        },
+        {
+          "title": "Include Only Listed Repositories",
+          "value": "include"
+        },
+        {
+          "title": "Exclude Listed Repositories",
+          "value": "exclude"
+        }
+      ]
+    },
+    {
+      "name": "repositoryList",
+      "type": "textfield",
+      "required": false,
+      "title": "Repository List",
+      "description": "Comma-separated list of repositories to include/exclude (e.g., 'owner/repo1, owner/repo2')",
+      "placeholder": "owner/repo1, owner/repo2, owner/repo3"
     }
   ],
   "dependencies": {
@@ -856,5 +889,9 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

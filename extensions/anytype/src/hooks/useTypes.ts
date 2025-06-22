@@ -1,7 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getTypes } from "../api/getTypes";
 import { useMemo } from "react";
-import { apiLimit } from "../helpers/constants";
+import { getTypes } from "../api";
+import { apiLimit } from "../utils";
 
 export function useTypes(spaceId: string) {
   const { data, error, isLoading, mutate, pagination } = useCachedPromise(
@@ -16,8 +16,8 @@ export function useTypes(spaceId: string) {
     },
     [spaceId],
     {
-      execute: !!spaceId,
       keepPreviousData: true,
+      execute: !!spaceId,
     },
   );
 

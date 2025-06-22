@@ -1,5 +1,9 @@
 # Ghostty Changelog
 
+## [Command] 2025-03-13
+
+- Add new command to open currently selected Finder directory in new Ghostty Window
+
 ## [Command] - 2025-02-23
 
 - Run launch configurations split pane bug fix

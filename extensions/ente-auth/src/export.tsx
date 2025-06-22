@@ -1,4 +1,5 @@
-import { Detail, showToast, Toast } from "@raycast/api";
+import { Detail } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { showError } from "./components/showError";
 import { DEFAULT_EXPORT_DIR_PATH, EXPORT_FILE_PATH } from "./constants/ente";
 import { checkEnteBinary, createEntePath, exportEnteAuthSecrets } from "./helpers/ente";
@@ -14,14 +15,14 @@ export default function Command() {
   try {
     createEntePath(DEFAULT_EXPORT_DIR_PATH());
   } catch (error) {
-    showToast(Toast.Style.Failure, "Folder creation failed");
-    return <Detail markdown={`## Failed to create folder at \`${DEFAULT_EXPORT_DIR_PATH}\``} />;
+    showFailureToast(error, { title: "Folder creation failed" });
+    return <Detail markdown={`## Failed to create folder at \`${DEFAULT_EXPORT_DIR_PATH()}\``} />;
   }
 
   try {
     exportEnteAuthSecrets();
   } catch (error) {
-    showToast(Toast.Style.Failure, "Export failed");
+    showFailureToast(error, { title: "Export failed" });
   }
 
   const secrets = parseSecrets(getSecrets(EXPORT_FILE_PATH));

@@ -6,15 +6,14 @@ Uses Raycast to search through Linking bookmarks.
 
 ![raycast-linkding-1.png](metadata/raycast-linkding-1.png)
 ![raycast-linkding-2.png](metadata/raycast-linkding-2.png)
-![raycast-linkding-3.png](metadata/raycast-linkding-3.png)
-![raycast-linkding-4.png](metadata/raycast-linkding-4.png)
 
 ## Features
 
-- Support bookmark search through multiple Linkding accounts and servers
+- Search bookmarks
 - Open bookmarks in the browser
 - Copy bookmarks to clipboard
 - Create and delete bookmarks in the extension
+- Save current browser tab
 
 ## Notice
 
@@ -23,7 +22,6 @@ The Linkding API key and server URL from your Linkding instance are needed to us
 ## Planned Features
 
 - Update bookmarks in extension
-
 
 ## Contributing
 

@@ -1,6 +1,7 @@
-import { withAccessToken } from "@raycast/utils";
-import { getLinearClient, linear } from "../api/linearClient";
 import { IssueLabel } from "@linear/sdk";
+import { withAccessToken } from "@raycast/utils";
+
+import { getLinearClient, linear } from "../api/linearClient";
 
 export type LabelResult = Pick<IssueLabel, "id" | "description" | "name">;
 

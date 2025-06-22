@@ -1,13 +1,15 @@
 import { Toast, closeMainWindow, getSelectedText, showHUD } from "@raycast/api";
-import { detectLanguage } from "./utils.js";
+import { detectLanguage, getCachedDetector, getCachedModel } from "./utils.js";
 
-export default async function SelectedTextToSay() {
+export default async function SelectedTextToDetect() {
+  const detector = getCachedDetector();
+  const model = getCachedModel();
   await closeMainWindow();
   try {
     const toast = new Toast({ style: Toast.Style.Animated, title: "Detecting language..." });
     toast.show();
     const selectedText = await getSelectedText();
-    const { languageName } = await detectLanguage(selectedText);
+    const { languageName } = await detectLanguage(selectedText, detector, model);
     toast.style = Toast.Style.Success;
     toast.title = languageName;
   } catch (error) {

@@ -48,7 +48,7 @@ export default function Command() {
   const Label = Metadata.Label;
   const Separator = Metadata.Separator;
 
-  const PreferredAction = getPreferenceValues().action;
+  const PreferredAction = getPreferenceValues().primaryAction;
 
   return (
     <List navigationTitle="Get TOTP" searchBarPlaceholder="Search..." isShowingDetail>

@@ -17,6 +17,7 @@ export type DomainPricing = {
           renewal?: Coupon;
           transfer?: Coupon;
         };
+    specialType?: string;
   };
 };
 

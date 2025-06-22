@@ -5,6 +5,9 @@
   "description": "Search your Evernote notes instantly using the local database of the Mac official Evernote client.",
   "icon": "ev-icon.png",
   "author": "artpi",
+  "contributors": [
+    "magnusmoaner"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -13,11 +16,19 @@
       "subtitle": "Search your Evernote notes",
       "description": "Search your Evernote notes instantly using the local database of the Mac official Evernote client.",
       "mode": "view"
-    }
+    },
+    {
+        "name": "search-tasks",
+        "title": "Search Open Tasks",
+        "subtitle": "Search your Evernote tasks within notes",
+        "description": "Search your Evernote tasks within notes instantly using the local database of the Mac official Evernote client.",
+        "mode": "view"
+      }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.2",
+    "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.17.0"
+
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

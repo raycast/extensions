@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, Keyboard, List, Toast, showToast, use
 import { useCachedState, usePromise } from "@raycast/utils";
 import { useRef } from "react";
 import { Bitwarden } from "~/api/bitwarden";
+import { DebuggingBugReportingActionSection } from "~/components/actions";
 import { ListLoadingView } from "~/components/ListLoadingView";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { CACHE_KEYS } from "~/constants/general";
@@ -349,7 +350,12 @@ function SearchSendsCommandContent() {
         <List.EmptyView
           title="There are no items to list."
           icon="sends-empty-list.svg"
-          actions={<ActionPanel>{sendManagementActionSection}</ActionPanel>}
+          actions={
+            <ActionPanel>
+              {sendManagementActionSection}
+              <DebuggingBugReportingActionSection />
+            </ActionPanel>
+          }
           description={`Try syncing your sends with the ${syncSendsAction.title} (${syncSendsAction.shortcutLabel}) action.`}
         />
       </List>
@@ -395,6 +401,7 @@ function SearchSendsCommandContent() {
                 shortcut={{ key: "d", modifiers: ["opt"] }}
               />
               {sendManagementActionSection}
+              <DebuggingBugReportingActionSection />
             </ActionPanel>
           }
         />

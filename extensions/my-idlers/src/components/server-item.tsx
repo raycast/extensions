@@ -1,13 +1,54 @@
-import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { Item, Server, ServerType } from "../types";
 import PriceListItem from "./price-list-item";
 import NextDueDate from "./next-due-date";
-import { numOrUnlimited } from "../utils";
+import { deleteServer, numOrUnlimited } from "../utils";
 import { MutatePromise, showFailureToast, useForm } from "@raycast/utils";
 import { useState } from "react";
 import useGet, { usePut } from "../hooks";
 
 export default function ServerItem({ server, mutate }: { server: Server; mutate: MutatePromise<Server[]> }) {
+  async function confirmAndDeleteServer(server: Server) {
+    const options: Alert.Options = {
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      title: `Delete "${server.hostname}"?`,
+      message: "Are you sure you want to delete this?",
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+    };
+
+    if (await confirmAlert(options)) {
+      const toast = await showToast(Toast.Style.Animated, "Deleting server", server.hostname);
+      try {
+        await mutate(deleteServer(server), {
+          optimisticUpdate(data) {
+            return data.filter((s) => s.id !== server.id);
+          },
+        });
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted server";
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could not delete";
+      }
+    }
+  }
+
   return (
     <List.Item
       icon={Icon.HardDrive}
@@ -56,6 +97,12 @@ export default function ServerItem({ server, mutate }: { server: Server; mutate:
             icon={Icon.Pencil}
             title="Update Server"
             target={<EditServer server={server} mutate={mutate} />}
+          />
+          <Action
+            icon={Icon.Trash}
+            title="Delete Server"
+            onAction={() => confirmAndDeleteServer(server)}
+            style={Action.Style.Destructive}
           />
         </ActionPanel>
       }

@@ -7,17 +7,19 @@ async function getChannelHistory(input: {
    */
   channelId: string;
   /**
-   * Only messages after this Unix timestamp will be included in results. If ommited, the last 30 messages of the channel will be returned.
+   * Only messages after this ISO 8601 timestamp will be included in results. If ommited, the last 30 messages of the channel will be returned.
    *
-   * Example: "1234567890.123456"
+   * @example "2025-03-26T00:00:00Z"
    */
   after?: string;
 }) {
   const slackWebClient = getSlackWebClient();
 
+  const unixTimestamp = input.after ? Math.floor(new Date(input.after).getTime() / 1000).toString() : undefined;
+
   const messages = await slackWebClient.conversations.history({
     channel: input.channelId,
-    oldest: input.after,
+    oldest: unixTimestamp,
     limit: 30,
   });
 
@@ -25,7 +27,14 @@ async function getChannelHistory(input: {
     throw new Error(messages.error);
   }
 
-  return messages.messages;
+  const response = messages.messages?.map((message) => ({
+    text: message.text,
+    user: message.user,
+    ts: message.ts,
+    date: message.ts ? new Date(parseInt(message.ts, 10) * 1000).toISOString() : undefined,
+  }));
+
+  return response;
 }
 
 export default withSlackClient(getChannelHistory);

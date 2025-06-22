@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { SubscriptionsListRequest } from "@polar-sh/sdk/models/operations";
+import { SubscriptionsListRequest } from "@polar-sh/sdk/dist/commonjs/models/operations/subscriptionslist";
 import { PolarContext } from "../providers";
 import { useContext } from "react";
 

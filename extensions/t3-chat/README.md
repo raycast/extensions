@@ -2,8 +2,6 @@
 
 Create T3 chats directly from Raycast!
 
-> ℹ️ Now in review for the store! [Follow the status here](https://github.com/raycast/extensions/pull/16961).
-
 ## Included Commands
 
 - `Ask T3 Chat`: Create a new chat on T3 Chat with the given query

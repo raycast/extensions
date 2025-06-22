@@ -12,7 +12,10 @@
     "thomaslombart",
     "srikirank",
     "vimtor",
-    "samuelkraft"
+    "samuelkraft",
+    "bendrucker",
+    "vmrjnvc",
+    "dinocosta"
   ],
   "license": "MIT",
   "commands": [
@@ -78,7 +81,7 @@
           "type": "checkbox",
           "title": "Count",
           "label": "Display To-Do",
-          "description": "When enabled, the first Things to-do wil be displayed in the menu bar.",
+          "description": "When enabled, the first incomplete Things to-do will be displayed in the menu bar.",
           "default": true,
           "required": false
         },
@@ -427,6 +430,10 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

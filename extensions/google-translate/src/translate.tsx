@@ -1,8 +1,8 @@
 import React, { ReactElement, useState } from "react";
 import { List, showToast, Toast, Action, Icon, ActionPanel } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hooks";
-import { getLanguageFlag, supportedLanguagesByCode } from "./languages";
+import { useDebouncedValue, usePreferences, useSelectedLanguagesSet, useTextState } from "./hooks";
+import { supportedLanguagesByCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { doubleWayTranslate, simpleTranslate, playTTS } from "./simple-translate";
 import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction, ToggleFullTextAction } from "./actions";
@@ -28,8 +28,8 @@ const DoubleWayTranslateItem: React.FC<{
       {results?.map((r, index) => {
         const langFrom = supportedLanguagesByCode[r.langFrom];
         const langTo = supportedLanguagesByCode[r.langTo];
-        const languages = `${getLanguageFlag(langFrom, langFrom?.code)} -> ${getLanguageFlag(langTo, langTo?.code)}`;
-        const tooltip = `${langFrom?.name ?? langFrom?.code} -> ${langTo?.name ?? langTo?.code}`;
+        const languages = `${langFrom.name} -> ${langTo.name}`;
+        const tooltip = `${langFrom?.name} -> ${langTo?.name}`;
         return (
           <React.Fragment key={index}>
             <List.Item
@@ -95,8 +95,8 @@ const TranslateItem: React.FC<{
 
   const langFrom = supportedLanguagesByCode[langFromCode];
   const langTo = supportedLanguagesByCode[langToCode];
-  const languages = `${getLanguageFlag(langFrom, langFrom?.code)} -> ${getLanguageFlag(langTo, langTo?.code)}`;
-  const tooltip = `${langFrom?.name ?? langFrom?.code} -> ${langTo?.name ?? langTo?.code}`;
+  const languages = `${langFrom.name} -> ${langTo.name}`;
+  const tooltip = `${langFrom?.name} -> ${langTo?.name}`;
 
   return (
     <List.Item
@@ -127,6 +127,7 @@ const TranslateItem: React.FC<{
 
 export default function Translate(): ReactElement {
   const [selectedLanguageSet] = useSelectedLanguagesSet();
+  const { proxy } = usePreferences();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [text, setText] = useTextState();
   const debouncedValue = useDebouncedValue(text, 500);
@@ -150,7 +151,7 @@ export default function Translate(): ReactElement {
           <TranslateItem
             key={`${index} ${langTo}`}
             value={debouncedValue}
-            selectedLanguageSet={{ langFrom: selectedLanguageSet.langFrom, langTo: [langTo] }}
+            selectedLanguageSet={{ langFrom: selectedLanguageSet.langFrom, langTo: [langTo], proxy }}
             toggleShowingDetail={() => setIsShowingDetail(!isShowingDetail)}
           />
         ))

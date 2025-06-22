@@ -1,11 +1,29 @@
 import { runAppleScriptSync } from "run-applescript";
 import { List, Action, ActionPanel } from "@raycast/api";
 import { Bookmark } from "./type";
-import { getFavicon } from "@raycast/utils";
 import fs from "fs";
+import React from "react";
+import BookmarkListSection from "./BookmarkListSection";
+
+const convertLineSeparatedToBookmarks = (input: string) => {
+  const lines = input.trim().split("\n");
+
+  // Bookmarks are separated by linefeed, each bookmark has 3 lines: title, address, path
+  const bookmarks = [];
+  for (let bookmarkIndex = 0; bookmarkIndex + 2 < lines.length; bookmarkIndex += 3) {
+    bookmarks.push({
+      title: lines[bookmarkIndex],
+      address: lines[bookmarkIndex + 1],
+      path: lines[bookmarkIndex + 2],
+    });
+  }
+
+  return bookmarks as Bookmark[];
+};
 
 export async function getBookmarks() {
   const response = runAppleScriptSync(`
+    set linefeed to ASCII character 10
     set _output to ""
   
     tell application "Hookmark"
@@ -19,20 +37,21 @@ export async function getBookmarks() {
         set _name to item i of _bookmark_name_list
         set _address to item i of _bookmark_addr_list
         set _path to item i of _bookmark_path_list
-        
-        set _output to (_output & "{\\"title\\": \\"" & _name & "\\", \\"address\\": \\"" & _address & "\\", \\"path\\": \\"" & _path & "\\"}")
-        
+
+        set _output to (_output & _name & linefeed & _address & linefeed & _path)
+
         if i < _bookmark_count then
-          set _output to (_output & ",\\n")
-        else
-          set _output to (_output & "\\n")
+          set _output to (_output & linefeed)
         end if
       end repeat
     end tell
     
-    return "[\\n" & _output & "\\n]" 
+    return _output
     `);
-  return response ? (JSON.parse(response) as Bookmark[]) : undefined;
+
+  if (!response) return undefined;
+
+  return convertLineSeparatedToBookmarks(response);
 }
 
 export function openInHook(name: string, address: string) {
@@ -45,66 +64,30 @@ export function openInHook(name: string, address: string) {
   runAppleScriptSync(script);
 }
 
-export function ShowHookedSubmenu(bookmark: Bookmark) {
-  const response = runAppleScriptSync(`
-    set _output to ""
-    tell application "Hookmark"
-      set currentBookmark to make bookmark with properties {name:"${bookmark.title}", address:"${bookmark.address}"}
-      set _hookedlist to hooked bookmarks of currentBookmark
-  
-      set _bookmark_count to count of _hookedlist
-      if _bookmark_count > 0 then
-        repeat with i from 1 to _bookmark_count
-            set _name to name of item i of _hookedlist
-            set _path to path of item i of _hookedlist
-            set _address to address of item i of _hookedlist
-    
-            set _output to (_output & "{\\"title\\": \\"" & _name & "\\", \\"address\\": \\"" & _address & "\\", \\"path\\": \\"" & _path & "\\" }")
+/**
+ * Fetch hooked bookmarks for a given AppleScript snippet that returns line-separated title, address, path triples.
+ */
+export function fetchHookedBookmarksFromAppleScript(script: string): Bookmark[] {
+  const response = runAppleScriptSync(script);
 
-            if i < _bookmark_count then
-                set _output to (_output & ",\n")
-            else
-                set _output to (_output & "\n")
-            end if
-        end repeat
-      end if
-    end tell
+  if (!response) return [];
 
-    return "[\n" & _output & "\n]"
-  `);
-  const data = JSON.parse(response);
+  return convertLineSeparatedToBookmarks(response);
+}
+
+export function HookedBookmarksList({ bookmarks }: { bookmarks: Bookmark[] }) {
   return (
     <List isShowingDetail>
-      <List.Section title={`Hooked Bookamrks:`}>
-        {data?.map((bookmark: Bookmark) => (
-          <List.Item
-            title={bookmark.title}
-            key={bookmark.address}
-            icon={getFavicon(bookmark.address)}
-            detail={
-              <List.Item.Detail
-                isLoading={false}
-                markdown={`<img> src="${encodeURIComponent(bookmark.path)}" alt="${bookmark.title}" height="190" />`}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Title" text={bookmark.title} />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Address" text={bookmark.address} />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Path" text={bookmark.path} />
-                    <List.Item.Detail.Metadata.Separator />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
-            actions={
-              <ActionPanel>
-                <Action title="Open in Hookmark" onAction={() => openInHook(bookmark.title, bookmark.address)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+      <BookmarkListSection
+        title="Hooked Bookmarks:"
+        bookmarks={bookmarks}
+        renderActions={(bookmark) => (
+          <ActionPanel>
+            <Action title="Open in Hookmark" onAction={() => openInHook(bookmark.title, bookmark.address)} />
+          </ActionPanel>
+        )}
+        isFileSection={false}
+      />
     </List>
   );
 }

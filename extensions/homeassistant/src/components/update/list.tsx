@@ -7,10 +7,10 @@ import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getStateTooltip } from "@lib/utils";
 import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import React, { useState } from "react";
 import { HACSRepo } from "./utils";
 
-function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): JSX.Element | null {
+function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): React.ReactElement | null {
   const r = props.repo;
   if (!r || !r.display_name || !r.available_version || !r.name) {
     return null;
@@ -36,7 +36,7 @@ function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): JS
   );
 }
 
-function HACSUpdateItems(props: { state: State | undefined }): JSX.Element | null {
+function HACSUpdateItems(props: { state: State | undefined }): React.ReactElement | null {
   const s = props.state;
   if (!s) {
     return null;
@@ -45,7 +45,7 @@ function HACSUpdateItems(props: { state: State | undefined }): JSX.Element | nul
   return <>{repos?.map((r, i) => <HACSUpdateItem key={i} repo={r} state={s} />)}</>;
 }
 
-export function UpdatesList(): JSX.Element {
+export function UpdatesList(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(searchText, "update", "", allStates);

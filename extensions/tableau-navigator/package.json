@@ -1,0 +1,78 @@
+{
+  "name": "tableau-navigator",
+  "title": "Tableau Navigator",
+  "description": "Search and open Tableau Dashboards and Views quickly.",
+  "icon": "extension-icon.png",
+  "author": "endiruslan",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "tableau-search",
+      "title": "Search Tableau",
+      "description": "Quickly search Tableau Dashboards and Views.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.98.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": ">=22.14.0",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
+    "prettier": "^3.5.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "eslint . --ext .ts,.tsx",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "tableauServerUrl",
+      "title": "Tableau Server URL",
+      "description": "Your Tableau Server (or Cloud) address (e.g., https://tableau.example.com)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://tableau.example.com"
+    },
+    {
+      "name": "tableauApiVersion",
+      "title": "Tableau API Version",
+      "description": "Tableau REST API version (e.g., 3.24). Find in Tableau REST API docs.",
+      "type": "textfield",
+      "required": true,
+      "default": "3.24",
+      "placeholder": "3.24"
+    },
+    {
+      "name": "personalAccessTokenName",
+      "title": "Personal Access Token Name",
+      "description": "The name you gave your PAT in Tableau.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "personalAccessTokenSecret",
+      "title": "Personal Access Token Secret",
+      "description": "Your Tableau Personal Access Token secret. How to get: Login to Tableau -> My Account Settings -> Personal Access Tokens -> Create new token.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "tableauSiteId",
+      "title": "Tableau Site ID (Content URL)",
+      "description": "The 'contentUrl' of your site. Leave empty for Default site. Find it in your Tableau site URL (e.g., 'yoursitename' in .../site/yoursitename/...).",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "e.g., company_name"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { AI, environment } from "@raycast/api";
 import { processInput } from "../services/wordCompletion";
 import { Suggestion } from "../utils/types";
@@ -11,6 +11,7 @@ export function useWritingLogic() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("Loading suggestions...");
   const [hasAIPro, setHasAIPro] = useState<boolean | null>(null);
+  const requestIdRef = useRef<number>(0);
 
   // Permission check logic
   useEffect(() => {
@@ -28,14 +29,20 @@ export function useWritingLogic() {
         return;
       }
 
+      const currentRequestId = ++requestIdRef.current;
+
       setIsLoading(true);
       try {
         const results = await processInput(text);
-        setSuggestions(results);
+        if (currentRequestId === requestIdRef.current) {
+          setSuggestions(results);
+        }
       } catch (error) {
         handleError(error);
       } finally {
-        setIsLoading(false);
+        if (currentRequestId === requestIdRef.current) {
+          setIsLoading(false);
+        }
       }
     }, CONFIG.AI.DEBOUNCE_DELAY),
     [hasAIPro],

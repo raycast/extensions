@@ -83,7 +83,7 @@ export default function EditDeliveryView({
   const handleCarrierChange = async (carrierId: string) => {
     const carrier = carriers.get(carrierId);
 
-    const shouldShowDatePicker = carrier === undefined ? true : !(await carrier.ableToTrackRemotely());
+    const shouldShowDatePicker = carrier === undefined ? true : !carrier.ableToTrackRemotely();
     setShowDatePicker(shouldShowDatePicker);
   };
 

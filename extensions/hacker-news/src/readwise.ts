@@ -1,5 +1,4 @@
 import { Cache } from "@raycast/api";
-import fetch from "node-fetch";
 import { getReadwiseToken } from "./preferences";
 export { hasReadwiseToken } from "./preferences";
 

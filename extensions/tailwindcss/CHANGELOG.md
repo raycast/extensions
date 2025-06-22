@@ -1,5 +1,9 @@
 # Tailwind CSS Changelog
 
+## [Add Dropdown for Version Selection in UI] - 2025-04-04
+
+- Add dropdown in the `Search Documentation` UI to select different Tailwind CSS versions.
+
 ## [Update documentation and add classes] - 2024-12-06
 
 - Reformatted the documentation links to mirror the order and content of the Tailwind website as of v3.4

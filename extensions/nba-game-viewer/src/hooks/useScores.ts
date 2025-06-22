@@ -34,7 +34,7 @@ const fetchScores = async (league: string) => {
             color: competitor.team.color,
             alternateColor: competitor.team.alternateColor,
             home: competitor.homeAway,
-            score: competitor.score,
+            score: Number(competitor.score),
             linescores: competitor.linescores,
             records: competitor.records ?? [],
           }),

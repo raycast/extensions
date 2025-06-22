@@ -1,5 +1,14 @@
 # Google Translate Changelog
 
+## [Maintenance] - 2025-06-19
+
+- Remove country flags from languages
+- Add all the languages from Google Translate website
+
+## [Feature] - 2025-03-31
+
+- Add ability to set proxy
+
 ## [Feature] - 2025-01-09
 
 - Add ability to set multiple target languages to translate

@@ -1,8 +1,7 @@
-import { ActionPanel, List, Action, Image, showToast, Toast, Icon, ImageMask } from "@raycast/api";
+import { ActionPanel, List, Action, Image, showToast, Toast, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BASE_URL } from "./lib/constants";
-import { getAuthHeaders } from "./lib/utils";
 import { ErrorResponse } from "./lib/types";
 import ProjectBuilds from "./views/ProjectBuilds";
 import ProjectTimeline from "./views/ProjectTimeline";
@@ -10,11 +9,13 @@ import ProjectSubmissions from "./views/ProjectSubmissions";
 import ProjectUpdates from "./views/ProjectUpdates";
 import AccountPicker from "./components/AccountPicker";
 import { ProjectsResponse } from "./lib/types/projects.types";
+import AuthWrapper from "./components/AuthWrapper";
+import useAuth from "./hooks/useAuth";
 
 export default function Command() {
-  const [headers, setHeaders] = useState<Record<string, string> | null>(null);
-
   const [accountName, setAccountName] = useState("");
+
+  const { authHeaders } = useAuth();
 
   const ProjectsPayload = JSON.stringify([
     {
@@ -33,8 +34,8 @@ export default function Command() {
   const { isLoading, data } = useFetch(BASE_URL, {
     body: ProjectsPayload,
     method: "post",
-    headers: headers || {},
-    execute: headers === null && !accountName ? false : true,
+    headers: authHeaders,
+    execute: accountName ? true : false,
     parseResponse: async (resp) => {
       const data = (await resp.json()) as ProjectsResponse;
       if ("errors" in data) {
@@ -43,10 +44,10 @@ export default function Command() {
         return [];
       }
 
-      return data[0].data.account.byName.appsPaginated.edges;
+      const projects = data[0].data.account.byName.appsPaginated.edges.map((item) => item.node);
+      return projects;
     },
     onError: (error) => {
-      console.log(error);
       showToast({
         title: "Error fetching projects",
         message: (error as Error)?.message || "",
@@ -56,83 +57,79 @@ export default function Command() {
     initialData: [],
   });
 
-  useEffect(() => {
-    async function init() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    init();
-  }, []);
-
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Expo Projects"
-      searchBarPlaceholder="Search Projects"
-      searchBarAccessory={<AccountPicker onPick={(acc) => setAccountName(acc.name)} />}
-    >
-      {data ? (
-        <>
-          {data.map((project) => (
-            <List.Item
-              key={project.node.id}
-              icon={
-                project.node.iconUrl
-                  ? {
-                      source: project.node.iconUrl,
-                      mask: Image.Mask.Circle,
-                    }
-                  : Icon.MemoryChip
-              }
-              title={project.node.name}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="View Activity"
-                    target={<ProjectTimeline appFullName={project.node.fullName} />}
-                    icon={Icon.LineChart}
-                  />
-                  <Action.Push
-                    title="View Builds"
-                    target={<ProjectBuilds appFullName={project.node.fullName} />}
-                    icon={Icon.HardDrive}
-                  />
-                  <Action.Push
-                    title="View Submissions"
-                    target={<ProjectSubmissions appFullName={project.node.fullName} />}
-                    icon={Icon.Leaf}
-                  />
-                  <Action.Push
-                    title="View Updates"
-                    target={<ProjectUpdates appFullName={project.node.fullName} />}
-                    icon={Icon.Layers}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open on Expo"
-                    url={`https://expo.dev/accounts/${project.node.fullName}`}
-                    icon={{
-                      source: "expo.png",
-                      mask: ImageMask.Circle,
-                    }}
-                  />
-                  {project.node.githubRepository && (
-                    <Action.OpenInBrowser
-                      title="Open on GitHub"
-                      url={project.node.githubRepository}
-                      icon={{
-                        source: "github.png",
-                        mask: ImageMask.Circle,
-                      }}
+    <AuthWrapper>
+      <List
+        isLoading={isLoading}
+        navigationTitle="Expo Projects"
+        searchBarPlaceholder="Search Projects"
+        searchBarAccessory={<AccountPicker onPick={(acc) => setAccountName(acc.name)} />}
+      >
+        {data && data.length > 0 ? (
+          <>
+            {data.map((project) => (
+              <List.Item
+                key={project.id}
+                icon={
+                  project.iconUrl
+                    ? {
+                        source: project.iconUrl,
+                        mask: Image.Mask.Circle,
+                      }
+                    : Icon.MemoryChip
+                }
+                title={project.name}
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      title="View Activity"
+                      target={<ProjectTimeline project={project} />}
+                      icon={Icon.LineChart}
                     />
-                  )}
-                </ActionPanel>
-              }
-            />
-          ))}
-        </>
-      ) : (
-        <List.EmptyView />
-      )}
-    </List>
+                    <Action.Push
+                      title="View Builds"
+                      target={<ProjectBuilds project={project} />}
+                      icon={Icon.HardDrive}
+                    />
+                    <Action.Push
+                      title="View Submissions"
+                      target={<ProjectSubmissions project={project} />}
+                      icon={Icon.Leaf}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                    />
+                    <Action.Push
+                      title="View Updates"
+                      target={<ProjectUpdates project={project} />}
+                      icon={Icon.Layers}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                    />
+                    <Action.OpenInBrowser
+                      title="Open on Expo"
+                      url={`https://expo.dev/accounts/projects/${project.fullName}`}
+                      icon={{
+                        source: "expo.png",
+                      }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    />
+                    {project.githubRepository && (
+                      <Action.OpenInBrowser
+                        title="Open on GitHub"
+                        url={project.githubRepository.githubRepositoryUrl}
+                        icon={{
+                          source: "github.png",
+                        }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                      />
+                    )}
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </>
+        ) : (
+          <List.EmptyView title="No projects found" />
+        )}
+      </List>
+    </AuthWrapper>
   );
 }

@@ -1,7 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { baseHeaders } from "./constants";
 import axios from "axios";
-import { AccountsItem } from "./types/users-types.types";
 
 export async function getAuthHeaders() {
   const sessionSecret = await LocalStorage.getItem<string>("sessionSecret");
@@ -12,10 +11,8 @@ export async function getAuthHeaders() {
   };
 }
 
-export async function getAccounts(): Promise<AccountsItem[]> {
-  const accounts = (await LocalStorage.getItem<string>("accounts")) ?? "{}";
-
-  return JSON.parse(accounts);
+export function isObjectEmpty(obj: object): boolean {
+  return Object.keys(obj).length === 0;
 }
 
 export function changeCase(

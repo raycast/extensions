@@ -5,6 +5,9 @@
   "description": "Add entries to Day One",
   "icon": "day-one.png",
   "author": "AntonNiklasson",
+  "contributors": [
+    "bestemic"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,7 +19,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.61.2",
+    "@raycast/api": "^1.72.1",
     "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
@@ -31,6 +34,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

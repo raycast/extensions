@@ -46,9 +46,9 @@ export default function Command() {
           value={state.filter}
           onChange={(newValue) => setState((previous) => ({ ...previous, filter: newValue as Filter }))}
         >
-          <List.Dropdown.Item title="All" value={Filter.All} />
-          <List.Dropdown.Item title="Open" value={Filter.Open} />
-          <List.Dropdown.Item title="Completed" value={Filter.Completed} />
+          <List.Dropdown.Item title="All" value={Filter.All} icon={Icon.CircleDisabled} />
+          <List.Dropdown.Item title="Open" value={Filter.Open} icon={Icon.Circle} />
+          <List.Dropdown.Item title="Completed" value={Filter.Completed} icon={Icon.CheckCircle} />
         </List.Dropdown>
       }
       filtering
@@ -60,7 +60,7 @@ export default function Command() {
       {filteredTodos.map((todo, index) => (
         <List.Item
           key={todo.id}
-          icon={todo.isCompleted ? Icon.Checkmark : Icon.Circle}
+          icon={todo.isCompleted ? Icon.CheckCircle : Icon.Circle}
           title={todo.title}
           actions={
             <ActionPanel>

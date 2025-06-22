@@ -2,10 +2,9 @@ import { showToast, Toast, Form, ActionPanel, Action, useNavigation } from "@ray
 import { useForm, FormValidation } from "@raycast/utils";
 import axios, { AxiosRequestConfig } from "axios";
 import { EditAppleDeviceNameResponse } from "../lib/types/apple-devices.types";
-import { useEffect, useState } from "react";
-import { getAuthHeaders } from "../lib/utils";
 import { BASE_URL } from "../lib/constants";
 import { ErrorResponse } from "../lib/types";
+import useAuth from "../hooks/useAuth";
 
 interface EditPayload {
   deviceName: string;
@@ -17,20 +16,17 @@ export default function EditAppleDevice({
   deviceId: string;
   refreshDevices: () => void;
 }) {
-  const [headers, setHeaders] = useState<Record<string, string>>({});
+  const { authHeaders } = useAuth();
+
   const { pop } = useNavigation();
 
   const { handleSubmit, itemProps } = useForm<EditPayload>({
     onSubmit: async (values) => {
-      console.log({ values });
-
-      console.log({ deviceId });
-
       const config: AxiosRequestConfig = {
         method: "post",
         maxBodyLength: Infinity,
         url: BASE_URL,
-        headers,
+        headers: authHeaders,
         data: JSON.stringify([
           {
             operationName: "UpdateAppleDevice",
@@ -45,7 +41,7 @@ export default function EditAppleDevice({
           },
         ]),
       };
-      console.log(config);
+
       try {
         const resp = await axios.request<EditAppleDeviceNameResponse>(config);
         console.log(resp.data);
@@ -59,7 +55,6 @@ export default function EditAppleDevice({
           pop();
         }
       } catch (error) {
-        console.log(error);
         showToast({
           title: "Failed to update device name",
           message: (error as Error).message || "",
@@ -71,14 +66,6 @@ export default function EditAppleDevice({
       deviceName: FormValidation.Required,
     },
   });
-
-  useEffect(() => {
-    async function fetchHeaders() {
-      const authHeaders = await getAuthHeaders();
-      setHeaders(authHeaders);
-    }
-    fetchHeaders();
-  }, []);
 
   return (
     <Form

@@ -5,6 +5,7 @@ import { captureException, showToast, Toast } from "@raycast/api";
 import { cache, cachePicture, checkCache } from "../utils/common-utils";
 import axios from "axios";
 import Style = Toast.Style;
+import { getAppearanceByTitle } from "../utils/appearance-utils";
 
 export const getRaycastWallpaperList = (refresh: number) => {
   const [raycastWallpapers, setRaycastWallpapers] = useState<RaycastWallpaperWithInfo[]>([]);
@@ -24,6 +25,7 @@ export const getRaycastWallpaperList = (refresh: number) => {
           title: value.title,
           url: value.url,
           exclude: _excludeList.includes(value.url),
+          appearance: getAppearanceByTitle(value.title),
         } as RaycastWallpaperWithInfo;
       });
 
@@ -44,6 +46,7 @@ export const getRaycastWallpaperList = (refresh: number) => {
               title: value.title,
               url: value.url,
               exclude: _excludeList.includes(value.url),
+              appearance: getAppearanceByTitle(value.title),
             } as RaycastWallpaperWithInfo;
           });
           setRaycastWallpapers(_raycastWallpaperWithInfo);

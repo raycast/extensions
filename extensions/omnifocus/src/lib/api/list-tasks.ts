@@ -19,7 +19,8 @@ return tasks.reduce((ts, t) => {
       dueDate: t.dueDate() ? t.dueDate().toString() : null,
       dropped: t.dropped(),
       completed,
-      tags: t.tags ? t.tags().map(tt => tt.name()) : []
+      tags: t.tags ? t.tags().map(tt => tt.name()) : [],
+      note: t.note ? t.note() : null
     });
   }
   return ts;

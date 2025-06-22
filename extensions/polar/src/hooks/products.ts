@@ -1,14 +1,11 @@
-import { ProductsListRequest } from "@polar-sh/sdk/models/operations";
+import { ProductsListRequest } from "@polar-sh/sdk/dist/commonjs/models/operations/productslist";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useContext } from "react";
 import { PolarContext, queryClient } from "../providers";
-import {
-  ProductBenefitsUpdate,
-  ProductCreate,
-  ProductUpdate,
-} from "@polar-sh/sdk/models/components";
-import { Organization } from "@polar-sh/sdk/models/components";
-
+import { ProductUpdate } from "@polar-sh/sdk/dist/commonjs/models/components/productupdate";
+import { Organization } from "@polar-sh/sdk/dist/commonjs/models/components/organization";
+import { ProductCreate } from "@polar-sh/sdk/dist/commonjs/models/components/productcreate";
+import { ProductBenefitsUpdate } from "@polar-sh/sdk/dist/commonjs/models/components/productbenefitsupdate";
 export const useProducts = ({
   organizationId,
   ...params

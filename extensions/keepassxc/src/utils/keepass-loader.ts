@@ -23,7 +23,7 @@ interface Preference {
 const showToastCliErrors = (e: { message: string }) => {
   let invalidPreference = "";
   let toastMessage = e.message.trim();
-  if (e.message.includes("Invalid credentials were provided") || e.message.includes("Failed to load key file")) {
+  if (e.message.includes("Invalid credentials") || e.message.includes("Failed to load key file")) {
     toastMessage = "Invalid Credentials";
   } else if (e.message.includes("keepassxc-cli: No such file or directory") || e.message.includes("ENOENT")) {
     invalidPreference = "KeePassXC App";
@@ -189,7 +189,11 @@ class KeePassLoader {
       cli.on("error", reject);
       cli.stderr.on("data", this.cliStderrErrorHandler(reject));
       cli.on("exit", (code) => {
-        code === 0 ? resolve() : reject(new Error("Invalid Credentials"));
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error("Invalid Credentials"));
+        }
       });
     });
   };
@@ -247,7 +251,7 @@ class KeePassLoader {
           exited = true;
           tryResolve();
         } else {
-          reject(new Error(`Process exited with code: ${code}`));
+          reject(new Error(`Something went wrong when accessing the database (exit code: ${code})`));
         }
       });
     });

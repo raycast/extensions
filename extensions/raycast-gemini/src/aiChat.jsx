@@ -24,6 +24,15 @@ export default function Chat({ launchContext }) {
     });
   };
 
+  function showFailureToast(error, options = {}) {
+    return showToast({
+      style: Toast.Style.Failure,
+      title: options.title || "Error",
+      message: error instanceof Error ? error.message : String(error),
+      primaryAction: options.primaryAction,
+    });
+  }
+
   const { apiKey, defaultModel } = getPreferenceValues();
   const gemini = new Gemini(apiKey, { fetch });
 
@@ -49,12 +58,12 @@ export default function Chat({ launchContext }) {
             <Action.SubmitForm
               title="Create Chat"
               onSubmit={(values) => {
-                if (chatData.chats.map((x) => x.name).includes(values.chatName)) {
-                  toast(Toast.Style.Failure, "Chat with that name already exists.");
+                let newName = values.chatName.trim() || createNewChatName();
+                if (chatData.chats.map((x) => x.name).includes(newName)) {
+                  showFailureToast("Chat with that name already exists.");
                 } else {
                   pop();
                   setChatData((oldData) => {
-                    let newName = createNewChatName();
                     let newChatData = structuredClone(oldData);
                     newChatData.chats.push({
                       name: newName,
@@ -285,6 +294,7 @@ export default function Chat({ launchContext }) {
       </ActionPanel>
     );
   };
+
   let formatDate = (dateToCheckISO) => {
     const dateToCheck = new Date(dateToCheckISO);
     if (dateToCheck.toDateString() === new Date().toDateString()) {

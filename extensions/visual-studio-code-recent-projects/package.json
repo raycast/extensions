@@ -35,7 +35,8 @@
     "codium",
     "positron",
     "windsurf",
-    "trae"
+    "trae",
+    "trae-cn"
   ],
   "license": "MIT",
   "commands": [
@@ -97,6 +98,10 @@
         {
           "title": "Trae",
           "value": "Trae"
+        },
+        {
+          "title": "Trae CN",
+          "value": "Trae CN"
         },
         {
           "title": "VSCodium",
@@ -209,5 +214,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,5 +1,14 @@
 # Linear Changelog
 
+## [Update API and bug fixes] - 2025-04-15
+
+- Updated dependencies
+- Fix project statuses bug in AI Extension
+
+## [Fix Search Issue] - 2025-03-11
+
+- Updated getIssues to use the new searchIssues API instead of issueSearch ( now deprecated )
+
 ## [Fix Creation Issue] - 2025-02-25
 
 - Fixed issue creation with stateId because of closing quote in the GraphQL mutation.

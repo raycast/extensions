@@ -1,5 +1,9 @@
 # Howlongtobeat Changelog
 
+## [Fixes] - 2025-05-12
+
+- Fix: Hash not found error when fetching games by search
+
 ## [Fixes] - 2025-02-26
 
 - Fix: Hash not found error when fetching games by search

@@ -1,4 +1,4 @@
-import { withGoogleAPIs, getCalendarClient } from "../google";
+import { withGoogleAPIs, getCalendarClient } from "../lib/google";
 
 type Input = {
   /**
@@ -57,13 +57,24 @@ type Input = {
    * The Google Calendar API has a maximum limit of 2500 events per request.
    */
   maxResults?: number;
+
+  /**
+   * The ID of the calendar to search
+   *
+   * @example "primary" or "email@abstract...com"
+   * @default "primary"
+   *
+   * @remarks
+   * If not provided, searches the user's primary calendar. If used, get this from `list-calendars` tool.
+   */
+  calendarId?: string;
 };
 
 const tool = async (input: Input) => {
   const calendar = getCalendarClient();
 
   const requestParams = {
-    calendarId: "primary",
+    calendarId: input.calendarId || "primary",
     q: input.query,
     timeMin: input.timeMin || new Date().toISOString(),
     timeMax: input.timeMax,

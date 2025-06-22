@@ -8,6 +8,7 @@ import {
   Toast,
   showToast,
   getPreferenceValues,
+  closeMainWindow,
 } from "@raycast/api";
 import { format } from "date-fns";
 import { FormValidation, getAvatarIcon, useCachedState, useForm } from "@raycast/utils";
@@ -33,6 +34,7 @@ export default function CreateTaskForm(props: {
 
   const [lastWorkspace, setLastWorkspace] = useCachedState<string>("last-workspace");
 
+  const { shouldCloseMainWindow } = getPreferenceValues<Preferences.CreateTask>();
   const { handleSubmit, itemProps, values, focus, reset } = useForm<TaskFormValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating task" });
@@ -41,7 +43,7 @@ export default function CreateTaskForm(props: {
         const htmlNotes = `<body>${values.description}</body>`;
 
         const customFieldsEntries = Object.entries(values).filter(
-          ([key, value]) => key.startsWith("field-") && value !== ""
+          ([key, value]) => key.startsWith("field-") && value !== "",
         );
         const customFields = customFieldsEntries.reduce((acc, field) => {
           const fieldId = field[0].split("-")[1];
@@ -58,6 +60,12 @@ export default function CreateTaskForm(props: {
           ...(values.start_date ? { start_on: format(values.start_date, "yyyy-MM-dd") } : {}),
           ...(values.due_date ? { due_on: format(values.due_date, "yyyy-MM-dd") } : {}),
         });
+
+        if (shouldCloseMainWindow) {
+          await closeMainWindow();
+          await showToast({ style: Toast.Style.Success, title: "Task created" });
+          return;
+        }
 
         toast.style = Toast.Style.Success;
         toast.title = "Created task";

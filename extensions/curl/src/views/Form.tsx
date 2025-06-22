@@ -1,11 +1,13 @@
 import { Fragment, useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, LocalStorage, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, LocalStorage, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { headerKeys, methods, makeObject } from "../../utils";
 import ResultView from "./Result";
 import axios from "axios";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const curlString = require("curl-string");
+
 interface Identifiable {
   [key: string]: string | number;
 }
@@ -61,15 +63,15 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
           method != "GET" && method != "DELETE"
             ? `${method}-${url}-${body.replace("```\n\b\b", "")}`
             : `${method}-${url}`,
-          JSON.stringify({ ...payload, meta: { title: "", description: "" } }),
+          JSON.stringify({ ...payload, meta: { title: "", description: "", jsonPathQuery: "" } }),
         );
-        push(<ResultView result={result as never} curl={curl} />);
+        push(<ResultView result={result as never} curl={curl} jsonPathResult={""} />);
       })
       .catch((err) => {
-        showToast({
-          title: "Error",
-          message: err.message,
-          style: Toast.Style.Failure,
+        const data = err.response?.data;
+        const errorMessage = typeof data === "string" ? data : data?.message || data?.error || data?.detail;
+        showFailureToast(`${err.message}${errorMessage ? `\n${errorMessage.toString()}` : ""}`, {
+          title: "Request Failed",
         });
       })
       .finally(() => setIsLoading(false));

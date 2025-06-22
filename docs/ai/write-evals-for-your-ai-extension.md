@@ -8,7 +8,7 @@ We all know that AI is not always reliable. This is why it's important to write 
 
 ## Add an Eval
 
-The easiest way to add an eval is to first use your AI Extension. Then, once Raycast AI used your tools to finish it's response, you can use the Copy Eval action to copy the eval to your clipboard.
+The easiest way to add an eval is to first use your AI Extension. Then, once Raycast AI used your tools to finish its response, you can use the Copy Eval action to copy the eval to your clipboard.
 
 ![Copy Eval](../.gitbook/assets/copy-eval.webp)
 

@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
+import { DebuggingBugReportingActionSection } from "~/components/actions";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
-import { Preferences } from "~/types/preferences";
 import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
@@ -102,6 +102,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
               style={Action.Style.Destructive}
             />
           )}
+          <DebuggingBugReportingActionSection />
         </ActionPanel>
       }
     >
@@ -126,7 +127,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
 };
 
 function TimeoutInfoDescription() {
-  const vaultTimeoutMs = getPreferenceValues<Preferences>().repromptIgnoreDuration;
+  const vaultTimeoutMs = getPreferenceValues<AllPreferences>().repromptIgnoreDuration;
   const timeoutLabel = getLabelForTimeoutPreference(vaultTimeoutMs);
 
   if (!timeoutLabel) return null;

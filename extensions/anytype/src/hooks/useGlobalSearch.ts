@@ -1,15 +1,19 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { globalSearch } from "../api/globalSearch";
 import { useMemo } from "react";
-import { apiLimit } from "../helpers/constants";
+import { globalSearch } from "../api";
+import { SortDirection } from "../models";
+import { apiLimit } from "../utils";
 
 export function useGlobalSearch(query: string, types: string[]) {
   const { data, error, isLoading, mutate, pagination } = useCachedPromise(
     (query: string, types: string[]) => async (options: { page: number }) => {
       const offset = options.page * apiLimit;
+      const sortPreference = getPreferenceValues().sort;
+      const sortDirection = sortPreference === "name" ? SortDirection.Ascending : SortDirection.Descending;
+
       const response = await globalSearch(
-        { query, types, sort: { direction: "desc", timestamp: getPreferenceValues().sort } },
+        { query, types, sort: { property_key: sortPreference, direction: sortDirection } },
         { offset, limit: apiLimit },
       );
 

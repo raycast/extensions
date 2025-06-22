@@ -17,6 +17,7 @@ import {
   deliveryIcon,
   deliveryStatus,
   getPackageWithEarliestDeliveryDate,
+  allPackagesDeliveredForDeliveryId,
   PackageMap,
 } from "./package";
 import { Delivery } from "./delivery";
@@ -75,41 +76,54 @@ export default function TrackDeliveriesCommand() {
             ]}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Show Details"
-                  icon={Icon.MagnifyingGlass}
-                  target={<ShowDetailsView delivery={delivery} packages={packages[delivery.id]?.packages ?? []} />}
-                />
-                <Action.OpenInBrowser
-                  url={carriers.get(delivery.carrier)?.urlToTrackingWebpage(delivery) ?? ""}
-                  shortcut={Keyboard.Shortcut.Common.Open}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Tracking Number"
-                  shortcut={Keyboard.Shortcut.Common.Copy}
-                  content={delivery.trackingNumber}
-                />
-                <Action.Push
-                  title="Edit Delivery"
-                  icon={Icon.Pencil}
-                  shortcut={Keyboard.Shortcut.Common.Edit}
-                  target={
-                    <EditDeliveryView
-                      delivery={delivery}
-                      deliveries={deliveries ?? []}
-                      setDeliveries={setDeliveries}
-                      setPackages={setPackages}
-                      isLoading={isLoading}
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="Show Details"
+                    icon={Icon.MagnifyingGlass}
+                    target={<ShowDetailsView delivery={delivery} packages={packages[delivery.id]?.packages ?? []} />}
+                  />
+                  <Action.OpenInBrowser
+                    url={carriers.get(delivery.carrier)?.urlToTrackingWebpage(delivery) ?? ""}
+                    shortcut={Keyboard.Shortcut.Common.Open}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Tracking Number"
+                    shortcut={Keyboard.Shortcut.Common.Copy}
+                    content={delivery.trackingNumber}
+                  />
+                  <Action.Push
+                    title="Edit Delivery"
+                    icon={Icon.Pencil}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                    target={
+                      <EditDeliveryView
+                        delivery={delivery}
+                        deliveries={deliveries ?? []}
+                        setDeliveries={setDeliveries}
+                        setPackages={setPackages}
+                        isLoading={isLoading}
+                      />
+                    }
+                  />
+                  {!carriers.get(delivery.carrier)?.ableToTrackRemotely() && (
+                    <Action
+                      title={
+                        delivery.manualMarkedAsDelivered ? "Manually Mark as Undelivered" : "Manually Mark as Delivered"
+                      }
+                      icon={delivery.manualMarkedAsDelivered ? Icon.CircleProgress : Icon.CheckCircle}
+                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      style={Action.Style.Regular}
+                      onAction={() => toggleDeliveryDelivered(delivery.id, deliveries, setDeliveries, setPackages)}
                     />
-                  }
-                />
-                <Action
-                  title="Delete Delivery"
-                  icon={Icon.Trash}
-                  shortcut={Keyboard.Shortcut.Common.Remove}
-                  style={Action.Style.Destructive}
-                  onAction={() => deleteTracking(delivery.id, deliveries, setDeliveries, setPackages)}
-                />
+                  )}
+                  <Action
+                    title="Delete Delivery"
+                    icon={Icon.Trash}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    style={Action.Style.Destructive}
+                    onAction={() => deleteTracking(delivery.id, deliveries, setDeliveries, setPackages)}
+                  />
+                </ActionPanel.Section>
                 <TrackNewDeliveryAction deliveries={deliveries} setDeliveries={setDeliveries} isLoading={isLoading} />
                 <Action
                   title="Refresh All"
@@ -120,6 +134,15 @@ export default function TrackDeliveriesCommand() {
                     refreshTracking(true, deliveries, packages, setPackages, setTrackingIsLoading);
                   }}
                 />
+                {atLeastOneDeliveryIsFullyDelivered(deliveries, packages) && (
+                  <Action
+                    title="Delete All Delivered Deliveries"
+                    icon={Icon.Trash}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                    style={Action.Style.Destructive}
+                    onAction={() => deleteDeliveredDeliveries(deliveries, setDeliveries, packages, setPackages)}
+                  />
+                )}
               </ActionPanel>
             }
           />
@@ -127,6 +150,17 @@ export default function TrackDeliveriesCommand() {
       )}
     </List>
   );
+}
+
+function atLeastOneDeliveryIsFullyDelivered(deliveries: Delivery[] | undefined, packages: PackageMap): boolean {
+  if (!deliveries || !packages) {
+    // don't do anything until both deliveries and packages are initialized
+    return false;
+  }
+
+  return deliveries
+    .map((delivery) => delivery.id)
+    .some((deliveryId) => allPackagesDeliveredForDeliveryId(deliveryId, packages));
 }
 
 async function refreshTracking(
@@ -191,6 +225,45 @@ async function refreshTracking(
   setTrackingIsLoading(false);
 }
 
+async function toggleDeliveryDelivered(
+  id: string,
+  deliveries: Delivery[] | undefined,
+  setDeliveries: (value: Delivery[]) => Promise<void>,
+  setPackages: (value: ((prevState: PackageMap) => PackageMap) | PackageMap) => void,
+) {
+  if (!deliveries) {
+    return;
+  }
+
+  const deliveryIndex = deliveries.findIndex((delivery) => delivery.id === id);
+  if (deliveryIndex === -1) {
+    return;
+  }
+
+  const toBeDelivered = !deliveries[deliveryIndex].manualMarkedAsDelivered;
+
+  deliveries[deliveryIndex] = {
+    ...deliveries[deliveryIndex],
+    manualMarkedAsDelivered: toBeDelivered,
+  };
+
+  const nameOfDeliveryToMarkAsDelivered = deliveries[deliveryIndex].name;
+
+  await setDeliveries(deliveries);
+
+  // clear packages for this delivery so it will refresh
+  setPackages((packages) => {
+    delete packages[id];
+    return packages;
+  });
+
+  await showToast({
+    style: Toast.Style.Success,
+    title: `Manually Marked as ${toBeDelivered ? "Delivered" : "Undelivered"}`,
+    message: nameOfDeliveryToMarkAsDelivered,
+  });
+}
+
 async function deleteTracking(
   id: string,
   deliveries: Delivery[] | undefined,
@@ -229,6 +302,49 @@ async function deleteTracking(
     style: Toast.Style.Success,
     title: "Deleted Delivery",
     message: nameOfDeliveryToDelete,
+  });
+}
+
+async function deleteDeliveredDeliveries(
+  deliveries: Delivery[] | undefined,
+  setDeliveries: (value: Delivery[]) => Promise<void>,
+  packages: PackageMap,
+  setPackages: (value: ((prevState: PackageMap) => PackageMap) | PackageMap) => void,
+) {
+  if (!deliveries || !packages) {
+    // don't do anything until both deliveries and packages are initialized
+    return false;
+  }
+
+  const deliveryIdsToDelete = deliveries
+    .map((delivery) => delivery.id)
+    .filter((deliveryId) => allPackagesDeliveredForDeliveryId(deliveryId, packages));
+
+  const options: Alert.Options = {
+    title: "Delete All Delivered Deliveries",
+    message: `Are you sure you want to delete ${deliveryIdsToDelete.length} deliver${deliveryIdsToDelete.length > 1 ? "ies" : "y"}?`,
+    icon: Icon.Trash,
+    primaryAction: {
+      title: "Delete",
+      style: Alert.ActionStyle.Destructive,
+    },
+  };
+
+  const confirmation = await confirmAlert(options);
+  if (!confirmation) {
+    return;
+  }
+
+  const reducedDeliveries = deliveries.filter((delivery) => !deliveryIdsToDelete.includes(delivery.id));
+  await setDeliveries(reducedDeliveries);
+  setPackages((packages) => {
+    deliveryIdsToDelete.forEach((deliveryId) => delete packages[deliveryId]);
+    return packages;
+  });
+
+  await showToast({
+    style: Toast.Style.Success,
+    title: "Deleted Delivered Deliveries",
   });
 }
 

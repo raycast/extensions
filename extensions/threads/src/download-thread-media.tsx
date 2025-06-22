@@ -15,7 +15,10 @@ export default async function Command({
   const { mediaDownloadPath } = await getPreferenceValues();
   const downloadFolder = mediaDownloadPath || `${homedir()}/Downloads`;
 
-  if (!threadsUrl.includes("threads.net")) {
+  if (
+    !threadsUrl.includes("threads.net") &&
+    !threadsUrl.includes("threads.com")
+  ) {
     await showToast({
       title: "Error",
       message: "Invalid URL provided. Please provide a valid threads URL",

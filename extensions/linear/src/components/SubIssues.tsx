@@ -2,10 +2,10 @@ import { Action, ActionPanel, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
 import { getSubIssues, IssueResult } from "../api/getIssues";
-
 import useIssues from "../hooks/useIssues";
-import usePriorities from "../hooks/usePriorities";
 import useMe from "../hooks/useMe";
+import usePriorities from "../hooks/usePriorities";
+
 import CreateIssueForm from "./CreateIssueForm";
 import IssueListItem from "./IssueListItem";
 

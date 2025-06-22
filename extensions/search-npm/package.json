@@ -21,6 +21,10 @@
   "categories": [
     "Developer Tools"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "index",

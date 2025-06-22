@@ -1,8 +1,8 @@
-import { OrganizationsListRequest } from "@polar-sh/sdk/models/operations";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useContext } from "react";
 import { PolarContext, queryClient } from "../providers";
-import { OrganizationCreate } from "@polar-sh/sdk/models/components";
+import { OrganizationCreate } from "@polar-sh/sdk/dist/commonjs/models/components/organizationcreate";
+import { OrganizationsListRequest } from "@polar-sh/sdk/dist/commonjs/models/operations/organizationslist";
 
 export const useOrganizations = (params: OrganizationsListRequest) => {
   const polar = useContext(PolarContext);

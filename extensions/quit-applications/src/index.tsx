@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { ActionPanel, List, Action, showToast, Toast, clearSearchBar } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  showToast,
+  Toast,
+  clearSearchBar,
+  getPreferenceValues,
+  Icon,
+  popToRoot,
+} from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 function applicationNameFromPath(path: string): string {
@@ -98,6 +108,7 @@ type CommandProps = {
 };
 
 export default function Command({ launchContext }: CommandProps) {
+  const preferences = getPreferenceValues();
   const [apps, setApps] = useState<
     {
       name: string;
@@ -120,12 +131,30 @@ export default function Command({ launchContext }: CommandProps) {
     }
 
     getRunningAppsPaths().then((appCandidatePaths) => {
-      // filter out all apps that do not end with .app
-      const apps = appCandidatePaths.map((path) => ({ name: applicationNameFromPath(path), path }));
-      setApps(apps);
+      const mappedApps = appCandidatePaths
+        .filter((path) => path.endsWith(".app"))
+        .map((path) => ({ name: applicationNameFromPath(path), path }));
 
-      if (apps && apps[0]) {
-        setSelectedId(apps[0].path);
+      const excludedNames = preferences.excludeApplications
+        ? preferences.excludeApplications.split(",").map((name: string) => name.trim().toLowerCase())
+        : [];
+
+      const filteredApps = mappedApps.filter((app) => !excludedNames.includes(app.name.toLowerCase()));
+
+      const uniqueApps: { name: string; path: string }[] = [];
+      const seenPaths = new Set<string>();
+
+      for (const app of filteredApps) {
+        if (!seenPaths.has(app.path)) {
+          seenPaths.add(app.path);
+          uniqueApps.push(app);
+        }
+      }
+
+      setApps(uniqueApps);
+
+      if (uniqueApps && uniqueApps[0]) {
+        setSelectedId(uniqueApps[0].path);
       }
 
       setIsLoading(false);
@@ -141,6 +170,49 @@ export default function Command({ launchContext }: CommandProps) {
       onSearchTextChange={setSearchText}
       onSelectionChange={(id) => setSelectedId(id)}
     >
+      {preferences.showQuitAllApplications && (
+        <List.Item
+          title="Quit All Applications"
+          icon={Icon.XMarkCircle}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Quit All"
+                onAction={async () => {
+                  let remainingApps = [...apps];
+
+                  for (const app of apps) {
+                    if (
+                      preferences.excludeApplications
+                        .split(",")
+                        .map((name: string) => name.trim())
+                        .includes(app.name)
+                    ) {
+                      continue;
+                    }
+
+                    const success = await quitAppWithToast(app.name);
+
+                    if (success) {
+                      remainingApps = remainingApps.filter((a) => a.name !== app.name);
+                    }
+                  }
+
+                  setApps(remainingApps);
+
+                  if (searchText) {
+                    clearSearchBar();
+                  }
+
+                  if (remainingApps.length == 0) {
+                    popToRoot({ clearSearchBar: true });
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {apps.map((app) => (
         <List.Item
           title={app.name}

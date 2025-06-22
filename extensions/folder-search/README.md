@@ -1,6 +1,42 @@
 # Folder Search
 
-Search for folders on your Mac
+A powerful Raycast extension for searching, managing, and organizing folders on your Mac. Quickly find folders, move files, and perform common file operations with keyboard shortcuts.
+
+## Features
+
+### 🔍 Smart Search
+- Search folders across your entire Mac or specific scopes
+- Sort results by last used date for quick access to frequently used folders
+- Filter results by pinned folders, user directory, or entire Mac
+- Support for exact matching using [term] syntax
+- Case-sensitive and case-insensitive search options
+- Uses Spotlight for fast search results
+
+### 📌 Folder Management
+- Pin frequently used folders for quick access
+- Reorder pinned folders using Move Up/Down actions
+- View detailed folder information including:
+  - Last used date
+  - Creation date
+  - Modification date
+  - Use count
+  - File size
+
+### 🚀 Quick Actions
+- Open folders in Finder
+- Open folders with specific applications
+- Show folder info in Finder
+- Copy folder path, name, or entire folder
+- Create quicklinks to folders
+- Move files to selected folders
+- Move folders to Trash
+- Navigate to enclosing or sub-folders
+
+### ⚙️ Customization
+- Configure maximum number of search results
+- Filter system Library folders (excluding cloud storage)
+- Enable/disable custom AppleScript plugins
+- Configure plugins folder location
 
 ## Plugins
 
@@ -40,7 +76,7 @@ exports.FolderSearchPlugin = {
 
   // a function which takes the result that was selected at the time of execution and returns a valid AppleScript. This AppleScript is what gets executed.
   appleScript: (result) => {
-    return `do shell script "open ${result.path}"`
+    return `do shell script "open '${result.path}'"`;
   }
 }
 ```
@@ -59,4 +95,34 @@ For reference, the `result` argument passed into the `appleScript` function is a
 }
 ```
 
-You will likely only need/use the `path` property.
+Plugin Folder Path Format:
+- Use absolute paths (starting with `/`)
+- Trailing slash is optional (both `/path/to/plugins` and `/path/to/plugins/` work)
+- The path must exist and be readable
+- Common paths:
+  - Default: `/Users/<username>/Library/Application Support/Raycast/extensions/folder-search/plugins/`
+  - Development: `/path/to/your/folder-search/plugins/`
+
+### 🎯 Keyboard Shortcuts
+- `⌘ + ⌥ + ↑` - Navigate to enclosing folder
+- `⌘ + ⌥ + ↓` - Enter selected folder
+- `⌘ + .` - Copy folder
+- `⌘ + ⇧ + .` - Copy folder name
+- `⌘ + ⇧ + ,` - Copy folder path
+- `⌘ + ⇧ + L` - Create quicklink
+- `⌘ + ⇧ + P` - Toggle pin status
+- `⌘ + ⇧ + D` - Toggle details view
+- `⌘ + ⇧ + S` - Move Finder selection to folder
+- `⌘ + O` - Open with...
+- `⌃ + X` - Move to Trash
+
+### 📊 Advanced Features
+- Support for cloud storage paths (iCloud, Dropbox, Google Drive, OneDrive)
+- Library folder filtering
+- Language-agnostic operation
+
+## Installation
+
+1. Install the extension from the Raycast Store
+2. Configure preferences in Raycast settings
+3. (Optional) Create custom plugins in your plugins folder

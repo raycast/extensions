@@ -49,6 +49,7 @@
   - [CLI](information/developer-tools/cli.md)
   - [ESLint](information/developer-tools/eslint.md)
   - [VS Code (community tool)](information/developer-tools/vscode.md)
+  - [Templates](information/developer-tools/templates.md)
 - [Security](information/security.md)
 - [Versioning](information/versioning.md)
 

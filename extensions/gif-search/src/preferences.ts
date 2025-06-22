@@ -59,3 +59,11 @@ export function getGridTrendingItemSize() {
 export function getHideFilename(): boolean {
   return preferences.hideFilename;
 }
+
+export function getGiphyLocale(): string {
+  return preferences.giphyLocale;
+}
+
+export function getTenorLocale(): string {
+  return preferences.tenorLocale;
+}

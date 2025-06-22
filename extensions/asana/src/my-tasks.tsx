@@ -24,7 +24,7 @@ function MyTasks() {
   const tasksBySection = groupBy(tasks, "assignee_section.gid");
   const sections = uniqBy(
     tasks?.map((task) => task.assignee_section),
-    "gid"
+    "gid",
   ).map((section) => {
     const tasks = tasksBySection[section.gid];
 

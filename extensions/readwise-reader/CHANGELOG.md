@@ -1,5 +1,9 @@
 # Readwise Reader Changelog
 
+## [Add category filtering for documents in list view] - 2025-03-12
+
+- Add category filtering for documents in list view
+
 ## [Add list documents command] - 2025-02-26
 
 - Add `List documents` command
