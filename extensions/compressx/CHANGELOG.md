@@ -1,6 +1,6 @@
 # Compresto Changelog
 
-## [Rename product] - 205-06-22
+## [Rename product] - 2025-06-22
 
 - Rename to Compresto. Visit us at https://compresto.app
 
