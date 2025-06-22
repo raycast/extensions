@@ -27,7 +27,7 @@ export default function PRCommand() {
       .map((b) => `- ${b.trim()}`)
       .join("\n");
 
-    const screenshotSection = includeScreenshot ? `\n## Screenshot\n\n[]\n` : "";
+    const screenshotSection = includeScreenshot ? `\n## Screenshot\n\n![]()\n` : "";
 
     return `## Summary
 
