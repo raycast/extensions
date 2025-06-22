@@ -5,6 +5,7 @@ import { join } from "path";
 import { downloadFile, extractAndRewrite } from "./utils";
 import { getDatabase } from "../db";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { showToast, Toast } from "@raycast/api";
 
 // At the time of writing, 11.10.0 is the latest version of better-sqlite3.
 const VERSION = "11.10.0";
@@ -54,6 +55,13 @@ export async function migrateDatabase() {
     migrate(database, { migrationsFolder: DatabaseMigrationsFolder });
   } catch (exception) {
     console.error("Failed to run database migrations...", exception);
+
+    // Display error to the user when database migrations fail so that, hopefully, the users can at
+    // least report the issue.
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to run database migrations",
+    });
   }
 }
 

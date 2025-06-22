@@ -1,4 +1,4 @@
-import type { Event, Session } from "./types";
+import type { Event, NewSession } from "./types";
 import { createSession, getCurrentSession, removeCurrentSession, saveSession, setCurrentSession } from "./sessions";
 import { getEvents } from "./events";
 import { ensureInitialized } from "./lib/init/tasks";
@@ -42,7 +42,7 @@ export default async function Command() {
         continue;
       }
 
-      const session: Session = { ...cachedSession, duration: event.duration };
+      const session: NewSession = { ...cachedSession, duration: event.duration };
       await saveSession(session);
       removeCurrentSession();
     }

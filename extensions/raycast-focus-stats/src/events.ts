@@ -53,11 +53,6 @@ export function getEvents(): Event[] {
     refreshedAt = formatDate(date);
   }
 
-  // Store current timestamp just before the command is run so we can keep track of when we want to
-  // continue searching logs from the next time the command is run.
-  const timestamp = new Date();
-  cache.set("refreshedAt", formatDate(timestamp));
-
   // Add the `--start` flag to the `log` command to ensure only log messages starting from the
   // provided date and time are provided.
   const command = `${COMMAND} --start '${refreshedAt}'`;
@@ -85,6 +80,13 @@ export function getEvents(): Event[] {
       inSummary = false;
     }
   }
+
+  // Store current timestamp just before the command is run so we can keep track of when we want to
+  // continue searching logs from the next time the command is run. This value is only set after the
+  // events have been parsed to ensure that, if the parsing times out or fails, we continue
+  // searching from the previous timestamp.
+  const timestamp = new Date();
+  cache.set("refreshedAt", formatDate(timestamp));
 
   return events;
 }

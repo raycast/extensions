@@ -1,8 +1,9 @@
 import { Cache } from "@raycast/api";
-import type { PendingSession, Session } from "./types";
+import type { PendingSession, Session, NewSession } from "./types";
 import { getDatabase } from "./lib/db";
 import { sessionsTable } from "./lib/schema";
 import { and, gte, lte } from "drizzle-orm";
+import { showToast, Toast } from "@raycast/api";
 
 const cache = new Cache();
 
@@ -22,8 +23,15 @@ export function getCurrentSession(): PendingSession | null {
     return null;
   }
 
-  const { start, goal } = JSON.parse(currentSessionString);
-  return { start: new Date(start), goal };
+  try {
+    const { start, goal } = JSON.parse(currentSessionString);
+    return { start: new Date(start), goal };
+  } catch {
+    // If this code fails to parse the existing cached session, simply inform the user but ignore
+    // the error, seeing as, as far as we know, there's no way to recover from it.
+    showToast({ style: Toast.Style.Failure, title: "Failed to parse cached session. Discarding." });
+    return null;
+  }
 }
 
 /**
@@ -48,7 +56,7 @@ export function removeCurrentSession() {
  * @param {Session} session - The session object to be saved
  * @returns {void}
  */
-export async function saveSession(session: Session): Promise<void> {
+export async function saveSession(session: NewSession): Promise<void> {
   await getDatabase().insert(sessionsTable).values({
     goal: session.goal,
     duration: session.duration,
@@ -78,7 +86,8 @@ export function getSessionsByDate(date: Date): Session[] {
     .orderBy(sessionsTable.timestamp)
     .all();
 
-  return rows.map((row: { goal: string; duration: number; timestamp: number }) => ({
+  return rows.map((row: { id: number; goal: string; duration: number; timestamp: number }) => ({
+    id: row.id,
     goal: row.goal,
     duration: row.duration,
     start: new Date(row.timestamp),

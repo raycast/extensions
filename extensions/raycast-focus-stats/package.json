@@ -13,12 +13,14 @@
     {
       "name": "view-sessions",
       "title": "View Sessions",
+      "subtitle": "Raycast Focus",
       "description": "Lists Focus Sessions by date",
       "mode": "view"
     },
     {
       "name": "view-summaries",
       "title": "View Summaries",
+      "subtitle": "Raycast Focus",
       "description": "Focus Sessions summaries by date",
       "mode": "view"
     },

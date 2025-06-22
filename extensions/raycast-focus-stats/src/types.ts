@@ -43,6 +43,28 @@ export type PendingSession = {
 };
 
 /**
+ * Represents a newly completed Focus session with all required data.
+ * This type contains the complete session information including goal, start time, and duration
+ * that can be used to create a full Session record.
+ */
+export type NewSession = {
+  /**
+   * The specific aim or objective for this session.
+   */
+  goal: string;
+
+  /**
+   * Timestamp for when the session started.
+   */
+  start: Date;
+
+  /**
+   * The length of the session in minutes.
+   */
+  duration: number;
+};
+
+/**
  * Represents the event that occurs when a Focus Session starts.
  * Contains information about the session goal and start time.
  */
