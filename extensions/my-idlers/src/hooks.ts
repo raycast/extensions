@@ -26,11 +26,11 @@ export default function useGet<T>(
     },
     async parseResponse(response) {
       if (!response.ok) {
-        const result: ErrorResponse = await response.json();
+        const result = (await response.json()) as ErrorResponse;
         if ("message" in result) throw new Error(result.message);
         throw new Error(Object.values(result.messages)[0][0]);
       }
-      const result: T[] = await response.json();
+      const result = (await response.json()) as T[];
       return result;
     },
     initialData: [],
@@ -50,11 +50,11 @@ export function useGetPricing({ execute = true, onData }: { execute?: boolean; o
     },
     async parseResponse(response) {
       if (!response.ok) {
-        const result: ErrorResponse = await response.json();
+        const result = (await response.json()) as ErrorResponse;
         if ("message" in result) throw new Error(result.message);
         throw new Error(Object.values(result.messages)[0][0]);
       }
-      const result: Pricing[] = await response.json();
+      const result = (await response.json()) as Pricing[];
       return result;
     },
     initialData: {
@@ -147,12 +147,12 @@ export function usePut(
     body: JSON.stringify(body),
     async parseResponse(response) {
       if (!response.ok) {
-        const result: ErrorResponse | { result: "fail"; request: PutBody } = await response.json();
+        const result = (await response.json()) as ErrorResponse | { result: "fail"; request: PutBody };
         if ("message" in result) throw new Error(result.message);
         if ("messages" in result) throw new Error(Object.values(result.messages)[0][0]);
         throw new Error(response.statusText);
       }
-      const result: { result: "success" } = await response.json();
+      const result = (await response.json()) as { result: "success" };
       return result;
     },
     execute,
