@@ -180,8 +180,8 @@ function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = fals
         };
       });
   } else {
-    return repoPaths.map((path) => {
-      const fullPath = path.replace("/.git", "");
+    return repoPaths.map((repoPath) => {
+      const fullPath = path.dirname(repoPath);
       const name = fullPath.split("/").pop() ?? "unknown";
       const remotes = gitRemotes(fullPath);
       return {

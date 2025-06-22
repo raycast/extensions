@@ -1,5 +1,9 @@
 # Expo Changelog
 
+## [Maintenance] - 2025-05-16
+
+- Remove duplicate files
+
 ## [New Additions] - 2025-04-22
 
 - Added support for Two-factor authentication

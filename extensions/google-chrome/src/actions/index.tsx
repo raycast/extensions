@@ -85,6 +85,8 @@ export async function openNewTab({
 
             if not winExists then
                 make new window
+            else
+                activate
             end if
 
             tell window 1

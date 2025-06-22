@@ -10,13 +10,13 @@ export async function checkApiTokenValidity(): Promise<boolean> {
 
     const apiVersion = response.headers.get("Anytype-Version");
     if (!apiVersion || apiVersion < currentApiVersion) {
-      showToast(
+      await showToast(
         Toast.Style.Failure,
         "App Update Required",
         `Please update the Anytype app to match the extension's API version ${currentApiVersion}.`,
       );
     } else if (apiVersion > currentApiVersion) {
-      showToast(
+      await showToast(
         Toast.Style.Failure,
         "Extension Update Required",
         `Please update the extension to match the Anytype app's API version ${apiVersion}.`,

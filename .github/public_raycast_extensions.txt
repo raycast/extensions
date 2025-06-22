@@ -55,4 +55,6 @@ fabric
 awork
 laravel-herd
 playtester
+model-context-protocol-registry
+clarify
 exa

@@ -17,6 +17,7 @@ export function useObjects(spaceId: string) {
     [spaceId],
     {
       keepPreviousData: true,
+      execute: !!spaceId,
     },
   );
 

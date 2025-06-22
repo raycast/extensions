@@ -54,7 +54,7 @@ function OpenWithIINAAction({ video, refresh }: VideoActionProps): JSX.Element |
         shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
         onOpen={() => {
           showHUD("Open IINA");
-          () => addRecentVideo(video.id);
+          addRecentVideo(video.id);
           if (refresh) refresh();
         }}
       />

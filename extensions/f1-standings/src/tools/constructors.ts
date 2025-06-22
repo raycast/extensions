@@ -17,7 +17,7 @@ type Input = {
 export default async function constructors(input: Input) {
   try {
     let year = input.year;
-    if (year === null) {
+    if (year === undefined) {
       const cs = await currentSeason();
       if (cs === null) {
         throw new Error("Could not fetch current season");

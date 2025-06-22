@@ -2,8 +2,6 @@
 
 A Raycast extension that lets users publish notes to [Nostr](https://github.com/nostr-protocol/nostr).
 
-![Extension Screenshot](./metadata/screenshot.png)
-
 
 ## Features
 - Publish notes to the Nostr relay network via form submission.

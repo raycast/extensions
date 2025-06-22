@@ -13,7 +13,7 @@ export function useGlobalSearch(query: string, types: string[]) {
       const sortDirection = sortPreference === "name" ? SortDirection.Ascending : SortDirection.Descending;
 
       const response = await globalSearch(
-        { query, types, sort: { property: sortPreference, direction: sortDirection } },
+        { query, types, sort: { property_key: sortPreference, direction: sortDirection } },
         { offset, limit: apiLimit },
       );
 

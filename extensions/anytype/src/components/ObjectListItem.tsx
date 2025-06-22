@@ -1,7 +1,7 @@
 import { Image, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { ObjectActions, ViewType } from ".";
-import { Member, Space, SpaceObject, Type, View } from "../models";
+import { Member, ObjectLayout, Property, Space, SpaceObject, Type, View } from "../models";
 
 type ObjectListItemProps = {
   space: Space;
@@ -16,14 +16,15 @@ type ObjectListItemProps = {
     tooltip?: string;
     tag?: { value: string; color: string; tooltip: string };
   }[];
-  mutate: MutatePromise<SpaceObject[] | Type[] | Member[]>[];
+  mutate: MutatePromise<SpaceObject[] | Type[] | Property[] | Member[]>[];
   mutateViews?: MutatePromise<View[]>;
-  member?: Member | undefined;
-  layout: string;
+  object: SpaceObject | Type | Property | Member;
+  layout: ObjectLayout | undefined;
   viewType: ViewType;
   isGlobalSearch: boolean;
   isNoPinView: boolean;
   isPinned: boolean;
+  searchText: string;
 };
 
 export function ObjectListItem({
@@ -35,12 +36,13 @@ export function ObjectListItem({
   accessories,
   mutate,
   mutateViews,
-  member,
+  object,
   layout,
   viewType,
   isGlobalSearch,
   isNoPinView,
   isPinned,
+  searchText,
 }: ObjectListItemProps) {
   return (
     <List.Item
@@ -74,12 +76,13 @@ export function ObjectListItem({
           title={title}
           mutate={mutate}
           mutateViews={mutateViews}
-          member={member}
+          object={object}
           layout={layout}
           viewType={viewType}
           isGlobalSearch={isGlobalSearch}
           isNoPinView={isNoPinView}
           isPinned={isPinned}
+          searchText={searchText}
         />
       }
     />

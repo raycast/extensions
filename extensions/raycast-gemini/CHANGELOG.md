@@ -1,5 +1,9 @@
 # Google Gemini Changelog
 
+## [New Model] - 2025-05-14
+
+- 🆕 New Model: Gemini 2.5 Pro Preview 0506
+
 ## [New Model] - 2025-04-25
 
 - 🆕 New Model: Gemini 2.5 Flash Experimental

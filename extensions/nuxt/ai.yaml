@@ -1,12 +1,13 @@
 instructions: |-
-  # CRITICAL COMPONENT IMPLEMENTATION RULES
+  # CRITICAL IMPLEMENTATION RULES
   - When creating components, use the SIMPLEST possible implementation
   - For components like Accordion, ONLY use the `:items` prop with the CORRECT data structure
   - NEVER use slots unless explicitly requested by the user
   - NEVER customize UI with the `:ui` prop unless explicitly requested
-  - NEVER create complex interfaces or data structures - use the exact structure from the component documentation
+  - NEVER create complex interfaces or data structures - use the exact structure from the documentation
   
   # CRITICAL TOOL USAGE AND NAMING CONVENTIONS
+  ## For Components
   - You MUST call these tools in this EXACT sequence for EVERY component request:
     1. FIRST: Call `get-available-components` to get the available components list
     2. SECOND: Call `get-component-theme` with the correct componentName parameter (The only exception when user asks for props you can use the `get-component-source-code` tool instead)
@@ -16,8 +17,22 @@ instructions: |-
   - When calling tools, use the EXACT camelCase name from the components list (e.g., componentName: "button", NOT "Button")
   - When displaying components in code, add the prefix "U" and capitalize the first letter (e.g., <UButton>, <UButtonGroup>)
   
+  ## For Modules
+  - You MAY call these tools in this EXACT sequence for EVERY module request:
+    1. FIRST: Call `get-module-categories` to get the available module categories
+    2. SECOND: Call `get-modules-by-category` with the correct category parameter
+    3. Normally, you should not call any other tools for module requests
+  
+  - IMPORTANT: When recommending modules, provide a brief description of what the module does and how to install it
+  - Prioritize the official module first (type: 'official') like @nuxt/ui, @nuxt/content, @nuxt/font, etc... and then the most popular modules (using stars, forks, etc... using the key `stats` of the module object)
+  - All official modules don't have the '@nuxt/' prefix and are called like this: `ui`, `content`, `font`, etc...
+  - Include the correct installation command (e.g., `npx nuxi module add <module-name>` or `npm install <module-name>` for examples)
+  - If a category doesn't exist, use a matching one
+  - When applicable, include basic configuration examples for the module
+  
   # CODE GENERATION RULES
   - DO NOT include ANY import statements as we are in a Nuxt environment - all Nuxt UI components are auto-imported (and all Vue macros are also)
+  - If multiple components are requested (e.g., a button and a select menu), handle each component accordingly. (For instance, you may need to call the relevant tools for both components.)
   - Keep component implementation MINIMAL and SIMPLE
   - For a FAQ component, use UAccordion with items prop ONLY: `<UAccordion :items="faqItems" />`
   - NEVER create custom templates or slots unless explicitly requested
@@ -28,6 +43,7 @@ instructions: |-
   - Be concise and direct in your responses
   - Always use the composition API (script setup lang="ts") for all components
   - Return MINIMAL component code that accomplishes the task
+  - For module recommendations, include installation instructions and basic usage examples
   - If a user asks for a FAQ component for example, the ONLY correct implementation is:
     ```vue
     <script setup>
@@ -44,14 +60,17 @@ instructions: |-
     This is an example not a full source of truth, but it should be enough to understand the concept
   
   # NEVER FORGET:
-  - NEVER include import statements (Vue macro, composables, etc)
+  - NEVER include import statements (from Vue, Reka UI, or elsewhere) in the final code.
   - NEVER use slots when `:items` prop is available (or any other prop use to generate the component content)
   - NEVER customize UI unless requested
   - NEVER create complex interfaces or data structures
+  - ALWAYS check the component theme or source code for reference, but do not copy or import it directly.
   - ALWAYS use the simplest implementation possible
   - ALWAYS check the component theme for the correct item structure
+  - When recommending modules, ALWAYS provide installation instructions and basic usage examples
+  - NEVER call `get-nuxt-ui-documentation` for module-related queries
 evals:
-  - input: "@nuxt-ui Create a button component"
+  - input: "@nuxt Create a button component"
     mocks:
       get-available-components:
         components:
@@ -200,8 +219,7 @@ evals:
           </ULink>
         </template>
     expected:
-      - callsTool:
-          arguments: get-available-components
+      - callsTool: get-available-components
       - callsTool:
           arguments:
             componentName: button
@@ -210,7 +228,7 @@ evals:
           arguments:
             componentName: button
           name: get-component-source-code
-  - input: "@nuxt-ui What components are available?"
+  - input: "@nuxt What components are available?"
     mocks:
       get-available-components:
         components:
@@ -226,7 +244,7 @@ evals:
           - pageCard
     expected:
       - callsTool: get-available-components
-  - input: "@nuxt-ui Create a FAQ component"
+  - input: "@nuxt Create a FAQ component"
     mocks:
       get-available-components:
         components:
@@ -269,7 +287,7 @@ evals:
           arguments:
             componentName: accordion
           name: get-component-theme
-  - input: "@nuxt-ui How many components in Nuxt UI ?"
+  - input: "@nuxt How many components in Nuxt UI ?"
     mocks:
       get-available-components:
         components:
@@ -295,7 +313,7 @@ evals:
     expected:
       - callsTool:
           name: get-available-components
-  - input: "@nuxt-ui Give me the avatar theme"
+  - input: "@nuxt Give me the avatar theme"
     mocks:
       get-available-components:
         components:
@@ -383,7 +401,7 @@ evals:
             componentName: avatar
           name: get-component-theme
 
-  - input: "@nuxt-ui Is there props on the card component ?"
+  - input: "@nuxt Is there props on the card component ?"
     mocks:
       get-available-components:
         components:
@@ -473,3 +491,70 @@ evals:
           arguments:
             componentName: card
           name: get-component-source-code
+  - input: "@nuxt What module categories are available?"
+    mocks:
+      get-module-categories:
+        categories:
+          - UI
+          - CMS
+          - SEO
+          - Testing
+    expected:
+      - callsTool: get-module-categories
+  - input: "@nuxt Recommend me some UI modules"
+    mocks:
+      get-module-categories:
+        categories:
+          - UI
+          - Content
+          - SEO
+          - Analytics
+      get-modules-by-category:
+        modules:
+          - name: "@nuxt/ui"
+            description: "UI Library for Nuxt based on Tailwind CSS"
+            npm: "@nuxt/ui"
+            github: "nuxt/ui"
+            category: "UI"
+            compatibility: "Nuxt 3"
+            stars: 4500
+          - name: "@nuxtjs/tailwindcss"
+            description: "Tailwind CSS module for Nuxt"
+            npm: "@nuxtjs/tailwindcss"
+            github: "nuxt-modules/tailwindcss"
+            category: "UI"
+            compatibility: "Nuxt 2, Nuxt 3"
+            stars: 3200
+          - name: "@nuxtjs/color-mode"
+            description: "Dark and Light mode with auto detection for Nuxt"
+            npm: "@nuxtjs/color-mode"
+            github: "nuxt-modules/color-mode"
+            category: "UI"
+            compatibility: "Nuxt 2, Nuxt 3"
+            stars: 1800
+    expected:
+      - callsTool: get-module-categories
+      - callsTool:
+          arguments:
+            category: "UI"
+          name: get-modules-by-category
+  - input: "@nuxt Which modules categories are available?"
+    mocks:
+      get-module-categories:
+        categories:
+          - UI
+          - CMS
+          - SEO
+          - Testing
+    expected:
+      - callsTool: get-module-categories
+  - input: "@nuxt How to install the ui module?"
+    mocks:
+      get-module-by-name:
+        name: "ui"
+        description: "UI Library for Nuxt based on Tailwind CSS"
+        npm: "@nuxt/ui"
+        github: "nuxt/ui"
+        category: "UI"
+    expected:
+      - callsTool: get-module-by-name

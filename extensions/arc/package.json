@@ -41,11 +41,12 @@
     "nebbles",
     "alanxmay",
     "gdsmith",
-    "josephlou"
+    "tama_harrison"
   ],
   "pastContributors": [
     "pomdtr",
-    "danulqua"
+    "danulqua",
+    "josephlou"
   ],
   "commands": [
     {
@@ -132,6 +133,10 @@
             {
               "title": "Kagi",
               "value": "kagi"
+            },
+            {
+              "title": "UnDuck",
+              "value": "unduck"
             }
           ]
         }
@@ -212,6 +217,10 @@
             {
               "title": "Kagi",
               "value": "kagi"
+            },
+            {
+              "title": "UnDuck",
+              "value": "unduck"
             }
           ]
         }
@@ -306,6 +315,10 @@
             {
               "title": "Kagi",
               "value": "kagi"
+            },
+            {
+              "title": "UnDuck",
+              "value": "unduck"
             }
           ]
         },

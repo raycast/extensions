@@ -19,7 +19,7 @@
     {
       "name": "set-outbound-mode",
       "title": "Set Outbound Mode",
-      "subtitle": "Surge",
+      "subtitle": "Surge Outbound Switcher",
       "description": "Set Surge's outbound mode",
       "mode": "view",
       "icon": "extension-icon.png"
@@ -27,7 +27,7 @@
     {
       "name": "set-to-direct",
       "title": "Set to Direct",
-      "subtitle": "Surge",
+      "subtitle": "Surge Outbound Switcher",
       "description": "Set Surge's outbound mode to Direct",
       "mode": "no-view",
       "icon": "extension-icon-d.png"
@@ -35,7 +35,7 @@
     {
       "name": "set-to-global",
       "title": "Set to Global",
-      "subtitle": "Surge",
+      "subtitle": "Surge Outbound Switcher",
       "description": "Set Surge's outbound mode to Global",
       "mode": "no-view",
       "icon": "extension-icon-g.png"
@@ -43,7 +43,7 @@
     {
       "name": "set-to-rule-based",
       "title": "Set to Rule-based",
-      "subtitle": "Surge",
+      "subtitle": "Surge Outbound Switcher",
       "description": "Set Surge's outbound mode to Rule-based",
       "mode": "no-view",
       "icon": "extension-icon-r.png"

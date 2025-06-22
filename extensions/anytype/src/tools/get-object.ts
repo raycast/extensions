@@ -1,5 +1,5 @@
-import { getExport, getObject } from "../api";
-import { ExportFormat } from "../models";
+import { getObject } from "../api";
+import { BodyFormat } from "../models";
 
 type Input = {
   /**
@@ -21,16 +21,9 @@ type Input = {
  * that matches the specified ID.
  */
 export default async function tool({ spaceId, objectId }: Input) {
-  const { object } = await getObject(spaceId, objectId);
-  const { markdown } = await getExport(spaceId, objectId, ExportFormat.Markdown);
+  const { object } = await getObject(spaceId, objectId, BodyFormat.Markdown);
 
-  if (!object) {
-    return {
-      markdown,
-    };
-  }
-
-  const results = {
+  return {
     object: object.object,
     name: object.name,
     id: object.id,
@@ -41,10 +34,6 @@ export default async function tool({ spaceId, objectId }: Input) {
       type_key: object.type.key,
     },
     properties: object.properties,
-  };
-
-  return {
-    results,
-    markdown,
+    markdown: object.markdown,
   };
 }

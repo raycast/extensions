@@ -38,6 +38,13 @@
       "subtitle": "SupaHabits",
       "description": "Track your mood",
       "mode": "view"
+    },
+    {
+      "name": "goals",
+      "title": "Goals",
+      "subtitle": "SupaHabits",
+      "description": "Track your goals",
+      "mode": "view"
     }
   ],
   "preferences": [

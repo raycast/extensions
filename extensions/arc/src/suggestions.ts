@@ -84,6 +84,11 @@ const config: SearchConfigs = {
       });
     },
   },
+  unduck: {
+    search: "https://unduck.link?q=",
+    suggestions: null,
+    suggestionParser: null,
+  },
 };
 
 async function parseResponse(response: Response) {

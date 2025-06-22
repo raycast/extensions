@@ -6,18 +6,14 @@ import { apiEndpoints, apiFetch } from "../../utils";
 export async function updateMember(
   spaceId: string,
   memberId: string,
-  data: UpdateMemberRequest,
-): Promise<{
-  member: Member | null;
-}> {
+  request: UpdateMemberRequest,
+): Promise<{ member: Member }> {
   const { url, method } = apiEndpoints.updateMember(spaceId, memberId);
 
   const response = await apiFetch<{ member: RawMember }>(url, {
     method: method,
-    body: JSON.stringify(data),
+    body: JSON.stringify(request),
   });
 
-  return {
-    member: response ? await mapMember(response.payload.member) : null,
-  };
+  return { member: await mapMember(response.payload.member) };
 }

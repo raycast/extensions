@@ -1,5 +1,10 @@
 # Say - Text to Speech Changelog
 
+## [Routine Maintenance] - 2025-05-19
+
+- Add icon to the Say action
+- Bump all dependencies to the latest
+
 ## [Routine Maintenance] - 2025-03-19
 
 - Migrate to `@raycast/api@1.94.0`

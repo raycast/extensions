@@ -9,7 +9,7 @@ type Input = {
 
   /**
    * The unique identifier of the list to remove the object from.
-   * This value can be obtained from the `search-space` or `search-anytype` tools by searching for type of `ot-collection`.
+   * This value can be obtained from the `search-space` or `search-anytype` tools by searching for type of 'collection'.
    */
   listId: string;
 

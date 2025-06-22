@@ -151,6 +151,8 @@ export function getAgentScopeConfig(scope: AgentConfigurationType["scope"]) {
       return { label: "Company", icon: Icon.Building, color: Color.Yellow };
     case "published":
       return { label: "Shared", icon: Icon.AddPerson, color: Color.Magenta };
+    default:
+      return { label: scope, icon: Icon.QuestionMark, color: Color.Red };
   }
 }
 

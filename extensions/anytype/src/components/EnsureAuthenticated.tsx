@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { showFailureToast, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { checkApiTokenValidity, displayCode, getToken } from "../api";
 import { apiAppName, downloadUrl, localStorageKeys } from "../utils";
@@ -28,11 +28,10 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
   const [challengeId, setChallengeId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { handleSubmit, itemProps } = useForm<{ userCode: string }>({
+  const { handleSubmit, itemProps } = useForm<{ code: string }>({
     onSubmit: async (values) => {
       if (!challengeId) {
-        showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "Pairing not started",
           message: "Start the pairing before submitting the code.",
         });
@@ -41,23 +40,19 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
 
       try {
         setIsLoading(true);
-        const { app_key } = await getToken(challengeId, values.userCode);
+        const { app_key } = await getToken(challengeId, values.code);
         await LocalStorage.setItem(localStorageKeys.appKey, app_key);
-        showToast({ style: Toast.Style.Success, title: "Successfully paired" });
+        await showToast({ style: Toast.Style.Success, title: "Successfully paired" });
         setHasToken(true);
         setTokenIsValid(true);
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to pair",
-          message: String(error),
-        });
+        await showFailureToast(error, { title: "Failed to pair" });
       } finally {
         setIsLoading(false);
       }
     },
     validation: {
-      userCode: (value) => {
+      code: (value) => {
         if (!value) {
           return "The code is required.";
         } else if (!/^\d{4}$/.test(value)) {
@@ -88,13 +83,13 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
       setChallengeId(challenge_id);
 
       // Prevent window from closing
-      showToast({
+      await showToast({
         style: Toast.Style.Animated,
         title: "Pairing started",
         message: "Check the app for the 4-digit code.",
       });
     } catch (error) {
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: "Failed to start pairing",
         message: error instanceof Error ? error.message : "An unknown error occurred.",
@@ -139,12 +134,7 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
         </ActionPanel>
       }
     >
-      <Form.TextField
-        {...itemProps.userCode}
-        id="userCode"
-        title="Verification Code"
-        placeholder="Enter the 4-digit code from popup"
-      />
+      <Form.TextField {...itemProps.code} id="code" title="Code" placeholder="Enter 4-digit code from popup" />
     </Form>
   ) : (
     <List
