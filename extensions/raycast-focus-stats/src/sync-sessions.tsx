@@ -1,50 +1,64 @@
-import type { Event, NewSession } from "./types";
+import type { NewSession } from "./types";
 import { createSession, getCurrentSession, removeCurrentSession, saveSession, setCurrentSession } from "./sessions";
 import { getEvents } from "./events";
 import { ensureInitialized } from "./lib/init/tasks";
+import { showToast, Toast, LaunchProps, LaunchType, showHUD } from "@raycast/api";
+
+// When the command was launched manually by the user, display a message in
+// Raycast's Toast. Otherwise the command was run in the background and
+// we'll display the error in the HUD instead.
+function showError(title: string, launchType: LaunchType) {
+  if (launchType === LaunchType.UserInitiated) {
+    return showToast({ style: Toast.Style.Failure, title });
+  }
+
+  return showHUD(title);
+}
 
 /*
  * The "Refresh Data" command is responsible for refreshing the data related to
  * the focus sessions in the background.
  */
-export default async function Command() {
-  // Ensure the extension is properly initialized before proceeding
-  const initialized = await ensureInitialized();
+export default async function Command(props: LaunchProps) {
+  try {
+    // Ensure the extension is properly initialized before proceeding
+    const initialized = await ensureInitialized();
 
-  if (!initialized) {
-    console.error("Failed to initialize extension. Aborting sync.");
-    return;
-  }
-
-  // List of events that the refresh command was able to pick up from MacOS's
-  // System Log.
-  const events: Event[] = getEvents();
-
-  // For 'start' events we'll want to:
-  // 1. Create a new `Session` object with the same information as the event's
-  // information
-  // 2. Cache that `Session` into the cache as the current session
-  //
-  // For 'summary' events we'll want to:
-  // 1. Retrieve the current session from cache
-  // 2. Update the session's duration with the duration from the event
-  // 3. Save the session to the database
-  // 4. Clear the cache
-  for (const event of events) {
-    if (event.type === "start") {
-      const session = createSession(event.start, event.goal);
-      setCurrentSession(session);
-    } else if (event.type === "summary") {
-      const cachedSession = getCurrentSession();
-
-      if (cachedSession === null) {
-        console.error("No current session found when processing summary event");
-        continue;
-      }
-
-      const session: NewSession = { ...cachedSession, duration: event.duration };
-      await saveSession(session);
-      removeCurrentSession();
+    if (!initialized) {
+      return showError("Failed to initialize database. Aborting sync.", props.launchType);
     }
+
+    const events = getEvents();
+
+    for (const event of events) {
+      try {
+        if (event.type === "start") {
+          const session = createSession(event.start, event.goal);
+          setCurrentSession(session);
+        } else if (event.type === "summary") {
+          const cachedSession = getCurrentSession();
+
+          if (cachedSession === null) {
+            console.error("No current session found when processing summary event");
+            continue;
+          }
+
+          const session: NewSession = { ...cachedSession, duration: event.duration };
+          await saveSession(session);
+          removeCurrentSession();
+        }
+      } catch (error) {
+        console.error(`Error processing event:`, error, event);
+      }
+    }
+
+    // When the command was launched manually by the user, display a message in
+    // Raycast's Toast.
+    if (props.launchType === LaunchType.UserInitiated) {
+      return await showToast({ style: Toast.Style.Success, title: `Synced ${events.length} Raycast Focus Events` });
+    }
+  } catch (error) {
+    console.error("Fatal error in sync command:", error);
+    return showError(`Failed Syncing Raycast Focus Events`, props.launchType);
   }
 }

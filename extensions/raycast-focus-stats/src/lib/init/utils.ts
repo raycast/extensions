@@ -26,10 +26,7 @@ export async function downloadFile(url: string, targetFile: string): Promise<voi
         }
 
         // save the file to disk
-        const fileWriter = fs.createWriteStream(targetFile).on("finish", () => {
-          resolve();
-        });
-
+        const fileWriter = fs.createWriteStream(targetFile).on("finish", resolve).on("error", reject);
         response.pipe(fileWriter);
       })
       .on("error", (error) => {
@@ -54,6 +51,7 @@ export async function extractAndRewrite(tarball: string, targetFile: string, dst
       });
       stream.resume();
     });
+
     extract.on("finish", function () {
       if (chunks.length) {
         const data = Buffer.concat(chunks);
@@ -64,9 +62,11 @@ export async function extractAndRewrite(tarball: string, targetFile: string, dst
           }
           resolve();
         });
+      } else {
+        reject(new Error(`Target file ${targetFile} not found in tarball`));
       }
     });
 
-    fs.createReadStream(tarball).pipe(zlib.createGunzip()).pipe(extract);
+    fs.createReadStream(tarball).pipe(zlib.createGunzip().on("error", reject)).pipe(extract);
   });
 }
