@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "git-wizard",
+  "title": "Git Wizard",
+  "description": "Git Wizard is your personal assistant for crafting clean, consistent Git commits and pull requests. Built on best-practice templates, it helps you write clear messages, follow team conventions, and streamline your Git workflow—right from Raycast. Whether you're committing a quick fix or opening a detailed PR, Git Wizard makes it effortless and professional.",
+  "icon": "git-wizard-icon.png",
+  "author": "juanmartinlopeze",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "commit",
+      "title": "Commit",
+      "subtitle": "Conventional commit",
+      "description": "Helps you craft clean, conventional Git commit messages quickly and with confidence.",
+      "mode": "view"
+    },
+    {
+      "name": "pull-request",
+      "title": "Pull Request",
+      "subtitle": "Structured Pull request",
+      "description": "PR Wizard helps you write professional, well-organized pull request messages by guiding you through key sections like summary, motivation, changes introduced, and issue reference — all formatted to match team standards.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
