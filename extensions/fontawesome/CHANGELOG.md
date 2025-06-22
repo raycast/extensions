@@ -1,10 +1,9 @@
 # Font Awesome Changelog
 
-## [Added AI icon search, Sharp Duotone and Duotone families] - 2025-03-06
+## [Added AI icon search, Sharp Duotone and Duotone families] - 2025-06-22
 
 - The extension now supports v6.7.2.
 - Added support for the Solid, Regular, Light and Thin styles for both Sharp Duotone and Duotone families.
-- Added a new command that suggests icons using AI based on user prompt.
 
 ## [Added primary action preference] - 2024-10-23
 
