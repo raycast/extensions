@@ -6,10 +6,14 @@
 - **⌃⌥⌘**-friendly shortcuts (matches Apple’s docs)
 - Per-command preferences for custom menu labels
 
-![Demo GIF](assets/demo.gif)
+![Demo GIF](metadata/demo.gif)
+
+## Screenshots
+
+![Static Screenshot](metadata/screenshots/demo.png)
 
 ## Requirements
-macOS 15+ (Sequoia).
+**This extension only works on macOS 15+ (Sequoia).**
 
 ## Setup (one-time)
 1. Accessibility permission: When Raycast runs the first command macOS will prompt → “Open System Settings” → Privacy & Security → Accessibility → enable Raycast.

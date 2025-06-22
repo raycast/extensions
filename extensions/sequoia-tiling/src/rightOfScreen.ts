@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import { makeCommand } from "./_factory";
+import { SubMenuType } from "./constants";
 
-export default () => makeCommand(getPreferenceValues<Preferences.Command>().menuName, "fullScreenTile")();
+export default () => makeCommand(getPreferenceValues<Preferences.Command>().menuName, SubMenuType.FullScreenTile)();

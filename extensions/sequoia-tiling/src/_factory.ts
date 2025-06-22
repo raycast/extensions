@@ -1,5 +1,6 @@
 import { closeMainWindow, PopToRootType } from "@raycast/api";
-import { invokeMenu, SubMenuType } from "./menuInvoker";
+import { SubMenuType } from "./constants";
+import { invokeMenu } from "./menuInvoker";
 
 export function makeCommand(menuItemLabel: string, subMenu?: SubMenuType) {
   return async function () {

@@ -10,6 +10,7 @@
     {
       "name": "fill",
       "title": "Fill",
+      "subtitle": "Window",
       "description": "Expand the active window to fill the desktop.",
       "icon": "window-tiling/fill.png",
       "mode": "no-view",
@@ -29,6 +30,7 @@
     {
       "name": "center",
       "title": "Center",
+      "subtitle": "Window",
       "description": "Center the active window on the desktop.",
       "icon": "window-tiling/center.png",
       "mode": "no-view",
@@ -48,6 +50,7 @@
     {
       "name": "leftHalf",
       "title": "Left",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the left half of the desktop.",
       "icon": "window-tiling/leftHalf.png",
       "mode": "no-view",
@@ -67,6 +70,7 @@
     {
       "name": "rightHalf",
       "title": "Right",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the right half of the desktop.",
       "icon": "window-tiling/rightHalf.png",
       "mode": "no-view",
@@ -86,6 +90,7 @@
     {
       "name": "topHalf",
       "title": "Top",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the top half of the desktop.",
       "icon": "window-tiling/topHalf.png",
       "mode": "no-view",
@@ -105,6 +110,7 @@
     {
       "name": "bottomHalf",
       "title": "Bottom",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the bottom half of the desktop.",
       "icon": "window-tiling/bottomHalf.png",
       "mode": "no-view",
@@ -124,6 +130,7 @@
     {
       "name": "topLeft",
       "title": "Top Left",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the top-left corner of the desktop.",
       "icon": "window-tiling/topLeft.png",
       "mode": "no-view",
@@ -143,6 +150,7 @@
     {
       "name": "topRight",
       "title": "Top Right",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the top-right corner of the desktop.",
       "icon": "window-tiling/topRight.png",
       "mode": "no-view",
@@ -162,6 +170,7 @@
     {
       "name": "bottomLeft",
       "title": "Bottom Left",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the bottom-left corner of the desktop.",
       "icon": "window-tiling/bottomLeft.png",
       "mode": "no-view",
@@ -181,6 +190,7 @@
     {
       "name": "bottomRight",
       "title": "Bottom Right",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the bottom-right corner of the desktop.",
       "icon": "window-tiling/bottomRight.png",
       "mode": "no-view",
@@ -200,6 +210,7 @@
     {
       "name": "restoreSize",
       "title": "Return to Previous Size",
+      "subtitle": "Move & Resize",
       "description": "Make the active window the size it was before it was tiled.",
       "icon": "window-tiling/restoreSize.png",
       "mode": "no-view",
@@ -227,6 +238,7 @@
     {
       "name": "leftAndRight",
       "title": "Left & Right",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the left half of the desktop and move the second window to the right half of the desktop.",
       "icon": "window-tiling/leftAndRight.png",
       "mode": "no-view",
@@ -246,6 +258,7 @@
     {
       "name": "rightAndLeft",
       "title": "Right & Left",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the right half of the desktop and move the second window to the left half of the desktop.",
       "icon": "window-tiling/rightAndLeft.png",
       "mode": "no-view",
@@ -265,6 +278,7 @@
     {
       "name": "topAndBottom",
       "title": "Top & Bottom",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the top half of the desktop and move the second window to the bottom half of the desktop.",
       "icon": "window-tiling/topAndBottom.png",
       "mode": "no-view",
@@ -284,6 +298,7 @@
     {
       "name": "bottomAndTop",
       "title": "Bottom & Top",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the bottom half of the desktop and move the second window to the top half of the desktop.",
       "icon": "window-tiling/bottomAndTop.png",
       "mode": "no-view",
@@ -303,6 +318,7 @@
     {
       "name": "quarters",
       "title": "Quarters",
+      "subtitle": "Move & Resize",
       "description": "Arrange windows in the top-left, top-right, bottom-left, and bottom-right corners of the desktop.",
       "icon": "window-tiling/quarters.png",
       "mode": "no-view",
@@ -321,6 +337,7 @@
     {
       "name": "leftAndQuarters",
       "title": "Left & Quarters",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the left half of the desktop, move the second window to the top-right corner of the desktop, and move the third window to the bottom-right corner of the desktop.",
       "icon": "window-tiling/leftAndQuarters.png",
       "mode": "no-view",
@@ -339,6 +356,7 @@
     {
       "name": "rightAndQuarters",
       "title": "Right & Quarters",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the right half of the desktop, move the second window to the top-left corner of the desktop, and move the third window to the bottom-left corner of the desktop.",
       "icon": "window-tiling/rightAndQuarters.png",
       "mode": "no-view",
@@ -357,6 +375,7 @@
     {
       "name": "topAndQuarters",
       "title": "Top & Quarters",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the top half of the desktop, move the second window to the bottom-left corner of the desktop, and move the third window to the bottom-right corner of the desktop.",
       "icon": "window-tiling/topAndQuarters.png",
       "mode": "no-view",
@@ -375,6 +394,7 @@
     {
       "name": "bottomAndQuarters",
       "title": "Bottom & Quarters",
+      "subtitle": "Move & Resize",
       "description": "Move the active window to the bottom half of the desktop, move the second window to the top-left corner of the desktop, and move the third window to the top-right corner of the desktop.",
       "icon": "window-tiling/bottomAndQuarters.png",
       "mode": "no-view",
@@ -393,6 +413,7 @@
     {
       "name": "leftOfScreen",
       "title": "Left of Screen",
+      "subtitle": "Full Screen Tile",
       "description": "Expand the active window to Split View on the left.",
       "icon": "window-tiling/leftOfScreen.png",
       "mode": "no-view",
@@ -411,6 +432,7 @@
     {
       "name": "rightOfScreen",
       "title": "Right of Screen",
+      "subtitle": "Full Screen Tile",
       "description": "Expand the active window to Split View on the right.",
       "icon": "window-tiling/rightOfScreen.png",
       "mode": "no-view",

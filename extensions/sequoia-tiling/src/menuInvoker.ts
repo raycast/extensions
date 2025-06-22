@@ -1,19 +1,18 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { SubMenuType } from "./constants";
 
 const DEFAULT_ERROR =
   "Could not perform the window-tiling action. Check that macOS Sequoia ‘Enable Window Tiling’ is on and Raycast has Accessibility permission.";
 
-type SubMenu = "moveResize" | "fullScreenTile";
-
-export async function invokeMenu(menuItemName: string, sub?: SubMenu) {
+export async function invokeMenu(menuItemName: string, sub?: SubMenuType) {
   const p = getPreferenceValues();
 
   const windowMenu = p.windowMenuTitle || "Window";
   const subMenu =
-    sub === "moveResize"
+    sub === SubMenuType.MoveResize
       ? p.moveResizeMenuTitle || "Move & Resize"
-      : sub === "fullScreenTile"
+      : sub === SubMenuType.FullScreenTile
         ? p.fullScreenTileMenuTitle || "Full Screen Tile"
         : undefined;
 
@@ -37,9 +36,7 @@ export async function invokeMenu(menuItemName: string, sub?: SubMenu) {
   `;
   try {
     await runAppleScript(script);
-  } catch {
-    await showToast({ style: Toast.Style.Failure, title: DEFAULT_ERROR });
+  } catch (error) {
+    await showFailureToast(error, { title: DEFAULT_ERROR });
   }
 }
-
-export type SubMenuType = SubMenu;
