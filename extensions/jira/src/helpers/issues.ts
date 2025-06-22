@@ -2,7 +2,7 @@ import { Color } from "@raycast/api";
 import { FormValidation } from "@raycast/utils";
 import { format } from "date-fns";
 import { groupBy, partition } from "lodash";
-import markdownToAdf from "md-to-adf";
+import { markdownToAdf } from "marklassian";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
 import { Issue, IssueDetail, IssueTypeWithCustomFields, StatusCategoryKey } from "../api/issues";
