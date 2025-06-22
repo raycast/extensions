@@ -7,6 +7,7 @@
 - Per-command preferences for custom menu labels
 
 ![Demo GIF](metadata/demo.gif)
+![Demo GIF 2](metadata/demo2.gif)
 
 ## Screenshots
 

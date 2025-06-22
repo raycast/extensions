@@ -2,8 +2,7 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { SubMenuType } from "./constants";
 
-const DEFAULT_ERROR =
-  "Could not perform the window-tiling action. Check that macOS Sequoia ‘Enable Window Tiling’ is on and Raycast has Accessibility permission.";
+const DEFAULT_ERROR = "Could not perform the window-tiling action. Check that Raycast has Accessibility permission.";
 
 export async function invokeMenu(menuItemName: string, sub?: SubMenuType) {
   const p = getPreferenceValues();
@@ -28,7 +27,7 @@ export async function invokeMenu(menuItemName: string, sub?: SubMenuType) {
   const script = `
     tell application "System Events"
       try
-        click menu item "${menuItemName}" of menu 1 ${
+        click (first menu item whose name is "${menuItemName}" and enabled is true) of menu 1 ${
           subMenu ? `of menu item "${subMenu}" of menu 1 ` : ""
         }of menu bar item "${windowMenu}" of menu bar 1 of (first application process whose frontmost is true)
       end try
