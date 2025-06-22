@@ -144,16 +144,19 @@ export default function Items(props: LaunchProps<{ arguments: Arguments.Items }>
         <>
           <List.Section title="Active Shared" subtitle={shared.filter((item) => item.active).length.toString()}>
             {shared
-              .filter((item) => item.active)
-              .map((item) => (
-                <HostingItem key={item.id} host={item} />
+              .filter((sharedItem) => sharedItem.active)
+              .map((sharedItem) => (
+                <HostingItem key={sharedItem.id} host={sharedItem} />
               ))}
           </List.Section>
-          <List.Section title="Inactive Shared" subtitle={shared.filter((item) => !item.active).length.toString()}>
+          <List.Section
+            title="Inactive Shared"
+            subtitle={shared.filter((sharedItem) => !sharedItem.active).length.toString()}
+          >
             {shared
-              .filter((item) => !item.active)
-              .map((item) => (
-                <HostingItem key={item.id} host={item} />
+              .filter((sharedItem) => !sharedItem.active)
+              .map((sharedItem) => (
+                <HostingItem key={sharedItem.id} host={sharedItem} />
               ))}
           </List.Section>
         </>
