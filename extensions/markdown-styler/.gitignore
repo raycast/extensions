@@ -58,6 +58,5 @@ __snapshots__/
 .inspect
 
 # Lock files (uncomment if you want to share with team)
-# package-lock.json
 # yarn.lock
 # pnpm-lock.yaml 

@@ -1,7 +1,7 @@
 {
   "name": "markdown-styler",
   "title": "Markdown Styler",
-  "description": "Convert Markdown to styled format for content platforms",
+  "description": "Convert Markdown to styled HTML with inline CSS for content platforms",
   "icon": "command-icon.png",
   "author": "qcrao",
   "categories": [
@@ -13,7 +13,7 @@
       "name": "mp-style-markdown",
       "title": "Style Markdown",
       "subtitle": "Convert to Styled Format",
-      "description": "Convert Markdown to styled format for content platforms",
+      "description": "Convert Markdown to styled HTML with inline CSS for content platforms",
       "mode": "view"
     }
   ],

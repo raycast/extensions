@@ -1,14 +1,15 @@
 # Markdown Styler
 
-A Raycast extension that converts Markdown text to styled format, ready for direct copy-paste into content editors.
+A Raycast extension that converts Markdown text to styled HTML with inline CSS, ready for direct copy-paste into content editors and platforms.
 
 ## Features
 
+- **Inline CSS Styling**: Generates HTML with embedded inline CSS for maximum compatibility
 - One-click conversion of Markdown text to styled format
-- Generates formatted HTML that can be directly copied and pasted into content editors
+- **Browser-based Preview & Copy**: Interactive HTML preview with one-click copying
 - Modern minimalist styling optimized for content platforms
 - Support for all common Markdown elements: headings, lists, code blocks, quotes, tables, etc.
-- Browser-based copying mechanism for seamless workflow
+- **Custom Styled Output**: Pre-designed CSS optimized for content platforms and editors
 
 ## How to Use
 

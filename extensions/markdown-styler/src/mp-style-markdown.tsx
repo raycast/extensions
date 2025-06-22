@@ -121,6 +121,7 @@ export default function StyleMarkdown() {
   );
   const [isLoading, setIsLoading] = useState(true);
   const hasProcessedRef = useRef(false);
+  const tempFilesRef = useRef<string[]>([]);
 
   const processMarkdown = async () => {
     // Prevent React Strict Mode from running this twice
@@ -435,6 +436,9 @@ export default function StyleMarkdown() {
       fs.writeFileSync(htmlPath, fullHtml);
       console.log(`💾 [${executionId}] HTML file written to: ${htmlPath}`);
 
+      // Track temp file for cleanup
+      tempFilesRef.current.push(htmlPath);
+
       // For preview in Raycast interface, provide meaningful feedback
       let statusMessage = "✅ Markdown converted to styled format";
 
@@ -484,6 +488,21 @@ export default function StyleMarkdown() {
 
   useEffect(() => {
     processMarkdown();
+
+    // Cleanup function to remove temporary files
+    return () => {
+      tempFilesRef.current.forEach((filePath) => {
+        try {
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            console.log(`🗑️ Cleaned up temp file: ${filePath}`);
+          }
+        } catch (error) {
+          console.warn(`⚠️ Failed to cleanup temp file: ${filePath}`, error);
+        }
+      });
+      tempFilesRef.current = [];
+    };
   }, []);
 
   const openInBrowser = async () => {
@@ -642,6 +661,9 @@ Ready to use this in your content editor!`;
 </html>`;
 
       fs.writeFileSync(htmlPath, fullHtml);
+
+      // Track temp file for cleanup
+      tempFilesRef.current.push(htmlPath);
 
       await showToast({
         style: Toast.Style.Success,
