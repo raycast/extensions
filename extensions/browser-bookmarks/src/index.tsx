@@ -23,10 +23,12 @@ import useBraveNightlyBookmarks from "./hooks/useBraveNightlyBookmarks";
 import useChromeBetaBookmarks from "./hooks/useChromeBetaBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
 import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
+import useDiaBookmarks from "./hooks/useDiaBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
 import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
+import useGhostBrowserBookmarks from "./hooks/useGhostBrowserBookmarks";
 import useIslandBookmarks from "./hooks/useIslandBookmarks";
 import usePrismaAccessBookmarks from "./hooks/usePrismaAccessBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
@@ -110,11 +112,13 @@ export default function Command() {
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
   const hasChromeBeta = browsers.includes(BROWSERS_BUNDLE_ID.chromeBeta) ?? false;
   const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
+  const hasDia = browsers.includes(BROWSERS_BUNDLE_ID.dia) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
   const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasFirefoxDev = browsers.includes(BROWSERS_BUNDLE_ID.firefoxDev) ?? false;
+  const hasGhostBrowser = browsers.includes(BROWSERS_BUNDLE_ID.ghostBrowser) ?? false;
   const hasIsland = browsers.includes(BROWSERS_BUNDLE_ID.island) ?? false;
   const hasPrismaAccess = browsers.includes(BROWSERS_BUNDLE_ID.prismaAccess) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
@@ -130,10 +134,12 @@ export default function Command() {
   const chrome = useChromeBookmarks(hasChrome);
   const chromeBeta = useChromeBetaBookmarks(hasChromeBeta);
   const chromeDev = useChromeDevBookmarks(hasChromeDev);
+  const dia = useDiaBookmarks(hasDia);
   const edge = useEdgeBookmarks(hasEdge);
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
   const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
   const firefox = useFirefoxBookmarks(hasFirefox || hasFirefoxDev);
+  const ghostBrowser = useGhostBrowserBookmarks(hasGhostBrowser);
   const island = useIslandBookmarks(hasIsland);
   const prismaAccess = usePrismaAccessBookmarks(hasPrismaAccess);
   const safari = useSafariBookmarks(hasSafari);
@@ -154,10 +160,12 @@ export default function Command() {
       ...chrome.bookmarks,
       ...chromeBeta.bookmarks,
       ...chromeDev.bookmarks,
+      ...dia.bookmarks,
       ...edge.bookmarks,
       ...edgeCanary.bookmarks,
       ...edgeDev.bookmarks,
       ...firefox.bookmarks,
+      ...ghostBrowser.bookmarks,
       ...island.bookmarks,
       ...prismaAccess.bookmarks,
       ...safari.bookmarks,
@@ -206,10 +214,12 @@ export default function Command() {
     chrome.bookmarks,
     chromeBeta.bookmarks,
     chromeDev.bookmarks,
+    dia.bookmarks,
     edge.bookmarks,
     edgeCanary.bookmarks,
     edgeDev.bookmarks,
     firefox.bookmarks,
+    ghostBrowser.bookmarks,
     island.bookmarks,
     prismaAccess.bookmarks,
     safari.bookmarks,
@@ -230,10 +240,12 @@ export default function Command() {
       ...chrome.folders,
       ...chromeBeta.folders,
       ...chromeDev.folders,
+      ...dia.folders,
       ...edge.folders,
       ...edgeCanary.folders,
       ...edgeDev.folders,
       ...firefox.folders,
+      ...ghostBrowser.folders,
       ...island.folders,
       ...prismaAccess.folders,
       ...safari.folders,
@@ -252,10 +264,12 @@ export default function Command() {
     chrome.folders,
     chromeBeta.folders,
     chromeDev.folders,
+    dia.folders,
     edge.folders,
     edgeCanary.folders,
     edgeDev.folders,
     firefox.folders,
+    ghostBrowser.folders,
     island.folders,
     prismaAccess.folders,
     safari.folders,
@@ -359,6 +373,9 @@ export default function Command() {
     if (hasChromeDev) {
       chromeDev.mutate();
     }
+    if (hasDia) {
+      dia.mutate();
+    }
     if (hasEdge) {
       edge.mutate();
     }
@@ -370,6 +387,9 @@ export default function Command() {
     }
     if (hasFirefox || hasFirefoxDev) {
       firefox.mutate();
+    }
+    if (hasGhostBrowser) {
+      ghostBrowser.mutate();
     }
     if (hasIsland) {
       island.mutate();
@@ -440,10 +460,12 @@ export default function Command() {
         chrome.isLoading ||
         chromeBeta.isLoading ||
         chromeDev.isLoading ||
+        dia.isLoading ||
         edge.isLoading ||
         edgeCanary.isLoading ||
         edgeDev.isLoading ||
         firefox.isLoading ||
+        ghostBrowser.isLoading ||
         island.isLoading ||
         prismaAccess.isLoading ||
         safari.isLoading ||
@@ -565,6 +587,15 @@ export default function Command() {
                     profiles={chromeDev.profiles}
                     currentProfile={chromeDev.currentProfile}
                     setCurrentProfile={chromeDev.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.dia}
+                    name="Dia"
+                    icon="dia.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                    profiles={dia.profiles}
+                    currentProfile={dia.currentProfile}
+                    setCurrentProfile={dia.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.edge}
