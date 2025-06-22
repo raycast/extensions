@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "compressx",
-  "title": "CompressX",
+  "title": "Compresto",
   "description": "Compress files easily, with up to 90% file size reduction",
   "icon": "compressx-icon.png",
   "author": "hieudinh",
@@ -13,20 +13,20 @@
     {
       "name": "compressVideo",
       "title": "Compress Files",
-      "subtitle": "CompressX",
-      "description": "Compress selected files with CompressX",
+      "subtitle": "Compresto",
+      "description": "Compress selected files with Compresto",
       "mode": "view"
     },
     {
       "name": "importFiles",
       "title": "Import Files",
-      "subtitle": "CompressX",
-      "description": "Import selected files into CompressX",
+      "subtitle": "Compresto",
+      "description": "Import selected files into Compresto",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
+    "@raycast/api": "^1.100.2",
     "open": "^9.1.0"
   },
   "devDependencies": {
