@@ -1,4 +1,5 @@
-import { ActionPanel, Action, Icon, Clipboard, showToast, Toast, environment, AI } from "@raycast/api";
+import { ActionPanel, Action, Icon, Clipboard, showToast, Toast, environment, open, AI } from "@raycast/api";
+import { preferences } from "../services/config";
 import CreateEditNoteForm from "./createEditNoteForm";
 import CreateTag from "./createTag";
 import DeleteNoteAction from "./deleteNoteAction";
@@ -63,6 +64,13 @@ const Actions = ({
               target={
                 <CreateEditNoteForm isDraft={isDraft} title={title} note={note} tags={tags} createdAt={createdAt} />
               }
+            />
+            <Action
+              title="Open Note"
+              icon={{ source: Icon.Pencil, tintColor: getTintColor("turquoise") }}
+              onAction={() => {
+                open(`${preferences.fileLocation}/${title}.md`);
+              }}
             />
             <Action
               title="Copy Note"
