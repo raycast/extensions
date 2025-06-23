@@ -1,13 +1,14 @@
 import { useState, useCallback, useEffect } from "react";
 import { PopToRootType, showHUD } from "@raycast/api";
 import { type ManifestData } from "image-shield";
+import pLimit from "p-limit";
 import { findImages, getSelectedItems } from "../utils/helpers";
 import { encryptImagesWithKey, validateEncryptFiles } from "../lib/imageShield";
 import { SettingsFormValues } from "../components/SettingsForm";
 import { EncryptImagesFormValues } from "../components/EncryptImagesForm";
 import { dirExists } from "../utils/file";
 import { useLoadingState } from "./useLoadingState";
-import { MANIFEST_FILE_NAME } from "../constraints";
+import { MANIFEST_FILE_NAME, CONCURRENCY_LIMIT } from "../constraints";
 import { generateFragmentFileName } from "image-shield/dist/utils/helpers";
 import { writeEncryptedImage, writeManifest } from "../utils/helpers";
 
@@ -53,10 +54,15 @@ export function useEncryptImages(settings: SettingsFormValues): UseEncryptImages
       const { manifest, imageBuffers, workdir } = data;
 
       await writeManifest(manifest, MANIFEST_FILE_NAME, workdir);
-      imageBuffers.forEach(async (imageBuffer, i) => {
-        const fileName = generateFragmentFileName(manifest, i);
-        await writeEncryptedImage(manifest, imageBuffer, fileName, workdir);
-      });
+      const limit = pLimit(CONCURRENCY_LIMIT);
+      await Promise.all(
+        imageBuffers.map(async (imageBuffer, i) => {
+          return limit(async () => {
+            const fileName = generateFragmentFileName(manifest, i);
+            await writeEncryptedImage(manifest, imageBuffer, fileName, workdir);
+          });
+        }),
+      );
       await showHUD("🎉 All images encrypted successfully!", {
         clearRootSearch: true,
         popToRootType: PopToRootType.Immediate,

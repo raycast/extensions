@@ -1,12 +1,13 @@
 import { Action, Icon, showToast, Toast } from "@raycast/api";
 import { ManifestData } from "image-shield";
+import pLimit from "p-limit";
 import {
   generateFragmentFileName,
   generateRestoredFileName,
   generateRestoredOriginalFileName,
 } from "image-shield/dist/utils/helpers";
 import { writeEncryptedImage, writeManifest, writeRestoredImage } from "../utils/helpers";
-import { MANIFEST_FILE_NAME } from "../constraints";
+import { MANIFEST_FILE_NAME, CONCURRENCY_LIMIT } from "../constraints";
 
 interface DownloadActionProps {
   manifest: ManifestData;
@@ -28,16 +29,26 @@ export function DownloadAllImagesAction({
       onAction={async () => {
         if (isFragmented) {
           await writeManifest(manifest, MANIFEST_FILE_NAME, workdir);
-          imageBuffers.forEach(async (imageBuffer, i) => {
-            const fileName = generateFragmentFileName(manifest, i);
-            await writeEncryptedImage(manifest, imageBuffer, fileName, workdir);
-          });
+          const limit = pLimit(CONCURRENCY_LIMIT);
+          await Promise.all(
+            imageBuffers.map(async (imageBuffer, i) => {
+              return limit(async () => {
+                const fileName = generateFragmentFileName(manifest, i);
+                await writeEncryptedImage(manifest, imageBuffer, fileName, workdir);
+              });
+            }),
+          );
         } else {
-          imageBuffers.forEach(async (imageBuffer, i) => {
-            const imageInfo = manifest.images[i];
-            const fileName = generateRestoredOriginalFileName(imageInfo) ?? generateRestoredFileName(manifest, i);
-            await writeRestoredImage(manifest, imageBuffer, fileName, workdir);
-          });
+          const limit = pLimit(CONCURRENCY_LIMIT);
+          await Promise.all(
+            imageBuffers.map(async (imageBuffer, i) => {
+              return limit(async () => {
+                const imageInfo = manifest.images[i];
+                const fileName = generateRestoredOriginalFileName(imageInfo) ?? generateRestoredFileName(manifest, i);
+                await writeRestoredImage(manifest, imageBuffer, fileName, workdir);
+              });
+            }),
+          );
         }
         await showToast({
           title: "Downloaded",

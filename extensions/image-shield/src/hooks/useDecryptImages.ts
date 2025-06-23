@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
 import { PopToRootType, showHUD } from "@raycast/api";
 import { type ManifestData } from "image-shield";
+import pLimit from "p-limit";
 import { findManifestAndImages, getSelectedItems } from "../utils/helpers";
 import { readManifest, restoreImagesWithKey, validateDecryptFiles } from "../lib/imageShield";
 import { useLoadingState } from "./useLoadingState";
+import { CONCURRENCY_LIMIT } from "../constraints";
 import { generateRestoredFileName, generateRestoredOriginalFileName } from "image-shield/dist/utils/helpers";
 import { writeRestoredImage } from "../utils/helpers";
 
@@ -49,10 +51,15 @@ export function useDecryptImages(): UseDecryptImagesResult {
       const { manifest, imageBuffers, workdir } = data;
       const imageInfos = manifest.images;
 
-      imageBuffers.forEach(async (imageBuffer, i) => {
-        const fileName = generateRestoredOriginalFileName(imageInfos[i]) ?? generateRestoredFileName(manifest, i);
-        await writeRestoredImage(manifest, imageBuffer, fileName, workdir);
-      });
+      const limit = pLimit(CONCURRENCY_LIMIT);
+      await Promise.all(
+        imageBuffers.map(async (imageBuffer, i) => {
+          return limit(async () => {
+            const fileName = generateRestoredOriginalFileName(imageInfos[i]) ?? generateRestoredFileName(manifest, i);
+            await writeRestoredImage(manifest, imageBuffer, fileName, workdir);
+          });
+        }),
+      );
       await showHUD("🎉 All images decrypted successfully!", {
         clearRootSearch: true,
         popToRootType: PopToRootType.Immediate,
