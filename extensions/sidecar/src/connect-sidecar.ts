@@ -64,25 +64,44 @@ tell application "System Events"
 				delay 0.1
 			end repeat
 		end tell
-
-
 	end tell
 end tell
 
 tell application "System Settings" to quit
 `;
 
-// Inline zsh script from References/zshscript
-const zshScript = `sleep 3
-system_profiler SPDisplaysDataType | grep -i "Sidecar" -A 10`;
-
 const MIRROR_SECTION_NAME = "Mirror or extend to";
+
+async function getSidecarState(): Promise<boolean> {
+  const { stdout } = await execAsync("/usr/sbin/system_profiler SPDisplaysDataType", { shell: "/bin/zsh" });
+  return stdout.toLowerCase().includes("sidecar");
+}
+
+async function waitForStateChange(initialState: boolean): Promise<boolean | null> {
+  // Check up to 6 times with 1-second intervals
+  for (let i = 0; i < 6; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const currentState = await getSidecarState();
+
+    // If state changed from initial state, return the new state
+    if (currentState !== initialState) {
+      return currentState;
+    }
+  }
+
+  // If no state change detected after all attempts, return null
+  return null;
+}
 
 export default async function main() {
   const { ipadName } = getPreferenceValues<Preferences>();
 
   try {
-    await showToast({ style: Toast.Style.Animated, title: "Connecting Sidecar..." });
+    await showToast({ style: Toast.Style.Animated, title: "Toggling Sidecar..." });
+
+    // Get initial state
+    const initialState = await getSidecarState();
+
     // Run AppleScript
     await execFileAsync("osascript", ["-e", appleScript], {
       env: {
@@ -92,14 +111,28 @@ export default async function main() {
       },
     });
 
-    // Run zsh script to check connection
-    const { stdout } = await execAsync(zshScript, { shell: "/bin/zsh" });
-    if (stdout && stdout.toLowerCase().includes("sidecar")) {
-      await showHUD("Sidecar Connected!");
+    // Wait for state change and check final state
+    const newState = await waitForStateChange(initialState);
+
+    if (newState === null) {
+      // No state change detected
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Sidecar action failed",
+        message: "No state change detected. Please try again.",
+      });
+    } else if (newState) {
+      // Connected
+      await showHUD("Sidecar Connected");
     } else {
-      await showToast({ style: Toast.Style.Failure, title: "Sidecar connection failed" });
+      // Disconnected
+      await showHUD("Sidecar Disconnected");
     }
   } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Error connecting Sidecar", message: String(error) });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error with Sidecar",
+      message: String(error),
+    });
   }
 }
