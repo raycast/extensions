@@ -1,5 +1,6 @@
-import { showHUD, Clipboard, showToast, Toast } from "@raycast/api";
+import { showHUD, Clipboard } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import { showFailureToast } from "@raycast/utils";
 
 import { getMeetTab, openMeetTabDefaultProfile } from "./helpers";
 
