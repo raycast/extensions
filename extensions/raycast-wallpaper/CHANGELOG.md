@@ -1,6 +1,6 @@
 # Raycast Wallpaper Changelog
 
-## [More Auto Switch Interval] - {PR_MERGE_DATE}
+## [More Auto Switch Interval] - 2025-06-23
 
 - Auto Switch Raycast Wallpaper command supports more intervals
 - Set Raycast Wallpaper command respects the system appearance
