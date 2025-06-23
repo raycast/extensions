@@ -12,6 +12,8 @@ export default function TranslateForm() {
   const langFrom = selectedLanguageSet.langFrom;
   const langTo = Array.isArray(selectedLanguageSet.langTo) ? selectedLanguageSet.langTo[0] : selectedLanguageSet.langTo;
   const { proxy } = usePreferences();
+  const toLangInputRef = React.useRef<Form.Dropdown>(null);
+  const fromLangInputRef = React.useRef<Form.Dropdown>(null);
   const setLangFrom = (l: LanguageCode) => setSelectedLanguageSet({ ...selectedLanguageSet, langFrom: l });
   const setLangTo = (l: LanguageCode) => setSelectedLanguageSet({ ...selectedLanguageSet, langTo: [l] });
   const fromLangObj = supportedLanguagesByCode[langFrom] ?? english;
@@ -83,18 +85,20 @@ export default function TranslateForm() {
               }}
               title={`${toLangObj.name} <-> ${fromLangObj.name}`}
             />
-            <ActionPanel.Submenu shortcut={{ modifiers: ["cmd"], key: "s" }} title="Change Languages">
-              <ActionPanel.Submenu shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} title="Change From Language">
-                {languages.map((lang) => (
-                  <Action key={lang.code} onAction={() => setLangFrom(lang.code)} title={lang.name} />
-                ))}
-              </ActionPanel.Submenu>
-              <ActionPanel.Submenu shortcut={{ modifiers: ["cmd", "shift"], key: "t" }} title="Change To Language">
-                {languages.map((lang) => (
-                  <Action key={lang.code} onAction={() => setLangTo(lang.code)} title={lang.name} />
-                ))}
-              </ActionPanel.Submenu>
-            </ActionPanel.Submenu>
+            <Action
+              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              title="Change From Language"
+              onAction={() => {
+                fromLangInputRef.current?.focus();
+              }}
+            />
+            <Action
+              shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+              title="Change To Language"
+              onAction={() => {
+                toLangInputRef.current?.focus();
+              }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -106,6 +110,7 @@ export default function TranslateForm() {
         value={autoDetectedLanguage?.code ?? langFrom}
         onChange={(v) => setLangFrom(v as LanguageCode)}
         storeValue
+        ref={fromLangInputRef}
       >
         {autoDetectedLanguage && (
           <Form.Dropdown.Item value={autoDetectedLanguage.code} title={`${autoDetectedLanguage.name} (Auto-detect)`} />
@@ -120,6 +125,7 @@ export default function TranslateForm() {
         value={langTo}
         onChange={(v) => setLangTo(v as LanguageCode)}
         storeValue
+        ref={toLangInputRef}
       >
         {languages
           .filter((lang) => lang.code !== AUTO_DETECT)
