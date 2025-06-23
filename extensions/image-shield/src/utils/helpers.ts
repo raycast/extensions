@@ -60,7 +60,7 @@ export async function getSelectedItems(): Promise<string[]> {
     return (await getSelectedFinderItems()).map((f) => f.path).sort();
   } catch (e) {
     // Do nothing if no files are selected
-    console.log(e);
+    console.log(String(e));
     return [];
   }
 }
