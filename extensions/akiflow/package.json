@@ -1,0 +1,787 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "akiflow",
+  "title": "Akiflow",
+  "description": "Manages your tasks in Akiflow",
+  "icon": "akiflow-icon.png",
+  "author": "andyjsiegel",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Search and view your tasks in Akiflow",
+      "mode": "view",
+      "preferences": [
+        {
+          "label": "Show Completed Tasks",
+          "name": "showCompletedTasks", 
+          "description": "Whether or not to show completed (done) tasks",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Completed Tasks",
+          "default": false
+        },
+        {
+          "label": "Whether to use flag icons for priority or !, !!, !!!, and a bullseye.",
+          "name": "useFlagsForPriority",
+          "description": "Whether to use flags for priority or !, !!, !!!, and a bullseye.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Use Flags for Priority",
+          "data": [
+            {
+              "title": "Use Flag Icons",
+              "value": "useFlags"
+            },
+            {
+              "title": "Use !, !!, !!!, and Bullseye Icons",
+              "value": "useBullseye"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Adds a task to Akiflow. Supports name, description, plan date, due date (deadline), tags, projects, and priority",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "taskAddedAction",
+          "description": "Determine what to do when a task is added successfully",
+          "type": "dropdown",
+          "required": true,
+          "title": "Action When Task Added",
+          "data": [
+            {
+              "title": "Do Nothing (Keep Raycast Open)",
+              "value": "doNothing"
+            },
+            {
+              "title": "Pop To Root",
+              "value": "popToRoot"
+            },
+            {
+              "title": "Close Raycast Window",
+              "value": "closeRaycastWindow"
+            },
+            {
+              "title": "Open Akiflow (Also closes Raycast Window)",
+              "value": "openAkiflow"
+            },
+            {
+              "title": "View The Task In Akiflow",
+              "value": "viewTaskInAkiflow"
+            }
+          ]
+        }
+      ]
+    }
+  ,
+    {
+      "name": "view-projects-and-tags",
+      "title": "View Projects and Tags",
+      "description": "View Your Akiflow Folders, Projects, and Tags",
+      "mode": "view"
+    }
+      ,
+    {
+      "name": "menu-bar-tasks",
+      "title": "Menu Bar Tasks",
+      "description": "See Your Tasks In The Menu Bar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "label": "Command Shortcut",
+          "name": "commandShortcut",
+          "description": "The shortcut to use for the command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Command Shortcut",
+          "default": "cmdShiftY",
+          "data": [
+            {
+              "title": "⌘Y",
+              "value": "cmdY"
+            },
+            {
+              "title": "⌘⇧Y",
+              "value": "cmdShiftY"
+            },
+            {
+              "title": "⌘⌥Y",
+              "value": "cmdOptionY"
+            },
+            {
+              "title": "⌘⌥⇧Y",
+              "value": "cmdOptionShiftY"
+            }
+          ]
+        },
+        {
+          "label": "Show Inbox Tasks",
+          "name": "showInboxTasks",
+          "description": "Whether or not to show inbox tasks in the menu bar",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Inbox Tasks",
+          "default": true
+        },
+        {
+          "label": "Show Today Tasks",
+          "name": "showTodayTasks",
+          "description": "Whether or not to show today tasks in the menu bar",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Today Tasks",
+          "default": true
+        },
+        {
+          "label": "Show Completed Tasks",
+          "name": "showCompletedTasks",
+          "description": "Whether or not to show completed (done) tasks in the menu bar",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Completed Tasks",
+          "default": false
+        }
+      ]
+    }
+      ,
+    {
+      "name": "quick-access",
+      "title": "Quick Access",
+      "description": "Quickly Access Upcoming, Daily Planning, Daily Shutdown, Weekly Planning, and Weekly Shutdown",
+      "mode": "view"
+    }
+      ],
+  "ai": {
+    "instructions": "When the user asks for a relative time like 'today', 'in 1 hour', 'tomorrow', or 'Monday at 9am', call the get-current-time tool. If the user asks you to get tasks, call get tasks first. If the criteria is specific, but you don't know what to do, call both get-projects and get-tags. Then call get-tasks.", 
+    "evals": [
+      {
+        "input" : "@akiflow what are my inbox tasks?",
+        "mocks" : {
+          "get-tasks" : [
+            {
+              "activation_datetime" : null,
+              "akiflow_account_id" : "51d94e7d-4b03-471b-83b9-4c2da8b8219c",
+              "calendar_id" : null,
+              "connector_id" : "notion",
+              "content" : {
+                "aiListId" : "e05470e6-fd04-4a12-ba1c-704bde7bcace",
+                "aiListIdPredictedAt" : 1736961106581,
+                "aiMethod" : 6,
+                "eventLockInCalendar" : "public"
+              },
+              "created_at" : "2025-01-15T17:11:46.678Z",
+              "dailyGoal" : 0,
+              "date" : null,
+              "datetime" : null,
+              "datetime_tz" : "America/Phoenix",
+              "deleted_at" : null,
+              "description" : null,
+              "doc" : {
+                "created_at" : "2025-01-15T17:05:00Z",
+                "hash" : "e22f223ead6fef9c1245775fba8de14c",
+                "local_url" : "notion:/Final-Project-65ed87e418f4456cb561b6100687a540",
+                "updated_at" : "2025-01-15T17:06:00Z",
+                "url" : "https://www.notion.so/Final-Project-65ed87e418f4456cb561b6100687a540",
+                "workspace_id" : "1106b520-933e-80bd-be59-e1129000f31c",
+                "workspace_name" : "Tasks"
+              },
+              "done" : false,
+              "done_at" : null,
+              "due_date" : "2025-04-25",
+              "duration" : 0,
+              "global_created_at" : "2025-01-15T17:11:47.689Z",
+              "global_list_id_updated_at" : "2025-04-06T21:14:41.458Z",
+              "global_tags_ids_updated_at" : "2025-04-12T18:15:42.592Z",
+              "global_updated_at" : "2025-04-12T18:15:42.592Z",
+              "id" : "88fb29cb-7ffc-4e9b-a2a8-618b7d2bb4b0",
+              "links" : null,
+              "listId" : "1b416fc3-9bc9-4d0a-83fa-ee0b464f1a77",
+              "origin" : null,
+              "origin_account_id" : "6bb780e5-31af-494b-9cef-b56b225b1d42-10ed872b-594c-81e6-a90b-0002f6d646d9",
+              "origin_id" : "65ed87e4-18f4-456c-b561-b6100687a540",
+              "original_date" : null,
+              "original_datetime" : null,
+              "plan_period" : null,
+              "plan_unit" : null,
+              "priority" : 1,
+              "read_at" : "2025-04-07T16:33:21.000Z",
+              "recurrence" : null,
+              "recurrence_version" : null,
+              "recurring_calendar_lock" : false,
+              "recurring_id" : null,
+              "section_id" : null,
+              "sorting" : 1744171117919,
+              "sorting_label" : null,
+              "status" : 1,
+              "tags_ids" : [
+                "4d4fd80f-1627-44d6-9f80-ed4e161e29e5"
+              ],
+              "temp_permanently_deleted" : null,
+              "time_slot_id" : null,
+              "title" : "Final Project",
+              "trashed_at" : null,
+              "unique_id" : null,
+              "until_datetime" : null,
+              "updated_at" : "2025-04-12T18:15:42.905Z",
+              "user_id" : 91432
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "done" : false,
+                "status" : 1
+              },
+                "name" : "get-tasks"
+              }
+            }
+          ]
+      },
+      {
+        "input" : "@akiflow list my tasks for today",
+        "mocks" : {
+          "get-tasks" : [
+            {
+              "activation_datetime" : null,
+              "akiflow_account_id" : "51d94e7d-4b03-471b-83b9-4c2da8b8219c",
+              "calendar_id" : null,
+              "connector_id" : "notion",
+              "content" : {
+                "aiListId" : "e05470e6-fd04-4a12-ba1c-704bde7bcace",
+                "aiListIdPredictedAt" : 1736962012745,
+                "aiMethod" : 6
+              },
+              "created_at" : "2025-01-15T17:26:53.061Z",
+              "dailyGoal" : 0,
+              "date" : "2025-04-14",
+              "datetime" : null,
+              "datetime_tz" : "America/Phoenix",
+              "deleted_at" : null,
+              "description" : "<p><br></p>",
+              "doc" : {
+                "created_at" : "2025-01-15T17:20:00Z",
+                "hash" : "a6188f408e3b51a631e58aeb9d6d795c",
+                "local_url" : "notion:/Simulation-Project-5-17c6b520933e80dd982bc4335ca6bf8c",
+                "updated_at" : "2025-04-14T13:00:00Z",
+                "url" : "https://www.notion.so/Simulation-Project-5-17c6b520933e80dd982bc4335ca6bf8c",
+                "workspace_id" : "1106b520-933e-80bd-be59-e1129000f31c",
+                "workspace_name" : "Tasks"
+              },
+              "done" : false,
+              "done_at" : null,
+              "due_date" : "2025-04-16",
+              "duration" : 0,
+              "global_created_at" : "2025-01-15T17:28:01.675Z",
+              "global_list_id_updated_at" : "2025-04-11T19:27:37.122Z",
+              "global_tags_ids_updated_at" : "2025-04-13T06:32:32.356Z",
+              "global_updated_at" : "2025-04-14T16:49:17.604Z",
+              "id" : "5c459d4a-5e8d-45bd-b5ce-8ef8250ff056",
+              "links" : null,
+              "listId" : "0461e1f6-78e3-449b-8f06-04e4646e53e3",
+              "origin" : null,
+              "origin_account_id" : "6bb780e5-31af-494b-9cef-b56b225b1d42-10ed872b-594c-81e6-a90b-0002f6d646d9",
+              "origin_id" : "17c6b520-933e-80dd-982b-c4335ca6bf8c",
+              "original_date" : null,
+              "original_datetime" : null,
+              "plan_period" : null,
+              "plan_unit" : null,
+              "priority" : 2,
+              "read_at" : "2025-01-15T17:28:17.000Z",
+              "recurrence" : null,
+              "recurrence_version" : null,
+              "recurring_calendar_lock" : false,
+              "recurring_id" : null,
+              "section_id" : null,
+              "sorting" : 1744635997723,
+              "sorting_label" : 1737059981436,
+              "status" : 2,
+              "tags_ids" : [
+                "4d4fd80f-1627-44d6-9f80-ed4e161e29e5"
+              ],
+              "temp_permanently_deleted" : null,
+              "time_slot_id" : null,
+              "title" : "Simulation Project 5",
+              "trashed_at" : null,
+              "unique_id" : null,
+              "until_datetime" : null,
+              "updated_at" : "2025-04-14T16:49:19.579Z",
+              "user_id" : 91432
+            },
+            {
+              "activation_datetime" : null,
+              "akiflow_account_id" : null,
+              "calendar_id" : null,
+              "connector_id" : "gmail",
+              "content" : {
+                "aiListId" : "0461e1f6-78e3-449b-8f06-04e4646e53e3",
+                "aiListIdPredictedAt" : 1744314499128,
+                "aiMethod" : 6
+              },
+              "created_at" : "2025-04-10T19:43:51.988Z",
+              "dailyGoal" : 1,
+              "date" : "2025-04-14",
+              "datetime" : null,
+              "datetime_tz" : "America/Phoenix",
+              "deleted_at" : null,
+              "description" : "Task was planned for the last Saturday, Apr 12, 2025",
+              "doc" : {
+                "from" : "lotz@d2l.arizona.edu",
+                "hash" : "8cf2fa52fe0c4259ed4d42d6eceb9952",
+                "internal_date" : "1744059248000",
+                "message_id" : "196120c86b8f90be",
+                "subject" : "CSC 335 SP25 001 - Midterm 2",
+                "thread_id" : "196120c86b8f90be",
+                "url" : "https://mail.google.com/mail/u/siegela1@arizona.edu/#all/196120c86b8f90be"
+              },
+              "done" : false,
+              "done_at" : null,
+              "due_date" : null,
+              "duration" : 3600,
+              "global_created_at" : "2025-04-10T19:46:15.893Z",
+              "global_list_id_updated_at" : "2025-04-10T19:48:32.226Z",
+              "global_tags_ids_updated_at" : "2025-04-10T19:48:28.074Z",
+              "global_updated_at" : "2025-04-14T16:49:17.603Z",
+              "id" : "a6629d15-d102-4c73-abf6-cf82142562fb",
+              "links" : null,
+              "listId" : "1b416fc3-9bc9-4d0a-83fa-ee0b464f1a77",
+              "origin" : null,
+              "origin_account_id" : "102805524244536684760",
+              "origin_id" : "196120c86b8f90be",
+              "original_date" : null,
+              "original_datetime" : null,
+              "plan_period" : null,
+              "plan_unit" : null,
+              "priority" : -1,
+              "read_at" : "2025-04-10T19:46:18.000Z",
+              "recurrence" : null,
+              "recurrence_version" : null,
+              "recurring_calendar_lock" : false,
+              "recurring_id" : null,
+              "section_id" : null,
+              "sorting" : 1744314231988,
+              "sorting_label" : null,
+              "status" : 2,
+              "tags_ids" : [
+                "4d4fd80f-1627-44d6-9f80-ed4e161e29e5"
+              ],
+              "temp_permanently_deleted" : null,
+              "time_slot_id" : null,
+              "title" : "Study For Midterm 2",
+              "trashed_at" : null,
+              "unique_id" : null,
+              "until_datetime" : null,
+              "updated_at" : "2025-04-14T16:49:19.597Z",
+              "user_id" : 91432
+            },
+            {
+              "activation_datetime" : null,
+              "akiflow_account_id" : null,
+              "calendar_id" : null,
+              "connector_id" : null,
+              "content" : {
+                "aiListId" : "6b3ad0e2-12c8-46bf-941f-2cf2ef201694",
+                "aiListIdPredictedAt" : 1744397242418,
+                "aiMethod" : 6
+              },
+              "created_at" : "2025-04-11T18:46:54.650Z",
+              "dailyGoal" : 0,
+              "date" : "2025-04-14",
+              "datetime" : null,
+              "datetime_tz" : "America/Phoenix",
+              "deleted_at" : null,
+              "description" : "<p>Look out for emails from <a href=\"http://contactcwt.com\">statefarm.us@contactcwt.com</a> to book onboarding travel. Respond within 24 hours.</p>",
+              "doc" : null,
+              "done" : false,
+              "done_at" : null,
+              "due_date" : null,
+              "duration" : 0,
+              "global_created_at" : "2025-04-11T18:46:55.420Z",
+              "global_list_id_updated_at" : "2025-04-11T18:47:24.043Z",
+              "global_tags_ids_updated_at" : null,
+              "global_updated_at" : "2025-04-14T22:01:46.606Z",
+              "id" : "f82a2779-9b7d-4d9e-bd10-f3e9076f716d",
+              "links" : null,
+              "listId" : "6b3ad0e2-12c8-46bf-941f-2cf2ef201694",
+              "origin" : null,
+              "origin_account_id" : null,
+              "origin_id" : null,
+              "original_date" : null,
+              "original_datetime" : null,
+              "plan_period" : null,
+              "plan_unit" : null,
+              "priority" : 1,
+              "read_at" : null,
+              "recurrence" : null,
+              "recurrence_version" : null,
+              "recurring_calendar_lock" : false,
+              "recurring_id" : null,
+              "section_id" : null,
+              "sorting" : 1744397214649,
+              "sorting_label" : null,
+              "status" : 2,
+              "tags_ids" : null,
+              "temp_permanently_deleted" : null,
+              "time_slot_id" : null,
+              "title" : "Check for onboarding travel email from State Farm",
+              "trashed_at" : null,
+              "unique_id" : null,
+              "until_datetime" : null,
+              "updated_at" : "2025-04-14T22:01:46.980Z",
+              "user_id" : 91432
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "date" : "2025-04-14",
+                "done" : false
+              },
+              "name" : "get-tasks"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {},
+              "name" : "get-current-time"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@akiflow list my tasks for csc 345.",
+        "mocks" : {
+          "get-projects" : {
+            "1b416fc3-9bc9-4d0a-83fa-ee0b464f1a77" : {
+              "color" : "#FFA500",
+              "icon" : "📦",
+              "parentId" : "7c619db3-50e8-486f-b292-a7bae846a58b",
+              "title" : "CSC 335"
+            },
+            "3c0a8019-647a-43dd-8354-b2f8ac553f72" : {
+              "color" : "#5F1C3A",
+              "icon" : "🧠",
+              "parentId" : "73926504-55ab-40cd-85d8-73e541e05d8e",
+              "title" : "Admin"
+            },
+            "6b3ad0e2-12c8-46bf-941f-2cf2ef201694" : {
+              "color" : "#FFC0CB",
+              "icon" : "🚗",
+              "parentId" : "7ae0a871-a58e-4001-87e3-5f87ca58608e",
+              "title" : "StateFarm"
+            },
+            "7ae0a871-a58e-4001-87e3-5f87ca58608e" : {
+              "icon" : null,
+              "parentId" : null,
+              "title" : "Professional"
+            },
+            "7c619db3-50e8-486f-b292-a7bae846a58b" : {
+              "icon" : null,
+              "parentId" : null,
+              "title" : "University"
+            },
+            "46e5659d-c1b1-4519-9174-55999a2f0f8b" : {
+              "color" : "#800080",
+              "icon" : "📆",
+              "parentId" : "7c619db3-50e8-486f-b292-a7bae846a58b",
+              "title" : "Planning"
+            },
+            "0461e1f6-78e3-449b-8f06-04e4646e53e3" : {
+              "color" : "#A52A2A",
+              "icon" : "📁",
+              "parentId" : "7c619db3-50e8-486f-b292-a7bae846a58b",
+              "title" : "CSC 252"
+            },
+            "424838be-4496-4e13-9c22-8f072c827bac" : {
+              "color" : "#00FFFF",
+              "icon" : "🧩",
+              "parentId" : "7c619db3-50e8-486f-b292-a7bae846a58b",
+              "title" : "CSC 345"
+            },
+            "73926504-55ab-40cd-85d8-73e541e05d8e" : {
+              "icon" : null,
+              "parentId" : null,
+              "title" : "Personal"
+            },
+            "b761f21d-45fe-41cd-846a-ecbe93ec8e09" : {
+              "color" : "#FF0000",
+              "icon" : "🎮",
+              "parentId" : "7ae0a871-a58e-4001-87e3-5f87ca58608e",
+              "title" : "eSports Arena"
+            },
+            "efb628e7-0d81-4a00-b351-d80426152e89" : {
+              "color" : "#FF0000",
+              "icon" : "🧺",
+              "parentId" : "73926504-55ab-40cd-85d8-73e541e05d8e",
+              "title" : "Chores"
+            },
+            "f0976dff-028f-4531-9cc6-e2719a83b94f" : {
+              "color" : "#31BF75",
+              "icon" : "🧪",
+              "parentId" : "7c619db3-50e8-486f-b292-a7bae846a58b",
+              "title" : "CHEM 151"
+            }
+          },
+          "get-tags" : {
+            "In Progress" : "4d4fd80f-1627-44d6-9f80-ed4e161e29e5"
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "get-projects"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "get-tags"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "listId" : "424838be-4496-4e13-9c22-8f072c827bac"
+              },
+              "name" : "get-tasks"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "done" : false,
+                "listId" : "424838be-4496-4e13-9c22-8f072c827bac"
+              },
+              "name" : "get-tasks"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@akiflow Can you rename my task \"Put Laundry Away\" to \"Put Laundry In Dresser\"",
+        "mocks" : {
+          "edit-task" : {
+            "data" : [
+              {
+                "activation_datetime" : null,
+                "akiflow_account_id" : null,
+                "calendar_id" : null,
+                "connector_id" : null,
+                "content" : {
+                  "aiListId" : "efb628e7-0d81-4a00-b351-d80426152e89",
+                  "aiListIdPredictedAt" : 1744906504446,
+                  "aiMethod" : 6000029
+                },
+                "created_at" : "2025-04-17T16:15:04.472Z",
+                "dailyGoal" : 0,
+                "date" : "2025-04-17",
+                "datetime" : "2025-04-18T02:00:00.000Z",
+                "datetime_tz" : "America/Phoenix",
+                "deleted_at" : null,
+                "description" : null,
+                "doc" : null,
+                "done" : false,
+                "done_at" : null,
+                "due_date" : null,
+                "duration" : 1800,
+                "global_created_at" : "2025-04-17T16:15:04.177Z",
+                "global_list_id_updated_at" : "2025-04-17T16:15:04.446Z",
+                "global_tags_ids_updated_at" : null,
+                "global_updated_at" : "2025-04-17T23:15:02.255Z",
+                "id" : "e81158ea-13e5-4985-995b-47aaeb77b3e4",
+                "links" : null,
+                "listId" : "efb628e7-0d81-4a00-b351-d80426152e89",
+                "origin" : null,
+                "origin_account_id" : null,
+                "origin_id" : null,
+                "original_date" : null,
+                "original_datetime" : null,
+                "plan_period" : null,
+                "plan_unit" : null,
+                "priority" : 3,
+                "read_at" : "2025-04-17T16:15:04.000Z",
+                "recurrence" : null,
+                "recurrence_version" : null,
+                "recurring_calendar_lock" : false,
+                "recurring_id" : null,
+                "section_id" : null,
+                "sorting" : 1744906504177,
+                "sorting_label" : 1744906504177,
+                "status" : 2,
+                "tags_ids" : null,
+                "temp_permanently_deleted" : null,
+                "time_slot_id" : null,
+                "title" : "Put Laundry In Dresser",
+                "trashed_at" : null,
+                "unique_id" : null,
+                "until_datetime" : null,
+                "updated_at" : "2025-04-17T23:15:02.255Z",
+                "user_id" : 91432
+              }
+            ]
+          },
+          "get-tasks" : [
+            {
+              "activation_datetime" : null,
+              "akiflow_account_id" : null,
+              "calendar_id" : "5caaf18a-d654-4ffb-b3da-06e9ffeec74c",
+              "connector_id" : null,
+              "content" : {
+                "aiListId" : "efb628e7-0d81-4a00-b351-d80426152e89",
+                "aiListIdPredictedAt" : 1744906504446,
+                "aiMethod" : 6000029
+              },
+              "created_at" : "2025-04-17T16:15:04.472Z",
+              "dailyGoal" : 0,
+              "date" : "2025-04-17",
+              "datetime" : "2025-04-18T02:00:00.000Z",
+              "datetime_tz" : "America/Phoenix",
+              "deleted_at" : null,
+              "description" : null,
+              "doc" : null,
+              "done" : false,
+              "done_at" : null,
+              "due_date" : null,
+              "duration" : 1800,
+              "global_created_at" : "2025-04-17T16:15:04.177Z",
+              "global_list_id_updated_at" : "2025-04-17T16:15:04.446Z",
+              "global_tags_ids_updated_at" : null,
+              "global_updated_at" : "2025-04-17T16:28:47.592Z",
+              "id" : "e81158ea-13e5-4985-995b-47aaeb77b3e4",
+              "links" : null,
+              "listId" : "efb628e7-0d81-4a00-b351-d80426152e89",
+              "origin" : null,
+              "origin_account_id" : null,
+              "origin_id" : null,
+              "original_date" : null,
+              "original_datetime" : null,
+              "plan_period" : null,
+              "plan_unit" : null,
+              "priority" : 3,
+              "read_at" : "2025-04-17T16:15:04.000Z",
+              "recurrence" : null,
+              "recurrence_version" : null,
+              "recurring_calendar_lock" : false,
+              "recurring_id" : null,
+              "section_id" : null,
+              "sorting" : 1744906504177,
+              "sorting_label" : 1744906504177,
+              "status" : 2,
+              "tags_ids" : null,
+              "temp_permanently_deleted" : null,
+              "time_slot_id" : null,
+              "title" : "Put Laundry Away",
+              "trashed_at" : null,
+              "unique_id" : null,
+              "until_datetime" : null,
+              "updated_at" : "2025-04-17T16:28:49.541Z",
+              "user_id" : 91432
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "done" : false,
+                "title" : "Put Laundry Away"
+              },
+              "name" : "get-tasks"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "id" : "e81158ea-13e5-4985-995b-47aaeb77b3e4",
+                "title" : "Put Laundry In Dresser"
+              },
+              "name" : "edit-task"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "tools": [
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Adds a task to Akiflow"
+    },
+    {
+      "name": "get-projects",
+      "title": "Get Projects",
+      "description": "Gets the user's projects from Akiflow"
+    },
+    {
+      "name": "get-tags",
+      "title": "Get Tags",
+      "description": "Gets the user's tags from Akiflow"
+    },
+    {
+      "name": "get-current-time",
+      "title": "Get Current Time",
+      "description": "Gets the current time"
+    },
+    {
+      "name": "get-tasks",
+      "title": "Get Tasks",
+      "description": "Gets the user's tasks."
+    }
+      ,
+    {
+      "name": "edit-task",
+      "title": "Edit Task",
+      "description": "Edits a task in Akiflow given its ID. Shows confirmation when properties are other than 'done' are changed."
+    }
+      ],
+  "preferences": [
+    {
+      "name": "refreshToken",
+      "description": "Akiflow Refresh Token",
+      "type": "password",
+      "required": true,
+      "title": "Akiflow Refresh Token",
+      "placeholder": "Click 'About' for info on how to get your refresh token."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.8.4",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
