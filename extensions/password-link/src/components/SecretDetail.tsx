@@ -52,7 +52,7 @@ export default function SecretDetail({ secret, onDelete }: SecretDetailProps) {
       onDelete(secret.id);
       pop();
     } catch (error) {
-      await handleApiError(error, "Failed to delete secret");
+      showFailureToast(error, { title: "Failed to delete secret" });
     }
   };
 
