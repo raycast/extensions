@@ -17,6 +17,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
   // Currently represents 0-100 in steps of 5 (as strings) for jpg heic avif webp, "lossless" for webp, "lzw" or "deflate" for tiff, "png-24" or "png-8" for png
   const [currentQualitySetting, setCurrentQualitySetting] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [filePickerError, setFilePickerError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (initialFiles && initialFiles.length > 0) {
@@ -28,6 +29,9 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
   }, [initialFiles]);
 
   const handleFileSelect = (files: string[]) => {
+    // Clear previous error
+    setFilePickerError(undefined);
+
     if (files.length === 0) {
       setCurrentFiles([]);
       setSelectedFileType(null);
@@ -45,10 +49,11 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       }
 
       if (!primaryFileType) {
+        setFilePickerError("No valid media files selected. Please select video, image, or audio files.");
         showToast({
           style: Toast.Style.Failure,
           title: "Invalid selection",
-          message: "No valid media files selected. Please select video, image, or audio files.",
+          message: filePickerError,
         });
         setCurrentFiles([]);
         setSelectedFileType(null);
@@ -60,11 +65,17 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       });
 
       if (processedFiles.length < files.length) {
+        setFilePickerError(
+          `Kept ${processedFiles.length} ${primaryFileType} file${processedFiles.length > 1 ? "s" : ""}. ${files.length - processedFiles.length} other file${files.length - processedFiles.length > 1 ? "s" : ""} from your selection were invalid or of a different type and have been discarded.`,
+        );
         showToast({
           style: Toast.Style.Failure,
           title: "Invalid files in selection",
-          message: `Kept ${processedFiles.length} ${primaryFileType} file(s). ${files.length - processedFiles.length} other file(s) from your selection were invalid or of a different type and have been discarded.`, // Updated message
+          message: filePickerError,
         });
+      } else {
+        // Clear error if all files are valid
+        setFilePickerError(undefined);
       }
 
       setCurrentFiles(processedFiles);
@@ -82,10 +93,12 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         setCurrentQualitySetting("");
       }
     } catch (error) {
+      const errorMessage = String(error);
+      setFilePickerError(errorMessage);
       showToast({
         style: Toast.Style.Failure,
         title: "Error processing files",
-        message: String(error),
+        message: errorMessage,
       });
       setCurrentFiles([]);
       setSelectedFileType(null);
@@ -133,7 +146,29 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         });
       } catch (error) {
         await toast.hide();
-        await showToast({ style: Toast.Style.Failure, title: "Conversion failed", message: String(error) });
+        const errorMessage = String(error);
+
+        // Check if the error is related to FFmpeg not being installed
+        if (errorMessage.includes("FFmpeg is not installed or configured")) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "FFmpeg Not Found",
+            message: "FFmpeg needs to be installed to convert files",
+            primaryAction: {
+              title: "Install FFmpeg",
+              onAction: () => {
+                // Re-run the command to trigger the installation flow
+                // This will bring up the FFmpeg installation page
+                showToast({
+                  style: Toast.Style.Animated,
+                  title: "Opening FFmpeg installer...",
+                });
+              },
+            },
+          });
+        } else {
+          await showToast({ style: Toast.Style.Failure, title: "Conversion failed", message: errorMessage });
+        }
       }
     }
     setIsLoading(false);
@@ -145,7 +180,13 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       actions={
         <ActionPanel>
           {currentFiles && currentFiles.length > 0 && selectedFileType && (
-            <Action.SubmitForm title="Convert" onSubmit={handleSubmit} icon={Icon.NewDocument} />
+            <Action.SubmitForm
+              title="Convert"
+              onSubmit={handleSubmit}
+              icon={Icon.NewDocument}
+              // For some reason, this still shows up as cmd+return instead of just return, so no use for now
+              /* shortcut={{ modifiers: [], key: "return" }} */
+            />
           )}
         </ActionPanel>
       }
@@ -158,6 +199,8 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         onChange={(newFiles) => {
           handleFileSelect(newFiles);
         }}
+        // Having an active error prevents the form from submitting, so no filePicker error I guess
+        /* error={filePickerError} */
       />
       {selectedFileType && (
         <Form.Dropdown
@@ -172,9 +215,12 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         >
           {selectedFileType === "image" ? (
             <Form.Dropdown.Section title="Image Formats">
-              {OUTPUT_IMAGE_EXTENSIONS.map((format) => (
-                <Form.Dropdown.Item key={format} value={format} title={format} />
-              ))}
+              {/* HEIC is only supported on macOS with SIPS, so we filter it out on other platforms. */}
+              {OUTPUT_IMAGE_EXTENSIONS.filter((format) => process.platform === "darwin" || format !== ".heic").map(
+                (format) => (
+                  <Form.Dropdown.Item key={format} value={format} title={format} />
+                ),
+              )}
             </Form.Dropdown.Section>
           ) : selectedFileType === "audio" ? (
             <Form.Dropdown.Section title="Audio Formats">

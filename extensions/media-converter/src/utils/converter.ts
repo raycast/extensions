@@ -72,6 +72,13 @@ export async function convertMedia(
     | (typeof OUTPUT_IMAGE_EXTENSIONS)[number],
   quality?: string, // Currently represents 0-100 in steps of 5 (as strings) for jpg heic avif webp, "lossless" for webp, "lzw" or "deflate" for tiff, "png-24" or "png-8" for png
 ): Promise<string> {
+  const ffmpegPath = await findFFmpegPath();
+
+  if (!ffmpegPath) {
+    throw new Error("FFmpeg is not installed or configured. Please install FFmpeg to use this converter.");
+  }
+
+  let ffmpegCmd = `"${ffmpegPath.path}" -i`;
   // If image
   if (checkExtensionType(filePath, OUTPUT_IMAGE_EXTENSIONS)) {
     const currentOutputFormat = outputFormat as (typeof OUTPUT_IMAGE_EXTENSIONS)[number];
@@ -83,6 +90,7 @@ export async function convertMedia(
     let processedInputPath = filePath;
 
     try {
+      // https://sharp.pixelplumbing.com/api-output/#heif
       // Only SIPS can handle converting to HEIC
       if (currentOutputFormat === ".heic") {
         await execPromise(
@@ -107,9 +115,8 @@ export async function convertMedia(
             throw new Error(`Failed to preprocess HEIC file: ${String(error)}`);
           }
         }
-        // FFmpeg for all other image formats
-        const ffmpegPath = await findFFmpegPath();
-        let ffmpegCmd = `"${ffmpegPath}" -i "${processedInputPath}"`;
+
+        ffmpegCmd += ` "${processedInputPath}"`;
 
         switch (currentOutputFormat) {
           case ".jpg":
@@ -123,10 +130,10 @@ export async function convertMedia(
 
               // Generate palette first
               await execPromise(
-                `"${ffmpegPath}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`,
+                `"${ffmpegPath.path}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`,
               );
               // Then apply palette
-              ffmpegCmd = `"${ffmpegPath}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5"`;
+              ffmpegCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5"`;
               // Note: FFmpeg's PNG-8 doesn't support non-binary transparency, no way to fix it (according to my research, @sacha_crispin). We could make use of other libraries like pngquant or ImageMagick for better PNG-8 alpha support, but that would require additional dependencies.
             }
             ffmpegCmd += ` -compression_level 100 "${finalOutputPath}"`;
@@ -173,29 +180,28 @@ export async function convertMedia(
   else if (checkExtensionType(filePath, OUTPUT_AUDIO_EXTENSIONS)) {
     const currentOutputFormat = outputFormat as (typeof OUTPUT_AUDIO_EXTENSIONS)[number];
 
-    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
-    const ffmpegPath = await findFFmpegPath();
-    let command = `"${ffmpegPath}" -i "${filePath}"`;
+    ffmpegCmd += ` "${filePath}"`;
 
     switch (currentOutputFormat) {
       case ".mp3":
-        command += ` -c:a libmp3lame`;
+        ffmpegCmd += ` -c:a libmp3lame`;
         break;
       case ".aac":
-        command += ` -c:a aac`;
+        ffmpegCmd += ` -c:a aac`;
         break;
       case ".wav":
-        command += ` -c:a pcm_s16le`;
+        ffmpegCmd += ` -c:a pcm_s16le`;
         break;
       case ".flac":
-        command += ` -c:a flac`;
+        ffmpegCmd += ` -c:a flac`;
         break;
       default:
         throw new Error(`Unknown audio output format: ${currentOutputFormat}`);
     }
 
-    command += ` "${finalOutputPath}"`;
-    await execPromise(command);
+    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+    ffmpegCmd += ` "${finalOutputPath}"`;
+    await execPromise(ffmpegCmd);
     return finalOutputPath;
   }
   // If video
@@ -205,35 +211,35 @@ export async function convertMedia(
   else if (checkExtensionType(filePath, OUTPUT_VIDEO_EXTENSIONS)) {
     const currentOutputFormat = outputFormat as (typeof OUTPUT_VIDEO_EXTENSIONS)[number];
 
-    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
-    const ffmpegPath = await findFFmpegPath();
-    let command = `"${ffmpegPath}" -i "${filePath}"`;
+    ffmpegCmd += ` "${filePath}"`;
 
     switch (currentOutputFormat) {
       case ".mp4":
-        command += ` -vcodec h264 -acodec aac`;
+        ffmpegCmd += ` -vcodec h264 -acodec aac`;
         break;
       case ".avi":
-        command += ` -vcodec libxvid -acodec mp3`;
+        ffmpegCmd += ` -vcodec libxvid -acodec mp3`;
         break;
       case ".mov":
-        command += ` -vcodec prores -acodec pcm_s16le`;
+        ffmpegCmd += ` -vcodec prores -acodec pcm_s16le`;
         break;
       case ".mkv":
-        command += ` -vcodec libx265 -acodec aac`;
+        ffmpegCmd += ` -vcodec libx265 -acodec aac`;
         break;
       case ".mpg":
-        command += ` -vcodec mpeg2video -acodec mp3`;
+        ffmpegCmd += ` -vcodec mpeg2video -acodec mp3`;
         break;
       case ".webm":
-        command += ` -vcodec libvpx-vp9 -acodec libopus`;
+        ffmpegCmd += ` -vcodec libvpx-vp9 -acodec libopus`;
         break;
       default:
         throw new Error(`Unknown video output format: ${currentOutputFormat}`);
     }
 
-    command += ` "${finalOutputPath}"`;
-    await execPromise(command);
+    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+    ffmpegCmd += ` "${finalOutputPath}"`;
+    console.log(`Executing FFmpeg command: ${ffmpegCmd}`);
+    await execPromise(ffmpegCmd);
     return finalOutputPath;
   }
   // Theoretically, this should never happen

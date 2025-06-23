@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { /* Detail,*/ /* environment, */ LocalStorage, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 import fs from "fs";
-import { findFFmpegPath } from "./utils/ffmpeg";
 import { HelloPage } from "./components/HelloPage";
-import { Installation } from "./components/Installation";
+import { FFmpegInstallPage } from "./components/FFmpegInstallPage";
 import { ConverterForm } from "./components/ConverterForm";
+import { findFFmpegPath } from "./utils/ffmpeg";
 
 export default function Command() {
+  // For some reason, limiting this to boolean only (and setting it to falce) will show HelloPage.tsx during loading, so that's a no no... There's probably an easy workaround though
   const [hasSeenHelloPage, setHasSeenHelloPage] = useState<boolean | null>(null);
-  const [initialFinderFiles, setInitialFinderFiles] = useState<string[] | undefined>(undefined);
+  const [initialFinderFiles, setInitialFinderFiles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showInstallation, setShowInstallation] = useState(false);
+  // ffmpegLostMessage has to be string or null because empty string could be given as ffmpegLostMessage, theorically
   const [ffmpegLostMessage, setFFmpegLostMessage] = useState<string | null>(null);
 
   // Check FFmpeg installation in the background
@@ -38,53 +40,21 @@ export default function Command() {
           return;
         }
 
-        // No stored path, check for system FFmpeg
-        const foundPath = await findFFmpegPath();
-        // FFmpeg found on system - determine if we should show success toast
-        const hasSeenHelloPageBefore = await LocalStorage.getItem("hasSeenHelloPage");
-        const isFirstTimeSetup = hasSeenHelloPageBefore;
-
-        if (!foundPath) {
-          // No FFmpeg found anywhere - check if this is first-time setup
-
-          // Only show failure toast if this isn't the first time setup
-          if (!isFirstTimeSetup) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "FFmpeg required",
-              message: "FFmpeg is required for media conversion. Please install it.",
-            });
-          }
+        // No stored path - check if we can find FFmpeg on the system
+        // If user has seen hello page but we have no stored path, we should try to find it
+        const ffmpegInfo = await findFFmpegPath();
+        if (!ffmpegInfo) {
+          // No FFmpeg found anywhere, show installation page
           setShowInstallation(true);
-        } else {
-          const hadLostFFmpeg = ffmpegLostMessage !== null;
-
-          // Show success toast if:
-          // 1. First time setup and FFmpeg was found, OR
-          // 2. Previously had FFmpeg that was lost, but system FFmpeg was found
-          if (isFirstTimeSetup || hadLostFFmpeg) {
-            await showToast({
-              style: Toast.Style.Success,
-              title: "FFmpeg found",
-              message: `FFmpeg detected at: ${foundPath}`,
-            });
-          }
-
-          // Store the found path for future use
-          await LocalStorage.setItem("ffmpeg-path", foundPath);
+          return;
         }
+        // FFmpeg was found and stored, we're good to go
       } catch (error) {
         console.error("Error checking FFmpeg:", error);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "FFmpeg check failed",
-          message: "Could not verify FFmpeg installation",
-        });
-        setShowInstallation(true);
       }
     };
 
-    // Only check FFmpeg after initial data is loaded
+    // Only check FFmpeg after initial data is loaded and user has seen HelloPage
     if (!isLoading && hasSeenHelloPage) {
       checkFFmpeg();
     }
@@ -94,9 +64,8 @@ export default function Command() {
   useEffect(() => {
     async function loadInitialData() {
       try {
-        const seen = await LocalStorage.getItem("hasSeenHelloPage");
+        const seen = /* environment.isDevelopment ? false : */ await LocalStorage.getItem("hasSeenHelloPage");
         setHasSeenHelloPage(seen === "true");
-        // setHasSeenHelloPage(seen === !environment.isDevelopment); // In dev mode, always show the HelloPage
 
         try {
           const finderItems = await getSelectedFinderItems();
@@ -116,20 +85,31 @@ export default function Command() {
     loadInitialData();
   }, []);
 
-  // Show HelloPage first on initial load (only if we know they haven't seen it)
   if (hasSeenHelloPage === false) {
-    return <HelloPage onContinue={() => setHasSeenHelloPage(true)} />;
+    return (
+      <HelloPage
+        onContinue={() => setHasSeenHelloPage(true)}
+        onChooseToSetCustomFFmpegPath={() => {
+          setHasSeenHelloPage(true);
+          setShowInstallation(true);
+        }}
+      />
+    );
   }
 
   // Show installation if we've determined FFmpeg is missing
+  // or if the user has chosen to set a custom path
   if (showInstallation) {
-    return <Installation onInstallComplete={() => setShowInstallation(false)} lostFFmpegMessage={ffmpegLostMessage} />;
+    return (
+      <FFmpegInstallPage onInstallComplete={() => setShowInstallation(false)} lostFFmpegMessage={ffmpegLostMessage} />
+    );
   }
 
   // Show loading only while we're still loading initial data
   /* if (isLoading || hasSeenHelloPage === null) {
     return <Detail markdown="Loading..." />;
   } */
+  // Disabled to make the UI more responsive, it still loads in the background
 
   // Default to ConverterForm (FFmpeg check happens in background)
   return <ConverterForm initialFiles={initialFinderFiles} />;
