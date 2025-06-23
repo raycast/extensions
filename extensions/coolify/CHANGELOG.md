@@ -1,6 +1,6 @@
 # Coolify Changelog
 
-## [View Environment Variable + Fix DB Deletion] - {PR_MERGE_DATE}
+## [View Environment Variable + Fix DB Deletion] - 2025-06-23
 
 - fix: Unable to delete Databases in `Resources`
 - view `Environment Variables` of **applications** and **services**
