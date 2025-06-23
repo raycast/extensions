@@ -46,12 +46,10 @@ export default function SuccessPage({ secretUrl, secretId }: SuccessPageProps) {
             title="View Details"
             icon={Icon.Info}
             onAction={() => {
-              import("@raycast/api").then(({ showToast, Toast }) => {
-                showToast({
-                  style: Toast.Style.Success,
-                  title: "Request Details",
-                  message: `ID: ${secretId}\nURL: ${secretUrl}`,
-                });
+              showToast({
+                style: Toast.Style.Success,
+                title: "Request Details",
+                message: `ID: ${secretId}\nURL: ${secretUrl}`,
               });
             }}
             shortcut={{ modifiers: ["cmd"], key: "i" }}
