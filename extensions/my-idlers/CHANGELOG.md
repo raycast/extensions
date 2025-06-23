@@ -1,6 +1,6 @@
 # MyIdlers Changelog
 
-## [Separate Active and Inactive Items] - {PR_MERGE_DATE}
+## [Separate Active and Inactive Items] - 2025-06-23
 
 - **Domain**, **Shared**, **Reseller** and **Server** are now split into "Active" and "Inactive" sections
 
