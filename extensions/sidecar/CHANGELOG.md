@@ -1,6 +1,6 @@
 # Sidecar Changelog
 
-## [1.0.0] - 2024-03-26
+## [1.0.0] - {PR_MERGE_DATE}
 
 Initial version of the Sidecar extension:
 
