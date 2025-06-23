@@ -142,11 +142,22 @@ export function jsonDataToIssue(issue: any): Issue {
   };
 }
 
-function paramString(params: { [key: string]: string }): string {
+/**
+ * Converts a params object to a query string, supporting arrays and nested keys (e.g., labels[], not[labels][]).
+ * - Arrays are output as multiple key[]=value pairs.
+ * - Nested keys (e.g., not[labels][]) are supported if the key is in the form 'not[labels][]'.
+ */
+function paramString(params: { [key: string]: any }): string {
   const p: string[] = [];
   for (const k in params) {
-    const v = encodeURI(params[k]);
-    p.push(`${k}=${v}`);
+    const v = params[k];
+    if (Array.isArray(v)) {
+      for (const item of v) {
+        p.push(`${encodeURIComponent(k)}=${encodeURIComponent(item)}`);
+      }
+    } else {
+      p.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+    }
   }
   let prefix = "";
   if (p.length > 0) {
@@ -525,8 +536,38 @@ export class GitLab {
     }
   }
 
+  /**
+   * Fetches issues for a project, supporting label inclusion and exclusion.
+   * If params.includeLabels or params.excludeLabels are provided (comma-separated strings),
+   * they are mapped to the correct GitLab API query parameters:
+   *   - labels[] for inclusion
+   *   - not[labels][] for exclusion
+   */
   async getIssues(params: Record<string, any>, project?: Project, all?: boolean): Promise<Issue[]> {
     const projectPrefix = project ? `projects/${project.id}/` : "";
+
+    // Build correct label filter params for GitLab API
+    if (params.includeLabels) {
+      const includeArr = params.includeLabels
+        .split(",")
+        .map((l: string) => l.trim())
+        .filter((l: string) => l.length > 0);
+      if (includeArr.length > 0) {
+        params["labels[]"] = includeArr;
+      }
+      delete params.includeLabels;
+    }
+    if (params.excludeLabels) {
+      const excludeArr = params.excludeLabels
+        .split(",")
+        .map((l: string) => l.trim())
+        .filter((l: string) => l.length > 0);
+      if (excludeArr.length > 0) {
+        params["not[labels][]"] = excludeArr;
+      }
+      delete params.excludeLabels;
+    }
+
     if (!params.with_labels_details) {
       params.with_labels_details = "true";
     }

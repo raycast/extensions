@@ -1,97 +1,35 @@
 import { z } from "zod";
 
-// Base schemas
-export const DailyUsageDataSchema = z.object({
-  date: z.string(),
-  inputTokens: z.number(),
-  outputTokens: z.number(),
-  cacheCreationTokens: z.number(),
-  cacheReadTokens: z.number(),
-  totalTokens: z.number(),
-  totalCost: z.number(),
-  modelsUsed: z.array(z.string()),
-  modelBreakdowns: z.array(
-    z.object({
-      modelName: z.string(),
-      inputTokens: z.number(),
-      outputTokens: z.number(),
-      cacheCreationTokens: z.number(),
-      cacheReadTokens: z.number(),
-      cost: z.number(),
-    }),
-  ),
-  cost: z.number(), // For compatibility, derived from totalCost (added in parseOutput)
-});
+// Base types (inferred from raw schemas)
+export type DailyUsageData = z.infer<typeof DailyUsageRawSchema> & {
+  cost: number; // For compatibility, derived from totalCost
+};
 
-export const MonthlyUsageDataSchema = z.object({
-  month: z.string(),
-  inputTokens: z.number(),
-  outputTokens: z.number(),
-  cacheCreationTokens: z.number(),
-  cacheReadTokens: z.number(),
-  totalTokens: z.number(),
-  totalCost: z.number(),
-  modelsUsed: z.array(z.string()),
-  modelBreakdowns: z.array(
-    z.object({
-      modelName: z.string(),
-      inputTokens: z.number(),
-      outputTokens: z.number(),
-      cacheCreationTokens: z.number(),
-      cacheReadTokens: z.number(),
-      cost: z.number(),
-    }),
-  ),
-  cost: z.number(), // For compatibility, derived from totalCost (added in parseOutput)
-});
+export type MonthlyUsageData = z.infer<typeof MonthlyUsageRawSchema> & {
+  cost: number; // For compatibility, derived from totalCost
+};
 
-export const SessionDataSchema = z.object({
-  sessionId: z.string(),
-  inputTokens: z.number(),
-  outputTokens: z.number(),
-  cacheCreationTokens: z.number(),
-  cacheReadTokens: z.number(),
-  totalTokens: z.number(),
-  totalCost: z.number(),
-  lastActivity: z.string(),
-  modelsUsed: z.array(z.string()),
-  modelBreakdowns: z.array(
-    z.object({
-      modelName: z.string(),
-      inputTokens: z.number(),
-      outputTokens: z.number(),
-      cacheCreationTokens: z.number(),
-      cacheReadTokens: z.number(),
-      cost: z.number(),
-    }),
-  ),
+export type SessionData = z.infer<typeof SessionDataRawSchema> & {
   // Additional computed fields for UI compatibility
-  cost: z.number().optional(),
-  model: z.string().optional(),
-  startTime: z.string().optional(),
-  projectName: z.string().optional(),
-  projectPath: z.string().optional(),
-});
+  cost?: number;
+  model?: string;
+  startTime?: string;
+  projectName?: string;
+  projectPath?: string;
+};
 
-export const ModelUsageSchema = z.object({
-  model: z.string(),
-  inputTokens: z.number(),
-  outputTokens: z.number(),
-  totalTokens: z.number(),
-  cost: z.number(),
-  sessionCount: z.number(),
-});
+export type ModelUsage = {
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  cost: number;
+  sessionCount: number;
+};
 
-// Total usage schema for ccusage --json response
-export const TotalUsageDataSchema = z.object({
-  inputTokens: z.number(),
-  outputTokens: z.number(),
-  cacheCreationTokens: z.number(),
-  cacheReadTokens: z.number(),
-  totalTokens: z.number(),
-  totalCost: z.number(),
-  cost: z.number(), // For compatibility, derived from totalCost (added in parseOutput)
-});
+export type TotalUsageData = z.infer<typeof TotalUsageResponseSchema>["totals"] & {
+  cost: number; // For compatibility, derived from totalCost
+};
 
 // Raw ccusage output schemas (without computed cost field)
 const DailyUsageRawSchema = z.object({
@@ -181,14 +119,3 @@ export const MonthlyUsageResponseSchema = z.object({
 export const SessionUsageResponseSchema = z.object({
   sessions: z.array(SessionDataRawSchema),
 });
-
-// Export types inferred from schemas
-export type DailyUsageData = z.infer<typeof DailyUsageDataSchema>;
-export type MonthlyUsageData = z.infer<typeof MonthlyUsageDataSchema>;
-export type SessionData = z.infer<typeof SessionDataSchema>;
-export type ModelUsage = z.infer<typeof ModelUsageSchema>;
-export type TotalUsageData = z.infer<typeof TotalUsageDataSchema>;
-export type TotalUsageResponse = z.infer<typeof TotalUsageResponseSchema>;
-export type DailyUsageResponse = z.infer<typeof DailyUsageResponseSchema>;
-export type MonthlyUsageResponse = z.infer<typeof MonthlyUsageResponseSchema>;
-export type SessionUsageResponse = z.infer<typeof SessionUsageResponseSchema>;

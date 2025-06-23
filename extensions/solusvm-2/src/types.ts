@@ -53,7 +53,7 @@ export type Server = {
       name: string;
     };
   };
-  status: "started" | "stopped" | "stopping" | "starting" | "restarting";
+  status: "started" | "stopped" | "stopping" | "starting" | "restarting" | "reinstalling";
   real_status: "started" | "stopped";
   ip_addresses: {
     ipv4: IPv4AddressResource[];
@@ -67,6 +67,11 @@ export type Server = {
   };
 };
 
+export type SshKeyResource = {
+  id: number;
+  name: string;
+};
+
 export type ISOImageResource = {
   id: number;
   name: string;
@@ -75,6 +80,35 @@ export type ISOImageResource = {
   iso_url: string;
   size: number;
 };
+
+type IconResource = {
+  id: number;
+  name: string;
+  url: string;
+  type: "os" | "application";
+};
+type OsImageVersionResource = {
+  id: number;
+  version: string;
+};
+export type OsImageResource = {
+  id: number;
+  name: string;
+  icon: IconResource;
+  versions: OsImageVersionResource[];
+  is_default: boolean;
+  is_visible: boolean;
+};
+
+export type SnapshotResource = {
+  id: number;
+  name: string;
+  size: number;
+  status: string;
+  created_at: string;
+};
+
+export type ApplicationResource = Exclude<OsImageResource, "versions">;
 
 export type Member = {
   id: number;

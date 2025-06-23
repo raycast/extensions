@@ -45,9 +45,6 @@ export default function QuickCapture() {
         toast.style = Toast.Style.Failure;
       }
     },
-    initialValues: {
-      priority: "3",
-    },
     validation: {
       name: FormValidation.Required,
     },

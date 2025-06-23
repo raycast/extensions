@@ -6,7 +6,7 @@ import { cpus } from "os";
  * Resolves version manager paths by dynamically detecting installed Node.js versions
  * @returns Array of valid bin paths from version managers
  */
-export const resolveVersionManagerPaths = (): string[] => {
+const resolveVersionManagerPaths = (): string[] => {
   const paths: string[] = [];
   const home = process.env.HOME;
 
