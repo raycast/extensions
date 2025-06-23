@@ -129,8 +129,17 @@ export async function installFFmpegBinary(onProgress?: (progress: number) => voi
       throw new Error(`FFmpeg binary not found at expected path: ${ffmpegPath}`);
     }
 
-    // Make it executable
-    fs.chmodSync(ffmpegPath, 0o755);
+    // Make it executable (Unix/Linux/macOS only)
+    const platform = os.platform();
+    if (platform !== "win32") {
+      try {
+        fs.chmodSync(ffmpegPath, 0o755);
+      } catch (error) {
+        console.warn("Warning: Could not set executable permissions:", error);
+        // Continue execution as this might not be critical on some systems
+      }
+    }
+    // Note: On Windows, .exe files are executable by default
 
     // Verify the binary works
     const { stdout } = await execPromise(`"${ffmpegPath}" -version`);

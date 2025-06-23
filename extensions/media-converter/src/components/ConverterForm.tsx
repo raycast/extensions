@@ -1,4 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, showInFinder, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import {
   convertMedia,
@@ -17,7 +18,6 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
   // Currently represents 0-100 in steps of 5 (as strings) for jpg heic avif webp, "lossless" for webp, "lzw" or "deflate" for tiff, "png-24" or "png-8" for png
   const [currentQualitySetting, setCurrentQualitySetting] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const [filePickerError, setFilePickerError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (initialFiles && initialFiles.length > 0) {
@@ -29,9 +29,6 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
   }, [initialFiles]);
 
   const handleFileSelect = (files: string[]) => {
-    // Clear previous error
-    setFilePickerError(undefined);
-
     if (files.length === 0) {
       setCurrentFiles([]);
       setSelectedFileType(null);
@@ -49,11 +46,10 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       }
 
       if (!primaryFileType) {
-        setFilePickerError("No valid media files selected. Please select video, image, or audio files.");
         showToast({
           style: Toast.Style.Failure,
           title: "Invalid selection",
-          message: filePickerError,
+          message: "No valid media files selected. Please select video, image, or audio files.",
         });
         setCurrentFiles([]);
         setSelectedFileType(null);
@@ -65,17 +61,11 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       });
 
       if (processedFiles.length < files.length) {
-        setFilePickerError(
-          `Kept ${processedFiles.length} ${primaryFileType} file${processedFiles.length > 1 ? "s" : ""}. ${files.length - processedFiles.length} other file${files.length - processedFiles.length > 1 ? "s" : ""} from your selection were invalid or of a different type and have been discarded.`,
-        );
         showToast({
           style: Toast.Style.Failure,
           title: "Invalid files in selection",
-          message: filePickerError,
+          message: `Kept ${processedFiles.length} ${primaryFileType} file${processedFiles.length > 1 ? "s" : ""}. ${files.length - processedFiles.length} other file${files.length - processedFiles.length > 1 ? "s" : ""} from your selection were invalid or of a different type and have been discarded.`,
         });
-      } else {
-        // Clear error if all files are valid
-        setFilePickerError(undefined);
       }
 
       setCurrentFiles(processedFiles);
@@ -94,7 +84,6 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       }
     } catch (error) {
       const errorMessage = String(error);
-      setFilePickerError(errorMessage);
       showToast({
         style: Toast.Style.Failure,
         title: "Error processing files",
@@ -150,10 +139,8 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
 
         // Check if the error is related to FFmpeg not being installed
         if (errorMessage.includes("FFmpeg is not installed or configured")) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "FFmpeg Not Found",
-            message: "FFmpeg needs to be installed to convert files",
+          showFailureToast(new Error("FFmpeg needs to be installed to convert files"), {
+            title: "FFmpeg not found",
             primaryAction: {
               title: "Install FFmpeg",
               onAction: () => {
@@ -199,8 +186,6 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         onChange={(newFiles) => {
           handleFileSelect(newFiles);
         }}
-        // Having an active error prevents the form from submitting, so no filePicker error I guess
-        /* error={filePickerError} */
       />
       {selectedFileType && (
         <Form.Dropdown

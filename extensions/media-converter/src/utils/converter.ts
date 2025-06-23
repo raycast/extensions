@@ -91,11 +91,43 @@ export async function convertMedia(
 
     try {
       // https://sharp.pixelplumbing.com/api-output/#heif
-      // Only SIPS can handle converting to HEIC
+      // HEIC conversion is theoretically only available on macOS via the built-in SIPS utility.
+      // While users could potentially install SIPS with proper HEIC dependencies (libheif, libde265, x265)
+      // on other systems, this is extremely unlikely in practice.
+      //
+      // In theory, the user isn't shown the HEIC option unless they are on MacOS anyways, so this is more of a safety net.
+      // They could try converting to HEIC using Raycast AI, but the documentation clearly states that HEIC conversion is only available on macOS.
+      // I think this is good enough : if it doesn't work, the user will get an error message.
       if (currentOutputFormat === ".heic") {
-        await execPromise(
-          `sips --setProperty format heic --setProperty formatOptions ${Number(quality)} "${filePath}" --out "${finalOutputPath}"`,
-        );
+        try {
+          // Attempt HEIC conversion using SIPS directly
+          // This will fail if SIPS is not available or lacks HEIC support
+          await execPromise(
+            `sips --setProperty format heic --setProperty formatOptions ${Number(quality)} "${filePath}" --out "${finalOutputPath}"`,
+          );
+        } catch (error) {
+          // Parse error to provide more specific feedback
+          const errorMessage = String(error).toLowerCase();
+
+          if (errorMessage.includes("command not found") || errorMessage.includes("not recognized")) {
+            // SIPS command not found - likely not on macOS or SIPS not installed
+            throw new Error(
+              "HEIC conversion failed: 'sips' command not found. " +
+                "Converting to HEIC format is theoretically only available on macOS, " +
+                "as it requires the built-in SIPS utility with proper HEIC support " +
+                "(libheif, libde265, and x265 dependencies).",
+            );
+          } else {
+            // SIPS exists but conversion failed - likely missing HEIC dependencies
+            throw new Error(
+              "HEIC conversion failed: SIPS command found but conversion unsuccessful. " +
+                "This may indicate that your SIPS installation lacks proper HEIC support. " +
+                "Converting to HEIC format typically requires macOS with built-in SIPS that includes " +
+                "libheif, libde265, and x265 dependencies. Error details: " +
+                String(error),
+            );
+          }
+        }
       } else {
         // If the input file is HEIC and the output format is not HEIC, we need to convert it to PNG first
         // so that ffmpeg can handle it
@@ -157,7 +189,7 @@ export async function convertMedia(
             break;
         }
         if (currentOutputFormat !== ".png" || quality !== "png-8") {
-          ffmpegCmd += ` "${finalOutputPath}"`;
+          ffmpegCmd += ` -y "${finalOutputPath}"`;
         }
         await execPromise(ffmpegCmd);
       }
@@ -200,7 +232,7 @@ export async function convertMedia(
     }
 
     const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
-    ffmpegCmd += ` "${finalOutputPath}"`;
+    ffmpegCmd += ` -y "${finalOutputPath}"`;
     await execPromise(ffmpegCmd);
     return finalOutputPath;
   }
@@ -237,7 +269,7 @@ export async function convertMedia(
     }
 
     const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
-    ffmpegCmd += ` "${finalOutputPath}"`;
+    ffmpegCmd += ` -y "${finalOutputPath}"`;
     console.log(`Executing FFmpeg command: ${ffmpegCmd}`);
     await execPromise(ffmpegCmd);
     return finalOutputPath;

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { /* Detail,*/ /* environment, */ LocalStorage, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { /* Detail,*/ /* environment, */ LocalStorage, getSelectedFinderItems } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import { HelloPage } from "./components/HelloPage";
 import { FFmpegInstallPage } from "./components/FFmpegInstallPage";
@@ -28,10 +29,8 @@ export default function Command() {
             // Stored binary no longer exists
             await LocalStorage.removeItem("ffmpeg-path");
             setFFmpegLostMessage(`We couldn't find FFmpeg at the previously configured path: ${storedPath}`);
-            await showToast({
-              style: Toast.Style.Failure,
+            showFailureToast(new Error("The previously configured FFmpeg binary is no longer available"), {
               title: "FFmpeg not found",
-              message: "The previously configured FFmpeg binary is no longer available",
             });
             setShowInstallation(true);
             return;

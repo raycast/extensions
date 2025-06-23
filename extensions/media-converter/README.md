@@ -41,7 +41,7 @@
 ### Requirements
 
 - FFmpeg:
-  - **RECOMMENDED:** If no FFmpeg is auto-detected, the extension will install a correct binary executable. That binary will only be available for the extension (not system-wide), and will be uninstalled when the extension is uninstalled. On MacOS, that weights about 45,6 MB.
+  - **RECOMMENDED:** If no FFmpeg is auto-detected, the extension will install a correct binary executable. That binary will only be available for the extension (not system-wide), and will be uninstalled when the extension is uninstalled. On MacOS, that weights about 45.6 MB.
   - If FFmpeg is already installed (and auto-detected) and is of version 6.0+, that will be used
   - If you have a 6.0+ FFmpeg binary executable but the extension didn't auto-detect it, you can specify the path to that binary on the Welcome page under actions, &#9881; Specify Local FFmpeg Path (Advanced)
 - macOS 10.15 or later

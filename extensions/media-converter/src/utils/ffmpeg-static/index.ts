@@ -163,8 +163,8 @@ async function installBinary(customDownloadDir?: string, onProgress?: ProgressCa
 // Export functions for programmatic use
 export { getBinaryPath, installBinary, executableBaseName };
 
-// For backward compatibility, also export the path directly
-export const binaryPath = getBinaryPath();
+// For backward compatibility, also export the path as a getter function
+export const binaryPath = () => getBinaryPath();
 
 // For backward compatibility when used as a direct require
-export default getBinaryPath();
+export default getBinaryPath;

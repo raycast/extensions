@@ -127,11 +127,8 @@ async function downloadFile(url: string, destinationPath: string, progressCallba
     const contentLength = response.headers["content-length"];
     if (contentLength && progressCallback) {
       totalBytes = parseInt(contentLength, 10);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      let downloadedBytes = 0;
 
       (response.data as NodeJS.ReadableStream).on("data", (chunk: Buffer) => {
-        downloadedBytes += chunk.length;
         progressCallback(chunk.length, totalBytes);
       });
     }
