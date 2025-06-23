@@ -1,5 +1,9 @@
 # Workouts Changelog
 
+## [🐛 Fix Desktop Path] - {PR_MERGE_DATE}
+
+Fixes a bug where the desktop path was not being correctly resolved on Windows.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 Added tools to get workouts, routes, clubs and leaderboards
