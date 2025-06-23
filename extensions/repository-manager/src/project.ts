@@ -1,6 +1,7 @@
-import fs from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import { Icon, Image } from '@raycast/api'
 import { homedir } from 'os'
+import path from 'path'
 import gitConfigParser from 'parse-git-config'
 import gh = require('parse-github-url')
 import { getColorForPrimaryDirectory, preferences } from './helpers'
@@ -36,6 +37,25 @@ export type ProjectList = Project[]
 
 export type GroupedProjectList = { [key: string]: ProjectList }
 
+const GIT_PROVIDERS = {
+    github: {
+        lightIcon: 'github-light.png',
+        darkIcon: 'github-dark.png',
+    },
+    gitlab: {
+        lightIcon: 'gitlab-light.png',
+        darkIcon: 'gitlab-dark.png',
+    },
+    bitbucket: {
+        lightIcon: 'bitbucket-light.png',
+        darkIcon: 'bitbucket-dark.png',
+    },
+    gitness: {
+        lightIcon: 'gitness-light.png',
+        darkIcon: 'gitness-dark.png',
+    },
+} as const
+
 export class Project {
     name = ''
     description: string | null = null
@@ -49,33 +69,49 @@ export class Project {
     gitRemotes: Repo[] = []
     isFavorite = false
 
-    constructor(cachedProject?: Project, path?: string) {
+    constructor(cachedProject?: Project, projectPath?: string) {
         if (cachedProject) {
             Object.assign(this, cachedProject)
             return
         }
 
-        if (!path) {
+        if (!projectPath) {
             throw new Error('Project path is required')
         }
 
-        this.fullPath = path
-        this.displayPath = path
-        if (path.startsWith(homedir())) {
-            this.displayPath = path.replace(homedir(), '~')
-        }
-        this.pathParts = path.split('/').slice(3)
+        this.initializeProject(projectPath)
+    }
+
+    private initializeProject(projectPath: string): void {
+        this.fullPath = projectPath
+        this.displayPath = this.getDisplayPath(projectPath)
+        this.pathParts = projectPath.split(path.sep).filter(Boolean)
         this.name = this.pathParts.at(-1) || ''
 
-        const color = getColorForPrimaryDirectory(this.pathParts.at(-2) || '')
+        this.setPrimaryDirectory()
+        this.setConfiguration()
+        this.gitRemotes = parseGitRemotes(this.fullPath)
+    }
+
+    private getDisplayPath(fullPath: string): string {
+        const homeDir = homedir()
+        return fullPath.startsWith(homeDir) ? fullPath.replace(homeDir, '~') : fullPath
+    }
+
+    private setPrimaryDirectory(): void {
+        const parentDirName = this.pathParts.at(-2) || ''
+        const color = getColorForPrimaryDirectory(parentDirName)
+
         this.primaryDirectory = {
-            name: this.pathParts.at(-2) || '',
+            name: parentDirName,
             icon: { source: Icon.HardDrive, tintColor: color },
             color: color,
         }
+    }
 
-        this.configPath = `${this.fullPath}/.raycast/project-manager.json`
-        this.config = getProjectConfig(this.fullPath) || {}
+    private setConfiguration(): void {
+        this.configPath = path.join(this.fullPath, '.raycast', 'project-manager.json')
+        this.config = getProjectConfig(this.fullPath)
 
         if (Object.keys(this.config).length > 0) {
             this.hasConfig = true
@@ -94,121 +130,151 @@ export class Project {
         }
 
         this.config.urls = getProjectCompiledUrls(this)
-
-        this.gitRemotes = parseGitRemotes(this.fullPath)
     }
 }
 
 function parseGitRemotes(fullPath: string): Repo[] {
-    let repos = [] as Repo[]
-    const gitConfig = gitConfigParser.sync({ cwd: fullPath, path: '.git/config', expandKeys: true })
+    try {
+        const gitConfigPath = path.join(fullPath, '.git', 'config')
 
-    if (!gitConfig.remote) {
-        return repos
-    }
-
-    for (const remoteName in gitConfig.remote) {
-        const config = gitConfig.remote[remoteName] as Remote
-        const parsed = gh(config.url)
-
-        if (!parsed || !parsed.host || !parsed.repo) {
-            continue
+        if (!existsSync(gitConfigPath)) {
+            return []
         }
 
-        const icon = {
-            source: {
-                light: Icon.Globe as Icon | string,
-                dark: Icon.Globe as Icon | string,
-            },
-        }
-
-        if (parsed.host.includes('github')) {
-            icon.source.light = 'github-light.png'
-            icon.source.dark = 'github-dark.png'
-        }
-
-        if (parsed.host.includes('gitlab')) {
-            icon.source.light = 'gitlab-light.png'
-            icon.source.dark = 'gitlab-dark.png'
-        }
-
-        if (parsed.host.includes('bitbucket')) {
-            icon.source.light = 'bitbucket-light.png'
-            icon.source.dark = 'bitbucket-dark.png'
-        }
-
-        if (parsed.host.includes('gitness')) {
-            icon.source.light = 'gitness-light.png'
-            icon.source.dark = 'gitness-dark.png'
-        }
-
-        const protocol = parsed?.protocol?.replace(':', '') || 'https'
-        let url = `${protocol}://${parsed.host}/${parsed.repo}`
-
-        if (parsed.host.includes('gitness')) {
-            const path = parsed?.path?.replace('git/', '')?.replace('.git', '')
-            url = `${protocol}://${parsed.host}/${path}`
-        }
-
-        repos = repos.concat({
-            name: remoteName,
-            host: parsed.host,
-            hostDisplayName: parsed.host.split('.')[0].charAt(0).toUpperCase() + parsed.host.split('.')[0].slice(1),
-            url: url,
-            icon: icon,
+        const gitConfig = gitConfigParser.sync({
+            cwd: fullPath,
+            path: '.git/config',
+            expandKeys: true,
         })
+
+        if (!gitConfig.remote) {
+            return []
+        }
+
+        const repos: Repo[] = []
+
+        for (const remoteName in gitConfig.remote) {
+            const config = gitConfig.remote[remoteName] as Remote
+            const parsed = gh(config.url)
+
+            if (!parsed?.host || !parsed?.repo) {
+                continue
+            }
+
+            const icon = createProviderIcon(parsed.host)
+            const url = buildRepositoryUrl(parsed)
+
+            repos.push({
+                name: remoteName,
+                host: parsed.host,
+                hostDisplayName: getHostDisplayName(parsed.host),
+                url,
+                icon,
+            })
+        }
+
+        return repos
+    } catch (error) {
+        console.error(`Failed to parse git remotes for ${fullPath}:`, error)
+        return []
+    }
+}
+
+function createProviderIcon(host: string): Image {
+    const defaultIcon = {
+        source: {
+            light: Icon.Globe as Icon | string,
+            dark: Icon.Globe as Icon | string,
+        },
     }
 
-    return repos
+    for (const [provider, icons] of Object.entries(GIT_PROVIDERS)) {
+        if (host.includes(provider)) {
+            return {
+                source: {
+                    light: icons.lightIcon,
+                    dark: icons.darkIcon,
+                },
+            }
+        }
+    }
+
+    return defaultIcon
+}
+
+function buildRepositoryUrl(parsed: ReturnType<typeof gh>): string {
+    const protocol = parsed?.protocol?.replace(':', '') || 'https'
+
+    if (parsed?.host?.includes('gitness')) {
+        const cleanPath = parsed?.path?.replace('git/', '')?.replace('.git', '')
+        return `${protocol}://${parsed.host}/${cleanPath}`
+    }
+
+    return `${protocol}://${parsed?.host}/${parsed?.repo}`
+}
+
+function getHostDisplayName(host: string): string {
+    const hostPart = host.split('.')[0]
+    return hostPart.charAt(0).toUpperCase() + hostPart.slice(1)
 }
 
 function getProjectConfig(fullPath: string): ProjectConfig {
-    let raycastConfig = {}
-    if (fs.existsSync(`${fullPath}/.raycast`) && fs.existsSync(`${fullPath}/.raycast/project-manager.json`)) {
-        try {
-            raycastConfig = JSON.parse(fs.readFileSync(`${fullPath}/.raycast/project-manager.json`, 'utf8'))
-        } catch (error) {
-            return raycastConfig
-        }
+    const configDir = path.join(fullPath, '.raycast')
+    const configFile = path.join(configDir, 'project-manager.json')
+
+    if (!existsSync(configDir) || !existsSync(configFile)) {
+        return {}
     }
 
-    return raycastConfig
+    try {
+        const configContent = JSON.parse(readFileSync(configFile, 'utf8'))
+        return configContent
+    } catch (error) {
+        console.error(`Failed to parse project config for ${fullPath}:`, error)
+        return {}
+    }
 }
 
 function getProjectCompiledUrls(project: Project): { [key: string]: string } {
-    const compiledUrls = {} as { [key: string]: string }
+    const compiledUrls: { [key: string]: string } = {}
 
-    const local = getProjectUrl(project, project.config?.urls?.local || preferences.localProjectUrlTemplate || null) || ''
-    if (local) {
-        compiledUrls.local = local
+    const localTemplate = project.config?.urls?.local || preferences.localProjectUrlTemplate
+    const localUrl = getProjectUrl(project, localTemplate)
+
+    if (localUrl) {
+        compiledUrls.local = localUrl
     }
 
-    Object.keys(project.config.urls || {}).forEach((key) => {
-        const compiledUrl = getProjectUrl(project, project.config.urls?.[key] || null)
-
-        if (compiledUrl) {
-            compiledUrls[key] = compiledUrl
+    if (project.config.urls) {
+        for (const [key, urlTemplate] of Object.entries(project.config.urls)) {
+            const compiledUrl = getProjectUrl(project, urlTemplate)
+            if (compiledUrl) {
+                compiledUrls[key] = compiledUrl
+            }
         }
-    })
+    }
 
     return compiledUrls
 }
 
-export function getProjectUrl(project: Project, urlTemplate: string | null): string | null {
+export function getProjectUrl(project: Project, urlTemplate: string | undefined): string | null {
     if (!urlTemplate) {
         return null
     }
 
     let url = urlTemplate
 
-    project.config?.dynamicUrlElements?.forEach((element) => {
-        url = url.replace(`{${element.key}}`, element.value)
-    })
+    // Replace dynamic placeholders first
+    if (project.config?.dynamicUrlElements) {
+        for (const element of project.config.dynamicUrlElements) {
+            url = url.replace(`{${element.key}}`, element.value)
+        }
+    }
 
-    // if not already swapped the {project} placeholder with a dynamicUrlElement, replace it with the project name
+    // Replace project placeholder if not already replaced
     url = url.replace('{project}', project.name)
 
-    // if not present a protocol, add http by default
+    // Add protocol if missing
     if (!/^(\w+):\/\//.test(url)) {
         url = `http://${url}`
     }
@@ -219,7 +285,7 @@ export function getProjectUrl(project: Project, urlTemplate: string | null): str
 export const getDefaultProjectConfig = (project: Project): ProjectConfig => {
     return {
         name: project.name,
-        description: project.description,
+        description: project.description || undefined,
         urls: {
             local: '{project}.test',
             staging: 'staging.{project}.com',
@@ -235,41 +301,33 @@ export const getDefaultProjectConfig = (project: Project): ProjectConfig => {
             apps: [DevelopmentCommandApp.Editor],
             urls: ['{urls.local}'],
         },
-    } as ProjectConfig
+    }
 }
 
 export function groupByDirectory(projects: ProjectList): GroupedProjectList {
     return projects.reduce((acc: GroupedProjectList, project: Project) => {
         const key = project.primaryDirectory.name
+
         if (!acc[key]) {
             acc[key] = []
         }
+
         acc[key].push(project)
         return acc
     }, {})
 }
 
 export function sortGroupedProjectsByFavorite(groupedProjects: GroupedProjectList): GroupedProjectList {
-    const sortedGroupedProjects: GroupedProjectList = { favorites: [] }
+    const sortedGroups: GroupedProjectList = {}
 
-    for (const directory in groupedProjects) {
-        if (Object.prototype.hasOwnProperty.call(groupedProjects, directory)) {
-            const [favorites, nonFavorites] = groupedProjects[directory].reduce(
-                ([fav, nonFav], project) => {
-                    if (project.isFavorite) {
-                        fav.push(project)
-                    } else {
-                        nonFav.push(project)
-                    }
-                    return [fav, nonFav]
-                },
-                [[], []] as [Project[], Project[]],
-            )
-
-            sortedGroupedProjects.favorites.push(...favorites)
-            sortedGroupedProjects[directory] = nonFavorites
-        }
+    for (const [directoryName, projects] of Object.entries(groupedProjects)) {
+        sortedGroups[directoryName] = [...projects].sort((a, b) => {
+            if (a.isFavorite === b.isFavorite) {
+                return a.name.localeCompare(b.name)
+            }
+            return a.isFavorite ? -1 : 1
+        })
     }
 
-    return sortedGroupedProjects
+    return sortedGroups
 }

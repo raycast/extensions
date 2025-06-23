@@ -1,4 +1,4 @@
-# Project Manager
+# Repository Manager
 
 This extension is aiming to be a manager for all your local projects
 

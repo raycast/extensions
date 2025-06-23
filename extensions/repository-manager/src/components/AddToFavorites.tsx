@@ -1,11 +1,11 @@
 import { Action, Icon, LocalStorage } from '@raycast/api'
-import { withToast } from '../ui/toast'
+import { showSuccessToast, showErrorToast } from '../ui/toast'
 import { getFavoriteProjects } from '../helpers'
 import { Project } from '../project'
 
 type AddToFavoritesProps = {
     project: Project
-    onFavoriteChange: (project: Project) => void
+    onFavoriteChange: () => void
 }
 
 export default function AddToFavorites({ project, onFavoriteChange }: AddToFavoritesProps) {
@@ -19,7 +19,7 @@ export default function AddToFavorites({ project, onFavoriteChange }: AddToFavor
             await LocalStorage.setItem('favorites', JSON.stringify([project.name]))
         }
 
-        onFavoriteChange(project)
+        onFavoriteChange()
     }
 
     async function removeProjectFromFavorites() {
@@ -30,14 +30,21 @@ export default function AddToFavorites({ project, onFavoriteChange }: AddToFavor
             await LocalStorage.setItem('favorites', JSON.stringify(newFavorites))
         }
 
-        onFavoriteChange(project)
+        onFavoriteChange()
     }
 
     async function toggleFavorite() {
-        if (project.isFavorite) {
-            await removeProjectFromFavorites()
-        } else {
-            await addProjectToFavorites()
+        try {
+            if (project.isFavorite) {
+                await removeProjectFromFavorites()
+                await showSuccessToast('Removed from favorites')
+            } else {
+                await addProjectToFavorites()
+                await showSuccessToast('Added to favorites')
+            }
+        } catch (error) {
+            const message = project.isFavorite ? 'Failed to remove from favorites' : 'Failed to add to favorites'
+            await showErrorToast(message)
         }
     }
 
@@ -47,11 +54,7 @@ export default function AddToFavorites({ project, onFavoriteChange }: AddToFavor
             key="add-to-favorites"
             icon={project.isFavorite ? Icon.StarDisabled : Icon.Star}
             shortcut={{ modifiers: ['cmd', 'shift'], key: 'f' }}
-            onAction={withToast({
-                action: toggleFavorite,
-                onSuccess: () => (project.isFavorite ? 'Removed from favorites' : 'Added to favorites'),
-                onFailure: () => (project.isFavorite ? 'Failed to remove from favorites' : 'Failed to add to favorites'),
-            })}
+            onAction={toggleFavorite}
         />
     )
 }
