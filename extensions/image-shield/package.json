@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "tuki0918",
   "categories": [
-    "Security", "Media"
+    "Security",
+    "Media"
   ],
   "license": "MIT",
   "commands": [
@@ -32,7 +33,8 @@
   "dependencies": {
     "@raycast/api": "^1.99.3",
     "@raycast/utils": "^1.17.0",
-    "image-shield": "^0.8.0"
+    "image-shield": "^0.8.0",
+    "p-limit": "^6.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
