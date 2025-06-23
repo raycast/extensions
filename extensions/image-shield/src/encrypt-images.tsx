@@ -2,7 +2,7 @@ import { usePromise } from "@raycast/utils";
 import EncryptImagesFrom from "./components/EncryptImagesFrom";
 import { useEncryptImages } from "./hooks/useEncryptImages";
 import GridLoadingView from "./components/GridLoadingView";
-import { SettingsFromValues } from "./components/SettingsFrom";
+import { SettingsFormValues } from "./components/SettingsForm";
 import PasswordForm from "./components/PasswordForm";
 import { useSettings } from "./hooks/useSettings";
 
@@ -16,7 +16,7 @@ export default function Command() {
   return <EncryptImages settings={settings} />;
 }
 
-function EncryptImages({ settings }: { settings: SettingsFromValues }) {
+function EncryptImages({ settings }: { settings: SettingsFormValues }) {
   const { isLoading, isInstantCall, data, selectedFiles, initialize, handleEncrypt } = useEncryptImages(settings);
 
   // Initialize (if command is called with selected items from Finder)

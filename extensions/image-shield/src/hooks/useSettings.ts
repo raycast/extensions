@@ -1,6 +1,6 @@
 import { useLocalStorage } from "@raycast/utils";
 import { SETTINGS_KEY } from "../constraints";
-import { initialSettings, SettingsFromValues } from "../components/SettingsFrom";
+import { initialSettings, SettingsFormValues } from "../components/SettingsForm";
 
 export function useSettings() {
   const {
@@ -8,7 +8,7 @@ export function useSettings() {
     setValue: setSettings,
     removeValue: reset,
     isLoading,
-  } = useLocalStorage<SettingsFromValues>(SETTINGS_KEY, initialSettings);
+  } = useLocalStorage<SettingsFormValues>(SETTINGS_KEY, initialSettings);
 
   return {
     settings,

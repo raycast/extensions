@@ -1,4 +1,4 @@
-import SettingsFrom from "./components/SettingsFrom";
+import SettingsForm from "./components/SettingsForm";
 import GridLoadingView from "./components/GridLoadingView";
 import { useSettings } from "./hooks/useSettings";
 
@@ -11,5 +11,5 @@ export default function Command() {
   }
 
   // Default form view
-  return <SettingsFrom settings={settings} setSettings={setSettings} reset={reset} />;
+  return <SettingsForm settings={settings} setSettings={setSettings} reset={reset} />;
 }

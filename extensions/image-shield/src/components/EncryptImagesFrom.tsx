@@ -1,6 +1,6 @@
 import { Form, Action, ActionPanel } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { SettingsFromValues } from "./SettingsFrom";
+import { SettingsFormValues } from "./SettingsForm";
 import { useEncryptImages } from "../hooks/useEncryptImages";
 import GridLoadingView from "./GridLoadingView";
 import GridEncryptedImages from "./GridEncryptedImages";
@@ -12,7 +12,7 @@ export interface EncryptImagesFromValues {
   outputDir: string[];
 }
 
-function EncryptImagesFrom({ settings }: { settings: SettingsFromValues }) {
+function EncryptImagesFrom({ settings }: { settings: SettingsFormValues }) {
   const { isLoading, data, selectedFiles, handleEncrypt, handleFormSubmit } = useEncryptImages(settings);
   const { handleSubmit, itemProps } = useForm<EncryptImagesFromValues>({
     initialValues: {

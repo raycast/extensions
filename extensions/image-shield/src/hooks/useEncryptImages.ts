@@ -3,7 +3,7 @@ import { PopToRootType, showHUD } from "@raycast/api";
 import { type ManifestData } from "image-shield";
 import { findImages, getSelectedItems } from "../utils/helpers";
 import { encryptImagesWithKey, validateEncryptFiles } from "../lib/imageShield";
-import { SettingsFromValues } from "../components/SettingsFrom";
+import { SettingsFormValues } from "../components/SettingsForm";
 import { EncryptImagesFromValues } from "../components/EncryptImagesFrom";
 import { dirExists } from "../utils/file";
 import { useLoadingState } from "./useLoadingState";
@@ -33,7 +33,7 @@ interface UseEncryptImagesResult {
   handleFormSubmit: (values: EncryptImagesFromValues) => Promise<void>;
 }
 
-export function useEncryptImages(settings: SettingsFromValues): UseEncryptImagesResult {
+export function useEncryptImages(settings: SettingsFormValues): UseEncryptImagesResult {
   const { isLoading, error, setError, handleError, setIsLoading, showErrorToast } = useLoadingState();
   const [isInstantCall, setIsInstantCall] = useState(false);
   const [data, setData] = useState<

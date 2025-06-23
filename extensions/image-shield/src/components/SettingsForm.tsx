@@ -9,27 +9,27 @@ import {
   SETTINGS_DEFAULT_RESTORE_FILE_NAME,
 } from "../constraints";
 
-export interface SettingsFromValues {
+export interface SettingsFormValues {
   blockSize: string;
   prefix: string;
   encrypted: boolean;
   restoreFileName: boolean;
 }
 
-export const initialSettings: SettingsFromValues = {
+export const initialSettings: SettingsFormValues = {
   blockSize: SETTINGS_DEFAULT_BLOCK_SIZE,
   prefix: SETTINGS_DEFAULT_PREFIX,
   encrypted: SETTINGS_DEFAULT_ENCRYPTED,
   restoreFileName: SETTINGS_DEFAULT_RESTORE_FILE_NAME,
 };
 
-function SettingsFrom({
+function SettingsForm({
   settings,
   setSettings,
   reset,
 }: {
-  settings: SettingsFromValues;
-  setSettings: (values: SettingsFromValues) => Promise<void>;
+  settings: SettingsFormValues;
+  setSettings: (values: SettingsFormValues) => Promise<void>;
   reset: () => Promise<void>;
 }) {
   const { error, setError, handleError, setIsLoading, showErrorToast } = useLoadingState();
@@ -40,7 +40,7 @@ function SettingsFrom({
     }
   }, [error]);
 
-  const { handleSubmit, itemProps } = useForm<SettingsFromValues>({
+  const { handleSubmit, itemProps } = useForm<SettingsFormValues>({
     initialValues: settings ?? initialSettings,
     onSubmit: (values) => {
       try {
@@ -57,7 +57,7 @@ function SettingsFrom({
       }
     },
     validation: {
-      blockSize: (value) => {
+      blockSize: (value?: string) => {
         if (!value) return "Block size is required";
         const num = parseInt(value);
         if (isNaN(num) || num < 1 || num > 64) {
@@ -112,7 +112,7 @@ function SettingsFrom({
   );
 }
 
-export default SettingsFrom;
+export default SettingsForm;
 
 function ResetSettingsAction({ reset }: { reset: () => Promise<void> }) {
   return (
