@@ -81,7 +81,14 @@ export default function TranslateForm() {
             <Action
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
               onAction={() => {
-                setSelectedLanguageSet({ langFrom: langTo, langTo: [langFrom] });
+                if (autoDetectedLanguage?.code) {
+                  setSelectedLanguageSet({
+                    langFrom: langTo,
+                    langTo: [supportedLanguagesByCode[autoDetectedLanguage.code].code],
+                  });
+                } else {
+                  setSelectedLanguageSet({ langFrom: langTo, langTo: [langFrom] });
+                }
               }}
               title={`${toLangObj.name} <-> ${fromLangObj.name}`}
             />
