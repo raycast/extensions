@@ -12,6 +12,7 @@ build/
 # Raycast specific
 .raycast-swift-build/
 .raycast-swift-build.xcodeproj/
+raycast-env.d.ts
 
 # Environment variables
 .env

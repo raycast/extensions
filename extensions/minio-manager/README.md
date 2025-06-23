@@ -61,9 +61,8 @@ The extension requires the following configuration:
 
 ## Screenshots
 
-![List Files](./metadata/list-files.png)
-![Upload File](./metadata/upload-file.png)
-![File Preview](./metadata/file-preview.png)
+![List Files](./metadata/minio-manager 2025-06-19 at 02.30.57.png)
+![Upload File](./metadata/minio-manager 2025-06-19 at 02.31.35.png)
 
 ## Development
 
