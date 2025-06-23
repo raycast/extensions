@@ -133,12 +133,8 @@ export const apiClient = new PasswordLinkApiClient();
  * @param error - Error to handle
  * @param title - Toast title
  */
-export async function handleApiError(error: unknown, title = "API Error"): Promise<void> {
-  const message = error instanceof Error ? error.message : "Unknown error occurred";
+import { showFailureToast } from "@raycast/utils";
 
-  await showToast({
-    style: Toast.Style.Failure,
-    title,
-    message,
-  });
+export async function handleApiError(error: unknown, title = "API Error"): Promise<void> {
+  showFailureToast(error, { title });
 }
