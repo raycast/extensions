@@ -8,10 +8,8 @@ import { validateConfig } from "./config";
  */
 export async function loadSecrets(): Promise<Secret[]> {
   if (!validateConfig()) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Configuration Error",
-      message: "Please configure your API keys in preferences",
+    await showFailureToast(new Error("Please configure your API keys in preferences"), {
+      title: "Configuration Error"
     });
     return [];
   }
