@@ -1,38 +1,6 @@
 import { z } from "zod";
 
-// Base types (inferred from raw schemas)
-export type DailyUsageData = z.infer<typeof DailyUsageRawSchema> & {
-  cost: number; // For compatibility, derived from totalCost
-};
-
-export type MonthlyUsageData = z.infer<typeof MonthlyUsageRawSchema> & {
-  cost: number; // For compatibility, derived from totalCost
-};
-
-export type SessionData = z.infer<typeof SessionDataRawSchema> & {
-  // Additional computed fields for UI compatibility
-  cost?: number;
-  model?: string;
-  startTime?: string;
-  projectName?: string;
-  projectPath?: string;
-};
-
-export type ModelUsage = {
-  model: string;
-  inputTokens: number;
-  outputTokens: number;
-  totalTokens: number;
-  cost: number;
-  sessionCount: number;
-};
-
-export type TotalUsageData = z.infer<typeof TotalUsageResponseSchema>["totals"] & {
-  cost: number; // For compatibility, derived from totalCost
-};
-
-// Raw ccusage output schemas (without computed cost field)
-const DailyUsageRawSchema = z.object({
+export const DailyUsageResponseSchema = z.object({
   date: z.string(),
   inputTokens: z.number(),
   outputTokens: z.number(),
@@ -53,7 +21,7 @@ const DailyUsageRawSchema = z.object({
   ),
 });
 
-const MonthlyUsageRawSchema = z.object({
+export const MonthlyUsageResponseSchema = z.object({
   month: z.string(),
   inputTokens: z.number(),
   outputTokens: z.number(),
@@ -74,7 +42,7 @@ const MonthlyUsageRawSchema = z.object({
   ),
 });
 
-const SessionDataRawSchema = z.object({
+export const SessionResponseSchema = z.object({
   sessionId: z.string(),
   inputTokens: z.number(),
   outputTokens: z.number(),
@@ -96,7 +64,28 @@ const SessionDataRawSchema = z.object({
   ),
 });
 
-// Command response schemas for ccusage CLI output
+export const ModelUsageSchema = z.object({
+  model: z.string(),
+  inputTokens: z.number(),
+  outputTokens: z.number(),
+  totalTokens: z.number(),
+  totalCost: z.number(),
+  sessionCount: z.number(),
+});
+
+export const DailyUsageDataSchema = DailyUsageResponseSchema;
+export const MonthlyUsageDataSchema = MonthlyUsageResponseSchema;
+export const SessionDataSchema = SessionResponseSchema;
+
+export const TotalUsageDataSchema = z.object({
+  inputTokens: z.number(),
+  outputTokens: z.number(),
+  cacheCreationTokens: z.number(),
+  cacheReadTokens: z.number(),
+  totalTokens: z.number(),
+  totalCost: z.number(),
+});
+
 export const TotalUsageResponseSchema = z.object({
   totals: z.object({
     inputTokens: z.number(),
@@ -108,14 +97,27 @@ export const TotalUsageResponseSchema = z.object({
   }),
 });
 
-export const DailyUsageResponseSchema = z.object({
-  daily: z.array(DailyUsageRawSchema),
+export const DailyUsageCommandResponseSchema = z.object({
+  daily: z.array(DailyUsageResponseSchema),
 });
 
-export const MonthlyUsageResponseSchema = z.object({
-  monthly: z.array(MonthlyUsageRawSchema),
+export const MonthlyUsageCommandResponseSchema = z.object({
+  monthly: z.array(MonthlyUsageResponseSchema),
 });
 
-export const SessionUsageResponseSchema = z.object({
-  sessions: z.array(SessionDataRawSchema),
+export const SessionUsageCommandResponseSchema = z.object({
+  sessions: z.array(SessionResponseSchema),
 });
+
+export type DailyUsageData = z.infer<typeof DailyUsageDataSchema>;
+export type MonthlyUsageData = z.infer<typeof MonthlyUsageDataSchema>;
+export type SessionData = z.infer<typeof SessionDataSchema>;
+export type ModelUsage = z.infer<typeof ModelUsageSchema>;
+export type TotalUsageData = z.infer<typeof TotalUsageDataSchema>;
+export type TotalUsageResponse = z.infer<typeof TotalUsageResponseSchema>;
+export type DailyUsageResponse = z.infer<typeof DailyUsageResponseSchema>;
+export type MonthlyUsageResponse = z.infer<typeof MonthlyUsageResponseSchema>;
+export type SessionResponse = z.infer<typeof SessionResponseSchema>;
+export type DailyUsageCommandResponse = z.infer<typeof DailyUsageCommandResponseSchema>;
+export type MonthlyUsageCommandResponse = z.infer<typeof MonthlyUsageCommandResponseSchema>;
+export type SessionUsageCommandResponse = z.infer<typeof SessionUsageCommandResponseSchema>;

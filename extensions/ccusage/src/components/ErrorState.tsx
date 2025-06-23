@@ -12,28 +12,31 @@ export function ErrorState({ actions }: ErrorStateProps) {
 ## Problem
 The ccusage command cannot be executed. The Raycast extension is unable to retrieve Claude usage data.
 
-## Solution
+## Quick Setup Guide
 
-### 1. 🔧 Configure Custom npx Path (if needed)
-If the automatic path detection doesn't work, you can set a custom npx path in preferences.
-
-Press **Cmd+Shift+,** or use the action below to open extension preferences.
-
-To find the correct npx path, run this command in Terminal:
-
+### Step 1: Test ccusage locally
+Open Terminal and run:
 \`\`\`bash
-# Find npx location  
+npx ccusage@latest
+\`\`\`
+
+### Step 2: If it works, find your npx path
+\`\`\`bash
 which npx
 # Example output: /usr/local/bin/npx
 \`\`\`
 
-Copy the output path and paste it into the "Custom npx Path" field in preferences.
+### Step 3: Add path to preferences
+1. Press **Cmd+Shift+,** or use the action below to open extension preferences
+2. Copy the output from "which npx" command
+3. Paste it into the "Custom npx Path" field in preferences
 
-### 2. 🔄 Verify ccusage Access
-The extension will automatically execute:
-\`npx ccusage@latest --json\`
+### If Step 1 doesn't work
+The extension uses npx to run ccusage, so no installation is required. 
+If the command fails, check your internet connection or try again later.
 
 ## 📚 Help & Resources
+- [Claude Code Usage Raycast Extension](https://www.raycast.com/nyatinte/ccusage)
 - [ccusage GitHub Repository](https://github.com/ryoppippi/ccusage)
 - [Claude Code](https://claude.ai/code)
 
