@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Fix search messages from specific user] - {PR_MERGE_DATE}
+## [Fix search messages from specific user] - 2025-06-23
 
 - Fix search messages from specific user (using `from:<@${user.id}>` instead of `from:${user.name}`)
 
