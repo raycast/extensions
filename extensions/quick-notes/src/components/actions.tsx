@@ -66,13 +66,6 @@ const Actions = ({
               }
             />
             <Action
-              title="Open Note"
-              icon={{ source: Icon.Pencil, tintColor: getTintColor("turquoise") }}
-              onAction={() => {
-                open(`${preferences.fileLocation}/${title}.md`);
-              }}
-            />
-            <Action
               title="Copy Note"
               icon={{ source: Icon.CopyClipboard, tintColor: getTintColor("turquoise") }}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
@@ -80,6 +73,14 @@ const Actions = ({
                 Clipboard.copy(note ?? "").then(() => {
                   showToast({ style: Toast.Style.Success, title: "Note Copied" });
                 });
+              }}
+            />
+            <Action
+              title="Open Note Externally"
+              icon={{ source: Icon.Folder, tintColor: getTintColor("sky") }}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={() => {
+                open(`${preferences.fileLocation}/${title}.md`);
               }}
             />
           </>
