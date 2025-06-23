@@ -64,6 +64,7 @@ const authLink = setContext(async (_, { headers }) => {
     headers: {
       ...headers,
       "X-API-Key": apiKey || "",
+      "X-Platform": "raycast",
     },
   };
 });
