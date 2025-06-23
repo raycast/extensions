@@ -1,6 +1,6 @@
 # Workouts Changelog
 
-## [Fix Desktop Path] - 2025-06-23
+## [🐛 Fix Desktop Path] - 2025-06-23
 
 Fixes a bug where the desktop path was not being correctly resolved on Windows.
 
