@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix quick translate with Chinese auto detected language
+
 ## [Fix] - 2025-06-23
 
 - Fix uppercase ISO language codes (fix Chinese and some other languages)
