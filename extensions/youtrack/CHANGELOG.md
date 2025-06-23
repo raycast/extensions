@@ -2,6 +2,10 @@
 
 ## [Update] - 2025-06-23
 
+- Move screenshots to `metadata`
+
+## [Update] - 2025-06-23
+
 - Switch to [udamir/youtrack-client](https://github.com/udamir/youtrack-client) with global refactoring
 - Improve `browse` command:
   - Add `apply command` command to apply [YouTrack command](https://www.jetbrains.com/help/youtrack/cloud/commands.html) to a selected issue
