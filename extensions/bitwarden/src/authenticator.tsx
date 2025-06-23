@@ -301,6 +301,14 @@ const authenticator = {
     useEffect(() => {
       if (error) return;
 
+      let interval: NodeJS.Timeout | undefined;
+      let timeout: NodeJS.Timeout | undefined;
+
+      const cleanup = () => {
+        clearTimeout(timeout);
+        clearInterval(interval);
+      };
+
       const setTimeAndCode = () => {
         try {
           const timeRemaining = Math.ceil(generator.remaining() / 1000);
@@ -312,30 +320,28 @@ const authenticator = {
         } catch {
           const error = new Error("ERR2: Failed to regenerate");
           setState(Err(error));
+          cleanup();
           captureException(error.message, error, { captureToRaycast: true });
         }
       };
 
       try {
-        let interval: NodeJS.Timeout | undefined;
         // set an initial timeout to ensure the first evaluation is time accurate
         // and then keep evaluating every second
-        const timeout = setTimeout(() => {
+        timeout = setTimeout(() => {
           setTimeAndCode();
           interval = setInterval(setTimeAndCode, 1000);
         }, generator.remaining() % 1000);
 
         setCode(generator.generate()); // first generation before the interval starts
-
-        return () => {
-          clearTimeout(timeout);
-          clearInterval(interval);
-        };
       } catch {
         const error = new Error("ERR1: Failed to generate");
         setState(Err(error));
+        cleanup();
         captureException(error.message, error, { captureToRaycast: true });
       }
+
+      return cleanup;
     }, [item, generator]);
 
     return { code, time, error, isLoading };
