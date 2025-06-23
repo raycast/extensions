@@ -61,6 +61,53 @@
       "placeholder": "e.g., /usr/local/bin/npx"
     }
   ],
+  "tools": [
+    {
+      "name": "get-daily-usage",
+      "title": "Get Daily Usage",
+      "description": "Get today's Claude Code usage including cost, tokens, and statistics"
+    },
+    {
+      "name": "get-total-usage",
+      "title": "Get Total Usage",
+      "description": "Get comprehensive Claude Code usage statistics including totals, sessions, and model breakdowns"
+    },
+    {
+      "name": "get-monthly-usage",
+      "title": "Get Monthly Usage",
+      "description": "Get current month's Claude Code usage statistics and model breakdowns"
+    },
+    {
+      "name": "get-session-usage",
+      "title": "Get Session Usage",
+      "description": "Get detailed session-by-session Claude Code usage statistics"
+    }
+  ],
+  "ai": {
+    "instructions": "Analyze Claude Code usage statistics and costs. All cost values are in USD ($). When displaying costs, include the $ symbol. Focus on providing accurate usage metrics and cost analysis.",
+    "evals": [
+      {
+        "prompt": "What is my usage today?",
+        "description": "Should call get-daily-usage tool to retrieve today's statistics",
+        "input": "{}"
+      },
+      {
+        "prompt": "Show me my monthly breakdown",
+        "description": "Should call get-monthly-usage tool with model breakdown information",
+        "input": "{\"breakdown\": true}"
+      },
+      {
+        "prompt": "How many sessions did I have recently?",
+        "description": "Should call get-session-usage tool to show recent session data",
+        "input": "{}"
+      },
+      {
+        "prompt": "What's my total usage across all time?",
+        "description": "Should call get-total-usage tool for comprehensive statistics",
+        "input": "{}"
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^1.17.0",

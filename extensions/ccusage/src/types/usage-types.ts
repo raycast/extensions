@@ -87,6 +87,7 @@ export const TotalUsageDataSchema = z.object({
 });
 
 export const TotalUsageResponseSchema = z.object({
+  daily: z.array(DailyUsageResponseSchema),
   totals: z.object({
     inputTokens: z.number(),
     outputTokens: z.number(),
@@ -107,6 +108,14 @@ export const MonthlyUsageCommandResponseSchema = z.object({
 
 export const SessionUsageCommandResponseSchema = z.object({
   sessions: z.array(SessionResponseSchema),
+  totals: z.object({
+    inputTokens: z.number(),
+    outputTokens: z.number(),
+    cacheCreationTokens: z.number(),
+    cacheReadTokens: z.number(),
+    totalCost: z.number(),
+    totalTokens: z.number(),
+  }),
 });
 
 export type DailyUsageData = z.infer<typeof DailyUsageDataSchema>;
