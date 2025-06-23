@@ -5,20 +5,41 @@ import { UseAppExists } from "./useAppExists";
 export type UseConfig = {
   configLoading: boolean;
   config: Config | null;
+  refreshConfig: () => void;
 };
 
 export default function useConfig({ appExistsLoading, appExists }: UseAppExists) {
-  const [state, setState] = useState<UseConfig>({ configLoading: true, config: null as Config | null });
+  const [state, setState] = useState<{ configLoading: boolean; config: Config | null }>({
+    configLoading: true,
+    config: null as Config | null,
+  });
 
-  useEffect(() => {
+  const loadConfig = () => {
     if (appExistsLoading) return;
 
     if (!appExists) {
-      return setState((prev) => ({ ...prev, configIsLoading: false }));
+      return setState((prev) => ({ ...prev, configLoading: false }));
     }
 
     setState({ configLoading: false, config: new Config() });
+  };
+
+  const refreshConfig = () => {
+    if (appExists) {
+      setState({ configLoading: true, config: null });
+      // Small delay to ensure loading state is visible, then load new config
+      setTimeout(() => {
+        setState({ configLoading: false, config: new Config() });
+      }, 100);
+    }
+  };
+
+  useEffect(() => {
+    loadConfig();
   }, [appExistsLoading]);
 
-  return state;
+  return {
+    ...state,
+    refreshConfig,
+  };
 }

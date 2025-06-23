@@ -1,5 +1,22 @@
 # Craftdocs Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Added Space Management functionality with new `Manage Spaces` command
+- Added ability to rename spaces with custom names instead of Space IDs
+- Added space enable/disable functionality to hide unused spaces extension-wide
+- Added space filtering dropdowns in Block Search and Daily Notes commands
+- Added persistent space settings that sync across all commands
+- Improved visual distinction between documents and blocks with better icons (Document vs Text)
+- Fixed React key conflicts when multiple spaces contain blocks with identical names
+- Enhanced user experience with consistent space naming throughout the extension
+
+## [Feature] - {PR_MERGE_DATE}
+
+- Added a new `Append to Daily Note` command with intelligent daily note detection and configurable append position.
+- Added timestamp toggle and customizable prefix/suffix options for flexible content formatting.
+- Updated dependencies via `npm audit fix`
+
 ## [Security] - 2024-11-12
 
 - Updated dependencies via `npm audit fix` to address 4 vulnerabilities (2 moderate, 2 high).
