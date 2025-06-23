@@ -1,6 +1,6 @@
 # Password.link Changelog
 
-## [Initial Version] - 2025-06-23
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Create encrypted secrets with client-side encryption
 - List and manage existing secrets with search functionality
