@@ -28,10 +28,8 @@ export async function loadSecrets(): Promise<Secret[]> {
  */
 export async function loadSecretRequests(): Promise<SecretRequest[]> {
   if (!validateConfig()) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Configuration Error",
-      message: "Please configure your API keys in preferences",
+    await showFailureToast(new Error("Please configure your API keys in preferences"), {
+      title: "Configuration Error"
     });
     return [];
   }
