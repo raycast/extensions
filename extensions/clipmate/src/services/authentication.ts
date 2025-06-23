@@ -20,8 +20,8 @@ export async function initiateAuthFlow(): Promise<string | null> {
     console.error("Authentication error:", error);
     await showToast({
       style: Toast.Style.Failure,
-      title: "Failed to log in",
-      message: error instanceof Error ? error.message : "Unknown error",
+      title: "Oops! That didn't work",
+      message: "Please try again",
     });
     return null;
   }

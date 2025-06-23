@@ -10,14 +10,15 @@ import { LocalStorage } from "@raycast/api";
 import * as crypto from "crypto";
 
 /**
- * Decrypt data using Node.js crypto (AES-GCM)
+ * Decrypt API key data from server using Node.js crypto (AES-CBC)
+ * Note: This function handles server-encrypted data which uses CBC mode
  */
 export async function decryptApiKey(encryptedData: string, passphrase: string): Promise<string> {
   try {
     // Convert from base64
     const combined = Buffer.from(encryptedData, "base64");
 
-    // Extract salt, IV, and encrypted data
+    // Extract salt, IV, and encrypted data (CBC format from server)
     const salt = combined.subarray(0, 16);
     const iv = combined.subarray(16, 32); // 16 bytes for CBC
     const encrypted = combined.subarray(32);
@@ -25,7 +26,7 @@ export async function decryptApiKey(encryptedData: string, passphrase: string): 
     // Derive key from passphrase using PBKDF2
     const key = crypto.pbkdf2Sync(passphrase, salt as any, 100000, 32, "sha256");
 
-    // Decrypt the data using AES-256-CBC
+    // Decrypt the data using AES-256-CBC (server format)
     const decipher = crypto.createDecipheriv("aes-256-cbc", key as any, iv as any);
     let decrypted = decipher.update(encrypted as any, undefined, "utf8");
     decrypted += decipher.final("utf8");
@@ -89,13 +90,14 @@ class SecurityManager {
   async encrypt(data: string): Promise<string> {
     try {
       const key = await this.getEncryptionKey();
-      const iv = crypto.randomBytes(16); // 16 bytes for CBC
+      const iv = crypto.randomBytes(12); // 12 bytes for GCM
 
-      const cipher = crypto.createCipheriv("aes-256-cbc", key as any, iv as any);
+      const cipher = crypto.createCipheriv("aes-256-gcm", key as any, iv as any);
       const encrypted = Buffer.concat([cipher.update(data, "utf8") as any, cipher.final() as any]);
+      const authTag = cipher.getAuthTag();
 
-      // Combine IV and encrypted data
-      const combined = Buffer.concat([iv as any, encrypted as any]);
+      // Combine IV, auth tag, and encrypted data
+      const combined = Buffer.concat([iv as any, authTag as any, encrypted as any]);
 
       // Convert to base64 for storage
       return combined.toString("base64");
@@ -113,11 +115,13 @@ class SecurityManager {
       const key = await this.getEncryptionKey();
       const combined = Buffer.from(encryptedData, "base64");
 
-      // Extract IV and encrypted data
-      const iv = combined.subarray(0, 16); // 16 bytes for CBC
-      const encrypted = combined.subarray(16);
+      // Extract IV, auth tag, and encrypted data
+      const iv = combined.subarray(0, 12); // 12 bytes for GCM
+      const authTag = combined.subarray(12, 28); // 16 bytes for auth tag
+      const encrypted = combined.subarray(28);
 
-      const decipher = crypto.createDecipheriv("aes-256-cbc", key as any, iv as any);
+      const decipher = crypto.createDecipheriv("aes-256-gcm", key as any, iv as any);
+      decipher.setAuthTag(authTag as any);
       let decrypted = decipher.update(encrypted as any, undefined, "utf8");
       decrypted += decipher.final("utf8");
 

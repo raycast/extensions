@@ -6,7 +6,7 @@ export type Collection = {
   isPublic: boolean;
   itemCount: number;
   parentFolderId?: string;
-  shortId?: string;
+  shortId: string;
 };
 
 export type CreateCollectionInput = {

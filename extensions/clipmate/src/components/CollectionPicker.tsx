@@ -100,7 +100,7 @@ export function CollectionPicker({ link }: CollectionPickerProps) {
 
   const handleSave = async () => {
     try {
-      await showHUD("Saving link...");
+      await showHUD("Saving your link...");
 
       if (selectedCollections.size === 0) {
         // If no collections selected, just add the link to Clipmate
@@ -120,7 +120,7 @@ export function CollectionPicker({ link }: CollectionPickerProps) {
 
         await Promise.all(savePromises);
 
-        const successMessage = `✅ Saved to ${selectedCollections.size} collection${selectedCollections.size > 1 ? "s" : ""}`;
+        const successMessage = `Saved to ${selectedCollections.size} collection${selectedCollections.size > 1 ? "s" : ""}!`;
         await showHUD(successMessage);
       }
 
@@ -132,10 +132,10 @@ export function CollectionPicker({ link }: CollectionPickerProps) {
 
       if (error instanceof LimitExceededError) {
         // Show limit exceeded error with upgrade options
-        await showHUD("❌ Monthly limit reached");
+        await showHUD("⚠️ Monthly limit reached");
         setError("limit_exceeded");
       } else {
-        await showHUD("❌ Failed to save link");
+        await showHUD("❌ Oops! Something went wrong");
         await new Promise((resolve) => setTimeout(resolve, 500));
         await popToRoot();
         await closeMainWindow();
@@ -163,8 +163,8 @@ export function CollectionPicker({ link }: CollectionPickerProps) {
     return (
       <List>
         <List.EmptyView
-          title="Authentication Required"
-          description="Please sign in to access your Clipmate collections"
+          title="Please Sign In"
+          description="Sign in to your Clipmate account to access your collections"
           icon={Icon.Person}
         />
       </List>

@@ -1,5 +1,6 @@
 import { List, ActionPanel, Action, Icon, Color, Clipboard } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { getFavicon } from "@raycast/utils";
 import { initiateAuthFlow, isAuthenticated, signOut } from "./services/authentication";
 import { CollectionPicker } from "./components/CollectionPicker";
 import { PageInfo } from "./types";
@@ -69,9 +70,8 @@ export default function Command() {
       const timeout = setTimeout(async () => {
         try {
           const normalizedUrl = normalizeUrl(manualUrl);
-          const urlObj = new URL(normalizedUrl);
           // Set fallback favicon while fetching rich preview
-          setManualFaviconUrl(`https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=128`);
+          setManualFaviconUrl(getFavicon(normalizedUrl) as string);
           const info = await getPageInfo(normalizedUrl);
           setManualPageInfo(info);
         } catch (e) {
@@ -103,9 +103,8 @@ export default function Command() {
         if (text && isValidUrl(text)) {
           try {
             const normalizedUrl = normalizeUrl(text);
-            const urlObj = new URL(normalizedUrl);
             // Set fallback favicon while fetching rich preview
-            setFaviconUrl(`https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=128`);
+            setFaviconUrl(getFavicon(normalizedUrl) as string);
             const info = await getPageInfo(normalizedUrl);
             setPageInfo(info);
           } catch (e) {
@@ -138,7 +137,7 @@ export default function Command() {
   if (checkingAuth) {
     return (
       <List isLoading={true}>
-        <List.EmptyView title="Checking authentication status..." />
+        <List.EmptyView title="Setting up Clipmate..." />
       </List>
     );
   }
@@ -147,7 +146,7 @@ export default function Command() {
   if (!authenticated) {
     return (
       <List isLoading={true}>
-        <List.EmptyView title="Connecting to Clipmate..." />
+        <List.EmptyView title="Signing you in..." />
       </List>
     );
   }
@@ -185,7 +184,7 @@ export default function Command() {
             }}
             accessories={[
               ...(pageInfo?.siteName ? [{ text: pageInfo.siteName }] : []),
-              { text: isClipboardValid ? "Valid URL " : "Invalid URL" },
+              { text: isClipboardValid ? "Valid URL" : "Invalid URL" },
               {
                 icon: {
                   source: isClipboardValid ? Icon.CheckCircle : Icon.XMarkCircle,
@@ -273,8 +272,8 @@ export default function Command() {
       {/* Empty State */}
       {!clipboardText && !manualUrl && !isLoading && (
         <List.EmptyView
-          title="No URL Found"
-          description="Copy a URL to your clipboard or start typing to enter one manually"
+          title="Ready to Save Links!"
+          description="Copy a URL to your clipboard or start typing above to enter one manually"
           icon={Icon.Link}
           actions={
             <ActionPanel>

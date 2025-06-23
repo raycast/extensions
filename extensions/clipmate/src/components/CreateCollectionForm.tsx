@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, useNavigation, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { fetchFolders, createFolder } from "../services/graphql";
 import { Folder } from "../types";
@@ -42,6 +42,11 @@ export function CreateCollectionForm({ onSubmit, initialName = "" }: CreateColle
       setSelectedFolderId(newFolder.folderId);
     } catch (error) {
       console.error("Error creating folder:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to create folder",
+        message: error instanceof Error ? error.message : "An unknown error occurred",
+      });
     }
   };
 

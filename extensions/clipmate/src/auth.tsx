@@ -59,12 +59,7 @@ export async function authorize(): Promise<string> {
     // Decrypt the API key
     const decryptedApiKey = await decryptApiKey(decodeURIComponent(authorizationCode), encryptionPassphrase);
 
-    console.log("API key decrypted successfully");
-    console.log("API key length:", decryptedApiKey.length);
-    console.log(
-      "API key preview:",
-      `${decryptedApiKey.substring(0, 10)}...${decryptedApiKey.substring(decryptedApiKey.length - 10)}`,
-    );
+    
 
     // Store the decrypted API key securely
     await secureStorage.setSecure("apiKey", decryptedApiKey);
@@ -165,20 +160,32 @@ export function useAuth() {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchToken() {
       try {
         setIsLoading(true);
         const key = await getApiKey();
-        setApiKey(key);
+        if (isMounted) {
+          setApiKey(key);
+        }
       } catch (e) {
         console.error("Error fetching API key:", e);
-        setError(e instanceof Error ? e : new Error("Failed to get API key"));
+        if (isMounted) {
+          setError(e instanceof Error ? e : new Error("Failed to get API key"));
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchToken();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const login = async () => {

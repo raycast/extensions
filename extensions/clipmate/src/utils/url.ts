@@ -86,7 +86,7 @@ export async function getPageInfo(url: string): Promise<PageInfo> {
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
       },
       timeout: 5000,
-      followRedirects: `follow`,
+      followRedirects: "follow",
       handleRedirects: (baseURL: string, forwardedURL: string) => {
         const urlObj = new URL(baseURL);
         const forwardedURLObj = new URL(forwardedURL);
