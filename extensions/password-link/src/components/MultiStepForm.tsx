@@ -79,7 +79,7 @@ export default function MultiStepForm({
             <Action.SubmitForm
               title={submitTitle}
               onSubmit={handleSubmit}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={{ modifiers: ["cmd"], key: "enter" }}
             />
           ) : (
             <Action.SubmitForm
