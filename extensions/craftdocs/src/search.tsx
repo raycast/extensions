@@ -4,6 +4,7 @@ import ListBlocks from "./components/ListBlocks";
 import useAppExists, { UseAppExists } from "./hooks/useAppExists";
 import useConfig, { UseConfig } from "./hooks/useConfig";
 import useDB, { UseDB } from "./hooks/useDB";
+import { CACHE_KEYS, APP_CONSTANTS } from "./constants";
 import {
   Action,
   ActionPanel,
@@ -56,11 +57,13 @@ export default function search() {
   const db = useDB(config);
 
   const [query, setQuery] = useState("");
-  const [selectedSpace, setSelectedSpace] = useState<string>(cache.get("searchSpaceId") || "all");
+  const [selectedSpace, setSelectedSpace] = useState<string>(
+    cache.get(CACHE_KEYS.SEARCH_SPACE_ID) || APP_CONSTANTS.DEFAULT_SPACE_FILTER
+  );
 
   const handleSpaceChange = (newValue: string) => {
     setSelectedSpace(newValue);
-    cache.set("searchSpaceId", newValue);
+    cache.set(CACHE_KEYS.SEARCH_SPACE_ID, newValue);
   };
 
   const params = { appExists, db, query, setQuery, config, selectedSpace, handleSpaceChange };

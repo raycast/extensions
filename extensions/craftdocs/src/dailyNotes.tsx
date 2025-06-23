@@ -4,6 +4,7 @@ import { List, Cache } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as chrono from "chrono-node";
 import { DailyNotes } from "./components/DailyNotes";
+import { CACHE_KEYS } from "./constants";
 
 const cache = new Cache();
 
@@ -39,11 +40,11 @@ export default function dailyNotes() {
   const { config, configLoading } = useConfig(appExists);
   const [query, setQuery] = useState("");
   const [date, setDate] = useState<Date>();
-  const [selectedSpaceId, setSelectedSpaceId] = useState<string>(cache.get("dailyNotesSpaceId") || "");
+  const [selectedSpaceId, setSelectedSpaceId] = useState<string>(cache.get(CACHE_KEYS.DAILY_NOTES_SPACE_ID) || "");
 
   const handleSpaceChange = (newValue: string) => {
     setSelectedSpaceId(newValue);
-    cache.set("dailyNotesSpaceId", newValue);
+    cache.set(CACHE_KEYS.DAILY_NOTES_SPACE_ID, newValue);
   };
 
   // Set default space when config loads
@@ -51,7 +52,7 @@ export default function dailyNotes() {
     if (config && config.primarySpace() && !selectedSpaceId) {
       const primarySpaceId = config.primarySpace()?.spaceID || "";
       setSelectedSpaceId(primarySpaceId);
-      cache.set("dailyNotesSpaceId", primarySpaceId);
+      cache.set(CACHE_KEYS.DAILY_NOTES_SPACE_ID, primarySpaceId);
     }
   }, [config, selectedSpaceId]);
 

@@ -137,7 +137,7 @@ export default function ManageSpaces() {
               title={displayName}
               subtitle={isCustomNamed ? `ID: ${space.spaceID}` : undefined}
               accessories={[
-                space.primary ? { tag: "Primary" } : {},
+                ...(space.primary ? [{ tag: "Primary" }] : []),
                 {
                   tag: {
                     value: space.isEnabled ? "Enabled" : "Disabled",

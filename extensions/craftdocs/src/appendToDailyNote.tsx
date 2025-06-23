@@ -27,6 +27,28 @@ interface Preferences {
   contentSuffix: string;
 }
 
+// Helper function to format content with timestamp, prefix, and suffix
+const formatContent = (content: string, preferences: Preferences): string => {
+  let finalContent = content;
+
+  if (preferences.addTimestamp) {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString("en-US", {
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    finalContent = `**${timeString}**${preferences.contentPrefix}${finalContent}`;
+  } else {
+    finalContent = `${preferences.contentPrefix}${finalContent}`;
+  }
+
+  // Add suffix
+  finalContent = `${finalContent}${preferences.contentSuffix}`;
+
+  return finalContent;
+};
+
 export default function AppendToDailyNote() {
   const appExists = useAppExists();
   const configResult = useConfig(appExists);
@@ -88,23 +110,8 @@ export default function AppendToDailyNote() {
       return;
     }
 
-    // Prepare final content with timestamp, prefix and suffix
-    let finalContent = formValues.content;
-
-    if (preferences.addTimestamp) {
-      const now = new Date();
-      const timeString = now.toLocaleTimeString("en-US", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      finalContent = `**${timeString}**${preferences.contentPrefix}${finalContent}`;
-    } else {
-      finalContent = `${preferences.contentPrefix}${finalContent}`;
-    }
-
-    // Add suffix
-    finalContent = `${finalContent}${preferences.contentSuffix}`;
+    // Format content with timestamp, prefix and suffix
+    const finalContent = formatContent(formValues.content, preferences);
 
     // Always copy to clipboard as safety fallback
     Clipboard.copy(finalContent);
@@ -121,23 +128,7 @@ export default function AppendToDailyNote() {
     const parentBlockId = getDailyNoteBlockId();
     if (!parentBlockId || !formValues.spaceId) return null;
 
-    let finalContent = formValues.content;
-
-    // Add timestamp if enabled
-    if (preferences.addTimestamp) {
-      const now = new Date();
-      const timeString = now.toLocaleTimeString("en-US", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      finalContent = `**${timeString}**${preferences.contentPrefix}${finalContent}`;
-    } else {
-      finalContent = `${preferences.contentPrefix}${finalContent}`;
-    }
-
-    // Add suffix
-    finalContent = `${finalContent}${preferences.contentSuffix}`;
+    const finalContent = formatContent(formValues.content, preferences);
 
     const index = preferences.appendPosition === "beginning" ? "0" : "999999";
 
