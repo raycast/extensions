@@ -59,8 +59,7 @@ function SettingsForm({
     validation: {
       blockSize: (value?: string) => {
         if (!value) return "Block size is required";
-        const num = parseInt(value);
-        if (isNaN(num) || num < 1 || num > 64) {
+        if (Number.isNaN(Number(value)) || Number(value) < 1 || Number(value) > 64) {
           return "Block size must be between 1 and 64";
         }
       },
