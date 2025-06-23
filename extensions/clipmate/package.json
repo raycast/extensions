@@ -4,7 +4,9 @@
   "title": "Clipmate AI",
   "description": "Save links to your Clipmate account",
   "icon": "clipmate.png",
-  "author": "clipmate.ai",
+  "access": "public",
+  "author": "shvmmshr",
+  "owner": "clipmate.ai",
   "categories": [
     "Productivity"
   ],
@@ -14,9 +16,8 @@
       "name": "save-link-to-clipmate",
       "title": "Save Link to Clipmate",
       "description": "Save links to your Clipmate collections",
-      "mode": "view",
       "icon": "command-icon.png",
-      "file": "save-link-to-clipmate.tsx"
+      "mode": "view"
     }
   ],
   "dependencies": {
