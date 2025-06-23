@@ -25,7 +25,7 @@ const issueDefaultFields = [
   "resolved",
   "description",
   "idReadable",
-  { customFields: ["name", { value: ["name", { color: ["background", "foreground"] }] }] },
+  { customFields: ["name", "id", { value: ["name", { color: ["background", "foreground"] }] }] },
   { project: ["id", "name", "shortName"] },
 ] as const;
 
@@ -35,7 +35,6 @@ export const issuesFields = withDefaultFields(issueDefaultFields) satisfies Sche
 
 export const extendedIssuesFields = withDefaultFields([
   ...issueDefaultFields,
-  "description",
   { attachments: ["name", "url"] },
   { reporter: userFields },
   { updater: userFields },

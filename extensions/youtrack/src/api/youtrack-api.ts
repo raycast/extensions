@@ -9,7 +9,7 @@ import type {
   User,
   WorkItem,
 } from "../interfaces";
-import { formatDate, isDurationValue, transformCustomFieldValue } from "../utils";
+import { formatDate, getUserAvatar, isDurationValue, transformCustomFieldValue } from "../utils";
 import getYouTrackClientInstance from "./youtrack-client";
 import type { SingleUserIssueCustomField, WorkItemType, YouTrack } from "youtrack-client";
 import type {
@@ -148,9 +148,9 @@ export class YouTrackApi {
       attachments,
       date: formatDate(updated ?? 0),
       created: formatDate(created ?? 0),
-      assignee,
-      reporter,
-      updater,
+      assignee: assignee ? { ...assignee, avatarUrl: getUserAvatar(assignee.avatarUrl, this.yt.baseUrl) } : null,
+      reporter: reporter ? { ...reporter, avatarUrl: getUserAvatar(reporter.avatarUrl, this.yt.baseUrl) } : null,
+      updater: updater ? { ...updater, avatarUrl: getUserAvatar(updater.avatarUrl, this.yt.baseUrl) } : null,
       tags: tags.map((tag) => ({ ...tag, name: tag.name ?? "" })),
       workItemTypes: await this.yt.Admin.Projects.getProjectWorkItemTypes<WorkItemFields>(project.id, {
         fields: workItemFields,
@@ -190,7 +190,11 @@ export class YouTrackApi {
   }
 
   async fetchUsers(): Promise<User[]> {
-    return await this.yt.Users.getUsers<UserFields>({ fields: userFields, $top: -1 });
+    const users = await this.yt.Users.getUsers<UserFields>({ fields: userFields, $top: -1 });
+    return users.map((user) => ({
+      ...user,
+      avatarUrl: getUserAvatar(user.avatarUrl, this.yt.baseUrl),
+    }));
   }
 
   async fetchSelf(): Promise<User> {

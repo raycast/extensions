@@ -25,9 +25,7 @@ type Input = {
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   return {
-    info: Object.entries(input)
-      .map(([key, value]) => ({ name: key === "idReadable" ? "Issue" : key, value }))
-      .filter(({ name }) => name !== "issueId"),
+    info: Object.entries(input).map(([key, value]) => ({ name: key === "idReadable" ? "Issue" : key, value })),
     message: `Are you sure you want to apply the following command: "${input.command}"?`,
   };
 };
@@ -43,5 +41,6 @@ export default async function applyCommand(input: Input) {
     await api.applyCommandToIssue(idReadable, { command: query, comment });
   } catch (error) {
     handleOnCatchError(error, "Error applying command");
+    throw error;
   }
 }

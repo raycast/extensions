@@ -36,7 +36,7 @@ export interface IssueExtended extends Issue {
   attachments: Attachment[];
 }
 
-interface WorkItemType {
+export interface WorkItemType {
   id: string;
   name: string | null;
   autoAttached?: boolean;

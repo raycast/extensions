@@ -1,5 +1,5 @@
-import type { IssueExtended, WorkItem, WorkItemSubmit } from "./interfaces";
-import { useEffect, useState } from "react";
+import type { IssueExtended, WorkItem, WorkItemSubmit, WorkItemType } from "./interfaces";
+import { useEffect, useMemo, useState } from "react";
 import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { isDurationValid } from "./utils";
 import { useForm } from "@raycast/utils";
@@ -10,8 +10,12 @@ export function AddWork(props: {
   link: string;
   instance: string;
 }) {
+  const emptyWorkType: WorkItemType = useMemo(() => ({ id: "", name: "No type" }), []);
   const [issue, setIssue] = useState<IssueExtended | null>(null);
+  const [workTypes, setWorkTypes] = useState<WorkItemType[]>([emptyWorkType]);
   const { pop } = useNavigation();
+  const { getIssueDetailsCb, createWorkItemCb } = props;
+
   const { handleSubmit, itemProps } = useForm<WorkItemSubmit>({
     async onSubmit({ comment, date, workTypeId, time }) {
       const toast = await showToast({
@@ -19,7 +23,7 @@ export function AddWork(props: {
         title: "Submitting work item",
       });
 
-      if (!props.createWorkItemCb) {
+      if (!createWorkItemCb) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed adding work item, missing callback function";
         return;
@@ -64,23 +68,24 @@ export function AddWork(props: {
       },
     },
   });
+
   useEffect(() => {
     async function fetchIssueDetails() {
-      const issue = await props.getIssueDetailsCb();
+      const issue = await getIssueDetailsCb();
       if (issue) {
         setIssue(issue);
+        if (issue.workItemTypes?.length) {
+          setWorkTypes([emptyWorkType, ...issue.workItemTypes]);
+        }
       }
     }
 
     fetchIssueDetails();
-  }, [props]);
+  }, [itemProps.workTypeId, getIssueDetailsCb, emptyWorkType]);
 
   if (!issue) {
     return <Detail isLoading />;
   }
-
-  const emptyWorkItemType = [{ id: "", name: "No type" }];
-  const workTypes = issue.workItemTypes?.length ? [...emptyWorkItemType, ...issue.workItemTypes] : emptyWorkItemType;
 
   return (
     <Form
@@ -106,6 +111,7 @@ export function AddWork(props: {
             key={workType.id}
             value={workType.id || ""}
             title={workType.name || `- missing (id: ${workType.id}) -`}
+            keywords={[workType.name || ""]}
           />
         ))}
       </Form.Dropdown>

@@ -22,6 +22,6 @@ export default async function getIssues(input: Input) {
   try {
     return await api.fetchIssues(`project: ${input.project}`, input.top ?? MAX_ISSUES);
   } catch (error) {
-    handleOnCatchError(error, "Error fetching projects");
+    handleOnCatchError(error, "Error fetching issues");
   }
 }

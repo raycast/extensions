@@ -128,3 +128,7 @@ export function getPriorityFieldValue(customFields: CustomField[]): EnumValue | 
   }
   return null;
 }
+
+export function getUserAvatar(avatarUrl: string, host: string): string {
+  return isURL(avatarUrl) ? avatarUrl : `${host}${avatarUrl}`;
+}

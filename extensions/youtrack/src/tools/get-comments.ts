@@ -17,7 +17,7 @@ type Input = {
 };
 
 /**
- * Fetches comments from YouTrack for the specified issue. Return in %AUTHOR% %TEXT% format.
+ * Fetches comments from YouTrack for the specified issue.
  */
 export default async function getComments(input: Input) {
   const api = YouTrackApi.getInstance();
@@ -35,5 +35,6 @@ export default async function getComments(input: Input) {
     }));
   } catch (error) {
     handleOnCatchError(error, "Error fetching comments");
+    throw error;
   }
 }

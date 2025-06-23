@@ -4,6 +4,7 @@ import eslint from "@eslint/js";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import vitest from "@vitest/eslint-plugin";
 import importPlugin from "eslint-plugin-import";
+import reactPlugin from "eslint-plugin-react";
 import * as reactHooks from "eslint-plugin-react-hooks";
 
 export default tseslint.config(
@@ -15,15 +16,23 @@ export default tseslint.config(
       importPlugin.flatConfigs.recommended,
       importPlugin.flatConfigs.typescript,
       tseslint.configs.recommended,
+      reactPlugin.configs.flat.recommended,
+      reactPlugin.configs.flat["jsx-runtime"],
       reactHooks.configs["recommended-latest"],
       eslintPluginPrettierRecommended,
       {
+        settings: {
+          react: {
+            version: "detect",
+          },
+        },
         languageOptions: {
           globals: {
             ...globals.node,
           },
 
           parser: tseslint.parser,
+          parserOptions: { ecmaFeatures: { jsx: true } },
         },
       },
     ],
@@ -38,6 +47,8 @@ export default tseslint.config(
       ],
       "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
       "import/no-unresolved": "off",
+      "no-use-before-define": "off",
+      "@typescript-eslint/no-use-before-define": "error",
     },
   },
   {
