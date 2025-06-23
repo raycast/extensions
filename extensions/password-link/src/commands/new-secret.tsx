@@ -79,7 +79,7 @@ export default function NewSecret(props?: LaunchProps<{ arguments: NewSecretArgu
    * @returns Parsed number or undefined
    */
   const parseNumericValue = (value: string): number | undefined => {
-    return value ? parseInt(value) : undefined;
+    return value ? parseInt(value, 10) : undefined;
   };
 
   /**
