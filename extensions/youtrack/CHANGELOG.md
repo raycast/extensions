@@ -1,6 +1,6 @@
 # YouTrack Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-06-23
 
 - Switch to [udamir/youtrack-client](https://github.com/udamir/youtrack-client) with global refactoring
 - Improve `browse` command:
