@@ -94,11 +94,7 @@ export default function NewSecretRequest() {
       });
     } catch (error) {
       console.error("Error creating secret request:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to create secret request",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      showFailureToast(error, { title: "Failed to create secret request" });
     }
   };
 
