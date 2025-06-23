@@ -25,13 +25,13 @@ export default function useGet<T>(
       Authorization: `Bearer ${api_key}`,
     },
     async parseResponse(response) {
+      const result = await response.json();
       if (!response.ok) {
-        const result: ErrorResponse = await response.json();
-        if ("message" in result) throw new Error(result.message);
-        throw new Error(Object.values(result.messages)[0][0]);
+        const errorResult = result as ErrorResponse;
+        if ("message" in errorResult) throw new Error(errorResult.message);
+        throw new Error(Object.values(errorResult.messages)[0][0]);
       }
-      const result: T[] = await response.json();
-      return result;
+      return result as T[];
     },
     initialData: [],
     execute,
@@ -49,13 +49,13 @@ export function useGetPricing({ execute = true, onData }: { execute?: boolean; o
       Authorization: `Bearer ${api_key}`,
     },
     async parseResponse(response) {
+      const result = await response.json();
       if (!response.ok) {
-        const result: ErrorResponse = await response.json();
-        if ("message" in result) throw new Error(result.message);
-        throw new Error(Object.values(result.messages)[0][0]);
+        const errorResult = result as ErrorResponse;
+        if ("message" in errorResult) throw new Error(errorResult.message);
+        throw new Error(Object.values(errorResult.messages)[0][0]);
       }
-      const result: Pricing[] = await response.json();
-      return result;
+      return result as Pricing[];
     },
     initialData: {
       weekly: "?",
@@ -146,14 +146,14 @@ export function usePut(
     },
     body: JSON.stringify(body),
     async parseResponse(response) {
+      const result = await response.json();
       if (!response.ok) {
-        const result: ErrorResponse | { result: "fail"; request: PutBody } = await response.json();
-        if ("message" in result) throw new Error(result.message);
-        if ("messages" in result) throw new Error(Object.values(result.messages)[0][0]);
+        const errorResult = result as ErrorResponse | { result: "fail"; request: PutBody };
+        if ("message" in errorResult) throw new Error(errorResult.message);
+        if ("messages" in errorResult) throw new Error(Object.values(errorResult.messages)[0][0]);
         throw new Error(response.statusText);
       }
-      const result: { result: "success" } = await response.json();
-      return result;
+      return result as { result: "success" };
     },
     execute,
     onData,
