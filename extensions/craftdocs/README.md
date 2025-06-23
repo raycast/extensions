@@ -24,7 +24,7 @@ Quick access to your daily notes with smart navigation.
 
 - Browse daily notes by date
 - Jump to today's note instantly
-Navigate to any date's daily note by exact date or natural expression (e.g., last Monday)
+- Navigate to any date's daily note by exact date or natural expression (e.g., last Monday)
 
 ![Daily Notes](./metadata/craft-daily-notes.png)
 
