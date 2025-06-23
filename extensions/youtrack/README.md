@@ -61,14 +61,3 @@ Raycast extension to browse and create YouTrack issues.
 Refer to [the official documentation](https://www.jetbrains.com/help/youtrack/standalone/Manage-Permanent-Token.html#obtain-permanent-token) and note: you only need `YouTrack` scope for the token.
 
 After setting up your token you should be able to browse and create YouTrack issues with Raycast 🚀.
-
-## Showcases
-
-![browse](media/youtrack-browse.png)
-![details](media/youtrack-browse-details.png)
-![create](media/youtrack-create.png)
-![draft](media/youtrack-draft.png)
-![created-actions](media/youtrack-created-actions.png)
-![apply-command](media/youtrack-browse-apply-command.png)
-![comment](media/youtrack-browse-comment.png)
-![work](media/youtrack-browse-add-work.png)
