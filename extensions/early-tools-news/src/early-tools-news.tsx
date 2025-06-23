@@ -6,10 +6,10 @@ import { useCachedPromise } from "@raycast/utils";
 const parser = new Parser();
 
 const feedURLs = [
-  "https://feed.informer.com/digests/0SYH5PPNPD/feeder.rss",
-  "https://feed.informer.com/digests/PY09VDLVRF/feeder.rss",
-  "https://feed.informer.com/digests/OL5GPXO2BT/feeder.rss",
-  "https://feed.informer.com/digests/10ZBTRCKZM/feeder.rss",
+  "https://feed.informer.com/digests/0SYH5PPNPD/feeder.atom",
+  "https://feed.informer.com/digests/PY09VDLVRF/feeder.atom",
+  "https://feed.informer.com/digests/OL5GPXO2BT/feeder.atom",
+  "https://feed.informer.com/digests/10ZBTRCKZM/feeder.atom",
 ];
 
 interface StoryItem {
