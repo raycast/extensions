@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { Action, ActionPanel, Detail, List, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import SpotifyWebApi from "spotify-web-api-node";
+import axios from "axios";
+import * as cheerio from "cheerio";
 
 // Import genius-lyrics
 import { Client as GeniusClient } from "genius-lyrics";
@@ -253,9 +255,10 @@ interface Song {
   fullSong?: any;
   availableSources?: LyricsSource[];
   isTopTrack?: boolean; // Indicates if this is a top track vs new release
+  isTamilMode?: boolean; // Indicates if this should use Tamil lyrics search
 }
 
-type SearchMode = "song" | "artist";
+type SearchMode = "song" | "artist" | "tamil";
 
 export default function SearchLyrics() {
   const [searchText, setSearchText] = useState("");
@@ -317,6 +320,34 @@ export default function SearchLyrics() {
               thumbnail: song.thumbnail,
               fullSong: song,
             }));
+          }
+        } else if (searchMode === "tamil") {
+          // Tamil search mode - use Spotify for song discovery
+          console.log(`🇮🇳 Searching Tamil songs: "${searchText}"`);
+          const spotifyResults = await searchSpotifyTracks(searchText, 15);
+
+          if (spotifyResults.length > 0) {
+            // Remove duplicates and mark for Tamil lyrics
+            const uniqueSongs = [];
+            const seenKeys = new Set();
+
+            for (const song of spotifyResults) {
+              const uniqueKey = `${song.id}-${song.title.toLowerCase()}-${song.artist.name.toLowerCase()}`;
+              if (!seenKeys.has(uniqueKey)) {
+                seenKeys.add(uniqueKey);
+                // Mark songs for Tamil lyrics handling
+                uniqueSongs.push({
+                  ...song,
+                  isTamilMode: true, // Custom flag to indicate Tamil lyrics search
+                });
+              }
+            }
+
+            searchResults = uniqueSongs;
+            console.log(`✅ Found ${searchResults.length} songs for Tamil lyrics search`);
+          } else {
+            console.log(`⚠️ No Spotify results found for Tamil search`);
+            searchResults = [];
           }
         } else if (searchMode === "artist") {
           // If no artist is selected, search for artists
@@ -624,7 +655,9 @@ export default function SearchLyrics() {
           ? "Search for songs... (e.g., 'Bohemian Rhapsody', 'Hotel California')"
           : searchMode === "artist"
             ? "Search for artists... (e.g., 'Queen', 'Eagles', 'The Beatles')"
-            : "Search Tamil lyrics... (e.g., 'happy birthday', 'vennilave', 'yaaro yarodi')",
+            : searchMode === "tamil"
+              ? "Search Tamil songs... (e.g., 'Vennilave', 'Yaaro Yarodi', 'Tum Hi Ho')"
+              : "Search songs...",
       throttle: true,
       searchBarAccessory: React.createElement(
         List.Dropdown,
@@ -643,6 +676,10 @@ export default function SearchLyrics() {
         React.createElement(List.Dropdown.Item, {
           title: "👨‍🎤 Artist",
           value: "artist",
+        }),
+        React.createElement(List.Dropdown.Item, {
+          title: "🇮🇳 Tamil",
+          value: "tamil",
         })
       ),
     },
@@ -668,6 +705,232 @@ async function searchAltLyrics(songTitle: string, artistName: string): Promise<L
   }
 
   return sources;
+}
+
+// Tamil lyrics search function
+async function searchTamilLyrics(songTitle: string, artistName: string): Promise<LyricsSource[]> {
+  const sources: LyricsSource[] = [];
+
+  try {
+    console.log(`🇮🇳 Searching Tamil lyrics for: ${songTitle} by ${artistName}`);
+
+    // Strategy 1: Try direct search on Tamil2Lyrics.com
+    const directSearchUrl = `https://tamil2lyrics.com/?s=${encodeURIComponent(songTitle + " " + artistName)}`;
+
+    try {
+      console.log(`🔍 Trying direct search on tamil2lyrics.com: ${directSearchUrl}`);
+
+      const searchResponse = await axios.get(directSearchUrl, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.5",
+          "Accept-Encoding": "gzip, deflate",
+          Connection: "keep-alive",
+        },
+        timeout: 8000,
+        maxContentLength: 1024 * 1024, // Limit to 1MB
+      });
+
+      const $ = cheerio.load(searchResponse.data);
+
+      // Look for search results or direct lyrics content
+      let firstResultUrl = "";
+
+      // Try to find links to lyrics pages
+      const searchResults = $('a[href*="tamil2lyrics.com"]').filter((index, element) => {
+        const href = $(element).attr("href") || "";
+        const text = $(element).text().toLowerCase();
+        return (
+          href.includes("tamil2lyrics.com") &&
+          !href.includes("/search") &&
+          !href.includes("/?s=") &&
+          (text.includes(songTitle.toLowerCase()) || text.includes("lyric"))
+        );
+      });
+
+      if (searchResults.length > 0) {
+        firstResultUrl = $(searchResults.first()).attr("href") || "";
+        console.log(`🎯 Found direct search result: ${firstResultUrl}`);
+      }
+
+      // If we found a direct result, try to get lyrics from it
+      if (firstResultUrl && firstResultUrl.startsWith("http")) {
+        console.log(`📖 Fetching lyrics from: ${firstResultUrl}`);
+
+        const lyricsResponse = await axios.get(firstResultUrl, {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          },
+          timeout: 8000,
+          maxContentLength: 512 * 1024, // Limit to 512KB
+        });
+
+        const lyricsPage = cheerio.load(lyricsResponse.data);
+        const lyricsText = await extractLyricsFromPage(lyricsPage);
+
+        if (lyricsText) {
+          sources.push({
+            name: "Tamil2Lyrics.com",
+            lyrics: lyricsText,
+            url: firstResultUrl,
+          });
+          console.log("✅ Successfully extracted Tamil lyrics from direct search");
+          return sources;
+        }
+      }
+    } catch (directError) {
+      console.log("⚠️ Direct search failed, trying alternative approach");
+    }
+
+    // Strategy 2: Try a simpler Google search approach
+    const searchQuery = `"${songTitle}" "${artistName}" tamil lyrics`;
+    const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery + " site:tamil2lyrics.com")}`;
+
+    console.log(`🔍 Trying Google search: ${searchQuery}`);
+
+    const searchResponse = await axios.get(googleSearchUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+      timeout: 6000,
+      maxContentLength: 512 * 1024, // Limit to 512KB
+    });
+
+    const $ = cheerio.load(searchResponse.data);
+
+    // Look for links to tamil2lyrics.com in search results
+    let bestUrl = "";
+    $("a").each((index, element) => {
+      const href = $(element).attr("href") || "";
+      let actualUrl = "";
+
+      // Handle Google's URL encoding
+      if (href.startsWith("/url?q=")) {
+        try {
+          const urlParams = new URLSearchParams(href.substring(6));
+          actualUrl = urlParams.get("q") || "";
+        } catch (e) {
+          return;
+        }
+      } else if (href.startsWith("http")) {
+        actualUrl = href;
+      }
+
+      // Check if this is a valid tamil2lyrics.com URL
+      if (
+        actualUrl.includes("tamil2lyrics.com") &&
+        !actualUrl.includes("/search") &&
+        !actualUrl.includes("accounts.google.com") &&
+        actualUrl.startsWith("http")
+      ) {
+        bestUrl = actualUrl;
+        return false; // Break the loop
+      }
+    });
+
+    if (!bestUrl) {
+      console.log("❌ No valid tamil2lyrics.com results found");
+      sources.push({
+        name: "Tamil Lyrics Search",
+        lyrics: `No Tamil lyrics found for "${songTitle}" by ${artistName}".\n\n🔍 **Search suggestions:**\n\n• Try searching with different spelling variations\n• Check if it's a Tamil song (this search is specifically for Tamil lyrics)\n• Try searching for the movie name if it's a film song\n• Some songs might not be available on tamil2lyrics.com\n\n🌐 **Manual search:**\nTry searching manually: https://tamil2lyrics.com/?s=${encodeURIComponent(songTitle + " " + artistName)}`,
+        url: `https://tamil2lyrics.com/?s=${encodeURIComponent(songTitle + " " + artistName)}`,
+      });
+      return sources;
+    }
+
+    console.log(`🎯 Found tamil2lyrics.com URL: ${bestUrl}`);
+
+    // Fetch the lyrics page with memory limits
+    const lyricsResponse = await axios.get(bestUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+      timeout: 8000,
+      maxContentLength: 512 * 1024, // Limit to 512KB
+    });
+
+    const lyricsPage = cheerio.load(lyricsResponse.data);
+    const lyricsText = await extractLyricsFromPage(lyricsPage);
+
+    if (lyricsText) {
+      sources.push({
+        name: "Tamil2Lyrics.com",
+        lyrics: lyricsText,
+        url: bestUrl,
+      });
+      console.log("✅ Successfully extracted Tamil lyrics");
+    } else {
+      sources.push({
+        name: "Tamil2Lyrics.com",
+        lyrics: `Found a Tamil lyrics page but couldn't extract the lyrics automatically.\n\n📖 **Page found:** ${bestUrl}\n\n🔍 **Manual check needed:**\nPlease visit the link above to view the lyrics manually.\n\nThis might happen if:\n• The website structure has changed\n• The page requires JavaScript to load content\n• The lyrics are in an image format`,
+        url: bestUrl,
+      });
+      console.log("⚠️ Found page but could not extract lyrics");
+    }
+  } catch (error) {
+    console.error("Error searching Tamil lyrics:", error);
+    sources.push({
+      name: "Tamil Lyrics Search Error",
+      lyrics: `Failed to search Tamil lyrics for "${songTitle}" by ${artistName}".\n\n❌ **Error occurred:**\n${error.message}\n\n🔄 **Try again:**\n• Check your internet connection\n• Try a different search term\n• The website might be temporarily unavailable\n\n🌐 **Manual search:**\nTry searching manually: https://tamil2lyrics.com/?s=${encodeURIComponent(songTitle + " " + artistName)}`,
+      url: `https://tamil2lyrics.com/?s=${encodeURIComponent(songTitle + " " + artistName)}`,
+    });
+  }
+
+  return sources;
+}
+
+// Helper function to extract lyrics from a page
+async function extractLyricsFromPage(lyricsPage: any): Promise<string> {
+  // Common selectors for lyrics content on tamil2lyrics.com
+  const possibleSelectors = [
+    ".post-content",
+    ".entry-content",
+    ".content",
+    "article .entry",
+    ".lyrics",
+    '[class*="lyric"]',
+    ".post",
+    "main .content",
+    "#content .post",
+  ];
+
+  for (const selector of possibleSelectors) {
+    try {
+      const content = lyricsPage(selector).first();
+      if (content.length > 0) {
+        // Remove unwanted elements but preserve structure
+        content
+          .find("script, style, nav, header, footer, .navigation, .sidebar, .menu, .comment, .advertisement, .ads")
+          .remove();
+
+        let text = content.text().trim();
+
+        // Clean up the text while preserving lyrics structure
+        text = text
+          .split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line.length > 0)
+          .join("\n")
+          .replace(/\n{3,}/g, "\n\n") // Max 2 consecutive newlines
+          .trim();
+
+        // Check if this looks like lyrics content
+        if (text.length > 50 && text.split("\n").length > 3) {
+          console.log(`✅ Found lyrics using selector: ${selector}`);
+          return text.substring(0, 3000); // Limit to 3000 chars to avoid memory issues
+        }
+      }
+    } catch (e) {
+      continue;
+    }
+  }
+
+  return "";
 }
 
 // Component to show lyrics for a selected song
@@ -728,15 +991,26 @@ function LyricsView({ song, onBack }: { song: Song; onBack: () => void }) {
           console.log("Genius lyrics not available", geniusError);
         }
 
-        // If Genius fails, search alternative sources
+        // If Genius fails, search alternative sources or Tamil lyrics
         if (!lyricsFound) {
-          console.log("Searching alternative lyrics sources...");
-          const altSources = await searchAltLyrics(song.title, song.artist.name);
+          if (song.isTamilMode) {
+            console.log("Searching Tamil lyrics sources...");
+            const tamilSources = await searchTamilLyrics(song.title, song.artist.name);
 
-          if (altSources.length > 0) {
-            setLyrics(altSources[0].lyrics);
+            if (tamilSources.length > 0) {
+              setLyrics(tamilSources[0].lyrics);
+            } else {
+              throw new Error("Tamil lyrics not available from any source");
+            }
           } else {
-            throw new Error("Lyrics not available from any source");
+            console.log("Searching alternative lyrics sources...");
+            const altSources = await searchAltLyrics(song.title, song.artist.name);
+
+            if (altSources.length > 0) {
+              setLyrics(altSources[0].lyrics);
+            } else {
+              throw new Error("Lyrics not available from any source");
+            }
           }
         }
       } catch (err: any) {
