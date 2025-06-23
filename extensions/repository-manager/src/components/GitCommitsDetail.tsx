@@ -191,6 +191,19 @@ export default function GitCommitsDetail({ project }: GitCommitsDetailProps) {
                                     }}
                                 />
                                 <Action
+                                    title="Copy Commit Message"
+                                    icon={Icon.Clipboard}
+                                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
+                                    onAction={async () => {
+                                        Clipboard.copy(commit.message)
+                                        await showToast({
+                                            style: Toast.Style.Success,
+                                            title: 'Message copied',
+                                            message: `Message: ${commit.message}`,
+                                        })
+                                    }}
+                                />
+                                <Action
                                     title="Close"
                                     icon={Icon.XMarkCircle}
                                     onAction={() => pop()}
