@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/tuki0918/raycast-image-shield/refs/heads/main/assets/extension-icon.png" alt="Image Shield Icon" width="128" height="128">
+  <img src="https://raw.githubusercontent.com/tuki0918/raycast-image-shield/main/assets/extension-icon.png" alt="Image Shield Icon" width="128" height="128">
   <h1 align="center">Image Shield</h1>
 </div>
 
@@ -27,12 +27,12 @@ This extension provides two main security modes for image protection:
 
 ### Quick Call
 
-![](.docs/howto_instantcall.gif)
+![](https://raw.githubusercontent.com/tuki0918/raycast-image-shield/main/.docs/howto_instantcall.gif)
 
 <details>
 <summary>Default Call</summary>
 
-![](.docs/howto_use.gif)
+![](https://raw.githubusercontent.com/tuki0918/raycast-image-shield/main/.docs/howto_use.gif)
 
 </details>
 
