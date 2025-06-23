@@ -74,7 +74,7 @@ export interface SecretRequest {
   send_to_email?: string;
   secret_description?: string;
   secret_message?: string;
-  secret_expiration?: string;
+  secret_expiration?: number;
   secret_max_views?: number;
   secret_password?: boolean;
   template_id?: string | null;
