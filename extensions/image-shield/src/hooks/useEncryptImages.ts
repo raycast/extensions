@@ -4,7 +4,7 @@ import { type ManifestData } from "image-shield";
 import { findImages, getSelectedItems } from "../utils/helpers";
 import { encryptImagesWithKey, validateEncryptFiles } from "../lib/imageShield";
 import { SettingsFormValues } from "../components/SettingsForm";
-import { EncryptImagesFromValues } from "../components/EncryptImagesFrom";
+import { EncryptImagesFormValues } from "../components/EncryptImagesForm";
 import { dirExists } from "../utils/file";
 import { useLoadingState } from "./useLoadingState";
 import { MANIFEST_FILE_NAME } from "../constraints";
@@ -30,7 +30,7 @@ interface UseEncryptImagesResult {
   selectedFiles: SelectedFiles;
   initialize: () => Promise<void>;
   handleEncrypt: (imagePathsArg?: string[], workdirArg?: string, secretKey?: string) => Promise<void>;
-  handleFormSubmit: (values: EncryptImagesFromValues) => Promise<void>;
+  handleFormSubmit: (values: EncryptImagesFormValues) => Promise<void>;
 }
 
 export function useEncryptImages(settings: SettingsFormValues): UseEncryptImagesResult {
@@ -107,7 +107,7 @@ export function useEncryptImages(settings: SettingsFormValues): UseEncryptImages
   };
 
   // Form submit handler
-  async function handleFormSubmit(values: EncryptImagesFromValues) {
+  async function handleFormSubmit(values: EncryptImagesFormValues) {
     try {
       setIsLoading(true);
       setError(undefined);

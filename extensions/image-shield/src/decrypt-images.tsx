@@ -3,7 +3,7 @@ import PasswordForm from "./components/PasswordForm";
 import GridLoadingView from "./components/GridLoadingView";
 import GridRestoredImages from "./components/GridRestoredImages";
 import { useDecryptImages } from "./hooks/useDecryptImages";
-import DecryptImagesFrom from "./components/DecryptImagesFrom";
+import DecryptImagesForm from "./components/DecryptImagesForm";
 
 export default function Command() {
   const { isLoading, isInstantCall, data, selectedFiles, initialize, handleDecrypt } = useDecryptImages();
@@ -39,5 +39,5 @@ export default function Command() {
   }
 
   // Default form view
-  return <DecryptImagesFrom />;
+  return <DecryptImagesForm />;
 }

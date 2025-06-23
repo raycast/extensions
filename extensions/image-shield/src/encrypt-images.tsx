@@ -1,5 +1,5 @@
 import { usePromise } from "@raycast/utils";
-import EncryptImagesFrom from "./components/EncryptImagesFrom";
+import EncryptImagesForm from "./components/EncryptImagesForm";
 import { useEncryptImages } from "./hooks/useEncryptImages";
 import GridLoadingView from "./components/GridLoadingView";
 import { SettingsFormValues } from "./components/SettingsForm";
@@ -43,5 +43,5 @@ function EncryptImages({ settings }: { settings: SettingsFormValues }) {
   }
 
   // Default form view
-  return <EncryptImagesFrom settings={settings} />;
+  return <EncryptImagesForm settings={settings} />;
 }

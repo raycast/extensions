@@ -5,7 +5,7 @@ import PasswordForm from "./PasswordForm";
 import { useDecryptImages } from "../hooks/useDecryptImages";
 import { FormValidation, useForm } from "@raycast/utils";
 
-function DecryptImagesFrom() {
+function DecryptImagesForm() {
   const { isLoading, data, selectedFiles, handleDecrypt, handleFormSubmit } = useDecryptImages();
   const { handleSubmit, itemProps } = useForm<{ folders: string[] }>({
     onSubmit: handleFormSubmit,
@@ -51,4 +51,4 @@ function DecryptImagesFrom() {
   );
 }
 
-export default DecryptImagesFrom;
+export default DecryptImagesForm;

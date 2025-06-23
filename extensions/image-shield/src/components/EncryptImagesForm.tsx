@@ -6,15 +6,15 @@ import GridLoadingView from "./GridLoadingView";
 import GridEncryptedImages from "./GridEncryptedImages";
 import PasswordForm from "./PasswordForm";
 
-export interface EncryptImagesFromValues {
+export interface EncryptImagesFormValues {
   folders: string[];
   encrypted: boolean;
   outputDir: string[];
 }
 
-function EncryptImagesFrom({ settings }: { settings: SettingsFormValues }) {
+function EncryptImagesForm({ settings }: { settings: SettingsFormValues }) {
   const { isLoading, data, selectedFiles, handleEncrypt, handleFormSubmit } = useEncryptImages(settings);
-  const { handleSubmit, itemProps } = useForm<EncryptImagesFromValues>({
+  const { handleSubmit, itemProps } = useForm<EncryptImagesFormValues>({
     initialValues: {
       folders: [],
       encrypted: settings.encrypted,
@@ -82,4 +82,4 @@ function EncryptImagesFrom({ settings }: { settings: SettingsFormValues }) {
   );
 }
 
-export default EncryptImagesFrom;
+export default EncryptImagesForm;
