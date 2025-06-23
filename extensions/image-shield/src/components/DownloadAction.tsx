@@ -43,7 +43,7 @@ export function DownloadAllImagesAction({
           await Promise.all(
             imageBuffers.map(async (imageBuffer, i) => {
               return limit(async () => {
-                const imageInfo = manifest.images[i];
+                const imageInfo = manifest.images[i] ?? {};
                 const fileName = generateRestoredOriginalFileName(imageInfo) ?? generateRestoredFileName(manifest, i);
                 await writeRestoredImage(manifest, imageBuffer, fileName, workdir);
               });

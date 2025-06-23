@@ -14,7 +14,7 @@ function GridRestoredImages({ manifest, imageBuffers, workdir }: GridRestoredIma
   return (
     <Grid filtering={false} searchText="Restored Images" onSearchTextChange={() => {}}>
       {imageBuffers.map((imageBuffer, i) => {
-        const imageInfo = manifest.images[i];
+        const imageInfo = manifest.images[i] ?? {};
         const fileName = generateRestoredOriginalFileName(imageInfo) ?? generateRestoredFileName(manifest, i);
         return (
           <Grid.Item
