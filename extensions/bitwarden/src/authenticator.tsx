@@ -33,6 +33,7 @@ import { Err, Ok, Result, tryCatch } from "~/utils/errors";
 import { useVaultSearch } from "~/utils/search";
 import ListFolderDropdown from "~/components/ListFolderDropdown";
 import ComponentReverser from "~/components/ComponentReverser";
+import { useStateEffect } from "~/utils/hooks/useStateEffect";
 
 const AuthenticatorCommand = () => (
   <RootErrorBoundary>
@@ -279,7 +280,7 @@ const authenticator = {
     return Ok(new OTPAuth.TOTP(options));
   },
   useCode(item: Item, canGenerate = true) {
-    const [generator, error, isLoading = false] = useMemo(() => {
+    const [[generator, error, isLoading = false], setState] = useStateEffect(() => {
       const { totp } = item.login ?? {};
       if (!canGenerate) return Loading(new Error("Needs confirmation..."));
       if (totp === SENSITIVE_VALUE_PLACEHOLDER) return Loading(new Error("Loading..."));
@@ -301,28 +302,40 @@ const authenticator = {
       if (error) return;
 
       const setTimeAndCode = () => {
-        const timeRemaining = Math.ceil(generator.remaining() / 1000);
-        setTime(timeRemaining);
+        try {
+          const timeRemaining = Math.ceil(generator.remaining() / 1000);
+          setTime(timeRemaining);
 
-        if (timeRemaining === generator.period) {
-          setCode(generator.generate());
+          if (timeRemaining === generator.period) {
+            setCode(generator.generate());
+          }
+        } catch {
+          const error = new Error("ERR2: Failed to regenerate");
+          setState(Err(error));
+          captureException(error.message, error, { captureToRaycast: true });
         }
       };
 
-      let interval: NodeJS.Timeout | undefined;
-      // set an initial timeout to ensure the first evaluation is time accurate
-      // and then keep evaluating every second
-      const timeout = setTimeout(() => {
-        setTimeAndCode();
-        interval = setInterval(setTimeAndCode, 1000);
-      }, generator.remaining() % 1000);
+      try {
+        let interval: NodeJS.Timeout | undefined;
+        // set an initial timeout to ensure the first evaluation is time accurate
+        // and then keep evaluating every second
+        const timeout = setTimeout(() => {
+          setTimeAndCode();
+          interval = setInterval(setTimeAndCode, 1000);
+        }, generator.remaining() % 1000);
 
-      setCode(generator.generate()); // first generation before the interval starts
+        setCode(generator.generate()); // first generation before the interval starts
 
-      return () => {
-        clearTimeout(timeout);
-        clearInterval(interval);
-      };
+        return () => {
+          clearTimeout(timeout);
+          clearInterval(interval);
+        };
+      } catch {
+        const error = new Error("ERR1: Failed to generate");
+        setState(Err(error));
+        captureException(error.message, error, { captureToRaycast: true });
+      }
     }, [item, generator]);
 
     return { code, time, error, isLoading };
