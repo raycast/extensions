@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ios-apps",
+  "title": "iOS App Search",
+  "description": "Search, view, and download iOS apps from the App Store.",
+  "icon": "extension-icon.png",
+  "author": "chrismessina",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Apps",
+      "subtitle": "iOS App Search",
+      "description": "Search for iOS apps on the App Store",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "download-app",
+      "title": "Download iOS App",
+      "description": "Download an iOS app"
+    },
+    {
+      "name": "get-app-details",
+      "title": "Get iOS App Details",
+      "description": "Get detailed information about an iOS app by name or search term"
+    },
+    {
+      "name": "search-apps",
+      "title": "Search iOS Apps",
+      "description": "Search for iOS apps on the App Store by name or keyword"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "appleId",
+      "title": "Apple ID Email",
+      "description": "Your Apple ID email for authentication",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "password",
+      "title": "Apple ID Password",
+      "description": "Your Apple ID password for authentication",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "enableAppDownloads",
+      "description": "Enable ipatool integration to download .ipa files.",
+      "title": "App Downloads",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "downloadPath",
+      "description": "Path to save downloaded app files and screenshots",
+      "title": "Download location",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": false
+    },
+    {
+      "name": "homebrewPath",
+      "description": "Path to the Homebrew executable. You can enter `which brew` in terminal to find its path.",
+      "title": "Homebrew Path",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/brew",
+      "required": false
+    },
+    {
+      "name": "ipatoolPath",
+      "description": "Path to the ipatool executable. You can enter `which ipatool` in terminal to find its path.",
+      "title": "ipatool Path",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/ipatool",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.17.0",
+    "@types/react-dom": "^19.1.2",
+    "@types/stream-json": "^1.7.8",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "stream-chain": "^2.2.5",
+    "stream-json": "^1.9.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^20.10.2",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "^19.1.2",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "evals": "npx ray evals"
+  }
+}
