@@ -12,6 +12,7 @@ export default function TranslateForm() {
   const langFrom = selectedLanguageSet.langFrom;
   const langTo = Array.isArray(selectedLanguageSet.langTo) ? selectedLanguageSet.langTo[0] : selectedLanguageSet.langTo;
   const { proxy } = usePreferences();
+  const textInputRef = React.useRef<Form.TextArea>(null);
   const toLangInputRef = React.useRef<Form.Dropdown>(null);
   const fromLangInputRef = React.useRef<Form.Dropdown>(null);
   const setLangFrom = (l: LanguageCode) => setSelectedLanguageSet({ ...selectedLanguageSet, langFrom: l });
@@ -90,7 +91,7 @@ export default function TranslateForm() {
                   setSelectedLanguageSet({ langFrom: langTo, langTo: [langFrom] });
                 }
               }}
-              title={`${toLangObj.name} <-> ${fromLangObj.name}`}
+              title={`${autoDetectedLanguage?.name ?? fromLangObj.name} <-> ${toLangObj.name}`}
             />
             <Action
               shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
@@ -110,12 +111,15 @@ export default function TranslateForm() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="text" title="Text" value={text} onChange={handleChange} />
+      <Form.TextArea id="text" title="Text" value={text} onChange={handleChange} ref={textInputRef} />
       <Form.Dropdown
         id="language_from"
         title="From"
         value={autoDetectedLanguage?.code ?? langFrom}
-        onChange={(v) => setLangFrom(v as LanguageCode)}
+        onChange={(v) => {
+          setLangFrom(v as LanguageCode);
+          textInputRef.current?.focus();
+        }}
         storeValue
         ref={fromLangInputRef}
       >
@@ -130,7 +134,10 @@ export default function TranslateForm() {
         id="language_to"
         title="To"
         value={langTo}
-        onChange={(v) => setLangTo(v as LanguageCode)}
+        onChange={(v) => {
+          setLangTo(v as LanguageCode);
+          textInputRef.current?.focus();
+        }}
         storeValue
         ref={toLangInputRef}
       >
