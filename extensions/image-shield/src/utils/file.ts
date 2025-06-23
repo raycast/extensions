@@ -41,7 +41,6 @@ export async function dirExists(dir: string) {
 /**
  * Create a directory if it does not exist
  * @param dir Directory path
- * @returns True if the directory was created, false if it already existed
  */
 export async function createDirIfNotExists(dir: string) {
   if (await dirExists(dir)) {
