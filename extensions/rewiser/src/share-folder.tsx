@@ -1,4 +1,5 @@
 import { Detail, ActionPanel, Action, showToast, Toast, List, Icon, Color, Clipboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState, useCallback } from "react";
 import { getValidToken, AuthenticationError } from "./utils/auth";
 import { fetchFolders, createShareLink, ApiError } from "./utils/api";
@@ -45,11 +46,7 @@ export default function Command() {
   const handleCreateShareLink = useCallback(
     async (folder: Folder) => {
       if (!token) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Authentication required",
-        });
+        await showFailureToast("Authentication required");
         return;
       }
 

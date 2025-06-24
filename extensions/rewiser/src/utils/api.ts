@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   Folder,
   Transaction,
@@ -148,22 +148,14 @@ export async function fetchFolders(token: string): Promise<Folder[]> {
     return validFolders;
   } catch (error) {
     if (error instanceof ApiError) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error loading folders",
-        message: error.message,
-      });
+      await showFailureToast(error.message);
       throw error;
     }
 
     logger.error("API request failed", error);
     const apiError = new ApiError(error instanceof Error ? error.message : "Network request failed", "NETWORK_ERROR");
 
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error loading folders",
-      message: apiError.message,
-    });
+    await showFailureToast(apiError.message);
 
     throw apiError;
   }
@@ -338,6 +330,10 @@ export async function manageShareFolder(token: string, request: ShareRequest): P
       throw new ApiError(response.error || "Share operation failed", "SHARE_ERROR");
     }
 
+    if (!response.data) {
+      throw new ApiError("No data returned from share operation", "NO_DATA");
+    }
+
     return response.data!;
   } catch (error) {
     if (error instanceof ApiError) {
@@ -354,7 +350,10 @@ export async function createShareLink(token: string, folderId: string): Promise<
     folder_id: folderId,
     action: "create",
   });
-  return result as ShareLink;
+  if (Array.isArray(result)) {
+    throw new ApiError("Expected single share link, got array", "INVALID_RESPONSE");
+  }
+  return result;
 }
 
 export async function getShareLinks(token: string, folderId: string): Promise<ShareLink[]> {
@@ -362,7 +361,10 @@ export async function getShareLinks(token: string, folderId: string): Promise<Sh
     folder_id: folderId,
     action: "list",
   });
-  return result as ShareLink[];
+  if (!Array.isArray(result)) {
+    throw new ApiError("Expected array of share links, got single object", "INVALID_RESPONSE");
+  }
+  return result;
 }
 
 export async function deleteShareLink(token: string, folderId: string, shareCode: string): Promise<void> {

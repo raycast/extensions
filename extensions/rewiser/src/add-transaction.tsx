@@ -1,4 +1,5 @@
 import { Detail, ActionPanel, Action, showToast, Toast, List, Icon, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState, useCallback } from "react";
 import { getValidToken, AuthenticationError } from "./utils/auth";
 import { fetchFolders, addTransaction, ApiError } from "./utils/api";
@@ -69,30 +70,18 @@ export default function Command() {
 
   const handleSendMessage = useCallback(async () => {
     if (!token) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Authentication required",
-        message: ERROR_MESSAGES.NO_TOKEN,
-      });
+      await showFailureToast(ERROR_MESSAGES.NO_TOKEN);
       return;
     }
 
     const trimmedInput = inputText.trim();
     if (!trimmedInput) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid input",
-        message: ERROR_MESSAGES.EMPTY_INPUT,
-      });
+      await showFailureToast(ERROR_MESSAGES.EMPTY_INPUT);
       return;
     }
 
     if (!selectedFolder) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Folder required",
-        message: "Please select a folder first",
-      });
+      await showFailureToast("Please select a folder first");
       return;
     }
 

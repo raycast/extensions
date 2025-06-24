@@ -1,4 +1,5 @@
 import { Detail, ActionPanel, Action, showToast, Toast, List, Icon, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState, useCallback } from "react";
 import { getValidToken, AuthenticationError } from "./utils/auth";
 import { fetchFolders, fetchMonthTransactions, updateTransaction, ApiError } from "./utils/api";
@@ -77,17 +78,9 @@ export default function Command() {
       logger.error("Failed to load transactions", error);
 
       if (error instanceof ApiError) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error loading transactions",
-          message: error.message,
-        });
+        await showFailureToast(error.message);
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error loading transactions",
-          message: ERROR_MESSAGES.TRANSACTION_LOAD_ERROR,
-        });
+        await showFailureToast(ERROR_MESSAGES.TRANSACTION_LOAD_ERROR);
       }
     } finally {
       setLoadingTransactions(false);
@@ -107,11 +100,7 @@ export default function Command() {
   const handleUpdateTransaction = useCallback(
     async (transactionId: string, action: "toggle" | "delete") => {
       if (!token) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Authentication required",
-          message: ERROR_MESSAGES.NO_TOKEN,
-        });
+        await showFailureToast(ERROR_MESSAGES.NO_TOKEN);
         return;
       }
 

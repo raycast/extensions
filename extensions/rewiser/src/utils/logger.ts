@@ -20,7 +20,11 @@ function formatMessage(level: string, message: string, data?: unknown): string {
   const prefix = `[${timestamp}] [${level}] [Rewiser]`;
 
   if (data) {
-    return `${prefix} ${message} ${JSON.stringify(data)}`;
+    try {
+      return `${prefix} ${message} ${JSON.stringify(data)}`;
+    } catch {
+      return `${prefix} ${message} [Circular/Non-serializable data]`;
+    }
   }
 
   return `${prefix} ${message}`;
