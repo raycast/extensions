@@ -1,6 +1,10 @@
 # Workouts Changelog
 
-## [🐛 Fix Desktop Path] - {PR_MERGE_DATE}
+## [Windows release] - 2025-06-24
+
+- Make available on Windows
+
+## [🐛 Fix Desktop Path] - 2025-06-23
 
 Fixes a bug where the desktop path was not being correctly resolved on Windows.
 
