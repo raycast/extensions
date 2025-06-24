@@ -39,7 +39,7 @@ export type Team = {
 
 export interface MLBTeam extends Team {
   stats: {
-    runs: string;
+    runs: number;
     hits: number;
     errors: number;
   };

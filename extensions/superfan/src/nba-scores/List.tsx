@@ -13,6 +13,7 @@ export default function ScoresList() {
           .map((game) => {
             return (
               <List.Item
+                key={game.id}
                 title={`${game.homeTeam.abbreviation} ${game.homeTeam.stats.score}, ${game.awayTeam.abbreviation} ${game.awayTeam.stats.score}`}
                 accessories={[{ text: game.status.description }]}
                 detail={<ListDetail homeTeam={game.homeTeam} awayTeam={game.awayTeam} lastPlay={game.lastPlay} />}
@@ -26,6 +27,7 @@ export default function ScoresList() {
           .map((game) => {
             return (
               <List.Item
+                key={game.id}
                 title={`${game.homeTeam.abbreviation} ${game.homeTeam.stats.score}, ${game.awayTeam.abbreviation} ${game.awayTeam.stats.score}`}
                 accessories={[{ text: game.status.description }]}
                 detail={<ListDetail homeTeam={game.homeTeam} awayTeam={game.awayTeam} lastPlay={game.lastPlay} />}
@@ -39,6 +41,7 @@ export default function ScoresList() {
           .map((game) => {
             return (
               <List.Item
+                key={game.id}
                 title={`${game.homeTeam.abbreviation} ${game.homeTeam.stats.score}, ${game.awayTeam.abbreviation} ${game.awayTeam.stats.score}`}
                 accessories={[{ text: game.status.description }]}
                 detail={<ListDetail homeTeam={game.homeTeam} awayTeam={game.awayTeam} lastPlay={game.lastPlay} />}

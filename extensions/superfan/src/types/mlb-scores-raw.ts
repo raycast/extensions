@@ -87,7 +87,7 @@ export interface Competition {
   wasSuspended: boolean;
   venue: Venue;
   competitors: Competitor[];
-  notes: [];
+  notes: Note[];
   status: Status;
   broadcasts: Broadcast[];
   leaders: Leader3[];
@@ -99,6 +99,11 @@ export interface Competition {
   headlines?: Headline[];
   situation?: Situation;
   outsText?: string;
+}
+
+export interface Note {
+  type: string;
+  headline: string;
 }
 
 export interface Type2 {

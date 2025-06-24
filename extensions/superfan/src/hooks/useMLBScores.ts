@@ -9,7 +9,7 @@ export const logoCache = new Map<string, string>();
 
 export async function fetchAllLogos() {
   const fetchPromises = teamIds.map(async (id) => {
-    const response = await fetch(`http://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/${id}`);
+    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/${id}`);
     const data: RootTwo = await response.json();
     logoCache.set(id, data?.team.logos[1]?.href);
   });
@@ -19,7 +19,7 @@ export async function fetchAllLogos() {
 
 export default function useMLBScores() {
   const { isLoading, data, revalidate } = useFetch<Root>(
-    "http://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard",
+    "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard",
   );
   const gameData = cleanRawMlbScores(data);
 

@@ -2,6 +2,8 @@ import { Root, Event, Competitor } from "../types/mlb-scores-raw";
 import { Game, MLBTeam } from "../types/mlb-scores";
 
 function mapCompetitorToMLBTeam(c: Competitor): MLBTeam {
+  const runsString = c.score ?? "0";
+
   return {
     id: c.team.id,
     name: c.team.name,
@@ -9,7 +11,7 @@ function mapCompetitorToMLBTeam(c: Competitor): MLBTeam {
     logo: c.team.logo,
     record: c.records?.[0]?.summary ?? "0-0",
     stats: {
-      runs: c.score ?? "0",
+      runs: +runsString,
       hits: c.hits ?? 0,
       errors: c.errors ?? 0,
     },

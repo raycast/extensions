@@ -158,10 +158,15 @@ export interface Competition {
   ticketsAvailable: boolean;
   venue: Venue2;
   competitors: Competitor[];
-  notes: [];
+  notes: Note[];
   broadcasts: Broadcast[];
   tickets: Ticket[];
   status: Status;
+}
+
+export interface Note {
+  type: string;
+  headline: string;
 }
 
 export interface Type {

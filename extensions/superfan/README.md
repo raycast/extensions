@@ -2,7 +2,7 @@
 
 View the scores and live in-game details about your favorite teams and sports.
 
-![Superfan Screenshot](https://github.com/icomey8/superfan/blob/main/metadata/superfan-1.png)
+![Superfan Screenshot](./metadata/superfan-1.png)
 
 
 ## Features 
