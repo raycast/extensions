@@ -1556,6 +1556,7 @@
 /extensions/rectangle                                               @crickford
 /extensions/recurly                                                 @kudrykv
 /extensions/reddit-search                                           @ewlcheng
+/extensions/redirect-trace                                          @nurkamol
 /extensions/redis                                                   @k8scat
 /extensions/redmine                                                 @jwickers
 /extensions/reflect                                                 @RyonHuedepohl @joshknowles @tylerwince @ocavue @theomjones @ErBlack
