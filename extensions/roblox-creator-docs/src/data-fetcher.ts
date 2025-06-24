@@ -59,7 +59,7 @@ interface SubitemData {
 class RobloxDocsDataFetcher {
   private cache: Cache;
   private cacheKey = "roblox-docs-data";
-  private cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours
+  private cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours as fallback
 
   // Memory optimization constants
   private readonly BATCH_SIZE = 25; // Process files in smaller batches
@@ -74,21 +74,60 @@ class RobloxDocsDataFetcher {
     console.log("Cache cleared");
   }
 
+  private async getLatestCommitSha(): Promise<string | null> {
+    try {
+      const response = await fetch("https://api.github.com/repos/Roblox/creator-docs/commits/main");
+      if (!response.ok) {
+        console.error(`Failed to fetch commit info: ${response.statusText}`);
+        return null;
+      }
+      const data = (await response.json()) as { sha: string };
+      return data.sha;
+    } catch (error) {
+      console.error("Error fetching latest commit SHA:", error);
+      return null;
+    }
+  }
+
   async fetchDocsData(): Promise<DocItem[]> {
+    // Get the latest commit SHA first
+    const latestSha = await this.getLatestCommitSha();
+
     // Check cache first
     const cachedData = this.cache.get(this.cacheKey);
     if (cachedData) {
       try {
         const parsed = JSON.parse(cachedData);
         const now = Date.now();
-        if (now - parsed.timestamp < this.cacheExpiry) {
-          console.log(`Using cached docs data (${parsed.data.length} items)`);
+
+        // Check if we have a SHA and it matches the latest SHA
+        if (latestSha && parsed.sha && parsed.sha === latestSha) {
+          console.log(`Using cached docs data - SHA match (${parsed.data.length} items)`);
           // If cached data is empty, force a fresh fetch
           if (parsed.data.length === 0) {
             console.log("Cached data is empty, forcing fresh fetch");
           } else {
             return parsed.data;
           }
+        }
+        // Fallback to time-based check if SHA comparison fails
+        else if (!latestSha && now - parsed.timestamp < this.cacheExpiry) {
+          console.log(`Using cached docs data - time-based fallback (${parsed.data.length} items)`);
+          if (parsed.data.length === 0) {
+            console.log("Cached data is empty, forcing fresh fetch");
+          } else {
+            return parsed.data;
+          }
+        }
+        // Log cache invalidation reason
+        else if (latestSha && parsed.sha && parsed.sha !== latestSha) {
+          console.log(
+            `Cache invalidated - SHA mismatch (cached: ${parsed.sha.substring(0, 8)}, latest: ${latestSha.substring(0, 8)})`,
+          );
+        } else if (latestSha && !parsed.sha) {
+          console.log("Cache invalidated - no SHA in cached data, upgrading cache format");
+        } else {
+          console.log("Cache invalidated - fallback time expiration");
         }
       } catch (error) {
         console.error("Error parsing cached data:", error);
@@ -111,10 +150,11 @@ class RobloxDocsDataFetcher {
 
       console.log(`Successfully processed ${docItems.length} documentation items`);
 
-      // Cache the results
+      // Cache the results with SHA and timestamp
       const cacheData = {
         data: docItems,
         timestamp: Date.now(),
+        sha: latestSha, // Store the SHA for future comparisons
       };
       this.cache.set(this.cacheKey, JSON.stringify(cacheData));
 

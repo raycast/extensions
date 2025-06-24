@@ -66,7 +66,7 @@ export default function Command() {
       showToast({
         style: Toast.Style.Animated,
         title: "Loading Roblox Creator Docs...",
-        message: "This may take a moment on first run",
+        message: "Checking for updates...",
       });
 
       const docs = await dataFetcher.fetchDocsData();
