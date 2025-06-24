@@ -62,9 +62,9 @@ function resolveYtDlpPath(): string {
 
   // 2. Try common installation paths first
   const commonPaths = [
-    "/opt/homebrew/bin/yt-dlp",  // Homebrew on Apple Silicon
-    "/usr/local/bin/yt-dlp",     // Homebrew on Intel Mac
-    "/usr/bin/yt-dlp",           // Linux common path
+    "/opt/homebrew/bin/yt-dlp", // Homebrew on Apple Silicon
+    "/usr/local/bin/yt-dlp", // Homebrew on Intel Mac
+    "/usr/bin/yt-dlp", // Linux common path
   ];
 
   for (const path of commonPaths) {
@@ -78,7 +78,7 @@ function resolveYtDlpPath(): string {
     return which.sync("yt-dlp");
   } catch (e) {
     throw new Error(
-      "yt-dlp executable not found. Please install yt-dlp and ensure it is in your PATH, or set the YT_DLP_PATH environment variable."
+      "yt-dlp executable not found. Please install yt-dlp and ensure it is in your PATH, or set the YT_DLP_PATH environment variable.",
     );
   }
 }
@@ -87,7 +87,7 @@ function resolveYtDlpPath(): string {
 const ytDlpPath = resolveYtDlpPath();
 
 // Remove old execCommand and execCommandSafe, and replace with a robust execFile-based implementation
-function execCommand(executable: string, args: string[]): Promise<{ stdout: string; stderr: string; }> {
+function execCommand(executable: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
     execFile(executable, args, { shell: false }, (error, stdout, stderr) => {
       if (error) {
@@ -107,24 +107,21 @@ async function validateYtDlpInstallation(): Promise<void> {
     await execCommand(ytDlpPath, ["--version"]);
   } catch (error) {
     throw new Error(
-      "yt-dlp is not installed or not found in your PATH. Please install yt-dlp and ensure it is accessible from the command line."
+      "yt-dlp is not installed or not found in your PATH. Please install yt-dlp and ensure it is accessible from the command line.",
     );
   }
 }
 
 async function getYouTubeTranscriptAsPlainText(
   videoUrl: string,
-  language: string = "en"
-): Promise<{ transcript: string | null; videoTitle: string | null; }> {
+  language: string = "en",
+): Promise<{ transcript: string | null; videoTitle: string | null }> {
   // Ensure yt-dlp is installed before proceeding
   await validateYtDlpInstallation();
 
   // Generate a unique temporary filename and output template
   const timestamp = Date.now();
-  const baseOutputPath = path.join(
-    os.tmpdir(),
-    `temp_transcript_${timestamp}`
-  );
+  const baseOutputPath = path.join(os.tmpdir(), `temp_transcript_${timestamp}`);
 
   // The VTT file will be created with the appropriate language extension
   const tempFilePath = `${baseOutputPath}.${language}.vtt`;
@@ -137,11 +134,11 @@ async function getYouTubeTranscriptAsPlainText(
     const { stdout: titleStdout, stderr: titleStderr } = await execCommand(ytDlpPath, titleArgs);
     videoTitle = titleStdout.trim();
     if (titleStderr && titleStderr.toLowerCase().includes("fail")) {
-      console.error('Failed to get video title:', titleStderr);
+      console.error("Failed to get video title:", titleStderr);
       // Continue without the title if we can't get it
     }
   } catch (titleError) {
-    console.error('Error fetching video title:', titleError);
+    console.error("Error fetching video title:", titleError);
     // Continue without the title
   }
 
@@ -149,9 +146,11 @@ async function getYouTubeTranscriptAsPlainText(
   const commandArgs = [
     "--write-auto-subs",
     "--skip-download",
-    "--sub-lang", language,
-    "--output", baseOutputPath,
-    videoUrl
+    "--sub-lang",
+    language,
+    "--output",
+    baseOutputPath,
+    videoUrl,
   ];
 
   let rawTranscriptContent: string | null = null; // Initialize as null
@@ -170,10 +169,7 @@ async function getYouTubeTranscriptAsPlainText(
         encoding: "utf8",
       });
     } catch (fileReadError: unknown) {
-      const errorMessage =
-        fileReadError instanceof Error
-          ? fileReadError.message
-          : String(fileReadError);
+      const errorMessage = fileReadError instanceof Error ? fileReadError.message : String(fileReadError);
       // We don't need to log the temporary file path
       throw new Error(`Failed to read transcript file: ${errorMessage}`); // Re-throw as a clear error
     }
@@ -215,15 +211,9 @@ async function getYouTubeTranscriptAsPlainText(
     finalTranscript = finalTranscript.replace(/\s*Kind:\s*captions\s*Language:\s*[a-z]{2}(\s|\n)+/gi, " ");
 
     return { transcript: finalTranscript, videoTitle };
-
   } catch (execOrFileError: unknown) {
-    const errorMessage =
-      execOrFileError instanceof Error
-        ? execOrFileError.message
-        : String(execOrFileError);
-    console.error(
-      `An error occurred during transcript retrieval: ${errorMessage}`
-    );
+    const errorMessage = execOrFileError instanceof Error ? execOrFileError.message : String(execOrFileError);
+    console.error(`An error occurred during transcript retrieval: ${errorMessage}`);
     throw new Error(`Transcript retrieval failed: ${errorMessage}`);
   } finally {
     // This block always runs, whether there's an error or not
@@ -263,7 +253,7 @@ function sanitizeFilename(filename: string): string {
 }
 
 // Main command function
-export default async function Command(props: { arguments: { videoUrl: string; }; }) {
+export default async function Command(props: { arguments: { videoUrl: string } }) {
   const { videoUrl } = props.arguments;
 
   if (!videoUrl) {
