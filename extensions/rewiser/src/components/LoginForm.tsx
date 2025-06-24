@@ -12,10 +12,7 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
 
   const handleLogin = async () => {
     if (!token.trim()) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Enter your API token",
-      });
+      showFailureToast("Enter your API token");
       return;
     }
 
