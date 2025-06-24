@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Icon, openExtensionPreferences } from "@raycast/api";
 import { ReactNode } from "react";
-import { copyToClipboard, getCCUsageCommand } from "../../utils/data-formatter";
+import { getCCUsageCommand } from "../../utils/data-formatter";
 
 export type ExternalLink = {
   title: string;
@@ -15,11 +15,7 @@ type StandardActionsProps = {
 export function StandardActions({ customActions, externalLinks }: StandardActionsProps) {
   return (
     <ActionPanel>
-      <Action
-        title="Copy Ccusage Command"
-        icon={Icon.Clipboard}
-        onAction={() => copyToClipboard(getCCUsageCommand(), "Copied ccusage command to clipboard")}
-      />
+      <Action.CopyToClipboard title="Copy Ccusage Command" content={getCCUsageCommand()} icon={Icon.Clipboard} />
       <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
 
       {customActions}
