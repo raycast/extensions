@@ -28,9 +28,9 @@
         {
           "name": "respectAppearance",
           "title": "Appearance",
-          "description": "Respect system appearance when setting wallpaper.",
+          "description": "Only show wallpapers that match the system appearance.",
           "type": "checkbox",
-          "default": true,
+          "default": false,
           "required": false,
           "label": "Respect System Appearance"
         },

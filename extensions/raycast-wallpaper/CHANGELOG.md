@@ -1,5 +1,9 @@
 # Raycast Wallpaper Changelog
 
+## [Update default setting] - 2025-06-24
+
+- Update default setting of `Respect System Appearance` to `false` for "Set Raycast Wallpaper" command.
+
 ## [More Auto Switch Interval] - 2025-06-23
 
 - Auto Switch Raycast Wallpaper command supports more intervals
