@@ -1,48 +1,43 @@
-import { List, Icon, ActionPanel, Action, openExtensionPreferences, Color } from "@raycast/api";
-import { ReactNode } from "react";
-import { SessionData } from "../types/usage-types";
-import { formatTokens, formatCost, copyToClipboard, getCcusageCommand } from "../utils/data-formatter";
+import { List, Icon } from "@raycast/api";
+import { ReactNode, useMemo } from "react";
+import { formatTokens, formatCost } from "../utils/data-formatter";
 import { formatDistanceToNow } from "date-fns";
 import {
   calculateAverageSessionCost,
   calculateAverageSessionTokens,
   calculateEfficiencyMetrics,
 } from "../utils/usage-calculator";
+import { useSessionUsage } from "../hooks/useSessionUsage";
+import { ErrorMetadata } from "./ErrorMetadata";
+import { StandardActions } from "./common/StandardActions";
+import { STANDARD_ACCESSORIES } from "./common/accessories";
+import { MESSAGES } from "../utils/messages";
 
-// Display limit for latest sessions
 const MAX_SESSIONS_DISPLAY = 5;
 
-type SessionUsageProps = {
-  sessions: SessionData[];
-  isLoading: boolean;
-  error?: string;
-  settingsActions?: ReactNode;
-};
+export function SessionUsage() {
+  const { recentSessions: sessions, isLoading, error } = useSessionUsage();
 
-export function SessionUsage({ sessions, isLoading, error, settingsActions }: SessionUsageProps) {
-  const getDetailMetadata = (): ReactNode => {
-    if (error) {
-      return (
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Error" text="ccusage is not available" icon={Icon.ExclamationMark} />
-          <List.Item.Detail.Metadata.Label title="Solution" text="Please configure JavaScript runtime in Preferences" />
-        </List.Item.Detail.Metadata>
-      );
+  const accessories = error
+    ? STANDARD_ACCESSORIES.ERROR
+    : !sessions || sessions.length === 0
+      ? [{ text: "No sessions", icon: Icon.Circle }]
+      : [{ text: `${sessions.length} sessions`, icon: Icon.List }];
+  const renderDetailMetadata = (): ReactNode => {
+    const errorMetadata = ErrorMetadata({
+      error,
+      noDataMessage: !sessions || sessions.length === 0 ? "No recent sessions found" : undefined,
+      noDataSubMessage:
+        !sessions || sessions.length === 0 ? `Sessions will appear here ${MESSAGES.AFTER_USAGE}` : undefined,
+    });
+
+    if (errorMetadata) {
+      return errorMetadata;
     }
 
-    if (!sessions || sessions.length === 0) {
-      return (
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Status" text="No recent sessions found" icon={Icon.Circle} />
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Note" text="Sessions will appear here after using Claude Code" />
-        </List.Item.Detail.Metadata>
-      );
-    }
-
-    const averageCost = calculateAverageSessionCost(sessions);
-    const averageTokens = calculateAverageSessionTokens(sessions);
-    const efficiency = calculateEfficiencyMetrics(sessions);
+    const averageCost = useMemo(() => calculateAverageSessionCost(sessions), [sessions]);
+    const averageTokens = useMemo(() => calculateAverageSessionTokens(sessions), [sessions]);
+    const efficiency = useMemo(() => calculateEfficiencyMetrics(sessions), [sessions]);
 
     return (
       <List.Item.Detail.Metadata>
@@ -77,23 +72,11 @@ export function SessionUsage({ sessions, isLoading, error, settingsActions }: Se
           <List.Item.Detail.Metadata.Label
             key={session.sessionId || index}
             title={session.sessionId}
-            text={`${formatTokens(session.totalTokens)} • ${formatCost(session.cost)} • ${formatDistanceToNow(new Date(session.startTime || session.lastActivity), { addSuffix: true })}`}
+            text={`${formatTokens(session.totalTokens)} • ${formatCost(session.totalCost)} • ${formatDistanceToNow(new Date(session.lastActivity), { addSuffix: true })}`}
           />
         ))}
       </List.Item.Detail.Metadata>
     );
-  };
-
-  const getAccessories = (): List.Item.Accessory[] => {
-    if (error) {
-      return [{ text: "Setup required", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
-    }
-
-    if (!sessions || sessions.length === 0) {
-      return [{ text: "No sessions", icon: Icon.Circle }];
-    }
-
-    return [{ text: `${sessions.length} sessions`, icon: Icon.List }];
   };
 
   return (
@@ -101,22 +84,9 @@ export function SessionUsage({ sessions, isLoading, error, settingsActions }: Se
       id="sessions"
       title="Sessions"
       icon={Icon.List}
-      accessories={getAccessories()}
-      detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
-      actions={
-        <ActionPanel>
-          <Action
-            title="Copy Ccusage Command"
-            icon={Icon.Clipboard}
-            onAction={() => copyToClipboard(getCcusageCommand(), "Copied ccusage command to clipboard")}
-          />
-          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-          {settingsActions}
-          <ActionPanel.Section>
-            <Action.OpenInBrowser title="View Session Data" url="https://claude.ai/code" icon={Icon.Clock} />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
+      accessories={accessories}
+      detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
+      actions={<StandardActions />}
     />
   );
 }
