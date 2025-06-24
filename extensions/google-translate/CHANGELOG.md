@@ -5,6 +5,8 @@
 - Auto-focus on Text input after changing source or target language
 - Add shortcuts for quick focus on Source(`CMD + SHIFT + F`) and Target(`CMD + SHIFT + T`) language fields
 - Use auto-detected language when switching languages
+- Fix quick translate with Chinese auto detected language
+- Fix translate compatibility with old Country Codes format for people who had Chinese saved for example and some more languages
 
 ## [Fix] - 2025-06-23
 
