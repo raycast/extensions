@@ -78,9 +78,12 @@ export default function Command() {
       logger.error("Failed to load transactions", error);
 
       if (error instanceof ApiError) {
-        await showFailureToast(error.message);
+        showFailureToast(error, { title: "Error loading transactions" });
       } else {
-        await showFailureToast(ERROR_MESSAGES.TRANSACTION_LOAD_ERROR);
+        showFailureToast(ERROR_MESSAGES.TRANSACTION_LOAD_ERROR, {
+          title: "Error loading transactions",
+          message: ERROR_MESSAGES.TRANSACTION_LOAD_ERROR,
+        });
       }
     } finally {
       setLoadingTransactions(false);

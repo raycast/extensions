@@ -27,6 +27,8 @@ export class ApiError extends Error {
 
 async function makeApiRequest<T>(url: string, token: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
   const perfLogger = new PerformanceLogger(`API Request: ${options.method || "GET"} ${url}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CONFIG.API_TIMEOUT);
 
   try {
     logger.apiRequest(
@@ -43,9 +45,6 @@ async function makeApiRequest<T>(url: string, token: string, options: RequestIni
         : undefined,
     );
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), CONFIG.API_TIMEOUT);
-
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -56,7 +55,6 @@ async function makeApiRequest<T>(url: string, token: string, options: RequestIni
       ...options,
     });
 
-    clearTimeout(timeoutId);
     logger.apiResponse(url, response.status);
 
     if (!response.ok) {
@@ -78,6 +76,8 @@ async function makeApiRequest<T>(url: string, token: string, options: RequestIni
     logger.apiError(url, error);
     perfLogger.finish("Network Error");
     throw new ApiError(error instanceof Error ? error.message : "Network request failed", "NETWORK_ERROR");
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
