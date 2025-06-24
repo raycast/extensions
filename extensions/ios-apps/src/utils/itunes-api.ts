@@ -39,19 +39,19 @@ export function convertITunesResultToAppDetails(
     sellerName: itunesData.sellerName || base.sellerName || "Unknown Developer",
     price: itunesData.price?.toString() || base.price || "0",
     genres: itunesData.genres && itunesData.genres.length > 0 ? itunesData.genres : base.genres || [],
-    size: itunesData.fileSizeBytes || base.size || "0",
+    size: itunesData.fileSizeBytes?.toString() || base.size || "0",
     contentRating: itunesData.contentAdvisoryRating || base.contentRating || "",
     // Set the artwork URLs from iTunes API
-    artworkUrl60: itunesData.artworkUrl60 || base.artworkUrl60,
-    artworkUrl512: itunesData.artworkUrl512 || base.artworkUrl512,
+    artworkUrl60: itunesData.artworkUrl60 || base.artworkUrl60 || "",
+    artworkUrl512: itunesData.artworkUrl512 || base.artworkUrl512 || "",
     // Additional iTunes-specific fields
-    averageUserRating: itunesData.averageUserRating || base.averageUserRating,
+    averageUserRating: itunesData.averageUserRating || base.averageUserRating || 0,
     averageUserRatingForCurrentVersion:
-      itunesData.averageUserRatingForCurrentVersion || base.averageUserRatingForCurrentVersion,
-    userRatingCount: itunesData.userRatingCount || base.userRatingCount,
+      itunesData.averageUserRatingForCurrentVersion || base.averageUserRatingForCurrentVersion || 0,
+    userRatingCount: itunesData.userRatingCount || base.userRatingCount || 0,
     userRatingCountForCurrentVersion:
-      itunesData.userRatingCountForCurrentVersion || base.userRatingCountForCurrentVersion,
-    releaseDate: itunesData.releaseDate || base.releaseDate,
+      itunesData.userRatingCountForCurrentVersion || base.userRatingCountForCurrentVersion || 0,
+    releaseDate: itunesData.releaseDate || base.releaseDate || "",
     currentVersionReleaseDate: itunesData.currentVersionReleaseDate || base.currentVersionReleaseDate,
     trackViewUrl: itunesData.trackViewUrl || base.trackViewUrl,
     artistViewUrl: itunesData.artistViewUrl || base.artistViewUrl,
@@ -222,13 +222,13 @@ export async function downloadScreenshots(
         genres: [],
         size: "",
         contentRating: "",
-        artworkUrl60: undefined,
+        artworkUrl60: "",
       };
     }
 
     // Now use the scraper to get high-resolution screenshots from the App Store website
     console.log(`[Screenshot Downloader] Scraping App Store website for high-resolution screenshots`);
-    const screenshots = await scrapeAppStoreScreenshots(appDetails);
+    const screenshots = await scrapeAppStoreScreenshots(appDetails!);
 
     if (screenshots.length === 0) {
       console.error(`[Screenshot Downloader] No screenshots found for ${bundleId}`);
@@ -341,10 +341,10 @@ export async function downloadScreenshots(
       `App Store Screenshots (High Resolution)`,
       `=====================================`,
       ``,
-      `App Name: ${appDetails.name}`,
-      `Bundle ID: ${appDetails.bundleId}`,
-      `App ID: ${appDetails.id}`,
-      `Version: ${appDetails.version}`,
+      `App Name: ${appDetails!.name}`,
+      `Bundle ID: ${appDetails!.bundleId}`,
+      `App ID: ${appDetails!.id}`,
+      `Version: ${appDetails!.version}`,
       ``,
       `Downloaded on: ${new Date().toISOString()}`,
       ``,
