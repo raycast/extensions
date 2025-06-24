@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-06-24
 
 - Auto-focus on Text input after changing source or target language
 - Add shortcuts for quick focus on Source(`CMD + SHIFT + F`) and Target(`CMD + SHIFT + T`) language fields
