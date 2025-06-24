@@ -35,6 +35,10 @@ export async function clearToken(): Promise<void> {
     await LocalStorage.removeItem(USER_NAME_KEY);
     await LocalStorage.removeItem(USER_EMAIL_KEY);
 
+    await LocalStorage.removeItem(TOKEN_KEY);
+    await LocalStorage.removeItem(USER_NAME_KEY);
+    await LocalStorage.removeItem(USER_EMAIL_KEY);
+
     await showToast({
       style: Toast.Style.Success,
       title: "Signed Out",
