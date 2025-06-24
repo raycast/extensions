@@ -1,9 +1,18 @@
 # Google Translate Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Feature] - 2025-06-24
 
+- Auto-focus on Text input after changing source or target language
+- Add shortcuts for quick focus on Source(`CMD + SHIFT + F`) and Target(`CMD + SHIFT + T`) language fields
+- Use auto-detected language when switching languages
+- Fix quick translate with Chinese auto detected language
+- Fix translate compatibility with old Country Codes format for people who had Chinese saved for example and some more languages
 - Fixed proxy for doubleWayTranslate
 - Add proxy for TTS
+
+## [Fix] - 2025-06-23
+
+- Fix uppercase ISO language codes (fix Chinese and some other languages)
 
 ## [Maintenance] - 2025-06-19
 

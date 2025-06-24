@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2025-06-24
+
+- More authenticator error handling to prevent "TypeError: t is not a function" error
+
 ## [Fix] - 2025-06-05
 
 - Fix attempt for authenticator "TypeError: t is not a function" error
