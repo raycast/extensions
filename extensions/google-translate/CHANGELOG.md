@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-06-24
 
 - Fix quick translate with Chinese auto detected language
 
