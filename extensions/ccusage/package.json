@@ -84,27 +84,28 @@
     }
   ],
   "ai": {
-    "instructions": "Analyze Claude Code usage statistics and costs. All cost values are in USD ($). When displaying costs, include the $ symbol. Focus on providing accurate usage metrics and cost analysis.",
+    "instructions": "Analyze Claude Code usage statistics and costs. All cost values are in USD ($). When displaying costs, include the $ symbol. You can convert USD amounts to other currencies when requested (JPY, EUR, etc.).",
     "evals": [
       {
-        "prompt": "What is my usage today?",
-        "description": "Should call get-daily-usage tool to retrieve today's statistics",
-        "input": "{}"
+        "input": "@ccusage What's my total cost?"
       },
       {
-        "prompt": "Show me my monthly breakdown",
-        "description": "Should call get-monthly-usage tool with model breakdown information",
-        "input": "{\"breakdown\": true}"
+        "input": "@ccusage Show me this month's daily breakdown"
       },
       {
-        "prompt": "How many sessions did I have recently?",
-        "description": "Should call get-session-usage tool to show recent session data",
-        "input": "{}"
+        "input": "@ccusage Show me my usage trends"
       },
       {
-        "prompt": "What's my total usage across all time?",
-        "description": "Should call get-total-usage tool for comprehensive statistics",
-        "input": "{}"
+        "input": "@ccusage What's my daily average cost?"
+      },
+      {
+        "input": "@ccusage Which model costs me the most?"
+      },
+      {
+        "input": "@ccusage Show me my recent sessions"
+      },
+      {
+        "input": "@ccusage Convert my total cost to yen"
       }
     ]
   },

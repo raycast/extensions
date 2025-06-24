@@ -12,8 +12,6 @@ type Input = {
   until?: string;
   /** Sort order */
   order?: "desc" | "asc";
-  /** Cost calculation mode */
-  mode?: "auto" | "calculate" | "display";
   /** Show per-model cost breakdown */
   breakdown?: boolean;
   /** Use offline mode */
@@ -60,10 +58,6 @@ export default async function getMonthlyUsage(input?: Input): Promise<{
 
   if (input?.order) {
     command += ` --order ${input.order}`;
-  }
-
-  if (input?.mode) {
-    command += ` --mode ${input.mode}`;
   }
 
   if (input?.breakdown) {
