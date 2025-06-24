@@ -11,8 +11,13 @@ export function ErrorMetadata({ error, noDataMessage, noDataSubMessage }: ErrorM
   if (error) {
     return (
       <List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label title="Error" text="ccusage is not available" icon={Icon.ExclamationMark} />
-        <List.Item.Detail.Metadata.Label title="Solution" text="Please configure JavaScript runtime in Preferences" />
+        <List.Item.Detail.Metadata.Label title="Error" text="ccusage command failed" icon={Icon.ExclamationMark} />
+        <List.Item.Detail.Metadata.Separator />
+        <List.Item.Detail.Metadata.Label title="Setup Guide" text="1. Run 'npx ccusage@latest' in Terminal" />
+        <List.Item.Detail.Metadata.Label title="Next Step" text="2. Find path with 'which npx'" />
+        <List.Item.Detail.Metadata.Label title="Configuration" text="3. Add path to Extension Preferences" />
+        <List.Item.Detail.Metadata.Separator />
+        <List.Item.Detail.Metadata.Label title="Quick Fix" text="Open Preferences (Cmd+Shift+,)" icon={Icon.Gear} />
       </List.Item.Detail.Metadata>
     );
   }

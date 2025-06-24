@@ -1,5 +1,4 @@
 import { MenuBarExtra, Icon, Color, open, openExtensionPreferences } from "@raycast/api";
-import { useCCUsageAvailability } from "./hooks/useCCUsageAvailability";
 import { useDailyUsage } from "./hooks/useDailyUsage";
 import { useMonthlyUsage } from "./hooks/useMonthlyUsage";
 import { useTotalUsage } from "./hooks/useTotalUsage";
@@ -7,14 +6,12 @@ import { formatCost, formatTokensAsMTok } from "./utils/data-formatter";
 import { TotalUsageData } from "./types/usage-types";
 
 export default function MenuBarccusage() {
-  const { isAvailable, isLoading: availabilityLoading, error: availabilityError } = useCCUsageAvailability();
-
   const { data: todayUsage, isLoading: dailyLoading, error: dailyError } = useDailyUsage();
   const { data: monthlyUsage, isLoading: monthlyLoading, error: monthlyError } = useMonthlyUsage();
   const { data: totalUsage, isLoading: totalLoading, error: totalError } = useTotalUsage();
 
-  const hasError = availabilityError || dailyError || monthlyError || totalError;
-  const isLoading = availabilityLoading || dailyLoading || monthlyLoading || totalLoading;
+  const hasError = dailyError || monthlyError || totalError;
+  const isLoading = dailyLoading || monthlyLoading || totalLoading;
 
   if (isLoading) {
     return (
@@ -23,34 +20,6 @@ export default function MenuBarccusage() {
         tooltip="Loading Claude usage..."
         isLoading={true}
       />
-    );
-  }
-
-  if (!isAvailable) {
-    const errorTitle = "ccusage is not available";
-    const errorMessage = "Please configure runtime and path in Preferences";
-
-    return (
-      <MenuBarExtra icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }} tooltip={errorTitle}>
-        <MenuBarExtra.Item
-          title={errorTitle}
-          subtitle={errorMessage}
-          icon={Icon.ExclamationMark}
-          onAction={openExtensionPreferences}
-        />
-        <MenuBarExtra.Item
-          title="Open Preferences"
-          subtitle="Configure custom npx path if needed"
-          icon={Icon.Gear}
-          onAction={openExtensionPreferences}
-        />
-        <MenuBarExtra.Item
-          title="Learn more about ccusage"
-          subtitle="Open GitHub repository"
-          icon={Icon.Code}
-          onAction={() => open("https://github.com/ryoppippi/ccusage")}
-        />
-      </MenuBarExtra>
     );
   }
 
@@ -85,9 +54,21 @@ export default function MenuBarccusage() {
         <MenuBarExtra.Section title="Error">
           <MenuBarExtra.Item
             title={typeof hasError === "string" ? hasError : hasError.message}
-            subtitle="Check your ccusage installation"
+            subtitle="ccusage command failed"
             icon={Icon.ExclamationMark}
             onAction={openExtensionPreferences}
+          />
+          <MenuBarExtra.Item
+            title="Open Preferences"
+            subtitle="Configure custom npx path"
+            icon={Icon.Gear}
+            onAction={openExtensionPreferences}
+          />
+          <MenuBarExtra.Item
+            title="Learn more about ccusage"
+            subtitle="Open GitHub repository"
+            icon={Icon.Code}
+            onAction={() => open("https://github.com/ryoppippi/ccusage")}
           />
         </MenuBarExtra.Section>
       )}
