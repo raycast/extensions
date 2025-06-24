@@ -1,26 +1,34 @@
-# Rewiser
+# Rewiser for Raycast
 
-Add transactions to Rewiser using natural language.
+Easily add and manage financial transactions in your Rewiser account — directly from Raycast.
 
-## Features
+## 🧠 Features
 
-- **Add Transaction (RewiserAI)**: Add transactions by simply describing them naturally
-- **Monthly Transactions**: View and search your current month's transactions
+- **Add Transaction (RewiserAI)**  
+  Quickly create transactions by typing natural language input.  
+  Example:
+  - `Coffee at Starbucks 6.50 euros`
+  - `Freelance payment 1200 dollars income`
 
-## Usage
+- **Monthly Transactions**  
+  View and search your current month's expenses and income.
+  - Toggle between paid and planned
+  - Delete entries
+  - Real-time search filtering
 
-### Adding Transactions
+## 🚀 How to Use
 
-Simply describe your transaction in natural language:
+1. Create an account on [Rewiser](https://rewiser.io)
+2. Log in and generate a personal API key from your profile
+3. Open the Raycast command: **Rewiser: Add Transaction**
+4. Enter a natural sentence describing the transaction
+5. Or use **Rewiser: Monthly Transactions** to browse and manage your records
 
-- "Coffee at Starbucks 6.50 euros"
-- "Freelance payment 1200 dollars income"
-- "Grocery shopping 89.30"
+## 🔐 Requirements
 
-### Viewing Transactions
+- A Rewiser account
+- Personal API Key from the Rewiser Web App
 
-Browse and search through your monthly transactions with real-time filtering.
-
-## Requirements
-
-You need a Rewiser account to use this extension.
+> To use this extension, sign up at [rewiser.io](https://rewiser.io) and create your personal API key.
+> For demo access or testing credentials, contact us at hello@rewiser.io
+> All data is handled securely through Rewiser’s API. No sensitive data is stored locally.
