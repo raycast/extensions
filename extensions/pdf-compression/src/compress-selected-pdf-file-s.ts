@@ -18,6 +18,14 @@ export default async function main() {
     try {
       // Call the Swift function
       const result = await compressPDF(pdf.path);
+      if (result.savedPercentage === 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `No improvement`,
+          message: `${fileName} could not be compressed further.`,
+        });
+        return;
+      }
       // Copy compressed file to the same directory as the original, with ' - compressed' appended
       const originalDir = dirname(pdf.path);
       const originalBase = basename(pdf.path, extname(pdf.path));
