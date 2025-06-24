@@ -31,7 +31,7 @@ export default async function downloadIosApp(input: Input) {
     }
 
     const app = searchResults[0];
-    bundleId = app.bundleID;
+    bundleId = app.bundleId;
     appName = app.name;
     appVersion = app.version;
     price = app.price.toString();
@@ -56,7 +56,7 @@ export default async function downloadIosApp(input: Input) {
       version: appVersion,
     };
   } catch (error) {
-    console.error(`[download-app tool] Error: ${error}`);
-    throw new Error(`Failed to download app: ${error}`);
+    console.error(`[download-app tool] Error:`, error);
+    throw new Error(`Failed to download app${error instanceof Error ? `: ${error.message}` : ""}`, { cause: error });
   }
 }

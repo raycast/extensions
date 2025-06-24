@@ -357,12 +357,21 @@ function extractHighestResolutionUrl(srcset: string): string | null {
   return highResUrl || null;
 }
 
+// App Store image resolution constants
+// Apple provides various image resolutions, 2000x0w is typically the highest quality available
+const APP_STORE_IMAGE_RESOLUTIONS = {
+  HIGHEST: "2000x0w", // Highest resolution typically available
+  MEDIUM: "1000x0w", // Medium resolution
+  LOW: "500x0w", // Lower resolution for bandwidth-constrained environments
+};
+
 /**
  * Transform App Store URLs to get original/highest resolution images
  * @param url Screenshot URL from the App Store
- * @returns URL to the highest resolution version
+ * @param resolution Optional resolution to use (defaults to highest available)
+ * @returns URL to the requested resolution version
  */
-export function getHighestResolutionUrl(url: string): string {
+export function getHighestResolutionUrl(url: string, resolution = APP_STORE_IMAGE_RESOLUTIONS.HIGHEST): string {
   // The App Store often uses URLs like:
   // https://is1-ssl.mzstatic.com/image/thumb/PurpleSource126/v4/aa/bb/cc/aabbcc-image.png/230x0w.webp
 
@@ -379,8 +388,8 @@ export function getHighestResolutionUrl(url: string): string {
       // This prioritizes PNG over WebP as requested
       const fileExt = "png";
 
-      // Return the URL with the highest resolution
-      return `${basePart}2000x0w.${fileExt}`;
+      // Return the URL with the requested resolution
+      return `${basePart}${resolution}.${fileExt}`;
     }
 
     // If not an App Store URL or doesn't match the expected format, return as is

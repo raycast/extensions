@@ -20,6 +20,12 @@ export function useAppDetails(initialApp: AppDetails): UseAppDetailsResult {
 
   useEffect(() => {
     async function loadEnrichedAppDetails() {
+      // Skip if we don't have the minimum required data
+      if (!initialApp.bundleId) {
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
 
@@ -35,7 +41,15 @@ export function useAppDetails(initialApp: AppDetails): UseAppDetailsResult {
     }
 
     loadEnrichedAppDetails();
-  }, [initialApp.bundleId]);
+  }, [
+    initialApp.bundleId,
+    initialApp.id,
+    initialApp.name,
+    initialApp.version,
+    initialApp.artistName,
+    initialApp.artworkUrl60,
+    initialApp.artworkUrl512,
+  ]);
 
   return {
     app,

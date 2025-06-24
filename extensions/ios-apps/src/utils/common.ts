@@ -10,9 +10,14 @@ const execAsync = promisify(exec);
  * Logs in to Apple ID using ipatool and user preferences.
  */
 async function loginToAppleId(): Promise<void> {
-  await execAsync(
-    `${IPATOOL_PATH} auth login -e "${preferences.appleId}" -p "${preferences.password}" --format json --non-interactive`,
-  );
+  // Use environment variables to pass credentials securely
+  const env = {
+    ...process.env,
+    IPATOOL_EMAIL: preferences.appleId,
+    IPATOOL_PASSWORD: preferences.password,
+  };
+
+  await execAsync(`${IPATOOL_PATH} auth login --format json --non-interactive`, { env });
   console.log("Successfully authenticated with Apple ID");
 }
 

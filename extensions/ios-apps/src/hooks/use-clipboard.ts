@@ -1,4 +1,5 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * Hook for clipboard operations
@@ -12,8 +13,12 @@ export function useClipboard() {
    * @param toastMessage Optional message for the toast notification
    */
   const copyToClipboard = async (text: string, toastTitle: string, toastMessage = "Copied to clipboard") => {
-    await Clipboard.copy(text);
-    showToast(Toast.Style.Success, toastTitle, toastMessage);
+    try {
+      await Clipboard.copy(text);
+      showToast(Toast.Style.Success, toastTitle, toastMessage);
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to copy to clipboard" });
+    }
   };
 
   return {

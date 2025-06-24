@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { debounce } from "lodash";
 import { AppDetails } from "../types";
@@ -9,7 +9,7 @@ import { IPATOOL_PATH } from "../utils/paths";
 import { ensureAuthenticated } from "../utils/common";
 import { enrichAppDetails } from "../utils/itunes-api";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 interface UseAppSearchResult {
   apps: AppDetails[];
@@ -48,9 +48,25 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500, limit = 2
       // Ensure the user is authenticated
       await ensureAuthenticated();
 
-      // Search for apps - using the correct flag --format json
-      const { stdout, stderr } = await execAsync(
-        `${IPATOOL_PATH} search "${query}" --limit ${limit} --format json --non-interactive`,
+      // Check if query is empty
+      if (!query.trim()) {
+        throw new Error("Search query is required");
+      }
+
+      // Search for apps using execFile with proper argument passing
+      // execFile properly handles argument escaping to prevent command injection
+      const { stdout, stderr } = await execFileAsync(
+        IPATOOL_PATH,
+        [
+          "search",
+          query.trim(), // Use original query - execFile handles escaping
+          "--limit",
+          limit.toString(),
+          "--format",
+          "json",
+          "--non-interactive",
+        ],
+        { shell: false },
       );
 
       if (stderr) {
@@ -69,12 +85,12 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500, limit = 2
       const mappedApps: AppDetails[] = ipaApps.map((app) => ({
         id: app.id.toString(),
         name: app.name,
-        bundleId: app.bundleID.toLowerCase(), // Use lowercase bundleId as per AppDetails interface
+        bundleId: app.bundleId.toLowerCase(), // Use lowercase bundleId as per AppDetails interface
         version: app.version,
         price: app.price.toString(),
         artistName: app.developer,
         // Required fields from AppDetails interface
-        artworkUrl60: undefined,
+        artworkUrl60: "",
         iconUrl: "",
         sellerName: app.developer,
         size: "",
@@ -91,6 +107,8 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500, limit = 2
         trackViewUrl: "",
         artistViewUrl: "",
         isGameCenterEnabled: false,
+        averageUserRatingForCurrentVersion: 0,
+        userRatingCountForCurrentVersion: 0,
       }));
 
       // Enrich the app details with iTunes API data
@@ -121,7 +139,7 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500, limit = 2
     debounce((query: string) => {
       performSearch(query);
     }, debounceMs),
-    [],
+    [performSearch, debounceMs], // Include all external dependencies to prevent stale closures
   );
 
   // Update search when text changes

@@ -5,14 +5,14 @@ import { ensureAuthenticated, safeJsonParse, extractFilePath } from "./utils/com
 import { fetchITunesAppDetails, convertITunesResultToAppDetails } from "./utils/itunes-api";
 import path from "path";
 import fs from "fs";
-import { exec, spawn } from "child_process";
+import { spawn, execFile } from "child_process";
 import { AppDetails, IpaToolSearchApp, IpaToolSearchResponse } from "./types";
 
 // Retry configuration for handling transient network errors
 const MAX_RETRIES = 3; // Maximum number of retry attempts
 const INITIAL_RETRY_DELAY = 2000; // Initial delay between retries (2 seconds)
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 /**
  * Search for iOS apps using ipatool
@@ -33,9 +33,17 @@ export async function searchApps(query: string, limit = 20): Promise<IpaToolSear
     }
 
     // Execute the search command with proper formatting and non-interactive mode
-    const searchCommand = `${IPATOOL_PATH} search "${query}" -l ${limit} --format json --non-interactive`;
-    console.log(`[ipatool] Executing search command: ${searchCommand}`);
-    const { stdout } = await execAsync(searchCommand);
+    // Using execFile with array arguments to prevent command injection
+    console.log(`[ipatool] Executing search for query: ${query} with limit: ${limit}`);
+    const { stdout } = await execFileAsync(IPATOOL_PATH, [
+      "search",
+      query,
+      "-l",
+      limit.toString(),
+      "--format",
+      "json",
+      "--non-interactive",
+    ]);
 
     // Parse the JSON output with fallback to empty response if parsing fails
     console.log(`[ipatool] Received search response, parsing JSON...`);
@@ -399,10 +407,17 @@ export async function getAppDetails(bundleId: string) {
       }
     }
 
-    // Execute the search command
-    const searchCommand = `${IPATOOL_PATH} search "${searchTerm}" -l 20 --format json --non-interactive`;
-    console.log(`[ipatool] Executing search command: ${searchCommand}`);
-    const { stdout } = await execAsync(searchCommand);
+    // Execute the search command using execFile to prevent command injection
+    console.log(`[ipatool] Executing search for term: ${searchTerm}`);
+    const { stdout } = await execFileAsync(IPATOOL_PATH, [
+      "search",
+      searchTerm,
+      "-l",
+      "20",
+      "--format",
+      "json",
+      "--non-interactive",
+    ]);
 
     // Parse the JSON output with fallback to null if parsing fails
     console.log(`[ipatool] Received search response, parsing JSON...`);
@@ -414,12 +429,12 @@ export async function getAppDetails(bundleId: string) {
     }
 
     // Find the exact bundle ID match in the search results
-    const exactMatch = searchResponse.apps.find((app) => app.bundleID === bundleId);
+    const exactMatch = searchResponse.apps.find((app) => app.bundleId === bundleId);
 
     // If no exact match is found, use the first result as a fallback
     const app = exactMatch || searchResponse.apps[0];
     console.log(
-      `[ipatool] ${exactMatch ? "Found exact match" : "No exact match found, using first result"}: ${app.name} (${app.bundleID})`,
+      `[ipatool] ${exactMatch ? "Found exact match" : "No exact match found, using first result"}: ${app.name} (${app.bundleId})`,
     );
 
     // Create a basic result with the data we have from ipatool search
@@ -427,8 +442,8 @@ export async function getAppDetails(bundleId: string) {
       id: app.id.toString(),
       name: app.name,
       version: app.version,
-      bundleId: app.bundleID,
-      artworkUrl60: undefined,
+      bundleId: app.bundleId,
+      artworkUrl60: "",
       description: "",
       iconUrl: "",
       sellerName: app.developer,
@@ -436,20 +451,27 @@ export async function getAppDetails(bundleId: string) {
       genres: [],
       size: "0",
       contentRating: "",
+      artistName: "",
+      artworkUrl512: "",
+      averageUserRating: 0,
+      averageUserRatingForCurrentVersion: 0,
+      userRatingCount: 0,
+      userRatingCountForCurrentVersion: 0,
+      releaseDate: "",
     };
 
     // Try to fetch additional details from iTunes API for the app we found
-    if (app.bundleID !== bundleId) {
-      console.log(`[ipatool] Trying to fetch iTunes data for found app: ${app.bundleID}`);
-      const appItunesDetails = await fetchITunesAppDetails(app.bundleID);
+    if (app.bundleId !== bundleId) {
+      console.log(`[ipatool] Trying to fetch iTunes data for found app: ${app.bundleId}`);
+      const appItunesDetails = await fetchITunesAppDetails(app.bundleId);
 
       if (appItunesDetails) {
-        console.log(`[ipatool] Enriching app details with iTunes data for ${app.bundleID}`);
+        console.log(`[ipatool] Enriching app details with iTunes data for ${app.bundleId}`);
 
         // Use the utility function to convert iTunes data to AppDetails
         result = convertITunesResultToAppDetails(appItunesDetails, result);
       } else {
-        console.log(`[ipatool] Could not fetch iTunes data for ${app.bundleID}, using basic details only`);
+        console.log(`[ipatool] Could not fetch iTunes data for ${app.bundleId}, using basic details only`);
       }
     }
 

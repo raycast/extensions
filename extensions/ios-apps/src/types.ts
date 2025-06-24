@@ -1,6 +1,7 @@
 // src/types.ts - Type definitions for the extension
 export interface AppDetails {
-  artworkUrl60: string | undefined;
+  artistName: string;
+  artworkUrl60: string;
   id: string;
   bundleId: string;
   name: string;
@@ -13,12 +14,12 @@ export interface AppDetails {
   size: string;
   contentRating: string;
   // iTunes API additional fields
-  artworkUrl512?: string;
-  averageUserRating?: number;
-  averageUserRatingForCurrentVersion?: number;
-  userRatingCount?: number;
-  userRatingCountForCurrentVersion?: number;
-  releaseDate?: string;
+  artworkUrl512: string;
+  averageUserRating: number;
+  averageUserRatingForCurrentVersion: number;
+  userRatingCount: number;
+  userRatingCountForCurrentVersion: number;
+  releaseDate: string;
   currentVersionReleaseDate?: string;
   trackViewUrl?: string;
   artistViewUrl?: string;
@@ -61,7 +62,7 @@ export interface ITunesResult {
   currentVersionReleaseDate: string;
   description: string;
   features: string[];
-  fileSizeBytes: string;
+  fileSizeBytes: number;
   formattedPrice: string;
   genreIds: string[];
   genres: string[];
@@ -91,7 +92,7 @@ export interface ITunesResult {
 // Interface for ipatool search results
 export interface IpaToolSearchApp {
   id: number;
-  bundleID: string;
+  bundleId: string;
   name: string;
   version: string;
   price: number;

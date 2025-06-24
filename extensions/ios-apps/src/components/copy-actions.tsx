@@ -11,8 +11,12 @@ interface CopyActionsProps {
 export function CopyActions({ app }: CopyActionsProps) {
   // Function to copy text to clipboard
   async function copyToClipboard(text: string, toastTitle: string) {
-    await Clipboard.copy(text);
-    showToast(Toast.Style.Success, toastTitle, "Copied to clipboard");
+    try {
+      await Clipboard.copy(text);
+      showToast(Toast.Style.Success, toastTitle, "Copied to clipboard");
+    } catch (error) {
+      showToast(Toast.Style.Failure, "Failed to copy", "Could not copy to clipboard");
+    }
   }
 
   // Create a fallback App Store URL if trackViewUrl is not available
@@ -55,7 +59,7 @@ export function CopyActions({ app }: CopyActionsProps) {
         <Action
           title="Copy Developer URL"
           icon={Icon.Link}
-          onAction={() => copyToClipboard(app.artistViewUrl!, "Developer URL")}
+          onAction={() => copyToClipboard(app.artistViewUrl || "", "Developer URL")}
         />
       )}
     </ActionPanel.Section>

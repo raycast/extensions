@@ -35,7 +35,7 @@ export default async function getIosAppDetails(input: Input) {
         throw new Error(`No apps found matching "${input.query}"`);
       }
 
-      bundleId = searchResults[0].bundleID;
+      bundleId = searchResults[0].bundleId;
       console.log(`[get-app-details tool] Found app with bundle ID: ${bundleId}`);
     }
 

@@ -1,12 +1,11 @@
 # iOS App Search
 
-<i>Search, download, and view iOS apps from the App Store.</i>
+_Search, download, and view iOS apps from the App Store._
 
-<img src="./metadata/screenshot-1.png" width="700">
-<img src="./metadata/screenshot-2.png" width="700">
-<img src="./metadata/screenshot-3.png" width="700">
-<img src="./metadata/screenshot-4.png" width="700">
-
+![screenshot-1](./metadata/screenshot-1.png){ width="700" }
+![screenshot-2](./metadata/screenshot-2.png){ width="700" }
+![screenshot-3](./metadata/screenshot-3.png){ width="700" }
+![screenshot-4](./metadata/screenshot-4.png){ width="700" }
 
 ## Features
 
@@ -59,11 +58,10 @@ This extension provides several AI tools that can be used with Raycast AI to enh
 
 Search for iOS apps on the App Store by name or keyword.
 
-```
-Search iOS Apps "Spotify"
-```
+> Search iOS Apps "Spotify"
 
 Options:
+
 - `query`: The search query for finding iOS apps (required)
 - `limit`: Maximum number of results to return (optional, default: 10, max: 20)
 
@@ -71,22 +69,20 @@ Options:
 
 Get detailed information about an iOS app by name or search term.
 
-```
-Get iOS App Details "Airbnb"
-```
+> Get iOS App Details "Airbnb"
 
 Options:
+
 - `query`: The name or search term for the iOS app (required)
 
 ### Download iOS App
 
 Download an iOS app directly to your computer.
 
-```
-Download iOS App "Instagram"
-```
+> Download iOS App "Instagram"
 
 Options:
+
 - `query`: The name or search term for the iOS app (required)
 
 The download tool will search for the app, retrieve its details, and download the IPA file to your specified download directory.
@@ -105,6 +101,7 @@ Downloaded apps are saved as IPA files to your specified downloads directory (de
 ## Privacy
 
 This extension:
+
 - Does not collect or transmit any personal data
 - Only communicates with Apple's servers via the ipatool CLI and iTunes API
 - Stores no credentials within the extension itself
@@ -121,5 +118,5 @@ This extension:
 
 - [ipatool](https://github.com/majd/ipatool) by Majd Alfhaily
 - [iTunes Search API](https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/index.html) by Apple
-- [Windsurf](https://codeium.com/refer?referral_code=650bebd9a5) by Codeium
+- [Windsurf](https://windsurf.com/)
 - [Claude 3.7](https://claude.ai) by Anthropic

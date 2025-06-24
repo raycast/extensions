@@ -169,8 +169,8 @@
     "@types/stream-json": "^1.7.8",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "stream-chain": "^2.2.5",
     "stream-json": "^1.9.1"
   },

@@ -35,7 +35,7 @@ export default function AppDetailView({ app: initialApp }: AppDetailViewProps) {
   // Get the app icon URL with fallbacks (prioritizing higher resolution)
   // Uses artworkUrl512 first, then falls back to artworkUrl60, then iconUrl
   const iconUrl = app.artworkUrl512 || app.artworkUrl60 || app.iconUrl || "";
-  console.log(`[AppDetailView] Rendering app: ${app.name}, version: ${app.version}, bundleID: ${app.bundleId}`);
+  console.log(`[AppDetailView] Rendering app: ${app.name}, version: ${app.version}, bundleId: ${app.bundleId}`);
   console.log("[AppDetailView] Using icon URL:", iconUrl);
 
   // Create a fallback App Store URL if trackViewUrl is not available
@@ -98,8 +98,8 @@ ${app.screenshotUrls.map((url, index) => `![Screenshot ${index + 1}](${url}?rayc
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Genres">
             {app.genres && app.genres.length > 0 ? (
-              app.genres.map((genre, index) => (
-                <Detail.Metadata.TagList.Item key={index} text={genre} color={Color.PrimaryText} />
+              app.genres.map((genre) => (
+                <Detail.Metadata.TagList.Item key={genre} text={genre} color={Color.PrimaryText} />
               ))
             ) : (
               <Detail.Metadata.TagList.Item text="No genres available" color={Color.SecondaryText} />

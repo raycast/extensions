@@ -1,5 +1,5 @@
 import { List, Icon } from "@raycast/api";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { formatPrice } from "./utils/paths";
 import { renderStarRating, formatDate } from "./utils/common";
 import { AppActionPanel } from "./components/app-action-panel";
@@ -12,16 +12,19 @@ export default function Search() {
   const { apps, isLoading, error, totalResults, setSearchText: setSearchFromHook } = useAppSearch(searchText, 500);
   const { downloadApp } = useAppDownload();
 
+  // Create a reusable search handler to avoid duplicate code
+  const handleSearchTextChange = useCallback(
+    (text: string) => {
+      setSearchText(text);
+      setSearchFromHook(text);
+    },
+    [setSearchText, setSearchFromHook],
+  );
+
   // If no search text has been entered yet, show a custom empty view
   if (!searchText) {
     return (
-      <List
-        onSearchTextChange={(text) => {
-          setSearchText(text);
-          setSearchFromHook(text);
-        }}
-        isLoading={isLoading}
-      >
+      <List onSearchTextChange={handleSearchTextChange} isLoading={isLoading}>
         <List.EmptyView
           title="Type Query to Search"
           description="Search for apps by name, developer, or bundle Id."
@@ -34,10 +37,7 @@ export default function Search() {
   return (
     <List
       isLoading={isLoading}
-      onSearchTextChange={(text) => {
-        setSearchText(text);
-        setSearchFromHook(text);
-      }}
+      onSearchTextChange={handleSearchTextChange}
       searchBarPlaceholder="Search for iOS apps..."
       throttle
       navigationTitle="Search iOS Apps"
