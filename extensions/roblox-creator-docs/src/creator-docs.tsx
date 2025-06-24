@@ -139,6 +139,16 @@ export default function Command() {
         return "🔢";
       case "global":
         return "🌐";
+      case "property":
+        return "🔶";
+      case "method":
+        return "🔵";
+      case "event":
+        return "⚡";
+      case "callback":
+        return "🔄";
+      case "function":
+        return "🟢";
       default:
         return "📄";
     }

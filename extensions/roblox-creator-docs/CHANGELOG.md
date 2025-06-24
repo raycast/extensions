@@ -1,3 +1,3 @@
-# ROBLOX Creator Docs Changelog
+# Roblox Creator Docs Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
