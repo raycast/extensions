@@ -33,6 +33,7 @@
     {
       "name": "transaction-list",
       "title": "Monthly Transactions",
+      "subtitle": "Rewiser",
       "description": "Select a folder to view and manage transactions from the current month",
       "mode": "view",
       "command": "src/transaction-list.tsx"
