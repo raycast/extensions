@@ -10,7 +10,7 @@ import { stringToJSON } from "../utils/string-to-json-schema";
 export const useCCUsageDailyCli = () => {
   const npxCommand = preferences.customNpxPath || "npx";
 
-  return useExec(npxCommand, ["ccusage@latest", "daily", "--json"], {
+  const result = useExec(npxCommand, ["ccusage@latest", "daily", "--json"], {
     ...getExecOptions(),
     parseOutput: ({ stdout }) => {
       if (!stdout) {
@@ -32,8 +32,11 @@ export const useCCUsageDailyCli = () => {
         title: "Retry",
         onAction: (toast) => {
           toast.hide();
+          result.revalidate();
         },
       },
     },
   });
+
+  return result;
 };
