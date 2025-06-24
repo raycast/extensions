@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-06-24
 
 - More authenticator error handling to prevent "TypeError: t is not a function" error
 
