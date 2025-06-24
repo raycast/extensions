@@ -1,0 +1,86 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "raycast-erpnext-extension",
+	"title": "Erpnext Integration",
+	"description": "Query DocTypes, view items, and create new documents in Frappe ERPNext",
+	"icon": "command-icon.png",
+	"author": "jakob",
+	"categories": [
+		"Productivity"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "search",
+			"title": "Global Search",
+			"description": "Search across all documents in your ERPNext instance",
+			"mode": "view",
+			"arguments": [
+				{
+					"name": "query",
+					"placeholder": "Search query",
+					"type": "text",
+					"required": false
+				},
+				{
+					"name": "doctype",
+					"placeholder": "DocType (optional)",
+					"type": "text",
+					"required": false
+				}
+			]
+		},
+		{
+			"name": "doctype",
+			"title": "Browse DocTypes",
+			"description": "Browse and search all DocTypes in ERPNext",
+			"mode": "view"
+		}
+	],
+	"preferences": [
+		{
+			"name": "erpnext_url",
+			"type": "textfield",
+			"required": true,
+			"title": "ERPNext URL",
+			"description": "The base URL of your ERPNext instance",
+			"placeholder": "https://your-site.erpnext.com"
+		},
+		{
+			"name": "api_key",
+			"type": "password",
+			"required": true,
+			"title": "API Key",
+			"description": "Your ERPNext API Key"
+		},
+		{
+			"name": "api_secret",
+			"type": "password",
+			"required": true,
+			"title": "API Secret",
+			"description": "Your ERPNext API Secret"
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.94.0",
+		"@raycast/utils": "^1.19.1",
+		"axios": "^1.6.2"
+	},
+	"devDependencies": {
+		"@raycast/eslint-config": "^2.0.4",
+		"@types/lodash": "^4.17.16",
+		"@types/node": "22.13.10",
+		"@types/react": "19.0.12",
+		"eslint": "^9.22.0",
+		"prettier": "^3.5.3",
+		"typescript": "^5.8.2"
+	},
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop",
+		"lint": "ray lint",
+		"fix-lint": "ray lint --fix",
+		"format": "prettier 'src/**' '!**/.DS_Store' --write",
+		"publish": "npx @raycast/api@latest publish"
+	}
+}
