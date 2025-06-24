@@ -56,6 +56,14 @@
       "required": true
     },
     {
+      "name": "preservePunctuation",
+      "type": "checkbox",
+      "default": false,
+      "description": "Check this option to preserve punctuation marks in their original positions when changing case. This option is only available for Lower Case and Upper Case.",
+      "label": "Preserve Punctuation",
+      "required": false
+    },
+    {
       "name": "popToRoot",
       "type": "checkbox",
       "default": false,
