@@ -4,6 +4,7 @@ import { execAsync } from "../utils/exec-async";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
 import { validateDateFormat } from "../utils/date-validator";
+import { getCurrentLocalDate } from "../utils/date-formatter";
 
 type Input = {
   /** Start date in YYYYMMDD format */
@@ -65,7 +66,7 @@ export default async function getDailyUsage(input?: Input): Promise<{
     throw new Error(`Invalid daily usage data: ${parseResult.error.message}`);
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getCurrentLocalDate();
   const todayEntry = parseResult.data.daily.find((entry) => entry.date === today);
 
   if (!todayEntry) {

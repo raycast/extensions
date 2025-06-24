@@ -4,6 +4,7 @@ import { execAsync } from "../utils/exec-async";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
 import { validateDateFormat } from "../utils/date-validator";
+import { getCurrentLocalMonth } from "../utils/date-formatter";
 
 type Input = {
   /** Start date in YYYYMMDD format */
@@ -80,7 +81,7 @@ export default async function getMonthlyUsage(input?: Input): Promise<{
     throw new Error(`Invalid monthly usage data: ${parseResult.error.message}`);
   }
 
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentMonth = getCurrentLocalMonth();
   const monthlyEntry = parseResult.data.monthly.find((entry) => entry.month === currentMonth);
 
   if (!monthlyEntry) {

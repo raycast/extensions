@@ -1,5 +1,6 @@
 import { useCCUsageMonthlyCli } from "./useCCUsageMonthlyCli";
 import { MonthlyUsageData } from "../types/usage-types";
+import { getCurrentLocalMonth } from "../utils/date-formatter";
 
 export const useMonthlyUsage = (): {
   data: MonthlyUsageData | undefined;
@@ -14,7 +15,7 @@ export const useMonthlyUsage = (): {
       return undefined;
     }
 
-    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentMonth = getCurrentLocalMonth();
     const currentMonthEntry = rawData.monthly.find((entry) => entry.month === currentMonth);
 
     if (currentMonthEntry) {

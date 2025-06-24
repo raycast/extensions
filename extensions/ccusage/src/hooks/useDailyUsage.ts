@@ -1,5 +1,6 @@
 import { useCCUsageDailyCli } from "./useCCUsageDailyCli";
 import { DailyUsageData } from "../types/usage-types";
+import { getCurrentLocalDate } from "../utils/date-formatter";
 
 export const useDailyUsage = (): {
   data: DailyUsageData | undefined;
@@ -14,7 +15,7 @@ export const useDailyUsage = (): {
       return undefined;
     }
 
-    const today = new Date().toISOString().split("T")[0];
+    const today = getCurrentLocalDate();
     const todayEntry = rawData.daily.find((entry) => entry.date === today);
 
     if (todayEntry) {
