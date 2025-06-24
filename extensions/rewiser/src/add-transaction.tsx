@@ -50,6 +50,11 @@ export default function Command() {
       const response = await fetch("https://nzkqapsaeatytqrnitpj.supabase.co/functions/v1/get-folders", {
         headers: { Authorization: `Bearer ${authToken}` },
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const foldersData = (await response.json()) as Folder[];
       setFolders(foldersData);
     } catch {
