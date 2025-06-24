@@ -77,7 +77,7 @@ const Actions = ({
             />
             <Action
               title="Open Note Externally"
-              icon={{ source: Icon.Folder, tintColor: getTintColor("sky") }}
+              icon={{ source: Icon.Folder, tintColor: getTintColor("turquoise") }}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
               onAction={() => {
                 open(`${preferences.fileLocation}/${title}.md`);

@@ -1,8 +1,8 @@
 # Quick Notes Changelog
 
-## [Open Note Externally] - {PR_MERGE_DATE}
+## [New Command] - {PR_MERGE_DATE}
 
-- `Open Note` action that opens the note in default markdown app
+-  Open Note Externally
 
 ## [New Commands] - 2025-04-08
 
