@@ -12,7 +12,7 @@ export default function Domains() {
 
   return (
     <List isLoading={isLoading}>
-      {domains.slice(0, 1).map((domain) => (
+      {domains.map((domain) => (
         <List.Item
           key={domain.id}
           icon={getFavicon(`https://${domain.name}`, { fallback: Icon.Globe })}
