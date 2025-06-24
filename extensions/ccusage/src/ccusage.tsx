@@ -1,4 +1,4 @@
-import { Detail, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useCCUsageAvailability } from "./hooks/useCCUsageAvailability";
 import { DailyUsage } from "./components/DailyUsage";
 import { SessionUsage } from "./components/SessionUsage";
@@ -11,7 +11,7 @@ export default function CCUsage() {
   const { isAvailable, isLoading: availabilityLoading } = useCCUsageAvailability();
 
   if (availabilityLoading) {
-    return <Detail isLoading={true} />;
+    return <List isLoading={true} isShowingDetail />;
   }
 
   if (!isAvailable) {
