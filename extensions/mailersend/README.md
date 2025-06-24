@@ -2,7 +2,7 @@
 
 ---
 
-# MailerSend - Intuitive email API and SMTP
+# MailerSend
 
 This is a Raycast extension for [MailerSend](https://www.mailersend.com/) - _Email sending with high deliverability, easy integration, and a robust API supported by extensive documentation._
 

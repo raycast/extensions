@@ -2,6 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mailersend",
   "title": "MailerSend",
+  "categories": ["Communication"],
   "description": "View Domains, Users, Templates in MailerSend Account",
   "icon": "symbol-512.png",
   "author": "xmok",
@@ -20,18 +21,21 @@
     {
       "name": "domains",
       "title": "Domains",
+      "subtitle": "MailerSend",
       "description": "View Domains and Activities",
       "mode": "view"
     },
     {
       "name": "templates",
       "title": "Templates",
+      "subtitle": "MailerSend",
       "description": "View Templates",
       "mode": "view"
     },
     {
       "name": "users",
       "title": "Users",
+      "subtitle": "MailerSend",
       "description": "View Users in Team",
       "mode": "view"
     }
