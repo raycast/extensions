@@ -3,7 +3,8 @@ import { Icon, Image } from '@raycast/api'
 import { homedir } from 'os'
 import path from 'path'
 import gitConfigParser from 'parse-git-config'
-import gh = require('parse-github-url')
+// Removed parse-github-url to avoid deprecation warnings
+// import gh = require('parse-github-url')
 import { getColorForPrimaryDirectory, preferences } from './helpers'
 import { Directory } from './components/DirectoriesDropdown'
 import { DevelopmentCommandApp } from './components/StartDevelopment'
@@ -133,6 +134,88 @@ export class Project {
     }
 }
 
+interface ParsedGitUrl {
+    host: string | null
+    repo: string | null
+    protocol: string | null
+    path: string | null
+}
+
+function parseGitUrl(url: string): ParsedGitUrl {
+    if (!url) {
+        return { host: null, repo: null, protocol: null, path: null }
+    }
+
+    // Normalize malformed URLs first
+    let normalizedUrl = url
+
+    // Handle malformed URLs that mix protocols
+    if (url.startsWith('http://git@') || url.startsWith('https://git@')) {
+        normalizedUrl = url.replace(/^https?:\/\//, '')
+    }
+
+    try {
+        // SSH format: git@github.com:owner/repo.git
+        if (normalizedUrl.includes('@') && normalizedUrl.includes(':') && !normalizedUrl.includes('://')) {
+            const sshMatch = normalizedUrl.match(/^(?:.*@)?([^:]+):(.+?)(?:\.git)?$/)
+            if (sshMatch) {
+                const [, host, path] = sshMatch
+                const pathParts = path.split('/')
+                const repo = pathParts.length >= 2 ? `${pathParts[0]}/${pathParts[1]}` : path
+
+                return {
+                    host,
+                    repo: pathParts.length >= 2 ? pathParts[1] : path,
+                    protocol: 'ssh',
+                    path: repo,
+                }
+            }
+        }
+
+        // HTTPS format: https://github.com/owner/repo.git
+        if (normalizedUrl.includes('://')) {
+            try {
+                const urlObj = new URL(normalizedUrl)
+                const pathParts = urlObj.pathname
+                    .replace(/^\/|\.git$/g, '')
+                    .split('/')
+                    .filter(Boolean)
+
+                if (pathParts.length >= 2) {
+                    return {
+                        host: urlObj.hostname,
+                        repo: pathParts[1],
+                        protocol: urlObj.protocol.replace(':', ''),
+                        path: pathParts.join('/'),
+                    }
+                }
+            } catch (urlError) {
+                console.warn(`Failed to parse HTTPS git URL: ${normalizedUrl}`, urlError)
+            }
+        }
+
+        // Fallback: try to extract basic info with regex
+        const fallbackMatch = normalizedUrl.match(/([^/]+)\/([^/]+?)(?:\.git)?$/)
+        if (fallbackMatch) {
+            const [, owner, repo] = fallbackMatch
+            // Try to extract host from earlier in the URL
+            const hostMatch = normalizedUrl.match(/(?:@|\/\/)([^/:]+)/)
+            const host = hostMatch ? hostMatch[1] : 'unknown'
+
+            return {
+                host,
+                repo,
+                protocol: normalizedUrl.includes('://') ? 'https' : 'ssh',
+                path: `${owner}/${repo}`,
+            }
+        }
+    } catch (error) {
+        console.warn(`Error parsing git URL "${normalizedUrl}":`, error)
+    }
+
+    return { host: null, repo: null, protocol: null, path: null }
+}
+
 function parseGitRemotes(fullPath: string): Repo[] {
     try {
         const gitConfigPath = path.join(fullPath, '.git', 'config')
@@ -155,22 +238,30 @@ function parseGitRemotes(fullPath: string): Repo[] {
 
         for (const remoteName in gitConfig.remote) {
             const config = gitConfig.remote[remoteName] as Remote
-            const parsed = gh(config.url)
 
-            if (!parsed?.host || !parsed?.repo) {
+            try {
+                // Use custom parser to avoid deprecation warnings
+                const parsed = parseGitUrl(config.url)
+
+                if (!parsed?.host || !parsed?.repo) {
+                    console.warn(`Skipping malformed git remote URL: ${config.url}`)
+                    continue
+                }
+
+                const icon = createProviderIcon(parsed.host)
+                const url = buildRepositoryUrl(parsed)
+
+                repos.push({
+                    name: remoteName,
+                    host: parsed.host,
+                    hostDisplayName: getHostDisplayName(parsed.host),
+                    url,
+                    icon,
+                })
+            } catch (urlError) {
+                console.warn(`Failed to parse git remote URL "${config.url}":`, urlError)
                 continue
             }
-
-            const icon = createProviderIcon(parsed.host)
-            const url = buildRepositoryUrl(parsed)
-
-            repos.push({
-                name: remoteName,
-                host: parsed.host,
-                hostDisplayName: getHostDisplayName(parsed.host),
-                url,
-                icon,
-            })
         }
 
         return repos
@@ -202,15 +293,17 @@ function createProviderIcon(host: string): Image {
     return defaultIcon
 }
 
-function buildRepositoryUrl(parsed: ReturnType<typeof gh>): string {
-    const protocol = parsed?.protocol?.replace(':', '') || 'https'
+function buildRepositoryUrl(parsed: ParsedGitUrl): string {
+    // Always use HTTPS for repository URLs that will be opened in browser
+    const protocol = 'https'
 
     if (parsed?.host?.includes('gitness')) {
         const cleanPath = parsed?.path?.replace('git/', '')?.replace('.git', '')
         return `${protocol}://${parsed.host}/${cleanPath}`
     }
 
-    return `${protocol}://${parsed?.host}/${parsed?.repo}`
+    // Use the full path (owner/repo) instead of just repo name
+    return `${protocol}://${parsed?.host}/${parsed?.path || ''}`
 }
 
 function getHostDisplayName(host: string): string {

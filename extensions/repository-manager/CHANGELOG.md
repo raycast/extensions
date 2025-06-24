@@ -1,6 +1,6 @@
 # Repository Manager Changelog
 
-## [Advanced Git Integration & Enhanced UI] - 2025-06-05
+## [Advanced Git Integration & Enhanced UI] - {PR_MERGE_DATE}
 - **Git Statistics & Analytics**: View comprehensive repository statistics including total commits, branches, tags, and contributor analysis
 - **Git Commits Browser**: Browse commit history with branch selection, view detailed commit information, and copy commit hashes
 - **Performance Optimizations**: Optimized directory scanning, caching mechanisms, and UI rendering

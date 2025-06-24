@@ -44,9 +44,9 @@ export const DirectoriesDropdown = React.memo(({ directories }: DirectoriesDropd
                 />
             </List.Dropdown.Section>
             <List.Dropdown.Section>
-                {directories.map((dir: Directory) => (
+                {directories.map((dir: Directory, index: number) => (
                     <List.Dropdown.Item
-                        key={dir.name}
+                        key={`${dir.name}-${index}`}
                         title={dir.name}
                         value={dir.name}
                         icon={dir.icon}

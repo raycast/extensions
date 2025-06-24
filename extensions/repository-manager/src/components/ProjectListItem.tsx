@@ -29,7 +29,7 @@ const ProjectListItem = React.memo(({ project, directories, onFavoriteChange }: 
         return directories.find((dir) => dir.name === project.primaryDirectory.name)
     }, [directories, project.primaryDirectory.name])
 
-    const actionsMap = useMemo<Record<PrimaryAction, JSX.Element>>(
+    const actionsMap = useMemo<Record<PrimaryAction, React.JSX.Element>>(
         () => ({
             'start-development': (
                 <StartDevelopment
@@ -114,7 +114,7 @@ const ProjectListItem = React.memo(({ project, directories, onFavoriteChange }: 
                         <Action
                             title="Git Commits"
                             icon={Icon.List}
-                            shortcut={{ modifiers: ['cmd'], key: 'c' }}
+                            shortcut={{ modifiers: ['cmd'], key: 'g' }}
                             onAction={handleGitCommits}
                         />
                         <Action

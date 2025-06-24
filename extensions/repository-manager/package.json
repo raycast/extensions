@@ -10,6 +10,9 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "preferences": [
     {
       "type": "directory",
@@ -194,14 +197,12 @@
   "dependencies": {
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^1.19.1",
-    "parse-git-config": "^3.0.0",
-    "parse-github-url": "^1.0.3"
+    "parse-git-config": "^3.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^22.15.29",
     "@types/parse-git-config": "^3.0.4",
-    "@types/parse-github-url": "^1.0.3",
     "@types/react": "^19.1.6",
     "eslint": "^8.57.0",
     "prettier": "^3.5.3",

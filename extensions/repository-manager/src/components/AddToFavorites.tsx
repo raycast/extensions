@@ -43,6 +43,7 @@ export default function AddToFavorites({ project, onFavoriteChange }: AddToFavor
                 await showSuccessToast('Added to favorites')
             }
         } catch (error) {
+            console.error('Favorite toggle error:', error)
             const message = project.isFavorite ? 'Failed to remove from favorites' : 'Failed to add to favorites'
             await showErrorToast(message)
         }
@@ -50,7 +51,7 @@ export default function AddToFavorites({ project, onFavoriteChange }: AddToFavor
 
     return (
         <Action
-            title={project.isFavorite ? 'Remove From Favorites' : 'Add to Favorites'}
+            title={project.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
             key="add-to-favorites"
             icon={project.isFavorite ? Icon.StarDisabled : Icon.Star}
             shortcut={{ modifiers: ['cmd', 'shift'], key: 'f' }}

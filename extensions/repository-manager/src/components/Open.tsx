@@ -36,7 +36,7 @@ export function OpenInEditor({ project }: OpenProps) {
             <Action
                 title="Open in Editor"
                 icon={Icon.Code}
-                onAction={handleOpenInEditor}
+                onAction={() => showErrorToast('Please configure your preferred editor in preferences')}
             />
         )
     }
@@ -75,7 +75,7 @@ export function OpenInTerminal({ project }: OpenProps) {
                 title="Open in Terminal"
                 icon={Icon.Terminal}
                 shortcut={{ modifiers: ['cmd'], key: 't' }}
-                onAction={handleOpenInTerminal}
+                onAction={() => showErrorToast('Please configure your preferred terminal in preferences')}
             />
         )
     }

@@ -23,7 +23,7 @@ export default function GitStatusDetail({ project }: GitStatusDetailProps) {
 
     const { data: remoteStatus, isLoading: isLoadingRemoteStatus } = useExec('git', ['rev-list', '--left-right', '--count', `HEAD...${upstreamBranch}`], {
         cwd: project.fullPath,
-        execute: !isLoadingUpstream && !!upstreamBranch,
+        execute: !isLoadingUpstream && !!upstreamBranch && !upstreamError,
     })
 
     const modifiedFilesStaged = (status?.match(/M/g) || []).length
@@ -75,7 +75,7 @@ ${status ? status : 'No changes'}
 
     return (
         <Detail
-            isLoading={isLoading || isLoadingUpstream}
+            isLoading={isLoading || isLoadingUpstream || isLoadingRemoteStatus}
             markdown={markdown}
             actions={
                 <ActionPanel>

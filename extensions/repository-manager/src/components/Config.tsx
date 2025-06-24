@@ -3,11 +3,8 @@ import { Project, getDefaultProjectConfig } from '../project'
 import { clearCache, preferences } from '../helpers'
 import fs from 'fs/promises'
 import { existsSync } from 'fs'
-import { exec } from 'child_process'
-import { promisify } from 'util'
+import path from 'path'
 import { showSuccessToast, showErrorToast } from '../ui/toast'
-
-const execAsync = promisify(exec)
 
 type ConfigProps = {
     project: Project
@@ -16,7 +13,9 @@ type ConfigProps = {
 export default function Config({ project }: ConfigProps) {
     async function createConfig() {
         try {
-            await execAsync(`mkdir -p "$(dirname "${project.configPath}")"`)
+            // Safely create the directory structure using fs.mkdir
+            const configDir = path.dirname(project.configPath)
+            await fs.mkdir(configDir, { recursive: true })
 
             const defaultConfig = getDefaultProjectConfig(project)
             await fs.writeFile(project.configPath, JSON.stringify(defaultConfig, null, 2))

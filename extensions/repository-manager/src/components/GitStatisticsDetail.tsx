@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Detail, Icon, useNavigation, showToast, Toast } from '@raycast/api'
+import { Action, ActionPanel, Detail, Icon, useNavigation } from '@raycast/api'
 import { Project } from '../project'
-import { useExec } from '@raycast/utils'
+import { useExec, showFailureToast } from '@raycast/utils'
 import { OpenInEditor, OpenInTerminal } from './Open'
 import OpenGitRemotes from './OpenGitRemotes'
 import GitStatusDetail from './GitStatusDetail'
@@ -88,15 +88,10 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
             setClocError('cloc command not found')
         } else if (clocAvailable === true && !isLoadingCloc && (!clocData || clocData.trim().length === 0)) {
             setClocError('cloc command failed or returned empty results')
-            showToast({
-                style: Toast.Style.Failure,
-                title: 'Code Statistics Error',
-                message: 'cloc command failed to generate statistics',
-            })
+            showFailureToast('Code Statistics Error', { title: 'cloc command failed to generate statistics' })
         }
     }, [clocAvailable, isLoadingCloc, clocData])
 
-    // const { isLoading: isLoadingCommitsByPerson, data: commitsByPerson } = useExec('git', ['shortlog', '-s', '-n', '--all', '--since=1.year.ago'], {
     const { isLoading: isLoadingCommitsByPerson, data: commitsByPerson } = useExec('git', ['shortlog', '-s', '-n', '--all'], {
         cwd: project.fullPath,
         timeout: 10000, // 10 second timeout
