@@ -1,0 +1,177 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grpn-jira-helper",
+  "title": "GRPN Jira Helper",
+  "description": "Create Jira tickets effortlessly using AI-powered descriptions and smart project detection for Groupon teams",
+  "icon": "extension-icon.png",
+  "author": "lukas_vaic",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "required": true,
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key for GPT-4o-mini integration"
+    },
+    {
+      "name": "jiraEmail",
+      "type": "textfield",
+      "required": true,
+      "title": "Jira Email",
+      "description": "Your Jira account email"
+    },
+    {
+      "name": "jiraApiToken",
+      "type": "password",
+      "required": true,
+      "title": "Jira API Token",
+      "description": "Your Jira API token"
+    },
+    {
+      "name": "jiraBaseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Jira Base URL",
+      "description": "Your Jira instance URL (e.g., https://your-domain.atlassian.net)"
+    },
+    {
+      "name": "defaultTeam",
+      "type": "dropdown",
+      "required": true,
+      "title": "Default Team",
+      "description": "Select your default MBNXT team for new tickets",
+      "default": "751581f6-62f0-450e-9776-49bcb5ae165e",
+      "data": [
+        {
+          "title": "MBNXT Platform team",
+          "value": "751581f6-62f0-450e-9776-49bcb5ae165e"
+        },
+        {
+          "title": "MBNXT Pre-purchase team",
+          "value": "abb1950a-5049-4ed5-915b-6c7971aed645"
+        },
+        {
+          "title": "MBNXT Checkout & Post-purchase team",
+          "value": "e5b7ec8e-1b7b-4f9e-98b8-b022fc9f330c"
+        },
+        {
+          "title": "MBNXT Mobile app team",
+          "value": "a91c75e6-b5a1-40ef-8ebc-2f848bd765c4"
+        },
+        {
+          "title": "MBNXT-Automation",
+          "value": "8d75f86d-5d18-4107-8801-8d5bbca5b3df"
+        },
+        {
+          "title": "MBNXT Design team",
+          "value": "ef51a484-a937-4b4f-976a-44709abb1e1d"
+        },
+        {
+          "title": "MBNXT Gifting team",
+          "value": "67af8c58-0739-43de-81e4-33e0a66a8be8"
+        }
+      ]
+    },
+    {
+      "name": "defaultInitiative",
+      "type": "dropdown",
+      "required": true,
+      "title": "Default Initiative (Parent)",
+      "description": "Select your default MBNXT initiative for new tickets",
+      "default": "QR-1106",
+      "data": [
+        {
+          "title": "[25Q2] Q2 MBNXT - Performance & Stability",
+          "value": "QR-1106"
+        },
+        {
+          "title": "[25Q2] MBNXT checkout Ireland",
+          "value": "QR-1161"
+        },
+        {
+          "title": "[25Q2] Integrate Suggest PoC in Mbnxt",
+          "value": "QR-1160"
+        },
+        {
+          "title": "[25Q2] MBNXT checkout in Ireland - discovery",
+          "value": "QR-1139"
+        },
+        {
+          "title": "[2025-Q2] MBNXT Mobile Test Automation",
+          "value": "QR-1128"
+        },
+        {
+          "title": "[25Q2] KTLO - MBNXT web",
+          "value": "QR-1080"
+        },
+        {
+          "title": "[25Q2] MBNXT web Post-purchase Q2 KTLO",
+          "value": "QR-1078"
+        },
+        {
+          "title": "[25Q2] MBNXT ramp-up support",
+          "value": "QR-1055"
+        },
+        {
+          "title": "[25Q2] [MBNXT] Mobile app - BAU",
+          "value": "QR-1046"
+        },
+        {
+          "title": "MBNXT pre-purchase - BAU",
+          "value": "QR-1032"
+        },
+        {
+          "title": "[25Q2] MBNXT pre-purchase - KTLO",
+          "value": "QR-1031"
+        },
+        {
+          "title": "[25Q1] bulkbpod optimization (mbnxt)",
+          "value": "QR-1015"
+        },
+        {
+          "title": "[25Q1] MBNXT INTL rollout plan",
+          "value": "QR-877"
+        },
+        {
+          "title": "[25Q1] MBNXT ramp-up support",
+          "value": "QR-869"
+        },
+        {
+          "title": "[25Q1] Travel - MBNXT INTL support",
+          "value": "QR-862"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "jira",
+      "title": "Create Jira Ticket",
+      "description": "Create a Jira ticket using AI-powered natural language processing",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.10.0",
+    "openai": "^5.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
