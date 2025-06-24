@@ -116,7 +116,6 @@
   "dependencies": {
     "@raycast/api": "^1.94.0",
     "@types/which": "^3.0.4",
-    "node-fetch": "^3.3.2",
     "which": "^5.0.0"
   },
   "devDependencies": {
@@ -125,7 +124,6 @@
     "@types/react": "^19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "react-devtools": "^6.1.1",
     "typescript": "^5.4.5"
   },
   "scripts": {
@@ -134,5 +132,10 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "cross-spawn": "^7.0.3",
+    "got": "^13.0.0",
+    "electron": "^32.0.0"
   }
 }
