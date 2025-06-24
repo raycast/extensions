@@ -47,7 +47,7 @@ export async function simpleTranslate(text: string, options: LanguageCodeSet): P
       originalText: text,
       translatedText: translated.text,
       pronunciationText: extractPronounceTextFromRaw(translated?.raw),
-      langFrom: translated?.from?.language?.iso.toLowerCase() as LanguageCode,
+      langFrom: translated?.from?.language?.iso as LanguageCode,
       langTo: options.langTo[0],
     };
   } catch (err) {
