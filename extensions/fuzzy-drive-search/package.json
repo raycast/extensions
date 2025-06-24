@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fuzzy-drive-search",
+  "title": "Fuzzy Drive Search",
+  "description": "Google Driveのファイルを曖昧検索",
+  "icon": "assets/extension-icon.png",
+  "author": "kexing_moyong",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Drive File Search",
+      "description": "Google Driveのファイルを曖昧検索",
+      "mode": "view",
+      "keywords": [
+        "drive",
+        "google",
+        "search",
+        "file",
+        "fuzzy"
+      ],
+      "preferences": [
+        {
+          "name": "shortcut",
+          "type": "textfield",
+          "required": false,
+          "title": "Keyboard Shortcut",
+          "description": "キーボードショートカット (例: cmd+shift+d)",
+          "placeholder": "cmd+shift+d"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.2",
+    "fuse.js": "^7.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.3",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
