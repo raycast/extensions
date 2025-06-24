@@ -1,6 +1,6 @@
 # Rewiser Changelog
 
-## [Version 1.0.0] - 2025-06-24
+## [Version 1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 
