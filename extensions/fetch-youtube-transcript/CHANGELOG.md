@@ -1,5 +1,13 @@
 # Fetch Youtube Transcript Changelog
 
+## [2.0.1] - 2025-06-24
+
+### Breaking Changes
+
+- Removed `youtube-transcript-scraper` dependency.
+- Switched to `yt-dlp` for fetching transcripts. Users are now required to install `yt-dlp` separately.
+- `ytdl-core` is no longer a dependency.
+
 ## [1.1.5] - 2024-12-18
 
 ### Fixed
@@ -31,7 +39,7 @@
 
 ## [1.1.3] - 2024-12-10
 
-### Fixed
+### 1.1.3 Fixed
 
 - Fixed issue due to ytdl-core
 
@@ -47,7 +55,7 @@
 
 ## [1.1.1] - 2024-11-26
 
-### Added
+### 1.1.1 Added
 
 - Initial project setup
 - Basic functionality for fetching YouTube transcripts
