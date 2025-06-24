@@ -1,6 +1,6 @@
 # Redirect Trace Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-06-24
 
 ### Added
 - Initial release of RedirectTrace extension
