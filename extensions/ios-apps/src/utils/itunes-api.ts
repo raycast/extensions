@@ -1,5 +1,5 @@
 // iTunes API utility functions
-import nodeFetch from "node-fetch";
+import fetch from "node-fetch";
 import fs from "fs";
 import path from "path";
 import { promisify } from "util";
@@ -9,10 +9,54 @@ import { AppDetails, ITunesResponse, ITunesResult } from "../types";
 import { getDownloadsDirectory } from "./paths";
 import { scrapeAppStoreScreenshots, getHighestResolutionUrl, ScreenshotInfo } from "./scraper";
 
-// Handle both ESM and CommonJS versions of node-fetch
-const fetch = nodeFetch;
+// Promisify file system operations
 const writeFileAsync = promisify(fs.writeFile);
 const mkdirAsync = promisify(fs.mkdir);
+
+// iTunes API Constants
+const ITUNES_API_BASE_URL = "https://itunes.apple.com";
+const ITUNES_LOOKUP_ENDPOINT = "/lookup";
+const ITUNES_SEARCH_ENDPOINT = "/search";
+const ITUNES_DEFAULT_COUNTRY = "us";
+const ITUNES_SOFTWARE_ENTITY = "software";
+
+// Rate limiting utilities
+interface RateLimiter {
+  lastRequest: number;
+  minInterval: number;
+}
+
+const apiRateLimiter: RateLimiter = {
+  lastRequest: 0,
+  minInterval: 100, // 100ms between API requests
+};
+
+const downloadRateLimiter: RateLimiter = {
+  lastRequest: 0,
+  minInterval: 50, // 50ms between downloads
+};
+
+/**
+ * Rate limit function calls
+ */
+async function rateLimit(limiter: RateLimiter): Promise<void> {
+  const now = Date.now();
+  const timeSinceLastRequest = now - limiter.lastRequest;
+
+  if (timeSinceLastRequest < limiter.minInterval) {
+    const waitTime = limiter.minInterval - timeSinceLastRequest;
+    await new Promise((resolve) => setTimeout(resolve, waitTime));
+  }
+
+  limiter.lastRequest = Date.now();
+}
+
+/**
+ * Convert buffer to compatible format for node-fetch v3
+ */
+function toBuffer(data: ArrayBuffer): Buffer {
+  return Buffer.from(data);
+}
 
 /**
  * Convert iTunes API result to AppDetails format
@@ -37,6 +81,7 @@ export function convertITunesResultToAppDetails(
     // Set the iconUrl as a fallback using the highest resolution available
     iconUrl: itunesData.artworkUrl512 || itunesData.artworkUrl100 || itunesData.artworkUrl60 || base.iconUrl || "",
     sellerName: itunesData.sellerName || base.sellerName || "Unknown Developer",
+    artistName: itunesData.artistName || base.artistName || "",
     price: itunesData.price?.toString() || base.price || "0",
     genres: itunesData.genres && itunesData.genres.length > 0 ? itunesData.genres : base.genres || [],
     size: itunesData.fileSizeBytes?.toString() || base.size || "0",
@@ -67,7 +112,11 @@ export function convertITunesResultToAppDetails(
 export async function fetchITunesAppDetails(bundleId: string): Promise<ITunesResult | null> {
   try {
     console.log(`[iTunes API] Fetching app details for bundleId: ${bundleId}`);
-    const url = `https://itunes.apple.com/lookup?bundleId=${encodeURIComponent(bundleId)}&country=us&entity=software`;
+
+    // Apply rate limiting
+    await rateLimit(apiRateLimiter);
+
+    const url = `${ITUNES_API_BASE_URL}${ITUNES_LOOKUP_ENDPOINT}?bundleId=${encodeURIComponent(bundleId)}&country=${ITUNES_DEFAULT_COUNTRY}&entity=${ITUNES_SOFTWARE_ENTITY}`;
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -101,7 +150,7 @@ export async function fetchITunesAppDetails(bundleId: string): Promise<ITunesRes
 export async function searchITunesApps(term: string, limit = 20): Promise<ITunesResult[]> {
   try {
     console.log(`[iTunes API] Searching for apps with term: "${term}", limit: ${limit}`);
-    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=us&entity=software&limit=${limit}`;
+    const url = `${ITUNES_API_BASE_URL}${ITUNES_SEARCH_ENDPOINT}?term=${encodeURIComponent(term)}&country=${ITUNES_DEFAULT_COUNTRY}&entity=${ITUNES_SOFTWARE_ENTITY}&limit=${limit}`;
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -218,17 +267,28 @@ export async function downloadScreenshots(
         description: "",
         iconUrl: "",
         sellerName: "",
+        artistName: "",
         price: price,
         genres: [],
         size: "",
         contentRating: "",
         artworkUrl60: "",
+        artworkUrl512: "",
+        averageUserRating: 0,
+        averageUserRatingForCurrentVersion: 0,
+        userRatingCount: 0,
+        userRatingCountForCurrentVersion: 0,
+        releaseDate: "",
+        currentVersionReleaseDate: "",
+        trackViewUrl: "",
+        artistViewUrl: "",
+        screenshotUrls: [],
       };
     }
 
     // Now use the scraper to get high-resolution screenshots from the App Store website
     console.log(`[Screenshot Downloader] Scraping App Store website for high-resolution screenshots`);
-    const screenshots = await scrapeAppStoreScreenshots(appDetails!);
+    const screenshots = await scrapeAppStoreScreenshots(appDetails);
 
     if (screenshots.length === 0) {
       console.error(`[Screenshot Downloader] No screenshots found for ${bundleId}`);
@@ -290,6 +350,9 @@ export async function downloadScreenshots(
 
     const downloadPromises = screenshots.map(async (screenshot) => {
       try {
+        // Apply rate limiting for downloads
+        await rateLimit(downloadRateLimiter);
+
         // Get the highest resolution URL
         const highResUrl = getHighestResolutionUrl(screenshot.url);
         console.log(
@@ -303,8 +366,9 @@ export async function downloadScreenshots(
           return false;
         }
 
-        // Get the image data as buffer
-        const imageBuffer = await response.buffer();
+        // Get the image data as buffer (node-fetch v3 compatible)
+        const arrayBuffer = await response.arrayBuffer();
+        const imageBuffer = toBuffer(arrayBuffer);
 
         // Always use PNG for consistency and best quality
         const fileExtension = "png";
@@ -341,10 +405,10 @@ export async function downloadScreenshots(
       `App Store Screenshots (High Resolution)`,
       `=====================================`,
       ``,
-      `App Name: ${appDetails!.name}`,
-      `Bundle ID: ${appDetails!.bundleId}`,
-      `App ID: ${appDetails!.id}`,
-      `Version: ${appDetails!.version}`,
+      `App Name: ${appDetails.name}`,
+      `Bundle ID: ${appDetails.bundleId}`,
+      `App ID: ${appDetails.id}`,
+      `Version: ${appDetails.version}`,
       ``,
       `Downloaded on: ${new Date().toISOString()}`,
       ``,
