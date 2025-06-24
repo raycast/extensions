@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fetch-youtube-transcript",
-  "version": "1.1.5",
+  "version": "2.0.1",
   "title": "Fetch YouTube Transcript",
   "description": "Fetches and saves the transcript of a YouTube video in your downaloads folder",
   "icon": "extension_icon.png",
