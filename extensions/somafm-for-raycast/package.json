@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "somafm-for-raycast",
+  "title": "SomaFM for Raycast",
+  "description": "Browse and play SomaFM internet radio stations with smart player detection, favorites, and now playing information",
+  "icon": "extension-icon.png",
+  "author": "mwarger",
+  "categories": ["Media"],
+  "license": "MIT",
+  "contributors": [],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Browse SomaFM Stations",
+      "description": "Browse and play SomaFM radio stations",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "SomaFM Menu",
+      "description": "Quick access to favorite stations",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^9.22.0",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
