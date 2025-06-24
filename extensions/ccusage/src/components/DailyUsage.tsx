@@ -23,18 +23,14 @@ export function DailyUsage() {
       : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
 
   const renderDetailMetadata = (): ReactNode => {
-    const errorMetadata = ErrorMetadata({
-      error,
-      noDataMessage: !dailyUsage ? "No usage recorded for today" : undefined,
-      noDataSubMessage: !dailyUsage ? `Date: ${currentDate || "Loading..."}` : undefined,
-    });
-
-    if (errorMetadata) {
-      return errorMetadata;
-    }
-
-    if (!dailyUsage) {
-      return null;
+    if (error || !dailyUsage) {
+      return (
+        <ErrorMetadata
+          error={error}
+          noDataMessage={!dailyUsage ? "No usage recorded for today" : undefined}
+          noDataSubMessage={!dailyUsage ? `Date: ${currentDate || "Loading..."}` : undefined}
+        />
+      );
     }
 
     const efficiency = useMemo(
