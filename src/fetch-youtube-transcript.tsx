@@ -4,10 +4,12 @@
 // The script uses the YouTube Data API and handles user preferences for download locations.
 import { showToast, Toast, getPreferenceValues, open } from "@raycast/api";
 import { promises as fs } from "fs";
+import * as fsSync from "fs";
 import path from "path";
 import os from "os";
 // import https from "https";
-import { exec } from "child_process";
+import { execFile } from "child_process";
+import which from "which";
 
 // Define interfaces
 interface ExtensionPreferences {
@@ -51,14 +53,45 @@ function extractVideoId(url: string): string | null {
   return null;
 }
 
-// Full path to yt-dlp executable
-const ytDlpPath = '/opt/homebrew/bin/yt-dlp';
+// Helper to find yt-dlp in PATH or use env var
+function resolveYtDlpPath(): string {
+  // 1. Check environment variable
+  if (process.env.YT_DLP_PATH && process.env.YT_DLP_PATH.trim() !== "") {
+    return process.env.YT_DLP_PATH;
+  }
 
-// Helper function to promisify exec, makes async/await easier
-function execCommand(command: string): Promise<{ stdout: string; stderr: string; }> {
+  // 2. Try common installation paths first
+  const commonPaths = [
+    "/opt/homebrew/bin/yt-dlp",  // Homebrew on Apple Silicon
+    "/usr/local/bin/yt-dlp",     // Homebrew on Intel Mac
+    "/usr/bin/yt-dlp",           // Linux common path
+  ];
+
+  for (const path of commonPaths) {
+    if (fsSync.existsSync(path)) {
+      return path;
+    }
+  }
+
+  // 3. Fall back to PATH lookup
+  try {
+    return which.sync("yt-dlp");
+  } catch (e) {
+    throw new Error(
+      "yt-dlp executable not found. Please install yt-dlp and ensure it is in your PATH, or set the YT_DLP_PATH environment variable."
+    );
+  }
+}
+
+// Full path to yt-dlp executable (resolved at runtime)
+const ytDlpPath = resolveYtDlpPath();
+
+// Remove old execCommand and execCommandSafe, and replace with a robust execFile-based implementation
+function execCommand(executable: string, args: string[]): Promise<{ stdout: string; stderr: string; }> {
   return new Promise((resolve, reject) => {
-    exec(command.replace('yt-dlp', ytDlpPath), (error, stdout, stderr) => {
-      if (error && !stderr.includes("WARNING")) {
+    execFile(executable, args, { shell: false }, (error, stdout, stderr) => {
+      if (error) {
+        // Always report errors, do not ignore based on warning content
         const errorMessage = `Command failed: ${error.message}\nstdout: ${stdout}\nstderr: ${stderr}`;
         reject(new Error(errorMessage));
         return;
@@ -68,10 +101,24 @@ function execCommand(command: string): Promise<{ stdout: string; stderr: string;
   });
 }
 
+// Validate yt-dlp installation before using it
+async function validateYtDlpInstallation(): Promise<void> {
+  try {
+    await execCommand(ytDlpPath, ["--version"]);
+  } catch (error) {
+    throw new Error(
+      "yt-dlp is not installed or not found in your PATH. Please install yt-dlp and ensure it is accessible from the command line."
+    );
+  }
+}
+
 async function getYouTubeTranscriptAsPlainText(
   videoUrl: string,
   language: string = "en"
 ): Promise<{ transcript: string | null; videoTitle: string | null; }> {
+  // Ensure yt-dlp is installed before proceeding
+  await validateYtDlpInstallation();
+
   // Generate a unique temporary filename and output template
   const timestamp = Date.now();
   const baseOutputPath = path.join(
@@ -83,11 +130,11 @@ async function getYouTubeTranscriptAsPlainText(
   const tempFilePath = `${baseOutputPath}.${language}.vtt`;
 
   // First, get the video title using yt-dlp
-  const titleCommand = `yt-dlp --get-title "${videoUrl}"`;
+  const titleArgs = ["--get-title", videoUrl];
   let videoTitle: string | null = null;
 
   try {
-    const { stdout: titleStdout, stderr: titleStderr } = await execCommand(titleCommand);
+    const { stdout: titleStdout, stderr: titleStderr } = await execCommand(ytDlpPath, titleArgs);
     videoTitle = titleStdout.trim();
     if (titleStderr && titleStderr.toLowerCase().includes("fail")) {
       console.error('Failed to get video title:', titleStderr);
@@ -99,25 +146,21 @@ async function getYouTubeTranscriptAsPlainText(
   }
 
   // Use a specific output template to ensure yt-dlp creates the file with exactly our desired name
-  const command = `yt-dlp --write-auto-subs --skip-download --sub-lang ${language} --output "${baseOutputPath}" "${videoUrl}"`;
+  const commandArgs = [
+    "--write-auto-subs",
+    "--skip-download",
+    "--sub-lang", language,
+    "--output", baseOutputPath,
+    videoUrl
+  ];
 
   let rawTranscriptContent: string | null = null; // Initialize as null
   try {
     // 1. Execute yt-dlp to download the VTT file
-    const { stdout, stderr } = await execCommand(command);
-
-    // Check stderr for potential errors even if the command exited cleanly
-    if (stderr && !stderr.includes("WARNING")) {
-      console.warn(
-        `yt-dlp reported warnings or potential errors to stderr:\n${stderr}`
-      );
-    }
+    const { stdout } = await execCommand(ytDlpPath, commandArgs);
 
     // Also check if yt-dlp explicitly said it *couldn't* find subtitles
     if (stdout.includes("No captions found") || stdout.includes("no subtitles")) {
-      console.log(
-        `yt-dlp indicated no subtitles/captions found for: ${videoUrl}`
-      );
       return { transcript: null, videoTitle }; // Return null transcript but include title if available
     }
 
@@ -131,10 +174,7 @@ async function getYouTubeTranscriptAsPlainText(
         fileReadError instanceof Error
           ? fileReadError.message
           : String(fileReadError);
-      console.error(
-        `Error reading temporary transcript file ${tempFilePath}:`,
-        errorMessage
-      );
+      // We don't need to log the temporary file path
       throw new Error(`Failed to read transcript file: ${errorMessage}`); // Re-throw as a clear error
     }
 
@@ -143,7 +183,8 @@ async function getYouTubeTranscriptAsPlainText(
     if (rawTranscriptContent) {
       // Split content into lines
       const lines = rawTranscriptContent.split(/\r?\n/);
-      // Process each line, skipping timestamps and other VTT formatting
+      // Use an array to collect cleaned lines for better performance
+      const transcriptLines: string[] = [];
       let previousLine = "";
       for (const line of lines) {
         // Skip empty lines, numeric timestamps, and webvtt header
@@ -159,10 +200,11 @@ async function getYouTubeTranscriptAsPlainText(
         const cleanedLine = line.replace(/<[^>]*>/g, "").trim();
         // Only add the line if it's different from the previous line
         if (cleanedLine && cleanedLine !== previousLine) {
-          plainTextTranscript += cleanedLine + " ";
+          transcriptLines.push(cleanedLine);
           previousLine = cleanedLine;
         }
       }
+      plainTextTranscript = transcriptLines.join(" ");
     }
 
     // Remove any metadata like "Kind: captions Language: en" from the transcript
@@ -188,7 +230,6 @@ async function getYouTubeTranscriptAsPlainText(
     // 4. Clean up: Delete the temporary VTT file if it exists
     try {
       await fs.unlink(tempFilePath);
-      console.log(`Cleaned up temporary file: ${tempFilePath}`);
     } catch (unlinkError: unknown) {
       // Ignore if file didn't exist or couldn't be deleted
     }

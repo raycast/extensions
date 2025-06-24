@@ -115,7 +115,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.94.0",
+    "@types/which": "^3.0.4",
     "node-fetch": "^3.3.2",
+    "which": "^5.0.0",
     "youtube-captions-scraper": "^2.0.3",
     "ytdl-core": "^4.11.5"
   },
