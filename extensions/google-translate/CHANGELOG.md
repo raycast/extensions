@@ -1,5 +1,11 @@
 # Google Translate Changelog
 
+## [Feature] - 2025-06-24
+
+- Auto-focus on Text input after changing source or target language
+- Add shortcuts for quick focus on Source(`CMD + SHIFT + F`) and Target(`CMD + SHIFT + T`) language fields
+- Use auto-detected language when switching languages
+
 ## [Fix] - 2025-06-23
 
 - Fix uppercase ISO language codes (fix Chinese and some other languages)
