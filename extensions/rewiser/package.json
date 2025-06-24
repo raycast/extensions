@@ -25,6 +25,7 @@
     {
       "name": "add-transaction",
       "title": "Add Transaction (RewiserAI)",
+      "subtitle": "Rewiser",
       "description": "Add a transaction by simply saying \"I spent $20 at a restaurant\"",
       "mode": "view",
       "command": "src/add-transaction.tsx"
