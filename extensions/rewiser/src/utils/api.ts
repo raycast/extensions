@@ -95,23 +95,46 @@ export async function fetchFolders(token: string): Promise<Folder[]> {
       throw new ApiError(`HTTP ${response.status}: ${errorText}`, "HTTP_ERROR", response.status);
     }
 
-    const data = await response.json();
+    const data: unknown = await response.json();
+
+    // Type guard functions
+    const isArrayOfFolders = (value: unknown): value is Folder[] => {
+      return (
+        Array.isArray(value) &&
+        value.every(
+          (item) => item && typeof item === "object" && "key" in item && "label" in item && "currency" in item,
+        )
+      );
+    };
+
+    const isWrappedResponse = (value: unknown): value is { success?: boolean; data?: unknown; error?: string } => {
+      return value !== null && typeof value === "object";
+    };
 
     // Handle both response formats: direct array or wrapped in success object
     let folders: Folder[];
-    if (Array.isArray(data)) {
+
+    if (isArrayOfFolders(data)) {
       folders = data;
-    } else if (data.success && Array.isArray(data.data)) {
-      folders = data.data;
-    } else if (data.data && Array.isArray(data.data)) {
-      folders = data.data;
+    } else if (isWrappedResponse(data)) {
+      const wrappedData = data as { success?: boolean; data?: unknown; error?: string };
+
+      if (wrappedData.success && isArrayOfFolders(wrappedData.data)) {
+        folders = wrappedData.data;
+      } else if (isArrayOfFolders(wrappedData.data)) {
+        folders = wrappedData.data;
+      } else {
+        const errorMessage =
+          typeof wrappedData.error === "string" ? wrappedData.error : ERROR_MESSAGES.FOLDER_LOAD_ERROR;
+        throw new ApiError(errorMessage, "FOLDER_ERROR");
+      }
     } else {
-      throw new ApiError(data.error || ERROR_MESSAGES.FOLDER_LOAD_ERROR, "FOLDER_ERROR");
+      throw new ApiError(ERROR_MESSAGES.FOLDER_LOAD_ERROR, "FOLDER_ERROR");
     }
 
     // Validate folder structure
     const validFolders = folders.filter(
-      (folder) =>
+      (folder): folder is Folder =>
         folder &&
         typeof folder.key === "string" &&
         typeof folder.label === "string" &&
