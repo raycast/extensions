@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2025-06-25
+
+- Check if user can access `BrowserExtension` before getting tabs
+
 ## [Fix] - 2025-06-24
 
 - More authenticator error handling to prevent "TypeError: t is not a function" error

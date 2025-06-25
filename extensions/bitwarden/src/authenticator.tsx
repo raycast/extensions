@@ -6,6 +6,7 @@ import {
   BrowserExtension,
   Clipboard,
   Color,
+  environment,
   getPreferenceValues,
   Icon,
   List,
@@ -248,8 +249,11 @@ function useGetCodeForAction(action: "copy" | "paste") {
 
 function useActiveTab() {
   return usePromise(async () => {
+    if (!environment.canAccess(BrowserExtension)) return undefined;
+
     const [tabs, error] = await tryCatch(BrowserExtension.getTabs());
     if (error) return undefined;
+
     const activeTab = tabs.find((tab) => tab.active);
     return activeTab ? { ...activeTab, url: new URL(activeTab.url) } : undefined;
   });
