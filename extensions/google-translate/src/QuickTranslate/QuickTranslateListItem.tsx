@@ -69,6 +69,9 @@ export function QuickTranslateListItem(props: {
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.TagList title="Source Language">
+                {props.languageSet.langFrom === "auto" && (
+                  <List.Item.Detail.Metadata.TagList.Item text={supportedLanguagesByCode.auto.name} color={"#FECD57"} />
+                )}
                 <List.Item.Detail.Metadata.TagList.Item text={langFrom.name} color={"#A0D468"} />
               </List.Item.Detail.Metadata.TagList>
               <List.Item.Detail.Metadata.TagList title="Target Language">
