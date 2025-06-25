@@ -1,5 +1,8 @@
 # Repository Manager Changelog
 
+## [Cloc command to show statistics] - 2025-06-25
+- Better handling of cloc command, displaying installation options when not found
+
 ## [Advanced Git Integration & Enhanced UI] - 2025-06-24
 - **Git Statistics & Analytics**: View comprehensive repository statistics including total commits, branches, tags, and contributor analysis
 - **Git Commits Browser**: Browse commit history with branch selection, view detailed commit information, and copy commit hashes

@@ -112,6 +112,11 @@ export class Project {
 
     private setConfiguration(): void {
         this.configPath = path.join(this.fullPath, '.raycast', 'project-manager.json')
+
+        if (!existsSync(this.configPath)) {
+            this.configPath = path.join(this.fullPath, '.raycast', 'repository-manager.json')
+        }
+
         this.config = getProjectConfig(this.fullPath)
 
         if (Object.keys(this.config).length > 0) {
