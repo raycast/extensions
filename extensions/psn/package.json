@@ -10,22 +10,22 @@
   "commands": [
     {
       "name": "trophy",
-      "title": "Trophy",
-      "subtitle": "View PSN Trophies",
+      "title": "Trophy Stats",
+      "subtitle": "PSN",
       "description": "Trophy of PSN user",
       "mode": "no-view"
     },
     {
       "name": "recently-trophy",
-      "title": "Recently Trophy",
-      "subtitle": "Latest Earned Trophies",
+      "title": "View Recently Earned Trophies",
+      "subtitle": "PSN",
       "description": "View recently earned trophies",
       "mode": "view"
     },
     {
       "name": "recently-played",
-      "title": "Recently Played",
-      "subtitle": "Latest Played Games",
+      "title": "View Recently Played Games",
+      "subtitle": "PSN",
       "description": "View recently played games",
       "mode": "view"
     }
