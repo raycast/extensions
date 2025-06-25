@@ -23,8 +23,8 @@
   "commands": [
     {
       "name": "look-up",
-      "title": "Look Up",
-      "subtitle": "Translate selected text",
+      "title": "Translate Selected Text",
+      "subtitle": "Look Up",
       "description": "Translate selected text to your preferred language",
       "mode": "no-view",
       "preferences": [
