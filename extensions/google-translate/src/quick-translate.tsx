@@ -17,8 +17,8 @@ export default function QuickTranslate(): ReactElement {
 
   const isAnyLoading = Array.from(loadingStates.values()).some((isLoading) => isLoading);
 
-  function setIsLoading(targetLang: LanguageCode, isLoading: boolean) {
-    setLoadingStates((prev) => new Map(prev).set(targetLang, isLoading));
+  function setIsLoading(lang: LanguageCode, isLoading: boolean) {
+    setLoadingStates((prev) => new Map(prev).set(lang, isLoading));
   }
 
   return (
