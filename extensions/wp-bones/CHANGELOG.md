@@ -1,6 +1,6 @@
 # WP Bones Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-06-25
 
 - 🔥 Removed the complete demo link for improved clarity and maintenance
 - ✨ Fixes the remote search functionality to ensure it works correctly with the latest API changes
