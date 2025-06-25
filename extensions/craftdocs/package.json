@@ -52,8 +52,8 @@
       "mode": "view"
     },
     {
-      "name": "appendToDailyNote",
-      "title": "Append to Daily Note",
+      "name": "addToDailyNote",
+      "title": "Add to Daily Note",
       "subtitle": "Craft",
       "description": "Add content to your daily note",
       "mode": "view",
@@ -66,11 +66,11 @@
           "default": "end",
           "data": [
             {
-              "title": "Append at End",
+              "title": "Add at End",
               "value": "end"
             },
             {
-              "title": "Prepend at Beginning",
+              "title": "Add at Beginning",
               "value": "beginning"
             }
           ],

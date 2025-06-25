@@ -6,13 +6,15 @@ import {
   Form,
   Icon,
   List,
+  LocalStorage,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useConfig from "./hooks/useConfig";
 import useAppExists from "./hooks/useAppExists";
+import SpaceIdTutorial from "./components/SpaceIdTutorial";
 
 interface RenameSpaceFormProps {
   spaceID: string;
@@ -58,6 +60,32 @@ function RenameSpaceForm({ spaceID, currentName, onRename }: RenameSpaceFormProp
 export default function ManageSpaces() {
   const appExists = useAppExists();
   const { config, configLoading, refreshConfig } = useConfig(appExists);
+  const { push } = useNavigation();
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Check if this is the first time opening Manage Spaces
+  useEffect(() => {
+    const checkFirstTime = async () => {
+      const hasSeenTutorial = await LocalStorage.getItem("hasSeenSpaceIdTutorial");
+      if (!hasSeenTutorial) {
+        setShowTutorial(true);
+        await LocalStorage.setItem("hasSeenSpaceIdTutorial", "true");
+      }
+    };
+    checkFirstTime();
+  }, []);
+
+  const showSpaceIdTutorial = () => {
+    push(<SpaceIdTutorial />);
+  };
+
+  // Show tutorial on first visit
+  useEffect(() => {
+    if (showTutorial && config && config.spaces.length > 0) {
+      showSpaceIdTutorial();
+      setShowTutorial(false);
+    }
+  }, [showTutorial, config]);
 
   const handleRename = (spaceID: string, newName: string | null) => {
     if (config) {
@@ -102,7 +130,18 @@ export default function ManageSpaces() {
 
   if (!appExists.appExists || !config) {
     return (
-      <List>
+      <List
+        actions={
+          <ActionPanel>
+            <Action
+              title="Show Space ID Tutorial"
+              icon={Icon.QuestionMark}
+              onAction={showSpaceIdTutorial}
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+            />
+          </ActionPanel>
+        }
+      >
         <List.EmptyView
           title="Craft not found"
           description="Make sure Craft is installed and configured properly"
@@ -114,7 +153,18 @@ export default function ManageSpaces() {
 
   if (config.spaces.length === 0) {
     return (
-      <List>
+      <List
+        actions={
+          <ActionPanel>
+            <Action
+              title="Show Space ID Tutorial"
+              icon={Icon.QuestionMark}
+              onAction={showSpaceIdTutorial}
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+            />
+          </ActionPanel>
+        }
+      >
         <List.EmptyView
           title="No spaces found"
           description="Try using Craft app first to initialize your spaces"
@@ -163,6 +213,12 @@ export default function ManageSpaces() {
                     title="Copy Space ID"
                     content={space.spaceID}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                  <Action
+                    title="Show Space ID Tutorial"
+                    icon={Icon.QuestionMark}
+                    onAction={showSpaceIdTutorial}
+                    shortcut={{ modifiers: ["cmd"], key: "t" }}
                   />
                 </ActionPanel>
               }

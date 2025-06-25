@@ -49,7 +49,7 @@ const formatContent = (content: string, preferences: Preferences): string => {
   return finalContent;
 };
 
-export default function AppendToDailyNote() {
+export default function AddToDailyNote() {
   const appExists = useAppExists();
   const configResult = useConfig(appExists);
   const config = configResult?.config || null;
@@ -154,7 +154,7 @@ export default function AppendToDailyNote() {
   return (
     <Form
       isLoading={configLoading || appExists.appExistsLoading || resultsLoading}
-      navigationTitle="Append to Daily Note"
+      navigationTitle="Add to Daily Note"
       actions={
         <ActionPanel>
           {(() => {
@@ -164,7 +164,7 @@ export default function AppendToDailyNote() {
             if (appendUrl && formValues.content.trim() && formValues.spaceId) {
               return (
                 <Action.OpenInBrowser
-                  title="Append to Daily Note"
+                  title="Add to Daily Note"
                   icon={Icon.Plus}
                   url={appendUrl}
                   onOpen={handleSubmit}
@@ -180,7 +180,7 @@ export default function AppendToDailyNote() {
                 />
               );
             } else {
-              return <Action.SubmitForm title="Append to Daily Note" icon={Icon.Plus} onSubmit={handleSubmit} />;
+              return <Action.SubmitForm title="Add to Daily Note" icon={Icon.Plus} onSubmit={handleSubmit} />;
             }
           })()}
         </ActionPanel>

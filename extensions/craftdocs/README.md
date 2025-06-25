@@ -28,16 +28,16 @@ Quick access to your daily notes with smart navigation.
 
 ![Daily Notes](./metadata/craft-daily-notes.png)
 
-### ✍️ Append to Daily Note
+### ✍️ Add to Daily Note
 
 Add content to your daily note without leaving Raycast.
 
 - Quick text entry with basic markdown formatting (headlines, lists, links)
 - Optional timestamp insertion
 - Configurable content prefix and suffix
-- Choose to append at beginning or end of note
+- Choose to add at beginning or end of note
 
-![Append to Daily Note](./metadata/craft-append.png)
+![Add to Daily Note](./metadata/craft-append.png)
 
 ### 🏷️ Manage Spaces
 
@@ -50,13 +50,28 @@ Organize your Craft spaces for better workflow.
 
 ![Manage Spaces](./metadata/craft-manage-spaces.png)
 
+#### How to Find Your Space IDs
+
+When you first open the Manage Spaces command, you'll see cryptic Space IDs like `1ab23c45-67de-89f0-1g23-hijk456789l0`. Here's how to identify which space is which:
+
+1. **Open Craft** and navigate to the space you want to identify
+2. **Right-click on any block** or document within that space
+3. **Select "Copy As" → "Deeplink"** from the context menu
+4. **Extract the Space ID** from the copied deeplink URL (the long string after `spaceId=`)
+
+> **💡 Tip**: The tutorial will automatically show on your first visit to Manage Spaces, and you can access it anytime via the action menu (⌘K → "Show Space ID Tutorial").
+
+![Find Space ID](./metadata/craft-find-spaceid.png)
+
+Once you know which ID corresponds to which space, you can rename them for better organization.
+
 ## Commands
 
 | Command | Description |
 |---------|-------------|
 | **Blocks Search** | Search across all your Craft documents and blocks |
 | **Daily Notes** | Navigate to and manage your daily notes |
-| **Append to Daily Note** | Add content to today's daily note |
+| **Add to Daily Note** | Add content to today's daily note |
 | **Manage Spaces** | Rename spaces and control their visibility |
 
 ## Configuration

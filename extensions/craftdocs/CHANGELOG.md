@@ -13,7 +13,7 @@
 
 ## [Feature] - {PR_MERGE_DATE}
 
-- Added a new `Append to Daily Note` command with intelligent daily note detection and configurable append position.
+- Added a new `Add to Daily Note` command with intelligent daily note detection and configurable append position.
 - Added timestamp toggle and customizable prefix/suffix options for flexible content formatting.
 - Updated dependencies via `npm audit fix`
 
