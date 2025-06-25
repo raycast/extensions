@@ -1,4 +1,14 @@
-import { ActionPanel, Action, List, open, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  open,
+  Icon,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  Application,
+} from "@raycast/api";
 import { useCachedState, showFailureToast } from "@raycast/utils";
 import { AddFromFinderAction } from "@components/add-from-finder-action";
 import { useZoxide } from "@hooks/use-zoxide";
@@ -7,7 +17,7 @@ import { base64ShellSanitize } from "@utils/misc";
 
 export const SearchResult = ({ searchResult }: { searchResult: SearchResult }) => {
   const [, setRemovedKeys] = useCachedState<string[]>("removed-keys", []);
-  const { "open-in": openIn } = getPreferenceValues<{ "open-in": string }>();
+  const { "open-in": openIn } = getPreferenceValues<{ "open-in": Application }>();
 
   const { revalidate: addQuery } = useZoxide(`add "${base64ShellSanitize(searchResult.originalPath)}"`, {
     keepPreviousData: false,
@@ -25,7 +35,7 @@ export const SearchResult = ({ searchResult }: { searchResult: SearchResult }) =
   const openResult = async () => {
     try {
       await addQuery();
-      open(searchResult.originalPath, openIn || "Finder");
+      open(searchResult.originalPath, openIn?.bundleId || "Finder");
     } catch (error) {
       showFailureToast(error, { title: "Failed to open folder" });
     }
