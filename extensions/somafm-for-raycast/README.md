@@ -4,7 +4,15 @@ Browse and play [SomaFM](https://somafm.com) internet radio stations directly fr
 
 > Note: "SomaFM" is the correct branding for this service. The Raycast linter may suggest "Somafm" but we're keeping the official branding.
 
-<!-- Add a screenshot of your extension in action -->
+## Screenshots
+
+<img src="screenshots/somafm-for-raycast 2025-06-24 at 15.45.03.png" alt="Grid view showing SomaFM stations with favorites" width="600">
+
+<img src="screenshots/somafm-for-raycast 2025-06-24 at 15.45.22.png" alt="List view with search and station details" width="600">
+
+<img src="screenshots/somafm-for-raycast 2025-06-24 at 15.46.14.png" alt="Station actions menu" width="600">
+
+<img src="screenshots/somafm-for-raycast 2025-06-24 at 15.47.54.png" alt="Menu bar extension showing favorite stations" width="600">
 
 ## Features
 
