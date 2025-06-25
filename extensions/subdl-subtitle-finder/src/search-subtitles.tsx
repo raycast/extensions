@@ -135,10 +135,10 @@ export default function Command() {
   const qualities = [
     { value: "", name: "All Qualities" },
     { value: "4k", name: "4K/2160p" },
-    { value: "1080p", name: "1080p" },
-    { value: "720p", name: "720p" },
-    { value: "480p", name: "480p" },
-    { value: "360p", name: "360p" },
+    { value: "1080p", name: "1080p/Blu-ray" },
+    { value: "720p", name: "720p/HD" },
+    { value: "480p", name: "480p/DVD" },
+    { value: "360p", name: "360p/SD" },
   ];
 
   // Generate smart suggestions based on search text
@@ -309,20 +309,41 @@ export default function Command() {
   const MovieInfoItem = () => {
     if (!movieInfo) return null;
 
+    const posterUrl = movieInfo.Poster && movieInfo.Poster !== "N/A" ? movieInfo.Poster : undefined;
+    const rating = movieInfo.imdbRating && movieInfo.imdbRating !== "N/A" ? `⭐ ${movieInfo.imdbRating}/10` : "";
+    const metascore = movieInfo.Metascore && movieInfo.Metascore !== "N/A" ? `📊 ${movieInfo.Metascore}/100` : "";
+    const runtime = movieInfo.Runtime && movieInfo.Runtime !== "N/A" ? `⏱️ ${movieInfo.Runtime}` : "";
+
+    const accessories = [];
+    if (rating) accessories.push({ text: rating });
+    if (metascore) accessories.push({ text: metascore });
+    if (runtime) accessories.push({ text: runtime });
+
     return (
       <List.Item
         key="movie-info"
-        icon={Icon.Video}
+        icon={posterUrl || Icon.Video}
         title={movieInfo.Title}
-        subtitle={`${movieInfo.Year} • ${movieInfo.Runtime} • ${movieInfo.Genre}`}
-        accessories={[
-          { icon: Icon.Star, text: movieInfo.imdbRating },
-          { icon: Icon.Person, text: movieInfo.Director },
-        ]}
+        subtitle={`${movieInfo.Year} • ${movieInfo.Genre} • ${movieInfo.Rated || "Not Rated"}`}
+        accessories={accessories}
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              <Action title="View Movie Details" icon={Icon.Info} onAction={() => setShowMovieDetail(true)} />
+              <Action title="View Full Details" icon={Icon.Eye} onAction={() => setShowMovieDetail(true)} />
+              <Action
+                title="Copy Imdb Link"
+                icon={Icon.Link}
+                onAction={async () => {
+                  if (movieInfo.imdbID) {
+                    await navigator.clipboard.writeText(`https://www.imdb.com/title/${movieInfo.imdbID}/`);
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Copied IMDb Link",
+                      message: "IMDb link copied to clipboard",
+                    });
+                  }
+                }}
+              />
             </ActionPanel.Section>
           </ActionPanel>
         }
@@ -333,31 +354,61 @@ export default function Command() {
   const MovieDetail = () => {
     if (!movieInfo) return null;
 
+    const posterSection =
+      movieInfo.Poster && movieInfo.Poster !== "N/A"
+        ? `<img src="${movieInfo.Poster}" alt="Movie Poster" width="300" style="border-radius: 8px; margin-bottom: 20px;" />\n\n`
+        : "";
+
+    const ratingsSection = movieInfo.Ratings?.length
+      ? `\n## 📊 Ratings\n${movieInfo.Ratings.map((rating) => `- **${rating.Source}:** ${rating.Value}`).join("\n")}\n`
+      : "";
+
     return (
       <Detail
         markdown={`# ${movieInfo.Title} (${movieInfo.Year})
 
-${movieInfo.Poster && movieInfo.Poster !== "N/A" ? `![Poster](${movieInfo.Poster})` : ""}
+${posterSection}## 📖 Overview
+${movieInfo.Plot}
 
-**Plot:** ${movieInfo.Plot}
+## 🎬 Production Details
+- **Director:** ${movieInfo.Director}
+- **Writers:** ${movieInfo.Writer}
+- **Starring:** ${movieInfo.Actors}
+- **Genre:** ${movieInfo.Genre}
+- **Runtime:** ${movieInfo.Runtime}
+- **Rating:** ${movieInfo.Rated || "Not Rated"}
+- **Release Date:** ${movieInfo.Released}
 
-**Director:** ${movieInfo.Director}
-**Writers:** ${movieInfo.Writer}
-**Actors:** ${movieInfo.Actors}
+## ⭐ User Scores
+- **IMDb Rating:** ${movieInfo.imdbRating}/10 (${movieInfo.imdbVotes} votes)
+- **Metascore:** ${movieInfo.Metascore}/100${ratingsSection}
 
-**Genre:** ${movieInfo.Genre}
-**Runtime:** ${movieInfo.Runtime}
-**Rating:** ${movieInfo.Rated}
-**Release Date:** ${movieInfo.Released}
+## 💼 Additional Info
+- **Box Office:** ${movieInfo.BoxOffice || "N/A"}
+- **Production:** ${movieInfo.Production || "N/A"}
+- **DVD Release:** ${movieInfo.DVD || "N/A"}
+${movieInfo.Website && movieInfo.Website !== "N/A" ? `- **Official Website:** [${movieInfo.Website}](${movieInfo.Website})` : ""}
 
-**IMDb Rating:** ${movieInfo.imdbRating}/10 (${movieInfo.imdbVotes} votes)
-**Metascore:** ${movieInfo.Metascore}
-
-${movieInfo.Ratings?.map((rating) => `**${rating.Source}:** ${rating.Value}`).join("\n") || ""}
+---
+*Information provided by OMDb API*
         `}
         actions={
           <ActionPanel>
             <Action title="Back to Search" icon={Icon.ArrowLeft} onAction={() => setShowMovieDetail(false)} />
+            <Action
+              title="Open Imdb Page"
+              icon={Icon.Globe}
+              onAction={async () => {
+                if (movieInfo.imdbID) {
+                  await navigator.clipboard.writeText(`https://www.imdb.com/title/${movieInfo.imdbID}/`);
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: "Opening IMDb",
+                    message: "IMDb link copied to clipboard",
+                  });
+                }
+              }}
+            />
           </ActionPanel>
         }
       />
@@ -388,71 +439,66 @@ ${movieInfo.Ratings?.map((rating) => `**${rating.Source}:** ${rating.Value}`).jo
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Language & Quality"
-          value={`${selectedLanguage}|${selectedQuality}`}
-          onChange={(value) => {
-            const [language, quality] = value.split("|");
-            setSelectedLanguage(language);
-            setSelectedQuality(quality);
-          }}
-        >
-          <List.Dropdown.Section title="Language & Quality Combinations">
-            <List.Dropdown.Item title="All Languages & Qualities" value="|" />
-
-            {/* All Languages with Quality Filters */}
-            <List.Dropdown.Item title="All Languages • 4K/2160p" value="|4k" />
-            <List.Dropdown.Item title="All Languages • 1080p" value="|1080p" />
-            <List.Dropdown.Item title="All Languages • 720p" value="|720p" />
-            <List.Dropdown.Item title="All Languages • 480p" value="|480p" />
-            <List.Dropdown.Item title="All Languages • 360p" value="|360p" />
+        <List.Dropdown tooltip="Filter by Language" value={selectedLanguage} onChange={setSelectedLanguage}>
+          <List.Dropdown.Section title="Languages">
+            <List.Dropdown.Item title="🌍 All Languages" value="" icon="🌍" />
+            <List.Dropdown.Item title="🇸🇦 Arabic" value="ar" icon="🇸🇦" />
+            <List.Dropdown.Item title="🇺🇸 English" value="en" icon="🇺🇸" />
+            <List.Dropdown.Item title="🇫🇷 French" value="fr" icon="🇫🇷" />
+            <List.Dropdown.Item title="🇪🇸 Spanish" value="es" icon="🇪🇸" />
+            <List.Dropdown.Item title="🇩🇪 German" value="de" icon="🇩🇪" />
+            <List.Dropdown.Item title="🇮🇹 Italian" value="it" icon="🇮🇹" />
+            <List.Dropdown.Item title="🇵🇹 Portuguese" value="pt" icon="🇵🇹" />
+            <List.Dropdown.Item title="🇷🇺 Russian" value="ru" icon="🇷🇺" />
+            <List.Dropdown.Item title="🇯🇵 Japanese" value="ja" icon="🇯🇵" />
+            <List.Dropdown.Item title="🇰🇷 Korean" value="ko" icon="🇰🇷" />
+            <List.Dropdown.Item title="🇨🇳 Chinese" value="zh" icon="🇨🇳" />
           </List.Dropdown.Section>
-
-          <List.Dropdown.Section title="Language Filters">
-            {languages.map((lang) => (
-              <List.Dropdown.Item
-                key={`${lang.code}-all`}
-                title={`${lang.name} • All Qualities`}
-                value={`${lang.code}|`}
-              />
-            ))}
-          </List.Dropdown.Section>
-
-          {/* Arabic with all quality options */}
-          <List.Dropdown.Section title="Arabic Subtitles">
-            {qualities.slice(1).map((quality) => (
-              <List.Dropdown.Item
-                key={`ar-${quality.value}`}
-                title={`Arabic • ${quality.name}`}
-                value={`ar|${quality.value}`}
-              />
-            ))}
-          </List.Dropdown.Section>
-
-          {/* English with all quality options */}
-          <List.Dropdown.Section title="English Subtitles">
-            {qualities.slice(1).map((quality) => (
-              <List.Dropdown.Item
-                key={`en-${quality.value}`}
-                title={`English • ${quality.name}`}
-                value={`en|${quality.value}`}
-              />
-            ))}
-          </List.Dropdown.Section>
-
-          {/* Other languages with quality options */}
-          {languages.slice(2).map((lang) => (
-            <List.Dropdown.Section key={lang.code} title={`${lang.name} Subtitles`}>
-              {qualities.slice(1).map((quality) => (
-                <List.Dropdown.Item
-                  key={`${lang.code}-${quality.value}`}
-                  title={`${lang.name} • ${quality.name}`}
-                  value={`${lang.code}|${quality.value}`}
+        </List.Dropdown>
+      }
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title="Quality Filter">
+            <Action
+              title={
+                selectedQuality
+                  ? `Quality: ${qualities.find((q) => q.value === selectedQuality)?.name}`
+                  : "All Qualities"
+              }
+              icon={Icon.Filter}
+              onAction={() => {}} // Will be handled by submenu
+            />
+            <ActionPanel.Submenu title="Select Quality" icon={Icon.Filter}>
+              {qualities.map((quality) => (
+                <Action
+                  key={quality.value}
+                  title={quality.name}
+                  icon={selectedQuality === quality.value ? Icon.CheckCircle : Icon.Circle}
+                  onAction={() => setSelectedQuality(quality.value)}
                 />
               ))}
-            </List.Dropdown.Section>
-          ))}
-        </List.Dropdown>
+            </ActionPanel.Submenu>
+          </ActionPanel.Section>
+          {hasSearched && (
+            <ActionPanel.Section title="Search Actions">
+              <Action
+                title="Clear All Filters"
+                icon={Icon.Eraser}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => {
+                  setSelectedLanguage("");
+                  setSelectedQuality("");
+                }}
+              />
+              <Action
+                title="Refresh Search"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                onAction={handleRefresh}
+              />
+            </ActionPanel.Section>
+          )}
+        </ActionPanel>
       }
     >
       {/* Show smart suggestions while typing */}

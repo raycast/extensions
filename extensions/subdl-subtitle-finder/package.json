@@ -2,16 +2,17 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "subdl-subtitle-finder",
   "title": "Subdl Subtitle Finder",
-  "description": "Search and download Arabic and international movie/TV subtitles from SubDL.com with quality filtering",
+  "description": "Search and download Arabic and international movie/TV subtitles from SubDL.com with separate filters and TMDB-style UI",
   "icon": "extension-icon.png",
   "author": "sal2049",
   "license": "MIT",
+  "version": "1.1.0",
   "commands": [
     {
       "name": "search-subtitles",
       "title": "Search Subtitles",
       "subtitle": "SubDL",
-      "description": "Search and download movie/TV subtitles with language and quality filtering",
+      "description": "Search and download movie/TV subtitles with separate language/quality filters and TMDB-style movie info",
       "mode": "view"
     }
   ],

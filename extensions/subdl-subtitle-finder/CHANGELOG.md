@@ -5,7 +5,45 @@ All notable changes to the SubDL Subtitle Finder extension will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2024-01-XX
+## [1.1.0] - 2024-01-16
+
+### 🎨 Enhanced UI & Separate Filters
+
+#### ✨ Added
+- **Separate Language & Quality Filters**: Redesigned filter interface for better UX
+  - Language filter moved to search bar dropdown with country flag emojis
+  - Quality filter accessible via action panel submenu
+  - Independent filter operation for more flexible searching
+  - Enhanced quality labels: 1080p/Blu-ray, 720p/HD, 480p/DVD, 360p/SD
+
+#### 🎬 TMDB-Style Movie Presentation
+- **Enhanced Movie Display**: High-quality poster integration directly in list items
+- **Rich Movie Details**: Structured movie detail view with organized sections
+- **Interactive Actions**: Copy IMDb links, open movie details
+- **Professional Layout**: TMDB-inspired design with emoji indicators
+- **Improved Accessories**: Runtime, ratings, and metascore with visual indicators
+
+#### ⌨️ Enhanced Keyboard Shortcuts
+- **Cmd+R**: Clear all active filters
+- **Cmd+Shift+R**: Refresh current search
+- **Existing shortcuts**: Cmd+Enter (download), Cmd+C (copy link)
+
+#### 🔧 Technical Improvements
+- Enhanced movie info API with full plot details instead of short summaries
+- Better poster fallback handling for missing or invalid poster URLs
+- Improved accessories display with emojis for visual appeal
+- Structured movie detail markdown with organized sections
+- Enhanced error handling for movie information retrieval
+
+### 🔄 Changed
+- **Filter Interface**: Separated combined language+quality dropdown into two independent filters
+- **Movie Details**: Restructured movie detail view with sections for overview, production, and ratings
+- **Quality Labels**: Updated quality descriptions to include format references (Blu-ray, HD, DVD, SD)
+- **Action Panel**: Added quality filter to action panel for better accessibility
+
+---
+
+## [1.0.0] - 2024-01-15
 
 ### 🎉 Initial Release
 
