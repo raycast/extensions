@@ -6,6 +6,7 @@
 
 - Fixed extension crashes on initial load when no cached data is available
 - Resolved runtime errors that occurred after clearing Raycast cache
+- Improved loading state indicators to show "Loading..." instead of "No data" during data fetch
 
 ## [v2.0.0] - 2025-06-24
 

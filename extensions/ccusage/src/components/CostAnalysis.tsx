@@ -49,11 +49,13 @@ export function CostAnalysis() {
     [totalUsage?.totalCost],
   );
 
-  const accessories = error
+  const accessories: List.Item.Accessory[] = error
     ? STANDARD_ACCESSORIES.ERROR
-    : !totalUsage
-      ? STANDARD_ACCESSORIES.NO_DATA
-      : [{ text: formatCost(totalUsage.totalCost), icon: Icon.Coins }];
+    : totalUsage == undefined
+      ? STANDARD_ACCESSORIES.LOADING
+      : !totalUsage
+        ? STANDARD_ACCESSORIES.NO_DATA
+        : [{ text: formatCost(totalUsage.totalCost), icon: Icon.Coins }];
   const renderDetailMetadata = (): ReactNode => {
     const errorMetadata = ErrorMetadata({
       error,

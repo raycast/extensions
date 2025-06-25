@@ -25,11 +25,13 @@ export function DailyUsage() {
     [dailyUsage?.totalCost, dailyUsage?.totalTokens],
   );
 
-  const accessories = error
+  const accessories: List.Item.Accessory[] = error
     ? STANDARD_ACCESSORIES.ERROR
-    : !dailyUsage
-      ? STANDARD_ACCESSORIES.NO_DATA
-      : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
+    : dailyUsage == undefined
+      ? STANDARD_ACCESSORIES.LOADING
+      : !dailyUsage
+        ? STANDARD_ACCESSORIES.NO_DATA
+        : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
 
   const renderDetailMetadata = (): ReactNode => {
     if (error || !dailyUsage) {

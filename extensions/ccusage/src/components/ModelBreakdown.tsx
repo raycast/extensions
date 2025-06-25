@@ -33,11 +33,13 @@ export function ModelBreakdown() {
 
   const modelsByTier = useMemo(() => (models ? groupModelsByTier(models) : {}), [models]);
 
-  const accessories = error
+  const accessories: List.Item.Accessory[] = error
     ? STANDARD_ACCESSORIES.ERROR
-    : !models || models.length === 0
-      ? [{ text: "No models", icon: Icon.Circle }]
-      : [{ text: `${models.length} models`, icon: Icon.BarChart }];
+    : models.length === 0 && isLoading
+      ? STANDARD_ACCESSORIES.LOADING
+      : !models || models.length === 0
+        ? [{ text: "No models", icon: Icon.Circle }]
+        : [{ text: `${models.length} models`, icon: Icon.BarChart }];
   const renderDetailMetadata = (): ReactNode => {
     const errorMetadata = ErrorMetadata({
       error,

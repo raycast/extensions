@@ -28,11 +28,13 @@ export function SessionUsage() {
     [sessions],
   );
 
-  const accessories = error
+  const accessories: List.Item.Accessory[] = error
     ? STANDARD_ACCESSORIES.ERROR
-    : !sessions || sessions.length === 0
-      ? [{ text: "No sessions", icon: Icon.Circle }]
-      : [{ text: `${sessions.length} sessions`, icon: Icon.List }];
+    : sessions.length == 0 && isLoading
+      ? STANDARD_ACCESSORIES.LOADING
+      : !sessions || sessions.length === 0
+        ? [{ text: "No sessions", icon: Icon.Circle }]
+        : [{ text: `${sessions.length} sessions`, icon: Icon.List }];
   const renderDetailMetadata = (): ReactNode => {
     const errorMetadata = ErrorMetadata({
       error,
