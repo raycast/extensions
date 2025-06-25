@@ -16,6 +16,15 @@ export function DailyUsage() {
   const { data: dailyUsage, isLoading, error } = useDailyUsage();
   const currentDate = getCurrentLocalDate();
 
+  const efficiency = useMemo(
+    () => (dailyUsage ? getTokenEfficiency(dailyUsage.inputTokens, dailyUsage.outputTokens) : "0.00"),
+    [dailyUsage?.inputTokens, dailyUsage?.outputTokens],
+  );
+  const costPerMTok = useMemo(
+    () => (dailyUsage ? getCostPerMTok(dailyUsage.totalCost, dailyUsage.totalTokens) : "$0.00"),
+    [dailyUsage?.totalCost, dailyUsage?.totalTokens],
+  );
+
   const accessories = error
     ? STANDARD_ACCESSORIES.ERROR
     : !dailyUsage
@@ -32,15 +41,6 @@ export function DailyUsage() {
         />
       );
     }
-
-    const efficiency = useMemo(
-      () => getTokenEfficiency(dailyUsage.inputTokens, dailyUsage.outputTokens),
-      [dailyUsage.inputTokens, dailyUsage.outputTokens],
-    );
-    const costPerMTok = useMemo(
-      () => getCostPerMTok(dailyUsage.totalCost, dailyUsage.totalTokens),
-      [dailyUsage.totalCost, dailyUsage.totalTokens],
-    );
 
     return (
       <List.Item.Detail.Metadata>

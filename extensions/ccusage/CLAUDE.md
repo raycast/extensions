@@ -245,6 +245,14 @@ src/
 - **No `any` Type**: Avoid `any` type usage; create proper interfaces or use union types
 - **Functional Patterns**: Use `ts-pattern` for complex conditional logic when necessary
 
+#### React Component Design Principles
+
+- **Hooks at Top Level**: Always call hooks at component top level, never inside conditions, loops, or nested functions
+- **Functional Components**: Use function declarations for components, arrow functions for utilities
+- **Null Safety in Hooks**: Handle null/undefined data within hooks using conditional logic and optional chaining
+- **Component Separation**: Keep render logic separate from business logic through proper abstraction
+- **Memoization Strategy**: Use `useMemo` for expensive calculations, `useCallback` for function references
+
 #### Examples of Preferred Patterns
 
 ```typescript
@@ -326,6 +334,16 @@ npm run fix-lint
 # Dependency cleanup check
 npm run knip
 ```
+
+### Development Checklist
+
+Before committing React component changes:
+
+- [ ] **Hooks compliance**: All hooks at component top level (never in conditions/loops/nested functions)
+- [ ] **Type safety**: No `any` types, proper interfaces for props and data
+- [ ] **Null handling**: Graceful handling of undefined/null data within hooks
+- [ ] **Performance**: Appropriate use of `useMemo`/`useCallback` for expensive operations
+- [ ] **ESLint clean**: No linting warnings, especially `react-hooks/rules-of-hooks`
 
 ## Development Status
 
