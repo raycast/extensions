@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
 import { TrackObject } from "./helpers/spotify.api";
@@ -111,7 +111,6 @@ export default function FindLyricsCommand() {
         console.error("Error fetching lyrics:", err);
         const errorMessage = err instanceof Error ? err.message : "Failed to fetch lyrics. Please try again.";
         setError(errorMessage);
-        showFailureToast(err, { title: "Error" });
       } finally {
         setIsLoading(false);
       }
