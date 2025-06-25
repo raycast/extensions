@@ -77,7 +77,7 @@ export default function MenuBarccusage() {
         <>
           <MenuBarExtra.Section title="Today's Usage">
             <MenuBarExtra.Item
-              title={formatUsageTitle(isLoading, todayUsage, "No usage data available")}
+              title={formatUsageTitle(dailyLoading, todayUsage, "No usage data available")}
               icon={Icon.Calendar}
               onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
             />
@@ -85,7 +85,7 @@ export default function MenuBarccusage() {
 
           <MenuBarExtra.Section title="Monthly Usage">
             <MenuBarExtra.Item
-              title={formatUsageTitle(isLoading, monthlyUsage, "No usage data available")}
+              title={formatUsageTitle(monthlyLoading, monthlyUsage, "No usage data available")}
               icon={Icon.BarChart}
               onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
             />
@@ -93,7 +93,7 @@ export default function MenuBarccusage() {
 
           <MenuBarExtra.Section title="Total Usage">
             <MenuBarExtra.Item
-              title={formatUsageTitle(isLoading, totalUsage, "No usage data available")}
+              title={formatUsageTitle(totalLoading, totalUsage, "No usage data available")}
               icon={Icon.Coins}
               onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
             />

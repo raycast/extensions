@@ -22,11 +22,24 @@ const externalLinks: ExternalLink[] = [
 export function ModelBreakdown() {
   const { topModels: models, isLoading, error } = useSessionUsage();
 
-  const accessories = error
+  const topModelsList = useMemo(() => (models ? getTopModels(models, 10) : []), [models]);
+
+  const { totalTokens, totalCost, totalSessions } = useMemo(
+    () => (models ? calculateModelAggregates(models) : { totalTokens: 0, totalCost: 0, totalSessions: 0 }),
+    [models],
+  );
+
+  const mostEfficientModel = useMemo(() => (models ? findMostEfficientModel(models) : null), [models]);
+
+  const modelsByTier = useMemo(() => (models ? groupModelsByTier(models) : {}), [models]);
+
+  const accessories: List.Item.Accessory[] = error
     ? STANDARD_ACCESSORIES.ERROR
-    : !models || models.length === 0
-      ? [{ text: "No models", icon: Icon.Circle }]
-      : [{ text: `${models.length} models`, icon: Icon.BarChart }];
+    : models.length === 0 && isLoading
+      ? STANDARD_ACCESSORIES.LOADING
+      : !models || models.length === 0
+        ? [{ text: "No models", icon: Icon.Circle }]
+        : [{ text: `${models.length} models`, icon: Icon.BarChart }];
   const renderDetailMetadata = (): ReactNode => {
     const errorMetadata = ErrorMetadata({
       error,
@@ -42,14 +55,6 @@ export function ModelBreakdown() {
     if (!models || models.length === 0) {
       return null;
     }
-
-    const topModels = useMemo(() => getTopModels(models, 10), [models]);
-
-    const { totalTokens, totalCost, totalSessions } = useMemo(() => calculateModelAggregates(models), [models]);
-
-    const mostEfficientModel = useMemo(() => findMostEfficientModel(models), [models]);
-
-    const modelsByTier = useMemo(() => groupModelsByTier(models), [models]);
 
     return (
       <List.Item.Detail.Metadata>
@@ -105,7 +110,7 @@ export function ModelBreakdown() {
         )}
 
         <List.Item.Detail.Metadata.Label title="Top Models by Usage" />
-        {topModels.slice(0, 5).map((model, index) => {
+        {topModelsList.slice(0, 5).map((model, index) => {
           const costPerMTok = getCostPerMTok(model.totalCost, model.totalTokens);
 
           return (

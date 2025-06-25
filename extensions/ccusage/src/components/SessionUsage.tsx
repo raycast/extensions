@@ -18,11 +18,23 @@ const MAX_SESSIONS_DISPLAY = 5;
 export function SessionUsage() {
   const { recentSessions: sessions, isLoading, error } = useSessionUsage();
 
-  const accessories = error
+  const averageCost = useMemo(() => (sessions ? calculateAverageSessionCost(sessions) : 0), [sessions]);
+  const averageTokens = useMemo(() => (sessions ? calculateAverageSessionTokens(sessions) : 0), [sessions]);
+  const efficiency = useMemo(
+    () =>
+      sessions
+        ? calculateEfficiencyMetrics(sessions)
+        : { averageInputOutputRatio: 0, averageCostPerOutput: 0, mostEfficientModel: null },
+    [sessions],
+  );
+
+  const accessories: List.Item.Accessory[] = error
     ? STANDARD_ACCESSORIES.ERROR
-    : !sessions || sessions.length === 0
-      ? [{ text: "No sessions", icon: Icon.Circle }]
-      : [{ text: `${sessions.length} sessions`, icon: Icon.List }];
+    : sessions.length === 0 && isLoading
+      ? STANDARD_ACCESSORIES.LOADING
+      : !sessions || sessions.length === 0
+        ? [{ text: "No sessions", icon: Icon.Circle }]
+        : [{ text: `${sessions.length} sessions`, icon: Icon.List }];
   const renderDetailMetadata = (): ReactNode => {
     const errorMetadata = ErrorMetadata({
       error,
@@ -34,10 +46,6 @@ export function SessionUsage() {
     if (errorMetadata) {
       return errorMetadata;
     }
-
-    const averageCost = useMemo(() => calculateAverageSessionCost(sessions), [sessions]);
-    const averageTokens = useMemo(() => calculateAverageSessionTokens(sessions), [sessions]);
-    const efficiency = useMemo(() => calculateEfficiencyMetrics(sessions), [sessions]);
 
     return (
       <List.Item.Detail.Metadata>

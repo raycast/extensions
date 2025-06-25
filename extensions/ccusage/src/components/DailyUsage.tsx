@@ -16,11 +16,22 @@ export function DailyUsage() {
   const { data: dailyUsage, isLoading, error } = useDailyUsage();
   const currentDate = getCurrentLocalDate();
 
-  const accessories = error
+  const efficiency = useMemo(
+    () => (dailyUsage ? getTokenEfficiency(dailyUsage.inputTokens, dailyUsage.outputTokens) : "0.00"),
+    [dailyUsage?.inputTokens, dailyUsage?.outputTokens],
+  );
+  const costPerMTok = useMemo(
+    () => (dailyUsage ? getCostPerMTok(dailyUsage.totalCost, dailyUsage.totalTokens) : "$0.00"),
+    [dailyUsage?.totalCost, dailyUsage?.totalTokens],
+  );
+
+  const accessories: List.Item.Accessory[] = error
     ? STANDARD_ACCESSORIES.ERROR
-    : !dailyUsage
-      ? STANDARD_ACCESSORIES.NO_DATA
-      : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
+    : dailyUsage === undefined
+      ? STANDARD_ACCESSORIES.LOADING
+      : !dailyUsage
+        ? STANDARD_ACCESSORIES.NO_DATA
+        : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
 
   const renderDetailMetadata = (): ReactNode => {
     if (error || !dailyUsage) {
@@ -32,15 +43,6 @@ export function DailyUsage() {
         />
       );
     }
-
-    const efficiency = useMemo(
-      () => getTokenEfficiency(dailyUsage.inputTokens, dailyUsage.outputTokens),
-      [dailyUsage.inputTokens, dailyUsage.outputTokens],
-    );
-    const costPerMTok = useMemo(
-      () => getCostPerMTok(dailyUsage.totalCost, dailyUsage.totalTokens),
-      [dailyUsage.totalCost, dailyUsage.totalTokens],
-    );
 
     return (
       <List.Item.Detail.Metadata>
