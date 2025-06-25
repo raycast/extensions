@@ -9,10 +9,13 @@ import { SECTION_TITLES } from "./constants";
 interface URLListProps {
   group: Group;
   rootData: Root;
+  isLoading?: boolean;
 }
 
-export function URLList({ group, rootData }: URLListProps) {
-  const { applications } = useApplications();
+export function URLList({ group, rootData, isLoading = false }: URLListProps) {
+  const { applications, loading: applicationsLoading } = useApplications();
+
+  const combinedLoading = isLoading || applicationsLoading;
 
   const otherUrls: DisplayUrl[] = Object.entries(group.otherUrls || {}).map(([key, otherUrl]) => {
     const title = otherUrl.title || key;
@@ -70,16 +73,12 @@ export function URLList({ group, rootData }: URLListProps) {
     items.map((item) => <URLListItem key={item.key} item={item} applications={applications} />);
 
   return (
-    <List>
-      {linkedUrls.length > 0 && (
-        <List.Section title={SECTION_TITLES.LINKED_URLS}>{renderItems(linkedUrls)}</List.Section>
-      )}
+    <List isLoading={combinedLoading}>
+      <List.Section title={SECTION_TITLES.LINKED_URLS}>{renderItems(linkedUrls)}</List.Section>
 
-      {otherUrls.length > 0 && <List.Section title={SECTION_TITLES.OTHER_URLS}>{renderItems(otherUrls)}</List.Section>}
+      <List.Section title={SECTION_TITLES.OTHER_URLS}>{renderItems(otherUrls)}</List.Section>
 
-      {templateUrls.length > 0 && (
-        <List.Section title={SECTION_TITLES.TEMPLATE_URLS}>{renderItems(templateUrls)}</List.Section>
-      )}
+      <List.Section title={SECTION_TITLES.TEMPLATE_URLS}>{renderItems(templateUrls)}</List.Section>
     </List>
   );
 }

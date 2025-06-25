@@ -1,7 +1,7 @@
 import { Root, Templateable } from "./types";
 
 export interface ValidationError {
-  type: "missing_placeholder" | "invalid_template" | "invalid_url" | "missing_template" | "invalid_icon";
+  type: "missing_placeholder" | "invalid_template" | "invalid_url" | "missing_template";
   message: string;
   location: string;
   severity: "error" | "warning";
@@ -265,7 +265,7 @@ function validateAppliedTemplates(
 function extractPlaceholders(templateUrl: string): string[] {
   if (!templateUrl) return [];
 
-  const matches = templateUrl.match(/\$\{([^}]+)\}/g);
+  const matches = templateUrl.match(/\$\{([^{}]+)\}/g);
   if (!matches) return [];
   return matches.map((match) => match.slice(2, -1));
 }

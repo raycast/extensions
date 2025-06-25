@@ -29,7 +29,6 @@ export function HelpView({ validationResult }: HelpViewProps) {
           description="Your configuration file looks good! No issues found."
           icon={Icon.Checkmark}
         />
-        <List.Section title="Quick Actions" />
       </List>
     );
   }

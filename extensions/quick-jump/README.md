@@ -190,7 +190,7 @@ If you need icons for services not included above, you have several options:
 
 ## Using Templates and the `openIn` Field
 
-You can define templates for URLs that require dynamic values. Use `{placeholder}` syntax in the `templateUrl`, and the extension will prompt you to fill in those values.
+You can define templates for URLs that require dynamic values. Use `${placeholder}` syntax in the `templateUrl`, and the extension will prompt you to fill in those values.
 
 You can also specify the application to open the URL with the `openIn` field for any URL type (regular URLs, other URLs in groups, and templates). This can be:
 - The app's name (e.g., `"Google Chrome"`, `"Visual Studio Code"`)
@@ -232,7 +232,7 @@ You can also specify the application to open the URL with the `openIn` field for
 ```json
 {
   "title": "Open Jira Ticket",
-  "templateUrl": "https://jira.company.com/browse/{ticketId}",
+  "templateUrl": "https://jira.company.com/browse/${ticketId}",
   "openIn": "Google Chrome"
 }
 ```
@@ -243,7 +243,7 @@ You can also specify the application to open the URL with the `openIn` field for
 ```json
 {
   "title": "Open in VS Code",
-  "templateUrl": "{projectPath}",
+  "templateUrl": "${projectPath}",
   "openIn": "Visual Studio Code"
 }
 ```

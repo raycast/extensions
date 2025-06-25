@@ -66,7 +66,7 @@ export function sleep(ms: number) {
 
 export function extractPlaceholders(templateUrl: string): string[] {
   if (!templateUrl) return [];
-  const matches = templateUrl.match(/\$\{([^}]+)\}/g); // Only escape $ and {, not }
+  const matches = templateUrl.match(/\$\{([^{}]+)\}/g);
   if (!matches) return [];
   return matches.map((match) => match.slice(2, -1));
 }

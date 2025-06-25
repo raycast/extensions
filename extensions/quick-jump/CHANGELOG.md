@@ -1,5 +1,5 @@
 # Quick Jump Changelog
 
-## [Added Quick Jump] - 2025-06-25
+## [Added Quick Jump] - {PR_MERGE_DATE}
 
 - Initial version code

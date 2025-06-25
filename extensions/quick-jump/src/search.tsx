@@ -77,7 +77,7 @@ export default function Command() {
                     title={ACTION_TITLES.BROWSE_GROUP}
                     icon={Icon.Folder}
                     onAction={() => {
-                      push(<URLList group={group} rootData={data} />);
+                      push(<URLList group={group} rootData={data} isLoading={loading} />);
                     }}
                   />
                   <ActionPanel.Section>
