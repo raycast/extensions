@@ -6,6 +6,7 @@ import {
   BrowserExtension,
   Clipboard,
   Color,
+  environment,
   getPreferenceValues,
   Icon,
   List,
@@ -33,6 +34,7 @@ import { Err, Ok, Result, tryCatch } from "~/utils/errors";
 import { useVaultSearch } from "~/utils/search";
 import ListFolderDropdown from "~/components/ListFolderDropdown";
 import ComponentReverser from "~/components/ComponentReverser";
+import { useStateEffect } from "~/utils/hooks/useStateEffect";
 
 const AuthenticatorCommand = () => (
   <RootErrorBoundary>
@@ -247,8 +249,11 @@ function useGetCodeForAction(action: "copy" | "paste") {
 
 function useActiveTab() {
   return usePromise(async () => {
+    if (!environment.canAccess(BrowserExtension)) return undefined;
+
     const [tabs, error] = await tryCatch(BrowserExtension.getTabs());
     if (error) return undefined;
+
     const activeTab = tabs.find((tab) => tab.active);
     return activeTab ? { ...activeTab, url: new URL(activeTab.url) } : undefined;
   });
@@ -279,7 +284,7 @@ const authenticator = {
     return Ok(new OTPAuth.TOTP(options));
   },
   useCode(item: Item, canGenerate = true) {
-    const [generator, error, isLoading = false] = useMemo(() => {
+    const [[generator, error, isLoading = false], setState] = useStateEffect(() => {
       const { totp } = item.login ?? {};
       if (!canGenerate) return Loading(new Error("Needs confirmation..."));
       if (totp === SENSITIVE_VALUE_PLACEHOLDER) return Loading(new Error("Loading..."));
@@ -300,29 +305,47 @@ const authenticator = {
     useEffect(() => {
       if (error) return;
 
-      const setTimeAndCode = () => {
-        const timeRemaining = Math.ceil(generator.remaining() / 1000);
-        setTime(timeRemaining);
-
-        if (timeRemaining === generator.period) {
-          setCode(generator.generate());
-        }
-      };
-
       let interval: NodeJS.Timeout | undefined;
-      // set an initial timeout to ensure the first evaluation is time accurate
-      // and then keep evaluating every second
-      const timeout = setTimeout(() => {
-        setTimeAndCode();
-        interval = setInterval(setTimeAndCode, 1000);
-      }, generator.remaining() % 1000);
+      let timeout: NodeJS.Timeout | undefined;
 
-      setCode(generator.generate()); // first generation before the interval starts
-
-      return () => {
+      const cleanup = () => {
         clearTimeout(timeout);
         clearInterval(interval);
       };
+
+      const setTimeAndCode = () => {
+        try {
+          const timeRemaining = Math.ceil(generator.remaining() / 1000);
+          setTime(timeRemaining);
+
+          if (timeRemaining === generator.period) {
+            setCode(generator.generate());
+          }
+        } catch {
+          const error = new Error("ERR2: Failed to regenerate");
+          setState(Err(error));
+          cleanup();
+          captureException(error.message, error, { captureToRaycast: true });
+        }
+      };
+
+      try {
+        // set an initial timeout to ensure the first evaluation is time accurate
+        // and then keep evaluating every second
+        timeout = setTimeout(() => {
+          setTimeAndCode();
+          interval = setInterval(setTimeAndCode, 1000);
+        }, generator.remaining() % 1000);
+
+        setCode(generator.generate()); // first generation before the interval starts
+      } catch {
+        const error = new Error("ERR1: Failed to generate");
+        setState(Err(error));
+        cleanup();
+        captureException(error.message, error, { captureToRaycast: true });
+      }
+
+      return cleanup;
     }, [item, generator]);
 
     return { code, time, error, isLoading };

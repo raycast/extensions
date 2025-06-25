@@ -13,6 +13,8 @@ export default function NewFileWithDetails(props: {
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];
   folder: string;
+  isLoading: boolean;
+  navigationTitle: string;
 }) {
   const templateFiles = props.templateFiles;
   const [newFileType, setNewFileType] = useState<{ section: string; index: number }>(props.newFileType);
@@ -23,7 +25,8 @@ export default function NewFileWithDetails(props: {
 
   return (
     <Form
-      navigationTitle={"New File With Details"}
+      isLoading={props.isLoading || false}
+      navigationTitle={props.navigationTitle}
       actions={
         <ActionPanel>
           <Action

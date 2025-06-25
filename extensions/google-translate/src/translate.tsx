@@ -13,7 +13,7 @@ const DoubleWayTranslateItem: React.FC<{
   selectedLanguageSet: LanguageCodeSet;
   toggleShowingDetail: () => void;
 }> = ({ toggleShowingDetail, value, selectedLanguageSet }) => {
-  const { data: results } = usePromise(doubleWayTranslate, [value, selectedLanguageSet], {
+  const { data: results, isLoading } = usePromise(doubleWayTranslate, [value, selectedLanguageSet], {
     onError(error) {
       showToast({
         style: Toast.Style.Failure,
@@ -22,6 +22,10 @@ const DoubleWayTranslateItem: React.FC<{
       });
     },
   });
+
+  if (isLoading) {
+    return <List.EmptyView icon={Icon.Hourglass} title="Translating..." />;
+  }
 
   return (
     <>
@@ -143,7 +147,7 @@ export default function Translate(): ReactElement {
       {selectedLanguageSet.langTo.length === 1 ? (
         <DoubleWayTranslateItem
           value={debouncedValue}
-          selectedLanguageSet={selectedLanguageSet}
+          selectedLanguageSet={{ langFrom: selectedLanguageSet.langFrom, langTo: selectedLanguageSet.langTo, proxy }}
           toggleShowingDetail={() => setIsShowingDetail(!isShowingDetail)}
         />
       ) : (
