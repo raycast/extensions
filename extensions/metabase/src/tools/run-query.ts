@@ -11,7 +11,7 @@ type Input = {
 export default async function (input: Input) {
   const result = await runQuery(input);
 
-  return { result };
+  return { result: result.rows };
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {

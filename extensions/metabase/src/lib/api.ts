@@ -93,7 +93,7 @@ export async function runQuestion(input: { questionId: number }) {
       "x-api-key": preferences.apiToken,
     },
     body: JSON.stringify({}),
-  }).then((res) => res.json() as Promise<Query>);
+  }).then((res) => res.json() as Promise<{ data: Query }>);
 }
 
 export async function getDatabases() {

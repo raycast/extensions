@@ -11,12 +11,12 @@ type Input = {
 export default async function (input: Input) {
   const result = await runQuestion(input);
 
-  return { result };
+  return { result: result.data.rows };
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   if (!input.requiresConfirmation) {
-    return true;
+    return;
   }
 
   const question = await getQuestion(input);
