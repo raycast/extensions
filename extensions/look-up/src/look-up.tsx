@@ -1,12 +1,6 @@
 import { getPreferenceValues, getSelectedText, showHUD, Clipboard } from "@raycast/api";
 import fetch from "node-fetch";
 
-interface Preferences {
-  targetLanguage: string;
-  sourceLanguage: string;
-  enableCopyToClipboard: boolean;
-}
-
 // Helper function to show HUD for a longer duration based on text length
 async function showExtendedHUD(message: string, minDurationMs: number = 3000) {
   await showHUD(message);
