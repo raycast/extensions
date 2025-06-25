@@ -1,5 +1,17 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.0.0] - 2025-06-24
+
+### Added
+
+- AI Extension Support: Comprehensive integration with Raycast AI Extensions for Claude models
+
+### Changed
+
+- Major architecture refactor: redesigned extension with layered hook architecture
+- Improved type safety and data validation throughout the codebase
+- Enhanced error handling and user guidance for system configuration
+
 ## [v1.0.2] - 2025-06-20
 
 - Cleaned up unused dependencies and exports detection
