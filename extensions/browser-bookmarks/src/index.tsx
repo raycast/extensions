@@ -642,6 +642,7 @@ export default function Command() {
                     currentProfile={firefox.currentProfile}
                     setCurrentProfile={firefox.setCurrentProfile}
                   />
+                  {/* Note: Ghost Browser doesn't seem to have a profile feature - no profile switching submenu added for it. */}
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.island}
                     name="Island"
