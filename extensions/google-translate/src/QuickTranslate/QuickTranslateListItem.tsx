@@ -1,6 +1,6 @@
 import { ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { supportedLanguagesByCode } from "../languages";
+import { LanguageCode, supportedLanguagesByCode } from "../languages";
 import { simpleTranslate } from "../simple-translate";
 import { LanguageCodeSet } from "../types";
 import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction, ToggleFullTextAction } from "../actions";
@@ -10,7 +10,7 @@ export function QuickTranslateListItem(props: {
   languageSet: LanguageCodeSet;
   isShowingDetail: boolean;
   setIsShowingDetail: (isShowingDetail: boolean) => void;
-  setIsLoading: (isLoading: boolean) => void;
+  setIsLoading: (isLoading: boolean, sourceLanguage?: LanguageCode) => void;
 }) {
   let langFrom = supportedLanguagesByCode[props.languageSet.langFrom];
   const langTo = supportedLanguagesByCode[props.languageSet.langTo[0]];
@@ -19,8 +19,8 @@ export function QuickTranslateListItem(props: {
     onWillExecute() {
       props.setIsLoading(true);
     },
-    onData() {
-      props.setIsLoading(false);
+    onData(data) {
+      props.setIsLoading(false, data.langFrom);
     },
     onError(error) {
       props.setIsLoading(false);

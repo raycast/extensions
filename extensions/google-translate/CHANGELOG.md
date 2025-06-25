@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Show Auto-Detected language in Quick Translate
+
 ## [Feature] - 2025-06-24
 
 - Auto-focus on Text input after changing source or target language

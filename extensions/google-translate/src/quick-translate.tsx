@@ -7,6 +7,7 @@ import { LanguageCode } from "./languages";
 
 export default function QuickTranslate(): ReactElement {
   const [sourceLanguage] = useSourceLanguage();
+  const [translateSourceLanguage, setTranslateSourceLanguage] = useState<LanguageCode>();
   const [targetLanguages] = useTargetLanguages();
   const { proxy } = usePreferences();
   const [isShowingDetail, setIsShowingDetail] = useState(true);
@@ -17,8 +18,8 @@ export default function QuickTranslate(): ReactElement {
 
   const isAnyLoading = Array.from(loadingStates.values()).some((isLoading) => isLoading);
 
-  function setIsLoading(lang: LanguageCode, isLoading: boolean) {
-    setLoadingStates((prev) => new Map(prev).set(lang, isLoading));
+  function setIsLoading(targetLang: LanguageCode, isLoading: boolean) {
+    setLoadingStates((prev) => new Map(prev).set(targetLang, isLoading));
   }
 
   return (
@@ -28,7 +29,7 @@ export default function QuickTranslate(): ReactElement {
       onSearchTextChange={setText}
       isLoading={isAnyLoading}
       isShowingDetail={isShowingDetail}
-      searchBarAccessory={<LanguageDropdown />}
+      searchBarAccessory={<LanguageDropdown translatedSourceLanguage={translateSourceLanguage} />}
     >
       {debouncedText
         ? targetLanguages.map((targetLanguage) => (
@@ -38,7 +39,10 @@ export default function QuickTranslate(): ReactElement {
               languageSet={{ langFrom: sourceLanguage, langTo: [targetLanguage], proxy }}
               isShowingDetail={isShowingDetail}
               setIsShowingDetail={setIsShowingDetail}
-              setIsLoading={(isLoading) => setIsLoading(targetLanguage, isLoading)}
+              setIsLoading={(isLoading, sourceLanguage) => {
+                setIsLoading(targetLanguage, isLoading);
+                setTranslateSourceLanguage(sourceLanguage);
+              }}
             />
           ))
         : null}
