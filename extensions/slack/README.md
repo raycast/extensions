@@ -59,6 +59,9 @@ If you don't want to log in through OAuth, you can use an access token instead. 
          # Command: Send Message
          - chat:write
 
+         # Command: Search Emojis
+         - emoji:read
+
    settings:
      org_deploy_enabled: false
      socket_mode_enabled: false
