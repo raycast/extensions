@@ -18,27 +18,13 @@ type CommitStat = {
 export default function GitStatisticsDetail({ project }: GitStatisticsDetailProps) {
     const { push, pop } = useNavigation()
     const [clocAvailable, setClocAvailable] = useState<boolean | null>(null)
-    const [clocError, setClocError] = useState<string | null>(null)
 
     const { isLoading: isLoadingCommits, data: totalCommits } = useExec('git', ['rev-list', '--all', '--count'], { cwd: project.fullPath })
     const { isLoading: isLoadingBranches, data: totalBranches } = useExec('git', ['branch', '-r'], { cwd: project.fullPath, parseOutput: (output) => output.stdout.split('\n').length - 1 })
     const { isLoading: isLoadingTags, data: totalTags } = useExec('git', ['tag'], { cwd: project.fullPath, parseOutput: (output) => output.stdout.split('\n').length - 1 })
 
-    // Check if cloc command is available - try common paths
-    const { isLoading: isCheckingCloc, data: clocCheckResult } = useExec('/opt/homebrew/bin/cloc', ['--version'], {
-        parseOutput: (output) => {
-            // Check if output contains version number (like "2.04") or the word cloc
-            if (output.stdout && (output.stdout.match(/\d+\.\d+/) || output.stdout.includes('cloc'))) {
-                setClocAvailable(true)
-                return '/opt/homebrew/bin/cloc'
-            }
-            return null
-        },
-    })
-
-    // Fallback check: try standard PATH locations
-    const { isLoading: isCheckingClocFallback, data: clocFallbackResult } = useExec('which', ['cloc'], {
-        execute: clocAvailable === false && !isCheckingCloc,
+    // First check if cloc is available
+    const { isLoading: isCheckingCloc, error: clocCheckError } = useExec('which', ['cloc'], {
         env: {
             ...process.env,
             PATH: '/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:' + (process.env.PATH || ''),
@@ -46,27 +32,14 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
         parseOutput: (output) => {
             if (output.stdout && output.stdout.trim().length > 0) {
                 setClocAvailable(true)
-                return output.stdout
+                return output.stdout.trim()
             }
             return null
         },
     })
 
-    // Final fallback: try usr/local/bin
-    const { isLoading: isCheckingClocUsrLocal, data: clocUsrLocalResult } = useExec('/usr/local/bin/cloc', ['--version'], {
-        execute: clocAvailable === false && !isCheckingCloc && !isCheckingClocFallback,
-        parseOutput: (output) => {
-            // Check if output contains version number (like "2.04") or the word cloc
-            if (output.stdout && (output.stdout.match(/\d+\.\d+/) || output.stdout.includes('cloc'))) {
-                setClocAvailable(true)
-                return '/usr/local/bin/cloc'
-            }
-            return null
-        },
-    })
-
-    // Execute cloc command only if available
-    const { isLoading: isLoadingCloc, data: clocData } = useExec(clocCheckResult || clocFallbackResult || clocUsrLocalResult || '/opt/homebrew/bin/cloc', ['.', '--exclude-dir=node_modules,vendor,.git,dist,build', '--git', '--exclude-ext=lock'], {
+    // Only run cloc if we confirmed it's available
+    const { isLoading: isLoadingCloc, data: clocData } = useExec('cloc', ['.', '--exclude-dir=node_modules,vendor,.git,dist,build', '--git', '--exclude-ext=lock'], {
         cwd: project.fullPath,
         execute: clocAvailable === true,
         timeout: 30000, // 30 second timeout
@@ -82,12 +55,18 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
         },
     })
 
+    // Set cloc as unavailable if the version check failed
+    useEffect(() => {
+        if (clocCheckError && clocAvailable !== false) {
+            setClocAvailable(false)
+        }
+    }, [clocCheckError, clocAvailable])
+
     // Handle cloc errors
     useEffect(() => {
         if (clocAvailable === false) {
-            setClocError('cloc command not found')
+            showFailureToast('Code Statistics Error', { title: 'cloc command not found' })
         } else if (clocAvailable === true && !isLoadingCloc && (!clocData || clocData.trim().length === 0)) {
-            setClocError('cloc command failed or returned empty results')
             showFailureToast('Code Statistics Error', { title: 'cloc command failed to generate statistics' })
         }
     }, [clocAvailable, isLoadingCloc, clocData])
@@ -136,7 +115,7 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
         },
     })
 
-    const isLoading = isLoadingCommits || isLoadingBranches || isLoadingTags || isLoadingCommitsByPerson || isCheckingCloc || isCheckingClocFallback || isCheckingClocUsrLocal || (clocAvailable === true && isLoadingCloc)
+    const isLoading = isLoadingCommits || isLoadingBranches || isLoadingTags || isLoadingCommitsByPerson || isCheckingCloc || (clocAvailable === true && isLoadingCloc)
 
     const formatClocData = (clocData: string): string => {
         const lines = clocData.trim().split('\n')
@@ -186,7 +165,7 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
     }
 
     const getClocSection = () => {
-        if (isCheckingCloc || isCheckingClocFallback || isCheckingClocUsrLocal) {
+        if (isCheckingCloc) {
             return 'Checking if cloc is available...'
         }
 
@@ -194,19 +173,16 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
             return 'Generating code statistics...'
         }
 
-        if (clocAvailable === false) {
-            return `**cloc not found** - Install [cloc](https://github.com/AlDanial/cloc) to get detailed code statistics including lines of code, comments, and blank lines by language.`
-        }
-
-        if (clocError) {
-            return `Unable to generate code statistics: ${clocError}`
-        }
-
         if (clocAvailable === true && clocData && clocData.trim().length > 0) {
             return formatClocData(clocData)
         }
 
-        return 'Code statistics not available'
+        // Show installation instructions for any case where cloc is not working
+        return `**cloc not found** - Install [cloc](https://github.com/AlDanial/cloc) to get detailed code statistics including lines of code, comments, and blank lines by language.
+
+**Installation options:**
+- **macOS:** \`brew install cloc\`
+- **npm:** \`npm install -g cloc\``
     }
 
     const getRepoStats = () => {
