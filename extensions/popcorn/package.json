@@ -24,13 +24,22 @@
           "placeholder": "https://www.example.com/manifest.json"
         },
         {
-          "name": "streamingApps",
+          "name": "defaultStreamingApp",
+          "type": "appPicker",
+          "required": false,
+          "title": "Default Streaming App",
+          "description": "Default Streaming App to use for streaming",
+          "placeholder": "Select a streaming app",
+          "default": "IINA"
+        },
+        {
+          "name": "alternativeStreamingApps",
           "type": "textfield",
           "required": false,
-          "title": "Streaming Apps (comma-separated)",
-          "description": "Custom Streaming Apps (ordered, comma-separated)",
-          "placeholder": "IINA, VLC",
-          "default": "IINA, VLC"
+          "title": "Alternative Streaming Apps (comma-separated)",
+          "description": "Custom Alternative Streaming Apps (ordered, comma-separated)",
+          "placeholder": "VLC, MPV",
+          "default": "VLC"
         }
       ]
     }

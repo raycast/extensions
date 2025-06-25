@@ -111,11 +111,10 @@ async function parseSearchResponse(response: Response): Promise<Media[]> {
 }
 
 async function parseSeriesResponse(response: Response): Promise<Episode[]> {
-  const json = (await response.json()) as SeriesDetailResponse;
-
   if (!response.ok) {
     throw new Error(response.statusText);
   }
+  const json = (await response.json()) as SeriesDetailResponse;
 
   return json.meta.videos.map((video) => ({
     id: video.id,
@@ -131,9 +130,17 @@ async function parseSeriesResponse(response: Response): Promise<Episode[]> {
 async function parseStreamResponse(response: Response): Promise<Stream[]> {
   const json = (await response.json()) as StreamResponse;
 
+  if (!json.streams || !Array.isArray(json.streams)) {
+    return [];
+  }
+  const parsedStreams = json.streams.map((stream) => ({
+    ...stream,
+    title: stream.title || stream.description || stream.name || "Unknown Stream Name",
+  }));
+
   if (!response.ok) {
     throw new Error(response.statusText);
   }
 
-  return json.streams || [];
+  return parsedStreams;
 }

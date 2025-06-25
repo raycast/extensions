@@ -19,13 +19,17 @@ export interface Media {
 }
 
 export interface Stream {
-  name: string;
   title: string;
   url: string;
   behaviorHints?: {
     bingeGroup?: string;
     filename?: string;
   };
+}
+
+export interface StreamLike extends Stream {
+  description?: string;
+  name?: string;
 }
 
 export interface Episode {
@@ -91,5 +95,5 @@ export interface SearchResponse {
 }
 
 export interface StreamResponse {
-  streams: Stream[];
+  streams: StreamLike[];
 }

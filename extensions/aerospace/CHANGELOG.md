@@ -1,5 +1,9 @@
 # aerospace Changelog
 
+## [Features] - 2025-06-19
+
+- Add monitor name to app switcher
+
 ## [Bug Fixes] - 2025-01-10
 
 - Fix issue with `aerospace` not found if installed in a non-standard location (e.g. managed by `nix-darwin`)
