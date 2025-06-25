@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Update Markdown library] - {PR_MERGE_DATE}
+## [Update Markdown library] - 2025-06-25
 
 - Migrated to a new Markdown to ADF library as the old one was no longer being maintained.
 
