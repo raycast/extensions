@@ -7,15 +7,6 @@ import CoreGraphics
 // Some code taken from https://github.com/nuance-dev/achico/blob/master/Achico/Processor/FileProcessor.swift
 // which uses MIT License
 
-// MARK: - Compression Settings
-struct CompressionSettings: Codable {
-    var quality: Double = 0.8
-    var maxDimension: CGFloat? = nil
-    var pngCompressionLevel: Int = 6
-    var preserveMetadata: Bool = true
-    var optimizeForWeb: Bool = false
-}
-
 // MARK: - Compression Result
 
 struct PDFCompressionResult: Codable {

@@ -24,7 +24,7 @@ export default async function main() {
           title: `No improvement`,
           message: `${fileName} could not be compressed further.`,
         });
-        return;
+        continue;
       }
       // Copy compressed file to the same directory as the original, with ' - compressed' appended
       const originalDir = dirname(pdf.path);
