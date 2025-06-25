@@ -1,6 +1,6 @@
 # Transmission Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-06-25
 
 - Fixed generation of SVG files
 
