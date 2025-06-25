@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "compress-selected-pdf-file-s",
-      "title": "Compress Selected Pdf File(s)",
+      "title": "Compress Selected PDF Files",
       "description": "This command compresses the selected PDF files in Finder using native PDFKit",
       "mode": "no-view"
     }
