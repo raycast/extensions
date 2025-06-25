@@ -79,11 +79,7 @@ export function useTranscription({
         await showHUD("Copied and pasted transcribed text");
       } catch (error) {
         console.error("Error during copy and paste:", error);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Failed to copy and paste text",
-        });
+        showFailureToast(error, { title: "Failed to copy and paste text" });
       }
       await Promise.all([
         cleanupAudioFile(),

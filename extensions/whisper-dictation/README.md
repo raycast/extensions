@@ -2,30 +2,6 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-<p align="center">
-  <img src="./assets/extension-icon.png" alt="Extension Icon" width="200">
-</p>
-
-
-<p align="center">
-  <img src="media/download-models.png" alt="Download and manage whisper models easily from within the extension">
-</p>
-<p align="center">
-   <img src="media/configure-ai.png" alt="Refine your transcribed text with custom prompts">
-</p>
-<p align="center">
-   <img src="media/dictate-prompt-selection.png" alt="Choose your prompt before each transcription, or turn this off in preferences and use the selction in 'Configure AI Refinement' by default.">
-</p>
-<p align="center">
-  <img src="media/recording.png" alt="Record any length of audio to transcribe">
-</p>
-<p align="center">
-  <img src="media/transcribed.png" alt="Modify your transcribed text before copying/pasting directly">
-</p>
-<p align="center">
-   <img src="media/history.png" alt="View, copy and paste you dictation/refinement history">
-</p>
-
 Effortlessly convert your speech to text directly within Raycast using the power of [`whisper.cpp`](https://github.com/ggerganov/whisper.cpp). This extension provides a simple interface to record audio, transcribe and refine it locally, privately on your machine. Refine the text with custom prompts privately using ollama, or additionally with Raycast AI or any v1 (OpenAI) compatible API.
 ## ✨ Features
 
@@ -35,22 +11,6 @@ Effortlessly convert your speech to text directly within Raycast using the power
     **Dictation History** Saves all transcriptions locally with timestamps which can be browsed, copied and pasted using the Dictation History command.
 *   **Simple Interface:** Start recording, press Enter to stop, copy or paste directly into your active window.
 *   **Configurable Output:** Choose to choose, or automatically paste/copy to clipboard. 
-
-## 📚 Table of Contents
-
-*   [Features](#-features)
-*   [Requirements](#-requirements)
-*   [Installation](#-installation)
-    *   [1. Prerequisites](#1-prerequisites)
-    *   [2. Install the Extension](#2-install-the-extension)
-*   [Configuration](#️-configuration)
-*   [Usage](#-usage)
-*   [Refine with AI](#-refine-with-ai)
-*   [Models](#-models)
-*   [Troubleshooting](#-troubleshooting)
-*   [Contributing](#-contributing)
-*   [License](#-license)
-*   [Acknowledgements](#-acknowledgements)
 
 ## ⚠️ Requirements
 
@@ -70,31 +30,6 @@ Before installing the extension, you need the following installed and configured
 ## 🚀 Installation
 
 **This ectension is now available to download from the [Raycast Store](https://www.raycast.com/finjo/whisper-dictation). However if you'd prefer to build from source see below**
-
-### 1. Prerequisites
-
-This installation assumes you have met all requirements posted above [Requirements](#-requirements). Have the full paths to your `whisper.cpp` executable, and the downloaded model file ready if not downloading through the extension.
-
-### 2. Install the Extension
-
-Since this extension isn't on the Raycast Store, you'll need to install it from the source code:
-
-1.  **Clone the Repository:**
-    ```bash
-    git clone https://github.com/Spuddy10345/whisper-raycast-extension.git 
-    cd whisper-raycast-extension
-    ```
-2.  **Install Dependencies:**
-    ```bash
-    npm install
-    ```
-3.  **Build the Extension:**
-    ```bash
-    npm run dev
-    ```
-4.  **Open Raycast Preferences:** Go to `Extensions` > `+` (Add Extension) > `Import Extension...`.
-5.  **Select Directory:** Navigate to and select the cloned `whisper-raycast-extension` directory.
-6.  **Configure:** Follow the steps in the [Configuration](#️-configuration) section below.
 
 ## ⚙️ Configuration
 
