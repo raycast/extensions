@@ -27,7 +27,7 @@ export function DailyUsage() {
 
   const accessories: List.Item.Accessory[] = error
     ? STANDARD_ACCESSORIES.ERROR
-    : dailyUsage == undefined
+    : dailyUsage === undefined
       ? STANDARD_ACCESSORIES.LOADING
       : !dailyUsage
         ? STANDARD_ACCESSORIES.NO_DATA

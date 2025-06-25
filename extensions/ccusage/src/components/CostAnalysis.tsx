@@ -51,7 +51,7 @@ export function CostAnalysis() {
 
   const accessories: List.Item.Accessory[] = error
     ? STANDARD_ACCESSORIES.ERROR
-    : totalUsage == undefined
+    : totalUsage === undefined
       ? STANDARD_ACCESSORIES.LOADING
       : !totalUsage
         ? STANDARD_ACCESSORIES.NO_DATA

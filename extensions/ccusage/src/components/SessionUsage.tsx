@@ -30,7 +30,7 @@ export function SessionUsage() {
 
   const accessories: List.Item.Accessory[] = error
     ? STANDARD_ACCESSORIES.ERROR
-    : sessions.length == 0 && isLoading
+    : sessions.length === 0 && isLoading
       ? STANDARD_ACCESSORIES.LOADING
       : !sessions || sessions.length === 0
         ? [{ text: "No sessions", icon: Icon.Circle }]
