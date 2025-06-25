@@ -7,7 +7,6 @@ import { LanguageCode } from "./languages";
 
 export default function QuickTranslate(): ReactElement {
   const [sourceLanguage] = useSourceLanguage();
-  const [translateSourceLanguage, setTranslateSourceLanguage] = useState<LanguageCode>();
   const [targetLanguages] = useTargetLanguages();
   const { proxy } = usePreferences();
   const [isShowingDetail, setIsShowingDetail] = useState(true);
@@ -29,7 +28,7 @@ export default function QuickTranslate(): ReactElement {
       onSearchTextChange={setText}
       isLoading={isAnyLoading}
       isShowingDetail={isShowingDetail}
-      searchBarAccessory={<LanguageDropdown translatedSourceLanguage={translateSourceLanguage} />}
+      searchBarAccessory={<LanguageDropdown />}
     >
       {debouncedText
         ? targetLanguages.map((targetLanguage) => (
@@ -39,10 +38,7 @@ export default function QuickTranslate(): ReactElement {
               languageSet={{ langFrom: sourceLanguage, langTo: [targetLanguage], proxy }}
               isShowingDetail={isShowingDetail}
               setIsShowingDetail={setIsShowingDetail}
-              setIsLoading={(isLoading, sourceLanguage) => {
-                setIsLoading(targetLanguage, isLoading);
-                setTranslateSourceLanguage(sourceLanguage);
-              }}
+              setIsLoading={(isLoading) => setIsLoading(targetLanguage, isLoading)}
             />
           ))
         : null}

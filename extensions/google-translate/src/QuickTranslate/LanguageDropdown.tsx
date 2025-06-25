@@ -3,13 +3,10 @@ import { useSourceLanguage, useTargetLanguages } from "../hooks";
 import { LanguageCode, languages, supportedLanguagesByCode } from "../languages";
 import { TargetLanguageList } from "./TargetLanguageList";
 
-export function LanguageDropdown(props: { translatedSourceLanguage?: LanguageCode }) {
+export function LanguageDropdown() {
   const navigation = useNavigation();
   const [sourceLanguage, setSourceLanguage] = useSourceLanguage();
   const [targetLanguages] = useTargetLanguages();
-  const autoDetectedLanguageName = props.translatedSourceLanguage
-    ? supportedLanguagesByCode[props.translatedSourceLanguage].name
-    : null;
   return (
     <List.Dropdown
       value={sourceLanguage}
@@ -28,21 +25,9 @@ export function LanguageDropdown(props: { translatedSourceLanguage?: LanguageCod
         title={`Translate to  ->  ${targetLanguages.map((l) => supportedLanguagesByCode[l].name).join(" ")}`}
         value="manageTargetLanguages"
       />
-      {languages.map((lang) =>
-        lang.code === "auto" ? (
-          <List.Dropdown.Item
-            key={lang.code}
-            title={
-              autoDetectedLanguageName && sourceLanguage === "auto"
-                ? `${lang.name} (${autoDetectedLanguageName})`
-                : lang.name
-            }
-            value={lang.code}
-          />
-        ) : (
-          <List.Dropdown.Item key={lang.code} title={lang.name} value={lang.code} />
-        ),
-      )}
+      {languages.map((lang) => (
+        <List.Dropdown.Item key={lang.code} title={lang.name} value={lang.code} />
+      ))}
     </List.Dropdown>
   );
 }

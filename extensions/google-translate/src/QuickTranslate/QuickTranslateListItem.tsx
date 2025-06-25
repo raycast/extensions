@@ -1,6 +1,6 @@
-import { ActionPanel, List, Toast, showToast } from "@raycast/api";
+import { ActionPanel, Color, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { LanguageCode, supportedLanguagesByCode } from "../languages";
+import { supportedLanguagesByCode } from "../languages";
 import { simpleTranslate } from "../simple-translate";
 import { LanguageCodeSet } from "../types";
 import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction, ToggleFullTextAction } from "../actions";
@@ -10,7 +10,7 @@ export function QuickTranslateListItem(props: {
   languageSet: LanguageCodeSet;
   isShowingDetail: boolean;
   setIsShowingDetail: (isShowingDetail: boolean) => void;
-  setIsLoading: (isLoading: boolean, sourceLanguage?: LanguageCode) => void;
+  setIsLoading: (isLoading: boolean) => void;
 }) {
   let langFrom = supportedLanguagesByCode[props.languageSet.langFrom];
   const langTo = supportedLanguagesByCode[props.languageSet.langTo[0]];
@@ -19,8 +19,8 @@ export function QuickTranslateListItem(props: {
     onWillExecute() {
       props.setIsLoading(true);
     },
-    onData(data) {
-      props.setIsLoading(false, data.langFrom);
+    onData() {
+      props.setIsLoading(false);
     },
     onError(error) {
       props.setIsLoading(false);
@@ -63,7 +63,21 @@ export function QuickTranslateListItem(props: {
           tooltip: `${langFrom.name} -> ${langTo.name}`,
         },
       ]}
-      detail={<List.Item.Detail markdown={result.translatedText} />}
+      detail={
+        <List.Item.Detail
+          markdown={result.translatedText}
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.TagList title="Source Language">
+                <List.Item.Detail.Metadata.TagList.Item text={langFrom.name} color={Color.Blue} />
+              </List.Item.Detail.Metadata.TagList>
+              <List.Item.Detail.Metadata.TagList title="Target Language">
+                <List.Item.Detail.Metadata.TagList.Item text={langTo.name} color={Color.Green} />
+              </List.Item.Detail.Metadata.TagList>
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
