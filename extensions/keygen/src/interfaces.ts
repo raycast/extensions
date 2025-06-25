@@ -1,4 +1,4 @@
-enum LicenseStatus {
+export enum LicenseStatus {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
   EXPIRING = "EXPIRING",
@@ -14,6 +14,7 @@ export interface License {
     expiry: string;
     status: LicenseStatus;
     protected: boolean;
+    scheme: string | null;
     suspended: boolean;
     maxMachines: number | null;
     maxUsers: number | null;
@@ -92,10 +93,22 @@ export interface Policy {
   };
 }
 
+export enum DistributionStrategy {
+  LICENSED="LICENSED",
+  OPEN="OPEN",
+  CLOSED="CLOSED",
+}
 export interface Product {
   id: string;
   attributes: {
     name: string;
+    code: string | null;
+    url: string | null;
+    distributionStrategy: DistributionStrategy;
+    platforms: string[];
+    permissions: string[];
+    created: string;
+    updated: string;
   };
 }
 
