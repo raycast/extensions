@@ -13,7 +13,7 @@ export function AddToQueueAction({ uri, title }: AddToQueueActionProps) {
   return (
     <Action
       icon={Icon.Plus}
-      title="Add to Queue"
+      title="Add To Queue"
       shortcut={{ modifiers: ["opt"], key: "q" }}
       onAction={async () => {
         try {
