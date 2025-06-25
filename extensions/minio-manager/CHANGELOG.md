@@ -1,6 +1,6 @@
 # MinIO Manager Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-06-25
 
 - Upload files to MinIO server
 - Browse and manage files in MinIO
