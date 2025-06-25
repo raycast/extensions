@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-06-25
 
 - Check if user can access `BrowserExtension` before getting tabs
 
