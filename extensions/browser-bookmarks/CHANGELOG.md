@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support Dia Browser] - {PR_MERGE_DATE}
+
+- Added support for `Dia` browser.
+
 ## [Support Island Browser] - 2025-01-30
 
 - Added support for `Island` browser.

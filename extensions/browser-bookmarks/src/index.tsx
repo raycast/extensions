@@ -23,6 +23,7 @@ import useBraveNightlyBookmarks from "./hooks/useBraveNightlyBookmarks";
 import useChromeBetaBookmarks from "./hooks/useChromeBetaBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
 import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
+import useDiaBookmarks from "./hooks/useDiaBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
 import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
@@ -110,6 +111,7 @@ export default function Command() {
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
   const hasChromeBeta = browsers.includes(BROWSERS_BUNDLE_ID.chromeBeta) ?? false;
   const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
+  const hasDia = browsers.includes(BROWSERS_BUNDLE_ID.dia) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
   const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
@@ -130,6 +132,7 @@ export default function Command() {
   const chrome = useChromeBookmarks(hasChrome);
   const chromeBeta = useChromeBetaBookmarks(hasChromeBeta);
   const chromeDev = useChromeDevBookmarks(hasChromeDev);
+  const dia = useDiaBookmarks(hasDia);
   const edge = useEdgeBookmarks(hasEdge);
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
   const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
@@ -154,6 +157,7 @@ export default function Command() {
       ...chrome.bookmarks,
       ...chromeBeta.bookmarks,
       ...chromeDev.bookmarks,
+      ...dia.bookmarks,
       ...edge.bookmarks,
       ...edgeCanary.bookmarks,
       ...edgeDev.bookmarks,
@@ -206,6 +210,7 @@ export default function Command() {
     chrome.bookmarks,
     chromeBeta.bookmarks,
     chromeDev.bookmarks,
+    dia.bookmarks,
     edge.bookmarks,
     edgeCanary.bookmarks,
     edgeDev.bookmarks,
@@ -230,6 +235,7 @@ export default function Command() {
       ...chrome.folders,
       ...chromeBeta.folders,
       ...chromeDev.folders,
+      ...dia.folders,
       ...edge.folders,
       ...edgeCanary.folders,
       ...edgeDev.folders,
@@ -252,6 +258,7 @@ export default function Command() {
     chrome.folders,
     chromeBeta.folders,
     chromeDev.folders,
+    dia.folders,
     edge.folders,
     edgeCanary.folders,
     edgeDev.folders,
@@ -359,6 +366,9 @@ export default function Command() {
     if (hasChromeDev) {
       chromeDev.mutate();
     }
+    if (hasDia) {
+      dia.mutate();
+    }
     if (hasEdge) {
       edge.mutate();
     }
@@ -440,6 +450,7 @@ export default function Command() {
         chrome.isLoading ||
         chromeBeta.isLoading ||
         chromeDev.isLoading ||
+        dia.isLoading ||
         edge.isLoading ||
         edgeCanary.isLoading ||
         edgeDev.isLoading ||
@@ -565,6 +576,15 @@ export default function Command() {
                     profiles={chromeDev.profiles}
                     currentProfile={chromeDev.currentProfile}
                     setCurrentProfile={chromeDev.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.dia}
+                    name="Dia"
+                    icon="dia.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                    profiles={dia.profiles}
+                    currentProfile={dia.currentProfile}
+                    setCurrentProfile={dia.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.edge}
