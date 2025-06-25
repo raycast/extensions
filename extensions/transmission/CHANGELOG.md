@@ -1,5 +1,9 @@
 # Transmission Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed generation of SVG files
+
 ## [Usability improvements] - 2024-05-22
 
 - Add a dedicated default download directory 
