@@ -21,13 +21,12 @@ export function HelloPage({ onContinue, onChooseToSetCustomFFmpegPath }: HelloPa
       const ffmpegInfo = await findFFmpegPath();
 
       if (ffmpegInfo) {
-        // FFmpeg found and is v6.0+
+        // FFmpeg found and is v6.0+ - show toast and continue
         await showToast({
           style: Toast.Style.Success,
           title: "FFmpeg found",
           message: `FFmpeg v${ffmpegInfo.version} detected at: ${ffmpegInfo.path}`,
         });
-
         await LocalStorage.setItem("hasSeenHelloPage", "true");
         onContinue();
       } else {

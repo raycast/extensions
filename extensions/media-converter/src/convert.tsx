@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { /* Detail,*/ /* environment, */ LocalStorage, getSelectedFinderItems } from "@raycast/api";
+import { /* Detail,*/ /* environment, */ LocalStorage, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import fs from "fs";
 import { HelloPage } from "./components/HelloPage";
@@ -47,7 +47,12 @@ export default function Command() {
           setShowInstallation(true);
           return;
         }
-        // FFmpeg was found and stored, we're good to go
+        // FFmpeg was found and stored, notify the user
+        showToast({
+          style: Toast.Style.Success,
+          title: "FFmpeg found",
+          message: `FFmpeg v${ffmpegInfo.version} detected at: ${ffmpegInfo.path}`,
+        });
       } catch (error) {
         console.error("Error checking FFmpeg:", error);
       }
