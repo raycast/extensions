@@ -1,6 +1,6 @@
 # Repository Manager Changelog
 
-## [Cloc command to show statistics] - {PR_MERGE_DATE}
+## [Cloc command to show statistics] - 2025-06-25
 - Better handling of cloc command, displaying installation options when not found
 
 ## [Advanced Git Integration & Enhanced UI] - 2025-06-24
