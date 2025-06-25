@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "subdl-subtitle-finder",
+  "title": "Subdl Subtitle Finder",
+  "description": "Search and download Arabic and international movie/TV subtitles from SubDL.com with quality filtering",
+  "icon": "extension-icon.png",
+  "author": "sal2049",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-subtitles",
+      "title": "Search Subtitles",
+      "subtitle": "SubDL",
+      "description": "Search and download movie/TV subtitles with language and quality filtering",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "subdlApiKey",
+      "type": "password",
+      "required": true,
+      "title": "SubDL API Key",
+      "description": "Your SubDL API key from subdl.com (required for searching subtitles)",
+      "placeholder": "Enter your SubDL API key"
+    },
+    {
+      "name": "defaultLanguage",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Language",
+      "description": "Default language for subtitle search",
+      "default": "ar",
+      "data": [
+        { "title": "Arabic", "value": "ar" },
+        { "title": "English", "value": "en" },
+        { "title": "French", "value": "fr" },
+        { "title": "Spanish", "value": "es" },
+        { "title": "German", "value": "de" },
+        { "title": "Italian", "value": "it" },
+        { "title": "Portuguese", "value": "pt" },
+        { "title": "Russian", "value": "ru" },
+        { "title": "Japanese", "value": "ja" },
+        { "title": "Korean", "value": "ko" },
+        { "title": "Chinese", "value": "zh" }
+      ]
+    },
+    {
+      "name": "downloadDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Download Directory",
+      "description": "Choose where to save downloaded subtitles (defaults to Downloads folder)",
+      "default": "~/Downloads"
+    },
+    {
+      "name": "showMovieInfo",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Movie Information",
+      "label": "Display movie details and posters",
+      "description": "Show rich movie information using OMDb API (requires OMDb API key)",
+      "default": true
+    },
+    {
+      "name": "omdbApiKey",
+      "type": "password",
+      "required": false,
+      "title": "OMDb API Key (Optional)",
+      "description": "OMDb API key for movie information and posters (get free key from omdbapi.com)",
+      "placeholder": "Enter your OMDb API key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
