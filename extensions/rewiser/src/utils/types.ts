@@ -2,7 +2,7 @@
 
 export interface Folder {
   key: string;
-  id?: string; // API'den gelen ID
+  id?: string;
   label: string;
   currency: string;
   is_personal?: boolean;
