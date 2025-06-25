@@ -1,5 +1,7 @@
 # Slack Changelog
 
+## [Fix YAML manifest errors in README] - 2025-06-25
+
 ## [Fix search messages from specific user] - 2025-06-23
 
 - Fix search messages from specific user (using `from:<@${user.id}>` instead of `from:${user.name}`)
