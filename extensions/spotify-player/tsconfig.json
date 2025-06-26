@@ -12,12 +12,5 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "noImplicitAny": true,
-    "allowSyntheticDefaultImports": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": false,
-    "strictNullChecks": true,
-    "noImplicitOverride": false,
-    "exactOptionalPropertyTypes": false
   }
 }
