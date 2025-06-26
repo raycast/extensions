@@ -14,7 +14,13 @@
       "description": "Expand the active window to fill the desktop.",
       "icon": "window-tiling/fill.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","opt"], "key": "f" },
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "f"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -34,7 +40,13 @@
       "description": "Center the active window on the desktop.",
       "icon": "window-tiling/center.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","opt"], "key": "c" },
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "c"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -54,7 +66,13 @@
       "description": "Move the active window to the left half of the desktop.",
       "icon": "window-tiling/leftHalf.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","opt"], "key": "left"},
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "left"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -74,7 +92,13 @@
       "description": "Move the active window to the right half of the desktop.",
       "icon": "window-tiling/rightHalf.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","opt"], "key": "right"},
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "right"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -94,7 +118,13 @@
       "description": "Move the active window to the top half of the desktop.",
       "icon": "window-tiling/topHalf.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","opt"], "key": "up" },
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "up"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -114,7 +144,13 @@
       "description": "Move the active window to the bottom half of the desktop.",
       "icon": "window-tiling/bottomHalf.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","opt"], "key": "down"},
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "down"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -134,7 +170,14 @@
       "description": "Move the active window to the top-left corner of the desktop.",
       "icon": "window-tiling/topLeft.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","opt","shift"], "key": "left"},
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt",
+          "shift"
+        ],
+        "key": "left"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -154,7 +197,14 @@
       "description": "Move the active window to the top-right corner of the desktop.",
       "icon": "window-tiling/topRight.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","opt","shift"], "key": "up" },
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt",
+          "shift"
+        ],
+        "key": "up"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -174,7 +224,14 @@
       "description": "Move the active window to the bottom-left corner of the desktop.",
       "icon": "window-tiling/bottomLeft.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","opt","shift"], "key": "down"},
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt",
+          "shift"
+        ],
+        "key": "down"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -194,7 +251,14 @@
       "description": "Move the active window to the bottom-right corner of the desktop.",
       "icon": "window-tiling/bottomRight.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","opt","shift"], "key": "right"},
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt",
+          "shift"
+        ],
+        "key": "right"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -214,7 +278,13 @@
       "description": "Make the active window the size it was before it was tiled.",
       "icon": "window-tiling/restoreSize.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","opt"], "key": "r" },
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "r"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -242,7 +312,13 @@
       "description": "Move the active window to the left half of the desktop and move the second window to the right half of the desktop.",
       "icon": "window-tiling/leftAndRight.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","shift"], "key": "left"},
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "shift"
+        ],
+        "key": "left"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -262,7 +338,13 @@
       "description": "Move the active window to the right half of the desktop and move the second window to the left half of the desktop.",
       "icon": "window-tiling/rightAndLeft.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","shift"], "key": "right"},
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "shift"
+        ],
+        "key": "right"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -282,7 +364,13 @@
       "description": "Move the active window to the top half of the desktop and move the second window to the bottom half of the desktop.",
       "icon": "window-tiling/topAndBottom.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","shift"], "key": "up" },
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "shift"
+        ],
+        "key": "up"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -302,7 +390,13 @@
       "description": "Move the active window to the bottom half of the desktop and move the second window to the top half of the desktop.",
       "icon": "window-tiling/bottomAndTop.png",
       "mode": "no-view",
-      "shortcut": { "modifiers": ["ctrl","shift"], "key": "down"},
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "shift"
+        ],
+        "key": "down"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -503,7 +597,15 @@
       "macos": "15"
     }
   },
-  "categories": ["System"],
+  "categories": [
+    "System"
+  ],
   "repository": "https://github.com/yazanzaid00/sequoia-tiling",
-  "keywords": ["window management", "tiling", "sequoia", "macOS 15"]
+  "keywords": [
+    "window management",
+    "tiling",
+    "sequoia",
+    "macOS 15"
+  ],
+  "version": "0.0.1"
 }
