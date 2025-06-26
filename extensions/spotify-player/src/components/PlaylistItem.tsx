@@ -6,7 +6,7 @@ import { PlaylistActionPanel } from "./PlaylistActionPanel";
 type PlaylistItemProps = {
   type: "grid" | "list";
   playlist: SimplifiedPlaylistObject;
-  actions?: React.JSX.Element;
+  actions?: JSX.Element;
 };
 
 export default function PlaylistItem({ type, playlist, actions }: PlaylistItemProps) {
