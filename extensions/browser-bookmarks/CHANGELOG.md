@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Support for Dia and Ghost Browser] - {PR_MERGE_DATE}
+## [Support for Dia and Ghost Browser] - 2025-06-26
 
 - Added support for `Dia` browser.
 - Added support for `Ghost Browser`.
