@@ -1,0 +1,167 @@
+import { showToast, Toast } from "@raycast/api";
+import { ReadwiseHighlight } from "../types";
+
+const READWISE_BASE_URL = "https://readwise.io/api/v2";
+
+export class ReadwiseAPI {
+  private token: string;
+
+  constructor(token: string) {
+    this.token = token;
+  }
+
+  private async makeRequestWithHttps<T>(endpoint: string, body?: string): Promise<T> {
+    const https = require("https");
+    const { URL } = require("url");
+
+    return new Promise((resolve, reject) => {
+      const url = new URL(`${READWISE_BASE_URL}${endpoint}`);
+
+      const options = {
+        hostname: url.hostname,
+        port: url.port || 443,
+        path: url.pathname + url.search,
+        method: body ? "POST" : "GET",
+        headers: {
+          Authorization: `Token ${this.token}`,
+          "Content-Type": "application/json",
+          "User-Agent": "WeReadSync-Extension/1.0",
+          ...(body && { "Content-Length": Buffer.byteLength(body) }),
+        },
+      };
+
+      console.log(`[Readwise HTTPS] Making request to: ${url.toString()}`);
+      console.log(`[Readwise HTTPS] Headers:`, options.headers);
+      if (body) {
+        console.log(`[Readwise HTTPS] Body:`, body);
+      }
+
+      const req = https.request(options, (res: any) => {
+        const chunks: Buffer[] = [];
+
+        console.log(`[Readwise HTTPS] Response status: ${res.statusCode}`);
+        console.log(`[Readwise HTTPS] Response headers:`, res.headers);
+
+        res.on("data", (chunk: Buffer) => {
+          chunks.push(chunk);
+        });
+
+        res.on("end", () => {
+          try {
+            const buffer = Buffer.concat(chunks);
+            const data = buffer.toString();
+
+            console.log(`[Readwise HTTPS] Raw response:`, data);
+
+            if (res.statusCode === 401) {
+              showToast({
+                style: Toast.Style.Failure,
+                title: "Authentication Failed",
+                message: "Readwise token is invalid. Please update in Settings.",
+              });
+              reject(new Error("Readwise authentication failed"));
+              return;
+            }
+
+            if (res.statusCode < 200 || res.statusCode >= 300) {
+              reject(new Error(`Readwise API error: ${res.statusCode} ${data}`));
+              return;
+            }
+
+            const jsonData = data ? JSON.parse(data) : {};
+            console.log(`[Readwise HTTPS] Parsed JSON:`, jsonData);
+            resolve(jsonData);
+          } catch (parseError) {
+            console.error(`[Readwise HTTPS] Parse error:`, parseError);
+            reject(new Error(`Failed to parse response: ${parseError}`));
+          }
+        });
+      });
+
+      req.on("error", (error: Error) => {
+        console.error(`[Readwise HTTPS] Request error:`, error);
+        reject(error);
+      });
+
+      if (body) {
+        req.write(body);
+      }
+      req.end();
+    });
+  }
+
+  async createHighlights(highlights: ReadwiseHighlight[]): Promise<void> {
+    if (highlights.length === 0) {
+      return;
+    }
+
+    try {
+      console.log(`[Readwise API] Sending ${highlights.length} highlights:`, highlights);
+
+      // Validate highlights data before sending - create clean objects
+      const validatedHighlights = highlights.map((highlight, index) => {
+        console.log(`[Readwise API] Validating highlight ${index}:`, JSON.stringify(highlight, null, 2));
+
+        // Create a completely new object with only the fields we need
+        const validated: any = {
+          text: String(highlight.text || "").trim(),
+          title: String(highlight.title || "").trim(),
+          author: String(highlight.author || "").trim(),
+        };
+
+        // Only add optional fields if they exist and are valid
+        if (highlight.note && String(highlight.note).trim()) {
+          validated.note = String(highlight.note).trim();
+        }
+
+        if (highlight.highlighted_at) {
+          validated.highlighted_at = String(highlight.highlighted_at);
+        }
+
+        if (highlight.location !== undefined && highlight.location !== null && !isNaN(Number(highlight.location))) {
+          validated.location = Number(highlight.location);
+        }
+
+        if (highlight.location_type && String(highlight.location_type).trim()) {
+          validated.location_type = String(highlight.location_type).trim();
+        }
+
+        console.log(`[Readwise API] Validated highlight ${index}:`, JSON.stringify(validated, null, 2));
+        return validated;
+      });
+
+      const requestBody = {
+        highlights: validatedHighlights,
+      };
+
+      const bodyString = JSON.stringify(requestBody);
+      console.log(`[Readwise API] Request body string:`, bodyString);
+
+      await this.makeRequestWithHttps("/highlights/", bodyString);
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Sync Complete",
+        message: `Successfully synced ${highlights.length} highlights to Readwise`,
+      });
+    } catch (error) {
+      console.error("Failed to sync highlights to Readwise:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Sync Failed",
+        message: "Failed to sync highlights to Readwise",
+      });
+      throw error;
+    }
+  }
+
+  async testConnection(): Promise<boolean> {
+    try {
+      await this.makeRequestWithHttps("/auth/");
+      return true;
+    } catch (error) {
+      console.error("Readwise connection test failed:", error);
+      return false;
+    }
+  }
+}
