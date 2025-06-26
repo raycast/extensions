@@ -1,4 +1,5 @@
 import { Action, ActionPanel, List, showToast, Toast, getLocalStorageItem, Icon, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { useWeReadBooks } from "./api/weread";
 import { SyncService } from "./services/syncService";
@@ -27,6 +28,7 @@ export default function SyncStatusView() {
         setReadwiseToken(token);
       } catch (error) {
         console.error("Failed to load credentials:", error);
+        await showFailureToast(error, { title: "Failed to Load Credentials" });
       }
     }
     loadCredentials();
@@ -111,6 +113,7 @@ export default function SyncStatusView() {
       setBookSyncInfo(syncInfos);
     } catch (error) {
       console.error("Failed to load sync status:", error);
+      await showFailureToast(error, { title: "Failed to Load Sync Status" });
     } finally {
       setIsLoading(false);
     }
@@ -133,6 +136,7 @@ export default function SyncStatusView() {
       await loadSyncStatus(); // Refresh status after sync
     } catch (error) {
       console.error("Full sync failed:", error);
+      await showFailureToast(error, { title: "Full Sync Failed" });
     } finally {
       setIsSyncing(false);
     }
@@ -155,6 +159,7 @@ export default function SyncStatusView() {
       await loadSyncStatus(); // Refresh status after sync
     } catch (error) {
       console.error("Incremental sync failed:", error);
+      await showFailureToast(error, { title: "Incremental Sync Failed" });
     } finally {
       setIsSyncing(false);
     }
@@ -186,6 +191,7 @@ export default function SyncStatusView() {
       await loadSyncStatus(); // Refresh status after sync
     } catch (error) {
       console.error("Single book sync failed:", error);
+      await showFailureToast(error, { title: "Single Book Sync Failed" });
     } finally {
       setIsSyncing(false);
     }
@@ -207,6 +213,7 @@ export default function SyncStatusView() {
       await loadSyncStatus(); // Refresh status after reset
     } catch (error) {
       console.error("Failed to reset sync statuses:", error);
+      await showFailureToast(error, { title: "Failed to Reset Sync Status" });
     }
   };
 

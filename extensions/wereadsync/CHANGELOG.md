@@ -1,6 +1,6 @@
 # WeRead Sync Changelog
 
-## [1.0.0] - Initial Release
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Features
 - **Browse WeRead Library**: View all your WeRead books with highlights

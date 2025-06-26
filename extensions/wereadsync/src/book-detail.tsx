@@ -1,4 +1,15 @@
-import { Action, ActionPanel, List, showToast, Toast, getLocalStorageItem, Icon, Color } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  showToast,
+  Toast,
+  getLocalStorageItem,
+  setLocalStorageItem,
+  Icon,
+  Color,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { useWeReadBookData } from "./api/weread";
 import { ReadwiseAPI } from "./api/readwise";
@@ -162,6 +173,7 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
       }
     } catch (error) {
       console.error("Sync failed:", error);
+      await showFailureToast(error, { title: "Sync Failed" });
     } finally {
       setIsLoading(false);
     }
@@ -364,6 +376,7 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
                               }
                             } catch (error) {
                               console.error("Single highlight sync failed:", error);
+                              await showFailureToast(error, { title: "Highlight Sync Failed" });
                             }
                           }}
                           icon={isSynced ? Icon.Checkmark : Icon.Upload}
@@ -439,6 +452,3 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
     </List>
   );
 }
-
-// Import setLocalStorageItem properly
-import { setLocalStorageItem } from "@raycast/api";

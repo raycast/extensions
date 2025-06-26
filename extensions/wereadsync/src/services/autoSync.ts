@@ -1,10 +1,10 @@
 import { getLocalStorageItem, setLocalStorageItem, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { SyncService } from "./syncService";
 
 export class AutoSyncService {
   private static instance: AutoSyncService;
-  private isRunning: boolean = false;
-  private intervalId: NodeJS.Timeout | null = null;
+  private isEnabled: boolean = false;
 
   static getInstance(): AutoSyncService {
     if (!AutoSyncService.instance) {
@@ -14,11 +14,6 @@ export class AutoSyncService {
   }
 
   async startAutoSync(): Promise<void> {
-    if (this.isRunning) {
-      console.log("[AutoSync] Auto-sync is already running");
-      return;
-    }
-
     const settings = await this.getAutoSyncSettings();
     if (!settings.enabled) {
       console.log("[AutoSync] Auto-sync is disabled");
@@ -30,43 +25,29 @@ export class AutoSyncService {
       return;
     }
 
-    this.isRunning = true;
-    const interval = this.getIntervalMs(settings.interval);
+    this.isEnabled = true;
 
-    console.log(`[AutoSync] Starting auto-sync with interval: ${settings.interval} (${interval}ms)`);
+    console.log(`[AutoSync] Auto-sync enabled with ${settings.interval} preference`);
 
-    // Run initial sync
-    await this.performSync(settings.wereadCookie, settings.readwiseToken);
-
-    // Schedule periodic syncs
-    this.intervalId = setInterval(async () => {
-      await this.performSync(settings.wereadCookie, settings.readwiseToken);
-    }, interval);
+    // Following Raycast guidelines: no background periodic sync
+    // Instead, we perform sync when extension is actively used
+    await this.performSyncIfNeeded(settings.wereadCookie, settings.readwiseToken, settings.interval);
 
     await showToast({
       style: Toast.Style.Success,
-      title: "Auto-sync Started",
-      message: `Checking for new highlights ${settings.interval}`,
+      title: "Auto-sync Enabled",
+      message: `Will sync when extension is used (${settings.interval} preference)`,
     });
   }
 
   async stopAutoSync(): Promise<void> {
-    if (!this.isRunning) {
-      return;
-    }
-
-    this.isRunning = false;
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-    }
-
-    console.log("[AutoSync] Auto-sync stopped");
+    this.isEnabled = false;
+    console.log("[AutoSync] Auto-sync disabled");
 
     await showToast({
       style: Toast.Style.Success,
-      title: "Auto-sync Stopped",
-      message: "Automatic sync has been disabled",
+      title: "Auto-sync Disabled",
+      message: "Automatic sync has been turned off",
     });
   }
 
@@ -94,44 +75,53 @@ export class AutoSyncService {
     }
   }
 
-  private getIntervalMs(interval: string): number {
+  private getIntervalHours(interval: string): number {
+    // Return hours for comparison with last sync time
     switch (interval) {
       case "hourly":
-        return 60 * 60 * 1000; // 1 hour
+        return 1;
       case "daily":
-        return 24 * 60 * 60 * 1000; // 24 hours
+        return 24;
       case "weekly":
-        return 7 * 24 * 60 * 60 * 1000; // 7 days
+        return 168; // 7 * 24
       default:
-        return 24 * 60 * 60 * 1000; // Default to daily
+        return 24; // Default to daily
     }
   }
 
-  private async performSync(wereadCookie: string, readwiseToken: string): Promise<void> {
+  private async performSyncIfNeeded(wereadCookie: string, readwiseToken: string, interval: string): Promise<void> {
     try {
-      console.log("[AutoSync] Starting automatic incremental sync...");
+      const lastSyncTime = await this.getLastSyncTime();
+      const now = Date.now();
+      const intervalHours = this.getIntervalHours(interval);
+      const intervalMs = intervalHours * 60 * 60 * 1000;
 
-      // Update last sync time
-      await setLocalStorageItem("lastAutoSyncTime", String(Date.now()));
+      // Only sync if enough time has passed since last sync
+      if (
+        lastSyncTime === "Never" ||
+        now - parseInt((await getLocalStorageItem<string>("lastAutoSyncTime")) || "0") > intervalMs
+      ) {
+        console.log("[AutoSync] Performing incremental sync (interval reached)");
 
-      // Use the SyncService for incremental sync
-      const syncService = new SyncService(wereadCookie, readwiseToken);
-      const result = await syncService.performIncrementalSync();
+        // Update last sync time
+        await setLocalStorageItem("lastAutoSyncTime", String(now));
 
-      console.log(`[AutoSync] Automatic sync completed. ${result.syncedCount} new highlights synced.`);
+        // Use the SyncService for incremental sync
+        const syncService = new SyncService(wereadCookie, readwiseToken);
+        const result = await syncService.performIncrementalSync();
+
+        console.log(`[AutoSync] Sync completed. ${result.syncedCount} new highlights synced.`);
+      } else {
+        console.log("[AutoSync] Sync skipped (interval not reached)");
+      }
     } catch (error) {
       console.error("[AutoSync] Auto-sync failed:", error);
-
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Auto-sync Failed",
-        message: "Failed to sync highlights automatically",
-      });
+      await showFailureToast(error, { title: "Auto-sync Failed" });
     }
   }
 
   isAutoSyncRunning(): boolean {
-    return this.isRunning;
+    return this.isEnabled;
   }
 
   async getLastSyncTime(): Promise<string> {
@@ -144,6 +134,14 @@ export class AutoSyncService {
       return "Never";
     } catch {
       return "Never";
+    }
+  }
+
+  // Method to trigger sync when extension is actively used
+  async checkAndSyncIfNeeded(): Promise<void> {
+    const settings = await this.getAutoSyncSettings();
+    if (settings.enabled && settings.wereadCookie && settings.readwiseToken) {
+      await this.performSyncIfNeeded(settings.wereadCookie, settings.readwiseToken, settings.interval);
     }
   }
 }

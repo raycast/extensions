@@ -1,4 +1,5 @@
 import { Action, ActionPanel, List, showToast, Toast, getLocalStorageItem, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { useWeReadBooks } from "./api/weread";
 import { WeReadBook } from "./types";
@@ -30,16 +31,20 @@ export default function ViewBooks() {
 
         setAutoSyncStatus({ isRunning, lastSync });
 
-        // Start auto-sync if enabled
+        // Check and start auto-sync if enabled, and trigger sync if needed
         if (!isRunning) {
           await autoSyncService.startAutoSync();
           setAutoSyncStatus({
             isRunning: autoSyncService.isAutoSyncRunning(),
             lastSync: await autoSyncService.getLastSyncTime(),
           });
+        } else {
+          // If auto-sync is already running, check if we need to sync
+          await autoSyncService.checkAndSyncIfNeeded();
         }
       } catch (error) {
         console.error("Failed to load credentials:", error);
+        await showFailureToast(error, { title: "Failed to Load Credentials" });
       }
     }
     loadCredentials();
@@ -107,6 +112,7 @@ export default function ViewBooks() {
       await revalidate(); // Refresh book list
     } catch (error) {
       console.error("Full sync failed:", error);
+      await showFailureToast(error, { title: "Full Sync Failed" });
     } finally {
       setIsSyncing(false);
     }
@@ -129,6 +135,7 @@ export default function ViewBooks() {
       await revalidate(); // Refresh book list
     } catch (error) {
       console.error("Incremental sync failed:", error);
+      await showFailureToast(error, { title: "Incremental Sync Failed" });
     } finally {
       setIsSyncing(false);
     }
