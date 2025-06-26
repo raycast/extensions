@@ -1,4 +1,4 @@
-import { LaunchProps, List, Clipboard, getSelectedText, showToast, Toast } from "@raycast/api";
+import { LaunchProps, List, getSelectedText, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import SearchResultItem from "./components/SearchResultItem";
@@ -38,20 +38,6 @@ export default function Command(props: LaunchProps) {
           }
         } catch (error) {
           console.error("Failed to get selected text:", error);
-          // Continue to clipboard fallback
-        }
-
-        // Try clipboard content as fallback
-        try {
-          const clipboardText = await Clipboard.readText();
-          if (clipboardText?.trim()) {
-            setInitialText(clipboardText.trim());
-            search(clipboardText.trim());
-            return;
-          }
-        } catch (error) {
-          console.error("Failed to read clipboard:", error);
-          throw new Error("Could not access clipboard content");
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Failed to initialize search";
@@ -97,17 +83,21 @@ export default function Command(props: LaunchProps) {
           description={error}
           icon={{ source: "🚨" }}
         />
+      ) : state.results.length === 0 ? (
+        <List.EmptyView
+          title="No results"
+          description="Try searching for something else"
+          icon={{ source: "🔍" }}
+        />
       ) : (
-        <List.Section title="Results" subtitle={state.results.length + ""}>
-          {state.results.map((searchResult) => (
-            <SearchResultItem
-              key={searchResult.id}
-              searchResult={searchResult}
-              addToHistory={addToHistory}
-              removeFromHistory={removeFromHistory}
-            />
-          ))}
-        </List.Section>
+        state.results.map((result) => (
+          <SearchResultItem
+            key={result.id}
+            searchResult={result}
+            addToHistory={addToHistory}
+            removeFromHistory={removeFromHistory}
+          />
+        ))
       )}
     </List>
   );
