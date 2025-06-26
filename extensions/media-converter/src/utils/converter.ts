@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import os from "os";
-import { getFFmpegPath } from "./ffmpeg";
+import { findFFmpegPath } from "./ffmpeg";
 import { execPromise } from "./exec";
 
 export const INPUT_VIDEO_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".webm"] as const;
@@ -72,8 +72,15 @@ export async function convertMedia(
     | (typeof OUTPUT_IMAGE_EXTENSIONS)[number],
   quality?: string, // Currently represents 0-100 in steps of 5 (as strings) for jpg heic avif webp, "lossless" for webp, "lzw" or "deflate" for tiff, "png-24" or "png-8" for png
 ): Promise<string> {
+  const ffmpegPath = await findFFmpegPath();
+
+  if (!ffmpegPath) {
+    throw new Error("FFmpeg is not installed or configured. Please install FFmpeg to use this converter.");
+  }
+
+  let ffmpegCmd = `"${ffmpegPath.path}" -i`;
   // If image
-  if ((OUTPUT_IMAGE_EXTENSIONS as ReadonlyArray<string>).includes(outputFormat)) {
+  if (checkExtensionType(filePath, OUTPUT_IMAGE_EXTENSIONS)) {
     const currentOutputFormat = outputFormat as (typeof OUTPUT_IMAGE_EXTENSIONS)[number];
     const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
 
@@ -83,11 +90,44 @@ export async function convertMedia(
     let processedInputPath = filePath;
 
     try {
-      // Only SIPS can handle converting to HEIC
+      // https://sharp.pixelplumbing.com/api-output/#heif
+      // HEIC conversion is theoretically only available on macOS via the built-in SIPS utility.
+      // While users could potentially install SIPS with proper HEIC dependencies (libheif, libde265, x265)
+      // on other systems, this is extremely unlikely in practice.
+      //
+      // In theory, the user isn't shown the HEIC option unless they are on MacOS anyways, so this is more of a safety net.
+      // They could try converting to HEIC using Raycast AI, but the documentation clearly states that HEIC conversion is only available on macOS.
+      // I think this is good enough : if it doesn't work, the user will get an error message.
       if (currentOutputFormat === ".heic") {
-        await execPromise(
-          `sips --setProperty format heic --setProperty formatOptions ${Number(quality)} "${filePath}" --out "${finalOutputPath}"`,
-        );
+        try {
+          // Attempt HEIC conversion using SIPS directly
+          // This will fail if SIPS is not available or lacks HEIC support
+          await execPromise(
+            `sips --setProperty format heic --setProperty formatOptions ${Number(quality)} "${filePath}" --out "${finalOutputPath}"`,
+          );
+        } catch (error) {
+          // Parse error to provide more specific feedback
+          const errorMessage = String(error).toLowerCase();
+
+          if (errorMessage.includes("command not found") || errorMessage.includes("not recognized")) {
+            // SIPS command not found - likely not on macOS or SIPS not installed
+            throw new Error(
+              "HEIC conversion failed: 'sips' command not found. " +
+                "Converting to HEIC format is theoretically only available on macOS, " +
+                "as it requires the built-in SIPS utility with proper HEIC support " +
+                "(libheif, libde265, and x265 dependencies).",
+            );
+          } else {
+            // SIPS exists but conversion failed - likely missing HEIC dependencies
+            throw new Error(
+              "HEIC conversion failed: SIPS command found but conversion unsuccessful. " +
+                "This may indicate that your SIPS installation lacks proper HEIC support. " +
+                "Converting to HEIC format typically requires macOS with built-in SIPS that includes " +
+                "libheif, libde265, and x265 dependencies. Error details: " +
+                String(error),
+            );
+          }
+        }
       } else {
         // If the input file is HEIC and the output format is not HEIC, we need to convert it to PNG first
         // so that ffmpeg can handle it
@@ -107,9 +147,8 @@ export async function convertMedia(
             throw new Error(`Failed to preprocess HEIC file: ${String(error)}`);
           }
         }
-        // FFmpeg for all other image formats
-        const ffmpegPath = await getFFmpegPath();
-        let ffmpegCmd = `"${ffmpegPath}" -i "${processedInputPath}"`;
+
+        ffmpegCmd += ` "${processedInputPath}"`;
 
         switch (currentOutputFormat) {
           case ".jpg":
@@ -123,10 +162,10 @@ export async function convertMedia(
 
               // Generate palette first
               await execPromise(
-                `"${ffmpegPath}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`,
+                `"${ffmpegPath.path}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`,
               );
               // Then apply palette
-              ffmpegCmd = `"${ffmpegPath}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5"`;
+              ffmpegCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5"`;
               // Note: FFmpeg's PNG-8 doesn't support non-binary transparency, no way to fix it (according to my research, @sacha_crispin). We could make use of other libraries like pngquant or ImageMagick for better PNG-8 alpha support, but that would require additional dependencies.
             }
             ffmpegCmd += ` -compression_level 100 "${finalOutputPath}"`;
@@ -150,7 +189,7 @@ export async function convertMedia(
             break;
         }
         if (currentOutputFormat !== ".png" || quality !== "png-8") {
-          ffmpegCmd += ` "${finalOutputPath}"`;
+          ffmpegCmd += ` -y "${finalOutputPath}"`;
         }
         await execPromise(ffmpegCmd);
       }
@@ -169,69 +208,70 @@ export async function convertMedia(
     }
   }
   // If audio
-  else if ((OUTPUT_AUDIO_EXTENSIONS as ReadonlyArray<string>).includes(outputFormat)) {
+  // TODO: Add quality options for audio formats
+  else if (checkExtensionType(filePath, OUTPUT_AUDIO_EXTENSIONS)) {
     const currentOutputFormat = outputFormat as (typeof OUTPUT_AUDIO_EXTENSIONS)[number];
 
-    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
-    const ffmpegPath = await getFFmpegPath();
-    let command = `"${ffmpegPath}" -i "${filePath}"`;
+    ffmpegCmd += ` "${filePath}"`;
 
     switch (currentOutputFormat) {
       case ".mp3":
-        command += ` -c:a libmp3lame`;
-        // TODO: Add quality options for mp3 if desired, e.g., -q:a
+        ffmpegCmd += ` -c:a libmp3lame`;
         break;
       case ".aac":
-        command += ` -c:a aac`;
+        ffmpegCmd += ` -c:a aac`;
         break;
       case ".wav":
-        command += ` -c:a pcm_s16le`;
+        ffmpegCmd += ` -c:a pcm_s16le`;
         break;
       case ".flac":
-        command += ` -c:a flac`;
+        ffmpegCmd += ` -c:a flac`;
         break;
       default:
         throw new Error(`Unknown audio output format: ${currentOutputFormat}`);
     }
 
-    command += ` "${finalOutputPath}"`;
-    await execPromise(command);
+    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+    ffmpegCmd += ` -y "${finalOutputPath}"`;
+    await execPromise(ffmpegCmd);
     return finalOutputPath;
   }
   // If video
-  else if ((OUTPUT_VIDEO_EXTENSIONS as ReadonlyArray<string>).includes(outputFormat)) {
+  // TODO: Add quality options for video formats
+  // Not to forget constant bitrate (CBR) vs variable bitrate (VBR) options,
+  // include 2-pass encoding ??? Unsure
+  else if (checkExtensionType(filePath, OUTPUT_VIDEO_EXTENSIONS)) {
     const currentOutputFormat = outputFormat as (typeof OUTPUT_VIDEO_EXTENSIONS)[number];
 
-    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
-    const ffmpegPath = await getFFmpegPath();
-    let command = `"${ffmpegPath}" -i "${filePath}"`;
+    ffmpegCmd += ` "${filePath}"`;
 
     switch (currentOutputFormat) {
       case ".mp4":
-        command += ` -vcodec h264 -acodec aac`;
-        // TODO: Add quality options for mp4 if desired, e.g., -crf
+        ffmpegCmd += ` -vcodec h264 -acodec aac`;
         break;
       case ".avi":
-        command += ` -vcodec libxvid -acodec mp3`;
+        ffmpegCmd += ` -vcodec libxvid -acodec mp3`;
         break;
       case ".mov":
-        command += ` -vcodec prores -acodec pcm_s16le`;
+        ffmpegCmd += ` -vcodec prores -acodec pcm_s16le`;
         break;
       case ".mkv":
-        command += ` -vcodec libx265 -acodec aac`;
+        ffmpegCmd += ` -vcodec libx265 -acodec aac`;
         break;
       case ".mpg":
-        command += ` -vcodec mpeg2video -acodec mp3`;
+        ffmpegCmd += ` -vcodec mpeg2video -acodec mp3`;
         break;
       case ".webm":
-        command += ` -vcodec libvpx-vp9 -acodec libopus`;
+        ffmpegCmd += ` -vcodec libvpx-vp9 -acodec libopus`;
         break;
       default:
         throw new Error(`Unknown video output format: ${currentOutputFormat}`);
     }
 
-    command += ` "${finalOutputPath}"`;
-    await execPromise(command);
+    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+    ffmpegCmd += ` -y "${finalOutputPath}"`;
+    console.log(`Executing FFmpeg command: ${ffmpegCmd}`);
+    await execPromise(ffmpegCmd);
     return finalOutputPath;
   }
   // Theoretically, this should never happen

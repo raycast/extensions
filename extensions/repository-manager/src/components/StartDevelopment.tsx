@@ -20,29 +20,41 @@ type DevelopmentCommandAppConfig = {
 function getDevelopmentCommandApps(project: Project): (DevelopmentCommandAppConfig | null)[] | undefined {
     // by default developmentCommand opens the project in the editor and in the browser (if localUrlTemplate is set in preferences or in the project config (urls.local))
     if (!project.config.developmentCommand) {
-        return [
-            {
-                type: DevelopmentCommandApp.Editor,
-                appPath: preferences.editorApp.path,
-                argument: project.fullPath,
-            },
-        ]
+        // Check if editorApp is configured before using it
+        if (preferences.editorApp && preferences.editorApp.path) {
+            return [
+                {
+                    type: DevelopmentCommandApp.Editor,
+                    appPath: preferences.editorApp.path,
+                    argument: project.fullPath,
+                },
+            ]
+        }
+        return []
     }
 
     const appsToOpen = project.config.developmentCommand?.apps?.map((app: string) => {
         switch (app) {
             case DevelopmentCommandApp.Editor:
-                return {
-                    type: DevelopmentCommandApp.Editor,
-                    appPath: preferences.editorApp.path,
-                    argument: project.fullPath,
+                // Check if editorApp is configured before using it
+                if (preferences.editorApp && preferences.editorApp.path) {
+                    return {
+                        type: DevelopmentCommandApp.Editor,
+                        appPath: preferences.editorApp.path,
+                        argument: project.fullPath,
+                    }
                 }
+                return null
             case DevelopmentCommandApp.Terminal:
-                return {
-                    type: DevelopmentCommandApp.Terminal,
-                    appPath: preferences.terminalApp.path,
-                    argument: project.fullPath,
+                // Check if terminalApp is configured before using it
+                if (preferences.terminalApp && preferences.terminalApp.path) {
+                    return {
+                        type: DevelopmentCommandApp.Terminal,
+                        appPath: preferences.terminalApp.path,
+                        argument: project.fullPath,
+                    }
                 }
+                return null
             default:
                 return null
         }
@@ -53,7 +65,7 @@ function getDevelopmentCommandApps(project: Project): (DevelopmentCommandAppConf
 
 function getDevelopmentCommandUrls(project: Project): (string | null)[] | undefined {
     if (!project.config.developmentCommand) {
-        return [getProjectUrl(project, project.config.urls?.local || null)]
+        return [getProjectUrl(project, project.config.urls?.local || undefined)]
     }
 
     return project.config.developmentCommand?.urls?.map((url: string) => {
@@ -98,7 +110,7 @@ export default function StartDevelopment({ project }: StartDevelopmentProps) {
 
                     open(config.argument, config.appPath)
 
-                    if (config.type === DevelopmentCommandApp.Editor) {
+                    if (config.type === DevelopmentCommandApp.Editor && preferences.editorApp) {
                         resizeEditorWindow(preferences.editorApp)
                     }
                 })

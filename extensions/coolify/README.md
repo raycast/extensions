@@ -2,9 +2,15 @@
     <img src="./assets/coolify.png" width="200" height="200" />
 </p>
 
-# Coolify Raycast Extension
+# Coolify
 
-This is a Raycast extension for [Coolify](https://coolify.io/). With this extension you can view Servers, Server Details, Resources, Teams, Team Members, Projects, Environments, Private Keys and more in your Coolify instance.
+This is a Raycast extension for [Coolify](https://coolify.io/) - _An open-source & self-hostable **Heroku** / **Netlify** / **Vercel** alternative_. With this extension you can view Servers, Server Details, Resources, Teams, Team Members, Projects, Environments, Private Keys and more in your Coolify instance.
+
+## ❗ Supported Versions
+
+**Coolify** is being updated all the time so the extension might not perform well on all versions. This extension has been tested on the following:
+
+1. **v4.0.0-beta.419**
 
 ## 🚀 Getting Started
 
@@ -20,7 +26,9 @@ This is a Raycast extension for [Coolify](https://coolify.io/). With this extens
 
 Looking for more infra extensions? Try these:
 
+<a title="Install appwrite Raycast Extension" href="https://www.raycast.com/xmok/appwrite"><img src="https://www.raycast.com/xmok/appwrite/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install cyberpanel Raycast Extension" href="https://www.raycast.com/xmok/cyberpanel"><img src="https://www.raycast.com/xmok/cyberpanel/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install dokploy Raycast Extension" href="https://www.raycast.com/xmok/dokploy"><img src="https://www.raycast.com/xmok/dokploy/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install hestiacp-admin Raycast Extension" href="https://www.raycast.com/xmok/hestiacp-admin"><img src="https://www.raycast.com/xmok/hestiacp-admin/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install oci Raycast Extension" href="https://www.raycast.com/xmok/oci"><img src="https://www.raycast.com/xmok/oci/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install vultr Raycast Extension" href="https://www.raycast.com/xmok/vultr"><img src="https://www.raycast.com/xmok/vultr/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
