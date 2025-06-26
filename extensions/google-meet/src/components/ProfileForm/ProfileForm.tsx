@@ -1,5 +1,5 @@
 import { ActionPanel, Form, Action, showToast, Toast } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { GoogleProfile, useCacheHelpers } from "../../hooks";
 
 type ProfileFormProps = { onFinish: () => void };
@@ -17,14 +17,13 @@ export const ProfileForm = ({ onFinish }: ProfileFormProps) => {
           style: Toast.Style.Success,
           title: "Profile created!",
         });
-      } catch (_err) {
-        showFailureToast(_err, { title: "Profile already exists!" });
+      } catch (err) {
+        showFailureToast(err, { title: "Profile already exists!" });
       }
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Profile already exists!",
-        });
-      }
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Profile already exists!",
+      });
     },
     validation: {
       name: FormValidation.Required,

@@ -1,8 +1,8 @@
 import { showHUD, Clipboard } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { showFailureToast } from "@raycast/utils";
 
 import { getMeetTab, openMeetTabDefaultProfile } from "./helpers";
+import { showFailureToast } from "@raycast/utils";
 
 async function switchToPreviousApp(): Promise<void> {
   // Use AppleScript to perform Command+Tab (switch to previous application)
@@ -26,9 +26,8 @@ export default async function main() {
 
     // Switch back to the previous application
     await switchToPreviousApp();
-  } catch (_err) {
-    await showToast({
-      style: Toast.Style.Failure,
+  } catch (err) {
+    await showFailureToast(err, {
       title: "Couldn't copy to clipboard",
     });
   }
