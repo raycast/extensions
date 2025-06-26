@@ -4,16 +4,6 @@ Browse and play [SomaFM](https://somafm.com) internet radio stations directly fr
 
 > Note: "SomaFM" is the correct branding for this service. The Raycast linter may suggest "Somafm" but we're keeping the official branding.
 
-## Screenshots
-
-<img src="screenshots/somafm-for-raycast 2025-06-24 at 15.45.03.png" alt="Grid view showing SomaFM stations with favorites" width="600">
-
-<img src="screenshots/somafm-for-raycast 2025-06-24 at 15.45.22.png" alt="List view with search and station details" width="600">
-
-<img src="screenshots/somafm-for-raycast 2025-06-24 at 15.46.14.png" alt="Station actions menu" width="600">
-
-<img src="screenshots/somafm-for-raycast 2025-06-24 at 15.47.54.png" alt="Menu bar extension showing favorite stations" width="600">
-
 ## Features
 
 ### 🎯 Current Features (v1.0)
@@ -121,9 +111,8 @@ This extension is built with:
 ### Project Structure
 ```
 src/
-├── index.tsx           # Main browse command
-├── play-station.tsx    # Deeplink handler for quick play
-├── menu-bar.tsx        # Menu bar extension
+├── browse-stations.tsx # Main browse command
+├── menu-bar-player.tsx # Menu bar extension
 ├── types/              # TypeScript interfaces
 ├── utils/              # API, player, and storage utilities
 └── hooks/              # React hooks for state management
@@ -137,8 +126,6 @@ src/
 5. Run `npm test` to ensure tests pass
 6. Submit a pull request
 
-### Feature Status
-See [docs/feature-status.md](docs/feature-status.md) for detailed progress on all features.
 
 ## License
 
