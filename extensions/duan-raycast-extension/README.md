@@ -18,7 +18,7 @@ URL shortener service based on Cloudflare Workers and D1 database.
   - Search across multiple fields (short code, URL, description)
   - Support partial matching
   - Case-insensitive search
-  - Chinese character support
+  - Unicode character support
 
 ## How to use?
 
@@ -43,7 +43,6 @@ URL shortener service based on Cloudflare Workers and D1 database.
 ```
 .
 ├── README.md
-├── README.zh-CN.md
 ├── package.json
 ├── src/
 │   ├── components/
@@ -87,7 +86,7 @@ The extension provides a powerful search feature that allows users to find links
 Search implementation supports:
 - Partial matching (e.g., searching "git" will match "github.com")
 - Case-insensitive search
-- Chinese character search
+- Unicode text search
 - Multiple field search (matches any of the fields)
 
 Example:
