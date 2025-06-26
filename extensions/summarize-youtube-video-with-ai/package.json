@@ -411,8 +411,7 @@
     "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
     "node-fetch": "^3.3.2",
-    "openai": "^5.1.0",
-    "youtube-transcript": "^1.2.1"
+    "openai": "^5.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -422,6 +421,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3",
+    "youtube-transcript-api": "^3.0.6",
     "ytdl-core": "^4.11.5"
   },
   "scripts": {
