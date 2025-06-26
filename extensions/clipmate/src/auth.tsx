@@ -59,8 +59,6 @@ export async function authorize(): Promise<string> {
     // Decrypt the API key
     const decryptedApiKey = await decryptApiKey(decodeURIComponent(authorizationCode), encryptionPassphrase);
 
-    
-
     // Store the decrypted API key securely
     await secureStorage.setSecure("apiKey", decryptedApiKey);
 
