@@ -97,7 +97,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
 
   let title = "";
   let coverImageUrl = "";
-  let menuItems: React.JSX.Element | null = null;
+  let menuItems: JSX.Element | null = null;
 
   if (isTrack) {
     const { artists, id: trackId, album } = item as TrackObject;
