@@ -1,5 +1,9 @@
 # Perplexity Changelog
 
+## [Perplexity App Support] - {PR_MERGE_DATE}
+
+Add a new command targeting the Perplexity app, instead of the browser.
+
 ## [Fallback Improvement] - 2023-11-29
 
 Now when using Ask Perplexity as a fallback command, the form will submit automatically. It will still use the stored value of the "Copilot" checkbox.

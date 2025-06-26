@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, LaunchProps, getPreferenceValues, open, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Form, type LaunchProps, getPreferenceValues, open, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 
 type Values = {
@@ -7,7 +7,12 @@ type Values = {
   focus: string;
 };
 
-export default function Command(props: LaunchProps<{ draftValues: Values; arguments: Arguments.AskPerplexity }>) {
+export default function Command(
+  props: LaunchProps<{
+    draftValues: Values;
+    arguments: Arguments.AskPerplexity;
+  }>,
+) {
   const { handleSubmit, itemProps } = useForm<Values>({
     onSubmit({ query, copilot, focus }) {
       const params = new URLSearchParams({
