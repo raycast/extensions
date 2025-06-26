@@ -1,6 +1,6 @@
 # ChatGPT Quick Actions Changelog
 
-## [API Pricing] - {PR_MERGE_DATE}
+## [API Pricing] - 2025-06-26
 
 - Updated [API pricing information](https://platform.openai.com/docs/pricing) and conversion fix
 
