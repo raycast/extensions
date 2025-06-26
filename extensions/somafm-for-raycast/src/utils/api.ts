@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ChannelsResponse, Station } from "../types/station";
 
 const SOMAFM_API_URL = "https://somafm.com/channels.json";
@@ -14,10 +14,8 @@ export async function fetchStations(): Promise<Station[]> {
     const data = (await response.json()) as ChannelsResponse;
     return data.channels;
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error instanceof Error ? error.message : "Unknown error occurred", {
       title: "Failed to fetch stations",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
     });
     return [];
   }

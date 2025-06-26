@@ -1,10 +1,12 @@
 import { showHUD, closeMainWindow, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
+import { showFailureToast } from "@raycast/utils";
+import { exec, execFile } from "child_process";
 import { promisify } from "util";
 import { Station } from "../types/station";
 import { addToRecentlyPlayed } from "./storage";
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 async function checkPlayerInstalled(player: string): Promise<boolean> {
   try {
@@ -31,6 +33,21 @@ async function getDirectStreamUrl(plsUrl: string): Promise<string | null> {
   return null;
 }
 
+async function launchPlayer(
+  command: string,
+  args: string[],
+  station: Station,
+  playerName: string,
+  toast: Toast,
+): Promise<void> {
+  await execFileAsync(command, args);
+  await addToRecentlyPlayed(station.id);
+  toast.style = Toast.Style.Success;
+  toast.title = `Playing ${station.title}`;
+  toast.message = playerName ? `Opened in ${playerName}` : `Opened ${station.title}`;
+  await closeMainWindow();
+}
+
 export async function playStation(station: Station): Promise<void> {
   // Find MP3 stream URL
   const mp3Stream = station.playlists.find((playlist) => playlist.format.toLowerCase() === "mp3");
@@ -49,49 +66,31 @@ export async function playStation(station: Station): Promise<void> {
   try {
     // Try different playback methods
 
-    // Track as recently played
-    await addToRecentlyPlayed(station.id);
-
     // Method 1: Try IINA (popular macOS media player)
     if (await checkPlayerInstalled("iina")) {
-      await execAsync(`iina "${mp3Stream.url}"`);
-      toast.style = Toast.Style.Success;
-      toast.title = `Playing ${station.title}`;
-      toast.message = "Opened in IINA";
-      await closeMainWindow();
+      await launchPlayer("iina", [mp3Stream.url], station, "IINA", toast);
       return;
     }
 
     // Method 2: Try VLC
     if (await checkPlayerInstalled("vlc")) {
-      await execAsync(`vlc "${mp3Stream.url}" --intf dummy --play-and-exit`);
-      toast.style = Toast.Style.Success;
-      toast.title = `Playing ${station.title}`;
-      toast.message = "Opened in VLC";
-      await closeMainWindow();
+      await launchPlayer("vlc", [mp3Stream.url, "--intf", "dummy", "--play-and-exit"], station, "VLC", toast);
       return;
     }
 
     // Method 3: Try to get direct stream URL and use Music.app
     const directUrl = await getDirectStreamUrl(mp3Stream.url);
     if (directUrl) {
-      // Try opening direct stream URL in Music.app
-      await execAsync(`open -a "Music" "${directUrl}"`);
-      toast.style = Toast.Style.Success;
-      toast.title = `Playing ${station.title}`;
-      toast.message = "Opened in Music";
-      await closeMainWindow();
+      await launchPlayer("open", ["-a", "Music", directUrl], station, "Music", toast);
       return;
     }
 
     // Method 4: Fallback to default behavior (will likely download)
-    await execAsync(`open "${mp3Stream.url}"`);
-    toast.style = Toast.Style.Success;
-    toast.title = `Opened ${station.title}`;
-    await closeMainWindow();
+    await launchPlayer("open", [mp3Stream.url], station, "", toast);
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = `Failed to play ${station.title}`;
-    toast.message = error instanceof Error ? error.message : "Unknown error";
+    toast.hide();
+    await showFailureToast(error instanceof Error ? error.message : "Unknown error", {
+      title: `Failed to play ${station.title}`,
+    });
   }
 }

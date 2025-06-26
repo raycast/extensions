@@ -53,7 +53,7 @@ npx @raycast/api@latest validate
 
 1. **Ensure all files are ready**
    - Screenshots in `metadata/`
-   - Update CHANGELOG.md with actual date
+   - Update CHANGELOG.md with {PR_MERGE_DATE} template
    - Commit all changes
 
 2. **Run the publish command**

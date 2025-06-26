@@ -44,7 +44,7 @@ Browse and play [SomaFM](https://somafm.com) internet radio stations directly fr
 ### ⭐ Favorites & History
 - **Favorites**: Star your favorite stations for quick access
   - Favorites appear at the top of the list
-  - Toggle with `⌘+F` or the star action
+  - Toggle with `⌘+D` or the star action
   - Persists between sessions
 - **Recently Played**: Automatically tracks your last 5 played stations
   - Shows ALL recently played stations (including favorites)
@@ -67,7 +67,7 @@ Browse and play [SomaFM](https://somafm.com) internet radio stations directly fr
 ### ⌨️ Keyboard Shortcuts
 - `Enter` - Play selected station
 - `1-9` - Quick play stations 1-9
-- `⌘+F` - Toggle favorite
+- `⌘+D` - Toggle favorite
 - `⌘+Shift+V` - Switch between grid/list view
 - `⌘+1` - Sort by name
 - `⌘+2` - Sort by listeners
@@ -97,7 +97,7 @@ Without these, streams will open in Music.app or your default browser.
 2. Type "soma" or "Browse SomaFM Stations"
 3. Browse stations in the grid or search for specific genres/stations
 4. Press `Enter` or use number keys `1-9` to play
-5. Use `⌘+F` to favorite stations you love
+5. Use `⌘+D` to favorite stations you love
 
 ### Menu Bar
 1. Look for the 🎵 icon in your menu bar

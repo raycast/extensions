@@ -153,7 +153,7 @@ interface Playlist {
 ```typescript
 interface StorageSchema {
   favorites: string[];              // Array of station IDs
-  recentlyPlayed: RecentItem[];     // Last 10 played stations
+  recentlyPlayed: RecentItem[];     // Last 5 played stations
   settings: UserSettings;
 }
 
@@ -265,13 +265,13 @@ Total: ~2-3 weeks for full implementation
 3. **Favorites**: 
    - Display at top of list
    - Use star icon (matching SomaFM site)
-   - Keyboard shortcut for toggle (⌘+F)
+   - Keyboard shortcut for toggle (⌘+D)
 4. **Recently Played**: 
    - Track 5 most recent stations
    - Show in separate section
 5. **Keyboard Shortcuts**: 
    - Number keys (1-9) for quick access
-   - ⌘+F for favorite toggle
+   - ⌘+D for favorite toggle
    - ⌘+R for refresh
 6. **Implementation Priority**:
    - Grid view with images (first)

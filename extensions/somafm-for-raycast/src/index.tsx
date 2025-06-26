@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Grid, Icon, List, Keyboard, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { fetchStations } from "./utils/api";
 import { playStation } from "./utils/player";
@@ -36,10 +37,8 @@ export default function Command() {
       setRecentlyPlayed(recent);
     } catch {
       if (!silent) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast("Check your internet connection", {
           title: "Failed to load stations",
-          message: "Check your internet connection",
         });
       }
     } finally {
@@ -195,7 +194,7 @@ export default function Command() {
           title={isFavorite(station.id) ? "Remove from Favorites" : "Add to Favorites"}
           icon={Icon.Star}
           onAction={() => toggleFavoriteStation(station.id, station.title)}
-          shortcut={{ modifiers: ["cmd"], key: "f" }}
+          shortcut={{ modifiers: ["cmd"], key: "d" }}
         />
         <Action
           title={`Switch to ${viewMode === "grid" ? "List" : "Grid"} View`}

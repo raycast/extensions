@@ -20,7 +20,8 @@
       "title": "SomaFM Menu",
       "description": "Quick access to favorite stations",
       "mode": "menu-bar",
-      "interval": "10m"
+      "interval": "10m",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {

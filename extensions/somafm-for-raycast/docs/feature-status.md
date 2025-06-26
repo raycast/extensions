@@ -13,7 +13,7 @@
 - [x] Implement favorites using Raycast LocalStorage
 - [x] Add recently played tracking (last 5 stations)
 - [x] Genre filtering with pipe-separated genre support
-- [x] Keyboard shortcuts (1-9 quick play, ⌘+F favorite, etc.)
+- [x] Keyboard shortcuts (1-9 quick play, ⌘+D favorite, etc.)
 - [x] View toggle between Grid/List (⌘+Shift+V)
 - [x] Sort by name or listeners with directional indicators
 - [x] Group by genre option

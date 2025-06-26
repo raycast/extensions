@@ -15,10 +15,21 @@ const STORAGE_KEYS = {
   RECENTLY_PLAYED: "somafm-recently-played",
 } as const;
 
+// Utility function for safe JSON parsing
+async function safeParseJSON<T>(key: string, defaultValue: T): Promise<T> {
+  const stored = await LocalStorage.getItem<string>(key);
+  if (!stored) return defaultValue;
+
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return defaultValue;
+  }
+}
+
 // Favorites functions
 export async function getFavorites(): Promise<string[]> {
-  const stored = await LocalStorage.getItem<string>(STORAGE_KEYS.FAVORITES);
-  return stored ? JSON.parse(stored) : [];
+  return safeParseJSON(STORAGE_KEYS.FAVORITES, []);
 }
 
 export async function addFavorite(stationId: string): Promise<void> {
@@ -48,8 +59,7 @@ export async function toggleFavorite(stationId: string): Promise<boolean> {
 
 // Recently played functions
 export async function getRecentlyPlayed(): Promise<RecentItem[]> {
-  const stored = await LocalStorage.getItem<string>(STORAGE_KEYS.RECENTLY_PLAYED);
-  return stored ? JSON.parse(stored) : [];
+  return safeParseJSON(STORAGE_KEYS.RECENTLY_PLAYED, []);
 }
 
 export async function addToRecentlyPlayed(stationId: string): Promise<void> {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getFavorites, toggleFavorite } from "../utils/storage";
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export function useFavorites() {
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -27,9 +28,9 @@ export function useFavorites() {
 
       // Update local state
       if (isNowFavorite) {
-        setFavorites([...favorites, stationId]);
+        setFavorites((prev) => [...prev, stationId]);
       } else {
-        setFavorites(favorites.filter((id) => id !== stationId));
+        setFavorites((prev) => prev.filter((id) => id !== stationId));
       }
 
       // Show feedback
@@ -39,10 +40,8 @@ export function useFavorites() {
         message: stationTitle,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error instanceof Error ? error.message : "Unknown error", {
         title: "Failed to update favorites",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { fetchStations } from "../api";
 
 describe("fetchStations", () => {
@@ -47,9 +47,9 @@ describe("fetchStations", () => {
     const result = await fetchStations();
 
     expect(result).toEqual([]);
-    expect(showToast).toHaveBeenCalledWith(
+    expect(showFailureToast).toHaveBeenCalledWith(
+      "Failed to fetch stations: Internal Server Error",
       expect.objectContaining({
-        style: Toast.Style.Failure,
         title: "Failed to fetch stations",
       }),
     );
@@ -61,11 +61,10 @@ describe("fetchStations", () => {
     const result = await fetchStations();
 
     expect(result).toEqual([]);
-    expect(showToast).toHaveBeenCalledWith(
+    expect(showFailureToast).toHaveBeenCalledWith(
+      "Network error",
       expect.objectContaining({
-        style: Toast.Style.Failure,
         title: "Failed to fetch stations",
-        message: "Network error",
       }),
     );
   });

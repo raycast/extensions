@@ -108,16 +108,18 @@ describe("storage utilities", () => {
       const mockDate = new Date("2024-01-01T02:00:00.000Z");
       vi.setSystemTime(mockDate);
 
-      await addToRecentlyPlayed("station1");
+      try {
+        await addToRecentlyPlayed("station1");
 
-      const expectedRecent = [
-        { stationId: "station1", playedAt: mockDate.toISOString() },
-        { stationId: "station2", playedAt: "2024-01-01T01:00:00.000Z" },
-      ];
+        const expectedRecent = [
+          { stationId: "station1", playedAt: mockDate.toISOString() },
+          { stationId: "station2", playedAt: "2024-01-01T01:00:00.000Z" },
+        ];
 
-      expect(LocalStorage.setItem).toHaveBeenCalledWith("somafm-recently-played", JSON.stringify(expectedRecent));
-
-      vi.useRealTimers();
+        expect(LocalStorage.setItem).toHaveBeenCalledWith("somafm-recently-played", JSON.stringify(expectedRecent));
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it("should limit recently played to 5 items", async () => {
@@ -131,16 +133,18 @@ describe("storage utilities", () => {
       const mockDate = new Date("2024-01-06T00:00:00.000Z");
       vi.setSystemTime(mockDate);
 
-      await addToRecentlyPlayed("station6");
+      try {
+        await addToRecentlyPlayed("station6");
 
-      const savedData = vi.mocked(LocalStorage.setItem).mock.calls[0][1];
-      const savedRecent = JSON.parse(savedData as string);
+        const savedData = vi.mocked(LocalStorage.setItem).mock.calls[0][1];
+        const savedRecent = JSON.parse(savedData as string);
 
-      expect(savedRecent).toHaveLength(5);
-      expect(savedRecent[0].stationId).toBe("station6");
-      expect(savedRecent[4].stationId).toBe("station4");
-
-      vi.useRealTimers();
+        expect(savedRecent).toHaveLength(5);
+        expect(savedRecent[0].stationId).toBe("station6");
+        expect(savedRecent[4].stationId).toBe("station4");
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it("should clear recently played", async () => {

@@ -1,6 +1,6 @@
 # SomaFM for Raycast Changelog
 
-## [1.0.0] - 2024-12-24
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 - Browse 40+ SomaFM radio stations in Grid or List view
@@ -12,7 +12,7 @@
 - Menu bar extension for instant access to favorites
 - Genre grouping with support for pipe-separated genres
 - Sort by name or listener count
-- Keyboard shortcuts (1-9 for quick play, ⌘+F for favorites)
+- Keyboard shortcuts (1-9 for quick play, ⌘+D for favorites)
 - PLS playlist file parsing for direct stream URLs
 - View toggle between Grid and List modes
 - Clear recently played history option
