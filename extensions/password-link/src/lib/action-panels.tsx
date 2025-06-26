@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon } from "@raycast/api";
+import { ActionPanel, Action, Icon, LaunchType } from "@raycast/api";
 import { useNavigation } from "@raycast/api";
 
 interface CreateActionsProps {
@@ -16,7 +16,9 @@ export function CreateActions({ push }: CreateActionsProps) {
         icon={Icon.Plus}
         onAction={() => {
           import("../commands/new-secret").then(({ default: NewSecret }) => {
-            push(<NewSecret />);
+            push(
+              <NewSecret launchType={LaunchType.UserInitiated} arguments={{}} />
+            );
           });
         }}
         shortcut={{ modifiers: ["cmd"], key: "n" }}

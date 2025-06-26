@@ -1,4 +1,14 @@
-import { ActionPanel, Action, Form, showToast, Toast, Clipboard, useNavigation, LaunchProps } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Form,
+  showToast,
+  Toast,
+  Clipboard,
+  useNavigation,
+  LaunchProps,
+  LaunchType,
+} from "@raycast/api";
 import { useState } from "react";
 import { apiClient } from "../lib/api-client";
 import { prepareSecretData } from "../lib/encryption";
@@ -22,7 +32,12 @@ interface FormValues {
  * New Secret Command
  * Creates a new encrypted secret via password.link API
  */
-export default function NewSecret(props?: LaunchProps<{ arguments: NewSecretArguments }>) {
+export default function NewSecret(
+  props: LaunchProps<{ arguments: NewSecretArguments }> = {
+    launchType: LaunchType.UserInitiated,
+    arguments: {} as NewSecretArguments,
+  },
+) {
   const { push } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
