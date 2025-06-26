@@ -1,5 +1,5 @@
 // Toggle this to enable/disable test data
-export const ENABLE_TEST_DATA = true;
+export const ENABLE_TEST_DATA = false;
 
 export const testSecrets = ENABLE_TEST_DATA
   ? [
