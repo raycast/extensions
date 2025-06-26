@@ -18,7 +18,7 @@ Works with:
 - A standalone Music Assistant server (`ws://HOST:8095/ws`)
 - The Home Assistant add-on (just expose port `8095` in the add-on’s settings)
 
-![Expose port 8095 in Home Assistant add-on settings](./assets/expose-port.png)
+![Expose port 8095 in Home Assistant add-on settings](./expose-port.png)
 
 
 ## Configuration
@@ -27,4 +27,4 @@ Works with:
 | `host`      | Local Music Assistant IP address (use the direct IP; mDNS is not reliable in the Raycast environment) |
 | `playerId`  | The player ID as displayed by Music Assistant (see image below)                               |
 
-![Find your player ID in Music Assistant](./assets/player-id.png)
+![Find your player ID in Music Assistant](./player-id.png)
