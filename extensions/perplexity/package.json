@@ -16,45 +16,26 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "ask-perplexity-app",
-      "title": "Ask Perplexity App",
-      "description": "Opens Perplexity app with your search query",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "query",
-          "type": "text",
-          "description": "The query to search for",
-          "placeholder": "Ask Anything..."
-        }
-      ]
-    },
-    {
       "name": "ask-perplexity",
       "title": "Ask Perplexity",
-      "description": "Opens Perplexity in a browser tab with your search query in the URL",
-      "mode": "view",
+      "description": "Search Perplexity with your query",
+      "mode": "no-view",
       "arguments": [
         {
           "name": "query",
           "type": "text",
           "description": "The query to search for",
-          "placeholder": "Ask Anything..."
-        },
-        {
-          "name": "copilot",
-          "type": "text",
-          "description": "Use Copilot Mode?",
-          "placeholder": "Use Copilot? (y/n)"
+          "placeholder": "Ask Anything...",
+          "required": true
         }
       ],
       "preferences": [
         {
-          "label": "Fallback with Copilot enabled",
-          "description": "This will enable Perplexity's Copilot mode when using this command as a Fallback",
+          "label": "Use Perplexity App",
+          "description": "Open your query in Perplexity app, instead of the default Browser",
           "default": false,
           "type": "checkbox",
-          "name": "fallbackCopilot",
+          "name": "perplexityApp",
           "required": false
         }
       ]

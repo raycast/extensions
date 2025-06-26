@@ -2,7 +2,8 @@
 
 ## [Perplexity App Support] - {PR_MERGE_DATE}
 
-Add a new command targeting the Perplexity app, instead of the browser.
+- Add new command preferences to allow opening the Perplexity app, instead of the browser.
+- Remove unsupported legacy fields.
 
 ## [Fallback Improvement] - 2023-11-29
 
