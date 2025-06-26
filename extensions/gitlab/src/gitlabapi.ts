@@ -70,6 +70,7 @@ function userFromJson(data: any): User {
 export function dataToProject(project: any): Project {
   return {
     id: project.id,
+    group_id: project.namespace.kind == "group" ? project.namespace.id : 0,
     name: project.name,
     name_with_namespace: project.name_with_namespace,
     fullPath: project.path_with_namespace,
@@ -301,6 +302,7 @@ export class Todo {
 
 export class Project {
   public id = 0;
+  public group_id = 0;
   public name_with_namespace = "";
   public name = "";
   public fullPath = "";
