@@ -1,4 +1,4 @@
-import { Form, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
+import { Form, Action, ActionPanel, Icon, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEncryptImages } from "../hooks/useEncryptImages";
 import GridLoadingView from "./GridLoadingView";
@@ -53,7 +53,8 @@ function EncryptImagesForm() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Encrypt" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Terminal} title="Encrypt" onSubmit={handleSubmit} />
+          <Action icon={Icon.Gear} title="Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >

@@ -1,4 +1,4 @@
-import { Form, Action, ActionPanel } from "@raycast/api";
+import { Form, Action, ActionPanel, Icon, openExtensionPreferences } from "@raycast/api";
 import GridLoadingView from "./GridLoadingView";
 import GridRestoredImages from "./GridRestoredImages";
 import PasswordForm from "./PasswordForm";
@@ -41,7 +41,8 @@ function DecryptImagesForm() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Decrypt" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Terminal} title="Decrypt" onSubmit={handleSubmit} />
+          <Action icon={Icon.Gear} title="Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >

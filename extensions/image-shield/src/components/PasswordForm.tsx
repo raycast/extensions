@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 
 interface PasswordFormProps {
@@ -17,7 +17,7 @@ function PasswordForm({ onSubmit, actionTitle }: PasswordFormProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={actionTitle} onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Terminal} title={actionTitle} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
