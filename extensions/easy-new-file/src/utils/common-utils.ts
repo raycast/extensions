@@ -1,12 +1,11 @@
-import { runAppleScript } from "run-applescript";
 import { environment, getSelectedFinderItems, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import fse from "fs-extra";
-import { homedir } from "os";
 import { buildFileName } from "../new-file-with-template";
 import { imgExt } from "./constants";
 import { allFileTypes, FileType, TemplateType } from "../types/file-type";
 import fileUrl from "file-url";
 import { showTips } from "../types/preferences";
+import { runAppleScript } from "@raycast/utils";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -60,17 +59,6 @@ export const getSelectedFile = async () => {
 
 export const isImage = (ext: string) => {
   return imgExt.includes(ext);
-};
-
-export const getSavedDirectory = (saveDirectory: string) => {
-  let actualDirectory = saveDirectory;
-  if (saveDirectory.startsWith("~")) {
-    actualDirectory = saveDirectory.replace("~", `${homedir()}`);
-  }
-  if (isEmpty(actualDirectory) || !fse.pathExistsSync(actualDirectory)) {
-    return homedir() + "/Desktop";
-  }
-  return actualDirectory.endsWith("/") ? actualDirectory : actualDirectory + "/";
 };
 
 export async function createNewFileWithText(

@@ -87,8 +87,7 @@
   "dependencies": {
     "@raycast/api": "^1.91.0",
     "@raycast/utils": "^1.18.1",
-    "cheerio": "^1.0.0-rc.12",
-    "fuse.js": "^7.1.0"
+    "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

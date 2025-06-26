@@ -8,7 +8,9 @@ export type Input = {
 export default async function (input: Input) {
   const { query } = input;
 
-  const research = await firecrawl.search(query);
+  const research = await firecrawl.search(query, {
+    integration: "raycast",
+  });
 
   if (!research.success) {
     throw new Error(research.error ?? "Failed to search the web");

@@ -28,8 +28,9 @@ export default function SearchByTitle(props: SearchMediaProps) {
     }
 
     try {
-      const titles = await searchTitles(search, viewType);
-      setTitles(titles);
+      const response = await searchTitles(search, viewType);
+      // Extract the Search array from the response data
+      setTitles(response.Search || []);
     } catch (error) {
       showFailureToast(error, { title: "Failed to search titles" });
     } finally {
