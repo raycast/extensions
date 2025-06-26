@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Form,
   Icon,
   List,
   closeMainWindow,
@@ -9,17 +8,19 @@ import {
   open,
   Keyboard,
   LaunchProps,
+  getPreferenceValues,
 } from "@raycast/api";
-import { folderName } from "./utils";
-import { SpotlightSearchResult } from "./types";
+import React from "react";
+import { folderName, log } from "./utils";
+import { SpotlightSearchResult, SpotlightSearchPreferences } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
-import { useCommandBase } from "./hooks/useCommandBase";
 import { moveFinderItems } from "./moveUtils";
 import { FolderListSection, Directory } from "./components";
-import path from "node:path";
+import path from "path";
 import { userInfo } from "os";
+import { showFailureToast } from "@raycast/utils";
 
-export default function Command(props: LaunchProps) {
+function Command(props: LaunchProps) {
   const {
     searchText,
     setSearchText,
@@ -40,13 +41,13 @@ export default function Command(props: LaunchProps) {
     hasSearched,
   } = useFolderSearch();
 
-  // Use the shared command base hook
-  useCommandBase({
-    commandName: "move",
-    launchProps: props,
-    searchText,
-    setSearchText,
-  });
+  // Simple launch logging
+  React.useEffect(() => {
+    log("debug", "move", "Command launched", {
+      searchText,
+      timestamp: new Date().toISOString(),
+    });
+  }, []); // Only log once on mount
 
   // Render actions for the folder list items
   const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number, isPinnedSection = false) => {
@@ -54,21 +55,24 @@ export default function Command(props: LaunchProps) {
     return (
       <ActionPanel title={folderName(result)}>
         <Action
-          title="Move to This Folder"
-          icon={Icon.ArrowRight}
-          shortcut={{ modifiers: ["cmd"], key: "return" }}
+          title="Move Finder Selection"
+          icon={Icon.NewFolder}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onAction={async () => {
             try {
               const moveResult = await moveFinderItems(result.path);
               if (moveResult.success) {
-                open(result.path);
+                // Only open the folder if the preference is enabled
+                const { openFolderAfterMove } = getPreferenceValues<SpotlightSearchPreferences>();
+                if (openFolderAfterMove) {
+                  open(result.path);
+                }
                 closeMainWindow();
                 popToRoot({ clearSearchBar: true });
               }
             } catch (error) {
-              // Error is already handled in moveFinderItems, but we need to catch it here
-              // to prevent unhandled promise rejections
-              console.error("Error in Move to This Folder action:", error);
+              // Show error to user with showFailureToast
+              showFailureToast(error, { title: "Could not move Finder selection" });
             }
           }}
         />
@@ -88,7 +92,7 @@ export default function Command(props: LaunchProps) {
           title={!resultIsPinned(result) ? "Pin" : "Unpin"}
           icon={!resultIsPinned(result) ? Icon.Star : Icon.StarDisabled}
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-          onAction={() => toggleResultPinnedStatus(result, resultIndex)}
+          onAction={() => toggleResultPinnedStatus(result)}
         />
         {resultIsPinned(result) && isPinnedSection && (
           <>
@@ -128,18 +132,15 @@ export default function Command(props: LaunchProps) {
     );
   };
 
-  return !(hasCheckedPlugins && hasCheckedPreferences) ? (
-    // prevent flicker due to details pref being async
-    <Form />
-  ) : (
+  return (
     <List
-      isLoading={isQuerying}
+      isLoading={!(hasCheckedPlugins && hasCheckedPreferences)}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search for destination folder to move files"
       isShowingDetail={isShowingDetail}
       throttle={true}
       searchText={searchText}
-      selectedItemId={selectedItemId}
+      selectedItemId={selectedItemId || undefined}
       searchBarAccessory={
         hasCheckedPlugins && hasCheckedPreferences ? (
           <List.Dropdown tooltip="Scope" onChange={setSearchScope} value={searchScope}>
@@ -150,7 +151,10 @@ export default function Command(props: LaunchProps) {
         ) : null
       }
     >
-      {!searchText && props.launchType === "userInitiated" && pinnedResults.length > 0 ? (
+      {!(hasCheckedPlugins && hasCheckedPreferences) ? (
+        // Show loading state while checking preferences and plugins
+        <List.EmptyView title="Loading..." description="Setting up folder search" icon={Icon.MagnifyingGlass} />
+      ) : !searchText && !props.fallbackText && pinnedResults.length > 0 ? (
         <FolderListSection
           title="Pinned"
           results={pinnedResults}
@@ -159,8 +163,8 @@ export default function Command(props: LaunchProps) {
           renderActions={renderFolderActions}
           isPinnedSection={true}
         />
-      ) : !searchText && props.launchType === "userInitiated" ? (
-        // No pins and no search text
+      ) : !searchText && !props.fallbackText ? (
+        // No pins and no search text (and not fallback mode)
         <List.EmptyView
           title="No Pinned Folders"
           description="Search to find folders or pin your favorites from the search command"
@@ -168,7 +172,19 @@ export default function Command(props: LaunchProps) {
         />
       ) : (
         <>
-          {isQuerying || (searchText && !hasSearched) ? (
+          {isQuerying ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for destination folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : searchText && !hasSearched ? (
+            <List.EmptyView
+              title="Searching..."
+              description="Looking for destination folders"
+              icon={Icon.MagnifyingGlass}
+            />
+          ) : props.fallbackText && !hasSearched ? (
             <List.EmptyView
               title="Searching..."
               description="Looking for destination folders"
@@ -176,14 +192,7 @@ export default function Command(props: LaunchProps) {
             />
           ) : hasSearched && results.length === 0 ? (
             <List.EmptyView title="No Results" description="Try a different search term" icon={Icon.Folder} />
-          ) : !searchText ? (
-            // Only show this when there's no search text at all
-            <List.EmptyView
-              title="Enter a search term"
-              description="Type to search for folders to move files to"
-              icon={Icon.MagnifyingGlass}
-            />
-          ) : (
+          ) : results.length > 0 ? (
             <FolderListSection
               title="Results"
               results={results}
@@ -192,9 +201,18 @@ export default function Command(props: LaunchProps) {
               renderActions={renderFolderActions}
               isPinnedSection={false}
             />
+          ) : (
+            // Only show this when there's truly no search text and no fallback
+            <List.EmptyView
+              title="Enter a search term"
+              description="Type to search for folders to move files to"
+              icon={Icon.MagnifyingGlass}
+            />
           )}
         </>
       )}
     </List>
   );
 }
+
+export default Command;
