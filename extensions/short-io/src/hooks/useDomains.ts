@@ -18,7 +18,6 @@ const getDomains = async () => {
       return res.data as Domain[];
     })
     .catch((err) => {
-      console.error(err);
       return [];
     });
 };

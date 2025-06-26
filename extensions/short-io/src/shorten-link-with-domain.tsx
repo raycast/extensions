@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import React, { useMemo, useState } from "react";
 import ShortenLink from "./shorten-link";
 import { isEmpty } from "./utils/common-utils";
@@ -8,12 +8,13 @@ import { ListEmptyView } from "./components/list-empty-view";
 import { useDomains } from "./hooks/useDomains";
 import { useDefaultDomain } from "./hooks/useDefaultDomain";
 import { Domain } from "./types/types";
+import AddDomain from "./add-domain";
 
 export default function ShortenLinkWithDomain() {
   const [refreshDomain, setRefreshDomain] = useState<Domain | undefined>(undefined);
 
-  const { data: defaultDomainData, isLoading: domainLoading } = useDefaultDomain(refreshDomain);
-  const { data: domainsData, isLoading: loading } = useDomains();
+  const { data: defaultDomainData, isLoading: domainLoading, revalidate: revalidateDefaultDomains } = useDefaultDomain(refreshDomain);
+  const { data: domainsData, isLoading: loading, revalidate: revalidateDomains } = useDomains();
 
   const domains = useMemo(() => {
     return domainsData || [];
@@ -33,9 +34,17 @@ export default function ShortenLinkWithDomain() {
       isShowingDetail={domains.length !== 0 && true}
       searchBarPlaceholder={"Search domains"}
     >
-      <ListEmptyView
-        title={"No Domain"}
+      <List.EmptyView
+        title="No Domain"
         icon={{ source: { light: "empty-domain-icon.svg", dark: "empty-domain-icon@dark.svg" } }}
+        actions={<ActionPanel>
+          <Action.Push icon={Icon.Plus} title="Add Domain" target={<AddDomain onAdd={() => {
+                  revalidateDefaultDomains();
+                  revalidateDomains();
+                }} />} shortcut={Keyboard.Shortcut.Common.New} />
+          <ActionGoShortIo />
+          <ActionOpenPreferences />
+        </ActionPanel>}
       />
       {domains.map((value, index) => {
         return (
@@ -99,6 +108,10 @@ export default function ShortenLinkWithDomain() {
                     setRefreshDomain(value);
                   }}
                 />
+                <Action.Push icon={Icon.Plus} title="Add Domain" target={<AddDomain onAdd={() => {
+                  revalidateDefaultDomains();
+                  revalidateDomains();
+                }} />} shortcut={Keyboard.Shortcut.Common.New} />
                 <ActionGoShortIo />
                 <ActionOpenPreferences />
               </ActionPanel>
