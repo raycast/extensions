@@ -1,4 +1,5 @@
 import { popToRoot, showToast, Toast } from "@raycast/api";
+// @ts-expect-error - youtube-transcript-api doesn't have TypeScript types
 import TranscriptClient from "youtube-transcript-api";
 
 function extractVideoId(video: string): string {
@@ -30,12 +31,12 @@ export async function getVideoTranscript(video: string) {
     }
 
     const joinedTranscription = result.tracks[0].transcript
-      .map((item) => item.text)
+      .map((item: { text: string }) => item.text)
       .join(" ")
       .replaceAll("\n", " ");
 
     return joinedTranscription;
-  } catch (error) {
+  } catch {
     showToast({
       style: Toast.Style.Failure,
       title: "❗",
