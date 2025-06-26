@@ -1,6 +1,6 @@
  # Changelog
 
-## [0.1.1] - {PR_MERGE_DATE}
+## [0.1.1] - 2025-06-26
 
 ### Added
 - Option to both copy and paste transcibed text automatically
