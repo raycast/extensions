@@ -3,7 +3,6 @@ import { SecretRequest } from "../types";
 import { apiClient } from "../lib/api-client";
 import {
   generateSecretRequestUrl,
-  formatUsageCount,
   getRequestDisplayTitle,
   shouldShowDescription,
   formatExpiration,
@@ -42,7 +41,6 @@ export default function SecretRequestDetail({ request, onDelete }: SecretRequest
 
   const displayTitle = getRequestDisplayTitle(request.message, request.id);
   const shouldShowDesc = shouldShowDescription(request.description, request.message);
-  const usageText = formatUsageCount(request.limit);
   const expirationText = formatExpiration(request.expiration);
 
   const getExpirationSummary = () => {
@@ -104,7 +102,7 @@ ${request.send_to_email ? `**Note:** Created secrets will be automatically sent 
 `}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Usage" text={usageText} />
+          <Detail.Metadata.Label title="Usage" text={String(request.limit)} />
           <Detail.Metadata.Label title="Expiration" text={expirationText} />
           {request.send_to_email && <Detail.Metadata.Label title="Send to Email" text={request.send_to_email} />}
           <Detail.Metadata.Separator />
@@ -112,7 +110,10 @@ ${request.send_to_email ? `**Note:** Created secrets will be automatically sent 
             <Detail.Metadata.Label title="Secret Description" text={request.secret_description} />
           )}
           <Detail.Metadata.Label title="Secret Message" text={request.secret_message || "None"} />
-          <Detail.Metadata.Label title="Secret Expiration" text={request.secret_expiration || "No expiration"} />
+          <Detail.Metadata.Label
+            title="Secret Expiration"
+            text={request.secret_expiration ? formatExpiration(request.secret_expiration) : "No expiration"}
+          />
           <Detail.Metadata.Label
             title="Secret Max Views"
             text={request.secret_max_views ? request.secret_max_views.toString() : "Unlimited"}
