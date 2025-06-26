@@ -15,7 +15,8 @@ export default function Command() {
         let title = `${artist} - ${song}`;
         if (!artist || !song) {
           const queue = await api.getPlayerQueue(playerId);
-          //const queue = queues.filter((q) => q.queue_id == playerId)[0];
+          if (!artist || !song) {
+          const queue = await api.getPlayerQueue(playerId);
           if (queue.current_item) {
             title = queue.current_item?.name;
           }
