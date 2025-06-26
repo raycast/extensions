@@ -9,7 +9,6 @@ This Raycast extension provides functionality for image encryption and decryptio
 
 - `Encrypt Images` ... Encrypt images into secure fragments
 - `Decrypt Images` ... Restore original images from the fragments
-- `Settings` ... Default settings
 
 ## Features
 
@@ -35,6 +34,30 @@ This extension provides two main security modes for image protection:
 ![](https://raw.githubusercontent.com/tuki0918/raycast-image-shield/main/.docs/howto_use.gif)
 
 </details>
+
+## Preferences
+
+You can customize the extension behavior through the following preferences:
+
+### Image Protection
+- **Type**: Checkbox
+- **Default**: `Enabled`
+- **Description**: If disabled, images are only shuffled without password protection. If enabled, images require password for decryption.
+
+### Block Size
+- **Type**: Dropdown (1, 2, 3, 4, 8, 16, 32, 64)
+- **Default**: `4`
+- **Description**: Fragment the image into multiple blocks and shuffle them. Larger block sizes use less memory but provide less fragmentation.
+
+### File Prefix
+- **Type**: Text field
+- **Default**: `img`
+- **Description**: Set the prefix for encrypted filename.
+
+### File Name
+- **Type**: Checkbox
+- **Default**: `Enabled`
+- **Description**: Restore the original file name when decrypting.
 
 ## Troubleshooting
 
