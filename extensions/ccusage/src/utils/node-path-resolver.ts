@@ -2,49 +2,48 @@ import { readdirSync, existsSync } from "fs";
 import { join } from "path";
 import { cpus } from "os";
 
-/**
- * Resolves version manager paths by dynamically detecting installed Node.js versions
- * @returns Array of valid bin paths from version managers
- */
+// Performance optimization: Cache expensive operations
+let cachedPaths: string | null = null;
+let cachedIsAppleSilicon: boolean | null = null;
+
+const getAppleSiliconStatus = (): boolean => {
+  if (cachedIsAppleSilicon !== null) return cachedIsAppleSilicon;
+  cachedIsAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
+  return cachedIsAppleSilicon;
+};
+
 export const resolveVersionManagerPaths = (): string[] => {
   const paths: string[] = [];
   const home = process.env.HOME;
 
   if (!home) return paths;
 
-  // Resolve nvm paths
   const nvmVersionsDir = join(home, ".nvm", "versions", "node");
-  if (existsSync(nvmVersionsDir)) {
-    try {
-      const nodeVersions = readdirSync(nvmVersionsDir);
-      for (const version of nodeVersions) {
-        const binPath = join(nvmVersionsDir, version, "bin");
-        if (existsSync(binPath)) {
-          paths.push(binPath);
-        }
+  try {
+    const nodeVersions = readdirSync(nvmVersionsDir);
+    for (const version of nodeVersions) {
+      const binPath = join(nvmVersionsDir, version, "bin");
+      if (existsSync(binPath)) {
+        paths.push(binPath);
       }
-    } catch {
-      // Ignore errors in reading directory
     }
+  } catch {
+    // Directory doesn't exist or no permissions - continue silently
   }
 
-  // Resolve fnm paths
   const fnmVersionsDir = join(home, ".fnm", "node-versions");
-  if (existsSync(fnmVersionsDir)) {
-    try {
-      const nodeVersions = readdirSync(fnmVersionsDir);
-      for (const version of nodeVersions) {
-        const binPath = join(fnmVersionsDir, version, "installation", "bin");
-        if (existsSync(binPath)) {
-          paths.push(binPath);
-        }
+  try {
+    const nodeVersions = readdirSync(fnmVersionsDir);
+    for (const version of nodeVersions) {
+      const binPath = join(fnmVersionsDir, version, "installation", "bin");
+      if (existsSync(binPath)) {
+        paths.push(binPath);
       }
-    } catch {
-      // Ignore errors in reading directory
     }
+  } catch {
+    // Directory doesn't exist or no permissions - continue silently
   }
 
-  // Static paths for other version managers
   const staticPaths = [join(home, ".n", "bin"), join(home, ".volta", "bin")];
 
   for (const path of staticPaths) {
@@ -57,11 +56,13 @@ export const resolveVersionManagerPaths = (): string[] => {
 };
 
 /**
- * Gets enhanced NODE_PATH with platform-specific paths and version manager paths
- * @returns Colon-separated PATH string for Node.js execution
+ * Runtime workaround: Ensures npx availability across diverse Node.js installation scenarios
+ * Performance optimized with caching to avoid repeated filesystem operations
  */
 export const getEnhancedNodePaths = (): string => {
-  const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
+  if (cachedPaths !== null) return cachedPaths;
+
+  const isAppleSilicon = getAppleSiliconStatus();
 
   const platformPaths = isAppleSilicon
     ? ["/opt/homebrew/bin", "/opt/homebrew/lib/node_modules/.bin"]
@@ -77,5 +78,12 @@ export const getEnhancedNodePaths = (): string => {
 
   const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
 
-  return allPaths.filter((path) => path).join(":");
+  cachedPaths = allPaths.filter((path) => path).join(":");
+  return cachedPaths;
+};
+
+// Optional: Cache clearing function for testing
+export const clearPathCache = (): void => {
+  cachedPaths = null;
+  cachedIsAppleSilicon = null;
 };

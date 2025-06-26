@@ -61,6 +61,187 @@
       "placeholder": "e.g., /usr/local/bin/npx"
     }
   ],
+  "tools": [
+    {
+      "name": "get-daily-usage",
+      "title": "Get Daily Usage",
+      "description": "Get today's Claude Code usage including cost, tokens, and statistics"
+    },
+    {
+      "name": "get-total-usage",
+      "title": "Get Total Usage",
+      "description": "Get comprehensive Claude Code usage statistics including totals, sessions, and model breakdowns"
+    },
+    {
+      "name": "get-monthly-usage",
+      "title": "Get Monthly Usage",
+      "description": "Get current month's Claude Code usage statistics and model breakdowns"
+    },
+    {
+      "name": "get-session-usage",
+      "title": "Get Session Usage",
+      "description": "Get detailed session-by-session Claude Code usage statistics"
+    }
+  ],
+  "ai": {
+    "instructions": "Analyze Claude Code usage statistics and costs. All cost values are in USD ($). When displaying costs, include the $ symbol. You can convert USD amounts to other currencies when requested (JPY, EUR, etc.).",
+    "evals": [
+      {
+        "input": "@ccusage What's my total cost?",
+        "mocks": {
+          "get-total-usage": {
+            "totalCost": 2.45,
+            "totalTokens": 23000,
+            "inputTokens": 15000,
+            "outputTokens": 8000,
+            "cacheCreationTokens": 500,
+            "cacheReadTokens": 1200,
+            "sessions": 12,
+            "modelBreakdowns": [
+              {
+                "modelName": "claude-3-5-sonnet-20241022",
+                "inputTokens": 10000,
+                "outputTokens": 6000,
+                "totalTokens": 16000,
+                "totalCost": 1.80
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-total-usage"
+          }
+        ]
+      },
+      {
+        "input": "@ccusage Show me today's usage",
+        "mocks": {
+          "get-daily-usage": {
+            "cost": 0.65,
+            "inputTokens": 2500,
+            "outputTokens": 1800,
+            "totalTokens": 4300,
+            "date": "2024-01-15"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-daily-usage"
+          }
+        ]
+      },
+      {
+        "input": "@ccusage Show me this month's breakdown",
+        "mocks": {
+          "get-monthly-usage": {
+            "month": "2024-01",
+            "totalCost": 12.75,
+            "totalTokens": 85000,
+            "inputTokens": 50000,
+            "outputTokens": 35000,
+            "cacheCreationTokens": 2000,
+            "cacheReadTokens": 5000,
+            "modelBreakdowns": [
+              {
+                "modelName": "claude-3-5-sonnet-20241022",
+                "inputTokens": 35000,
+                "outputTokens": 25000,
+                "totalTokens": 60000,
+                "totalCost": 9.00
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-monthly-usage"
+          }
+        ]
+      },
+      {
+        "input": "@ccusage Show me my recent sessions",
+        "mocks": {
+          "get-session-usage": {
+            "sessions": [
+              {
+                "sessionId": "session-123",
+                "totalCost": 0.38,
+                "totalTokens": 2700,
+                "inputTokens": 1500,
+                "outputTokens": 1200,
+                "cacheCreationTokens": 50,
+                "cacheReadTokens": 100,
+                "modelName": "claude-3-5-sonnet-20241022",
+                "date": "2024-01-15T10:30:00Z"
+              }
+            ],
+            "sessionCount": 1
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-session-usage"
+          }
+        ]
+      },
+      {
+        "input": "@ccusage Which model costs me the most?",
+        "mocks": {
+          "get-total-usage": {
+            "totalCost": 2.45,
+            "totalTokens": 23000,
+            "inputTokens": 15000,
+            "outputTokens": 8000,
+            "cacheCreationTokens": 500,
+            "cacheReadTokens": 1200,
+            "sessions": 12,
+            "modelBreakdowns": [
+              {
+                "modelName": "claude-3-5-sonnet-20241022",
+                "inputTokens": 10000,
+                "outputTokens": 6000,
+                "totalTokens": 16000,
+                "totalCost": 1.80
+              },
+              {
+                "modelName": "claude-3-haiku-20240307",
+                "inputTokens": 5000,
+                "outputTokens": 2000,
+                "totalTokens": 7000,
+                "totalCost": 0.65
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-total-usage"
+          }
+        ]
+      },
+      {
+        "input": "@ccusage Convert my total cost to yen",
+        "mocks": {
+          "get-total-usage": {
+            "totalCost": 2.45,
+            "totalTokens": 23000,
+            "inputTokens": 15000,
+            "outputTokens": 8000,
+            "cacheCreationTokens": 500,
+            "cacheReadTokens": 1200,
+            "sessions": 12,
+            "modelBreakdowns": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-total-usage"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^1.17.0",
@@ -68,7 +249,6 @@
     "date-fns": "^4.1.0",
     "es-toolkit": "^1.39.3",
     "ts-pattern": "^5.7.1",
-    "usehooks-ts": "^3.1.0",
     "zod": "^3.25.61"
   },
   "devDependencies": {
