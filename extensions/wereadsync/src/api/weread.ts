@@ -396,7 +396,7 @@ export class WeReadAPI {
         return [];
       }
 
-      return response.reviews.map((review) => ({
+      return response.reviews.map((review: any) => ({
         reviewId: review.reviewId,
         bookId: review.bookId,
         chapterUid: review.chapterUid,

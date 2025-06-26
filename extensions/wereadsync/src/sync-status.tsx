@@ -241,7 +241,7 @@ export default function SyncStatusView() {
               title={`Incremental Sync (${totalNewHighlights} New)`}
               subtitle="Sync only new highlights"
               onAction={performIncrementalSync}
-              icon={Icon.CloudUpload}
+              icon={Icon.Upload}
               shortcut={{ modifiers: ["cmd"], key: "i" }}
             />
             <Action
@@ -279,7 +279,7 @@ export default function SyncStatusView() {
           icon={
             totalNewHighlights === 0
               ? { source: Icon.Checkmark, tintColor: Color.Green }
-              : { source: Icon.CloudUpload, tintColor: Color.Blue }
+              : { source: Icon.Upload, tintColor: Color.Blue }
           }
         />
       </List.Section>
@@ -350,7 +350,7 @@ ${
                       bookInfo.newHighlights > 0 ? `Sync ${bookInfo.newHighlights} New Highlights` : "Already Synced"
                     }
                     onAction={() => syncSingleBook(bookInfo)}
-                    icon={bookInfo.newHighlights > 0 ? Icon.CloudUpload : Icon.Checkmark}
+                    icon={bookInfo.newHighlights > 0 ? Icon.Upload : Icon.Checkmark}
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
                   />
 
@@ -358,7 +358,7 @@ ${
                     <Action
                       title={`Incremental Sync (${totalNewHighlights} New)`}
                       onAction={performIncrementalSync}
-                      icon={Icon.CloudUpload}
+                      icon={Icon.Upload}
                       shortcut={{ modifiers: ["cmd"], key: "i" }}
                     />
                     <Action

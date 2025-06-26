@@ -206,7 +206,7 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
           <Action
             title={`Sync ${newCount} New Highlights`}
             onAction={syncToReadwise}
-            icon={Icon.CloudUpload}
+            icon={Icon.Upload}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
           <Action
@@ -366,12 +366,12 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
                               console.error("Single highlight sync failed:", error);
                             }
                           }}
-                          icon={isSynced ? Icon.Checkmark : Icon.CloudUpload}
+                          icon={isSynced ? Icon.Checkmark : Icon.Upload}
                         />
                         <Action
                           title={`Sync All ${newCount} New Highlights`}
                           onAction={syncToReadwise}
-                          icon={Icon.CloudUpload}
+                          icon={Icon.Upload}
                           shortcut={{ modifiers: ["cmd"], key: "s" }}
                         />
                         <Action

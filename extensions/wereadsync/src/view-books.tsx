@@ -173,7 +173,7 @@ export default function ViewBooks() {
               title="Incremental Sync"
               subtitle="Sync only new highlights"
               onAction={performIncrementalSync}
-              icon={Icon.CloudUpload}
+              icon={Icon.Upload}
               shortcut={{ modifiers: ["cmd"], key: "i" }}
             />
             <Action
@@ -268,7 +268,7 @@ export default function ViewBooks() {
                       title="Incremental Sync"
                       subtitle="Sync only new highlights"
                       onAction={performIncrementalSync}
-                      icon={Icon.CloudUpload}
+                      icon={Icon.Upload}
                       shortcut={{ modifiers: ["cmd"], key: "i" }}
                     />
                     <Action
