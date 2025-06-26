@@ -1340,6 +1340,7 @@
   "capipo/pass": "pass",
   "omBratteng/passphrase-generator": "passphrase-generator",
   "joshuaiz/password-generator": "password-generator",
+  "taylor_drayson/password-link": "password-link",
   "afok/password-store": "password-store",
   "j3lte/password-strength": "password-strength",
   "koinzhang/paste-as-plain-text": "paste-as-plain-text",
