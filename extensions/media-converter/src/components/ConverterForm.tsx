@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, showInFinder, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, showInFinder, Icon, openCommandPreferences } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import {
@@ -139,17 +139,13 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
 
         // Check if the error is related to FFmpeg not being installed
         if (errorMessage.includes("FFmpeg is not installed or configured")) {
-          showFailureToast(new Error("FFmpeg needs to be installed to convert files"), {
+          showFailureToast(new Error("FFmpeg needs to be configured to convert files"), {
             title: "FFmpeg not found",
             primaryAction: {
-              title: "Install FFmpeg",
+              title: "Configure FFmpeg",
               onAction: () => {
-                // Re-run the command to trigger the installation flow
-                // This will bring up the FFmpeg installation page
-                showToast({
-                  style: Toast.Style.Animated,
-                  title: "Opening FFmpeg installer...",
-                });
+                // Open command preferences to set FFmpeg path
+                openCommandPreferences();
               },
             },
           });

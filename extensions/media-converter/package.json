@@ -107,5 +107,14 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "ffmpeg_path",
+      "type": "file",
+      "required": false,
+      "title": "Custom FFmpeg Path (Advanced)",
+      "description": "If left empty, the extension will look for a valid FFmpeg binary executable at common paths. If not found (expected for most users), you will be prompted to download a lightweight FFmpeg binary only available to this extension."
+    }
+  ]
 }
