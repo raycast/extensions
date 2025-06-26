@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { vi } from "vitest";
+import { vi, beforeEach } from "vitest";
 
 // Mock fetch for API tests
 global.fetch = vi.fn();
@@ -12,7 +12,7 @@ const localStorageMock = {
   clear: vi.fn(),
 };
 
-Object.defineProperty(window, "localStorage", {
+Object.defineProperty(global, "localStorage", {
   value: localStorageMock,
 });
 
