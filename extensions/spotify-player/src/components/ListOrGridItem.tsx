@@ -1,7 +1,7 @@
 import { Grid, List } from "@raycast/api";
 
 type ListOrGridItemProps = (List.Item.Props | Grid.Item.Props) & {
-type: "list" | "grid";
+  type: "list" | "grid";
 };
 export function ListOrGridItem<T>(props: ListOrGridItemProps, context?: T) {
   const { type, ...itemProps } = props;
