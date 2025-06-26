@@ -61,7 +61,7 @@ When you first open the Manage Spaces command, you'll see cryptic Space IDs like
 
 > **💡 Tip**: The tutorial will automatically show on your first visit to Manage Spaces, and you can access it anytime via the action menu (⌘K → "Show Space ID Tutorial").
 
-![Find Space ID](./metadata/craft-find-spaceid.png)
+![Find Space ID](./media/craft-find-spaceid.png)
 
 Once you know which ID corresponds to which space, you can rename them for better organization.
 
