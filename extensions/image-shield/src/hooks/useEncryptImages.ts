@@ -4,9 +4,9 @@ import { type ManifestData } from "image-shield";
 import pLimit from "p-limit";
 import { findImages, getSelectedItems } from "../utils/helpers";
 import { encryptImagesWithKey, validateEncryptFiles } from "../lib/imageShield";
-import { SettingsFormValues } from "../components/SettingsForm";
 import { EncryptImagesFormValues } from "../components/EncryptImagesForm";
 import { dirExists } from "../utils/file";
+import { type Preferences } from "../types";
 import { useLoadingState } from "./useLoadingState";
 import { MANIFEST_FILE_NAME, CONCURRENCY_LIMIT } from "../constraints";
 import { generateFragmentFileName } from "image-shield/dist/utils/helpers";
@@ -34,7 +34,7 @@ interface UseEncryptImagesResult {
   handleFormSubmit: (values: EncryptImagesFormValues) => Promise<void>;
 }
 
-export function useEncryptImages(settings: SettingsFormValues): UseEncryptImagesResult {
+export function useEncryptImages(preferences: Preferences): UseEncryptImagesResult {
   const { isLoading, error, setError, handleError, setIsLoading, showErrorToast } = useLoadingState();
   const [isInstantCall, setIsInstantCall] = useState(false);
   const [data, setData] = useState<
@@ -93,17 +93,17 @@ export function useEncryptImages(settings: SettingsFormValues): UseEncryptImages
       const validated = validateEncryptFiles(imagePaths);
 
       // If not encrypted, try to encrypt immediately
-      if (!settings.encrypted) {
+      if (!preferences.encrypted) {
         await handleEncrypt(validated.imagePaths);
       }
 
       setSelectedFiles({
         imagePaths: validated.imagePaths,
         config: {
-          blockSize: Number(settings.blockSize),
-          prefix: settings.prefix,
-          encrypted: settings.encrypted,
-          restoreFileName: settings.restoreFileName,
+          blockSize: Number(preferences.blockSize),
+          prefix: preferences.prefix,
+          encrypted: preferences.encrypted,
+          restoreFileName: preferences.restoreFileName,
         },
       });
       setIsLoading(false);
@@ -136,10 +136,10 @@ export function useEncryptImages(settings: SettingsFormValues): UseEncryptImages
         imagePaths: validated.imagePaths,
         workdir,
         config: {
-          blockSize: Number(settings.blockSize),
-          prefix: settings.prefix,
+          blockSize: Number(preferences.blockSize),
+          prefix: preferences.prefix,
           encrypted,
-          restoreFileName: settings.restoreFileName,
+          restoreFileName: preferences.restoreFileName,
         },
       });
       setIsLoading(false);
@@ -159,9 +159,9 @@ export function useEncryptImages(settings: SettingsFormValues): UseEncryptImages
         const validated = validateEncryptFiles(imagePaths);
         const { manifest, fragmentedImages } = await encryptImagesWithKey(
           {
-            blockSize: Number(settings.blockSize),
-            prefix: settings.prefix,
-            restoreFileName: settings.restoreFileName,
+            blockSize: Number(preferences.blockSize),
+            prefix: preferences.prefix,
+            restoreFileName: preferences.restoreFileName,
           },
           validated.imagePaths,
           secretKey,
@@ -172,7 +172,7 @@ export function useEncryptImages(settings: SettingsFormValues): UseEncryptImages
         handleError(e);
       }
     },
-    [selectedFiles, settings],
+    [selectedFiles, preferences],
   );
 
   return {

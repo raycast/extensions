@@ -1,10 +1,10 @@
-import { Form, Action, ActionPanel } from "@raycast/api";
+import { Form, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { SettingsFormValues } from "./SettingsForm";
 import { useEncryptImages } from "../hooks/useEncryptImages";
 import GridLoadingView from "./GridLoadingView";
 import GridEncryptedImages from "./GridEncryptedImages";
 import PasswordForm from "./PasswordForm";
+import { type Preferences } from "../types";
 
 export interface EncryptImagesFormValues {
   folders: string[];
@@ -12,12 +12,13 @@ export interface EncryptImagesFormValues {
   outputDir: string[];
 }
 
-function EncryptImagesForm({ settings }: { settings: SettingsFormValues }) {
-  const { isLoading, data, selectedFiles, handleEncrypt, handleFormSubmit } = useEncryptImages(settings);
+function EncryptImagesForm() {
+  const preferences = getPreferenceValues<Preferences>();
+  const { isLoading, data, selectedFiles, handleEncrypt, handleFormSubmit } = useEncryptImages(preferences);
   const { handleSubmit, itemProps } = useForm<EncryptImagesFormValues>({
     initialValues: {
       folders: [],
-      encrypted: settings.encrypted,
+      encrypted: preferences.encrypted,
       outputDir: [],
     },
     onSubmit: handleFormSubmit,

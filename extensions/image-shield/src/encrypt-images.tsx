@@ -1,23 +1,14 @@
+import { getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import EncryptImagesForm from "./components/EncryptImagesForm";
 import { useEncryptImages } from "./hooks/useEncryptImages";
 import GridLoadingView from "./components/GridLoadingView";
-import { SettingsFormValues } from "./components/SettingsForm";
 import PasswordForm from "./components/PasswordForm";
-import { useSettings } from "./hooks/useSettings";
+import { type Preferences } from "./types";
 
 export default function Command() {
-  const { settings, isLoading } = useSettings();
-  // Loading
-  if (isLoading || !settings) {
-    return <GridLoadingView />;
-  }
-
-  return <EncryptImages settings={settings} />;
-}
-
-function EncryptImages({ settings }: { settings: SettingsFormValues }) {
-  const { isLoading, isInstantCall, data, selectedFiles, initialize, handleEncrypt } = useEncryptImages(settings);
+  const preferences = getPreferenceValues<Preferences>();
+  const { isLoading, isInstantCall, data, selectedFiles, initialize, handleEncrypt } = useEncryptImages(preferences);
 
   // Initialize (if command is called with selected items from Finder)
   const { isLoading: isInitializing } = usePromise(async () => await initialize(), []);
@@ -43,5 +34,5 @@ function EncryptImages({ settings }: { settings: SettingsFormValues }) {
   }
 
   // Default form view
-  return <EncryptImagesForm settings={settings} />;
+  return <EncryptImagesForm />;
 }
