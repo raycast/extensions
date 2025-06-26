@@ -16,9 +16,7 @@ export function CreateActions({ push }: CreateActionsProps) {
         icon={Icon.Plus}
         onAction={() => {
           import("../commands/new-secret").then(({ default: NewSecret }) => {
-            push(
-              <NewSecret launchType={LaunchType.UserInitiated} arguments={{}} />
-            );
+            push(<NewSecret launchType={LaunchType.UserInitiated} arguments={{}} />);
           });
         }}
         shortcut={{ modifiers: ["cmd"], key: "n" }}
