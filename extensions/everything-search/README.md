@@ -1,4 +1,4 @@
-# Everything Search
+# Everything 
 
 Search files & folders on multiple Windows Everything ETP/FTP servers from Raycast. 
 

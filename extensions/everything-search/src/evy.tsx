@@ -105,6 +105,17 @@ export default function Command({ arguments: args }: LaunchProps<{ arguments: Ar
       return;
     }
 
+    const sanitizedMask = mask.replace(/[\r\n]+/g, "").trim();
+    if (!sanitizedMask) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid file mask",
+        message: "Mask can’t be empty or contain newlines.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -114,7 +125,7 @@ export default function Command({ arguments: args }: LaunchProps<{ arguments: Ar
       // Connect to each server and fetch results in parallel
       await Promise.all(
         servers.map(async (srv, serverIndex) => {
-          const client = new ftp.Client();
+          const client = new ftp.Client(5000);
           client.ftp.verbose = DEBUG;
 
           try {
@@ -136,7 +147,7 @@ export default function Command({ arguments: args }: LaunchProps<{ arguments: Ar
             const cmds = [
               "EVERYTHING CASE 0",
               "EVERYTHING PATH 0",
-              `EVERYTHING SEARCH ${mask}`,
+              `EVERYTHING SEARCH ${sanitizedMask}`,
               `EVERYTHING OFFSET ${serverOffset}`,
               `EVERYTHING COUNT ${RESULTS_PER_PAGE}`,
               "EVERYTHING PATH_COLUMN 1",
