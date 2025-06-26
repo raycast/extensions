@@ -1,12 +1,14 @@
 import { Action, ActionPanel, Form, Icon, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
-import { FormValidation, showFailureToast, useForm, useLocalStorage } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
+import { useRepoStorage } from "./hooks/useRepo.js";
 
 export default function Command() {
-  const { value, setValue, removeValue, isLoading } = useLocalStorage<string | undefined>("selectedRepo");
+  const repo = useRepoStorage();
 
   const { handleSubmit, itemProps } = useForm({
     onSubmit({ newRepo }: { newRepo: string[] }) {
-      setValue(newRepo[0])
+      repo
+        .setValue(newRepo[0])
         .then(() => {
           showToast({
             style: Toast.Style.Success,
@@ -37,11 +39,11 @@ export default function Command() {
   return (
     <Form
       navigationTitle="Select Git Repo"
-      isLoading={isLoading}
+      isLoading={repo.isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Set Repo" onSubmit={handleSubmit} icon={Icon.Checkmark} />
-          <Action.SubmitForm title="Unset Repo" onSubmit={removeValue} icon={Icon.Xmark} />
+          <Action.SubmitForm title="Unset Repo" onSubmit={repo.removeValue} icon={Icon.Xmark} />
         </ActionPanel>
       }
     >
@@ -52,7 +54,7 @@ export default function Command() {
         storeValue
         allowMultipleSelection={false}
         canChooseFiles={false}
-        defaultValue={value ? [value] : undefined}
+        defaultValue={repo.value ? [repo.value] : undefined}
         autoFocus
         error={itemProps.newRepo.error}
       />
