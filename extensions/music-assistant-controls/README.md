@@ -9,7 +9,7 @@ Control [Music Assistant](https://github.com/music-assistant/server) from anywhe
 
 | Command                    | What it does                                              |
 | -------------------------- | --------------------------------------------------------- |
-| **Play / Pause**           | Toggles playback on the selected player                   |
+| **Toggle**           | Pauses/resumes playback on the selected player                   |
 | **Next / Previous**        | Skips tracks                                              |
 | **Menu Bar Player**        | Displays title - artist in the macOS menu bar          |
 
