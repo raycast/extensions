@@ -4,10 +4,6 @@ import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
 import { execPromise } from "../utils/exec";
 import * as ffmpegStatic from "./ffmpeg-static";
 
-interface Preferences {
-  ffmpeg_path?: string;
-}
-
 export async function checkFFmpegVersion(ffmpegPath: string): Promise<number | null> {
   try {
     const { stdout } = await execPromise(`"${ffmpegPath}" -version`);
@@ -27,7 +23,7 @@ export async function checkFFmpegVersion(ffmpegPath: string): Promise<number | n
 export async function findFFmpegPath(minimumVersion = 6.0): Promise<{ path: string; version: number } | null> {
   try {
     // First, check if there's a custom path in preferences
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues();
     const customPath = preferences.ffmpeg_path;
 
     if (customPath && customPath.trim() && fs.existsSync(customPath)) {

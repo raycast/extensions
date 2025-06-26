@@ -15,10 +15,6 @@ import { findFFmpegPath, checkFFmpegVersion } from "../utils/ffmpeg";
 import { useFFmpegInstaller } from "../hooks/useFFmpegInstaller";
 import fs from "fs";
 
-interface Preferences {
-  ffmpeg_path?: string;
-}
-
 interface HelloPageProps {
   onContinue: () => void;
   lostFFmpegMessage?: string | null;
@@ -38,7 +34,7 @@ export function HelloPage({ onContinue, lostFFmpegMessage }: HelloPageProps) {
   useEffect(() => {
     const checkFFmpegStatus = async () => {
       try {
-        const preferences = getPreferenceValues<Preferences>();
+        const preferences = getPreferenceValues();
         const customPath = preferences.ffmpeg_path;
 
         // Check system FFmpeg
@@ -108,7 +104,7 @@ export function HelloPage({ onContinue, lostFFmpegMessage }: HelloPageProps) {
     setIsSettingUp(true);
 
     try {
-      const preferences = getPreferenceValues<Preferences>();
+      const preferences = getPreferenceValues();
       const customPath = preferences.ffmpeg_path;
 
       if (!customPath || !customPath.trim()) {
