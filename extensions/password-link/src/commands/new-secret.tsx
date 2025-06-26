@@ -1,10 +1,11 @@
 import { ActionPanel, Action, Form, showToast, Toast, Clipboard, useNavigation, LaunchProps } from "@raycast/api";
 import { useState } from "react";
-import { apiClient, handleApiError } from "../lib/api-client";
+import { apiClient } from "../lib/api-client";
 import { prepareSecretData } from "../lib/encryption";
 import { validateConfig } from "../lib/config";
 import { generateSecretUrl, dateToHoursFromNow } from "../lib/utils";
 import { NewSecretArguments } from "../types";
+import { showFailureToast } from "@raycast/utils";
 
 interface FormValues {
   secret: string;
@@ -147,7 +148,7 @@ export default function NewSecret(props?: LaunchProps<{ arguments: NewSecretArgu
 
       await handleSecretCreated(response.data.id, publicPart);
     } catch (error) {
-      await handleApiError(error, "Failed to create secret");
+      await showFailureToast(error, { title: "Failed to create secret" });
     } finally {
       setIsLoading(false);
     }

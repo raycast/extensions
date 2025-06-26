@@ -4,6 +4,7 @@
  */
 
 import sjcl from "sjcl";
+import crypto from "crypto";
 
 /**
  * Generate a random password for encryption
@@ -13,8 +14,7 @@ import sjcl from "sjcl";
 export function generateRandomPassword(length = 18): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$|/\\!_+,.-?()[]{}<>&#^*=@";
   let result = "";
-  const array = new Uint8Array(length);
-  crypto.getRandomValues(array);
+  const array = crypto.randomBytes(length);
   for (let i = 0; i < length; i++) {
     result += chars.charAt(array[i] % chars.length);
   }

@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Detail, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { SecretRequest } from "../types";
-import { apiClient, handleApiError } from "../lib/api-client";
+import { apiClient } from "../lib/api-client";
 import {
   generateSecretRequestUrl,
   formatUsageCount,
@@ -13,6 +13,7 @@ import {
 import { useRelatedSecrets } from "../hooks/useRelatedData";
 import { openUrl } from "../lib/action-utils";
 import { CreateActions } from "../lib/action-panels";
+import { showFailureToast } from "@raycast/utils";
 
 interface SecretRequestDetailProps {
   request: SecretRequest;
@@ -35,7 +36,7 @@ export default function SecretRequestDetail({ request, onDelete }: SecretRequest
       onDelete(request.id);
       pop();
     } catch (error) {
-      await handleApiError(error, "Failed to delete secret request");
+      await showFailureToast(error, { title: "Failed to delete secret request" });
     }
   };
 

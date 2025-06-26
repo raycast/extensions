@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Detail, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { Secret } from "../types";
-import { apiClient, handleApiError } from "../lib/api-client";
+import { apiClient } from "../lib/api-client";
 import {
   formatDate,
   formatTime,
@@ -14,6 +14,7 @@ import {
 } from "../lib/utils";
 import { useRelatedRequests } from "../hooks/useRelatedData";
 import { CreateActions } from "../lib/action-panels";
+import { showFailureToast } from "@raycast/utils";
 
 interface SecretDetailProps {
   secret: Secret;

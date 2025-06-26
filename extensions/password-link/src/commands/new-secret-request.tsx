@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { apiClient } from "../lib/api-client";
 import { getPreferenceValues } from "@raycast/api";

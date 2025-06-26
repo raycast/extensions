@@ -1,7 +1,8 @@
-import { showToast, Toast } from "@raycast/api";
 import { Secret, SecretRequest } from "../types";
-import { apiClient, handleApiError } from "./api-client";
+import { apiClient } from "./api-client";
 import { validateConfig } from "./config";
+import { testSecrets, ENABLE_TEST_DATA } from "./test-data";
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * Load secrets with error handling and validation
@@ -9,17 +10,23 @@ import { validateConfig } from "./config";
 export async function loadSecrets(): Promise<Secret[]> {
   if (!validateConfig()) {
     await showFailureToast(new Error("Please configure your API keys in preferences"), {
-      title: "Configuration Error"
+      title: "Configuration Error",
     });
     return [];
   }
 
   try {
     const response = await apiClient.listSecrets();
-    return response.data;
+    let secrets: Secret[] = response.data;
+    if (ENABLE_TEST_DATA && testSecrets.length > 0) {
+      // Merge test secrets, avoiding duplicate IDs
+      const existingIds = new Set(secrets.map((s) => s.id));
+      secrets = [...secrets, ...testSecrets.filter((t) => !existingIds.has(t.id))];
+    }
+    return secrets;
   } catch (error) {
-    await handleApiError(error, "Failed to load secrets");
-    return [];
+    await showFailureToast(error, { title: "Failed to load secrets" });
+    return ENABLE_TEST_DATA ? (testSecrets as Secret[]) : [];
   }
 }
 
@@ -29,7 +36,7 @@ export async function loadSecrets(): Promise<Secret[]> {
 export async function loadSecretRequests(): Promise<SecretRequest[]> {
   if (!validateConfig()) {
     await showFailureToast(new Error("Please configure your API keys in preferences"), {
-      title: "Configuration Error"
+      title: "Configuration Error",
     });
     return [];
   }
@@ -38,7 +45,7 @@ export async function loadSecretRequests(): Promise<SecretRequest[]> {
     const response = await apiClient.listSecretRequests();
     return response.data;
   } catch (error) {
-    await handleApiError(error, "Failed to load secret requests");
+    await showFailureToast(error, { title: "Failed to load secret requests" });
     return [];
   }
 }

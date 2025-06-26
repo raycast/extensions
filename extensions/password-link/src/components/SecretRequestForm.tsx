@@ -1,4 +1,5 @@
 import { Form } from "@raycast/api";
+import { useState } from "react";
 
 interface SecretRequestFormProps {
   values: {
@@ -21,18 +22,48 @@ interface SecretRequestFormProps {
   onClearValidationError?: (field: string) => void;
 }
 
+function validateEmail(email: string): boolean {
+  // Simple email regex
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function validateLimit(limit: string): boolean {
+  return /^\d+$/.test(limit) && Number(limit) > 0;
+}
+
 export default function SecretRequestForm({
   values,
   onChange,
   validationErrors,
   onClearValidationError,
 }: SecretRequestFormProps) {
+  const [emailError, setEmailError] = useState<string | undefined>(undefined);
+  const [limitError, setLimitError] = useState<string | undefined>(undefined);
+
   const handleMessageChange = (message: string) => {
     // Clear validation error when user types
     if (validationErrors?.message && onClearValidationError) {
       onClearValidationError("message");
     }
     onChange({ ...values, message });
+  };
+
+  const handleEmailChange = (sendRequestToEmail: string) => {
+    if (sendRequestToEmail.length === 0 || validateEmail(sendRequestToEmail)) {
+      setEmailError(undefined);
+    } else {
+      setEmailError("Please enter a valid email address");
+    }
+    onChange({ ...values, sendRequestToEmail });
+  };
+
+  const handleLimitChange = (limit: string) => {
+    if (limit.length === 0 || validateLimit(limit)) {
+      setLimitError(undefined);
+    } else {
+      setLimitError("Usage limit must be a positive number");
+    }
+    onChange({ ...values, limit });
   };
 
   // Set minimum date to 1 hour from now
@@ -73,7 +104,8 @@ export default function SecretRequestForm({
         title="Usage Limit"
         placeholder="1"
         value={values.limit}
-        onChange={(limit) => onChange({ ...values, limit })}
+        onChange={handleLimitChange}
+        error={limitError}
         storeValue={true}
         info="How many times the request can be used"
       />
@@ -82,7 +114,8 @@ export default function SecretRequestForm({
         title="Send Request To Email"
         placeholder="email@example.com"
         value={values.sendRequestToEmail}
-        onChange={(sendRequestToEmail) => onChange({ ...values, sendRequestToEmail })}
+        onChange={handleEmailChange}
+        error={emailError}
         info="Send the request link to this email"
       />
     </>

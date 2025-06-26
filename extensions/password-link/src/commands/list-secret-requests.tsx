@@ -1,10 +1,11 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { apiClient, handleApiError } from "../lib/api-client";
+import { apiClient } from "../lib/api-client";
 import { SecretRequest, Secret } from "../types";
 import { copyRequestUrl, openRequest } from "../lib/action-utils";
 import { CreateActions } from "../lib/action-panels";
 import { loadSecretRequests, findRelatedSecrets } from "../lib/data-utils";
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * List Secret Requests Command
@@ -52,7 +53,7 @@ export default function ListSecretRequests() {
       // Reload requests
       await loadRequestsData();
     } catch (error) {
-      await handleApiError(error, "Failed to delete secret request");
+      await showFailureToast(error, { title: "Failed to delete secret request" });
     }
   }
 

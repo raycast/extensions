@@ -1,4 +1,3 @@
-import { showToast, Toast } from "@raycast/api";
 import { getPasswordLinkConfig } from "./config";
 import {
   ApiResponse,
@@ -127,14 +126,3 @@ export class PasswordLinkApiClient {
  * Global API client instance
  */
 export const apiClient = new PasswordLinkApiClient();
-
-/**
- * Handle API errors with user-friendly toast messages
- * @param error - Error to handle
- * @param title - Toast title
- */
-import { showFailureToast } from "@raycast/utils";
-
-export async function handleApiError(error: unknown, title = "API Error"): Promise<void> {
-  showFailureToast(error, { title });
-}
