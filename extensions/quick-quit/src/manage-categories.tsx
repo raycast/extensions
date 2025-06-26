@@ -130,7 +130,7 @@ export default function ManageCategoriesCommand() {
                   target={
                     <CategoryAppList
                       categoryName={categoryName}
-                      apps={PREBUILT_CATEGORIES[categoryName as keyof typeof PREBUILT_CATEGORIES]}                     
+                      apps={PREBUILT_CATEGORIES[categoryName as keyof typeof PREBUILT_CATEGORIES]}
                       allApps={state.data?.installedApps ?? []}
                     />
                   }

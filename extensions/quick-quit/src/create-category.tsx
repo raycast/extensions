@@ -65,8 +65,8 @@ interface CreateCategoryFormProps {
 
 export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCategoryFormProps) {
   const { pop } = useNavigation();
-  const [installedApps, setInstalledApps] = useState<string[]>([]);
   const [apps, setApps] = useState<{ name: string; bundleId?: string }[]>([]);
+  // const [installedApps, setInstalledApps] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // These states will now control the form fields directly
@@ -80,12 +80,12 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
         // Fetch all installed applications
         const apps = await getApplications();
         console.log("[Debug] All installed apps:", apps);
-        const appNames = apps.map((app) => app.name).sort();
-        setInstalledApps(appNames);
+        //        const appNames = apps.map((app) => app.name).sort();
+        // setInstalledApps(appNames);
 
         const appArray = apps.map((app) => ({
           name: app.name,
-          bundleId: app.bundleId
+          bundleId: app.bundleId,
         }));
         setApps(appArray);
 
@@ -133,16 +133,14 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
     try {
       const storedCategories = await LocalStorage.getItem<string>("categories");
       const categories: Category[] = storedCategories ? JSON.parse(storedCategories) : [];
-      const selectedAppObjs = apps.filter(
-        (app) => app.bundleId && selectedBundleIds.includes(app.bundleId)
-      );
+      const selectedAppObjs = apps.filter((app) => app.bundleId && selectedBundleIds.includes(app.bundleId));
       const values = {
         name: categoryName,
         apps: selectedAppObjs.map((app) => ({
           name: app.name,
-          bundleId: app.bundleId
+          bundleId: app.bundleId,
         })),
-        icon: selectedIcon
+        icon: selectedIcon,
       };
 
       if (categoryId) {
@@ -156,7 +154,8 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
           name: values.name,
           bundleIds: selectedBundleIds,
           icon: values.icon,
-        };        categories.push(newCategory);
+        };
+        categories.push(newCategory);
       }
 
       await LocalStorage.setItem("categories", JSON.stringify(categories));
@@ -200,15 +199,11 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
         value={selectedBundleIds}
         onChange={setSelectedBundleIds}
       >
-{apps
-  .filter((app) => !!app.bundleId)
-  .map((app) => (
-    <Form.TagPicker.Item
-      key={app.bundleId!}
-      value={app.bundleId!}
-      title={app.name}
-    />
-  ))}
+        {apps
+          .filter((app) => !!app.bundleId)
+          .map((app) => (
+            <Form.TagPicker.Item key={app.bundleId!} value={app.bundleId!} title={app.name} />
+          ))}
       </Form.TagPicker>
     </Form>
   );

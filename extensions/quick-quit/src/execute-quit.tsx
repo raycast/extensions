@@ -16,7 +16,9 @@ async function handleQuit(categoryName: string, bundleIds: string[]) {
   });
 
   try {
-    const quitPromises = bundleIds.map((bundleId) => runAppleScript(`tell application id ${JSON.stringify(bundleId)} to quit`));
+    const quitPromises = bundleIds.map((bundleId) =>
+      runAppleScript(`tell application id ${JSON.stringify(bundleId)} to quit`),
+    );
     await Promise.all(quitPromises);
 
     toast.style = Toast.Style.Success;

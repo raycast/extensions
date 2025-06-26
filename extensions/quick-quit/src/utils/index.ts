@@ -10,9 +10,7 @@ export function getRelevantPrebuiltCategories(installedApps: Application[]) {
     const masterAppList = PREBUILT_CATEGORIES[categoryName as keyof typeof PREBUILT_CATEGORIES];
 
     // Filter on the bundleId property of each object
-    const userAppsForCategory = masterAppList.filter((app) =>
-      installedBundleIds.has(app.bundleId)
-    );
+    const userAppsForCategory = masterAppList.filter((app) => installedBundleIds.has(app.bundleId));
 
     if (userAppsForCategory.length > 0) {
       relevantCategories[categoryName] = userAppsForCategory;

@@ -107,7 +107,7 @@ export default function QuickQuitCommand() {
     setState((previous) => ({ ...previous, isLoading: true }));
     try {
       const allInstalledApps = (await getApplications()).filter(
-        (app) => typeof app.bundleId === "string" && app.bundleId.length > 0
+        (app) => typeof app.bundleId === "string" && app.bundleId.length > 0,
       ) as { bundleId: string; name: string }[];
       const data = await loadActiveCategories();
       setState({ data, isLoading: false, installedApps: allInstalledApps });
@@ -136,31 +136,36 @@ export default function QuickQuitCommand() {
           <List.Item
             key={category.id}
             title={category.name}
+            icon={category.icon}
             subtitle={category.bundleIds
               .map((bundleId) => getAppNameFromBundleId(bundleId, state.installedApps))
               .join(", ")}
             actions={
               <ActionPanel>
                 {/* 3. MODIFIED: We now pass `fetchData` as the callback to handleQuit. */}
-                <Action title={`Quit ${category.name}`} onAction={() => handleQuit(category.name, category.bundleIds, fetchData)} />
+                <Action
+                  title={`Quit ${category.name}`}
+                  onAction={() => handleQuit(category.name, category.bundleIds, fetchData)}
+                />
               </ActionPanel>
             }
           />
         ))}
       </List.Section>
-      <List.Section title="Active Default Categories">
+      <List.Section title="Active Default Categories & Apps">
         {Object.entries(state.data?.activePrebuiltCategories ?? {}).map(([categoryName, bundleIds]) => (
           <List.Item
             key={categoryName}
             icon={Icon.HardDrive}
             title={categoryName}
-            subtitle={bundleIds
-              .map((bundleId) => getAppNameFromBundleId(bundleId, state.installedApps))
-              .join(", ")}
+            subtitle={bundleIds.map((bundleId) => getAppNameFromBundleId(bundleId, state.installedApps)).join(", ")}
             actions={
               <ActionPanel>
                 {/* 3. MODIFIED: We also pass `fetchData` here. */}
-                <Action title={`Quit ${categoryName}`} onAction={() => handleQuit(categoryName, bundleIds, fetchData)} />
+                <Action
+                  title={`Quit ${categoryName}`}
+                  onAction={() => handleQuit(categoryName, bundleIds, fetchData)}
+                />
               </ActionPanel>
             }
           />
