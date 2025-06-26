@@ -49,8 +49,8 @@ export default function ShortenLinkWithDomain() {
 
   return (
     <List
-      isLoading={loading && domainLoading}
-      isShowingDetail={domains.length !== 0 && true}
+      isLoading={loading || domainLoading}
+      isShowingDetail={domains.length !== 0}
       searchBarPlaceholder={"Search domains"}
     >
       <List.EmptyView
