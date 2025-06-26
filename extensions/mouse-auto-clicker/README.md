@@ -5,6 +5,7 @@ A Raycast extension that provides a simple toggle-able mouse auto-clicker functi
 ## Features
 
 - **Toggle Auto Clicker**: Start and stop mouse auto-clicking with a single command
+- **Continuous Operation**: Runs indefinitely until manually stopped
 - **Customizable Interval**: Configure click intervals (default: 100ms)
 - **Background Operation**: Runs in the background while active
 - **Toast Notifications**: Visual feedback when toggling on/off

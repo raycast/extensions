@@ -17,17 +17,23 @@ interface Preferences {
 interface ClickerState {
   isRunning: boolean;
   intervalId: NodeJS.Timeout | null;
+  keepAliveId: NodeJS.Timeout | null;
 }
 
 const clickerState: ClickerState = {
   isRunning: false,
   intervalId: null,
+  keepAliveId: null,
 };
 
 const cleanup = () => {
   if (clickerState.intervalId) {
     clearInterval(clickerState.intervalId);
     clickerState.intervalId = null;
+  }
+  if (clickerState.keepAliveId) {
+    clearInterval(clickerState.keepAliveId);
+    clickerState.keepAliveId = null;
   }
   clickerState.isRunning = false;
 };
@@ -165,6 +171,14 @@ const startAutoClicker = (interval: number) => {
   clickerState.intervalId = setInterval(() => {
     performClick();
   }, interval);
+
+  // Add a keep-alive interval that runs indefinitely
+  clickerState.keepAliveId = setInterval(() => {
+    // Just keeping the process alive, no action needed
+    if (clickerState.isRunning) {
+      console.log("Auto-clicker is still running...");
+    }
+  }, 5000); // Log every 5 seconds to keep the process alive
 };
 
 const stopAutoClicker = () => {
@@ -272,9 +286,14 @@ brew install cliclick
       process.on("SIGINT", handleSystemEvent);
     }
 
-    // Close main window
+    // Close main window but don't let the process exit when running
     try {
       await closeMainWindow();
+
+      // This keeps the Node.js process alive until the auto-clicker is explicitly stopped
+      if (clickerState.isRunning) {
+        console.log("Auto-clicker activated and running in background");
+      }
     } catch (error) {
       // Window operations may not be available in background mode
     }
