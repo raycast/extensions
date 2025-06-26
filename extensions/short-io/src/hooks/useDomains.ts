@@ -17,7 +17,7 @@ const getDomains = async () => {
     .then((res) => {
       return res.data as Domain[];
     })
-    .catch((err) => {
+    .catch(() => {
       return [];
     });
 };

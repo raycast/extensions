@@ -6,14 +6,12 @@ import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { ActionGoShortIo } from "./components/action-go-short-io";
 import Style = Toast.Style;
 
-export default function AddDomain(props: {
-  onAdd: () => void;
-}) {
+export default function AddDomain(props: { onAdd: () => void }) {
   const { onAdd } = props;
   const [hostname, setHostname] = useState("");
   const [hideReferer, setHideReferer] = useState(true);
   const { pop } = useNavigation();
-  
+
   return (
     <Form
       navigationTitle={"Add Domain"}
@@ -43,7 +41,12 @@ export default function AddDomain(props: {
         </ActionPanel>
       }
     >
-      <Form.TextField id="hostname" title="Hostname" placeholder="Enter domain (e.g. yourbrand.com)" onChange={setHostname} />
+      <Form.TextField
+        id="hostname"
+        title="Hostname"
+        placeholder="Enter domain (e.g. yourbrand.com)"
+        onChange={setHostname}
+      />
       <Form.Checkbox id="hideReferer" label="Hide Referer" onChange={setHideReferer} defaultValue={true} />
     </Form>
   );

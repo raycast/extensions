@@ -139,8 +139,8 @@ export const addDomain = async (hostname: string, hideReferer: boolean) => {
       },
       data: {
         hostname,
-        hideReferer
-      }
+        hideReferer,
+      },
     })
       .then(function (response) {
         return { success: response.data, message: response.data ? "" : response.data.error };
