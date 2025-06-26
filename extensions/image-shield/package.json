@@ -22,12 +22,54 @@
       "title": "Decrypt Images",
       "description": "Restore original images from the fragments",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "encrypted",
+      "title": "Image Protection",
+      "description": "Default: true\nIf disabled, images are only shuffled without password protection. If enabled, images require password for decryption.",
+      "type": "checkbox",
+      "label": "Password",
+      "default": true,
+      "required": false
     },
     {
-      "name": "settings",
-      "title": "Settings",
-      "description": "Default settings",
-      "mode": "view"
+      "name": "blockSize",
+      "title": "Block Size",
+      "description": "Default: 4\nFragment the image into multiple blocks and shuffle them.",
+      "type": "dropdown",
+      "placeholder": "Enter block size (e.g. 1-64)",
+      "data": [
+        { "title": "1", "value": "1" },
+        { "title": "2", "value": "2" },
+        { "title": "3", "value": "3" },
+        { "title": "4", "value": "4" },
+        { "title": "8", "value": "8" },
+        { "title": "16", "value": "16" },
+        { "title": "32", "value": "32" },
+        { "title": "64", "value": "64" }
+      ],
+      "default": "4",
+      "required": false
+    },
+    {
+      "name": "prefix",
+      "title": "File Prefix",
+      "description": "Default: img\nSet the prefix for encrypted filename.",
+      "type": "textfield",
+      "placeholder": "Enter prefix name (e.g. img)",
+      "default": "img",
+      "required": false
+    },
+      {
+        "name": "restoreFileName",
+        "title": "File Name",
+        "description": "Default: true\nRestore the original file name when decrypting.",
+        "type": "checkbox",
+        "label": "Original File Name",
+        "default": true,
+        "required": false
     }
   ],
   "dependencies": {
