@@ -1,5 +1,9 @@
 # Summarize YouTube Video Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- 📚 Remove `youtube-transcript` package and install `youtube-transcript-api`
+
 ## [New Features] - 2025-06-04
 
 - 📜 Added support for a summary history.
