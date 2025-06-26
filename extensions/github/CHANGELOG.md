@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix repository filtering] - {PR_MERGE_DATE}
+## [Fix repository filtering] - 2025-06-26
 
 - Correct the repository filtering for exclude mode
 
