@@ -1,6 +1,6 @@
 # Quick Notes Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2025-06-26
 
 -  Open Note Externally
 
