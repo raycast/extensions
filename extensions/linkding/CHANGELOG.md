@@ -1,6 +1,6 @@
 # Linkding Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-06-26
 
 - fix!: use server-side filtering to handle large bookmark counts
 - fix!: remove Firefox-specific code (doesn't work)
