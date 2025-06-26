@@ -239,14 +239,12 @@ export default function SyncStatusView() {
           <ActionPanel.Section title="Sync Operations">
             <Action
               title={`Incremental Sync (${totalNewHighlights} New)`}
-              subtitle="Sync only new highlights"
               onAction={performIncrementalSync}
               icon={Icon.Upload}
               shortcut={{ modifiers: ["cmd"], key: "i" }}
             />
             <Action
               title="Full Sync"
-              subtitle="Sync all highlights (ignores sync status)"
               onAction={performFullSync}
               icon={Icon.Cloud}
               shortcut={{ modifiers: ["cmd"], key: "f" }}
@@ -262,7 +260,6 @@ export default function SyncStatusView() {
             />
             <Action
               title="Reset All Sync Status"
-              subtitle="Reset all sync tracking"
               onAction={resetAllSyncStatuses}
               icon={Icon.Trash}
               shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}

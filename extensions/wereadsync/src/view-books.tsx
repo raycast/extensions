@@ -171,14 +171,12 @@ export default function ViewBooks() {
           <ActionPanel.Section title="Sync Operations">
             <Action
               title="Incremental Sync"
-              subtitle="Sync only new highlights"
               onAction={performIncrementalSync}
               icon={Icon.Upload}
               shortcut={{ modifiers: ["cmd"], key: "i" }}
             />
             <Action
               title="Full Sync"
-              subtitle="Sync all highlights (ignores sync status)"
               onAction={performFullSync}
               icon={Icon.Cloud}
               shortcut={{ modifiers: ["cmd"], key: "f" }}
@@ -204,7 +202,6 @@ export default function ViewBooks() {
             <Action title="Refresh Books" onAction={revalidate} icon={Icon.ArrowClockwise} />
             <Action
               title="Reset Sync Status"
-              subtitle="Reset all sync tracking (for re-sync)"
               onAction={resetAllSyncStatuses}
               icon={Icon.Trash}
               shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
@@ -266,14 +263,12 @@ export default function ViewBooks() {
                   <ActionPanel.Section title="Sync Operations">
                     <Action
                       title="Incremental Sync"
-                      subtitle="Sync only new highlights"
                       onAction={performIncrementalSync}
                       icon={Icon.Upload}
                       shortcut={{ modifiers: ["cmd"], key: "i" }}
                     />
                     <Action
                       title="Full Sync"
-                      subtitle="Sync all highlights"
                       onAction={performFullSync}
                       icon={Icon.Cloud}
                       shortcut={{ modifiers: ["cmd"], key: "f" }}
