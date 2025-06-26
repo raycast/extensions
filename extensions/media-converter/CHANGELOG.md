@@ -1,5 +1,9 @@
 # Media Converter Changelog
 
+## [1.4.1] - {PR_MERGE_DATE}
+
+Publish on windows
+
 ## [1.4.0] - 2025-06-25
 
 Major rework of the installation of FFmpeg (way more streamline for non-brew users), future-proof (for when Raycast will support more platforms than MacOS)
