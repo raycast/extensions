@@ -2,6 +2,6 @@
 export interface Category {
   id: string;
   name: string;
+  bundleIds: string[];
   icon: string;
-  apps: string[];
 }

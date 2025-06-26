@@ -9,29 +9,40 @@ interface ActiveCategoriesData {
   activePrebuiltCategories: Record<string, string[]>;
 }
 
-async function getRunningAppNames(): Promise<Set<string>> {
+// Utility to map bundle IDs to app names
+function getAppNameFromBundleId(bundleId: string, installedApps: { bundleId: string; name: string }[]): string {
+  const found = installedApps.find((app) => app.bundleId === bundleId);
+  return found ? found.name : bundleId;
+}
+
+async function getRunningBundleIds(): Promise<Set<string>> {
+  // AppleScript to get running application bundle IDs
   const appleScript = `
-    set appNames to {}
+    set bundleIds to {}
     tell application "System Events"
       set allProcesses to every process whose background only is false
       repeat with aProcess in allProcesses
-        set end of appNames to name of aProcess
+        try
+          set end of bundleIds to bundle identifier of aProcess
+        on error
+          -- fallback: use name as bundle id if bundle identifier is not available
+          set end of bundleIds to name of aProcess
+        end try
       end repeat
     end tell
-    return appNames
+    return bundleIds
   `;
 
   const output = await runAppleScript(appleScript);
-  const names = output
+  const bundleIds = output
     .trim()
     .split(", ")
-    .map((name) => name.trim());
-
-  return new Set(names);
+    .map((id) => id.trim());
+  return new Set(bundleIds);
 }
 
 async function loadActiveCategories(): Promise<ActiveCategoriesData> {
-  const runningAppNames = await getRunningAppNames();
+  const runningBundleIds = await getRunningBundleIds();
   const storedCustom = await LocalStorage.getItem<string>("categories");
   const customCategories: Category[] = storedCustom ? JSON.parse(storedCustom) : [];
   const allInstalledApps = await getApplications();
@@ -39,34 +50,34 @@ async function loadActiveCategories(): Promise<ActiveCategoriesData> {
 
   const activeCustomCategories = customCategories
     .map((category) => {
-      const runningApps = category.apps.filter((appName) => runningAppNames.has(appName));
-      return { ...category, apps: runningApps };
+      const runningBundles = (category.bundleIds ?? []).filter((bundleId) => runningBundleIds.has(bundleId));
+      return { ...category, bundleIds: runningBundles };
     })
-    .filter((category) => category.apps.length > 0);
+    .filter((category) => category.bundleIds.length > 0);
 
   const activePrebuiltCategories: Record<string, string[]> = {};
-  for (const [categoryName, apps] of Object.entries(relevantPrebuilt)) {
-    const runningAppsInCategory = apps.filter((appName) => runningAppNames.has(appName));
-    if (runningAppsInCategory.length > 0) {
-      activePrebuiltCategories[categoryName] = runningAppsInCategory;
+  for (const [categoryName, bundleIds] of Object.entries(relevantPrebuilt)) {
+    const runningBundlesInCategory = bundleIds.filter((bundleId) => runningBundleIds.has(bundleId.bundleId));
+    if (runningBundlesInCategory.length > 0) {
+      activePrebuiltCategories[categoryName] = runningBundlesInCategory.map((bundleId) => bundleId.bundleId);
     }
   }
   return { activeCustomCategories, activePrebuiltCategories };
 }
 
 // 1. MODIFIED: The handleQuit function now accepts an `onSuccess` callback.
-async function handleQuit(categoryName: string, appsToQuit: string[], onSuccess: () => Promise<void>) {
+async function handleQuit(categoryName: string, bundleIdsToQuit: string[], onSuccess: () => Promise<void>) {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: `Quitting ${categoryName} apps...`,
   });
   try {
-    const quitPromises = appsToQuit.map((app) =>
+    const quitPromises = bundleIdsToQuit.map((bundleId) =>
       runAppleScript(`
-        tell application ${JSON.stringify(app)} to quit
+        tell application id ${JSON.stringify(bundleId)} to quit
         delay 0.2
         tell application "System Events"
-          repeat while (exists (processes where name is ${JSON.stringify(app)}))
+          repeat while (exists (processes where bundle identifier is ${JSON.stringify(bundleId)}))
             delay 0.2
           end repeat
         end tell
@@ -89,20 +100,24 @@ export default function QuickQuitCommand() {
   const [state, setState] = useState<{
     isLoading: boolean;
     data?: ActiveCategoriesData;
-  }>({ isLoading: true });
+    installedApps: { bundleId: string; name: string }[];
+  }>({ isLoading: true, installedApps: [] });
 
   const fetchData = useCallback(async () => {
     setState((previous) => ({ ...previous, isLoading: true }));
     try {
+      const allInstalledApps = (await getApplications()).filter(
+        (app) => typeof app.bundleId === "string" && app.bundleId.length > 0
+      ) as { bundleId: string; name: string }[];
       const data = await loadActiveCategories();
-      setState({ data, isLoading: false });
+      setState({ data, isLoading: false, installedApps: allInstalledApps });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to load active categories",
         message: error instanceof Error ? error.message : "An unknown error occurred",
       });
-      setState({ isLoading: false });
+      setState({ isLoading: false, installedApps: [] });
     }
   }, []);
 
@@ -116,36 +131,36 @@ export default function QuickQuitCommand() {
         title="No Active Categories Found"
         description="None of the apps in your categories are currently running."
       />
-      <List.Section title="Your Active Categories">
+      <List.Section title="Your Active Categories & Apps">
         {state.data?.activeCustomCategories.map((category) => (
           <List.Item
             key={category.id}
-            icon={category.icon}
             title={category.name}
-            subtitle={`${category.apps.length} app${category.apps.length === 1 ? "" : "s"} running`}
+            subtitle={category.bundleIds
+              .map((bundleId) => getAppNameFromBundleId(bundleId, state.installedApps))
+              .join(", ")}
             actions={
               <ActionPanel>
                 {/* 3. MODIFIED: We now pass `fetchData` as the callback to handleQuit. */}
-                <Action
-                  title={`Quit ${category.name}`}
-                  onAction={() => handleQuit(category.name, category.apps, fetchData)}
-                />
+                <Action title={`Quit ${category.name}`} onAction={() => handleQuit(category.name, category.bundleIds, fetchData)} />
               </ActionPanel>
             }
           />
         ))}
       </List.Section>
       <List.Section title="Active Default Categories">
-        {Object.entries(state.data?.activePrebuiltCategories ?? {}).map(([categoryName, apps]) => (
+        {Object.entries(state.data?.activePrebuiltCategories ?? {}).map(([categoryName, bundleIds]) => (
           <List.Item
             key={categoryName}
             icon={Icon.HardDrive}
             title={categoryName}
-            subtitle={`${apps.length} app${apps.length === 1 ? "" : "s"} running`}
+            subtitle={bundleIds
+              .map((bundleId) => getAppNameFromBundleId(bundleId, state.installedApps))
+              .join(", ")}
             actions={
               <ActionPanel>
                 {/* 3. MODIFIED: We also pass `fetchData` here. */}
-                <Action title={`Quit ${categoryName}`} onAction={() => handleQuit(categoryName, apps, fetchData)} />
+                <Action title={`Quit ${categoryName}`} onAction={() => handleQuit(categoryName, bundleIds, fetchData)} />
               </ActionPanel>
             }
           />

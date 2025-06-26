@@ -66,11 +66,12 @@ interface CreateCategoryFormProps {
 export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCategoryFormProps) {
   const { pop } = useNavigation();
   const [installedApps, setInstalledApps] = useState<string[]>([]);
+  const [apps, setApps] = useState<{ name: string; bundleId?: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // These states will now control the form fields directly
   const [categoryName, setCategoryName] = useState<string>("");
-  const [selectedApps, setSelectedApps] = useState<string[]>([]);
+  const [selectedBundleIds, setSelectedBundleIds] = useState<string[]>([]);
   const [selectedIcon, setSelectedIcon] = useState<string>("🧑‍💻");
 
   useEffect(() => {
@@ -78,8 +79,15 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
       try {
         // Fetch all installed applications
         const apps = await getApplications();
+        console.log("[Debug] All installed apps:", apps);
         const appNames = apps.map((app) => app.name).sort();
         setInstalledApps(appNames);
+
+        const appArray = apps.map((app) => ({
+          name: app.name,
+          bundleId: app.bundleId
+        }));
+        setApps(appArray);
 
         // If we are editing, fetch the category and set the state
         if (categoryId) {
@@ -89,7 +97,7 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
             const foundCategory = categories.find((cat) => cat.id === categoryId);
             if (foundCategory) {
               setCategoryName(foundCategory.name);
-              setSelectedApps(foundCategory.apps);
+              setSelectedBundleIds(foundCategory.bundleIds);
               setSelectedIcon(foundCategory.icon); // ADD THIS LINE
             }
           }
@@ -112,7 +120,7 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
       await showToast({ style: Toast.Style.Failure, title: "Category name is required" });
       return;
     }
-    if (!selectedApps || selectedApps.length === 0) {
+    if (!selectedBundleIds || selectedBundleIds.length === 0) {
       await showToast({ style: Toast.Style.Failure, title: "Please select at least one application" });
       return;
     }
@@ -125,7 +133,17 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
     try {
       const storedCategories = await LocalStorage.getItem<string>("categories");
       const categories: Category[] = storedCategories ? JSON.parse(storedCategories) : [];
-      const values = { name: categoryName, apps: selectedApps, icon: selectedIcon };
+      const selectedAppObjs = apps.filter(
+        (app) => app.bundleId && selectedBundleIds.includes(app.bundleId)
+      );
+      const values = {
+        name: categoryName,
+        apps: selectedAppObjs.map((app) => ({
+          name: app.name,
+          bundleId: app.bundleId
+        })),
+        icon: selectedIcon
+      };
 
       if (categoryId) {
         const categoryIndex = categories.findIndex((cat) => cat.id === categoryId);
@@ -133,8 +151,12 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
           categories[categoryIndex] = { ...categories[categoryIndex], ...values };
         }
       } else {
-        const newCategory: Category = { id: randomUUID(), name: values.name, apps: values.apps, icon: values.icon };
-        categories.push(newCategory);
+        const newCategory: Category = {
+          id: randomUUID(),
+          name: values.name,
+          bundleIds: selectedBundleIds,
+          icon: values.icon,
+        };        categories.push(newCategory);
       }
 
       await LocalStorage.setItem("categories", JSON.stringify(categories));
@@ -175,12 +197,18 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
         id="apps"
         title="Applications"
         placeholder="Type to search for applications"
-        value={selectedApps}
-        onChange={setSelectedApps}
+        value={selectedBundleIds}
+        onChange={setSelectedBundleIds}
       >
-        {installedApps.map((app) => (
-          <Form.TagPicker.Item key={app} value={app} title={app} />
-        ))}
+{apps
+  .filter((app) => !!app.bundleId)
+  .map((app) => (
+    <Form.TagPicker.Item
+      key={app.bundleId!}
+      value={app.bundleId!}
+      title={app.name}
+    />
+  ))}
       </Form.TagPicker>
     </Form>
   );

@@ -2,17 +2,18 @@ import { Application } from "@raycast/api";
 import { PREBUILT_CATEGORIES } from "../data/prebuilt-categories";
 
 export function getRelevantPrebuiltCategories(installedApps: Application[]) {
-  const installedAppNames = new Set(installedApps.map((app) => app.name));
-  const relevantCategories: Record<string, string[]> = {};
+  const installedBundleIds = new Set(installedApps.map((app) => app.bundleId));
+  // Notice: type now matches new shape
+  const relevantCategories: Record<string, { bundleId: string; name: string }[]> = {};
 
-  // Loop through each pre-built category (e.g., "Dev", "Write")
   for (const categoryName in PREBUILT_CATEGORIES) {
     const masterAppList = PREBUILT_CATEGORIES[categoryName as keyof typeof PREBUILT_CATEGORIES];
 
-    // Find which apps from our master list are actually installed on the user's machine
-    const userAppsForCategory = masterAppList.filter((appName) => installedAppNames.has(appName));
+    // Filter on the bundleId property of each object
+    const userAppsForCategory = masterAppList.filter((app) =>
+      installedBundleIds.has(app.bundleId)
+    );
 
-    // If the user has at least one app for this category, we consider it "relevant"
     if (userAppsForCategory.length > 0) {
       relevantCategories[categoryName] = userAppsForCategory;
     }

@@ -3,21 +3,21 @@ import { useMemo } from "react";
 
 interface CategoryAppListProps {
   categoryName: string;
-  apps: string[]; // The master list of apps for this category
-  allApps: Application[]; // The full list of all apps installed on the system
+  apps: { bundleId: string; name: string }[]; // Changed!
+  allApps: Application[];
 }
 
 export function CategoryAppList({ categoryName, apps, allApps }: CategoryAppListProps) {
   const { installed, notInstalled } = useMemo(() => {
     const installedList: Application[] = [];
-    const notInstalledList: string[] = [];
+    const notInstalledList: { bundleId: string; name: string }[] = [];
 
-    apps.forEach((appName) => {
-      const foundApp = allApps.find((installedApp) => installedApp.name === appName);
+    apps.forEach((prebuiltApp) => {
+      const foundApp = allApps.find((installedApp) => installedApp.bundleId === prebuiltApp.bundleId);
       if (foundApp) {
         installedList.push(foundApp);
       } else {
-        notInstalledList.push(appName);
+        notInstalledList.push(prebuiltApp);
       }
     });
     return { installed: installedList, notInstalled: notInstalledList };
@@ -44,12 +44,12 @@ export function CategoryAppList({ categoryName, apps, allApps }: CategoryAppList
       )}
       {notInstalled.length > 0 && (
         <List.Section title="Not Installed">
-          {notInstalled.map((appName) => (
+          {notInstalled.map((app) => (
             <List.Item
-              key={appName}
-              title={appName}
+              key={app.bundleId}
+              title={app.name}
               icon={Icon.QuestionMark}
-              // subtitle="Not found on your system"
+              // subtitle={app.bundleId}
             />
           ))}
         </List.Section>

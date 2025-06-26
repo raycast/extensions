@@ -19,11 +19,12 @@ import { Category } from "./types";
 import { CreateCategoryForm } from "./create-category";
 import { CategoryAppList } from "./components/CategoryAppsDetail";
 import { PREBUILT_CATEGORIES } from "./data/prebuilt-categories";
+import { Keyboard } from "@raycast/api";
 
 // 1. Update the data shape to include all installed apps
 interface CategoriesData {
   customCategories: Category[];
-  relevantPrebuilt: Record<string, string[]>;
+  relevantPrebuilt: Record<string, { bundleId: string; name: string }[]>;
   installedApps: Application[];
 }
 
@@ -78,7 +79,7 @@ export default function ManageCategoriesCommand() {
             key={category.id}
             icon={category.icon}
             title={category.name}
-            subtitle={`${category.apps.length} app${category.apps.length === 1 ? "" : "s"}`}
+            subtitle={`${category.bundleIds.length} app${category.bundleIds.length === 1 ? "" : "s"}`}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -86,17 +87,6 @@ export default function ManageCategoriesCommand() {
                   icon={Icon.Pencil}
                   target={<CreateCategoryForm categoryId={category.id} onCategoryUpdated={fetchData} />}
                 />
-                {/* <Action.Push
-                  title="View Apps"
-                  // 3. Pass the list of installed apps to the component
-                  target={
-                    <CategoryAppList
-                      categoryName={category.name}
-                      apps={category.apps}
-                      allApps={state.data?.installedApps ?? []}
-                    />
-                  }
-                /> */}
                 <Action.CreateQuicklink
                   title="Create Quicklink"
                   icon={Icon.Link}
@@ -116,7 +106,7 @@ export default function ManageCategoriesCommand() {
                     title="Delete"
                     style={Action.Style.Destructive}
                     icon={Icon.Trash}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => handleDelete(category.id)}
                   />
                 </ActionPanel.Section>
@@ -136,10 +126,11 @@ export default function ManageCategoriesCommand() {
               <ActionPanel>
                 <Action.Push
                   title="View Apps"
+                  icon={Icon.List}
                   target={
                     <CategoryAppList
                       categoryName={categoryName}
-                      apps={PREBUILT_CATEGORIES[categoryName as keyof typeof PREBUILT_CATEGORIES]}
+                      apps={PREBUILT_CATEGORIES[categoryName as keyof typeof PREBUILT_CATEGORIES]}                     
                       allApps={state.data?.installedApps ?? []}
                     />
                   }

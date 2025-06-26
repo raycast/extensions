@@ -9,14 +9,14 @@ interface LaunchProps {
 }
 
 // This is the quit logic, copied here to be self-contained.
-async function handleQuit(categoryName: string, apps: string[]) {
+async function handleQuit(categoryName: string, bundleIds: string[]) {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: `Quitting ${categoryName} apps...`,
   });
 
   try {
-    const quitPromises = apps.map((app) => runAppleScript(`tell application ${JSON.stringify(app)} to quit`));
+    const quitPromises = bundleIds.map((bundleId) => runAppleScript(`tell application id ${JSON.stringify(bundleId)} to quit`));
     await Promise.all(quitPromises);
 
     toast.style = Toast.Style.Success;
@@ -47,6 +47,8 @@ export default async function Command(props: LaunchProps) {
     return;
   }
 
+  // TODO: Any conversion from bundleId to display name should happen in the UI, not in this quit logic.
+
   // 2. If found, execute the quit logic
-  await handleQuit(targetCategory.name, targetCategory.apps);
+  await handleQuit(targetCategory.name, targetCategory.bundleIds);
 }
