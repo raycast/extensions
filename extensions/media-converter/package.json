@@ -15,6 +15,10 @@
     "Design Tools",
     "Media"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "commands": [
     {
