@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-06-26
 
 - Catch any errors caused by `OTPAuth.TOTP` constructor
 
