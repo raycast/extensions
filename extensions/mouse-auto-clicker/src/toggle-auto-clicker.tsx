@@ -10,10 +10,6 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
-interface Preferences {
-  clickInterval: string;
-}
-
 interface ClickerState {
   isRunning: boolean;
   intervalId: NodeJS.Timeout | null;
@@ -242,7 +238,7 @@ brew install cliclick
     }
 
     // Dependencies are installed, proceed with auto-clicker logic
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues();
     const clickInterval = parseInt(preferences.clickInterval) || 100; // Default to 100ms
 
     if (clickerState.isRunning) {
