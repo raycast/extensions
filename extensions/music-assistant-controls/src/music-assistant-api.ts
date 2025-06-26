@@ -816,8 +816,8 @@ export class MusicAssistantApi {
   public playerCommandVolumeDown(playerId: string): Promise<void> {
     return this.playerCommand(playerId, "volume_down");
   }
-  public playerCommandVolumeMute(playerId: string, muted: boolean): Promise<void> {
-    return this.playerCommand(playerId, "volume_mute", {
+  public async playerCommandVolumeMute(playerId: string, muted: boolean): Promise<void> {
+    await this.playerCommand(playerId, "volume_mute", {
       muted,
     });
     this.players[playerId].volume_muted = muted;

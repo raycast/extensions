@@ -13,7 +13,7 @@ export default function Command() {
     [host, playerId],
   );
 
-  const format = (current: PlayerMedia | undefined) => `${current?.artist} - ${current?.title}`;
+  const format = (current: PlayerMedia | undefined) => `${current!.artist} - ${current!.title}`;
 
   const next = async () =>
     await executeApiCommand(host, async (api) => {

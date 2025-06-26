@@ -414,7 +414,7 @@ export interface SuccessResultMessage extends ResultMessageBase {
 }
 
 export interface ErrorResultMessage extends ResultMessageBase {
-  // Message sent when a Command has been successfully executed.
+  // Message sent when a Command has been unsuccessfully executed.
 
   error_code: string;
   details?: string;
@@ -441,7 +441,7 @@ export type MessageType = CommandMessage | EventMessage | SuccessResultMessage |
 
 // config entries
 
-export type ConfigValueType = number | string | boolean | number[] | string[] | boolean[] | number[] | string[] | null;
+export type ConfigValueType = number | string | boolean | number[] | string[] | boolean[] | null;
 
 export interface ConfigValueOption {
   // Model for a value with separated name/value.
@@ -866,7 +866,7 @@ export interface ProviderManifest {
   icon_svg?: string;
   // icon_svg_dark: optional separate dark svg icon (full xml string)
   icon_svg_dark?: string;
-  // icon_svg_dark: optional separate monochrome svg icon (full xml string)
+  // icon_svg_monochrome: optional separate monochrome svg icon (full xml string)
   icon_svg_monochrome?: string;
   // depends on: domain of another provider that is required for this provider
   depends_on?: string;
