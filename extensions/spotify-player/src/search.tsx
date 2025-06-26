@@ -141,7 +141,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     );
   }
 
-  const sections: { key: FilterValue; component: React.ReactNode }[] = [
+  const sections: { key: FilterValue; component: JSX.Element }[] = [
     { key: "artists", component: <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} /> },
     { key: "tracks", component: <TracksSection limit={4} tracks={searchData?.tracks?.items} /> },
     { key: "albums", component: <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} /> },
