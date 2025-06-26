@@ -962,15 +962,13 @@ export class MusicAssistantApi {
     start_item?: PlayableMediaItemType | string,
     queue_id?: string,
   ): Promise<void> {
-    // if (
-    //   !queue_id &&
-    //   store.activePlayer?.active_source &&
-    //   store.activePlayer?.active_source in this.queues
-    // ) {
-    //   queue_id = store.activePlayer?.active_source;
-    // } else if (!queue_id) {
-    //   queue_id = store.activePlayer?.player_id;
-    // }
+    return this.sendCommand("player_queues/play_media", {
+      queue_id,
+      media,
+      option,
+      radio_mode,
+      start_item,
+    });
     return this.sendCommand("player_queues/play_media", {
       queue_id,
       media,
