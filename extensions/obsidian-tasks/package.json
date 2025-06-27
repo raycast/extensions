@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "ozencb",
   "contributors": [
-    "elfitaflores"
+    "elfitaflores",
+    "xmok"
   ],
   "license": "MIT",
   "categories": [
@@ -111,6 +112,7 @@
       "description": "Maximum length of task description to show in menubar",
       "type": "textfield",
       "default": "30",
+      "placeholder": "30",
       "required": true
     },
     {
@@ -119,7 +121,17 @@
       "description": "Refresh interval in minutes",
       "type": "textfield",
       "default": "1",
+      "placeholder": "1",
       "required": true
+    },
+    {
+      "name": "showDescriptionInListTaskDetails",
+      "title": "Show Description (List Tasks)",
+      "description": "Show Description in List Task Details",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Show description in details panel"
     }
   ],
   "dependencies": {
