@@ -7,8 +7,8 @@ import { environment } from "@raycast/api";
 export const useSpeech = (options: CommandOptions, isLoading: boolean, response: string) => {
   const [speaking, setSpeaking] = useState<boolean>(false);
   const [spokenResponse, setSpokenResponse] = useState<boolean>(false);
-  const sendContent = useRef<(message: string) => void>();
-  const stopSpeech = useRef<() => void>();
+  const sendContent = useRef<(message: string) => void>(null);
+  const stopSpeech = useRef<() => void>(null);
   const [restartSpeech, setRestartSpeech] = useState<boolean>(false);
   const startedLoading = useRef<boolean>(false);
 

@@ -11,7 +11,8 @@
     "stelo",
     "noblecloud",
     "sebastiankranz",
-    "kosha"
+    "kosha",
+    "Olivier-OG"
   ],
   "license": "MIT",
   "commands": [
@@ -20,7 +21,17 @@
       "title": "Manage Containers",
       "subtitle": "Docker",
       "description": "List All Docker Containers",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "groupContainersByState",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Group containers by state",
+          "description": "Group containers by their state (running, exited, etc.)"
+        }
+      ]
     },
     {
       "name": "projects_list",
