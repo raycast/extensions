@@ -9,7 +9,7 @@ Map macOS 15+ Sequoia tiling commands to Raycast with intuitive keyboard shortcu
 * Custom menu labels per command
 
 ![Demo](https://raw.githubusercontent.com/raycast/extensions/41764bae650cbab5176fafb4d90f470b67442855/extensions/sequoia-tiling/assets/demo.gif)
-![Demo](https://raw.githubusercontent.com/raycast/extensions/41764bae650cbab5176fafb4d90f470b67442855/extensions/sequoia-tiling/assets/demo2.gif)
+![Demo](https://raw.githubusercontent.com/raycast/extensions/018a6b9a6fca886ac6a4493f8c04a8fb48d784f5/extensions/sequoia-tiling/assets/demo2.gif)
 
 ## Screenshots
 

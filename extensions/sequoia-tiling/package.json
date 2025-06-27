@@ -541,6 +541,32 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "zoom",
+      "title": "Zoom",
+      "subtitle": "Window",
+      "description": "Toggle the active window between its standard size and its previous size/position.",
+      "icon": "window-tiling/zoom.png",
+      "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "enter"
+      },
+      "preferences": [
+        {
+          "name": "menuName",
+          "type": "textfield",
+          "title": "Menu Item Label",
+          "description": "Name of the 'Zoom' item in the Window menu",
+          "default": "Zoom",
+          "placeholder": "Zoom",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
