@@ -10,16 +10,20 @@ export default function Command() {
     async (host: string, playerId: string) =>
       await executeApiCommand(host, async (api) => {
         const player = await api.getPlayer(playerId);
-        const artist = player.current_media?.artist;
-        const song = player.current_media?.title;
-        let title = `${artist} - ${song}`;
-        if (!artist || !song) {
-          const queue = await api.getPlayerQueue(playerId);
-          if (queue.current_item) {
-            title = queue.current_item?.name;
+        let title;
+        if (player.state !== PlayerState.PLAYING) {
+          title = "";
+        } else {
+          const artist = player.current_media?.artist;
+          const song = player.current_media?.title;
+          title = `${artist} - ${song}`;
+          if (!artist || !song) {
+            const queue = await api.getPlayerQueue(playerId);
+            if (queue.current_item) {
+              title = queue.current_item?.name;
+            }
           }
         }
-
         return {
           player,
           title,
