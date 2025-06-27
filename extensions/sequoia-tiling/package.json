@@ -170,14 +170,6 @@
       "description": "Move the active window to the top-left corner of the desktop.",
       "icon": "window-tiling/topLeft.png",
       "mode": "no-view",
-      "shortcut": {
-        "modifiers": [
-          "ctrl",
-          "opt",
-          "shift"
-        ],
-        "key": "left"
-      },
       "preferences": [
         {
           "name": "menuName",
@@ -197,14 +189,6 @@
       "description": "Move the active window to the top-right corner of the desktop.",
       "icon": "window-tiling/topRight.png",
       "mode": "no-view",
-      "shortcut": {
-        "modifiers": [
-          "ctrl",
-          "opt",
-          "shift"
-        ],
-        "key": "up"
-      },
       "preferences": [
         {
           "name": "menuName",
@@ -224,14 +208,6 @@
       "description": "Move the active window to the bottom-left corner of the desktop.",
       "icon": "window-tiling/bottomLeft.png",
       "mode": "no-view",
-      "shortcut": {
-        "modifiers": [
-          "ctrl",
-          "opt",
-          "shift"
-        ],
-        "key": "down"
-      },
       "preferences": [
         {
           "name": "menuName",
@@ -251,14 +227,6 @@
       "description": "Move the active window to the bottom-right corner of the desktop.",
       "icon": "window-tiling/bottomRight.png",
       "mode": "no-view",
-      "shortcut": {
-        "modifiers": [
-          "ctrl",
-          "opt",
-          "shift"
-        ],
-        "key": "right"
-      },
       "preferences": [
         {
           "name": "menuName",
@@ -435,6 +403,14 @@
       "description": "Move the active window to the left half of the desktop, move the second window to the top-right corner of the desktop, and move the third window to the bottom-right corner of the desktop.",
       "icon": "window-tiling/leftAndQuarters.png",
       "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt",
+          "shift"
+        ],
+        "key": "left"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -454,6 +430,14 @@
       "description": "Move the active window to the right half of the desktop, move the second window to the top-left corner of the desktop, and move the third window to the bottom-left corner of the desktop.",
       "icon": "window-tiling/rightAndQuarters.png",
       "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt",
+          "shift"
+        ],
+        "key": "right"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -473,6 +457,14 @@
       "description": "Move the active window to the top half of the desktop, move the second window to the bottom-left corner of the desktop, and move the third window to the bottom-right corner of the desktop.",
       "icon": "window-tiling/topAndQuarters.png",
       "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt",
+          "shift"
+        ],
+        "key": "up"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -492,6 +484,14 @@
       "description": "Move the active window to the bottom half of the desktop, move the second window to the top-left corner of the desktop, and move the third window to the top-right corner of the desktop.",
       "icon": "window-tiling/bottomAndQuarters.png",
       "mode": "no-view",
+      "shortcut": {
+        "modifiers": [
+          "ctrl",
+          "opt",
+          "shift"
+        ],
+        "key": "down"
+      },
       "preferences": [
         {
           "name": "menuName",
@@ -549,13 +549,6 @@
       "description": "Toggle the active window between its standard size and its previous size/position.",
       "icon": "window-tiling/zoom.png",
       "mode": "no-view",
-      "shortcut": {
-        "modifiers": [
-          "ctrl",
-          "opt"
-        ],
-        "key": "enter"
-      },
       "preferences": [
         {
           "name": "menuName",
