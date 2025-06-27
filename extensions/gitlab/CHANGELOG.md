@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Group milestones in MRs and Issues] - {PR_MERGE_DATE}
+## [Group milestones in MRs and Issues] - 2025-06-27
 
 - Add group milestones to the issue create form
 - Add group milestones to the MR create form
