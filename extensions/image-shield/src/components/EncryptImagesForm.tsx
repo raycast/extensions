@@ -4,7 +4,6 @@ import { useEncryptImages } from "../hooks/useEncryptImages";
 import GridLoadingView from "./GridLoadingView";
 import GridEncryptedImages from "./GridEncryptedImages";
 import PasswordForm from "./PasswordForm";
-import { type Preferences } from "../types";
 
 export interface EncryptImagesFormValues {
   folders: string[];

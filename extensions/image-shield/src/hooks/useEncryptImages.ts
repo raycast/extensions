@@ -6,7 +6,6 @@ import { findImages, getSelectedItems } from "../utils/helpers";
 import { encryptImagesWithKey, validateEncryptFiles } from "../lib/imageShield";
 import { EncryptImagesFormValues } from "../components/EncryptImagesForm";
 import { dirExists } from "../utils/file";
-import { type Preferences } from "../types";
 import { useLoadingState } from "./useLoadingState";
 import { MANIFEST_FILE_NAME, CONCURRENCY_LIMIT } from "../constraints";
 import { generateFragmentFileName } from "image-shield/dist/utils/helpers";

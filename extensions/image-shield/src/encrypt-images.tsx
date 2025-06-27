@@ -4,7 +4,6 @@ import EncryptImagesForm from "./components/EncryptImagesForm";
 import { useEncryptImages } from "./hooks/useEncryptImages";
 import GridLoadingView from "./components/GridLoadingView";
 import PasswordForm from "./components/PasswordForm";
-import { type Preferences } from "./types";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
