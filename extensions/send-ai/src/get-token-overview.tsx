@@ -153,7 +153,7 @@ function GetTokenOverview(props: LaunchProps<{ arguments: { tokenAddress: string
         setChartDataUrl(chart.data?.chartImageUrl);
         setChartDurationLabel(ChartDurationOptions["1D"].title);
       } catch (chartError) {
-        console.error("Failed to fetch chart:", chartError);
+        showFailureToast(chartError, { title: "Failed to fetch chart" });
       }
 
       setIsLoading(false);
