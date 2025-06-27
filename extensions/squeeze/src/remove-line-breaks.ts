@@ -36,10 +36,6 @@ export default async function Command() {
             title: "Line breaks removed",
         });
     } catch (error) {
-        await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to process clipboard",
-            message: String(error),
-        });
+        await showFailureToast(error, { title: "Failed to process clipboard" });
     }
 }
