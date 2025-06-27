@@ -1,5 +1,9 @@
 #  Zed Recent Projects Changelog
 
+## [Fixes] - 2025-06-27
+
+- Fix missing local projects
+
 ## [Fixes] - 2025-04-03
 
 - Show Git branch label based on extension preferences
