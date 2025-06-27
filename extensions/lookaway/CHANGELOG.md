@@ -1,6 +1,6 @@
 # LookAway Raycast Extension Changelog
 
-## [Unreleased]
+## [Unreleased] - {PR_MERGE_DATE}
 
 - Added new commands:
     - Start Lookaway (requires LookAway v1.13.5+)
