@@ -6,8 +6,8 @@
   "icon": "icon.png",
   "author": "kanishq_khandelwal",
   "owner": "sendai",
-  "access": "public",
   "contributors": [],
+  "access": "public",
   "categories": [
     "Productivity",
     "Finance",
@@ -730,7 +730,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
+    "publish": "ray publish",
     "pull": "ray pull-contributions"
   }
 }
