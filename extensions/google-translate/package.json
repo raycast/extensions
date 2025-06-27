@@ -43,6 +43,13 @@
       "subtitle": "Google Translate",
       "description": "Quickly translate to multiple languages",
       "mode": "view"
+    },
+    {
+      "name": "instant-translate",
+      "title": "Instant Translate",
+      "subtitle": "Google Translate",
+      "description": "Instantly translate selected text with HUD display",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -962,6 +969,10 @@
         {
           "title": "Paste to App",
           "value": "paste"
+        },
+        {
+          "title": "Show Only",
+          "value": "show"
         }
       ]
     },
