@@ -1,6 +1,6 @@
 # Cobalt Changelog
 
-## [Download History command and improvements] - {PR_MERGE_DATE}
+## [Download History command and improvements] - 2025-06-27
 
 - Added `Download History` command (Thanks @ripgrim!)
 - Minor under-the-hood improvements
