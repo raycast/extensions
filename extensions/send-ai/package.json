@@ -5,9 +5,9 @@
   "description": "Your shortcut to everything Solana. At your command bar.",
   "icon": "icon.png",
   "author": "kanishq_khandelwal",
+  "access": "public",
   "owner": "sendai",
   "contributors": [],
-  "access": "public",
   "categories": [
     "Productivity",
     "Finance",
