@@ -35,10 +35,10 @@ Map macOS 15+ Sequoia tiling commands to Raycast with intuitive keyboard shortcu
 | Right Half            | ⌃ ⌥ →    | Move the window to the right half    |
 | Top Half              | ⌃ ⌥ ↑    | Move the window to the top half      |
 | Bottom Half           | ⌃ ⌥ ↓    | Move the window to the bottom half   |
-| Top-Left Quarter      | ⌃ ⌥ ⇧ ←  | Top-left quarter tiling              |
-| Top-Right Quarter     | ⌃ ⌥ ⇧ ↑  | Top-right quarter tiling             |
-| Bottom-Left Quarter   | ⌃ ⌥ ⇧ ↓  | Bottom-left quarter tiling           |
-| Bottom-Right Quarter  | ⌃ ⌥ ⇧ →  | Bottom-right quarter tiling          |
+| Left & Quarters       | ⌃ ⌥ ⇧ ←  | Left half and quarters tiling        |
+| Up & Quarters         | ⌃ ⌥ ⇧ ↑  | Up half and quarters tiling          |
+| Bottom & Quarters     | ⌃ ⌥ ⇧ ↓  | Bottom half and quarters tiling      |
+| Right & Quarters      | ⌃ ⌥ ⇧ →  | Right half and quarters tiling       |
 | Restore Previous Size | ⌃ ⌥ R    | Revert to the window’s previous size |
 | Left & Right          | ⌃ ⇧ ←    | Active → left, next → right          |
 | Right & Left          | ⌃ ⇧ →    | Active → right, next → left          |
