@@ -17,8 +17,7 @@ export default async (props: LaunchProps<{ arguments: Arguments.RandomNote }>) =
 
     if (!Array.isArray(notes) || notes.length === 0) {
       showFailureToast(null, {
-        title: "No notes found",
-        message: tags.length ? "No notes found with the specified tags" : undefined,
+        title: tags.length ? "No notes found with specified tags" : "No notes found",
       });
       return;
     }
