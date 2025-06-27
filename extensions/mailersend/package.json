@@ -33,6 +33,13 @@
       "mode": "view"
     },
     {
+      "name": "tokens",
+      "title": "Tokens",
+      "subtitle": "MailerSend",
+      "description": "View Tokens",
+      "mode": "view"
+    },
+    {
       "name": "users",
       "title": "Users",
       "subtitle": "MailerSend",

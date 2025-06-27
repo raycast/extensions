@@ -44,7 +44,7 @@ function Activities({ domain }: { domain: Domain }) {
     [ActivityEventType.QUEUED]: undefined,
     [ActivityEventType.SENT]: undefined,
     [ActivityEventType.SOFT_BOUNCED]: undefined,
-    [ActivityEventType.HARD_BOUNCED]: undefined,
+    [ActivityEventType.HARD_BOUNCED]: Color.Red,
     [ActivityEventType.CLICKED]: undefined,
     [ActivityEventType.UNSUBSCRIBED]: undefined,
     [ActivityEventType.SPAM_COMPLAINTS]: undefined,
