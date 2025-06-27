@@ -570,7 +570,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://gen-pdf.com",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://gen-pdf.com/mcp"]     
+      args: ["-y", "mcp-remote", "https://gen-pdf.com/mcp"],
     },
   },
 ];
