@@ -1,6 +1,6 @@
 # Short.io Changelog
 
-## [Add Domain] - {PR_MERGE_DATE}
+## [Add Domain] - 2025-06-27
 
 - Add Domain inside `shorten-link-with-domain`
 - Modernize extension to use latest Raycast config
