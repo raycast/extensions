@@ -1,5 +1,5 @@
 # Sequoia Window Hotkeys Changelog
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2025-06-27
 - Fixed demo GIF link in README.
 - Added Window->Zoom command as a bonus.
 
