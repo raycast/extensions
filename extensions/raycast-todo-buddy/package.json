@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-todo-buddy",
+  "title": "Todo Buddy",
+  "description": "A powerful, keyboard-driven todo list with tags, priorities, and advanced search capabilities for Raycast",
+  "icon": "command-icon.png",
+  "author": "yuichkun",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "creates a new task",
+      "mode": "view"
+    },
+    {
+      "name": "list-tasks",
+      "title": "List Tasks",
+      "description": "lists existing tasks",
+      "mode": "view"
+    },
+    {
+      "name": "create-tag",
+      "title": "Create Tag",
+      "description": "creates a new tag",
+      "mode": "view"
+    },
+    {
+      "name": "list-tags",
+      "title": "List Tags",
+      "description": "List existing tags",
+      "mode": "view"
+    },
+    {
+      "name": "export-data",
+      "title": "Export Tasks and Tags",
+      "description": "exports all tasks and tags to a json file",
+      "mode": "no-view"
+    },
+    {
+      "name": "import-data",
+      "title": "Import Tasks and Tags",
+      "description": "imports tasks and tags from a json file",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Language",
+      "type": "textfield",
+      "default": "en-US",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.100.3",
+    "@raycast/utils": "2.0.1",
+    "axios": "1.7.7",
+    "fuse.js": "7.0.0",
+    "moment": "2.30.1",
+    "uuid": "11.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "22.9.3",
+    "@types/react": "19.1.8",
+    "eslint": "8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "5.8.3",
+    "vitest": "2.1.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "test": "vitest",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
