@@ -74,14 +74,6 @@ export async function runLookAwayCommand(
   }
 
   const bundleId = await findLookAwayApp();
-  if (!bundleId) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: `${APP_NAME} not found`,
-      message: `Please install ${APP_NAME} from lookaway.app`,
-    });
-    return;
-  }
 
   let script: string;
   let finalSuccessMessage = successMessage;
