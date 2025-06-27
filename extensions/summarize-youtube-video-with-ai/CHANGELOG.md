@@ -1,6 +1,6 @@
 # Summarize YouTube Video Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-06-27
 
 - 📚 Remove `youtube-transcript` package and install `youtube-transcript-api`
 
