@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "send-ai",
   "title": "SendAI",
-  "description": "Your shortcut to everything Solana by SendAI. At your command bar.",
+  "description": "Your shortcut to everything Solana. At your command bar.",
   "icon": "icon.png",
   "author": "kanishq_khandelwal",
   "owner": "sendai",
