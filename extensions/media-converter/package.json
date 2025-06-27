@@ -111,10 +111,11 @@
   "preferences": [
     {
       "name": "ffmpeg_path",
-      "type": "file",
+      "type": "textfield",
+      "placeholder": "path/to/ffmpeg/binary",
       "required": false,
       "title": "Custom FFmpeg Path (Advanced)",
-      "description": "If left empty, the extension will look for a valid FFmpeg binary executable at common paths. If not found (expected for most users), you will be prompted to download a lightweight FFmpeg binary only available to this extension."
+      "description": "OPTIONAL - If left empty, the extension will look for a valid FFmpeg binary executable at common paths. If not found (expected for most users), you will be prompted to download a lightweight FFmpeg binary only available to this extension."
     }
   ]
 }
