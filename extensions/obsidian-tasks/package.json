@@ -26,7 +26,18 @@
       "name": "list-tasks",
       "title": "List Tasks",
       "description": "List all Obsidian tasks",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+      "name": "showDescriptionInDetails",
+      "title": "Show Description",
+      "description": "Show Description in Details Markdown",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Show description in details panel"
+    }
+      ]
     },
     {
       "name": "add-task",
@@ -123,15 +134,6 @@
       "default": "1",
       "placeholder": "1",
       "required": true
-    },
-    {
-      "name": "showDescriptionInListTaskDetails",
-      "title": "Show Description (List Tasks)",
-      "description": "Show Description in List Task Details",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "label": "Show description in details panel"
     }
   ],
   "dependencies": {

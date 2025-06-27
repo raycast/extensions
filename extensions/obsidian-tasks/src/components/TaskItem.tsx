@@ -11,7 +11,7 @@ interface TaskItemProps {
   showActions?: boolean;
 }
 
-const preferences = getPreferenceValues<Preferences>();
+const listTaskPreferences = getPreferenceValues<Preferences.ListTasks>();
 export function TaskItem({
   task,
   onMarkDone,
@@ -29,7 +29,7 @@ export function TaskItem({
       icon={task.completed ? Icon.Checkmark : priorityMeta.icon}
       detail={
         <List.Item.Detail
-          markdown={preferences.showDescriptionInListTaskDetails ? taskDesc : undefined}
+          markdown={listTaskPreferences.showDescriptionInDetails ? taskDesc : undefined}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label
