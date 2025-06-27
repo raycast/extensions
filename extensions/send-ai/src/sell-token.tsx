@@ -46,7 +46,7 @@ function SellToken(props: LaunchProps<{ arguments: SellTokenFormValues }>) {
 
       await showToast(createSuccessToast("Success", "Token sale executed successfully"));
     } catch (error) {
-      await showToast(createErrorToast("Error", error, "Failed to execute token sale"));
+      await showFailureToast(error, { title: "Failed to execute token sale" });
     } finally {
       setIsLoading(false);
     }
