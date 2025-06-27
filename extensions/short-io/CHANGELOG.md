@@ -1,5 +1,10 @@
 # Short.io Changelog
 
+## [Add Domain] - 2025-06-27
+
+- Add Domain inside `shorten-link-with-domain`
+- Modernize extension to use latest Raycast config
+
 ## [Fix crash] - 2024-12-02
 
 - Fix potential crash issues in Search Links command
