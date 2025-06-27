@@ -169,7 +169,7 @@ function GetTokenOverview(props: LaunchProps<{ arguments: { tokenAddress: string
         );
         setRugcheckData(rugcheck as RugcheckResult);
       } catch (rugcheckError) {
-        console.error("Failed to fetch rugcheck:", rugcheckError);
+        showFailureToast(rugcheckError, { title: "Failed to fetch rugcheck" });
       }
     } catch (error) {
       console.error(error);
