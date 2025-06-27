@@ -1,5 +1,5 @@
 # Sequoia Window Hotkeys Changelog
-## 1.0.1 - 2025-06-27
+## [1.0.1] - {PR_MERGE_DATE}
 - Fixed demo GIF link in README.
 
 ## 1.0.0 - 2025-06-27
