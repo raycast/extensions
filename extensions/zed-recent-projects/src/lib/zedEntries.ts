@@ -7,6 +7,7 @@ import util from "util";
 
 import { getZedDbName } from "./zed";
 
+const MAX_PATH_COUNT = 100;
 const preferences = getPreferenceValues<Preferences>();
 const zedBuild = preferences.build;
 
@@ -76,7 +77,7 @@ function parseLocalPaths(str: string): string[] | null {
     const count = Number(buffer.readBigUInt64LE(offset));
     offset += 8;
 
-    if (count < 0 || count > 100) return null; // Sanity check
+    if (count < 0 || count > MAX_PATH_COUNT) return null; // Sanity check
 
     const paths: string[] = [];
     for (let i = 0; i < count; i++) {
