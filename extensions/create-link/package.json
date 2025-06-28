@@ -15,28 +15,28 @@
       "name": "copy-plain-text",
       "title": "Copy Link as Plain Text",
       "subtitle": "Create Link",
-      "description": "This command captures the current URL from your browser and copies it directly to your clipboard, allowing for quick and easy sharing or pasting into other applications.",
+      "description": "Copy the URL of the frontmost tab as plain text.",
       "mode": "no-view"
     },
     {
       "name": "copy-html",
       "title": "Copy Link as HTML",
       "subtitle": "Create Link",
-      "description": "This command captures the current URL from your browser, formats it as an HTML anchor tag, and copies it to your clipboard. This allows for easy integration into web pages or HTML documents.",
+      "description": "Copy the URL of the frontmost tab as an HTML link.",
       "mode": "no-view"
     },
     {
       "name": "copy-markdown",
       "title": "Copy Link as Markdown",
       "subtitle": "Create Link",
-      "description": "This command captures the current URL from your browser, formats it as a Markdown link, and copies it to your clipboard. This is useful for integrating links into Markdown documents or notes.",
+      "description": "Copy the URL of the frontmost tab as a Markdown link.",
       "mode": "no-view"
     },
     {
       "name": "copy-custom",
       "title": "Copy Link as Custom",
       "subtitle": "Create Link",
-      "description": "This command captures the current URL from your browser, formats it as a custom link, and copies it to your clipboard. You can customize the link format to suit your needs.",
+      "description": "Copy the URL of the frontmost tab using a custom format.",
       "mode": "no-view",
       "preferences": [
         {
@@ -54,7 +54,7 @@
       "name": "show-tabs",
       "title": "Show Tabs",
       "subtitle": "Create Link",
-      "description": "This command shows a list of tabs in your browser and allows you to copy the URL of the selected tab.",
+      "description": "Show all open tabs and copy the URL of the selected one.",
       "mode": "view",
       "preferences": [
         {
