@@ -33,7 +33,7 @@ export default function TabList({ tabs }: { tabs: BrowserExtension.Tab[] }) {
     <List
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Dropdown With Items"
+          tooltip="Filter tabs by domain"
           defaultValue=""
           onChange={setSelectedDomain}
           value={selectedDomain}
