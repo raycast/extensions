@@ -10,8 +10,10 @@ import {
   WorkflowState,
 } from "@linear/sdk";
 import { getPreferenceValues } from "@raycast/api";
-import { LabelResult } from "./getLabels";
+
 import { getLinearClient } from "../api/linearClient";
+
+import { LabelResult } from "./getLabels";
 import { getPaginated, PageInfo } from "./pagination";
 
 const DEFAULT_PAGE_SIZE = 50;

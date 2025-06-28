@@ -85,6 +85,8 @@ export async function openNewTab({
 
             if not winExists then
                 make new window
+            else
+                activate
             end if
 
             tell window 1
@@ -192,6 +194,16 @@ export async function createNewTabToWebsite(website: string): Promise<void> {
     tell application "Google Chrome"
       activate
       open location "${website}"
+    end tell
+    return true
+  `);
+}
+
+export async function createNewIncognitoWindow(): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      make new window with properties {mode:"incognito"}
+      activate
     end tell
     return true
   `);

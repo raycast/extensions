@@ -1,5 +1,9 @@
 # WhatsApp Changelog
 
+## [AI Extension] - {PR_MERGE_DATE}
+- Added AI tools: `add-new-whatsapp-chat`, `add-whatsapp-group`, and `open-chat`
+- Updated Raycast packages to support AI extensions
+
 ## [Enhancements] - 2024-10-01
 - "Group Code" when adding a group is now **required**
 - "Edit Chat" action in `open-chat` now has a shortcut

@@ -133,6 +133,13 @@
           "description": "Cleans up the title with AI to make it more readable (Pro only)"
         }
       ]
+    },
+    {
+      "name": "close-other-tabs",
+      "title": "Close Other Tabs",
+      "subtitle": "Safari",
+      "description": "Close all Safari tabs except the current one",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -538,5 +545,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

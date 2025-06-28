@@ -7,7 +7,8 @@
   "author": "thomas",
   "contributors": [
     "ridemountainpig",
-    "xmok"
+    "xmok",
+    "Francois"
   ],
   "license": "MIT",
   "categories": [
@@ -49,7 +50,7 @@
   ],
   "dependencies": {
     "@dopplerhq/node-sdk": "^1.3.0",
-    "@raycast/api": "^1.94.0",
+    "@raycast/api": "^1.95.0",
     "@raycast/utils": "^1.19.1",
     "got": "^11.8.2"
   },

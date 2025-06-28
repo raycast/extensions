@@ -1,22 +1,19 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType, Keyboard } from "@raycast/api";
 import { format } from "date-fns";
 
+import { deleteNotification as linearDeleteNotification } from "./api/deleteNotification";
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
-import { deleteNotification as linearDeleteNotification } from "./api/deleteNotification";
-
-import useNotifications from "./hooks/useNotifications";
-import usePriorities from "./hooks/usePriorities";
-import useMe from "./hooks/useMe";
-
+import IssueDetail from "./components/IssueDetail";
+import OpenInLinear from "./components/OpenInLinear";
+import View from "./components/View";
+import { getBotIcon } from "./helpers/bots";
 import { getErrorMessage } from "./helpers/errors";
 import { getNotificationIcon, getNotificationTitle, getNotificationURL } from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
-import { getBotIcon } from "./helpers/bots";
-
-import View from "./components/View";
-import IssueDetail from "./components/IssueDetail";
-import OpenInLinear from "./components/OpenInLinear";
+import useMe from "./hooks/useMe";
+import useNotifications from "./hooks/useNotifications";
+import usePriorities from "./hooks/usePriorities";
 
 function Notifications() {
   const {

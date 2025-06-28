@@ -55,6 +55,7 @@ export declare class UserService {
     })[]>;
     inviteMembers(params: {
         space: Exclude<Awaited<ReturnType<typeof db.space.findUnique>>, null>;
+        actorEmail: string;
         emails: string[];
     }): Promise<void>;
     subscribeTag(p: {
@@ -72,4 +73,7 @@ export declare class UserService {
         name?: string;
         image?: string;
     }): Promise<void>;
+    getSessionId(p: {
+        accessToken: string;
+    }): Promise<string | undefined>;
 }

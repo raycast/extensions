@@ -1,7 +1,7 @@
 ---
 description: Knowledge base for the problem domain
 globs: *.ts, *.tsx, *.md
-alwaysApply: false
+alwaysApply: true
 ---
 # Knowledge
 
@@ -17,3 +17,4 @@ Explains the domain of HTML colors
         - Easy filtering/access to just the basic colors
         - Maintaining the semantic distinction between basic and extended colors
         - Following the HTML color standard which recognizes these two categories
+    - wikipedia article contains table, this table specifies various shades where specific colors belong, e.g. "Pink colors", "Red colors" etc

@@ -1,7 +1,6 @@
-import "@/polyfills/fetch";
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { ShortLinksResponse, useShortLinks } from "@hooks/use-short-links";
-import { DUB_CO_URL } from "@utils/constants";
+import { DUB_APP_URL, DUB_CO_URL } from "@utils/constants";
 import { deleteShortLink } from "@/api";
 import { MutatePromise, showFailureToast, useCachedState } from "@raycast/utils";
 import { withDubClient } from "./with-dub-client";
@@ -58,6 +57,7 @@ export function SearchLinks() {
           expiresAt,
           expiredUrl,
           updatedAt,
+          workspaceId,
         } = value;
         const shortUrl = `${domain}/${key}`;
         return (
@@ -157,7 +157,10 @@ export function SearchLinks() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title={"Copy Link"} content={shortLink} />
-                <Action.OpenInBrowser title={"Open Link"} url={shortLink} />
+                <Action.OpenInBrowser
+                  title={"Open Link Page"}
+                  url={`${DUB_CO_URL}/${workspaceId}/links/${domain}/${key}`}
+                />
                 <Action
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title={"Delete Link"}
@@ -172,9 +175,14 @@ export function SearchLinks() {
                     icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
                   />
                   <Action.OpenInBrowser
-                    title="Go to Dub.co"
-                    shortcut={Keyboard.Shortcut.Common.Open}
-                    url={DUB_CO_URL}
+                    title="Open Analytics Page"
+                    shortcut={{ modifiers: ["cmd"], key: "v" }}
+                    url={`${DUB_APP_URL}/${workspaceId}/analytics?domain=${domain}&key=${key}&interval=30d`}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open Events Page"
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    url={`${DUB_APP_URL}/${workspaceId}/events?domain=${domain}&key=${key}&interval=30d`}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

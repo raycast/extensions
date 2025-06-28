@@ -1,5 +1,9 @@
 # URL Unshortener Changelog
 
+## [Improvement] - 2025-04-09
+
+- Fixed issue with selected text retrieval, adding clipboard fallback when frontmost application access fails
+
 ## [Improvement] - 2025-03-18
 
 - Improved URL unshortening to better handle complex URLs like Microsoft SafeLinks

@@ -1,5 +1,36 @@
 # Bitwarden Changelog
 
+## [Fix] - 2025-06-26
+
+- Catch any errors caused by `OTPAuth.TOTP` constructor
+
+## [Fix] - 2025-06-25
+
+- Check if user can access `BrowserExtension` before getting tabs
+
+## [Fix] - 2025-06-24
+
+- More authenticator error handling to prevent "TypeError: t is not a function" error
+
+## [Fix] - 2025-06-05
+
+- Fix attempt for authenticator "TypeError: t is not a function" error
+
+## [New Preference] - 2025-04-09
+
+- Add primary action preference for authenticator command
+
+## [New Command] - 2025-04-08
+
+- Add Authenticator command
+- Correct README typos
+
+## [Improvement] - 2025-03-24
+
+- Correct setup API key instructions
+- Remove local CLI mention from extension description
+- Mention local CLI option in README
+
 ## [Fix] - 2025-03-17
 
 - Fix CLI binary download hash mismatch error

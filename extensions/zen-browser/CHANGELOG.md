@@ -1,5 +1,29 @@
 # Zen Changelog
 
+## [Fix New Tab and History Tab] - 2025-06-11
+
+- Fix new tab and history tab commands, by adding a delay to the script to ensure the URL bar is focused.
+
+## [✨ AI Enhancements] - 2025-05-15
+
+AI Tools to:
+
+- Open New Tab
+- Search History
+
+## [Update brew install command] - 2025-04-24
+
+- Update the brew install command from Firefox to Zen Browser.
+
+## [Add Browser Default Search Engine] - 2025-04-22
+
+- Added the ability to use the user's default browser search engine set within Zen as the search engine.
+- Changed the default search engine to the Browser Default.
+
+## [Changing the name of app called] - 2025-03-21
+
+- Changed name of app being called from "Zen Browser" to "Zen"
+
 ## [Add custom new tab shortcut] - 2025-03-10
 
 - Add ability to set a custom new tab shortcut.

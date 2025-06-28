@@ -1,6 +1,7 @@
 import { withAccessToken } from "@raycast/utils";
-import { linear } from "../api/linearClient";
+
 import { filterIssues } from "../api/getIssues";
+import { linear } from "../api/linearClient";
 
 export default withAccessToken(linear)(async (inputs: {
   /**

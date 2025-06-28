@@ -10,7 +10,12 @@ import { loadStarredFiles } from "./starFiles";
 import type { TeamFiles } from "./types";
 
 function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
-  const { data, isLoading, error } = useCachedPromise(
+  const {
+    data,
+    isLoading,
+    error,
+    revalidate: revalidateAllFiles,
+  } = useCachedPromise(
     async () => {
       const results = await resolveAllFiles();
       return results;
@@ -31,7 +36,12 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
     return results;
   }, []);
 
-  const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
+  const {
+    files: visitedFiles,
+    visitFile,
+    isLoading: isLoadingVisitedFiles,
+    revalidate: revalidateVisitedFiles,
+  } = useVisitedFiles();
   const isLoadingBlock = isLoading || isLoadingVisitedFiles || isLoadingStarredFiles;
   const [filteredFiles, setFilteredFiles] = useState(data);
   const [isFiltered, setIsFiltered] = useState(false);
@@ -120,7 +130,9 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
               file={file}
               desktopApp={desktopApp}
               extraKey={file.key + "-starred-file-item"}
-              revalidate={revalidateStarredFiles}
+              revalidateStarredFiles={revalidateStarredFiles}
+              revalidateVisitedFiles={revalidateVisitedFiles}
+              revalidateAllFiles={revalidateAllFiles}
               onVisit={visitFile}
               starredFiles={starredFiles || []}
               starredFilesCount={starredFiles.length || 0}
@@ -137,7 +149,9 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
               file={file}
               desktopApp={desktopApp}
               extraKey={file.key + "-recent-file-item"}
-              revalidate={revalidateStarredFiles}
+              revalidateStarredFiles={revalidateStarredFiles}
+              revalidateVisitedFiles={revalidateVisitedFiles}
+              revalidateAllFiles={revalidateAllFiles}
               onVisit={visitFile}
               starredFiles={starredFiles ?? []}
               starredFilesCount={starredFiles?.length ?? 0}
@@ -162,7 +176,9 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
                 <FileGridItem
                   key={file.key + "-file"}
                   searchkeywords={project.name}
-                  revalidate={revalidateStarredFiles}
+                  revalidateStarredFiles={revalidateStarredFiles}
+                  revalidateVisitedFiles={revalidateVisitedFiles}
+                  revalidateAllFiles={revalidateAllFiles}
                   file={file}
                   desktopApp={desktopApp}
                   onVisit={visitFile}

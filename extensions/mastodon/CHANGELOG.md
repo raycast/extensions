@@ -1,5 +1,9 @@
 # Mastodon Changelog
 
+## [Bug Fix] - 2025-04-07
+
+- Fixed the issue where the loading animation persisted when adding a status ([#18115](https://github.com/raycast/extensions/issues/18115)).
+
 ## [New feature] - 2024-04-22
 
 - Add support for opening notifications with a specific app

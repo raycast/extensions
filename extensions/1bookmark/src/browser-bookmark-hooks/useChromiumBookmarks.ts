@@ -3,6 +3,7 @@ import { join } from "path";
 import { promisify } from "util";
 
 import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useMemo } from "react";
 
 const read = promisify(readFile);
 
@@ -161,28 +162,32 @@ export default function useChromiumBookmarks(
     [currentProfile, enabled, path],
   );
 
-  const toolbarBookmarks = data ? getBookmarks(data.roots.bookmark_bar) : [];
-  const toolbarFolders = data ? getFolders(data.roots.bookmark_bar) : [];
+  const toolbarBookmarks = useMemo(() => (data ? getBookmarks(data.roots.bookmark_bar) : []), [data]);
+  const toolbarFolders = useMemo(() => (data ? getFolders(data.roots.bookmark_bar) : []), [data]);
 
-  const otherBookmarks = data ? getBookmarks(data.roots.other) : [];
-  const otherFolders = data ? getFolders(data.roots.other) : [];
+  const otherBookmarks = useMemo(() => (data ? getBookmarks(data.roots.other) : []), [data]);
+  const otherFolders = useMemo(() => (data ? getFolders(data.roots.other) : []), [data]);
 
-  const bookmarks = [...toolbarBookmarks, ...otherBookmarks].map((bookmark) => {
-    return {
-      ...bookmark,
-      id: `${bookmark.id}-${browserBundleId}`,
-      browser: browserBundleId,
-    };
-  });
+  const bookmarks = useMemo(() => {
+    return [...toolbarBookmarks, ...otherBookmarks].map((bookmark) => {
+      return {
+        ...bookmark,
+        id: `${bookmark.id}-${browserBundleId}`,
+        browser: browserBundleId,
+      };
+    });
+  }, [toolbarBookmarks, otherBookmarks, browserBundleId]);
 
-  const folders = [...toolbarFolders, ...otherFolders].map((folder) => {
-    return {
-      ...folder,
-      id: `${folder.id}-${browserBundleId}`,
-      icon: browserIcon,
-      browser: browserBundleId,
-    };
-  });
+  const folders = useMemo(() => {
+    return [...toolbarFolders, ...otherFolders].map((folder) => {
+      return {
+        ...folder,
+        id: `${folder.id}-${browserBundleId}`,
+        icon: browserIcon,
+        browser: browserBundleId,
+      };
+    });
+  }, [toolbarFolders, otherFolders, browserBundleId]);
 
   return {
     bookmarks,

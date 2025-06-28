@@ -101,6 +101,15 @@
       ]
     },
     {
+      "name": "enableVerificationLinks",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Enable Verification Links",
+      "description": "Show verification and sign-in links from messages",
+      "label": "Show verification/sign-in links"
+    },
+    {
       "data": [
         {
           "title": "Days",
@@ -167,5 +176,8 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "test": "jest"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,5 +1,9 @@
 # Changelog
 
+## [Improvements] - 2025-03-20
+
+- Add preference for custom color
+
 ## [Improvements] - 2025-03-10
 
 - Add action to copy icon data URI

@@ -1,39 +1,104 @@
-import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  captureException,
+  Color,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { Folder } from "../types/folders";
 import { AddFoldersAction, EditFolderAction } from "./add-folder";
-import { CreateNewFolder } from "../actions/createNewFolder";
-import { DeleteFolder } from "../actions/deleteFolder";
-import { EditFolder } from "../actions/editFolder";
-import { useFetchStoredFolders } from "../hooks/useFetchStoredFolders";
+import { useLocalStorage } from "@raycast/utils";
+import { buildException } from "../utils/buildException";
 
 const ListFolders = () => {
-  const { folders, setFolders, isLoading } = useFetchStoredFolders();
+  const { value: folders, setValue: setFolder, isLoading: isLoading } = useLocalStorage<Folder[]>("folders", []);
 
   const createNewFolder = async (folder: Folder) => {
     try {
-      await CreateNewFolder({ newFolder: folder, existingFolders: folders, setFolders });
-    } catch (e) {
+      if (!folders) return;
+
+      const checkFolderName = folders.find((f) => f.id === folder.id);
+      if (checkFolderName) {
+        await showToast(Toast.Style.Failure, "Folder not Created", "Folder with same ID already exists");
+        return;
+      }
+
+      const newFolders = [...folders, folder];
+      await setFolder(newFolders);
+
+      await showToast(Toast.Style.Success, "Folder Created", "Will be used to clean your files");
+    } catch (error) {
+      captureException(buildException(error as Error, "Folder not created", { folder }));
       await showToast(Toast.Style.Failure, "Folder not created", "Something went wrong!");
     }
   };
 
   const editFolder = async (oldFolder: Folder, newFolder: Folder) => {
     try {
-      await EditFolder({ folderId: oldFolder.id, editedFolder: newFolder, existingFolders: folders, setFolders });
-    } catch (e) {
+      if (!folders) return;
+
+      const foundFolder = folders.find((f) => f.id === oldFolder.id);
+      if (!foundFolder) {
+        await showToast(Toast.Style.Failure, "Folder not Edited", "Unable to find folder to edit");
+        return;
+      }
+
+      const newFolders = folders.map((f) => (f.id === foundFolder.id ? newFolder : f));
+      await setFolder(newFolders);
+
+      await showToast(Toast.Style.Success, "Folder Edited");
+    } catch (error) {
+      captureException(buildException(error as Error, "Folder not edited", { oldFolder, newFolder }));
       await showToast(Toast.Style.Failure, "Folder not edited", "Something went wrong!");
     }
   };
 
   const deleteFolder = async (folderId: string) => {
     try {
-      await DeleteFolder({ folderId, existingFolders: folders, setFolders });
-    } catch (e) {
+      if (!folders) return;
+
+      const foundFolder = folders.find((f) => f.id === folderId);
+      if (!foundFolder) {
+        await showToast(Toast.Style.Failure, "Folder not Deleted", "Unable to find folder to delete");
+        return;
+      }
+
+      const deleteConfirmation = await confirmAlert({
+        title: "Delete Folder",
+        message: "Are you sure you wish to delete this folder?",
+        primaryAction: {
+          title: "Yes",
+          style: Alert.ActionStyle.Destructive,
+        },
+        dismissAction: {
+          title: "No",
+          style: Alert.ActionStyle.Cancel,
+        },
+        icon: {
+          source: Icon.Trash,
+          tintColor: Color.Red,
+        },
+      });
+
+      if (deleteConfirmation) {
+        const newFolders = folders.filter((f) => f.id !== foundFolder.id);
+        await setFolder(newFolders);
+
+        await showToast(Toast.Style.Success, "Folder Deleted");
+      }
+    } catch (error) {
+      captureException(buildException(error as Error, "Folder not deleted", { folderId }));
       await showToast(Toast.Style.Failure, "Folder not deleted", "Something went wrong!");
     }
   };
 
-  const listIsEmpty = folders.length <= 0;
+  const listIsEmpty = folders && folders.length <= 0;
 
   return (
     <List
@@ -93,10 +158,13 @@ const ListFolders = () => {
   );
 };
 
-type ListFoldersActionProps = {
-  refetchFolders: () => void;
-};
-
-export const ListFoldersAction = ({ refetchFolders }: ListFoldersActionProps) => {
-  return <Action.Push icon={Icon.Cog} title="List Folders" target={<ListFolders />} onPop={() => refetchFolders()} />;
+export const ListFoldersAction = () => {
+  return (
+    <Action.Push
+      icon={Icon.Cog}
+      title="List Folders"
+      target={<ListFolders />}
+      shortcut={{ key: "l", modifiers: ["ctrl"] }}
+    />
+  );
 };

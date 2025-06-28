@@ -139,7 +139,6 @@ class FileDataSource implements DataSource {
       updateTime: nowTimestamp,
       lastUsedTime: nowTimestamp,
     };
-    console.log("newItem", newItem);
 
     const dataStructure = this.readFile(filePath);
 

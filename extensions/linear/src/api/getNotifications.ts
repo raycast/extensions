@@ -1,6 +1,8 @@
 import { Organization, Comment, User, IssueNotification, ProjectUpdate, Project, ActorBot } from "@linear/sdk";
-import { IssueFragment, IssueResult } from "./getIssues";
+
 import { getLinearClient } from "../api/linearClient";
+
+import { IssueFragment, IssueResult } from "./getIssues";
 
 export type NotificationResult = Pick<
   IssueNotification,

@@ -103,12 +103,7 @@ export default async ({ github, context }: API) => {
     // we don't want to label the issue here, only answer to a comment
 
     // if the one who posts a comment is an owner of the extension related to the issue
-    if (
-      context.payload.comment.user &&
-      (owners.indexOf(context.payload.comment.user.login) !== -1 ||
-        // also allow the OP to close the issue that way
-        context.payload.comment.user.login === context.payload.issue.user.login)
-    ) {
+    if (context.payload.comment.user && owners.indexOf(context.payload.comment.user.login) !== -1) {
       if (closeIssueMatch.test(context.payload.comment.body)) {
         console.log(`closing #${context.payload.issue.number}`);
         await github.rest.issues.update({
@@ -170,6 +165,19 @@ export default async ({ github, context }: API) => {
       } else {
         console.log(`didn't find the right comment`);
       }
+    } else if (
+      // also allow the OP to close the issue that way
+      context.payload.comment.user &&
+      context.payload.comment.user.login === context.payload.issue.user.login &&
+      closeIssueMatch.test(context.payload.comment.body)
+    ) {
+      console.log(`closing #${context.payload.issue.number}`);
+      await github.rest.issues.update({
+        issue_number: context.payload.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        state: "closed",
+      });
     } else {
       console.log(`${context.payload.comment.user.login} is not an owner`);
     }

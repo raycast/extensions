@@ -5,6 +5,9 @@
   "description": "Use the powerful models via Groq from the comfort of Raycast.",
   "icon": "groq.png",
   "author": "ilian",
+  "contributors": [
+    "dez_dezsson"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools",
@@ -31,8 +34,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -55,12 +70,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -93,8 +120,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -117,12 +156,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -155,8 +206,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -179,12 +242,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -217,8 +292,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -241,12 +328,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -279,8 +378,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -303,12 +414,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -341,8 +464,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -365,12 +500,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -419,8 +566,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -443,12 +602,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -498,8 +669,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -522,12 +705,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -561,8 +756,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -585,12 +792,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -624,8 +843,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -648,12 +879,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -687,8 +930,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -711,12 +966,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -750,8 +1017,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -774,12 +1053,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -813,8 +1104,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -837,12 +1140,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -876,8 +1191,20 @@
               "value": "global"
             },
             {
+              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+              "title": "Llama 4 Scout 131k"
+            },
+            {
+              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+              "title": "Llama 4 Maverick 131k"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
+            },
+            {
+              "value": "deepseek-r1-distill-qwen-32b",
+              "title": "DeepSeek R1 32B 128K"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -900,12 +1227,24 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7B 32k"
+              "value": "mistral-saba-24b",
+              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
+            },
+            {
+              "value": "qwen-2.5-32b",
+              "title": "Qwen 2.5 32B 128K"
+            },
+            {
+              "value": "qwen-2.5-coder-32b",
+              "title": "Qwen 2.5 Coder 32B 128K"
+            },
+            {
+              "value": "qwen-qwq-32b",
+              "title": "Qwen QWQ 32B 128K"
             }
           ]
         }
@@ -930,8 +1269,20 @@
       "default": "llama-3.3-70b-versatile",
       "data": [
         {
+          "value": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "title": "Llama 4 Scout 131k"
+        },
+        {
+          "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
+          "title": "Llama 4 Maverick 131k"
+        },
+        {
           "value": "deepseek-r1-distill-llama-70b",
           "title": "DeepSeek R1 70B 128k"
+        },
+        {
+          "value": "deepseek-r1-distill-qwen-32b",
+          "title": "DeepSeek R1 32B 128K"
         },
         {
           "value": "llama-3.3-70b-versatile",
@@ -954,12 +1305,24 @@
           "title": "Llama 3 8B 8k"
         },
         {
-          "value": "mixtral-8x7b-32768",
-          "title": "Mixtral 8x7B 32k"
+          "value": "mistral-saba-24b",
+          "title": "Mistral Saba 24B 32K"
         },
         {
           "value": "gemma2-9b-it",
           "title": "Gemma2 9B 8k"
+        },
+        {
+          "value": "qwen-2.5-32b",
+          "title": "Qwen 2.5 32B 128K"
+        },
+        {
+          "value": "qwen-2.5-coder-32b",
+          "title": "Qwen 2.5 Coder 32B 128K"
+        },
+        {
+          "value": "qwen-qwq-32b",
+          "title": "Qwen QWQ 32B 128K"
         }
       ]
     },
@@ -968,6 +1331,15 @@
       "title": "Response Streaming",
       "label": "Enabled",
       "description": "This will allow you to see the response as it's being generated. If disabled, the response will be shown once it's fully generated.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showMetadata",
+      "title": "Show metadata",
+      "label": "Enabled",
+      "description": "This will show the metadata of the response, including the model used, price, the token count, and the time taken to generate the response.",
       "type": "checkbox",
       "default": true,
       "required": false

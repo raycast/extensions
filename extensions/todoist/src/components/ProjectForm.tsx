@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Toast, Form, Icon, showToast, open, useNavigation } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 
 import {
   AddProjectArgs,
@@ -8,11 +8,10 @@ import {
   Project as TProject,
   updateProject,
   addProject,
-  handleError,
 } from "../api";
 import { colors } from "../helpers/colors";
-import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 import { getProjectAppUrl, getProjectIcon, getProjectUrl } from "../helpers/projects";
+import { isTodoistInstalled } from "../hooks/useIsTodoistInstalled";
 import useSyncData from "../hooks/useSyncData";
 
 import Project from "./Project";
@@ -82,10 +81,11 @@ export default function ProjectForm({ project, fromProjectList }: ProjectFormPro
             };
 
             toast.secondaryAction = {
-              title: `Open Project ${isTodoistInstalled ? "in Todoist" : "in Browser"}`,
+              title: `Open Project`,
               shortcut: { modifiers: ["cmd", "shift"], key: "o" },
               onAction: async () => {
-                open(isTodoistInstalled ? getProjectAppUrl(projectId) : getProjectUrl(projectId));
+                const isInstalled = await isTodoistInstalled();
+                open(isInstalled ? getProjectAppUrl(projectId) : getProjectUrl(projectId));
               },
             };
           }
@@ -97,8 +97,7 @@ export default function ProjectForm({ project, fromProjectList }: ProjectFormPro
             pop();
           }
         } catch (error) {
-          console.error(error);
-          handleError({ error, title: "Unable to create project" });
+          await showFailureToast(error, { title: "Unable to create project" });
         }
       }
 
@@ -125,7 +124,7 @@ export default function ProjectForm({ project, fromProjectList }: ProjectFormPro
           await showToast({ style: Toast.Style.Success, title: "Project updated" });
           pop();
         } catch (error) {
-          handleError({ error, title: "Unable to update project" });
+          await showFailureToast(error, { title: "Unable to update project" });
         }
       }
 

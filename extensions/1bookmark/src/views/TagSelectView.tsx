@@ -3,10 +3,9 @@ import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@ra
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { NewTagForm } from "./NewTagForm";
 import { useMe } from "../hooks/use-me.hook";
-import { useAtom } from "jotai";
-import { sessionTokenAtom } from "../states/session-token.state";
 import { Tag } from "../types";
 import { useEffect } from "react";
+import { useMyTags } from "../hooks/use-tags.hook";
 
 const TagItem = (props: {
   tag: Tag;
@@ -42,15 +41,14 @@ const TagItem = (props: {
 };
 
 export const Body = (props: {
-  spaceIds: string[];
   toggleTag: string; // Tag clicked from DropDown UI.
   toggleTagType: "subscribe" | "unsubscribe"; // Which action was clicked.
   promise: Promise<void>;
 }) => {
-  const { spaceIds, toggleTag, toggleTagType, promise } = props;
-  const [sessionToken] = useAtom(sessionTokenAtom);
-  const me = useMe(sessionToken);
-  const { data: tags, refetch, isFetching } = trpc.tag.list.useQuery({ spaceIds });
+  const { toggleTag, toggleTagType, promise } = props;
+  const me = useMe();
+  const { data: tags, refetch, isFetching } = useMyTags();
+  const firstSpaceId = me.data?.associatedSpaces[0]?.id as string | undefined;
 
   const selectedTags = me.data?.associatedSpaces.flatMap((space) => {
     return space.myTags.map((tag) => `${space.id}:${tag}`);
@@ -101,13 +99,15 @@ export const Body = (props: {
           icon={Icon.Plus}
           actions={
             <ActionPanel>
-              <Action.Push
-                title={"Create New Tag"}
-                icon={Icon.Plus}
-                shortcut={Keyboard.Shortcut.Common.New}
-                target={<NewTagForm spaceId={spaceIds[0]!} />}
-                onPop={() => refetch()}
-              />
+              {firstSpaceId && (
+                <Action.Push
+                  title={"Create New Tag"}
+                  icon={Icon.Plus}
+                  shortcut={Keyboard.Shortcut.Common.New}
+                  target={<NewTagForm spaceId={firstSpaceId} />}
+                  onPop={() => refetch()}
+                />
+              )}
             </ActionPanel>
           }
         />
@@ -131,15 +131,14 @@ export const Body = (props: {
 };
 
 export function TagSelectView(props: {
-  spaceIds: string[];
   toggleTag: string;
   toggleTagType: "unsubscribe" | "subscribe";
   promise: Promise<void>;
 }) {
-  const { spaceIds, toggleTag, toggleTagType, promise } = props;
+  const { toggleTag, toggleTagType, promise } = props;
   return (
     <CachedQueryClientProvider>
-      <Body spaceIds={spaceIds} toggleTag={toggleTag} toggleTagType={toggleTagType} promise={promise} />
+      <Body toggleTag={toggleTag} toggleTagType={toggleTagType} promise={promise} />
     </CachedQueryClientProvider>
   );
 }

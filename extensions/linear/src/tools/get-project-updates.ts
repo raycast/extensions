@@ -1,6 +1,7 @@
-import { withAccessToken } from "@raycast/utils";
-import { getLinearClient, linear } from "../api/linearClient";
 import { ProjectUpdate } from "@linear/sdk";
+import { withAccessToken } from "@raycast/utils";
+
+import { getLinearClient, linear } from "../api/linearClient";
 
 export type ProjectUpdateResult = Pick<ProjectUpdate, "id" | "health" | "body" | "updatedAt" | "url">;
 

@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ado-search",
   "title": "Azure DevOps Repositories Search",
-  "description": "Search trough Azure DevOps git repositories and find open Pull Requests",
+  "description": "Search through Azure DevOps git repositories and find open Pull Requests",
   "icon": "Azure-DevOps.png",
   "author": "willem_van_lent",
+  "contributors": [
+    "fschaal"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -18,6 +21,27 @@
       "mode": "view"
     },
     {
+      "name": "search-ado-pipelines",
+      "title": "Azure DevOps Pipelines Search",
+      "description": "Search and open Azure DevOps Pipelines",
+      "subtitle": "Azure DevOps",
+      "mode": "view"
+    },
+    {
+      "name": "search-my-pull-requests",
+      "title": "Azure DevOps My Open Pull Requests",
+      "description": "Search and open my Azure DevOps Open Pull Requests",
+      "subtitle": "Azure DevOps",
+      "mode": "view"
+    },
+    {
+      "name": "search-my-pbis",
+      "title": "Azure DevOps My Open PBIs",
+      "description": "Search and open my Azure DevOps PBIs",
+      "subtitle": "Azure DevOps",
+      "mode": "view"
+    },
+    {
       "name": "menu-bar",
       "title": "Azure DevOps Open Pull Requests",
       "description": "Open Azure DevOps Open Pull Requests",
@@ -28,11 +52,19 @@
   ],
   "preferences": [
     {
-      "description": "The organization name of the Azure DevOps account which you will search trough",
+      "description": "The organization name of the Azure DevOps account which you will search through",
       "name": "organizationName",
       "placeholder": "myorg",
       "required": true,
       "title": "The organization name",
+      "type": "textfield"
+    },
+    {
+      "description": "The project name of the Azure DevOps account which you will search through",
+      "name": "projectName",
+      "placeholder": "myproject",
+      "required": true,
+      "title": "The project name",
       "type": "textfield"
     },
     {
@@ -42,6 +74,14 @@
       "required": true,
       "title": "Azure DevOps PAT",
       "type": "password"
+    },
+    {
+      "description": "The email address of your Azure DevOps account",
+      "name": "email",
+      "placeholder": "example@test.com",
+      "required": true,
+      "title": "Azure DevOps Email",
+      "type": "textfield"
     }
   ],
   "dependencies": {
@@ -62,6 +102,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "pull": "npx @raycast/api@latest pull-contributions",
-    "publish": "npx @raycast/api@latest publish"    
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -5,7 +5,10 @@
   "description": "Interact with teleport, the open infrastructure access platform",
   "icon": "icon.png",
   "author": "lamberttraccard",
-  "categories": ["Developer Tools", "Security"],
+  "categories": [
+    "Developer Tools",
+    "Security"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -110,5 +113,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

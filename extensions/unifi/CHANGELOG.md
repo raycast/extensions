@@ -1,5 +1,9 @@
 # UniFi Changelog
 
+## [Maintenance] - 2025-05-16
+
+- Cleanup outdated files
+
 ## [Improvements] - 2025-02-23
 
 - Updated to use new local UniFi API with api key

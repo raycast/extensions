@@ -1,5 +1,9 @@
 # Git Repos Changelog
 
+## [Bug Fix] - 2025-05-28
+
+- Fixes an issue where if a directory path contained ".git", it would not be properly parsed. A common case is the special GitHub ".github" repository.
+
 ## [Bug Fix] - 2024-02-10
 
 - Make find command handle errors better
@@ -19,7 +23,7 @@
 
 - Added option to filter search with the entire repo path.
 - Added ability to filter by repo type (normal repos vs submodules vs worktrees).
-- Resolved issue where submodules that have been renamed would not be found. 
+- Resolved issue where submodules that have been renamed would not be found.
 
 ## [Bug Fix] - 2023-10-17
 

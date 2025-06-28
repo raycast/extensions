@@ -20,7 +20,7 @@ const { primaryAction } = getPreferenceValues<{
   primaryAction: primaryActionEnum;
 }>();
 
-const { iconColor } = getPreferenceValues<{ iconColor: iconColorEnum }>();
+const { iconColor, customColor } = getPreferenceValues<{ iconColor: iconColorEnum; customColor?: string }>();
 
 const service = new Service();
 const cache = new Cache({
@@ -154,7 +154,16 @@ function Command() {
           .slice(itemsPerPage * page, itemsPerPage * (page + 1))
           .map((icon) => {
             const { id, body, width, height } = icon;
-            const svgIcon = toSvg(body, width, height, iconColor);
+            const svgIcon = toSvg(
+              body,
+              width,
+              height,
+              iconColor === iconColorEnum.customColor &&
+                customColor &&
+                /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(customColor)
+                ? customColor
+                : iconColor,
+            );
             const dataURIIcon = toDataURI(svgIcon);
 
             const paste = <Action.Paste title="Paste Svg String" content={svgIcon} />;

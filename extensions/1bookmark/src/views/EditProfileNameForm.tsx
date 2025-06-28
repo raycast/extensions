@@ -10,20 +10,19 @@ function Body(props: { name: string }) {
   const { pop } = useNavigation();
   const update = trpc.user.updateName.useMutation();
 
-  async function handleSubmit() {
-    try {
-      await update.mutateAsync({ name: editingName });
-      showToast({
-        style: Toast.Style.Success,
-        title: "Updated profile",
-      });
-      pop();
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update name",
-      });
-    }
+  function handleSubmit() {
+    update.mutate(
+      { name: editingName },
+      {
+        onSuccess: () => {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Updated profile",
+          });
+          pop();
+        },
+      },
+    );
   }
 
   return (

@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "tkdkid1000",
   "contributors": [
-    "johnstclair"
+    "johnstclair",
+    "ryanlauderbach"
   ],
   "categories": [
     "Media"
@@ -43,11 +44,10 @@
   "dependencies": {
     "@raycast/api": "^1.73.2",
     "@raycast/utils": "^1.15.0",
-    "cheerio": "^1.0.0-rc.12"
+    "cheerio": "^1.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/cheerio": "^0.22.35",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",

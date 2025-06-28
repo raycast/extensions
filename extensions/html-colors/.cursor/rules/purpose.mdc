@@ -1,7 +1,7 @@
 ---
 description: Describes what is the purpose of the extension and how users should use it
 globs: *.ts, *.tsx, *.md, package.json
-alwaysApply: false
+alwaysApply: true
 ---
 # Purpose of the extension
 
@@ -28,3 +28,4 @@ alwaysApply: false
     - copy rgba color to clipboard
     - copy the name to the clipboard
     - toggle between rgba or hex format in secondary text on search result
+    - toggle the list that separates extended colors into shades of colors as specified in [knowledge.mdc](mdc:extensions/html-colors/.cursor/rules/knowledge.mdc)

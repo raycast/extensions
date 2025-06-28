@@ -32,6 +32,7 @@ export interface HAServiceFieldSelectorSelect {
   options?: HAServiceFieldSelectorSelectOption[] | string[] | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface HAServiceFieldSelectorColorRgb {}
 
 export interface HAServiceFieldSelectorColorTemp {
@@ -40,10 +41,15 @@ export interface HAServiceFieldSelectorColorTemp {
   max?: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface HAServiceFieldSelectorAddon {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface HAServiceFieldSelectorBackupLocation {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface HAServiceFieldSelectorTime {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface HAServiceFieldSelectorConversationAgent {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface HAServiceFieldSelectorDatetime {}
 
 export interface HAServiceFieldSelector {
@@ -96,7 +102,7 @@ export interface HAServiceTarget {
 export interface HAServiceMeta {
   name: string;
   description: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   fields: Record<string, HAServiceField>;
   target?: HAServiceTarget;
 }

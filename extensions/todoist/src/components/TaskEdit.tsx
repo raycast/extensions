@@ -1,7 +1,8 @@
 import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 
-import { Task, updateTask, handleError } from "../api";
+import { Task, updateTask } from "../api";
 import useCachedData from "../hooks/useCachedData";
 
 type TaskEditProps = {
@@ -24,7 +25,7 @@ export default function TaskEdit({ task }: TaskEditProps) {
 
       pop();
     } catch (error) {
-      handleError({ error, title: "Unable to update task" });
+      await showFailureToast(error, { title: "Unable to update task" });
     }
   }
 

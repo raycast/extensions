@@ -17,7 +17,9 @@
     "teziovsky",
     "lukebars",
     "AlanHuang",
-    "alexs"
+    "alexs",
+    "ARui",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -148,6 +150,15 @@
       "description": "Whether or not to show the tags field in the create and update time entry forms.",
       "label": "Show tags",
       "default": true
+    },
+    {
+      "name": "timeEntriesLookbackDays",
+      "type": "textfield",
+      "required": false,
+      "title": "Time Entries Lookback Days",
+      "description": "Number of days to look back when fetching time entries (default: 14, max: 60)",
+      "placeholder": "Enter a number between 1-60",
+      "default": "14"
     }
   ],
   "dependencies": {

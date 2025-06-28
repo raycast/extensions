@@ -16,7 +16,7 @@ import { useLocalStorage, showFailureToast } from "@raycast/utils";
 import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
-import { exec } from "child_process";
+import { exec, ChildProcess } from "child_process";
 import { promisify } from "util";
 import fetch from "node-fetch";
 
@@ -50,7 +50,7 @@ const readHistoryFromStorage = async (): Promise<CommandHistoryItem[]> => {
   }
 };
 
-// Mark a single item as read
+// Mark a single item as read (or played status which is 'read')
 const markItemAsRead = async (
   item: CommandHistoryItem,
   history: CommandHistoryItem[],
@@ -67,7 +67,7 @@ const markItemAsRead = async (
 
   // Save back to LocalStorage
   await LocalStorage.setItem("commandHistory", JSON.stringify(updatedHistory));
-
+  // console.log(`Item ${item.id} marked as read in LocalStorage.`); // Optional logging
   return updatedHistory;
 };
 
@@ -76,119 +76,323 @@ const isAudioFile = (url: string): boolean => {
   return url.toLowerCase().endsWith(".ogg");
 };
 
-// Function to play OGG audio directly from URL
-const playAudioFromUrl = async (url: string): Promise<void> => {
-  try {
-    console.log(`Starting playback for audio: ${url}`);
+// --- Audio Playback State ---
+let isAudioPlaying = false;
+let currentAudioProcess: ChildProcess | null = null;
+let currentPlayingItemId: string | null = null;
 
-    // Get FFmpeg path from preferences
-    const preferences = getPreferenceValues<{
-      ffmpegPath?: string;
-    }>();
+// Function to mark audio as played (updates status to 'read' in storage)
+// Renamed from the general markItemAsRead to be specific for audio completion
+const markAudioAsPlayed = async (item: CommandHistoryItem): Promise<void> => {
+  if (!item || item.status !== "success") return;
+
+  console.log(`Attempting to mark audio item ${item.id} as played (read).`);
+  try {
+    const history = await readHistoryFromStorage();
+    // Find the specific item again to ensure we have the latest status before marking
+    const currentItemState = history.find((h) => h.id === item.id);
+    if (currentItemState && currentItemState.status === "success") {
+      const updatedHistory = history.map((historyItem) =>
+        historyItem.id === item.id ? { ...historyItem, status: "read" as const } : historyItem,
+      );
+      await LocalStorage.setItem("commandHistory", JSON.stringify(updatedHistory));
+      console.log(`Item ${item.id} marked as read in LocalStorage after playback.`);
+    } else {
+      console.log(`Item ${item.id} status was not 'success' when attempting to mark as played, or item not found.`);
+    }
+  } catch (error) {
+    console.error(`Error updating read status for item ${item.id}:`, error);
+  }
+};
+
+// Function to play OGG audio, ensuring only one plays at a time
+const playAudioFromUrl = async (url: string, itemId: string): Promise<void> => {
+  // --- Stop any currently playing audio ---
+  if (isAudioPlaying && currentAudioProcess && currentAudioProcess.pid) {
+    console.log(`Stopping existing audio playback (item: ${currentPlayingItemId}, pid: ${currentAudioProcess.pid})...`);
+    try {
+      // Sending SIGTERM gracefully first
+      const killed = currentAudioProcess.kill("SIGTERM");
+      if (!killed) {
+        console.log("Failed to send SIGTERM, trying SIGKILL...");
+        currentAudioProcess.kill("SIGKILL"); // Force kill if SIGTERM failed
+      }
+    } catch (killError) {
+      console.error(`Error stopping previous audio process (pid: ${currentAudioProcess.pid}):`, killError);
+    }
+    // Reset state immediately after kill attempt
+    isAudioPlaying = false;
+    currentAudioProcess = null;
+    currentPlayingItemId = null;
+  }
+
+  // Set loading state immediately
+  isAudioPlaying = true;
+  currentPlayingItemId = itemId; // Track the new item ID
+  await showToast({ style: Toast.Style.Animated, title: "Playing audio..." });
+
+  try {
+    console.log(`Starting playback for audio: ${url} (item: ${itemId})`);
+    const preferences = getPreferenceValues<{ ffmpegPath?: string }>();
     const ffmpegPath = preferences.ffmpegPath?.trim() || "ffmpeg";
     const ffplayPath = ffmpegPath.endsWith("ffmpeg")
       ? ffmpegPath.replace(/ffmpeg$/, "ffplay")
       : path.join(path.dirname(ffmpegPath), "ffplay");
 
-    console.log(`Using ffmpeg path: ${ffmpegPath}`);
     console.log(`Using ffplay path: ${ffplayPath}`);
 
-    // Try to use ffplay directly with the URL (no download needed)
+    // --- Helper to execute playback command and manage state ---
+    const playCommand = (cmd: string, isConversionStep = false): Promise<boolean> => {
+      return new Promise((resolve, reject) => {
+        // --- Re-check and stop if another process started somehow ---
+        if (isAudioPlaying && currentAudioProcess && currentAudioProcess.pid && currentPlayingItemId !== itemId) {
+          console.warn(
+            `Race condition? Another process (item: ${currentPlayingItemId}) was active. Stopping it before starting ${itemId}.`,
+          );
+          try {
+            currentAudioProcess.kill("SIGTERM");
+          } catch (killError) {
+            console.error("Error stopping previous audio process during race condition check:", killError);
+          }
+          // Assume killed, reset state before starting new process
+          isAudioPlaying = false;
+          currentAudioProcess = null;
+          currentPlayingItemId = null;
+        }
+
+        // --- Set state for the new process ---
+        isAudioPlaying = true;
+        currentPlayingItemId = itemId;
+        console.log(`Executing (item: ${itemId}): ${cmd}`);
+        const process = exec(cmd);
+        currentAudioProcess = process; // Store the new process
+
+        // --- Process Event Handlers ---
+        const handleClose = async (code: number | null, signal: NodeJS.Signals | null) => {
+          console.log(
+            `Audio process (item: ${itemId}, pid: ${process.pid}) exited with code ${code}, signal ${signal}`,
+          );
+
+          // --- State Reset Logic ---
+          // Only reset state if this is the process we are currently tracking
+          if (currentAudioProcess === process) {
+            isAudioPlaying = false;
+            currentAudioProcess = null;
+            currentPlayingItemId = null;
+            console.log(`Global state reset by process ${process.pid}`);
+          } else {
+            console.log(
+              `Closed event received for a stale process (expected: ${currentAudioProcess?.pid}, got: ${process.pid}). Ignoring state reset.`,
+            );
+            // If the process finished but wasn't the *current* one, it means it was likely killed previously.
+            // We don't resolve or reject here for stale processes.
+            return;
+          }
+
+          // --- Outcome Handling ---
+          if (signal === "SIGTERM" || signal === "SIGKILL") {
+            console.log(`Process (item: ${itemId}) was killed intentionally.`);
+            resolve(false); // Indicate stopped, not played fully
+          } else if (code === 0) {
+            console.log(`Process (item: ${itemId}) completed successfully.`);
+            if (!isConversionStep) {
+              // Find the item in the latest history to mark as played
+              const history = await readHistoryFromStorage();
+              const itemToMark = history.find((h) => h.id === itemId);
+              if (itemToMark) {
+                await markAudioAsPlayed(itemToMark); // Call the mark function
+              } else {
+                console.log(`Item ${itemId} not found in history to mark as played.`);
+              }
+            }
+            resolve(true); // Indicate played successfully
+          } else {
+            console.error(`Process (item: ${itemId}) failed with code ${code}.`);
+            reject(new Error(`Process exited with code ${code}`));
+          }
+        };
+
+        const handleError = (err: Error) => {
+          console.error(`Error executing audio process (item: ${itemId}, pid: ${process.pid}):`, err);
+          // Only reset state if this error belongs to the currently tracked process
+          if (currentAudioProcess === process) {
+            isAudioPlaying = false;
+            currentAudioProcess = null;
+            currentPlayingItemId = null;
+            console.log(`Global state reset due to error in process ${process.pid}`);
+          } else {
+            console.log(
+              `Error event received for a stale process (expected: ${currentAudioProcess?.pid}, got: ${process.pid}). Ignoring state reset.`,
+            );
+          }
+          reject(err); // Reject the promise
+        };
+
+        process.on("close", handleClose);
+        process.on("error", handleError);
+
+        process.stderr?.on("data", (data) =>
+          console.error(`stderr (item: ${itemId}, pid: ${process.pid}): ${data.toString()}`),
+        );
+        // process.stdout?.on('data', (data) => console.log(`stdout (item: ${itemId}): ${data}`));
+      });
+    };
+
+    // --- Playback Attempts ---
+    let playedSuccessfully = false;
+    let stoppedIntentionally = false;
+
+    // 1. Try ffplay directly
     try {
-      console.log("Attempting to play directly with ffplay...");
-      await execPromise(`${ffplayPath} -nodisp -autoexit "${url}"`);
-    } catch (ffplayError) {
-      console.log("Direct ffplay failed, falling back to temporary download...");
+      console.log(`Attempting direct play (item: ${itemId})...`);
+      playedSuccessfully = await playCommand(`${ffplayPath} -nodisp -autoexit "${url}"`);
+      if (playedSuccessfully) {
+        await showToast({ style: Toast.Style.Success, title: "Playback Finished" });
+        return; // Success, exit function
+      } else {
+        console.log(`Direct play (item: ${itemId}) was stopped.`);
+        stoppedIntentionally = true; // Assume stopped if playCommand resolved false
+        // If stopped, playAudioFromUrl should just return. State is already reset by playCommand.
+        return;
+      }
+    } catch (ffplayError: unknown) {
+      console.log(`Direct ffplay (item: ${itemId}) failed, falling back to download...`, ffplayError);
+      // If it failed (not stopped), proceed to fallback
+    }
 
-      // Create a temporary file for download
-      const tmpDir = os.tmpdir();
-      const fileName = `notis-audio-${Date.now()}.ogg`;
-      const filePath = path.join(tmpDir, fileName);
+    // 2. Fallback: Download and play local
+    const tmpDir = os.tmpdir();
+    const fileName = `notis-audio-${Date.now()}-${itemId}.ogg`;
+    const filePath = path.join(tmpDir, fileName);
 
+    try {
+      console.log(`Downloading audio for item ${itemId} to ${filePath}...`);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
+      const buffer = await response.arrayBuffer(); // Use arrayBuffer
+      await fs.writeFile(filePath, Buffer.from(buffer)); // Convert to Buffer for writeFile
+      console.log(`Audio (item: ${itemId}) saved to: ${filePath}`);
+
+      // 3. Try ffplay local
       try {
-        // Download the file
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`Failed to download audio: ${response.statusText}`);
+        console.log(`Attempting local play (item: ${itemId})...`);
+        playedSuccessfully = await playCommand(`${ffplayPath} -nodisp -autoexit "${filePath}"`);
+        if (playedSuccessfully) {
+          await showToast({ style: Toast.Style.Success, title: "Playback Finished" });
+          // Clean up successful local play temp file
+          await fs
+            .unlink(filePath)
+            .catch((err) => console.error("Error deleting temp file after successful local play:", err));
+          return; // Success
+        } else {
+          console.log(`Local play (item: ${itemId}) was stopped.`);
+          stoppedIntentionally = true;
+          // Clean up and return if stopped
+          await fs
+            .unlink(filePath)
+            .catch((err) => console.error("Error deleting temp file after stopped local play:", err));
+          return;
         }
+      } catch (localFfplayError: unknown) {
+        console.log(`Local ffplay (item: ${itemId}) failed, converting...`, localFfplayError);
+        // If failed (not stopped), proceed to conversion
+      }
 
-        // Get file buffer and write to disk
-        const buffer = await response.buffer();
-        await fs.writeFile(filePath, buffer);
-        console.log(`Audio temporarily saved to: ${filePath}`);
+      // 4. Convert to m4a and play with afplay
+      const m4aPath = filePath.replace(".ogg", ".m4a");
+      try {
+        console.log(`Converting (item: ${itemId}) ${filePath} to ${m4aPath}...`);
+        // Use execPromise for conversion as we don't need to kill it specifically
+        await execPromise(`${ffmpegPath} -i "${filePath}" -c:a aac "${m4aPath}"`);
+        console.log(`Converted (item: ${itemId}) to: ${m4aPath}`);
 
-        // Try ffplay on the local file
-        try {
-          await execPromise(`${ffplayPath} -nodisp -autoexit "${filePath}"`);
-        } catch (localFfplayError) {
-          // Try to convert to m4a which macOS can play
-          console.log("Local ffplay failed, converting to m4a...");
-          const m4aPath = filePath.replace(".ogg", ".m4a");
-          await execPromise(`${ffmpegPath} -i "${filePath}" -c:a aac "${m4aPath}"`);
-          await execPromise(`afplay "${m4aPath}"`);
-
-          // Clean up the converted file
+        // 5. Try afplay
+        console.log(`Attempting afplay (item: ${itemId})...`);
+        playedSuccessfully = await playCommand(`afplay "${m4aPath}"`);
+        if (playedSuccessfully) {
+          await showToast({ style: Toast.Style.Success, title: "Playback Finished" });
+          // Success
+        } else {
+          console.log(`afplay (item: ${itemId}) was stopped.`);
+          stoppedIntentionally = true;
+          // If stopped, return. Cleanup happens in finally.
+          return;
+        }
+      } catch (afplayError: unknown) {
+        console.error(`afplay (item: ${itemId}) failed:`, afplayError);
+        throw afplayError; // Re-throw final playback error
+      } finally {
+        // Clean up converted file if it exists, unless stopped intentionally before afplay finished
+        if (!stoppedIntentionally || currentPlayingItemId !== itemId) {
           await fs.unlink(m4aPath).catch((err) => console.error("Error deleting converted file:", err));
+        } else if (stoppedIntentionally) {
+          console.log("Skipping m4a cleanup as afplay was stopped intentionally.");
         }
-
-        // Clean up the temporary file
-        await fs.unlink(filePath).catch((err) => console.error("Error deleting temporary file:", err));
-      } catch (error) {
-        console.error("Error with temporary file approach:", error);
-        throw error;
+      }
+    } finally {
+      // Clean up original downloaded file if it exists, unless stopped intentionally
+      if (!stoppedIntentionally || currentPlayingItemId !== itemId) {
+        await fs.unlink(filePath).catch((err) => console.error("Error deleting temporary ogg file:", err));
+      } else if (stoppedIntentionally) {
+        console.log("Skipping ogg cleanup as playback was stopped intentionally.");
       }
     }
   } catch (error) {
-    console.error("Error playing audio:", error);
-    console.log("Falling back to browser playback...");
-    // Fallback to opening in browser if native playback fails
-    showFailureToast("Error Playing Audio", {
-      message: "Failed to play audio. Please try again or open in browser.",
-    });
+    console.error(`Error playing audio (item: ${itemId}):`, error);
+    // Ensure state is reset only if the error pertains to the current item
+    if (currentPlayingItemId === itemId) {
+      isAudioPlaying = false;
+      currentAudioProcess = null;
+      currentPlayingItemId = null;
+      console.log(`Global state reset due to error for item ${itemId}`);
+    }
+    showFailureToast("Error Playing Audio", { message: "Failed to play audio. Check logs for details." });
+  } finally {
+    // Final safety check: if this item ID was supposed to be playing but isn't marked as playing, clear state.
+    // This covers edge cases where state might not have been reset properly.
+    if (currentPlayingItemId === itemId && !isAudioPlaying && currentAudioProcess === null) {
+      console.log(`Final state cleanup check for item ${itemId}. State seems consistent.`);
+    } else if (currentPlayingItemId === itemId && (isAudioPlaying || currentAudioProcess !== null)) {
+      console.warn(`Final state cleanup check for item ${itemId}: State inconsistent! Forcing reset.`);
+      isAudioPlaying = false;
+      currentAudioProcess = null;
+      currentPlayingItemId = null;
+    }
   }
 };
 
-// Mark an item as played and read
-const markAudioAsPlayed = async (item: CommandHistoryItem): Promise<void> => {
-  if (!item.id || item.status !== "success") return;
-
-  // Mark the item as read
-  try {
-    const history = await readHistoryFromStorage();
-    const updatedHistory = history.map((historyItem) =>
-      historyItem.id === item.id ? { ...historyItem, status: "read" as const } : historyItem,
-    );
-
-    await LocalStorage.setItem("commandHistory", JSON.stringify(updatedHistory));
-  } catch (error) {
-    console.error("Error updating read status:", error);
-  }
-};
-
-// Play audio for an item
+// Play audio for an item, passing the item ID
 const playItemAudio = async (item: CommandHistoryItem): Promise<void> => {
-  console.log(`Attempting to play audio for item: ${item.id}`);
-  console.log(`Media URLs: ${JSON.stringify(item.mediaUrls)}`);
+  console.log(`Request to play audio for item: ${item.id}`);
+  // console.log(`Media URLs: ${JSON.stringify(item.mediaUrls)}`); // Reduce verbosity
+
+  if (item.status !== "success" && item.status !== "read") {
+    console.log(`Skipping playback for item ${item.id} due to status: ${item.status}`);
+    showFailureToast("Cannot Play Audio", { message: "Audio can only be played for successful messages." });
+    return;
+  }
 
   if (!item.mediaUrls || item.mediaUrls.length === 0) {
-    console.log("No audio files to play - mediaUrls is empty");
+    console.log(`No media URLs found for item ${item.id}.`);
+    showFailureToast("No Audio Found", { message: "This item does not contain any media." });
     return;
   }
 
-  // Find the first audio file
   const audioUrl = item.mediaUrls.find((url) => isAudioFile(url));
   if (!audioUrl) {
-    console.log("No OGG audio files found in mediaUrls");
+    console.log(`No OGG audio file found in mediaUrls for item ${item.id}.`);
+    showFailureToast("No Audio Found", { message: "Could not find a playable OGG audio file in the media URLs." });
     return;
   }
 
-  console.log(`Found audio URL to play: ${audioUrl}`);
+  console.log(`Found audio URL to play for item ${item.id}: ${audioUrl}`);
 
-  // Play the audio file
-  await playAudioFromUrl(audioUrl);
+  // Pass item.id to playAudioFromUrl
+  // No try/catch needed here as playAudioFromUrl handles its own errors/toasts.
+  await playAudioFromUrl(audioUrl, item.id);
 
-  // Mark as played
-  await markAudioAsPlayed(item);
+  // No need to mark as played here; playAudioFromUrl handles it internally on success.
+  console.log(`playItemAudio finished for item ${item.id}.`);
 };
 
 /**
@@ -471,12 +675,14 @@ export default function Command() {
               <ActionPanel>
                 <ActionPanel.Section title="Item Actions">
                   {item.mediaUrls && item.mediaUrls.some((url) => isAudioFile(url)) && (
-                    <Action
-                      title="Play Audio"
-                      icon={Icon.Play}
-                      shortcut={{ modifiers: ["opt"], key: "p" }}
-                      onAction={() => playItemAudio(item)}
-                    />
+                    <>
+                      <Action
+                        title="Play Audio"
+                        icon={Icon.Play}
+                        shortcut={{ modifiers: ["opt"], key: "p" }}
+                        onAction={() => playItemAudio(item)}
+                      />
+                    </>
                   )}
                   <Action.CopyToClipboard
                     title="Copy Response"

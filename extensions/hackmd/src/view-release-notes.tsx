@@ -15,7 +15,7 @@ function astToMarkdown(contents: Content[]) {
 function getVersionFromHeading2Node(heading: Content) {
   return (heading as unknown as Root).children
     .filter((c) => c.type === "text")
-    .map((c) => (c as any).value)
+    .map((c) => (c as { value: string }).value)
     .join("");
 }
 
@@ -53,11 +53,14 @@ export default function Releases() {
   }, [note]);
 
   const sectionsChangelogMap = useMemo(() => {
-    return sections.reduce((acc, [heading, ...contents]) => {
-      const version = getVersionFromHeading2Node(heading);
-      acc[version] = astToMarkdown(contents);
-      return acc;
-    }, {} as { [version: string]: string });
+    return sections.reduce(
+      (acc, [heading, ...contents]) => {
+        const version = getVersionFromHeading2Node(heading);
+        acc[version] = astToMarkdown(contents);
+        return acc;
+      },
+      {} as { [version: string]: string },
+    );
   }, [sections]);
 
   const searchIndex = useMemo(() => {
@@ -74,7 +77,7 @@ export default function Releases() {
         id: version,
         title: version,
         content: content,
-      }))
+      })),
     );
 
     return miniSearch;
@@ -85,12 +88,7 @@ export default function Releases() {
   }, [searchIndex, search]);
 
   return (
-    <List
-      isShowingDetail
-      isLoading={isLoading}
-      enableFiltering={false}
-      onSearchTextChange={(value) => setSearch(value)}
-    >
+    <List isShowingDetail isLoading={isLoading} filtering={false} onSearchTextChange={(value) => setSearch(value)}>
       {sections
         .filter((section) => {
           if (search) {

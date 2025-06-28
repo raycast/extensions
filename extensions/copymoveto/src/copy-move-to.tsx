@@ -97,6 +97,8 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
       let completedFiles = 0;
       let completedDirectories = 0;
       for (const item of selectedItems) {
+        const itemIsFile = await isFile(item.path);
+        const itemIsDirectory = await isDirectory(item.path);
         const filename = await getFilenameFromPath(item.path);
         const alreadyExists = await checkExistence(item.path, destination.directory);
         if (alreadyExists) {
@@ -133,8 +135,6 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
           await fileAction(item.path, destination.directory);
         }
 
-        const itemIsFile = await isFile(item.path);
-        const itemIsDirectory = await isDirectory(item.path);
         if (itemIsFile) {
           completedFiles += 1;
         }

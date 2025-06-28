@@ -1,5 +1,16 @@
 # KeePassXC Extension Changelog
 
+## [1.6.0] - 2025-04-07
+
+### Added
+
+- Optional favicon support for the user interface.
+- New image with favicons.
+
+### Fixed
+
+- Better descriptions for the preferences.
+
 ## [1.5.6] - 2025-03-12
 
 ### Fixed
@@ -121,4 +132,4 @@
 
 ### Added
 
-- Add support for Key File protected database file.
+- Initial release.

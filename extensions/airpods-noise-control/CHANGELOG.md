@@ -1,5 +1,9 @@
 # AirPods Noise Control Changelog
 
+## [Bug Fix] - 2025-04-15
+
+- Fixed incorrect logic selecting "Adaptive" instead of "Transparency" in Noise Control toggle
+
 ## [Bug Fix] - 2024-11-14
 
 - Fixed incorrect sound menu expand toggle index computation on macOS Sequoia

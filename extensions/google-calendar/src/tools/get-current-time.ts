@@ -1,4 +1,4 @@
-import { toHumanReadableTime, toISO8601WithTimezoneOffset } from "../utils";
+import { toHumanReadableTime, toISO8601WithTimezoneOffset } from "../lib/utils";
 
 /**
  * Get the current time

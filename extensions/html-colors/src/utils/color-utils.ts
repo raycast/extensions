@@ -1,5 +1,7 @@
 import { Icon } from "@raycast/api";
 import { ColorWithCategories } from "../types";
+import { ColorResult } from "./search-utils";
+import { ShadeCategory } from "../constants";
 
 /**
  * SVG dimensions for color preview
@@ -7,6 +9,20 @@ import { ColorWithCategories } from "../types";
 const SVG_WIDTH = 200;
 const SVG_HEIGHT = 150;
 const BORDER_RADIUS = 8;
+
+const EMPTY_GROUPS: Record<ShadeCategory, ColorResult[]> = Object.freeze({
+  pink: [],
+  red: [],
+  orange: [],
+  yellow: [],
+  brown: [],
+  "purple, violet and magenta": [],
+  blue: [],
+  cyan: [],
+  green: [],
+  white: [],
+  "black and gray": [],
+});
 
 /**
  * Generates an SVG preview of a color as a rounded rectangle with a border
@@ -34,4 +50,17 @@ export function getCategoryIcons(categories: ColorWithCategories["categories"]) 
     icon: category === "basic" ? Icon.Circle : Icon.CircleEllipsis,
     tooltip: `${category.charAt(0).toUpperCase()}${category.slice(1)} Color`,
   }));
+}
+
+/**
+ * Group colors by their shade categories
+ */
+export function groupColorsByShade(colors: ColorResult[]): Record<ShadeCategory, ColorResult[]> {
+  return colors.reduce(
+    (groups, color) => ({
+      ...groups,
+      [color.shade]: [...groups[color.shade], color],
+    }),
+    { ...EMPTY_GROUPS },
+  );
 }

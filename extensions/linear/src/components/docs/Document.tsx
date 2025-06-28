@@ -1,11 +1,13 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { getUserIcon } from "../../helpers/users";
-import { getDocumentIcon } from "../../helpers/documents";
 import { format } from "date-fns";
+
+import { getDocumentIcon } from "../../helpers/documents";
+import { getInitiativeIcon } from "../../helpers/initiatives";
 import { getProjectIcon } from "../../helpers/projects";
+import { getUserIcon } from "../../helpers/users";
+
 import { DocumentActions, DocumentActionsProps } from "./DocumentActions";
 import { DocumentDetail } from "./DocumentDetail";
-import { getInitiativeIcon } from "../../helpers/initiatives";
 
 export function Document({ doc, ...rest }: DocumentActionsProps) {
   const keywords = [doc.project?.name ?? "", doc.initiative?.name ?? "", doc.title, doc.creator.displayName];

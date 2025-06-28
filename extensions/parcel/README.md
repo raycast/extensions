@@ -27,10 +27,13 @@ This Raycast extension allows Parcel app users to view their upcoming and active
 ## Commands
 
 ### My Deliveries
+
 View all your active deliveries in Parcel.
 
 ### Add Delivery
+
 Add a new delivery to track in Parcel using a form interface. You can enter:
+
 - Tracking Number (required): The tracking code for your package
 - Description (optional): A description to help you identify your package
 

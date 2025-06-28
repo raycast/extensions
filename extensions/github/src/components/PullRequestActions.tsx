@@ -5,6 +5,7 @@ import { useState } from "react";
 import { getGitHubClient } from "../api/githubClient";
 import {
   MergeableState,
+  MergeStateStatus,
   PullRequestDetailsFieldsFragment,
   PullRequestFieldsFragment,
   PullRequestMergeMethod,
@@ -116,6 +117,101 @@ export default function PullRequestActions({
     }
   }
 
+  async function addPullRequestToMergeQueue() {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Adding pull request #${pullRequest.number} to merge queue`,
+      });
+
+      await github.addPullRequestToMergeQueue({ nodeId: pullRequest.id });
+
+      await mutate();
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Pull request #${pullRequest.number} added to merge queue`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed adding pull request to merge queue",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function removePullRequestFromMergeQueue() {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Removing pull request #${pullRequest.number} from merge queue`,
+      });
+
+      await github.removePullRequestFromMergeQueue({ nodeId: pullRequest.id });
+
+      await mutate();
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Pull request #${pullRequest.number} removed from merge queue`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed removing pull request from merge queue",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function enableAutoMerge() {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Enabling auto-merge for pull request #${pullRequest.number}`,
+      });
+
+      await github.enablePullRequestAutoMerge({ nodeId: pullRequest.id });
+
+      await mutate();
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Auto-merge enabled for pull request #${pullRequest.number}`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed enabling auto-merge",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function disableAutoMerge() {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Disabling auto-merge for pull request #${pullRequest.number}`,
+      });
+
+      await github.disablePullRequestAutoMerge({ nodeId: pullRequest.id });
+
+      await mutate();
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Auto-merge disabled for pull request #${pullRequest.number}`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed disabling auto-merge",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   async function assignToMe(id: string) {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Assigning to me" });
@@ -170,7 +266,13 @@ export default function PullRequestActions({
     }
   }
 
-  const canMerge = !pullRequest.closed && !pullRequest.isDraft && pullRequest.mergeable === MergeableState.Mergeable;
+  const canMerge =
+    !pullRequest.closed &&
+    !pullRequest.isDraft &&
+    pullRequest.mergeable === MergeableState.Mergeable &&
+    pullRequest.mergeStateStatus !== MergeStateStatus.Blocked;
+
+  const anyMergeActionAvailable = canMerge || pullRequest.repository.autoMergeAllowed;
 
   const viewerUser = getGitHubUser(viewer);
 
@@ -203,36 +305,79 @@ export default function PullRequestActions({
         target={<PullRequestCommits pullRequest={pullRequest} />}
       />
 
-      {canMerge ? (
+      {anyMergeActionAvailable && (
         <ActionPanel.Section>
-          {pullRequest.repository.mergeCommitAllowed ? (
+          {!canMerge && !pullRequest.isInMergeQueue && !pullRequest.repository.autoMergeAllowed && (
+            <>
+              {pullRequest.autoMergeRequest && (
+                <Action
+                  title="Disable Auto Merge"
+                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                  onAction={() => disableAutoMerge()}
+                />
+              )}
+
+              {!pullRequest.autoMergeRequest && (
+                <Action
+                  title="Merge When Ready"
+                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                  onAction={() => enableAutoMerge()}
+                />
+              )}
+            </>
+          )}
+
+          {pullRequest.isMergeQueueEnabled && canMerge && !pullRequest.isInMergeQueue && (
             <Action
-              title="Create Merge Commit"
+              title="Add to Merge Queue"
               icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-              onAction={() => mergePullRequest(PullRequestMergeMethod.Merge)}
+              onAction={() => addPullRequestToMergeQueue()}
             />
-          ) : null}
-
-          {pullRequest.repository.squashMergeAllowed ? (
+          )}
+          {pullRequest.isMergeQueueEnabled && pullRequest.isInMergeQueue && (
             <Action
-              title="Squash and Merge"
+              title="Remove from Merge Queue"
               icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
-              onAction={() => mergePullRequest(PullRequestMergeMethod.Squash)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              onAction={() => removePullRequestFromMergeQueue()}
             />
-          ) : null}
+          )}
 
-          {pullRequest.repository.rebaseMergeAllowed ? (
-            <Action
-              title="Rebase and Merge"
-              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
-              shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
-              onAction={() => mergePullRequest(PullRequestMergeMethod.Rebase)}
-            />
+          {!pullRequest.isMergeQueueEnabled && canMerge ? (
+            <>
+              {pullRequest.repository.mergeCommitAllowed ? (
+                <Action
+                  title="Create Merge Commit"
+                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                  onAction={() => mergePullRequest(PullRequestMergeMethod.Merge)}
+                />
+              ) : null}
+
+              {pullRequest.repository.squashMergeAllowed ? (
+                <Action
+                  title="Squash and Merge"
+                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
+                  onAction={() => mergePullRequest(PullRequestMergeMethod.Squash)}
+                />
+              ) : null}
+
+              {pullRequest.repository.rebaseMergeAllowed ? (
+                <Action
+                  title="Rebase and Merge"
+                  icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
+                  shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
+                  onAction={() => mergePullRequest(PullRequestMergeMethod.Rebase)}
+                />
+              ) : null}
+            </>
           ) : null}
         </ActionPanel.Section>
-      ) : null}
+      )}
 
       <ActionPanel.Section>
         <RequestReviewSubmenu pullRequest={pullRequest} mutate={mutate} />

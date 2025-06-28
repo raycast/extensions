@@ -1,4 +1,5 @@
 import { Color, Icon } from "@raycast/api";
+import { Delivery } from "./delivery";
 
 interface Activity {
   time: Date;
@@ -17,6 +18,16 @@ export interface PackageMap {
     packages: Package[];
     lastUpdated?: Date;
   };
+}
+
+export function packagesFromOfflineCarrier(delivery: Delivery): Package[] {
+  return [
+    {
+      delivered: delivery.manualMarkedAsDelivered ?? false,
+      deliveryDate: delivery.manualDeliveryDate,
+      activity: [],
+    },
+  ];
 }
 
 export function deliveryIcon(packages?: Package[]): Icon {
@@ -126,4 +137,12 @@ export function calculateDayDifference(deliveryDate: Date, comparisonDate: Date)
   }
 
   return dayDifference;
+}
+
+export function allPackagesDeliveredForDeliveryId(deliveryId: string, packages: PackageMap): boolean {
+  const deliveryPackages = packages[deliveryId]?.packages;
+  if (!deliveryPackages) {
+    return false;
+  }
+  return deliveryPackages.every((aPackage) => aPackage.delivered); // all the packages of this delivery have been delivered
 }
