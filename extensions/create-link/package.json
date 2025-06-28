@@ -49,7 +49,6 @@
           "default": "{url}"
         }
       ]
-<<<<<<< HEAD
     },
     {
       "name": "show-tabs",
@@ -94,8 +93,6 @@
           "default": "{url}"
         }
       ]
-=======
->>>>>>> main
     }
   ],
   "dependencies": {
