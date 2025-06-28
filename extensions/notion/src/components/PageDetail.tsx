@@ -67,9 +67,7 @@ export function PageDetail({ page, setRecentPage, users }: PageDetailProps) {
         for (const [key, value] of Object.entries(page.properties)) {
           const propertyText = pagePropertyToText(value);
           if (propertyText) {
-            blocks.push(
-              `**${key}**: ${propertyText}\n`
-            );
+            blocks.push(`**${key}**: ${propertyText}\n`);
           }
         }
       }
