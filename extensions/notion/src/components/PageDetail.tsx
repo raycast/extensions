@@ -41,7 +41,8 @@ function pagePropertyToText(
       // That's not very useful so don't show anything.
       return;
     default:
-      return JSON.stringify(property.value);
+      // Don't show unsupported types in the preview.
+      return;
   }
 }
 
