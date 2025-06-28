@@ -11,7 +11,7 @@ async function checkExtension() {
   return true;
 }
 
-export default function CopyPlainText() {
+export default function ShowTabs() {
   const [tabs, setTabs] = useState<BrowserExtension.Tab[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
