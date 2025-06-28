@@ -30,13 +30,15 @@ function pagePropertyToText(
     case "number":
       return String(property.value);
     case "people":
-      return property.value.map((person) => person.object).join(", ");
+      // For people, we can only show the IDs without another query.
+      // That's not very useful so don't show anything.
+      return;
     case "rich_text":
     case "title":
       return property.value.map((text) => text.plain_text).join("");
     case "relation":
-      // For relations, we can only show the IDs. That's not very useful,
-      // so don't show anything.
+      // For relations, we can only show the IDs without another query.
+      // That's not very useful so don't show anything.
       return;
     default:
       return JSON.stringify(property.value);
