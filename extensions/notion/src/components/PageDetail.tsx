@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, Action, Icon, Image, Color } from "@raycast/api";
+import { ActionPanel, Detail, Action, Icon, Image, Color, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { format, formatDistanceToNow } from "date-fns";
 import { useEffect, useState } from "react";
@@ -7,6 +7,41 @@ import { fetchPageContent, getPageName, notionColorToTintColor, PageProperty, Pa
 import { handleOnOpenPage } from "../utils/openPage";
 
 import { AppendToPageForm } from "./forms";
+
+function pagePropertyToText(
+  property: PageProperty | (Extract<PageProperty, { type: "formula" }>["value"] & { id: string }),
+): string | undefined {
+  if (property.value === null) return;
+  switch (property.type) {
+    case "checkbox":
+      return property.value ? "Checked" : "Unchecked";
+    case "date": {
+      if (!property.value) return;
+      let displayedDate = property.value.start;
+      if (property.value.end) displayedDate += ` → ${property.value.end}`;
+      return displayedDate;
+    }
+    case "email":
+      return property.value;
+    case "formula":
+      return pagePropertyToText({ ...property.value, id: property.id });
+    case "multi_select":
+      return property.value.map((option) => option.name).join(", ");
+    case "number":
+      return String(property.value);
+    case "people":
+      return property.value.map((person) => person.object).join(", ");
+    case "rich_text":
+    case "title":
+      return property.value.map((text) => text.plain_text).join("");
+    case "relation":
+      // For relations, we can only show the IDs. That's not very useful,
+      // so don't show anything.
+      return;
+    default:
+      return JSON.stringify(property.value);
+  }
+}
 
 type PageDetailProps = {
   page: Page;
@@ -23,7 +58,28 @@ export function PageDetail({ page, setRecentPage, users }: PageDetailProps) {
     async (id) => {
       const fetchedPageContent = await fetchPageContent(id);
 
-      return fetchedPageContent && fetchedPageContent.markdown ? fetchedPageContent : undefined;
+      const blocks = [];
+
+      if (getPreferenceValues().properties_in_page_previews) {
+        for (const [key, value] of Object.entries(page.properties)) {
+          const propertyText = pagePropertyToText(value);
+          if (propertyText) {
+            blocks.push(
+              `**${key}**: ${propertyText}\n`
+            );
+          }
+        }
+      }
+
+      if (blocks.length > 0) {
+        blocks.push("---\n");
+      }
+
+      if (fetchedPageContent && fetchedPageContent.markdown) {
+        blocks.push(fetchedPageContent.markdown);
+      }
+
+      return { markdown: blocks.join("\n") };
     },
     [page.id],
   );
