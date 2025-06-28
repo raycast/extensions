@@ -9,7 +9,6 @@ export async function getActiveTab() {
     const tabs = await BrowserExtension.getTabs();
     const tab = tabs.find((tab) => tab.active);
     return tab;
-<<<<<<< HEAD
   } catch (error: unknown) {
     console.debug(error);
     return undefined;
@@ -25,10 +24,3 @@ export async function getTabs() {
     return [];
   }
 }
-=======
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error: unknown) {
-    return undefined;
-  }
-}
->>>>>>> main
