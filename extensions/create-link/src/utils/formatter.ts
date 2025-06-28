@@ -66,7 +66,7 @@ export function generateCustomTemplate(tab: BrowserExtension.Tab) {
     const { customFormat } = preferences;
 
     if (!customFormat || customFormat.trim() === "") {
-      showFailureToast("No custom format defined, Please set a custom format in the extension settings.", {
+      showFailureToast("No custom format defined, please set a custom format in the extension settings.", {
         title: "No custom format defined",
         primaryAction: {
           title: "Open Extension Settings",
