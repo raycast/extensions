@@ -1,5 +1,10 @@
 # Resend Changelog
 
+## [Modernize] - {PR_MERGE_DATE}
+
+- Modernize extension to use latest Raycast config
+- chore: remove `node-fetch`, `cross-fetch`
+
 ## [Added Region] - 2025-03-10
 
 Added support for Tokyo region
