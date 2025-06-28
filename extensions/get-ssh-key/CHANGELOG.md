@@ -1,5 +1,11 @@
 # Get SSH Key Changelog
 
+## [Open In Finder] - {PR_MERGE_DATE}
+
+- Show number of keys in Section subtitle
+- Action to OpenInFinder
+- Use Key as List Icon
+
 ## [Updates] - 2024-06-07
 
 - Update dependencies
