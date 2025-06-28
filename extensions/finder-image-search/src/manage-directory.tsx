@@ -2,6 +2,7 @@ import { Action, ActionPanel, Form, List, showToast, Toast, LocalStorage, confir
 import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
+import { showFailureToast } from "@raycast/utils";
 
 const STORAGE_KEY = "image-search-directories";
 
@@ -37,7 +38,7 @@ export default function ManageDirectory() {
       setDirectories(directoriesWithStatus);
     } catch (error) {
       console.error("Failed to load directories:", error);
-      showToast(Toast.Style.Failure, "Failed to load directories");
+      showFailureToast("Failed to load directories");
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +50,7 @@ export default function ManageDirectory() {
       await loadDirectories();
     } catch (error) {
       console.error("Failed to save directories:", error);
-      showToast(Toast.Style.Failure, "Failed to save directories");
+      showFailureToast("Failed to save directories");
     }
   };
 
@@ -87,13 +88,16 @@ export default function ManageDirectory() {
     const newDirs = commonDirs.filter((dir) => fs.existsSync(dir) && !existingPaths.includes(dir));
 
     if (newDirs.length === 0) {
-      showToast(Toast.Style.Failure, "All common directories are already added or don't exist");
+      showFailureToast("All common directories are already added or don't exist");
       return;
     }
 
     const allDirectories = [...existingPaths, ...newDirs];
     await saveDirectories(allDirectories);
-    showToast(Toast.Style.Success, `Added ${newDirs.length} common director${newDirs.length === 1 ? "y" : "ies"}`);
+    showToast(
+      Toast.Style.Success,
+      `Added ${newDirs.length} common ${newDirs.length === 1 ? "directory" : "directories"}`,
+    );
   };
 
   return (
@@ -187,14 +191,17 @@ function DirectoryManagerForm({ onUpdate, existingDirectories }: DirectoryManage
         if (added.length > 0 && removed.length > 0) {
           showToast(Toast.Style.Success, `Updated: +${added.length}, -${removed.length}`);
         } else if (added.length > 0) {
-          showToast(Toast.Style.Success, `Added ${added.length} director${added.length === 1 ? "y" : "ies"}`);
+          showToast(Toast.Style.Success, `Added ${added.length} ${added.length === 1 ? "directory" : "directories"}`);
         } else if (removed.length > 0) {
-          showToast(Toast.Style.Success, `Removed ${removed.length} director${removed.length === 1 ? "y" : "ies"}`);
+          showToast(
+            Toast.Style.Success,
+            `Removed ${removed.length} ${removed.length === 1 ? "directory" : "directories"}`,
+          );
         }
       }
     } catch (error) {
       console.error("Failed to update directories:", error);
-      showToast(Toast.Style.Failure, "Failed to update directories");
+      showFailureToast("Failed to update directories");
       // Revert selection on error
       setSelectedDirectories(currentDirectories);
     } finally {

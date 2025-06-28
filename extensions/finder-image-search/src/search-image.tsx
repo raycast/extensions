@@ -11,7 +11,7 @@ interface SearchResult {
   name: string;
   path: string;
   size: string;
-  modifiedDate: string;
+  modifiedTimestamp: number;
 }
 
 interface Preferences {
@@ -95,7 +95,9 @@ export default function SearchImage() {
         const extensionPattern = IMAGE_EXTENSIONS.map((ext) => `-name "*${ext}" -o -name "*${ext.toUpperCase()}"`).join(
           " -o ",
         );
-        const command = `find '${escapedDir}' -type f \\( ${extensionPattern} \\) -iname "*${searchText}*" 2>/dev/null | head -100`;
+
+        const escapedSearchText = searchText.replace(/'/g, "'\"'\"'");
+        const command = `find '${escapedDir}' -type f \\( ${extensionPattern} \\) -iname "*${escapedSearchText}*" 2>/dev/null | head -100`;
 
         try {
           const { stdout } = await execAsync(command);
@@ -116,16 +118,16 @@ export default function SearchImage() {
       const resultsWithStats = await Promise.all(
         flatResults.map(async (filePath) => {
           try {
-            const stats = fs.statSync(filePath);
+            const stats = await fs.promises.stat(filePath);
             const name = path.basename(filePath);
             const size = formatFileSize(stats.size);
-            const modifiedDate = stats.mtime.toLocaleDateString();
+            const modifiedTimestamp = stats.mtime.getTime();
 
             return {
               name,
               path: filePath,
               size,
-              modifiedDate,
+              modifiedTimestamp,
             };
           } catch {
             return null;
@@ -136,7 +138,7 @@ export default function SearchImage() {
       const validResults = resultsWithStats.filter((result): result is SearchResult => result !== null);
 
       // Sort by modification date (newest first)
-      validResults.sort((a, b) => new Date(b.modifiedDate).getTime() - new Date(a.modifiedDate).getTime());
+      validResults.sort((a, b) => b.modifiedTimestamp - a.modifiedTimestamp);
 
       setResults(validResults);
     } catch (error) {
@@ -156,16 +158,19 @@ export default function SearchImage() {
   };
 
   const openInFinder = (filePath: string) => {
-    exec(`open -R "${filePath}"`);
+    const escapedPath = filePath.replace(/'/g, "'\"'\"'");
+    exec(`open -R "${escapedPath}"`);
   };
 
   const openWithDefaultApp = (filePath: string) => {
-    exec(`open "${filePath}"`);
+    const escapedPath = filePath.replace(/'/g, "'\"'\"'");
+    exec(`open "${escapedPath}"`);
   };
 
   const openWithApp = async (filePath: string, appName: string) => {
+    const escapedPath = filePath.replace(/'/g, "'\"'\"'");
     try {
-      await exec(`open -a "${appName}" "${filePath}"`);
+      await exec(`open -a "${appName}" "${escapedPath}"`);
       showToast(Toast.Style.Success, `Opened with ${appName}`);
     } catch {
       showToast(Toast.Style.Failure, `Failed to open with ${appName}`);
@@ -173,8 +178,9 @@ export default function SearchImage() {
   };
 
   const copyPath = async (filePath: string) => {
+    const escapedPath = filePath.replace(/'/g, "'\"'\"'");
     try {
-      await exec(`echo "${filePath}" | pbcopy`);
+      await exec(`echo "${escapedPath}" | pbcopy`);
       showToast(Toast.Style.Success, "Path copied to clipboard");
     } catch {
       showToast(Toast.Style.Failure, "Failed to copy path");
@@ -225,7 +231,7 @@ export default function SearchImage() {
           key={`${result.path}-${index}`}
           content={{ source: result.path }}
           title={result.name}
-          subtitle={`${result.size} • ${result.modifiedDate}`}
+          subtitle={`${result.size} • ${new Date(result.modifiedTimestamp).toLocaleString()}`}
           quickLook={{ path: result.path, name: result.name }}
           actions={
             <ActionPanel>
