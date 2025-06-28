@@ -41,7 +41,6 @@ export function getExtensionFriendlyName(ext: x509.Extension): string | null {
   if (ext instanceof x509.CRLDistributionPointsExtension) return "CRL Distribution Points";
   if (ext instanceof x509.AuthorityInfoAccessExtension) return "Authority Information Access";
   if (ext.type === "1.3.6.1.4.1.11129.2.4.2") return "Signed Certificate Timestamp List";
-  console.log(ext.type);
   return null;
 }
 
@@ -91,7 +90,7 @@ function parseSpecificExtensionDetails(ext: x509.Extension, baseKey: string): Li
       "1.3.6.1.5.5.7.3.5": "IP Security End System",
       "1.3.6.1.5.5.7.3.6": "IP Security Tunnel Termination",
       "1.3.6.1.5.5.7.3.7": "IP Security User",
-      anyExtendedKeyUsage: "2.5.29.37.0", // Any Extended Key Usage
+      "2.5.29.37.0": "Any Extended Key Usage",
     };
     const usageNames = ext.usages.map((usageOid) => ekuFriendlyNames[usageOid as string] || usageOid).join(", ");
     items.push(createListItem("Usages", usageNames, `${baseKey}-ekus`, usageNames));
@@ -217,17 +216,9 @@ function parseSpecificExtensionDetails(ext: x509.Extension, baseKey: string): Li
       });
     }
   }
-  // --- Fallback for other extensions: Show raw value ---
+  // --- Fallback for other extensions ---
   else {
-    items.push(createListItem("Not Supported Extension", "Please check the detail view", "not-supported-extension"));
-    // items.push(
-    //     createListItem(
-    //         "Value (Hex)",
-    //         Buffer.from(ext.value).toString("hex"),
-    //         `${baseKey}-hexval`,
-    //         Buffer.from(ext.value).toString("hex"),
-    //     ),
-    // );
+    items.push(createListItem("Not Supported Extension", "Please check the detail view", `${baseKey}-not-supported`));
   }
 
   return items;
@@ -237,10 +228,10 @@ export async function parseCertificate(cert: x509.X509Certificate): Promise<List
   const sections: ListSectionData[] = [];
 
   // Calculate fingerprints
-  const sha1 = Array.from(new Uint8Array(await cert!.getThumbprint()), (byte) =>
+  const sha1 = Array.from(new Uint8Array(await cert.getThumbprint()), (byte) =>
     byte.toString(16).padStart(2, "0"),
   ).join(":");
-  const sha256 = Array.from(new Uint8Array(await cert!.getThumbprint("SHA-256")), (byte) =>
+  const sha256 = Array.from(new Uint8Array(await cert.getThumbprint("SHA-256")), (byte) =>
     byte.toString(16).padStart(2, "0"),
   ).join(":");
 

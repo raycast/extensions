@@ -1,9 +1,10 @@
 import * as x509 from "@peculiar/x509";
 import { useEffect, useState } from "react";
 import { ListSectionData, parseCertificate } from "../utils/certificate-parser";
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import CertDetailView from "./CertDetailView";
 import { cleanPemInput } from "../utils/x509utils";
+import { showFailureToast } from "@raycast/utils";
 
 export function CertListView({ certText }: { certText: string }) {
   const [sections, setSections] = useState<ListSectionData[]>([]);
@@ -20,10 +21,9 @@ export function CertListView({ certText }: { certText: string }) {
       }
     }
     parseCert()
-      .catch(() => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: `Error parsing certificate: Must be one of DER, PEM, HEX, Base64, or Base64Url`,
+      .catch((error) => {
+        showFailureToast(error, {
+          title: "Error parsing certificate: Must be one of DER, PEM, HEX, Base64, or Base64Url",
         });
         setSections([]);
       })
@@ -45,9 +45,6 @@ export function CertListView({ certText }: { certText: string }) {
                 <ActionPanel>
                   <ActionPanel.Section title="Copy">
                     <Action.CopyToClipboard title={`Copy ${item.title}`} content={item.copyContent ?? item.subtitle} />
-                    <Action.CopyToClipboard title="Copy Value" content={item.copyContent ?? item.subtitle} />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section>
                     <Action.Push
                       icon={Icon.Plus}
                       title="Show Details"

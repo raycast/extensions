@@ -15,7 +15,7 @@ export default function Command() {
       if (!url) {
         showToast({
           style: Toast.Style.Failure,
-          title: "PÍlease enter a URL",
+          title: "Please enter a URL",
         });
         return;
       }
