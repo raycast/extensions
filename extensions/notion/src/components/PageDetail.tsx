@@ -34,8 +34,10 @@ function pagePropertyToText(
       // That's not very useful so don't show anything.
       return;
     case "rich_text":
-    case "title":
       return property.value.map((text) => text.plain_text).join("");
+    case "title":
+      // The title is already shown in the page preview, so no need to show it again.
+      return;
     case "relation":
       // For relations, we can only show the IDs without another query.
       // That's not very useful so don't show anything.
