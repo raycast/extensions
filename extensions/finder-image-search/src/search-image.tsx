@@ -187,7 +187,7 @@ export default function SearchImage() {
   };
 
   const openAddDirectory = async () => {
-    await open("raycast://extensions/ahmad_awdiyanto/finder-image-search/add-directory");
+    await open("raycast://extensions/ahmad_awdiyanto/finder-image-search/manage-directory");
     // Refresh directories after a delay to account for the user adding directories
     setTimeout(() => {
       loadDirectories();
@@ -204,7 +204,7 @@ export default function SearchImage() {
       aspectRatio="1"
       actions={
         <ActionPanel>
-          <Action title="Add Directory" onAction={openAddDirectory} />
+          <Action title="Manage Directory" onAction={openAddDirectory} />
           <Action title="Refresh Directories" onAction={refreshDirectories} />
         </ActionPanel>
       }

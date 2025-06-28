@@ -2,7 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "finder-image-search",
   "title": "Finder Image Search",
-  "description": "Finder Image Search",
+  "description": "Fast and intuitive image searching capabilities across your macOS systemFinder Image Search.",
+  "keywords": [
+    "finder",
+    "image",
+    "search",
+    "macOS",
+    "images",
+    "file search"
+  ],
+  "categories": [
+    "Productivity"
+  ],
   "icon": "fis-icon.png",
   "author": "ahmad_awdiyanto",
   "license": "MIT",
