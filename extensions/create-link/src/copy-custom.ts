@@ -17,5 +17,5 @@ export default async function copyCustom() {
   const customLink = generateCustomTemplate(activeTab);
 
   await Clipboard.copy(customLink);
-  await showHUD(`Copied HTML Link for "${activeTab.title || ""}" to clipboard`);
+  await showHUD(`Copied Custom Link for "${activeTab.title || ""}" to clipboard`);
 }
