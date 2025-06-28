@@ -157,9 +157,14 @@ export default function SearchImage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  const openInFinder = (filePath: string) => {
+  const openInFinder = async (filePath: string) => {
     const escapedPath = filePath.replace(/'/g, "'\"'\"'");
-    exec(`open -R "${escapedPath}"`);
+    try {
+      await execAsync(`open -R "${escapedPath}"`);
+      showToast(Toast.Style.Success, "Opened in Finder");
+    } catch {
+      showToast(Toast.Style.Failure, "Failed to open in Finder");
+    }
   };
 
   const openWithDefaultApp = (filePath: string) => {
