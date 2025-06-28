@@ -48,12 +48,14 @@ interface CopyCustomFormatPreferences {
 function applyCustomTemplate(template: string, tab: BrowserExtension.Tab): string {
   const { url, title, id, favicon } = tab;
   const safeUrl = sanitizeUrl(url);
-  const safeTitle = title || "";
+  const rawTitle = title || "";
   const safeFavicon = favicon || "";
 
   return template
     .replace(/\{url\}/g, safeUrl)
-    .replace(/\{title\}/g, safeTitle)
+    .replace(/\{title\}/g, rawTitle)
+    .replace(/\{title_html_escaped\}/g, sanitizeForHtml(rawTitle))
+    .replace(/\{title_markdown_escaped\}/g, sanitizeForMarkdown(rawTitle))
     .replace(/\{id\}/g, String(id))
     .replace(/\{favicon\}/g, safeFavicon);
 }
