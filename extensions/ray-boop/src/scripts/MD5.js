@@ -9,8 +9,8 @@
 	}
 **/
 
-import CryptoJS from "crypto-js";
+import { createHash } from "crypto";
 
 export function main(state) {
-  state.text = CryptoJS.MD5(state.text).toString();
+  state.text = createHash("md5").update(state.text).digest("hex");
 }

@@ -8,8 +8,8 @@
     }
 **/
 
-import CryptoJS from "crypto-js";
+import { createHash } from "crypto";
 
 export function main(state) {
-  state.text = CryptoJS.SHA1(state.text).toString();
+  state.text = createHash("sha1").update(state.text).digest("hex");
 }

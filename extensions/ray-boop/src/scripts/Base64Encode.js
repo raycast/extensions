@@ -9,8 +9,6 @@
 	}
 **/
 
-import { encode } from "js-base64";
-
 export function main(input) {
-  input.text = encode(input.text);
+  input.text = Buffer.from(input.text, "utf8").toString("base64");
 }
