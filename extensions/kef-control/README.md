@@ -2,8 +2,8 @@
 
 ### To start control Kef speakers
 
-To start control Kef speakers, you need IP address of them.
-You can find it in Kef Connect app.
+To control Kef speakers, you need their IP address.
+You can find it in the Kef Connect app.
 
 #### 1. Enter app
 ![1](./media/1.png)
