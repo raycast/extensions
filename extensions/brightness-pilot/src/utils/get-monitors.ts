@@ -1,17 +1,35 @@
-import { environment } from "@raycast/api";
-import { exec } from "child_process";
-import { promisify } from "util";
-import { chmod } from "fs/promises";
-import { join } from "path";
+import { spawn } from "child_process";
 import { Monitor } from "../types";
-
-const execAsync = promisify(exec);
+import { getCli } from "./cli";
 
 export async function getMonitors() {
+  const cli = await getCli();
   try {
-    const cliUtilPath = join(environment.assetsPath, "brightness-cli");
-    await chmod(cliUtilPath, "755");
-    const { stdout, stderr } = await execAsync(`${cliUtilPath} detect-displays`);
+    const { stdout, stderr } = await new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
+      const process = spawn(cli, ["detect-displays"]);
+      let stdout = "";
+      let stderr = "";
+
+      process.stdout.on("data", (data) => {
+        stdout += data.toString();
+      });
+
+      process.stderr.on("data", (data) => {
+        stderr += data.toString();
+      });
+
+      process.on("close", (code) => {
+        if (code === 0) {
+          resolve({ stdout, stderr });
+        } else {
+          reject(new Error(`Process exited with code ${code}`));
+        }
+      });
+
+      process.on("error", (err) => {
+        reject(err);
+      });
+    });
     if (stderr) throw new Error(stderr);
     return JSON.parse(stdout) as Monitor[];
   } catch {

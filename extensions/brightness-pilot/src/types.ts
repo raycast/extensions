@@ -5,3 +5,11 @@ export interface Monitor {
   isBuiltIn: boolean;
   isSupported: boolean;
 }
+
+export interface Release {
+  assets: Array<{
+    name: string;
+    digest: string;
+    browser_download_url: string;
+  }>;
+}

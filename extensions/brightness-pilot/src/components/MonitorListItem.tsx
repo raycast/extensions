@@ -3,10 +3,12 @@ import { showFailureToast } from "@raycast/utils";
 import { Monitor } from "../types";
 import { Dispatch, SetStateAction, useRef } from "react";
 import { setBrightness } from "../utils/set-brightness";
+import { ClearCacheAction } from "./ClearCacheAction";
 
 interface MonitorListItemProps {
   monitor: Monitor;
   setMonitors: Dispatch<SetStateAction<Monitor[]>>;
+  revalidate?: () => Promise<void>;
 }
 
 const showResToast = async (res: { ok: boolean; message: string }) => {
@@ -20,7 +22,7 @@ const showResToast = async (res: { ok: boolean; message: string }) => {
   });
 };
 
-export function MonitorListItem({ monitor, setMonitors }: MonitorListItemProps) {
+export function MonitorListItem({ monitor, setMonitors, revalidate }: MonitorListItemProps) {
   const isUpdatingRef = useRef(false);
 
   const updateBrightness = async (newBrightness: number) => {
@@ -69,44 +71,51 @@ export function MonitorListItem({ monitor, setMonitors }: MonitorListItemProps) 
             ]
       }
       actions={
-        !monitor.isSupported ? null : (
+        !monitor.isSupported ? (
           <ActionPanel>
-            <Action
-              title="Increase Brightness"
-              onAction={async () => {
-                const currentBrightness = monitor.brightness ?? 0;
+            <ClearCacheAction revalidate={revalidate} />
+          </ActionPanel>
+        ) : (
+          <ActionPanel>
+            <ActionPanel.Section>
+              <Action
+                title="Increase Brightness"
+                onAction={async () => {
+                  const currentBrightness = monitor.brightness ?? 0;
 
-                if (currentBrightness >= 1) {
-                  await showToast({
-                    style: Toast.Style.Success,
-                    title: "Max Brightness Reached",
-                    message: "Brightness is already at maximum level.",
-                  });
-                  return;
-                }
+                  if (currentBrightness >= 1) {
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Max Brightness Reached",
+                      message: "Brightness is already at maximum level.",
+                    });
+                    return;
+                  }
 
-                const newBrightness = Math.min(currentBrightness + 0.1, 1.0);
-                await updateBrightness(newBrightness);
-              }}
-            />
-            <Action
-              title="Decrease Brightness"
-              onAction={async () => {
-                const currentBrightness = monitor.brightness ?? 0;
+                  const newBrightness = Math.min(currentBrightness + 0.1, 1.0);
+                  await updateBrightness(newBrightness);
+                }}
+              />
+              <Action
+                title="Decrease Brightness"
+                onAction={async () => {
+                  const currentBrightness = monitor.brightness ?? 0;
 
-                if (currentBrightness <= 0) {
-                  await showToast({
-                    style: Toast.Style.Success,
-                    title: "Min Brightness Reached",
-                    message: "Brightness is already at minimum level.",
-                  });
-                  return;
-                }
+                  if (currentBrightness <= 0) {
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Min Brightness Reached",
+                      message: "Brightness is already at minimum level.",
+                    });
+                    return;
+                  }
 
-                const newBrightness = Math.max(currentBrightness - 0.1, 0.0);
-                await updateBrightness(newBrightness);
-              }}
-            />
+                  const newBrightness = Math.max(currentBrightness - 0.1, 0.0);
+                  await updateBrightness(newBrightness);
+                }}
+              />
+            </ActionPanel.Section>
+            <ClearCacheAction revalidate={revalidate} />
           </ActionPanel>
         )
       }
