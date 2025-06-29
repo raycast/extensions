@@ -83,6 +83,9 @@ export interface ErrorResult {
     [key: string]: string[];
   };
 }
+export interface Result<T> {
+  data: T;
+}
 export interface PaginatedResult<T> {
   data: T[];
   links: {
