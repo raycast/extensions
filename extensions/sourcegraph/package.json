@@ -179,10 +179,62 @@
       "preferences": []
     }
   ],
+  "tools": [
+    {
+      "name": "keyword_code_search",
+      "title": "Keyword Code Search",
+      "description": "Search private repositories using keyword patterns with boolean operators (AND/OR/NOT), regex patterns (/pattern/), exact phrases (\"text\"), and comprehensive filters (repo:, file:, lang:, select:, repo:has.path()). Best for precise literal matches and complex filtering."
+    },
+    {
+      "name": "nls_code_search",
+      "title": "Natural Language Code Search",
+      "description": "Search for code in private repositories using natural language queries. Describe functionality in plain English like 'functions that handle authentication' or 'React components for forms'. Optimized for AI-driven searches."
+    },
+    {
+      "name": "commit_search",
+      "title": "Commit Search",
+      "description": "Search commit messages and metadata in private repositories. Supports author:user, before:date, after:date, message:\"text\", repo:name@branch:tag, and rev:at.time() for temporal searches. Find commits by content, author, or time period."
+    },
+    {
+      "name": "diff_search",
+      "title": "Diff Search",
+      "description": "Search code changes and diffs in private repositories. Searches actual modifications (additions/deletions) with select:commit.diff.added/removed filters, author/date filters, and boolean operators. Track code evolution and specific changes."
+    },
+    {
+      "name": "read_file",
+      "title": "Read File",
+      "description": "Read complete file contents from private repositories at any git revision. Supports branches, tags, commit SHAs, relative refs (HEAD~1), multiple revisions (v1:v2), and temporal syntax (at.time()). Get full source code from any point in history."
+    },
+    {
+      "name": "public_keyword_code_search",
+      "title": "Public Keyword Code Search",
+      "description": "FALLBACK TOOL: Search public repositories using keyword patterns with boolean operators (AND/OR/NOT), regex patterns (/pattern/), exact phrases (\"text\"), and comprehensive filters. Use only when private search yields no results or user requests open source examples."
+    },
+    {
+      "name": "public_nls_code_search",
+      "title": "Public Natural Language Code Search",
+      "description": "FALLBACK TOOL: Search public repositories using natural language queries. Describe functionality in plain English like 'React hooks for state management'. Use only when private search yields no results or user requests open source examples."
+    },
+    {
+      "name": "public_commit_search",
+      "title": "Public Commit Search",
+      "description": "FALLBACK TOOL: Search commit messages and metadata in public repositories. Supports author:username, repo:owner/name, before:date filters. Use only when private search yields no results or user requests open source examples."
+    },
+    {
+      "name": "public_diff_search",
+      "title": "Public Diff Search",
+      "description": "FALLBACK TOOL: Search code changes and diffs in public repositories. Searches actual code modifications in open source projects. Use only when private search yields no results or user requests open source examples."
+    },
+    {
+      "name": "public_read_file",
+      "title": "Public Read File",
+      "description": "FALLBACK TOOL: Read complete file contents from public repositories at any git revision. Supports branches, tags, commit SHAs, and temporal syntax. Use only when private search yields no results or user requests open source examples."
+    }
+  ],
   "dependencies": {
     "@apollo/client": "^3.11.10",
-    "@raycast/api": "^1.86.1",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1",
     "@sourcegraph/telemetry": "^0.18.0",
     "@types/uuid": "^10.0.0",
     "cross-fetch": "^4.0.0",
@@ -202,8 +254,8 @@
     "@graphql-codegen/typescript-react-apollo": "^4.3.2",
     "@types/eventsource": "^1.1.15",
     "@types/luxon": "^3.4.2",
-    "@types/node": "~22.10.1",
-    "@types/react": "^18.3.12",
+    "@types/node": "~22.14.0",
+    "@types/react": "^19.1.8",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.16.0",
