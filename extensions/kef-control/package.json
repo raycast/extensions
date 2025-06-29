@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kef-control",
+  "title": "Control Kef",
+  "description": "Control Kef LSX2 through Raycast",
+  "icon": "extension-icon.png",
+  "author": "ho991217",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "commands": [
+    {
+      "name": "set-volume",
+      "title": "Set Volume",
+      "subtitle": "Sets volume for kef",
+      "description": "Set the volume of the kef",
+      "mode": "view"
+    },
+    {
+      "name": "set-source",
+      "title": "Set source",
+      "subtitle": "Sets source for kef",
+      "description": "Set the source of the kef (wifi, bluetooth, tv, optical, usb, aux)",
+      "mode": "view"
+    },
+    {
+      "name": "set-volume-menubar",
+      "title": "Set Volume Menubar",
+      "subtitle": "Kef",
+      "description": "Set volume of the Kef speaker through menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "tools": [
+    {
+      "name": "set-volume",
+      "title": "Set volume",
+      "description": "Sets current volume"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "ip-address",
+      "type": "textfield",
+      "required": true,
+      "title": "IP Address",
+      "description": "KEF CONNECT APP > Settings > Select Speaker > info icon > IP Address",
+      "default": "192.168.0.35"
+    }
+  ],
+  "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184"
+}
