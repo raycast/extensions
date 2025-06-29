@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [AI tools](https://github.com/raycast/extensions/pull/20128)
 
 - **ai**: This extension now supports Raycast AI with a set of tools that grants Raycast AI access to Sourcegraph code search across your private code (if configured) and the public code search corpus on [Sourcegraph.com](https://sourcegraph.com). To get started, include `@sourcegraph` in your next Raycast AI chat session!
 
