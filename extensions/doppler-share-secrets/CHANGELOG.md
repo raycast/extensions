@@ -1,5 +1,10 @@
 # Doppler Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- View Logs of a Config
+- Open In Doppler component
+
 ## [Increase max projects listed + change project list icon] - 2025-05-01
 
 - chore: update project listing to fetch a maximum of 100 projects per request
