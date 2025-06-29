@@ -1,5 +1,10 @@
 # Pocket Changelog
 
+## [Add Alert to Go to Export] - {PR_MERGE_DATE}
+- EmptyView when no bookmarks
+- URL in create is now Required
+- Add an Alert to let users know Pocket is shutting down
+
 ## Handle Deleted Items - 2025-03-13
 - Hide deleted items in the `Search Bookmarks` command
 

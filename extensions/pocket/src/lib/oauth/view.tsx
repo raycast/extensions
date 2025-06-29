@@ -1,6 +1,6 @@
 import { PocketClient } from "../api";
 import { useMemo, useState } from "react";
-import { Detail, environment, MenuBarExtra } from "@raycast/api";
+import { confirmAlert, Detail, environment, MenuBarExtra, open } from "@raycast/api";
 import { createPocketClient } from "./client";
 
 let pocketClient: PocketClient | null = null;
@@ -39,5 +39,16 @@ export function usePocketClient(): PocketClient {
 }
 
 export function View({ children }: { children: JSX.Element }) {
+  confirmAlert({
+    title: "Pocket will only be available until July 8",
+    message: "Go online to export your saved articles",
+    primaryAction: {
+      title: "Export",
+      async onAction() {
+        await open("https://getpocket.com/export");
+      },
+    },
+    rememberUserChoice: true,
+  });
   return withPocketClient(children);
 }
