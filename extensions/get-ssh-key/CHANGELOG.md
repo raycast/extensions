@@ -1,6 +1,6 @@
 # Get SSH Key Changelog
 
-## [Open In Finder] - {PR_MERGE_DATE}
+## [Open In Finder] - 2025-06-29
 
 - Show number of keys in Section subtitle
 - Action to OpenInFinder
