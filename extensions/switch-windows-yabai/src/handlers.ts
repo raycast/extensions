@@ -31,7 +31,7 @@ export const handleFocusWindow = (windowId: number, windowApp: string, onFocused
       await showToast({
         style: Toast.Style.Failure,
         title: `Failed Window ${windowApp} (${windowId}) focus`,
-        message: error.message || "Unknown error while focusing window",
+        message: error instanceof Error ? error.message : "Unknown error while focusing window",
       });
     }
   };
@@ -63,7 +63,7 @@ export const handleCloseWindow = (windowId: number, windowApp: string, onRemove:
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Close Window",
-        message: error.message || "Unknown error while closing window",
+        message: error instanceof Error ? error.message : "Unknown error while closing window",
       });
     }
   };
@@ -160,7 +160,9 @@ export const handleAggregateToSpace = (windowId: number, windowApp: string) => {
             console.log(`Moved window ${win.id} to space ${targetSpaceId}.`);
           }
         } catch (innerError: unknown) {
-          console.error(`Exception while moving window ${win.id}: ${innerError.message}`);
+          console.error(
+            `Exception while moving window ${win.id}: ${innerError instanceof Error ? innerError.message : "Unknown error"}`,
+          );
         }
       }
 
@@ -183,7 +185,7 @@ export const handleAggregateToSpace = (windowId: number, windowApp: string) => {
       await showToast({
         style: Toast.Style.Failure,
         title: "Aggregation Failed",
-        message: error.message || "An unknown error occurred during aggregation.",
+        message: error instanceof Error ? error.message : "An unknown error occurred during aggregation.",
       });
     }
   };
@@ -214,7 +216,7 @@ export const handleCloseEmptySpaces = (windowId: number, onRemove: (id: number) 
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Close Empty Spaces",
-        message: error.message || "Unknown error while closing window",
+        message: error instanceof Error ? error.message : "Unknown error while closing window",
       });
     }
   };
@@ -252,7 +254,7 @@ export const handleMoveWindowToDisplay = (windowId: number, windowApp: string, d
       await showToast({
         style: Toast.Style.Failure,
         title: "Move Window Failed",
-        message: error.message || "An unknown error occurred while moving the window.",
+        message: error instanceof Error ? error.message : "An unknown error occurred while moving the window.",
       });
     }
   };
@@ -335,7 +337,7 @@ export const handleDisperseWindowsBySpace = (screenIdx: string) => {
       await showToast({
         style: Toast.Style.Failure,
         title: "Dispersal Failed",
-        message: error.message || "An unknown error occurred during dispersal.",
+        message: error instanceof Error ? error.message : "An unknown error occurred during dispersal.",
       });
     }
   };
