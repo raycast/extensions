@@ -21,7 +21,7 @@ export function VolumeItem({ value }: VolumeItemProps) {
             title="Set Volume"
             icon={Icon.Speaker}
             onAction={async () => {
-              setVolume(value);
+              await setVolume(value);
               showHUD(`Volume set to ${value}%`);
             }}
           />
