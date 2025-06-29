@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node 20 + Strictest",
+  "compilerOptions": {
+    "charset": "utf8",
+    "esModuleInterop": true,
+    "allowJs": false,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "lib": ["ES2022"],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022",
+    "jsx": "react"
+  },
+  "exclude": ["node_modules"],
+  "include": ["src/**/*", "raycast-env.d.ts"]
+}

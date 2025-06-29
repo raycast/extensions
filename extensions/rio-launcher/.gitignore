@@ -1,0 +1,290 @@
+# ==============================
+# Compiled Files
+# ==============================
+*.lock
+*.[oa]  
+*.d
+*.rlib  
+*.rmeta  
+**/*.rmeta  
+.history/  
+*.so
+*.dylib
+*.dll
+*.exe
+.idea
+
+# ==============================
+# Rust Specific
+# ==============================
+target/       # Only ignore the target directory at the crate root
+**/target/    # Ignore target directories in any subdirectory
+*.rs.bk      # Backup files for Rust sources at the crate root
+db.surreal
+**/db.surreal/
+
+# ==============================
+# pyo3 Specific
+# ==============================
+# pyo3 builds are typically within the Rust `target` directory,
+# which is already ignored. No additional pyo3-specific patterns needed.
+
+# ==============================
+# Python Specific
+# ==============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd  # CPython Windows extension modules
+
+# Virtual environments
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Distribution / Packaging
+.Python
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit Test / Coverage Reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+pytest_debug.log
+
+# Django
+local_settings.py
+db.sqlite3
+
+# Flask
+instance/
+.webassets-cache
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# ==============================
+# Environment Files
+# ==============================
+.env*
+.env
+
+# ==============================
+# IDE and Editor Files
+# ==============================
+.vscode/
+.idea/
+*.sw[po]
+
+# ==============================
+# OS Generated Files
+# ==============================
+.DS_Store*
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+
+# ==============================
+# Dependencies
+# ==============================
+node_modules/
+vendor/
+vendors/
+
+# ==============================
+# Log and Temp Files
+# ==============================
+*.log
+*.[tb][ma][pk]
+*.tmp
+*.cache
+
+# ==============================
+# Build and Output
+# ==============================
+dist/
+build/
+coverage/
+doc/
+
+# ==============================
+# Database Files
+# ==============================
+*.sqlite*
+*.db
+*.neon
+
+# ==============================
+# Binary Files
+# ==============================
+**/bin/
+**/.target/
+**/dist/
+**/build/
+**/out/
+!.gitkeep
+
+# ==============================
+# Project Specific
+# ==============================
+.ropeproject/
+.modal
+.lapce/
+.qodo
+.koolaid
+
+# Ignore any file or directory containing .history (only at the repository root)
+.history/
+*.history
+
+# Ignore any file or directory containing .aider (only at the repository root)
+*.aider*
+
+# ==============================
+# React Specific
+# ==============================
+# Production
+/.next
+/out
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# Testing
+# Environment Files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Misc
+.DS_Store
+
+# ==============================
+# Node.js Specific
+# ==============================
+# Logs
+logs
+# Optional npm cache
+.npm
+# Optional eslint cache
+.eslintcache
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+# Stylelint cache
+.stylelintcache
+# TypeScript cache
+*.tsbuildinfo
+# Optional REPL history
+.node_repl_history
+# dotenv environment variables
+.env.*.local
+# Parcel cache
+.cache/
+# Next.js build output
+.next/
+# Nuxt.js build / generate output
+.nuxt/
+
+# Vuepress build output
+.vuepress/dist
+# Serverless directories
+.serverless/
+# FuseBox cache
+.fusebox/
+# DynamoDB Local files
+.dynamodb/
+# ROLLUP cache
+.rollup.cache
+# Temporary directories
+.temp/
+tmp/
+# Storybook build outputs
+out/
+.storybook-out/
+# SvelteKit build
+.svelte-kit/
+# Gridsome cache
+
+*.o
+*.bin
+
+# ==============================
+# Miscellaneous
+# ==============================
+fork
+/target
+/debug/
+release/
+
+# ============== <cyrup> ===============
+# ------  ## MIRRORMARK PROTOCOL   -----
+!.mdmirror
+# ----------  ## OZ PROTOCOL   ---------
+!.mdmirror/.OZ
+# Chrome data directories
+chrome_data*/
+
+# Assets and large files
+*.fig
+*.gif
+*.mp4
+*.png
+*.svg
+*.ico
+*.icns
+*.jpg
+assets/
+*/assets/
+tokenizer_files/
+
+# Temporary and Cache directories
+.tmp*/
+.tmpX*/
+Cache*/
+**/Cache/
+**/Cache_Data/
+
+# ==============================
+# Rust build output
+# ==============================
+**/target/
+
+# ============== </cyrup> ==============
