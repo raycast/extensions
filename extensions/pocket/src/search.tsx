@@ -97,7 +97,7 @@ function SearchBookmarks(props: { arguments?: SearchArguments }) {
     >
       {!loading && !bookmarks.length ? (
         <List.EmptyView
-          icon="myList.49feea21.svg"
+          icon="myList.svg"
           title="Start saving to your Pocket"
           actions={
             <ActionPanel>
