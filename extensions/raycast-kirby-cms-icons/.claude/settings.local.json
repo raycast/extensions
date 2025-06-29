@@ -1,0 +1,8 @@
+{
+  "enableAllProjectMcpServers": false,
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)"
+    ]
+  }
+}
