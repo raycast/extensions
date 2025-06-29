@@ -48,8 +48,8 @@ function CreateBookmark() {
     },
     validation: {
       url: (value) => {
-        if (!value) return "URL is required";
-        if (!isUrl(value)) {
+        if (!value) return "URL isrequired";
+        if (value && !isUrl(value)) {
           return "Invalid URL format";
         }
       },

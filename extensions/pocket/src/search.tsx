@@ -17,7 +17,7 @@ import { View } from "./lib/oauth/view";
 import { preferences } from "./lib/preferences";
 import { useBookmarks } from "./lib/hooks/use-bookmarks";
 import { useTags } from "./lib/hooks/use-tags";
-import { titleCase } from "./lib/utils";
+import { showExportAlert, titleCase } from "./lib/utils";
 
 interface SearchArguments {
   title: string;
@@ -276,6 +276,7 @@ function SearchBookmarks(props: { arguments?: SearchArguments }) {
 }
 
 export default function Command() {
+  showExportAlert();
   return (
     <View>
       <SearchBookmarks />
