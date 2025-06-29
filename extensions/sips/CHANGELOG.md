@@ -1,6 +1,6 @@
 # Image Modification Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2025-06-29
 
 - Remove `-lossless` flag from `dwebp` command.
 
