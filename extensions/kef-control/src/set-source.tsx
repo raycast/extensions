@@ -1,5 +1,6 @@
 import { ActionPanel, Action, Icon, List, showHUD } from "@raycast/api";
 import setSource, { type Source } from "./tools/set-source";
+import { showFailureToast } from "@raycast/utils";
 
 const SOURCES: { icon: Icon; name: Source }[] = [
   {
@@ -29,6 +30,20 @@ const SOURCES: { icon: Icon; name: Source }[] = [
 ];
 
 export default function Command() {
+  const setSourceAction = async (source: Source) => {
+    try {
+      await setSource({ source });
+      showHUD(`Source set to ${source}`);
+    } catch {
+      showFailureToast(`Failed to set source to ${source}`, {
+        primaryAction: {
+          title: "Retry",
+          onAction: () => setSourceAction(source),
+        },
+      });
+    }
+  };
+
   return (
     <List>
       {SOURCES.map((source) => (
@@ -38,13 +53,7 @@ export default function Command() {
           title={source.name}
           actions={
             <ActionPanel>
-              <Action
-                title="Set Source"
-                onAction={async () => {
-                  await setSource(source.name);
-                  showHUD(`Source set to ${source.name}`);
-                }}
-              />
+              <Action title="Set Source" onAction={() => setSourceAction(source.name)} />
             </ActionPanel>
           }
         />

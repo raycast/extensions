@@ -16,6 +16,12 @@ export const useFavorite = (kind: "volume" | "source") => {
   const addFavorite = useCallback(
     (newValue: number) => {
       const currentFavorites = favoriteStore.getSnapshot();
+
+      // if the value is already in the favorites, do nothing
+      if (currentFavorites.includes(newValue)) {
+        return;
+      }
+
       const newFavorites = [...currentFavorites, newValue];
       setValue(newFavorites);
       favoriteStore.addFavorite(newValue);
@@ -26,6 +32,12 @@ export const useFavorite = (kind: "volume" | "source") => {
   const removeFavorite = useCallback(
     (newValue: number) => {
       const currentFavorites = favoriteStore.getSnapshot();
+
+      // if the value is not in the favorites, do nothing
+      if (!currentFavorites.includes(newValue)) {
+        return;
+      }
+
       const newFavorites = currentFavorites.filter((v) => v !== newValue);
       setValue(newFavorites);
       favoriteStore.removeFavorite(newValue);

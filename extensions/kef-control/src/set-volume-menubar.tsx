@@ -7,7 +7,12 @@ export default function Command() {
   const { volume, setVolume } = useVolume();
 
   return (
-    <MenuBarExtra icon={{ source: "kef-icon.png" }} title={`${volume}%`} isLoading tooltip="Kef volume">
+    <MenuBarExtra
+      icon={{ source: "kef-icon.png" }}
+      title={`${volume}%`}
+      isLoading={volume === undefined}
+      tooltip="Kef volume"
+    >
       {favorites.map((favorite) => (
         <MenuBarExtra.Item key={favorite} title={`${favorite}%`} onAction={() => setVolume(favorite)} />
       ))}

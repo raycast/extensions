@@ -1,4 +1,4 @@
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import getVolumeTool from "../tools/get-volume";
 import setVolumeTool from "../tools/set-volume";
 import { useCallback, useEffect, useState } from "react";
@@ -15,11 +15,20 @@ export function useVolume() {
 
   const setVolume = useCallback(
     async (volume: number) => {
-      await setVolumeTool(volume);
-      revalidate();
-      _setVolume(volume);
+      try {
+        await setVolumeTool({ volume });
+        _setVolume(volume);
+        revalidate();
+      } catch {
+        showFailureToast(`Failed to set volume to ${volume}`, {
+          primaryAction: {
+            title: "Retry",
+            onAction: () => setVolume(volume),
+          },
+        });
+      }
     },
-    [revalidate],
+    [_setVolume, revalidate],
   );
 
   return { volume, setVolume };

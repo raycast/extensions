@@ -35,6 +35,16 @@
   ],
   "tools": [
     {
+      "name": "get-volume",
+      "title": "Get volume",
+      "description": "Gets current volume"
+    },
+    {
+      "name": "set-source",
+      "title": "Set source",
+      "description": "Sets current input source"
+    },
+    {
       "name": "set-volume",
       "title": "Set volume",
       "description": "Sets current volume"
@@ -70,5 +80,55 @@
       "default": "192.168.0.35"
     }
   ],
-  "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184"
+  "ai": {
+    "instructions": "You are a helpful assistant that can control KEF LSX2 through Raycast. The volume is between 0 and 100, which is percentage. And you can set the source to wifi, bluetooth, tv, optical, usb, aux, standby. standby means the speaker is in standby mode.",
+    "evals": [
+      {
+        "input": "@kef-control get current volume",
+        "mocks": {
+          "get-volume": "35"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-volume"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@kef-control set volume to 50",
+        "mocks": {
+          "set-volume": "Successfully called \"set-volume\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "volume": 50
+              },
+              "name": "set-volume"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@kef-control set kef to standby mode",
+        "mocks": {
+          "set-source": "Successfully called \"set-source\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "source": "standby"
+              },
+              "name": "set-source"
+            }
+          }
+        ]
+      }
+    ]
+  }
 }
