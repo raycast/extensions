@@ -220,6 +220,7 @@ function Project({
                   />
                 );
               }
+              return null;
             })}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
