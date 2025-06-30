@@ -13,7 +13,7 @@
     {
       "name": "reboot",
       "title": "Reboot",
-      "description": "Reboots your mac",
+      "description": "Reboots your Mac",
       "mode": "no-view"
     },
     {
