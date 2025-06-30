@@ -124,7 +124,6 @@ export default function Command(props: { arguments?: CommandArgs }) {
 
   return (
     <List
-      navigationTitle="Climbing Grade Converter"
       isLoading={isLoading}
       searchBarPlaceholder="Enter grade (e.g., '7a in v-scale' or 'v5 to font')"
       onSearchTextChange={parseAndConvert}
