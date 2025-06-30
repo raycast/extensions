@@ -1,6 +1,6 @@
 # Markdown Styler Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-06-30
 
 - Convert Markdown text to styled format for content platforms
 - Support all common Markdown elements: headings, lists, blockquotes, code blocks, etc.
