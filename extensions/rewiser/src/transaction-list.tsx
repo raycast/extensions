@@ -1,10 +1,13 @@
-import { Detail, ActionPanel, Action, showToast, Toast, List, Icon, Color } from "@raycast/api";
+import { Detail, ActionPanel, Action, showToast, Toast, List, Icon, Color, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState, useCallback } from "react";
-import { getValidToken, AuthenticationError } from "./utils/auth";
 import { fetchFolders, fetchMonthTransactions, updateTransaction, ApiError } from "./utils/api";
 import { Folder, Transaction, SUCCESS_MESSAGES, ERROR_MESSAGES } from "./utils/types";
 import { logger } from "./utils/logger";
-import LoginForm from "./components/LoginForm";
+
+interface Preferences {
+  personalAccessToken: string;
+}
 
 export default function Command() {
   const [token, setToken] = useState<string | null>(null);
@@ -31,16 +34,19 @@ export default function Command() {
 
   const initializeAuth = useCallback(async () => {
     try {
-      const t = await getValidToken();
-      setToken(t);
-      await loadFolders(t);
-    } catch (error) {
-      if (error instanceof AuthenticationError) {
-        setToken(null);
-      } else {
-        logger.error("Initialization error", error);
-        setToken(null);
+      const preferences = getPreferenceValues<Preferences>();
+      const personalToken = preferences.personalAccessToken;
+
+      if (!personalToken?.trim()) {
+        throw new Error("Personal Access Token is required. Please set it in extension preferences.");
       }
+
+      setToken(personalToken);
+      await loadFolders(personalToken);
+    } catch (error) {
+      logger.error("Initialization error", error);
+      setToken(null);
+      await showFailureToast(error instanceof Error ? error.message : "Failed to initialize extension");
     } finally {
       setLoading(false);
     }
@@ -77,14 +83,9 @@ export default function Command() {
       logger.error("Failed to load transactions", error);
 
       if (error instanceof ApiError) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error loading transactions",
-          message: error.message,
-        });
+        showFailureToast(error, { title: "Error loading transactions" });
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
+        showFailureToast(ERROR_MESSAGES.TRANSACTION_LOAD_ERROR, {
           title: "Error loading transactions",
           message: ERROR_MESSAGES.TRANSACTION_LOAD_ERROR,
         });
@@ -107,11 +108,7 @@ export default function Command() {
   const handleUpdateTransaction = useCallback(
     async (transactionId: string, action: "toggle" | "delete") => {
       if (!token) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Authentication required",
-          message: ERROR_MESSAGES.NO_TOKEN,
-        });
+        await showFailureToast(ERROR_MESSAGES.NO_TOKEN);
         return;
       }
 
@@ -151,10 +148,6 @@ export default function Command() {
     [token],
   );
 
-  const handleLoginSuccess = useCallback(async () => {
-    await initializeAuth();
-  }, [initializeAuth]);
-
   const resetToFolderSelection = useCallback(() => {
     setCurrentView("folders");
     setSelectedFolder("");
@@ -171,7 +164,23 @@ export default function Command() {
   }
 
   if (!token) {
-    return <LoginForm onLogin={handleLoginSuccess} />;
+    return (
+      <Detail
+        navigationTitle="Configuration Required"
+        markdown={`# Personal Access Token Required
+        
+Please set your Rewiser Personal Access Token in the extension preferences.
+        
+1. Open Raycast preferences
+2. Go to Extensions → Rewiser
+3. Enter your Personal Access Token
+        
+To get your token:
+1. Visit [app.rewiser.io](https://app.rewiser.io)
+2. Go to Profile → API Keys
+3. Create a new Personal Access Token`}
+      />
+    );
   }
 
   // Folder selection screen

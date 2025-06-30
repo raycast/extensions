@@ -1,4 +1,5 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { API_ENDPOINTS } from "./config";
 import { logger } from "./logger";
 
@@ -50,11 +51,7 @@ export async function saveToken(token: string): Promise<void> {
   try {
     await LocalStorage.setItem(TOKEN_KEY, token);
   } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Storage Error",
-      message: "Failed to save authentication token",
-    });
+    await showFailureToast("Failed to save authentication token");
     throw new AuthenticationError("Failed to save token", "STORAGE_ERROR");
   }
 }
@@ -71,11 +68,7 @@ export async function clearToken(): Promise<void> {
       message: "Authentication cleared successfully",
     });
   } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
-      message: "Failed to clear authentication",
-    });
+    await showFailureToast("Failed to clear authentication");
     throw new AuthenticationError("Failed to clear authentication", "CLEAR_ERROR");
   }
 }

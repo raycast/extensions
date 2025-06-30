@@ -2,7 +2,7 @@
 
 export interface Folder {
   key: string;
-  id?: string; // API'den gelen ID
+  id?: string;
   label: string;
   currency: string;
   is_personal?: boolean;
@@ -55,7 +55,7 @@ export interface TransactionUpdateRequest {
 }
 
 export interface ProcessedTransaction {
-  type: string;
+  type: "Expense" | "Income";
   name: string;
   amount: number;
   currency?: string;

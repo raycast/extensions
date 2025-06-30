@@ -47,9 +47,19 @@
       "command": "src/share-folder.tsx"
     }
   ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "description": "Your Rewiser personal API key. Get it from your Rewiser profile settings.",
+      "placeholder": "Enter your personal access token"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
