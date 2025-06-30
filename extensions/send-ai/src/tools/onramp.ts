@@ -11,7 +11,7 @@ export default withAccessToken(provider)(async ({ amount }: { amount?: number })
     return {
       status: "success",
       message: "Onramp URL generated successfully",
-      result: result,
+      result,
     };
   } catch (error) {
     showFailureToast(error, { title: "Error generating onramp URL" });
