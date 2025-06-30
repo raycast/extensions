@@ -1,4 +1,4 @@
-import { withAccessToken } from "@raycast/utils";
+import { showFailureToast, withAccessToken } from "@raycast/utils";
 import { provider } from "../utils/auth";
 import { getPriceHistory } from "../utils/getPriceHistory";
 
@@ -16,7 +16,7 @@ export default withAccessToken(provider)(async ({ tokenId }: { tokenId: string }
       result: result,
     };
   } catch (error) {
-    console.error(error);
+    showFailureToast(error, { title: "Error retrieving token price history" });
     return {
       status: "error",
       message: "Error retrieving token price",

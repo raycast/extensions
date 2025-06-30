@@ -1,5 +1,5 @@
 import { executeAction } from "../utils/api-wrapper";
-import { withAccessToken } from "@raycast/utils";
+import { showFailureToast, withAccessToken } from "@raycast/utils";
 import { provider } from "../utils/auth";
 
 export default withAccessToken(provider)(async ({ amount }: { amount: string }) => {
@@ -13,7 +13,7 @@ export default withAccessToken(provider)(async ({ amount }: { amount: string }) 
       result: result,
     };
   } catch (error) {
-    console.error(error);
+    showFailureToast(error, { title: "Error generating bridge URL" });
     return {
       status: "error",
       message: "Error generating bridge URL",

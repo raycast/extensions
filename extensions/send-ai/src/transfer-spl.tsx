@@ -70,6 +70,7 @@ function TransferSPL() {
           title: "Error",
           message: result.message,
         });
+        setIsLoading(false);
         return;
       }
 

@@ -1,4 +1,4 @@
-import { withAccessToken } from "@raycast/utils";
+import { showFailureToast, withAccessToken } from "@raycast/utils";
 import { executeAction, provider } from "../utils";
 
 interface BuyTokenParams {
@@ -37,7 +37,7 @@ export default withAccessToken(provider)(async ({ outputMint, inputAmount }: Buy
       result,
     };
   } catch (error) {
-    console.error("Buy token error:", error);
+    showFailureToast(error, { title: "Error executing trade" });
     return {
       status: "error",
       message: error instanceof Error ? error.message : "Error executing trade",
