@@ -1,6 +1,6 @@
 # Zeabur Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-06-30
 
 - Fixed the issue where the provider information in the project list may be null.
 
