@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "two-factor-authentication-code-generator",
+  "title": "Two-Factor Authentication Code Generator",
+  "description": "Quickly access your two-factor authentication codes.",
+  "icon": "command-icon.png",
+  "author": "cjdenio",
+  "contributors": [
+    "lunareclipsewasshort",
+    "litomore",
+    "cristiangrojas",
+    "xmok"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "auth",
+    "2fa",
+    "authentication",
+    "login"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Generate 2FA Code",
+      "description": "Quickly access your two-factor authentication codes.",
+      "mode": "view"
+    },
+    {
+      "name": "backup",
+      "title": "Backup 2FA Codes",
+      "description": "Create a backup of your 2FA codes.",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "restore",
+      "title": "Restore 2FA Codes",
+      "description": "Restore your 2FA codes from a backup.",
+      "mode": "view",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "description": "Set the default action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "hi-base32": "^0.5.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react": "^18.2.0",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brew",
+  "title": "Brew",
+  "description": "Search and install Homebrew formulae",
+  "author": "nhojb",
+  "contributors": [
+    "Aayush9029",
+    "mathieudutour",
+    "urwrstkn8mare",
+    "ashokbaruaakas",
+    "millerapps",
+    "pernielsentikaer",
+    "stelo",
+    "vyacheslav",
+    "j3lte",
+    "alexandercato",
+    "ViGeng",
+    "ridemountainpig"
+  ],
+  "license": "MIT",
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "installed",
+      "title": "Show Installed",
+      "subtitle": "Brew",
+      "description": "List installed brew formulae & casks",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Brew",
+      "description": "Search brew formulae & casks",
+      "mode": "view"
+    },
+    {
+      "name": "outdated",
+      "title": "Show Outdated",
+      "subtitle": "Brew",
+      "description": "Show outdated brew formulae & casks",
+      "mode": "view"
+    },
+    {
+      "name": "upgrade",
+      "title": "Upgrade",
+      "subtitle": "Brew",
+      "description": "Upgrade brew formulae & casks",
+      "mode": "no-view"
+    },
+    {
+      "name": "clean-up",
+      "title": "Clean Up",
+      "subtitle": "Brew",
+      "description": "Clean files and packages from the cache that are older than 120 days",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "withoutThreshold",
+          "title": "Clean Up",
+          "type": "checkbox",
+          "default": false,
+          "required": false,
+          "label": "Include --prune=all when cleaning",
+          "description": "Include --prune=all when cleaning files & packages from cache.\nThis option bypasses the 120 days threshold."
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "customBrewPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Brew Executable Path",
+      "description": "Set this if your brew executable is in a non-standard location"
+    },
+    {
+      "name": "terminalApp",
+      "type": "dropdown",
+      "required": false,
+      "default": "terminal",
+      "title": "Terminal Application",
+      "data": [
+        {
+          "title": "Alacritty",
+          "value": "alacritty"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
+          "title": "Hyper",
+          "value": "hyper"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        },
+        {
+          "title": "kitty",
+          "value": "kitty"
+        },
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "Warp",
+          "value": "warp"
+        },
+        {
+          "title": "WezTerm",
+          "value": "wezterm"
+        }
+      ],
+      "description": "The terminal application/emulator to use when using any Run in Terminal action."
+    },
+    {
+      "name": "greedyUpgrades",
+      "type": "checkbox",
+      "required": false,
+      "title": "Upgrades",
+      "description": "Include auto-updating casks when upgrading or checking for outdated items.",
+      "default": false,
+      "label": "Include auto-updating casks when upgrading"
+    },
+    {
+      "name": "zapCask",
+      "type": "checkbox",
+      "required": false,
+      "title": "Uninstall",
+      "label": "Remove all files associated with a cask.",
+      "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask.\nWARNING: This may remove files shared with other applications."
+    },
+    {
+      "name": "quarantine",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Quarantine",
+      "label": "Enable quarantine of downloads",
+      "description": "Enable or disable quarantine of files downloaded by brew"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
+    "@types/stream-json": "^1.7.8",
+    "node-fetch": "^3.3.2",
+    "stream-chain": "^2.2.5",
+    "stream-json": "^1.9.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.2",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "^18.3.18",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "react": "^19.0.0",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

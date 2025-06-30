@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vuejobs",
+  "title": "VueJobs",
+  "description": "Browse through our list of Vue.js jobs, find your perfect match and apply.Use the filter or search for more accurate results!",
+  "icon": "vuejobs.png",
+  "author": "abusiraj84",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Find the Best Vue.js Jobs",
+      "subtitle": "vuejobs",
+      "description": "Browse through our list of Vue.js jobs, find your perfect match and apply.Use the filter or search for more accurate results!",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Show VueJobs In Menu Bar",
+      "subtitle": "vuejobs",
+      "description": "Show our list of Vue.js jobs in mac menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.2",
+    "@raycast/utils": "^1.7.1",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

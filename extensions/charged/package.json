@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "charged",
+  "title": "Charged: Starknet Shortcuts",
+  "description": "Shorcuts for common web3 tasks",
+  "icon": "icon.png",
+  "author": "apoorv",
+  "categories": [
+    "Developer Tools",
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "starknetConverterCommand",
+      "title": "Starknet Converter",
+      "description": "Convert between felts, integers, strings and hex",
+      "mode": "view",
+      "icon": "icon.png",
+      "subtitle": "Charged"
+    },
+    {
+      "name": "cairoBookCommand",
+      "title": "Starknet Cairo Book",
+      "description": "Search the Cairo book",
+      "mode": "view",
+      "icon": "icon.png",
+      "subtitle": "Charged"
+    },
+    {
+      "name": "starknetEcosystemSearchCommand",
+      "title": "Starknet Ecosystem",
+      "description": "Search the entire Starknet Ecosystem",
+      "mode": "view",
+      "icon": "icon.png",
+      "subtitle": "Charged"
+    },
+    {
+      "name": "starknetStatsCommand",
+      "title": "Starknet Stats",
+      "description": "Get live stats of Starknet",
+      "mode": "view",
+      "icon": "icon.png",
+      "subtitle": "Charged"
+    },
+    {
+      "name": "starknetChadsCommand",
+      "title": "Starknet Chads",
+      "description": "See top contributors on Starknet",
+      "mode": "view",
+      "icon": "icon.png",
+      "subtitle": "Charged"
+    },
+    {
+      "name": "starknetUtilsCommand",
+      "title": "Starknet Utils",
+      "description": "Common starknet utils taken from famous libraries",
+      "mode": "view",
+      "icon": "icon.png",
+      "subtitle": "Charged"
+    },
+    {
+      "name": "starknetTransactionBuilderCommand",
+      "title": "Starknet Transaction Builder",
+      "description": "Build and submit transactions",
+      "mode": "view",
+      "icon": "icon.png",
+      "subtitle": "Charged"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.1",
+    "@types/uuid": "^9.0.1",
+    "axios": "^1.8.4",
+    "bn.js": "^5.2.1",
+    "debounce": "^1.2.1",
+    "mixpanel": "^0.17.0",
+    "starknet": "^5.10.2",
+    "ts-interface-checker": "^1.0.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/bn.js": "^5.1.1",
+    "@types/debounce": "^1.2.1",
+    "@types/mixpanel": "^2.14.4",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "ts-interface-builder": "^0.3.3",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "build-runtime-type-checks": "ts-interface-builder src/utils/starknetJsTypes.ts"
+  }
+}

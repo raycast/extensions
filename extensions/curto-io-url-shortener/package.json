@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "curto-io-url-shortener",
+  "title": "curto.io URL Shortener",
+  "description": "Quickly shorten the current clipboard URL with curto.io",
+  "icon": "command-icon.png",
+  "author": "birobirobiro",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Shorten URL",
+      "subtitle": "curto.io",
+      "description": "Overwrite the clipboard contents with a shortened URL",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your curto.io API Key.",
+      "placeholder": "Can be found at https://curto.io/profile/developer"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.2",
+    "node-fetch": "^3.1.0",
+    "prettier": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

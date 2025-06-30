@@ -1,0 +1,335 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "menubar-calendar",
+  "title": "Menubar Calendar",
+  "description": "Show calendar and reminders in the menu bar.",
+  "icon": "calendar-icon.png",
+  "author": "koinzhang",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "calendar",
+    "reminders",
+    "date",
+    "ical",
+    "cal",
+    "year",
+    "month",
+    "week",
+    "day"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Menubar Calendar",
+      "subtitle": "Calendar",
+      "description": "Show calendar and reminders in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "title": "Week Start",
+          "name": "weekStart",
+          "type": "dropdown",
+          "description": "Start day of the week",
+          "required": false,
+          "default": "1",
+          "data": [
+            {
+              "title": "Monday",
+              "value": "1"
+            },
+            {
+              "title": "Sunday",
+              "value": "0"
+            }
+          ]
+        },
+        {
+          "title": "Menubar Style",
+          "name": "menubarStyle",
+          "type": "dropdown",
+          "description": "Show calendar icon and date in the menu bar",
+          "required": false,
+          "default": "iconOnly",
+          "data": [
+            {
+              "title": "Icon and Date",
+              "value": "both"
+            },
+            {
+              "title": "Icon Only",
+              "value": "iconOnly"
+            },
+            {
+              "title": "Date Only",
+              "value": "dateOnly"
+            }
+          ]
+        },
+        {
+          "title": "Menubar Icon Style",
+          "name": "menubarIconStyle",
+          "type": "dropdown",
+          "description": "Show different icon style in the menu bar",
+          "required": false,
+          "default": "Day",
+          "data": [
+            {
+              "title": "Day",
+              "value": "Day"
+            },
+            {
+              "title": "Calendar",
+              "value": "Calendar"
+            }
+          ]
+        },
+        {
+          "title": "Menubar Item Icon Style",
+          "name": "menubarItemIconStyle",
+          "type": "dropdown",
+          "description": "Show different icon style in the menu bar item",
+          "required": false,
+          "default": "Raycast",
+          "data": [
+            {
+              "title": "Raycast",
+              "value": "Raycast"
+            },
+            {
+              "title": "Native",
+              "value": "Native"
+            },
+            {
+              "title": "None",
+              "value": "None"
+            }
+          ]
+        },
+        {
+          "title": "Show Events in Menubar",
+          "name": "showEventsInMenubar",
+          "type": "dropdown",
+          "description": "Show calendar events in the menu bar",
+          "required": false,
+          "default": "0.5",
+          "data": [
+            {
+              "title": "Never",
+              "value": "0"
+            },
+            {
+              "title": "10 minutes before",
+              "value": "0.16"
+            },
+            {
+              "title": "20 minutes before",
+              "value": "0.33"
+            },
+            {
+              "title": "30 minutes before",
+              "value": "0.5"
+            },
+            {
+              "title": "1 hour before",
+              "value": "1"
+            },
+            {
+              "title": "As long as they are upcoming",
+              "value": "6"
+            },
+            {
+              "title": "Always",
+              "value": "-1"
+            }
+          ]
+        },
+        {
+          "title": "Title Max Length",
+          "name": "titleTruncateLength",
+          "type": "textfield",
+          "description": "Truncate length of the title",
+          "required": false,
+          "default": "60",
+          "placeholder": "60"
+        },
+        {
+          "title": "Calendar Style",
+          "name": "largeCalendar",
+          "label": "Large Calendar",
+          "type": "checkbox",
+          "description": "Large calendar for more visibility",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "highlightCalendar",
+          "label": "Highlight Calendar",
+          "type": "checkbox",
+          "description": "Highlight calendar for more visibility",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showWeekNumber",
+          "label": "Show Week Number",
+          "type": "checkbox",
+          "description": "Show week number in the calendar",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "dateFormat",
+          "title": "Date Fromat",
+          "type": "dropdown",
+          "description": "Choose the time format to display.",
+          "required": false,
+          "default": "macOS",
+          "data": [
+            {
+              "title": "Default",
+              "value": "macOS"
+            },
+            {
+              "title": "MM/dd/yyyy",
+              "value": "MM/dd/yyyy"
+            },
+            {
+              "title": "dd/MM/yyyy",
+              "value": "dd/MM/yyyy"
+            },
+            {
+              "title": "yyyy/MM/dd",
+              "value": "yyyy/MM/dd"
+            },
+            {
+              "title": "yyyy-MM-dd",
+              "value": "yyyy-MM-dd"
+            },
+            {
+              "title": "dd.MM.yyyy",
+              "value": "dd.MM.yyyy"
+            }
+          ]
+        },
+        {
+          "name": "calendarView",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Calendar View",
+          "description": "Choose which calendar events you want to see in your menu bar."
+        },
+        {
+          "name": "remindersView",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Reminders View",
+          "description": "Choose which reminder view you want to see in your menu bar."
+        },
+        {
+          "title": "Extra Items",
+          "name": "showCalendar",
+          "label": "Show Calendar",
+          "type": "checkbox",
+          "description": "Show Calendar in the menu bar item",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showReminders",
+          "label": "Show Reminders",
+          "type": "checkbox",
+          "description": "Show Reminders in the menu bar item",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showSettings",
+          "label": "Show Settings",
+          "type": "checkbox",
+          "description": "Show Settings in the menu bar item",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "index2",
+      "title": "Configure Calendar List",
+      "description": "Configure calendar and reminders list displayed in the menu bar.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "@raycast/api": "^1.89.0",
+    "calendar": "^0.1.1",
+    "unicode-text-decorator": "^0.1.1",
+    "weeknumber": "^1.2.1",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/calendar": "^0.1.4",
+    "@types/node": "22.10.7",
+    "@types/react": "18.3.18",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

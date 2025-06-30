@@ -1,0 +1,111 @@
+{
+  "name": "clash-verge-rev",
+  "title": "Clash Verge Rev",
+  "description": "Switch Clash Verge Rev proxy modes and nodes quickly",
+  "icon": "icon.png",
+  "author": "jun",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-mode",
+      "title": "Switch Proxy Mode",
+      "subtitle": "Clash Verge Rev",
+      "description": "Switch between Clash proxy modes (Rule/Global/Direct)",
+      "mode": "view"
+    },
+    {
+      "name": "switch-proxy",
+      "title": "Switch Proxy Node",
+      "subtitle": "Clash Verge Rev",
+      "description": "Select and switch proxy nodes",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "View Status",
+      "subtitle": "Clash Verge Rev",
+      "description": "View current Clash status information",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clashApiUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Clash API URL",
+      "description": "Clash API URL, defaults to http://127.0.0.1:9097",
+      "default": "http://127.0.0.1:9097",
+      "placeholder": "http://127.0.0.1:9097"
+    },
+    {
+      "name": "clashSecret",
+      "type": "password",
+      "required": false,
+      "title": "Clash API Secret",
+      "description": "Clash API authentication secret, leave empty to disable authentication",
+      "placeholder": "Enter API secret"
+    },
+    {
+      "name": "autoCloseConnections",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Close Connections",
+      "description": "Automatically close existing connections when switching modes or nodes",
+      "default": false,
+      "label": "Enable auto close connections"
+    },
+    {
+      "name": "refreshInterval",
+      "type": "dropdown",
+      "required": false,
+      "title": "Refresh Interval",
+      "description": "Status information refresh interval",
+      "default": "5",
+      "data": [
+        {
+          "title": "3 seconds",
+          "value": "3"
+        },
+        {
+          "title": "5 seconds",
+          "value": "5"
+        },
+        {
+          "title": "10 seconds",
+          "value": "10"
+        },
+        {
+          "title": "30 seconds",
+          "value": "30"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.7.7",
+    "yaml": "^2.5.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

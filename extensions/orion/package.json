@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orion",
+  "title": "Orion",
+  "description": "Manage your Orion Bookmarks, History, Tabs, and Reading list",
+  "icon": "orion-icon.png",
+  "author": "plonq",
+  "contributors": [
+    "erics118"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "bookmarks",
+      "title": "Search Orion Bookmarks",
+      "description": "Browse your bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "reading-list",
+      "title": "Search Orion Reading List",
+      "description": "Browse your reading list",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Search Orion History",
+      "description": "Browse your history",
+      "mode": "view"
+    },
+    {
+      "name": "tabs",
+      "title": "Search Tabs",
+      "subtitle": "Orion",
+      "description": "Browse your open tabs",
+      "mode": "view"
+    },
+    {
+      "name": "profiles",
+      "title": "Search Profiles",
+      "subtitle": "Orion",
+      "description": "Browse your profiles",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "orion-rc",
+      "title": "Orion",
+      "label": "Use Release Candidate",
+      "description": "Looks in '~/Library/Application Support/Orion RC' instead of '~/Library/Application Support/Orion'",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.58.0",
+    "@raycast/utils": "^1.9.1",
+    "bplist-parser": "^0.3.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.6.0",
+    "@typescript-eslint/parser": "^6.6.0",
+    "eslint": "^8.49.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,0 +1,412 @@
+{
+    "simple": {
+        "Adverb": {
+            "long": "Adverb",
+            "short": "Adv."
+        },
+        "AdverbTo": {
+            "long": "To Adverb",
+            "short": "To Adv.",
+            "kana": {
+                "long": "と Adverb",
+                "short": "と Adv."
+            }
+        },
+        "AuxilaryVerb": {
+            "long": "Auxiliary",
+            "short": "Aux."
+        },
+        "Conjungation": {
+            "long": "Conjunction",
+            "short": "conj."
+        },
+        "Noun": {
+            "long": "Noun",
+            "short": "N."
+        },
+        "Prefix": {
+            "long": "Prefix",
+            "short": "Pref."
+        },
+        "Suffix": {
+            "long": "Suffix",
+            "short": "Suf."
+        },
+        "Particle": {
+            "long": "Particle",
+            "short": "Part."
+        },
+        "Sfx": {
+            "long": "Sound effect",
+            "short": "Sfx."
+        },
+        "Verb": {
+            "long": "Verb",
+            "short": "V."
+        },
+        "Adjective": {
+            "long": "Adjective",
+            "short": "Adj."
+        },
+        "Counter": {
+            "long": "Counter",
+            "short": "Count."
+        },
+        "Expr": {
+            "long": "Expression",
+            "short": "Expr."
+        },
+        "Interjection": {
+            "long": "Interjection",
+            "short": "Interj."
+        },
+        "Pronoun": {
+            "long": "Pronoun",
+            "short": "Pron."
+        },
+        "Numeric": {
+            "long": "Numeric",
+            "short": "Num."
+        },
+        "Unclassified": {
+            "long": "Unclassified",
+            "short": "Uncl."
+        },
+        "Intransitive": {
+            "long": "Intransitive",
+            "short": "Intrans."
+        },
+        "Transitive": {
+            "long": "Transitive",
+            "short": "Trans."
+        }
+    },
+    "detailed": {
+        "Noun": {
+            "Normal": {
+                "long": "Noun",
+                "short": "N."
+            },
+            "Adverbial": {
+                "long": "Noun adverbial",
+                "short": "Noun adv."
+            },
+            "Prefix": {
+                "long": "Prefix (noun)",
+                "short": "Pref. (n.)"
+            },
+            "Suffix": {
+                "long": "Suffix (noun)",
+                "short": "Suff. (n.)"
+            },
+            "Temporal": {
+                "long": "Temporal noun",
+                "short": "Temporal n."
+            }
+        },
+        "Adjective": {
+            "PreNounVerb": {
+                "long": "Noun or verb describing a noun",
+                "short": "Noun/verb desc. noun"
+            },
+            "Keiyoushi": {
+                "long": "I adjective",
+                "short": "I adj.",
+                "kana": {
+                    "long": "い adjective",
+                    "short": "い adj."
+                }
+            },
+            "KeiyoushiYoiIi": {
+                "long": "I adjective (conjugated like いい)",
+                "short": "I adj. (conj. like いい)",
+                "kana": {
+                    "long": "い adjective (conjugated like いい)",
+                    "short": "い adj. (conj. like いい)"
+                }
+            },
+            "Ku": {
+                "long": "Ku adjective",
+                "short": "Ku adj.",
+                "kana": {
+                    "long": "く adjective",
+                    "short": "く adj."
+                }
+            },
+            "Na": {
+                "long": "Na adjective",
+                "short": "Na adj.",
+                "kana": {
+                    "long": "な adjective",
+                    "short": "な adj."
+                }
+            },
+            "Nari": {
+                "long": "Formal form of na adjective",
+                "short": "Formal na adj.",
+                "kana": {
+                    "long": "Formal form of な adjective",
+                    "short": "Formal な adj."
+                }
+            },
+            "No": {
+                "long": "No adjective",
+                "short": "No adj.",
+                "kana": {
+                    "long": "の adjective",
+                    "short": "の adj."
+                }
+            },
+            "PreNoun": {
+                "long": "Pre noun adjective",
+                "short": "Pre noun adj."
+            },
+            "Shiku": {
+                "long": "Shiku adjective",
+                "short": "Shiku adj.",
+                "kana": {
+                    "long": "しく adjective",
+                    "short": "しく adj."
+                }
+            },
+            "Taru": {
+                "long": "Taru adjective",
+                "short": "Taru adj.",
+                "kana": {
+                    "long": "たる adjective",
+                    "short": "たる adj."
+                }
+            }
+        },
+        "Verb": {
+            "Unspecified": {
+                "long": "Unspecified verb",
+                "short": "Unspec. verb"
+            },
+            "Intransitive": {
+                "long": "Intransitive verb",
+                "short": "Intrans. verb"
+            },
+            "Transitive": {
+                "long": "Transitive verb",
+                "short": "Trans. verb"
+            },
+            "Ichidan": {
+                "long": "Ichidan verb",
+                "short": "Ichidan v.",
+                "kana": {
+                    "long": "一段 verb",
+                    "short": "一段 v."
+                }
+            },
+            "IchidanZuru": {
+                "long": "Ichidan zuru verb",
+                "short": "Ichidan zuru v.",
+                "kana": {
+                    "long": "一段　ずる verb",
+                    "short": "一段　ずる v."
+                }
+            },
+            "IchidanKureru": {
+                "long": "Ichidan kureru verb",
+                "short": "Ichidan kureru v.",
+                "kana": {
+                    "long": "一段　くれる verb",
+                    "short": "一段　くれる v."
+                }
+            },
+            "Kuru": {
+                "long": "Kuru verb",
+                "short": "Kuru v.",
+                "kana": {
+                    "long": "くる verb",
+                    "short": "くる v."
+                }
+            },
+            "Godan": {
+                "long": "Godan verb",
+                "short": "Godan v.",
+                "kana": {
+                    "long": "五段 verb",
+                    "short": "五段 v."
+                },
+                "types": {
+                    "Bu": {
+                        "long": "Godan verb ending in bu",
+                        "short": "Godan bu v.",
+                        "kana": {
+                            "long": "五段 verb ending in ぶ",
+                            "short": "五段 ぶ v."
+                        }
+                    },
+                    "Gu": {
+                        "long": "Godan verb ending in gu",
+                        "short": "Godan gu v.",
+                        "kana": {
+                            "long": "五段 verb ending in ぐ",
+                            "short": "五段 ぐ v."
+                        }
+                    },
+                    "Ku": {
+                        "long": "Godan verb ending in ku",
+                        "short": "Godan ku v.",
+                        "kana": {
+                            "long": "五段 verb ending in く",
+                            "short": "五段 く v."
+                        }
+                    },
+                    "Mu": {
+                        "long": "Godan verb ending in mu",
+                        "short": "Godan mu v.",
+                        "kana": {
+                            "long": "五段 verb ending in む",
+                            "short": "五段 む v."
+                        }
+                    },
+                    "Nu": {
+                        "long": "Godan verb ending in nu",
+                        "short": "Godan nu v.",
+                        "kana": {
+                            "long": "五段 verb ending in ぬ",
+                            "short": "五段 ぬ v."
+                        }
+                    },
+                    "Ru": {
+                        "long": "Godan verb ending in ru",
+                        "short": "Godan ru v.",
+                        "kana": {
+                            "long": "五段 verb ending in る",
+                            "short": "五段 る v."
+                        }
+                    },
+                    "Su": {
+                        "long": "Godan verb ending in su",
+                        "short": "Godan su v.",
+                        "kana": {
+                            "long": "五段 verb ending in す",
+                            "short": "五段 す v."
+                        }
+                    },
+                    "Tsu": {
+                        "long": "Godan verb ending in tsu",
+                        "short": "Godan tsu v.",
+                        "kana": {
+                            "long": "五段 verb ending in つ",
+                            "short": "五段 つ v."
+                        }
+                    },
+                    "U": {
+                        "long": "Godan verb ending in u",
+                        "short": "Godan u v.",
+                        "kana": {
+                            "long": "五段 verb ending in う",
+                            "short": "五段 う v."
+                        }
+                    },
+                    "Aru": {
+                        "long": "Godan verb ending in aru",
+                        "short": "Godan aru v.",
+                        "kana": {
+                            "long": "五段 verb ending in ある",
+                            "short": "五段 ある v."
+                        }
+                    },
+                    "USpecial": {
+                        "long": "Special Godan verb ending in u",
+                        "short": "Sp. Godan u v.",
+                        "kana": {
+                            "long": "Special 五段 verb ending in う",
+                            "short": "Sp. 五段 う v."
+                        }
+                    },
+                    "Uru": {
+                        "long": "Godan verb ending in uru",
+                        "short": "Godan uru v.",
+                        "kana": {
+                            "long": "五段 verb ending in うる",
+                            "short": "五段 うる v."
+                        }
+                    },
+                    "RuIrreg": {
+                        "long": "Irregular Godan verb ending in ru",
+                        "short": "Irreg. Godan ru v.",
+                        "kana": {
+                            "long": "Irregular 五段 verb ending in る",
+                            "short": "Irreg. 五段 る v."
+                        }
+                    },
+                    "IkuYuku": {
+                        "long": "Godan verb like Iku/Yuku",
+                        "short": "Godan Iku/Yuku v.",
+                        "kana": {
+                            "long": "五段 verb like いく/ゆく",
+                            "short": "五段 いく/ゆく v."
+                        }
+                    }
+                }
+            },
+            "Irregular": {
+                "long": "Irregular",
+                "short": "Irreg.",
+                "types": {
+                    "Nu": {
+                        "long": "Nu verb",
+                        "short": "Nu v.",
+                        "kana": {
+                            "long": "ぬ verb",
+                            "short": "ぬ v."
+                        }
+                    },
+                    "Ru": {
+                        "long": "Ru verb",
+                        "short": "Ru v.",
+                        "kana": {
+                            "long": "る verb",
+                            "short": "る v."
+                        }
+                    },
+                    "NounOrAuxSuru": {
+                        "long": "Noun taking suru",
+                        "short": "Suru n.",
+                        "kana": {
+                            "long": "Noun taking する",
+                            "short": "する n."
+                        }
+                    },
+                    "Suru": {
+                        "long": "Suru verb",
+                        "short": "Suru v.",
+                        "kana": {
+                            "long": "する verb",
+                            "short": "する v."
+                        }
+                    },
+                    "SuruSpecial": {
+                        "long": "Suru special",
+                        "short": "Suru sp.",
+                        "kana": {
+                            "long": "する special",
+                            "short": "する sp."
+                        }
+                    },
+                    "Su": {
+                        "long": "Su verb",
+                        "short": "Su v.",
+                        "kana": {
+                            "long": "す verb",
+                            "short": "す v."
+                        }
+                    }
+                }
+            },
+            "_": {
+                "long": "Godan verb",
+                "short": "Godan v.",
+                "kana": {
+                    "long": "五段 verb",
+                    "short": "五段 v."
+                }
+            }
+        }
+    }
+}

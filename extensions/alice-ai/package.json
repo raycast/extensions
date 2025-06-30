@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alice-ai",
+  "title": "Alice AI - Your ChatGPT Actions Companion",
+  "description": "Alice helps with your daily tasks by providing quick access to OpenAI's ChatGPT API. Use Alice to generate text, code, and more with just a few keystrokes.",
+  "icon": "icon.png",
+  "author": "quiknull",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Web",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "commands",
+      "title": "Select Action",
+      "description": "Select available action from the list",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Show History",
+      "description": "Show Results History",
+      "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Create New Action",
+      "description": "Create New Action",
+      "mode": "view"
+    },
+    {
+      "name": "custom",
+      "title": "Custom Action",
+      "description": "Execute your custom action on the fly",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "What's on your mind?",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model",
+          "title": "Model",
+          "description": "Select Custom Action Model",
+          "type": "dropdown",
+          "default": "gpt-3.5-turbo",
+          "data": [
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o Mini",
+              "value": "gpt-4o-mini"
+            }
+          ],
+          "required": true
+        },
+        {
+          "name": "temperature",
+          "title": "Temperature",
+          "description": "Custom Action Temperature (value between 0.0 and 1.0)",
+          "type": "textfield",
+          "default": "0.7",
+          "required": true
+        },
+        {
+          "name": "maxTokens",
+          "title": "Max Tokens",
+          "description": "Custom Action Max Tokens to be generated (set -1 for unlimited)",
+          "type": "textfield",
+          "default": "-1",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "menubar",
+      "title": "Display Actions in Menu Bar",
+      "description": "Quick access your actions from the menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apikey",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API Key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.14.0",
+    "@reduxjs/toolkit": "^2.2.3",
+    "openai": "^4.56.0",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull": "npx @raycast/api@latest pull-contributions"
+  }
+}

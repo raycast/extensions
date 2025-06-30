@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "moneylover",
+  "title": "MoneyLover",
+  "description": "MoneyLover is a personal finance app that helps you manage your money, budget, and track your spending.",
+  "icon": "moneylover-icon.png",
+  "author": "lachero",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-wallets",
+      "title": "View Wallets",
+      "subtitle": "MoneyLover",
+      "description": "View your wallets",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Email of your Money Lover account",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "moneylover@example.com"
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Password of your Money Lover account",
+      "type": "password",
+      "required": true,
+      "placeholder": "hunter2"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.3",
+    "moneylover": "^1.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

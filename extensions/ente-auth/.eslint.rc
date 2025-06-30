@@ -1,0 +1,16 @@
+{
+  "root": true,
+  "extends": [
+    "eslint:recommended",
+    "@raycast"
+  ],
+  "env": {
+    "node": true
+  },
+  "ignorePatterns": [
+    "dist/"
+  ],
+  "rules": {
+    "@raycast/prefer-title-case": "off"
+  }
+}

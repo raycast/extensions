@@ -1,0 +1,204 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "1password",
+  "title": "1Password",
+  "description": "Search, open or edit your 1Password passwords from Raycast",
+  "icon": "1password-icon.png",
+  "author": "khasbilegt",
+  "contributors": [
+    "thomas",
+    "dteare",
+    "pernielsentikaer",
+    "cb372",
+    "henrik-dmg",
+    "superwhys",
+    "lukah",
+    "litomore",
+    "vimtor"
+  ],
+  "past_contributors": [
+    "Davidwalser",
+    "JakeMoosey",
+    "spacedog",
+    "Lemon"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "item-list",
+      "title": "My Passwords",
+      "subtitle": "1Password",
+      "description": "List of all your 1Password items. Then open in your default browser, view items in 1Password, or open items in 1Password for editing.",
+      "keywords": [
+        "1p",
+        "1password",
+        "password",
+        "login"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "renew-auth",
+      "title": "Auto Renew Authorization",
+      "subtitle": "1Password",
+      "description": "Renews the authorization each 9 minutes. Avoiding the prompt for user's password each use after 10 minutes.",
+      "keywords": [
+        "1p",
+        "1password",
+        "password",
+        "login"
+      ],
+      "interval": "9m",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "vault-list",
+      "title": "My Vaults",
+      "subtitle": "1Password",
+      "description": "List of all your 1Password vaults. Then open all items related to each vault.",
+      "keywords": [
+        "1p",
+        "1password",
+        "password",
+        "login"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "subtitle": "1Password",
+      "description": "Generate a random password with 1Password.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "data": [
+        {
+          "title": "1Password 8",
+          "value": "v8"
+        },
+        {
+          "title": "1Password 7",
+          "value": "v7"
+        }
+      ],
+      "description": "Select the version of the 1Password app you want to use",
+      "name": "version",
+      "required": true,
+      "title": "1Password App Version",
+      "type": "dropdown"
+    },
+    {
+      "data": [
+        {
+          "title": "Open In 1Password",
+          "value": "open-in-1password"
+        },
+        {
+          "title": "Open In Browser",
+          "value": "open-in-browser"
+        },
+        {
+          "title": "Copy Username",
+          "value": "copy-username"
+        },
+        {
+          "title": "Copy Password",
+          "value": "copy-password"
+        },
+        {
+          "title": "Copy One-time Password",
+          "value": "copy-one-time-password"
+        }
+      ],
+      "default": "open-in-1password",
+      "description": "Primary action for 1Password login items (v8 only)",
+      "name": "primaryAction",
+      "required": false,
+      "title": "Primary Action",
+      "type": "dropdown"
+    },
+    {
+      "data": [
+        {
+          "title": "Open In 1Password",
+          "value": "open-in-1password"
+        },
+        {
+          "title": "Open In Browser",
+          "value": "open-in-browser"
+        },
+        {
+          "title": "Copy Username",
+          "value": "copy-username"
+        },
+        {
+          "title": "Copy Password",
+          "value": "copy-password"
+        },
+        {
+          "title": "Copy One-time Password",
+          "value": "copy-one-time-password"
+        }
+      ],
+      "default": "open-in-browser",
+      "description": "Secondary action for 1Password login items (v8 only)",
+      "name": "secondaryAction",
+      "required": false,
+      "title": "Secondary Action",
+      "type": "dropdown"
+    },
+    {
+      "name": "closeWindowAfterCopying",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Close window after copying.",
+      "description": "Close Raycast window after copying a username or password."
+    },
+    {
+      "description": "Enter the CLI binary path",
+      "name": "cliPath",
+      "placeholder": "e.g., /usr/local/bin/op",
+      "required": false,
+      "title": "1Password CLI path",
+      "type": "textfield"
+    },
+    {
+      "description": "Enter your ZSH binary path",
+      "name": "zshPath",
+      "placeholder": "e.g., /bin/zsh",
+      "required": false,
+      "title": "1Password SHELL path",
+      "type": "textfield",
+      "default": "/bin/zsh"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.18.1",
+    "fast-glob": "^3.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.7",
+    "@types/react": "18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "react": "^18.3.1",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "unifi",
+  "title": "Unifi",
+  "description": "Manage Unifi Controllers",
+  "icon": "extension-icon.png",
+  "author": "lewj",
+  "pastContributors": [
+    "tonka3000"
+  ],
+  "categories": [
+    "Other",
+    "System"
+  ],
+  "keywords": [
+    "Ubiquiti",
+    "UniFi"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "select-site",
+      "title": "Select Site",
+      "keywords": [
+        "site",
+        "unifi",
+        "network"
+      ],
+      "description": "Select site to view devices/clients for",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-dashboard",
+      "title": "Open Dashboard",
+      "keywords": [
+        "site",
+        "unifi",
+        "network",
+        "dashboard"
+      ],
+      "description": "Open the dashboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "view-devices",
+      "title": "Search Devices",
+      "keywords": [
+        "devices",
+        "unifi",
+        "network",
+        "ip",
+        "mac"
+      ],
+      "description": "View general info, radios, ports and quickly restart devices connected to your UniFi network",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "placeholder": "Name, IP or MAC address",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "statsPollingInterval",
+          "title": "Live Stats Interval",
+          "description": "The interval in seconds to poll live stats",
+          "type": "textfield",
+          "default": "2",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "view-clients",
+      "title": "Search Clients",
+      "keywords": [
+        "clients",
+        "unifi",
+        "network",
+        "ip",
+        "mac"
+      ],
+      "description": "View info and quickly copy key info of clients connected to your UniFi network",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "placeholder": "Name, IP or MAC address",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "groupClientsByOctet",
+          "title": "Group clients by octet",
+          "description": "Group clients by the first X octets of their IP address. 0 = Disabled",
+          "type": "textfield",
+          "required": false,
+          "default": "0"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "controllerUrl",
+      "description": "URL of your UniFi Controller",
+      "type": "textfield",
+      "required": true,
+      "title": "Controller URL",
+      "default": "https://192.168.1.1"
+    },
+    {
+      "name": "apiKey",
+      "title": "UniFi API Key",
+      "description": "The API key for your UniFi controller",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "username",
+      "description": "Username of Local(!) UniFi User. Cloud accounts are not supported.",
+      "type": "textfield",
+      "required": false,
+      "title": "Username (Deprecated: Use API Key instead)"
+    },
+    {
+      "name": "password",
+      "description": "Password of Local UniFi User",
+      "type": "password",
+      "required": false,
+      "title": "Password (Deprecated: Use API Key instead)"
+    },
+    {
+      "name": "dateFormat",
+      "title": "Date Format",
+      "description": "The format to display dates in",
+      "type": "textfield",
+      "default": "yyyy-MM-dd HH:mm:ss",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.91.1",
+    "@raycast/utils": "1.18.1",
+    "unifi-client": "^0.11.0",
+    "node-fetch": "3.3.2",
+    "date-fns": "^4.1.0",
+    "fuse.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node-fetch": "3.0.2",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^3.0.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
