@@ -1,6 +1,6 @@
 # Pocket Changelog
 
-## [Add Alert to Go to Export] - {PR_MERGE_DATE}
+## [Add Alert to Go to Export] - 2025-06-30
 - EmptyView when no bookmarks
 - URL in create is now Required
 - Add an Alert to let users know Pocket is shutting down
