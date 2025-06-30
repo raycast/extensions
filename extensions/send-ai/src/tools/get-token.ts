@@ -1,4 +1,4 @@
-import { withAccessToken } from "@raycast/utils";
+import { showFailureToast, withAccessToken } from "@raycast/utils";
 import { executeAction, provider } from "../utils";
 
 interface GetTokenParams {
@@ -29,7 +29,7 @@ export default withAccessToken(provider)(async ({ tokenAddress }: GetTokenParams
       result,
     };
   } catch (error) {
-    console.error("Get token error:", error);
+    showFailureToast(error, { title: "Error retrieving token data" });
     return {
       status: "error",
       message: error instanceof Error ? error.message : "Error retrieving token data",

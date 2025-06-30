@@ -2,7 +2,7 @@ import { ActionPanel, Action, List, showToast, Toast, Color } from "@raycast/api
 import { useState, useEffect, useMemo } from "react";
 import { executeAction } from "./utils/api-wrapper";
 import { provider } from "./utils/auth";
-import { withAccessToken } from "@raycast/utils";
+import { showFailureToast, withAccessToken } from "@raycast/utils";
 import { LimitOrder, TokenInfo } from "./type";
 import { USDC, WRAPPED_SOL_ADDRESS } from "./constants/tokenAddress";
 
@@ -120,7 +120,7 @@ const ShowLimitOrders = () => {
       await executeAction("cancelLO", { orderKey });
       await loadLimitOrders();
     } catch (error) {
-      console.error(error);
+      await showFailureToast(error, { title: "Error cancelling limit order" });
     }
   };
   return (

@@ -1,4 +1,4 @@
-import { withAccessToken } from "@raycast/utils";
+import { showFailureToast, withAccessToken } from "@raycast/utils";
 import { executeAction } from "../utils/api-wrapper";
 import { provider } from "../utils/auth";
 import { PublicKey } from "@solana/web3.js";
@@ -23,7 +23,7 @@ export default withAccessToken(provider)(async ({ tokenId }: { tokenId: string }
       },
     };
   } catch (error) {
-    console.error(error);
+    showFailureToast(error, { title: "Error retrieving token price" });
     return {
       status: "error",
       message: "Error retrieving token price",

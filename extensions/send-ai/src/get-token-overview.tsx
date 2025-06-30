@@ -2,7 +2,7 @@ import { ActionPanel, Action, showToast, Toast, Detail, LaunchProps, Color, Imag
 import { useEffect, useState } from "react";
 import { executeAction } from "./utils/api-wrapper";
 import { provider } from "./utils/auth";
-import { withAccessToken } from "@raycast/utils";
+import { showFailureToast, withAccessToken } from "@raycast/utils";
 import { isValidSolanaAddress } from "./utils/is-valid-address";
 import { getPriceHistory } from "./utils/getPriceHistory";
 import BuyTokenForm from "./views/buy-token-form";
@@ -153,7 +153,7 @@ function GetTokenOverview(props: LaunchProps<{ arguments: { tokenAddress: string
         setChartDataUrl(chart.data?.chartImageUrl);
         setChartDurationLabel(ChartDurationOptions["1D"].title);
       } catch (chartError) {
-        console.error("Failed to fetch chart:", chartError);
+        showFailureToast(chartError, { title: "Error fetching chart" });
       }
 
       setIsLoading(false);
@@ -169,7 +169,7 @@ function GetTokenOverview(props: LaunchProps<{ arguments: { tokenAddress: string
         );
         setRugcheckData(rugcheck as RugcheckResult);
       } catch (rugcheckError) {
-        console.error("Failed to fetch rugcheck:", rugcheckError);
+        showFailureToast(rugcheckError, { title: "Error fetching rugcheck" });
       }
     } catch (error) {
       console.error(error);

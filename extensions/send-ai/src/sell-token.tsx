@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Form, showToast, LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { executeAction, provider, createErrorToast, createSuccessToast } from "./utils";
-import { withAccessToken } from "@raycast/utils";
+import { showFailureToast, withAccessToken } from "@raycast/utils";
 
 interface SellTokenFormValues {
   inputMint: string;
@@ -46,7 +46,7 @@ function SellToken(props: LaunchProps<{ arguments: SellTokenFormValues }>) {
 
       await showToast(createSuccessToast("Success", "Token sale executed successfully"));
     } catch (error) {
-      await showToast(createErrorToast("Error", error, "Failed to execute token sale"));
+      await showFailureToast(error, { title: "Error executing token sale" });
     } finally {
       setIsLoading(false);
     }
