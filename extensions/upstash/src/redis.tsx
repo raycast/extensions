@@ -10,26 +10,21 @@ const API_HEADERS = {
 interface RedisDatabase {
   database_id: string;
   database_name: string;
+  database_type: string;
   endpoint: string;
   pinned?: true;
 }
+interface RedisDatabaseDetails extends RedisDatabase {
+  port: number;
+  tls: boolean;
+}
 interface RedisDatabaseStats {
-  daily_net_commands: number;
-  daily_read_requests: number;
-  daily_write_requests: number;
-  // dailyproduce: null,
-  // dailyconsume: null,
   total_monthly_bandwidth: number;
   total_monthly_requests: number;
   total_monthly_read_requests: number;
   total_monthly_write_requests: number;
-  total_monthly_script_requests: number;
-  queue_optimized: boolean;
   total_monthly_storage: number;
-  current_storage: number;
   total_monthly_billing: number;
-  // total_monthly_produce: null,
-  // total_monthly_consume: null,
 }
 
 function OpenInUpstash({route}: {route: string}) {
@@ -125,7 +120,7 @@ function CreateDatabase({mutate}: {mutate: MutatePromise<RedisDatabase[]>}) {
 }
 
 function ViewDetails({database}: {database: RedisDatabase}) {
-  const {isLoading: isLoadingDetails} = useFetch<RedisDatabase>(API_URL + `redis/database/${database.database_id}`, {
+  const {isLoading: isLoadingDetails, data: details} = useFetch<RedisDatabaseDetails>(API_URL + `redis/database/${database.database_id}`, {
     headers: API_HEADERS
   });
   const {isLoading: isLoadingStats, data: stats} = useFetch<RedisDatabaseStats>(API_URL + `redis/stats/${database.database_id}`, {
@@ -133,11 +128,20 @@ function ViewDetails({database}: {database: RedisDatabase}) {
   });
 
   return <List isLoading={isLoadingStats || isLoadingDetails} isShowingDetail>
-    {stats && <List.Item title="Details" detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label title="Commands" text={`${stats.total_monthly_requests} / 500k per month`} />
+    {details && stats && <>
+    <List.Item title="Details" detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
+      <List.Item.Detail.Metadata.Label title="Endpoint" text={details.endpoint} />
+      <List.Item.Detail.Metadata.Label title="Port" text={`${details.port}`} />
+      <List.Item.Detail.Metadata.Label title="TLS/SSL" text={details.tls ? "Enabled" : "Disabled"} />
+    </List.Item.Detail.Metadata>} />} />
+    <List.Item title="Usage" detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
+      <List.Item.Detail.Metadata.Label title="Commands" text={`${stats.total_monthly_requests} / ${details.database_type==="free" ? "500k" : "?"} per month`} />
       <List.Item.Detail.Metadata.Label icon={{source:Icon.Dot, tintColor: Color.Green}} title="" text={`Writes...${stats.total_monthly_write_requests}`} />
       <List.Item.Detail.Metadata.Label icon={{source:Icon.Dot, tintColor: Color.Blue}} title="" text={`Reads...${stats.total_monthly_read_requests}`} />
-      {/* <List.Item.Detail.Metadata.Label title="Bandwidth" text={`${stats.daily_net_commands} / 500k per month`} /> */}
-    </List.Item.Detail.Metadata>} />} />}
+      <List.Item.Detail.Metadata.Label title="Bandwidth" text={`${stats.total_monthly_bandwidth} B / ${details.database_type==="free" ? "50" : "?"} GB`} />
+      <List.Item.Detail.Metadata.Label title="Storage" text={`${stats.total_monthly_storage} B / ${details.database_type==="free" ? "256" : "?"} MB`} />
+      <List.Item.Detail.Metadata.Label title="Cost" text={`$${stats.total_monthly_billing}`} />
+    </List.Item.Detail.Metadata>} />} />
+    </>}
   </List>
 }
