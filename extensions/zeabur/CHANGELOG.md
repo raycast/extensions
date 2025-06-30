@@ -1,5 +1,9 @@
 # Zeabur Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed the issue where the provider information in the project list may be null.
+
 ## [Feature] - 2025-06-18
 
 - Added the manage projects command to manage the projects on Zeabur.
