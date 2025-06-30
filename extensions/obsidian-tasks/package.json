@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "ozencb",
   "contributors": [
-    "elfitaflores"
+    "elfitaflores",
+    "xmok"
   ],
   "license": "MIT",
   "categories": [
@@ -25,7 +26,18 @@
       "name": "list-tasks",
       "title": "List Tasks",
       "description": "List all Obsidian tasks",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+      "name": "showDescriptionInDetails",
+      "title": "Show Description",
+      "description": "Show Description in Details Markdown",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Show description in details panel"
+    }
+      ]
     },
     {
       "name": "add-task",
@@ -111,6 +123,7 @@
       "description": "Maximum length of task description to show in menubar",
       "type": "textfield",
       "default": "30",
+      "placeholder": "30",
       "required": true
     },
     {
@@ -119,6 +132,7 @@
       "description": "Refresh interval in minutes",
       "type": "textfield",
       "default": "1",
+      "placeholder": "1",
       "required": true
     }
   ],
