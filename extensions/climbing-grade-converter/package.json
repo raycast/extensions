@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Convert Grade",
+      "title": "Climbing Grade Converter",
       "description": "It converts climbing grades",
       "mode": "view"
     }
