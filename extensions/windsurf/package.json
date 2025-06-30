@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "windsurf",
+  "title": "Windsurf Extension",
+  "description": "Quick Raycast actions for Windsurf: open files/folders in Windsurf and manage Windsurf projects.",
+  "icon": "./extension-icon.png",
+  "categories": ["Developer Tools", "Productivity"],
+  "author": "vikas-bansal",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vikasbnsl/windsurf-raycast"
+  },
+  "commands": [
+    {
+      "name": "open-with-windsurf",
+      "title": "Open with Windsurf",
+      "description": "Select a file or folder to open it in Windsurf IDE",
+      "mode": "no-view"
+    },
+    {
+      "name": "windsurf-projects",
+      "title": "View Windsurf Projects",
+      "description": "View and manage all folders or files opened using 'Open with Windsurf'",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^20.11.19",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
