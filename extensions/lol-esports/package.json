@@ -265,7 +265,7 @@
       "label": "Show Match Score",
       "description": "Show Completed Match Score",
       "required": false,
-      "title": "Match score",
+      "title": "Match Score",
       "default": true
     }
   ],
