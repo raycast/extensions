@@ -3,7 +3,8 @@
 ## [BYOK + View Products] - {PR_MERGE_DATE}
 
 - View Products and their Media
-- Set an optional "Access Token" in Preferences
+- Set an optional "Access Token" in Preferences to BYOK
+- Remove `node-fetch`
 
 ## [Update] - 2025-04-09
 

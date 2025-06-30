@@ -47,10 +47,15 @@ const ProductItem = ({ product }: ProductProps) => {
           markdown={product.description}
           metadata={
             <List.Item.Detail.Metadata>
-              
-              <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title="Media" />
-              {product.medias.map(media => <List.Item.Detail.Metadata.Link key={media.id} title={media.name} text={media.publicUrl} target={media.publicUrl} />)}
+              {product.medias.map((media) => (
+                <List.Item.Detail.Metadata.Link
+                  key={media.id}
+                  title={media.name}
+                  text={media.publicUrl}
+                  target={media.publicUrl}
+                />
+              ))}
               <List.Item.Detail.Metadata.Separator />
             </List.Item.Detail.Metadata>
           }
@@ -62,7 +67,10 @@ const ProductItem = ({ product }: ProductProps) => {
             title="Open in Polar"
             url={`https://polar.sh/dashboard/${organization?.slug}/products/${product.id}`}
           />
-          <Action.CopyToClipboard title="Copy Product ID" content={product.id} />
+          <Action.CopyToClipboard
+            title="Copy Product ID"
+            content={product.id}
+          />
         </ActionPanel>
       }
     />
@@ -70,10 +78,7 @@ const ProductItem = ({ product }: ProductProps) => {
 };
 
 const ProductsView = () => {
-  const {
-    data: products,
-    isLoading
-  } = useProducts({});
+  const { data: products, isLoading } = useProducts({});
 
   return (
     <List
@@ -81,8 +86,9 @@ const ProductsView = () => {
       searchBarPlaceholder="Filter Products..."
       isShowingDetail
     >
-      {products?.result.items
-        .map((product) => <ProductItem key={product.id} product={product} />)}
+      {products?.result.items.map((product) => (
+        <ProductItem key={product.id} product={product} />
+      ))}
     </List>
   );
 };
