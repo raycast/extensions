@@ -90,14 +90,14 @@ interface EventDetail {
 }
 
 export const eventDetail = (event: Event, includeTime: boolean): EventDetail => {
-  const [teamA, teamsB] = event.match.teams;
+  const [teamA, teamB] = event.match.teams;
 
-  let subtitle = `${teamA.name} - ${teamsB.name}`;
+  let subtitle = `${teamA.name} - ${teamB.name}`;
 
   if (preferences.score) {
     // Use preference here
-    if (teamA.result?.outcome && teamsB.result?.outcome) {
-      subtitle = `${teamA.name} ${teamA.result.gameWins} - ${teamsB.result.gameWins} ${teamsB.name}`;
+    if (teamA.result?.outcome && teamB.result?.outcome) {
+      subtitle = `${teamA.name} ${teamA.result.gameWins} - ${teamB.result.gameWins} ${teamB.name}`;
     }
   }
 
@@ -105,7 +105,7 @@ export const eventDetail = (event: Event, includeTime: boolean): EventDetail => 
 
   const title = includeTime ? formatDate(eventDate, "MMM d, HH:mm") : formatDate(eventDate, "HH:mm");
 
-  const keywords = [...teamA.name.split(" "), ...teamsB.name.split(" "), title];
+  const keywords = [...teamA.name.split(" "), ...teamB.name.split(" "), title];
 
   return {
     title: title,
