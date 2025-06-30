@@ -1,6 +1,6 @@
 # Stacks Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-06-30
 
 ### Added
 - **Search Stacks**: Browse and search through saved resources with grid and list views
