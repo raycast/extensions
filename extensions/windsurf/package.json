@@ -15,14 +15,12 @@
     {
       "name": "open-with-windsurf",
       "title": "Open with Windsurf",
-      "subtitle": "Open selected file/folder in Windsurf",
       "description": "Select a file or folder to open it in Windsurf IDE",
       "mode": "no-view"
     },
     {
       "name": "windsurf-projects",
-      "title": "Windsurf Projects",
-      "subtitle": "List all Windsurf projects",
+      "title": "View Windsurf Projects",
       "description": "View and manage all folders or files opened using 'Open with Windsurf'",
       "mode": "view"
     }
