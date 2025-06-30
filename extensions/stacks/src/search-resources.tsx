@@ -15,7 +15,7 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { executeQuery, Preferences } from "./utils/graphql";
+import { executeQuery } from "./utils/graphql";
 
 // GraphQL query to fetch resources (links)
 const FETCH_RESOURCES_QUERY = `
@@ -137,7 +137,7 @@ function formatDate(dateString?: string): string {
 // Main Search Command
 export default function Command() {
   // Get preferences
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const isGridView = preferences.viewType === "grid";
 
   // Shared state
@@ -275,26 +275,30 @@ export default function Command() {
     });
   }
 
-  // Show error state if there's an authentication error
-  if (error && error.includes("API token not found")) {
+  // Show error state if there's an authentication error or invalid token
+  const isTokenError =
+    error &&
+    (error.toLowerCase().includes("api token") ||
+      error.toLowerCase().includes("authentication failed") ||
+      error.toLowerCase().includes("sign in again") ||
+      error.toLowerCase().includes("invalid api token"));
+
+  if (isTokenError) {
     return (
       <Detail
         markdown={`
-# API Token Required
+# Invalid or Expired API Token
 
-Please configure your Stacks API token in the extension preferences to use this extension.
+Your Stacks API token is invalid or expired. Please update it in the extension preferences to continue using Stacks.
 
-## How to find your token
+---
 
-1. Open betterstacks.com and make sure you're logged in
+**How to update your token:**
+1. Open betterstacks.com and log in
 2. Open browser developer tools (Right-click → Inspect or Cmd+Option+I)
-3. Navigate to 'Application' tab (Chrome) or 'Storage' tab (Firefox)
-4. Expand the 'Cookies' section
-5. Select the betterstacks.com domain
-6. Find the 'gqlToken' cookie
-7. Copy the cookie value
-
-Your token is stored securely and only used to communicate with the Stacks API.
+3. Go to 'Application' (Chrome) or 'Storage' (Firefox)
+4. Find the 'gqlToken' cookie for betterstacks.com
+5. Copy the value and paste it in Raycast extension preferences
         `}
         actions={
           <ActionPanel>
@@ -376,24 +380,40 @@ Your token is stored securely and only used to communicate with the Stacks API.
           ))
         ) : (
           <Grid.EmptyView
-            title={error || (searchText ? `No Results for "${searchText}"` : "No Resources Found")}
-            description={
-              error
-                ? "Please try again or check your connection"
-                : searchText
-                  ? "Try different search terms or clear the search"
-                  : "Start saving resources to see them here"
+            title={
+              isTokenError
+                ? "Invalid or Expired API Token"
+                : error || (searchText ? `No Results for "${searchText}"` : "No Resources Found")
             }
-            icon={error ? Icon.ExclamationMark : searchText ? Icon.MagnifyingGlass : Icon.Bookmark}
+            description={
+              isTokenError
+                ? "Your Stacks API token is invalid or expired. Please update it in Preferences."
+                : error
+                  ? "Please try again or check your connection"
+                  : searchText
+                    ? "Try different search terms or clear the search"
+                    : "Start saving resources to see them here"
+            }
+            icon={
+              isTokenError
+                ? Icon.ExclamationMark
+                : error
+                  ? Icon.ExclamationMark
+                  : searchText
+                    ? Icon.MagnifyingGlass
+                    : Icon.Bookmark
+            }
             actions={
               <ActionPanel>
                 <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  onAction={handleRefresh}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  title={isTokenError ? "Open Extension Preferences" : "Refresh"}
+                  icon={isTokenError ? Icon.Gear : Icon.ArrowClockwise}
+                  onAction={isTokenError ? openExtensionPreferences : handleRefresh}
+                  shortcut={{ modifiers: ["cmd"], key: isTokenError ? "k" : "r" }}
                 />
-                <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                {!isTokenError && (
+                  <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                )}
               </ActionPanel>
             }
           />
@@ -533,24 +553,40 @@ Your token is stored securely and only used to communicate with the Stacks API.
           ))
         ) : (
           <List.EmptyView
-            title={error || (searchText ? `No Results for "${searchText}"` : "No Resources Found")}
-            description={
-              error
-                ? "Please try again or check your connection"
-                : searchText
-                  ? "Try different search terms or clear the search"
-                  : "Start saving resources to see them here"
+            title={
+              isTokenError
+                ? "Invalid or Expired API Token"
+                : error || (searchText ? `No Results for "${searchText}"` : "No Resources Found")
             }
-            icon={error ? Icon.ExclamationMark : searchText ? Icon.MagnifyingGlass : Icon.Bookmark}
+            description={
+              isTokenError
+                ? "Your Stacks API token is invalid or expired. Please update it in Preferences."
+                : error
+                  ? "Please try again or check your connection"
+                  : searchText
+                    ? "Try different search terms or clear the search"
+                    : "Start saving resources to see them here"
+            }
+            icon={
+              isTokenError
+                ? Icon.ExclamationMark
+                : error
+                  ? Icon.ExclamationMark
+                  : searchText
+                    ? Icon.MagnifyingGlass
+                    : Icon.Bookmark
+            }
             actions={
               <ActionPanel>
                 <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  onAction={handleRefresh}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  title={isTokenError ? "Open Extension Preferences" : "Refresh"}
+                  icon={isTokenError ? Icon.Gear : Icon.ArrowClockwise}
+                  onAction={isTokenError ? openExtensionPreferences : handleRefresh}
+                  shortcut={{ modifiers: ["cmd"], key: isTokenError ? "k" : "r" }}
                 />
-                <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                {!isTokenError && (
+                  <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                )}
               </ActionPanel>
             }
           />

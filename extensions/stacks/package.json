@@ -23,7 +23,7 @@
       "title": "Add Link",
       "subtitle": "BetterStacks",
       "description": "Add a new link to your Stacks workspace",
-      "mode": "view",
+      "mode": "no-view",
       "arguments": [
         {
           "name": "url",
