@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [New Config] - {PR_MERGE_DATE}
+## [New Config] - 2025-06-30
 
 - Added a new configuration option to disable HUDs
 
