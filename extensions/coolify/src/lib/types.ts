@@ -107,46 +107,8 @@ export type Team = {
   id: number;
   name: string;
   description: string | null;
-  discord_enabled: boolean;
-  discord_notifications_database_backups: boolean;
-  discord_notifications_deployments: boolean;
-  discord_notifications_scheduled_tasks: boolean;
-  discord_notifications_status_changes: boolean;
-  discord_notifications_test: boolean;
-  discord_webhook_url: string | null;
   personal_team: boolean;
-  resend_api_key: string | null;
-  resend_enabled: boolean;
   show_boarding: boolean;
-  smtp_enabled: boolean;
-  smtp_encryption: string | null;
-  smtp_from_address: string | null;
-  smtp_from_name: string | null;
-  smtp_host: string | null;
-  smtp_notifications_database_backups: boolean;
-  smtp_notifications_deployments: boolean;
-  smtp_notifications_scheduled_tasks: boolean;
-  smtp_notifications_status_changes: boolean;
-  smtp_notifications_test: boolean;
-  smtp_password: string | null;
-  smtp_port: string | null;
-  smtp_recipients: string | null;
-  smtp_timeout: string | null;
-  smtp_username: string | null;
-  telegram_chat_id: string | null;
-  telegram_enabled: boolean;
-  telegram_notifications_database_backups: boolean;
-  telegram_notifications_database_backups_message_thread_id: string | null;
-  telegram_notifications_deployments: boolean;
-  telegram_notifications_deployments_message_thread_id: string | null;
-  telegram_notifications_scheduled_tasks: boolean;
-  telegram_notifications_scheduled_tasks_thread_id: string | null;
-  telegram_notifications_status_changes: boolean;
-  telegram_notifications_status_changes_message_thread_id: string | null;
-  telegram_notifications_test: boolean;
-  telegram_notifications_test_message_thread_id: string | null;
-  telegram_token: string | null;
-  use_instance_email_settings: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -166,7 +128,6 @@ export type Project = {
   id: number;
   uuid: string;
   name: string;
-  default_environment: string;
   description: string | null;
 };
 export type ProjectDetails = Project & {
@@ -196,6 +157,25 @@ export type EnvironmentDetails = Environment & {
   postgresqls: Resource[];
   redis: Resource[];
   services: Resource[];
+};
+
+export type EnvironmentVariable = {
+  uuid: string;
+  is_build_time: boolean;
+  is_literal: boolean;
+  is_multiline: boolean;
+  is_preview: boolean;
+  is_really_required: boolean;
+  is_required: boolean;
+  is_shared: boolean;
+  is_shown_once: boolean;
+  key: string;
+  order: number | null;
+  real_value: string;
+  value: string | null;
+  version: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export type MessageResult = {

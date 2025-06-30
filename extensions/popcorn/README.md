@@ -1,4 +1,4 @@
-<h1><img src="assets/extension-icon.png" width="25" height="25"/>  Popcorn for Raycast</h1>
+<h1><img src="assets/extension-icon.png" width="25" height="25"/> Popcorn</h1>
 
 <div>
   <img src="metadata/popcorn-1.png" width="30%"/>

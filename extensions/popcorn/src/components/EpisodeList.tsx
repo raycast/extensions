@@ -12,7 +12,6 @@ interface EpisodeListProps {
   onEpisodeSelect: (episode: Episode) => void;
   onSeasonChange: (season: string) => void;
   onWatchedFilterChange: (filter: "all" | "watched" | "unwatched") => void;
-  onConfigure: () => void;
 }
 
 export function EpisodeList({
@@ -24,7 +23,6 @@ export function EpisodeList({
   onEpisodeSelect,
   onSeasonChange,
   onWatchedFilterChange,
-  onConfigure,
 }: EpisodeListProps) {
   // Group episodes by season
   const episodesBySeason = episodes.reduce(
@@ -104,11 +102,6 @@ export function EpisodeList({
         </List.Dropdown>
       }
       isShowingDetail
-      actions={
-        <ActionPanel>
-          <Action title="Configure" onAction={onConfigure} icon={Icon.Gear} />
-        </ActionPanel>
-      }
     >
       {seasonsToShow.map((season) => {
         const seasonEpisodes = filterEpisodes(episodesBySeason[Number(season)]);
@@ -212,7 +205,6 @@ export function EpisodeList({
                           icon={getFilterIcon()}
                           shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                         />
-                        <Action title="Configure" onAction={onConfigure} icon={Icon.Gear} />
                       </ActionPanel>
                     }
                   />

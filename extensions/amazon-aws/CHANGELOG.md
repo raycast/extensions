@@ -1,5 +1,8 @@
 # Amazon AWS Changelog
 
+## [Fixes] - 2025-06-18
+- Fix local development crashing without AWS Vault.
+
 ## [Console command] - 2025-06-13
 - Add AWS Audit Manager service to console command
 - Fix Amazon Bedrock service details (previously had incorrect AWS Audit Manager information)

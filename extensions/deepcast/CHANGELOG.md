@@ -1,5 +1,9 @@
 # Deepcast Changelog
 
+## [Default Formality Configuration] - 2025-06-07
+
+- Added new "Default Formality" preference option to set a global formality level for all supported languages
+
 ## [Return to Root State] - 2025-05-27
 
 - Added preference option to reset Raycast to root state after copying the translated text

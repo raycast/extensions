@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { showFailureToast } from "@raycast/utils";
 
 interface TermsAcknowledgementProps {
   onAccept: () => void;
@@ -13,7 +14,7 @@ export function TermsAcknowledgement({ onAccept }: TermsAcknowledgementProps) {
       await storage.saveTermsAcceptance();
       onAccept();
     } catch (error) {
-      console.error("Failed to save terms acceptance:", error);
+      showFailureToast(error, { title: "Failed to save terms acceptance:" });
     }
   };
 

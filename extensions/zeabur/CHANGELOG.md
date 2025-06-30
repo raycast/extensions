@@ -1,5 +1,13 @@
 # Zeabur Changelog
 
+## [Fix] - 2025-06-30
+
+- Fixed the issue where the provider information in the project list may be null.
+
+## [Feature] - 2025-06-18
+
+- Added the manage projects command to manage the projects on Zeabur.
+
 ## [Update] - 2025-05-26
 
 - Updated the deploy script for the "Deploy Project" command.
