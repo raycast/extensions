@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Feature] - 2025-06-30
+## [Feature] - {PR_MERGE_DATE}
 
 - Added instant translate commands for selected text translation
 - Added "Instant Translate View" command to display translation in HUD
