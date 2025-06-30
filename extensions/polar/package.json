@@ -26,24 +26,21 @@
       "title": "View Recent Orders",
       "subtitle": "Polar",
       "description": "View your last incoming orders",
-      "mode": "view",
-      "icon": "command-icon.png"
+      "mode": "view"
     },
     {
       "name": "products",
       "title": "View Products",
       "subtitle": "Polar",
       "description": "View your products",
-      "mode": "view",
-      "icon": "command-icon.png"
+      "mode": "view"
     },
     {
       "name": "subscriptions",
       "title": "View Subscriptions",
       "subtitle": "Polar",
       "description": "View your active subscriptions",
-      "mode": "view",
-      "icon": "command-icon.png"
+      "mode": "view"
     }
   ],
   "dependencies": {

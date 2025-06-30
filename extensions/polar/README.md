@@ -36,3 +36,6 @@ Manage all your Polar products, sales & analytics within Raycast
         * metrics:read
 4. `Copy` the **token**
 5. `Open` and `Paste` in **Extension Preferences**
+
+---
+<img src="./assets/logotype_white.svg" height="100" />
