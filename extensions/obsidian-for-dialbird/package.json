@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-for-dialbird",
+  "title": "Obsidian for Dialbird",
+  "description": "Control Obsidian with Raycast",
+  "icon": "extension_icon.png",
+  "author": "marcjulian",
+  "categories": [
+    "Productivity"
+  ],
+  "contributors": [
+    "KevinBatdorf",
+    "iancanderson",
+    "pernielsentikaer",
+    "ofalvai",
+    "adamadamsmusic",
+    "fservais",
+    "psychomane",
+    "denis_ufimtsev",
+    "dialbird"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "type": "textfield",
+      "placeholder": "path/to/vault",
+      "title": "Path to Vault",
+      "required": false,
+      "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
+    },
+    {
+      "name": "configFileName",
+      "type": "textfield",
+      "placeholder": ".obsidian",
+      "title": "Config filename",
+      "required": false,
+      "default": ".obsidian",
+      "description": "Override the vault config filename (default: .obsidian)"
+    }
+  ],
+  "commands": [
+    {
+      "name": "driftLoggerCommand",
+      "title": "Drift Logger",
+      "subtitle": "Obsidian for Dialbird",
+      "description": "Log a task to a note of your choice",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Your task",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "minutes",
+          "placeholder": "30",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "description": "Path of note",
+          "name": "notePath",
+          "required": true,
+          "title": "Path of the note you wish to append the task to",
+          "type": "textfield"
+        },
+        {
+          "description": "Name of Obsidian vault where note is",
+          "name": "vaultName",
+          "required": false,
+          "title": "Name of Obsidian vault where note is",
+          "type": "textfield"
+        },
+        {
+          "description": "If no heading is not set, text will be appended to the end of the note",
+          "name": "heading",
+          "required": false,
+          "title": "Name of heading in note in which to append",
+          "type": "textfield"
+        },
+        {
+          "default": true,
+          "description": "Don't open note when appending.",
+          "label": "Silent Mode",
+          "name": "silent",
+          "required": false,
+          "title": "Silent Mode",
+          "type": "checkbox"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@types/uuid": "^8.3.4",
+    "fuse.js": "^7.0.0",
+    "luxon": "^3.4.4",
+    "uuid": "^8.3.2",
+    "yaml": "^2.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.42.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}
