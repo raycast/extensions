@@ -1,5 +1,21 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Gen-PDF MCP Server] - 2025-06-19
+
+Add Gen-PDF MCP server to let AI generate beautiful PDF documents.
+
+## [Add Keboola MCP Server] - 2025-06-17
+
+Add official Keboola MCP Server to registry - an open-source bridge between your Keboola project and modern AI tools. It turns Keboola features—like storage access, SQL transformations, and job triggers—into callable tools for Claude, Cursor, CrewAI, LangChain, Amazon Q, and more.
+
+## [Updated Prisma MCP Server URL] - 2025-06-05
+
+The Prisma MCP server URL was updated.
+
+## [Add Kagi Search MCP Server] - 2025-06-05
+
+Add official Kagi Search MCP Server to registry.
+
 ## [Add Anytype MCP Server] - 2025-05-30
 
 Add official Anytype MCP Server to registry.

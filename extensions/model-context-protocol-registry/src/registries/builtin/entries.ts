@@ -175,6 +175,49 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "kagimcp",
+    title: "Kagi Search",
+    description: "The Official Model Context Protocol (MCP) server for Kagi search & other tools.",
+    icon: "kagi.svg",
+    homepage: "https://github.com/kagisearch/kagimcp",
+    configuration: {
+      command: "uvx",
+      args: ["kagimcp"],
+      env: {
+        KAGI_API_KEY: "YOUR_API_KEY_HERE",
+        KAGI_SUMMARIZER_ENGINE: "YOUR_ENGINE_CHOICE_HERE", // Defaults to "cecil" engine if env var not present
+      },
+    },
+  },
+  {
+    name: "keboola",
+    title: "Keboola",
+    description:
+      "Keboola MCP Server is an open-source bridge between your Keboola project and modern AI tools. It turns Keboola features—like storage access, SQL transformations, and job triggers—into callable tools for Claude, Cursor, CrewAI, LangChain, Amazon Q, and more.",
+    icon: "keboola.svg",
+    homepage: "https://github.com/keboola/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["mcp-remote", "https://mcp.canary-orion.keboola.dev/sse"],
+    },
+  },
+  {
+    name: "keboola-local",
+    title: "Keboola (Local)",
+    description:
+      "Keboola MCP Server is an open-source bridge between your Keboola project and modern AI tools. It turns Keboola features—like storage access, SQL transformations, and job triggers—into callable tools for Claude, Cursor, CrewAI, LangChain, Amazon Q, and more. This is the local server version.",
+    icon: "keboola.svg",
+    homepage: "https://github.com/keboola/mcp-server",
+    configuration: {
+      command: "uvx",
+      args: ["keboola_mcp_server", "--api-url", "https://connection.YOUR_REGION.keboola.com"],
+      env: {
+        KBC_STORAGE_TOKEN: "your_keboola_storage_token",
+        KBC_WORKSPACE_SCHEMA: "your_workspace_schema",
+      },
+    },
+  },
+  {
     name: "filesystem",
     title: "Filesystem",
     description:
@@ -222,7 +265,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://www.prisma.io/docs/postgres/integrations/mcp-server",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://api.prisma.io/mcp-server/mcp"],
+      args: ["-y", "mcp-remote", "https://mcp.prisma.io/mcp"],
     },
   },
   {
@@ -409,7 +452,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "pydantic-logfire",
     title: "Pydantic Logfire",
     description:
-      "This repository contains a Model Context Protocol (MCP) server with tools that can access the OpenTelemetry traces and metrics you've sent to Logfire.\n\nThis MCP server enables LLMs to retrieve your application's telemetry data, analyze distributed traces, and make use of the results of arbitrary SQL queries executed using the Logfire APIs.",
+      "This repository contains a Model Context Protocol (MCP) server with tools that can access the OpenTelemetry traces and metrics you've sent to Logfire. This MCP server enables LLMs to retrieve your application's telemetry data, analyze distributed traces, and make use of the results of arbitrary SQL queries executed using the Logfire APIs.",
     icon: "pydantic.svg",
     homepage: "https://github.com/pydantic/logfire-mcp",
     configuration: {
@@ -516,6 +559,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-05-20"}',
       },
+    },
+  },
+  {
+    name: "gen-pdf",
+    title: "Gen-PDF",
+    description:
+      "MCP server to generate professional looking PDF. Perfect for creating reports, invoices, contracts, and more.",
+    icon: "https://gen-pdf.com/favicon.ico",
+    homepage: "https://gen-pdf.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://gen-pdf.com/mcp"],
     },
   },
 ];

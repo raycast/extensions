@@ -1,6 +1,78 @@
 # Changelog
 
-## [1.0.0] - 2025-05-30
+## [2.0.1] - 2025-06-16
+
+Add new images for metadata and remove old ones
+
+## [2.0.0] - 2025-06-12
+
+### 🚨 BREAKING CHANGES - Major Redesign for Compliance
+
+This version represents a complete architectural overhaul to ensure long-term sustainability and compliance with Google Scholar's Terms of Service.
+
+### ✅ Added
+- **Smart conditional year filtering** - Year range fields only appear when sorting by relevance
+- **Enhanced search validation** - Better error messages and form validation
+- **Improved search history** - Cleaner display of recent searches with better formatting
+
+### 🔄 Changed
+- **Complete removal of web scraping** - Now uses official Google Scholar URLs instead of parsing HTML
+- **Browser-based results** - Opens searches directly in browser for full Google Scholar experience
+- **Simplified architecture** - Removed complex bookmark management system
+- **Streamlined interface** - Focus on core search functionality
+- **Improved UX logic** - Year filtering disabled when sorting by newest (eliminates logical conflicts)
+
+### 🗑️ Removed
+- **Web scraping dependencies** - Removed axios, cheerio, and HTML parsing
+- **Bookmark system** - Removed complex research management features
+- **AI tools integration** - Removed automated article processing
+- **Local article storage** - No longer stores or caches article data
+- **Advanced metadata tracking** - Simplified to core search functionality
+
+### 🛡️ Security & Compliance
+- **Terms of Service compliance** - No longer violates Google Scholar's ToS
+- **Anti-scraping resilience** - Immune to Google's bot detection measures
+- **Privacy improvements** - No external API calls or data collection
+- **Sustainable operation** - Uses Google Scholar's intended access methods
+
+### 📈 Performance
+- **Faster startup** - Removed heavy dependencies and processing
+- **Instant search** - Direct URL construction without API delays
+- **Reduced resource usage** - No background processing or data storage
+- **Better reliability** - No network timeouts or parsing errors
+
+### 🎯 Why This Change?
+
+**The Problem:** The previous version used web scraping to extract search results from Google Scholar, which:
+- Violated Google Scholar's Terms of Service
+- Was blocked by Google's anti-scraping measures
+- Required constant maintenance due to HTML structure changes
+
+- Provided an unreliable user experience
+
+**The Solution:** This version takes a compliance-first approach:
+- Uses Google Scholar's official search parameters
+- Opens results in the user's browser for full functionality
+- Respects Google's intended usage patterns
+- Provides a sustainable, future-proof solution
+- Maintains excellent usability while ensuring compliance
+
+### 🔄 Migration Notes
+
+**For users upgrading from v1.0:**
+- Previous bookmarks and saved articles are no longer accessible
+- Search functionality is now browser-based instead of in-app
+- Recent search history will be reset
+- No data migration is possible due to architectural changes
+
+**Recommended workflow:**
+1. Use the extension to construct advanced searches
+2. Review results in Google Scholar (full features available)
+3. Bookmark articles using your browser's bookmark system
+4. Use Google Scholar's "My Library" for research management
+
+
+## [1.0.0] - 2025-05-30 DEPRECATED
 
 ### Added
 

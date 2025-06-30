@@ -1,5 +1,12 @@
 # Brand Icons Changelog
 
+## [Routine Maintenance] - 2025-06-20
+
+- We reached 3300+ icons!
+- Update extension icon to liquid glass style
+- Update extension screenshots with macOS Tahoe wallpaper
+- Bump all dependencies to the latest
+
 ## [Routine Maintenance] - 2025-06-04
 
 - Use local vendor instead of simple-icons/sdk
@@ -136,4 +143,4 @@
 
 ## [Initial Version] - 2024-01-12
 
-- Over 2900 Free SVG icons for popular brands. See them all on one page at https://simpleicons.org. Contributions, corrections & requests can be made on GitHub.
+- Over 2900 SVG icons for popular brands. See them all on one page at https://simpleicons.org. Contributions, corrections & requests can be made on GitHub.
