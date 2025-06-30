@@ -1,0 +1,78 @@
+{
+  "name": "raycast-zenoss-extension",
+  "version": "1.0.0",
+  "description": "Raycast extension to search for devices in Zenoss on-premise installations.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "raycast",
+    "extension",
+    "zenoss"
+  ],
+  "author": "claus_ebild",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "@eslint/js": "^9.30.0",
+    "@eslint/json": "^0.12.0",
+    "@types/node": "^20.8.10",
+    "@types/react": "18.2.36",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "globals": "^16.2.0",
+    "prettier": "^3.2.5",
+    "react": "18.2.0",
+    "typescript": "5.2.2",
+    "typescript-eslint": "^8.35.0"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "axios": "^1.10.0"
+  },
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "title": "Zenoss Search",
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Zenoss Device",
+      "description": "Searches for a specific Zenoss device and lists its details.",
+      "mode": "view",
+      "icon": "icon.png",
+      "preferences": [
+        {
+          "name": "zenossUrl",
+          "type": "textfield",
+          "title": "Zenoss URL",
+          "description": "URL for your Zenoss installation (e.g., https://monitor.netic.dk)",
+          "required": true,
+          "placeholder": "https://monitor.netic.dk"
+        },
+        {
+          "name": "zenossUsername",
+          "type": "textfield",
+          "title": "Zenoss Username",
+          "description": "Your Zenoss username",
+          "required": true
+        },
+        {
+          "name": "zenossPassword",
+          "type": "password",
+          "title": "Zenoss Password",
+          "description": "Your Zenoss password (stored securely)",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
