@@ -1,6 +1,6 @@
 # Obsidian Tasks Changelog
 
-## [Show description in details] - {PR_MERGE_DATE}
+## [Show description in details] - 2025-06-30
 
 - Add preference to show description in markdown (ref: [Issue #20035](https://github.com/raycast/extensions/issues/20035))
 - Remove `Preferences` type definition as it is auto-generated
