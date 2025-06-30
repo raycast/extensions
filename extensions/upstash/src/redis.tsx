@@ -1,12 +1,7 @@
-import { Action, ActionPanel, Color, Form, getPreferenceValues, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, useFetch, useForm } from "@raycast/utils";
+import { API_HEADERS, API_URL, OpenInUpstash, postUpstash } from "./upstash";
 
-const { email, api_key } = getPreferenceValues<Preferences>();
-const TOKEN = Buffer.from(`${email}:${api_key}`).toString('base64');
-const API_URL = "https://api.upstash.com/v2/"
-const API_HEADERS = {
-  Authorization: `Basic ${TOKEN}`
-}
 interface RedisDatabase {
   database_id: string;
   database_name: string;
@@ -27,26 +22,6 @@ interface RedisDatabaseStats {
   total_monthly_billing: number;
 }
 
-function OpenInUpstash({route}: {route: string}) {
-  return <Action.OpenInBrowser icon="upstash-icon-dark-bg.png" title="Open in Upstash" url={`https://console.upstash.com/${route}`} />
-}
-async function callUpstash(endpoint: string, body: Record<string, string>) {
-  const response = await fetch(API_URL + endpoint, {
-    method: "POST",
-    headers: API_HEADERS,
-    body: JSON.stringify(body)
-  });
-  const text = await response.text();
-  let result;
-  try {
-    result = await JSON.parse(text);
-  } catch {
-    result = text;
-  }
-  if (!response.ok) throw new Error(result || response.statusText);
-  return result;
-}
-
 export default function Redis() {
   const {isLoading, data: databases, error, mutate} = useFetch<RedisDatabase[], RedisDatabase[]>(API_URL + "redis/databases", {
     headers: API_HEADERS,
@@ -59,7 +34,8 @@ export default function Redis() {
     </ActionPanel>} /> : databases.map(database => <List.Item key={database.database_id} icon="redis.svg" title={database.database_name} subtitle={database.endpoint.split(".")[0]} accessories={[
       {...database.pinned && {icon: Icon.Star}}
     ]} actions={<ActionPanel>
-      <Action.Push title="View Details" target={<ViewDetails database={database} />} />
+      <Action.Push icon={Icon.Eye} title="View Details & Usage" target={<ViewDetailsAndUsage database={database} />} />
+      <Action.Push icon={Icon.Plus} title="Create Database" target={<CreateDatabase mutate={mutate} />} />
       <OpenInUpstash route={`redis/${database.database_id}`} />
     </ActionPanel>} />)}
   </List>
@@ -86,7 +62,7 @@ function CreateDatabase({mutate}: {mutate: MutatePromise<RedisDatabase[]>}) {
       const toast = await showToast(Toast.Style.Animated, "Creating", values.name);
       try {
         await mutate(
-          callUpstash("redis/database", {
+          postUpstash("redis/database", {
             name: values.name,
             region: "global",
             primary_region: values.primary_region,
@@ -119,7 +95,7 @@ function CreateDatabase({mutate}: {mutate: MutatePromise<RedisDatabase[]>}) {
   </Form>
 }
 
-function ViewDetails({database}: {database: RedisDatabase}) {
+function ViewDetailsAndUsage({database}: {database: RedisDatabase}) {
   const {isLoading: isLoadingDetails, data: details} = useFetch<RedisDatabaseDetails>(API_URL + `redis/database/${database.database_id}`, {
     headers: API_HEADERS
   });

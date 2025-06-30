@@ -30,6 +30,12 @@
       "title": "Redis",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "vector",
+      "title": "Vector",
+      "description": "",
+      "mode": "view"
     }
   ],
   "dependencies": {
