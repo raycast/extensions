@@ -1,6 +1,6 @@
 # Radicle Changelog
 
-## [Remove dependency on `radicle-httpd`] - {PR_MERGE_DATE}
+## [Remove dependency on `radicle-httpd`] - 2025-06-30
 
 - Remove the need for users to run `radicle-httpd` locally, by querying the Radicle storage directly.
 - Update dependencies.
