@@ -18,7 +18,8 @@
     "ridemountainpig",
     "teemu_suvinen",
     "juan_saldana",
-    "andreaselia"
+    "andreaselia",
+    "fhf1121"
   ],
   "license": "MIT",
   "commands": [
@@ -435,7 +436,8 @@
     "@raycast/utils": "^1.18.1",
     "date-fns": "^3.6.0",
     "lodash": "^4.17.21",
-    "node-html-markdown": "^1.3.0"
+    "node-html-markdown": "^1.3.0",
+    "pinyin-pro": "^3.26.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
