@@ -258,9 +258,19 @@
       }
     ]
   },
+  "preferences": [
+    {
+      "type": "checkbox",
+      "name": "score",
+      "description": "Show Completed Match Score",
+      "required": false,
+      "title": "Match score",
+      "default": true
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.19.0",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1",
     "date-fns": "^3.3.1",
     "p-min-delay": "^4.0.2"
   },
