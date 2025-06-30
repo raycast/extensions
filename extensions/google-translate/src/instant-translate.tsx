@@ -1,36 +1,40 @@
-import { getPreferenceValues, getSelectedText, showHUD, Clipboard } from "@raycast/api";
+import { getPreferenceValues, getSelectedText, showHUD } from "@raycast/api";
 import { simpleTranslate } from "./simple-translate";
 import { LanguageCode } from "./languages";
 
+// Reading time per character based on average reading speed of ~200 words per minute
+const READING_TIME_PER_CHAR_MS = 150;
+
+// HUD display constants
+const MIN_HUD_DURATION_MS = 2000;
+const MAX_HUD_DURATION_MS = 15000;
+const HUD_REFRESH_INTERVAL_MS = 1000;
+
 // Helper function to show HUD for a longer duration based on text length
-async function showExtendedHUD(message: string, minDurationMs = 2000) {
+export async function showExtendedHUD(message: string, minDurationMs = MIN_HUD_DURATION_MS) {
   await showHUD(message);
 
   // Calculate duration based on message length
-  // Assuming average reading speed of 150ms per character (adjust as needed)
-  const readingTimePerChar = 150; // milliseconds
-  const calculatedDuration = Math.max(minDurationMs, message.length * readingTimePerChar);
+  const calculatedDuration = Math.max(minDurationMs, message.length * READING_TIME_PER_CHAR_MS);
 
   // Cap maximum duration to avoid excessive waiting
-  const maxDuration = 15000; // 15 seconds max
-  const finalDuration = Math.min(calculatedDuration, maxDuration);
+  const finalDuration = Math.min(calculatedDuration, MAX_HUD_DURATION_MS);
 
   // Show the same message multiple times with a delay to extend visibility
-  const intervalTime = 1000; // Refresh every 1 second
-  const iterations = Math.floor(finalDuration / intervalTime);
+  const iterations = Math.floor(finalDuration / HUD_REFRESH_INTERVAL_MS);
 
   for (let i = 0; i < iterations; i++) {
-    await new Promise((resolve) => setTimeout(resolve, intervalTime));
+    await new Promise((resolve) => setTimeout(resolve, HUD_REFRESH_INTERVAL_MS));
     await showHUD(message);
   }
 }
 
-export default async function InstantTranslate() {
+// Base function for instant translation logic
+export async function baseInstantTranslate(onTranslated: (translatedText: string) => Promise<void>) {
   try {
     const preferences = getPreferenceValues<ExtensionPreferences>();
     const targetLanguage = preferences.lang2; // Use secondary language as target
-    const sourceLanguage = preferences.lang1 === "auto" ? "auto" : preferences.lang1;
-    const defaultAction = preferences.defaultAction; // Can be "copy", "paste", or "show"
+    const sourceLanguage = preferences.lang1;
     const proxy = preferences.proxy;
 
     // Get the selected text from any active application
@@ -46,7 +50,6 @@ export default async function InstantTranslate() {
 
     await showHUD("Translating...");
 
-    // Use the existing Google Translate implementation
     const result = await simpleTranslate(selectedText, {
       langFrom: sourceLanguage as LanguageCode,
       langTo: [targetLanguage as LanguageCode],
@@ -55,25 +58,7 @@ export default async function InstantTranslate() {
 
     if (result && result.translatedText) {
       const translation = result.translatedText;
-
-      // Handle different action types
-      switch (defaultAction) {
-        case "copy":
-          await Clipboard.copy(translation);
-          await showHUD(`✓ Copied To Clipboard`);
-          break;
-
-        case "paste":
-          await Clipboard.paste(translation);
-          await showHUD(`✓ Pasted`);
-          break;
-
-        case "show":
-        default:
-          // Just show the translation without copying or pasting
-          await showExtendedHUD(translation);
-          break;
-      }
+      await onTranslated(translation);
     } else {
       throw new Error("Translation not found in response");
     }
