@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Docs: Add note about automation permissions] - 2025-06-30
+## [Docs: Add note about automation permissions] - {PR_MERGE_DATE}
 
 Added a note about automation permissions for Raycast in the README.md file.
 
