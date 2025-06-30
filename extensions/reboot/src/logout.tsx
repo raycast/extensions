@@ -9,4 +9,9 @@ tell application "System Events"
 end tell
 `);
   await showHUD("Bye 🚪");
+  await runAppleScript(`
+tell application "System Events"
+    log out
+end tell
+`);
 }
