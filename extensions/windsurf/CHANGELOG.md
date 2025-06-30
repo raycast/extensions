@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-06-30
 
 ### Added
 - **Open with Windsurf** - Quick file/folder opening in Windsurf IDE
