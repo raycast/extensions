@@ -1,5 +1,4 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon, open } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { verifyAndSaveToken, AuthenticationError } from "../utils/auth";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../utils/types";
@@ -12,6 +11,14 @@ interface LoginFormProps {
 export default function LoginForm({ onLogin }: LoginFormProps) {
   const [token, setToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const showFailureToast = (message: string) => {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message,
+    });
+  };
 
   const handleLogin = async () => {
     const trimmedToken = token.trim();
@@ -71,11 +78,11 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
     }
   };
 
-  const openRewiserApp = async () => {
+  const openApiDocs = async () => {
     try {
       await open("https://app.rewiser.io");
     } catch (error) {
-      logger.error("Failed to open Rewiser app", error);
+      logger.error("Failed to open API documentation", error);
       showFailureToast("Failed to open profile page");
     }
   };
@@ -91,7 +98,7 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
             <Action
               title="Get Api Token"
               icon={Icon.Key}
-              onAction={openRewiserApp}
+              onAction={openApiDocs}
               shortcut={{ modifiers: ["cmd"], key: "g" }}
             />
           </ActionPanel.Section>

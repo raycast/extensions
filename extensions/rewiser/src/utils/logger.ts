@@ -19,11 +19,12 @@ function formatMessage(level: string, message: string, data?: unknown): string {
   const timestamp = new Date().toISOString();
   const prefix = `[${timestamp}] [${level}] [Rewiser]`;
 
-  if (data) {
+  if (data !== undefined) {
     try {
-      return `${prefix} ${message} ${JSON.stringify(data)}`;
+      const dataStr = typeof data === "string" ? data : JSON.stringify(data);
+      return `${prefix} ${message} ${dataStr}`;
     } catch {
-      return `${prefix} ${message} [Circular/Non-serializable data]`;
+      return `${prefix} ${message} [object Object]`;
     }
   }
 

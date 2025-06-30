@@ -1,4 +1,4 @@
-import { showFailureToast } from "@raycast/utils";
+import { showToast, Toast } from "@raycast/api";
 import {
   Folder,
   Transaction,
@@ -27,8 +27,6 @@ export class ApiError extends Error {
 
 async function makeApiRequest<T>(url: string, token: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
   const perfLogger = new PerformanceLogger(`API Request: ${options.method || "GET"} ${url}`);
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), CONFIG.API_TIMEOUT);
 
   try {
     logger.apiRequest(
@@ -45,6 +43,9 @@ async function makeApiRequest<T>(url: string, token: string, options: RequestIni
         : undefined,
     );
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), CONFIG.API_TIMEOUT);
+
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -55,6 +56,7 @@ async function makeApiRequest<T>(url: string, token: string, options: RequestIni
       ...options,
     });
 
+    clearTimeout(timeoutId);
     logger.apiResponse(url, response.status);
 
     if (!response.ok) {
@@ -76,8 +78,6 @@ async function makeApiRequest<T>(url: string, token: string, options: RequestIni
     logger.apiError(url, error);
     perfLogger.finish("Network Error");
     throw new ApiError(error instanceof Error ? error.message : "Network request failed", "NETWORK_ERROR");
-  } finally {
-    clearTimeout(timeoutId);
   }
 }
 
@@ -148,14 +148,22 @@ export async function fetchFolders(token: string): Promise<Folder[]> {
     return validFolders;
   } catch (error) {
     if (error instanceof ApiError) {
-      await showFailureToast(error.message);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error loading folders",
+        message: error.message,
+      });
       throw error;
     }
 
     logger.error("API request failed", error);
     const apiError = new ApiError(error instanceof Error ? error.message : "Network request failed", "NETWORK_ERROR");
 
-    await showFailureToast(apiError.message);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error loading folders",
+      message: apiError.message,
+    });
 
     throw apiError;
   }
@@ -330,10 +338,6 @@ export async function manageShareFolder(token: string, request: ShareRequest): P
       throw new ApiError(response.error || "Share operation failed", "SHARE_ERROR");
     }
 
-    if (!response.data) {
-      throw new ApiError("No data returned from share operation", "NO_DATA");
-    }
-
     return response.data!;
   } catch (error) {
     if (error instanceof ApiError) {
@@ -350,10 +354,7 @@ export async function createShareLink(token: string, folderId: string): Promise<
     folder_id: folderId,
     action: "create",
   });
-  if (Array.isArray(result)) {
-    throw new ApiError("Expected single share link, got array", "INVALID_RESPONSE");
-  }
-  return result;
+  return result as ShareLink;
 }
 
 export async function getShareLinks(token: string, folderId: string): Promise<ShareLink[]> {
@@ -361,10 +362,7 @@ export async function getShareLinks(token: string, folderId: string): Promise<Sh
     folder_id: folderId,
     action: "list",
   });
-  if (!Array.isArray(result)) {
-    throw new ApiError("Expected array of share links, got single object", "INVALID_RESPONSE");
-  }
-  return result;
+  return result as ShareLink[];
 }
 
 export async function deleteShareLink(token: string, folderId: string, shareCode: string): Promise<void> {

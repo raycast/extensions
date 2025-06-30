@@ -1,13 +1,10 @@
-import { Detail, ActionPanel, Action, showToast, Toast, List, Icon, Color, getPreferenceValues } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { Detail, ActionPanel, Action, showToast, Toast, List, Icon, Color } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
+import { getValidToken, AuthenticationError } from "./utils/auth";
 import { fetchFolders, addTransaction, ApiError } from "./utils/api";
 import { Folder, ChatMessage, SUCCESS_MESSAGES, ERROR_MESSAGES } from "./utils/types";
 import { logger } from "./utils/logger";
-
-interface Preferences {
-  personalAccessToken: string;
-}
+import LoginForm from "./components/LoginForm";
 
 export default function Command() {
   const [token, setToken] = useState<string | null>(null);
@@ -25,19 +22,16 @@ export default function Command() {
 
   const initializeAuth = useCallback(async () => {
     try {
-      const preferences = getPreferenceValues<Preferences>();
-      const personalToken = preferences.personalAccessToken;
-
-      if (!personalToken?.trim()) {
-        throw new Error("Personal Access Token is required. Please set it in extension preferences.");
-      }
-
-      setToken(personalToken);
-      await loadFolders(personalToken);
+      const t = await getValidToken();
+      setToken(t);
+      await loadFolders(t);
     } catch (error) {
-      logger.error("Initialization error", error);
-      setToken(null);
-      await showFailureToast(error instanceof Error ? error.message : "Failed to initialize extension");
+      if (error instanceof AuthenticationError) {
+        setToken(null);
+      } else {
+        logger.error("Initialization error", error);
+        setToken(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -75,18 +69,30 @@ export default function Command() {
 
   const handleSendMessage = useCallback(async () => {
     if (!token) {
-      await showFailureToast(ERROR_MESSAGES.NO_TOKEN);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Authentication required",
+        message: ERROR_MESSAGES.NO_TOKEN,
+      });
       return;
     }
 
     const trimmedInput = inputText.trim();
     if (!trimmedInput) {
-      await showFailureToast(ERROR_MESSAGES.EMPTY_INPUT);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid input",
+        message: ERROR_MESSAGES.EMPTY_INPUT,
+      });
       return;
     }
 
     if (!selectedFolder) {
-      await showFailureToast("Please select a folder first");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Folder required",
+        message: "Please select a folder first",
+      });
       return;
     }
 
@@ -133,6 +139,10 @@ export default function Command() {
     }
   }, [token, inputText, selectedFolder, addMessage]);
 
+  const handleLoginSuccess = useCallback(async () => {
+    await initializeAuth();
+  }, [initializeAuth]);
+
   const resetToFolderSelection = useCallback(() => {
     setCurrentView("folders");
     setSelectedFolder("");
@@ -145,23 +155,7 @@ export default function Command() {
   }
 
   if (!token) {
-    return (
-      <Detail
-        navigationTitle="Configuration Required"
-        markdown={`# Personal Access Token Required
-        
-Please set your Rewiser Personal Access Token in the extension preferences.
-        
-1. Open Raycast preferences
-2. Go to Extensions → Rewiser
-3. Enter your Personal Access Token
-        
-To get your token:
-1. Visit [app.rewiser.io](https://app.rewiser.io)
-2. Go to Profile → API Keys
-3. Create a new Personal Access Token`}
-      />
-    );
+    return <LoginForm onLogin={handleLoginSuccess} />;
   }
 
   // Folder selection screen
@@ -212,7 +206,12 @@ To get your token:
       isLoading={isProcessing}
       actions={
         <ActionPanel>
-          <Action title="Add Transaction" icon={Icon.Plus} onAction={handleSendMessage} />
+          <Action
+            title="Add Transaction"
+            icon={Icon.Plus}
+            onAction={handleSendMessage}
+            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+          />
           <Action
             title="Back to Folders"
             icon={Icon.ArrowLeft}
@@ -229,13 +228,12 @@ To get your token:
           icon={{ source: Icon.Stars, tintColor: Color.Yellow }}
           actions={
             <ActionPanel>
-              <Action title="Add Transaction" icon={Icon.Plus} onAction={handleSendMessage} />
               <Action
                 title="Use This Example"
                 icon={Icon.Wand}
                 onAction={() => setInputText("Coffee at Starbucks 6.50 euros")}
-                shortcut={{ modifiers: ["cmd"], key: "enter" }}
               />
+              <Action title="Add Transaction" icon={Icon.Plus} onAction={handleSendMessage} />
             </ActionPanel>
           }
         />
@@ -245,13 +243,12 @@ To get your token:
           icon={{ source: Icon.Stars, tintColor: Color.Yellow }}
           actions={
             <ActionPanel>
-              <Action title="Add Transaction" icon={Icon.Plus} onAction={handleSendMessage} />
               <Action
                 title="Use This Example"
                 icon={Icon.Wand}
                 onAction={() => setInputText("Freelance payment 1200 dollars income")}
-                shortcut={{ modifiers: ["cmd"], key: "enter" }}
               />
+              <Action title="Add Transaction" icon={Icon.Plus} onAction={handleSendMessage} />
             </ActionPanel>
           }
         />
@@ -261,13 +258,12 @@ To get your token:
           icon={{ source: Icon.Stars, tintColor: Color.Yellow }}
           actions={
             <ActionPanel>
-              <Action title="Add Transaction" icon={Icon.Plus} onAction={handleSendMessage} />
               <Action
                 title="Use This Example"
                 icon={Icon.Wand}
                 onAction={() => setInputText("Grocery shopping at Whole Foods 89.30")}
-                shortcut={{ modifiers: ["cmd"], key: "enter" }}
               />
+              <Action title="Add Transaction" icon={Icon.Plus} onAction={handleSendMessage} />
             </ActionPanel>
           }
         />
@@ -277,13 +273,12 @@ To get your token:
           icon={{ source: Icon.Stars, tintColor: Color.Yellow }}
           actions={
             <ActionPanel>
-              <Action title="Add Transaction" icon={Icon.Plus} onAction={handleSendMessage} />
               <Action
                 title="Use This Example"
                 icon={Icon.Wand}
                 onAction={() => setInputText("Uber ride to airport 28 euros")}
-                shortcut={{ modifiers: ["cmd"], key: "enter" }}
               />
+              <Action title="Add Transaction" icon={Icon.Plus} onAction={handleSendMessage} />
             </ActionPanel>
           }
         />
@@ -293,13 +288,12 @@ To get your token:
           icon={{ source: Icon.Stars, tintColor: Color.Yellow }}
           actions={
             <ActionPanel>
-              <Action title="Add Transaction" icon={Icon.Plus} onAction={handleSendMessage} />
               <Action
                 title="Use This Example"
                 icon={Icon.Wand}
                 onAction={() => setInputText("Monthly salary 3500 euros income")}
-                shortcut={{ modifiers: ["cmd"], key: "enter" }}
               />
+              <Action title="Add Transaction" icon={Icon.Plus} onAction={handleSendMessage} />
             </ActionPanel>
           }
         />
