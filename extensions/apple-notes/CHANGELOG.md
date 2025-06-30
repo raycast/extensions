@@ -1,6 +1,6 @@
 # Apple Notes Changelog
 
-## [Add Chinese Pinyin input match] - {PR_MERGE_DATE}
+## [Add Chinese Pinyin input match] - 2025-06-30
 
 When using the Chinese Pinyin input method, the note title, folder name, and snippet are now matched using Pinyin.
 
