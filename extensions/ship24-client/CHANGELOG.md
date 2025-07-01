@@ -1,6 +1,6 @@
 # Ship24 Package Tracker Changelog
 
-## [1.0.0] - Initial Release
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Universal package tracking from 1200+ carriers worldwide

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { ParcelService, ParcelWithStatus } from "../parcel-service";
+import { handleApiError } from "../utils/error-handler";
 
 interface UseParcelsResult {
   parcels: ParcelWithStatus[];
@@ -20,8 +21,8 @@ export function useParcels(): UseParcelsResult {
       const result = await ParcelService.getAllParcelsWithStatus();
       setParcels(result);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to fetch parcels";
-      setError(errorMessage);
+      handleApiError(err, "Failed to fetch parcels");
+      setError("Failed to fetch parcels");
     } finally {
       setIsLoading(false);
     }
@@ -60,8 +61,8 @@ export function useParcel(trackingNumber: string): UseParcelResult {
       const result = await ParcelService.getParcelStatus(trackingNumber);
       setParcel(result);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to fetch parcel";
-      setError(errorMessage);
+      handleApiError(err, "Failed to fetch parcel");
+      setError("Failed to fetch parcel");
     } finally {
       setIsLoading(false);
     }

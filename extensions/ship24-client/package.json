@@ -11,12 +11,14 @@
     {
       "name": "add-parcel",
       "title": "Add Package",
+      "subtitle": "Ship24 Package Tracker",
       "description": "Add a new package to track by entering tracking number. Instantly see tracking details and delivery status from Ship24's network of 1200+ carriers.",
       "mode": "view"
     },
     {
       "name": "parcels-statuses",
       "title": "My Packages",
+      "subtitle": "Ship24 Package Tracker",
       "description": "View all your tracked packages with real-time delivery status, rename packages for easy identification, and get detailed tracking history with events timeline.",
       "mode": "view"
     }

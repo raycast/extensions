@@ -1,7 +1,8 @@
 import { Ship24ApiClient } from "./api";
 import { StorageService, StoredParcel } from "./storage";
 import { getPreferences } from "./preferences";
-import { Ship24Tracker, ErrorObject } from "./types";
+import { Ship24Tracker } from "./types";
+import { getErrorMessage } from "./utils/error-handler";
 
 export interface ParcelWithStatus extends StoredParcel {
   status?: Ship24Tracker | null;
@@ -39,22 +40,9 @@ export class ParcelService {
         const { tracking, error } = result.value;
 
         if (error) {
-          let errorMessage = "Unknown error";
-
-          if (error instanceof Error) {
-            errorMessage = error.message;
-          } else if (typeof error === "object" && error !== null) {
-            const errorObj = error as ErrorObject;
-            if (errorObj.message) {
-              errorMessage = errorObj.message;
-            } else {
-              errorMessage = JSON.stringify(error, null, 2);
-            }
-          }
-
           return {
             ...parcel,
-            error: errorMessage,
+            error: getErrorMessage(error),
           };
         }
 
@@ -90,23 +78,14 @@ export class ParcelService {
         status: tracking,
       };
     } catch (error) {
-      let errorMessage = "Unknown error";
-
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === "object" && error !== null) {
-        const errorObj = error as ErrorObject;
-        if (errorObj.message) {
-          errorMessage = errorObj.message;
-        } else {
-          errorMessage = JSON.stringify(error, null, 2);
-        }
-      }
-
       return {
         ...parcel,
-        error: errorMessage,
+        error: getErrorMessage(error),
       };
     }
+  }
+
+  static async refreshSingleParcel(trackingNumber: string): Promise<ParcelWithStatus | null> {
+    return this.getParcelStatus(trackingNumber);
   }
 }

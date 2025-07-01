@@ -1,8 +1,9 @@
-import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast, Clipboard, open, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ParcelService, ParcelWithStatus } from "./parcel-service";
 import { StorageService } from "./storage";
 import { ParcelDetails } from "./parcel-details";
+import { handleApiError } from "./utils/error-handler";
 
 export default function Command() {
   const [parcels, setParcels] = useState<ParcelWithStatus[]>([]);
@@ -62,8 +63,19 @@ export default function Command() {
     }
   }
 
-  async function refreshSingleParcel() {
-    await loadParcels();
+  async function refreshSingleParcel(trackingNumber?: string) {
+    if (trackingNumber) {
+      try {
+        const updatedParcel = await ParcelService.refreshSingleParcel(trackingNumber);
+        if (updatedParcel) {
+          setParcels((prev) => prev.map((p) => (p.trackingNumber === trackingNumber ? updatedParcel : p)));
+        }
+      } catch (err) {
+        handleApiError(err, "Failed to refresh parcel");
+      }
+    } else {
+      await loadParcels();
+    }
   }
 
   function getStatusIcon(parcel: ParcelWithStatus): Icon {
@@ -126,7 +138,24 @@ export default function Command() {
                 icon={Icon.Eye}
                 target={<ParcelDetails parcel={parcel} onRefresh={refreshSingleParcel} />}
               />
-              <Action title="Refresh Status" icon={Icon.ArrowClockwise} onAction={refreshSingleParcel} />
+              <Action
+                title="Copy Tracking Number"
+                icon={Icon.Clipboard}
+                onAction={async () => {
+                  await Clipboard.copy(parcel.trackingNumber);
+                  await showHUD("Tracking number copied to clipboard");
+                }}
+              />
+              <Action
+                title="Track on Ship24 Website"
+                icon={Icon.Globe}
+                onAction={() => open(`https://www.ship24.com/tracking?p=${parcel.trackingNumber}`)}
+              />
+              <Action
+                title="Refresh Status"
+                icon={Icon.ArrowClockwise}
+                onAction={() => refreshSingleParcel(parcel.trackingNumber)}
+              />
               <Action title="Refresh All" icon={Icon.ArrowClockwise} onAction={() => refreshParcels()} />
               <Action
                 title="Remove Parcel"
