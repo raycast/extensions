@@ -25,6 +25,12 @@ export default function DriftLogger(props: { arguments: appendTaskArgs }) {
   const now = new Date();
   const startTime = new Date(now.getTime() - parseInt(minutes) * 60 * 1000);
   const startTimeString = startTime.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+  const endTimeString = now.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+
+  // ドリフトログ用のフォーマット関数
+  const formatDriftLogEntry = (startTime: string, endTime: string, content: string, minutes: string): string => {
+    return `- ${startTime}~${endTime} (${minutes}min): ${content}`;
+  };
 
   const { appendTemplate, heading, notePath, vaultName, silent } = getPreferenceValues<appendTaskPreferences>();
   const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
@@ -77,7 +83,7 @@ export default function DriftLogger(props: { arguments: appendTaskArgs }) {
         type: ObsidianTargetType.AppendTask,
         path: notePathExpanded,
         vault: vaultToUse,
-        text: "- " + startTimeString + "~: " + content + " (" + minutes + "min)",
+        text: formatDriftLogEntry(startTimeString, endTimeString, content, minutes),
         heading: heading,
         silent: silent,
       });
@@ -111,7 +117,7 @@ export default function DriftLogger(props: { arguments: appendTaskArgs }) {
                   type: ObsidianTargetType.AppendTask,
                   path: notePath,
                   vault: vault,
-                  text: "- " + startTimeString + "~: " + content + " (" + minutes + "min)",
+                  text: formatDriftLogEntry(startTimeString, endTimeString, content, minutes),
                   heading: heading,
                 })}
               />
