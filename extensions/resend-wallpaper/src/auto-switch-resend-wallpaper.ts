@@ -51,6 +51,7 @@ export const getRandomWallpaper = async () => {
         .catch((error) => {
           captureException(error);
           console.error(error);
+          showFailureToast(error, { title: "Failed to fetch wallpapers" });
         });
     }
   } catch (e) {

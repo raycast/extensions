@@ -8,7 +8,6 @@ import { buildCachePath, cachePicture } from "./common-utils";
 const scriptSetWallpaper = (path: string, applyTo: string) => {
   return `
       set temp_folder to (POSIX path of "${path}")
-      set q_temp_folder to quoted form of temp_folder
       
       set x to alias (POSIX file temp_folder)
 

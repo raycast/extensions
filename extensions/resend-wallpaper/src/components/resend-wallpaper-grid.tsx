@@ -22,7 +22,7 @@ export function ResendWallpaperGrid(props: {
       selectedItemId={selectedItem}
       onSelectionChange={(selected) => {
         if (selected) {
-          setSelectedItem(selectedItem);
+          setSelectedItem(selected);
         }
       }}
       searchBarPlaceholder={"Search wallpapers..."}

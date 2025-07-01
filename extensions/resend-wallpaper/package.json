@@ -94,7 +94,7 @@
               "value": "current"
             },
             {
-              "title": "Monitor",
+              "title": "All Monitors",
               "value": "every"
             }
           ],
@@ -139,7 +139,7 @@
               "value": "current"
             },
             {
-              "title": "Monitor",
+              "title": "All Monitors",
               "value": "every"
             }
           ],
@@ -171,27 +171,27 @@
               "value": "3600"
             },
             {
-              "title": "2 Hour",
+              "title": "2 Hours",
               "value": "7200"
             },
             {
-              "title": "3 Hour",
+              "title": "3 Hours",
               "value": "10800"
             },
             {
-              "title": "6 Hour",
+              "title": "6 Hours",
               "value": "21600"
             },
             {
-              "title": "9 Hour",
+              "title": "9 Hours",
               "value": "32400"
             },
             {
-              "title": "12 Hour",
+              "title": "12 Hours",
               "value": "43200"
             },
             {
-              "title": "18 Hour",
+              "title": "18 Hours",
               "value": "64800"
             },
             {

@@ -8,6 +8,7 @@ import { getSystemAppearance } from "../utils/applescript-utils";
 import { cache, cachePicture, checkCache } from "../utils/common-utils";
 import { CacheKey, RESEND_WALLPAPER_LIST_URL } from "../utils/constants";
 import Style = Toast.Style;
+import { showFailureToast } from "@raycast/utils";
 
 export const getResendWallpaperList = (refresh: number) => {
   const [resendWallpapers, setResendWallpapers] = useState<ResendWallpaperWithInfo[]>([]);
@@ -80,6 +81,7 @@ export const getResendWallpaperList = (refresh: number) => {
         .catch((error) => {
           captureException(error);
           console.error(error);
+          showFailureToast(error, { title: "Failed to fetch wallpapers" });
         });
     } catch (e) {
       await showToast(Style.Failure, String(e));

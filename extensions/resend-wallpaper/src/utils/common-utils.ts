@@ -17,7 +17,7 @@ export const getSavedDirectory = () => {
   if (isEmpty(actualDirectory) || !fse.pathExistsSync(actualDirectory)) {
     return `${homedir()}/Downloads`;
   }
-  return actualDirectory.endsWith("/") ? actualDirectory.substring(0, -1) : actualDirectory;
+  return actualDirectory.endsWith("/") ? actualDirectory.slice(0, -1) : actualDirectory;
 };
 
 const getFileType = (url: string) => {

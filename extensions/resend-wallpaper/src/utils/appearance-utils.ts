@@ -103,7 +103,15 @@ const WallpaperAppearance: AppearancedWallpaper[] = [
 
 const getWallpaperAppearance = () => {
   const customAppearance = cache.get(CacheKey.WALLPAPER_APPEARANCE);
-  const customWallpaperAppearance: AppearancedWallpaper[] = customAppearance ? JSON.parse(customAppearance) : [];
+  const customWallpaperAppearance: AppearancedWallpaper[] = customAppearance
+    ? (() => {
+        try {
+          return JSON.parse(customAppearance);
+        } catch {
+          return [];
+        }
+      })()
+    : [];
 
   if (customWallpaperAppearance.length === 0) {
     return WallpaperAppearance;

@@ -53,7 +53,7 @@ export default function PreviewResendWallpaper(props: {
               title={"Set Desktop Wallpaper"}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={() => {
-                setWallpaper(resendWallpapers[pageIndex]).then(() => "");
+                setWallpaper(resendWallpapers[pageIndex]);
               }}
             />
 

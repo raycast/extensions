@@ -20,7 +20,7 @@ export function ResendWallpaperList(props: {
       selectedItemId={selectedItem}
       onSelectionChange={(selected) => {
         if (selected) {
-          setSelectedItem(selectedItem);
+          setSelectedItem(selected);
         }
       }}
       searchBarPlaceholder={"Search wallpapers"}

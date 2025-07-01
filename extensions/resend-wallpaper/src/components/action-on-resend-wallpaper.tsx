@@ -18,8 +18,9 @@ export function ActionOnResendWallpaper(props: {
   const { index, resendWallpapers, setRefresh, setSelectedItem } = props;
   const wallpaper = resendWallpapers[index];
 
-  const actionAppearanceIcon = wallpaper.appearance === "light" ? Icon.Moon : Icon.Moon;
+  const actionAppearanceIcon = wallpaper.appearance === "light" ? Icon.Sun : Icon.Moon;
   const actionAppearanceTitle = wallpaper.appearance === "light" ? "Dark" : "Light";
+
   return (
     <ActionPanel>
       <Action
@@ -120,7 +121,7 @@ export function ActionOnResendWallpaper(props: {
           <Action
             icon={Icon.PlusTopRightSquare}
             title={"Include in Auto Switch"}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            shortcut={{ modifiers: ["ctrl"], key: "i" }}
             onAction={() => {
               const _excludeCache = cache.get(CacheKey.EXCLUDE_LIST_CACHE);
               const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
