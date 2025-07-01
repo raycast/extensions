@@ -1,7 +1,8 @@
 # Resend Changelog
 
-## [Modernize] - {PR_MERGE_DATE}
+## [Update Icons] - {PR_MERGE_DATE}
 
+- Update Icons to reflect Resend's new Brand ([Brand Kit](https://resend.com/brand))
 - Modernize extension to use latest Raycast config
 - chore: remove `node-fetch`, `cross-fetch`
 

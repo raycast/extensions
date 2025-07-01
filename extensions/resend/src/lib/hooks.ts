@@ -1,8 +1,7 @@
-import { showFailureToast, useCachedPromise, useFetch } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import { API_HEADERS, API_URL } from "../utils/constants";
 import { showToast, Toast } from "@raycast/api";
 import { ErrorResponse, GetAPIKeysResponse, GetDomainsResponse } from "../utils/types";
-import { resend } from "./resend";
 
 const useResend = <T>(
   endpoint: string,
@@ -31,27 +30,20 @@ const useResend = <T>(
     onData,
   });
 
-
-const onError = async (error: Error) => {
-  await showFailureToast(error, {title: String(error.cause ?? "Something went wrong")});
-}
 export const useGetDomains = () => {
-  const { data, ...rest } = useCachedPromise(async () => {
-    const toast = await showToast(Toast.Style.Animated, "Processing...", "Fetching Domains");
-    const res = await resend.domains.list();
-    if (res.error) throw new Error(res.error.message, {cause: res.error.name});
-    const data = res.data?.data ?? [];
-    const numOfDomains = data.length;
-    toast.style = Toast.Style.Success;
-    toast.title = "Success";
-    toast.message = `Fetched ${numOfDomains} ${numOfDomains === 1 ? "domain" : "domains"}`;
-    return data;
-  }, [], {
-    initialData: [],
-    onError,
-  })
-
-  return { domains: data, ...rest };
+  const { data, ...rest } = useResend<GetDomainsResponse>("domains", {
+    animatedToastMessage: "Fetching Domains",
+    async onData(data) {
+      const numOfDomains = data.data.length;
+      await showToast({
+        title: "Success",
+        message: `Fetched ${numOfDomains} ${numOfDomains === 1 ? "domain" : "domains"}`,
+        style: Toast.Style.Success,
+      });
+    },
+  });
+  const domains = data?.data ?? [];
+  return { domains, ...rest };
 };
 
 export const useGetAPIKeys = () => {

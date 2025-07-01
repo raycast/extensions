@@ -3,7 +3,7 @@
   "name": "resend",
   "title": "Resend",
   "description": "Manage API Keys and Domains, and Send Emails using Resend",
-  "icon": "resend.png",
+  "icon": "resend-extension_icon.png",
   "access": "public",
   "owner": "resend",
   "author": "xmok",
