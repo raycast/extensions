@@ -10,7 +10,6 @@
     {
       "name": "parse-issue-url",
       "title": "Parse Issue URL",
-      "subtitle": "Parse the URL to get the id formatted for a commit message",
       "description": "Parse the URL to get the id formatted for a commit message",
       "mode": "view"
     }
