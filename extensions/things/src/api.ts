@@ -237,6 +237,10 @@ export type TodoParams = {
   'completion-date'?: string;
 };
 
+export type ProjectUpdateParams = Omit<TodoParams, 'list-id'> & {
+  'area-id'?: string;
+};
+
 export async function silentlyOpenThingsURL(url: string) {
   const asyncExec = promisify(exec);
   await asyncExec(`open -g "${url}"`);
@@ -270,12 +274,12 @@ export async function updateProject(id: string, todoParams: TodoParams) {
 
   if (!authToken) throw new Error('unauthorized');
 
-  // update-project uses area-id while update uses list-id
-  const projectParams = { ...todoParams };
-  if (projectParams['list-id']) {
-    projectParams['area-id'] = projectParams['list-id'];
-    delete projectParams['list-id'];
-  }
+  // Transform TodoParams to ProjectUpdateParams: list-id → area-id
+  const { 'list-id': listId, ...restParams } = todoParams;
+  const projectParams: ProjectUpdateParams = {
+    ...restParams,
+    ...(listId && { 'area-id': listId }),
+  };
 
   await silentlyOpenThingsURL(
     `things:///update-project?${qs.stringify({
