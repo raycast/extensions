@@ -14,9 +14,11 @@ export default function Templates() {
           title={template.name}
           subtitle={`ID: ${template.id}`}
           content={template.image_path}
-          actions={<ActionPanel>
-            <OpenInMailerSend route={`templates/${template.id}`} />
-          </ActionPanel>}
+          actions={
+            <ActionPanel>
+              <OpenInMailerSend route={`templates/${template.id}`} />
+            </ActionPanel>
+          }
         />
       ))}
     </Grid>

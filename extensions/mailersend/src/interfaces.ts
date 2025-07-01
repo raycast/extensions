@@ -1,3 +1,9 @@
+export interface APIQuota {
+  quota: number;
+  remaining: number;
+  reset: string;
+}
+
 export interface Domain {
   id: string;
   name: string;
@@ -59,15 +65,15 @@ export enum TokenScopeType {
   TOKENS_FULL = "tokens_full",
   WEBHOOKS_FULL = "webhooks_full",
   TEMPLATES_FULL = "templates_full",
-  SUPPRESSIONS_READ = 'suppressions_read',
-  SUPPRESSIONS_FULL = 'suppressions_full',
-  SMS_READ = 'sms_read',
-  SMS_FULL = 'sms_full',
-  EMAIL_VERIFICATION_READ = 'email_verification_read',
-  EMAIL_VERIFICATION_FULL = 'email_verification_full',
-  INBOUNDS_FULL = 'inbounds_full',
-  RECIPIENTS_READ = 'recipients_read',
-  RECIPIENTS_FULL = 'recipients_full',
+  SUPPRESSIONS_READ = "suppressions_read",
+  SUPPRESSIONS_FULL = "suppressions_full",
+  SMS_READ = "sms_read",
+  SMS_FULL = "sms_full",
+  EMAIL_VERIFICATION_READ = "email_verification_read",
+  EMAIL_VERIFICATION_FULL = "email_verification_full",
+  INBOUNDS_FULL = "inbounds_full",
+  RECIPIENTS_READ = "recipients_read",
+  RECIPIENTS_FULL = "recipients_full",
 }
 export interface Token {
   id: string;
@@ -75,7 +81,7 @@ export interface Token {
   status: "pause" | "unpause";
   created_at: string;
   scopes: TokenScopeType[];
-  domain: Pick<Domain, "id"|"name"> | null;
+  domain: Pick<Domain, "id" | "name"> | null;
 }
 export interface ErrorResult {
   message: string;

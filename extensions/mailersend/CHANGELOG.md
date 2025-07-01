@@ -1,7 +1,8 @@
 # MailerSend Changelog
 
-## [Manage Tokens + Filter Activity] - {PR_MERGE_DATE}
+## [Manage Tokens + Filter Activity + API Quota] - {PR_MERGE_DATE}
 
+- View API Quota
 - Filter Domain Activity by Type
 - View Tokens
     - Rename Token
