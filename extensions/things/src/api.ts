@@ -58,7 +58,7 @@ export const executeJxa = async (script: string) => {
 export const thingsNotRunningError = `
   ## Things Not Running
   Please make sure Things is installed and running before using this extension.
-  
+
   ### But my Things app is running!
   If Things is running, you may need to grant Raycast access to Things in *System Settings > Privacy & Security > Automation > Raycast > Things*
 `;
@@ -107,7 +107,7 @@ export const getTodo = (todoId: string) =>
   const things = Application('Things3');
   const lists = ['Inbox', 'Today', 'Anytime', 'Upcoming', 'Someday', 'Logbook', 'Trash'];
   let foundTodo = null;
-  
+
   // Search through all lists
   for (const listName of lists) {
     const todos = things.lists.byName(listName).toDos();
@@ -125,7 +125,7 @@ export const getTodo = (todoId: string) =>
     }
     if (foundTodo) break;
   }
-  
+
   return foundTodo;
 `);
 
@@ -188,8 +188,8 @@ export const getAreas = async (): Promise<Area[]> => {
 export type List = { id: string; name: string; type: 'area' | 'project' };
 
 export const getLists = async (): Promise<List[]> => {
-  const projects = await getProjects() || [];
-  const areas = await getAreas() || [];
+  const projects = (await getProjects()) || [];
+  const areas = (await getAreas()) || [];
 
   const projectsWithoutAreas = projects
     .filter((project) => !project.area)
@@ -259,7 +259,7 @@ export async function updateTodo(id: string, todoParams: TodoParams) {
 export async function isProjectById(id: string): Promise<boolean> {
   try {
     const projects = await getProjects();
-    return projects.some(project => project.id === id);
+    return projects.some((project) => project.id === id);
   } catch {
     return false;
   }
