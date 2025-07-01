@@ -1,4 +1,4 @@
-import { useCachedPromise, useForm, usePromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState, useForm, usePromise } from "@raycast/utils";
 import { doppler, PER_PAGE } from "./lib/doppler";
 import {
   Action,
@@ -17,18 +17,26 @@ import { DopplerSecret, SecretVisibility } from "./type";
 import { useState } from "react";
 
 function OpenInDoppler({ route }: { route: string }) {
+  const [workplace] = useCachedState("workplace");
   return (
     <Action.OpenInBrowser
       icon="doppler.png"
       title="Open in Doppler"
-      url={`https://dashboard.doppler.com/workplace/${route}/`}
+      url={`https://dashboard.doppler.com/workplace/${workplace}/${route}`}
       shortcut={Keyboard.Shortcut.Common.Open}
     />
   );
 }
 
 export default function SearchProjects() {
-  const { isLoading, data: projects = [] } = useCachedPromise(
+  const [, setWorkplace] = useCachedState("workplace", "");
+  const { isLoading: isLoadingWorkplace } = useCachedPromise(async () => {
+    const res = await doppler.workplace.get();
+    const workplace = res.workplace?.id ?? "";
+    setWorkplace(workplace);
+  });
+
+  const { isLoading: isLoadingProjects, data: projects = [] } = useCachedPromise(
     async () => {
       const res = await doppler.projects.list({
         perPage: 100,
@@ -40,6 +48,7 @@ export default function SearchProjects() {
       onError,
     },
   );
+  const isLoading = isLoadingWorkplace || isLoadingProjects;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search for a project" isShowingDetail>
@@ -309,22 +318,30 @@ function ViewLogs({ project, config }: { project: string; config: string }) {
           description="There has been no activity to record over the past 3 days."
         />
       ) : (
-        logs.map((log, logIndex) => (
+        logs.map((log) => (
           <List.Item
             key={log.id}
-            title={`${logIndex}`}
+            title={`${log.id}`}
+            accessories={[{ date: new Date(`${log.created_at}`) }]}
             detail={
               <List.Item.Detail
                 markdown={`${log.text}`}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="User" />
-                    <List.Item.Detail.Metadata.Label title="Email" text={`${log.user?.email}`} />
-                    <List.Item.Detail.Metadata.Label title="Name" text={`${log.user?.name}`} />
-                    <List.Item.Detail.Metadata.Label title="Username" text={`${log.user?.username}`} />
+                    <List.Item.Detail.Metadata.Label title="Rollback" icon={log.rollback ? Icon.Check : Icon.Xmark} />
+                    <List.Item.Detail.Metadata.Label
+                      icon={log.user?.profile_image_url}
+                      title="Username"
+                      text={`${log.user?.username}`}
+                    />
                   </List.Item.Detail.Metadata>
                 }
               />
+            }
+            actions={
+              <ActionPanel>
+                <OpenInDoppler route={`projects/${project}/configs/${config}/logs?id=${log.id}`} />
+              </ActionPanel>
             }
           />
         ))
