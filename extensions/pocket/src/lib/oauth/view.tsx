@@ -1,5 +1,5 @@
 import { PocketClient } from "../api";
-import { useMemo, useState } from "react";
+import { JSX, useMemo, useState } from "react";
 import { Detail, environment, MenuBarExtra } from "@raycast/api";
 import { createPocketClient } from "./client";
 

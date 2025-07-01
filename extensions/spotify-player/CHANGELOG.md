@@ -1,5 +1,10 @@
 # Spotify Player Changelog
 
+## [Add Option to View the Lyrics of the Song playing] - 2025-06-30
+
+- Add new command 'Find Lyrics'.
+- Add an option that allows users to See the current song’s Lyrics, artist and title.
+
 ## [Add Option to Copy the Current Song’s Artist and Title] - 2025-05-26
 
 - Add new command 'Copy Artist And Title'.

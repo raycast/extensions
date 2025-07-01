@@ -1,5 +1,9 @@
 # Messages Changelog
 
+## [Docs: Add note about automation permissions] - 2025-07-01
+
+Added a note about automation permissions for Raycast in the README.md file.
+
 ## [Fix OTP Code Parsing for Messages with colons in the message body] - 2025-05-30
 
 Fixed an issue where OTP codes with colons in the message body were not being parsed correctly.
