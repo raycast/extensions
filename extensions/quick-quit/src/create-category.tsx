@@ -10,7 +10,7 @@ import {
   Application,
   Icon,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { randomUUID } from "crypto";
 import { Category } from "./types";
 
@@ -67,11 +67,15 @@ interface CreateCategoryFormProps {
 export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCategoryFormProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
+  const hasInitialized = useRef(false);
 
   const [apps, setApps] = useState<Application[]>([]);
   const [categoryName, setCategoryName] = useState<string>("");
   const [selectedBundleIds, setSelectedBundleIds] = useState<string[]>([]);
   const [selectedIcon, setSelectedIcon] = useState<string>("🧑‍💻");
+
+  // Track the initial bundle IDs to prevent them from being cleared by Form.TagPicker
+  const initialBundleIds = useRef<string[]>([]);
 
   // Effect 1: Fetch all installed applications once on mount
   useEffect(() => {
@@ -101,6 +105,7 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
     // If we are creating a new category, we can stop loading and exit.
     if (!categoryId) {
       setIsLoading(false);
+      hasInitialized.current = true;
       return;
     }
 
@@ -117,7 +122,9 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
 
             setCategoryName(foundCategory.name);
             setSelectedBundleIds(validBundleIds);
+            initialBundleIds.current = validBundleIds;
             setSelectedIcon(foundCategory.icon);
+            hasInitialized.current = true;
           }
         }
       } catch (error) {
@@ -181,6 +188,13 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
       toast.message = error instanceof Error ? error.message : "An unknown error occurred";
     }
   }
+
+  // Effect to prevent selectedBundleIds from being cleared by Form.TagPicker after initialization
+  useEffect(() => {
+    if (hasInitialized.current && initialBundleIds.current.length > 0 && selectedBundleIds.length === 0) {
+      setSelectedBundleIds(initialBundleIds.current);
+    }
+  }, [selectedBundleIds]);
 
   return (
     <Form
