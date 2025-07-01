@@ -188,8 +188,8 @@ export const getAreas = async (): Promise<Area[]> => {
 export type List = { id: string; name: string; type: 'area' | 'project' };
 
 export const getLists = async (): Promise<List[]> => {
-  const projects = await getProjects();
-  const areas = await getAreas();
+  const projects = await getProjects() || [];
+  const areas = await getAreas() || [];
 
   const projectsWithoutAreas = projects
     .filter((project) => !project.area)
@@ -249,6 +249,29 @@ export async function updateTodo(id: string, todoParams: TodoParams) {
 
   await silentlyOpenThingsURL(
     `things:///update?${qs.stringify({
+      'auth-token': authToken,
+      id,
+      ...todoParams,
+    })}`,
+  );
+}
+
+export async function isProjectById(id: string): Promise<boolean> {
+  try {
+    const projects = await getProjects();
+    return projects.some(project => project.id === id);
+  } catch {
+    return false;
+  }
+}
+
+export async function updateProject(id: string, todoParams: TodoParams) {
+  const { authToken } = getPreferenceValues<Preferences>();
+
+  if (!authToken) throw new Error('unauthorized');
+
+  await silentlyOpenThingsURL(
+    `things:///update-project?${qs.stringify({
       'auth-token': authToken,
       id,
       ...todoParams,
