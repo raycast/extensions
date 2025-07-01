@@ -89,7 +89,7 @@ function FHIRResourceListItem({ resource }: { resource: FHIRResource }) {
     resource.status,
   ].filter((keyword): keyword is string => Boolean(keyword));
 
-  const descriptionMarkdown = resource.description ? `### ${resource.name}\n\n${resource.description}` : "";
+  const descriptionMarkdown = resource.description ? `### ${title}\n\n${resource.description}` : "";
 
   const getStatusColor = (status: string) => {
     switch (status) {
