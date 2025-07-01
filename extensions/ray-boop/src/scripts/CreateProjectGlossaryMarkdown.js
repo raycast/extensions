@@ -57,7 +57,7 @@ export function main(state) {
   } catch (error) {
     options = getDefaultParameters();
     options.error = error.toString();
-    state.text = JSON.stringify(options);
+    // state.text = JSON.stringify(options);
     //state.text = error.toString()
     state.postError(error.toString());
   }

@@ -15,7 +15,18 @@
       "name": "boop-scripts",
       "title": "Ray Boop",
       "description": "Run any Boop script on clipboard content",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showPreview",
+          "title": "Show Preview",
+          "label": "Show Preview",
+          "description": "Show a preview of the text transformation in the detail pane",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
     }
   ],
   "dependencies": {

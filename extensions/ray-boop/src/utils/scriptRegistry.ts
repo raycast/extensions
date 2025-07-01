@@ -14,7 +14,7 @@ interface ScriptMetadata {
 
 interface BoopScript {
   metadata: ScriptMetadata;
-  main: (state: { text: string; postError: (message: string) => void }) => void;
+  main: (state: { text: string; postError: (message: string) => void; postInfo: (message: string) => void }) => void;
 }
 
 // Import all scripts
@@ -77,7 +77,6 @@ import * as MinifyJSON from "../scripts/MinifyJSON.js";
 import * as MinifySQL from "../scripts/MinifySQL.js";
 import * as MinifyXML from "../scripts/MinifyXML.js";
 import * as NatSort from "../scripts/NatSort.js";
-import * as NewBoopScript from "../scripts/NewBoopScript.js";
 import * as PhpUnserialize from "../scripts/PhpUnserialize.js";
 import * as QueryToJson from "../scripts/QueryToJson.js";
 import * as RemoveDuplicates from "../scripts/RemoveDuplicates.js";
@@ -98,7 +97,6 @@ import * as SortJSON from "../scripts/SortJSON.js";
 import * as SpongeCase from "../scripts/SpongeCase.js";
 import * as StartCase from "../scripts/StartCase.js";
 import * as SumAll from "../scripts/SumAll.js";
-import * as Test from "../scripts/Test.js";
 import * as TimeToSecond from "../scripts/TimeToSecond.js";
 import * as toggleCamelHyphen from "../scripts/toggleCamelHyphen.js";
 import * as toUnicode from "../scripts/toUnicode.js";
@@ -120,7 +118,7 @@ import * as YAMLtoJSON from "../scripts/YAMLtoJSON.js";
 
 // Interface for script modules
 interface ScriptModule {
-  main: (state: { text: string; postError: (message: string) => void }) => void;
+  main: (state: { text: string; postError: (message: string) => void; postInfo: (message: string) => void }) => void;
   [key: string]: unknown;
 }
 
@@ -773,16 +771,6 @@ export const scripts: Record<string, BoopScript> = {
     "javascript,eval,execute",
     "development",
   ),
-  newBoopScript: createScript(
-    NewBoopScript,
-    "New Boop Script",
-    "Creates a new Boop script template",
-    "➕",
-    "boop,script,template,new",
-    "development",
-  ),
-  test: createScript(Test, "Test Script", "Test script for development", "🧪", "test,development", "development"),
-
   // File/Path
   fishHexPathConverter: createScript(
     FishHexPathConverter,
@@ -909,7 +897,7 @@ export function getScript(key: string): BoopScript | undefined {
 }
 
 // Execute a script
-export function executeScript(key: string, text: string): Promise<string> {
+export function executeScript(key: string, text: string): Promise<{ text: string; info?: string; error?: string }> {
   return new Promise((resolve, reject) => {
     const script = scripts[key];
     if (!script) {
@@ -918,15 +906,24 @@ export function executeScript(key: string, text: string): Promise<string> {
     }
 
     try {
+      let info: string | undefined;
+      let error: string | undefined;
+
       const state = {
         text,
         postError: (message: string) => {
-          reject(new Error(message));
+          error = message;
+        },
+        postInfo: (message: string) => {
+          info = message;
         },
       };
 
       script.main(state);
-      resolve(state.text);
+
+      // Ensure the result is always a string
+      const resultText = String(state.text);
+      resolve({ text: resultText, info, error });
     } catch (error) {
       reject(error);
     }

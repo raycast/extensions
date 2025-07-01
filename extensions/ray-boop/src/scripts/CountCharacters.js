@@ -11,5 +11,5 @@
 
 export function main(input) {
   const count = input.text.length;
-  input.text = `${count} characters`;
+  input.postInfo(`${count} characters`);
 }

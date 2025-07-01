@@ -11,7 +11,6 @@
 
 export function main(input) {
   let parsedDate = Date.parse(input.text);
-
   if (isNaN(parsedDate)) {
     input.postError("Invalid Date");
   } else {

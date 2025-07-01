@@ -1,8 +1,21 @@
 import React from "react";
-import { Action, ActionPanel, List, Clipboard, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  Clipboard,
+  showToast,
+  Toast,
+  getSelectedText,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BoopScriptManager } from "./utils/scriptManager";
 import { analyzeClipboardAndSuggestScripts, getScriptSuggestionTooltip } from "./utils/scriptSuggestions";
+
+interface Preferences {
+  showPreview: boolean;
+}
 
 interface ScriptInfo {
   name: string;
@@ -16,9 +29,28 @@ interface ScriptInfo {
   suggestionReasons?: string[];
 }
 
+/**
+ * Main Raycast extension component for Ray Boop.
+ *
+ * Features:
+ * - Automatically detects selected text from the current application
+ * - Falls back to clipboard content if no text is selected
+ * - Provides different primary actions based on input source:
+ *   - Selected text: Transform and paste back (primary), copy to clipboard (secondary)
+ *   - Clipboard: Copy to clipboard (primary), transform and paste (secondary)
+ * - Smart script suggestions based on content analysis
+ */
+
 export default function BoopScriptsCommand() {
   const [scripts, setScripts] = useState<ScriptInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [inputSource, setInputSource] = useState<"clipboard" | "selection" | null>(null);
+  const [currentInputText, setCurrentInputText] = useState<string>("");
+  const [selectedScript, setSelectedScript] = useState<string | null>(null);
+  const [currentPreview, setCurrentPreview] = useState<string>("Select a script to see preview");
+  const [currentInfo, setCurrentInfo] = useState<string | undefined>(undefined);
+  const [currentError, setCurrentError] = useState<string | undefined>(undefined);
+  const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     loadScripts();
@@ -26,11 +58,24 @@ export default function BoopScriptsCommand() {
 
   async function loadScripts() {
     try {
-      // Get clipboard content for suggestions
-      const clipboard = await Clipboard.readText();
+      // Try to get selected text first, fallback to clipboard
+      let text: string = "";
+      let source: "clipboard" | "selection" = "clipboard";
 
-      // Get script suggestions if clipboard has content
-      const suggestions = clipboard ? analyzeClipboardAndSuggestScripts(clipboard) : [];
+      const selectedText = await safeGetSelectedText();
+      if (selectedText) {
+        text = selectedText;
+        source = "selection";
+      } else {
+        // Fallback to clipboard if no selection
+        text = (await Clipboard.readText()) || "";
+      }
+
+      setInputSource(source);
+      setCurrentInputText(text);
+
+      // Get script suggestions if we have content
+      const suggestions = text ? analyzeClipboardAndSuggestScripts(text) : [];
       const suggestionMap = new Map(suggestions.map((s) => [s.scriptKey, s]));
 
       const scriptNames = BoopScriptManager.getAvailableScripts();
@@ -90,27 +135,109 @@ export default function BoopScriptsCommand() {
     }
   }
 
-  async function runScript(scriptName: string, displayName: string) {
+  /**
+   * Safely attempts to get selected text without throwing
+   */
+  async function safeGetSelectedText(): Promise<string | null> {
     try {
-      const clipboardText = await Clipboard.readText();
+      const selectedText = await getSelectedText();
+      return selectedText && selectedText.trim().length > 0 ? selectedText : null;
+    } catch {
+      // getSelectedText can fail if there's no selection or no frontmost app
+      return null;
+    }
+  }
 
-      if (!clipboardText) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "No clipboard content",
-          message: "Copy some text to clipboard first",
-        });
-        return;
-      }
+  /**
+   * Gets the current input text (selected text or clipboard)
+   */
+  async function getCurrentInputText(): Promise<{ text: string; source: "clipboard" | "selection" }> {
+    const selectedText = await safeGetSelectedText();
+    if (selectedText) {
+      return { text: selectedText, source: "selection" };
+    }
+
+    const clipboardText = (await Clipboard.readText()) || "";
+    return { text: clipboardText, source: "clipboard" };
+  }
+
+  /**
+   * Executes a script and returns the result, optionally using cached preview
+   */
+  async function executeScriptWithResult(
+    scriptName: string,
+    inputText?: string,
+  ): Promise<{ text: string; info?: string; error?: string }> {
+    // If we have a valid preview for this script and no specific input text, use the preview
+    if (
+      !inputText &&
+      selectedScript === scriptName &&
+      currentPreview &&
+      !String(currentPreview).startsWith("Error:") &&
+      currentPreview !== "Generating preview..." &&
+      currentPreview !== "Select a script to see preview" &&
+      currentPreview !== "No input text available for preview"
+    ) {
+      return { text: String(currentPreview), info: currentInfo, error: currentError };
+    }
+
+    const text = inputText !== undefined ? inputText : currentInputText;
+    return await BoopScriptManager.executeScript(scriptName, text);
+  }
+
+  /**
+   * Runs a script and handles the output based on input source
+   */
+  async function runScriptWithSmartOutput(scriptName: string, displayName: string) {
+    try {
+      const { text: inputText, source } = await getCurrentInputText();
 
       await showToast({
         style: Toast.Style.Animated,
         title: `Running ${displayName}...`,
       });
 
-      const result = await BoopScriptManager.executeScript(scriptName, clipboardText);
+      const result = await executeScriptWithResult(scriptName, inputText);
 
-      await Clipboard.copy(result);
+      if (source === "selection") {
+        await Clipboard.paste(result.text);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Success!",
+          message: `Text transformed and pasted back`,
+        });
+      } else {
+        await Clipboard.copy(result.text);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Success!",
+          message: `Result copied to clipboard`,
+        });
+      }
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Script failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  /**
+   * Runs a script and always copies result to clipboard
+   */
+  async function runScriptAndCopyToClipboard(scriptName: string, displayName: string) {
+    try {
+      const { text: inputText } = await getCurrentInputText();
+
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Running ${displayName}...`,
+      });
+
+      const result = await executeScriptWithResult(scriptName, inputText);
+
+      await Clipboard.copy(result.text);
       await showToast({
         style: Toast.Style.Success,
         title: "Success!",
@@ -125,6 +252,94 @@ export default function BoopScriptsCommand() {
     }
   }
 
+  /**
+   * Runs a script and always pastes result to frontmost application
+   */
+  async function runScriptAndPaste(scriptName: string, displayName: string) {
+    try {
+      const { text: inputText } = await getCurrentInputText();
+
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Running ${displayName}...`,
+      });
+
+      const result = await executeScriptWithResult(scriptName, inputText);
+
+      await Clipboard.paste(result.text);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Success!",
+        message: `Text transformed and pasted`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Script failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  async function generatePreview(scriptName: string): Promise<{ text: string; info?: string; error?: string }> {
+    try {
+      const result = await BoopScriptManager.executeScript(scriptName, currentInputText);
+      return result;
+    } catch (error) {
+      return { text: `Error: ${error instanceof Error ? error.message : "Unknown error"}` };
+    }
+  }
+
+  async function handleSelectionChange(scriptId: string | null) {
+    if (!scriptId || !preferences.showPreview) {
+      setSelectedScript(null);
+      setCurrentPreview("Select a script to see preview");
+      setCurrentInfo(undefined);
+      setCurrentError(undefined);
+      return;
+    }
+
+    if (scriptId === selectedScript) {
+      return; // No change
+    }
+
+    setSelectedScript(scriptId);
+    setCurrentPreview("Generating preview...");
+    setCurrentInfo(undefined);
+    setCurrentError(undefined);
+
+    try {
+      const result = await generatePreview(scriptId);
+      setCurrentPreview(result.text);
+      setCurrentInfo(result.info);
+      setCurrentError(result.error);
+    } catch (error) {
+      setCurrentPreview(`Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setCurrentInfo(undefined);
+      setCurrentError(undefined);
+    }
+  }
+
+  function getDetailMarkdown(script: ScriptInfo): string {
+    const isSelected = selectedScript === script.filename;
+    const previewText = isSelected ? currentPreview : "Select this script to see preview";
+    const infoText = isSelected && currentInfo ? currentInfo : null;
+    const errorText = isSelected && currentError ? currentError : null;
+
+    return `# ${script.name}\n\n${script.description}\n\n${script.isSuggested && script.suggestionConfidence ? `**Confidence:** ${Math.round(script.suggestionConfidence * 100)}%\n\n` : ""}${script.suggestionReasons && script.suggestionReasons.length > 0 ? `**Reasons:** ${script.suggestionReasons.join(", ")}\n\n` : ""}## Input\n\`\`\`\n${currentInputText || "No input text"}\n\`\`\`\n\n## Preview\n\`\`\`\n${previewText}\n\`\`\`${infoText ? `\n\n## Info\n✅ **${infoText}**` : ""}${errorText ? `\n\n## Error\n❌ **${errorText}**` : ""}`;
+  }
+
+  /**
+   * Shows instructions for toggling preview preference
+   */
+  function showPreviewToggleInstructions() {
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Toggle Preview",
+      message: "Please use ⌘+, to open preferences and toggle the preview setting",
+    });
+  }
+
   const suggestedScripts = scripts.filter((s) => s.isSuggested);
   const otherScripts = scripts.filter((s) => !s.isSuggested);
 
@@ -132,50 +347,82 @@ export default function BoopScriptsCommand() {
     List,
     {
       isLoading: isLoading,
-      searchBarPlaceholder: "Search Boop scripts...",
+      isShowingDetail: preferences.showPreview,
+      searchBarPlaceholder: inputSource
+        ? `Search Boop scripts... (Source: ${inputSource === "selection" ? "Selected Text" : "Clipboard"})`
+        : "Search Boop scripts...",
+      onSelectionChange: handleSelectionChange,
     },
     // Show suggested scripts section if there are any
     ...(suggestedScripts.length > 0
       ? [
           React.createElement(List.Section, {
-            title: `💡 Suggested for your clipboard content (${suggestedScripts.length})`,
+            title: inputSource
+              ? `💡 Suggested for your ${inputSource === "selection" ? "selected text" : "clipboard content"} (${suggestedScripts.length})`
+              : `💡 Suggested (${suggestedScripts.length})`,
             children: suggestedScripts.map((script) =>
               React.createElement(List.Item, {
-                key: script.filename,
+                id: script.filename,
+                key: `${script.filename}-${selectedScript === script.filename ? String(currentPreview).substring(0, 20) : "unselected"}`,
                 title: `⭐ ${script.name}`,
-                subtitle: script.description,
+                subtitle: preferences.showPreview ? undefined : script.description,
                 icon: script.icon,
                 keywords: script.tags.split(",").map((tag) => tag.trim()),
-                accessories: script.suggestionConfidence
-                  ? [
-                      {
-                        text: `${Math.round(script.suggestionConfidence * 100)}%`,
-                        tooltip: getScriptSuggestionTooltip({
-                          scriptKey: script.filename,
-                          confidence: script.suggestionConfidence,
-                          reasons: script.suggestionReasons || [],
-                        }),
-                      },
-                    ]
+                accessories:
+                  !preferences.showPreview && script.suggestionConfidence
+                    ? [
+                        {
+                          text: `${Math.round(script.suggestionConfidence * 100)}%`,
+                          tooltip: getScriptSuggestionTooltip({
+                            scriptKey: script.filename,
+                            confidence: script.suggestionConfidence,
+                            reasons: script.suggestionReasons || [],
+                          }),
+                        },
+                      ]
+                    : undefined,
+                detail: preferences.showPreview
+                  ? React.createElement(List.Item.Detail, {
+                      key: `${script.filename}-${selectedScript === script.filename ? currentPreview.length : 0}`,
+                      markdown: getDetailMarkdown(script),
+                    })
                   : undefined,
                 actions: React.createElement(
                   ActionPanel,
                   {},
-                  React.createElement(Action, {
-                    title: "Run Script on Clipboard",
-                    onAction: () => runScript(script.filename, script.name),
-                    icon: "🚀",
-                  }),
+                  // Primary action based on input source
+                  inputSource === "selection"
+                    ? React.createElement(Action, {
+                        title: "Transform and Paste Back",
+                        onAction: () => runScriptWithSmartOutput(script.filename, script.name),
+                        icon: "📝",
+                      })
+                    : React.createElement(Action, {
+                        title: "Run Script on Text",
+                        onAction: () => runScriptWithSmartOutput(script.filename, script.name),
+                        icon: "🚀",
+                      }),
+
+                  // Secondary action - opposite of primary
+                  inputSource === "selection"
+                    ? React.createElement(Action, {
+                        title: "Copy to Clipboard",
+                        onAction: () => runScriptAndCopyToClipboard(script.filename, script.name),
+                        icon: "📋",
+                        shortcut: { modifiers: ["shift"], key: "enter" },
+                      })
+                    : React.createElement(Action, {
+                        title: "Transform and Paste",
+                        onAction: () => runScriptAndPaste(script.filename, script.name),
+                        icon: "📝",
+                        shortcut: { modifiers: ["shift"], key: "enter" },
+                      }),
+
                   React.createElement(Action, {
                     title: "Refresh Suggestions",
                     onAction: () => loadScripts(),
                     icon: "🔄",
                     shortcut: { modifiers: ["cmd"], key: "r" },
-                  }),
-                  React.createElement(Action.CopyToClipboard, {
-                    title: "Copy Script Name",
-                    content: script.name,
-                    shortcut: { modifiers: ["cmd"], key: "c" },
                   }),
                 ),
               }),
@@ -189,29 +436,60 @@ export default function BoopScriptsCommand() {
       title: suggestedScripts.length > 0 ? `All Scripts (${otherScripts.length})` : `Scripts (${scripts.length})`,
       children: (suggestedScripts.length > 0 ? otherScripts : scripts).map((script) =>
         React.createElement(List.Item, {
-          key: script.filename,
+          id: script.filename,
+          key: `${script.filename}-${selectedScript === script.filename ? String(currentPreview).substring(0, 20) : "unselected"}`,
           title: script.name,
-          subtitle: script.description,
+          subtitle: preferences.showPreview ? undefined : script.description,
           icon: script.icon,
           keywords: script.tags.split(",").map((tag) => tag.trim()),
+          detail: preferences.showPreview
+            ? React.createElement(List.Item.Detail, {
+                key: `${script.filename}-${selectedScript === script.filename ? currentPreview.length : 0}`,
+                markdown: getDetailMarkdown(script),
+              })
+            : undefined,
           actions: React.createElement(
             ActionPanel,
             {},
-            React.createElement(Action, {
-              title: "Run Script on Clipboard",
-              onAction: () => runScript(script.filename, script.name),
-              icon: "🚀",
-            }),
+            // Primary action based on input source
+            inputSource === "selection"
+              ? React.createElement(Action, {
+                  title: "Transform and Paste Back",
+                  onAction: () => runScriptWithSmartOutput(script.filename, script.name),
+                  icon: "📝",
+                })
+              : React.createElement(Action, {
+                  title: "Run Script on Text",
+                  onAction: () => runScriptWithSmartOutput(script.filename, script.name),
+                  icon: "🚀",
+                }),
+
+            // Secondary action - opposite of primary
+            inputSource === "selection"
+              ? React.createElement(Action, {
+                  title: "Copy to Clipboard",
+                  onAction: () => runScriptAndCopyToClipboard(script.filename, script.name),
+                  icon: "📋",
+                  shortcut: { modifiers: ["shift"], key: "enter" },
+                })
+              : React.createElement(Action, {
+                  title: "Transform and Paste",
+                  onAction: () => runScriptAndPaste(script.filename, script.name),
+                  icon: "📝",
+                  shortcut: { modifiers: ["shift"], key: "enter" },
+                }),
+
             React.createElement(Action, {
               title: "Refresh Suggestions",
               onAction: () => loadScripts(),
               icon: "🔄",
               shortcut: { modifiers: ["cmd"], key: "r" },
             }),
-            React.createElement(Action.CopyToClipboard, {
-              title: "Copy Script Name",
-              content: script.name,
-              shortcut: { modifiers: ["cmd"], key: "c" },
+            React.createElement(Action, {
+              title: preferences.showPreview ? "Hide Preview" : "Show Preview",
+              onAction: showPreviewToggleInstructions,
+              icon: preferences.showPreview ? "👁️‍🗨️" : "👁️",
+              shortcut: { modifiers: ["cmd", "shift"], key: "p" },
             }),
           ),
         }),

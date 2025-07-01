@@ -38,7 +38,10 @@ export class BoopScriptManager {
   /**
    * Execute a script
    */
-  static async executeScript(scriptName: string, inputText: string): Promise<string> {
+  static async executeScript(
+    scriptName: string,
+    inputText: string,
+  ): Promise<{ text: string; info?: string; error?: string }> {
     return executeScript(scriptName, inputText);
   }
 
