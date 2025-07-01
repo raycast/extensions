@@ -94,9 +94,9 @@ export default async ({ github, context }: API) => {
     });
 
     // Auto-label AI Extensions
-    const aiExtension = await getGitHubFile("ai.json", { github, context });
-    const aiExtensionYaml = await getGitHubFile("ai.yaml", { github, context });
-    const aiExtensionJson5 = await getGitHubFile("ai.json5", { github, context });
+    const aiExtension = await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
+    const aiExtensionYaml = await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
+    const aiExtensionJson5 = await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
 
     const packageJson = await getGitHubFile("package.json", { github, context });
     const packageJsonObj = JSON.parse(packageJson);
