@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Add toggle to filter song name in menu bar] - 2025-07-01
+
+- Added new toggle for removing extra info like remix titles or versions from the song name in the menubar
+
 ## [Add Option to View the Lyrics of the Song playing] - 2025-06-30
 
 - Add new command 'Find Lyrics'.
