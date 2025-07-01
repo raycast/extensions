@@ -98,7 +98,7 @@ export default async ({ github, context }: API) => {
     const aiExtensionYaml = await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
     const aiExtensionJson5 = await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
 
-    const packageJson = await getGitHubFile("package.json", { github, context });
+    const packageJson = await getGitHubFile(`extensions/${extensionFolder}/package.json`, { github, context });
     const packageJsonObj = JSON.parse(packageJson);
     const tools = packageJsonObj.tools;
 
