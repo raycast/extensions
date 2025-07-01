@@ -81,7 +81,6 @@ async function scanWindowsQRCodeAcrossDisplays(path: string): Promise<string | u
       let image = await display.captureImage();
       let data = await image.toPng();
       await fs.writeFile(path, data);
-      console.log(path);
       scannedData = await extractQRCodeFromImage(path);
       if (scannedData) {
         break; // Stop if a QR code is found
@@ -92,7 +91,7 @@ async function scanWindowsQRCodeAcrossDisplays(path: string): Promise<string | u
     await execAsync(`start raycast:`).catch(() => {});
   } catch (error) {
     console.error('Error scanning screens on Windows:', error);
-    // You might want to handle this error more gracefully, e.g., throw it or return undefined.
+    return undefined;
   }
 
   try {
