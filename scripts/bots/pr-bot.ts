@@ -94,13 +94,40 @@ export default async ({ github, context }: API) => {
     });
 
     // Auto-label AI Extensions
-    const aiExtensionJson = await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
-    const aiExtensionYaml = await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
-    const aiExtensionJson5 = await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
+    let aiExtensionJson: string | undefined;
+    let aiExtensionYaml: string | undefined;
+    let aiExtensionJson5: string | undefined;
+    let tools: any;
 
-    const packageJson = await getGitHubFile(`extensions/${extensionFolder}/package.json`, { github, context });
-    const packageJsonObj = JSON.parse(packageJson);
-    const tools = packageJsonObj.tools;
+    // Check package.json tools first
+    try {
+      const packageJson = await getGitHubFile(`extensions/${extensionFolder}/package.json`, { github, context });
+      const packageJsonObj = JSON.parse(packageJson);
+      tools = packageJsonObj.tools;
+    } catch {
+      console.log(`no package.json tools for ${extensionFolder}`);
+    }
+
+    // Only check AI files if no tools found in package.json
+    if (!tools) {
+      try {
+        aiExtensionJson = await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
+      } catch {
+        console.log(`no ai.json for ${extensionFolder}`);
+      }
+
+      try {
+        aiExtensionYaml = await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
+      } catch {
+        console.log(`no ai.yaml for ${extensionFolder}`);
+      }
+
+      try {
+        aiExtensionJson5 = await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
+      } catch {
+        console.log(`no ai.json5 for ${extensionFolder}`);
+      }
+    }
 
     if (aiExtensionJson || aiExtensionYaml || aiExtensionJson5 || tools) {
       await github.rest.issues.addLabels({
