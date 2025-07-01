@@ -1,6 +1,6 @@
 # Doppler Changelog
 
-## [View Config Logs + "Open in Doppler" component] - {PR_MERGE_DATE}
+## [View Config Logs + "Open in Doppler" component] - 2025-07-01
 
 - View Logs of a Config
 - "Open In Doppler" component
