@@ -38,10 +38,11 @@ export async function search(
   }
 
   let errorMessage: string;
-  
+
   try {
     const errorData: { message?: string } = await searchResponse.json();
-    errorMessage = errorData.message || searchResponse.statusText || "Search request failed";
+    errorMessage =
+      errorData.message || searchResponse.statusText || "Search request failed";
   } catch {
     const responseText = await searchResponse.text();
     errorMessage = `API returned HTTP error ${searchResponse.status} with non-JSON body:\n\n${responseText}`;
