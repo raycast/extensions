@@ -270,11 +270,18 @@ export async function updateProject(id: string, todoParams: TodoParams) {
 
   if (!authToken) throw new Error('unauthorized');
 
+  // update-project uses area-id while update uses list-id
+  const projectParams = { ...todoParams };
+  if (projectParams['list-id']) {
+    projectParams['area-id'] = projectParams['list-id'];
+    delete projectParams['list-id'];
+  }
+
   await silentlyOpenThingsURL(
     `things:///update-project?${qs.stringify({
       'auth-token': authToken,
       id,
-      ...todoParams,
+      ...projectParams,
     })}`,
   );
 }
