@@ -24,6 +24,7 @@ export type Todo = {
   dueDate: string;
   activationDate: string;
   notes: string;
+  isProject?: boolean;
 };
 
 export type CommandListName = 'inbox' | 'today' | 'anytime' | 'upcoming' | 'someday';
@@ -75,6 +76,8 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
   return executeJxa(`
   const things = Application('${preferences.thingsAppIdentifier}');
   const todos = things.lists.byId('${commandListNameToListIdMapping[commandListName]}').toDos();
+  const projectConstructor = things.projects()[0]?.constructor;
+  
   return todos.map(todo => ({
     id: todo.id(),
     name: todo.name(),
@@ -83,6 +86,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
     tags: todo.tagNames(),
     dueDate: todo.dueDate() && todo.dueDate().toISOString(),
     activationDate: todo.activationDate() && todo.activationDate().toISOString(),
+    isProject: projectConstructor && todo.constructor === projectConstructor,
     project: todo.project() && {
       id: todo.project().id(),
       name: todo.project().name(),
@@ -258,15 +262,6 @@ export async function updateTodo(id: string, todoParams: TodoParams) {
       ...todoParams,
     })}`,
   );
-}
-
-export async function isProjectById(id: string): Promise<boolean> {
-  try {
-    const projects = await getProjects();
-    return projects.some((project) => project.id === id);
-  } catch {
-    return false;
-  }
 }
 
 export async function updateProject(id: string, todoParams: TodoParams) {

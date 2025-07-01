@@ -19,7 +19,6 @@ import {
   deleteTodo,
   updateTodo,
   updateProject,
-  isProjectById,
   handleError,
   List as TList,
   TodoParams,
@@ -58,8 +57,7 @@ export default function TodoListItemActions({
 
   async function updateAction(args: TodoParams, successToastOptions: Toast.Options) {
     try {
-      const isProject = await isProjectById(todo.id);
-      if (isProject) {
+      if (todo.isProject) {
         await updateProject(todo.id, args);
       } else {
         await updateTodo(todo.id, args);
