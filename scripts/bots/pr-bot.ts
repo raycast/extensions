@@ -94,7 +94,7 @@ export default async ({ github, context }: API) => {
     });
 
     // Auto-label AI Extensions
-    const aiExtension = await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
+    const aiExtensionJson = await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
     const aiExtensionYaml = await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
     const aiExtensionJson5 = await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
 
@@ -102,7 +102,7 @@ export default async ({ github, context }: API) => {
     const packageJsonObj = JSON.parse(packageJson);
     const tools = packageJsonObj.tools;
 
-    if (aiExtension || aiExtensionYaml || aiExtensionJson5 || tools) {
+    if (aiExtensionJson || aiExtensionYaml || aiExtensionJson5 || tools) {
       await github.rest.issues.addLabels({
         issue_number: context.issue.number,
         owner: context.repo.owner,
