@@ -2,6 +2,7 @@ import { Icon, List } from "@raycast/api";
 import type React from "react";
 import { layout } from "../types/preferences";
 import type { ResendWallpaperWithInfo } from "../types/types";
+import { getThumbnailUrl } from "../utils/common-utils";
 import { ActionOnResendWallpaper } from "./action-on-resend-wallpaper";
 import { ResendWallpaperEmptyView } from "./resend-wallpaper-empty-view";
 
@@ -31,7 +32,7 @@ export function ResendWallpaperList(props: {
           <List.Item
             id={`${index}`}
             key={`${index}-${value.title}`}
-            icon={{ source: value.url }}
+            icon={{ source: getThumbnailUrl(value.url) }}
             title={value.title}
             accessories={
               value.exclude
@@ -43,7 +44,7 @@ export function ResendWallpaperList(props: {
                   ]
                 : undefined
             }
-            detail={<List.Item.Detail isLoading={false} markdown={`![](${value.url})`} />}
+            detail={<List.Item.Detail isLoading={false} markdown={`![](${getThumbnailUrl(value.url)})`} />}
             actions={
               <ActionOnResendWallpaper
                 index={index}

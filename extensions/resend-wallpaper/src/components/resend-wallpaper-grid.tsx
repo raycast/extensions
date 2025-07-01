@@ -2,6 +2,7 @@ import { Color, Grid, Icon } from "@raycast/api";
 import type React from "react";
 import { columns, layout } from "../types/preferences";
 import type { ResendWallpaperWithInfo } from "../types/types";
+import { getThumbnailUrl } from "../utils/common-utils";
 import { ActionOnResendWallpaper } from "./action-on-resend-wallpaper";
 import { ResendWallpaperEmptyView } from "./resend-wallpaper-empty-view";
 
@@ -33,7 +34,7 @@ export function ResendWallpaperGrid(props: {
           <Grid.Item
             id={`${index}`}
             key={`${index}-${value.title}`}
-            content={value.url}
+            content={getThumbnailUrl(value.url)}
             title={value.title}
             actions={
               <ActionOnResendWallpaper

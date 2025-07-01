@@ -33,6 +33,17 @@ export const axiosGetImageArrayBuffer = async (url: string) => {
   return res.data;
 };
 
+export const getThumbnailUrl = (url: string) => {
+  try {
+    const urlObj = new URL(url);
+    const encodedPath = encodeURIComponent(urlObj.pathname);
+    return `https://resend.com/_next/image?url=${encodedPath}&w=1920&q=75`;
+  } catch (error) {
+    console.error(error);
+    return url;
+  }
+};
+
 export async function downloadPicture(wallpaper: { title: string; url: string }) {
   await showToast(Toast.Style.Animated, "Downloading...");
 
