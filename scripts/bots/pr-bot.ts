@@ -93,6 +93,24 @@ export default async ({ github, context }: API) => {
       labels: ["extension fix / improvement", await extensionLabel(extensionFolder, { github, context })],
     });
 
+    // Auto-label AI Extensions
+    const aiExtensionJson = await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
+    const aiExtensionYaml = await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
+    const aiExtensionJson5 = await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
+
+    const packageJson = await getGitHubFile(`extensions/${extensionFolder}/package.json`, { github, context });
+    const packageJsonObj = JSON.parse(packageJson);
+    const tools = packageJsonObj.tools;
+
+    if (aiExtensionJson || aiExtensionYaml || aiExtensionJson5 || tools) {
+      await github.rest.issues.addLabels({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        labels: ["AI Extension"],
+      });
+    }
+
     if (!owners.length) {
       console.log("no maintainer for this extension");
       await comment({
