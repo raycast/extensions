@@ -32,3 +32,4 @@ Easily add and manage financial transactions in your Rewiser account — directl
 > To use this extension, sign up at [app.rewiser.io](https://app.rewiser.io) and create your personal API key.
 > For demo access or testing credentials, contact us at hello@rewiser.io
 > All data is handled securely through Rewiser’s API. No sensitive data is stored locally.
+// Cleaned up image
