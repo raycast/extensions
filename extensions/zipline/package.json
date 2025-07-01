@@ -13,24 +13,28 @@
     {
       "name": "browse-uploads",
       "title": "Browse Uploads",
+      "subtitle": "Zipline",
       "description": "Browse and search your Zipline uploads",
       "mode": "view"
     },
     {
       "name": "upload-file",
       "title": "Upload File",
+      "subtitle": "Zipline",
       "description": "Upload a new file to Zipline",
       "mode": "view"
     },
     {
       "name": "recent-uploads",
       "title": "Recent Uploads",
+      "subtitle": "Zipline",
       "description": "View your most recent uploads",
       "mode": "view"
     },
     {
       "name": "upload-clipboard-instant",
       "title": "Upload Clipboard Text",
+      "subtitle": "Zipline",
       "description": "Instantly upload clipboard text to Zipline",
       "mode": "no-view",
       "arguments": [

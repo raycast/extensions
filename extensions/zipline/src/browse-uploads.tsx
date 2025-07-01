@@ -18,6 +18,7 @@ import {
   getMimeTypeIcon,
   getPageSize,
 } from "./utils/preferences";
+import { showFailureToast } from "@raycast/utils";
 
 export default function BrowseUploads() {
   const [files, setFiles] = useState<ZiplineFile[]>([]);
@@ -34,27 +35,24 @@ export default function BrowseUploads() {
       setError(undefined);
 
       const ziplineClient = createZiplineClient();
-      getPageSize();
+      const pageSize = getPageSize();
 
       const response = await ziplineClient.getUserFiles({
         search: search || undefined,
         page: pageNum,
+        limit: pageSize,
       });
 
-      setFiles(response || []);
+      setFiles(response.page || []);
       setLoading(false);
       setPage(pageNum);
-      setTotalPages(1);
-      setTotalCount(response?.length || 0);
+      setTotalPages(response.pages);
+      setTotalCount(response.count);
     } catch (error) {
       setLoading(false);
       setError(error instanceof Error ? error.message : "Failed to load files");
 
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load files",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      showFailureToast(error, { title: "Failed to load files" });
     }
   };
 

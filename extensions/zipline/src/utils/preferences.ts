@@ -43,7 +43,7 @@ export function getMimeTypeIcon(mimetype: string): string {
   if (mimetype.startsWith("image/")) return "🖼️";
   if (mimetype.startsWith("video/")) return "🎥";
   if (mimetype.startsWith("audio/")) return "🎵";
-  if (mimetype.includes("pdf")) return "📄";
+  if (mimetype.startsWith("application/pdf")) return "📄";
   if (mimetype.includes("text/")) return "📝";
   if (
     mimetype.includes("application/zip") ||

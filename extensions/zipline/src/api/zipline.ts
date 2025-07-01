@@ -53,7 +53,12 @@ export class ZiplineAPI {
     return response.json() as Promise<T>;
   }
 
-  async getUserFiles(options: FileFilterOptions = {}): Promise<ZiplineFile[]> {
+  async getUserFiles(options: FileFilterOptions = {}): Promise<{
+    page: ZiplineFile[];
+    count: number;
+    pages: number;
+    currentPage: number;
+  }> {
     const params = new URLSearchParams();
 
     if (options.search) params.append("filter", options.search);
@@ -66,8 +71,18 @@ export class ZiplineAPI {
 
     const endpoint = `/api/user/files?${params.toString()}`;
 
-    const response = await this.makeRequest<{ page: ZiplineFile[] }>(endpoint);
-    return response.page || [];
+    const response = await this.makeRequest<{
+      page: ZiplineFile[];
+      count: number;
+      pages: number;
+      currentPage: number;
+    }>(endpoint);
+    return {
+      page: response.page || [],
+      count: response.count || 0,
+      pages: response.pages || 1,
+      currentPage: options.page || 1,
+    };
   }
 
   async uploadFile(

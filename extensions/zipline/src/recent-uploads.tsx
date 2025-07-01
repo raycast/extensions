@@ -40,9 +40,9 @@ export default function RecentUploads() {
       });
 
       // Sort by upload date (most recent first) and take first 10
-      const sortedFiles = response
+      const sortedFiles = response.page
         .sort(
-          (a, b) =>
+          (a: ZiplineFile, b: ZiplineFile) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         )
         .slice(0, 10);
