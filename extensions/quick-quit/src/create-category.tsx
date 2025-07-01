@@ -7,12 +7,13 @@ import {
   showToast,
   useNavigation,
   Toast,
+  Application,
+  Icon,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { randomUUID } from "crypto";
 import { Category } from "./types";
 
-// ADD THIS LIST
 const EMOJI_ICONS: Record<string, string> = {
   "🧑‍💻": "Developer",
   "🚀": "Rocket",
@@ -65,95 +66,106 @@ interface CreateCategoryFormProps {
 
 export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCategoryFormProps) {
   const { pop } = useNavigation();
-  const [apps, setApps] = useState<{ name: string; bundleId?: string }[]>([]);
-  // const [installedApps, setInstalledApps] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // These states will now control the form fields directly
+  const [apps, setApps] = useState<Application[]>([]);
   const [categoryName, setCategoryName] = useState<string>("");
   const [selectedBundleIds, setSelectedBundleIds] = useState<string[]>([]);
   const [selectedIcon, setSelectedIcon] = useState<string>("🧑‍💻");
 
+  // Effect 1: Fetch all installed applications once on mount
   useEffect(() => {
-    async function fetchInitialData() {
+    async function fetchApps() {
       try {
-        // Fetch all installed applications
-        const apps = await getApplications();
-        console.log("[Debug] All installed apps:", apps);
-        //        const appNames = apps.map((app) => app.name).sort();
-        // setInstalledApps(appNames);
+        const installedApps = await getApplications();
+        setApps(installedApps);
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load applications",
+          message: error instanceof Error ? error.message : "An unknown error occurred",
+        });
+        setIsLoading(false); // Stop loading on error
+      }
+    }
+    fetchApps();
+  }, []); // Runs only once
 
-        const appArray = apps.map((app) => ({
-          name: app.name,
-          bundleId: app.bundleId,
-        }));
-        setApps(appArray);
+  // Effect 2: Load category details, but only after apps have been loaded and if editing
+  useEffect(() => {
+    // Don't run this effect until the apps are loaded
+    if (apps.length === 0 && categoryId) {
+      return;
+    }
 
-        // If we are editing, fetch the category and set the state
-        if (categoryId) {
-          const storedCategories = await LocalStorage.getItem<string>("categories");
-          if (storedCategories) {
-            const categories: Category[] = JSON.parse(storedCategories);
-            const foundCategory = categories.find((cat) => cat.id === categoryId);
-            if (foundCategory) {
-              setCategoryName(foundCategory.name);
-              setSelectedBundleIds(foundCategory.bundleIds);
-              setSelectedIcon(foundCategory.icon); // ADD THIS LINE
-            }
+    // If we are creating a new category, we can stop loading and exit.
+    if (!categoryId) {
+      setIsLoading(false);
+      return;
+    }
+
+    async function fetchCategoryDetails() {
+      try {
+        const storedCategoriesRaw = await LocalStorage.getItem<string>("categories");
+        if (storedCategoriesRaw) {
+          const categories: Category[] = JSON.parse(storedCategoriesRaw);
+          const foundCategory = categories.find((cat) => cat.id === categoryId);
+
+          if (foundCategory) {
+            const installedBundleIdsSet = new Set(apps.map((app) => app.bundleId));
+            const validBundleIds = foundCategory.bundleIds.filter((id) => id && installedBundleIdsSet.has(id));
+
+            setCategoryName(foundCategory.name);
+            setSelectedBundleIds(validBundleIds);
+            setSelectedIcon(foundCategory.icon);
           }
         }
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Failed to load data",
+          title: "Failed to load category details",
           message: error instanceof Error ? error.message : "An unknown error occurred",
         });
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Done loading
       }
     }
-    fetchInitialData();
-  }, [categoryId]);
+
+    fetchCategoryDetails();
+  }, [categoryId, apps]); // This effect now correctly depends on `apps`
 
   async function handleSubmit() {
     if (!categoryName) {
       await showToast({ style: Toast.Style.Failure, title: "Category name is required" });
       return;
     }
-    if (!selectedBundleIds || selectedBundleIds.length === 0) {
+    if (selectedBundleIds.length === 0) {
       await showToast({ style: Toast.Style.Failure, title: "Please select at least one application" });
       return;
     }
 
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: categoryId ? "Saving changes..." : "Creating category...",
-    });
+    const toast = await showToast({ style: Toast.Style.Animated, title: categoryId ? "Saving..." : "Creating..." });
 
     try {
       const storedCategories = await LocalStorage.getItem<string>("categories");
       const categories: Category[] = storedCategories ? JSON.parse(storedCategories) : [];
-      const selectedAppObjs = apps.filter((app) => app.bundleId && selectedBundleIds.includes(app.bundleId));
-      const values = {
-        name: categoryName,
-        apps: selectedAppObjs.map((app) => ({
-          name: app.name,
-          bundleId: app.bundleId,
-        })),
-        icon: selectedIcon,
-      };
 
       if (categoryId) {
         const categoryIndex = categories.findIndex((cat) => cat.id === categoryId);
         if (categoryIndex !== -1) {
-          categories[categoryIndex] = { ...categories[categoryIndex], ...values };
+          categories[categoryIndex] = {
+            ...categories[categoryIndex],
+            name: categoryName,
+            icon: selectedIcon,
+            bundleIds: selectedBundleIds,
+          };
         }
       } else {
         const newCategory: Category = {
           id: randomUUID(),
-          name: values.name,
+          name: categoryName,
           bundleIds: selectedBundleIds,
-          icon: values.icon,
+          icon: selectedIcon,
         };
         categories.push(newCategory);
       }
@@ -161,7 +173,6 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
       await LocalStorage.setItem("categories", JSON.stringify(categories));
       toast.style = Toast.Style.Success;
       toast.title = categoryId ? "Category Updated" : "Category Created";
-      toast.message = values.name;
       onCategoryUpdated();
       pop();
     } catch (error) {
@@ -176,19 +187,23 @@ export function CreateCategoryForm({ categoryId, onCategoryUpdated }: CreateCate
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={categoryId ? "Save Changes" : "Create Category"} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title={categoryId ? "Save Changes" : "Create Category"}
+            onSubmit={handleSubmit}
+            icon={Icon.CheckCircle}
+          />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="name"
         title="Category Name"
-        placeholder="e.g., AI Apps"
+        placeholder="e.g., Work Apps"
         value={categoryName}
         onChange={setCategoryName}
       />
       <Form.Dropdown id="icon" title="Icon" value={selectedIcon} onChange={setSelectedIcon}>
-        {Object.entries(EMOJI_ICONS).map(([emoji, name]: [string, string]) => (
+        {Object.entries(EMOJI_ICONS).map(([emoji, name]) => (
           <Form.Dropdown.Item key={emoji} value={emoji} title={`${emoji} ${name}`} />
         ))}
       </Form.Dropdown>

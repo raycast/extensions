@@ -2,7 +2,7 @@
 
 A Raycast extension to instantly quit custom groups of applications, streamlining your workflow and helping you regain focus.
 
-![Quick Quit Demo](./media/QuickQuitDemo.gif)
+![Quick Quit Demo](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHVseWZleXMwaXYxMHU1andtZHJ2cGpmOG82MDU1aXRudXp4cjlqZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6lEPSmyTQ5sRnIM9EG/giphy.gif)
 
 *(A GIF demonstrating the core functionality: creating and editing a category. Using the Quit Applications command to quit a category. Creating a Quicklink and using it to quit apps.)*
 

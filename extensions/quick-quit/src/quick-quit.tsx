@@ -145,6 +145,7 @@ export default function QuickQuitCommand() {
                 {/* 3. MODIFIED: We now pass `fetchData` as the callback to handleQuit. */}
                 <Action
                   title={`Quit ${category.name}`}
+                  icon={Icon.XMarkCircle}
                   onAction={() => handleQuit(category.name, category.bundleIds, fetchData)}
                 />
               </ActionPanel>
@@ -164,6 +165,7 @@ export default function QuickQuitCommand() {
                 {/* 3. MODIFIED: We also pass `fetchData` here. */}
                 <Action
                   title={`Quit ${categoryName}`}
+                  icon={Icon.XMarkCircle}
                   onAction={() => handleQuit(categoryName, bundleIds, fetchData)}
                 />
               </ActionPanel>
