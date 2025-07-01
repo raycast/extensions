@@ -1,9 +1,9 @@
 # Doppler Changelog
 
-## [] - {PR_MERGE_DATE}
+## [View Config Logs + "Open in Doppler" component] - {PR_MERGE_DATE}
 
 - View Logs of a Config
-- Open In Doppler component
+- "Open In Doppler" component
 
 ## [Increase max projects listed + change project list icon] - 2025-05-01
 
