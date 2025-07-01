@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [Bug Fix] - 2025-06-29
+
+- Remove `-lossless` flag from `dwebp` command.
+
 ## [Improved Selection Detection] - 2025-05-12
 
 - Added full support for QSpace Pro

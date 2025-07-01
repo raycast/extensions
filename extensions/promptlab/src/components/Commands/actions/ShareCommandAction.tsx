@@ -8,12 +8,8 @@ import { AdvancedSettings } from "../../../data/default-advanced-settings";
 /**
  * Action to share a command to the PromptLab store.
  * @param props.command The command to share.
- * @returns {JSX.Element} The action component.
  */
-export default function ShareCommandAction(props: {
-  command: Command;
-  settings: AdvancedSettings;
-}): JSX.Element | null {
+export default function ShareCommandAction(props: { command: Command; settings: AdvancedSettings }) {
   const { command, settings } = props;
 
   if (!isActionEnabled("ShareCommandAction", settings)) {
