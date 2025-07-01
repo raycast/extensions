@@ -2,7 +2,7 @@
 
 A Raycast Extension that instantly pastes rich text or HTML content into Markdown.
 
-![Settings Screenshot](./media/preferences-screenshot.png)
+![Settings Screenshot](https://cdn.jsdelivr.net/gh/wei/paste-to-markdown/media/preferences-screenshot.png)
 
 ## Features
 
