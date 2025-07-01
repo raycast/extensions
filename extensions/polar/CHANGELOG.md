@@ -1,6 +1,6 @@
 # Polar Changelog
 
-## [BYOK + View Products] - {PR_MERGE_DATE}
+## [BYOK + View Products] - 2025-07-01
 
 - View Products and their Media
 - Set an optional "Access Token" in Preferences to BYOK
