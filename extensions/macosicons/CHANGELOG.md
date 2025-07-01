@@ -1,6 +1,6 @@
 # macOSIcons.com Changelog
 
-## [Fix API Error Handling] - 2025-07-01
+## [Fix API Error Handling] - {PR_MERGE_DATE}
 
 - Fix error handling to check HTTP status before parsing JSON response
 - Properly handle non-JSON error responses (e.g., Cloudflare HTML 403 pages)
