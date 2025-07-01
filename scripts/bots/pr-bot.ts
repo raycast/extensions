@@ -93,6 +93,51 @@ export default async ({ github, context }: API) => {
       labels: ["extension fix / improvement", await extensionLabel(extensionFolder, { github, context })],
     });
 
+    // Auto-label AI Extensions
+    let aiExtensionJson: string | undefined;
+    let aiExtensionYaml: string | undefined;
+    let aiExtensionJson5: string | undefined;
+    let tools: any;
+
+    // Check package.json tools first
+    try {
+      const packageJson = await getGitHubFile(`extensions/${extensionFolder}/package.json`, { github, context });
+      const packageJsonObj = JSON.parse(packageJson);
+      tools = packageJsonObj.tools;
+    } catch {
+      console.log(`no package.json tools for ${extensionFolder}`);
+    }
+
+    // Only check AI files if no tools found in package.json
+    if (!tools) {
+      try {
+        aiExtensionJson = await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
+      } catch {
+        console.log(`no ai.json for ${extensionFolder}`);
+      }
+
+      try {
+        aiExtensionYaml = await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
+      } catch {
+        console.log(`no ai.yaml for ${extensionFolder}`);
+      }
+
+      try {
+        aiExtensionJson5 = await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
+      } catch {
+        console.log(`no ai.json5 for ${extensionFolder}`);
+      }
+    }
+
+    if (aiExtensionJson || aiExtensionYaml || aiExtensionJson5 || tools) {
+      await github.rest.issues.addLabels({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        labels: ["AI Extension"],
+      });
+    }
+
     if (!owners.length) {
       console.log("no maintainer for this extension");
       await comment({
