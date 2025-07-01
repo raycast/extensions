@@ -108,7 +108,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
 
 export const getTodo = (todoId: string) =>
   executeJxa(`
-  const things = Application('Things3');
+  const things = Application('${preferences.thingsAppIdentifier}');
   const lists = ['Inbox', 'Today', 'Anytime', 'Upcoming', 'Someday', 'Logbook', 'Trash'];
   let foundTodo = null;
 
