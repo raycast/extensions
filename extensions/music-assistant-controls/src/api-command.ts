@@ -1,6 +1,5 @@
 import { EventType } from "./interfaces";
 import { MusicAssistantApi } from "./music-assistant-api";
-
 import "./polyfills";
 
 export default function executeApiCommand<T>(host: string, command: (api: MusicAssistantApi) => Promise<T>) {
