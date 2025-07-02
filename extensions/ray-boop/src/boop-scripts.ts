@@ -326,7 +326,10 @@ export default function BoopScriptsCommand() {
     const infoText = isSelected && currentInfo ? currentInfo : null;
     const errorText = isSelected && currentError ? currentError : null;
 
-    return `# ${script.name}\n\n${script.description}\n\n${script.isSuggested && script.suggestionConfidence ? `**Confidence:** ${Math.round(script.suggestionConfidence * 100)}%\n\n` : ""}${script.suggestionReasons && script.suggestionReasons.length > 0 ? `**Reasons:** ${script.suggestionReasons.join(", ")}\n\n` : ""}## Input\n\`\`\`\n${currentInputText || "No input text"}\n\`\`\`\n\n## Preview\n\`\`\`\n${previewText}\n\`\`\`${infoText ? `\n\n## Info\n✅ **${infoText}**` : ""}${errorText ? `\n\n## Error\n❌ **${errorText}**` : ""}`;
+    // Hide preview if we have info/error and preview text is same as input (script didn't transform)
+    const shouldShowPreview = !((infoText || errorText) && isSelected && String(currentPreview) === currentInputText);
+
+    return `# ${script.name}\n\n${script.description}\n\n${script.isSuggested && script.suggestionConfidence ? `**Confidence:** ${Math.round(script.suggestionConfidence * 100)}%\n\n` : ""}${script.suggestionReasons && script.suggestionReasons.length > 0 ? `**Reasons:** ${script.suggestionReasons.join(", ")}\n\n` : ""}## Input\n\`\`\`\n${currentInputText || "No input text"}\n\`\`\`${shouldShowPreview ? `\n\n## Preview\n\`\`\`\n${previewText}\n\`\`\`` : ""}${infoText ? `\n\n## Info\n✅ **${infoText}**` : ""}${errorText ? `\n\n## Error\n❌ **${errorText}**` : ""}`;
   }
 
   /**
