@@ -2,7 +2,7 @@
 
 ## [Fix Search Feature] - 2025-07-02
 
-- Fixed an issue with the search functionality to improve reliability and performance.
+- Fixed an issue with the search functionality.
 
 ## [Add Option to View the Lyrics of the Song playing] - 2025-06-30
 
