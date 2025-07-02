@@ -72,9 +72,9 @@ export default async function createProject(input: Input) {
     aliases: [],
   };
 
-  let categories = (await LocalStorage.getItem<string>("categories")) || "[]";
-  categories = JSON.parse(categories || "[]") as Category[];
-  const categoryDetails = categories.find((c) => c.name === category);
+  const categoriesString = (await LocalStorage.getItem<string>("categories")) || "[]";
+  const categories = JSON.parse(categoriesString || "[]") as Category[];
+  const categoryDetails = categories.find((c: Category) => c.name === category);
 
   if (categoryDetails) {
     if (categoryDetails.command != "" && categoryDetails.command != null && categoryDetails.command != undefined) {

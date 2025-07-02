@@ -281,8 +281,8 @@ export default function Command() {
               onSubmit={(values) => {
                 const aliases = values.aliases
                   .split(",")
-                  .map((a) => a.trim())
-                  .filter((a) => a);
+                  .map((a: string) => a.trim())
+                  .filter((a: string) => a);
                 onSubmit(aliases);
               }}
             />
@@ -317,7 +317,7 @@ export default function Command() {
                 if (selectedCoolifyProject === "new") {
                   createCoolifyProject(values.newName);
                   onSubmit(values.newName);
-                } else {
+                } else if (selectedCoolifyProject) {
                   deployToCoolify(project, selectedCoolifyProject);
                 }
               }}

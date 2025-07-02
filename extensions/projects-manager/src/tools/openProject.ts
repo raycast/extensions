@@ -54,9 +54,9 @@ function checkIfRaycastProject(dirPath: string): boolean {
 }
 
 export default async function openProject(input: Input) {
-  let categories = await LocalStorage.getItem<string>("categories");
-  categories = JSON.parse(categories || "[]");
-  const category = categories.find((c) => c.name === input.project.categoryName);
+  const categoriesString = await LocalStorage.getItem<string>("categories");
+  const categories = JSON.parse(categoriesString || "[]") as Category[];
+  const category = categories.find((c: Category) => c.name === input.project.categoryName);
   if (!category) return;
 
   const lastOpenedTimes = JSON.parse((await LocalStorage.getItem("lastOpenedTimes")) || "{}") as Record<string, number>;
@@ -76,8 +76,8 @@ export default async function openProject(input: Input) {
       if (checkIfXcodePackage(input.project.fullPath)) {
         open(input.project.fullPath, category.defaultAppPath);
       } else {
-        if (findXcodeProject(input.project.fullPath) != null) {
-          const xcodePath = findXcodeProject(input.project.fullPath);
+        const xcodePath = findXcodeProject(input.project.fullPath);
+        if (xcodePath != null) {
           open(xcodePath, category.defaultAppPath);
         } else {
           open(input.project.fullPath, category.defaultAppPath);

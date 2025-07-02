@@ -10,6 +10,7 @@ type Values = {
   category: string;
   template: Template;
   createRepo: boolean;
+  description: string;
 };
 
 export default function Command() {
@@ -79,13 +80,16 @@ export default function Command() {
                     actions={
                       <ActionPanel>
                         <Action.SubmitForm
-                          onSubmit={(values) =>
-                            handleSubmit({
-                              ...values,
-                              category: category.name,
-                              template: templates.find((template) => template.id === values.template),
-                            })
-                          }
+                          onSubmit={(values) => {
+                            const foundTemplate = templates.find((template) => template.id === values.template);
+                            if (foundTemplate) {
+                              handleSubmit({
+                                ...values,
+                                category: category.name,
+                                template: foundTemplate,
+                              });
+                            }
+                          }}
                         />
                       </ActionPanel>
                     }
