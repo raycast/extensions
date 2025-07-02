@@ -1,7 +1,7 @@
 import { getLocalStorageItem, setLocalStorageItem, showToast, Toast } from "@raycast/api";
 import { WeReadAPI } from "../api/weread";
 import { ReadwiseAPI } from "../api/readwise";
-import { WeReadBook, WeReadBookmark, SyncStatus } from "../types";
+import { WeReadBook, WeReadBookmark, SyncStatus, ReadwiseHighlight } from "../types";
 
 export interface SyncResult {
   success: boolean;
@@ -258,7 +258,7 @@ export class SyncService {
       const highlights = bookmarksToSync.map((bookmark) => {
         const thought = bookData.thoughts.find((t) => t.chapterUid === bookmark.chapterUid);
 
-        const cleanHighlight: any = {
+        const cleanHighlight: Partial<ReadwiseHighlight> = {
           text: String(bookmark.markText || ""),
           title: String(book.title || ""),
           author: String(book.author || ""),

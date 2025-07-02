@@ -6,6 +6,7 @@ import {
   Toast,
   getLocalStorageItem,
   setLocalStorageItem,
+  getPreferenceValues,
   Icon,
   Color,
 } from "@raycast/api";
@@ -15,26 +16,26 @@ import { useWeReadBookData } from "./api/weread";
 import { ReadwiseAPI } from "./api/readwise";
 import { WeReadBook, WeReadBookmark, WeReadThought, ReadwiseHighlight, SyncStatus } from "./types";
 
+interface Preferences {
+  wereadCookie: string;
+  readwiseToken: string;
+}
+
 interface BookDetailProps {
   bookId: string;
   book: WeReadBook;
 }
 
 export default function BookDetail({ bookId, book }: BookDetailProps) {
-  const [wereadCookie, setWereadCookie] = useState<string>();
-  const [readwiseToken, setReadwiseToken] = useState<string>();
+  const preferences = getPreferenceValues<Preferences>();
+  const { wereadCookie, readwiseToken } = preferences;
   const [syncStatus, setSyncStatus] = useState<SyncStatus>();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    async function loadCredentials() {
+    async function loadSyncStatus() {
       try {
-        const cookie = await getLocalStorageItem<string>("wereadCookie");
-        const token = await getLocalStorageItem<string>("readwiseToken");
         const statusJson = await getLocalStorageItem<string>(`syncStatus_${bookId}`);
-
-        setWereadCookie(cookie);
-        setReadwiseToken(token);
 
         // Parse JSON string back to object
         let status: SyncStatus;
@@ -51,10 +52,10 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
 
         setSyncStatus(status);
       } catch (error) {
-        console.error("Failed to load credentials:", error);
+        console.error("Failed to load sync status:", error);
       }
     }
-    loadCredentials();
+    loadSyncStatus();
   }, [bookId]);
 
   const { data: bookData, isLoading: isLoadingData, error, revalidate } = useWeReadBookData(bookId, wereadCookie);
@@ -126,7 +127,7 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
         });
 
         // Create clean highlight object with no circular references
-        const cleanHighlight: any = {
+        const cleanHighlight: Partial<ReadwiseHighlight> = {
           text: String(bookmark.markText || ""),
           title: String(book.title || ""),
           author: String(book.author || ""),
@@ -332,7 +333,7 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
                               });
 
                               // Create clean highlight object with no circular references
-                              const highlight: any = {
+                              const highlight: Partial<ReadwiseHighlight> = {
                                 text: String(bookmark.markText || ""),
                                 title: String(book.title || ""),
                                 author: String(book.author || ""),

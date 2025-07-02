@@ -1,6 +1,13 @@
-import { getLocalStorageItem, setLocalStorageItem, showToast, Toast } from "@raycast/api";
+import { getLocalStorageItem, setLocalStorageItem, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { SyncService } from "./syncService";
+
+interface Preferences {
+  wereadCookie: string;
+  readwiseToken: string;
+  autoSyncEnabled: boolean;
+  autoSyncInterval: string;
+}
 
 export class AutoSyncService {
   private static instance: AutoSyncService;
@@ -14,29 +21,30 @@ export class AutoSyncService {
   }
 
   async startAutoSync(): Promise<void> {
-    const settings = await this.getAutoSyncSettings();
-    if (!settings.enabled) {
+    const preferences = getPreferenceValues<Preferences>();
+
+    if (!preferences.autoSyncEnabled) {
       console.log("[AutoSync] Auto-sync is disabled");
       return;
     }
 
-    if (!settings.wereadCookie || !settings.readwiseToken) {
+    if (!preferences.wereadCookie || !preferences.readwiseToken) {
       console.log("[AutoSync] Missing credentials for auto-sync");
       return;
     }
 
     this.isEnabled = true;
 
-    console.log(`[AutoSync] Auto-sync enabled with ${settings.interval} preference`);
+    console.log(`[AutoSync] Auto-sync enabled with ${preferences.autoSyncInterval} preference`);
 
     // Following Raycast guidelines: no background periodic sync
     // Instead, we perform sync when extension is actively used
-    await this.performSyncIfNeeded(settings.wereadCookie, settings.readwiseToken, settings.interval);
+    await this.performSyncIfNeeded(preferences.wereadCookie, preferences.readwiseToken, preferences.autoSyncInterval);
 
     await showToast({
       style: Toast.Style.Success,
       title: "Auto-sync Enabled",
-      message: `Will sync when extension is used (${settings.interval} preference)`,
+      message: `Will sync when extension is used (${preferences.autoSyncInterval} preference)`,
     });
   }
 
@@ -51,24 +59,14 @@ export class AutoSyncService {
     });
   }
 
-  private async getAutoSyncSettings() {
+  private getAutoSyncSettings(): Preferences {
     try {
-      const enabled = await getLocalStorageItem<string>("autoSyncEnabled");
-      const interval = await getLocalStorageItem<string>("autoSyncInterval");
-      const wereadCookie = await getLocalStorageItem<string>("wereadCookie");
-      const readwiseToken = await getLocalStorageItem<string>("readwiseToken");
-
-      return {
-        enabled: enabled ? JSON.parse(enabled) : false,
-        interval: interval || "daily",
-        wereadCookie: wereadCookie || "",
-        readwiseToken: readwiseToken || "",
-      };
+      return getPreferenceValues<Preferences>();
     } catch (error) {
-      console.error("[AutoSync] Failed to load settings:", error);
+      console.error("[AutoSync] Failed to load preferences:", error);
       return {
-        enabled: false,
-        interval: "daily",
+        autoSyncEnabled: false,
+        autoSyncInterval: "daily",
         wereadCookie: "",
         readwiseToken: "",
       };
@@ -139,9 +137,9 @@ export class AutoSyncService {
 
   // Method to trigger sync when extension is actively used
   async checkAndSyncIfNeeded(): Promise<void> {
-    const settings = await this.getAutoSyncSettings();
-    if (settings.enabled && settings.wereadCookie && settings.readwiseToken) {
-      await this.performSyncIfNeeded(settings.wereadCookie, settings.readwiseToken, settings.interval);
+    const settings = this.getAutoSyncSettings();
+    if (settings.autoSyncEnabled && settings.wereadCookie && settings.readwiseToken) {
+      await this.performSyncIfNeeded(settings.wereadCookie, settings.readwiseToken, settings.autoSyncInterval);
     }
   }
 }

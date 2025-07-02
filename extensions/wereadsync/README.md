@@ -10,6 +10,7 @@ Sync your highlights from WeRead to Readwise automatically and efficiently.
 - **📊 Sync Status**: Detailed sync status tracking with visual indicators
 - **🎯 Incremental Sync**: Smart sync that only processes new highlights
 - **🔧 Full Sync**: Complete re-sync option when needed
+- **⚙️ Native Preferences**: Built-in Raycast preferences for easy configuration
 
 ## Setup
 
@@ -21,8 +22,9 @@ Sync your highlights from WeRead to Readwise automatically and efficiently.
 ### Configuration
 
 1. Install the extension from Raycast Store
-2. Run the "WeRead Sync" command
-3. Click "Settings" to configure:
+2. Open Raycast preferences (`⌘,`) 
+3. Navigate to Extensions → WeRead Sync
+4. Configure the required settings:
 
 #### WeRead Cookie
 1. Open [WeRead](https://weread.qq.com) in your browser
@@ -31,20 +33,23 @@ Sync your highlights from WeRead to Readwise automatically and efficiently.
 4. Go to the Network tab
 5. Refresh the page
 6. Find any request and copy the `Cookie` header value
-7. Paste it in the WeRead Cookie field
+7. Paste it in the WeRead Cookie preference field
 
-#### Readwise Token
+#### Readwise Access Token
 1. Go to [readwise.io/access_token](https://readwise.io/access_token)
 2. Login to your account
 3. Copy your access token
-4. Paste it in the Readwise Access Token field
+4. Paste it in the Readwise Access Token preference field
+
+#### Auto-Sync Settings (Optional)
+- **Enable Auto-sync**: Turn on automatic background sync
+- **Sync Interval**: Choose frequency (hourly, daily, weekly)
 
 ## Usage
 
-### Commands
+### Command
 
-- **View WeRead Books**: Browse your library and sync highlights
-- **Settings**: Configure authentication credentials
+- **WeRead Sync**: Access your library, sync highlights, and manage sync operations
 
 ### Sync Operations
 
@@ -65,12 +70,27 @@ Sync your highlights from WeRead to Readwise automatically and efficiently.
 
 ## Auto Sync
 
-Configure automatic syncing in Settings:
+Configure automatic syncing in Raycast preferences:
 
 - **Enable Auto-sync**: Turn on automatic background sync
 - **Sync Interval**: Choose frequency (hourly, daily, weekly)
 
-When enabled, the extension will automatically check for new highlights and sync them to Readwise.
+When enabled, the extension will automatically check for new highlights and sync them to Readwise when you use the extension.
+
+## Sync Status
+
+The extension provides detailed sync status information:
+
+- **Green Checkmark**: All highlights are synced
+- **Orange Clock**: Book has been synced before but has new highlights
+- **Red Exclamation**: Book has never been synced
+- **Blue Upload**: New highlights ready to sync
+
+View the sync status page to see:
+- Total books with highlights
+- Number of new highlights per book
+- Last sync timestamp for each book
+- Individual book sync operations
 
 ## Troubleshooting
 
@@ -79,18 +99,35 @@ When enabled, the extension will automatically check for new highlights and sync
 - **WeRead Cookie Invalid**: Ensure you're logged into WeRead and the cookie is fresh
 - **Readwise Token Invalid**: Verify your token at readwise.io/access_token
 - **Connection Failed**: Check your internet connection
+- **Missing Preferences**: Configure credentials in Raycast preferences (`⌘,`)
 
 ### Sync Issues
 
 - **No New Highlights**: Use "Reset Sync Status" to force a complete re-sync
 - **Partial Sync**: Some books may fail individually - check sync status for details
-- **Auto-sync Not Working**: Ensure both credentials are configured and auto-sync is enabled
+- **Auto-sync Not Working**: Ensure both credentials are configured and auto-sync is enabled in preferences
 
-## Privacy
+### First Time Setup
 
-- All data is stored locally on your device
-- No data is transmitted to third parties except WeRead and Readwise
-- Credentials are stored securely in Raycast's local storage
+If you see "Authentication Required":
+1. Press `⌘,` to open Raycast preferences
+2. Navigate to Extensions → WeRead Sync
+3. Fill in your WeRead Cookie and Readwise Access Token
+4. Restart the command
+
+## Privacy & Security
+
+- All credentials are stored securely in Raycast's preferences system
+- Sync status is stored locally on your device
+- No data is transmitted to third parties except WeRead and Readwise APIs
+- The extension only accesses your highlighted books and notes
+
+## Technical Details
+
+- **Incremental Sync**: Tracks which highlights have been synced to avoid duplicates
+- **Batch Processing**: Efficiently processes multiple books and highlights
+- **Error Handling**: Graceful handling of network issues and API errors
+- **Auto-Sync**: Respects Raycast guidelines - only syncs when extension is actively used
 
 ## License
 

@@ -1,5 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
 import { ReadwiseHighlight } from "../types";
+import * as https from "https";
+import { URL } from "url";
+import type { IncomingMessage } from "http";
 
 const READWISE_BASE_URL = "https://readwise.io/api/v2";
 
@@ -11,9 +14,6 @@ export class ReadwiseAPI {
   }
 
   private async makeRequestWithHttps<T>(endpoint: string, body?: string): Promise<T> {
-    const https = require("https");
-    const { URL } = require("url");
-
     return new Promise((resolve, reject) => {
       const url = new URL(`${READWISE_BASE_URL}${endpoint}`);
 
@@ -36,7 +36,7 @@ export class ReadwiseAPI {
         console.log(`[Readwise HTTPS] Body:`, body);
       }
 
-      const req = https.request(options, (res: any) => {
+      const req = https.request(options, (res: IncomingMessage) => {
         const chunks: Buffer[] = [];
 
         console.log(`[Readwise HTTPS] Response status: ${res.statusCode}`);
@@ -103,7 +103,7 @@ export class ReadwiseAPI {
         console.log(`[Readwise API] Validating highlight ${index}:`, JSON.stringify(highlight, null, 2));
 
         // Create a completely new object with only the fields we need
-        const validated: any = {
+        const validated: Partial<ReadwiseHighlight> = {
           text: String(highlight.text || "").trim(),
           title: String(highlight.title || "").trim(),
           author: String(highlight.author || "").trim(),

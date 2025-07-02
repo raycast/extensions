@@ -5,11 +5,33 @@ import https from "https";
 import { URL } from "url";
 import zlib from "zlib";
 
+// API Response interfaces
+interface WeReadSessionInfo {
+  initialized?: boolean;
+  [key: string]: unknown;
+}
+
+interface WeReadShelfResponse {
+  books?: unknown[];
+  [key: string]: unknown;
+}
+
+interface WeReadBookmarkResponse {
+  updated: unknown[];
+  chapters: Array<{ uid: number; title: string; level: number; [key: string]: unknown }>;
+  [key: string]: unknown;
+}
+
+interface WeReadThoughtResponse {
+  reviews: unknown[];
+  [key: string]: unknown;
+}
+
 const BASE_URL = "https://weread.qq.com";
 
 export class WeReadAPI {
   private cookie: string;
-  private sessionInfo: any = null;
+  private sessionInfo: WeReadSessionInfo | null = null;
 
   constructor(cookie: string) {
     this.cookie = cookie;
@@ -148,7 +170,7 @@ export class WeReadAPI {
 
             if (returnText) {
               console.log(`[WeRead API] Returning raw text response`);
-              resolve(data as any);
+              resolve(data as T);
             } else {
               console.log(`[WeRead API] Decompressed response:`, data);
               const jsonData = JSON.parse(data);
@@ -179,15 +201,15 @@ export class WeReadAPI {
       console.log(`[WeRead API] Initializing session...`);
 
       // First, access the main page to establish session
-      const mainPageResponse = await this.makeHttpsRequest<string>("/", "GET", false, true);
+      await this.makeHttpsRequest<string>("/", "GET", false, true);
       console.log(`[WeRead API] Main page accessed successfully`);
 
       // Then get user info to warm up the session
       try {
-        const userResponse = await this.makeHttpsRequest<any>("/api/user");
+        const userResponse = await this.makeHttpsRequest<WeReadSessionInfo>("/api/user");
         console.log(`[WeRead API] User info retrieved:`, userResponse);
         this.sessionInfo = userResponse;
-      } catch (userError) {
+      } catch {
         console.log(`[WeRead API] User info not available, but main page accessed`);
         this.sessionInfo = { initialized: true };
       }
@@ -204,10 +226,10 @@ export class WeReadAPI {
       // Initialize session first
       await this.initializeSession();
 
-      const response = await this.makeHttpsRequest<any>("/api/user/notebook");
+      const response = await this.makeHttpsRequest<WeReadShelfResponse>("/api/user/notebook");
 
       // Handle different possible response structures
-      let books: any[] = [];
+      let books: unknown[] = [];
       if (response.books) {
         books = response.books;
       } else if (Array.isArray(response)) {
@@ -299,7 +321,7 @@ export class WeReadAPI {
         console.log(`[WeRead API] Book page access failed, continuing anyway:`, pageError);
       }
 
-      const jsonResponse = await this.makeHttpsRequest<any>(endpoint, "GET", true);
+      const jsonResponse = await this.makeHttpsRequest<WeReadBookmarkResponse>(endpoint, "GET", true);
 
       return this.processBookmarksResponse(jsonResponse);
     } catch (e) {
@@ -308,7 +330,7 @@ export class WeReadAPI {
     }
   }
 
-  private processBookmarksResponse(response: any): WeReadBookmark[] {
+  private processBookmarksResponse(response: WeReadBookmarkResponse): WeReadBookmark[] {
     console.log("Processing bookmarks response:", {
       hasUpdated: !!response.updated,
       updatedLength: response.updated?.length || 0,
@@ -346,7 +368,7 @@ export class WeReadAPI {
     // Create a map of chapterUid to chapter info
     const chapterMap = new Map();
     if (response.chapters && Array.isArray(response.chapters)) {
-      response.chapters.forEach((chapter: any) => {
+      response.chapters.forEach((chapter) => {
         chapterMap.set(chapter.chapterUid, {
           title: chapter.title,
           idx: chapter.chapterIdx,
@@ -356,7 +378,7 @@ export class WeReadAPI {
 
     console.log(`Successfully processing ${response.updated.length} bookmarks`);
 
-    return response.updated.map((item: any) => {
+    return response.updated.map((item: unknown) => {
       const chapterInfo = chapterMap.get(item.chapterUid);
       return {
         bookmarkId: item.bookmarkId,
@@ -376,7 +398,7 @@ export class WeReadAPI {
 
   async getReviews(bookId: string): Promise<WeReadThought[]> {
     try {
-      const response = await this.makeHttpsRequest<any>(
+      const response = await this.makeHttpsRequest<WeReadThoughtResponse>(
         `/web/review/list?bookId=${bookId}&listType=11&mine=1&synckey=0`,
       );
 
@@ -396,7 +418,7 @@ export class WeReadAPI {
         return [];
       }
 
-      return response.reviews.map((review: any) => ({
+      return response.reviews.map((review: unknown) => ({
         reviewId: review.reviewId,
         bookId: review.bookId,
         chapterUid: review.chapterUid,

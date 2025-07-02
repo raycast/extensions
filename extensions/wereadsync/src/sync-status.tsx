@@ -1,9 +1,14 @@
-import { Action, ActionPanel, List, showToast, Toast, getLocalStorageItem, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, getPreferenceValues, Icon, Color } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { useWeReadBooks } from "./api/weread";
 import { SyncService } from "./services/syncService";
 import { WeReadBook, SyncStatus } from "./types";
+
+interface Preferences {
+  wereadCookie: string;
+  readwiseToken: string;
+}
 
 interface BookSyncInfo {
   book: WeReadBook;
@@ -13,26 +18,11 @@ interface BookSyncInfo {
 }
 
 export default function SyncStatusView() {
-  const [wereadCookie, setWereadCookie] = useState<string>();
-  const [readwiseToken, setReadwiseToken] = useState<string>();
+  const preferences = getPreferenceValues<Preferences>();
+  const { wereadCookie, readwiseToken } = preferences;
   const [bookSyncInfo, setBookSyncInfo] = useState<BookSyncInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
-
-  useEffect(() => {
-    async function loadCredentials() {
-      try {
-        const cookie = await getLocalStorageItem<string>("wereadCookie");
-        const token = await getLocalStorageItem<string>("readwiseToken");
-        setWereadCookie(cookie);
-        setReadwiseToken(token);
-      } catch (error) {
-        console.error("Failed to load credentials:", error);
-        await showFailureToast(error, { title: "Failed to Load Credentials" });
-      }
-    }
-    loadCredentials();
-  }, []);
 
   const { data: books, isLoading: isLoadingBooks } = useWeReadBooks(wereadCookie);
 
@@ -124,7 +114,7 @@ export default function SyncStatusView() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Missing Credentials",
-        message: "Please configure WeRead cookie and Readwise token in Settings",
+        message: "Please configure WeRead cookie and Readwise token in Raycast preferences",
       });
       return;
     }
@@ -147,7 +137,7 @@ export default function SyncStatusView() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Missing Credentials",
-        message: "Please configure WeRead cookie and Readwise token in Settings",
+        message: "Please configure WeRead cookie and Readwise token in Raycast preferences",
       });
       return;
     }
@@ -170,7 +160,7 @@ export default function SyncStatusView() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Missing Credentials",
-        message: "Please configure credentials in Settings",
+        message: "Please configure credentials in Raycast preferences",
       });
       return;
     }
@@ -202,7 +192,7 @@ export default function SyncStatusView() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Missing Credentials",
-        message: "Please configure credentials in Settings",
+        message: "Please configure credentials in Raycast preferences",
       });
       return;
     }

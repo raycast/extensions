@@ -22,16 +22,59 @@
   ],
   "commands": [
     {
-      "name": "view-books",
-      "title": "View Weread Books",
-      "description": "Browse your WeRead library and highlights",
+      "name": "weread-sync",
+      "title": "Weread Sync",
+      "description": "Sync your WeRead highlights to Readwise and manage your library",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "wereadCookie",
+      "type": "textfield",
+      "required": true,
+      "title": "WeRead Cookie",
+      "description": "Your WeRead authentication cookie",
+      "placeholder": "Paste your WeRead cookie here..."
     },
     {
-      "name": "settings",
-      "title": "Settings",
-      "description": "Configure WeRead Cookie and Readwise API Token",
-      "mode": "view"
+      "name": "readwiseToken",
+      "type": "password",
+      "required": true,
+      "title": "Readwise Access Token",
+      "description": "Your Readwise API access token",
+      "placeholder": "Enter your Readwise access token..."
+    },
+    {
+      "name": "autoSyncEnabled",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable Auto-sync",
+      "description": "Automatically sync new highlights to Readwise",
+      "default": false,
+      "label": "Enable automatic syncing"
+    },
+    {
+      "name": "autoSyncInterval",
+      "type": "dropdown",
+      "required": false,
+      "title": "Sync Interval",
+      "description": "How often to check for new highlights",
+      "default": "daily",
+      "data": [
+        {
+          "title": "Every Hour",
+          "value": "hourly"
+        },
+        {
+          "title": "Daily",
+          "value": "daily"
+        },
+        {
+          "title": "Weekly",
+          "value": "weekly"
+        }
+      ]
     }
   ],
   "dependencies": {
