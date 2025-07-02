@@ -94,18 +94,20 @@ export default async function createProject(input: Input) {
     }
   }
 
-  if (categoryDetails.autoCreateRepo) {
+  if (categoryDetails?.autoCreateRepo) {
     createGitRepo(project);
   }
 
   openProject({ project: project });
   console.log("Waiting for app to open");
-  waitUntilAppIsOpen(categoryDetails.defaultAppPath, () => {
-    console.log("App is open");
-    setTimeout(() => {
-      typeAndEnter(input.prompt);
-    }, 3000);
-  });
+  if (categoryDetails?.defaultAppPath) {
+    waitUntilAppIsOpen(categoryDetails.defaultAppPath, () => {
+      console.log("App is open");
+      setTimeout(() => {
+        typeAndEnter(input.prompt);
+      }, 3000);
+    });
+  }
 
   // setTimeout(() => {
   //     open("raycast://customWindowManagementCommand?&name=To%20UW%20Middle&position=topCenter&relativeWidth=0.5&relativeHeight=1.0")

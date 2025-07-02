@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { LocalStorage } from "@raycast/api";
 import Project from "../types/project";
+import { Category } from "../types/category";
 import { open } from "@raycast/api";
 
 type Input = {

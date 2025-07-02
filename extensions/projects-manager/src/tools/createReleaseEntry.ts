@@ -42,11 +42,19 @@ export default async function createReleaseEntry(input: Input) {
   const latestRelease = releases[0];
   const releaseEntries = await LocalStorage.getItem<string>("releaseEntries");
   const allReleaseEntries: ReleaseEntry[] = releaseEntries ? JSON.parse(releaseEntries) : [];
+  const entryTypeMap: Record<string, string> = {
+    addition: "Addition",
+    improvement: "Improvement",
+    "bug-fix": "Bug Fix",
+  };
+
   const newReleaseEntry = {
-    ...input,
     id: allReleaseEntries.length + 1,
+    projectID: input.projectID,
     releaseID: latestRelease.id,
     type: input.entryType,
+    entryType: entryTypeMap[input.entryType],
+    description: input.description,
   };
   allReleaseEntries.push(newReleaseEntry);
   await LocalStorage.setItem("releaseEntries", JSON.stringify(allReleaseEntries));

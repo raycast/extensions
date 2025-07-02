@@ -84,9 +84,11 @@ export default function Command() {
                             const foundTemplate = templates.find((template) => template.id === values.template);
                             if (foundTemplate) {
                               handleSubmit({
-                                ...values,
+                                name: values.name,
                                 category: category.name,
                                 template: foundTemplate,
+                                createRepo: values.createRepo,
+                                description: values.description,
                               });
                             }
                           }}
