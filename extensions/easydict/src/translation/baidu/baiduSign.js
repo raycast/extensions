@@ -45,14 +45,11 @@ export default function genBaiduWebSign(t) {
                     : "Arguments" === r || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r)
                       ? e(t, n)
                       : void 0
-                      ? e(t, n)
-                      : void 0
                 );
               }
             })(o) ||
             (function () {
               throw new TypeError(
-                "Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.",
                 "Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.",
               );
             })(),
