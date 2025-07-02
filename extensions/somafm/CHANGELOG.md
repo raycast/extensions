@@ -1,6 +1,6 @@
 # SomaFM for Raycast Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-07-02
 
 ### Added
 - Browse 40+ SomaFM radio stations in Grid or List view
