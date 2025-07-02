@@ -66,10 +66,6 @@ If you want to modify or contribute to the extension:
    npm install
    ```
 
-4. **Create Icon** (Optional):
-   - Add a `calculator.png` icon file (16x16 or 32x32 pixels) to the root directory
-   - Or update the `icon` field in `package.json` to use a built-in Raycast icon
-
 ### Testing the Extension
 
 1. **Development Mode**:
