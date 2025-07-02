@@ -1,0 +1,183 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "projects-manager",
+  "title": "Projects Manager",
+  "description": "This manages all of my projects",
+  "icon": "extension_icon.png",
+  "author": "JoshuaRileyDev",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "tools": [
+    {
+      "name": "getCategories",
+      "title": "Get Categories",
+      "description": "Gets all categories"
+    },
+    {
+      "name": "getAllProjects",
+      "title": "Get All Projects",
+      "description": "Gets all projects"
+    },
+    {
+      "name": "openProject",
+      "title": "Open Project",
+      "description": "Opens a project, use the getAllProjects tool to get a list of projects. IMPORTANT: If no project name is provided, ask the user which project they would like to open."
+    },
+    {
+      "name": "createProject",
+      "title": "Create Project",
+      "description": "Creates a new project"
+    },
+    {
+      "name": "createProjectWithPrompt",
+      "title": "Create Project with Prompt",
+      "description": "Creates a new project with a prompt that will be used to create the project"
+    },
+    {
+      "name": "checkIfGithubRepo",
+      "title": "Check If GitHub Repo",
+      "description": "Checks if a project has a GitHub repository"
+    },
+    {
+      "name": "launchRepo",
+      "title": "Launch Repo",
+      "description": "Launches a project's GitHub repository"
+    },
+    {
+      "name": "createRepo",
+      "title": "Create Repo",
+      "description": "Creates a new GitHub repository for a project"
+    },
+    {
+      "name": "getAllCoolifyProjects",
+      "title": "Get All Coolify Projects",
+      "description": "Gets all Coolify projects"
+    },
+    {
+      "name": "getAllCoolifyApps",
+      "title": "Get All Coolify Apps",
+      "description": "Gets all Coolify apps"
+    },
+    {
+      "name": "createCoolifyProject",
+      "title": "Create Coolify Project",
+      "description": "Creates a new Coolify project"
+    },
+    {
+      "name": "getAllCoolifyServers",
+      "title": "Get All Coolify Servers",
+      "description": "Gets all Coolify servers"
+    },
+    {
+      "name": "getAllTemplates",
+      "title": "Get All Templates",
+      "description": "Gets all templates"
+    },
+    {
+      "name": "createTemplate",
+      "title": "Create Template",
+      "description": "Creates a new template for a category"
+    },
+    {
+      "name": "openTerminal",
+      "title": "Open Terminal",
+      "description": "Opens a terminal for a project"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "description": "Searches through all projects",
+      "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "description": "Creates a new project",
+      "mode": "view"
+    },
+    {
+      "name": "search-categories",
+      "title": "Search Categories",
+      "description": "Searches through all project category types",
+      "mode": "view"
+    },
+    {
+      "name": "create-category",
+      "title": "Create Category",
+      "description": "Creates a new category",
+      "mode": "view"
+    },
+    {
+      "name": "clone-project",
+      "title": "Clone Project",
+      "description": "Clones a project from a GitHub URL",
+      "mode": "view"
+    },
+    {
+      "name": "push-to-github",
+      "title": "Push to GitHub",
+      "description": "Pushes a project to GitHub",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-template",
+      "title": "Create Template",
+      "description": "Creates a new template for a category",
+      "mode": "view"
+    },
+    {
+      "name": "search-templates",
+      "title": "Search Templates",
+      "description": "Searches through all templates",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "preferences": [
+    {
+      "name": "projectsFolder",
+      "title": "Projects Folder",
+      "description": "Default folder for all projects",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "name": "coolifyToken",
+      "title": "Coolify Token",
+      "description": "Coolify token for authentication",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "coolifyUrl",
+      "title": "Coolify URL",
+      "description": "Coolify URL for authentication",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
