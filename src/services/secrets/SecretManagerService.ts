@@ -321,8 +321,8 @@ export class SecretManagerService {
     const { spawn } = await import("child_process");
 
     return new Promise((resolve, reject) => {
-      const fullCommand = `${this.gcloudPath} ${command} --project ${this.projectId} --data-file=-`;
-      const child = spawn("bash", ["-c", fullCommand], { stdio: ["pipe", "pipe", "pipe"] });
+      const args = command.split(" ").concat(["--project", this.projectId, "--data-file=-"]);
+      const child = spawn(this.gcloudPath, args, { stdio: ["pipe", "pipe", "pipe"] });
 
       let stderr = "";
 
@@ -361,19 +361,35 @@ export class SecretManagerService {
    * SECURITY: This method returns sensitive data - handle with care
    */
   private async executeGcloudCommandWithOutput(command: string): Promise<string | null> {
-    const { exec } = await import("child_process");
-    const { promisify } = await import("util");
-    const execPromise = promisify(exec);
+    const { spawn } = await import("child_process");
 
-    const fullCommand = `${this.gcloudPath} ${command} --project ${this.projectId}`;
+    return new Promise((resolve, reject) => {
+      const args = command.split(" ").concat(["--project", this.projectId]);
+      const child = spawn(this.gcloudPath, args, { stdio: ["pipe", "pipe", "pipe"] });
 
-    try {
-      const { stdout } = await execPromise(fullCommand);
-      return stdout || null;
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Command failed";
-      throw new Error(errorMessage);
-    }
+      let stdout = "";
+      let stderr = "";
+
+      child.stdout.on("data", (data) => {
+        stdout += data;
+      });
+
+      child.stderr.on("data", (data) => {
+        stderr += data;
+      });
+
+      child.on("close", (code) => {
+        if (code === 0) {
+          resolve(stdout || null);
+        } else {
+          reject(new Error(stderr || `Command failed with exit code ${code}`));
+        }
+      });
+
+      child.on("error", (error) => {
+        reject(error);
+      });
+    });
   }
 
   /**

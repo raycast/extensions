@@ -5,6 +5,9 @@ interface SecretListItemProps {
   secret: Secret;
 }
 
+// 7 days in milliseconds for expiration warning threshold
+const EXPIRE_WARNING_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000;
+
 export default function SecretListItem({ secret }: SecretListItemProps) {
   const secretId = SecretManagerService.extractSecretId(secret.name);
 
@@ -14,7 +17,7 @@ export default function SecretListItem({ secret }: SecretListItemProps) {
       const now = new Date();
       if (expireDate < now) {
         return { source: Icon.Clock, tintColor: Color.Red };
-      } else if (expireDate.getTime() - now.getTime() < 7 * 24 * 60 * 60 * 1000) {
+      } else if (expireDate.getTime() - now.getTime() < EXPIRE_WARNING_THRESHOLD_MS) {
         return { source: Icon.Clock, tintColor: Color.Orange };
       }
     }

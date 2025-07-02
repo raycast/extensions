@@ -46,6 +46,11 @@ export default function AddVersionForm({ secretId, projectId, gcloudPath, onVers
         });
         onVersionAdded();
         pop();
+      } else {
+        showFailureToast({
+          title: "Failed to add version",
+          message: "Version creation failed. Please check your permissions and try again.",
+        });
       }
     } catch (error) {
       console.error("Failed to add version:", error);
@@ -65,7 +70,7 @@ export default function AddVersionForm({ secretId, projectId, gcloudPath, onVers
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add Version" icon="➕" onSubmit={handleSubmit} />
-          <Action title="Cancel" onAction={pop} shortcut={{ modifiers: ["cmd"], key: "w" }} />
+          <Action title="Cancel" onAction={pop} shortcut={{ modifiers: ["cmd"], key: "k" }} />
         </ActionPanel>
       }
     >

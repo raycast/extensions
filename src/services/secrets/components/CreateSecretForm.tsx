@@ -85,6 +85,11 @@ export default function CreateSecretForm({ projectId, gcloudPath, onSecretCreate
         });
         onSecretCreated();
         pop();
+      } else {
+        showFailureToast({
+          title: "Failed to create secret",
+          message: "Secret creation failed. Please check your permissions and try again.",
+        });
       }
     } catch (error) {
       console.error("Failed to create secret:", error);
@@ -104,7 +109,7 @@ export default function CreateSecretForm({ projectId, gcloudPath, onSecretCreate
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Secret" icon="🔒" onSubmit={handleSubmit} />
-          <Action title="Cancel" onAction={pop} shortcut={{ modifiers: ["cmd"], key: "w" }} />
+          <Action title="Cancel" onAction={pop} shortcut={{ modifiers: ["cmd"], key: "k" }} />
         </ActionPanel>
       }
     >
