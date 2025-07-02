@@ -11,8 +11,21 @@ interface WeReadSessionInfo {
   [key: string]: unknown;
 }
 
+interface WeReadBookData {
+  bookId: string;
+  noteCount: number;
+  book: {
+    title: string;
+    author: string;
+    cover: string;
+    translator?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
 interface WeReadShelfResponse {
-  books?: unknown[];
+  books?: WeReadBookData[];
   [key: string]: unknown;
 }
 
@@ -258,7 +271,7 @@ export class WeReadAPI {
       const response = await this.makeHttpsRequest<WeReadShelfResponse>("/api/user/notebook");
 
       // Handle different possible response structures
-      let books: unknown[] = [];
+      let books: WeReadBookData[] = [];
       if (response.books) {
         books = response.books;
       } else if (Array.isArray(response)) {
@@ -279,14 +292,14 @@ export class WeReadAPI {
 
       // Map and validate the book data
       const validBooks: WeReadBook[] = books
-        .filter((item) => {
+        .filter((item: WeReadBookData) => {
           const isValid = item.bookId && item.book && item.book.title;
           if (!isValid) {
             console.warn("Filtering out invalid book:", item);
           }
           return isValid;
         })
-        .map((item) => {
+        .map((item: WeReadBookData) => {
           // Handle author with translator if available
           let author = item.book.author || "Unknown Author";
           if (item.book.translator) {
@@ -407,7 +420,7 @@ export class WeReadAPI {
 
     console.log(`Successfully processing ${response.updated.length} bookmarks`);
 
-    return response.updated.map((item) => {
+    return response.updated.map((item: WeReadBookmarkItem) => {
       const chapterInfo = chapterMap.get(item.chapterUid);
       return {
         bookmarkId: item.bookmarkId,
@@ -447,7 +460,7 @@ export class WeReadAPI {
         return [];
       }
 
-      return response.reviews.map((review) => ({
+      return response.reviews.map((review: WeReadReviewItem) => ({
         reviewId: review.reviewId,
         bookId: review.bookId,
         chapterUid: review.chapterUid,
