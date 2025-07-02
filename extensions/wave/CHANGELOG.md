@@ -1,6 +1,6 @@
 # Wave Changelog
 
-## [Add & Remove Customers] - {PR_MERGE_DATE}
+## [Add & Remove Customers] - 2025-07-02
 
 - Add new customers through a detailed `Form`
 - Remove customers after confirming (`Alert`)
