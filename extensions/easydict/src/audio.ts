@@ -131,7 +131,7 @@ export async function downloadAudio(url: string, audioPath: string, callback?: (
     if (!forceDownload) {
       const word = audioPath.substring(audioPath.lastIndexOf("/") + 1);
       console.log(`download audio has exist: ${word}`);
-      callback && callback();
+      callback?.();
       return;
     }
     console.log(`forced download audio, url: ${url}`);
@@ -147,7 +147,7 @@ export async function downloadAudio(url: string, audioPath: string, callback?: (
       fileStream.on("finish", async () => {
         fileStream.close();
         await tryConvertAudioToM4a(audioPath);
-        callback && callback();
+        callback?.();
       });
     })
     .catch((error) => {

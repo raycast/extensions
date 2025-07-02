@@ -209,7 +209,7 @@ export function downloadYoudaoAudio(
     downloadYoudaoEnglishWordAudio(queryWordInfo.word, callback, (forceDownload = false));
   } else {
     console.log(`use say command to play derectly`);
-    callback && callback();
+    callback?.();
   }
 }
 
