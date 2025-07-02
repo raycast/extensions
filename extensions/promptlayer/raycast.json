@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "name": "PromptLayer Filler",
+  "description": "Browse and fill PromptLayer prompts from Raycast",
+  "author": "matthieucousin",
+  "commands": [
+    {
+      "name": "browse-prompts",
+      "title": "Browse PromptLayer Prompts",
+      "description": "Search and fill PromptLayer prompts with variables",
+      "mode": "view",
+      "src": "src/index.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "PromptLayer API Key",
+      "description": "Your PromptLayer API key",
+      "required": true
+    }
+  ]
+}

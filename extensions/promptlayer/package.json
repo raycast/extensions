@@ -1,0 +1,50 @@
+{
+  "name": "promptlayer",
+  "title": "Promptlayer",
+  "description": "Browse, search, and use your PromptLayer prompts with variable filling",
+  "icon": "command-icon.png",
+  "author": "Khalagan",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-prompts",
+      "title": "Browse Promptlayer Prompts",
+      "description": "Search, filter and use your PromptLayer prompts with automatic variable filling",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "PromptLayer API Key",
+      "description": "Get your API key from PromptLayer Settings",
+      "link": "https://promptlayer.com/settings"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "mustache": "^4.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/mustache": "^4.2.2",
+    "@types/node": "20.8.10",
+    "@types/react": "18.0.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
