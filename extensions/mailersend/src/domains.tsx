@@ -55,9 +55,7 @@ function Activities({ domain }: { domain: Domain }) {
     isLoading,
     data: activities,
     pagination,
-  } = useMailerSendPaginated<Activity>(`activity/${domain.id}?date_from=${from}&date_to=${to}`);
-
-  const filteredActivities = !filter ? activities : activities.filter((a) => a.type === filter);
+  } = useMailerSendPaginated<Activity>(`activity/${domain.id}?date_from=${from}&date_to=${to}&event=${filter}`);
 
   return (
     <List
@@ -79,7 +77,7 @@ function Activities({ domain }: { domain: Domain }) {
         </List.Dropdown>
       }
     >
-      {!isLoading && !filteredActivities.length && (
+      {!isLoading && !activities.length && (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No activity found"
@@ -90,7 +88,7 @@ function Activities({ domain }: { domain: Domain }) {
         title={domain.name}
         subtitle={`${dayjs.unix(from).format("lll")} - ${dayjs.unix(to).format("lll")}`}
       >
-        {filteredActivities.map((activity) => (
+        {activities.map((activity) => (
           <List.Item
             key={activity.id}
             icon={{ value: { source: Icon.Dot, tintColor: TYPE_TO_COLOR[activity.type] }, tooltip: activity.type }}
