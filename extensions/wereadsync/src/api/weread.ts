@@ -16,14 +16,43 @@ interface WeReadShelfResponse {
   [key: string]: unknown;
 }
 
+interface WeReadBookmarkItem {
+  bookmarkId: string;
+  chapterUid: number;
+  markText: string;
+  createTime: number;
+  colorStyle: number;
+  type: number;
+  range: string;
+  bookVersion: number;
+  style: number;
+  [key: string]: unknown;
+}
+
+interface WeReadReviewItem {
+  reviewId: string;
+  bookId: string;
+  chapterUid: number;
+  chapterTitle: string;
+  chapterIdx: number;
+  abstract: string;
+  content: string;
+  createTime: number;
+  review: {
+    reviewId: string;
+    content: string;
+  };
+  [key: string]: unknown;
+}
+
 interface WeReadBookmarkResponse {
-  updated: unknown[];
+  updated: WeReadBookmarkItem[];
   chapters: Array<{ uid: number; title: string; level: number; [key: string]: unknown }>;
   [key: string]: unknown;
 }
 
 interface WeReadThoughtResponse {
-  reviews: unknown[];
+  reviews: WeReadReviewItem[];
   [key: string]: unknown;
 }
 
@@ -378,7 +407,7 @@ export class WeReadAPI {
 
     console.log(`Successfully processing ${response.updated.length} bookmarks`);
 
-    return response.updated.map((item: unknown) => {
+    return response.updated.map((item) => {
       const chapterInfo = chapterMap.get(item.chapterUid);
       return {
         bookmarkId: item.bookmarkId,
@@ -418,7 +447,7 @@ export class WeReadAPI {
         return [];
       }
 
-      return response.reviews.map((review: unknown) => ({
+      return response.reviews.map((review) => ({
         reviewId: review.reviewId,
         bookId: review.bookId,
         chapterUid: review.chapterUid,

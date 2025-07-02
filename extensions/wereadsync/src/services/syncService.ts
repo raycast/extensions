@@ -258,7 +258,7 @@ export class SyncService {
       const highlights = bookmarksToSync.map((bookmark) => {
         const thought = bookData.thoughts.find((t) => t.chapterUid === bookmark.chapterUid);
 
-        const cleanHighlight: Partial<ReadwiseHighlight> = {
+        const cleanHighlight: ReadwiseHighlight = {
           text: String(bookmark.markText || ""),
           title: String(book.title || ""),
           author: String(book.author || ""),

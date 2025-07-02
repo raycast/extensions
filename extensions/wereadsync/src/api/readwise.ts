@@ -63,8 +63,8 @@ export class ReadwiseAPI {
               return;
             }
 
-            if (res.statusCode < 200 || res.statusCode >= 300) {
-              reject(new Error(`Readwise API error: ${res.statusCode} ${data}`));
+            if ((res.statusCode ?? 0) < 200 || (res.statusCode ?? 0) >= 300) {
+              reject(new Error(`Readwise API error: ${res.statusCode ?? "unknown"} ${data}`));
               return;
             }
 

@@ -127,7 +127,7 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
         });
 
         // Create clean highlight object with no circular references
-        const cleanHighlight: Partial<ReadwiseHighlight> = {
+        const cleanHighlight: ReadwiseHighlight = {
           text: String(bookmark.markText || ""),
           title: String(book.title || ""),
           author: String(book.author || ""),
@@ -333,7 +333,7 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
                               });
 
                               // Create clean highlight object with no circular references
-                              const highlight: Partial<ReadwiseHighlight> = {
+                              const highlight: ReadwiseHighlight = {
                                 text: String(bookmark.markText || ""),
                                 title: String(book.title || ""),
                                 author: String(book.author || ""),
