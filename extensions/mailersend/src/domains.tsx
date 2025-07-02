@@ -43,10 +43,10 @@ function Activities({ domain }: { domain: Domain }) {
     [ActivityEventType.OPENED]: Color.Green,
     [ActivityEventType.DELIVERED]: Color.Blue,
     [ActivityEventType.QUEUED]: undefined,
-    [ActivityEventType.SENT]: Color.Purple,
+    [ActivityEventType.SENT]: undefined,
     [ActivityEventType.SOFT_BOUNCED]: Color.Orange,
     [ActivityEventType.HARD_BOUNCED]: Color.Red,
-    [ActivityEventType.CLICKED]: undefined,
+    [ActivityEventType.CLICKED]: Color.Purple,
     [ActivityEventType.UNSUBSCRIBED]: undefined,
     [ActivityEventType.SPAM_COMPLAINTS]: undefined,
   };
