@@ -23,7 +23,7 @@ export default function genBaiduWebSign(t) {
         .concat(t.substr(-10, 10)));
   } else {
     for (var s = t.split(/[\uD800-\uDBFF][\uDC00-\uDFFF]/), c = 0, u = s.length, l = []; c < u; c++)
-      "" !== s[c] &&
+      ("" !== s[c] &&
         l.push.apply(
           l,
           (function (t) {
@@ -42,18 +42,18 @@ export default function genBaiduWebSign(t) {
                   "Map" === r || "Set" === r
                     ? Array.from(t)
                     : "Arguments" === r || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r)
-                    ? e(t, n)
-                    : void 0
+                      ? e(t, n)
+                      : void 0
                 );
               }
             })(o) ||
             (function () {
               throw new TypeError(
-                "Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."
+                "Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.",
               );
-            })()
+            })(),
         ),
-        c !== u - 1 && l.push(i[c]);
+        c !== u - 1 && l.push(i[c]));
     var p = l.length;
     p > 30 &&
       (t =
@@ -115,9 +115,9 @@ function e(t, e) {
 function n(t, e) {
   for (var n = 0; n < e.length - 2; n += 3) {
     var r = e.charAt(n + 2);
-    (r = "a" <= r ? r.charCodeAt(0) - 87 : Number(r)),
+    ((r = "a" <= r ? r.charCodeAt(0) - 87 : Number(r)),
       (r = "+" === e.charAt(n + 1) ? t >>> r : t << r),
-      (t = "+" === e.charAt(n) ? (t + r) & 4294967295 : t ^ r);
+      (t = "+" === e.charAt(n) ? (t + r) & 4294967295 : t ^ r));
   }
   return t;
 }

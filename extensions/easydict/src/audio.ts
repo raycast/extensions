@@ -113,7 +113,7 @@ export function downloadWordAudioWithURL(
   word: string,
   url: string,
   callback?: () => void,
-  forceDownload = false
+  forceDownload = false,
 ): void {
   console.log(`down load word: ${word}, audio url: ${url}`);
   const audioPath = getWordAudioPath(word);

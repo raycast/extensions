@@ -311,7 +311,7 @@ export function getBaiduWebTranslateURL(queryTextInfo: QueryWordInfo): string | 
  */
 export function getAutoSelectedTargetLanguageItem(fromLangCode: string): LanguageItem {
   const targetLanguageItem = preferredLanguages.find(
-    (languageItem) => languageItem.youdaoLangCode !== fromLangCode
+    (languageItem) => languageItem.youdaoLangCode !== fromLangCode,
   ) as LanguageItem;
   console.log(`fromLangCode: ${fromLangCode}, auto selected target: ${targetLanguageItem.youdaoLangCode}`);
   return targetLanguageItem;
