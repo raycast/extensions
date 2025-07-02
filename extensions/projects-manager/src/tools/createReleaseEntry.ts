@@ -42,7 +42,7 @@ export default async function createReleaseEntry(input: Input) {
   const latestRelease = releases[0];
   const releaseEntries = await LocalStorage.getItem<string>("releaseEntries");
   const allReleaseEntries: ReleaseEntry[] = releaseEntries ? JSON.parse(releaseEntries) : [];
-  const entryTypeMap: Record<string, string> = {
+  const entryTypeMap: Record<string, "Addition" | "Improvement" | "Bug Fix"> = {
     addition: "Addition",
     improvement: "Improvement",
     "bug-fix": "Bug Fix",
