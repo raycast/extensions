@@ -194,13 +194,14 @@ export default function Command() {
         <Action
           title="Play Station"
           onAction={() => playStation(station)}
+          icon={Icon.Play}
           shortcut={numberKey ? { modifiers: [], key: numberKey as Keyboard.KeyEquivalent } : undefined}
         />
         <Action
           title={isFavorite(station.id) ? "Remove from Favorites" : "Add to Favorites"}
           icon={Icon.Star}
           onAction={() => toggleFavoriteStation(station.id, station.title)}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          shortcut={Keyboard.Shortcut.Common.Pin}
         />
         <Action
           title={`Switch to ${viewMode === "grid" ? "List" : "Grid"} View`}

@@ -57,10 +57,14 @@ export default function Command() {
               title="Browse All Stations"
               icon={Icon.List}
               onAction={async () => {
-                await launchCommand({
-                  name: "index",
-                  type: LaunchType.UserInitiated,
-                });
+                try {
+                  await launchCommand({
+                    name: "browse-stations",
+                    type: LaunchType.UserInitiated,
+                  });
+                } catch (error) {
+                  console.error("Failed to launch browse-stations command:", error);
+                }
               }}
             />
           </MenuBarExtra.Section>

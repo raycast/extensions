@@ -1,17 +1,19 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "somafm-for-raycast",
-  "title": "Somafm for Raycast",
+  "name": "somafm",
+  "title": "SomaFM",
   "description": "Browse and play SomaFM internet radio stations with smart player detection, favorites, and now playing information",
   "icon": "extension-icon.png",
   "author": "mwarger",
-  "categories": ["Media"],
+  "categories": [
+    "Media"
+  ],
   "license": "MIT",
   "contributors": [],
   "commands": [
     {
       "name": "browse-stations",
-      "title": "Browse Somafm Stations",
+      "title": "Browse SomaFM Stations",
       "description": "Browse all SomaFM radio stations with search, favorites, and genre filtering",
       "mode": "view",
       "preferences": [
@@ -31,8 +33,14 @@
           "title": "Default View",
           "description": "Choose the default view mode",
           "data": [
-            { "title": "Grid View", "value": "grid" },
-            { "title": "List View", "value": "list" }
+            {
+              "title": "Grid View",
+              "value": "grid"
+            },
+            {
+              "title": "List View",
+              "value": "list"
+            }
           ],
           "required": false
         }
@@ -55,11 +63,26 @@
       "type": "dropdown",
       "default": "auto",
       "data": [
-        { "title": "Auto-detect", "value": "auto" },
-        { "title": "IINA", "value": "iina" },
-        { "title": "VLC", "value": "vlc" },
-        { "title": "Music.app", "value": "music" },
-        { "title": "Default Browser", "value": "browser" }
+        {
+          "title": "Auto-detect",
+          "value": "auto"
+        },
+        {
+          "title": "IINA",
+          "value": "iina"
+        },
+        {
+          "title": "VLC",
+          "value": "vlc"
+        },
+        {
+          "title": "Music.app",
+          "value": "music"
+        },
+        {
+          "title": "Default Browser",
+          "value": "browser"
+        }
       ],
       "required": false
     }
