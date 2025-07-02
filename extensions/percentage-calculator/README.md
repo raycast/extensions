@@ -149,6 +149,6 @@ You can modify the extension by:
 ## Development Notes
 
 - The extension uses React with TypeScript
-- Built with Raycast API v1.48.9
+- Built with Raycast API ^1.66.1
 - Follows Raycast's design guidelines
 - Includes proper error handling and user feedback
