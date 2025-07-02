@@ -698,6 +698,7 @@ export default function Command() {
                       name: item.title,
                       link: item.url,
                     }}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
                   />
                 </ActionPanel.Section>
 
