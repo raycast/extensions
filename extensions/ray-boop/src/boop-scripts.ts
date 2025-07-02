@@ -332,17 +332,6 @@ export default function BoopScriptsCommand() {
     return `# ${script.name}\n\n${script.description}\n\n${script.isSuggested && script.suggestionConfidence ? `**Confidence:** ${Math.round(script.suggestionConfidence * 100)}%\n\n` : ""}${script.suggestionReasons && script.suggestionReasons.length > 0 ? `**Reasons:** ${script.suggestionReasons.join(", ")}\n\n` : ""}## Input\n\`\`\`\n${currentInputText || "No input text"}\n\`\`\`${shouldShowPreview ? `\n\n## Preview\n\`\`\`\n${previewText}\n\`\`\`` : ""}${infoText ? `\n\n## Info\n✅ **${infoText}**` : ""}${errorText ? `\n\n## Error\n❌ **${errorText}**` : ""}`;
   }
 
-  /**
-   * Shows instructions for toggling preview preference
-   */
-  function showPreviewToggleInstructions() {
-    showToast({
-      style: Toast.Style.Animated,
-      title: "Toggle Preview",
-      message: "Please use ⌘+, to open preferences and toggle the preview setting",
-    });
-  }
-
   const suggestedScripts = scripts.filter((s) => s.isSuggested);
   const otherScripts = scripts.filter((s) => !s.isSuggested);
 
@@ -487,12 +476,6 @@ export default function BoopScriptsCommand() {
               onAction: () => loadScripts(),
               icon: "🔄",
               shortcut: { modifiers: ["cmd"], key: "r" },
-            }),
-            React.createElement(Action, {
-              title: preferences.showPreview ? "Hide Preview" : "Show Preview",
-              onAction: showPreviewToggleInstructions,
-              icon: preferences.showPreview ? "👁️‍🗨️" : "👁️",
-              shortcut: { modifiers: ["cmd", "shift"], key: "p" },
             }),
           ),
         }),
