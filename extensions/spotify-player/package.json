@@ -227,7 +227,7 @@
     },
     {
       "name": "togglePlayPause",
-      "title": "Toggle Play/pause",
+      "title": "Toggle Play/Pause",
       "subtitle": "Spotify",
       "description": "Toggle the playback of the current song.",
       "mode": "no-view"
@@ -407,7 +407,7 @@
     },
     {
       "name": "copyArtistAndTitle",
-      "title": "Copy Artist and Title",
+      "title": "Copy Artist And Title",
       "subtitle": "Spotify",
       "description": "Copy the artist and track title of the current song/episode",
       "mode": "no-view",
@@ -454,7 +454,7 @@
     },
     {
       "name": "startDJ",
-      "title": "Start Dj",
+      "title": "Start DJ",
       "subtitle": "Spotify",
       "description": "Start the DJ.",
       "mode": "no-view",
