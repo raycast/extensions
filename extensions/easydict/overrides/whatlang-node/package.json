@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "whatlang-node",
   "version": "1.0.0",
   "description": "Mock whatlang-node for Raycast compatibility",
