@@ -26,11 +26,7 @@ export default function useConfig({ appExistsLoading, appExists }: UseAppExists)
 
   const refreshConfig = () => {
     if (appExists) {
-      setState({ configLoading: true, config: null });
-      // Small delay to ensure loading state is visible, then load new config
-      setTimeout(() => {
-        setState({ configLoading: false, config: new Config() });
-      }, 100);
+      setState({ configLoading: false, config: new Config() });
     }
   };
 

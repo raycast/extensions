@@ -62,7 +62,7 @@ export default function AddToDailyNote() {
     spaceId: "",
   });
 
-  // Format today's date as YYYY.MM.DD
+  // Format today's date as YYYY.MM.DD (Craft's internal db time format)
   const today = new Date();
   const dateString =
     today.getFullYear() +

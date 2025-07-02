@@ -121,3 +121,9 @@ The extension performs best when Craft has finished syncing. Large document coll
 ### Space Management Issues
 
 If renamed spaces don't appear correctly, try refreshing the extension or restarting Raycast. Space settings are stored locally and persist between sessions.
+
+## Previous Developer / Maintainer
+This extension was originally developed by [Vitaliy Kudryk](https://github.com/kudrykv) and is currently maintained by [Samuel François](https://github.com/sfkmk).
+
+## Disclaimer
+This project is not affiliated, associated, authorized or in any way officially connected with Craft Docs. The official website can be found at [https://www.craft.do](https://www.craft.do). "Craft Docs" as well as related names, marks, emblems and images are registered trademarks of their respective owners.
