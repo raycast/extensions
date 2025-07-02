@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Fix Project Updates] - {PR_MERGE_DATE}
+## [Fix Project Updates] - 2025-07-02
 
 - Fixed update actions failing when used on projects in lists. Projects now use the correct `things:///update-project` URL scheme instead of the regular `things:///update` scheme used for todos.
 
