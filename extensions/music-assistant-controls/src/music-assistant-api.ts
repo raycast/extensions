@@ -92,7 +92,7 @@ export class MusicAssistantApi {
     this.ws?.close();
   }
 
-  public async initialize(baseUrl: string) {
+  public initialize(baseUrl: string) {
     if (this.ws) throw new Error("already initialized");
     if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
     this.baseUrl = baseUrl;
@@ -100,7 +100,7 @@ export class MusicAssistantApi {
     this.log(`Connecting to Music Assistant API ${wsUrl}`);
     this.state = ConnectionState.CONNECTING;
     // connect to the websocket api
-    this.ws = new WebsocketBuilder(wsUrl)
+    const wsBuilder = new WebsocketBuilder(wsUrl)
       .onOpen((i, ev) => {
         this.log("connection opened");
         // state is updated on first message to be sure data is coming in
@@ -115,6 +115,12 @@ export class MusicAssistantApi {
       })
       .onError((i, ev) => {
         this.log("error on connection", ev);
+        this.state = ConnectionState.DISCONNECTED;
+        this.signalEvent({
+          event: EventType.Error,
+          object_id: "",
+          data: (ev as ErrorEvent).error,
+        });
       })
       .onMessage((i, ev) => {
         // Message retrieved on the websocket
@@ -134,8 +140,8 @@ export class MusicAssistantApi {
         this.log("retry");
         this.state = ConnectionState.CONNECTING;
       })
-      .withBackoff(new LinearBackoff(0, 1000, 2000))
-      .build();
+      .withBackoff(new LinearBackoff(0, 1000, 2000));
+    this.ws = wsBuilder.build();
   }
 
   public subscribe(eventFilter: EventType, callback: CallableFunction, object_id: string = "*") {

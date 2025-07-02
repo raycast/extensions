@@ -1,4 +1,4 @@
-import { getPreferenceValues, Icon, MenuBarExtra } from "@raycast/api";
+import { getPreferenceValues, Icon, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
 import { Prefs } from "./preferences";
 import executeApiCommand from "./api-command";
 import { usePromise } from "@raycast/utils";
@@ -46,14 +46,22 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon="logo.png" isLoading={isLoading} title={data?.title}>
-      <MenuBarExtra.Section title="Controls">
-        <MenuBarExtra.Item title="Next" icon={Icon.ArrowRight} onAction={next}></MenuBarExtra.Item>
+      {data ? (
+        <MenuBarExtra.Section title="Controls">
+          <MenuBarExtra.Item title="Next" icon={Icon.ArrowRight} onAction={next}></MenuBarExtra.Item>
+          <MenuBarExtra.Item
+            title={data.player.state == PlayerState.PLAYING ? "Pause" : "Play"}
+            icon={data.player.state == PlayerState.PLAYING ? Icon.Pause : Icon.Play}
+            onAction={pause}
+          ></MenuBarExtra.Item>
+        </MenuBarExtra.Section>
+      ) : (
         <MenuBarExtra.Item
-          title={data?.player.state == PlayerState.PLAYING ? "Pause" : "Play"}
-          icon={data?.player.state == PlayerState.PLAYING ? Icon.Pause : Icon.Play}
-          onAction={pause}
+          title="Fix configuration"
+          icon={Icon.WrenchScrewdriver}
+          onAction={openExtensionPreferences}
         ></MenuBarExtra.Item>
-      </MenuBarExtra.Section>
+      )}
     </MenuBarExtra>
   );
 }
