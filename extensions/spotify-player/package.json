@@ -38,7 +38,8 @@
     "eyal_levy",
     "jonasengelmann",
     "vmrjnvc",
-    "karthik_manikandan"
+    "karthik_manikandan",
+    "kartheesan05"
   ],
   "pastContributors": [
     "bkeys818"
@@ -226,7 +227,7 @@
     },
     {
       "name": "togglePlayPause",
-      "title": "Toggle Play/Pause",
+      "title": "Toggle Play/pause",
       "subtitle": "Spotify",
       "description": "Toggle the playback of the current song.",
       "mode": "no-view"
@@ -406,7 +407,7 @@
     },
     {
       "name": "copyArtistAndTitle",
-      "title": "Copy Artist And Title",
+      "title": "Copy Artist and Title",
       "subtitle": "Spotify",
       "description": "Copy the artist and track title of the current song/episode",
       "mode": "no-view",
@@ -453,7 +454,7 @@
     },
     {
       "name": "startDJ",
-      "title": "Start DJ",
+      "title": "Start Dj",
       "subtitle": "Spotify",
       "description": "Start the DJ.",
       "mode": "no-view",
