@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Added option to create Quicklinks from bookmarks
+
 ## [Support for Dia and Ghost Browser] - 2025-06-26
 
 - Added support for `Dia` browser.
