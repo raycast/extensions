@@ -29,6 +29,17 @@ export type Todo = {
 
 export type CommandListName = 'inbox' | 'today' | 'anytime' | 'upcoming' | 'someday';
 
+export class ThingsError extends Error {
+  constructor(
+    message: string,
+    public readonly type: 'APP_NOT_FOUND' | 'PERMISSION_DENIED' | 'EXECUTION_ERROR' | 'UNKNOWN_ERROR',
+    public readonly originalError?: string,
+  ) {
+    super(message);
+    this.name = 'ThingsError';
+  }
+}
+
 export const executeJxa = async (script: string) => {
   try {
     const result = await runAppleScript(`(function(){${script}})()`, {
@@ -37,32 +48,32 @@ export const executeJxa = async (script: string) => {
     });
     return JSON.parse(result);
   } catch (err: unknown) {
-    if (typeof err === 'string') {
-      const message = err.replace('execution error: Error: ', '');
-      if (message.match(/Application can't be found/)) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Application not found',
-          message: 'Things must be running',
-        });
-      } else {
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Something went wrong',
-          message: message,
-        });
-      }
+    const errorMessage = typeof err === 'string' ? err : err instanceof Error ? err.message : String(err);
+    const message = errorMessage.replace('execution error: Error: ', '');
+
+    if (message.match(/Application can't be found/i)) {
+      throw new ThingsError(
+        'Things application not found. Please make sure Things is installed and running.',
+        'APP_NOT_FOUND',
+        message,
+      );
+    } else if (message.match(/not allowed assistive access/i) || message.match(/permission/i)) {
+      throw new ThingsError(
+        'Permission denied. Please grant Raycast access to Things in System Settings > Privacy & Security > Automation > Raycast > Things.',
+        'PERMISSION_DENIED',
+        message,
+      );
+    } else if (message.match(/doesn't understand/i) || message.match(/can't get/i)) {
+      throw new ThingsError(
+        'Things automation interface error. This might be due to a Things version incompatibility or the app not being ready.',
+        'EXECUTION_ERROR',
+        message,
+      );
+    } else {
+      throw new ThingsError(`Unexpected error: ${message}`, 'UNKNOWN_ERROR', message);
     }
   }
 };
-
-export const thingsNotRunningError = `
-  ## Things Not Running
-  Please make sure Things is installed and running before using this extension.
-
-  ### But my Things app is running!
-  If Things is running, you may need to grant Raycast access to Things in *System Settings > Privacy & Security > Automation > Raycast > Things*
-`;
 
 const commandListNameToListIdMapping: Record<CommandListName, string> = {
   inbox: 'TMInboxListSource',

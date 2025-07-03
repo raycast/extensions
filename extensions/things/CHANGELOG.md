@@ -1,5 +1,11 @@
 # Things Changelog
 
+## [Enhanced Error Handling] - {PR_MERGE_DATE}
+
+- Improved error messages with specific troubleshooting steps for Things connection issues
+- Added detailed guidance for permission errors and automation setup in System Settings
+- Replaced generic "Things Not Running" message with actionable error screens and retry functionality
+
 ## [Fix Project Updates] - 2025-07-02
 
 - Fixed update actions failing when used on projects in lists. Projects now use the correct `things:///update-project` URL scheme instead of the regular `things:///update` scheme used for todos.
