@@ -1,10 +1,10 @@
 export type ZedBuild = Preferences["build"];
-export type ZedBundleId = "dev.zed.Zed" | "dev.zed.Zed-Preview";
+export type ZedBundleId = "dev.zed.Zed" | "dev.zed.Zed-Preview" | "dev.zed.Zed-Dev";
 
 const ZedBundleIdBuildMapping: Record<ZedBuild, ZedBundleId> = {
   Zed: "dev.zed.Zed",
   "Zed Preview": "dev.zed.Zed-Preview",
-  "Zed Dev": "dev.zed.Zed",
+  "Zed Dev": "dev.zed.Zed-Dev",
 };
 
 const ZedDbNameMapping: Record<ZedBuild, string> = {
