@@ -110,7 +110,6 @@ export default function Main() {
     },
     validation: {
       input: FormValidation.Required,
-      output: FormValidation.Required,
     },
     initialValues: {
       input: "",
@@ -189,7 +188,12 @@ export default function Main() {
 
       <Form.Separator />
 
-      <Form.TextArea {...itemProps.output} title="Preview" placeholder="Read-only" />
+      <Form.TextArea
+        {...itemProps.output}
+        title="Preview"
+        placeholder="Read-only"
+        onChange={() => {}} // Prevent user modifications
+      />
     </Form>
   );
 }
