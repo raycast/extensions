@@ -1,6 +1,6 @@
-import { FormValidation, MutatePromise, useFetch, useForm } from "@raycast/utils";
-import { API_HEADERS, API_URL, OpenInUpstash, postUpstash } from "./upstash";
-import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { FormValidation, MutatePromise, showFailureToast, useFetch, useForm } from "@raycast/utils";
+import { API_HEADERS, API_URL, deleteUpstash, OpenInUpstash, postUpstash } from "./upstash";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 
 interface VectorIndex {
     id: string;
@@ -10,18 +10,39 @@ interface VectorIndex {
 }
 
 export default function Vector() {
-    const { isLoading, data: indices, error, mutate } = useFetch<VectorIndex[], VectorIndex[]>(API_URL + "vector/index", {
+    const { isLoading, data: indexes, error, mutate } = useFetch<VectorIndex[], VectorIndex[]>(API_URL + "vector/index", {
         headers: API_HEADERS,
         initialData: []
     })
 
     return <List isLoading={isLoading}>
-        {!isLoading && !indices.length && !error ? <List.EmptyView icon="empty-image.svg" title="Create Index" description="We manage the index for you and you only pay for what you use." actions={<ActionPanel>
+        {!isLoading && !indexes.length && !error ? <List.EmptyView icon="empty-image.svg" title="Create Index" description="We manage the index for you and you only pay for what you use." actions={<ActionPanel>
             <Action.Push icon={Icon.Plus} title="Create Index" target={<CreateIndex mutate={mutate} />} />
-        </ActionPanel>} /> : indices.map(index => <List.Item key={index.id} icon="vector.svg" title={index.name} subtitle={index.endpoint} accessories={[
+        </ActionPanel>} /> : indexes.map(index => <List.Item key={index.id} icon="vector.svg" title={index.name} subtitle={index.endpoint} accessories={[
             {...index.pinned && {icon: Icon.Star}}
         ]} actions={<ActionPanel>
             <Action.Push icon={Icon.Plus} title="Create Index" target={<CreateIndex mutate={mutate} />} />
+            <Action icon={Icon.Trash} title="Delete Index" onAction={() => confirmAlert({
+              title: `Delete "${index.name}"?`,
+              message: "All data will be deleted permanently. This action cannot be undone.",
+              primaryAction: {
+                style: Alert.ActionStyle.Destructive,
+                title: "Delete",
+                async onAction() {
+                  try {
+                    await mutate(
+                    deleteUpstash(`vector/index/${index.id}`), {
+                      optimisticUpdate(data) {
+                        return data.filter(i => i.id!==index.id)
+                      },
+                    }
+                  )
+                  } catch (error) {
+                    await showFailureToast(error);
+                  }
+                },
+              }
+            })} style={Action.Style.Destructive} />
             <OpenInUpstash route={`vector/${index.id}`} />
         </ActionPanel>} />)}
     </List>
