@@ -34,6 +34,24 @@ const useSearchAPIData = () => {
 
       scriptElements.each((index, element) => {
         const script = $(element).html();
+
+        if (script?.includes(`apiKey`)) {
+          const start = script.indexOf(`"[[`) + 1;
+          const end = script.indexOf(`]"`) + 1;
+          const slice = script.slice(start, end).replace(/\\/g, "");
+          try {
+            const arr = JSON.parse(slice);
+            // find element that is string and starts with 'jsr-'
+            const indexIdPosition = arr.findIndex(
+              (item: unknown) => typeof item === "string" && item.startsWith("jsr-"),
+            );
+            if (indexIdPosition !== -1 && indexIdPosition > 0 && typeof arr[indexIdPosition - 1] === "string") {
+              res = { apiKey: arr[indexIdPosition - 1], indexId: arr[indexIdPosition] };
+            }
+            // eslint-disable-next-line no-empty
+          } catch (_) {}
+        }
+
         if (script?.includes(`"apiKey"`)) {
           const json = JSON.parse(script) as SearchAPIDataResponse;
           const searchAPIData = json.v[0].find((item) => "apiKey" in item && "indexId" in item) as

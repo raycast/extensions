@@ -24,12 +24,18 @@ export const createShortLink = async ({
   });
 };
 
-export const getAllShortLinks = async () => {
+export const getAllShortLinks = async (search?: string) => {
   const dub = getDubClient();
 
-  const { result } = await dub.links.list();
+  const { result } = await dub.links.list({ search });
 
   return result;
+};
+
+export const getShortLinksCount = async (search?: string) => {
+  const dub = getDubClient();
+
+  return await dub.links.count({ search });
 };
 
 export const deleteShortLink = async (linkId: string) => {

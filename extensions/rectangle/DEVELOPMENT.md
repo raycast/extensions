@@ -14,7 +14,7 @@ External dev dependencies for the project are managed via [Devbox](https://githu
 
 Assuming you have devbox installed, running `devbox run generateIcons` from the repository root will perform the following:
 
-1. Install necesarry dependencies (python and pillow)
+1. Install necessary dependencies (python and pillow)
 2. Run the included script `src/icons/generateIcons.py`
 
 ## Todo / Roadmap

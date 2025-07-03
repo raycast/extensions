@@ -968,6 +968,8 @@ export interface components {
        * @default []
        */
       tags?: string[];
+      /** Local Date */
+      local_date?: string | null;
     };
     /** DatetimeRangeSchema */
     DatetimeRangeSchema: {

@@ -15,7 +15,7 @@ export default async function Command() {
 
   if (!text?.trim()) {
     return await Notifications.getInstance().errorToast(
-      "There is no text selected in the frontmost application!",
+      "No text detected. Ensure 'Accessibility' permissions are enabled for Raycast on your device",
     );
   }
 

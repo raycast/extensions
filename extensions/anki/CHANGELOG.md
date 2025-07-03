@@ -1,5 +1,9 @@
 # Anki Changelog
 
+## [Bug Fixes] - 2024-12-06
+
+- Fixed turndown to support markdown syntax when rendering card content
+
 ## [Improvements] - 2024-10-07
 
 - Made `model` and `deck` dropdowns remeber last selected item

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { say } from "mac-say";
 import { ConfigureSpokenContent } from "./components/actions.js";
 import { systemDefault } from "./constants.js";
@@ -12,6 +12,7 @@ export default function TextToSay() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={Icon.SpeechBubbleActive}
             title="Say"
             onSubmit={async (values) => {
               await say(values.content, {

@@ -1,5 +1,29 @@
 # Color Picker Changelog
 
+## [Bugfix] - 2025-06-05
+
+- Add a new callback return value `formattedColor` to return the color in the user's preferred format
+- Fix an issue where the callback hex color was not being returned correctly
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2025-03-10
+
+- Add the color format dropdown option to the `Convert Color` command.
+
+## [Extract Color] - 2025-02-25
+
+- Select image from finder
+- Run `Extract Color` command from Raycast
+- Get color palette from the image
+
+## [Accessibility] - 2025-02-13
+
+- Add support for showing color name after picking color
+
+## [Enhancement] - 2024-11-25
+
+- Update README with FAQs
+
 ## [Enhancement] - 2024-10-04
 
 - Add Color Names command

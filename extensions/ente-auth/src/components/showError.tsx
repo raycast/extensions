@@ -1,5 +1,5 @@
+import { Action, ActionPanel, Detail, Icon, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { LINE_BREAK } from "../constants/string";
-import { ActionPanel, Action, Detail, Icon, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 
 const SUBMIT_ISSUE =
   "https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2Cbug&template=extension_bug_report.yml&title=%5BEnte%20Auth%5D+...";

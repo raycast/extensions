@@ -1,33 +1,30 @@
-import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { Clipboard, closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { SEARCH_ENGINE } from "../constants";
 import { Preferences, Tab } from "../interfaces";
-import { NOT_INSTALLED_MESSAGE, SEARCH_ENGINE } from "../constants";
+import { getNewTabShortcut } from "../util";
 
 export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
+  await Clipboard.copy(`${SEARCH_ENGINE[getPreferenceValues<Preferences>().searchEngine.toLowerCase()]}${queryText}`);
   popToRoot();
   closeMainWindow({ clearRootSearch: true });
 
   const script = `
-    tell application "Zen Browser"
+    tell application "Zen"
       activate
-      repeat while not frontmost
-        delay 0.1
-      end repeat
-      tell application "System Events"
-        keystroke "t" using {command down}
-        ${
-          queryText
-            ? `keystroke "l" using {command down}
-           keystroke "a" using {command down}
-           key code 51
-           keystroke "${SEARCH_ENGINE[getPreferenceValues<Preferences>().searchEngine.toLowerCase()]}${queryText}"
-           key code 36`
-            : ""
-        }
-      end tell
+    end tell
+    repeat while not application "Zen" is frontmost
+      delay 0.1
+    end repeat
+    tell application "System Events"
+      ${getNewTabShortcut()}
+      delay 0.1
+      keystroke "a" using {command down}
+      key code 51
+      keystroke "v" using {command down}
+      key code 36 
     end tell
   `;
-  await checkAppInstalled();
 
   return await runAppleScript(script);
 }
@@ -37,19 +34,23 @@ export async function openHistoryTab(url: string): Promise<boolean | string> {
   closeMainWindow({ clearRootSearch: true });
 
   const script = `
-    tell application "Zen Browser"
+    tell application "Zen"
+     set savedClipboard to get the clipboard
+      set the clipboard to "${url}"
       activate
       repeat while not frontmost
         delay 0.1
       end repeat
       tell application "System Events"
-        keystroke "t" using {command down}
-        keystroke "l" using {command down}
+        ${getNewTabShortcut()}
+        delay 0.1
         keystroke "a" using {command down}
         key code 51
-        keystroke "${url}"
-        key code 36
+        keystroke "v" using {command down}
+        key code 36 
       end tell
+      delay 0.1
+      set the clipboard to savedClipboard
     end tell
   `;
 
@@ -58,12 +59,12 @@ export async function openHistoryTab(url: string): Promise<boolean | string> {
 
 export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
-    tell application "Zen Browser"
+    tell application "Zen"
       activate
       repeat with w from 1 to count of windows
         set startTab to name of window 1
         repeat
-            if name of window 1 contains "${tab.title}" then 
+            if name of window 1 contains "${tab.title}" then
               exit repeat
             else
               tell application "System Events" to key code 48 using control down
@@ -74,18 +75,3 @@ export async function setActiveTab(tab: Tab): Promise<void> {
     end tell
   `);
 }
-
-const checkAppInstalled = async () => {
-  const appInstalled = await runAppleScript(`
-set isInstalled to false
-try
-    do shell script "osascript -e 'exists application \\"Zen Browser\\"'"
-    set isInstalled to true
-end try
-
-return isInstalled`);
-  console.log(appInstalled);
-  if (appInstalled === "false") {
-    throw new Error(NOT_INSTALLED_MESSAGE);
-  }
-};

@@ -1,5 +1,5 @@
 <p align="center">
-<img width=100 src="https://github.com/abielzulio/chatgpt-raycast/blob/main/assets/icon@dark.png?raw=true">
+<img width=100 src="assets/icon@dark.png">
 </p>
 
 <h1 align="center">ChatGPT</h1>
@@ -42,18 +42,16 @@ Automatically save all the question and answer so you can go back digging for th
 
 ![Looking through the question history](metadata/5.png)
 
-# Models availability
+### Use AI commands and create your own
 
-### GPT-3.5
+Process text taken from anywhere (selected text, clipboard text, opened web page) and 
+insert the result into the frontmost application or copy it to the clipboard.
 
-- `gpt-3.5-turbo`
-- `gpt-3.5-turbo-0301`
+![Search AI commands and create a quicklink to the command and use it easily](metadata/8.png)
 
-### GPT-4
+![AI command in action](metadata/9.png)
 
-- `gpt-4`
-- `gpt-4-32k`
-- `gpt-4o`
+# Models
 
 GPT-4o model supports vision capabilities, which can be enabled in the Models Command when creating or editing a model.
 
@@ -96,19 +94,10 @@ All preferences properties list that can be customize through `Raycast Settings 
 ### How to use Azure OpenAI
 
 1. Copy and paste your Azure OpenAI's `KEY` value to the `API key` field
-
-   ![Enter Azure OpenAI Key](https://github.com/abielzulio/extensions/assets/7030944/9c2797b6-4005-4ddf-9f84-ad74d690ed3a)
-   
    
 2. Copy and paste your Azure OpenAI `Endpoint` value to the `Azure Endpoint` field. Then, Tick the `Use Azure OpenAI` checkbox
 
-   ![Enter Azure OpenAI Endpoint](https://github.com/abielzulio/extensions/assets/7030944/f09aa681-b36f-4441-aa55-cb55f7cbe248)
-
-
 3. Copy and paste your Azure OpenAI `Model deployment name` value to the `Azure Deployment` field
-
-   ![Enter Azure OpenAI Deployment](https://github.com/abielzulio/extensions/assets/7030944/b2ebaf3b-f961-4c5f-8ea7-6c6f164e3934)
-
 
 # Support
 

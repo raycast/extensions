@@ -1,6 +1,19 @@
 # cPanel Changelog
 
-## [Enhancements: Files & DB + New Account Command ] - 2024-10-21
+## [Modernize + Manage API Tokens] - 2025-05-19
+
+- View API Tokens
+- Revoke API Token
+- Modernize to use latest Raycast config
+- DEV: add new `callUAPI` func that wraps native `fetch`
+
+## [View FTP Accounts + Copy File Contents] - 2025-02-17
+
+- Copy file contents after viewing in `Files`
+- View FTP Accounts in `FTP Accounts`
+- Create FTP Account in `FTP Accounts`
+
+## [Enhancements: Files & DB + New Account Command] - 2024-10-21
 
 - Show or Hide "MIME Type" in `Files` via Preferences
 - View "File Content" for small files in `Files`

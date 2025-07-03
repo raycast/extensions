@@ -1,8 +1,8 @@
-import * as OTPAuth from "otpauth";
-import { dataTransformer } from "../constants/transformer";
-import { Secret, JsonFormat } from "./types";
 import { LocalStorage } from "@raycast/api";
+import * as OTPAuth from "otpauth";
 import { STORAGE_KEY } from "../constants/secrets";
+import { dataTransformer } from "../constants/transformer";
+import { JsonFormat, Secret } from "./types";
 
 export const getJsonFormatFromStore = async (): Promise<JsonFormat[]> => {
   const storageStringRaw = await LocalStorage.getItem<string>(STORAGE_KEY);

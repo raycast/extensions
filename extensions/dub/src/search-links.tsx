@@ -1,20 +1,35 @@
-import "@/polyfills/fetch";
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useShortLinks } from "@hooks/use-short-links";
-import { DUB_CO_URL } from "@utils/constants";
+import { ShortLinksResponse, useShortLinks } from "@hooks/use-short-links";
+import { DUB_APP_URL, DUB_CO_URL } from "@utils/constants";
 import { deleteShortLink } from "@/api";
-import { MutatePromise, showFailureToast } from "@raycast/utils";
-import type { LinkSchema } from "dub/dist/commonjs/models/components";
+import { MutatePromise, showFailureToast, useCachedState } from "@raycast/utils";
 import { withDubClient } from "./with-dub-client";
+import { useState } from "react";
 
 export function SearchLinks() {
-  const { shortLinks, error: linksError, isLoading: isLoadingLinks, mutate } = useShortLinks();
+  const [query, setQuery] = useState<string | undefined>(undefined);
+  const [showDetails, setShowDetails] = useCachedState<boolean>("show-details", false, {
+    cacheNamespace: "dub-search-links",
+  });
+  const {
+    shortLinks,
+    supportsLinksTypeahead,
+    error: linksError,
+    isLoading: isLoadingLinks,
+    mutate,
+  } = useShortLinks(query);
 
   return (
     <List
       isLoading={isLoadingLinks}
-      isShowingDetail={!isLoadingLinks && !linksError && shortLinks?.length !== 0}
-      searchBarPlaceholder={"Search links by domain, url, key, comments, tags..."}
+      {...(!supportsLinksTypeahead
+        ? { searchBarPlaceholder: "Search links by domain, url, key, comments, tags" }
+        : {
+            onSearchTextChange: setQuery,
+            searchBarPlaceholder: "Search links by short link slug or destination url",
+            throttle: true,
+          })}
+      isShowingDetail={!isLoadingLinks && !linksError && shortLinks?.length !== 0 && showDetails}
       filtering
     >
       {linksError && (
@@ -42,6 +57,7 @@ export function SearchLinks() {
           expiresAt,
           expiredUrl,
           updatedAt,
+          workspaceId,
         } = value;
         const shortUrl = `${domain}/${key}`;
         return (
@@ -141,7 +157,10 @@ export function SearchLinks() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title={"Copy Link"} content={shortLink} />
-                <Action.OpenInBrowser title={"Open Link"} url={shortLink} />
+                <Action.OpenInBrowser
+                  title={"Open Link Page"}
+                  url={`${DUB_CO_URL}/${workspaceId}/links/${domain}/${key}`}
+                />
                 <Action
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title={"Delete Link"}
@@ -149,10 +168,21 @@ export function SearchLinks() {
                   onAction={() => deleteLink(id, mutate)}
                 />
                 <ActionPanel.Section>
+                  <Action
+                    title={showDetails ? "Hide Details" : "Show Details"}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    onAction={() => setShowDetails(!showDetails)}
+                    icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
+                  />
                   <Action.OpenInBrowser
-                    title="Go to Dub.co"
-                    shortcut={Keyboard.Shortcut.Common.Open}
-                    url={DUB_CO_URL}
+                    title="Open Analytics Page"
+                    shortcut={{ modifiers: ["cmd"], key: "v" }}
+                    url={`${DUB_APP_URL}/${workspaceId}/analytics?domain=${domain}&key=${key}&interval=30d`}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open Events Page"
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    url={`${DUB_APP_URL}/${workspaceId}/events?domain=${domain}&key=${key}&interval=30d`}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
@@ -164,7 +194,7 @@ export function SearchLinks() {
   );
 }
 
-const deleteLink = (linkId: string, mutate: MutatePromise<LinkSchema[]>) =>
+const deleteLink = (linkId: string, mutate: MutatePromise<ShortLinksResponse | undefined>) =>
   confirmAlert({
     title: "Delete Link",
     message: "Are you sure you want to delete this link?",
@@ -175,10 +205,17 @@ const deleteLink = (linkId: string, mutate: MutatePromise<LinkSchema[]>) =>
     },
   });
 
-const tryDeleteLink = async (linkId: string, mutate: MutatePromise<LinkSchema[]>) => {
+const tryDeleteLink = async (linkId: string, mutate: MutatePromise<ShortLinksResponse | undefined>) => {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting link..." });
   await mutate(deleteShortLink(linkId), {
-    optimisticUpdate: (data) => data?.filter((l) => l.id !== linkId),
+    optimisticUpdate: (data) => {
+      if (!data) return undefined;
+
+      return {
+        ...data,
+        links: data.shortLinks.filter((l) => l.id !== linkId),
+      };
+    },
   })
     .then(async ({ id }) => {
       toast.style = Toast.Style.Success;

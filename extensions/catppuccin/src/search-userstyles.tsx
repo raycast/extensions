@@ -1,30 +1,15 @@
 import { ActionPanel, Action, List } from "@raycast/api";
+import { ColorName } from "@catppuccin/palette";
+
+import { getDefaultIcon, getIcon } from "./utils/icons.util";
 import { SearchList } from "./components/SearchList";
-import { isValidUrl } from "./utils/data.util";
+import type { Userstyle } from "./types";
 
-interface UserStyleDetails {
-  name: string | string[];
-  categories?: string[];
-  icon?: string;
-  color?: string;
-  readme?: {
-    "app-link"?: string | string[];
-    usage?: string;
-  };
-  currentMaintainers?: string[];
-  pastMaintainers?: string[];
-}
+export default function SearchUserstyles() {
+  const renderItem = (identifier: string, userstyle: Userstyle) => {
+    const githubLink = `https://github.com/catppuccin/userstyles/tree/main/styles/${identifier}`;
+    const appLink = userstyle.link;
 
-const getAppLink = (appLink?: string | string[]) => {
-  if (!appLink) return undefined;
-  return Array.isArray(appLink) ? appLink[0] : appLink;
-};
-
-export default function SearchUserStyles() {
-  const renderItem = (styleKey: string, userStyleDetails: UserStyleDetails) => {
-    const githubLink = `https://github.com/catppuccin/userstyles/tree/main/styles/${styleKey}`;
-    const appLink = getAppLink(userStyleDetails.readme?.["app-link"]);
-    // remove www http https & trailing slashes if present
     const formattedAppLink = appLink
       .replace("https://", "")
       .replace("http://", "")
@@ -33,32 +18,29 @@ export default function SearchUserStyles() {
 
     return (
       <List.Item
-        key={styleKey}
-        title={Array.isArray(userStyleDetails.name) ? userStyleDetails.name.join(" / ") : userStyleDetails.name}
-        subtitle={`Categories: ${userStyleDetails.categories?.join(", ") || "None"}`}
-        accessories={appLink ? [{ text: formattedAppLink }] : undefined}
+        key={identifier}
+        title={userstyle.name}
+        subtitle={`Categories: ${userstyle.categories?.join(", ") || "None"}`}
+        accessories={[{ text: formattedAppLink }, { text: `Maintainers: ${userstyle["current-maintainers"].length}` }]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser url={githubLink} title="Open GitHub" />
-            {appLink && isValidUrl(appLink) && <Action.OpenInBrowser url={appLink} title="Open App Link" />}
+            <Action.OpenInBrowser url={appLink} title="Open Website" />
+            <Action.CopyToClipboard content={appLink} title="Copy Website Link" />
+            {userstyle.note && <Action.CopyToClipboard content={userstyle.note} title="Copy Note" />}
           </ActionPanel>
         }
+        icon={{
+          value: userstyle.icon
+            ? getIcon(userstyle.icon, userstyle.color as ColorName)
+            : getDefaultIcon(userstyle.color as ColorName),
+          tooltip: identifier,
+        }}
       />
     );
   };
 
-  const filterFunction = (styleKey: string, userStyleDetails: UserStyleDetails, searchText: string) => {
-    const lowerSearchText = searchText.toLowerCase();
-    const styleName = Array.isArray(userStyleDetails.name) ? userStyleDetails.name.join(" ") : userStyleDetails.name;
-    return styleName.toLowerCase().includes(lowerSearchText) || styleKey.toLowerCase().includes(lowerSearchText);
-  };
-
   return (
-    <SearchList<UserStyleDetails>
-      dataKey="styles"
-      searchBarPlaceholder="Search user styles..."
-      renderItem={renderItem}
-      filterFunction={filterFunction}
-    />
+    <SearchList<Userstyle> dataKey="userstyles" searchBarPlaceholder="Search userstyles..." renderItem={renderItem} />
   );
 }

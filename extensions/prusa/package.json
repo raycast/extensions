@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prusa",
+  "title": "Prusa Printer Control",
+  "description": "Monitor and control your Prusa 3D printer directly from Raycast. View temperatures, manage files, and control prints with keyboard shortcuts. Supports Prusa XL, MK4, MINI+, and MK3S+ (via PrusaLink).",
+  "icon": "command-icon.png",
+  "author": "chad_walters",
+  "categories": [
+    "Developer Tools",
+    "Applications",
+    "Productivity"
+  ],
+  "keywords": [
+    "3d-printer",
+    "prusa",
+    "prusalink",
+    "printing",
+    "monitoring",
+    "control",
+    "automation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "status",
+      "title": "Printer Status",
+      "description": "View live printer status, temperatures, and control ongoing prints",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "files",
+      "title": "Print Files",
+      "description": "Browse and manage your print files, start new prints",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "printerIP",
+      "type": "textfield",
+      "required": true,
+      "title": "Printer IP Address",
+      "description": "The IP address of your Prusa printer",
+      "placeholder": "192.168.1.100"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your PrusaLink API key",
+      "placeholder": "Enter your API key"
+    },
+    {
+      "name": "requestTimeout",
+      "type": "textfield",
+      "required": false,
+      "title": "Request Timeout (seconds)",
+      "description": "Timeout for API requests in seconds",
+      "placeholder": "10"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

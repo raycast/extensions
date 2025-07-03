@@ -1,11 +1,10 @@
-import { useState } from "react";
 import { List } from "@raycast/api";
+import { useState } from "react";
 
-import usePriorities from "./hooks/usePriorities";
-import useMe from "./hooks/useMe";
-
-import View from "./components/View";
 import IssueListItem from "./components/IssueListItem";
+import View from "./components/View";
+import useMe from "./hooks/useMe";
+import usePriorities from "./hooks/usePriorities";
 import useSearchIssues from "./hooks/useSearchIssues";
 
 function SearchIssues() {

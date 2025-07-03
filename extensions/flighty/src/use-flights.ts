@@ -36,11 +36,20 @@ const FlightSchema = z.object({
     depTimeOriginal: TimestampSchema,
     depTimeEstimated: TimestampSchema.nullable(),
     depTimeActual: TimestampSchema.nullable(),
+    depTerminal: z.string().nullable(),
+    depGate: z.string().nullable(),
 
     arrTz: z.string(),
     arrTimeOriginal: TimestampSchema.nullable(),
     arrTimeEstimated: TimestampSchema.nullable(),
     arrTimeActual: TimestampSchema.nullable(),
+    arrTerminal: z.string().nullable(),
+    arrGate: z.string().nullable(),
+
+    arrBaggageBelt: z.string().nullable(),
+
+    pnr: z.string().nullable(),
+    seatNumber: z.string().nullable(),
 })
 
 export type Flight = z.infer<typeof FlightSchema>
@@ -71,11 +80,20 @@ SELECT
     Flight.departureScheduleGateOriginal as depTimeOriginal,
     Flight.departureScheduleGateEstimated as depTimeEstimated,
     Flight.departureScheduleGateActual as depTimeActual,
+    Flight.departureTerminal as depTerminal,
+    Flight.departureGate as depGate,
 
     AirportArr.timezoneIdentifier as arrTz,
     Flight.arrivalScheduleGateOriginal as arrTimeOriginal,
     Flight.arrivalScheduleGateEstimated as arrTimeEstimated,
-    Flight.arrivalScheduleGateActual as arrTimeActual
+    Flight.arrivalScheduleGateActual as arrTimeActual,
+    Flight.arrivalTerminal as arrTerminal,
+    Flight.arrivalGate as arrGate,
+
+    Flight.arrivalBaggageBelt as arrBaggageBelt,
+
+    Ticket.pnr as pnr,
+    Ticket.seatNumber as seatNumber
 FROM
     UserFlight
 JOIN
@@ -83,6 +101,8 @@ JOIN
     Airport as AirportDep on AirportDep.id = Flight.departureAirportId,
     Airport as AirportArr on AirportArr.id = Flight.scheduledarrivalAirportId,
     Flight ON Flight.id = UserFlight.flightId
+LEFT JOIN
+    Ticket ON Ticket.flightId = Flight.id
 WHERE
     Flight.deleted IS NULL
     AND
@@ -93,6 +113,8 @@ WHERE
     UserFlight.isRandom = 0
     AND
     UserFlight.importSource IS NOT "CONNECTED_FRIEND"
+    AND
+    Ticket.userId IS NOT ""
 `
 
 function useFlightQuery(): AsyncState<Flight[]> {

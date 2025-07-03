@@ -78,7 +78,13 @@ export class TimeoutError extends DisplayableError {
 /**
  * These errors are shown buz should not be send to raycast
  */
-const uncapturedErrors = [CLIVersionNotSupportedError, CLINotLoggedInError, MasterPasswordMissingError, TimeoutError];
+const uncapturedErrors = [
+  CLIVersionNotSupportedError,
+  CLINotLoggedInError,
+  MasterPasswordMissingError,
+  TimeoutError,
+  CLINotFoundError,
+];
 
 /**
  * Captures unexpected errors to raycast

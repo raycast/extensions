@@ -1,5 +1,15 @@
 # Spotify Controls Changelog
 
+## [Routine Maintenance] - {PR_MERGE_DATE}
+
+- Migrate to `@raycast/api@1.94.0`
+- Use ESLint 9 flag config
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2025-01-19
+
+Allow the user to dynamically enter the steps when increasing or decreasing the volume.
+
 ## [Enhancement] - 2024-05-06
 
 Add Mute Volume command.

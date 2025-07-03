@@ -10,10 +10,13 @@ import SearchResultListItem from "./SearchResultListItem";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import useInstances from "../hooks/useInstances";
 import InstanceForm from "./InstanceForm";
-import { GlobalSearchResponse, Instance, Record, SearchResult } from "../types";
+import { GlobalSearchResponse, Record, SearchResult } from "../types";
+import useFavorites from "../hooks/useFavorites";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
-export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
-  const { addInstance, mutate: mutateInstances } = useInstances();
+export default function ({ searchTerm }: { searchTerm: string }) {
+  const { isInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
+  const { addInstance, mutate: mutateInstances, selectedInstance } = useInstances();
   const { commandName } = environment;
   const command = commandName == "search" ? "Search" : "Quickly Search";
 
@@ -21,12 +24,11 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
   const [table] = useCachedState<string>("table", "all");
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
-  const [selectedInstance] = useCachedState<Instance>("instance");
   const { alias = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
-  const { isLoading, data, mutate } = useFetch(
+  const { isLoading, data, revalidate } = useFetch(
     `${instanceUrl}/api/now/globalsearch/search?sysparm_search=${searchTerm}`,
     {
       headers: {
@@ -68,13 +70,13 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
     const aliasOrName = alias ? alias : instanceName;
 
     if (isLoading) {
-      setNavigationTitle(`${command} > ${aliasOrName} > Loading results...`);
+      setNavigationTitle(`${command} > ${aliasOrName} > Loading results for ${searchTerm}...`);
       return;
     }
     const count = sumBy(data, (r) => r.record_count);
-    if (count == 0) setNavigationTitle(`${command} > ${aliasOrName} > No results found for "${searchTerm}"`);
-    else setNavigationTitle(`${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for "${searchTerm}"`);
-  }, [data, searchTerm, isLoading, errorFetching, selectedInstance]);
+    if (count == 0) setNavigationTitle(`${command} > ${aliasOrName} > No results found for ${searchTerm}`);
+    else setNavigationTitle(`${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for ${searchTerm}`);
+  }, [command, selectedInstance, errorFetching, isLoading, data, searchTerm, alias, instanceName]);
 
   return (
     <List
@@ -91,7 +93,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
             description="Press ⏎ to refresh or try later again"
             actions={
               <ActionPanel>
-                <Actions mutate={mutate} />
+                <Actions revalidate={revalidate} />
               </ActionPanel>
             }
           />
@@ -103,10 +105,12 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
               source: Icon[iconName as keyof typeof Icon],
               tintColor: Color[colorName as keyof typeof Color],
             };
+            const allResultsUrl = buildServiceNowUrl(instanceName, result.all_results_url);
             return (
               <List.Section
                 key={result.name + "_" + index}
-                title={`${result.name == "u_documate_page" ? "Documate Pages" : result.label_plural} (${result.record_count})`}
+                title={`${result.name == "u_documate_page" ? "Documate Pages" : result.label_plural}`}
+                subtitle={`${result.record_count} ${result.record_count == 1 ? "result" : "results"}`}
               >
                 {records.map((record: Record) => (
                   <SearchResultListItem
@@ -115,7 +119,11 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                     icon={icon}
                     label={result.label}
                     fields={result.fields}
-                    mutateSearchResults={mutate}
+                    revalidateSearchResults={revalidate}
+                    favoriteId={isInFavorites(record.record_url)}
+                    addUrlToFavorites={addUrlToFavorites}
+                    removeFromFavorites={removeFromFavorites}
+                    revalidateFavorites={revalidateFavorites}
                   />
                 ))}
                 <List.Item
@@ -131,13 +139,13 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
                         title={`View all ${result.name == "u_documate_page" ? "Documate Page" : result.label} matches`}
                       >
                         <Action.OpenInBrowser
-                          title="Open in Servicenow"
-                          url={`${instanceUrl}${result.all_results_url}`}
+                          title="Open in ServiceNow"
+                          url={allResultsUrl}
                           icon={{ source: "servicenow.svg" }}
                         />
-                        <Action.CopyToClipboard title="Copy URL" content={`${instanceUrl}${result.all_results_url}`} />
+                        <Action.CopyToClipboard title="Copy URL" content={allResultsUrl} />
                       </List.Dropdown.Section>
-                      <Actions mutate={mutate} />
+                      <Actions revalidate={revalidate} />
                     </ActionPanel>
                   }
                 />
@@ -149,7 +157,7 @@ export default function ({ searchTerm }: { searchTerm: string }): JSX.Element {
             title="No Results"
             actions={
               <ActionPanel>
-                <Actions mutate={mutate} />
+                <Actions revalidate={revalidate} />
               </ActionPanel>
             }
           />

@@ -1,0 +1,165 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "code",
+  "title": "Code Execution",
+  "description": "Give Raycast AI the ability to run Python, Bash, and AppleScript",
+  "icon": "code-execution.png",
+  "author": "EvanZhouDev",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "run-shell-command",
+      "title": "Run Shell Command",
+      "description": "Executes a shell command.",
+      "mode": "no-view",
+      "icon": "code-execution.png",
+      "arguments": [
+        {
+          "name": "command",
+          "placeholder": "Command",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "run-python",
+      "title": "Run Python",
+      "description": "Allow AI to run Python",
+      "icon": "python-logo.png"
+    },
+    {
+      "name": "run-applescript",
+      "title": "Run AppleScript",
+      "description": "Allow AI to run AppleScript",
+      "icon": "apple-logo.png"
+    },
+    {
+      "name": "run-bash",
+      "title": "Run Bash",
+      "description": "Allow AI to run Bash commands",
+      "icon": "command-logo.png"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@code find the 5th Fibonacci number",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-python",
+              "arguments": {
+                "code": {
+                  "includes": "fibonacci"
+                }
+              }
+            }
+          },
+          {
+            "includes": "5"
+          }
+        ],
+        "mocks": {
+          "run-python": "5"
+        }
+      },
+      {
+        "input": "@code Caesar Cipher \\\"Hello World\\\" with key A -> B",
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "code": {
+                  "includes": "caesar"
+                }
+              },
+              "name": "run-python"
+            }
+          },
+          {
+            "includes": "Ifmmp Xpsme"
+          }
+        ],
+        "mocks": {
+          "run-python": "Ifmmp Xpsme"
+        }
+      },
+      {
+        "input": "@code clone raycast/extensions onto Desktop",
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "code": [
+                  {
+                    "includes": "git clone"
+                  },
+                  {
+                    "includes": "raycast/extensions"
+                  }
+                ]
+              },
+              "name": "run-bash"
+            }
+          }
+        ],
+        "mocks": {
+          "run-bash": "ok"
+        }
+      },
+      {
+        "input": "@code create 5 new notes in Apple Notes",
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "code": [
+                  {
+                    "includes": "tell application"
+                  },
+                  {
+                    "includes": "Notes"
+                  },
+                  {
+                    "includes": "make new note"
+                  }
+                ]
+              },
+              "name": "run-applescript"
+            }
+          }
+        ],
+        "mocks": {
+          "run-applescript": "note id x-coredata://3D0A19EE-CB88-42EF-831E-6DEA46283E01/ICNote/p1592"
+        }
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.87.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

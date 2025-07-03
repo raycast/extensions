@@ -1,5 +1,38 @@
 # Dust.tt Changelog
 
+## [Update] - 2025-06-18
+
+- Move Oauth connexion flow from Auth0 to WorkOS.
+
+## [Fixes] - 2025-05-05
+
+- Fix again the listing of agents.
+
+## [Fixes] - 2025-04-14
+
+- Upgrade dust-tt/client to fix the listing of agents.
+- Add new logo for salesforce, gong and bigquery connectors.
+
+## [Fixes] - 2024-12-11
+
+- Upgrade dust-tt/client to allow more flexibility in the api response.
+
+## [Fixes] - 2024-11-21
+
+- Use the proper oauth audience and add scopes to limit api access.
+
+## [Feature] - 2024-11-09
+
+- Add support for Oauth connexion flow.
+- Add Command to Select Workspace (oauth only)
+- Add Command for Claude-3
+- Use official Dust Client (removed custom implementation)
+- Support dust favorite assistants feature (oauth only, removed the localStorage implementation)
+- Fix icons for referenced documents
+- Fix labels for assistant scopes
+- Update wording to match Dust (especially agent -> assistant).
+- Improve UX (thinking animation, abort fetching when exiting view...)
+
 ## [Feature] - 2024-10-01
 
 - allow user to specify custom API URL
@@ -9,16 +42,16 @@
 - ask user to provide email address during the setup
 - specify email address and username in API calls to provide accurate usage statistics
 
-## [chore] - 2024-09-23
+## [Chore] - 2024-09-23
 
 - transfer extension ownership to the Dust team
 
-## [bug fixes] - 2024-07-22
+## [Bug fixes] - 2024-07-22
 
 - use `agent_message_success` event as stop condition
 - don't stream Chain Of Thought tokens
 
-## [bug fixes] - 2024-03-27
+## [Bug fixes] - 2024-03-27
 
 - fixed a bug when the favorite agent was no longer available
 - fixed API related crashes (show an error)

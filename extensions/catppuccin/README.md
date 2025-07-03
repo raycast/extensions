@@ -6,21 +6,21 @@ Quickly view the [Catppuccin](https://github.com/catppuccin) color palette, user
 
 ## Flavors
 
-Catppuccin offers four distinct flavors, each designed for different lighting conditions:
+Catppuccin consists of 4 beautiful pastel color palettes, called flavors. The theme comes in one light and three dark variants:
 
-- **Macchiato** (Dark)
-- **Mocha** (Darkest)
-- **Frappe** (Light)
-- **Latte** (Lightest)
+- 🌻 **Latte**: Our lightest theme harmoniously inverting the essence of Catppuccin's dark themes.
+- 🪴 **Frappé**: A less vibrant alternative using subdued colors for a muted aesthetic.
+- 🌺 **Macchiato**: Medium contrast with gentle colors creating a soothing atmosphere.
+- 🌿 **Mocha**: The Original — Our darkest variant offering a cozy feeling with color-rich accents.
 
 ## Ports
 
-Catppuccin has been ported to various applications, enhancing the visual experience across many platforms. This [Catppuccin Raycast port](https://github.com/catppuccin/raycast) is an example of that, but many others are available. 
+Catppuccin has hundreds of ports (such as the [Catppuccin for Raycast port](https://github.com/catppuccin/raycast)), covering a wide range of applications, tools, websites, and just about anything you can imagine!
 
 ## Userstyles
 
-You can also apply Catppuccin's soothing palette to websites using custom CSS. Userstyles are easy to apply via browser extensions like [Stylus](https://github.com/openstyles/stylus). Make your browsing experience more delightful with Catppuccin's signature styles.
+You can also apply Catppuccin's soothing pastel palette to websites using CSS userstyles. Userstyles are easy to apply via the [Stylus](https://github.com/openstyles/stylus) browser extension. Make your browsing experience more delightful with Catppuccin's signature styles.
 
 ## Documentation
 
-In addition to the color palette, Catppuccin also provides extensive documentation, covering the project's style guides, specifications, and principles. Dive into the [Catppuccin documentation](https://github.com/catppuccin/docs) to understand how to implement and adhere to this beautiful design language.
+In addition to the color palette, Catppuccin also provides extensive documentation, covering the project's style guides, specifications, and principles. Dive into the [Catppuccin documentation](https://github.com/catppuccin/catppuccin/tree/main/docs) to understand how to implement and adhere to this beautiful design language.

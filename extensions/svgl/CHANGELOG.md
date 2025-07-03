@@ -1,5 +1,30 @@
 # svgl Changelog
 
+## [✨ AI Enhancements] - {PR_MERGE_DATE}
+
+AI Tools to:
+- Get SVG Logo
+- Get SVG Component
+
+## [Update] - 2025-03-27
+
+- Added a default action preference that allows users to choose the default action when selecting an SVG.
+
+## [Update] - 2025-02-21
+
+- Updated the SVG logo request form.  
+- Added the action `Visit SVG Brand Website` to open the SVG brand website in the browser.
+- Added the action `Copy SVG File` to copy the SVG as a file to the clipboard.
+
+## [Add Angular Component Feature] - 2025-01-10
+
+- Add the action `Copy Angular Component` to copy the Angular component code to the clipboard.
+- Remove duplicate action shortcuts.
+
+## [Add Copy Vue & Svelte Component Feature] - 2024-11-04
+
+- Add the actions `Copy Vue Component` and `Copy Svelte Component` to copy the Vue and Svelte component code to the clipboard.
+
 ## [Add Copy SVG URL Feature] - 2024-09-17
 
 - Add the commands `Copy SVG URL` and `Copy SVG Wordmark URL` to copy the SVG URL to the clipboard.
@@ -44,9 +69,11 @@ You can use the `Request SVG Logo` command to request SVGs you want to add to th
 - Remove the category subtitle below the SVG name to make it cleaner.
 
 ## [Copy React Component] - 2024-04-10
+
 - Add copy React component feature.
 
 ## [SVG Wordmark Features] - 2024-03-18
+
 - Add SVG wordmark copy actions.
 - Fix SVG error in multiple categories.
 

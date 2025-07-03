@@ -1,8 +1,7 @@
-import { getPreferenceValues, showToast, Toast, LocalStorage, environment } from "@raycast/api";
-import fetch, { RequestInit } from "node-fetch";
-import { ProjectFiles, TeamFiles, TeamProjects } from "./types";
+import { LocalStorage, Toast, environment, getPreferenceValues, showToast } from "@raycast/api";
 import { getAccessToken } from "@raycast/utils";
-import type { FileDetail } from "./types";
+import fetch, { type RequestInit } from "node-fetch";
+import type { FileDetail, ProjectFiles, TeamFiles, TeamProjects } from "./types";
 
 async function request<T>(path: string, opts?: RequestInit) {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
@@ -77,7 +76,7 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
 
 export async function resolveAllFiles(): Promise<TeamFiles[]> {
   const teamFiles = await fetchFiles();
-  const teams = ((await LocalStorage.getItem<string>("teamNames")) || "").split(",");
+  const teams = ((await LocalStorage.getItem<string>("teamNames")) ?? "").split(",");
   const fi = teamFiles.map((projectFiles, index) => {
     return { name: teams[index], files: projectFiles } as TeamFiles;
   });
@@ -89,12 +88,11 @@ export async function fetchPages(fileKey: string) {
     const json = await request<FileDetail>(`/files/${fileKey}?depth=1`, {
       method: "GET",
     });
-
     return json.document.children;
   } catch (error) {
     console.error(error);
     if (environment.launchType !== "background") {
-      showToast(Toast.Style.Failure, "Could not load pages");
+      showToast(Toast.Style.Failure, "Could not load pages (Figma Slides not supported)");
     }
     return Promise.resolve([]);
   }

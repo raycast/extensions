@@ -35,16 +35,23 @@ npm run dev
 Bug fixes and improvements are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Start development server:
+
 ```sh
 npm run dev
 ```
 
 Fix linting errors:
+
 ```sh
 npm run fix-lint
 ```
 
 Publish a new version to Raycast Store:
+
 ```sh
 npm run publish
 ```
+
+## About
+
+This extension is built by [Marc Köhlbrugge](https://marc.io) for [WIP](https://wip.co).

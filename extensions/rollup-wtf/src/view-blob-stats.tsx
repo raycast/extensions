@@ -22,7 +22,7 @@ function padValue(value: string, width: number): string {
 }
 
 function formatPrice(price: number): string {
-  return (price * 1000000).toFixed(6);
+  return price.toFixed(6);
 }
 
 export default function Command() {
@@ -45,7 +45,7 @@ export default function Command() {
 
       itemsRef.current = itemsRef.current.filter((item) => item.id !== newItem.id);
       itemsRef.current.push(newItem);
-      itemsRef.current.sort((a, b) => a.price - b.price);
+      itemsRef.current.sort((a, b) => b.price - a.price);
     } catch (error) {
       console.error("Error processing blob SSE event:", error);
     }

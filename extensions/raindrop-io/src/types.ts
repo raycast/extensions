@@ -5,7 +5,10 @@ type Highlight = {
 
 export type Bookmark = {
   _id: number;
-  collection: unknown; // object
+  collection: {
+    $id: number;
+    title: string;
+  };
   cover: string;
   created: string;
   domain: string;
@@ -44,13 +47,6 @@ export type Group = {
   sort: number;
   collections: number[];
 };
-
-export interface Preferences {
-  token: string;
-  useLastCollection?: boolean;
-  additionalItemToDisplayInList?: string;
-  displayDate?: string;
-}
 
 export interface CollectionsResponse {
   result: boolean;

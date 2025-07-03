@@ -1,8 +1,8 @@
+import { LocalStorage } from "@raycast/api";
 import fse from "fs-extra";
 import * as OTPAuth from "otpauth";
-import { LocalStorage } from "@raycast/api";
-import { Secret } from "./types";
 import { STORAGE_KEY } from "../constants/secrets";
+import { Secret } from "./types";
 
 const parseSecretURL = (url: string): Secret => {
   const totp = OTPAuth.URI.parse(url);

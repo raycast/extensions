@@ -34,7 +34,7 @@ export const commandConfig: CommandConfig = {
       style: "flat-square",
     },
     parameterIds: ["Logo", "Style", "Label", "Message", "Color", "LabelColor"],
-    validationFields: ["label", "color", "labelColor", "logoColor"],
+    validationFields: ["color", "labelColor", "logoColor"],
   },
   createStaticBadge: {
     defaultBadge: {
@@ -43,6 +43,6 @@ export const commandConfig: CommandConfig = {
       color: "blue",
     },
     parameterIds: ["Label", "Message", "Color", "LabelColor", "Logo", "Style"],
-    validationFields: ["label", "color", "labelColor", "logoColor"],
+    validationFields: ["color", "labelColor", "logoColor"],
   },
 };

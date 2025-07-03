@@ -188,3 +188,7 @@ export async function handleSetWallpaper(filePath: string) {
 export function iCloudDrivePath(): string {
   return `${homedir()}/Library/Mobile Documents/com~apple~CloudDocs`;
 }
+
+export function escapeShellArg(arg: string): string {
+  return `'${arg.replace(/'/g, "'\\''")}'`;
+}

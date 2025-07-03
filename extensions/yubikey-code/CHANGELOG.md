@@ -1,5 +1,13 @@
 # YubiKey Code Changelog
 
+## [Bug Fix] - 2025-04-28
+
+- Fix issue [#18826](https://github.com/raycast/extensions/issues/18826) which caused the extension to require a Pro subscription
+
+## [New Feature] - 2025-04-25
+
+- Updated list view to sort accounts by usage
+
 ## [New Feature] - 2024-02-19
 
 - Add preference for providing an icon pack

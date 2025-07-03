@@ -15,6 +15,7 @@ import { TextTranslateResponse } from "tencentcloud-sdk-nodejs-tmt/tencentcloud/
 import { LanguageDetectType } from "./detectLanguage/types";
 import { IcibaDictionaryResult } from "./dictionary/iciba/interface";
 import { LingueeDictionaryResult, LingueeListItemType } from "./dictionary/linguee/types";
+import { YoudaoTranslateResponse } from "./dictionary/youdao/translate.type";
 import {
   QueryWordInfo,
   YoudaoDictionaryFormatResult,
@@ -83,7 +84,8 @@ export type QueryResponse =
   | VolcanoTranslateResult
   | VolcanoDetectResult
   | GoogleTranslateResult
-  | OpenAITranslateResult;
+  | OpenAITranslateResult
+  | YoudaoTranslateResponse;
 
 export interface RequestErrorInfo {
   type: RequestType;
@@ -211,3 +213,4 @@ export interface AbortObject {
   abortController?: AbortController;
   childProcess?: ChildProcess;
 }
+export type { QueryWordInfo };

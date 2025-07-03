@@ -32,10 +32,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.82.5",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.18.1",
     "cheerio": "^1.0.0",
-    "date-fns": "^4.0.0",
+    "date-fns": "^4.1.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
@@ -45,8 +45,8 @@
     "@types/node": "22.5.5",
     "@types/react": "18.3.6",
     "eslint": "^8.51.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "prettier": "^3.4.1",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e ./dist",

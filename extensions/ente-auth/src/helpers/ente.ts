@@ -1,14 +1,16 @@
-import fse from "fs-extra";
-import { execSync } from "child_process";
 import { getPreferenceValues } from "@raycast/api";
-import { DEFAULT_EXPORT_PATH } from "../constants/ente";
+import { execSync } from "child_process";
+import fse from "fs-extra";
+import { EXPORT_FILE_PATH } from "../constants/ente";
 
 const DEFAULT_CLI_PATH = getPreferenceValues().cliPath || "/usr/local/bin/ente";
 
 export const createEntePath = (path: string): string => {
   if (!fse.existsSync(path)) {
-    fse.mkdirSync(path);
+    fse.mkdirSync(path, { recursive: true });
     console.log("Ente folder created at", path);
+  } else {
+    console.log("Ente folder already exists at", path);
   }
 
   return path;
@@ -26,31 +28,22 @@ export const checkEnteBinary = (): boolean => {
 
 export const exportEnteAuthSecrets = (): boolean => {
   try {
-    if (!fse.existsSync(`${DEFAULT_EXPORT_PATH}/ente_auth.txt`)) {
-      console.log("ente_auth.txt not found. Exporting...");
-      try {
-        execSync("ente export");
-      } catch (error) {
-        throw new Error("Export failed. Please check if the command is correct.");
-      }
-
-      if (!fse.existsSync(`${DEFAULT_EXPORT_PATH}/ente_auth.txt`)) {
-        throw new Error("Export failed. Please check if the command is correct.");
-      }
-    } else {
-      console.log("Skipping export...");
-    }
+    fse.removeSync(EXPORT_FILE_PATH);
   } catch (error) {
-    console.error("Error during export:", error);
-    return false;
+    console.error("Error during removal:", error);
   }
 
+  try {
+    execSync(`${DEFAULT_CLI_PATH} export`);
+  } catch (error) {
+    throw new Error("Export failed. Please check if the command is correct.");
+  }
   return true;
 };
 
 export const deleteEnteExport = (): boolean => {
   try {
-    fse.removeSync(`${DEFAULT_EXPORT_PATH}/ente_auth.txt`);
+    fse.removeSync(EXPORT_FILE_PATH);
   } catch (error) {
     console.error("Error during removal:", error);
     return false;

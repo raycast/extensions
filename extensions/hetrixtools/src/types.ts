@@ -3,7 +3,7 @@ type Location = {
   response_time: number;
   last_check: number;
 };
-export type Monitor = {
+export type UptimeMonitor = {
   id: string;
   name: string;
   type: "website" | "ping" | "service" | "smtp" | "heartbeat";
@@ -67,6 +67,40 @@ export type Monitor = {
   repeat_alert_times: number;
   repeat_alert_frequency: number;
   agent_id: string | null;
+};
+
+export type BlacklistMonitor = {
+  id: string;
+  name: string;
+  type: "ipv4" | "domain";
+  target: string;
+  report_id: string;
+  status: "active" | "disabled" | "processing";
+  contact_lists: string[];
+  listed: Array<{
+    rbl: string;
+    delist: string;
+  }>;
+  created_at: number;
+  last_check: number;
+};
+
+export type ContactList = {
+  id: string;
+  name: string;
+  default: boolean;
+  email: string[];
+};
+
+export type StatusPage = {
+  id: string;
+  name: string;
+  type: "blacklist" | "uptime";
+  monitors: string[];
+  password_protected: boolean;
+  twitter_feed: boolean;
+  twitter_user: string;
+  twitter_pos: string;
 };
 
 export type SuccessResponse<T> = {

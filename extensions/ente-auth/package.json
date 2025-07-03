@@ -11,11 +11,21 @@
   "categories": [
     "Security"
   ],
+  "keywords": [
+    "ente",
+    "totp",
+    "2fa",
+    "security",
+    "authentication",
+    "otp",
+    "mfa",
+    "authenticator"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Get TOTP",
+      "title": "Get Totp",
       "description": "Search for an Ente Auth account and copy the TOTP code to the clipboard",
       "mode": "view"
     },
@@ -23,6 +33,7 @@
       "name": "export",
       "title": "Export Secrets",
       "description": "Export Ente Auth secrets to a JSON file",
+      "disabledByDefault": true,
       "mode": "view"
     },
     {
@@ -35,6 +46,7 @@
       "name": "delete",
       "title": "Delete Export",
       "description": "Delete Ente Auth Exported file",
+      "disabledByDefault": true,
       "mode": "no-view"
     }
   ],
@@ -54,15 +66,43 @@
       "title": "Ente CLI Export Location",
       "description": "If you wish to change the default export path, type here the location of your local installation.",
       "placeholder": "Export Path"
+    },
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "Choose whether the primary action should copy or paste the output.",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ],
+      "default": "paste",
+      "required": false
+    },
+    {
+      "name": "deleteExport",
+      "type": "checkbox",
+      "title": "Privacy",
+      "label": "Delete Export File After Import",
+      "description": "Choose whether the export should be deleted after import.",
+      "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.81.2",
     "@raycast/utils": "^1.16.3",
+    "axios": "^1.7.8",
     "commander": "^9.0.0",
     "figlet": "^1.7.0",
     "fs-extra": "^11.2.0",
     "otpauth": "^9.3.2",
+    "simple-icons": "^13.18.0",
     "ts-node": "^10.0.0",
     "typescript": "^4.0.0",
     "url-parse": "^1.5.10"

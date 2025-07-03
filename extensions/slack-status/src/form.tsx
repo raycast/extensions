@@ -7,16 +7,17 @@ import { FormValues } from "./types";
 export function StatusForm(props: {
   navigationTitle?: string;
   actionTitle?: string;
-  initalValues?: FormValues;
+  initialValues?: FormValues;
   onSubmit: (values: FormValues) => void;
 }) {
   const { handleSubmit, itemProps } = useForm<FormValues>({
-    initialValues: props.initalValues,
+    initialValues: props.initialValues,
     validation: {
       statusText: FormValidation.Required,
     },
     onSubmit: props.onSubmit,
   });
+
   return (
     <Form
       navigationTitle={props.navigationTitle}
@@ -26,17 +27,24 @@ export function StatusForm(props: {
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Emoji" storeValue={props.initalValues?.emoji === undefined} {...itemProps.emoji}>
+      <Form.Dropdown title="Emoji" storeValue={props.initialValues?.emoji === undefined} {...itemProps.emoji}>
         {Object.entries(slackEmojiCodeMap).map(([emojiCode, emoji]) => (
           <Form.Dropdown.Item key={emojiCode} title={`${emoji}  ${emojiCode}`} value={emojiCode} />
         ))}
       </Form.Dropdown>
       <Form.TextField title="Status" placeholder="What's your status?" {...itemProps.statusText} />
-      <Form.Dropdown title="Duration" storeValue={props.initalValues?.emoji === undefined} {...itemProps.duration}>
+      <Form.Dropdown title="Duration" storeValue={props.initialValues?.emoji === undefined} {...itemProps.duration}>
         {Object.entries(durationTitleMap).map(([duration, title]) => (
           <Form.Dropdown.Item key={duration} title={title} value={duration.toString()} />
         ))}
       </Form.Dropdown>
+
+      <Form.Checkbox
+        title="Notifications"
+        label="Pause notifications"
+        storeValue={props.initialValues?.pauseNotifications === undefined}
+        {...itemProps.pauseNotifications}
+      />
     </Form>
   );
 }

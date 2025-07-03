@@ -1,5 +1,6 @@
-import { Media, Note } from "./interfaces";
+import { Media } from "./interfaces";
 import Fuse from "fuse.js";
+import { Note } from "../api/vault/notes/notes.types";
 
 /**
  * Filters a list of notes according to the input search string. If the search string is empty, all notes are returned. It will match the notes title, path and content.
@@ -81,8 +82,4 @@ export function filterMedia(mediaList: Media[], input: string, notes: Note[]) {
       notes.some((note) => note.content.includes(media.title))
     );
   });
-}
-
-function tokenize(input: string) {
-  return input.split(" ").filter((s) => s.length > 0);
 }

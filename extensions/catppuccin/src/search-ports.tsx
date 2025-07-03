@@ -1,47 +1,46 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActionPanel, Action, List } from "@raycast/api";
-import { SearchList } from "./components/SearchList";
 
-interface PortDetails {
-  name: string;
-  platform?: string | string[];
-  categories?: string[];
-  icon?: string;
-  color?: string;
-}
+import { getDefaultIcon, getIcon, isInvalidIcon } from "./utils/icons.util";
+import { SearchList } from "./components/SearchList";
+import type { Port } from "./types";
 
 export default function SearchPorts() {
-  const renderItem = (portName: string, portDetails: PortDetails) => {
-    const githubLink = `https://github.com/catppuccin/${portName}`;
-    const platform = Array.isArray(portDetails.platform)
-      ? portDetails.platform.join(", ")
-      : portDetails.platform || "Unknown Platform";
+  const renderItem = (key: string, port: Port) => {
+    const identifier = port.identifier || key;
+    const githubLink = port.repository?.url || `https://github.com/catppuccin/${identifier}`;
+    const platform = Array.isArray(port.platform) ? port.platform.join(", ") : port.platform || "Unknown";
 
     return (
       <List.Item
-        key={portName}
-        title={portDetails.name}
-        subtitle={`Platforms: ${platform}`}
-        accessories={portDetails.categories ? portDetails.categories.map((category) => ({ tag: category })) : undefined}
+        key={identifier}
+        title={port.name || key}
+        subtitle={platform}
+        accessories={[
+          ...port.categories.map((category) => {
+            if (typeof category === "string") {
+              return { tag: category };
+            } else if (category && typeof category === "object") {
+              const categoryName =
+                (category as any).name || (category as any).key || (category as any).title || "Unknown";
+              return { tag: categoryName };
+            }
+            return { tag: "Unknown" };
+          }),
+          ...(port["is-archived"] ? [{ tag: { value: "Archived", color: "#f38ba8" } }] : []),
+        ]}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser url={githubLink} title="Open GitHub" />
+            <Action.OpenInBrowser url={githubLink} />
+            {port.links?.map((link, index) => (
+              <Action.OpenInBrowser key={index} url={link.url} title={`Open ${link.name}`} />
+            ))}
           </ActionPanel>
         }
+        icon={port.icon && !isInvalidIcon(port.icon) ? getIcon(port.icon, port.color) : getDefaultIcon(port.color)}
       />
     );
   };
 
-  const filterFunction = (name: string, portDetails: PortDetails, searchText: string) => {
-    const lowerSearchText = searchText.toLowerCase();
-    return name.toLowerCase().includes(lowerSearchText) || portDetails.name.toLowerCase().includes(lowerSearchText);
-  };
-
-  return (
-    <SearchList<PortDetails>
-      dataKey="ports"
-      searchBarPlaceholder="Search ports..."
-      renderItem={renderItem}
-      filterFunction={filterFunction}
-    />
-  );
+  return <SearchList<Port> dataKey="ports" searchBarPlaceholder="Search ports..." renderItem={renderItem} />;
 }

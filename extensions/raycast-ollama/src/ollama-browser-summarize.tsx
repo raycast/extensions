@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { OllamaApiModelCapability } from "./lib/ollama/enum";
 import { CommandAnswer } from "./lib/settings/enum";
 import { Preferences } from "./lib/types";
 import { AnswerView } from "./lib/ui/AnswerView/main";
@@ -25,5 +26,5 @@ Some rules to follow precisely:
 
 Here's the website information:
 {browser-tab}`;
-  return <AnswerView command={c} prompt={p} />;
+  return <AnswerView command={c} prompt={p} capabilities={[OllamaApiModelCapability.COMPLETION]} />;
 }

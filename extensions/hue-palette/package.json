@@ -14,15 +14,15 @@
   "commands": [
     {
       "name": "hue-palette",
-      "title": "Hue Palette",
+      "title": "View Hue Palette",
       "subtitle": "Hue Palette",
       "description": "Explore color palettes to discover various color schemes and find inspiration for your design projects.",
       "mode": "view"
     },
     {
       "name": "hue-generator",
-      "title": "Hue Generator",
-      "subtitle": "Generate a custom hue palette",
+      "title": "View Hue Generator",
+      "subtitle": "Hue Palette",
       "description": "Generate a custom color palette based on your hues.",
       "mode": "view",
       "arguments": [
@@ -52,8 +52,15 @@
     {
       "name": "random-hue-generator",
       "title": "Random Hue Generator",
-      "subtitle": "Get a random hue palette",
+      "subtitle": "Hue Palette",
       "description": "Quickly generate a random set of hues to inspire your design process or discover unexpected color combinations.",
+      "mode": "view"
+    },
+    {
+      "name": "hue-generate-record",
+      "title": "Search Hue Palette History",
+      "subtitle": "Hue Palette",
+      "description": "View your generated hues and color palettes.",
       "mode": "view"
     }
   ],

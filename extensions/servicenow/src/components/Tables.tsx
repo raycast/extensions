@@ -1,16 +1,23 @@
 import { useState } from "react";
 
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCachedState, useFetch } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 
 import { DBObjectsResponse, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function Tables() {
-  const { instances, isLoading: isLoadingInstances, addInstance, mutate: mutateInstances } = useInstances();
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
+  const {
+    instances,
+    isLoading: isLoadingInstances,
+    addInstance,
+    mutate: mutateInstances,
+    selectedInstance,
+    setSelectedInstance,
+  } = useInstances();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -18,7 +25,7 @@ export default function Tables() {
 
   const instanceUrl = `https://${instanceName}.service-now.com`;
 
-  const { isLoading, data, mutate, pagination } = useFetch(
+  const { isLoading, data, revalidate, pagination } = useFetch(
     (options) => {
       const terms = searchTerm.split(" ");
       const query = terms.map((t) => `^labelLIKE${t}^ORnameLIKE${t}^ORsuper_class.labelLIKE${t}`).join("");
@@ -32,7 +39,7 @@ export default function Tables() {
       onError: (error) => {
         setErrorFetching(true);
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch history", error.message);
+        showToast(Toast.Style.Failure, "Could not fetch tables", error.message);
       },
 
       mapResult(response: DBObjectsResponse) {
@@ -92,17 +99,18 @@ export default function Tables() {
             description="Press ⏎ to refresh or try later again"
             actions={
               <ActionPanel>
-                <Actions mutate={mutate} />
+                <Actions revalidate={revalidate} />
               </ActionPanel>
             }
           />
         ) : (
           data?.map((table) => {
             const accessories: List.Item.Accessory[] = [];
+            const listUrl = buildServiceNowUrl(instanceName, `${table.name}_list.do`);
             if (table.super_class)
               accessories.push({
                 tag: { value: table.super_class },
-                tooltip: "Super Class",
+                tooltip: `Super Class: ${table.super_class}`,
               });
             return (
               <List.Item
@@ -115,28 +123,31 @@ export default function Tables() {
                   <ActionPanel>
                     <ActionPanel.Section title={table.label}>
                       <Action.OpenInBrowser
-                        title="Open in Servicenow"
-                        url={`${instanceUrl}/${table.name}_list.do`}
+                        title="Open in ServiceNow"
+                        url={listUrl}
                         icon={{ source: "servicenow.svg" }}
                       />
                       <Action.OpenInBrowser
                         title="Open Table Definition (Admins)"
-                        url={`${instanceUrl}/sys_db_object.do?sysparm_query=name=${table.name}`}
+                        url={buildServiceNowUrl(instanceName, `/sys_db_object.do?sysparm_query=name=${table.name}`)}
                         icon={{ source: "servicenow.svg" }}
                       />
                       <Action.OpenInBrowser
                         title="Open Schema Map (Admins)"
-                        url={`${instanceUrl}/generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=${table.name},show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext`}
+                        url={buildServiceNowUrl(
+                          instanceName,
+                          `generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=${table.name},show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext`,
+                        )}
                         icon={{ source: "servicenow.svg" }}
                         shortcut={{ modifiers: ["cmd"], key: "s" }}
                       />
                     </ActionPanel.Section>
                     <Action.CopyToClipboard
                       title="Copy URL"
-                      content={`${instanceUrl}/${table.name}_list.do`}
+                      content={listUrl}
                       shortcut={Keyboard.Shortcut.Common.CopyPath}
                     />
-                    <Actions mutate={mutate} />
+                    <Actions revalidate={revalidate} />
                   </ActionPanel>
                 }
               />

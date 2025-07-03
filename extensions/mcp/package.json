@@ -1,0 +1,186 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mcp",
+  "title": "Model Context Protocol",
+  "description": "Interact with the Model Context Protocol (MCP) in Raycast AI",
+  "icon": "mcp-icon.png",
+  "author": "EvanZhouDev",
+  "version": "1.1.0",
+  "contributors": [
+    "EugeneVanchugov",
+    "radzio"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raycast/extensions"
+  },
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-mcp-servers",
+      "title": "Manage MCP Servers",
+      "description": "Add, remove, or edit your MCP servers.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-mcp-clients",
+      "title": "Get MCP Clients",
+      "description": "Get data about loaded MCP clients"
+    },
+    {
+      "name": "run-mcp-tool",
+      "title": "Run MCP Tool",
+      "description": "Runs an available MCP tool. The client name, tool name, and tool parameters must be provided."
+    }
+  ],
+  "ai": {
+    "instructions": "get-mcp-clients must be called first to get the list of available MCP clients. Then, run-mcp-tool can be called to run a specific tool from one of the clients.",
+    "evals": [
+      {
+        "input": "@mcp think about derivative of cos(cos(sin(x)))",
+        "expected": [
+          {
+            "callsTool": "get-mcp-clients"
+          }
+        ],
+        "mocks": {
+          "get-mcp-clients": []
+        }
+      },
+      {
+        "input": "@mcp use calculator tool to add 2 and 3",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-mcp-clients"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "run-mcp-tool",
+              "args": {
+                "clientName": "my-tools",
+                "toolName": "calculator",
+                "toolParameters": "{ \"expression\": \"2 + 3\" }"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-mcp-clients": [
+            {
+              "name": "my-tools",
+              "tools": [
+                {
+                  "name": "calculator",
+                  "description": "A simple calculator tool",
+                  "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                      "expression": {
+                        "type": "string",
+                        "description": "Mathematical expression to evaluate"
+                      }
+                    },
+                    "required": [
+                      "expression"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "run-mcp-tool": {
+            "result": 5
+          }
+        },
+        "usedAsExample": false
+      },
+      {
+        "input": "@mcp get top posts from hackernews",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-mcp-clients"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "run-mcp-tool",
+              "args": {
+                "clientName": "hackernews",
+                "toolName": "getTopPosts",
+                "toolParameters": "{ \"limit\": 5 }"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-mcp-clients": [
+            {
+              "name": "hackernews",
+              "tools": [
+                {
+                  "name": "getTopPosts",
+                  "description": "Get top posts from Hacker News",
+                  "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                      "limit": {
+                        "type": "number",
+                        "description": "Number of posts to retrieve"
+                      }
+                    },
+                    "required": [
+                      "limit"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "run-mcp-tool": {
+            "result": [
+              {
+                "title": "Post 1",
+                "url": "https://example.com/post1"
+              },
+              {
+                "title": "Post 2",
+                "url": "https://example.com/post2"
+              }
+            ]
+          }
+        },
+        "usedAsExample": false
+      }
+    ]
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.9.0",
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.17.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

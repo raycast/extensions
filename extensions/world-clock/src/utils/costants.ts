@@ -1,12 +1,14 @@
 import { Icon } from "@raycast/api";
 
-export const TIMEZONE_BASE_URL = "https://worldtimeapi.org/api/timezone";
-export const IP_BASE_URL = "http://worldtimeapi.org/api/ip/";
-export const IP_GEOLOCATION_API = "http://ip-api.com/json/";
+const BASE_URL = "https://www.timeapi.io";
+export const API_ALL_TIMEZONE = BASE_URL + "/api/timezone/availabletimezones";
+export const API_CURRENT_TIME = BASE_URL + "/api/time/current/zone";
+export const API_TIMEZONE_BY_ZONE = BASE_URL + "/api/timezone/zone";
+export const API_TIMEZONE_BY_IP = BASE_URL + "/api/timezone/ip";
+export const API_IP_GEOLOCATION = "http://ip-api.com/json/";
 
 export enum localStorageKey {
   STAR_TIMEZONE = "StarTimeZone",
-  TIMEZONE_CACHE = "TimezoneCache",
   SHOW_DETAILS = "ShowDetails",
 }
 
@@ -16,6 +18,6 @@ export const filterTag = [
   { title: "Other", value: "Other", icon: Icon.Ellipsis },
 ];
 
-export const weeks = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
 export const icons = Object.values(Icon);
+
+export const TIME_SECOND_TO_HOUR = 60 * 60;

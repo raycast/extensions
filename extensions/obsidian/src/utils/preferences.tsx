@@ -1,5 +1,6 @@
 export interface GlobalPreferences {
   vaultPath: string;
+  configFileName: string;
   removeYAML: boolean;
   removeLinks: boolean;
   removeLatex: boolean;
@@ -40,6 +41,7 @@ export interface DailyNoteAppendPreferences {
   appendTemplate?: string;
   vaultName?: string;
   heading?: string;
+  prepend?: boolean;
   silent?: boolean;
 }
 
@@ -50,4 +52,5 @@ export interface appendTaskPreferences {
   notePath?: string;
   noteTag?: string;
   silent?: boolean;
+  creationDate?: boolean;
 }

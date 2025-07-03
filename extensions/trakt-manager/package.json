@@ -23,6 +23,13 @@
       "mode": "view"
     },
     {
+      "name": "episodes",
+      "title": "Search Episodes",
+      "subtitle": "Trakt Manager",
+      "description": "Search for episodes by title",
+      "mode": "view"
+    },
+    {
       "name": "watchlist",
       "title": "Watchlist",
       "subtitle": "Trakt Manager",
@@ -44,37 +51,40 @@
       "mode": "view"
     },
     {
-      "name": "refresh",
-      "title": "Refresh",
+      "name": "recommendations",
+      "title": "Recommendations",
       "subtitle": "Trakt Manager",
-      "description": "Refreshes the cache from API",
-      "mode": "no-view",
-      "interval": "6h"
+      "description": "Lists recommended movies and shows",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.1",
-    "@raycast/utils": "^1.16.1",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.91.1",
+    "@raycast/utils": "^1.18.1",
+    "@ts-rest/core": "^3.51.0",
+    "node-fetch": "^3.3.2",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
-    "eslint": "^8.51.0",
-    "prettier-plugin-organize-imports": "^3.2.4",
-    "syncpack": "^12.3.2",
-    "typescript": "^5.2.2"
+    "eslint": "^8.57.1",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "syncpack": "^13.0.2",
+    "typescript": "^5.7.3"
   },
   "icon": "trakt.png",
   "license": "MIT",
   "scripts": {
     "build": "ray build -e dist",
+    "check": "tsc --noEmit",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "fmt": "prettier '**/*' -wu && syncpack-format",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "ray publish",
+    "pull": "ray pull-contributions"
   },
   "title": "Trakt Manager"
 }

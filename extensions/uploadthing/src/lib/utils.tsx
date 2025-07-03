@@ -6,6 +6,8 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   Icon,
+  Color,
+  Image,
 } from "@raycast/api";
 import { ACL } from "@uploadthing/shared";
 import { readFile } from "node:fs/promises";
@@ -121,4 +123,11 @@ export const getSignedUrls = async (files: { key: string }[]) => {
       return url;
     }),
   );
+};
+
+export const StatusIconMap: Record<string, Image.ImageLike> = {
+  "Deletion Pending": { source: Icon.Document, tintColor: Color.Orange },
+  Failed: { source: Icon.Document, tintColor: Color.Red },
+  Uploaded: { source: Icon.Document, tintColor: Color.Green },
+  Uploading: { source: Icon.Document, tintColor: Color.Blue },
 };

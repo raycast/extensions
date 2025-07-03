@@ -23,13 +23,19 @@ import useBraveNightlyBookmarks from "./hooks/useBraveNightlyBookmarks";
 import useChromeBetaBookmarks from "./hooks/useChromeBetaBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
 import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
+import useDiaBookmarks from "./hooks/useDiaBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
 import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
+import useGhostBrowserBookmarks from "./hooks/useGhostBrowserBookmarks";
+import useIslandBookmarks from "./hooks/useIslandBookmarks";
+import usePrismaAccessBookmarks from "./hooks/usePrismaAccessBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
+import useWhaleBookmarks from "./hooks/useWhaleBookmarks";
+import useZenBookmarks from "./hooks/useZenBookmarks";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
@@ -106,14 +112,20 @@ export default function Command() {
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
   const hasChromeBeta = browsers.includes(BROWSERS_BUNDLE_ID.chromeBeta) ?? false;
   const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
+  const hasDia = browsers.includes(BROWSERS_BUNDLE_ID.dia) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
   const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasFirefoxDev = browsers.includes(BROWSERS_BUNDLE_ID.firefoxDev) ?? false;
+  const hasGhostBrowser = browsers.includes(BROWSERS_BUNDLE_ID.ghostBrowser) ?? false;
+  const hasIsland = browsers.includes(BROWSERS_BUNDLE_ID.island) ?? false;
+  const hasPrismaAccess = browsers.includes(BROWSERS_BUNDLE_ID.prismaAccess) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
   const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
+  const hasZen = browsers.includes(BROWSERS_BUNDLE_ID.zen) ?? false;
+  const hasWhale = browsers.includes(BROWSERS_BUNDLE_ID.whale) ?? false;
 
   const arc = useArcBookmarks(hasArc);
   const brave = useBraveBookmarks(hasBrave);
@@ -122,13 +134,19 @@ export default function Command() {
   const chrome = useChromeBookmarks(hasChrome);
   const chromeBeta = useChromeBetaBookmarks(hasChromeBeta);
   const chromeDev = useChromeDevBookmarks(hasChromeDev);
+  const dia = useDiaBookmarks(hasDia);
   const edge = useEdgeBookmarks(hasEdge);
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
   const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
   const firefox = useFirefoxBookmarks(hasFirefox || hasFirefoxDev);
+  const ghostBrowser = useGhostBrowserBookmarks(hasGhostBrowser);
+  const island = useIslandBookmarks(hasIsland);
+  const prismaAccess = usePrismaAccessBookmarks(hasPrismaAccess);
   const safari = useSafariBookmarks(hasSafari);
   const sidekick = useSidekickBookmarks(hasSidekick);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
+  const whale = useWhaleBookmarks(hasWhale);
+  const zen = useZenBookmarks(hasZen);
 
   const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
   const [folders, setFolders] = useCachedState<Folder[]>("folders", []);
@@ -142,13 +160,19 @@ export default function Command() {
       ...chrome.bookmarks,
       ...chromeBeta.bookmarks,
       ...chromeDev.bookmarks,
+      ...dia.bookmarks,
       ...edge.bookmarks,
       ...edgeCanary.bookmarks,
       ...edgeDev.bookmarks,
       ...firefox.bookmarks,
+      ...ghostBrowser.bookmarks,
+      ...island.bookmarks,
+      ...prismaAccess.bookmarks,
       ...safari.bookmarks,
       ...sidekick.bookmarks,
       ...vivaldi.bookmarks,
+      ...whale.bookmarks,
+      ...zen.bookmarks,
     ]
       .map((item) => {
         let domain;
@@ -190,13 +214,19 @@ export default function Command() {
     chrome.bookmarks,
     chromeBeta.bookmarks,
     chromeDev.bookmarks,
+    dia.bookmarks,
     edge.bookmarks,
     edgeCanary.bookmarks,
     edgeDev.bookmarks,
     firefox.bookmarks,
+    ghostBrowser.bookmarks,
+    island.bookmarks,
+    prismaAccess.bookmarks,
     safari.bookmarks,
     sidekick.bookmarks,
     vivaldi.bookmarks,
+    whale.bookmarks,
+    zen.bookmarks,
     frecencies,
     setBookmarks,
   ]);
@@ -210,13 +240,19 @@ export default function Command() {
       ...chrome.folders,
       ...chromeBeta.folders,
       ...chromeDev.folders,
+      ...dia.folders,
       ...edge.folders,
       ...edgeCanary.folders,
       ...edgeDev.folders,
       ...firefox.folders,
+      ...ghostBrowser.folders,
+      ...island.folders,
+      ...prismaAccess.folders,
       ...safari.folders,
       ...sidekick.folders,
       ...vivaldi.folders,
+      ...whale.folders,
+      ...zen.folders,
     ];
 
     setFolders(folders);
@@ -228,13 +264,19 @@ export default function Command() {
     chrome.folders,
     chromeBeta.folders,
     chromeDev.folders,
+    dia.folders,
     edge.folders,
     edgeCanary.folders,
     edgeDev.folders,
     firefox.folders,
+    ghostBrowser.folders,
+    island.folders,
+    prismaAccess.folders,
     safari.folders,
     sidekick.folders,
     vivaldi.folders,
+    whale.folders,
+    zen.folders,
     setFolders,
   ]);
 
@@ -331,6 +373,9 @@ export default function Command() {
     if (hasChromeDev) {
       chromeDev.mutate();
     }
+    if (hasDia) {
+      dia.mutate();
+    }
     if (hasEdge) {
       edge.mutate();
     }
@@ -343,6 +388,15 @@ export default function Command() {
     if (hasFirefox || hasFirefoxDev) {
       firefox.mutate();
     }
+    if (hasGhostBrowser) {
+      ghostBrowser.mutate();
+    }
+    if (hasIsland) {
+      island.mutate();
+    }
+    if (hasPrismaAccess) {
+      prismaAccess.mutate();
+    }
     if (hasSafari) {
       safari.mutate();
     }
@@ -351,6 +405,12 @@ export default function Command() {
     }
     if (hasVivaldi) {
       vivaldi.mutate();
+    }
+    if (hasWhale) {
+      whale.mutate();
+    }
+    if (hasZen) {
+      zen.mutate();
     }
   }
 
@@ -400,13 +460,19 @@ export default function Command() {
         chrome.isLoading ||
         chromeBeta.isLoading ||
         chromeDev.isLoading ||
+        dia.isLoading ||
         edge.isLoading ||
         edgeCanary.isLoading ||
         edgeDev.isLoading ||
         firefox.isLoading ||
+        ghostBrowser.isLoading ||
+        island.isLoading ||
+        prismaAccess.isLoading ||
         safari.isLoading ||
         sidekick.isLoading ||
-        vivaldi.isLoading
+        vivaldi.isLoading ||
+        whale.isLoading ||
+        zen.isLoading
       }
       searchBarPlaceholder="Search by title, domain name, or folder name"
       onSearchTextChange={setQuery}
@@ -523,6 +589,15 @@ export default function Command() {
                     setCurrentProfile={chromeDev.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.dia}
+                    name="Dia"
+                    icon="dia.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                    profiles={dia.profiles}
+                    currentProfile={dia.currentProfile}
+                    setCurrentProfile={dia.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.edge}
                     name="Edge"
                     icon="edge.png"
@@ -562,10 +637,29 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.firefoxDev}
                     name="Firefox Dev"
                     icon="firefoxDev.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                     profiles={firefox.profiles}
                     currentProfile={firefox.currentProfile}
                     setCurrentProfile={firefox.setCurrentProfile}
+                  />
+                  {/* Note: Ghost Browser doesn't seem to have a profile feature - no profile switching submenu added for it. */}
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.island}
+                    name="Island"
+                    icon="island.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                    profiles={island.profiles}
+                    currentProfile={island.currentProfile}
+                    setCurrentProfile={island.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.prismaAccess}
+                    name="Prisma Access"
+                    icon="prisma-access.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    profiles={prismaAccess.profiles}
+                    currentProfile={prismaAccess.currentProfile}
+                    setCurrentProfile={prismaAccess.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.vivaldi}
@@ -575,6 +669,24 @@ export default function Command() {
                     profiles={vivaldi.profiles}
                     currentProfile={vivaldi.currentProfile}
                     setCurrentProfile={vivaldi.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.whale}
+                    name="Whale"
+                    icon="whale.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                    profiles={whale.profiles}
+                    currentProfile={whale.currentProfile}
+                    setCurrentProfile={whale.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.zen}
+                    name="Zen"
+                    icon="zen.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "z" }}
+                    profiles={zen.profiles}
+                    currentProfile={zen.currentProfile}
+                    setCurrentProfile={zen.setCurrentProfile}
                   />
                 </ActionPanel.Section>
 

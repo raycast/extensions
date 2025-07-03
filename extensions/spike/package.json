@@ -5,7 +5,7 @@
   "description": "Resolve incidents, check who is on-call, and add overrides from Raycast.",
   "icon": "spike-logo.png",
   "author": "damanpreet_singh",
-  "owner": "spike.sh",
+  "owner": "spike",
   "access": "public",
   "categories": [
     "Developer Tools"
@@ -74,7 +74,7 @@
   "dependencies": {
     "@raycast/api": "^1.83.2",
     "@raycast/utils": "^1.17.0",
-    "axios": "^1.7.7",
+    "axios": "^1.8.4",
     "crypto-js": "^4.2.0",
     "moment-timezone": "^0.5.46"
   },

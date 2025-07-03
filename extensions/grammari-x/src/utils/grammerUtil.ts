@@ -38,7 +38,7 @@ class OpenAIModule {
   private async gptRequest(prompt: string): Promise<string> {
     const response = await this.openai?.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       temperature: 0.5,
     });
 

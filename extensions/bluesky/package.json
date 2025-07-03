@@ -3,7 +3,7 @@
   "name": "bluesky",
   "title": "Bluesky",
   "description": "Browse through your Bluesky timeline. Create new posts, find people, and view your notifications.",
-  "icon": "extension-icon.png",
+  "icon": "bsky-logo-1.png",
   "author": "dharamkapila",
   "categories": [
     "Communication",
@@ -20,6 +20,7 @@
       "title": "Bluesky Service URL",
       "description": "Service URL",
       "default": "https://bsky.social",
+      "placeholder": "https://bsky.social",
       "name": "service",
       "required": true
     },
@@ -28,6 +29,7 @@
       "title": "Bluesky Email or Handle",
       "description": "Your Bluesky email or handle",
       "name": "accountId",
+      "placeholder": "bsky.app",
       "required": true
     },
     {
@@ -35,6 +37,7 @@
       "title": "App Password",
       "description": "Your App Password",
       "name": "password",
+      "placeholder": "xxxx-xxxx-xxxx-xxxx",
       "required": true
     }
   ],
@@ -101,10 +104,10 @@
     }
   ],
   "dependencies": {
-    "@atproto/api": "^0.13.12",
+    "@atproto/api": "^0.14.7",
     "@atproto/uri": "^0.1.1",
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
     "cross-fetch": "^3.1.5",
     "use-debounce": "^9.0.4"
   },
@@ -122,6 +125,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -1,5 +1,10 @@
 # Unicode Symbols
 
+## [Improvements] - 2024-12-17
+
+- Added option to set Primary Action (`copy`/`paste`) - ([#15901](https://github.com/raycast/extensions/issues/15901))
+- Updated (dev) dependencies
+
 ## [Improvements] - 2024-10-11
 
 - Updated the paste action to dynamically show the name and icon of the frontmost application.

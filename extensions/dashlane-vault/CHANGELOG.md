@@ -1,5 +1,14 @@
 # Dashlane Vault Changelog
 
+## [Improvements] - 2025-02-04
+
+- Add Manage devices command
+- Handle parallel CLI requests
+- Add password strength information
+- Improve error handling:
+  - CLI path is set but false
+  - Show more error information on Sync command
+
 ## [Improvements] - 2024-10-25
 
 - Add frecency sorting to passwords

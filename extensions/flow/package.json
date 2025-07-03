@@ -5,6 +5,9 @@
   "description": "Control Flow application timer",
   "icon": "flow.png",
   "author": "vimtor",
+  "contributors": [
+    "tyuichis"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -12,7 +15,10 @@
       "title": "Start Timer",
       "subtitle": "Flow",
       "description": "Resume current timer",
-      "keywords": ["start", "play"],
+      "keywords": [
+        "start",
+        "play"
+      ],
       "mode": "no-view"
     },
     {
@@ -20,7 +26,9 @@
       "title": "Pause Timer",
       "subtitle": "Flow",
       "description": "Pause current timer",
-      "keywords": ["stop"],
+      "keywords": [
+        "stop"
+      ],
       "mode": "no-view"
     },
     {
@@ -56,7 +64,10 @@
       "title": "Reset Timer",
       "subtitle": "Flow",
       "description": "Reset current timer",
-      "keywords": ["reset", "restart"],
+      "keywords": [
+        "reset",
+        "restart"
+      ],
       "mode": "no-view"
     },
     {
@@ -71,6 +82,21 @@
       "subtitle": "Flow",
       "description": "Start the next focus session",
       "mode": "no-view"
+    },
+    {
+      "name": "set-session-title",
+      "title": "Set Session Title",
+      "description": "Set the session title for Flow",
+      "subtitle": "Flow",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Enter session title",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "categories": [
@@ -78,7 +104,7 @@
     "Productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.50.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
@@ -88,13 +114,18 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "prettier": "^3.5.1",
+    "react-devtools": "^5.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,8 +1,7 @@
 import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI, Detail } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
-import qs from 'qs';
 
-import { getAreas, getTags, silentlyOpenThingsURL, thingsNotRunningError } from './api';
+import { addProject, getAreas, getTags, thingsNotRunningError } from './api';
 import { listItems } from './helpers';
 import { getDateString } from './utils';
 
@@ -38,7 +37,7 @@ export function AddNewProject({ draftValues }: AddNewProjectProps) {
         'to-dos': values.toDos,
       };
 
-      await silentlyOpenThingsURL(`things:///add-project?${qs.stringify(json)}`);
+      await addProject(json);
 
       showToast({ style: Toast.Style.Success, title: 'Added new project', message: values.title });
       reset({ title: '', notes: '', tags: [], when: '', areaId: '', toDos: '', deadline: null });

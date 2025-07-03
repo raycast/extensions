@@ -25,7 +25,7 @@ export default async function testAssetsStream() {
     "Number of assets from controller is not equal to the number of assets from the identifiers snapshot",
   );
 
-  const asset = await saveTextToPieces('console.log("hello world"');
+  const asset = await saveTextToPieces('console.log("hello world")');
   await sleep(300);
 
   expect(assets.length).to.eq(

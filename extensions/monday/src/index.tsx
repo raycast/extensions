@@ -1,63 +1,20 @@
 import { ActionPanel, Image, List, Action, Icon } from "@raycast/api";
-import { useState, useEffect } from "react";
 import AddItem from "./addItem";
-import { Me, Board, Account } from "./lib/models";
-import {
-  getCachedBoards,
-  cacheBoards,
-  getCachedUser,
-  cacheUser,
-} from "./lib/persistence";
+import { Board, Account } from "./lib/models";
 import { getBoardsAndUser } from "./lib/api";
 import { ErrorView } from "./lib/helpers";
+import { useCachedPromise } from "@raycast/utils";
+import BoardItems from "./boardItems";
 
 export default function BoardsList() {
-  const [state, setState] = useState<{
-    isLoading: boolean;
-    boards: Board[];
-    me?: Me;
-    error?: string;
-  }>({ isLoading: true, boards: [] });
-  useEffect(() => {
-    async function fetch() {
-      // Fetch from cache first
-      const [cachedBoards, cachedUser] = await Promise.all([
-        getCachedBoards(),
-        getCachedUser(),
-      ]);
-      if (cachedBoards && cachedUser) {
-        setState((oldState) => ({
-          ...oldState,
-          boards: cachedBoards,
-          me: cachedUser,
-        }));
-      }
+  const state = useCachedPromise(getBoardsAndUser, [], {
+    initialData: {
+      me: undefined,
+      boards: [],
+    },
+  });
 
-      try {
-        // In any case, fetch remote and re-fill cache and state
-        const response = await getBoardsAndUser();
-        await Promise.all([
-          cacheUser(response.me),
-          cacheBoards(response.boards),
-        ]);
-
-        setState((oldState) => ({
-          ...oldState,
-          boards: response.boards || [],
-          me: response.me,
-          isLoading: false,
-        }));
-      } catch (error) {
-        setState((oldState) => ({
-          ...oldState,
-          error: error as string,
-        }));
-      }
-    }
-    fetch();
-  }, []);
-
-  const account = state.me?.account;
+  const account = state.data.me?.account;
   if (state.error) {
     return <ErrorView error={state.error} />;
   } else if (account) {
@@ -66,7 +23,7 @@ export default function BoardsList() {
         isLoading={state.isLoading}
         searchBarPlaceholder="Filter boards by name..."
       >
-        {state.boards.map((board) => BuildBoardItem({ board, account }))}
+        {state.data.boards.map((board) => BuildBoardItem({ board, account }))}
       </List>
     );
   } else {
@@ -91,8 +48,12 @@ function BuildBoardItem({
         mask: Image.Mask.Circle,
       }}
       subtitle={board.workspace?.name ?? "Main Workspace"}
-      accessoryTitle={getPrettyDate(new Date(board.updated_at))}
       actions={getBoardActions(board, account)}
+      accessories={[
+        {
+          text: getPrettyDate(new Date(board.updated_at)),
+        },
+      ]}
     />
   );
 }
@@ -150,17 +111,26 @@ function getBoardActions(board: Board, account: Account) {
 
   return (
     <ActionPanel>
-      <Action.OpenInBrowser title="Open Board" url={boardUrl} />
+      <Action.OpenInBrowser
+        icon="work-management.svg"
+        title="Open Board"
+        url={boardUrl}
+      />
       <Action.Push
-        title="Add an item"
+        title="Add an Item"
         target={<AddItem board={board} />}
         icon={Icon.Plus}
-        shortcut={{ modifiers: ["cmd"], key: "enter" }}
       />
       <Action.CopyToClipboard
-        title="Copy board link"
+        title="Copy Board Link"
         content={boardUrl}
         shortcut={{ modifiers: ["opt"], key: "c" }}
+      />
+      <Action.Push
+        shortcut={{ modifiers: ["cmd"], key: "v" }}
+        icon={Icon.List}
+        title="View Board Items"
+        target={<BoardItems boardId={board.id} />}
       />
     </ActionPanel>
   );

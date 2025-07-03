@@ -1,83 +1,76 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
-import * as yaml from "js-yaml";
-import Ajv from "ajv";
 
-type DataType = "ports" | "styles";
+export type DataType = "ports" | "categories" | "collaborators" | "showcases" | "userstyles";
 
-const ajv = new Ajv();
+const API_BASE_URL = "https://catppuccin.dvh.sh";
+const dataCache: { [key in DataType]?: any } = {};
 
-const BASE_URLS = {
-  ports: "https://raw.githubusercontent.com/catppuccin/catppuccin",
-  styles: "https://raw.githubusercontent.com/catppuccin/userstyles",
-};
-
-const FILE_PATHS = {
-  ports: {
-    main: "/main/resources/ports.yml",
-    fallback: "/6eeafba3f426d72b5d47ab8e843845612e3b7947/resources/ports.yml",
-    schema: "/main/resources/ports.schema.json",
-  },
-  styles: {
-    main: "/main/scripts/userstyles.yml",
-    fallback: "/061ac554c1bed32db3b627f83ab402c0b2b26ee0/scripts/userstyles.yml",
-    schema: "/main/scripts/userstyles.schema.json",
-  },
-};
-
-const getURL = (type: DataType, version: "main" | "fallback" | "schema"): string => {
-  return `${BASE_URLS[type]}${FILE_PATHS[type][version]}`;
-};
-
-const dataCache: { [key in DataType]?: unknown } = {};
-
-const fetchYAML = async (url: string): Promise<unknown> => {
-  const res = await axios.get(url);
-  return yaml.load(res.data);
-};
-
-const fetchSchema = async (url: string): Promise<unknown> => {
-  const res = await axios.get(url);
-  return res.data;
-};
-
-const validateSchema = <T>(data: unknown, schema: unknown): data is T => {
-  const validate = ajv.compile<T>(schema);
-  return validate(data);
-};
-
-const fetchData = async <T>(type: DataType): Promise<T> => {
+export const fetchData = async <T>(type: DataType): Promise<Record<string, T>> => {
   if (dataCache[type]) {
-    return dataCache[type] as T;
+    return dataCache[type];
   }
 
   try {
-    const [dataJSON, schema] = await Promise.all([
-      fetchYAML(getURL(type, "main")),
-      fetchSchema(getURL(type, "schema")),
-    ]);
+    let allData: T[] = [];
+    let page = 1;
+    let hasMore = true;
 
-    if (!validateSchema<T>(dataJSON, schema)) {
-      const fallbackData = await fetchYAML(getURL(type, "fallback"));
-      if (!validateSchema<T>(fallbackData, schema)) {
-        throw new Error("Data validation failed for both main and fallback data.");
+    while (hasMore) {
+      const response = await axios.get(`${API_BASE_URL}/${type}?page=${page}&per_page=100`);
+
+      if (response.data && Array.isArray(response.data)) {
+        allData = [...allData, ...response.data];
+        hasMore = false;
+      } else if (response.data && response.data[type]) {
+        if (Array.isArray(response.data[type])) {
+          allData = [...allData, ...response.data[type]];
+        } else {
+          const items = Object.entries(response.data[type]).map(([key, value]: [string, any]) => ({
+            ...value,
+            identifier: key,
+          }));
+          allData = [...allData, ...items];
+        }
+
+        if (response.data.pagination) {
+          hasMore = page < response.data.pagination.total_pages;
+        } else {
+          hasMore = false;
+        }
+      } else {
+        hasMore = false;
       }
-      dataCache[type] = fallbackData;
-      return fallbackData as T;
+
+      page++;
     }
-    dataCache[type] = dataJSON;
-    return dataJSON as T;
+
+    const dataObject: Record<string, T> = {};
+    allData.forEach((item: any) => {
+      const key = item.identifier || item.key || item.username || item.title || item.name || item.id;
+      if (key) {
+        dataObject[key] = item;
+      }
+    });
+
+    dataCache[type] = dataObject;
+    return dataObject;
   } catch (error) {
-    throw new Error(`Failed to fetch data: ${(error as Error).message}`);
+    throw new Error(`Failed to fetch ${type}: ${(error as Error).message}`);
   }
 };
 
-const isValidUrl = (url: string) => {
+export const getApiHealth = async (): Promise<boolean> => {
   try {
-    new URL(url);
-    return true;
+    const { data } = await axios.get(`${API_BASE_URL}/health`);
+    return data.status === "healthy" || data.status === "ok";
   } catch {
     return false;
   }
 };
 
-export { fetchData, isValidUrl };
+export const clearCache = () => {
+  Object.keys(dataCache).forEach((key) => {
+    delete dataCache[key as DataType];
+  });
+};

@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/a
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
-import { CollectionCreationResponse, FormValues, Preferences } from "../types";
+import { CollectionCreationResponse, FormValues } from "../types";
 
 import { useRequest } from "../hooks/useRequest";
 import { useTags } from "../hooks/useTags";

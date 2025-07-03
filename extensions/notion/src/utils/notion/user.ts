@@ -1,11 +1,16 @@
+import { iteratePaginatedAPI } from "@notionhq/client";
+
 import { handleError, isNotNullOrUndefined } from "./global";
 import { getNotionClient } from "./oauth";
 
 export async function fetchUsers() {
   try {
     const notion = getNotionClient();
-    const users = await notion.users.list({});
-    return users.results
+    const users = [];
+    for await (const user of iteratePaginatedAPI(notion.users.list, {})) {
+      users.push(user);
+    }
+    return users
       .map((x) => (x.object === "user" && x.type === "person" ? x : undefined))
       .filter(isNotNullOrUndefined)
       .map(

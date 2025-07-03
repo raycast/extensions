@@ -8,7 +8,8 @@
   "license": "MIT",
   "contributors": [
     "tonka3000",
-    "BalliAsghar"
+    "BalliAsghar",
+    "imposibrus"
   ],
   "commands": [
     {
@@ -85,6 +86,9 @@
     "axios": "^0.27.2",
     "axios-retry": "^3.3.1"
   },
+  "overrides": {
+    "tar-fs": ">=3.0.9"
+  },
   "devDependencies": {
     "@types/node": "^18.0.0",
     "@types/react": "^17.0.28",
@@ -92,6 +96,7 @@
     "@typescript-eslint/parser": "^5.29.0",
     "eslint": "^8.18.0",
     "eslint-config-prettier": "^8.5.0",
+    "prettier": "^3.3.3",
     "react-devtools": "^4.24.7",
     "typescript": "^4.7.4"
   },

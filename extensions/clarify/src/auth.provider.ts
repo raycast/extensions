@@ -22,8 +22,8 @@ export const oAuthDev = new OAuthService({
   client: clientDev,
   clientId: "UgjkQ9A6Ey2SNOmYP7AWQyVncvHp4dxc",
   scope: scopes.join(" "),
-  authorizeUrl: "https://auth.dev.getclarify.ai/authorize",
-  tokenUrl: "https://auth.dev.getclarify.ai/oauth/token",
+  authorizeUrl: "https://auth.dev.clarify.ai/authorize",
+  tokenUrl: "https://auth.dev.clarify.ai/oauth/token",
   extraParameters,
   onAuthorize,
 });
@@ -40,8 +40,8 @@ export const oAuthProd = new OAuthService({
   client: clientProd,
   clientId: "XcByc8h1MOn8Zoo757jKAns0mQoc7xd1",
   scope: scopes.join(" "),
-  authorizeUrl: "https://auth.getclarify.ai/authorize",
-  tokenUrl: "https://auth.getclarify.ai/oauth/token",
+  authorizeUrl: "https://auth.clarify.ai/authorize",
+  tokenUrl: "https://auth.clarify.ai/oauth/token",
   extraParameters,
   onAuthorize,
 });

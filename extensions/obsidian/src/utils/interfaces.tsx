@@ -1,45 +1,6 @@
 import { Image } from "@raycast/api";
-
-export interface Vault {
-  name: string;
-  key: string;
-  path: string;
-}
-
-export interface Note {
-  title: string;
-  path: string;
-  lastModified: Date;
-  tags: string[];
-  content: string;
-  bookmarked: boolean;
-}
-
-export interface CodeBlock {
-  language: string;
-  code: string;
-}
-
-export interface FormValue {
-  path: string;
-  name: string;
-  content: string;
-  tags: string[];
-}
-interface ObsidianVaultJSON {
-  path: string;
-  ts: number;
-  open: boolean;
-}
-
-export interface ObsidianJSON {
-  vaults: Record<string, ObsidianVaultJSON>;
-}
-
-export interface ObsidianVaultsState {
-  ready: boolean;
-  vaults: Vault[];
-}
+import { Note } from "../api/vault/notes/notes.types";
+import { Vault } from "../api/vault/vault.types";
 
 export interface SearchArguments {
   searchArgument: string;
@@ -68,7 +29,7 @@ export interface NoteListProps {
   notes: Note[];
   isLoading?: boolean;
   searchArguments: SearchArguments;
-  action?: (note: Note, vault: Vault) => React.ReactFragment;
+  action?: (note: Note, vault: Vault) => React.ReactNode;
   onDelete?: (note: Note, vault: Vault) => void;
   onSearchChange?: (search: string) => void;
 }

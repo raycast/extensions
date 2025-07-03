@@ -69,3 +69,4 @@ Many thanks to the following resources and people:
 - [Raycast Slack community](https://www.raycast.com/community)
 - Airtable Developer Platform & Ecosystem team
 - @marks and @SeanKeenan-at built this extension
+- @xmok currently managing the OAuth App

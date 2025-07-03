@@ -9,14 +9,20 @@ export const BROWSERS_BUNDLE_ID = {
   chrome: "com.google.chrome",
   chromeBeta: "com.google.chrome.beta",
   chromeDev: "com.google.chrome.dev",
+  dia: "company.thebrowser.dia",
   firefox: "org.mozilla.firefox",
   firefoxDev: "org.mozilla.firefoxdeveloperedition",
+  ghostBrowser: "com.ghostbrowser.gb1",
+  island: "io.island.island",
   safari: "com.apple.safari",
   sidekick: "com.pushplaylabs.sidekick",
   edge: "com.microsoft.edgemac",
   edgeDev: "com.microsoft.edgemac.dev",
   edgeCanary: "com.microsoft.edgemac.canary",
+  prismaAccess: "com.talon-sec.work",
   vivaldi: "com.vivaldi.vivaldi",
+  zen: "org.mozilla.com.zen.browser",
+  whale: "com.naver.whale",
 };
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);

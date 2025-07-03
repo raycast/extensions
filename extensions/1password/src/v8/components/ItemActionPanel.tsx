@@ -46,7 +46,8 @@ function OpenIn1Password(account: User | undefined, item: Item) {
     return (
       <Action.Open
         key="open-in-1password"
-        title="Open In 1Password"
+        // eslint-disable-next-line @raycast/prefer-title-case
+        title="Open in 1Password"
         target={`onepassword://view-item/?a=${account.account_uuid}&v=${item.vault.id}&i=${item.id}`}
         application="com.1password.1password"
         shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
@@ -63,7 +64,7 @@ function OpenInBrowser(item: Item) {
     return (
       <Action.OpenInBrowser
         key="open-in-browser"
-        title="Open In Browser"
+        title="Open in Browser"
         url={href}
         shortcut={{ modifiers: ["opt"], key: "return" }}
       />

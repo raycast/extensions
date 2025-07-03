@@ -1,3 +1,5 @@
+import { environment } from "@raycast/api";
+
 export type StoredDatabase = {
   connectionString: string;
   name: string;
@@ -5,6 +7,16 @@ export type StoredDatabase = {
 
 export type TableInfo = {
   columns: ColumnInfo[];
+  relations?: RelationInfo[];
+};
+
+export type RelationInfo = {
+  direction: "inbound" | "outbound";
+  constraintName?: string;
+  foreignSchema: string;
+  foreignTable: string;
+  columnNames: string[];
+  foreignColumnNames: string[];
 };
 
 export type ColumnInfo = {
@@ -16,10 +28,11 @@ export type ColumnInfo = {
   typeId: number;
   isNullable: boolean;
   defaultValue: string | null;
+  enumValues?: string[];
   isPrimaryKey: boolean;
 };
 
-export type CustomQueryList = {
+export type CustomQuery = {
   type: CustomQueryType;
   connectionString: string;
   query: string;
@@ -49,3 +62,11 @@ export type TimeSeriesItem = {
   category?: string;
   count: number;
 };
+
+export type LaunchContext = {
+  view: "search-table";
+  schemaTable: string;
+  searchText: string;
+};
+
+export const launchContext: LaunchContext | null = (environment.launchContext as LaunchContext) || null;

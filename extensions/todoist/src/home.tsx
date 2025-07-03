@@ -1,7 +1,6 @@
 import { Color, Icon, LaunchProps, List, getPreferenceValues } from "@raycast/api";
 import { useMemo, useState } from "react";
 
-import { handleError } from "./api";
 import CompletedTasks from "./components/CompletedTasks";
 import FilterTasks from "./components/FilterTasks";
 import InboxTasks from "./components/InboxTasks";
@@ -10,12 +9,12 @@ import ProjectTasks from "./components/ProjectTasks";
 import TaskDetail from "./components/TaskDetail";
 import TodayTasks from "./components/TodayTasks";
 import UpcomingTasks from "./components/UpcomingTasks";
-import View from "./components/View";
 import { getColorByKey } from "./helpers/colors";
 import { getFilterAppUrl, getFilterUrl } from "./helpers/filters";
 import { getLabelAppUrl, getLabelUrl } from "./helpers/labels";
 import { getProjectAppUrl, getProjectIcon, getProjectUrl } from "./helpers/projects";
 import { searchBarPlaceholder as defaultSearchBarPlaceholder } from "./helpers/tasks";
+import { withTodoistApi } from "./helpers/withTodoistApi";
 import useSyncData from "./hooks/useSyncData";
 
 export type ViewType =
@@ -45,12 +44,8 @@ export enum ViewMode {
 export function Home({ launchContext }: LaunchProps) {
   const { view: preferencesView } = getPreferenceValues<Preferences.Home>();
 
-  const { data, isLoading, error } = useSyncData();
+  const { data, isLoading } = useSyncData();
   const [view, setView] = useState<ViewType>(launchContext?.view ?? preferencesView ?? "today");
-
-  if (error) {
-    handleError({ error, title: "Unable to get Todoist data" });
-  }
 
   const projects = useMemo(() => {
     return data?.projects.filter((p) => !p.inbox_project) ?? [];
@@ -65,7 +60,7 @@ export function Home({ launchContext }: LaunchProps) {
   }, [data]);
 
   const { component, searchBarPlaceholder, navigationTitle } = useMemo(() => {
-    let component: JSX.Element | null = null;
+    let component: React.ReactElement | null = null;
     let searchBarPlaceholder = defaultSearchBarPlaceholder;
     let navigationTitle = view as string;
 
@@ -238,15 +233,11 @@ export function Home({ launchContext }: LaunchProps) {
       }
       isLoading={isLoading}
     >
+      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+      {/* @ts-expect-error */}
       {component}
     </List>
   );
 }
 
-export default function Command(props: LaunchProps) {
-  return (
-    <View>
-      <Home {...props} />
-    </View>
-  );
-}
+export default withTodoistApi(Home);

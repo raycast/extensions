@@ -1,5 +1,13 @@
 # JSR Changelog
 
+## [Updates] - 2024-12-04
+
+- Update API Search key retrieval (search was showing empty results)
+
+## [Updates] - 2024-11-02
+
+- Update Deno Logo
+
 ## [Improvements] - 2024-09-17
 
 - Added Version list

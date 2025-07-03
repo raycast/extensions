@@ -1,5 +1,9 @@
 # YouTube Changelog
 
+## [Fix] - 2025-05-20
+
+- Fixed missing call to add recent video when opening with IINA from video details
+
 ## [Enhancement] - 2024-10-22
 
 - Update the cache in the `search-videos` and `search-channels` commands to use local storage

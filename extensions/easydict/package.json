@@ -6,7 +6,9 @@
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
-  "contributors": [],
+  "contributors": [
+    "ViGeng"
+  ],
   "commands": [
     {
       "name": "easydict",
@@ -55,7 +57,7 @@
   "dependencies": {
     "@raycast/api": "^1.68.0",
     "@vitalets/google-translate-api": "^9.1.0",
-    "axios": "^1.7.4",
+    "axios": "^1.8.4",
     "cheerio": "^1.0.0-rc.12",
     "crypto-js": "^4.2.0",
     "eventsource": "^2.0.2",
@@ -704,7 +706,7 @@
     {
       "title": "OpenAI API Key",
       "name": "openAIAPIKey",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your OpenAI API Key",
       "default": ""
@@ -729,7 +731,7 @@
     {
       "title": "DeepL Auth Key",
       "name": "deepLAuthKey",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your DeepL Auth Key",
       "default": ""
@@ -754,7 +756,7 @@
     {
       "title": "Baidu App Secret",
       "name": "baiduAppSecret",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your Baidu App Secret",
       "default": ""
@@ -770,7 +772,7 @@
     {
       "title": "Tencent SecretKey",
       "name": "tencentSecretKey",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your Tencent SecretKey",
       "default": ""
@@ -786,7 +788,7 @@
     {
       "title": "Volcano Access Key Secret",
       "name": "volcanoAccessKeySecret",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your Volcano Access Key Secret",
       "default": ""
@@ -794,10 +796,13 @@
     {
       "title": "Caiyun Token",
       "name": "caiyunToken",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "description": "Your Caiyun Token",
       "default": ""
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

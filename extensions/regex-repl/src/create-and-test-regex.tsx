@@ -1,6 +1,22 @@
-import { Form, ActionPanel, Action, showToast, Detail, useNavigation, Toast, List, Clipboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Detail,
+  Form,
+  getPreferenceValues,
+  Keyboard,
+  List,
+  openCommandPreferences,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
+import History from "./components/History";
 import findAndProcessMatches from "./utils/find-and-process-matches";
+import { HISTORY_KEY, MAX_HISTORY_SIZE, RegexHistoryItem, selectedRegex, setSelectedRegex } from "./utils/history";
 
 type Values = {
   pattern: string;
@@ -18,13 +34,33 @@ const flagOptions = [
 ];
 
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences.CreateAndTestRegex>();
   const { push } = useNavigation();
+  const {
+    value: historyItems,
+    setValue: setHistoryItems,
+    isLoading: isHistoryLoading,
+  } = useLocalStorage<RegexHistoryItem[]>(HISTORY_KEY, []);
+
   const [pattern, setPattern] = useState("([A-Z])\\w+");
   const [flags, setFlags] = useState<string[]>([flagOptions[0].value]);
   const [text, setText] = useState("");
   const [result, setResult] = useState("");
   const [error, setError] = useState(false);
-  const toastRef = useRef<Toast>();
+  const toastRef = useRef<Toast>(null);
+
+  const firstMount = useRef(true);
+  useEffect(() => {
+    if (!preferences["use-last-used-pattern"]) {
+      return;
+    }
+
+    if (historyItems && historyItems.length > 0 && firstMount.current) {
+      setPattern(historyItems[0].pattern);
+      setFlags(historyItems[0].flags);
+      firstMount.current = false;
+    }
+  }, [historyItems]);
 
   useEffect(() => {
     try {
@@ -42,7 +78,26 @@ export default function Command() {
     }
   }, [pattern, flags, text]);
 
-  const validateThenShowDetails = (values: Values) => {
+  const addToHistory = async (pattern: string, flags: string[]) => {
+    if (isHistoryLoading || historyItems === undefined) {
+      console.log("History is loading or not loaded");
+      return;
+    }
+
+    const newItem = { pattern, flags, timestamp: Date.now(), isPinned: false };
+    const filteredHistory = historyItems.filter(
+      (item) => item.pattern !== pattern || item.flags.join("") !== flags.join("")
+    );
+
+    filteredHistory.unshift(newItem);
+    while (filteredHistory.length > MAX_HISTORY_SIZE) {
+      filteredHistory.pop();
+    }
+
+    setHistoryItems(filteredHistory);
+  };
+
+  const validateThenShowDetails = async (values: Values) => {
     let submitAction: (() => void) | undefined;
     if (error) {
       submitAction = undefined;
@@ -52,16 +107,58 @@ export default function Command() {
     } else if (!text) {
       submitAction = () => showToast({ title: "Empty field", message: "Missing text", style: Toast.Style.Failure });
     } else {
-      submitAction = () => push(<Details {...values} />);
+      submitAction = () => {
+        addToHistory(pattern, flags);
+        push(<Details {...values} />);
+      };
     }
     submitAction?.();
   };
 
+  const updateRegexFromHistoryIfSelected = () => {
+    if (selectedRegex) {
+      setPattern(selectedRegex.pattern);
+      setFlags(selectedRegex.flags);
+    }
+
+    setSelectedRegex(undefined);
+  };
+
   return (
     <Form
+      isLoading={isHistoryLoading}
       actions={
         <ActionPanel>
           <Action.Push target={<QuickReference />} title="Show Quick Reference" />
+          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+          <Action.Push
+            target={<History />}
+            title="Show History"
+            shortcut={{ modifiers: ["cmd"], key: "y" }}
+            onPop={updateRegexFromHistoryIfSelected}
+          />
+          <Action
+            title="Save to History"
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            onAction={() => {
+              addToHistory(pattern, flags);
+              showToast({
+                title: "Saved to History",
+                style: Toast.Style.Success,
+              });
+            }}
+          />
+          <Action
+            title="Clear History"
+            shortcut={Keyboard.Shortcut.Common.RemoveAll}
+            onAction={() => {
+              setHistoryItems([]);
+              showToast({
+                title: "History Cleared",
+                style: Toast.Style.Success,
+              });
+            }}
+          />
           {!error && text && pattern && <Action.SubmitForm onSubmit={validateThenShowDetails} title="Show Details" />}
         </ActionPanel>
       }

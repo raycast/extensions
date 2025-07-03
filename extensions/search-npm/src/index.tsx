@@ -9,7 +9,6 @@ import {
 } from '@raycast/api'
 import { useFetch, useCachedState } from '@raycast/utils'
 import { useState, useEffect } from 'react'
-import type { Preferences } from './components/PackagListItem'
 import { PackageListItem } from './components/PackagListItem'
 import { addToHistory, getHistory } from './utils/history-storage'
 import { HistoryListItem } from './components/HistoryListItem'
@@ -23,16 +22,18 @@ export default function PackageList() {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [history, setHistory] = useCachedState<HistoryItem[]>('history', [])
   const [favorites, fetchFavorites] = useFavorites()
-  const { historyCount, showLinkToSearchResultsInListView }: Preferences =
-    getPreferenceValues()
+  const { historyCount, showLinkToSearchResultsInListView } =
+    getPreferenceValues<ExtensionPreferences>()
 
   const { isLoading, data, revalidate } = useFetch<NpmFetchResponse>(
     `${API_PATH}${searchTerm.replace(/\s/g, '+')}`,
     {
       execute: !!searchTerm,
       onError: (error) => {
-        console.error(error)
-        showToast(Toast.Style.Failure, 'Could not fetch packages')
+        if (searchTerm) {
+          console.error(error)
+          showToast(Toast.Style.Failure, 'Could not fetch packages')
+        }
       },
       keepPreviousData: true,
     },
@@ -82,7 +83,7 @@ export default function PackageList() {
                     <ActionPanel>
                       <Action.OpenInBrowser
                         url={`https://www.npmjs.com/search?q=${searchTerm}`}
-                        title="View Npm Search Results"
+                        title="View npm Search Results"
                       />
                     </ActionPanel>
                   }
@@ -90,9 +91,12 @@ export default function PackageList() {
               ) : null}
               <List.Section title="Results" subtitle={data.length.toString()}>
                 {data.map((result) => {
+                  if (!result.name) {
+                    return null
+                  }
                   return (
                     <PackageListItem
-                      key={result.name}
+                      key={`search-${result.name}`}
                       result={result}
                       searchTerm={searchTerm}
                       setHistory={setHistory}
@@ -114,10 +118,29 @@ export default function PackageList() {
           {Number(historyCount) > 0 ? (
             history.length ? (
               <List.Section title="History">
-                {history.map((item, index) => {
+                {history.map((item) => {
+                  if (item.type === 'package' && item?.package?.name) {
+                    const pkgName = item.package.name
+                    return (
+                      <PackageListItem
+                        key={`history-${pkgName}`}
+                        result={item.package}
+                        searchTerm={searchTerm}
+                        setHistory={setHistory}
+                        isFavorited={
+                          favorites.findIndex(
+                            (fave) => fave.name === pkgName,
+                          ) !== -1
+                        }
+                        handleFaveChange={fetchFavorites}
+                        isHistoryItem={true}
+                      />
+                    )
+                  }
+
                   return (
                     <HistoryListItem
-                      key={`${item.term}-${item.type}-${index}`}
+                      key={`history-${item.term}-${item.type}`}
                       item={item}
                       setHistory={setHistory}
                       setSearchTerm={setSearchTerm}

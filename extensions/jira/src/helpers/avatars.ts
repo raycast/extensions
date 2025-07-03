@@ -1,4 +1,4 @@
-import { Icon } from "@raycast/api";
+import { Icon, Image } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 
 import { Project } from "../api/projects";
@@ -9,7 +9,7 @@ export function getUserAvatar(user?: User | null) {
 
   if (!user.avatarUrls) return getAvatarIcon(user.displayName);
 
-  return user.avatarUrls["32x32"];
+  return { source: user.avatarUrls["32x32"], mask: Image.Mask.Circle };
 }
 
 export function getProjectAvatar(project: Project) {

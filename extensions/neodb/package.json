@@ -5,11 +5,42 @@
   "description": "Search NeoDB items and view item details",
   "icon": "command-icon.png",
   "author": "SevicheCC",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Web",
     "Media"
   ],
   "license": "MIT",
+  "preferences": [
+        {
+          "name": "lang",
+          "title": "Preferred Language",
+          "type": "dropdown",
+          "required": false,
+          "description": "Results will be shown in Preferred Language (if they exist)",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "English (en)",
+              "value": "en"
+            },
+            {
+              "title": "Chinese (PRC)",
+              "value": "zh-cn"
+            },
+            {
+              "title": "Chinese (Taiwan)",
+              "value": "zh-tw"
+            }
+          ],
+          "default": "default"
+        }
+      ],
   "commands": [
     {
       "name": "search",
@@ -17,18 +48,37 @@
       "subtitle": "NeoDB",
       "description": "Search items",
       "mode": "view"
+    },
+    {
+      "name": "account",
+      "title": "View Account",
+      "subtitle": "NeoDB",
+      "description": "View Collections and Reviews in Account",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "token",
+          "title": "Access Token",
+          "type": "password",
+          "required": true,
+          "description": "API Access Token",
+          "placeholder": "XXxx...xxx"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.4",
-    "@raycast/utils": "^1.8.0"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
     "prettier": "^2.8.8",
+    "react": "^18.2.0",
     "typescript": "^4.9.5"
   },
   "scripts": {
@@ -36,6 +86,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

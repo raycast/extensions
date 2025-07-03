@@ -19,7 +19,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.53.4",
-    "axios": "^1.4.0",
+    "axios": "^1.8.4",
     "cheerio": "^1.0.0-rc.12",
     "user-agents": "^1.0.580"
   },
