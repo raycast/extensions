@@ -1,35 +1,35 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "wave",
-  "title": "Wave",
-  "description": "Manage your Wave Businesses",
-  "icon": "wave.png",
-  "author": "xmok",
+  "name": "certificate-viewer",
+  "title": "Certificate Viewer",
+  "description": "Quick download and decode certificates",
+  "icon": "extension-icon.png",
+  "author": "gamerslouis",
   "categories": [
-    "Finance"
+    "Developer Tools",
+    "Security"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "access_token",
-      "title": "Access Token",
-      "description": "Use an Access Token instead of logging in via Wave",
-      "type": "password",
-      "required": false,
-      "placeholder": "OPTIONAL"
-    }
-  ],
   "commands": [
     {
-      "name": "manage-wave",
-      "title": "Manage Wave",
-      "description": "Manage your Wave Businesses",
+      "name": "decode-certificate",
+      "title": "Decode Certificate",
+      "description": "Decode an X.509 certificate from clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "download-certificate",
+      "title": "Download Certificate",
+      "description": "Download an X.509 certificate from a URL",
       "mode": "view"
     }
   ],
   "dependencies": {
+    "@peculiar/webcrypto": "^1.5.0",
+    "@peculiar/x509": "^1.12.3",
     "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.0.1"
+    "@raycast/utils": "^1.19.1",
+    "raycast-hooks": "^1.0.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -40,7 +40,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
