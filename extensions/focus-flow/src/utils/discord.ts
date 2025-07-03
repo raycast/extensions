@@ -1,0 +1,60 @@
+import type { DiscordEmbed } from "../types";
+
+export class DiscordAPI {
+  static async sendMessage(webhookUrl: string, content?: string, embeds?: DiscordEmbed[]): Promise<{ id: string }> {
+    const response = await fetch(`${webhookUrl}?wait=true`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content, embeds }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Discord API error: ${response.status} - ${errorText}`);
+    }
+
+    return await response.json();
+  }
+
+  static async getMessage(webhookUrl: string, messageId: string): Promise<{ content: string; embeds: DiscordEmbed[] }> {
+    const { id, token } = this.parseWebhookUrl(webhookUrl);
+    const response = await fetch(`https://discord.com/api/webhooks/${id}/${token}/messages/${messageId}`);
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Team not found or deleted");
+      }
+      const errorText = await response.text();
+      throw new Error(`Discord API error: ${response.status} - ${errorText}`);
+    }
+
+    return await response.json();
+  }
+
+  static async updateMessage(
+    webhookUrl: string,
+    messageId: string,
+    content?: string,
+    embeds?: DiscordEmbed[],
+  ): Promise<void> {
+    const { id, token } = this.parseWebhookUrl(webhookUrl);
+    const response = await fetch(`https://discord.com/api/webhooks/${id}/${token}/messages/${messageId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content, embeds }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Discord API error: ${response.status} - ${errorText}`);
+    }
+  }
+
+  private static parseWebhookUrl(webhookUrl: string): { id: string; token: string } {
+    const match = webhookUrl.match(/webhooks\/(\d+)\/([^/]+)/);
+    if (!match) {
+      throw new Error("Invalid webhook URL format");
+    }
+    return { id: match[1], token: match[2] };
+  }
+}
