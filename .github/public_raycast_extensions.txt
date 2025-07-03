@@ -57,4 +57,5 @@ laravel-herd
 playtester
 model-context-protocol-registry
 clarify
+kaleidoscope
 exa
