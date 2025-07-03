@@ -182,7 +182,7 @@ export async function imageNextSearch(
       console.error(reqUrl, error);
       attempt += 1;
       if (attempt > retries) {
-        throw Error("attempt finished");
+        throw Error(`attempt finished after {retries} retries`);
       }
       await sleepPromise(sleep);
     }

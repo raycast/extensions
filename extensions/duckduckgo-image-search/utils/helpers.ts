@@ -128,7 +128,7 @@ export async function downloadImage(
   await fs.promises.writeFile(filePath, response.data);
   setCachedImagePath(image_token, filePath);
 
-  if (showToast) {
+  if (showToastMessage) {
     await showToast({
       title: "Image Downloaded!",
       style: Toast.Style.Success,
