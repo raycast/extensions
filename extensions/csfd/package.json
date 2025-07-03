@@ -51,7 +51,7 @@
     }
   ],
   "ai": {
-    "instructions": "You are a movie search assistant for ČSFD (Czech-Slovak Film Database). When users mention movies or need information about specific films, you can help them search and provide details..\n\nKey behaviors:\n- For movie searches, use the search-movies tool first to find matches\n- To get detailed information about a specific movie, use the get-movie-details tool with the movie ID\n- Interpret user intent carefully - they may want to search for a movie or get details about one they already know\n- When a user mentions a movie title, offer to search for it\n- Present search results in a clear format, highlighting key information like title, year, and rating\n- For movie details, highlight important information like rating, genres, and where to watch. When user asks about rating, always get movie detail as you get precies rating. Do NOT include not relevant search results.",
+    "instructions": "You are a movie search assistant for ČSFD (Czech-Slovak Film Database). When users mention movies or need information about specific films, you can help them search and provide details..\n\nKey behaviors:\n- For movie searches, use the search-movies tool first to find matches\n- When searching for a specific movie/TV show by title, always follow up with get-movie-details to provide comprehensive information\n- To get detailed information about a specific movie, use the get-movie-details tool with the movie ID\n- Interpret user intent carefully - they may want to search for a movie or get details about one they already know\n- When a user mentions a movie title, offer to search for it\n- Present search results in a clear format, highlighting key information like title, year, and rating\n- For movie details, highlight important information like rating, genres, and where to watch. When user asks about rating, always get movie detail as you get precies rating. Do NOT include not relevant search results.\n\nSearch parameters:\n- When searching for a specific movie/TV show (user mentions exact title), use limit: 1\n- When searching for TV shows specifically, use contentType: \"tvshows\" and limit: 5\n- When searching for movies specifically, use contentType: \"movies\" and limit: 1 for specific titles\n- For general searches, use the default limit (no limit parameter needed)",
     "evals": [
       {
         "input": "@csfd Search for the movie Inception",
@@ -88,6 +88,29 @@
               }
             ],
             "totalCount": 1
+          },
+          "get-movie-details": {
+            "id": 64768,
+            "title": "Inception",
+            "year": 2010,
+            "rating": 88,
+            "colorRating": "good",
+            "duration": 148,
+            "genres": ["Sci-Fi", "Action", "Thriller"],
+            "origins": ["USA", "Velká Británie"],
+            "poster": "https://image.pmgstatic.com/cache/resized/w1080/files/images/film/posters/158/180/158180052_2e67c1.jpg",
+            "description": "Dom Cobb je zručný zloděj, největší na světě v nebezpečném umění extrakce: krade cenné tajemství z hlubin nevědomí během snového stavu, kdy je mysl nejvíce zranitelná.",
+            "cast": {
+              "directors": "Christopher Nolan",
+              "actors": "Leonardo DiCaprio, Marion Cotillard, Tom Hardy, Ellen Page, Joseph Gordon-Levitt"
+            },
+            "url": "https://www.csfd.cz/film/64768",
+            "watchOn": [
+              {
+                "title": "Netflix",
+                "url": "https://www.netflix.com/title/70131314"
+              }
+            ]
           }
         },
         "expected": [
@@ -95,9 +118,17 @@
             "callsTool": {
               "name": "search-movies",
               "arguments": {
-                "query": {
-                  "eq": "Inception"
-                }
+                "query": "Inception",
+                "contentType": "movies",
+                "limit": 1
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-movie-details",
+              "arguments": {
+                "movieId": 64768
               }
             }
           }
@@ -172,15 +203,18 @@
             "callsTool": {
               "name": "search-movies",
               "arguments": {
-                "query": {
-                  "includes": "Interstellar"
-                }
+                "query": "Interstellar",
+                "contentType": "movies",
+                "limit": 1
               }
             }
           },
           {
             "callsTool": {
-              "name": "get-movie-details"
+              "name": "get-movie-details",
+              "arguments": {
+                "movieId": 278133
+              }
             }
           }
         ]
@@ -836,7 +870,8 @@
             "callsTool" : {
               "arguments" : {
                 "contentType" : "movies",
-                "query" : "Green Mile"
+                "query" : "Green Mile",
+                "limit" : 1
               },
               "name" : "search-movies"
             }
