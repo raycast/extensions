@@ -117,6 +117,7 @@ async function tryFetch<T>(url: string, options: RequestInit): Promise<T | undef
     }
     return (await result.json()) as T;
   } catch (error) {
+    console.error(error);
     showToast({
       title: "Failed to fetch data",
       style: Toast.Style.Failure,
