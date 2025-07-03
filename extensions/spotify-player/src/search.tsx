@@ -1,145 +1,218 @@
-import React, { useState } from "react";
-import { List, getPreferenceValues } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { useState, useEffect, ComponentProps, Fragment } from "react";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Grid,
+  Icon,
+  Keyboard,
+  LaunchProps,
+  List,
+  LocalStorage,
+  confirmAlert,
+  getPreferenceValues,
+} from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useSearch } from "./hooks/useSearch";
 import { View } from "./components/View";
-import { TracksSection } from "./components/TracksSection";
-import { AlbumsSection } from "./components/AlbumsSection";
 import { ArtistsSection } from "./components/ArtistsSection";
+import { AlbumsSection } from "./components/AlbumsSection";
+import { TracksSection } from "./components/TracksSection";
 import { PlaylistsSection } from "./components/PlaylistsSection";
+import { debounce } from "./helpers/debounce";
 import { ShowsSection } from "./components/ShowsSection";
 import { EpisodesSection } from "./components/EpisodesSection";
 
-type SearchType = "all" | "tracks" | "albums" | "artists" | "playlists" | "shows" | "episodes";
+const filters = {
+  all: "All",
+  artists: "Artists",
+  tracks: "Songs",
+  albums: "Albums",
+  playlists: "Playlists",
+  shows: "Podcasts & Shows",
+  episodes: "Episodes",
+};
 
-interface SearchPreferences {
-  musicOnly: boolean;
-  topView: "playlists" | "albums" | "artists" | "tracks" | "shows" | "episodes";
-}
+const musicOnlyIgnoredFilters = ["shows", "episodes"];
 
-export default function SearchCommand() {
-  const [searchText, setSearchText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useCachedState<SearchType>("selected-search-category", "all");
-  const preferences = getPreferenceValues<SearchPreferences>();
+type FilterValue = keyof typeof filters;
 
+function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
+  let { topView } = getPreferenceValues<Preferences.Search>();
+  const { musicOnly } = getPreferenceValues<Preferences.Search>();
+
+  if (musicOnly && musicOnlyIgnoredFilters.includes(topView)) {
+    topView = "artists";
+  }
+
+  const {
+    data: recentSearchesData,
+    isLoading: recentSearchIsLoading,
+    revalidate: recentSearchRevalidate,
+  } = useCachedPromise(() => LocalStorage.getItem<string>("recent-searches"));
+
+  const [searchText, setSearchText] = useState(initialSearchText || "");
+  const [searchFilter, setSearchFilter] = useState<FilterValue>("all");
   const { searchData, searchIsLoading } = useSearch({
     query: searchText,
-    options: {
-      execute: Boolean(searchText),
-      keepPreviousData: true,
-    },
+    options: { keepPreviousData: true },
   });
 
-  const searchDropdownOptions = [
-    { title: "All", value: "all" },
-    { title: "Artists", value: "artists" },
-    { title: "Albums", value: "albums" },
-    { title: "Songs", value: "tracks" },
-    ...(preferences.musicOnly
-      ? []
-      : [
-          { title: "Playlists", value: "playlists" },
-          { title: "Podcasts & Shows", value: "shows" },
-          { title: "Episodes", value: "episodes" },
-        ]),
+  const recentSearches: string[] = recentSearchesData ? JSON.parse(recentSearchesData) : [];
+
+  useEffect(() => {
+    if (searchText.length > 3 && recentSearches.includes(searchText.trim()) === false && searchIsLoading === false) {
+      const addSearchToStorage = debounce(async () => {
+        LocalStorage.setItem("recent-searches", JSON.stringify([searchText, ...recentSearches]));
+        recentSearchRevalidate();
+      }, 3000);
+      addSearchToStorage();
+    }
+  }, [searchText, searchIsLoading]);
+
+  const sharedProps: ComponentProps<typeof List> = {
+    searchBarPlaceholder: "What do you want to listen to",
+    searchText,
+    onSearchTextChange: setSearchText,
+    isLoading: searchIsLoading || recentSearchIsLoading,
+    throttle: true,
+  };
+
+  if (!searchText) {
+    return (
+      <List {...sharedProps}>
+        <List.EmptyView title="What do you want to listen to?" />
+        <List.Section title="Recent searches">
+          {recentSearches.map(
+            (search, index) =>
+              index < 10 && (
+                <List.Item
+                  key={search}
+                  title={search}
+                  actions={
+                    <ActionPanel>
+                      <Action icon={Icon.MagnifyingGlass} title="Search Again" onAction={() => setSearchText(search)} />
+                      <ActionPanel.Section>
+                        <Action
+                          icon={Icon.Trash}
+                          title="Remove Search"
+                          style={Action.Style.Destructive}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
+                          onAction={async () => {
+                            await LocalStorage.setItem(
+                              "recent-searches",
+                              JSON.stringify(recentSearches.filter((item: string) => item !== search)),
+                            );
+                            recentSearchRevalidate();
+                          }}
+                        />
+                        <Action
+                          icon={Icon.Trash}
+                          title="Remove All Searches"
+                          style={Action.Style.Destructive}
+                          shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                          onAction={async () => {
+                            await confirmAlert({
+                              title: "Are you sure?",
+                              message: "This will remove all recent searches.",
+                              primaryAction: {
+                                title: "Remove",
+                                style: Alert.ActionStyle.Destructive,
+                                onAction: async () => {
+                                  await LocalStorage.setItem("recent-searches", JSON.stringify([]));
+                                  recentSearchRevalidate();
+                                },
+                              },
+                              dismissAction: {
+                                title: "Cancel",
+                              },
+                              rememberUserChoice: true,
+                            });
+                          }}
+                        />
+                      </ActionPanel.Section>
+                    </ActionPanel>
+                  }
+                />
+              ),
+          )}
+        </List.Section>
+      </List>
+    );
+  }
+
+  const sections: { key: FilterValue; component: JSX.Element }[] = [
+    { key: "artists", component: <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} /> },
+    { key: "tracks", component: <TracksSection limit={4} tracks={searchData?.tracks?.items} /> },
+    { key: "albums", component: <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} /> },
+    {
+      key: "playlists",
+      component: <PlaylistsSection type="list" limit={6} playlists={searchData?.playlists?.items} />,
+    },
+    { key: "shows", component: <ShowsSection type="list" limit={3} shows={searchData?.shows?.items} /> },
+    { key: "episodes", component: <EpisodesSection limit={3} episodes={searchData?.episodes?.items} /> },
   ];
 
-  const shouldShowSection = (sectionType: SearchType) => {
-    if (
-      preferences.musicOnly &&
-      (sectionType === "shows" || sectionType === "episodes" || sectionType === "playlists")
-    ) {
-      return false;
-    }
-    return selectedCategory === "all" || selectedCategory === sectionType;
-  };
+  const searchBarAccessory = (
+    <List.Dropdown
+      tooltip="Filter search"
+      value={searchFilter}
+      onChange={(newValue) => setSearchFilter(newValue as FilterValue)}
+    >
+      {Object.entries(filters).map(
+        ([value, label]) =>
+          (!musicOnly || (musicOnly && !musicOnlyIgnoredFilters.includes(value))) && (
+            <List.Dropdown.Item key={value} title={label} value={value} />
+          ),
+      )}
+    </List.Dropdown>
+  );
 
-  const getSectionOrder = () => {
-    const sections = [];
+  if (
+    searchText &&
+    (searchFilter === "all" || searchFilter === "tracks" || searchFilter === "playlists" || searchFilter === "episodes")
+  ) {
+    const orderedSections =
+      searchFilter === "all"
+        ? [
+            ...sections.filter((section) => section.key === topView),
+            ...sections.filter((section) => section.key !== topView),
+          ]
+        : sections.filter((section) => section.key === searchFilter);
 
-    // Add the top view first if showing all
-    if (selectedCategory === "all" && preferences.topView) {
-      sections.push(preferences.topView);
-    }
+    return (
+      <List {...sharedProps} searchBarAccessory={searchBarAccessory}>
+        {searchFilter === "all" &&
+          orderedSections.map(
+            ({ key, component }) =>
+              (!musicOnly || (musicOnly && !musicOnlyIgnoredFilters.includes(key))) && (
+                <Fragment key={key}>{component}</Fragment>
+              ),
+          )}
 
-    // Add other sections in order
-    const otherSections = ["artists", "albums", "tracks", "playlists", "shows", "episodes"].filter(
-      (section) => section !== preferences.topView || selectedCategory !== "all",
+        {searchFilter === "tracks" && <TracksSection tracks={searchData?.tracks?.items} />}
+        {searchFilter === "episodes" && <EpisodesSection episodes={searchData?.episodes?.items} />}
+
+        {searchFilter === "playlists" && <PlaylistsSection type="list" playlists={searchData?.playlists?.items} />}
+      </List>
     );
-
-    return [...sections, ...otherSections];
-  };
-
-  const renderSection = (sectionType: string) => {
-    switch (sectionType) {
-      case "artists":
-        if (shouldShowSection("artists") && searchData?.artists?.items?.length) {
-          return <ArtistsSection type="list" artists={searchData.artists.items} limit={3} />;
-        }
-        break;
-      case "albums":
-        if (shouldShowSection("albums") && searchData?.albums?.items?.length) {
-          return <AlbumsSection type="list" albums={searchData.albums.items} limit={4} />;
-        }
-        break;
-      case "tracks":
-        if (shouldShowSection("tracks") && searchData?.tracks?.items?.length) {
-          return <TracksSection title="Songs" tracks={searchData.tracks.items} limit={4} />;
-        }
-        break;
-      case "playlists":
-        if (shouldShowSection("playlists") && searchData?.playlists?.items?.length) {
-          return <PlaylistsSection type="list" playlists={searchData.playlists.items} limit={4} />;
-        }
-        break;
-      case "shows":
-        if (shouldShowSection("shows") && searchData?.shows?.items?.length) {
-          return <ShowsSection type="list" shows={searchData.shows.items} limit={4} />;
-        }
-        break;
-      case "episodes":
-        if (shouldShowSection("episodes") && searchData?.episodes?.items?.length) {
-          return <EpisodesSection episodes={searchData.episodes.items} title="Episodes" limit={4} />;
-        }
-        break;
-    }
-    return null;
-  };
+  }
 
   return (
+    <Grid {...sharedProps} searchBarAccessory={searchBarAccessory}>
+      {searchFilter === "artists" && <ArtistsSection type="grid" columns={5} artists={searchData?.artists?.items} />}
+
+      {searchFilter === "albums" && <AlbumsSection type="grid" columns={5} albums={searchData?.albums?.items} />}
+
+      {searchFilter === "shows" && <ShowsSection type="grid" columns={5} shows={searchData?.shows?.items} />}
+    </Grid>
+  );
+}
+
+export default function Command({ launchContext, fallbackText }: LaunchProps<{ launchContext: { query: string } }>) {
+  return (
     <View>
-      <List
-        isLoading={searchIsLoading}
-        onSearchTextChange={setSearchText}
-        searchBarPlaceholder="Search artists, albums, songs, playlists, podcasts..."
-        searchBarAccessory={
-          <List.Dropdown
-            tooltip="Select Category"
-            storeValue={true}
-            onChange={(newValue) => setSelectedCategory(newValue as SearchType)}
-          >
-            {searchDropdownOptions.map((option) => (
-              <List.Dropdown.Item key={option.value} title={option.title} value={option.value} />
-            ))}
-          </List.Dropdown>
-        }
-      >
-        {searchText && !searchIsLoading && !searchData && (
-          <List.EmptyView title="No results found" description={`No results found for "${searchText}"`} />
-        )}
-
-        {!searchText && (
-          <List.EmptyView
-            title="Search Spotify"
-            description="Enter a search term to find artists, albums, songs, playlists, podcasts, and episodes"
-          />
-        )}
-
-        {searchData &&
-          getSectionOrder().map((sectionType) => (
-            <React.Fragment key={sectionType}>{renderSection(sectionType)}</React.Fragment>
-          ))}
-      </List>
+      <SearchCommand initialSearchText={launchContext?.query ?? fallbackText} />
     </View>
   );
 }
