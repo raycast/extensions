@@ -75,6 +75,24 @@
             }
           ],
           "default": "MM/dd/yyyy"
+        },
+        {
+          "required": false,
+          "description": "Choose time format",
+          "type": "dropdown",
+          "title": "Time Format",
+          "name": "timeFormat",
+          "data": [
+            {
+              "title": "HH:mm (eg 16:00)",
+              "value": "HH:mm"
+            },
+            {
+              "title": "hh:mm aa (eg 4:00 PM)",
+              "value": "h:mm aa"
+            }
+          ],
+          "default": "HH:mm"
         }
       ]
     }
