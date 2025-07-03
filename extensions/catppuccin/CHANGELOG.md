@@ -1,6 +1,6 @@
 # Catppuccin Changelog
 
-## [Data Sourcing] - {PR_MERGE_DATE}
+## [Data Sourcing] - 2025-07-03
 - Source data from `catppuccin.dvh.sh`
 
 ## [Search Improvements and Refactoring] - 2025-01-03
