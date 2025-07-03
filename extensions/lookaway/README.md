@@ -4,6 +4,8 @@ Control the [LookAway](https://lookaway.app) macOS app using Raycast.
 
 ## Features
 
+- Start LookAway
+- Stop LookAway
 - Start Next Break
 - Start Long Break
 - Pause Work Mode

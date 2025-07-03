@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2025-06-26
+
+- Catch any errors caused by `OTPAuth.TOTP` constructor
+
 ## [Fix] - 2025-06-25
 
 - Check if user can access `BrowserExtension` before getting tabs

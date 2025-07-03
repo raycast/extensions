@@ -269,19 +269,33 @@ type AuthenticatorOptions = {
 const authenticator = {
   parseTotp(totpString: string): AuthenticatorOptions {
     if (totpString.includes("otpauth")) {
-      const [otp, error] = tryCatch(() => OTPAuth.URI.parse(totpString));
-      if (error) throw error;
-      if (!(otp instanceof OTPAuth.TOTP)) throw new Error("Invalid authenticator key");
+      const [totp, parseError] = tryCatch(() => OTPAuth.URI.parse(totpString));
+      if (parseError) throw parseError;
+      if (!(totp instanceof OTPAuth.TOTP)) throw new Error("Invalid authenticator key");
 
-      return { algorithm: otp.algorithm, secret: otp.secret.base32.toString(), period: otp.period, digits: otp.digits };
+      return {
+        algorithm: totp.algorithm,
+        secret: totp.secret.base32.toString(),
+        period: totp.period,
+        digits: totp.digits,
+      };
     }
 
     return { secret: totpString, period: 30, algorithm: "SHA1", digits: 6 };
   },
   getGenerator(totpString: string): Result<OTPAuth.TOTP> {
-    const [options, error] = tryCatch(() => authenticator.parseTotp(totpString));
-    if (error) return Err(error);
-    return Ok(new OTPAuth.TOTP(options));
+    const [options, parseError] = tryCatch(() => authenticator.parseTotp(totpString));
+    if (parseError) {
+      captureException("Failed to parse key", parseError);
+      return Err(new Error("Failed to parse authenticator key"));
+    }
+    const [generator, initError] = tryCatch(() => new OTPAuth.TOTP(options));
+    if (initError) {
+      captureException("Failed to initialize authenticator", initError);
+      return Err(new Error("Failed to initialize authenticator"));
+    }
+
+    return Ok(generator);
   },
   useCode(item: Item, canGenerate = true) {
     const [[generator, error, isLoading = false], setState] = useStateEffect(() => {
@@ -290,13 +304,7 @@ const authenticator = {
       if (totp === SENSITIVE_VALUE_PLACEHOLDER) return Loading(new Error("Loading..."));
       if (!totp) return Err(new Error("No TOTP found"));
 
-      const [generator, error] = authenticator.getGenerator(totp);
-      if (error) return Err(error);
-
-      const [testGenerate, testGenerateError] = tryCatch(() => generator.generate());
-      if (testGenerateError || !testGenerate) return Err(new Error("Failed to initialize"));
-
-      return Ok(generator);
+      return authenticator.getGenerator(totp);
     }, [item, canGenerate]);
 
     const [code, setCode] = useState<string | null>(null);
@@ -321,11 +329,10 @@ const authenticator = {
           if (timeRemaining === generator.period) {
             setCode(generator.generate());
           }
-        } catch {
-          const error = new Error("ERR2: Failed to regenerate");
-          setState(Err(error));
+        } catch (error) {
+          setState(Err(new Error("Failed to regenerate")));
           cleanup();
-          captureException(error.message, error, { captureToRaycast: true });
+          captureException("Failed to regenerate", error);
         }
       };
 
@@ -338,11 +345,10 @@ const authenticator = {
         }, generator.remaining() % 1000);
 
         setCode(generator.generate()); // first generation before the interval starts
-      } catch {
-        const error = new Error("ERR1: Failed to generate");
-        setState(Err(error));
+      } catch (error) {
+        setState(Err(new Error("Failed to generate")));
         cleanup();
-        captureException(error.message, error, { captureToRaycast: true });
+        captureException("Failed to generate", error);
       }
 
       return cleanup;
