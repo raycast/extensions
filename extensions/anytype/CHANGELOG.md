@@ -1,5 +1,13 @@
 # Anytype Changelog
 
+## [Fixes] - 2025-07-XX
+
+- Fix error when creating objects without linked type properties
+- Fix display issues when Note layouts are missing icons
+- Fix draft functionality in CreateObject form
+- Fix form validation in AddToList command
+- Fix string pluralization issues
+
 ## [UI Polish, Tag Management & Fixes] - 2025-05-26
 
 - Add context actions to manage tags on objects (add/remove)
