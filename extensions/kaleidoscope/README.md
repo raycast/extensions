@@ -16,8 +16,7 @@ Also keep a tab on the [Kaleidoscope Blog](https://blog.kaleidoscope.app) to lea
 - [Open Git File History](#open-git-file-history)
 
 <picture>
-    <source srcset="media/raycast-kaleidoscope~dark@2x.jpg" media="(prefers-color-scheme: dark)">
-    <img src="media/raycast-kaleidoscope@2x.jpg" style="border-radius:10px;margin-top:1em;">
+    <img src="media/raycast-kaleidoscope~dark@2x.jpg" style="border-radius:10px;margin-top:1em;">
 </picture>
 
 ### Compare Clipboards

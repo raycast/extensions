@@ -4,10 +4,12 @@
   "title": "Kaleidoscope",
   "description": "Compare or open content from Raycast in Kaleidoscope.",
   "icon": "icon.png",
-  "author": "anfalas",
+  "owner": "leitmotif",
+  "access": "public",
+  "author": "flo_muc",
   "contributors": [
     "bjrmatos",
-    "flo_muc"
+    "anfalas"
   ],
   "categories": [
     "Applications",
