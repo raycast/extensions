@@ -46,16 +46,31 @@ export default function Products() {
                     <List.Item.Detail.Metadata.Label title="Attributes" />
                     <List.Item.Detail.Metadata.Label title="Name" text={product.attributes.name} />
                     <List.Item.Detail.Metadata.Label title="Code" text={product.attributes.code || "---"} />
-                    {product.attributes.url ? <List.Item.Detail.Metadata.Link title="URL" text={product.attributes.url} target={product.attributes.url} /> : 
-                    <List.Item.Detail.Metadata.Label title="URL" text="---" />}
+                    {product.attributes.url ? (
+                      <List.Item.Detail.Metadata.Link
+                        title="URL"
+                        text={product.attributes.url}
+                        target={product.attributes.url}
+                      />
+                    ) : (
+                      <List.Item.Detail.Metadata.Label title="URL" text="---" />
+                    )}
                     <List.Item.Detail.Metadata.TagList title="Distribution Strategy">
                       <List.Item.Detail.Metadata.TagList.Item text={product.attributes.distributionStrategy} />
                     </List.Item.Detail.Metadata.TagList>
-                    {product.attributes.platforms.length ? <List.Item.Detail.Metadata.TagList title="Platforms">
-                      {product.attributes.platforms.map(platform => <List.Item.Detail.Metadata.TagList.Item key={platform} text={platform} />)}
-                    </List.Item.Detail.Metadata.TagList> : <List.Item.Detail.Metadata.Label title="Platforms" text="---" />}
+                    {product.attributes.platforms?.length ? (
+                      <List.Item.Detail.Metadata.TagList title="Platforms">
+                        {product.attributes.platforms.map((platform) => (
+                          <List.Item.Detail.Metadata.TagList.Item key={platform} text={platform} />
+                        ))}
+                      </List.Item.Detail.Metadata.TagList>
+                    ) : (
+                      <List.Item.Detail.Metadata.Label title="Platforms" text="---" />
+                    )}
                     <List.Item.Detail.Metadata.TagList title="Permissions">
-                      {product.attributes.permissions.map(permission => <List.Item.Detail.Metadata.TagList.Item key={permission} text={permission} />)}
+                      {product.attributes.permissions.map((permission) => (
+                        <List.Item.Detail.Metadata.TagList.Item key={permission} text={permission} />
+                      ))}
                     </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Separator />
                   </List.Item.Detail.Metadata>
@@ -77,7 +92,7 @@ export default function Products() {
 
 function NewProduct({ onNew }: { onNew: () => void }) {
   const { pop } = useNavigation();
-  
+
   interface FormValues {
     name: string;
     code: string;
@@ -92,13 +107,13 @@ function NewProduct({ onNew }: { onNew: () => void }) {
         name: values.name,
         ...(values.code && { code: values.code }),
         ...(values.url && { url: values.url }),
-        distributionStrategy: values.distributionStrategy as DistributionStrategy
+        distributionStrategy: values.distributionStrategy as DistributionStrategy,
       };
 
       const body = {
         data: {
           type: "products",
-          attributes
+          attributes,
         },
       };
 
@@ -120,7 +135,7 @@ function NewProduct({ onNew }: { onNew: () => void }) {
       }
     },
     initialValues: {
-      distributionStrategy: "LICENSED"
+      distributionStrategy: "LICENSED",
     },
     validation: {
       name: FormValidation.Required,
@@ -132,7 +147,7 @@ function NewProduct({ onNew }: { onNew: () => void }) {
             return "Must be a valid URL";
           }
         }
-      }
+      },
     },
   });
 
@@ -146,8 +161,18 @@ function NewProduct({ onNew }: { onNew: () => void }) {
     >
       <Form.Description text="Attributes" />
       <Form.TextField title="Name" placeholder="Example App" info="The name of the product." {...itemProps.name} />
-      <Form.TextField title="Code" placeholder="example" info="This can be used to lookup the product by a human-readable identifier." {...itemProps.code} />
-      <Form.TextField title="URL" placeholder="https://example.com" info="A related URL for the product e.g. the marketing website, company website, etc. Must be a valid URL." {...itemProps.url} />
+      <Form.TextField
+        title="Code"
+        placeholder="example"
+        info="This can be used to lookup the product by a human-readable identifier."
+        {...itemProps.code}
+      />
+      <Form.TextField
+        title="URL"
+        placeholder="https://example.com"
+        info="A related URL for the product e.g. the marketing website, company website, etc. Must be a valid URL."
+        {...itemProps.url}
+      />
       <Form.Dropdown
         title="Distribution Strategy"
         info="The distribution strategy for releases. Licensed = only licensed users. Open = anybody, no license required. Closed = only admins."

@@ -94,9 +94,9 @@ export interface Policy {
 }
 
 export enum DistributionStrategy {
-  LICENSED="LICENSED",
-  OPEN="OPEN",
-  CLOSED="CLOSED",
+  LICENSED = "LICENSED",
+  OPEN = "OPEN",
+  CLOSED = "CLOSED",
 }
 export interface Product {
   id: string;
@@ -105,7 +105,7 @@ export interface Product {
     code: string | null;
     url: string | null;
     distributionStrategy: DistributionStrategy;
-    platforms: string[];
+    platforms: string[] | null;
     permissions: string[];
     created: string;
     updated: string;

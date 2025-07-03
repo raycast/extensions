@@ -26,7 +26,10 @@ export default function Licenses() {
         licenses.map((license) => (
           <List.Item
             key={license.id}
-            icon={{value: {source:Icon.Dot, tintColor: LICENSE_STATUS_COLOR[license.attributes.status]}, tooltip: license.attributes.status}}
+            icon={{
+              value: { source: Icon.Dot, tintColor: LICENSE_STATUS_COLOR[license.attributes.status] },
+              tooltip: license.attributes.status,
+            }}
             title={license.id.slice(0, 8)}
             subtitle={license.attributes.name || undefined}
             detail={
@@ -44,9 +47,15 @@ export default function Licenses() {
                     <List.Item.Detail.Metadata.Label title="Attributes" />
                     <List.Item.Detail.Metadata.Label title="Name" text={license.attributes.name || "--"} />
                     <List.Item.Detail.Metadata.Label title="Key" text={license.attributes.key} />
-                    <List.Item.Detail.Metadata.Label title="Expiry" text={`${license.attributes.expiry} (${dayjs(license.attributes.expiry).fromNow()})`} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Expiry"
+                      text={`${license.attributes.expiry} (${dayjs(license.attributes.expiry).fromNow()})`}
+                    />
                     <List.Item.Detail.Metadata.TagList title="Status">
-                      <List.Item.Detail.Metadata.TagList.Item text={license.attributes.status} color={LICENSE_STATUS_COLOR[license.attributes.status]} />
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text={license.attributes.status}
+                        color={LICENSE_STATUS_COLOR[license.attributes.status]}
+                      />
                     </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Label
                       title="Machines"
@@ -71,7 +80,16 @@ export default function Licenses() {
                       title="Last Validation"
                       text={license.attributes.lastValidated?.toString() || "--"}
                     />
-                    <List.Item.Detail.Metadata.Label title="Valid" icon={license.attributes.status===LicenseStatus.ACTIVE ? Icon.Check : license.attributes.status===LicenseStatus.EXPIRED ? Icon.Xmark : Icon.QuestionMark} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Valid"
+                      icon={
+                        license.attributes.status === LicenseStatus.ACTIVE
+                          ? Icon.Check
+                          : license.attributes.status === LicenseStatus.EXPIRED
+                            ? Icon.Xmark
+                            : Icon.QuestionMark
+                      }
+                    />
                     <List.Item.Detail.Metadata.Label
                       title="Last Check-Out"
                       text={license.attributes.lastCheckOut?.toString() || "--"}

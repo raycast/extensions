@@ -1,13 +1,13 @@
 # Keygen Changelog
 
-## [] - {PR_MERGE_DATE}
+## [List & Add Products + License Enhancements] - {PR_MERGE_DATE}
 
+- List Products and Create new ones
 - Color License based on Status
 - In License also show following:
-    * Expiry
-    * Scheme
-    * Valid
-- List Products and Create new ones
+    1. Expiry
+    2. Scheme
+    3. Valid
 
 ## [Initial Version] - 2025-06-16
 
