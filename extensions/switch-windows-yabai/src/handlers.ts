@@ -323,8 +323,8 @@ export const handleDisperseWindowsBySpace = (screenIdx: string) => {
       try {
         // Added: Focus on the first space to ensure a target for focus exists.
         await execFilePromise(YABAI, ["-m", "space", "--focus", "1"], { env: ENV });
-      } catch {
-        /*ignore, error will be thrown*/
+      } catch (error) {
+        console.error("Failed to focus first space:", error);
       }
 
       await showToast({
