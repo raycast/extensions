@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix Search Feature] - 2025-07-02
+## [Fix Search Feature] - {PR_MERGE_DATE}
 
 - Fixed an issue with the search functionality.
 
