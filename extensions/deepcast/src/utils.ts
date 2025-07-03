@@ -173,7 +173,9 @@ export async function sendTranslateRequest({
 }
 
 export async function translate(target: TargetLanguage, text?: string, formality?: Formality) {
-  await sendTranslateRequest({ targetLanguage: target, text: text, formality: formality ?? "default" });
+  const prefs = getPreferenceValues<Preferences>();
+  const defaultFormality = prefs.defaultFormality ?? "default";
+  await sendTranslateRequest({ targetLanguage: target, text: text, formality: formality ?? defaultFormality });
 }
 
 export const source_languages = {

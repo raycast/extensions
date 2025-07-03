@@ -88,8 +88,8 @@ function NowPlayingCommand() {
 
   let title = "";
   let markdown;
-  let metadata: JSX.Element | null = null;
-  let trackOrEpisodeActions: JSX.Element | null = null;
+  let metadata: React.JSX.Element | null = null;
+  let trackOrEpisodeActions: React.JSX.Element | null = null;
 
   if (isTrack) {
     const { album, artists, id: trackId, duration_ms } = item as TrackObject;

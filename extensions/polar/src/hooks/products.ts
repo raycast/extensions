@@ -15,7 +15,6 @@ export const useProducts = ({
   return useQuery({
     queryKey: ["products", organizationId, params],
     queryFn: () => polar.products.list({ organizationId, ...params }),
-    enabled: !!organizationId,
   });
 };
 

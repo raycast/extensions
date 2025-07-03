@@ -561,6 +561,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       },
     },
   },
+  {
+    name: "gen-pdf",
+    title: "Gen-PDF",
+    description:
+      "MCP server to generate professional looking PDF. Perfect for creating reports, invoices, contracts, and more.",
+    icon: "https://gen-pdf.com/favicon.ico",
+    homepage: "https://gen-pdf.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://gen-pdf.com/mcp"],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
