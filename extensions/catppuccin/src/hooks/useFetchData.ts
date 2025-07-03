@@ -30,7 +30,7 @@ export function useFetchData<T>(dataKey: DataType) {
     };
 
     loadData();
-  }, [dataKey, data]);
+  }, [dataKey]);
 
   return { data, isLoading, setData };
 }
