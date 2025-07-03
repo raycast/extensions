@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Add Safety Settings] - {PR_MERGE_DATE}
+## [Add Safety Settings] - 2025-07-03
 
 - 🛡️ Now users can set their safety filtering options as they need.
 - 🐛 Fix a bug in AI chat
