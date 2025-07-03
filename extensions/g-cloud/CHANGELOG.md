@@ -1,5 +1,11 @@
 # G-Cloud Changelog
 
+## [Secret Manager] - {PR_MERGE_DATE}
+- Add Secret Manager command for managing Google Cloud secrets
+- Add secure secret value viewing with confirmation dialogs
+- Add version management for secrets (create, enable, disable, destroy)
+- Add search and filtering capabilities for secrets
+
 ## [0.1.31] - {MERGE_DATE}
 - feature: Commands for each service.
 - feature: QuickSwitcher, quick switch between projects inside same service.
