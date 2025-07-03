@@ -114,8 +114,6 @@ export async function downloadImage(
     }
     throw new Error(`Failed to fetch image: ${response.statusText}`);
   }
-    throw new Error(`Failed to fetch image: ${response.statusText}`);
-  }
 
   // Get the correct file extension from the response's Content-Type header
   const contentType = response.headers["content-type"];
