@@ -8,8 +8,8 @@ Search Images inside [Raycast](https://raycast.com) by [DuckDuckGo](https://duck
 
 ## Screenshots
 
-![Duckduckgo Image Search Raycast Extension in Raycast menu](https://github.com/jag-k/ddg-image-raycast-extension/main/metadata/duckduckgo-image-search-1.png)
-![Duckduckgo Image Search Raycast Extension in Raycast Settings](https://github.com/jag-k/ddg-image-raycast-extension/main/metadata/duckduckgo-image-search-2.png)
+![Duckduckgo Image Search Raycast Extension in Raycast menu](https://github.com/jag-k/ddg-image-raycast-extension/main/metadata/duckduckgo-image-search-1.jpg)
+![Duckduckgo Image Search Raycast Extension in Raycast Settings](https://github.com/jag-k/ddg-image-raycast-extension/main/metadata/duckduckgo-image-search-2.jpg)
 
 ## Links
 
