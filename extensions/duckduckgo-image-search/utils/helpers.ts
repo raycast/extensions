@@ -111,8 +111,9 @@ export async function downloadImage(
         message: response.statusText,
         style: Toast.Style.Failure,
       });
-      return "";
     }
+    throw new Error(`Failed to fetch image: ${response.statusText}`);
+  }
     throw new Error(`Failed to fetch image: ${response.statusText}`);
   }
 

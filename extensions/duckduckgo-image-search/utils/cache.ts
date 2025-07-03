@@ -1,7 +1,7 @@
 import { Cache } from "@raycast/api";
 import fs from "fs";
 
-const imageCache = new Cache({ namespace: "images" });
+const imageCache = new Cache({ namespace: "ddg-images" });
 
 export function getCachedImagePath(token: string): string | undefined {
   const path = imageCache.get(token);
