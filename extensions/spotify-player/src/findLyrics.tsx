@@ -14,6 +14,44 @@ try {
   console.error("Failed to import genius-lyrics:", error);
 }
 
+// Function to clean up Genius lyrics by removing metadata
+function cleanGeniusLyrics(rawLyrics: string): string {
+  if (!rawLyrics) return "";
+
+  let cleaned = rawLyrics;
+
+  // Remove contributor count (e.g., "1629 Contributors")
+  cleaned = cleaned.replace(/^\d+\s+Contributors?/i, "");
+
+  // Remove translations list (languages like Türkçe, Português, etc.)
+  cleaned = cleaned.replace(/Translations?[^[]+/i, "");
+
+  // Remove song description/annotation that appears before lyrics
+  // This typically starts with quotes and ends with "Read More" or similar
+  cleaned = cleaned.replace(/"[^"]*"\s+is\s+[^"]*[.…]\s*(?:Read More\s*)?/i, "");
+
+  // Remove any remaining metadata before the first bracket (like [Intro], [Verse 1], etc.)
+  const firstBracketIndex = cleaned.search(/\[/);
+  if (firstBracketIndex > 0) {
+    const beforeBracket = cleaned.substring(0, firstBracketIndex).trim();
+    // If there's a lot of text before the first bracket, it's likely metadata
+    if (beforeBracket.length > 100 || beforeBracket.includes("Lyrics")) {
+      cleaned = cleaned.substring(firstBracketIndex);
+    }
+  }
+
+  // Clean up extra whitespace and normalize line breaks
+  cleaned = cleaned
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n") // Max 2 consecutive newlines
+    .trim();
+
+  return cleaned;
+}
+
 // Component to show lyrics for the currently playing song
 export default function FindLyricsCommand() {
   const [lyrics, setLyrics] = useState<string>("");
@@ -93,7 +131,8 @@ export default function FindLyricsCommand() {
               console.log(`🎯 Found match: "${bestMatch.title}" by "${bestMatch.artist.name}"`);
               const lyricsText = await bestMatch.lyrics();
               if (lyricsText && lyricsText.trim() !== "") {
-                setLyrics(lyricsText);
+                const cleanedLyrics = cleanGeniusLyrics(lyricsText);
+                setLyrics(cleanedLyrics);
                 lyricsFound = true;
                 console.log("✅ Using Genius lyrics from search");
               }
@@ -129,13 +168,11 @@ export default function FindLyricsCommand() {
     }
 
     // Format lyrics EXACTLY like search-lyrics.tsx
-    const formattedLyrics = lyrics
+    return `# ${songInfo?.title}\n\n**Artist:** ${songInfo?.artist}\n\n${songInfo?.album ? `**Album:** ${songInfo.album}\n\n` : ""}---\n\n${lyrics
       .split("\n")
       .map((line: string) => line.trim())
       .filter((line: string) => line.length > 0)
-      .join("\n\n"); // Each line gets double line breaks for proper verse spacing
-
-    return `# ${songInfo?.title}\n\n**Artist:** ${songInfo?.artist}\n\n${songInfo?.album ? `**Album:** ${songInfo.album}\n\n` : ""}---\n\n${formattedLyrics}`;
+      .join("\n\n")}`;
   };
 
   return (

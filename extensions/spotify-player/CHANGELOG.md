@@ -3,6 +3,10 @@
 ## [Add toggle to filter song name in menu bar] - {PR_MERGE_DATE}
 
 - Added new toggle for removing extra info like remix titles or versions from the song name in the menubar
+- 
+## [Fix Noises and Additional data in Find Lyrics Function] - 2025-07-02
+
+- Fixed Noises in retrieved lyrics in Find Lyrics Function,now clean lyrics is extracted without any additional noise or data like contributors count and numbers 
 
 ## [Add Option to View the Lyrics of the Song playing] - 2025-06-30
 

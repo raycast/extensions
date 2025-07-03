@@ -228,6 +228,7 @@
 /extensions/ccusage                                                 @nyatinte
 /extensions/center                                                  @enesozturk
 /extensions/cerebras                                                @EvanZhouDev
+/extensions/certificate-viewer                                      @gamerslouis
 /extensions/chakra-ui-docs                                          @pgvr @Ansub @StanleyDing
 /extensions/change-case                                             @erics118 @pernielsentikaer @nagauta @PWrzesinski @yug2005
 /extensions/change-scroll-direction                                 @gregoralbrecht @emilshr
@@ -1055,6 +1056,7 @@
 /extensions/markdown-codeblock                                      @lacherogwu
 /extensions/markdown-image-to-html                                  @qeude @daniellacoste
 /extensions/markdown-navigator                                      @chihkang
+/extensions/markdown-preview                                        @JohanDevl
 /extensions/markdown-reference                                      @codedbyjordan
 /extensions/markdown-slides                                         @dnnsmnstrr @pernielsentikaer
 /extensions/markdown-styler                                         @qcrao
@@ -1762,6 +1764,7 @@
 /extensions/solidtime                                               @cupcakearmy
 /extensions/solusvm-1-client                                        @xmok
 /extensions/solusvm-2                                               @xmok
+/extensions/somafm                                                  @mwarger
 /extensions/sonarr                                                  @Aayush9029 @j3lte
 /extensions/sonos                                                   @AntonNiklasson @pastenes @krsntn
 /extensions/sonu-stream                                             @bob-obringer
