@@ -25,7 +25,7 @@ export default function AddVersionForm({ secretId, projectId, gcloudPath, onVers
 
   async function handleSubmit(values: { value: string; description?: string }) {
     if (!values.value.trim()) {
-      showFailureToast("Validation Error", {
+      showFailureToast(new Error("Validation Error"), {
         title: "Invalid Secret Value",
         message: "Secret value cannot be empty",
       });
