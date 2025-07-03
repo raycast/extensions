@@ -23,9 +23,9 @@ export default function AddVersionForm({ secretId, projectId, gcloudPath, onVers
     }
   }
 
-  async function handleSubmit(values: { value: string; description?: string }) {
+  async function handleSubmit(values: { value: string }) {
     if (!values.value.trim()) {
-      showFailureToast(new Error("Validation Error"), {
+      showFailureToast("Validation Error", {
         title: "Invalid Secret Value",
         message: "Secret value cannot be empty",
       });
@@ -86,12 +86,6 @@ export default function AddVersionForm({ secretId, projectId, gcloudPath, onVers
         info="This will create a new version of the secret with this value"
       />
 
-      <Form.TextField
-        id="description"
-        title="Change Description (Optional)"
-        placeholder="Brief description of what changed in this version"
-        info="Optional description to help track changes between versions"
-      />
 
       <Form.Separator />
 
