@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clipboard-formatters",
+  "title": "Clipboard Formatters",
+  "description": "Format XML, JSON, and escape strings from clipboard",
+  "icon": "clipboard.png",
+  "author": "chirag_nighut",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "format-xml",
+      "title": "Format Xml from Clipboard",
+      "description": "Format XML content from clipboard and copy back formatted XML",
+      "mode": "no-view"
+    },
+    {
+      "name": "format-json",
+      "title": "Format Json from Clipboard",
+      "description": "Format JSON content from clipboard and copy back formatted JSON",
+      "mode": "no-view"
+    },
+    {
+      "name": "escape-string",
+      "title": "Escape String from Clipboard",
+      "description": "Escape string content from clipboard and copy back escaped string",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.0",
+    "fast-xml-parser": "^4.3.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
