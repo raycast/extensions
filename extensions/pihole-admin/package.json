@@ -1,0 +1,100 @@
+{
+  "name": "pihole-admin",
+  "title": "Pi-hole Admin",
+  "description": "Manage your Pi-hole v6 directly from Raycast",
+  "icon": "pihole-icon.png",
+  "author": "vandertoorm",
+  "categories": ["Developer Tools", "System"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "status",
+      "title": "View Status",
+      "description": "Show Pi-hole general status and statistics",
+      "mode": "view",
+      "keywords": ["status", "dashboard", "stats", "overview", "pihole"]
+    },
+    {
+      "name": "enable-disable",
+      "title": "Manage Blocking",
+      "description": "Enable or disable Pi-hole DNS blocking",
+      "mode": "view",
+      "keywords": ["enable", "disable", "toggle", "blocking", "dns"]
+    },
+    {
+      "name": "query-log",
+      "title": "Query Log",
+      "description": "Examine recent DNS query logs and activity",
+      "mode": "view",
+      "keywords": ["queries", "log", "dns", "history", "activity"]
+    },
+    {
+      "name": "top-domains",
+      "title": "Top Domains",
+      "description": "View most queried and blocked domains",
+      "mode": "view",
+      "keywords": ["domains", "top", "blocked", "allowed", "statistics"]
+    },
+    {
+      "name": "add-domain",
+      "title": "Add Domain",
+      "description": "Add a domain to whitelist or blacklist",
+      "mode": "view",
+      "keywords": ["add", "domain", "whitelist", "blacklist", "allow", "block"]
+    },
+    {
+      "name": "flush-logs",
+      "title": "Flush Logs",
+      "description": "Clear all query logs and history",
+      "mode": "no-view",
+      "keywords": ["flush", "clear", "logs", "cleanup", "reset"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "pihole_url",
+      "title": "Pi-hole URL",
+      "description": "Complete URL of your Pi-hole instance (e.g., http://192.168.1.100 or https://pi.hole)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "http://192.168.1.100"
+    },
+    {
+      "name": "password",
+      "title": "Admin Password",
+      "description": "Pi-hole administrator password",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "verify_ssl",
+      "title": "Verify SSL Certificate",
+      "description": "Verify SSL certificates when using HTTPS",
+      "type": "checkbox",
+      "default": true,
+      "label": "Verify SSL certificates",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~20.17.0",
+    "@types/react": "^18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+} 
