@@ -5,7 +5,9 @@
   "description": "Control music assistant and displays current song in the menu bar",
   "icon": "logo.png",
   "author": "yoerivd",
-  "categories": ["Media"],
+  "categories": [
+    "Media"
+  ],
   "license": "MIT",
   "commands": [
     {

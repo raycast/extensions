@@ -45,7 +45,7 @@ export default function Command() {
     });
 
   return (
-    <MenuBarExtra icon="logo.png" isLoading={isLoading} title={data?.title}>
+    <MenuBarExtra icon="transparent-logo.png" isLoading={isLoading} title={data?.title}>
       {data ? (
         <MenuBarExtra.Section title="Controls">
           <MenuBarExtra.Item title="Next" icon={Icon.ArrowRight} onAction={next}></MenuBarExtra.Item>
