@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Fix Project Updates] - 2025-07-02
+
+- Fixed update actions failing when used on projects in lists. Projects now use the correct `things:///update-project` URL scheme instead of the regular `things:///update` scheme used for todos.
+
 ## [✨ Reminders] - 2025-05-06
 
 - Update the "Today" and "Upcoming" lists to allow updating todo's reminders.

@@ -44,6 +44,27 @@
       "subtitle": "Google Translate",
       "description": "Quickly translate to multiple languages",
       "mode": "view"
+    },
+    {
+      "name": "instant-translate-copy",
+      "title": "Instant Translate Copy",
+      "subtitle": "Google Translate",
+      "description": "Instantly translate selected text and copy to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-translate-paste",
+      "title": "Instant Translate Paste",
+      "subtitle": "Google Translate",
+      "description": "Instantly translate selected text and paste to active app",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-translate-view",
+      "title": "Instant Translate View",
+      "subtitle": "Google Translate",
+      "description": "Instantly translate selected text with HUD display",
+      "mode": "no-view"
     }
   ],
   "preferences": [
