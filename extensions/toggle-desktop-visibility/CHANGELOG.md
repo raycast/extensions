@@ -1,4 +1,4 @@
-# Toggle desktop visible Changelog
+# Toggle Desktop Visibility Changelog
 
 ## [Support Tahoe] - {PR_MERGE_DATE}
 - Added support for macOS Tahoe (version 26)
