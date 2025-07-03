@@ -1,5 +1,8 @@
 # Toggle desktop visible Changelog
 
+## [Support Tahoe] - 2024-12-19
+- Added support for macOS Tahoe (version 26)
+
 ## [Support Sequoia] - 2024-10-10
 - Added support for macOS Sequoia
 
