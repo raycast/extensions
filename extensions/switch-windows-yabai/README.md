@@ -1,4 +1,4 @@
-# Yabai Window Switcher for Raycast
+# Switch Windows (yabai)
 
 A powerful Raycast extension for managing windows with yabai window manager.
 
