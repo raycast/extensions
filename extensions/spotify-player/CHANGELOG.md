@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Fix Search Feature] - 2025-07-03
+
+- Fixed an issue with the search functionality.
+
 ## [Fix Noises and Additional data in Find Lyrics Function] - 2025-07-02
 
 - Fixed Noises in retrieved lyrics in Find Lyrics Function,now clean lyrics is extracted without any additional noise or data like contributors count and numbers 
