@@ -86,7 +86,7 @@ function formatLineName(ec: Departure) {
 function getTravelPlannerUrl(ec: Departure, webPlannerConfig: WebPlannerConfig) {
   const base = `${webPlannerConfig.url}/departures/details`;
   const date = new Date(ec.date);
-  const dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  const dateString = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
 
   return `${base}/${ec.serviceJourney.id}?date=${dateString}&fromQuayId=${ec.quay.id}`;
 }

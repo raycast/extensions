@@ -1,6 +1,6 @@
 # Raycast Norwegian Public Transport Changelog
 
-## [Added trip search] - 2025-07-03
+## [Added trip search] - {PR_MERGE_DATE}
 
 Added a new command for trip search 🚀 Supports searching for trips between two stop places, and viewing details for each leg of said trip. Thanks to [@binarybaba](https://github.com/binarybaba) for the contribution!
 

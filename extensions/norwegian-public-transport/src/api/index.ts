@@ -1,7 +1,8 @@
-import fetch from "node-fetch";
+import fetch, { RequestInit } from "node-fetch";
 import { getDepartureQueryDocument, QuayDepartures } from "./departuresQuery";
 import { TripQuery, tripsQueryDocument } from "./tripsQuery";
 import { Feature, QuayLineFavorites, StopPlaceQuayDeparturesQuery } from "../types";
+import { showToast, Toast } from "@raycast/api";
 
 const CLIENT_NAME = "raycast-norwegian-public-transport";
 
@@ -21,14 +22,8 @@ export async function fetchVenues(
 
   const url = `https://api.entur.io/geocoder/v1/autocomplete?${params.toString()}`;
   console.debug(url);
-  const response = await fetch(url, {
-    headers: {
-      "ET-Client-Name": CLIENT_NAME,
-    },
-    signal,
-  });
-  const featureResponse = (await response.json()) as FeatureResponse;
-  return featureResponse.features;
+  const featureResponse = await tryFetch<FeatureResponse>(url, { signal });
+  return featureResponse?.features;
 }
 
 export async function fetchDepartures(
@@ -47,18 +42,35 @@ export async function fetchDepartures(
   return departures;
 }
 
+export async function fetchTrip(
+  originId: string,
+  destinationId: string,
+  pageCursor: string,
+  signal?: AbortSignal,
+): Promise<TripQuery | undefined> {
+  const tripQuery = await fetchJourneyPlannerData<TripQuery>(
+    tripsQueryDocument,
+    {
+      fromPlace: originId,
+      toPlace: destinationId,
+      pageCursor,
+    },
+    signal,
+  );
+  return tripQuery;
+}
+
 async function fetchJourneyPlannerData<T>(
   document: string,
   variables: object,
   signal?: AbortSignal,
-): Promise<T> {
+): Promise<T | undefined> {
   const url = "https://api.entur.io/journey-planner/v3/graphql";
   console.debug(url, JSON.stringify(variables));
-  const response = await fetch(url, {
+  const response = await tryFetch<{ data: T }>(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "ET-Client-Name": CLIENT_NAME,
     },
     body: JSON.stringify({
       query: document,
@@ -66,19 +78,14 @@ async function fetchJourneyPlannerData<T>(
     }),
     signal,
   });
-  if (response.status !== 200) {
-    console.error(response);
-    throw new Error("Failed to fetch data");
-  }
-  const result = (await response.json()) as { data: T };
-  return result.data;
+  return response?.data;
 }
 
 function mapDepartureQueryKeys(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any,
   favorites: QuayLineFavorites[],
-): StopPlaceQuayDeparturesQuery {
+): StopPlaceQuayDeparturesQuery | undefined {
+  if (!data) return;
   const favoriteQuayIds = favorites.map((fav) => fav.quayId);
   const quayDepartures = favoriteQuayIds
     .map((favoriteQuayId) => {
@@ -94,25 +101,24 @@ function mapDepartureQueryKeys(
   };
 }
 
-type FetchTripArgs = {
-  originId: string;
-  destinationId: string;
-  pageCursor: string;
-};
-
-export async function fetchTrip({
-  originId,
-  destinationId,
-  pageCursor,
-  signal,
-}: FetchTripArgs & { signal?: AbortSignal }) {
-  return await fetchJourneyPlannerData<TripQuery>(
-    tripsQueryDocument,
-    {
-      fromPlace: originId,
-      toPlace: destinationId,
-      pageCursor,
-    },
-    signal,
-  );
+async function tryFetch<T>(url: string, options: RequestInit): Promise<T | undefined> {
+  try {
+    const result = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        "ET-Client-Name": CLIENT_NAME,
+      },
+    });
+    if (result.status !== 200) {
+      console.error(result);
+      throw new Error("Failed to fetch data");
+    }
+    return (await result.json()) as T;
+  } catch (error) {
+    showToast({
+      title: "Failed to fetch data",
+      style: Toast.Style.Failure,
+    });
+  }
 }

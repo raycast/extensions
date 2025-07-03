@@ -31,14 +31,12 @@ export default function TripsPage({ origin, destination }: Props) {
   const loadMore = useCallback(
     async (cursor: string, prevState: TripPattern[]) => {
       setIsLoading(true);
-      const data = await fetchTrip({
-        originId: origin.properties.id,
-        destinationId: destination.properties.id,
-        pageCursor: cursor || "",
-      });
-      tripPatterns.current = prevState.concat(data.trip.tripPatterns);
-      setGroupedTrips(groupTripsByDate(tripPatterns.current));
-      setPageCursor(data.trip.nextPageCursor);
+      const tripQuery = await fetchTrip(origin.properties.id, destination.properties.id, cursor);
+      if (tripQuery) {
+        tripPatterns.current = prevState.concat(tripQuery.trip.tripPatterns);
+        setGroupedTrips(groupTripsByDate(tripPatterns.current));
+        setPageCursor(tripQuery.trip.nextPageCursor);
+      }
       setIsLoading(false);
     },
     [origin, destination],
@@ -108,7 +106,7 @@ const TripDetails = ({ trip }: { trip: TripPattern }) => {
         </Fragment>
       ))}
       <List.Item.Detail.Metadata.Label
-        title={getDestinationTitle(trip.legs[trip.legs.length - 1])}
+        title={trip.legs.length > 0 ? getDestinationTitle(trip.legs[trip.legs.length - 1]) : ""}
         text={formatTimeDifferenceAsClock(trip.expectedStartTime, trip.expectedEndTime) + " total"}
         icon={Icon.Clock}
       />

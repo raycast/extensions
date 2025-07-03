@@ -25,7 +25,7 @@ export default function Search({ searchBarPlaceholder, onSubmit, primaryActionTi
       if (preferredVenues) setFavorites(preferredVenues);
       setFavoritesIsLoading(false);
     });
-  }, [onSubmit]);
+  }, []);
   if (favoritesIsLoading) {
     return (
       <List
