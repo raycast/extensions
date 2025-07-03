@@ -1,3 +1,3 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export const preferences = <Preferences>getPreferenceValues();
+export const preferences = getPreferenceValues<Preferences>();

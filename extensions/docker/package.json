@@ -11,7 +11,8 @@
     "stelo",
     "noblecloud",
     "sebastiankranz",
-    "kosha"
+    "kosha",
+    "Olivier-OG"
   ],
   "license": "MIT",
   "commands": [
@@ -20,7 +21,17 @@
       "title": "Manage Containers",
       "subtitle": "Docker",
       "description": "List All Docker Containers",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "groupContainersByState",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Group containers by state",
+          "description": "Group containers by their state (running, exited, etc.)"
+        }
+      ]
     },
     {
       "name": "projects_list",
@@ -51,6 +62,9 @@
     "@priithaamer/dockerode": "^3.3.1-priithaamer.1",
     "@raycast/api": "^1.89.1",
     "node-fetch": "^3.0.0"
+  },
+  "overrides": {
+    "tar-fs": ">=3.0.9"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

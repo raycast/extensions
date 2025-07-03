@@ -5,7 +5,7 @@ This extension uses a consolidation system to maintain model lists in a single l
 ## Adding New Models
 
 1. Edit `scripts/models.js`
-2. Update [pricing](https://openai.com/api/pricing/) in `src/util.ts`
+2. Update [pricing](https://platform.openai.com/docs/pricing) in `src/util.ts`
 3. Run `npm run build-package`
 4. Update `CHANGELOG.md`
 

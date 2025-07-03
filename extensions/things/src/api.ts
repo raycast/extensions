@@ -24,6 +24,7 @@ export type Todo = {
   dueDate: string;
   activationDate: string;
   notes: string;
+  isProject?: boolean;
 };
 
 export type CommandListName = 'inbox' | 'today' | 'anytime' | 'upcoming' | 'someday';
@@ -58,7 +59,7 @@ export const executeJxa = async (script: string) => {
 export const thingsNotRunningError = `
   ## Things Not Running
   Please make sure Things is installed and running before using this extension.
-  
+
   ### But my Things app is running!
   If Things is running, you may need to grant Raycast access to Things in *System Settings > Privacy & Security > Automation > Raycast > Things*
 `;
@@ -75,6 +76,8 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
   return executeJxa(`
   const things = Application('${preferences.thingsAppIdentifier}');
   const todos = things.lists.byId('${commandListNameToListIdMapping[commandListName]}').toDos();
+  const projectConstructor = things.projects()[0]?.constructor;
+  
   return todos.map(todo => ({
     id: todo.id(),
     name: todo.name(),
@@ -83,6 +86,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
     tags: todo.tagNames(),
     dueDate: todo.dueDate() && todo.dueDate().toISOString(),
     activationDate: todo.activationDate() && todo.activationDate().toISOString(),
+    isProject: projectConstructor && todo.constructor === projectConstructor,
     project: todo.project() && {
       id: todo.project().id(),
       name: todo.project().name(),
@@ -104,10 +108,10 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
 
 export const getTodo = (todoId: string) =>
   executeJxa(`
-  const things = Application('Things3');
+  const things = Application('${preferences.thingsAppIdentifier}');
   const lists = ['Inbox', 'Today', 'Anytime', 'Upcoming', 'Someday', 'Logbook', 'Trash'];
   let foundTodo = null;
-  
+
   // Search through all lists
   for (const listName of lists) {
     const todos = things.lists.byName(listName).toDos();
@@ -125,7 +129,7 @@ export const getTodo = (todoId: string) =>
     }
     if (foundTodo) break;
   }
-  
+
   return foundTodo;
 `);
 
@@ -188,8 +192,8 @@ export const getAreas = async (): Promise<Area[]> => {
 export type List = { id: string; name: string; type: 'area' | 'project' };
 
 export const getLists = async (): Promise<List[]> => {
-  const projects = await getProjects();
-  const areas = await getAreas();
+  const projects = (await getProjects()) || [];
+  const areas = (await getAreas()) || [];
 
   const projectsWithoutAreas = projects
     .filter((project) => !project.area)
@@ -237,6 +241,10 @@ export type TodoParams = {
   'completion-date'?: string;
 };
 
+export type ProjectUpdateParams = Omit<TodoParams, 'list-id'> & {
+  'area-id'?: string;
+};
+
 export async function silentlyOpenThingsURL(url: string) {
   const asyncExec = promisify(exec);
   await asyncExec(`open -g "${url}"`);
@@ -252,6 +260,27 @@ export async function updateTodo(id: string, todoParams: TodoParams) {
       'auth-token': authToken,
       id,
       ...todoParams,
+    })}`,
+  );
+}
+
+export async function updateProject(id: string, todoParams: TodoParams) {
+  const { authToken } = getPreferenceValues<Preferences>();
+
+  if (!authToken) throw new Error('unauthorized');
+
+  // Transform TodoParams to ProjectUpdateParams: list-id → area-id
+  const { 'list-id': listId, ...restParams } = todoParams;
+  const projectParams: ProjectUpdateParams = {
+    ...restParams,
+    ...(listId && { 'area-id': listId }),
+  };
+
+  await silentlyOpenThingsURL(
+    `things:///update-project?${qs.stringify({
+      'auth-token': authToken,
+      id,
+      ...projectParams,
     })}`,
   );
 }

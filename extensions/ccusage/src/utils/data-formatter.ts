@@ -1,8 +1,8 @@
 import { match } from "ts-pattern";
 import { Clipboard, showToast, Toast } from "@raycast/api";
 
-export const formatTokens = (tokens: number | null | undefined): string => {
-  if (tokens === null || tokens === undefined) return "0";
+export const formatTokens = (tokens: number | undefined): string => {
+  if (tokens === undefined) return "0";
 
   return match(tokens)
     .when(
@@ -16,22 +16,22 @@ export const formatTokens = (tokens: number | null | undefined): string => {
     .otherwise((t) => `${(t / 1000000).toFixed(2)}M`);
 };
 
-export const formatTokensAsMTok = (tokens: number | null | undefined): string => {
-  if (tokens === null || tokens === undefined) return "0 MTok";
+export const formatTokensAsMTok = (tokens: number | undefined): string => {
+  if (tokens === undefined) return "0 MTok";
 
   const mTokens = tokens / 1000000;
   return `${mTokens.toFixed(2)} MTok`;
 };
 
-export const formatCost = (cost: number | null | undefined): string => {
-  if (cost === null || cost === undefined) return "$0.00";
+export const formatCost = (totalCost: number | undefined): string => {
+  if (totalCost === undefined) return "$0.00";
 
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(cost);
+  }).format(totalCost);
 };
 
 export const getTokenEfficiency = (inputTokens: number, outputTokens: number): string => {
@@ -40,9 +40,9 @@ export const getTokenEfficiency = (inputTokens: number, outputTokens: number): s
   return `${ratio.toFixed(2)}x`;
 };
 
-export const getCostPerMTok = (cost: number, totalTokens: number): string => {
+export const getCostPerMTok = (totalCost: number, totalTokens: number): string => {
   if (totalTokens === 0) return "$0.00/MTok";
-  const costPerMTok = (cost / totalTokens) * 1000000;
+  const costPerMTok = (totalCost / totalTokens) * 1000000;
   return `$${costPerMTok.toFixed(2)}/MTok`;
 };
 
@@ -61,6 +61,6 @@ export const copyToClipboard = async (text: string, message: string): Promise<vo
   }
 };
 
-export const getCcusageCommand = (): string => {
+export const getCCUsageCommand = (): string => {
   return "npx ccusage@latest";
 };

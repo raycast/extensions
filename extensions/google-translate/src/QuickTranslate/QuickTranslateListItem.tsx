@@ -63,7 +63,24 @@ export function QuickTranslateListItem(props: {
           tooltip: `${langFrom.name} -> ${langTo.name}`,
         },
       ]}
-      detail={<List.Item.Detail markdown={result.translatedText} />}
+      detail={
+        <List.Item.Detail
+          markdown={result.translatedText}
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.TagList title="Source Language">
+                {props.languageSet.langFrom === "auto" && (
+                  <List.Item.Detail.Metadata.TagList.Item text={supportedLanguagesByCode.auto.name} color={"#FECD57"} />
+                )}
+                <List.Item.Detail.Metadata.TagList.Item text={langFrom.name} color={"#A0D468"} />
+              </List.Item.Detail.Metadata.TagList>
+              <List.Item.Detail.Metadata.TagList title="Target Language">
+                <List.Item.Detail.Metadata.TagList.Item text={langTo.name} color={"#B3A5EF"} />
+              </List.Item.Detail.Metadata.TagList>
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
