@@ -86,7 +86,6 @@ export default function AddVersionForm({ secretId, projectId, gcloudPath, onVers
         info="This will create a new version of the secret with this value"
       />
 
-
       <Form.Separator />
 
       <Form.Description
