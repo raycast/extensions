@@ -27,24 +27,21 @@
       "title": "Add Transaction",
       "subtitle": "Rewiser",
       "description": "Add a transaction by simply saying \"I spent $20 at a restaurant\"",
-      "mode": "view",
-      "command": "src/add-transaction.tsx"
+      "mode": "view"
     },
     {
       "name": "transaction-list",
       "title": "Monthly Transactions",
       "subtitle": "Rewiser",
       "description": "Select a folder to view and manage transactions from the current month",
-      "mode": "view",
-      "command": "src/transaction-list.tsx"
+      "mode": "view"
     },
     {
       "name": "share-folder",
       "title": "Share Folder",
       "subtitle": "Rewiser",
       "description": "Generate and manage share links for your folders",
-      "mode": "view",
-      "command": "src/share-folder.tsx"
+      "mode": "view"
     }
   ],
   "preferences": [
