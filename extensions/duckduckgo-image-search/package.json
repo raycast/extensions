@@ -16,7 +16,7 @@
     {
       "title": "Retry Count",
       "name": "retries",
-      "description": "The number of times to retry a failed search (default: )",
+      "description": "The number of times to retry a failed search (default: 4)",
       "type": "textfield",
       "default": "4",
       "placeholder": "4",

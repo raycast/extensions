@@ -151,6 +151,6 @@ export interface ImageSearchOptions {
 export class OldVQDError extends Error {
   constructor(message = "Old VQD token") {
     super(message);
-    this.name = "VqdInvalidError";
+    this.name = "OldVQDError";
   }
 }

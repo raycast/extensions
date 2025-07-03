@@ -1,3 +1,3 @@
-# DuckDuckGo Image Search
+# Duckduckgo Image Search
 
 Search Images inside Raycast by DuckDuckGo Image!

@@ -64,7 +64,11 @@ async function getVQD(query: string, ia = "web", signal?: AbortSignal) {
       timeout: DEFAULT_TIMEOUT,
       signal,
     });
-    vqd = VQD_REGEX.exec(response.data)![1];
+    const match = VQD_REGEX.exec(response.data);
+    if (!match) {
+      throw new Error(`Failed to extract VQD from response for query "${query}".`);
+    }
+    vqd = match[1];
     await LocalStorage.setItem("vqd", vqd);
     return vqd;
   } catch (error) {
