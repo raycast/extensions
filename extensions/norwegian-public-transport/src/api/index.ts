@@ -82,6 +82,7 @@ async function fetchJourneyPlannerData<T>(
 }
 
 function mapDepartureQueryKeys(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any,
   favorites: QuayLineFavorites[],
 ): StopPlaceQuayDeparturesQuery | undefined {
