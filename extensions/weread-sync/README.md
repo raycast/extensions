@@ -2,6 +2,8 @@
 
 Sync your highlights from Weread to Readwise automatically and efficiently.
 
+> Enhanced with improved fetch API and cleaner code structure.
+
 ## Features
 
 - **📚 Browse Weread Library**: View all your Weread books with highlights
