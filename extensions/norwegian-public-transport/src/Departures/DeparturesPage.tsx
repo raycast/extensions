@@ -3,13 +3,7 @@ import { useEffect, useState } from "react";
 import { Actions } from "./Actions";
 import { Detail } from "./Detail";
 import { fetchDepartures } from "../api";
-import {
-  DirectionType,
-  EstimatedCall,
-  Feature,
-  QuayLineFavorites,
-  StopPlaceQuayDeparturesQuery,
-} from "../types";
+import { DirectionType, Feature, QuayLineFavorites, StopPlaceQuayDeparturesQuery } from "../types";
 import {
   filterFavoritesFromResponse,
   filterFavoritesOnStopPlace,
@@ -23,8 +17,9 @@ import {
   sortEstimatedCallsByTime,
 } from "../utils";
 import { loadFavoriteLines } from "../storage";
+import { Departure } from "../api/departuresQuery";
 
-export default function StopPlacePage({ venue }: { venue: Feature }) {
+export default function DeparturesPage({ venue }: { venue: Feature }) {
   const [items, setItems] = useState<StopPlaceQuayDeparturesQuery>();
   const [isLoading, setIsLoading] = useState(true);
   const [numberOfDepartures, setNumberOfDepartures] = useState(5);
@@ -166,7 +161,7 @@ function EstimatedCallItem({
   isFavorite = false,
   setFavorites,
 }: {
-  ec: EstimatedCall;
+  ec: Departure;
   venue: Feature;
   setShowDetails: () => void;
   loadMore: () => void;

@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
-import { getDepartureQuery } from "./departureQuery";
-import { Feature, QuayDeparture, QuayLineFavorites, StopPlaceQuayDeparturesQuery } from "./types";
+import { getDepartureQueryDocument, QuayDepartures } from "./departuresQuery";
+import { TripQuery, tripsQueryDocument } from "./tripsQuery";
+import { Feature, QuayLineFavorites, StopPlaceQuayDeparturesQuery } from "../types";
 
 const CLIENT_NAME = "raycast-norwegian-public-transport";
 
@@ -36,7 +37,7 @@ export async function fetchDepartures(
   favorites: QuayLineFavorites[],
   signal?: AbortSignal,
 ): Promise<StopPlaceQuayDeparturesQuery | undefined> {
-  const departuresQuery = await fetchJourneyPlannerData(getDepartureQuery(favorites), {
+  const departuresQuery = await fetchJourneyPlannerData(getDepartureQueryDocument(favorites), {
     id: stopId,
     numberOfDepartures,
     signal,
@@ -83,12 +84,35 @@ function mapDepartureQueryKeys(
     .map((favoriteQuayId) => {
       const key = favoriteQuayId.replaceAll(":", "_");
       if (!Object.keys(data).includes(key)) return;
-      return data[key] as QuayDeparture;
+      return data[key] as QuayDepartures;
     })
-    .filter(Boolean) as QuayDeparture[];
+    .filter(Boolean) as QuayDepartures[];
   const quaysWithDepartures = quayDepartures.filter((quay) => quay.estimatedCalls.length > 0);
   return {
     stopPlace: data.stopPlace,
     favorites: quaysWithDepartures,
   };
+}
+
+type FetchTripArgs = {
+  originId: string;
+  destinationId: string;
+  pageCursor: string;
+};
+
+export async function fetchTrip({
+  originId,
+  destinationId,
+  pageCursor,
+  signal,
+}: FetchTripArgs & { signal?: AbortSignal }) {
+  return await fetchJourneyPlannerData<TripQuery>(
+    tripsQueryDocument,
+    {
+      fromPlace: originId,
+      toPlace: destinationId,
+      pageCursor,
+    },
+    signal,
+  );
 }
