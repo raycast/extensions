@@ -302,7 +302,7 @@ export const handleDisperseWindowsBySpace = (screenIdx: string) => {
       }
 
       // Step 4: Disperse each window to its corresponding space
-      for (let i = 0; i < windows.length - 1; i++) {
+      for (let i = 0; i < windows.length; i++) {
         const window = windows[i];
         const space = spaces[i];
 
