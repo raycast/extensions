@@ -1,3 +1,3 @@
-# Focusflow - a Study Clock Changelog
+# FocusFlow Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
