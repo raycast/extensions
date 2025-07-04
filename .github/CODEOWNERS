@@ -373,6 +373,7 @@
 /extensions/crunchbase                                              @qdequele
 /extensions/cryptgeon                                               @cupcakearmy
 /extensions/crypto-price                                            @gutenye
+/extensions/csfd                                                    @AdamVyborny
 /extensions/css-calculations                                        @teziovsky
 /extensions/css-gg                                                  @astrit
 /extensions/css-tricks                                              @j3lte @xmok
@@ -910,7 +911,7 @@
 /extensions/kafka                                                   @fonimus
 /extensions/kagi-fastgpt                                            @httpjamesm
 /extensions/kagi-search                                             @fearoffish @jg33
-/extensions/kaleidoscope                                            @anfalas
+/extensions/kaleidoscope                                            @anfalas @bjrmatos @anfalas
 /extensions/kaomoji-search                                          @allexks
 /extensions/karabiner-profile-switcher                              @lucaschultz @erics118
 /extensions/kde-connect                                             @StevenRCE0
@@ -1511,6 +1512,7 @@
 /extensions/rateyourmusic-search                                    @romaincabirol
 /extensions/ratingsdb                                               @K-Rod12
 /extensions/ratio-calculator                                        @Justiniscoding
+/extensions/ray-boop                                                @nschwermann
 /extensions/ray-so                                                  @gt-codes @RSO @dgrzedzielski @emlez @samuelkraft @benoitgrelard @sdorra
 /extensions/raycast-apple-intelligence                              @EvanZhouDev
 /extensions/raycast-arcade                                          @EvanZhouDev
@@ -1604,6 +1606,7 @@
 /extensions/retrac                                                  @Skarf4U
 /extensions/reverso-context                                         @MrModest @MrModest
 /extensions/rewardful                                               @AlexIsMaking
+/extensions/rewiser                                                 @sertanhelvaci
 /extensions/ricescore                                               @tonka3000
 /extensions/rick-and-morty                                          @xmok
 /extensions/ring-intercom                                           @stefanbd
@@ -1678,6 +1681,7 @@
 /extensions/seedsnote                                               @nanbingxyz
 /extensions/selfh-st-icons                                          @greirson
 /extensions/semantic-scholar                                        @blainerothrock
+/extensions/send-ai                                                 @kanishq1
 /extensions/send-to-e-reader                                        @tangerine1202
 /extensions/send-to-flomo                                           @ahonn @fankaidev @pernielsentikaer @thishym @maidangzhu
 /extensions/sendme                                                  @nazifishrak
@@ -1792,7 +1796,7 @@
 /extensions/sportssync                                              @daniyalmaster693
 /extensions/spotify-beta                                            @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon
 /extensions/spotify-controls                                        @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer @yansq @amureki
-/extensions/spotify-player                                          @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @erics118 @hjoelh @hobhouse @jatindotdev @the-devbear @rfaccio @badta5te @andyburris @thomaslombart @rhesamu @mpatel283 @LitoMore @EnneEmme @lineville @tsibog @viethung0823 @eyalevy23 @jonasengelmann @vmrjnvc @Karthikxp
+/extensions/spotify-player                                          @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @erics118 @hjoelh @hobhouse @jatindotdev @the-devbear @rfaccio @badta5te @andyburris @thomaslombart @rhesamu @mpatel283 @LitoMore @EnneEmme @lineville @tsibog @viethung0823 @eyalevy23 @jonasengelmann @vmrjnvc @Karthikxp @kartheesan05
 /extensions/spring-initializr                                       @danvega
 /extensions/spryker-docs                                            @DinisEsteves
 /extensions/sql-format                                              @tonngw @jfkisafk

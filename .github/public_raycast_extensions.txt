@@ -58,4 +58,6 @@ playtester
 model-context-protocol-registry
 clarify
 clipmate
+send-ai
+kaleidoscope
 exa
