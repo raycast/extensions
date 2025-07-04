@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "upstash",
   "title": "Upstash",
-  "description": "Serverless Data Platform",
+  "description": "Manage Redis Databases and Vector Indices",
   "icon": "upstash-icon-dark-bg.png",
   "author": "xmok",
   "license": "MIT",
@@ -13,7 +13,7 @@
       "placeholder": "upstash@example.com",
       "type": "textfield",
       "required": true,
-      "description": "Email Address"
+      "description": "Upstash Email Address"
     },
     {
       "name": "api_key",
@@ -21,20 +21,20 @@
       "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
       "type": "password",
       "required": true,
-      "description": "API Key"
+      "description": "Upstash API Key"
     }
   ],
   "commands": [
     {
       "name": "redis",
       "title": "Redis",
-      "description": "",
+      "description": "Manage Redis Databases",
       "mode": "view"
     },
     {
       "name": "vector",
       "title": "Vector",
-      "description": "",
+      "description": "Manage Vector Indices",
       "mode": "view"
     }
   ],

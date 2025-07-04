@@ -25,7 +25,14 @@ This is a Raycast extension for [Upstash](https://upstash.com/) - _Serverless Da
 
 - List Vector Indices
     - Create Index
+    - Delete Index
 
+## ➕ MORE
+
+Looking for another DB solution? Try these:
+
+<a title="Install aiven Raycast Extension" href="https://www.raycast.com/xmok/aiven"><img src="https://www.raycast.com/xmok/aiven/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install neon Raycast Extension" href="https://www.raycast.com/xmok/neon"><img src="https://www.raycast.com/xmok/neon/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 ---
 
 <img src="./assets/upstash.svg" />
