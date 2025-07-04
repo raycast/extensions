@@ -267,12 +267,22 @@
       "required": false,
       "title": "Match Score",
       "default": true
+    },
+    {
+      "name": "timezone",
+      "type": "textfield",
+      "label": "Timezone",
+      "description": "Settings to show correct date and time",
+      "required": false,
+      "title": "Timezone Location",
+      "default": ""
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@raycast/utils": "^2.0.1",
     "date-fns": "^3.3.1",
+    "date-fns-tz": "^3.2.0",
     "p-min-delay": "^4.0.2"
   },
   "devDependencies": {

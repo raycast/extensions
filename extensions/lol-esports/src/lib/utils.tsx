@@ -1,22 +1,25 @@
 import { Color, Icon, List } from "@raycast/api";
 import { Event } from "./hooks/use-schedule";
 import { getPreferenceValues } from "@raycast/api";
-import { format as formatDate } from "date-fns";
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 
 interface Preferences {
   score: boolean;
+  timezone: string;
 }
+
+const preferences = getPreferenceValues<Preferences>();
 
 const getMatchStatePriority = (state: Event["state"]): number => {
   switch (state) {
     case "completed":
-      return 0; // Lowest priority
+      return 2;
     case "unstarted":
-      return 1; // Highest priority
+      return 1;
     case "inProgress":
-      return 2; // Medium priority
+      return 0;
     default:
-      return 99; // Fallback
+      return 99;
   }
 };
 
@@ -32,7 +35,7 @@ export const sortMatchPriority = (a: Event, b: Event) => {
 };
 
 export const sortMatchDate = (a: Event, b: Event) => {
-  return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+  return getZonedDate(b.startTime).getTime() - getZonedDate(a.startTime).getTime();
 };
 
 export const eventIcon = (event: Event): List.Item.Props["icon"] => {
@@ -65,20 +68,31 @@ export const eventIcon = (event: Event): List.Item.Props["icon"] => {
   return icon;
 };
 
-const preferences = getPreferenceValues<Preferences>();
+export const eventAccessories = (event: Event): List.Item.Accessory[] => {
+  const [teamA, teamB] = event.match.teams;
 
-export const eventStrategy = (event: Event): List.Item.Accessory => {
   let strategy: List.Item.Accessory = {};
   switch (event.match.strategy.type) {
     case "bestOf":
       strategy = {
-        text: `BO${event.match.strategy.count}`,
+        tag: { value: `BO${event.match.strategy.count}`, color: Color.SecondaryText },
         tooltip: `Best of ${event.match.strategy.count}`,
       };
+
       break;
   }
 
-  return strategy;
+  let matchScore: List.Item.Accessory = {};
+
+  if (preferences.score && teamA.result?.outcome && teamB.result?.outcome) {
+    matchScore = {
+      tag: {
+        value: `${teamA.result.gameWins} - ${teamB.result.gameWins}`,
+        color: Color.Green,
+      },
+    };
+  }
+  return [matchScore, strategy];
 };
 
 interface EventDetail {
@@ -86,7 +100,7 @@ interface EventDetail {
   subtitle: string;
   keywords: string[];
   icon: List.Item.Props["icon"];
-  strategy: List.Item.Accessory;
+  accessories: List.Item.Accessory[];
 }
 
 export const eventDetail = (event: Event, includeTime: boolean): EventDetail => {
@@ -97,13 +111,17 @@ export const eventDetail = (event: Event, includeTime: boolean): EventDetail => 
   if (preferences.score) {
     // Use preference here
     if (teamA.result?.outcome && teamB.result?.outcome) {
-      subtitle = `${teamA.name} ${teamA.result.gameWins} - ${teamB.result.gameWins} ${teamB.name}`;
+      subtitle = `${teamA.name}  -  ${teamB.name}`;
     }
   }
 
   const eventDate = new Date(event.startTime);
 
-  const title = includeTime ? formatDate(eventDate, "MMM d, HH:mm") : formatDate(eventDate, "HH:mm");
+  let timezone = preferences.timezone || "";
+
+  const title = includeTime
+    ? formatInTimeZone(eventDate, timezone, "MMM d, HH:mm")
+    : formatInTimeZone(eventDate, timezone, "HH:mm");
 
   const keywords = [...teamA.name.split(" "), ...teamB.name.split(" "), title];
 
@@ -111,7 +129,13 @@ export const eventDetail = (event: Event, includeTime: boolean): EventDetail => 
     title: title,
     subtitle: subtitle,
     icon: eventIcon(event),
-    strategy: eventStrategy(event),
+    accessories: eventAccessories(event),
     keywords: keywords,
   };
+};
+
+// Helper function to get the date in the target timezone
+export const getZonedDate = (dateString: string | Date): Date => {
+  let timezone = preferences.timezone || "";
+  return fromZonedTime(new Date(dateString), timezone);
 };

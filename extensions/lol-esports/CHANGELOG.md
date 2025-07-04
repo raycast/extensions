@@ -4,6 +4,7 @@
 
 - New option to hide match scores
 - Show Schedule listing improved
+- New timezone setting to show correct date and times
 
 ## [AI Tools] - 2025-05-12
 

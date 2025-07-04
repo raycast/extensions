@@ -5,7 +5,7 @@ import { addMinutes, differenceInMinutes, isThisYear, isToday, isPast, isFuture 
 import { useSchedule, Event } from "./lib/hooks/use-schedule";
 import { LeagueDropdown } from "./lib/components/league-dropdown";
 import { AddToCalendar } from "./lib/components/add-to-calendar";
-import { eventDetail, sortMatchDate, sortMatchPriority } from "./lib/utils";
+import { eventDetail, getZonedDate, sortMatchDate, sortMatchPriority } from "./lib/utils";
 
 export default function ShowSchedule() {
   const [leagueId, setLeagueId] = useCachedState("leagueId", "98767991302996019");
@@ -14,18 +14,23 @@ export default function ShowSchedule() {
   // Filter all relevant matches first (type 'match' and this year)
   const allMatchesThisYear = chain(schedule?.events)
     .filter((event: Event) => event.type === "match")
-    .filter((event: Event) => isThisYear(new Date(event.startTime)))
+    .filter((event: Event) => isThisYear(getZonedDate(event.startTime)))
     .value();
 
-  // Categorize events using filter
+  // Today matches
   const matchesToday = allMatchesThisYear
-    .filter((event: Event) => isToday(new Date(event.startTime)))
+    .filter((event: Event) => isToday(getZonedDate(event.startTime)))
     .sort(sortMatchPriority);
+
+  // Upcoming matches
   const upcomingMatches = allMatchesThisYear
-    .filter((event: Event) => isFuture(new Date(event.startTime)))
-    .sort(sortMatchDate);
+    .filter((event: Event) => isFuture(getZonedDate(event.startTime)) && !isToday(getZonedDate(event.startTime)))
+    .sort(sortMatchDate)
+    .reverse();
+
+  // Previous matches
   const previousMatches = allMatchesThisYear
-    .filter((event: Event) => isPast(new Date(event.startTime)) && !isToday(new Date(event.startTime)))
+    .filter((event: Event) => isPast(getZonedDate(event.startTime)) && !isToday(getZonedDate(event.startTime)))
     .sort(sortMatchDate);
 
   const commonEventDistance = chain(schedule?.events)
@@ -37,7 +42,7 @@ export default function ShowSchedule() {
         return 0;
       }
       const matches = event.match.strategy.count || 1;
-      const minutes = differenceInMinutes(nextEvent.startTime, event.startTime);
+      const minutes = differenceInMinutes(getZonedDate(nextEvent.startTime), getZonedDate(event.startTime));
       return minutes / matches;
     })
     .filter((distance) => distance > 0 && distance <= 300)
@@ -63,7 +68,7 @@ export default function ShowSchedule() {
               icon={detail.icon}
               title={detail.title}
               subtitle={detail.subtitle}
-              accessories={[detail.strategy]}
+              accessories={detail.accessories}
               keywords={detail.keywords}
               actions={
                 <ActionPanel>
@@ -71,7 +76,7 @@ export default function ShowSchedule() {
                     event={{
                       title: `${teamA.name} vs ${teamsB.name}`,
                       startDate: event.startTime,
-                      endDate: addMinutes(event.startTime, commonEventDistance as number),
+                      endDate: addMinutes(new Date(event.startTime), commonEventDistance as number),
                     }}
                   />
                 </ActionPanel>
