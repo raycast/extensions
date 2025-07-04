@@ -47,14 +47,16 @@ An unofficial Raycast extension that provides access to [Sefaria.org](https://ww
 2. Enter a specific reference (e.g., "Exodus 17:15", "ברכות י״ד", "Rashi on Genesis 1:1")
 3. View the source with Hebrew and English text side by side
 4. Use **⌘+O** to open the source on Sefaria.org
-5. Copy Hebrew text (**⌘+H**), English text (**⌘+E**), or both (**⌘+A**)
+5. Copy Hebrew text (**⌘+H**), English text (**⌘+E**), or both (**⌘+⇧+A**)
 
 ### Keyboard Shortcuts
-- **⌘+O**: Open source on Sefaria.org
 - **⌘+H**: Copy Hebrew text
 - **⌘+E**: Copy English text  
-- **⌘+A**: Copy both texts
-- **⌘+←**: Go back to search results
+- **⌘+⇧+A**: Copy both texts
+- **⌘+F**: Copy footnotes (when available)
+- **⌘+O**: Open in browser
+- **⌘+←**: Go back
+- **⌘+↑**: Back to categories
 
 ## Installation
 

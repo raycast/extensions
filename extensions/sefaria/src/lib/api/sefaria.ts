@@ -58,7 +58,10 @@ export class SefariaApi {
     const hebrewResponse = await fetch(`${SefariaApi.TEXT_ENDPOINT}/${encodedRef}`);
 
     if (!hebrewResponse.ok) {
-      throw new Error(`Failed to fetch Hebrew text: ${hebrewResponse.status} ${hebrewResponse.statusText}`);
+      // Try to provide more context for the error
+      const errorMsg = `Failed to fetch Hebrew text for "${reference}": ${hebrewResponse.status} ${hebrewResponse.statusText}`;
+      console.warn(errorMsg);
+      throw new Error(errorMsg);
     }
 
     const hebrewData = await hebrewResponse.json();
@@ -129,6 +132,7 @@ export class SefariaApi {
           categoryMap.get(primaryCategory)!.push(result);
         } catch (error) {
           // If we can't fetch text data, categorize as 'Other'
+          // This handles cases where Hebrew text is not available (like footnotes)
           console.warn(`Failed to fetch category for ${result._id}:`, error);
           if (!categoryMap.has("Other")) {
             categoryMap.set("Other", []);

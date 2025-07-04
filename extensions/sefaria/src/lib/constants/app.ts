@@ -7,7 +7,7 @@ const SHORTCUTS = {
   OPEN_BROWSER: { modifiers: ["cmd"], key: "o" },
   COPY_HEBREW: { modifiers: ["cmd"], key: "h" },
   COPY_ENGLISH: { modifiers: ["cmd"], key: "e" },
-  COPY_ALL: { modifiers: ["cmd"], key: "a" },
+  COPY_ALL: { modifiers: ["cmd", "shift"], key: "a" },
   COPY_FOOTNOTES: { modifiers: ["cmd"], key: "f" },
 };
 
