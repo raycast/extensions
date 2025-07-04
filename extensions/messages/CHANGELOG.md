@@ -1,5 +1,9 @@
 # Messages Changelog
 
+## [Support for Hyphenated OTP Codes] - {PR_MERGE_DATE}
+
+Added detection for OTP codes formatted with hyphens (e.g. 123-456), requiring at least 3 digits on both sides.
+
 ## [Docs: Add note about automation permissions] - 2025-07-01
 
 Added a note about automation permissions for Raycast in the README.md file.
