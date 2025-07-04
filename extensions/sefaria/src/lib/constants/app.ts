@@ -1,4 +1,17 @@
 /**
+ * Keyboard shortcuts (not readonly to be compatible with Raycast API)
+ */
+const SHORTCUTS = {
+  BACK: { modifiers: ["cmd"], key: "arrowLeft" },
+  BACK_TO_CATEGORIES: { modifiers: ["cmd"], key: "arrowUp" },
+  OPEN_BROWSER: { modifiers: ["cmd"], key: "o" },
+  COPY_HEBREW: { modifiers: ["cmd"], key: "h" },
+  COPY_ENGLISH: { modifiers: ["cmd"], key: "e" },
+  COPY_ALL: { modifiers: ["cmd"], key: "a" },
+  COPY_FOOTNOTES: { modifiers: ["cmd"], key: "f" },
+};
+
+/**
  * Application constants
  */
 
@@ -56,15 +69,7 @@ export const APP_CONSTANTS = {
   /**
    * Keyboard shortcuts
    */
-  SHORTCUTS: {
-    BACK: { modifiers: ["cmd"], key: "arrowLeft" },
-    BACK_TO_CATEGORIES: { modifiers: ["cmd"], key: "arrowUp" },
-    OPEN_BROWSER: { modifiers: ["cmd"], key: "o" },
-    COPY_HEBREW: { modifiers: ["cmd"], key: "h" },
-    COPY_ENGLISH: { modifiers: ["cmd"], key: "e" },
-    COPY_ALL: { modifiers: ["cmd"], key: "a" },
-    COPY_FOOTNOTES: { modifiers: ["cmd"], key: "f" },
-  },
+  SHORTCUTS,
 
   /**
    * URLs
