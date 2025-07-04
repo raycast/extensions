@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, ActionPanel, Action } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { SourceDetail } from "./lib/components/SourceDetail";
 
 /**
@@ -17,6 +17,10 @@ export default function GetSourceCommand() {
   const [submittedReference, setSubmittedReference] = useState("");
 
   const handleSubmit = (values: FormValues) => {
+    if (!values.reference.trim()) {
+      showToast(Toast.Style.Failure, "Reference Required", "Please enter a reference to search for");
+      return;
+    }
     setSubmittedReference(values.reference);
   };
 

@@ -9,6 +9,30 @@ export class SefariaApi {
   private static readonly TEXT_ENDPOINT = `${SefariaApi.BASE_URL}/v3/texts`;
   private static readonly DEFAULT_SEARCH_SIZE = 20;
   private static readonly CATEGORY_SEARCH_SIZE = 100;
+  private static readonly TIMEOUT_MS = 10000; // 10 seconds timeout
+
+  /**
+   * Create a fetch request with timeout handling
+   */
+  private static async fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), SefariaApi.TIMEOUT_MS);
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+      return response;
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error(`Request timed out after ${SefariaApi.TIMEOUT_MS}ms`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
 
   /**
    * Search for texts in Sefaria with pagination support
@@ -22,7 +46,7 @@ export class SefariaApi {
       return { hits: { hits: [], total: 0 } };
     }
 
-    const response = await fetch(SefariaApi.SEARCH_ENDPOINT, {
+    const response = await SefariaApi.fetchWithTimeout(SefariaApi.SEARCH_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -55,7 +79,7 @@ export class SefariaApi {
     const encodedRef = encodeURIComponent(cleanRef);
 
     // Fetch Hebrew version (default)
-    const hebrewResponse = await fetch(`${SefariaApi.TEXT_ENDPOINT}/${encodedRef}`);
+    const hebrewResponse = await SefariaApi.fetchWithTimeout(`${SefariaApi.TEXT_ENDPOINT}/${encodedRef}`);
 
     if (!hebrewResponse.ok) {
       // Try to provide more context for the error
@@ -69,7 +93,9 @@ export class SefariaApi {
     // Try to fetch English version
     let englishData = null;
     try {
-      const englishResponse = await fetch(`${SefariaApi.TEXT_ENDPOINT}/${encodedRef}?version=english`);
+      const englishResponse = await SefariaApi.fetchWithTimeout(
+        `${SefariaApi.TEXT_ENDPOINT}/${encodedRef}?version=english`,
+      );
       if (englishResponse.ok) {
         englishData = await englishResponse.json();
       }

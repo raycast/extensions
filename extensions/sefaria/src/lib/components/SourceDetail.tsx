@@ -1,5 +1,6 @@
 import React from "react";
-import { Detail, showToast, Toast } from "@raycast/api";
+import { Detail } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useSefariaText } from "../hooks/useSefaria";
 import { cleanSefariaText, processEnglishText, addRTLMarkers } from "../utils/text-processing";
 import { SourceDetailActionPanel, ErrorActionPanel } from "./ActionPanels";
@@ -13,7 +14,7 @@ export function SourceDetail({ reference, onBack }: SourceDetailProps) {
   const { data, isLoading, error } = useSefariaText(reference);
 
   if (error) {
-    showToast(Toast.Style.Failure, APP_CONSTANTS.MESSAGES.ERROR.SOURCE_FAILED, error.message);
+    showFailureToast(error, { title: APP_CONSTANTS.MESSAGES.ERROR.SOURCE_FAILED });
     return (
       <Detail
         markdown={`# ${APP_CONSTANTS.MESSAGES.ERROR.GENERAL_ERROR} Retrieving Source

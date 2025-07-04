@@ -1,5 +1,6 @@
 import React from "react";
-import { List, showToast, Toast, ActionPanel, Action } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { CategoryListProps } from "../types/sefaria";
 import { APP_CONSTANTS } from "../constants/app";
 import { ErrorActionPanel, NoResultsActionPanel } from "./ActionPanels";
@@ -9,7 +10,7 @@ import { ErrorActionPanel, NoResultsActionPanel } from "./ActionPanels";
  */
 export function CategoryList({ query, data, error, isLoading, onSelectCategory }: CategoryListProps) {
   if (error) {
-    showToast(Toast.Style.Failure, APP_CONSTANTS.MESSAGES.ERROR.SEARCH_FAILED, error.message);
+    showFailureToast(error, { title: APP_CONSTANTS.MESSAGES.ERROR.SEARCH_FAILED });
     return (
       <List.Item
         title="Search Error"

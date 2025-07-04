@@ -10,12 +10,14 @@
     {
       "name": "search-sefaria",
       "title": "Search Sefaria",
+      "subtitle": "Sefaria",
       "description": "Search for texts, commentaries, and sources in Sefaria",
       "mode": "view"
     },
     {
       "name": "get-source",
       "title": "Get Source",
+      "subtitle": "Sefaria",
       "description": "Get Hebrew and English text for a specific reference",
       "mode": "view"
     }

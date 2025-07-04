@@ -1,5 +1,6 @@
 import React from "react";
-import { List, showToast, Toast, ActionPanel, Action } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { extractTitleFromId, extractReferenceFromId, cleanHighlightTags, truncateText } from "../utils/text-processing";
 import { SearchResultActionPanel, ErrorActionPanel, NoResultsActionPanel } from "./ActionPanels";
 import { APP_CONSTANTS } from "../constants/app";
@@ -18,7 +19,7 @@ export function SearchList({
   onBackToCategories,
 }: Omit<SearchListProps, "pagination">) {
   if (error) {
-    showToast(Toast.Style.Failure, APP_CONSTANTS.MESSAGES.ERROR.SEARCH_FAILED, error.message);
+    showFailureToast(error, { title: APP_CONSTANTS.MESSAGES.ERROR.SEARCH_FAILED });
     return (
       <List.Item
         title="Search Error"

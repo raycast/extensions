@@ -26,12 +26,21 @@ export function SearchResultActionPanel({
 
   return (
     <ActionPanel>
-      <Action title="View Full Source" onAction={onViewFullSource} icon={APP_CONSTANTS.ICONS.VIEW_SOURCE} />
       <Action.OpenInBrowser url={sefariaUrl} title="Open on Sefaria" shortcut={APP_CONSTANTS.SHORTCUTS.OPEN_BROWSER} />
-      <Action.CopyToClipboard title="Copy Title" content={title} />
-      <Action.CopyToClipboard title="Copy Reference" content={reference} />
-      <Action.CopyToClipboard title="Copy Highlighted Text" content={highlightedText} />
-      <Action.CopyToClipboard title="Copy First Match" content={firstMatch} />
+      <Action title="View Full Source" onAction={onViewFullSource} icon={APP_CONSTANTS.ICONS.VIEW_SOURCE} />
+      <Action.CopyToClipboard
+        title={`Copy Title: ${title.length > 25 ? `${title.substring(0, 25)}...` : title}`}
+        content={title}
+      />
+      <Action.CopyToClipboard title={`Copy Reference: ${reference}`} content={reference} />
+      <Action.CopyToClipboard
+        title={`Copy Highlighted: ${highlightedText.length > 20 ? `${highlightedText.substring(0, 20)}...` : highlightedText}`}
+        content={highlightedText}
+      />
+      <Action.CopyToClipboard
+        title={`Copy First Match: ${firstMatch.length > 20 ? `${firstMatch.substring(0, 20)}...` : firstMatch}`}
+        content={firstMatch}
+      />
     </ActionPanel>
   );
 }
@@ -58,14 +67,18 @@ export function SourceDetailActionPanel({
   onBack,
 }: SourceDetailActionPanelProps) {
   const sefariaUrl = `${APP_CONSTANTS.URLS.SEFARIA_BASE}/${encodeURIComponent(reference)}`;
-  const bothTexts = `Hebrew:\n${hebrewText}\n\nEnglish:\n${englishText}${
-    footnotes.length > 0 ? "\n\nFootnotes:\n" + footnotes.map((note, i) => `${i + 1}. ${note}`).join("\n") : ""
-  }`;
+  const bothTexts = [
+    hebrewText && `Hebrew:\n${hebrewText}`,
+    englishText && `English:\n${englishText}`,
+    footnotes.length > 0 && `Footnotes:\n${footnotes.map((note, i) => `${i + 1}. ${note}`).join("\n")}`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
   return (
     <ActionPanel>
-      <Action title="Back to Search" onAction={onBack} shortcut={APP_CONSTANTS.SHORTCUTS.BACK} />
       <Action.OpenInBrowser url={sefariaUrl} title="View on Sefaria" shortcut={APP_CONSTANTS.SHORTCUTS.OPEN_BROWSER} />
+      <Action title="Back to Search" onAction={onBack} shortcut={APP_CONSTANTS.SHORTCUTS.BACK} />
       <Action.CopyToClipboard
         title="Copy Hebrew Text"
         content={hebrewText}
