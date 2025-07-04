@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "smart-calendars-ai-create-events-using-ai",
-  "title": "Smart Calendars AI: Create Events Using AI",
+  "title": "Smart Calendars AI – Create Events / Reminders Using AI",
   "description": "Transform scheduling with AI-powered calendar management: Create events instantly by pasting text/emails/websites.",
-  "icon": "extension-icon.png",
+  "icon": "logo.png",
   "author": "johannes_lohmeier",
   "categories": [
     "Productivity"
@@ -12,24 +12,33 @@
   "commands": [
     {
       "name": "create-calendar-event-from-url",
-      "title": "Create Calendar Event from URL",
-      "subtitle": "Paste URL to receive a calendar event",
-      "description": "Seamlessly convert URLs into calendar events. When you paste a URL containing event information, this feature extracts the relevant details and generates a calendar event. It's perfect for quickly adding webinars, online meetings, or any event linked online to your calendar, ensuring you never miss out on important events.",
+      "title": "Create Calendar Event / Reminder from URL",
+      "subtitle": "Paste URL to receive a calendar event or reminder",
+      "description": "Seamlessly convert URLs into calendar events or reminders. When you paste a URL containing event information, this feature extracts the relevant details and generates a calendar event or reminder. It's perfect for quickly adding webinars, online meetings, or any event linked online to your calendar, ensuring you never miss out on important events.",
       "mode": "no-view",
-      "icon": "SM_A.png"
+      "icon": "logo.png"
     },
     {
       "name": "create-calendar-event-from-text",
-      "title": "Create Calendar Event from Text",
-      "subtitle": "Paste text to receive a calendar event",
-      "description": "Transform any text into a calendar event with ease. Simply paste text containing event details, such as date, time, and location, and this feature will automatically create a calendar event for you. It's an efficient way to organize meetings and appointments directly from your clipboard, saving you time and ensuring you stay on top of your schedule.",
+      "title": "Create Calendar Event / Reminder from Text",
+      "subtitle": "Paste text to receive a calendar event or reminder",
+      "description": "Transform any text into a calendar event or reminder with ease. Simply paste text containing event details, such as date, time, and location, and this feature will automatically create a calendar event or reminder for you. It's an efficient way to organize meetings and appointments directly from your clipboard, saving you time and ensuring you stay on top of your schedule.",
       "mode": "no-view",
-      "icon": "SM_A.png"
+      "icon": "logo.png"
+    },
+    {
+      "name": "create-calendar-event-from-image",
+      "title": "Create Calendar Event / Reminder from Image",
+      "subtitle": "Process image to receive a calendar event or reminder",
+      "description": "Extract event details or reminders from images (JPEG, PNG, GIF, BMP, TIFF). Processes images from clipboard or file picker. Perfect for concert posters, event flyers, and screenshots.",
+      "mode": "view",
+      "icon": "logo.png"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.94.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "jimp": "^1.6.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -44,7 +53,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+
     "publish": "npx @raycast/api@latest publish"
   }
 }

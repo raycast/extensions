@@ -37,7 +37,7 @@ export default async function Command() {
     const url = `smartcalendars://${encodedText}`;
 
     // Update toast
-    loadingToast.title = "Creating calendar event...";
+    loadingToast.title = "Creating calendar event/reminder...";
 
     // Open the URL
     await open(url);
@@ -45,14 +45,14 @@ export default async function Command() {
     // Show success toast
     await showToast({
       style: Toast.Style.Success,
-      title: "Calendar event created",
+      title: "Calendar event/reminder created",
       message: "Text sent to Smart Calendars app",
     });
   } catch (error) {
     // Show error toast
     await showToast({
       style: Toast.Style.Failure,
-      title: "Failed to create calendar event",
+      title: "Failed to create calendar event/reminder",
       message: String(error),
     });
   }
