@@ -1,5 +1,6 @@
 # Smart Calendars AI: Create Events Using AI Changelog
 
+<<<<<<< HEAD
 ## [Version 2.0.0] - 2025-07-04
 
 - **NEW**: "Create Calendar Event/Reminder from Image" command
