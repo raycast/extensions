@@ -29,16 +29,16 @@ export function SearchResultActionPanel({
       <Action.OpenInBrowser url={sefariaUrl} title="Open on Sefaria" shortcut={APP_CONSTANTS.SHORTCUTS.OPEN_BROWSER} />
       <Action title="View Full Source" onAction={onViewFullSource} icon={APP_CONSTANTS.ICONS.VIEW_SOURCE} />
       <Action.CopyToClipboard
-        title={`Copy Title: ${title.length > 25 ? `${title.substring(0, 25)}...` : title}`}
+        title={`Copy Title: ${title.length > APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH ? `${title.substring(0, APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH)}...` : title}`}
         content={title}
       />
       <Action.CopyToClipboard title={`Copy Reference: ${reference}`} content={reference} />
       <Action.CopyToClipboard
-        title={`Copy Highlighted: ${highlightedText.length > 20 ? `${highlightedText.substring(0, 20)}...` : highlightedText}`}
+        title={`Copy Highlighted: ${highlightedText.length > APP_CONSTANTS.SEARCH.HIGHLIGHTED_TEXT_PREVIEW_LENGTH ? `${highlightedText.substring(0, APP_CONSTANTS.SEARCH.HIGHLIGHTED_TEXT_PREVIEW_LENGTH)}...` : highlightedText}`}
         content={highlightedText}
       />
       <Action.CopyToClipboard
-        title={`Copy First Match: ${firstMatch.length > 20 ? `${firstMatch.substring(0, 20)}...` : firstMatch}`}
+        title={`Copy First Match: ${firstMatch.length > APP_CONSTANTS.SEARCH.HIGHLIGHTED_TEXT_PREVIEW_LENGTH ? `${firstMatch.substring(0, APP_CONSTANTS.SEARCH.HIGHLIGHTED_TEXT_PREVIEW_LENGTH)}...` : firstMatch}`}
         content={firstMatch}
       />
     </ActionPanel>
@@ -80,19 +80,23 @@ export function SourceDetailActionPanel({
       <Action.OpenInBrowser url={sefariaUrl} title="View on Sefaria" shortcut={APP_CONSTANTS.SHORTCUTS.OPEN_BROWSER} />
       <Action title="Back to Search" onAction={onBack} shortcut={APP_CONSTANTS.SHORTCUTS.BACK} />
       <Action.CopyToClipboard
-        title="Copy Hebrew Text"
+        title={`Copy Hebrew: ${hebrewText.length > APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH ? `${hebrewText.substring(0, APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH)}...` : hebrewText}`}
         content={hebrewText}
         shortcut={APP_CONSTANTS.SHORTCUTS.COPY_HEBREW}
       />
       <Action.CopyToClipboard
-        title="Copy English Text"
+        title={`Copy English: ${englishText.length > APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH ? `${englishText.substring(0, APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH)}...` : englishText}`}
         content={englishText}
         shortcut={APP_CONSTANTS.SHORTCUTS.COPY_ENGLISH}
       />
-      <Action.CopyToClipboard title="Copy Both Texts" content={bothTexts} shortcut={APP_CONSTANTS.SHORTCUTS.COPY_ALL} />
+      <Action.CopyToClipboard
+        title={`Copy Both: ${bothTexts.length > APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH ? `${bothTexts.substring(0, APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH)}...` : bothTexts}`}
+        content={bothTexts}
+        shortcut={APP_CONSTANTS.SHORTCUTS.COPY_ALL}
+      />
       {footnotes.length > 0 && (
         <Action.CopyToClipboard
-          title="Copy Footnotes"
+          title={`Copy Footnotes (${footnotes.length})`}
           content={footnotes.map((note, i) => `${i + 1}. ${note}`).join("\n")}
           shortcut={APP_CONSTANTS.SHORTCUTS.COPY_FOOTNOTES}
         />

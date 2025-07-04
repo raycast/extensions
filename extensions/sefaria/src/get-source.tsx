@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { SourceDetail } from "./lib/components/SourceDetail";
 
 /**
@@ -13,12 +14,11 @@ interface FormValues {
  * Main get source command component
  */
 export default function GetSourceCommand() {
-  const [reference, setReference] = useState("");
   const [submittedReference, setSubmittedReference] = useState("");
 
   const handleSubmit = (values: FormValues) => {
     if (!values.reference.trim()) {
-      showToast(Toast.Style.Failure, "Reference Required", "Please enter a reference to search for");
+      showFailureToast("Reference Required");
       return;
     }
     setSubmittedReference(values.reference);
@@ -44,8 +44,6 @@ export default function GetSourceCommand() {
         id="reference"
         title="Reference"
         placeholder="e.g., Exod. 17:15, Exodus 17:15, Shemot 17:15, Berakhot 14b, Rashi on Genesis 1:1"
-        value={reference}
-        onChange={setReference}
         info="Enter a biblical reference, Talmudic reference, or commentary reference"
       />
     </Form>

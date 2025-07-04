@@ -23,7 +23,18 @@ export const APP_CONSTANTS = {
    */
   SEARCH: {
     MAX_PREVIEW_LENGTH: 80,
-    DEFAULT_SIZE: 20,
+    DEFAULT_PAGE_SIZE: 20,
+    CATEGORY_SEARCH_SIZE: 100,
+    COPY_ACTION_PREVIEW_LENGTH: 30,
+    HIGHLIGHTED_TEXT_PREVIEW_LENGTH: 25,
+  },
+
+  /**
+   * API configuration
+   */
+  API: {
+    REQUEST_TIMEOUT_MS: 10000, // 10 seconds
+    BATCH_SIZE: 10,
   },
 
   /**

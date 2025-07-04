@@ -19,7 +19,7 @@ export function SearchList({
   onBackToCategories,
 }: Omit<SearchListProps, "pagination">) {
   if (error) {
-    showFailureToast(error, { title: APP_CONSTANTS.MESSAGES.ERROR.SEARCH_FAILED });
+    showFailureToast(APP_CONSTANTS.MESSAGES.ERROR.SEARCH_FAILED);
     return (
       <List.Item
         title="Search Error"
@@ -30,18 +30,19 @@ export function SearchList({
     );
   }
 
-  // Only show loading state if we have no data at all
-  if (isLoading && !data?.results.length) {
-    return null; // Let the parent List handle loading state
+  // Don't render anything while loading - let parent handle the loading state
+  if (isLoading && !data) {
+    return null;
   }
 
-  if (!data?.results.length && !isLoading) {
+  // Show "no results" only if we're not loading and have no data or empty results
+  if (!isLoading && (!data || !data.results || data.results.length === 0)) {
     return (
       <List.Item
         title={APP_CONSTANTS.MESSAGES.SUCCESS.NO_RESULTS_TITLE}
-        subtitle={`No results for "${query}"`}
+        subtitle={query ? `No results for "${query}"` : "Enter a search term to begin"}
         accessories={[{ text: APP_CONSTANTS.ICONS.NO_RESULTS }]}
-        actions={<NoResultsActionPanel query={query} />}
+        actions={query ? <NoResultsActionPanel query={query} /> : undefined}
       />
     );
   }
@@ -65,7 +66,7 @@ export function SearchList({
           }
         />
       )}
-      {data?.results.map((result, index) => {
+      {data?.results?.map((result, index) => {
         // Extract content from highlight fields - API only returns 'exact' field
         const exactHighlights = result.highlight?.exact || [];
         const firstHighlight = exactHighlights[0] || "";
@@ -80,7 +81,7 @@ export function SearchList({
         const cleanAllHighlights = cleanHighlightTags(allHighlights);
 
         // Create a preview subtitle from the first highlight
-        const previewText = truncateText(cleanFirstHighlight) || `Score: ${result._score.toFixed(2)}`;
+        const previewText = truncateText(cleanFirstHighlight) || `Score: ${result._score?.toFixed(2) || "N/A"}`;
 
         return (
           <List.Item
@@ -88,9 +89,9 @@ export function SearchList({
             title={title}
             subtitle={previewText}
             accessories={[
-              { text: result._index },
-              { text: `Score: ${result._score.toFixed(2)}` },
-              { text: `${index + 1}/${data.totalCount}` },
+              { text: result._index || "Unknown" },
+              { text: `Score: ${result._score?.toFixed(2) || "N/A"}` },
+              { text: `${index + 1}/${data.totalCount || "?"}` },
             ]}
             detail={
               <List.Item.Detail
@@ -98,15 +99,15 @@ export function SearchList({
 ## ${title}
 
 **Highlighted Matches:**
-${cleanAllHighlights}
+${cleanAllHighlights || "No highlights available"}
 
-**Score:** ${result._score.toFixed(2)}
-**Index:** ${result._index}
-**ID:** ${result._id}
-**Position:** ${index + 1} of ${data.totalCount} total results
+**Score:** ${result._score?.toFixed(2) || "N/A"}
+**Index:** ${result._index || "Unknown"}
+**ID:** ${result._id || "Unknown"}
+**Position:** ${index + 1} of ${data.totalCount || "?"} total results
 
 **Raw Highlights (${exactHighlights.length}):**
-${exactHighlights.map((highlight, i) => `${i + 1}. ${cleanHighlightTags(highlight)}`).join("\n")}
+${exactHighlights.length > 0 ? exactHighlights.map((highlight, i) => `${i + 1}. ${cleanHighlightTags(highlight)}`).join("\n") : "No highlights available"}
                 `}
               />
             }
@@ -114,8 +115,8 @@ ${exactHighlights.map((highlight, i) => `${i + 1}. ${cleanHighlightTags(highligh
               <SearchResultActionPanel
                 reference={reference}
                 title={title}
-                highlightedText={cleanAllHighlights}
-                firstMatch={cleanFirstHighlight}
+                highlightedText={cleanAllHighlights || "No highlights available"}
+                firstMatch={cleanFirstHighlight || "No match available"}
                 onViewFullSource={() => onSelectResult(reference)}
               />
             }

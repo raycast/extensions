@@ -1,4 +1,5 @@
 import { SearchResponse, TextContent, CategoryGroup, SearchResult } from "../types/sefaria";
+import { APP_CONSTANTS } from "../constants/app";
 
 /**
  * Sefaria API client with proper error handling and type safety
@@ -7,16 +8,13 @@ export class SefariaApi {
   private static readonly BASE_URL = "https://www.sefaria.org/api";
   private static readonly SEARCH_ENDPOINT = `${SefariaApi.BASE_URL}/search-wrapper`;
   private static readonly TEXT_ENDPOINT = `${SefariaApi.BASE_URL}/v3/texts`;
-  private static readonly DEFAULT_SEARCH_SIZE = 20;
-  private static readonly CATEGORY_SEARCH_SIZE = 100;
-  private static readonly TIMEOUT_MS = 10000; // 10 seconds timeout
 
   /**
    * Create a fetch request with timeout handling
    */
   private static async fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), SefariaApi.TIMEOUT_MS);
+    const timeoutId = setTimeout(() => controller.abort(), APP_CONSTANTS.API.REQUEST_TIMEOUT_MS);
 
     try {
       const response = await fetch(url, {
@@ -26,7 +24,7 @@ export class SefariaApi {
       return response;
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
-        throw new Error(`Request timed out after ${SefariaApi.TIMEOUT_MS}ms`);
+        throw new Error(`Request timed out after ${APP_CONSTANTS.API.REQUEST_TIMEOUT_MS}ms`);
       }
       throw error;
     } finally {
@@ -39,7 +37,7 @@ export class SefariaApi {
    */
   static async search(
     query: string,
-    size: number = SefariaApi.DEFAULT_SEARCH_SIZE,
+    size: number = APP_CONSTANTS.SEARCH.DEFAULT_PAGE_SIZE,
     from: number = 0,
   ): Promise<SearchResponse> {
     if (!query.trim()) {
@@ -125,51 +123,53 @@ export class SefariaApi {
     }
 
     // Fetch a larger set of results to get good category distribution
-    const response = await SefariaApi.search(query, SefariaApi.CATEGORY_SEARCH_SIZE);
+    const response = await SefariaApi.search(query, APP_CONSTANTS.SEARCH.CATEGORY_SEARCH_SIZE);
     const results = response.hits.hits;
 
     if (results.length === 0) {
       return [];
     }
 
-    // Group results by primary category
-    const categoryMap = new Map<string, SearchResult[]>();
-
     // We'll need to fetch text metadata for each result to get category info
     // For now, let's batch the requests to avoid overwhelming the API
-    const batchSize = 10;
     const batches = [];
 
-    for (let i = 0; i < results.length; i += batchSize) {
-      batches.push(results.slice(i, i + batchSize));
+    for (let i = 0; i < results.length; i += APP_CONSTANTS.API.BATCH_SIZE) {
+      batches.push(results.slice(i, i + APP_CONSTANTS.API.BATCH_SIZE));
     }
 
-    // Process each batch
+    // Process each batch and collect results
+    const categoryResults: Array<{ category: string; result: SearchResult }> = [];
+
     for (const batch of batches) {
-      const promises = batch.map(async (result) => {
+      const batchPromises = batch.map(async (result) => {
         try {
           const reference = SefariaApi.extractReferenceFromId(result._id);
           const textData = await SefariaApi.getText(reference);
           const primaryCategory = textData.hebrew.primary_category || "Other";
 
-          if (!categoryMap.has(primaryCategory)) {
-            categoryMap.set(primaryCategory, []);
-          }
-          categoryMap.get(primaryCategory)!.push(result);
+          return { category: primaryCategory, result };
         } catch (error) {
           // If we can't fetch text data, categorize as 'Other'
           // This handles cases where Hebrew text is not available (like footnotes)
           console.warn(`Failed to fetch category for ${result._id}:`, error);
-          if (!categoryMap.has("Other")) {
-            categoryMap.set("Other", []);
-          }
-          categoryMap.get("Other")!.push(result);
+          return { category: "Other", result };
         }
       });
 
       // Wait for current batch to complete before processing next batch
-      await Promise.all(promises);
+      const batchResults = await Promise.all(batchPromises);
+      categoryResults.push(...batchResults);
     }
+
+    // Group results by category using reduce for better performance
+    const categoryMap = categoryResults.reduce((acc, { category, result }) => {
+      if (!acc.has(category)) {
+        acc.set(category, []);
+      }
+      acc.get(category)!.push(result);
+      return acc;
+    }, new Map<string, SearchResult[]>());
 
     // Convert map to CategoryGroup array and sort by count
     const categories: CategoryGroup[] = Array.from(categoryMap.entries())

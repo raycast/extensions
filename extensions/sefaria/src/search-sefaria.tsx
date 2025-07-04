@@ -72,13 +72,16 @@ export default function SearchSefariaCommand() {
     );
   }
 
+  // Determine loading state: only show loading when we have a query and no data yet
+  const shouldShowLoading = categoryLoading && query.length > 0 && !categoryData;
+
   // Default view: show categories
   return (
     <List
       searchBarPlaceholder="Search Sefaria..."
       onSearchTextChange={setQuery}
       throttle={true}
-      isLoading={categoryLoading && query.length > 0 && !categoryData?.categories.length}
+      isLoading={shouldShowLoading}
     >
       {query.length > 0 ? (
         <CategoryList

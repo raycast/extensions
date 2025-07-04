@@ -10,7 +10,7 @@ import { ErrorActionPanel, NoResultsActionPanel } from "./ActionPanels";
  */
 export function CategoryList({ query, data, error, isLoading, onSelectCategory }: CategoryListProps) {
   if (error) {
-    showFailureToast(error, { title: APP_CONSTANTS.MESSAGES.ERROR.SEARCH_FAILED });
+    showFailureToast(APP_CONSTANTS.MESSAGES.ERROR.SEARCH_FAILED);
     return (
       <List.Item
         title="Search Error"
@@ -21,30 +21,31 @@ export function CategoryList({ query, data, error, isLoading, onSelectCategory }
     );
   }
 
-  // Only show loading state if we have no data at all
-  if (isLoading && !data?.categories.length) {
-    return null; // Let the parent List handle loading state
+  // Don't render anything while loading - let parent handle the loading state
+  if (isLoading && !data) {
+    return null;
   }
 
-  if (!data?.categories.length && !isLoading) {
+  // Show "no results" only if we're not loading and have no data or empty categories
+  if (!isLoading && (!data || !data.categories || data.categories.length === 0)) {
     return (
       <List.Item
         title={APP_CONSTANTS.MESSAGES.SUCCESS.NO_RESULTS_TITLE}
-        subtitle={`No results for "${query}"`}
+        subtitle={query ? `No results for "${query}"` : "Enter a search term to begin"}
         accessories={[{ text: APP_CONSTANTS.ICONS.NO_RESULTS }]}
-        actions={<NoResultsActionPanel query={query} />}
+        actions={query ? <NoResultsActionPanel query={query} /> : undefined}
       />
     );
   }
 
   return (
     <>
-      {data?.categories.map((category) => (
+      {data?.categories?.map((category) => (
         <List.Item
           key={category.category}
           title={category.category}
-          subtitle={`${category.count} results`}
-          accessories={[{ text: `${category.count} results` }, { text: APP_CONSTANTS.ICONS.SEARCH }]}
+          subtitle={`${category.count} ${category.count === 1 ? "result" : "results"}`}
+          accessories={[{ text: `${category.count}` }, { text: APP_CONSTANTS.ICONS.SEARCH }]}
           actions={
             <ActionPanel>
               <Action
