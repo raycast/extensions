@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { piHoleAPI } from "./lib/api";

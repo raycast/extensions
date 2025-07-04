@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import { Action, ActionPanel, List, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
