@@ -1,8 +1,8 @@
 # Messages Changelog
 
-## [Support for Hyphenated OTP Codes] - {PR_MERGE_DATE}
+## [Start New Chat on No Results] - {PR_MERGE_DATE}
 
-Added detection for OTP codes formatted with hyphens (e.g. 123-456), requiring at least 3 digits on both sides.
+When a search yields no matching chats and the input consists solely of valid phone-number characters, display a “Start New Chat” action to open the Messages app with the entered number.  
 
 ## [Docs: Add note about automation permissions] - 2025-07-01
 
