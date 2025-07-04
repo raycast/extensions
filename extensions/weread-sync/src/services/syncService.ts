@@ -1,4 +1,5 @@
 import { getLocalStorageItem, setLocalStorageItem, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { WeReadAPI } from "../api/weread";
 import { ReadwiseAPI } from "../api/readwise";
 import { WeReadBook, WeReadBookmark, SyncStatus, ReadwiseHighlight } from "../types";
@@ -85,10 +86,8 @@ export class SyncService {
           message: `Successfully synced ${result.syncedCount} highlights from ${bookResults.length} books`,
         });
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Full Sync Completed with Errors",
-          message: `Synced ${result.syncedCount} highlights, ${result.failedBooks.length} books failed`,
+        await showFailureToast(new Error("Full Sync Completed with Errors"), {
+          title: `Synced ${result.syncedCount} highlights, ${result.failedBooks.length} books failed`,
         });
       }
 
@@ -99,11 +98,7 @@ export class SyncService {
       result.success = false;
       result.errors.push(error instanceof Error ? error.message : String(error));
 
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Full Sync Failed",
-        message: "Failed to complete full sync operation",
-      });
+      await showFailureToast(new Error("Full Sync Failed"), { title: "Failed to complete full sync operation" });
 
       return result;
     }
@@ -191,10 +186,8 @@ export class SyncService {
           message: `Synced ${result.syncedCount} new highlights`,
         });
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Incremental Sync Completed with Errors",
-          message: `Synced ${result.syncedCount} highlights, ${result.failedBooks.length} books failed`,
+        await showFailureToast(new Error("Incremental Sync Completed with Errors"), {
+          title: `Synced ${result.syncedCount} highlights, ${result.failedBooks.length} books failed`,
         });
       }
 
@@ -205,10 +198,8 @@ export class SyncService {
       result.success = false;
       result.errors.push(error instanceof Error ? error.message : String(error));
 
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Incremental Sync Failed",
-        message: "Failed to complete incremental sync operation",
+      await showFailureToast(new Error("Incremental Sync Failed"), {
+        title: "Failed to complete incremental sync operation",
       });
 
       return result;

@@ -106,10 +106,8 @@ export default function SyncStatusView() {
 
   const performFullSync = async () => {
     if (!wereadCookie || !readwiseToken) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Missing Credentials",
-        message: "Please configure WeRead cookie and Readwise token in Raycast preferences",
+      await showFailureToast(new Error("Missing Credentials"), {
+        title: "Please configure WeRead cookie and Readwise token in Raycast preferences",
       });
       return;
     }
@@ -129,10 +127,8 @@ export default function SyncStatusView() {
 
   const performIncrementalSync = async () => {
     if (!wereadCookie || !readwiseToken) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Missing Credentials",
-        message: "Please configure WeRead cookie and Readwise token in Raycast preferences",
+      await showFailureToast(new Error("Missing Credentials"), {
+        title: "Please configure WeRead cookie and Readwise token in Raycast preferences",
       });
       return;
     }
@@ -152,10 +148,8 @@ export default function SyncStatusView() {
 
   const syncSingleBook = async (bookInfo: BookSyncInfo) => {
     if (!wereadCookie || !readwiseToken) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Missing Credentials",
-        message: "Please configure credentials in Raycast preferences",
+      await showFailureToast(new Error("Missing Credentials"), {
+        title: "Please configure credentials in Raycast preferences",
       });
       return;
     }
@@ -184,10 +178,8 @@ export default function SyncStatusView() {
 
   const resetAllSyncStatuses = async () => {
     if (!wereadCookie || !readwiseToken) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Missing Credentials",
-        message: "Please configure credentials in Raycast preferences",
+      await showFailureToast(new Error("Missing Credentials"), {
+        title: "Please configure credentials in Raycast preferences",
       });
       return;
     }

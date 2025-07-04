@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ReadwiseHighlight } from "../types";
 
 const READWISE_BASE_URL = "https://readwise.io/api/v2";
@@ -39,11 +39,7 @@ export class ReadwiseAPI {
       console.log(`[Readwise Fetch] Raw response:`, data);
 
       if (response.status === 401) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Authentication Failed",
-          message: "Readwise token is invalid. Please update in Settings.",
-        });
+        showFailureToast(new Error("Readwise token is invalid. Please update in Settings."));
         throw new Error("Readwise authentication failed");
       }
 
@@ -116,11 +112,7 @@ export class ReadwiseAPI {
       });
     } catch (error) {
       console.error("Failed to sync highlights to Readwise:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Sync Failed",
-        message: "Failed to sync highlights to Readwise",
-      });
+      await showFailureToast(error, { title: "Failed to sync highlights to Readwise" });
       throw error;
     }
   }

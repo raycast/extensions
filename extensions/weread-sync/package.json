@@ -14,14 +14,13 @@
     "weread",
     "readwise",
     "highlights",
-    "sync",
     "reading",
     "books",
     "notes"
   ],
   "commands": [
     {
-      "name": "weread-sync",
+      "name": "sync",
       "title": "Weread Sync",
       "description": "Sync your Weread highlights to Readwise and manage your library",
       "mode": "view"

@@ -1,5 +1,4 @@
-import { useCachedPromise } from "@raycast/utils";
-import { showToast, Toast } from "@raycast/api";
+import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { WeReadBook, WeReadBookmark, WeReadThought } from "../types";
 import https from "https";
 import { URL } from "url";
@@ -115,7 +114,7 @@ export class WeReadAPI {
     const baseHeaders = {
       "User-Agent":
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
-      "Accept-Encoding": "gzip, deflate, br, zstd",
+      "Accept-Encoding": "gzip, deflate, br",
       "Accept-Language": "en-US,en;q=0.9",
       Accept: "application/json, text/plain, */*",
       "Cache-Control": "no-cache",
@@ -137,7 +136,7 @@ export class WeReadAPI {
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
         Accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Encoding": "gzip, deflate, br",
         "Accept-Language": "en-US,en;q=0.9",
         "Cache-Control": "max-age=0",
         DNT: "1",
@@ -282,10 +281,8 @@ export class WeReadAPI {
       }
 
       if (!books || books.length === 0) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "No Books Found",
-          message: "No books with highlights found in your WeRead library.",
+        await showFailureToast(new Error("No Books Found"), {
+          title: "No books with highlights found in your WeRead library.",
         });
         return [];
       }
@@ -391,10 +388,8 @@ export class WeReadAPI {
 
       // If it's a -2012 error, show a toast but don't crash
       if (response.errCode === -2012 || response.errcode === -2012) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Book Highlights Unavailable",
-          message: "Cannot access highlights for this book at the moment.",
+        showFailureToast(new Error("Book Highlights Unavailable"), {
+          title: "Cannot access highlights for this book at the moment.",
         });
       }
 

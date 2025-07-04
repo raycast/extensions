@@ -82,24 +82,21 @@ export class AutoSyncService {
 
   private async performSyncIfNeeded(wereadCookie: string, readwiseToken: string, interval: string): Promise<void> {
     try {
-      const lastSyncTime = await this.getLastSyncTime();
       const now = Date.now();
       const intervalHours = this.getIntervalHours(interval);
       const intervalMs = intervalHours * 60 * 60 * 1000;
+      const lastSyncTimeMs = await getLocalStorageItem<string>("lastAutoSyncTime");
 
       // Only sync if enough time has passed since last sync
-      if (
-        lastSyncTime === "Never" ||
-        now - parseInt((await getLocalStorageItem<string>("lastAutoSyncTime")) || "0") > intervalMs
-      ) {
+      if (!lastSyncTimeMs || now - parseInt(lastSyncTimeMs || "0") > intervalMs) {
         console.log("[AutoSync] Performing incremental sync (interval reached)");
-
-        // Update last sync time
-        await setLocalStorageItem("lastAutoSyncTime", String(now));
 
         // Use the SyncService for incremental sync
         const syncService = new SyncService(wereadCookie, readwiseToken);
         const result = await syncService.performIncrementalSync();
+
+        // Update last sync time only after successful sync
+        await setLocalStorageItem("lastAutoSyncTime", String(now));
 
         console.log(`[AutoSync] Sync completed. ${result.syncedCount} new highlights synced.`);
       } else {

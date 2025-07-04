@@ -81,11 +81,7 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
 
   const syncToReadwise = async () => {
     if (!readwiseToken || !bookData) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Sync Failed",
-        message: "Missing Readwise token or book data",
-      });
+      await showFailureToast(new Error("Sync Failed"), { title: "Missing Readwise token or book data" });
       return;
     }
 
@@ -308,10 +304,8 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
                             }
 
                             if (!readwiseToken) {
-                              await showToast({
-                                style: Toast.Style.Failure,
-                                title: "Missing Token",
-                                message: "Please configure Readwise token in Settings",
+                              await showFailureToast(new Error("Missing Token"), {
+                                title: "Please configure Readwise token in Settings",
                               });
                               return;
                             }
