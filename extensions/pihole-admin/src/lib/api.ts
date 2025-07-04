@@ -514,7 +514,6 @@ class PiHoleAPI {
 
         // FALLBACK: Si falla por límites de API, intentar método legacy
         if (error.message.includes("api_seats_exceeded") || error.message.includes("429")) {
-          console.log(`🔄 Fallback: Intentando API legacy para status...`);
           return await this.getStatusLegacy();
         }
       }
@@ -524,7 +523,6 @@ class PiHoleAPI {
 
   private async getStatusLegacy(): Promise<{ enabled: boolean }> {
     const url = `${this.baseUrl}/admin/api.php?status&auth=${this.password}`;
-    console.log(`🔍 Petición Legacy Status: ${url}`);
 
     const fetchOptions: any = {
       method: "GET",
@@ -640,7 +638,6 @@ class PiHoleAPI {
 
     try {
       const response = await this.makeRequest(`/stats/database/top_clients?from=${from}&until=${until}&count=${count}`);
-      console.log(`🔍 Respuesta completa de top_clients:`, JSON.stringify(response, null, 2));
       return (response as any).clients || {};
     } catch (error) {
       if (error instanceof Error && error.message.includes("Sesión expirada")) {
@@ -773,14 +770,12 @@ export const getPiHoleAPI = (): PiHoleAPI => {
   // Intentar obtener instancia del contexto global de Node.js
   if (typeof global !== "undefined") {
     if ((global as any)[GLOBAL_INSTANCE_KEY]) {
-      console.log(`♻️ Reutilizando instancia global existente de PiHoleAPI`);
       return (global as any)[GLOBAL_INSTANCE_KEY];
     }
   }
 
   // Si no existe, crear nueva instancia
   if (!apiInstance) {
-    console.log(`🏗️ Creando nueva instancia GLOBAL de PiHoleAPI`);
     apiInstance = new PiHoleAPI();
 
     // Guardar en contexto global

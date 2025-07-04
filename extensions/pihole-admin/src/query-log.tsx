@@ -45,31 +45,71 @@ export default function QueryLog() {
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "blocked":
-        return { source: Icon.XMarkCircle, tintColor: Color.Red };
-      case "allowed":
-      case "ok":
-        return { source: Icon.CheckCircle, tintColor: Color.Green };
-      case "cached":
-        return { source: Icon.CircleProgress, tintColor: Color.Blue };
-      default:
-        return { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
+    const statusUpper = status.toUpperCase();
+    // Pi-hole v6 blocked statuses
+    if (
+      statusUpper === "GRAVITY" ||
+      statusUpper === "REGEX" ||
+      statusUpper === "DENYLIST" ||
+      statusUpper === "GRAVITY_CNAME" ||
+      statusUpper === "REGEX_CNAME" ||
+      statusUpper === "DENYLIST_CNAME" ||
+      statusUpper === "EXTERNAL_BLOCKED_IP" ||
+      statusUpper === "EXTERNAL_BLOCKED_NULL" ||
+      statusUpper === "EXTERNAL_BLOCKED_NXRA" ||
+      statusUpper === "EXTERNAL_BLOCKED_EDE15"
+    ) {
+      return { source: Icon.XMarkCircle, tintColor: Color.Red };
     }
+    // Pi-hole v6 cached statuses
+    if (statusUpper === "CACHE" || statusUpper === "CACHE_STALE") {
+      return { source: Icon.CircleProgress, tintColor: Color.Blue };
+    }
+    // Pi-hole v6 allowed statuses
+    if (
+      statusUpper === "FORWARDED" ||
+      statusUpper === "RETRIED" ||
+      statusUpper === "RETRIED_DNSSEC" ||
+      statusUpper === "SPECIAL_DOMAIN"
+    ) {
+      return { source: Icon.CheckCircle, tintColor: Color.Green };
+    }
+    // Default for unknown statuses
+    return { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
   };
 
   const getStatusText = (status: string): string => {
-    switch (status.toLowerCase()) {
-      case "blocked":
-        return "🔴 BLOCKED";
-      case "allowed":
-      case "ok":
-        return "🟢 ALLOWED";
-      case "cached":
-        return "🔵 CACHED";
-      default:
-        return "❓ UNKNOWN";
+    const statusUpper = status.toUpperCase();
+    // Pi-hole v6 blocked statuses
+    if (
+      statusUpper === "GRAVITY" ||
+      statusUpper === "REGEX" ||
+      statusUpper === "DENYLIST" ||
+      statusUpper === "GRAVITY_CNAME" ||
+      statusUpper === "REGEX_CNAME" ||
+      statusUpper === "DENYLIST_CNAME" ||
+      statusUpper === "EXTERNAL_BLOCKED_IP" ||
+      statusUpper === "EXTERNAL_BLOCKED_NULL" ||
+      statusUpper === "EXTERNAL_BLOCKED_NXRA" ||
+      statusUpper === "EXTERNAL_BLOCKED_EDE15"
+    ) {
+      return "🔴 BLOCKED";
     }
+    // Pi-hole v6 cached statuses
+    if (statusUpper === "CACHE" || statusUpper === "CACHE_STALE") {
+      return "🔵 CACHED";
+    }
+    // Pi-hole v6 allowed statuses
+    if (
+      statusUpper === "FORWARDED" ||
+      statusUpper === "RETRIED" ||
+      statusUpper === "RETRIED_DNSSEC" ||
+      statusUpper === "SPECIAL_DOMAIN"
+    ) {
+      return "🟢 ALLOWED";
+    }
+    // Return the actual status for unknown ones
+    return `❓ ${statusUpper}`;
   };
 
   const getQueryTypeColor = (queryType: string) => {
@@ -97,10 +137,31 @@ export default function QueryLog() {
     // Filter by status
     if (statusFilter !== "all") {
       filtered = filtered.filter((query) => {
+        const statusUpper = query.status.toUpperCase();
         if (statusFilter === "blocked") {
-          return query.status.toLowerCase() === "blocked";
+          // Pi-hole v6 blocked statuses
+          return (
+            statusUpper === "GRAVITY" ||
+            statusUpper === "REGEX" ||
+            statusUpper === "DENYLIST" ||
+            statusUpper === "GRAVITY_CNAME" ||
+            statusUpper === "REGEX_CNAME" ||
+            statusUpper === "DENYLIST_CNAME" ||
+            statusUpper === "EXTERNAL_BLOCKED_IP" ||
+            statusUpper === "EXTERNAL_BLOCKED_NULL" ||
+            statusUpper === "EXTERNAL_BLOCKED_NXRA" ||
+            statusUpper === "EXTERNAL_BLOCKED_EDE15"
+          );
         } else if (statusFilter === "allowed") {
-          return query.status.toLowerCase() === "allowed" || query.status.toLowerCase() === "ok";
+          // Pi-hole v6 allowed statuses
+          return (
+            statusUpper === "FORWARDED" ||
+            statusUpper === "CACHE" ||
+            statusUpper === "CACHE_STALE" ||
+            statusUpper === "RETRIED" ||
+            statusUpper === "RETRIED_DNSSEC" ||
+            statusUpper === "SPECIAL_DOMAIN"
+          );
         }
         return true;
       });
@@ -172,34 +233,49 @@ export default function QueryLog() {
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Domain Management">
-                  {query.status.toLowerCase() === "blocked" ? (
-                    <Action
-                      title="Add to Allowlist"
-                      icon={Icon.Plus}
-                      onAction={async () => {
-                        try {
-                          await piHoleAPI.addToWhitelist(query.domain);
-                          revalidate();
-                        } catch (error) {
-                          await showFailureToast(error, { title: "Failed to add domain to allowlist" });
-                        }
-                      }}
-                    />
-                  ) : (
-                    <Action
-                      title="Add to Blocklist"
-                      icon={Icon.Minus}
-                      style={Action.Style.Destructive}
-                      onAction={async () => {
-                        try {
-                          await piHoleAPI.addToBlacklist(query.domain);
-                          revalidate();
-                        } catch (error) {
-                          await showFailureToast(error, { title: "Failed to add domain to blocklist" });
-                        }
-                      }}
-                    />
-                  )}
+                  {(() => {
+                    const statusUpper = query.status.toUpperCase();
+                    const isBlocked =
+                      statusUpper === "GRAVITY" ||
+                      statusUpper === "REGEX" ||
+                      statusUpper === "DENYLIST" ||
+                      statusUpper === "GRAVITY_CNAME" ||
+                      statusUpper === "REGEX_CNAME" ||
+                      statusUpper === "DENYLIST_CNAME" ||
+                      statusUpper === "EXTERNAL_BLOCKED_IP" ||
+                      statusUpper === "EXTERNAL_BLOCKED_NULL" ||
+                      statusUpper === "EXTERNAL_BLOCKED_NXRA" ||
+                      statusUpper === "EXTERNAL_BLOCKED_EDE15";
+
+                    return isBlocked ? (
+                      <Action
+                        title="Add to Allowlist"
+                        icon={Icon.Plus}
+                        onAction={async () => {
+                          try {
+                            await piHoleAPI.addToWhitelist(query.domain);
+                            revalidate();
+                          } catch (error) {
+                            await showFailureToast(error, { title: "Failed to add domain to allowlist" });
+                          }
+                        }}
+                      />
+                    ) : (
+                      <Action
+                        title="Add to Blocklist"
+                        icon={Icon.Minus}
+                        style={Action.Style.Destructive}
+                        onAction={async () => {
+                          try {
+                            await piHoleAPI.addToBlacklist(query.domain);
+                            revalidate();
+                          } catch (error) {
+                            await showFailureToast(error, { title: "Failed to add domain to blocklist" });
+                          }
+                        }}
+                      />
+                    );
+                  })()}
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Utilities">
                   <Action
@@ -229,13 +305,34 @@ export default function QueryLog() {
 - **DNSSEC**: ${query.dnssec || "Not available"}
 
 ## Status Description
-${
-  query.status.toLowerCase() === "blocked"
-    ? "This query was **blocked** by Pi-hole because the domain is on a blocklist."
-    : query.status.toLowerCase() === "cached"
-      ? "This query was answered from Pi-hole's **cache**, which speeds up the response."
-      : "This query was **allowed** and forwarded to the upstream DNS server."
-}
+${(() => {
+  const statusUpper = query.status.toUpperCase();
+  if (
+    statusUpper === "GRAVITY" ||
+    statusUpper === "REGEX" ||
+    statusUpper === "DENYLIST" ||
+    statusUpper === "GRAVITY_CNAME" ||
+    statusUpper === "REGEX_CNAME" ||
+    statusUpper === "DENYLIST_CNAME" ||
+    statusUpper === "EXTERNAL_BLOCKED_IP" ||
+    statusUpper === "EXTERNAL_BLOCKED_NULL" ||
+    statusUpper === "EXTERNAL_BLOCKED_NXRA" ||
+    statusUpper === "EXTERNAL_BLOCKED_EDE15"
+  ) {
+    return "This query was **blocked** by Pi-hole because the domain is on a blocklist.";
+  } else if (statusUpper === "CACHE" || statusUpper === "CACHE_STALE") {
+    return "This query was answered from Pi-hole's **cache**, which speeds up the response.";
+  } else if (
+    statusUpper === "FORWARDED" ||
+    statusUpper === "RETRIED" ||
+    statusUpper === "RETRIED_DNSSEC" ||
+    statusUpper === "SPECIAL_DOMAIN"
+  ) {
+    return "This query was **allowed** and forwarded to the upstream DNS server.";
+  } else {
+    return `This query has status **${statusUpper}**.`;
+  }
+})()}
                 `}
               />
             }

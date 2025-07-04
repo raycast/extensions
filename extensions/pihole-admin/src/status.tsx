@@ -14,22 +14,10 @@ export default function Status() {
     revalidate: revalidateApi,
   } = useCachedPromise(
     async () => {
-      console.log("🚀 Starting Pi-hole data loading...");
-      try {
-        // Load data sequentially to avoid multiple authentications
-        console.log("📊 Getting summary...");
-        const summary = await piHoleAPI.getSummary();
-        console.log("✅ Summary obtained:", summary);
-
-        console.log("🔍 Getting status...");
-        const status = await piHoleAPI.getStatus();
-        console.log("✅ Status obtained:", status);
-
-        return { summary, status };
-      } catch (error) {
-        console.error("❌ Error loading data:", error);
-        throw error;
-      }
+      // Load data sequentially to avoid multiple authentications
+      const summary = await piHoleAPI.getSummary();
+      const status = await piHoleAPI.getStatus();
+      return { summary, status };
     },
     [],
     {
@@ -41,18 +29,8 @@ export default function Status() {
   const summary = apiData?.summary;
   const status = apiData?.status;
 
-  console.log("🔍 Debug - apiData:", apiData);
-  console.log("🔍 Debug - summary:", summary);
-  console.log("🔍 Debug - summary?.dns:", summary?.dns);
-  console.log("🔍 Debug - status:", status);
-
   const isLoading = isApiLoading;
   const hasErrors = apiError;
-
-  // Mostrar errores en consola para debugging
-  if (apiError) {
-    console.error("🔥 Error cargando datos de Pi-hole:", apiError);
-  }
 
   const revalidateAll = () => {
     revalidateApi();

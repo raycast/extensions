@@ -146,110 +146,114 @@ export default function TopDomains() {
       }
     >
       <List.Section title={`Allowed Domains (${topDomains?.allowed.length || 0})`}>
-        {topDomains?.allowed.map((item, index) => (
-          <List.Item
-            key={`allowed-${item.domain}`}
-            title={item.domain}
-            subtitle={`${item.count} queries`}
-            icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-            accessories={[
-              { text: `#${index + 1}`, icon: Icon.Trophy },
-              { text: formatNumber(item.count), icon: Icon.BarChart },
-            ]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section title="Domain Management">
-                  <Action
-                    title="Add to Blocklist"
-                    icon={Icon.Minus}
-                    style={Action.Style.Destructive}
-                    onAction={async () => {
-                      try {
-                        await piHoleAPI.addToBlacklist(item.domain);
-                        revalidateAll();
-                      } catch (error) {
-                        await showFailureToast(error, { title: "Failed to add domain to blocklist" });
-                      }
-                    }}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Information">
-                  <Action.CopyToClipboard
-                    title="Copy to Clipboard"
-                    content={item.domain}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open in Browser"
-                    url={`https://${item.domain}`}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Utilities">
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    onAction={revalidateAll}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
+        {topDomains?.allowed
+          .sort((a, b) => b.count - a.count)
+          .map((item, index) => (
+            <List.Item
+              key={`allowed-${item.domain}`}
+              title={item.domain}
+              subtitle={`${item.count} queries`}
+              icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+              accessories={[
+                { text: `#${index + 1}`, icon: Icon.Trophy },
+                { text: formatNumber(item.count), icon: Icon.BarChart },
+              ]}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section title="Domain Management">
+                    <Action
+                      title="Add to Blocklist"
+                      icon={Icon.Minus}
+                      style={Action.Style.Destructive}
+                      onAction={async () => {
+                        try {
+                          await piHoleAPI.addToBlacklist(item.domain);
+                          revalidateAll();
+                        } catch (error) {
+                          await showFailureToast(error, { title: "Failed to add domain to blocklist" });
+                        }
+                      }}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Information">
+                    <Action.CopyToClipboard
+                      title="Copy to Clipboard"
+                      content={item.domain}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    />
+                    <Action.OpenInBrowser
+                      title="Open in Browser"
+                      url={`https://${item.domain}`}
+                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Utilities">
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      onAction={revalidateAll}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
       </List.Section>
 
       <List.Section title={`Blocked Domains (${topDomains?.blocked.length || 0})`}>
-        {topDomains?.blocked.map((item, index) => (
-          <List.Item
-            key={`blocked-${item.domain}`}
-            title={item.domain}
-            subtitle={`${item.count} blocked attempts`}
-            icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-            accessories={[
-              { text: `#${index + 1}`, icon: Icon.Trophy },
-              { text: formatNumber(item.count), icon: Icon.BarChart },
-            ]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section title="Domain Management">
-                  <Action
-                    title="Add to Allowlist"
-                    icon={Icon.Plus}
-                    onAction={async () => {
-                      try {
-                        await piHoleAPI.addToWhitelist(item.domain);
-                        revalidateAll();
-                      } catch (error) {
-                        await showFailureToast(error, { title: "Failed to add domain to allowlist" });
-                      }
-                    }}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Information">
-                  <Action.CopyToClipboard
-                    title="Copy to Clipboard"
-                    content={item.domain}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  />
-                  <Action.OpenInBrowser
-                    title="View Domain (may Be Blocked)"
-                    url={`https://${item.domain}`}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Utilities">
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    onAction={revalidateAll}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
+        {topDomains?.blocked
+          .sort((a, b) => b.count - a.count)
+          .map((item, index) => (
+            <List.Item
+              key={`blocked-${item.domain}`}
+              title={item.domain}
+              subtitle={`${item.count} blocked attempts`}
+              icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+              accessories={[
+                { text: `#${index + 1}`, icon: Icon.Trophy },
+                { text: formatNumber(item.count), icon: Icon.BarChart },
+              ]}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section title="Domain Management">
+                    <Action
+                      title="Add to Allowlist"
+                      icon={Icon.Plus}
+                      onAction={async () => {
+                        try {
+                          await piHoleAPI.addToWhitelist(item.domain);
+                          revalidateAll();
+                        } catch (error) {
+                          await showFailureToast(error, { title: "Failed to add domain to allowlist" });
+                        }
+                      }}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Information">
+                    <Action.CopyToClipboard
+                      title="Copy to Clipboard"
+                      content={item.domain}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    />
+                    <Action.OpenInBrowser
+                      title="View Domain (may Be Blocked)"
+                      url={`https://${item.domain}`}
+                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Utilities">
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      onAction={revalidateAll}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
       </List.Section>
 
       {(topDomains?.allowed.length || 0) === 0 && (topDomains?.blocked.length || 0) === 0 && !isLoading && (
