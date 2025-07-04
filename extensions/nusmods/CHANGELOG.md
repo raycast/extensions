@@ -4,6 +4,7 @@
 
 - Added support for Raycast Windows
 - Updated Academic Year starting Month to be July instead of August, based on NUSMods' update timeline.
+- Bumped Raycast API Version
 
 ## [Initial Version] - 2025-04-29
 
