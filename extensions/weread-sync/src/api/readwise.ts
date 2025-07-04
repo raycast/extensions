@@ -1,3 +1,4 @@
+import { showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { ReadwiseHighlight } from "../types";
 
