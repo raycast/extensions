@@ -1,4 +1,4 @@
-import { ActionPanel, Action } from "@raycast/api";
+import { ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { APP_CONSTANTS } from "../constants/app";
 
 /**
@@ -31,15 +31,22 @@ export function SearchResultActionPanel({
       <Action.CopyToClipboard
         title={`Copy Title: ${title.length > APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH ? `${title.substring(0, APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH)}...` : title}`}
         content={title}
+        onCopy={() => showToast({ style: Toast.Style.Success, title: "Copied Title" })}
       />
-      <Action.CopyToClipboard title={`Copy Reference: ${reference}`} content={reference} />
+      <Action.CopyToClipboard
+        title={`Copy Reference: ${reference}`}
+        content={reference}
+        onCopy={() => showToast({ style: Toast.Style.Success, title: "Copied Reference" })}
+      />
       <Action.CopyToClipboard
         title={`Copy Highlighted: ${highlightedText.length > APP_CONSTANTS.SEARCH.HIGHLIGHTED_TEXT_PREVIEW_LENGTH ? `${highlightedText.substring(0, APP_CONSTANTS.SEARCH.HIGHLIGHTED_TEXT_PREVIEW_LENGTH)}...` : highlightedText}`}
         content={highlightedText}
+        onCopy={() => showToast({ style: Toast.Style.Success, title: "Copied Highlighted Text" })}
       />
       <Action.CopyToClipboard
         title={`Copy First Match: ${firstMatch.length > APP_CONSTANTS.SEARCH.HIGHLIGHTED_TEXT_PREVIEW_LENGTH ? `${firstMatch.substring(0, APP_CONSTANTS.SEARCH.HIGHLIGHTED_TEXT_PREVIEW_LENGTH)}...` : firstMatch}`}
         content={firstMatch}
+        onCopy={() => showToast({ style: Toast.Style.Success, title: "Copied First Match" })}
       />
     </ActionPanel>
   );
@@ -83,22 +90,26 @@ export function SourceDetailActionPanel({
         title={`Copy Hebrew: ${hebrewText.length > APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH ? `${hebrewText.substring(0, APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH)}...` : hebrewText}`}
         content={hebrewText}
         shortcut={APP_CONSTANTS.SHORTCUTS.COPY_HEBREW}
+        onCopy={() => showToast({ style: Toast.Style.Success, title: "Copied Hebrew Text" })}
       />
       <Action.CopyToClipboard
         title={`Copy English: ${englishText.length > APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH ? `${englishText.substring(0, APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH)}...` : englishText}`}
         content={englishText}
         shortcut={APP_CONSTANTS.SHORTCUTS.COPY_ENGLISH}
+        onCopy={() => showToast({ style: Toast.Style.Success, title: "Copied English Text" })}
       />
       <Action.CopyToClipboard
         title={`Copy Both: ${bothTexts.length > APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH ? `${bothTexts.substring(0, APP_CONSTANTS.SEARCH.COPY_ACTION_PREVIEW_LENGTH)}...` : bothTexts}`}
         content={bothTexts}
         shortcut={APP_CONSTANTS.SHORTCUTS.COPY_ALL}
+        onCopy={() => showToast({ style: Toast.Style.Success, title: "Copied Both Texts" })}
       />
       {footnotes.length > 0 && (
         <Action.CopyToClipboard
           title={`Copy Footnotes (${footnotes.length})`}
           content={footnotes.map((note, i) => `${i + 1}. ${note}`).join("\n")}
           shortcut={APP_CONSTANTS.SHORTCUTS.COPY_FOOTNOTES}
+          onCopy={() => showToast({ style: Toast.Style.Success, title: "Copied Footnotes" })}
         />
       )}
     </ActionPanel>

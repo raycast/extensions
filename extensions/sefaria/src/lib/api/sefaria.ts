@@ -1,5 +1,6 @@
 import { SearchResponse, TextContent, CategoryGroup, SearchResult } from "../types/sefaria";
 import { APP_CONSTANTS } from "../constants/app";
+import { extractReferenceFromId } from "../utils/text-processing";
 
 /**
  * Sefaria API client with proper error handling and type safety
@@ -106,15 +107,6 @@ export class SefariaApi {
   }
 
   /**
-   * Extract reference from search result _id
-   */
-  private static extractReferenceFromId(id: string): string {
-    // Remove the version information in parentheses
-    const cleanId = id.replace(/\s*\([^)]*\)\s*$/, "");
-    return cleanId;
-  }
-
-  /**
    * Search for texts and group by category
    */
   static async searchWithCategories(query: string): Promise<CategoryGroup[]> {
@@ -130,37 +122,35 @@ export class SefariaApi {
       return [];
     }
 
-    // We'll need to fetch text metadata for each result to get category info
-    // For now, let's batch the requests to avoid overwhelming the API
+    // Create batches for parallel processing
     const batches = [];
-
     for (let i = 0; i < results.length; i += APP_CONSTANTS.API.BATCH_SIZE) {
       batches.push(results.slice(i, i + APP_CONSTANTS.API.BATCH_SIZE));
     }
 
-    // Process each batch and collect results
-    const categoryResults: Array<{ category: string; result: SearchResult }> = [];
+    // Process all batches in parallel
+    const batchPromises = batches.map(async (batch) => {
+      const batchResults = await Promise.all(
+        batch.map(async (result) => {
+          try {
+            const reference = extractReferenceFromId(result._id);
+            const textData = await SefariaApi.getText(reference);
+            const primaryCategory = textData.hebrew.primary_category || "Other";
 
-    for (const batch of batches) {
-      const batchPromises = batch.map(async (result) => {
-        try {
-          const reference = SefariaApi.extractReferenceFromId(result._id);
-          const textData = await SefariaApi.getText(reference);
-          const primaryCategory = textData.hebrew.primary_category || "Other";
+            return { category: primaryCategory, result };
+          } catch (error) {
+            // If we can't fetch text data, categorize as 'Other'
+            console.warn(`Failed to fetch category for ${result._id}:`, error);
+            return { category: "Other", result };
+          }
+        }),
+      );
+      return batchResults;
+    });
 
-          return { category: primaryCategory, result };
-        } catch (error) {
-          // If we can't fetch text data, categorize as 'Other'
-          // This handles cases where Hebrew text is not available (like footnotes)
-          console.warn(`Failed to fetch category for ${result._id}:`, error);
-          return { category: "Other", result };
-        }
-      });
-
-      // Wait for current batch to complete before processing next batch
-      const batchResults = await Promise.all(batchPromises);
-      categoryResults.push(...batchResults);
-    }
+    // Wait for all batches to complete
+    const allBatchResults = await Promise.all(batchPromises);
+    const categoryResults = allBatchResults.flat();
 
     // Group results by category using reduce for better performance
     const categoryMap = categoryResults.reduce((acc, { category, result }) => {

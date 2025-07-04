@@ -1,31 +1,7 @@
 import { usePromise } from "@raycast/utils";
 import { useRef, useMemo, useDeferredValue } from "react";
 import { SefariaApi } from "../api/sefaria";
-import {
-  SearchResponse,
-  InfiniteSearchReturn,
-  InfiniteSearchData,
-  CategorySearchReturn,
-  CategorySearchData,
-} from "../types/sefaria";
-
-/**
- * Hook for searching Sefaria texts (original implementation)
- */
-export function useSefariaSearch(query: string) {
-  return usePromise(
-    async (searchQuery: string) => {
-      if (!searchQuery.trim()) {
-        return { hits: { hits: [], total: 0 } } as SearchResponse;
-      }
-      return SefariaApi.search(searchQuery);
-    },
-    [query],
-    {
-      execute: query.length > 0,
-    },
-  );
-}
+import { InfiniteSearchReturn, InfiniteSearchData, CategorySearchReturn, CategorySearchData } from "../types/sefaria";
 
 /**
  * Hook for searching Sefaria texts with infinite scroll support
