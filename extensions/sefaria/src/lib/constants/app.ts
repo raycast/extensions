@@ -1,15 +1,17 @@
+import { Keyboard } from "@raycast/api";
+
 /**
- * Keyboard shortcuts (not readonly to be compatible with Raycast API)
+ * Keyboard shortcuts (properly typed for Raycast API)
  */
 const SHORTCUTS = {
-  BACK: { modifiers: ["cmd"], key: "arrowLeft" },
-  BACK_TO_CATEGORIES: { modifiers: ["cmd"], key: "arrowUp" },
-  OPEN_BROWSER: { modifiers: ["cmd"], key: "o" },
-  COPY_HEBREW: { modifiers: ["cmd"], key: "h" },
-  COPY_ENGLISH: { modifiers: ["cmd"], key: "e" },
-  COPY_ALL: { modifiers: ["cmd", "shift"], key: "a" },
-  COPY_FOOTNOTES: { modifiers: ["cmd"], key: "f" },
-};
+  BACK: { modifiers: ["cmd" as const], key: "arrowLeft" as const },
+  BACK_TO_CATEGORIES: { modifiers: ["cmd" as const], key: "arrowUp" as const },
+  OPEN_BROWSER: { modifiers: ["cmd" as const], key: "o" as const },
+  COPY_HEBREW: { modifiers: ["cmd" as const], key: "h" as const },
+  COPY_ENGLISH: { modifiers: ["cmd" as const], key: "e" as const },
+  COPY_ALL: { modifiers: ["cmd" as const, "shift" as const], key: "a" as const },
+  COPY_FOOTNOTES: { modifiers: ["cmd" as const], key: "f" as const },
+} satisfies Record<string, Keyboard.Shortcut>;
 
 /**
  * Application constants

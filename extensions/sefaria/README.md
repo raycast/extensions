@@ -34,6 +34,7 @@ An unofficial Raycast extension that provides access to [Sefaria.org](https://ww
 ## Usage
 
 ### Search Sefaria
+
 1. Open Raycast and type "Search Sefaria"
 2. Enter your search query in **Hebrew or English** (e.g., "משה" or "Moses")
    - **Hebrew searches work great!** Try searching for "תורה", "תפילה", "משה", etc.
@@ -43,6 +44,7 @@ An unofficial Raycast extension that provides access to [Sefaria.org](https://ww
 5. Use **⌘+O** to open the source directly on Sefaria.org for further study
 
 ### Get Source
+
 1. Open Raycast and type "Get Source"
 2. Enter a specific reference (e.g., "Exodus 17:15", "ברכות י״ד", "Rashi on Genesis 1:1")
 3. View the source with Hebrew and English text side by side
@@ -50,8 +52,9 @@ An unofficial Raycast extension that provides access to [Sefaria.org](https://ww
 5. Copy Hebrew text (**⌘+H**), English text (**⌘+E**), or both (**⌘+⇧+A**)
 
 ### Keyboard Shortcuts
+
 - **⌘+H**: Copy Hebrew text
-- **⌘+E**: Copy English text  
+- **⌘+E**: Copy English text
 - **⌘+⇧+A**: Copy both texts
 - **⌘+F**: Copy footnotes (when available)
 - **⌘+O**: Open in browser
