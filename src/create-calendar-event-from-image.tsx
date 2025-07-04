@@ -25,8 +25,8 @@ async function convertImageToJPEG(imageBuffer: Buffer): Promise<Buffer> {
 
     return jpegBuffer;
   } catch (error) {
-        console.log(`⚠️ Jimp processing failed for ${originalSizeMB.toFixed(2)}MB image:`, error);
-    
+    console.log(`⚠️ Jimp processing failed for ${originalSizeMB.toFixed(2)}MB image:`, error);
+
     // Check if it might be an unsupported format
     const errorMessage = String(error);
     if (errorMessage.includes("Unsupported MIME type") || errorMessage.includes("format")) {
@@ -37,7 +37,7 @@ async function convertImageToJPEG(imageBuffer: Buffer): Promise<Buffer> {
       });
       throw new Error("Unsupported image format");
     }
-    
+
     // Fallback with more forgiving size limits when compression fails
     if (originalSizeMB > 10) {
       await showToast({
@@ -267,11 +267,7 @@ export default function Command() {
       }
     >
       <Form.Description text="No image found in clipboard or selected files. Please choose an image file below (JPEG, PNG, GIF, BMP, TIFF):" />
-      <Form.FilePicker 
-        id="file" 
-        title="Select Image File" 
-        allowMultipleSelection={false}
-      />
+      <Form.FilePicker id="file" title="Select Image File" allowMultipleSelection={false} />
     </Form>
   );
 }
