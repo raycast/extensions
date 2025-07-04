@@ -53,6 +53,10 @@ If no text is selected it will take the text from your clipboard instead and tra
 - **Minify XML** 📦 - Minifies XML by removing whitespace
 - **Minify CSS** 📦 - Minifies CSS by removing whitespace
 - **Minify SQL** 📦 - Minifies SQL by removing whitespace
+- **Normalize to NFC** 🔤 - Normalizes text to NFC (Normalization Form C)
+- **Normalize to NFD** 🔤 - Normalizes text to NFD (Normalization Form D)
+- **Normalize to NFKC** 🔤 - Normalizes text to NFKC (Normalization Form KC)
+- **Normalize to NFKD** 🔤 - Normalizes text to NFKD (Normalization Form KD)  
 
 ### 🔄 Data Conversion
 - **JSON to YAML** 🔄 - Converts JSON to YAML format
