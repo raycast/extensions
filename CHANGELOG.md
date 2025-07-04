@@ -1,6 +1,6 @@
 # Smart Calendars AI: Create Events Using AI Changelog
 
-## [Initial Version] - 2025-03-29
+## [Initial Version] - 2025-04-04
 
 - Added "Create Calendar Event from Text" command
 - Added "Create Calendar Event from URL" command
