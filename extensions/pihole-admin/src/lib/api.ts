@@ -2,13 +2,6 @@ import fetch from "node-fetch";
 import { getPreferenceValues, showToast, Toast, LocalStorage } from "@raycast/api";
 import { Agent } from "https";
 
-interface RequestOptions {
-  method?: string;
-  body?: string;
-  headers?: Record<string, unknown>;
-  agent?: Agent;
-}
-
 interface Preferences {
   pihole_url: string;
   password: string;
@@ -195,9 +188,9 @@ class PiHoleAPI {
     }
   }
 
-  private async makeRequest(endpoint: string, options: RequestOptions = {}): Promise<unknown> {
+  private async makeRequest(endpoint: string, options: any = {}) {
     const url = `${this.baseUrl}/api${endpoint}`;
-    const fetchOptions: Record<string, unknown> = {
+    const fetchOptions = {
       ...options,
       headers: {
         "Content-Type": "application/json",
@@ -210,7 +203,7 @@ class PiHoleAPI {
     }
 
     if (this.sessionId && endpoint !== "/auth") {
-      (fetchOptions.headers as Record<string, unknown>).sid = this.sessionId;
+      fetchOptions.headers.sid = this.sessionId;
     }
 
     console.log(`🔍 Haciendo petición a: ${url}`);
