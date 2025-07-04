@@ -25,8 +25,9 @@ export class TimeUtils {
     return result.trim();
   }
 
-  static getSessionDuration(startTime: number): number {
-    return Math.floor((Date.now() - startTime) / (1000 * 60));
+  static getSessionDuration(startTime: number, endTime?: number): number {
+    const end = endTime || Date.now();
+    return Math.floor((end - startTime) / (1000 * 60));
   }
 
   static formatSessionTime(startTime: number): string {

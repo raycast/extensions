@@ -86,11 +86,18 @@ export default function MenuBar() {
             />
           </>
         ) : (
-          <MenuBarExtra.Item
-            title="Start Focus Session"
-            onAction={handleStartSession}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-          />
+          <>
+            <MenuBarExtra.Item
+              title="Start Focus Session"
+              onAction={handleStartSession}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+            />
+            <MenuBarExtra.Item
+              title="Modify Last Session"
+              onAction={() => launchCommand({ name: "modify-session", type: LaunchType.UserInitiated })}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+            />
+          </>
         )}
       </MenuBarExtra.Section>
 

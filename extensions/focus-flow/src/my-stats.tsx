@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, showToast, Toast, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { List, showToast, Toast, ActionPanel, Action, Icon, Color, launchCommand, LaunchType } from "@raycast/api";
 import { Storage } from "./utils/storage";
 import { DiscordAPI } from "./utils/discord";
 import { TeamUtils } from "./utils/team";
@@ -117,10 +117,14 @@ export default function MyStats() {
     if (!session) return;
 
     try {
-      const sessionMinutes = TimeUtils.getSessionDuration(session.startTime);
+      const endTime = Date.now();
+      const sessionWithEndTime = { ...session, endTime };
+      await Storage.setLastSession(sessionWithEndTime);
+
+      const sessionMinutes = TimeUtils.getSessionDuration(session.startTime, endTime);
       const currentTeam = await Storage.getTeam();
 
-      await Storage.updateStats(sessionMinutes);
+      await Storage.updateStats(sessionMinutes, 1);
 
       if (currentTeam) {
         try {
@@ -181,7 +185,14 @@ export default function MyStats() {
           {session ? (
             <Action title="Stop Session" onAction={stopSession} icon={Icon.Stop} />
           ) : (
-            <Action title="Start Session" onAction={startSession} icon={Icon.Play} />
+            <>
+              <Action title="Start Session" onAction={startSession} icon={Icon.Play} />
+              <Action
+                title="Modify Last Session"
+                onAction={() => launchCommand({ name: "modify-session", type: LaunchType.UserInitiated })}
+                icon={Icon.Pencil}
+              />
+            </>
           )}
         </ActionPanel>
       }

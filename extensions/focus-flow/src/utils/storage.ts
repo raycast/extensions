@@ -7,6 +7,7 @@ export class Storage {
     USERNAME: "username",
     STATS: "user_stats",
     SESSION: "current_session",
+    LAST_SESSION: "last_session",
   };
 
   static async getTeam(): Promise<TeamData | null> {
@@ -45,6 +46,19 @@ export class Storage {
     await LocalStorage.setItem(this.KEYS.SESSION, JSON.stringify(session));
   }
 
+  static async getLastSession(): Promise<StudySession | null> {
+    const data = await LocalStorage.getItem<string>(this.KEYS.LAST_SESSION);
+    return data ? JSON.parse(data) : null;
+  }
+
+  static async setLastSession(session: StudySession): Promise<void> {
+    await LocalStorage.setItem(this.KEYS.LAST_SESSION, JSON.stringify(session));
+  }
+
+  static async clearLastSession(): Promise<void> {
+    await LocalStorage.removeItem(this.KEYS.LAST_SESSION);
+  }
+
   static async clearCurrentSession(): Promise<void> {
     await LocalStorage.removeItem(this.KEYS.SESSION);
   }
@@ -53,7 +67,7 @@ export class Storage {
     await LocalStorage.removeItem(this.KEYS.STATS);
   }
 
-  static async updateStats(additionalMinutes: number): Promise<void> {
+  static async updateStats(additionalMinutes: number, sessionIncrement: number): Promise<void> {
     const username = await this.getUsername();
     if (!username) return;
 
@@ -63,10 +77,15 @@ export class Storage {
     const newStats: UserStats = {
       username,
       totalMinutes: (currentStats?.totalMinutes || 0) + additionalMinutes,
-      sessionsToday: currentStats?.lastStudyDate === today ? currentStats.sessionsToday + 1 : 1,
+      sessionsToday:
+        currentStats?.lastStudyDate === today
+          ? (currentStats.sessionsToday || 0) + sessionIncrement
+          : sessionIncrement > 0
+            ? 1
+            : 0,
       lastStudyDate: today,
       longestSession: Math.max(currentStats?.longestSession || 0, additionalMinutes),
-      totalSessions: (currentStats?.totalSessions || 0) + 1,
+      totalSessions: (currentStats?.totalSessions || 0) + sessionIncrement,
     };
 
     await this.setStats(newStats);

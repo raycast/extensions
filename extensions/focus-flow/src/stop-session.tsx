@@ -16,6 +16,10 @@ export default async function StopSession() {
       return;
     }
 
+    const endTime = Date.now();
+    const sessionWithEndTime = { ...currentSession, endTime };
+    await Storage.setLastSession(sessionWithEndTime);
+
     const currentTeam = await Storage.getTeam();
     if (!currentTeam) {
       await showToast({
@@ -26,7 +30,7 @@ export default async function StopSession() {
       return;
     }
 
-    const sessionMinutes = TimeUtils.getSessionDuration(currentSession.startTime);
+    const sessionMinutes = TimeUtils.getSessionDuration(currentSession.startTime, endTime);
 
     const message = await DiscordAPI.getMessage(currentTeam.webhookUrl, currentTeam.messageId);
     const currentMembers = TeamUtils.parseEmbed(message.embeds);
@@ -42,7 +46,7 @@ export default async function StopSession() {
 
     await Storage.clearCurrentSession();
 
-    await Storage.updateStats(sessionMinutes);
+    await Storage.updateStats(sessionMinutes, 1);
 
     await showToast({
       style: Toast.Style.Success,

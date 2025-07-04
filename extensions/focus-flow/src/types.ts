@@ -17,6 +17,7 @@ export interface UserStats {
 
 export interface StudySession {
   startTime: number;
+  endTime?: number;
   username: string;
 }
 

@@ -17,6 +17,7 @@
       "name": "menu-bar",
       "title": "Focus Menubar",
       "subtitle": "FocusFlow",
+      "interval": "10s",
       "description": "Quick access to FocusFlow from your menubar.",
       "mode": "menu-bar"
     },
@@ -51,9 +52,15 @@
       "mode": "view"
     },
     {
+      "name": "modify-session",
+      "title": "Modify Last Session",
+      "description": "Modify your last completed study session.",
+      "mode": "view"
+    },
+    {
       "name": "my-stats",
-      "title": "View Your Focus Stats",
-      "description": "View your personal Focus statistics.",
+      "title": "My Stats",
+      "description": "View your personal study statistics and rank.",
       "mode": "view"
     }
   ],

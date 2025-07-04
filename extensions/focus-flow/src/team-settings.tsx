@@ -155,11 +155,11 @@ export default function TeamSettings() {
         />
       </List.Section>
 
-      <List.Section title="Team Actions">
+      <List.Section title="Danger Zone">
         <List.Item
           title="Reset All Study Times"
           subtitle="Reset all members' times to 0 minutes"
-          icon={{ source: Icon.Trash, tintColor: Color.Red }}
+          icon={{ source: Icon.Trash, tintColor: Color.Orange }}
           actions={
             <ActionPanel>
               <Action
@@ -172,9 +172,7 @@ export default function TeamSettings() {
             </ActionPanel>
           }
         />
-      </List.Section>
 
-      <List.Section title="Danger Zone">
         <List.Item
           title="Leave Team"
           subtitle="Leave this team and lose creator privileges"
