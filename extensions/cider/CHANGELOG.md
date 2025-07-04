@@ -1,5 +1,8 @@
 # Cider Changelog
 
+## [Windows] - {PR_MERGE_DATE}
+- Added support for Windows
+
 ## [Fixes & Improvements] - 2025-01-26
 - Added token support (more details in [Overview](https://raycast.com/feyli/cider#readme))
 - Added handcrafted icons for all commands
