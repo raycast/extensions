@@ -96,7 +96,7 @@ export default function Status() {
       const percentage = (summary.dns.blocked_today / summary.dns.queries_today) * 100;
       return percentage.toFixed(1) + "%";
     } catch (error) {
-      console.error("🔥 Error calculando porcentaje:", error);
+      // Error calculating percentage
       return "0%";
     }
   }
@@ -168,7 +168,7 @@ ${hasErrors ? "\n⚠️ **Error loading data**: " + (apiError?.message || "Unkno
                   await piHoleAPI.flushLogs();
                   revalidateAll();
                 } catch (error) {
-                  console.error("Error flushing logs:", error);
+                  // Error flushing logs handled by API layer
                 }
               }}
             />
@@ -203,22 +203,22 @@ function EnableDisableView({ onComplete }: { onComplete: () => void }) {
       onComplete();
       pop();
     } catch (error) {
-      console.error("Error cambiando estado:", error);
+      // Error changing status handled by API layer
     }
   };
 
   const markdown = `
-# ${status?.enabled ? "🟢 Pi-hole Activo" : "🔴 Pi-hole Desactivado"}
+# ${status?.enabled ? "🟢 Pi-hole Active" : "🔴 Pi-hole Disabled"}
 
 ${
   status?.enabled
-    ? "Pi-hole está bloqueando consultas DNS. Puedes desactivarlo temporalmente si necesitas acceso completo a internet."
-    : "Pi-hole está desactivado. Las consultas DNS no se están bloqueando."
+    ? "Pi-hole is blocking DNS queries. You can temporarily disable it if you need full internet access."
+    : "Pi-hole is disabled. DNS queries are not being blocked."
 }
 
-## Opciones de Control
+## Control Options
 
-Selecciona una acción:
+Select an action:
   `;
 
   return (
@@ -228,24 +228,24 @@ Selecciona una acción:
       actions={
         <ActionPanel>
           {status?.enabled ? (
-            <ActionPanel.Section title="Desactivar Pi-hole">
-              <Action title="Desactivar Por 5 Minutos" icon={Icon.Clock} onAction={() => handleToggle(true, 300)} />
-              <Action title="Desactivar Por 30 Minutos" icon={Icon.Clock} onAction={() => handleToggle(true, 1800)} />
-              <Action title="Desactivar Por 1 Hora" icon={Icon.Clock} onAction={() => handleToggle(true, 3600)} />
+            <ActionPanel.Section title="Disable Pi-hole">
+              <Action title="Disable for 5 Minutes" icon={Icon.Clock} onAction={() => handleToggle(true, 300)} />
+              <Action title="Disable for 30 Minutes" icon={Icon.Clock} onAction={() => handleToggle(true, 1800)} />
+              <Action title="Disable for 1 Hour" icon={Icon.Clock} onAction={() => handleToggle(true, 3600)} />
               <Action
-                title="Desactivar Permanentemente"
+                title="Disable Permanently"
                 icon={Icon.Stop}
                 style={Action.Style.Destructive}
                 onAction={() => handleToggle(true)}
               />
             </ActionPanel.Section>
           ) : (
-            <ActionPanel.Section title="Activar Pi-hole">
-              <Action title="Activar Pi-hole" icon={Icon.Play} onAction={() => handleToggle(false)} />
+            <ActionPanel.Section title="Enable Pi-hole">
+              <Action title="Enable Pi-hole" icon={Icon.Play} onAction={() => handleToggle(false)} />
             </ActionPanel.Section>
           )}
           <ActionPanel.Section>
-            <Action title="Volver" icon={Icon.ArrowLeft} onAction={pop} />
+            <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -263,15 +263,15 @@ function TopDomainsView() {
   const blockedList = topDomains?.blocked || [];
 
   const markdown = `
-# 📊 Dominios Principales
+# 📊 Top Domains
 
-## 🟢 Dominios Permitidos (Top ${allowedList.length})
+## 🟢 Allowed Domains (Top ${allowedList.length})
 
-${allowedList.map((item, index) => `${index + 1}. **${item.domain}** - ${item.count} consultas`).join("\n")}
+${allowedList.map((item, index) => `${index + 1}. **${item.domain}** - ${item.count} queries`).join("\n")}
 
-## 🔴 Dominios Bloqueados (Top ${blockedList.length})
+## 🔴 Blocked Domains (Top ${blockedList.length})
 
-${blockedList.map((item, index) => `${index + 1}. **${item.domain}** - ${item.count} intentos`).join("\n")}
+${blockedList.map((item, index) => `${index + 1}. **${item.domain}** - ${item.count} attempts`).join("\n")}
   `;
 
   return (
@@ -281,10 +281,13 @@ ${blockedList.map((item, index) => `${index + 1}. **${item.domain}** - ${item.co
       actions={
         <ActionPanel>
           <Action
-            title="Actualizar"
+            title="Refresh"
             icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={() => window.location.reload()}
+            onAction={() => {
+              // Navigate back to trigger revalidation
+              window.location.reload();
+            }}
           />
         </ActionPanel>
       }
@@ -301,20 +304,20 @@ function QueryLogView() {
   const queries = queryLog?.queries || [];
 
   const markdown = `
-# 📝 Registro de Consultas DNS
+# 📝 DNS Query Log
 
 ${queries
   .slice(0, 50)
   .map((query, index) => {
     const date = new Date(query.timestamp);
-    const status = query.status === "blocked" ? "🔴 BLOQUEADO" : "🟢 PERMITIDO";
+    const status = query.status === "blocked" ? "🔴 BLOCKED" : "🟢 ALLOWED";
 
     return `## ${index + 1}. ${query.domain}
-- **Estado**: ${status}
-- **Cliente**: ${query.client}
-- **Hora**: ${date.toLocaleTimeString()}
-- **Tipo**: ${query.query_type}
-- **Tiempo de respuesta**: ${query.reply_time}ms
+- **Status**: ${status}
+- **Client**: ${query.client}
+- **Time**: ${date.toLocaleTimeString()}
+- **Type**: ${query.query_type}
+- **Response Time**: ${query.reply_time}ms
 
 ---`;
   })
@@ -328,10 +331,13 @@ ${queries
       actions={
         <ActionPanel>
           <Action
-            title="Actualizar"
+            title="Refresh"
             icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={() => window.location.reload()}
+            onAction={() => {
+              // Navigate back to trigger revalidation
+              window.location.reload();
+            }}
           />
         </ActionPanel>
       }
@@ -339,17 +345,19 @@ ${queries
   );
 }
 
-// Vista para agregar dominios
+// View for adding domains
 function AddDomainView() {
+  const { pop } = useNavigation();
+
   const markdown = `
-# ➕ Agregar Dominio
+# ➕ Add Domain
 
-Para agregar un dominio a las listas de Pi-hole, usa los otros comandos específicos:
+To add a domain to Pi-hole lists, use the dedicated commands:
 
-- **Raycast Command**: "Agregar a Lista Blanca"
-- **Raycast Command**: "Agregar a Lista Negra"
+- **Raycast Command**: "Add Domain"
+- **Available Lists**: Allowlist (whitelist) or Blocklist (blacklist)
 
-Esta funcionalidad está disponible como comandos separados para mayor facilidad de uso.
+This functionality is available as a separate command for easier access.
   `;
 
   return (
@@ -357,7 +365,7 @@ Esta funcionalidad está disponible como comandos separados para mayor facilidad
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action title="Volver" icon={Icon.ArrowLeft} onAction={() => {}} />
+          <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
         </ActionPanel>
       }
     />

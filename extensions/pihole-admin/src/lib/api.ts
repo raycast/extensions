@@ -120,10 +120,7 @@ class PiHoleAPI {
     this.baseUrl = preferences.pihole_url.replace(/\/$/, "");
     this.password = preferences.password;
 
-    console.log(`🔧 Configuración Pi-hole:`);
-    console.log(`🌐 URL: ${this.baseUrl}`);
-    console.log(`🔑 Password configurado: ${this.password ? "✅ Sí" : "❌ No"}`);
-    console.log(`🔒 Verificar SSL: ${preferences.verify_ssl ? "✅ Sí" : "❌ No"}`);
+    // Configuration logging removed for production
 
     if (!preferences.verify_ssl) {
       this.httpsAgent = new Agent({
@@ -152,16 +149,14 @@ class PiHoleAPI {
         if (parsed.sessionId && parsed.timestamp && now - parsed.timestamp < this.AUTH_TIMEOUT) {
           this.sessionId = parsed.sessionId;
           this.lastAuthTime = parsed.timestamp;
-          console.log(
-            `💾 Sesión recuperada desde localStorage (${Math.round((now - parsed.timestamp) / 1000)}s de antigüedad)`
-          );
+          // Session recovered from localStorage
         } else {
-          console.log(`🗑️ Sesión en localStorage expirada, se eliminará`);
+          // Session expired, removing from localStorage
           await LocalStorage.removeItem("pihole_session");
         }
       }
     } catch (error) {
-      console.log(`⚠️ No se pudo cargar sesión persistente:`, error);
+      // Could not load persistent session
     }
   }
 
@@ -173,17 +168,16 @@ class PiHoleAPI {
           timestamp: this.lastAuthTime,
         };
         await LocalStorage.setItem("pihole_session", JSON.stringify(sessionData));
-        console.log(`💾 Sesión guardada en localStorage`);
+        // Session saved to localStorage
       }
     } catch (error) {
-      console.log(`⚠️ No se pudo guardar sesión:`, error);
+      // Could not save session
     }
   }
 
   private cleanup(): void {
     if (this.sessionId) {
-      console.log(`🧹 Limpiando sesión al cerrar aplicación...`);
-      // Fire and forget - no esperamos
+      // Cleaning up session on application close
       this.logout().catch(() => {});
     }
   }
@@ -206,37 +200,22 @@ class PiHoleAPI {
       fetchOptions.headers.sid = this.sessionId;
     }
 
-    console.log(`🔍 Haciendo petición a: ${url}`);
-    console.log(`📋 Headers:`, { ...fetchOptions.headers, sid: fetchOptions.headers.sid ? "[REDACTED]" : undefined });
-    if (fetchOptions.body) {
-      const body = typeof fetchOptions.body === "string" ? JSON.parse(fetchOptions.body) : fetchOptions.body;
-      const sanitizedBody = { ...body };
-      if (sanitizedBody.password) sanitizedBody.password = "[REDACTED]";
-      console.log(`📦 Body:`, sanitizedBody);
-    }
+    // Request logging removed for production
 
-    try {
-      const response = await fetch(url, fetchOptions);
-      console.log(`📡 Respuesta: ${response.status} ${response.statusText}`);
+    const response = await fetch(url, fetchOptions);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log(`❌ Error response body:`, errorText);
+    if (!response.ok) {
+      const errorText = await response.text();
 
-        if (response.status === 401) {
-          this.sessionId = null;
-          throw new Error("Sesión expirada. Reintentando autenticación...");
-        }
-        throw new Error(`Error HTTP: ${response.status} ${response.statusText} - ${errorText}`);
+      if (response.status === 401) {
+        this.sessionId = null;
+        throw new Error("Session expired. Retrying authentication...");
       }
-
-      const jsonResponse = await response.json();
-      console.log(`✅ Respuesta exitosa:`, jsonResponse);
-      return jsonResponse;
-    } catch (error) {
-      console.error(`💥 Error en petición a ${url}:`, error);
-      throw error;
+      throw new Error(`HTTP Error: ${response.status} ${response.statusText} - ${errorText}`);
     }
+
+    const jsonResponse = await response.json();
+    return jsonResponse;
   }
 
   private async delay(ms: number): Promise<void> {
@@ -247,52 +226,51 @@ class PiHoleAPI {
     if (!this.sessionId) return;
 
     try {
-      console.log(`🚪 Cerrando sesión: ${this.sessionId.substring(0, 8)}...`);
+      // Closing session
       await this.makeRequest("/auth", {
         method: "DELETE",
       });
-      console.log(`✅ Sesión cerrada exitosamente`);
+      // Session closed successfully
     } catch (error) {
-      console.log(`⚠️ Error cerrando sesión (puede ser normal):`, error);
+      // Error closing session (may be normal)
     } finally {
       this.sessionId = null;
 
-      // Limpiar localStorage también
+      // Clean localStorage as well
       try {
         await LocalStorage.removeItem("pihole_session");
-        console.log(`🗑️ Sesión eliminada del localStorage`);
+        // Session removed from localStorage
       } catch (error) {
-        console.log(`⚠️ No se pudo limpiar localStorage:`, error);
+        // Could not clean localStorage
       }
     }
   }
 
   private async clearAllSessions(): Promise<void> {
     try {
-      console.log(`🧹 Intentando limpiar todas las sesiones...`);
-      // Algunos endpoints de Pi-hole para limpiar sesiones
-      const response = await fetch(`${this.baseUrl}/admin/api.php?logout`, {
+      // Attempting to clear all sessions
+      await fetch(`${this.baseUrl}/admin/api.php?logout`, {
         method: "GET",
       });
-      console.log(`🧹 Respuesta de limpieza: ${response.status}`);
+      // Cleanup response received
     } catch (error) {
-      console.log(`⚠️ No se pudo limpiar sesiones automáticamente:`, error);
+      // Could not clear sessions automatically
     }
   }
 
   private async authenticateInternal(): Promise<void> {
     const now = Date.now();
 
-    // Verificar si necesitamos esperar por rate limiting
+    // Check if we need to wait for rate limiting
     const timeSinceLastAuth = now - this.lastAuthTime;
     if (timeSinceLastAuth < this.RATE_LIMIT_DELAY) {
       const waitTime = this.RATE_LIMIT_DELAY - timeSinceLastAuth;
-      console.log(`⏱️ Esperando ${waitTime}ms para evitar rate limiting...`);
+      // Waiting to avoid rate limiting
       await this.delay(waitTime);
     }
 
     this.lastAuthTime = Date.now();
-    console.log(`🔐 Iniciando autenticación (intento ${this.authRetryCount + 1}/${this.MAX_AUTH_RETRIES})...`);
+    // Starting authentication
 
     try {
       const response = (await this.makeRequest("/auth", {
@@ -302,100 +280,100 @@ class PiHoleAPI {
 
       this.sessionId = response.session.sid;
       this.authRetryCount = 0; // Reset counter on success
-      console.log(`✅ Autenticación exitosa. Session ID: ${this.sessionId?.substring(0, 8)}...`);
+      // Authentication successful
 
-      // Guardar sesión en localStorage para reutilización
+      // Save session to localStorage for reuse
       await this.persistSession();
     } catch (error) {
-      console.error(`❌ Error en autenticación (intento ${this.authRetryCount + 1}):`, error);
+      // Authentication error
 
       if (error instanceof Error) {
         const errorMessage = error.message;
 
-        // Manejar "API seats exceeded"
+        // Handle "API seats exceeded"
         if (errorMessage.includes("api_seats_exceeded")) {
-          console.log(`🚫 Límite de sesiones API alcanzado`);
+          // API session limit reached
 
           if (this.authRetryCount < this.MAX_AUTH_RETRIES) {
             this.authRetryCount++;
-            console.log(`🧹 Intento ${this.authRetryCount}: Limpiando sesiones y reintentando...`);
+            // Clearing sessions and retrying
 
-            // Limpiar sesión actual si existe
+            // Clear current session if it exists
             await this.logout();
 
-            // Intentar limpiar todas las sesiones
+            // Attempt to clear all sessions
             await this.clearAllSessions();
 
-            // Esperar más tiempo antes del reintento (backoff exponencial)
+            // Wait longer before retry (exponential backoff)
             const backoffDelay = this.RATE_LIMIT_DELAY * Math.pow(2, this.authRetryCount);
-            console.log(`⏳ Esperando ${backoffDelay}ms antes del reintento...`);
+            // Waiting before retry
             await this.delay(backoffDelay);
 
-            // Reintentár recursivamente
+            // Retry recursively
             return this.authenticateInternal();
           } else {
-            console.log(`💥 Máximo número de reintentos alcanzado`);
+            // Maximum number of retries reached
             throw new Error(
-              "Pi-hole ha alcanzado su límite máximo de sesiones API. Reinicia Pi-hole o espera unos minutos."
+              "Pi-hole has reached its maximum API session limit. Restart Pi-hole or wait a few minutes."
             );
           }
         }
 
-        // Manejar rate limiting general
+        // Handle general rate limiting
         if (errorMessage.includes("429") || errorMessage.includes("rate_limiting")) {
-          console.log(`🚫 Rate limit detectado`);
+          // Rate limit detected
 
           if (this.authRetryCount < this.MAX_AUTH_RETRIES) {
             this.authRetryCount++;
             const backoffDelay = this.RATE_LIMIT_DELAY * Math.pow(2, this.authRetryCount);
-            console.log(`⏳ Esperando ${backoffDelay}ms por rate limiting...`);
+            // Waiting for rate limiting
             await this.delay(backoffDelay);
 
             return this.authenticateInternal();
           } else {
             throw new Error(
-              "Rate limiting activo. Pi-hole está limitando los intentos de login. Espera unos minutos e inténtalo de nuevo."
+              "Rate limiting active. Pi-hole is limiting login attempts. Wait a few minutes and try again."
             );
           }
         }
       }
 
-      // Para otros errores, mostrar toast y relanzar
+      // For other errors, show toast and rethrow
       await showToast({
         style: Toast.Style.Failure,
-        title: "Error de Autenticación",
-        message: error instanceof Error ? error.message : "Error desconocido",
+        title: "Authentication Error",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
   }
 
   async authenticate(): Promise<void> {
-    // Si ya hay una autenticación en progreso, esperar a que termine
+    // If authentication is already in progress, wait for it to finish
     if (this.authPromise) {
-      console.log(`🔄 Esperando autenticación en progreso...`);
+      // Waiting for authentication in progress
       return this.authPromise;
     }
 
-    // Si ya tenemos una sesión válida reciente, no autenticar de nuevo
+    // If we already have a valid recent session, don't authenticate again
     const now = Date.now();
     if (this.sessionId && now - this.lastAuthTime < this.AUTH_TIMEOUT) {
-      console.log(`✅ Usando sesión existente (${Math.round((now - this.lastAuthTime) / 1000)}s de antigüedad)`);
+      // Using existing session
       return;
     }
 
-    console.log(`🚀 Iniciando nueva autenticación...`);
+    // Starting new authentication
 
-    // Resetear contador de reintentos para nueva sesión
+    // Reset retry counter for new session
     this.authRetryCount = 0;
 
-    // Añadir pequeño delay aleatorio para evitar colisiones entre comandos
+    // Add small random delay to avoid collisions between commands
     const antiCollisionDelay = Math.random() * 500; // 0-500ms
     await this.delay(antiCollisionDelay);
 
-    // Crear y almacenar la promesa de autenticación
+    // Create and store the authentication promise
     this.authPromise = this.authenticateInternal().finally(() => {
-      // Limpiar la promesa cuando termine (exitosa o fallida)
+      // Clear the promise when finished (successful or failed)
       this.authPromise = null;
     });
 
@@ -403,7 +381,7 @@ class PiHoleAPI {
   }
 
   private async ensureAuthenticated() {
-    // Cargar sesión persistente si no se ha intentado ya
+    // Load persistent session if not already attempted
     if (!this.sessionId && this.lastAuthTime === 0) {
       await this.loadPersistedSession();
     }
@@ -416,15 +394,12 @@ class PiHoleAPI {
       await this.ensureAuthenticated();
       const v6Response = (await this.makeRequest("/stats/summary")) as PiHoleV6SummaryResponse;
 
-      console.log("🔍 Respuesta raw de Pi-hole v6:", JSON.stringify(v6Response, null, 2));
-
-      // Verificar que la respuesta tenga la estructura esperada
+      // Check that the response has the expected structure
       if (!v6Response || !v6Response.queries) {
-        console.error("❌ Respuesta de Pi-hole v6 no tiene estructura esperada:", v6Response);
-        throw new Error("Respuesta inválida de Pi-hole v6");
+        throw new Error("Invalid Pi-hole v6 response");
       }
 
-      // Mapear datos de Pi-hole v6 al formato esperado por la extensión
+      // Map Pi-hole v6 data to the format expected by the extension
       const mappedData = {
         dns: {
           queries_today: v6Response.queries.total || 0,
@@ -432,23 +407,22 @@ class PiHoleAPI {
           queries_forwarded: v6Response.queries.forwarded || 0,
           queries_cached: v6Response.queries.cached || 0,
           unique_domains: v6Response.queries.unique_domains || 0,
-          clients_ever_seen: 0, // Este campo no existe en v6, se calculará de otra forma
+          clients_ever_seen: 0, // This field doesn't exist in v6, will be calculated elsewhere
         },
         gravity: {
-          domains_being_blocked: 0, // Este campo se obtendrá de otro endpoint si es necesario
+          domains_being_blocked: 0, // This field will be obtained from another endpoint if necessary
         },
       };
 
-      console.log("✅ Datos mapeados para la extensión:", JSON.stringify(mappedData, null, 2));
       return mappedData;
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message.includes("Sesión expirada")) {
+        if (error.message.includes("Session expired")) {
           await this.authenticate();
           const v6Response = (await this.makeRequest("/stats/summary")) as PiHoleV6SummaryResponse;
 
           if (!v6Response || !v6Response.queries) {
-            throw new Error("Respuesta inválida de Pi-hole v6 después de reautenticación");
+            throw new Error("Invalid Pi-hole v6 response after reauthentication");
           }
 
           return {
@@ -466,9 +440,9 @@ class PiHoleAPI {
           };
         }
 
-        // FALLBACK: Si falla por límites de API, intentar método legacy
+        // FALLBACK: If it fails due to API limits, try legacy method
         if (error.message.includes("api_seats_exceeded") || error.message.includes("429")) {
-          console.log(`🔄 Fallback: Intentando API legacy para summary...`);
+          // Fallback: Trying legacy API for summary
           return await this.getSummaryLegacy();
         }
       }
@@ -478,7 +452,7 @@ class PiHoleAPI {
 
   private async getSummaryLegacy(): Promise<SummaryStats> {
     const url = `${this.baseUrl}/admin/api.php?summaryRaw&auth=${this.password}`;
-    console.log(`🔍 Petición Legacy Summary: ${url}`);
+    // Legacy Summary request
 
     const fetchOptions: any = {
       method: "GET",

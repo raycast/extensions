@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState } from "react";
 import { Action, ActionPanel, List, Icon, Color } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { piHoleAPI } from "./lib/api";
 
 interface QueryLogEntry {
@@ -61,14 +61,14 @@ export default function QueryLog() {
   const getStatusText = (status: string): string => {
     switch (status.toLowerCase()) {
       case "blocked":
-        return "🔴 BLOQUEADO";
+        return "🔴 BLOCKED";
       case "allowed":
       case "ok":
-        return "🟢 PERMITIDO";
+        return "🟢 ALLOWED";
       case "cached":
-        return "🔵 CACHÉ";
+        return "🔵 CACHED";
       default:
-        return "❓ DESCONOCIDO";
+        return "❓ UNKNOWN";
     }
   };
 
@@ -94,7 +94,7 @@ export default function QueryLog() {
   const filterQueries = (queries: QueryLogEntry[]): QueryLogEntry[] => {
     let filtered = queries;
 
-    // Filtrar por estado
+    // Filter by status
     if (statusFilter !== "all") {
       filtered = filtered.filter((query) => {
         if (statusFilter === "blocked") {
@@ -106,7 +106,7 @@ export default function QueryLog() {
       });
     }
 
-    // Filtrar por texto de búsqueda
+    // Filter by search text
     if (searchText) {
       const searchLower = searchText.toLowerCase();
       filtered = filtered.filter(
@@ -127,20 +127,20 @@ export default function QueryLog() {
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Buscar por dominio, cliente o tipo..."
+      searchBarPlaceholder="Search by domain, client, or type..."
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Filtrar por Estado"
+          tooltip="Filter by Status"
           value={statusFilter}
           onChange={(value) => setStatusFilter(value as "all" | "blocked" | "allowed")}
         >
-          <List.Dropdown.Item title="Todos" value="all" />
-          <List.Dropdown.Item title="Solo Bloqueados" value="blocked" />
-          <List.Dropdown.Item title="Solo Permitidos" value="allowed" />
+          <List.Dropdown.Item title="All" value="all" />
+          <List.Dropdown.Item title="Blocked Only" value="blocked" />
+          <List.Dropdown.Item title="Allowed Only" value="allowed" />
         </List.Dropdown>
       }
     >
-      <List.Section title={`Registro de Consultas (${filteredQueries.length} resultados)`}>
+      <List.Section title={`Query Log (${filteredQueries.length} results)`}>
         {filteredQueries.map((query, index) => (
           <List.Item
             key={`${query.timestamp}-${index}`}
@@ -159,35 +159,35 @@ export default function QueryLog() {
             ]}
             actions={
               <ActionPanel>
-                <ActionPanel.Section title="Información">
+                <ActionPanel.Section title="Information">
                   <Action.CopyToClipboard
-                    title="Copiar Dominio"
+                    title="Copy Domain"
                     content={query.domain}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
                   <Action.CopyToClipboard
-                    title="Copiar Cliente"
+                    title="Copy Client"
                     content={query.client}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                 </ActionPanel.Section>
-                <ActionPanel.Section title="Gestión de Dominios">
+                <ActionPanel.Section title="Domain Management">
                   {query.status.toLowerCase() === "blocked" ? (
                     <Action
-                      title="Agregar a Lista Blanca"
+                      title="Add to Allowlist"
                       icon={Icon.Plus}
                       onAction={async () => {
                         try {
                           await piHoleAPI.addToWhitelist(query.domain);
                           revalidate();
                         } catch (error) {
-                          console.error("Error agregando a whitelist:", error);
+                          await showFailureToast(error, { title: "Failed to add domain to allowlist" });
                         }
                       }}
                     />
                   ) : (
                     <Action
-                      title="Agregar a Lista Negra"
+                      title="Add to Blocklist"
                       icon={Icon.Minus}
                       style={Action.Style.Destructive}
                       onAction={async () => {
@@ -195,15 +195,15 @@ export default function QueryLog() {
                           await piHoleAPI.addToBlacklist(query.domain);
                           revalidate();
                         } catch (error) {
-                          console.error("Error agregando a blacklist:", error);
+                          await showFailureToast(error, { title: "Failed to add domain to blocklist" });
                         }
                       }}
                     />
                   )}
                 </ActionPanel.Section>
-                <ActionPanel.Section title="Utilidades">
+                <ActionPanel.Section title="Utilities">
                   <Action
-                    title="Actualizar"
+                    title="Refresh"
                     icon={Icon.ArrowClockwise}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                     onAction={revalidate}
@@ -214,27 +214,27 @@ export default function QueryLog() {
             detail={
               <List.Item.Detail
                 markdown={`
-# Consulta DNS Detallada
+# DNS Query Details
 
-## Información General
-- **Dominio**: ${query.domain}
-- **Estado**: ${getStatusText(query.status)}
-- **Cliente**: ${query.client}
-- **Fecha y Hora**: ${formatDate(query.timestamp)}
+## General Information
+- **Domain**: ${query.domain}
+- **Status**: ${getStatusText(query.status)}
+- **Client**: ${query.client}
+- **Date & Time**: ${formatDate(query.timestamp)}
 
-## Detalles Técnicos
-- **Tipo de Consulta**: ${query.query_type}
-- **Tipo de Respuesta**: ${query.reply_type}
-- **Tiempo de Respuesta**: ${query.reply_time}ms
-- **DNSSEC**: ${query.dnssec || "No disponible"}
+## Technical Details
+- **Query Type**: ${query.query_type}
+- **Reply Type**: ${query.reply_type}
+- **Response Time**: ${query.reply_time}ms
+- **DNSSEC**: ${query.dnssec || "Not available"}
 
-## Descripción del Estado
+## Status Description
 ${
   query.status.toLowerCase() === "blocked"
-    ? "Esta consulta fue **bloqueada** por Pi-hole debido a que el dominio está en una lista de bloqueo."
+    ? "This query was **blocked** by Pi-hole because the domain is on a blocklist."
     : query.status.toLowerCase() === "cached"
-      ? "Esta consulta fue respondida desde la **caché** de Pi-hole, lo que acelera la respuesta."
-      : "Esta consulta fue **permitida** y reenviada al servidor DNS upstream."
+      ? "This query was answered from Pi-hole's **cache**, which speeds up the response."
+      : "This query was **allowed** and forwarded to the upstream DNS server."
 }
                 `}
               />
@@ -245,17 +245,17 @@ ${
 
       {filteredQueries.length === 0 && !isLoading && (
         <List.EmptyView
-          title="Sin Resultados"
+          title="No Results"
           description={
             searchText || statusFilter !== "all"
-              ? "No se encontraron consultas que coincidan con los filtros aplicados"
-              : "No hay consultas DNS registradas"
+              ? "No queries found matching the applied filters"
+              : "No DNS queries have been recorded"
           }
           actions={
             <ActionPanel>
-              <Action title="Actualizar" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
               <Action
-                title="Limpiar Filtros"
+                title="Clear Filters"
                 icon={Icon.Multiply}
                 onAction={() => {
                   setSearchText("");

@@ -22,22 +22,22 @@ export default async function FlushLogs() {
 
     await showToast({
       style: Toast.Style.Animated,
-      title: "Limpiando registros...",
-      message: "Eliminando todos los registros de consultas DNS",
+      title: "Flushing logs...",
+      message: "Deleting all DNS query logs",
     });
 
     await piHoleAPI.flushLogs();
 
     await showToast({
       style: Toast.Style.Success,
-      title: "✅ Registros Limpiados",
-      message: "Todos los registros de consultas han sido eliminados exitosamente",
+      title: "✅ Logs Flushed",
+      message: "All query logs have been successfully deleted",
     });
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
       title: "❌ Error",
-      message: error instanceof Error ? error.message : "Error desconocido al limpiar registros",
+      message: error instanceof Error ? error.message : "Unknown error while flushing logs",
     });
   }
 }

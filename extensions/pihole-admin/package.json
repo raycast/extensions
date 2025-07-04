@@ -38,6 +38,7 @@
     {
       "name": "add-domain",
       "title": "Add Domain",
+      "subtitle": "Pi-hole",
       "description": "Add a domain to whitelist or blacklist",
       "mode": "view",
       "keywords": ["add", "domain", "whitelist", "blacklist", "allow", "block"]

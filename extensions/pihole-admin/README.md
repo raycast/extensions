@@ -2,161 +2,156 @@
 
 A complete Raycast extension to manage **Pi-hole v6** directly from Raycast. This extension has been completely rewritten to be compatible with Pi-hole v6's new REST API.
 
-## ✨ Características
+## ✨ Features
 
-- 📊 **Dashboard de Estado**: Visualiza estadísticas en tiempo real de Pi-hole
-- ⚡ **Control de Bloqueo**: Activa/desactiva Pi-hole con opciones de duración
-- 📝 **Registro de Consultas**: Examina consultas DNS con filtros avanzados
-- 📈 **Dominios Principales**: Ve los dominios más consultados y bloqueados
-- ➕ **Gestión de Dominios**: Agrega dominios a listas blancas y negras
-- 🗑️ **Limpiar Registros**: Elimina todos los registros de consultas
-- 🔒 **Autenticación Segura**: Compatible con el nuevo sistema de sesiones de Pi-hole v6
+- 📊 **Status Dashboard**: View real-time Pi-hole statistics
+- ⚡ **Blocking Control**: Enable/disable Pi-hole with duration options
+- 📝 **Query Log**: Examine DNS queries with advanced filters
+- 📈 **Top Domains**: See most queried and blocked domains
+- ➕ **Domain Management**: Add domains to allowlists and blocklists
+- 🗑️ **Flush Logs**: Remove all query logs
+- 🔒 **Secure Authentication**: Compatible with Pi-hole v6's new session system
 
-## 🚀 Instalación
+## 🚀 Installation
 
-### Prerrequisitos
+### Prerequisites
 
-- **Pi-hole v6.0 o superior** instalado y funcionando
-- **Raycast** instalado en tu Mac
-- **Node.js 18+** para desarrollo
+- **Pi-hole v6.0 or higher** installed and running
+- **Raycast** installed on your Mac
+- **Node.js 18+** for development
 
-### Pasos de Instalación
+### Installation Steps
 
+1. **Configure the extension**
+   - Go to Raycast Preferences → Extensions → Pi-hole Admin
+   - Configure the following parameters:
+     - **Pi-hole URL**: The complete URL of your Pi-hole (e.g., `http://192.168.1.100` or `https://pi.hole`)
+     - **Admin Password**: Pi-hole administrator password
+     - **Verify SSL**: Enable if using HTTPS with valid certificates
 
-1. **Configura la extensión**
-   - Ve a Raycast Preferences → Extensions → Pi-hole Admin
-   - Configura los siguientes parámetros:
-     - **URL de Pi-hole**: La URL completa de tu Pi-hole (ej: `http://192.168.1.100` o `https://pi.hole`)
-     - **Contraseña Admin**: La contraseña de administrador de Pi-hole
-     - **Verificar SSL**: Activa si usas HTTPS con certificados válidos
+## 🔧 Pi-hole v6 Configuration
 
-## 🔧 Configuración de Pi-hole v6
-
-Esta extensión requiere Pi-hole v6 con la nueva API REST. Si tienes una versión anterior, necesitarás actualizar:
+This extension requires Pi-hole v6 with the new REST API. If you have an older version, you'll need to update:
 
 ```bash
-# Actualizar Pi-hole a v6
+# Update Pi-hole to v6
 pihole -up
 ```
 
-### ⚠️ Configuración Requerida para Múltiples Sesiones (Solo si da problemas la extensión)
+### ⚠️ Required Configuration for Multiple Sessions (Only if extension has issues)
 
-Pi-hole v6 por defecto limita las sesiones concurrentes. Para evitar conflictos con la interfaz web mientras usas esta extensión, **debes incrementar el límite de sesiones**:
+Pi-hole v6 by default limits concurrent sessions. To avoid conflicts with the web interface while using this extension, **you must increase the session limit**:
 
-1. **Edita el archivo de configuración**:
+1. **Edit the configuration file**:
    ```bash
    sudo nano /etc/pihole/pihole.toml
    ```
 
-2. **Modifica la sección `[webserver.api.auth]`**:
+2. **Modify the `[webserver.api.auth]` section**:
    ```toml
    [webserver.api.auth]
-   max_sessions = 16  # Cambia a 100 o más (puedes ir probando hasta encontrar la que funcione correctamente)
+   max_sessions = 16  # Change to 100 or more (you can test until you find what works correctly)
    ```
 
-3. **Reinicia Pi-hole**:
+3. **Restart Pi-hole**:
    ```bash
    sudo systemctl restart pihole-FTL
    ```
 
-### Configuración de HTTPS (Opcional)
+### HTTPS Configuration (Optional)
 
-Si tu Pi-hole usa HTTPS, asegúrate de:
+If your Pi-hole uses HTTPS, make sure to:
 
-1. **Con certificados válidos**: Mantén "Verificar SSL" activado
-2. **Con certificados autofirmados**: Desactiva "Verificar SSL" en las preferencias
+1. **With valid certificates**: Keep "Verify SSL" enabled
+2. **With self-signed certificates**: Disable "Verify SSL" in preferences
 
-## 📋 Comandos Disponibles
+## 📋 Available Commands
 
-### 🏠 Ver Estado
-- **Descripción**: Dashboard principal con estadísticas de Pi-hole
-- **Características**:
-  - Estado actual (activo/desactivado)
-  - Consultas totales y bloqueadas del día
-  - Porcentaje de bloqueo
-  - Información del sistema
+### 🏠 View Status
+- **Description**: Main dashboard with Pi-hole statistics
+- **Features**:
+  - Current status (active/disabled)
+  - Total and blocked queries today
+  - Blocking percentage
+  - System information
 
-### ⚡ Activar/Desactivar Bloqueo
-- **Descripción**: Control completo del estado de Pi-hole
-- **Opciones de desactivación**:
-  - 5 minutos
-  - 30 minutos
-  - 1 hora
-  - 2 horas
-  - Permanente
+### ⚡ Enable/Disable Blocking
+- **Description**: Complete control of Pi-hole status
+- **Disable options**:
+  - 5 minutes
+  - 30 minutes
+  - 1 hour
+  - 2 hours
+  - Permanent
 
-### 📝 Ver Registro de Consultas
-- **Descripción**: Examina las consultas DNS recientes
-- **Características**:
-  - Filtros por estado (bloqueado/permitido)
-  - Búsqueda por dominio, cliente o tipo
-  - Información detallada de cada consulta
-  - Acciones rápidas desde el registro
+### 📝 View Query Log
+- **Description**: Examine recent DNS queries
+- **Features**:
+  - Filter by status (blocked/allowed)
+  - Search by domain, client, or type
+  - Detailed information for each query
+  - Quick actions from the log
 
-### 📊 Dominios Principales
-- **Descripción**: Estadísticas de dominios más consultados
-- **Vistas disponibles**:
-  - Dominios permitidos más consultados
-  - Dominios bloqueados más frecuentes
-  - Top clientes por número de consultas
+### 📊 Top Domains
+- **Description**: Statistics of most queried domains
+- **Available views**:
+  - Most queried allowed domains
+  - Most frequent blocked domains
+  - Top clients by number of queries
 
-### ➕ Agregar Dominio
-- **Descripción**: Agrega dominios a listas blancas o negras
-- **Características**:
-  - Validación de formato de dominio
-  - Selección de tipo de lista
-  - Campo opcional para comentarios
+### ➕ Add Domain
+- **Description**: Add domains to allowlists or blocklists
+- **Features**:
+  - Domain format validation
+  - List type selection
+  - Optional comment field
 
-### 🗑️ Limpiar Registros
-- **Descripción**: Elimina todos los registros de consultas
-- **Seguridad**: Requiere confirmación antes de ejecutar
+### 🗑️ Flush Logs
+- **Description**: Remove all query logs
+- **Security**: Requires confirmation before execution
 
-## 🔧 Solución de Problemas
+## 🔧 Troubleshooting
 
-### Error de Autenticación
-- Verifica que la contraseña sea correcta
-- Asegúrate de que Pi-hole v6 esté funcionando
-- Verifica la URL de Pi-hole (incluye http:// o https://)
+### Authentication Error
+- Verify that the password is correct
+- Make sure Pi-hole v6 is running
+- Check Pi-hole URL (include http:// or https://)
 
-### Error de Conexión
-- Confirma que Pi-hole sea accesible desde tu Mac
-- Si usas HTTPS, verifica la configuración SSL
-- Revisa que no hay firewalls bloqueando la conexión
+### Connection Error
+- Confirm that Pi-hole is accessible from your Mac
+- If using HTTPS, verify SSL configuration
+- Check that no firewalls are blocking the connection
 
-### Comandos No Aparecen
-- Asegúrate de que la extensión esté habilitada en Raycast
-- Reinicia Raycast si es necesario
-- Verifica que todas las dependencias estén instaladas
+### Commands Don't Appear
+- Make sure the extension is enabled in Raycast
+- Restart Raycast if necessary
+- Verify that all dependencies are installed
 
-## 🌟 Características de Pi-hole v6 Soportadas
+## 🌟 Supported Pi-hole v6 Features
 
-- ✅ Nueva API REST
-- ✅ Autenticación por sesión (SID)
-- ✅ Servidor web embebido
-- ✅ Paginación del lado del servidor
-- ✅ Configuración consolidada (pihole.toml)
-- ✅ Soporte HTTPS nativo
+- ✅ New REST API
+- ✅ Session-based authentication (SID)
+- ✅ Embedded web server
+- ✅ Server-side pagination
+- ✅ Consolidated configuration (pihole.toml)
+- ✅ Native HTTPS support
 
-## 🤝 Contribuir
+## ☕ Support
 
-Las contribuciones son bienvenidas. Para contribuir:
+If you find this extension useful, consider buying me a coffee to support development:
 
-1. Fork el repositorio
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`)
-3. Commit tus cambios (`git commit -am 'Agrega nueva característica'`)
-4. Push a la rama (`git push origin feature/nueva-caracteristica`)
-5. Abre un Pull Request
+[![Buy Me A Coffee](https://img.shields.io/badge/-buy_me_a%C2%A0coffee-gray?logo=buy-me-a-coffee)](https://coff.ee/vandertoorm)
 
-## 📄 Licencia
+## 📄 License
 
-MIT License - ver el archivo [LICENSE](LICENSE) para más detalles.
+MIT License - see the [LICENSE](LICENSE) file for more details.
 
-## 🙏 Reconocimientos
+## 🙏 Acknowledgments
 
-- Equipo de [Pi-hole](https://pi-hole.net/) por el excelente software
-- Equipo de [Raycast](https://raycast.com/) por la plataforma de extensiones
-- Comunidad de desarrolladores que mantienen Pi-hole actualizado
+- [Pi-hole](https://pi-hole.net/) team for the excellent software
+- [Raycast](https://raycast.com/) team for the extension platform
+- Developer community that keeps Pi-hole updated
 
 ---
 
-**¿Problemas o sugerencias?** Abre un issue en este repositorio. 
+**Issues or suggestions?** Open an issue in this repository. 

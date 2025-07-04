@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React from "react";
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { piHoleAPI } from "./lib/api";
 
 interface FormValues {
@@ -54,11 +55,7 @@ export default function AddDomain() {
 
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "❌ Error",
-        message: error instanceof Error ? error.message : "Unknown error adding domain",
-      });
+      await showFailureToast(error, { title: "Failed to add domain" });
     }
   };
 

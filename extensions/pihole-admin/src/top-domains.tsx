@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState } from "react";
 import { Action, ActionPanel, List, Icon, Color } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { piHoleAPI } from "./lib/api";
 
 interface TopClient {
@@ -73,21 +73,21 @@ export default function TopDomains() {
         isLoading={isLoading}
         searchBarAccessory={
           <List.Dropdown
-            tooltip="Seleccionar Vista"
+            tooltip="Select View"
             value={viewMode}
             onChange={(value) => setViewMode(value as "domains" | "clients")}
           >
-            <List.Dropdown.Item title="Dominios" value="domains" />
-            <List.Dropdown.Item title="Clientes" value="clients" />
+            <List.Dropdown.Item title="Domains" value="domains" />
+            <List.Dropdown.Item title="Clients" value="clients" />
           </List.Dropdown>
         }
       >
-        <List.Section title={`Top Clientes (${clientsArray.length})`}>
+        <List.Section title={`Top Clients (${clientsArray.length})`}>
           {clientsArray.map((item, index) => (
             <List.Item
               key={item.client}
               title={item.client}
-              subtitle={`${item.count} consultas`}
+              subtitle={`${item.count} queries`}
               icon={{ source: Icon.ComputerChip, tintColor: Color.Blue }}
               accessories={[
                 { text: `#${index + 1}`, icon: Icon.Trophy },
@@ -95,16 +95,16 @@ export default function TopDomains() {
               ]}
               actions={
                 <ActionPanel>
-                  <ActionPanel.Section title="Información">
+                  <ActionPanel.Section title="Information">
                     <Action.CopyToClipboard
-                      title="Copiar Ip Del Cliente"
+                      title="Copy to Clipboard"
                       content={item.client}
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
                   </ActionPanel.Section>
-                  <ActionPanel.Section title="Utilidades">
+                  <ActionPanel.Section title="Utilities">
                     <Action
-                      title="Actualizar"
+                      title="Refresh"
                       icon={Icon.ArrowClockwise}
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                       onAction={revalidateAll}
@@ -118,11 +118,11 @@ export default function TopDomains() {
 
         {clientsArray.length === 0 && !isLoading && (
           <List.EmptyView
-            title="No hay Clientes"
-            description="No se encontraron clientes con consultas registradas"
+            title="No Clients Found"
+            description="No clients with recorded queries were found"
             actions={
               <ActionPanel>
-                <Action title="Actualizar" icon={Icon.ArrowClockwise} onAction={revalidateAll} />
+                <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidateAll} />
               </ActionPanel>
             }
           />
@@ -136,21 +136,21 @@ export default function TopDomains() {
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Seleccionar Vista"
+          tooltip="Select View"
           value={viewMode}
           onChange={(value) => setViewMode(value as "domains" | "clients")}
         >
-          <List.Dropdown.Item title="Dominios" value="domains" />
-          <List.Dropdown.Item title="Clientes" value="clients" />
+          <List.Dropdown.Item title="Domains" value="domains" />
+          <List.Dropdown.Item title="Clients" value="clients" />
         </List.Dropdown>
       }
     >
-      <List.Section title={`Dominios Permitidos (${topDomains?.allowed.length || 0})`}>
+      <List.Section title={`Allowed Domains (${topDomains?.allowed.length || 0})`}>
         {topDomains?.allowed.map((item, index) => (
           <List.Item
             key={`allowed-${item.domain}`}
             title={item.domain}
-            subtitle={`${item.count} consultas`}
+            subtitle={`${item.count} queries`}
             icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
             accessories={[
               { text: `#${index + 1}`, icon: Icon.Trophy },
@@ -158,9 +158,9 @@ export default function TopDomains() {
             ]}
             actions={
               <ActionPanel>
-                <ActionPanel.Section title="Gestión de Dominio">
+                <ActionPanel.Section title="Domain Management">
                   <Action
-                    title="Agregar a Lista Negra"
+                    title="Add to Blocklist"
                     icon={Icon.Minus}
                     style={Action.Style.Destructive}
                     onAction={async () => {
@@ -168,26 +168,26 @@ export default function TopDomains() {
                         await piHoleAPI.addToBlacklist(item.domain);
                         revalidateAll();
                       } catch (error) {
-                        console.error("Error agregando a blacklist:", error);
+                        await showFailureToast(error, { title: "Failed to add domain to blocklist" });
                       }
                     }}
                   />
                 </ActionPanel.Section>
-                <ActionPanel.Section title="Información">
+                <ActionPanel.Section title="Information">
                   <Action.CopyToClipboard
-                    title="Copiar Dominio"
+                    title="Copy to Clipboard"
                     content={item.domain}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
                   <Action.OpenInBrowser
-                    title="Abrir En Navegador"
+                    title="Open in Browser"
                     url={`https://${item.domain}`}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                   />
                 </ActionPanel.Section>
-                <ActionPanel.Section title="Utilidades">
+                <ActionPanel.Section title="Utilities">
                   <Action
-                    title="Actualizar"
+                    title="Refresh"
                     icon={Icon.ArrowClockwise}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                     onAction={revalidateAll}
@@ -199,12 +199,12 @@ export default function TopDomains() {
         ))}
       </List.Section>
 
-      <List.Section title={`Dominios Bloqueados (${topDomains?.blocked.length || 0})`}>
+      <List.Section title={`Blocked Domains (${topDomains?.blocked.length || 0})`}>
         {topDomains?.blocked.map((item, index) => (
           <List.Item
             key={`blocked-${item.domain}`}
             title={item.domain}
-            subtitle={`${item.count} intentos bloqueados`}
+            subtitle={`${item.count} blocked attempts`}
             icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
             accessories={[
               { text: `#${index + 1}`, icon: Icon.Trophy },
@@ -212,35 +212,35 @@ export default function TopDomains() {
             ]}
             actions={
               <ActionPanel>
-                <ActionPanel.Section title="Gestión de Dominio">
+                <ActionPanel.Section title="Domain Management">
                   <Action
-                    title="Agregar a Lista Blanca"
+                    title="Add to Allowlist"
                     icon={Icon.Plus}
                     onAction={async () => {
                       try {
                         await piHoleAPI.addToWhitelist(item.domain);
                         revalidateAll();
                       } catch (error) {
-                        console.error("Error agregando a whitelist:", error);
+                        await showFailureToast(error, { title: "Failed to add domain to allowlist" });
                       }
                     }}
                   />
                 </ActionPanel.Section>
-                <ActionPanel.Section title="Información">
+                <ActionPanel.Section title="Information">
                   <Action.CopyToClipboard
-                    title="Copiar Dominio"
+                    title="Copy to Clipboard"
                     content={item.domain}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
                   <Action.OpenInBrowser
-                    title="Ver Dominio (puede Estar Bloqueado)"
+                    title="View Domain (may Be Blocked)"
                     url={`https://${item.domain}`}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                   />
                 </ActionPanel.Section>
-                <ActionPanel.Section title="Utilidades">
+                <ActionPanel.Section title="Utilities">
                   <Action
-                    title="Actualizar"
+                    title="Refresh"
                     icon={Icon.ArrowClockwise}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                     onAction={revalidateAll}
@@ -254,11 +254,11 @@ export default function TopDomains() {
 
       {(topDomains?.allowed.length || 0) === 0 && (topDomains?.blocked.length || 0) === 0 && !isLoading && (
         <List.EmptyView
-          title="No hay Datos"
-          description="No se encontraron dominios en las estadísticas"
+          title="No Data Found"
+          description="No domains found in statistics"
           actions={
             <ActionPanel>
-              <Action title="Actualizar" icon={Icon.ArrowClockwise} onAction={revalidateAll} />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidateAll} />
             </ActionPanel>
           }
         />
