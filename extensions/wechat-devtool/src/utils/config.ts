@@ -1,27 +1,23 @@
-import { getApplications, showToast, Toast, environment } from "@raycast/api";
+import path from "path";
 import { randomUUID } from "crypto";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { join } from "path";
-import { DeviceConfig, ExtensionConfig, Project } from "../types";
 import { execSync } from "child_process";
-
-interface DeviceOperationResult {
-  success: boolean;
-  error?: string;
-  deviceId?: string;
-  deviceName?: string;
-}
+import { readFile, writeFile, access, mkdir } from "fs/promises";
+import { showFailureToast } from "@raycast/utils";
+import { environment, getApplications, showToast, Toast } from "@raycast/api";
+import { DeviceConfig, ExtensionConfig, Project } from "../types";
 
 const CONFIG_DIR = environment.supportPath;
-const CONFIG_PATH = join(CONFIG_DIR, "config.json");
+const CONFIG_PATH = path.join(CONFIG_DIR, "config.json");
 
-function ensureConfigDir() {
-  if (!existsSync(CONFIG_DIR)) {
-    mkdirSync(CONFIG_DIR, { recursive: true });
+async function ensureConfigDir() {
+  try {
+    await access(CONFIG_DIR);
+  } catch {
+    await mkdir(CONFIG_DIR, { recursive: true });
   }
 }
 
-export function getCurrentDeviceName(): string {
+export function getCurrentDeviceName() {
   try {
     return execSync("/usr/sbin/scutil --get ComputerName", { encoding: "utf8" }).trim();
   } catch (error) {
@@ -30,32 +26,35 @@ export function getCurrentDeviceName(): string {
   }
 }
 
-export function loadConfig(): ExtensionConfig {
+export async function loadConfig(): Promise<ExtensionConfig> {
   try {
-    ensureConfigDir();
-    if (existsSync(CONFIG_PATH)) {
-      const content = readFileSync(CONFIG_PATH, "utf8");
+    await ensureConfigDir();
+    try {
+      const content = await readFile(CONFIG_PATH, "utf8");
       return JSON.parse(content);
+    } catch {
+      // File doesn't exist, return empty config
+      return {};
     }
   } catch (error) {
     console.error("Failed to load config:", error);
+    return {};
   }
-  return {};
 }
 
-export function saveConfig(config: ExtensionConfig): void {
+export async function saveConfig(config: ExtensionConfig) {
   try {
-    ensureConfigDir();
-    writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+    await ensureConfigDir();
+    await writeFile(CONFIG_PATH, JSON.stringify(config, null, 2));
   } catch (error) {
     console.error("Failed to save config:", error);
     throw error;
   }
 }
 
-export function getCurrentDeviceConfig(): DeviceConfig | null {
+export async function getCurrentDeviceConfig() {
   const currentDeviceName = getCurrentDeviceName();
-  const deviceConfigs = loadConfig();
+  const deviceConfigs = await loadConfig();
 
   for (const [, deviceConfig] of Object.entries(deviceConfigs)) {
     if (deviceConfig.name === currentDeviceName) {
@@ -66,43 +65,43 @@ export function getCurrentDeviceConfig(): DeviceConfig | null {
   return null;
 }
 
-export function getAllDeviceConfigs(): ExtensionConfig {
-  return loadConfig();
+export async function getAllDeviceConfigs() {
+  return await loadConfig();
 }
 
-export function updateDeviceConfig(deviceId: string, deviceConfig: DeviceConfig): void {
-  const config = loadConfig();
+export async function updateDeviceConfig(deviceId: string, deviceConfig: DeviceConfig) {
+  const config = await loadConfig();
   config[deviceId] = deviceConfig;
-  saveConfig(config);
+  await saveConfig(config);
 }
 
-export function addProjectToDevice(deviceId: string, project: Project): void {
-  const config = loadConfig();
+export async function addProjectToDevice(deviceId: string, project: Project) {
+  const config = await loadConfig();
   if (!config[deviceId]) {
     config[deviceId] = { name: "", cliPath: "", projects: [] };
   }
   config[deviceId].projects.push(project);
-  saveConfig(config);
+  await saveConfig(config);
 }
 
-export function removeProjectFromDevice(deviceId: string, projectId: string): void {
-  const config = loadConfig();
+export async function removeProjectFromDevice(deviceId: string, projectId: string) {
+  const config = await loadConfig();
   if (config[deviceId]) {
     config[deviceId].projects = config[deviceId].projects.filter((project) => project.id !== projectId);
-    saveConfig(config);
+    await saveConfig(config);
   }
 }
 
-export function deleteDevice(deviceId: string): void {
-  const config = loadConfig();
+export async function deleteDevice(deviceId: string) {
+  const config = await loadConfig();
   if (config[deviceId]) {
     delete config[deviceId];
-    saveConfig(config);
+    await saveConfig(config);
   }
 }
 
-export function isDeviceNameExists(deviceName: string, excludeDeviceId?: string): boolean {
-  const config = loadConfig();
+export async function isDeviceNameExists(deviceName: string, excludeDeviceId?: string) {
+  const config = await loadConfig();
   for (const [deviceId, deviceConfig] of Object.entries(config)) {
     if (deviceConfig.name === deviceName && deviceId !== excludeDeviceId) {
       return true;
@@ -111,8 +110,8 @@ export function isDeviceNameExists(deviceName: string, excludeDeviceId?: string)
   return false;
 }
 
-export function getDeviceIdByName(deviceName: string): string | null {
-  const config = loadConfig();
+export async function getDeviceIdByName(deviceName: string) {
+  const config = await loadConfig();
   for (const [deviceId, deviceConfig] of Object.entries(config)) {
     if (deviceConfig.name === deviceName) {
       return deviceId;
@@ -121,7 +120,7 @@ export function getDeviceIdByName(deviceName: string): string | null {
   return null;
 }
 
-export async function findWeChatDevtool(): Promise<string | null> {
+export async function findWeChatDevtool() {
   try {
     const applications = await getApplications();
     const wechatDevtool = applications.find(
@@ -136,20 +135,17 @@ export async function findWeChatDevtool(): Promise<string | null> {
   return null;
 }
 
-export function generateUUID(): string {
+export function generateUUID() {
   return randomUUID();
 }
 
-export async function saveOrUpdateDevice(data: DeviceConfig, deviceId?: string): Promise<DeviceOperationResult> {
-  const config = getAllDeviceConfigs();
+export async function saveOrUpdateDevice(data: DeviceConfig, deviceId?: string) {
+  const config = await getAllDeviceConfigs();
 
   const isDuplicate = Object.entries(config).some(([id, d]) => d.name === data.name && id !== deviceId);
   if (isDuplicate) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Duplicate Device Name",
-      message: `Device name "${data.name}" already exists. Please use a different name.`,
-    });
+    const error = new Error(`Device name "${data.name}" already exists. Please use a different name.`);
+    await showFailureToast(error, { title: "Duplicate Device Name" });
     return { success: false, error: "duplicate" };
   }
   let id = deviceId;
@@ -157,23 +153,23 @@ export async function saveOrUpdateDevice(data: DeviceConfig, deviceId?: string):
     id = generateUUID();
   }
   config[id] = data;
-  saveConfig(config);
+  await saveConfig(config);
   await showToast({
     style: Toast.Style.Success,
-    title: "Save Successful",
-    message: `Device "${data.name}" configuration saved`,
+    title: "Configuration Saved",
+    message: `Saved "${data.name}" configuration`,
   });
   return { success: true, deviceId: id, deviceName: data.name };
 }
 
-export function updateProjectLastUsed(deviceConfig: DeviceConfig, projectId: string) {
-  const config = getAllDeviceConfigs();
+export async function updateProjectLastUsed(deviceConfig: DeviceConfig, projectId: string) {
+  const config = await getAllDeviceConfigs();
   const deviceId = Object.keys(config).find((id) => config[id].name === deviceConfig.name);
   if (!deviceId) return;
   const device = config[deviceId];
   const project = device.projects.find((p) => p.id === projectId);
   if (project) {
     project.lastUsedAt = Date.now();
-    saveConfig(config);
+    await saveConfig(config);
   }
 }

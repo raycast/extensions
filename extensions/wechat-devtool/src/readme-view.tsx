@@ -1,7 +1,8 @@
+import path from "path";
+import { readFile } from "fs/promises";
 import React, { useState, useEffect } from "react";
-import { Detail, showToast, Toast, environment } from "@raycast/api";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { Detail, environment } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default function ReadmeView() {
   const [readmeContent, setReadmeContent] = useState<string>("");
@@ -14,16 +15,12 @@ export default function ReadmeView() {
   async function loadReadme() {
     try {
       setIsLoading(true);
-      const readmePath = join(environment.assetsPath, "README.md");
-      const content = readFileSync(readmePath, "utf8");
+      const readmePath = path.join(environment.assetsPath, "README.md");
+      const content = await readFile(readmePath, "utf8");
       setReadmeContent(content);
     } catch (error) {
       console.error("Failed to load README:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Load Failed",
-        message: "Unable to load README.md file",
-      });
+      await showFailureToast(error, { title: "Failed to Load", message: "Could not load README file" });
       setReadmeContent("# Load Failed\n\nUnable to load README.md file. Please check if the file exists.");
     } finally {
       setIsLoading(false);

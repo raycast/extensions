@@ -1,12 +1,12 @@
 # WeChat DevTool
 
-🚀 Currently focused on quickly opening WeChat Mini Program projects, with plans to support additional features like Mini Program preview in the future.
+Quickly open WeChat Mini Program projects with plans to support additional features like Mini Program preview in the future.
 
 ## ✨ Features
 
-- **⚡ Quick Project Opening** - Quickly open configured Mini Program projects using the WeChat DevTool CLI
-- **🖥️ Multi-Device Support** - Support for independent configuration across multiple devices with automatic current device detection
-- **⚙️ Graphical Configuration** - Fully graphical configuration interface supporting dynamic device and project addition
+- **⚡ Quick Project Opening** - Open configured Mini Program projects using the WeChat DevTool CLI
+- **🖥️ Multi-Device Support** - Independent configuration across multiple devices with automatic device detection
+- **⚙️ Graphical Configuration** - Complete graphical interface for dynamic device and project management
 - **🔍 Smart Search** - Search by project name and path
 
 ## 📦 Installation
@@ -17,7 +17,7 @@ Search for **WeChat DevTool** in the [Raycast Store](https://www.raycast.com/sto
 
 1. Use the "Configure Projects" command to open the configuration interface
 2. Add device configuration:
-   - Device Name: Defaults to current device name, should match the device's `scutil --get ComputerName`
+   - Device Name: Defaults to current device name, should match `scutil --get ComputerName`
    - CLI Path: WeChat DevTool CLI path, defaults to `/Applications/wechatwebdevtools.app/Contents/MacOS/cli`
 3. Add one or more projects:
    - Project Name: Display name

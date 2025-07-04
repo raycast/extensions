@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wechat-devtool",
   "title": "WeChat DevTool",
-  "description": "Quickly open and manage WeChat Mini Program projects using the official CLI with multi-device support.",
+  "description": "Quickly open and manage WeChat Mini Program projects with multi-device support using the official CLI.",
   "version": "1.0.0",
   "icon": "icon.png",
   "author": "tofrankie",

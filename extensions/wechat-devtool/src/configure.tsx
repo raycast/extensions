@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { List, ActionPanel, Action, showToast, Toast, Icon, useNavigation, confirmAlert, Alert } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, useNavigation, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getCurrentDeviceName, getAllDeviceConfigs, saveConfig } from "./utils/config";
 import DeviceForm from "./components/device-form";
 import ReadmeView from "./readme-view";
 import { ExtensionConfig } from "./types";
+import { WECHAT_DEVTOOL_CLI_PATH } from "./constants";
 
 export default function Configure() {
   const [devices, setDevices] = useState<ExtensionConfig>({});
@@ -17,15 +19,11 @@ export default function Configure() {
   async function loadDevices() {
     try {
       setIsLoading(true);
-      const config = getAllDeviceConfigs();
+      const config = await getAllDeviceConfigs();
       setDevices(config);
     } catch (error) {
       console.error("Failed to load devices:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Load Failed",
-        message: "Unable to load configuration",
-      });
+      await showFailureToast(error, { title: "Failed to Load", message: "Could not load configuration" });
     } finally {
       setIsLoading(false);
     }
@@ -35,7 +33,7 @@ export default function Configure() {
     push(
       <DeviceForm
         initialData={{
-          cliPath: "/Applications/wechatwebdevtools.app/Contents/MacOS/cli",
+          cliPath: WECHAT_DEVTOOL_CLI_PATH,
           projects: [],
         }}
         onSuccess={loadDevices}
@@ -80,12 +78,12 @@ export default function Configure() {
       const updatedDevices = { ...devices };
       delete updatedDevices[deviceId];
       setDevices(updatedDevices);
-      saveConfig(updatedDevices);
+      await saveConfig(updatedDevices);
 
       await showToast({
         style: Toast.Style.Success,
-        title: "Delete Successful",
-        message: `Deleted configuration for "${deviceConfig.name}"`,
+        title: "Configuration Deleted",
+        message: `Deleted "${deviceConfig.name}" configuration`,
       });
     }
   }
@@ -102,7 +100,7 @@ export default function Configure() {
             onAction={handleAddDevice}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
-          <Action title="Readme" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
+          <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
         </ActionPanel>
       }
     >
@@ -112,16 +110,7 @@ export default function Configure() {
           icon={Icon.Devices}
           title={deviceConfig.name}
           subtitle={`${deviceConfig.projects.length} projects`}
-          accessories={
-            deviceConfig.name === getCurrentDeviceName()
-              ? [
-                  {
-                    text: "Current Device",
-                    icon: Icon.Info,
-                  },
-                ]
-              : []
-          }
+          accessories={deviceConfig.name === getCurrentDeviceName() ? [{ text: "Current Device" }] : []}
           actions={
             <ActionPanel>
               <Action title="Edit Configuration" icon={Icon.Pencil} onAction={() => handleEditDevice(deviceId)} />
@@ -131,13 +120,13 @@ export default function Configure() {
                 onAction={handleAddDevice}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
+              <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
               <Action
                 title="Delete Configuration"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 onAction={() => handleDeleteDevice(deviceId)}
               />
-              <Action title="Readme" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
             </ActionPanel>
           }
         />
@@ -146,17 +135,17 @@ export default function Configure() {
       {Object.keys(devices).length === 0 && (
         <List.EmptyView
           icon={Icon.Devices}
-          title="No Project Configurations Added"
+          title="No Configurations"
           description="Configure project settings for different devices"
           actions={
             <ActionPanel>
               <Action
-                title="Add Project Configuration"
+                title="Add Configuration"
                 icon={Icon.Plus}
                 onAction={handleAddDevice}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
-              <Action title="Readme" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
+              <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
             </ActionPanel>
           }
         />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   getCurrentDeviceConfig,
   getCurrentDeviceName,
@@ -39,30 +40,17 @@ export default function ProjectList({
   async function loadProjects() {
     try {
       setIsLoading(true);
-      const allDevicesObj = getAllDeviceConfigs();
-      const deviceEntries = Object.entries(allDevicesObj);
-      const deviceList = deviceEntries.map(([, d]) => d);
-      setAllDevices(deviceList);
-      const hasNoDevice = deviceList.length === 0;
-
-      if (hasNoDevice) {
-        push(<Configure />);
-        return;
-      }
-
-      const config = getCurrentDeviceConfig();
       const deviceName = getCurrentDeviceName();
+      const allDevicesObj = await getAllDeviceConfigs();
+      const allDevices = Object.values(allDevicesObj);
+      const config = await getCurrentDeviceConfig();
 
-      const allProjects: Array<{ deviceName: string; projects: Project[] }> = [];
-      deviceEntries.forEach(([, deviceConfig]) => {
-        if (deviceConfig.projects && deviceConfig.projects.length > 0) {
-          allProjects.push({
-            deviceName: deviceConfig.name,
-            projects: deviceConfig.projects,
-          });
-        }
-      });
-      setAllDeviceProjects(allProjects);
+      setAllDevices(allDevices);
+      setAllDeviceProjects(
+        allDevices
+          .filter((device) => device.name !== deviceName)
+          .map((device) => ({ deviceName: device.name, projects: device.projects })),
+      );
 
       if (!config) {
         setDeviceConfig(null);
@@ -76,11 +64,7 @@ export default function ProjectList({
       setProjects(config?.projects || []);
     } catch (error) {
       console.error("Failed to load projects:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Load Failed",
-        message: "Unable to load project configuration",
-      });
+      await showFailureToast(error, { title: "Failed to Load", message: "Could not load project configuration" });
     } finally {
       setIsLoading(false);
     }
@@ -91,15 +75,11 @@ export default function ProjectList({
       await loadProjects();
       await showToast({
         style: Toast.Style.Success,
-        title: "Refresh Complete",
-        message: "List has been updated",
+        title: "Refreshed",
+        message: "Project list updated",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Refresh Failed",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to Refresh" });
     }
   }
 
@@ -126,9 +106,7 @@ export default function ProjectList({
 
       return (
         <List isLoading={isLoading} searchBarPlaceholder="Search projects..." onSearchTextChange={setSearchText}>
-          <List.Section
-            title={`No specific configuration for current device "${currentDeviceName}". Showing all projects from other devices. You can add configuration for the current device in the Actions panel.`}
-          >
+          <List.Section title={`No configuration for "${currentDeviceName}". Showing projects from other devices.`}>
             {sortedAllProjects.map((project) => {
               const device = allDevices.find((d) => d.name === project.deviceName);
               return (
@@ -186,8 +164,8 @@ export default function ProjectList({
       <List isLoading={isLoading} searchBarPlaceholder="Search projects...">
         <List.EmptyView
           icon={Icon.Devices}
-          title="No Project Configurations Added"
-          description="Please add project configuration first"
+          title="No Configurations"
+          description="Add project configuration first"
           actions={
             <ActionPanel>
               <Action
@@ -226,7 +204,7 @@ export default function ProjectList({
         <List.EmptyView
           icon={Icon.Folder}
           title="No Projects"
-          description={`${deviceInfo} has no configured projects`}
+          description={`${deviceInfo} has no projects`}
           actions={
             <ActionPanel>
               <Action
@@ -254,8 +232,8 @@ export default function ProjectList({
       <List searchBarPlaceholder="Search projects...">
         <List.EmptyView
           icon={Icon.ExclamationMark}
-          title="Incomplete Project Configuration"
-          description={`Some projects are missing required fields: ${requiredFields.join(", ")}`}
+          title="Incomplete Configuration"
+          description={`Missing required fields: ${requiredFields.join(", ")}`}
           actions={
             <ActionPanel>
               <Action
@@ -295,11 +273,10 @@ export default function ProjectList({
                 title={actionTitle}
                 icon={Icon.Terminal}
                 onAction={() => {
-                  const device = allDevices.find((d) => d.name === currentDeviceName);
-                  if (device) {
-                    updateProjectLastUsed(device, project.id);
+                  if (deviceConfig) {
+                    updateProjectLastUsed(deviceConfig, project.id);
                   }
-                  onProjectAction(project, device);
+                  onProjectAction(project, deviceConfig);
                 }}
                 shortcut={{ modifiers: [], key: "return" }}
               />

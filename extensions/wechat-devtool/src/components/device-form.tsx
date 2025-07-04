@@ -1,5 +1,11 @@
+import path from "path";
+import { readFile, access } from "fs/promises";
 import React, { useState, useEffect } from "react";
-import { Form, ActionPanel, Action, Icon, useNavigation, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, useNavigation, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import ReadmeView from "../readme-view";
+import { WECHAT_DEVTOOL_CLI_PATH } from "../constants";
+import { DeviceConfig, Project, WechatProjectConfig } from "../types";
 import {
   saveOrUpdateDevice,
   deleteDevice,
@@ -7,9 +13,6 @@ import {
   getAllDeviceConfigs,
   generateUUID,
 } from "../utils/config";
-import { DeviceConfig, Project, WechatProjectConfig } from "../types";
-import * as fs from "fs";
-import * as path from "path";
 
 interface DeviceFormProps {
   initialData?: Partial<DeviceConfig> & { id?: string };
@@ -22,45 +25,56 @@ interface FormErrors {
   projects?: { name?: string; path?: string }[];
 }
 
-const PROJECT_CONFIG_JSON = "project.config.json";
-const PROJECT_PRIVATE_CONFIG_JSON = "project.private.config.json";
+async function isValidWechatMiniprogramDir(dirPath: string) {
+  const projectConfigPath = path.join(dirPath, "project.config.json");
+  const projectPrivateConfigPath = path.join(dirPath, "project.private.config.json");
 
-function isValidWechatMiniprogramDir(path: string): boolean {
   try {
-    const projectConfigPath = `${path}/${PROJECT_CONFIG_JSON}`;
-    const projectPrivateConfigPath = `${path}/${PROJECT_PRIVATE_CONFIG_JSON}`;
-    return fs.existsSync(projectConfigPath) || fs.existsSync(projectPrivateConfigPath);
+    await access(projectConfigPath);
+    return true;
   } catch {
-    return false;
+    try {
+      await access(projectPrivateConfigPath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 
-function getProjectName(projectPath: string): string | null {
+async function getProjectName(projectPath: string) {
+  const configPath = path.join(projectPath, "project.config.json");
+  const privateConfigPath = path.join(projectPath, "project.private.config.json");
+
   try {
-    const privateConfigPath = path.join(projectPath, PROJECT_PRIVATE_CONFIG_JSON);
-    if (fs.existsSync(privateConfigPath)) {
-      const privateConfig: WechatProjectConfig = JSON.parse(fs.readFileSync(privateConfigPath, "utf8"));
+    try {
+      const privateConfigContent = await readFile(privateConfigPath, "utf8");
+      const privateConfig: WechatProjectConfig = JSON.parse(privateConfigContent);
       if (privateConfig.projectname) {
         return decodeURIComponent(privateConfig.projectname);
       }
+    } catch {
+      // Private config doesn't exist or is invalid, try public config
     }
 
-    const configPath = path.join(projectPath, PROJECT_CONFIG_JSON);
-    if (fs.existsSync(configPath)) {
-      const config: WechatProjectConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    try {
+      const configContent = await readFile(configPath, "utf8");
+      const config: WechatProjectConfig = JSON.parse(configContent);
       if (config.projectname) {
         return decodeURIComponent(config.projectname);
       }
+    } catch {
+      // Config doesn't exist or is invalid
     }
-
-    return null;
-  } catch {
-    return null;
+  } catch (error) {
+    console.error("Failed to read project config:", error);
   }
+
+  return null;
 }
 
 export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) {
-  const { pop } = useNavigation();
+  const { pop, push } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
 
   const [deviceName, setDeviceName] = useState(() => {
@@ -125,7 +139,8 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
   }
 
   function handleCliPathChange(files: string[]) {
-    setCliPath(files[0] || "");
+    const normalizedPath = files[0] ? path.normalize(files[0]) : "";
+    setCliPath(normalizedPath);
     clearError("cliPath");
   }
 
@@ -134,19 +149,17 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
     clearError(`project_${index}_name`);
   }
 
-  function handleProjectPathChange(index: number, files: string[]) {
-    const selectedPath = files[0] || "";
+  async function handleProjectPathChange(index: number, files: string[]) {
+    const selectedPath = files[0] ? path.normalize(files[0]) : "";
+
     const project = projects[index];
     updateProject(index, { ...project, path: selectedPath });
     clearError(`project_${index}_path`);
 
     if (selectedPath) {
-      if (!isValidWechatMiniprogramDir(selectedPath)) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Invalid WeChat Mini Program Project",
-          message: "Keeping original path",
-        });
+      if (!(await isValidWechatMiniprogramDir(selectedPath))) {
+        const message = "Invalid WeChat Mini Program Project";
+        showFailureToast(new Error(message), { title: "Invalid Project" });
         showErrors({
           [`project_${index}_path`]: "Selected path is not a valid WeChat Mini Program project",
         });
@@ -158,7 +171,7 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
         return;
       } else {
         if (!project.name.trim()) {
-          const projectName = getProjectName(selectedPath);
+          const projectName = await getProjectName(selectedPath);
           if (projectName) {
             updateProject(index, { ...project, path: selectedPath, name: projectName });
           }
@@ -167,7 +180,7 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
     }
   }
 
-  function validate(): boolean {
+  function validate() {
     const newErrors: FormErrors = {};
     let hasErrors = false;
 
@@ -209,9 +222,8 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
 
   async function handleSubmit() {
     if (!validate()) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Please complete all required fields",
+      await showFailureToast(new Error("Please complete all required fields"), {
+        title: "Required Fields Missing",
       });
       return;
     }
@@ -228,11 +240,7 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
         pop();
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Save Failed",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to Save" });
     } finally {
       setIsLoading(false);
     }
@@ -256,7 +264,7 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
       });
 
       if (confirmed) {
-        deleteDevice(initialData.id);
+        await deleteDevice(initialData.id);
         await showToast({
           style: Toast.Style.Success,
           title: "Configuration Deleted",
@@ -265,11 +273,7 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
         pop();
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Delete Failed",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      await showFailureToast(error, { title: "Failed to Delete" });
     } finally {
       setIsLoading(false);
     }
@@ -293,10 +297,7 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
 
   function removeProject(index: number) {
     if (projects.length <= 1) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "At least one project must be kept",
-      });
+      showFailureToast(new Error("At least one project must be kept"), { title: "Cannot Remove Project" });
       return;
     }
     const newProjects = projects.filter((_, i) => i !== index);
@@ -310,21 +311,14 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
       actions={
         <ActionPanel>
           <Action title="Save" icon={Icon.Check} onAction={handleSubmit} shortcut={{ modifiers: ["cmd"], key: "s" }} />
+          <Action title="Cancel" icon={Icon.Xmark} onAction={pop} />
           <Action
             title="Add Project"
             icon={Icon.Plus}
             onAction={() => addProject()}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
-          <Action title="Cancel" icon={Icon.Xmark} onAction={pop} />
-          {isEdit && (
-            <Action
-              title="Delete Configuration"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              onAction={handleDelete}
-            />
-          )}
+          <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
           {projects.map((project, index) => (
             <Action
               key={`remove_${project.id}`}
@@ -334,6 +328,14 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
               onAction={() => removeProject(index)}
             />
           ))}
+          {isEdit && (
+            <Action
+              title="Delete Configuration"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              onAction={handleDelete}
+            />
+          )}
         </ActionPanel>
       }
     >
@@ -344,7 +346,7 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
         value={deviceName}
         onChange={handleDeviceNameChange}
         error={errorVisible ? errors.deviceName : undefined}
-        info="Should match 'System Settings - General - About This Mac - Name', can be obtained via 'scutil --get ComputerName' command"
+        info="Should match your Mac's name in System Settings > General > About > Name. You can also run 'scutil --get ComputerName' to get it."
       />
       <Form.FilePicker
         id="cliPath"
@@ -354,7 +356,7 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
         canChooseFiles
         canChooseDirectories={false}
         allowMultipleSelection={false}
-        info="WeChat DevTool built-in CLI executable, typically located at /Applications/wechatwebdevtools.app/Contents/MacOS/cli"
+        info={`WeChat DevTool CLI executable, typically at ${WECHAT_DEVTOOL_CLI_PATH}`}
         error={errorVisible ? errors.cliPath : undefined}
       />
       <Form.Separator />
@@ -383,7 +385,7 @@ export default function DeviceForm({ initialData, onSuccess }: DeviceFormProps) 
               canChooseFiles={false}
               canChooseDirectories
               allowMultipleSelection={false}
-              info="WeChat Mini Program project root directory (contains project.config.json file)"
+              info="WeChat Mini Program project directory (contains project.config.json)"
               error={errorVisible ? projectError.path : undefined}
             />
             {!isLastProject && <Form.Separator />}
