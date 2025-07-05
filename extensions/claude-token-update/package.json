@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-token-update",
+  "title": "Claude Tokens Update",
+  "description": "Update Claude OAuth tokens as GitHub repository secrets",
+  "icon": "icon.png",
+  "author": "thomas",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "claude-token-update",
+      "title": "Update Claude Tokens",
+      "description": "Update Claude OAuth tokens as GitHub repository secrets",
+      "mode": "view"
+    }
+  ],
+  "preferences": [],
+  "dependencies": {
+    "@octokit/rest": "^22.0.0",
+    "@raycast/api": "^1.40.0",
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-sealedbox-js": "^1.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
