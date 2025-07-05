@@ -39,7 +39,7 @@ export default async function SetApiKey() {
       },
       dismissAction: {
         title: "Get API Key from Website",
-        style: Alert.ActionStyle.Cancel,
+        style: Alert.ActionStyle.Destructive,
       },
     });
 
