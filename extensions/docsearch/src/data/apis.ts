@@ -180,7 +180,7 @@ export const data: Data = {
   },
   [DocID.Arthas]: {
     "en-US": {
-      icon: "../assets/logo/arthas.ico",
+      icon: "../assets/logo/arthas.png",
       apiKey: "03fb4b6577b57b5dafc792d9ddf66508",
       appId: "UX8WBNVHHR",
       indexName: "arthas",
@@ -214,7 +214,7 @@ export const data: Data = {
   },
   [DocID.Bootstrap]: {
     "en-US": {
-      icon: "../assets/logo/bootstrap.ico",
+      icon: "../assets/logo/bootstrap.png",
       apiKey: "3151f502c7b9e9dafd5e6372b691a24e",
       appId: "AK7KMZKZHQ",
       indexName: "bootstrap",
@@ -428,7 +428,7 @@ export const data: Data = {
   },
   [DocID.React]: {
     "en-US": {
-      icon: "../assets/logo/react.ico",
+      icon: "../assets/logo/react.png",
       apiKey: "36221914cce388c46d0420343e0bb32e",
       appId: "BH4D9OD16A",
       indexName: "react",
@@ -436,7 +436,7 @@ export const data: Data = {
       homepage: "https://reactjs.org/",
     },
     "zh-CN": {
-      icon: "../assets/logo/react.ico",
+      icon: "../assets/logo/react.png",
       apiKey: "72499aaa151dba0828babe727c7b86ee",
       appId: "BH4D9OD16A",
       indexName: "reactjs_zh-hans",
@@ -456,7 +456,7 @@ export const data: Data = {
   },
   [DocID.React_Native]: {
     "en-US": {
-      icon: "../assets/logo/react.ico",
+      icon: "../assets/logo/react.png",
       apiKey: "83cd239c72f9f8b0ed270a04b1185288",
       appId: "8TDSE0OHGQ",
       indexName: "react-native-v2",
@@ -949,7 +949,7 @@ export const data: Data = {
   },
   [DocID.NextJS]: {
     "en-US App": {
-      icon: "../assets/logo/nextjs.ico",
+      icon: "../assets/logo/nextjs.png",
       apiKey: "948b42d1edd177a55c6d6ae8dab24621",
       appId: "NNTAHQI9C5",
       indexName: "nextjs_docs_canary",
@@ -960,7 +960,7 @@ export const data: Data = {
       },
     },
     "en-US Pages": {
-      icon: "../assets/logo/nextjs.ico",
+      icon: "../assets/logo/nextjs.png",
       apiKey: "948b42d1edd177a55c6d6ae8dab24621",
       appId: "NNTAHQI9C5",
       indexName: "nextjs_docs_canary",
@@ -973,7 +973,7 @@ export const data: Data = {
   },
   [DocID.MassTransit]: {
     "en-US": {
-      icon: "../assets/logo/masstransit.ico",
+      icon: "../assets/logo/masstransit.png",
       apiKey: "c1b63b1b97fd65692eaf194862ce532b",
       appId: "TGRVKMJDRV",
       indexName: "masstransit_io",

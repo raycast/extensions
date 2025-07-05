@@ -65,7 +65,7 @@
     },
     {
       "name": "arthas",
-      "icon": "/logo/arthas.ico",
+      "icon": "/logo/arthas.png",
       "title": "Arthas",
       "subtitle": "DocSearch",
       "description": "Search Arthas documentation",
@@ -95,7 +95,7 @@
     },
     {
       "name": "bootstrap",
-      "icon": "/logo/bootstrap.ico",
+      "icon": "/logo/bootstrap.png",
       "title": "Bootstrap",
       "subtitle": "DocSearch",
       "description": "Search Bootstrap documentation",
@@ -320,7 +320,7 @@
     },
     {
       "name": "react",
-      "icon": "/logo/react.ico",
+      "icon": "/logo/react.png",
       "title": "React",
       "subtitle": "DocSearch",
       "description": "Search React documentation",
@@ -350,7 +350,7 @@
     },
     {
       "name": "react_native",
-      "icon": "/logo/react.ico",
+      "icon": "/logo/react.png",
       "title": "React Native",
       "subtitle": "DocSearch",
       "description": "Search React_Native documentation",
@@ -650,7 +650,7 @@
     },
     {
       "name": "nextjs",
-      "icon": "/logo/nextjs.ico",
+      "icon": "/logo/nextjs.png",
       "title": "NextJS",
       "subtitle": "DocSearch",
       "description": "Search NextJS documentation",
@@ -665,7 +665,7 @@
     },
     {
       "name": "masstransit",
-      "icon": "/logo/masstransit.ico",
+      "icon": "/logo/masstransit.png",
       "title": "MassTransit",
       "subtitle": "DocSearch",
       "description": "Search MassTransit documentation",

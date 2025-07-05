@@ -6,6 +6,7 @@
 - 📄 Support [Next.js](https://nextjs.org/)
 - 📄 Support [MassTransit](https://masstransit.io/)
 - 📄 Support [Pinia](https://pinia.vuejs.org/)
+- 🐛 Fix icon sizing
 
 ## [New feature] - 2024-9-17
 
