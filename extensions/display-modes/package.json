@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "display-modes",
   "title": "Display Modes",
-  "description": "Manage displays modes (resolution, refresh rate...).", 
+  "description": "Manage displays modes (resolution, refresh rate...).",
   "icon": "command-icon.png",
   "author": "agustin.prats",
+  "contributors": [
+    "rom100maim"
+  ],
   "categories": [
     "System"
   ],
@@ -15,6 +18,38 @@
       "title": "Change Display Mode",
       "description": "Change the display mode (resolution, refresh rate...) of your monitors.",
       "mode": "view"
+    },
+    {
+      "name": "quick-display-mode",
+      "title": "Quickly Change Display Mode",
+      "description": "Quickly change the display mode of your monitors.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "display",
+          "placeholder": "Display number",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "height",
+          "placeholder": "Height",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "refreshRate",
+          "placeholder": "Refresh Rate",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "display-modes-status-menu-bar",
+      "title": "Display Modes Status Menu Bar",
+      "description": "Change the display mode of your monitors from the status menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m"
     }
   ],
   "dependencies": {
