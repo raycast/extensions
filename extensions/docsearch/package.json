@@ -338,7 +338,7 @@
       "icon": "/logo/react_bootstrap.png",
       "title": "React Bootstrap",
       "subtitle": "DocSearch",
-      "description": "Search React_Bootstrap documentation",
+      "description": "Search React Bootstrap documentation",
       "arguments": [
         {
           "name": "search",
@@ -353,7 +353,7 @@
       "icon": "/logo/react.png",
       "title": "React Native",
       "subtitle": "DocSearch",
-      "description": "Search React_Native documentation",
+      "description": "Search React Native documentation",
       "arguments": [
         {
           "name": "search",
@@ -503,7 +503,7 @@
       "icon": "/logo/vue.png",
       "title": "Vue Router",
       "subtitle": "DocSearch",
-      "description": "Search Vue_Router documentation",
+      "description": "Search Vue Router documentation",
       "arguments": [
         {
           "name": "search",
