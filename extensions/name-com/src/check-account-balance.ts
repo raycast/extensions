@@ -7,8 +7,8 @@ export default async function CheckAccountBalance() {
     const response = await fetch(API_URL + "accountinfo/balance", {
       headers,
     });
-    const result: { balance?: number } = await parseResponse(response);
-    const strBalance = `$${result.balance ?? 0}`;
+    const result = await parseResponse(response) as { balance: number };
+    const strBalance = `$${result.balance}`;
     await updateCommandMetadata({ subtitle: `Name.com - Balance: ${strBalance}` });
     toast.style = Toast.Style.Success;
     toast.title = "Checked";
