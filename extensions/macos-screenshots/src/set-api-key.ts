@@ -17,7 +17,7 @@ export default async function SetApiKey() {
   try {
     let existingKey = "";
     try {
-      const stored = await LocalStorage.getSecureString("pain-is-api-key");
+      const stored = await LocalStorage.getItem("pain-is-api-key");
       if (stored && typeof stored === "string") {
         existingKey = stored;
       }
