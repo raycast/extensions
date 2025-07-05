@@ -8,8 +8,8 @@ export function getTitleForAlgolis(result: any) {
     combinedTitle(
       "path" in result || "slug" in result || "name" in result
         ? [result.title || result.name]
-        : Object.values(result.hierarchy)
-    )
+        : Object.values(result.hierarchy),
+    ),
   );
 }
 
@@ -34,6 +34,6 @@ export function getTitleForMeilisearch(result: any) {
       hierarchy_lvl4,
       hierarchy_lvl5,
       hierarchy_lvl6,
-    ])
+    ]),
   );
 }
