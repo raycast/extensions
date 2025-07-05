@@ -1,4 +1,5 @@
 import { ActionPanel, List, Action, useNavigation, showHUD, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ReactNode, useEffect, useState } from "react";
 import { listDisplays, setMode, formatDisplayMode, formatDisplayTitle, formatDisplaySubtitle } from "./utils";
 import { DisplayInfo, areModesEqual } from "./types";
@@ -46,7 +47,7 @@ export default function Command() {
                         await fetchDisplaysInfo();
                         navigation.pop();
                       } else {
-                        await showHUD("❌ Failed to change display mode");
+                        showFailureToast("Failed to change display mode");
                       }
                     }}
                   />

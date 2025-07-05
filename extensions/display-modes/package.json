@@ -22,7 +22,7 @@
     {
       "name": "quick-display-mode",
       "title": "Quickly Change Display Mode",
-      "description": "Quickly change the display mode of your monitors.",
+      "description": "Quickly change your monitor's display mode by specifying the desired height and refresh rate; the closest available mode will be selected.",
       "mode": "no-view",
       "arguments": [
         {

@@ -1,6 +1,13 @@
 import { LaunchProps, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { listDisplays, setMode, formatDisplayMode } from "./utils";
 import { DisplayInfo, Mode, areModesEqual } from "./types";
+
+// Scoring constants for findClosestMode
+const EXACT_MATCH_SCORE = 1500;
+const MAX_DIFF_SCORE = 1000;
+const SUITABLE_FOR_UI_BONUS = 500;
+const SAFE_FOR_HARDWARE_BONUS = 500;
 
 export default async function QuickDisplayMode(props: LaunchProps<{ arguments: Arguments.QuickDisplayMode }>) {
   const { display, height, refreshRate } = props.arguments;
@@ -10,17 +17,17 @@ export default async function QuickDisplayMode(props: LaunchProps<{ arguments: A
   const targetRefreshRate = refreshRate ? parseInt(refreshRate, 10) : undefined;
 
   if (isNaN(displayId)) {
-    await showHUD("❌ Invalid display ID");
+    showFailureToast("Invalid display ID");
     return;
   }
 
   if (isNaN(targetHeight) || targetHeight <= 0) {
-    await showHUD("❌ Invalid height value");
+    showFailureToast("Invalid height value");
     return;
   }
 
   if (refreshRate && (targetRefreshRate === undefined || isNaN(targetRefreshRate) || targetRefreshRate <= 0)) {
-    await showHUD("❌ Invalid refresh rate value");
+    showFailureToast("Invalid refresh rate value");
     return;
   }
 
@@ -28,7 +35,7 @@ export default async function QuickDisplayMode(props: LaunchProps<{ arguments: A
     const displays = await listDisplays();
 
     if (!displays) {
-      await showHUD("❌ Failed to get display list");
+      showFailureToast("Failed to get display list");
       return;
     }
 
@@ -36,14 +43,14 @@ export default async function QuickDisplayMode(props: LaunchProps<{ arguments: A
 
     if (!targetDisplay) {
       const availableDisplays = displays.map((d) => d.display.id).join(", ");
-      await showHUD(`❌ Display ${displayId} not found. Available: ${availableDisplays}`);
+      showFailureToast(`Display ${displayId} not found. Available: ${availableDisplays}`);
       return;
     }
 
     const closestMode = findClosestMode(targetDisplay, targetHeight, targetRefreshRate);
 
     if (!closestMode) {
-      await showHUD(`❌ No suitable mode found for display ${displayId}`);
+      showFailureToast(`No suitable mode found for display ${displayId}`);
       return;
     }
 
@@ -59,11 +66,11 @@ export default async function QuickDisplayMode(props: LaunchProps<{ arguments: A
       const modeDescription = formatDisplayMode(closestMode);
       await showHUD(`✅ Display ${displayId} changed to ${modeDescription}`);
     } else {
-      await showHUD(`❌ Failed to change display ${displayId} mode`);
+      showFailureToast(`Failed to change display ${displayId} mode`);
     }
   } catch (error) {
     console.error("Error in quick display modes:", error);
-    await showHUD("❌ Error changing display mode");
+    showFailureToast("Error changing display mode");
   }
 }
 
@@ -80,16 +87,16 @@ function findClosestMode(display: DisplayInfo, targetHeight: number, targetRefre
     // Prefer exact matches, then smaller differences
 
     const heightDiff = Math.abs(mode.height - targetHeight);
-    score += heightDiff === 0 ? 1500 : Math.max(0, 1000 - heightDiff);
+    score += heightDiff === 0 ? EXACT_MATCH_SCORE : Math.max(0, MAX_DIFF_SCORE - heightDiff);
 
     if (targetRefreshRate !== undefined) {
       const refreshRateDiff = Math.abs(mode.refreshRate - targetRefreshRate);
-      score += refreshRateDiff === 0 ? 1500 : Math.max(0, 1000 - refreshRateDiff);
+      score += refreshRateDiff === 0 ? EXACT_MATCH_SCORE : Math.max(0, MAX_DIFF_SCORE - refreshRateDiff);
     }
 
     // Bonus for modes that are suitable for UI and safe for hardware
-    if (mode.isSuitableForUI) score += 500;
-    if (mode.isSafeForHardware) score += 500;
+    if (mode.isSuitableForUI) score += SUITABLE_FOR_UI_BONUS;
+    if (mode.isSafeForHardware) score += SAFE_FOR_HARDWARE_BONUS;
 
     return { mode, score };
   });

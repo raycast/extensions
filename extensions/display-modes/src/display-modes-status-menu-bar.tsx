@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Icon, MenuBarExtra, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { listDisplays, setMode, sortModes, formatDisplayMode, formatDisplayTitle, getDisplayIcon } from "./utils";
 import { DisplayInfo, Mode, areModesEqual } from "./types";
 
@@ -42,11 +43,11 @@ export default function Command() {
         await showHUD(`✅ Display ${displayId} changed to ${formatDisplayMode(mode)}`);
         await refetch();
       } else {
-        await showHUD(`❌ Failed to change display ${displayId} mode`);
+        showFailureToast(`Failed to change display ${displayId} mode`);
       }
     } catch (error) {
       console.error("Error changing display mode:", error);
-      await showHUD("❌ Error changing display mode");
+      showFailureToast("Error changing display mode");
     }
   };
 
