@@ -2,7 +2,7 @@ import { escape2Html } from "./escapeToHtml";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function getTitleForAlgolis(result: any) {
-  const combinedTitle = (titles: Array<string>) => titles.filter((itme) => itme).join(" > ");
+  const combinedTitle = (titles: Array<string>) => titles.filter((item) => item).join(" > ");
 
   return escape2Html(
     combinedTitle(
@@ -14,7 +14,7 @@ export function getTitleForAlgolis(result: any) {
 }
 
 export function getTitleForMeilisearch(result: any) {
-  const combinedTitle = (titles: Array<string>) => titles.filter((itme) => itme).join(" > ");
+  const combinedTitle = (titles: Array<string>) => titles.filter((item) => item).join(" > ");
   const {
     hierarchy_lvl0,
     hierarchy_lvl1,
