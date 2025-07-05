@@ -1,5 +1,10 @@
 # MynaUI Icons Changelog
 
+## [Update Icons Version] - 2025-07-05
+
+- Updated mynaui-icons package to the latest version (v0.3.9)
+- Update README
+
 ## [Add Solid Variant] - 2024-10-07
 
 - Add solid variant to all icons

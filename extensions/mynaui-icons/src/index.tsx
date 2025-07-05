@@ -1,13 +1,22 @@
-import { ActionPanel, Action, Grid, Color } from "@raycast/api";
+import { ActionPanel, Action, Grid } from "@raycast/api";
 import Icons from "../node_modules/@mynaui/icons/meta.json";
-import { useState } from "react";
 
-// Builds SVG string based on type
-function buildSVG(svg: string, type: string): string {
-  const commonProps = 'xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"';
-  return type === "regular"
-    ? `<svg ${commonProps} fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor">${svg}</svg>`
-    : `<svg ${commonProps} fill="currentColor">${svg}</svg>`;
+// Gets a svg path string and wraps it in an SVG tag (for regular icons)
+function buildSVG(svg: string): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor">${svg}</svg>`;
+}
+
+// Gets a svg path string and wraps it in an SVG tag (for solid icons)
+function buildSolidSVG(code: string): string {
+  return `<svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${code}</svg>`;
+}
+
+// Gets a svg string and returns a data url
+function buildDataURL(svg: string, isSolid: boolean = false): string {
+  const rawSVG = isSolid ? buildSolidSVG(svg) : buildSVG(svg);
+  const base64SVG = Buffer.from(rawSVG).toString("base64");
+  const dataUrl = `data:image/svg+xml;base64,${base64SVG}`;
+  return dataUrl;
 }
 
 // Converts a string to PascalCase
@@ -18,28 +27,10 @@ const toPascalCase = (str: string, type: string) =>
     .join("") + (type === "solid" ? "Solid" : "");
 
 export default function Command() {
-  const [type, setType] = useState("regular");
-
   return (
-    <Grid
-      columns={8}
-      inset={Grid.Inset.Large}
-      searchBarAccessory={
-        <Grid.Dropdown
-          storeValue={true}
-          onChange={setType}
-          defaultValue="regular"
-          tooltip="Icon Category"
-          placeholder="Select Icon Category"
-        >
-          {["regular", "solid"].map((value) => (
-            <Grid.Dropdown.Item key={value} title={value.charAt(0).toUpperCase() + value.slice(1)} value={value} />
-          ))}
-        </Grid.Dropdown>
-      }
-    >
+    <Grid columns={7} inset={Grid.Inset.Large}>
       <Grid.EmptyView
-        title="No icons found."
+        title="Nothing found."
         description="Press Enter to request this icon"
         actions={
           <ActionPanel>
@@ -47,36 +38,44 @@ export default function Command() {
           </ActionPanel>
         }
       />
-      {Object.entries(Icons).map(([name, icon]) => {
-        const iconData = icon[type as keyof typeof icon];
-        const svg = buildSVG(Array.isArray(iconData) ? iconData[0] : iconData, type);
-        return (
-          <Grid.Item
-            key={name}
-            title={name}
-            keywords={icon.tags}
-            content={{
-              source: `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`,
-              tintColor: Color.PrimaryText,
-            }}
-            actions={
-              <ActionPanel>
-                <Action.Paste content={svg} />
-                <Action.CopyToClipboard content={svg} />
-                <Action.CopyToClipboard
-                  content={`<${toPascalCase(name, type)} />`}
-                  title="Copy Component Name to Clipboard"
-                />
-                <Action.OpenInBrowser
-                  url={
-                    type === "regular" ? `https://mynaui.com/icons/${name}` : `https://mynaui.com/icons/${name}/solid`
-                  }
-                />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {Object.entries(Icons).flatMap((icon) => [
+        // Regular icon
+        <Grid.Item
+          key={`${icon[0]}-regular`}
+          title={icon[0]}
+          keywords={[...icon[1].tags, "regular"]}
+          content={{ source: buildDataURL(icon[1].regular) }}
+          actions={
+            <ActionPanel>
+              <Action.Paste content={buildSVG(icon[1].regular)} />
+              <Action.CopyToClipboard content={buildSVG(icon[1].regular)} />
+              <Action.CopyToClipboard
+                content={`<${toPascalCase(icon[0], "regular")} />`}
+                title="Copy Component Name to Clipboard"
+              />
+              <Action.OpenInBrowser url={`https://mynaui.com/icons/${icon[0]}`} />
+            </ActionPanel>
+          }
+        />,
+        // Solid icon
+        <Grid.Item
+          key={`${icon[0]}-solid`}
+          title={`${icon[0]} (Solid)`}
+          keywords={[...icon[1].tags, "solid"]}
+          content={{ source: buildDataURL(icon[1].solid, true) }}
+          actions={
+            <ActionPanel>
+              <Action.Paste content={buildSolidSVG(icon[1].solid)} />
+              <Action.CopyToClipboard content={buildSolidSVG(icon[1].solid)} />
+              <Action.CopyToClipboard
+                content={`<${toPascalCase(icon[0], "solid")} />`}
+                title="Copy Component Name to Clipboard"
+              />
+              <Action.OpenInBrowser url={`https://mynaui.com/icons/${icon[0]}/solid`} />
+            </ActionPanel>
+          }
+        />,
+      ])}
     </Grid>
   );
 }
