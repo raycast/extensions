@@ -124,7 +124,13 @@ export default async function FullscreenScreenshot() {
           },
           secondaryAction: {
             title: "Upload Anyway",
-            onAction: async () => {},
+            onAction: async () => {
+              const formData = new FormData();
+              formData.append("file", imageBuffer, {
+                filename: `fullscreen-screenshot-${Date.now()}.png`,
+                contentType: "image/png",
+              });
+            },
           },
         });
       }
