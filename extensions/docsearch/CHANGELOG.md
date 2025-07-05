@@ -1,5 +1,12 @@
 # DocSearch Changelog
 
+## [Support for new documentation] - {PR_MERGE_DATE}
+
+- 📄 Support [TailwindCSS V4](https://tailwindcss.com/)
+- 📄 Support [Next.js](https://nextjs.org/)
+- 📄 Support [MassTransit](https://masstransit.io/)
+- 📄 Support [Pinia](https://pinia.vuejs.org/)
+
 ## [New feature] - 2024-9-17
 
 - 📄 Support [TypeScript](https://www.typescriptlang.org/)

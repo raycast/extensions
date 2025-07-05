@@ -14,7 +14,8 @@
   "license": "MIT",
   "contributors": [
     "AnishDe12020",
-    "pomdtr"
+    "pomdtr",
+    "janosorcsik"
   ],
   "commands": [
     {
@@ -638,6 +639,51 @@
       "title": "TypeScript",
       "subtitle": "DocSearch",
       "description": "Search TypeScript documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "nextjs",
+      "icon": "/logo/nextjs.ico",
+      "title": "NextJS",
+      "subtitle": "DocSearch",
+      "description": "Search NextJS documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "masstransit",
+      "icon": "/logo/masstransit.ico",
+      "title": "MassTransit",
+      "subtitle": "DocSearch",
+      "description": "Search MassTransit documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "pinia",
+      "icon": "/logo/pinia.png",
+      "title": "Pinia",
+      "subtitle": "DocSearch",
+      "description": "Search Pinia documentation",
       "arguments": [
         {
           "name": "search",

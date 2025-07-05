@@ -10,7 +10,8 @@ export enum DocID {
   TailwindCSS, Tauri, Unidata, Vite,
   Vitest, Vue_Router, Vue, VueUse,
   Vuepress, ElementPlus, Neovim, Less,
-  Sass, Deno, TypeScript
+  Sass, Deno, TypeScript, NextJS,
+  MassTransit, Pinia,
 }
 
 type Base = {
@@ -31,7 +32,7 @@ export type Meilisearch = Base & {
   type: "meilisearch";
 };
 
-type DocsTypes = "Manual" | "Modules";
+type DocsTypes = "Manual" | "Modules" | "App" | "Pages";
 type Languages = "en-US" | "zh-CN" | "fr-FR" | "ko-KR" | "it-IT";
 type Versions = "V0" | "V1" | "V2" | "V3" | "V4" | "V9";
 export type Tags = `${Versions} ${Languages}` | `${Languages} ${DocsTypes}` | `${Languages}`;
@@ -519,13 +520,47 @@ export const data: Data = {
     },
   },
   [DocID.TailwindCSS]: {
-    "V3 en-US": {
+    "V4 en-US": {
       icon: "../assets/logo/tailwindcss.png",
       apiKey: "5fc87cef58bb80203d2207578309fab6",
       appId: "KNPXZI5B0M",
       indexName: "tailwindcss",
       type: "algolia",
       homepage: "https://tailwindcss.com/",
+      searchParameters: {
+        facetFilters: [["version:v4", "version:plus"]],
+        attributesToRetrieve: [
+          "hierarchy.lvl0",
+          "hierarchy.lvl1",
+          "hierarchy.lvl2",
+          "hierarchy.lvl3",
+          "hierarchy.lvl4",
+          "hierarchy.lvl5",
+          "hierarchy.lvl6",
+          "content",
+          "type",
+          "url",
+          "product",
+          "product_category",
+        ],
+        attributesToSnippet: [
+          "hierarchy.lvl1:5",
+          "hierarchy.lvl2:5",
+          "hierarchy.lvl3:5",
+          "hierarchy.lvl4:5",
+          "hierarchy.lvl5:5",
+          "hierarchy.lvl6:5",
+          "content:5",
+        ],
+      },
+    },
+    "V3 en-US": {
+      icon: "../assets/logo/tailwindcss.png",
+      apiKey: "5fc87cef58bb80203d2207578309fab6",
+      appId: "KNPXZI5B0M",
+      indexName: "tailwindcss",
+      type: "algolia",
+      homepage: "https://v3.tailwindcss.com/",
       searchParameters: {
         facetFilters: ["version:v3"],
       },
@@ -910,6 +945,98 @@ export const data: Data = {
       indexName: "ts-yayujs",
       type: "algolia",
       homepage: "https://yayujs.com/",
+    },
+  },
+  [DocID.NextJS]: {
+    "en-US App": {
+      icon: "../assets/logo/nextjs.ico",
+      apiKey: "948b42d1edd177a55c6d6ae8dab24621",
+      appId: "NNTAHQI9C5",
+      indexName: "nextjs_docs_canary",
+      type: "algolia",
+      homepage: "https://nextjs.org/docs",
+      searchParameters: {
+        filters: "isApp:true",
+      },
+    },
+    "en-US Pages": {
+      icon: "../assets/logo/nextjs.ico",
+      apiKey: "948b42d1edd177a55c6d6ae8dab24621",
+      appId: "NNTAHQI9C5",
+      indexName: "nextjs_docs_canary",
+      type: "algolia",
+      homepage: "https://nextjs.org/docs",
+      searchParameters: {
+        filters: "isPages:true",
+      },
+    },
+  },
+  [DocID.MassTransit]: {
+    "en-US": {
+      icon: "../assets/logo/masstransit.ico",
+      apiKey: "c1b63b1b97fd65692eaf194862ce532b",
+      appId: "TGRVKMJDRV",
+      indexName: "masstransit_io",
+      type: "algolia",
+      homepage: "https://masstransit.io/",
+      searchParameters: {
+        facetFilters: ["lang:en"],
+        attributesToRetrieve: [
+          "hierarchy.lvl0",
+          "hierarchy.lvl1",
+          "hierarchy.lvl2",
+          "hierarchy.lvl3",
+          "hierarchy.lvl4",
+          "hierarchy.lvl5",
+          "hierarchy.lvl6",
+          "content",
+          "type",
+          "url",
+        ],
+        attributesToSnippet: [
+          "hierarchy.lvl1:5",
+          "hierarchy.lvl2:5",
+          "hierarchy.lvl3:5",
+          "hierarchy.lvl4:5",
+          "hierarchy.lvl5:5",
+          "hierarchy.lvl6:5",
+          "content:5",
+        ],
+      },
+    },
+  },
+  [DocID.Pinia]: {
+    "en-US": {
+      icon: "../assets/logo/pinia.png",
+      apiKey: "45441f4b65a2f80329fd45c7cb371fea",
+      appId: "69Y3N7LHI2",
+      indexName: "pinia",
+      type: "algolia",
+      homepage: "https://pinia.vuejs.org/",
+      searchParameters: {
+        facetFilters: ["lang:en-US"],
+        attributesToRetrieve: [
+          "hierarchy.lvl0",
+          "hierarchy.lvl1",
+          "hierarchy.lvl2",
+          "hierarchy.lvl3",
+          "hierarchy.lvl4",
+          "hierarchy.lvl5",
+          "hierarchy.lvl6",
+          "content",
+          "type",
+          "url",
+        ],
+        attributesToSnippet: [
+          "hierarchy.lvl1:5",
+          "hierarchy.lvl2:5",
+          "hierarchy.lvl3:5",
+          "hierarchy.lvl4:5",
+          "hierarchy.lvl5:5",
+          "hierarchy.lvl6:5",
+          "content:5",
+        ],
+      },
     },
   },
 };
