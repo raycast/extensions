@@ -6,7 +6,7 @@ import algoliasearch from "algoliasearch/lite";
 import { Toast, showToast } from "@raycast/api";
 import { Algolia } from "../data/apis";
 
-const DEFUALT_PARAMETERS = {
+const DEFAULT_PARAMETERS = {
   highlightPreTag: "**",
   highlightPostTag: "**",
 };
@@ -24,7 +24,7 @@ export function useAlgolia(query = "", currentAPI: Algolia) {
 
     searchIndex
       .search(query, {
-        ...DEFUALT_PARAMETERS,
+        ...DEFAULT_PARAMETERS,
         ...currentAPI.searchParameters,
       })
       .then((res: any) => {
