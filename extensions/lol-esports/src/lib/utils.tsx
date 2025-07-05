@@ -117,7 +117,7 @@ export const eventDetail = (event: Event, includeTime: boolean): EventDetail => 
 
   const eventDate = new Date(event.startTime);
 
-  let timezone = preferences.timezone || "";
+  const timezone = preferences.timezone || "";
 
   const title = includeTime
     ? formatInTimeZone(eventDate, timezone, "MMM d, HH:mm")
@@ -136,6 +136,6 @@ export const eventDetail = (event: Event, includeTime: boolean): EventDetail => 
 
 // Helper function to get the date in the target timezone
 export const getZonedDate = (dateString: string | Date): Date => {
-  let timezone = preferences.timezone || "";
+  const timezone = preferences.timezone || "";
   return fromZonedTime(new Date(dateString), timezone);
 };
