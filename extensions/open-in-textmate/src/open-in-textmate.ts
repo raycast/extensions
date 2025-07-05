@@ -1,17 +1,14 @@
 import {
   Toast,
   getApplications,
-  getPreferenceValues,
   getSelectedFinderItems,
   open,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+
 
 import { exec } from "child_process";
-
-interface OpenTextMatePreferences {
-  TextMateAppId: string;
-}
 
 /**
  * Gets the selected Finder window.
@@ -39,24 +36,17 @@ const getSelectedFinderWindow = (): Promise<string> => {
         resolve(stdout.trim());
       },
     );
-
-    child.on("close", () => {
-      child.kill();
-    });
   });
 };
 
 export default async () => {
-  const preferences = getPreferenceValues<OpenTextMatePreferences>();
   const applications = await getApplications();
   const textmateApplication = applications.find(
-    (app) => app.bundleId === preferences.TextMateAppId,
+    (app) => app.bundleId === "com.macromates.TextMate",
   );
 
   if (!textmateApplication) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "TextMate is not installed",
+    await showFailureToast("TextMate is not installed", {
       primaryAction: {
         title: "Install TextMate",
         onAction: () => open("https://macromates.com/"),

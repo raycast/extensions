@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "open-in-textmate",
+  "name": "openInTextmate",
   "title": "Open in TextMate",
   "description": "Open selected Finder file or folder in TextMate",
   "icon": "icon.png",
@@ -16,22 +16,6 @@
       "title": "Open in TextMate",
       "description": "Open selected Finder file or folder in TextMate",
       "mode": "no-view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "TextMateAppId",
-      "description": "The editor to open the selected file/folder from finder into.",
-      "type": "dropdown",
-      "title": "Selected editor",
-      "required": false,
-      "default": "com.macromates.TextMate",
-      "data": [
-        {
-          "title": "TextMate",
-          "value": "com.macromates.TextMate"
-        }
-      ]
     }
   ],
   "dependencies": {
