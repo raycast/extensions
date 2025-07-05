@@ -1,4 +1,11 @@
-import { Toast, getApplications, getPreferenceValues, getSelectedFinderItems, open, showToast } from "@raycast/api";
+import {
+  Toast,
+  getApplications,
+  getPreferenceValues,
+  getSelectedFinderItems,
+  open,
+  showToast,
+} from "@raycast/api";
 
 import { exec } from "child_process";
 
@@ -24,10 +31,14 @@ const getSelectedFinderWindow = (): Promise<string> => {
   end if
  `;
   return new Promise((resolve, reject) => {
-    const child = exec(`osascript -e '${appleScript}'`, (error, stdout, stderr) => {
-      if (error || stderr) reject(Error("Could not get the selected Finder window"));
-      resolve(stdout.trim());
-    });
+    const child = exec(
+      `osascript -e '${appleScript}'`,
+      (error, stdout, stderr) => {
+        if (error || stderr)
+          reject(Error("Could not get the selected Finder window"));
+        resolve(stdout.trim());
+      },
+    );
 
     child.on("close", () => {
       child.kill();
@@ -38,7 +49,9 @@ const getSelectedFinderWindow = (): Promise<string> => {
 export default async () => {
   const preferences = getPreferenceValues<OpenTextMatePreferences>();
   const applications = await getApplications();
-  const textmateApplication = applications.find((app) => app.bundleId === preferences.TextMateAppId);
+  const textmateApplication = applications.find(
+    (app) => app.bundleId === preferences.TextMateAppId,
+  );
 
   if (!textmateApplication) {
     await showToast({
