@@ -1,5 +1,10 @@
 # Bing Wallpaper Changelog
 
+## [Refresh Interval] - {PR_MERGE_DATE}
+
+- Add refresh interval setting to the command preferences
+- Optimize extension icons for macOS Tahoe
+
 ## [Remove error dialog] - 2024-09-30
 
 - Remove error dialog that pops up not as expected
