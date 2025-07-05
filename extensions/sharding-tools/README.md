@@ -167,18 +167,18 @@ ShardingTools 提供三个独立的命令，覆盖分库分表的完整工作流
 
 配置分库分表的基本参数，支持表名、库名、分片数量等设置。
 
-![AddConfig](assets/add-config.png)
+![AddConfig](media/add-config.png)
 
 ### 配置列表
 
 管理所有分库分表配置，支持编辑、删除和快速计算。
 
-![ConfigList](assets/config-list.png)
+![ConfigList](media/config-list.png)
 
 ### 分库分表计算器
 
 输入分表因子值，实时计算对应的库表位置，自动生成 SQL 语句。
-![ConfigList](assets/shard-calculator.png)
+![ConfigList](media/shard-calculator.png)
 
 ## 🧮 计算示例
 
