@@ -1,12 +1,5 @@
-import {
-  Toast,
-  getApplications,
-  getSelectedFinderItems,
-  open,
-  showToast,
-} from "@raycast/api";
+import { Toast, getApplications, getSelectedFinderItems, open, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-
 
 import { exec } from "child_process";
 
@@ -28,22 +21,16 @@ const getSelectedFinderWindow = (): Promise<string> => {
   end if
  `;
   return new Promise((resolve, reject) => {
-    const child = exec(
-      `osascript -e '${appleScript}'`,
-      (error, stdout, stderr) => {
-        if (error || stderr)
-          reject(Error("Could not get the selected Finder window"));
-        resolve(stdout.trim());
-      },
-    );
+    exec(`osascript -e '${appleScript}'`, (error, stdout, stderr) => {
+      if (error || stderr) reject(Error("Could not get the selected Finder window"));
+      resolve(stdout.trim());
+    });
   });
 };
 
 export default async () => {
   const applications = await getApplications();
-  const textmateApplication = applications.find(
-    (app) => app.bundleId === "com.macromates.TextMate",
-  );
+  const textmateApplication = applications.find((app) => app.bundleId === "com.macromates.TextMate");
 
   if (!textmateApplication) {
     await showFailureToast("TextMate is not installed", {

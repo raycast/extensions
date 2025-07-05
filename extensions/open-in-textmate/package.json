@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "openInTextmate",
+  "name": "open-in-textmate",
   "title": "Open in TextMate",
   "description": "Open selected Finder file or folder in TextMate",
   "icon": "icon.png",
