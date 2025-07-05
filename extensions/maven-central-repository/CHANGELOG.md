@@ -1,8 +1,12 @@
 # Maven Central Repository Changelog
 
+## [New Icon Style] - {PR_MERGE_DATE}
+
+- Optimize extension icons for macOS Tahoe
+
 ## [Fix Hotkey Error] - 2024-05-28
 
--  Fix the problem of using hotkeys to invoke commands
+- Fix the problem of using hotkeys to invoke commands
 
 ## [Update Raycast API] - 2022-12-05
 
