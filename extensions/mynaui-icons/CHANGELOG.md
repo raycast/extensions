@@ -1,6 +1,6 @@
 # MynaUI Icons Changelog
 
-## [Update Icons Version] - 2025-07-05
+## [Update Icons Version] - {PR_MERGE_DATE}
 
 - Updated mynaui-icons package to the latest version (v0.3.9)
 - Update README
