@@ -84,12 +84,12 @@
           "name": "timeFormat",
           "data": [
             {
-              "title": "HH:mm (eg 16:00)",
+              "title": "24-Hour Time (eg 16:00)",
               "value": "HH:mm"
             },
             {
-              "title": "hh:mm aa (eg 4:00 PM)",
-              "value": "h:mm aa"
+              "title": "12-Hour Time (eg 4:00 PM)",
+              "value": "h:mm a"
             }
           ],
           "default": "HH:mm"
