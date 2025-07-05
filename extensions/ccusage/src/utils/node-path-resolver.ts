@@ -1,6 +1,7 @@
 import { readdirSync, existsSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
 import { cpus } from "os";
+import { preferences } from "../preferences";
 
 // Performance optimization: Cache expensive operations
 let cachedPaths: string | null = null;
@@ -76,7 +77,13 @@ export const getEnhancedNodePaths = (): string => {
     systemPaths.push(`${process.env.HOME}/.npm/bin`, `${process.env.HOME}/.yarn/bin`);
   }
 
-  const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
+  const allPaths = [
+    process.env.PATH || "",
+    ...platformPaths,
+    ...versionManagerPaths,
+    ...systemPaths,
+    preferences.customNpxPath ? dirname(preferences.customNpxPath) : "",
+  ];
 
   cachedPaths = allPaths.filter((path) => path).join(":");
   return cachedPaths;
