@@ -260,10 +260,10 @@
   },
   "preferences": [
     {
-      "name": "score",
+      "name": "spoilerFree",
       "type": "checkbox",
-      "label": "Show Match Score",
-      "description": "Show Completed Match Score",
+      "label": "Spoiler Free",
+      "description": "Hide match scores for completed games",
       "required": false,
       "title": "Match Score",
       "default": true
