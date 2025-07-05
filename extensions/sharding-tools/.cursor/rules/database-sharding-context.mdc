@@ -1,0 +1,42 @@
+---
+description: 数据库分库分表相关功能开发指导
+---
+
+# 数据库分库分表开发指导
+
+## 核心概念
+- **分库（Database Sharding）**: 将数据分散到多个数据库实例中
+- **分表（Table Sharding）**: 将单个表的数据分散到多个表中
+- **路由策略**: 确定数据存储和查询的具体库表位置
+
+## 常见分库分表策略
+1. **取模分库分表**: 根据ID对库数量/表数量取模
+2. **范围分库分表**: 按照数据范围划分
+3. **哈希分库分表**: 使用哈希算法确定位置
+4. **一致性哈希**: 支持动态扩容的哈希策略
+
+## 计算逻辑示例
+```typescript
+// 取模分库分表示例
+function calculateShardPosition(id: number, dbCount: number, tableCount: number) {
+  const dbIndex = id % dbCount;
+  const tableIndex = id % tableCount;
+  return {
+    database: `db_${dbIndex}`,
+    table: `table_${tableIndex}`
+  };
+}
+```
+
+## 关键参数
+- `schemeName`: 数据库名称前缀
+- `schemeSize`: 分库数量
+- `tableName`: 数据表名称前缀  
+- `tableSize`: 分表数量
+- `shardingKey`: 分库分表键（通常是主键ID）
+
+## 实现建议
+- 提供多种分库分表策略选择
+- 支持自定义分库分表算法
+- 添加结果预览功能
+- 考虑分库分表的扩容场景

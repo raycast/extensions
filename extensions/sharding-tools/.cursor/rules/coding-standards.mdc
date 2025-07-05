@@ -1,0 +1,33 @@
+---
+globs: *.ts,*.tsx,*.js,*.jsx
+---
+
+# 编码标准规范
+
+## 代码风格
+- 使用 TypeScript 严格模式
+- 优先使用函数组件而非类组件
+- 使用 const 声明不可变变量
+- 使用 let 声明可变变量，避免 var
+- 函数参数和返回值必须有明确的类型注解
+
+## 命名规范
+- 组件名使用 PascalCase（大驼峰）
+- 变量和函数使用 camelCase（小驼峰）
+- 常量使用 UPPER_SNAKE_CASE
+- 类型定义使用 PascalCase 并以 Type 结尾（如 `FormDataType`）
+
+## 注释规范
+- 复杂业务逻辑必须添加中文注释
+- 公共函数和组件添加 JSDoc 注释
+- TODO 注释使用中文描述待完成功能
+
+## 错误处理
+- 使用 try-catch 处理异步操作
+- 用户友好的错误提示使用中文
+- 开发调试信息可以使用英文
+
+## 性能优化
+- 避免在渲染函数中创建新对象
+- 使用 React.memo 优化组件重渲染
+- 合理使用 useMemo 和 useCallback

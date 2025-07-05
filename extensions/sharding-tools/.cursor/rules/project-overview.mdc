@@ -1,0 +1,26 @@
+---
+alwaysApply: true
+---
+
+# ShardingTools 项目概览
+
+这是一个用于数据库分库分表计算的 Raycast 扩展工具。
+
+## 项目结构
+- 主要入口文件：[src/addtable.tsx](mdc:src/addtable.tsx) - 包含分库分表表单界面
+- 配置文件：[package.json](mdc:package.json) - 定义了 Raycast 扩展的元数据和依赖
+- 项目文档：[README.md](mdc:README.md) - 包含完整的项目说明和使用指南
+
+## 核心功能
+- 提供表单界面输入分库分表参数：表名、库名、库数量、表数量
+- 基于 Raycast API 构建，集成到 Raycast 工作流中
+- 目标用户：需要进行数据库分库分表设计的开发者
+
+## 技术栈
+- React + TypeScript
+- Raycast Extension API
+- 构建工具：Raycast CLI
+
+## 用户偏好
+- 所有回复请使用中文
+- 专注于数据库分库分表场景的工具开发

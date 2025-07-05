@@ -1,0 +1,49 @@
+---
+globs: *.ts,*.tsx
+---
+
+# Raycast 扩展开发标准
+
+## 导入顺序
+1. 首先导入 Raycast API 组件：`@raycast/api`
+2. 然后导入 Raycast 工具函数：`@raycast/utils`
+3. 最后导入本地文件
+
+## 组件结构规范
+- 默认导出一个 `Command` 函数组件
+- 使用 TypeScript 类型定义表单数据结构
+- 表单提交处理使用 `handleSubmit` 函数命名
+
+## Raycast API 使用规范
+- 表单组件使用 `<Form>` 包裹
+- 操作按钮使用 `<ActionPanel>` 和 `<Action.SubmitForm>`
+- 用户反馈使用 `showToast` 函数
+- 表单字段使用 `<Form.TextField>` 等组件
+
+## 示例代码结构
+```typescript
+import { Form, ActionPanel, Action, showToast } from "@raycast/api";
+
+type FormData = {
+  // 定义表单数据类型
+};
+
+export default function Command() {
+  function handleSubmit(values: FormData) {
+    // 处理表单提交
+    showToast({ title: "Success", message: "Operation completed" });
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      {/* 表单字段 */}
+    </Form>
+  );
+}
+```
