@@ -1,13 +1,10 @@
-import { Action, ActionPanel, Application, Clipboard, Detail, List, getFrontmostApplication, Icon } from "@raycast/api";
+import type { Application } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, List, getFrontmostApplication, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ProcessOutput } from "zx";
 import { capitalCase, kebabCase } from "change-case";
-
 import { commandNotFoundMd, noContentMd } from "./content/messages";
-
-import { FormattedMatch } from "./lib/types";
+import type { FormattedMatch } from "./lib/types";
 import { getEspansoConfig, getMatches, sortMatches } from "./lib/utils";
-
 import CategoryDropdown from "./components/category-dropdown";
 
 export default function Command() {
@@ -16,7 +13,7 @@ export default function Command() {
   const [filteredItems, setFilteredItems] = useState<FormattedMatch[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [error, setError] = useState<ProcessOutput | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [application, setApplication] = useState<Application | undefined>(undefined);
 
   useEffect(() => {
@@ -26,7 +23,7 @@ export default function Command() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { packages: packageFilesDirectory, match: matchFilesDirectory } = await getEspansoConfig();
+        const { packages: packageFilesDirectory, match: matchFilesDirectory } = getEspansoConfig();
 
         const combinedMatches = [
           ...getMatches(packageFilesDirectory, { packagePath: true }),
@@ -73,7 +70,7 @@ export default function Command() {
         setCategories(["all", ...sortedCategories]);
         setIsLoading(false);
       } catch (err) {
-        setError(err instanceof ProcessOutput ? err : null);
+        setError(err instanceof Error ? err : null);
         setIsLoading(false);
       }
     };
@@ -86,8 +83,8 @@ export default function Command() {
   }, [selectedCategory, items]);
 
   if (error) {
-    const notFound = /command not found/.test(error.stderr);
-    return <Detail markdown={notFound ? commandNotFoundMd : error.stderr} />;
+    const notFound = /command not found/.test(error.message);
+    return <Detail markdown={notFound ? commandNotFoundMd : error.message} />;
   }
 
   if (!isLoading && items.length === 0) {
