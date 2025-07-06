@@ -4,7 +4,7 @@ This is a Raycast extension for [Upstash](https://upstash.com/) - _Serverless Da
 
 ## 🚀 Getting Started
 
-1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/mailersend) OR `install` via Raycast Store
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/upstash) OR `install` via Raycast Store
 
 2. **Get your Upstash Email Address**: this will be the one you use to `login`
 

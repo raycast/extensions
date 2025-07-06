@@ -131,6 +131,7 @@ function CreateIndex({ mutate }: { mutate: MutatePromise<VectorIndex[]> }) {
     validation: {
       name: FormValidation.Required,
       region: FormValidation.Required,
+      index_type: FormValidation.Required,
     },
     initialValues: {
       dimension_count: "1536",
