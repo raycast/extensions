@@ -72,9 +72,27 @@ function cliPaths(): Record<string, string> {
   if (isWin) {
     cliPaths = {
       Code: path.join(os.homedir(), "AppData", "Local", "Programs", "Microsoft VS Code", "bin", "code.cmd"),
-      "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
-      Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
-      Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
+      "Code - Insiders": path.join(
+        os.homedir(),
+        "AppData",
+        "Local",
+        "Programs",
+        "Microsoft VS Code Insiders",
+        "bin",
+        "code-insiders.cmd"
+      ),
+      Cursor: path.join(
+        os.homedir(),
+        "AppData",
+        "Local",
+        "Programs",
+        "cursor",
+        "resources",
+        "app",
+        "bin",
+        "cursor.cmd"
+      ), // it also has code, which is an alias
+      Positron: path.join(process.env.ProgramFiles ?? "C:Program Files", "Positron", "bin", "positron.cmd"),
       Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
       "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
       VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
