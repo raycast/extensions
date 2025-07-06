@@ -3,6 +3,12 @@ import YAML from "yaml";
 import path from "node:path";
 import { exec, execSync } from "node:child_process";
 import type { EspansoMatch, MultiTrigger, Label, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
+import { getPreferenceValues } from "@raycast/api";
+
+export function getEspansoCmd(): string {
+  const { espansoPath } = getPreferenceValues<{ espansoPath?: string }>();
+  return espansoPath && espansoPath.trim() !== "" ? espansoPath : "espanso";
+}
 
 export function execPromise(cmd: string): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
@@ -106,7 +112,7 @@ export function getEspansoConfig(): EspansoConfig {
   const configObject: EspansoConfig = { config: "", packages: "", runtime: "", match: "" };
   let configString = "";
   try {
-    configString = execSync("espanso path", { encoding: "utf-8" });
+    configString = execSync(`${getEspansoCmd()} path`, { encoding: "utf-8" });
   } catch (error) {
     throw new Error(`Failed to run 'espanso path': ${error}`);
   }
