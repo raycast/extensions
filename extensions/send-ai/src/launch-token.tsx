@@ -44,7 +44,7 @@ function LaunchTokenForm() {
         if (values.telegram) params.telegram = values.telegram;
         if (values.website) params.website = values.website;
         // Call API
-        const response = await executeAction<{ mintAddress: string }>("launchSendshot", params);
+        const response = await executeAction<{ mintAddress: string }>("launchMeteoraToken", params);
         const mintAddress = response.data?.mintAddress;
 
         push(
