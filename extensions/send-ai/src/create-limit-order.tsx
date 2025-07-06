@@ -4,7 +4,7 @@ import { ApiParams, executeAction } from "./utils/api-wrapper";
 import { provider } from "./utils/auth";
 import { withAccessToken, useForm } from "@raycast/utils";
 import { isValidSolanaAddress } from "./utils/is-valid-address";
-import { LimitOrderRequest, TokenInfo } from "./type";
+import { LimitOrderRequest, PortfolioToken, TokenInfo } from "./type";
 import { OwnedTokensDropdown } from "./components/owned-tokens-dropdown";
 import { SOL, USDC, WRAPPED_SOL_ADDRESS } from "./constants/tokenAddress";
 import { convertUsdAmountToSol } from "./utils/convert-usd-amount-to-sol";
@@ -176,8 +176,8 @@ function CreateLimitOrder() {
   );
 
   const handleInputMintChange = useCallback(
-    (value: string) => {
-      const mintType = value === SOL.address ? "sol" : value === USDC.address ? "usdc" : "other";
+    (value: PortfolioToken | undefined) => {
+      const mintType = value?.address === SOL.address ? "sol" : value?.address === USDC.address ? "usdc" : "other";
       setInputMintValue(mintType);
       setValue("outputMint", "");
     },
