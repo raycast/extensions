@@ -11,8 +11,9 @@ export const getExecOptions = () => {
   // If the user defined a custom npx path, ensure the directory that contains
   // that binary (and the accompanying `node` binary) is prepended to PATH so
   // that the shebang in npx can resolve `node` correctly.
-  if (preferences.customNpxPath) {
-    const customDir = dirname(preferences.customNpxPath);
+  const customNpxPath = preferences.customNpxPath?.trim();
+  if (customNpxPath) {
+    const customDir = dirname(customNpxPath);
     env.PATH = `${customDir}:${env.PATH}`;
   }
 
