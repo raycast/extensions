@@ -387,7 +387,7 @@ export const scripts: Record<string, BoopScript> = {
     "Normalize to NFKD",
     "Normalizes text to NFKD (Normalization Form KD)",
     "🔤",
-    "normalize,nfk,unicode",
+    "normalize,nfkd,unicode",
     "formatting",
   ),
 
