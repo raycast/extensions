@@ -37,7 +37,6 @@ export interface DomainStatus {
   response_time?: number;
   ssl_valid?: boolean;
   ssl_expires?: string;
-  screenshot_url?: string;
   error?: string;
 }
 
@@ -77,16 +76,7 @@ export interface IPInfo {
   organization?: string;
   as?: string;
   timezone?: string;
-  control_panels?: ControlPanel[];
   error?: string;
-}
-
-// Types for detected control panels
-export interface ControlPanel {
-  name: string;
-  port: number;
-  accessible: boolean;
-  url?: string;
 }
 
 // Types for detected technologies
@@ -136,7 +126,5 @@ export interface DomainAnalysis {
 
 // Extension preferences
 export interface ExtensionPreferences {
-  timeout: string;
-  enable_screenshots: boolean;
-  enable_control_panels: boolean;
+  timeout: number;
 }

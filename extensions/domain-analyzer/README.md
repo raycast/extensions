@@ -43,8 +43,6 @@ Complete domain analysis with DNS information, ping, status, whois, geolocation 
 - CSS libraries (Bootstrap, etc.)
 - Programming languages (PHP, ASP.NET, etc.)
 
-   ```
-
 ## Usage
 
 1. Open Raycast
@@ -64,7 +62,6 @@ Complete domain analysis with DNS information, ping, status, whois, geolocation 
 
 - **Timeout**: Time limit in seconds for queries (default: 10s)
 - **Screenshots**: Enable website screenshots
-- **Control Panels**: Activate the check for the most popular control panels (cPanel, Plesk, Directadmin, etc.). Note: This option will add a few seconds to the verification process.
 
 ## Dependencies
 
@@ -75,7 +72,7 @@ Complete domain analysis with DNS information, ping, status, whois, geolocation 
 
 ## Required System Tools
 
-The extension uses the following system tools (Included in macOS by default):
+The extension uses the following system tools (included in macOS by default):
 - `dig` - For DNS queries
 - `ping` - For connectivity tests
 - `whois` - For registration information
@@ -91,7 +88,6 @@ These tools are available by default on macOS.
 - Queries are subject to the configured timeout
 
 ## Development
-
 
 ### Available Scripts
 
@@ -116,8 +112,4 @@ MIT - See LICENSE file for more details.
 
 ## Support
 
-If you encounter any problems or have suggestions, please create an issue in the repository.
-
----
-
-**Note**: This extension is designed for macOS and requires Raycast v1.83.1 or higher. 
+If you encounter any problems or have suggestions, please create an issue in the repository. 

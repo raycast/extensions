@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.0] - 2025-07-06
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of Domain Analyzer extension for Raycast
@@ -18,15 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - WHOIS registration information lookup
   - IP geolocation and ISP details
   - Technology detection (CMS, frameworks, programming languages)
-  - Optional control panel detection (cPanel, Plesk, DirectAdmin, etc.)
   - Optional website screenshots
 - User preferences for:
   - Configurable timeout settings
   - Toggle for screenshot functionality
-  - Toggle for control panel detection
 - Comprehensive error handling and user feedback
 - Professional UI with organized information display
-- NebulaCloud branding integration
 - Support for both domain names and IP addresses
 
 ### Technical Features

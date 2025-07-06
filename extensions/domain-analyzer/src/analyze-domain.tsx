@@ -12,7 +12,6 @@ import {
   LaunchProps,
   List,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import { domainAnalyzerAPI } from "./lib/api";
 import { DomainAnalysis } from "./types";
 
@@ -20,9 +19,7 @@ interface Arguments {
   domain: string;
 }
 
-export default function AnalyzeDomain(
-  props: LaunchProps<{ arguments: Arguments }>,
-) {
+export default function AnalyzeDomain(props: LaunchProps<{ arguments: Arguments }>) {
   const { domain: initialDomain } = props.arguments || {};
   const [domain, setDomain] = useState(initialDomain || "");
   const [showAnalysis, setShowAnalysis] = useState(!!initialDomain);
@@ -51,11 +48,7 @@ export default function AnalyzeDomain(
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Analyze Domain"
-            icon={Icon.MagnifyingGlass}
-            onSubmit={handleDomainSubmit}
-          />
+          <Action.SubmitForm title="Analyze Domain" icon={Icon.MagnifyingGlass} onSubmit={handleDomainSubmit} />
         </ActionPanel>
       }
     >
@@ -96,12 +89,18 @@ function DomainAnalysisView({ domain }: { domain: string }) {
               dns,
               loading: { ...prev.loading, dns: false },
             })),
-          (error) =>
+          (error) => {
             setAnalysis((prev) => ({
               ...prev,
               loading: { ...prev.loading, dns: false },
-              errors: { ...prev.errors, dns: error.message },
-            })),
+              errors: { ...prev.errors, dns: (error as Error).message },
+            }));
+            showToast({
+              style: Toast.Style.Failure,
+              title: "DNS Error",
+              message: (error as Error).message,
+            });
+          },
         ),
         domainAnalyzerAPI.getPingInfo(domain).then(
           (ping) =>
@@ -110,12 +109,18 @@ function DomainAnalysisView({ domain }: { domain: string }) {
               ping,
               loading: { ...prev.loading, ping: false },
             })),
-          (error) =>
+          (error) => {
             setAnalysis((prev) => ({
               ...prev,
               loading: { ...prev.loading, ping: false },
-              errors: { ...prev.errors, ping: error.message },
-            })),
+              errors: { ...prev.errors, ping: (error as Error).message },
+            }));
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Ping Error",
+              message: (error as Error).message,
+            });
+          },
         ),
         domainAnalyzerAPI.getDomainStatus(domain).then(
           (status) =>
@@ -124,12 +129,18 @@ function DomainAnalysisView({ domain }: { domain: string }) {
               status,
               loading: { ...prev.loading, status: false },
             })),
-          (error) =>
+          (error) => {
             setAnalysis((prev) => ({
               ...prev,
               loading: { ...prev.loading, status: false },
-              errors: { ...prev.errors, status: error.message },
-            })),
+              errors: { ...prev.errors, status: (error as Error).message },
+            }));
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Status Error",
+              message: (error as Error).message,
+            });
+          },
         ),
         domainAnalyzerAPI.getWhoisInfo(domain).then(
           (whois) =>
@@ -138,12 +149,18 @@ function DomainAnalysisView({ domain }: { domain: string }) {
               whois,
               loading: { ...prev.loading, whois: false },
             })),
-          (error) =>
+          (error) => {
             setAnalysis((prev) => ({
               ...prev,
               loading: { ...prev.loading, whois: false },
-              errors: { ...prev.errors, whois: error.message },
-            })),
+              errors: { ...prev.errors, whois: (error as Error).message },
+            }));
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Whois Error",
+              message: (error as Error).message,
+            });
+          },
         ),
         domainAnalyzerAPI.getIPInfo(domain).then(
           (ip_info) =>
@@ -152,12 +169,18 @@ function DomainAnalysisView({ domain }: { domain: string }) {
               ip_info,
               loading: { ...prev.loading, ip_info: false },
             })),
-          (error) =>
+          (error) => {
             setAnalysis((prev) => ({
               ...prev,
               loading: { ...prev.loading, ip_info: false },
-              errors: { ...prev.errors, ip_info: error.message },
-            })),
+              errors: { ...prev.errors, ip_info: (error as Error).message },
+            }));
+            showToast({
+              style: Toast.Style.Failure,
+              title: "IP Info Error",
+              message: (error as Error).message,
+            });
+          },
         ),
         domainAnalyzerAPI.getTechnologyInfo(domain).then(
           (technologies) =>
@@ -166,12 +189,18 @@ function DomainAnalysisView({ domain }: { domain: string }) {
               technologies,
               loading: { ...prev.loading, technologies: false },
             })),
-          (error) =>
+          (error) => {
             setAnalysis((prev) => ({
               ...prev,
               loading: { ...prev.loading, technologies: false },
-              errors: { ...prev.errors, technologies: error.message },
-            })),
+              errors: { ...prev.errors, technologies: (error as Error).message },
+            }));
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Technology Error",
+              message: (error as Error).message,
+            });
+          },
         ),
       ];
 
@@ -182,7 +211,7 @@ function DomainAnalysisView({ domain }: { domain: string }) {
   }, [domain]);
 
   // Function to get status icon
-  const getStatusIcon = (section: string) => {
+  const getStatusIcon = (section: keyof typeof analysis.loading) => {
     if (analysis.loading[section]) {
       return Icon.Clock; // Yellow for loading
     }
@@ -193,7 +222,7 @@ function DomainAnalysisView({ domain }: { domain: string }) {
   };
 
   // Function to get icon color
-  const getStatusColor = (section: string) => {
+  const getStatusColor = (section: keyof typeof analysis.loading) => {
     if (analysis.loading[section]) {
       return "#F59E0B"; // Yellow
     }
@@ -203,206 +232,171 @@ function DomainAnalysisView({ domain }: { domain: string }) {
     return "#10B981"; // Green
   };
 
-  const isLoading = Object.values(analysis.loading).some((loading) => loading);
-
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={`📊 Analysis of ${domain}`}
-      searchBarPlaceholder="Select section..."
-    >
-      <List.Section title="🌐 General Information">
+    <List navigationTitle={`Analysis: ${domain}`} searchBarPlaceholder="Filter results...">
+      <List.Section title="Analysis Results">
         <List.Item
+          icon={{ source: getStatusIcon("dns"), tintColor: getStatusColor("dns") }}
           title="DNS Information"
           subtitle={
-            analysis.dns
-              ? `${analysis.dns.A.length} A records found`
-              : "Loading..."
+            analysis.loading.dns
+              ? "Loading..."
+              : analysis.errors.dns
+                ? "Error"
+                : analysis.dns
+                  ? `${Object.values(analysis.dns).flat().length - 1} records found`
+                  : "No data"
           }
-          icon={{
-            source: getStatusIcon("dns"),
-            tintColor: getStatusColor("dns"),
-          }}
           actions={
             <ActionPanel>
-              <Action
-                title="View Dns Details"
-                icon={Icon.List}
-                onAction={() => push(<DNSDetailView analysis={analysis} />)}
-              />
-              <Action
-                title="Analyze New Domain"
-                icon={Icon.Plus}
-                onAction={() => push(<AnalyzeDomain />)}
-              />
+              {!analysis.loading.dns && !analysis.errors.dns && (
+                <Action
+                  title="View Dns Details"
+                  icon={Icon.Eye}
+                  onAction={() => push(<DNSDetailView analysis={analysis} />)}
+                />
+              )}
+              <Action title="New Analysis" icon={Icon.Plus} onAction={() => push(<AnalyzeDomain />)} />
             </ActionPanel>
           }
         />
 
         <List.Item
-          title="Connectivity (Ping)"
+          icon={{ source: getStatusIcon("ping"), tintColor: getStatusColor("ping") }}
+          title="Ping Test"
           subtitle={
-            analysis.ping
-              ? analysis.ping.alive
-                ? `🟢 Responds - ${analysis.ping.avg?.toFixed(1)}ms average`
-                : "🔴 No response"
-              : "Checking..."
+            analysis.loading.ping
+              ? "Loading..."
+              : analysis.errors.ping
+                ? "Error"
+                : analysis.ping
+                  ? analysis.ping.alive
+                    ? `Online - ${analysis.ping.avg?.toFixed(1) || "N/A"}ms avg`
+                    : "Offline"
+                  : "No data"
           }
-          icon={{
-            source: getStatusIcon("ping"),
-            tintColor: getStatusColor("ping"),
-          }}
           actions={
             <ActionPanel>
-              <Action
-                title="View Ping Details"
-                icon={Icon.Signal3}
-                onAction={() => push(<PingDetailView analysis={analysis} />)}
-              />
-              <Action
-                title="Analyze New Domain"
-                icon={Icon.Plus}
-                onAction={() => push(<AnalyzeDomain />)}
-              />
+              {!analysis.loading.ping && !analysis.errors.ping && (
+                <Action
+                  title="View Ping Details"
+                  icon={Icon.Eye}
+                  onAction={() => push(<PingDetailView analysis={analysis} />)}
+                />
+              )}
+              <Action title="New Analysis" icon={Icon.Plus} onAction={() => push(<AnalyzeDomain />)} />
             </ActionPanel>
           }
         />
 
         <List.Item
+          icon={{ source: getStatusIcon("status"), tintColor: getStatusColor("status") }}
           title="Website Status"
           subtitle={
-            analysis.status
-              ? analysis.status.online
-                ? `🟢 Online - HTTP ${analysis.status.status_code}`
-                : "🔴 Offline"
-              : "Checking..."
+            analysis.loading.status
+              ? "Loading..."
+              : analysis.errors.status
+                ? "Error"
+                : analysis.status
+                  ? analysis.status.online
+                    ? `Online - ${analysis.status.status_code} (${analysis.status.response_time}ms)`
+                    : "Offline"
+                  : "No data"
           }
-          icon={{
-            source: getStatusIcon("status"),
-            tintColor: getStatusColor("status"),
-          }}
           actions={
             <ActionPanel>
-              <Action
-                title="View Detailed Status"
-                icon={Icon.Monitor}
-                onAction={() => push(<StatusDetailView analysis={analysis} />)}
-              />
-              <Action
-                title="Analyze New Domain"
-                icon={Icon.Plus}
-                onAction={() => push(<AnalyzeDomain />)}
-              />
+              {!analysis.loading.status && !analysis.errors.status && (
+                <Action
+                  title="View Status Details"
+                  icon={Icon.Eye}
+                  onAction={() => push(<StatusDetailView analysis={analysis} />)}
+                />
+              )}
+              <Action title="New Analysis" icon={Icon.Plus} onAction={() => push(<AnalyzeDomain />)} />
             </ActionPanel>
           }
         />
-      </List.Section>
 
-      <List.Section title="📋 Registration Information">
         <List.Item
+          icon={{ source: getStatusIcon("whois"), tintColor: getStatusColor("whois") }}
           title="Whois Information"
           subtitle={
-            analysis.whois
-              ? analysis.whois.registrar
-                ? `📝 Registered with ${analysis.whois.registrar}`
-                : "📝 Limited information"
-              : "Querying..."
+            analysis.loading.whois
+              ? "Loading..."
+              : analysis.errors.whois
+                ? "Error"
+                : analysis.whois
+                  ? analysis.whois.registrar
+                    ? `Registrar: ${analysis.whois.registrar}`
+                    : "Registration info available"
+                  : "No data"
           }
-          icon={{
-            source: getStatusIcon("whois"),
-            tintColor: getStatusColor("whois"),
-          }}
           actions={
             <ActionPanel>
-              <Action
-                title="View Complete Whois"
-                icon={Icon.Document}
-                onAction={() => push(<WhoisDetailView analysis={analysis} />)}
-              />
-              <Action
-                title="Analyze New Domain"
-                icon={Icon.Plus}
-                onAction={() => push(<AnalyzeDomain />)}
-              />
+              {!analysis.loading.whois && !analysis.errors.whois && (
+                <Action
+                  title="View Whois Details"
+                  icon={Icon.Eye}
+                  onAction={() => push(<WhoisDetailView analysis={analysis} />)}
+                />
+              )}
+              <Action title="New Analysis" icon={Icon.Plus} onAction={() => push(<AnalyzeDomain />)} />
             </ActionPanel>
           }
         />
-      </List.Section>
 
-      <List.Section title="🔧 Technical Information">
         <List.Item
-          title="Geographic/IP Information"
+          icon={{ source: getStatusIcon("ip_info"), tintColor: getStatusColor("ip_info") }}
+          title="Geographic Information"
           subtitle={
-            analysis.ip_info
-              ? analysis.ip_info.country
-                ? `🌍 ${analysis.ip_info.ip} - ${analysis.ip_info.country}`
-                : "🌍 Limited information"
-              : "Querying..."
+            analysis.loading.ip_info
+              ? "Loading..."
+              : analysis.errors.ip_info
+                ? "Error"
+                : analysis.ip_info
+                  ? analysis.ip_info.country
+                    ? `${analysis.ip_info.city || "Unknown"}, ${analysis.ip_info.country}`
+                    : `IP: ${analysis.ip_info.ip}`
+                  : "No data"
           }
-          icon={{
-            source: getStatusIcon("ip_info"),
-            tintColor: getStatusColor("ip_info"),
-          }}
           actions={
             <ActionPanel>
-              <Action
-                title="View Ip Information"
-                icon={Icon.Globe}
-                onAction={() => push(<IPDetailView analysis={analysis} />)}
-              />
-              <Action
-                title="Analyze New Domain"
-                icon={Icon.Plus}
-                onAction={() => push(<AnalyzeDomain />)}
-              />
+              {!analysis.loading.ip_info && !analysis.errors.ip_info && (
+                <Action
+                  title="View Ip Details"
+                  icon={Icon.Eye}
+                  onAction={() => push(<IPDetailView analysis={analysis} />)}
+                />
+              )}
+              <Action title="New Analysis" icon={Icon.Plus} onAction={() => push(<AnalyzeDomain />)} />
             </ActionPanel>
           }
         />
 
         <List.Item
-          title="Detected Technologies"
+          icon={{ source: getStatusIcon("technologies"), tintColor: getStatusColor("technologies") }}
+          title="Technologies"
           subtitle={
-            analysis.technologies
-              ? analysis.technologies.technologies.length > 0
-                ? `⚡ ${analysis.technologies.technologies.length} technologies detected`
-                : "⚡ No technologies detected"
-              : "Analyzing..."
+            analysis.loading.technologies
+              ? "Loading..."
+              : analysis.errors.technologies
+                ? "Error"
+                : analysis.technologies
+                  ? analysis.technologies.cms
+                    ? `CMS: ${analysis.technologies.cms}`
+                    : `${analysis.technologies.technologies.length} technologies detected`
+                  : "No data"
           }
-          icon={{
-            source: getStatusIcon("technologies"),
-            tintColor: getStatusColor("technologies"),
-          }}
           actions={
             <ActionPanel>
-              <Action
-                title="View Technologies"
-                icon={Icon.Code}
-                onAction={() =>
-                  push(<TechnologiesDetailView analysis={analysis} />)
-                }
-              />
-              <Action
-                title="Analyze New Domain"
-                icon={Icon.Plus}
-                onAction={() => push(<AnalyzeDomain />)}
-              />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-
-      <List.Section title="🚀 Actions">
-        <List.Item
-          title="Analyze New Domain"
-          subtitle="Enter another domain to analyze"
-          icon={Icon.Plus}
-          actions={
-            <ActionPanel>
-              <Action
-                title="New Analysis"
-                icon={Icon.Plus}
-                onAction={() => push(<AnalyzeDomain />)}
-              />
+              {!analysis.loading.technologies && !analysis.errors.technologies && (
+                <Action
+                  title="View Technology Details"
+                  icon={Icon.Eye}
+                  onAction={() => push(<TechnologiesDetailView analysis={analysis} />)}
+                />
+              )}
+              <Action title="New Analysis" icon={Icon.Plus} onAction={() => push(<AnalyzeDomain />)} />
             </ActionPanel>
           }
         />
@@ -425,57 +419,28 @@ function DNSDetailView({ analysis }: { analysis: DomainAnalysis }) {
 ${analysis.dns?.parent ? `**Parent domain:** ${analysis.dns.parent}\n` : ""}
 
 ## 📍 A Records (IPv4)
-${
-  dnsInfo.A.length > 0
-    ? dnsInfo.A.map((record) => `- ${record.value}`).join("\n")
-    : "_No A records found_"
-}
+${dnsInfo.A.length > 0 ? dnsInfo.A.map((record) => `- ${record.value}`).join("\n") : "_No A records found_"}
 
 ## 📍 AAAA Records (IPv6)
-${
-  dnsInfo.AAAA.length > 0
-    ? dnsInfo.AAAA.map((record) => `- ${record.value}`).join("\n")
-    : "_No AAAA records found_"
-}
+${dnsInfo.AAAA.length > 0 ? dnsInfo.AAAA.map((record) => `- ${record.value}`).join("\n") : "_No AAAA records found_"}
 
 ## 📧 MX Records (Mail Exchange)
-${
-  dnsInfo.MX.length > 0
-    ? dnsInfo.MX.map((record) => `- ${record.value}`).join("\n")
-    : "_No MX records found_"
-}
+${dnsInfo.MX.length > 0 ? dnsInfo.MX.map((record) => `- ${record.value}`).join("\n") : "_No MX records found_"}
 
 ## 🏢 NS Records (Name Servers)
-${
-  dnsInfo.NS.length > 0
-    ? dnsInfo.NS.map((record) => `- ${record.value}`).join("\n")
-    : "_No NS records found_"
-}
+${dnsInfo.NS.length > 0 ? dnsInfo.NS.map((record) => `- ${record.value}`).join("\n") : "_No NS records found_"}
 
 ## 📝 TXT Records
-${
-  dnsInfo.TXT.length > 0
-    ? dnsInfo.TXT.map((record) => `- ${record.value}`).join("\n")
-    : "_No TXT records found_"
-}
+${dnsInfo.TXT.length > 0 ? dnsInfo.TXT.map((record) => `- ${record.value}`).join("\n") : "_No TXT records found_"}
 
 ## ⚙️ SOA Records (Start of Authority)
-${
-  dnsInfo.SOA.length > 0
-    ? dnsInfo.SOA.map((record) => `- ${record.value}`).join("\n")
-    : "_No SOA records found_"
-}
+${dnsInfo.SOA.length > 0 ? dnsInfo.SOA.map((record) => `- ${record.value}`).join("\n") : "_No SOA records found_"}
 
 ## 🔗 CNAME Records
-${
-  dnsInfo.CNAME.length > 0
-    ? dnsInfo.CNAME.map((record) => `- ${record.value}`).join("\n")
-    : "_No CNAME records found_"
-}
+${dnsInfo.CNAME.length > 0 ? dnsInfo.CNAME.map((record) => `- ${record.value}`).join("\n") : "_No CNAME records found_"}
 
 ---
-*Information obtained through standard DNS queries*  
-- Powered by [NebulaCloud](https://nebulacloud.es)
+*Information obtained through standard DNS queries*
   `;
 
   return (
@@ -539,8 +504,7 @@ ${ping.error ? `❌ ${ping.error}` : "Could not establish connection"}
 }
 
 ---
-*Ping performed with 4 ICMP packets*  
-- Powered by [NebulaCloud](https://nebulacloud.es)
+*Ping performed with 4 ICMP packets*
   `;
 
   return (
@@ -600,29 +564,15 @@ ${
 `
     : ""
 }
-
-## Status Code Interpretation
-${
-  status.status_code
-    ? status.status_code >= 200 && status.status_code < 300
-      ? "✅ **Success** - Site responds correctly"
-      : status.status_code >= 300 && status.status_code < 400
-        ? "↗️ **Redirection** - Site redirects to another URL"
-        : status.status_code >= 400 && status.status_code < 500
-          ? "❌ **Client error** - Problem with the request"
-          : "🔥 **Server error** - Problem on the server"
-    : ""
-}
 `
     : `
 ## Error
-${status.error ? `❌ ${status.error}` : "Could not access the website"}
+${status.error ? `❌ ${status.error}` : "Website is not accessible"}
 `
 }
 
 ---
-*Verification performed via HTTP HEAD request*  
-- Powered by [NebulaCloud](https://nebulacloud.es)
+*Status check performed via HTTP/HTTPS request*
   `;
 
   return (
@@ -632,18 +582,14 @@ ${status.error ? `❌ ${status.error}` : "Could not access the website"}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
-            title="Copy Site Status"
+            title="Copy Status Information"
             content={markdown}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
           {status.online && (
             <Action.OpenInBrowser
               title="Open Website"
-              url={
-                analysis.domain.startsWith("http")
-                  ? analysis.domain
-                  : `https://${analysis.domain}`
-              }
+              url={analysis.domain.startsWith("http") ? analysis.domain : `https://${analysis.domain}`}
             />
           )}
         </ActionPanel>
@@ -696,8 +642,7 @@ ${whois.status.map((status) => `- ${status}`).join("\n")}
 }
 
 ---
-*Information obtained through whois query*  
-- Powered by [NebulaCloud](https://nebulacloud.es)
+*Information obtained through whois query*
   `;
 
   return (
@@ -748,25 +693,11 @@ ${ipInfo.timezone ? `**Timezone:** ${ipInfo.timezone}` : ""}
 ${ipInfo.isp ? `**ISP:** ${ipInfo.isp}` : ""}
 ${ipInfo.organization ? `**Organization:** ${ipInfo.organization}` : ""}
 ${ipInfo.as ? `**Autonomous System:** ${ipInfo.as}` : ""}
-
-## Control Panels
-${
-  ipInfo.control_panels && ipInfo.control_panels.length > 0
-    ? `The following control panels were detected:
-${ipInfo.control_panels
-  .map(
-    (panel) =>
-      `- **${panel.name}** (Port ${panel.port}) ${panel.url ? `- [Access](${panel.url})` : ""}`,
-  )
-  .join("\n")}`
-    : "_No common control panels detected_"
-}
 `
 }
 
 ---
-*Geolocation information and control panel detection*  
-- Powered by [NebulaCloud](https://nebulacloud.es)
+*Geolocation information provided by third-party service*
   `;
 
   return (
@@ -849,8 +780,7 @@ ${tech.frameworks.map((framework) => `- ${framework}`).join("\n")}
 }
 
 ---
-*Analysis based on HTML inspection and HTTP headers*  
-- Powered by [NebulaCloud](https://nebulacloud.es)
+*Analysis based on HTML inspection and HTTP headers*
   `;
 
   return (
