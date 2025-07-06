@@ -393,7 +393,7 @@ export const colorEffectFilters: Filter[] = [
     presets: {
       inputIntensity: 1.0,
       inputRadius: `(imgSize's width / 2)`,
-    }
+    },
   },
   {
     name: "X-Ray",

@@ -3,7 +3,7 @@ import { getActiveFilters } from "../utilities/filters";
 import { cleanup, getSelectedImages } from "../utilities/utils";
 
 type Input = {
-    /**
+  /**
    * The names of each filter to apply. List one or more valid filters to best match the user's request. Keep the list under 5 filters unless the user specifically requests more. You must use the full name of the filter. For example, to increase the contrast of an image, use "Process" instead of "Contrast". To make an image greyscale, use "Tonal" instead of "Greyscale".
    *
    * The available filters and their descriptions are:
@@ -16,7 +16,7 @@ type Input = {
    *  - Motion Blur: Simulates the effect of capturing a photo while the camera is moving.
    *  - Noise Reduction: Reduces noise in the image; minimal blurring effect (use only for noise reduction).
    *  - Zoom Blur: Simulates the effect of zooming in or out while taking a photo.
-   * 
+   *
    * - Color Adjustment Filters:
    *   - Chrome: Increases contrast and saturation.
    *   - Dither: Reduces color banding by adding noise.
@@ -36,7 +36,7 @@ type Input = {
    *   - Transfer: Simulates the look of a Polaroid transfer, with a soft, washed-out effect.
    *   - Vignette: Darkens the edges and corners of images.
    *   - X-Ray: Simulates the look of an X-ray image.
-   * 
+   *
    * - Distortion Filters:
    *   - Circular Screen: Creates a circular halftone pattern.
    *   - Dot Screen: Creates a dot pattern halftone effect.
@@ -55,11 +55,11 @@ type Input = {
    *   - Torus Lens: Adds a toroidal lens distortion in the center of the image.
    *   - Twirl: Creates a twirl effect by rotating pixels around the center of the image.
    *   - Vortex: Creates a vortex-like effect with light rays emanating from the center.
-   * 
+   *
    * - Sharpening Filters:
    *   - Sharpen Luminance: Increases detail by sharpening. Operates on luminance only, not chrominance.
    *   - Unsharp Mask: Increases contrast of edges between pixels of different colors.
-   * 
+   *
    * - Style Filters:
    *   - Bloom: Softens edges, add a slight glow effect.
    *   - Comic: Simulate a comic book drawing by outlining edges and applying a color halftone effort.
@@ -75,7 +75,7 @@ type Input = {
    *   - Pixellate: Makes images blocky.
    *   - Pointillize: Renders images in a pointillistic style.
    *   - Spotlight: Applies a directional spotlight effect at the center of the image.
-   * 
+   *
    * - Tiling Filters:
    *   - n-fold Reflected Tile: Creates tiled images by applying n-way reflection.
    *   - n-fold Rotated Tile: Creates a tiled image by rotating the original at increments of 90 degrees.

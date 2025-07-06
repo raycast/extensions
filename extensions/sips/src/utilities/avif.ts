@@ -78,7 +78,7 @@ async function installAVIFEnc(): Promise<boolean> {
 }
 
 async function verifyInstall() {
-  let exists = false
+  let exists = false;
   let attempts = 0;
   while (!exists && attempts < 7) {
     const encoderPath = execSync(`/bin/zsh -lc 'command -v avifenc'`).toString().trim();
@@ -89,7 +89,7 @@ async function verifyInstall() {
       exists = true;
       break;
     }
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     attempts++;
   }
   return exists;
