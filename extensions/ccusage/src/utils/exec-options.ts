@@ -8,9 +8,7 @@ export const getExecOptions = () => {
     PATH: getEnhancedNodePaths(),
   };
 
-  // If the user defined a custom npx path, ensure the directory that contains
-  // that binary (and the accompanying `node` binary) is prepended to PATH so
-  // that the shebang in npx can resolve `node` correctly.
+  // Prepend custom npx directory to PATH for proper binary resolution
   const customNpxPath = preferences.customNpxPath?.trim();
   if (customNpxPath) {
     const customDir = dirname(customNpxPath);
