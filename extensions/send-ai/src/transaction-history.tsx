@@ -14,11 +14,16 @@ function TransactionHistory() {
     fetchTransactionHistory();
   }, []);
 
-  async function fetchTransactionHistory() {
+  async function fetchTransactionHistory(isReload: boolean = false) {
     try {
       setIsLoading(true);
       const walletAddress = await executeAction("getWalletAddress", {}, true, 1000 * 60 * 60 * 24);
-      const result = (await executeAction("getTransactionHistory", {}, false)) as TransactionHistoryResponse;
+      const result = (await executeAction(
+        "getTransactionHistory",
+        {},
+        !isReload,
+        1000 * 60,
+      )) as TransactionHistoryResponse;
 
       if (result.status === "success") {
         setTransactions(result.data);
@@ -54,8 +59,14 @@ function TransactionHistory() {
     }
   }
 
-  function getTransactionColor(status: string): Color {
-    return status === "success" ? Color.Green : Color.Red;
+  function getTransactionColor(transaction: Transaction): Color {
+    if (
+      transaction.from.toLowerCase() === walletAddress.toLowerCase() &&
+      transaction.type.toLowerCase() === "transfer"
+    ) {
+      return Color.Red;
+    }
+    return Color.Green;
   }
 
   return (
@@ -64,14 +75,17 @@ function TransactionHistory() {
         <List.Item
           key={transaction.signature}
           title={transaction.description
-            .replace(new RegExp(`${walletAddress}\\s*`), "")
-            .replace(new RegExp("minted"), "launched")}
+            .replace(new RegExp(`${walletAddress}\\s+`), "")
+            .replace(new RegExp(`\\s*${walletAddress}\\.?$`), " you")
+            .replace(new RegExp("minted"), "launched")
+            .replace(new RegExp("1000000000.00"), "")
+            .replace(/\.\s*$/, "")}
           accessories={[
             {
               text: transaction.type,
               icon: {
                 source: getTransactionIcon(transaction.type),
-                tintColor: getTransactionColor(transaction.status),
+                tintColor: getTransactionColor(transaction),
               },
             },
           ]}
@@ -83,6 +97,7 @@ function TransactionHistory() {
                 icon={Icon.Globe}
               />
               <Action.CopyToClipboard title="Copy Transaction Signature" content={transaction.signature} />
+              <Action title="Refresh" onAction={() => fetchTransactionHistory(true)} />
             </ActionPanel>
           }
         />
