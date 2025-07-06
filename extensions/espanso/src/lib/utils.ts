@@ -1,13 +1,23 @@
 import fse from "fs-extra";
-import path from "path";
-import { $ } from "zx";
-import { EspansoMatch, MultiTrigger, Label, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
 import YAML from "yaml";
-$.verbose = false;
+import path from "node:path";
+import { exec, execSync } from "node:child_process";
+import type { EspansoMatch, MultiTrigger, Label, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
+
+export function execPromise(cmd: string): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    exec(cmd, (_error, stdout, stderr) => {
+      if (_error) {
+        reject(new Error(stderr || _error.message));
+      } else {
+        resolve({ stdout, stderr });
+      }
+    });
+  });
+}
 
 function lastUpdatedDate(file: string) {
   const { mtime } = fse.statSync(file);
-
   return mtime.getTime();
 }
 
@@ -16,13 +26,14 @@ export function getAndSortTargetFiles(espansoMatchDir: string): { file: string; 
     .readdirSync(espansoMatchDir, { withFileTypes: true })
     .filter((dirent: fse.Dirent) => dirent.isFile() && path.extname(dirent.name).toLowerCase() === ".yml");
 
-  const matchFilesTimes = targetFiles.map((targetFile) => {
+  const matchFilesTimes = targetFiles.map((targetFile: fse.Dirent) => {
     return { file: targetFile.name, mtime: lastUpdatedDate(path.join(espansoMatchDir, targetFile.name)) };
   });
 
-  return matchFilesTimes.sort((a, b) => b.mtime - a.mtime);
+  return matchFilesTimes.sort(
+    (a: { file: string; mtime: number }, b: { file: string; mtime: number }) => b.mtime - a.mtime,
+  );
 }
-
 export function formatMatch(espansoMatch: MultiTrigger & Label & Replacement) {
   const triggerList = espansoMatch.triggers.map((trigger) => `"${trigger}"`).join(", ");
   const labelLine = espansoMatch.label ? `\n    label: "${espansoMatch.label}"` : "";
@@ -66,7 +77,7 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
 
   function processFile(filePath: string) {
     const content = fse.readFileSync(filePath);
-    const { matches = [] }: { matches?: EspansoMatch[] } = YAML.parse(content.toString()) || {};
+    const { matches = [] }: { matches?: EspansoMatch[] } = YAML.parse(content.toString()) ?? {};
 
     finalMatches.push(
       ...matches.flatMap((obj: EspansoMatch) => {
@@ -91,15 +102,14 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
   return finalMatches;
 }
 
-export async function getEspansoConfig(): Promise<EspansoConfig> {
-  const configObject: EspansoConfig = {
-    config: "",
-    packages: "",
-    runtime: "",
-    match: "",
-  };
-
-  const { stdout: configString } = await $`espanso path`;
+export function getEspansoConfig(): EspansoConfig {
+  const configObject: EspansoConfig = { config: "", packages: "", runtime: "", match: "" };
+  let configString = "";
+  try {
+    configString = execSync("espanso path", { encoding: "utf-8" });
+  } catch (error) {
+    throw new Error(`Failed to run 'espanso path': ${error}`);
+  }
 
   configString.split("\n").forEach((item) => {
     const [key, value] = item.split(":");
@@ -112,7 +122,6 @@ export async function getEspansoConfig(): Promise<EspansoConfig> {
   });
 
   configObject.match = path.join(configObject.config, "match");
-
   return configObject;
 }
 
