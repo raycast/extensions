@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows support.
+
 ## [Update] - 2025-03-05
 
 - Added support for Trae CN.
