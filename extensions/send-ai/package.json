@@ -139,6 +139,13 @@
       "subtitle": "SendAI",
       "description": "Launch a new token",
       "mode": "view"
+    },
+    {
+      "name": "transaction-history",
+      "title": "Transaction History",
+      "subtitle": "SendAI",
+      "description": "Get the transaction history of your wallet",
+      "mode": "view"
     }
   ],
   "tools": [
