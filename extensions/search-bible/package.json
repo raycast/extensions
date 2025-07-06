@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-bible",
+  "title": "Bible Search Tool",
+  "description": "Find verses and footnotes",
+  "icon": "command-icon.png",
+  "author": "nicolai_krebs",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "searchBible",
+      "title": "Search Bible",
+      "description": "A fast, local-first Raycast extension to search for Bible verses and footnotes.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Reference(s) and keyword(s)",
+          "required": false,
+          "type": "text"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "enterToSearch",
+          "label": "Press Enter to search",
+          "description": "Press Enter key to perform search, as opposed to searching while typing. Saves network calls.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "includeVerseNumbers",
+          "label": "Include verse numbers",
+          "description": "Include individual verse numbers in the results.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "includeReferences",
+          "label": "Include references",
+          "description": "Add passage references to the results.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "oneVersePerLine",
+          "label": "Show one verse per line",
+          "description": "Display each verse on a separate line. Might separate verses into multiple lines, for ex. see Psalm 1",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.3",
+    "better-sqlite3": "^11.9.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/react": "18.3.3",
+    "electron": "^29.4.6",
+    "electron-rebuild": "^3.2.9",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "rebuild": "electron-rebuild -f -w better-sqlite3 -v 22.0.0",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "1.0.0",
+  "main": "index.js"
+}
