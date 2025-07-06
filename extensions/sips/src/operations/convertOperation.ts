@@ -172,7 +172,7 @@ export default async function convert(
           .filter((file) => file.endsWith(".png"));
         for (const pngFile of pngFiles) {
           execSync(
-            `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""} "${pngFile}" "${pngFile.replace(".png", ".avif")}"`,
+            `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100 " : ""}'${pngFile}' '${pngFile.replace(".png", ".avif")}'`,
           );
           await addItemToRemove(pngFile);
         }
@@ -180,7 +180,7 @@ export default async function convert(
         await using pngFile = await getScopedTempFile("tmp", "png");
         await convert([item], "PNG", [pngFile.path], true);
         execSync(
-          `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""} "${pngFile.path}" "${newPath}"`,
+          `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100 " : ""}"${pngFile.path}" "${newPath}"`,
         );
       }
     } else if (originalType.toLowerCase() == "webp") {

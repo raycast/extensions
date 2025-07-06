@@ -3,6 +3,9 @@
 ## [Bug Fixes] - {{PR_MERGE_DATE}}
 
 - Added support for detecting file selection in ForkLift's List and Icon views
+- Improve performance of "Apply Filter" AI Tool by supplying filter definitions
+- Fixed AVIF installation appearing to fail on the first try
+- Fixed AVIF encoder/decoder failing to run due to not following symlinks
 - Fixed selection detection scripts not raising Automation permission dialogs (and thus failing without reason)
 - Fixed ForkLift script not raising Accessibility permission dialog (and thus failing without reason)
 
