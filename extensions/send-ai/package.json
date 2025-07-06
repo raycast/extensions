@@ -494,6 +494,20 @@
         "price chart",
         "24hour price history"
       ]
+    },
+    {
+      "name": "get-transaction-history",
+      "title": "Get Transaction History",
+      "description": "Get the transaction history of your wallet. This action/tool retrieves all transactions including transfers, swaps, token mints, and other activities associated with your wallet address.",
+      "keywords": [
+        "get transaction history",
+        "fetch transaction history",
+        "wallet transactions",
+        "transaction list",
+        "show transactions",
+        "transaction log",
+        "wallet history"
+      ]
     }
   ],
   "ai": {
