@@ -1,13 +1,17 @@
 # Espanso Changelog
 
+## [Improvements] - 2025-07-06
+
+- Add a custom Espanso binary path in preferences to make it work even with non-standard installations.
+
 ## [Patch] - 2024-06-15
 
-- Fixing search when the user has installed packages
+- Fixing search when the user has installed packages.
 
 ## [Improvements] - 2024-06-08
 
-- Add metadata display
-- Add categories and subcategories depending on folders and files
+- Add metadata display.
+- Add categories and subcategories depending on folders and files.
 
 ## [Improvements] - 2024-02-06
 
@@ -21,13 +25,13 @@
 ## [Search Matches Improvements] - 2023-11-04
 
 - Updated command - Search Matches: search results now display match labels and triggers.
-- Bug fix: A match with a label's replacement text is now displayed correctly
+- Bug fix: A match with a label's replacement text is now displayed correctly.
 
 ## [Update] - 2023-08-29
 
-- New command - Add Match: add a new match to any of your Espanso config files
-- New command - Toggle Espanso: disable or enable Espanso
+- New command - Add Match: add a new match to any of your Espanso config files.
+- New command - Toggle Espanso: disable or enable Espanso.
 
 ## [Initial Version] - 2023-05-09
 
-First version!
+First version.

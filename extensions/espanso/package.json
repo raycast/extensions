@@ -68,6 +68,15 @@
     "prettier": "3.6.2",
     "typescript": "5.8.3"
   },
+  "preferences": [
+    {
+      "name": "espansoPath",
+      "type": "textfield",
+      "title": "Espanso Binary Path",
+      "description": "Full path to the espanso binary. Leave empty to use the default (espanso in PATH).",
+      "required": false
+    }
+  ],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",

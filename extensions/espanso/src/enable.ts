@@ -1,10 +1,11 @@
 import { showHUD } from "@raycast/api";
 import { exec } from "child_process";
+const { getEspansoCmd } = require("./lib/utils");
 
 export default async function main() {
   try {
     await new Promise<void>((resolve, reject) => {
-      exec("espanso cmd enable", (error: Error | null, stdout: string, stderr: string) => {
+      exec(`${getEspansoCmd()} cmd enable`, (error: Error | null, stdout: string, stderr: string) => {
         if (error) {
           reject(new Error(stderr ?? error.message));
         } else {
