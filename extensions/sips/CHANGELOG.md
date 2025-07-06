@@ -1,5 +1,11 @@
 # Image Modification Changelog
 
+## [Bug Fixes] - {{PR_MERGE_DATE}}
+
+- Added support for detecting file selection in ForkLift's List and Icon views
+- Fixed selection detection scripts not raising Automation permission dialogs (and thus failing without reason)
+- Fixed ForkLift script not raising Accessibility permission dialog (and thus failing without reason)
+
 ## [Improved Selection Detection] - 2025-05-12
 
 - Added full support for QSpace Pro
