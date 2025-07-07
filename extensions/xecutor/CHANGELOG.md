@@ -1,6 +1,6 @@
 # Xecutor Changelog
 
-## [Added Quicklink support] - {PR_MERGE_DATE}
+## [Added Quicklink support] - 2025-07-07
 
 - Added launch_preset command to allow quicklinks
 - Added action to create a quicklink for a preset
