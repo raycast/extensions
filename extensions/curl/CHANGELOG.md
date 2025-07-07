@@ -1,6 +1,6 @@
 # cURL Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-07-07
 
 - Enhanced the request form to allow users to select and modify parameters for their requests
 
