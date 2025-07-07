@@ -41,11 +41,23 @@ export default function Command() {
   }
 
   if (error) {
-    return <List searchBarPlaceholder="Loading Secret Manager..."><List.EmptyView icon={{ source: Icon.Warning, tintColor: "red" }} title="Error" description={error} /></List>;
+    return (
+      <List searchBarPlaceholder="Loading Secret Manager...">
+        <List.EmptyView icon={{ source: Icon.Warning, tintColor: "red" }} title="Error" description={error} />
+      </List>
+    );
   }
 
   if (!projectId) {
-    return <List searchBarPlaceholder="Loading Secret Manager..."><List.EmptyView icon={{ source: Icon.Warning, tintColor: "red" }} title="Error" description={"Project ID not found"} /></List>;
+    return (
+      <List searchBarPlaceholder="Loading Secret Manager...">
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: "red" }}
+          title="Error"
+          description={"Project ID not found"}
+        />
+      </List>
+    );
   }
 
   return <SecretListView projectId={projectId} gcloudPath={GCLOUD_PATH} onProjectChange={handleProjectChange} />;
