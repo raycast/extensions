@@ -1,6 +1,11 @@
 # Ship24 Package Tracker Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.1.0] - {PR_MERGE_DATE}
+
+### Changed
+- Merged "Add Package" and "My Packages" into single streamlined command
+- Improved UX with ⌘N shortcut to add packages directly from package list
+- Simplified navigation with single entry point for all package management
 
 ### Added
 - Universal package tracking from 1200+ carriers worldwide
