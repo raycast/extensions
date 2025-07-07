@@ -13,7 +13,21 @@
       "name": "percentage-calculator",
       "title": "Percentage Calculator",
       "description": "Calculate percentages with multiple formats",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "value1",
+          "placeholder": "First value",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "value2",
+          "placeholder": "Second value",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -1,7 +1,7 @@
-import { Form, ActionPanel, Action, showToast, Toast, Clipboard, List, Color, Icon } from "@raycast/api";
-import { useState } from "react";
+import { ActionPanel, Action, showToast, Toast, Clipboard, List, Color, Icon, LaunchProps } from "@raycast/api";
+import { useState, useEffect } from "react";
 
-interface FormValues {
+interface Arguments {
   value1: string;
   value2: string;
 }
@@ -14,9 +14,13 @@ interface CalculationResult {
   color: Color;
 }
 
-export default function PercentageCalculator() {
+export default function PercentageCalculator({ arguments: args }: LaunchProps<{ arguments: Arguments }>) {
   const [results, setResults] = useState<CalculationResult[]>([]);
-  const [showResults, setShowResults] = useState<boolean>(false);
+
+  // Calculate immediately when component mounts
+  useEffect(() => {
+    performCalculation(args);
+  }, []);
 
   const calculateBasicPercentage = (percent: number, value: number): number => {
     return (percent / 100) * value;
@@ -34,10 +38,10 @@ export default function PercentageCalculator() {
     return ((newValue - oldValue) / oldValue) * 100;
   };
 
-  const handleSubmit = (values: FormValues) => {
+  const performCalculation = (args: Arguments) => {
     try {
-      const value1 = parseFloat(values.value1);
-      const value2 = parseFloat(values.value2);
+      const value1 = parseFloat(args.value1);
+      const value2 = parseFloat(args.value2);
 
       if (isNaN(value1) || isNaN(value2)) {
         throw new Error("Invalid numbers");
@@ -111,7 +115,6 @@ export default function PercentageCalculator() {
       });
 
       setResults(calculationResults);
-      setShowResults(true);
 
       showToast({
         style: Toast.Style.Success,
@@ -141,64 +144,30 @@ export default function PercentageCalculator() {
     copyToClipboard(allResults);
   };
 
-  if (showResults) {
-    return (
-      <List
-        actions={
-          <ActionPanel>
-            <Action title="New Calculation" onAction={() => setShowResults(false)} />
-            <Action title="Copy All Results" onAction={copyAllResults} />
-          </ActionPanel>
-        }
-      >
-        {results.map((result, index) => (
-          <List.Item
-            key={index}
-            title={result.title}
-            subtitle={result.subtitle}
-            accessoryTitle={result.value}
-            icon={{ source: result.icon, tintColor: result.color }}
-            actions={
-              <ActionPanel>
-                <Action title="Copy Result" onAction={() => copyToClipboard(result.value)} />
-                <Action title="Copy Full Text" onAction={() => copyToClipboard(`${result.title}: ${result.value}`)} />
-                <Action title="New Calculation" onAction={() => setShowResults(false)} />
-                <Action title="Copy All Results" onAction={copyAllResults} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List>
-    );
-  }
-
   return (
-    <Form
+    <List
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Calculate" onSubmit={handleSubmit} />
+          <Action title="Copy All Results" onAction={copyAllResults} />
         </ActionPanel>
       }
     >
-      <Form.Description
-        title="Full Statistics Calculator"
-        text="Enter two values to get a full breakdown of percentage calculations in beautiful cards."
-      />
-      <Form.Separator />
-
-      <Form.TextField
-        id="value1"
-        title="Value 1"
-        placeholder="Enter first value"
-        info="The first value for comprehensive calculations"
-      />
-
-      <Form.TextField
-        id="value2"
-        title="Value 2"
-        placeholder="Enter second value"
-        info="The second value for comprehensive calculations"
-      />
-    </Form>
+      {results.map((result, index) => (
+        <List.Item
+          key={index}
+          title={result.title}
+          subtitle={result.subtitle}
+          accessoryTitle={result.value}
+          icon={{ source: result.icon, tintColor: result.color }}
+          actions={
+            <ActionPanel>
+              <Action title="Copy Result" onAction={() => copyToClipboard(result.value)} />
+              <Action title="Copy Full Text" onAction={() => copyToClipboard(`${result.title}: ${result.value}`)} />
+              <Action title="Copy All Results" onAction={copyAllResults} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
   );
 }
