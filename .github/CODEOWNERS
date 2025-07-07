@@ -269,6 +269,7 @@
 /extensions/cleanshotx                                              @Aayush9029 @thomaslombart @lukaszmtw @erics118 @mlnchk @pernielsentikaer
 /extensions/clear-clipboard                                         @d3caf
 /extensions/clickup                                                 @Ali-Parandeh @aesadde @JoltCode @xmok
+/extensions/climbing-grade-converter                                @MrTartuf0
 /extensions/clip-swap                                               @joshfarrant
 /extensions/clipboard-editor                                        @pomdtr
 /extensions/clipboard-formatter                                     @joshtemple
@@ -2154,7 +2155,7 @@
 /extensions/xcode                                                   @SvenTiigi @qeude @oliverepper @kiliankoe @3llomi @ridemountainpig
 /extensions/xcode-cloud                                             @yuta24
 /extensions/xcodes                                                  @friendlycashew
-/extensions/xecutor                                                 @GastroGeek
+/extensions/xecutor                                                 @GastroGeek @ClaPalo
 /extensions/xid                                                     @rosszurowski
 /extensions/xkcd                                                    @maggie-j-liu
 /extensions/xqc                                                     @Aayush9029
