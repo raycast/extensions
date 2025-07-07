@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "upstash",
+  "title": "Upstash",
+  "description": "Manage Redis Databases and Vector Indices",
+  "icon": "upstash-icon-dark-bg.png",
+  "author": "xmok",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "email",
+      "title": "Email Address",
+      "placeholder": "upstash@example.com",
+      "type": "textfield",
+      "required": true,
+      "description": "Upstash Email Address"
+    },
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "type": "password",
+      "required": true,
+      "description": "Upstash API Key"
+    }
+  ],
+  "commands": [
+    {
+      "name": "redis",
+      "title": "Redis",
+      "subtitle": "Upstash",
+      "description": "Manage Redis Databases",
+      "mode": "view"
+    },
+    {
+      "name": "vector",
+      "title": "Vector",
+      "subtitle": "Upstash",
+      "description": "Manage Vector Indices",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

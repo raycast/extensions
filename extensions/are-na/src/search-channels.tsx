@@ -1,14 +1,10 @@
 import { useRef } from "react";
-import { List, LaunchProps, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, LaunchProps, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useArena } from "./hooks/useArena";
 import type { SearchChannelsResponse, Channel } from "./api/types";
 import { usePromise } from "@raycast/utils";
 import { ChannelView } from "./components/channel";
-
-interface SearchArguments {
-  query: string;
-}
 
 function Actions(props: { channel: Channel }) {
   return (
@@ -39,6 +35,25 @@ function Actions(props: { channel: Channel }) {
 }
 
 function ChannelListItem({ channel }: { channel: Channel }) {
+  function getStatusAccessory() {
+    switch (channel.status) {
+      case "private":
+        return {
+          icon: { source: Icon.EyeDisabled, tintColor: Color.Red },
+          tooltip: "Private | only collaborators can view / add",
+        };
+      case "closed":
+        return {
+          icon: { source: Icon.Eye },
+          tooltip: "Closed | only collaborators can add",
+        };
+      case "public":
+        return {
+          icon: { source: Icon.Eye, tintColor: Color.Green },
+          tooltip: "Open | anyone can add",
+        };
+    }
+  }
   return (
     <List.Item
       icon={{ source: "extension-icon.png" }}
@@ -52,13 +67,14 @@ function ChannelListItem({ channel }: { channel: Channel }) {
           text: channel.length.toString(),
           icon: { source: Icon.AppWindowGrid2x2 },
         },
+        getStatusAccessory(),
       ]}
       actions={<Actions channel={channel} />}
     />
   );
 }
 
-export default function Command(props: LaunchProps<{ arguments: SearchArguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchChannels }>) {
   const abortable = useRef<AbortController | null>(null);
   const arena = useArena();
   const { query } = props.arguments;
