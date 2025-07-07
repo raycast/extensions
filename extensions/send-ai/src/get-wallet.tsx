@@ -82,6 +82,10 @@ ${balance} SOL
 
 [View Wallet on Solscan](https://solscan.io/account/${walletAddress})
 
+Wallet Protected by Privy 
+
+[Export Wallet](https://portfolio.sendai.fun)
+
 ---
 
 `

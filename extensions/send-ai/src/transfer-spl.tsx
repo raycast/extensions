@@ -15,11 +15,13 @@ interface FormValues {
 function TransferSPL() {
   const [isLoading, setIsLoading] = useState(false);
   const [txHash, setTxHash] = useState<string | undefined>(undefined);
+  const [portfolioRefreshKey, setPortfolioRefreshKey] = useState(0);
 
   const { handleSubmit, itemProps, reset } = useForm<FormValues>({
     async onSubmit(values) {
       await handleTransfer(values);
       reset();
+      setPortfolioRefreshKey((k) => k + 1); // trigger dropdown refresh
     },
     validation: {
       to: (value) => {
@@ -105,7 +107,13 @@ function TransferSPL() {
       }
     >
       <Form.TextField {...itemProps.to} title="To Address" placeholder="Enter wallet address" />
-      <OwnedTokensDropdown title="Token" placeholder="Select token from portfolio" itemProps={itemProps.mintAddress} />
+      <OwnedTokensDropdown
+        key={portfolioRefreshKey}
+        title="Token"
+        placeholder="Select token from portfolio"
+        itemProps={itemProps.mintAddress}
+        refreshKey={portfolioRefreshKey}
+      />
       <Form.TextField {...itemProps.amount} title="Amount" placeholder="Enter amount to transfer" />
     </Form>
   );

@@ -4,6 +4,7 @@ import { LocalStorage } from "@raycast/api";
 import { STORAGE_KEYS } from "./constants";
 import { PublicKey } from "@solana/web3.js";
 import { CacheAdapter } from "./cache";
+import fs from "fs";
 
 export interface ApiResponse<T = unknown> {
   status: "success" | "error";
@@ -12,7 +13,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 export interface ApiParams {
-  [key: string]: string | number | string[] | PublicKey;
+  [key: string]: string | number | string[] | PublicKey | undefined;
 }
 
 /**
@@ -114,5 +115,37 @@ export async function executeAction<T>(
     }
 
     throw new Error("An unexpected error occurred");
+  }
+}
+
+/**
+ * Uploads a file to Pinata and returns the IPFS url
+ * @param file - The file to upload
+ * @returns The IPFS url
+ */
+export async function uploadFile(file: string): Promise<string> {
+  try {
+    const token = await LocalStorage.getItem<string>(STORAGE_KEYS.BACKEND_SESSION_TOKEN);
+    if (!token) {
+      throw new Error("Authentication token not found. Please sign in again.");
+    }
+    const response = await axios.get(`${URL_ENDPOINTS.SEND_AI_API_URL}/get-pinata-signed-url`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const presignedUrl = response.data.url;
+
+    const formdata = new FormData();
+    const fileBlob = new File([fs.readFileSync(file)], file.split("/").pop() || "image.png");
+    formdata.append("file", fileBlob);
+
+    const uploadResponse = await axios.post(presignedUrl, formdata);
+    const cid = uploadResponse.data.data.cid;
+
+    return `https://ipfs.io/ipfs/${cid}`;
+  } catch (error) {
+    console.error(error instanceof Error ? error.name : "Unknown error");
+    throw new Error(`Failed to upload file: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }

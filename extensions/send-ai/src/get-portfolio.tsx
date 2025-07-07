@@ -4,6 +4,8 @@ import { executeAction, provider, createErrorToast, formatNumber, formatTokenBal
 import { withAccessToken } from "@raycast/utils";
 import { PortfolioToken } from "./type";
 import GetTokenOverview from "./get-token-overview";
+import SellToken from "./sell-token";
+import BuyTokenForm from "./views/buy-token-form";
 
 interface PortfolioData {
   wallet: string;
@@ -62,6 +64,19 @@ function GetPortfolio() {
                     title="View Details"
                     target={<GetTokenOverview arguments={{ tokenAddress: token.address }} />}
                   />
+                  <Action.Push
+                    title="Sell"
+                    target={
+                      <SellToken
+                        arguments={{
+                          inputMint: token.address,
+                          inputAmount: token.uiAmount.toString(),
+                          dontAutoExecute: true,
+                        }}
+                      />
+                    }
+                  />
+                  <Action.Push title="Buy More" target={<BuyTokenForm arguments={{ outputMint: token.address }} />} />
                   <Action title="Refresh" onAction={loadPortfolio} />
                 </ActionPanel>
               }

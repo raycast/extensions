@@ -1,3 +1,4 @@
+import { SOL } from "../constants/tokenAddress";
 import { isValidSolanaAddress } from "./is-valid-address";
 
 /**
@@ -40,7 +41,7 @@ export function validateTokenAddress(value: string | undefined, fieldName = "tok
     return `Please enter a valid ${fieldName}`;
   }
 
-  if (!isValidSolanaAddress(value)) {
+  if (!(isValidSolanaAddress(value) || value === SOL.address)) {
     return `Please enter a valid ${fieldName}`;
   }
 
