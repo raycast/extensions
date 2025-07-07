@@ -33,6 +33,7 @@ Using another domain registrar? Try these:
 
 <a title="Install manotori Raycast Extension" href="https://www.raycast.com/xmok/manotori"><img src="https://www.raycast.com/xmok/manotori/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install namecheap Raycast Extension" href="https://www.raycast.com/xmok/namecheap"><img src="https://www.raycast.com/xmok/namecheap/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install name-com Raycast Extension" href="https://www.raycast.com/xmok/name-com"><img src="https://www.raycast.com/xmok/name-com/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install namesilo Raycast Extension" href="https://www.raycast.com/xmok/namesilo"><img src="https://www.raycast.com/xmok/namesilo/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install olacv Raycast Extension" href="https://www.raycast.com/xmok/olacv"><img src="https://www.raycast.com/xmok/olacv/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install porkbun Raycast Extension" href="https://www.raycast.com/xmok/porkbun"><img src="https://www.raycast.com/xmok/porkbun/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
