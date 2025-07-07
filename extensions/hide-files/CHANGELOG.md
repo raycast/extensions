@@ -1,6 +1,6 @@
 # Hide Files Changelog
 
-## [New Icon Style] - {PR_MERGE_DATE}
+## [New Icon Style] - 2025-07-07
 
 - Optimize extension icons for macOS Tahoe
 
