@@ -3,7 +3,7 @@
   "name": "sanity",
   "title": "Sanity",
   "description": "Quickly search for Sanity projects you have access to",
-  "icon": "sanity-icon.png",
+  "icon": "favicon-512.png",
   "author": "marcusforsberg",
   "contributors": [
     "xmok"
@@ -23,21 +23,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.17.0",
-    "@sanity/cli": "^3.57.4",
-    "@sanity/client": "^6.21.3",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1",
+    "@sanity/cli": "^3.95.0",
+    "@sanity/client": "^7.6.0",
     "configstore": "^6.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/configstore": "^6.0.0",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^5.6.2"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
