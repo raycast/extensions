@@ -1,6 +1,6 @@
 # Bing Wallpaper Changelog
 
-## [Refresh Interval] - {PR_MERGE_DATE}
+## [Refresh Interval] - 2025-07-07
 
 - Add refresh interval setting to the command preferences
 - Optimize extension icons for macOS Tahoe
