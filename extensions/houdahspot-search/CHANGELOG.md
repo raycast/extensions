@@ -1,5 +1,9 @@
 # HoudahSpot Search Changelog
 
+## [Fix text not used in fallback mode] - {PR_MERGE_DATE}
+
+- fix: text passed in fallback mode is now used if present
+
 ## [Fix text "undefined" when empty + Modernize] - 2025-07-07
 
 - fix: text passed as "undefined" when Argument is empty (ref: [Issue #20238](https://github.com/raycast/extensions/issues/20238))
