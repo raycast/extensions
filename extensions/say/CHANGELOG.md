@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Bugfix & Maintenance] - {PR_MERGE_DATE}
+## [Bugfix & Maintenance] - 2025-07-07
 
 - Bump mac-say@0.3.2 to fix the possibly duplicate lines in Configure Say command
 - Bump all dependencies to the latest
