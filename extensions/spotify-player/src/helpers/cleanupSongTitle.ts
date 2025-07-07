@@ -23,7 +23,7 @@ function cleanupSongTitle(inputString: string): string {
 
   const spacedHyphenIndex = inputString.indexOf(" - ");
 
-  const featMatch = inputString.match(/\s+(feat\.|ft\.|featuring)\s/i);
+  const featMatch = inputString.match(/(\s+|\()(feat\.|ft\.|featuring)(\s|\))/i);
   const featIndex = featMatch ? featMatch.index! : -1;
 
   // Determine the first relevant cutoff point
