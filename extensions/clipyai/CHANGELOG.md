@@ -1,6 +1,6 @@
 # ClipyAI Changelog
 
-## [1.0.0] - Initial Release {PR_MERGE_DATE}
+## [1.0.0] - Initial Release 2025-07-07
 
 ### Features
 
