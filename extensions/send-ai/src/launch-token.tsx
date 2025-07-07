@@ -47,6 +47,15 @@ function LaunchTokenForm() {
         const response = await executeAction<{ mintAddress: string }>("launchMeteoraToken", params);
         const mintAddress = response.data?.mintAddress;
 
+        if (!mintAddress) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Error",
+            message: "Error launching token on Meteora",
+          });
+          return;
+        }
+
         push(
           <TokenLaunched
             launchData={{
@@ -59,7 +68,7 @@ function LaunchTokenForm() {
               website: values.website,
               amount: "0",
             }}
-            mintAddress={mintAddress ?? ""}
+            mintAddress={mintAddress}
           />,
         );
         await showToast({ style: Toast.Style.Success, title: "Success", message: "Token launched successfully" });
