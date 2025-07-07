@@ -1,8 +1,13 @@
 // src/tools/mozilla-vpn-control.ts
 
-import { fetchServerLocations, selectRandomServerFromCity, CountryLocation, CityLocation } from "../utils/serverUtils";
-import { runCommand, checkVpnStatus } from "../utils/vpnService";
-import { fetchCurrentIP } from "../utils/fetchCurrentIP";
+import {
+  fetchServerLocations,
+  selectRandomServerFromCity,
+  CountryLocation,
+  CityLocation,
+} from '../utils/serverUtils';
+import { runCommand, checkVpnStatus } from '../utils/vpnService';
+import { fetchCurrentIP } from '../utils/fetchCurrentIP';
 
 // Timing constants for VPN operations
 const DISCONNECT_DELAY_MS = 4000;
@@ -13,33 +18,43 @@ const RETRY_CONNECT_DELAY_MS = 3000;
 const MAX_CONNECTION_RETRIES = 2;
 
 type VpnControlInput = {
-  action?: 'connect' | 'disconnect' | 'status' | 'list' | 'list_cities' | 'list_servers' | 'change_server';
+  action?:
+    | 'connect'
+    | 'disconnect'
+    | 'status'
+    | 'list'
+    | 'list_cities'
+    | 'list_servers'
+    | 'change_server';
   country?: string;
   city?: string;
   connect_after_change?: boolean;
 };
 
 const COUNTRY_ALIASES: Record<string, string> = {
-  usa: "USA",
-  "united states": "USA",
-  "united states of america": "USA",
-  us: "USA",
-  uk: "UK",
-  "united kingdom": "UK",
-  "great britain": "UK",
-  gb: "UK",
-  gbr: "UK",
-  de: "Germany",
-  deu: "Germany"
+  usa: 'USA',
+  'united states': 'USA',
+  'united states of america': 'USA',
+  us: 'USA',
+  uk: 'UK',
+  'united kingdom': 'UK',
+  'great britain': 'UK',
+  gb: 'UK',
+  gbr: 'UK',
+  de: 'Germany',
+  deu: 'Germany',
 };
 
 function normalizeCountryName(countryName: string): string {
   return COUNTRY_ALIASES[countryName.trim().toLowerCase()] || countryName;
 }
 
-async function findCountryFromLocations(countryName: string, locations: CountryLocation[]): Promise<CountryLocation | null> {
+async function findCountryFromLocations(
+  countryName: string,
+  locations: CountryLocation[]
+): Promise<CountryLocation | null> {
   const normalizedName = normalizeCountryName(countryName);
-  
+
   // Exact match first
   let country = locations.find(
     (loc) =>
@@ -78,33 +93,48 @@ async function connectByCountryAndCity(
         c.cityName.toLowerCase().includes(cityName.toLowerCase())
     );
     if (!city) {
-      return { success: false, message: `City "${cityName}" not found in ${country.country}.` };
+      return {
+        success: false,
+        message: `City "${cityName}" not found in ${country.country}.`,
+      };
     }
   } else {
     city = country.cities[Math.floor(Math.random() * country.cities.length)];
   }
 
   try {
-    const serverChanged = await selectRandomServerFromCity(country.countryCode, city.cityCode);
+    const serverChanged = await selectRandomServerFromCity(
+      country.countryCode,
+      city.cityCode
+    );
     if (!serverChanged) {
       return {
         success: false,
-        message: `Failed to switch VPN server to ${city.cityName}, ${country.country}.`
+        message: `Failed to switch VPN server to ${city.cityName}, ${country.country}.`,
       };
     }
     return {
       success: true,
-      message: `VPN server switched to ${city.cityName}, ${country.country}.`
+      message: `VPN server switched to ${city.cityName}, ${country.country}.`,
     };
   } catch (err) {
     return {
       success: false,
-      message: `Error selecting server: ${err instanceof Error ? err.message : String(err)}`
+      message: `Error selecting server: ${err instanceof Error ? err.message : String(err)}`,
     };
   }
 }
 
-function detectActionFromInput(input: VpnControlInput): 'connect' | 'disconnect' | 'status' | 'list' | 'change_server' | 'list_cities' | 'list_servers' {
+function detectActionFromInput(
+  input: VpnControlInput
+):
+  | 'connect'
+  | 'disconnect'
+  | 'status'
+  | 'list'
+  | 'change_server'
+  | 'list_cities'
+  | 'list_servers' {
   // If action is explicitly provided, use it
   if (input.action) {
     return input.action;
@@ -120,7 +150,7 @@ function detectActionFromInput(input: VpnControlInput): 'connect' | 'disconnect'
 }
 
 async function handleCountryCityOperation(
-  input: VpnControlInput, 
+  input: VpnControlInput,
   action: 'list_cities' | 'list_servers'
 ): Promise<string> {
   if (!input.country) {
@@ -140,8 +170,10 @@ async function handleCountryCityOperation(
       if (!country.cities.length) {
         return `No cities available in ${country.country}.`;
       }
-      const cityNames = country.cities.map((cityItem: CityLocation) => cityItem.cityName).sort();
-      return `Cities available in ${country.country}: ${cityNames.join(", ")}`;
+      const cityNames = country.cities
+        .map((cityItem: CityLocation) => cityItem.cityName)
+        .sort();
+      return `Cities available in ${country.country}: ${cityNames.join(', ')}`;
     }
 
     // list_servers action
@@ -153,20 +185,21 @@ async function handleCountryCityOperation(
       );
 
       if (!cityFound) {
-        return `City "${input.city}" not found in ${country.country}. Available cities: ${country.cities.map((cityItem: CityLocation) => cityItem.cityName).join(", ")}`;
+        return `City "${input.city}" not found in ${country.country}. Available cities: ${country.cities.map((cityItem: CityLocation) => cityItem.cityName).join(', ')}`;
       }
 
       if (!cityFound.servers.length) {
         return `No servers available in ${cityFound.cityName}, ${country.country}.`;
       }
 
-      return `Servers in ${cityFound.cityName}, ${country.country}:\n${cityFound.servers.map(server => `• ${server}`).join('\n')}`;
+      return `Servers in ${cityFound.cityName}, ${country.country}:\n${cityFound.servers.map((server) => `• ${server}`).join('\n')}`;
     } else {
       let result = `Servers in ${country.country}:\n\n`;
       for (const cityItem of country.cities) {
         if (cityItem.servers.length > 0) {
           result += `${cityItem.cityName}:\n`;
-          result += cityItem.servers.map(server => `• ${server}`).join('\n') + '\n\n';
+          result +=
+            cityItem.servers.map((server) => `• ${server}`).join('\n') + '\n\n';
         }
       }
       return result.trim();
@@ -183,13 +216,15 @@ export default async function tool(input: VpnControlInput): Promise<string> {
   switch (action) {
     case 'disconnect': {
       try {
-        await runCommand("deactivate");
-        await new Promise((resolve) => setTimeout(resolve, DISCONNECT_DELAY_MS));
+        await runCommand('deactivate');
+        await new Promise((resolve) =>
+          setTimeout(resolve, DISCONNECT_DELAY_MS)
+        );
         const status = await checkVpnStatus();
         if (!status.isActive) {
-          return "Mozilla VPN disconnected successfully.";
+          return 'Mozilla VPN disconnected successfully.';
         } else {
-          return "Tried to disconnect, but VPN is still active. Please try again or use the VPN app directly.";
+          return 'Tried to disconnect, but VPN is still active. Please try again or use the VPN app directly.';
         }
       } catch (error) {
         return `Failed to disconnect Mozilla VPN: ${error instanceof Error ? error.message : String(error)}`;
@@ -200,7 +235,7 @@ export default async function tool(input: VpnControlInput): Promise<string> {
       try {
         const status = await checkVpnStatus();
         const ip = await fetchCurrentIP();
-        return `VPN is currently ${status.isActive ? "connected" : "disconnected"}.\nServer: ${status.serverCity}, ${status.serverCountry}\nIP address: ${ip}`;
+        return `VPN is currently ${status.isActive ? 'connected' : 'disconnected'}.\nServer: ${status.serverCity}, ${status.serverCountry}\nIP address: ${ip}`;
       } catch (error) {
         return `Failed to retrieve VPN status: ${error instanceof Error ? error.message : String(error)}`;
       }
@@ -210,10 +245,10 @@ export default async function tool(input: VpnControlInput): Promise<string> {
       try {
         const locations = await fetchServerLocations();
         if (!locations.length) {
-          return "No VPN countries are currently available.";
+          return 'No VPN countries are currently available.';
         }
         const countryNames = locations.map((loc) => loc.country).sort();
-        return `Available VPN countries: ${countryNames.join(", ")}`;
+        return `Available VPN countries: ${countryNames.join(', ')}`;
       } catch (error) {
         return `Failed to retrieve country list: ${error instanceof Error ? error.message : String(error)}`;
       }
@@ -229,16 +264,21 @@ export default async function tool(input: VpnControlInput): Promise<string> {
 
     case 'connect':
     case 'change_server': {
-      if (!input.country || ['connect', 'activate', 'start', 'vpn'].includes(input.country.trim().toLowerCase())) {
+      if (
+        !input.country ||
+        ['connect', 'activate', 'start', 'vpn'].includes(
+          input.country.trim().toLowerCase()
+        )
+      ) {
         try {
-          await runCommand("activate");
+          await runCommand('activate');
           await new Promise((resolve) => setTimeout(resolve, CONNECT_DELAY_MS));
           const status = await checkVpnStatus();
           if (status.isActive) {
             const newIp = await fetchCurrentIP();
             return `VPN connected using your last configuration.\nServer: ${status.serverCity}, ${status.serverCountry}\nNew IP address: ${newIp}`;
           } else {
-            return "Tried to connect, but VPN is still inactive. Please check the VPN app or try again.";
+            return 'Tried to connect, but VPN is still inactive. Please check the VPN app or try again.';
           }
         } catch (error) {
           return `Failed to connect VPN: ${error instanceof Error ? error.message : String(error)}`;
@@ -246,7 +286,7 @@ export default async function tool(input: VpnControlInput): Promise<string> {
       }
 
       if (!input.country) {
-        return "Country is required for this action.";
+        return 'Country is required for this action.';
       }
 
       let wasConnected = false;
@@ -257,29 +297,38 @@ export default async function tool(input: VpnControlInput): Promise<string> {
         // Silently continue if status check fails
       }
 
-      const { success, message } = await connectByCountryAndCity(input.country, input.city);
+      const { success, message } = await connectByCountryAndCity(
+        input.country,
+        input.city
+      );
       if (!success) {
         return message;
       }
 
-      const shouldConnect = action === 'connect' || 
-                          (input.country && input.city) ||
-                          wasConnected ||
-                          ['connect', 'activate', 'start'].some((keyword) => 
-                            input.country!.trim().toLowerCase().includes(keyword));
+      const shouldConnect =
+        action === 'connect' ||
+        (input.country && input.city) ||
+        wasConnected ||
+        ['connect', 'activate', 'start'].some((keyword) =>
+          input.country!.trim().toLowerCase().includes(keyword)
+        );
 
       if (shouldConnect) {
         try {
-          await runCommand("activate");
-          await new Promise((resolve) => setTimeout(resolve, SERVER_SWITCH_DELAY_MS));
-          
+          await runCommand('activate');
+          await new Promise((resolve) =>
+            setTimeout(resolve, SERVER_SWITCH_DELAY_MS)
+          );
+
           let status = await checkVpnStatus();
           let retries = 0;
-          
+
           while (!status.isActive && retries < MAX_CONNECTION_RETRIES) {
             await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-            await runCommand("activate");
-            await new Promise((resolve) => setTimeout(resolve, RETRY_CONNECT_DELAY_MS));
+            await runCommand('activate');
+            await new Promise((resolve) =>
+              setTimeout(resolve, RETRY_CONNECT_DELAY_MS)
+            );
             status = await checkVpnStatus();
             retries++;
           }
