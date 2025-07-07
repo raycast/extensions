@@ -1,4 +1,4 @@
-![ClipyAi](./metadata//ClipyAi.png)
+![ClipyAi](./media/ClipyAi.png)
 
 # ClipyAI
 
