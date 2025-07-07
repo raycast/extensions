@@ -1,6 +1,6 @@
 # Keygen Changelog
 
-## [List & Add Products + License Enhancements] - {PR_MERGE_DATE}
+## [List & Add Products + License Enhancements] - 2025-07-07
 
 - List Products and Create new ones
 - Color License based on Status
