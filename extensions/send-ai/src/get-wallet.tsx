@@ -82,6 +82,10 @@ ${balance} SOL
 
 [View Wallet on Solscan](https://solscan.io/account/${walletAddress})
 
+Wallet Protected by Privy 
+
+[Export Wallet](https://portfolio.sendai.fun)
+
 ---
 
 `
@@ -102,7 +106,7 @@ Unable to fetch your wallet address. Please try refreshing.
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Wallet Address" content={walletAddress} icon={Icon.CopyClipboard} />
           <Action.Push title="View Portfolio" target={<GetPortfolio />} />
-          <Action title="Sign Out" onAction={signOut} />
+          <Action title="Sign out" onAction={signOut} />
         </ActionPanel>
       }
     />

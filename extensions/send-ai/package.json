@@ -64,15 +64,13 @@
           "name": "inputMint",
           "type": "text",
           "title": "Token Address",
-          "placeholder": "enter token address",
-          "required": true
+          "placeholder": "enter token address"
         },
         {
           "name": "inputAmount",
           "type": "text",
           "title": "Amount",
-          "placeholder": "enter number of tokens",
-          "required": true
+          "placeholder": "enter number of tokens"
         }
       ]
     },
@@ -133,6 +131,20 @@
       "title": "Show DCA Orders",
       "subtitle": "SendAI",
       "description": "Show all DCA orders",
+      "mode": "view"
+    },
+    {
+      "name": "launch-token",
+      "title": "Launch Token",
+      "subtitle": "SendAI",
+      "description": "Launch a new token",
+      "mode": "view"
+    },
+    {
+      "name": "transaction-history",
+      "title": "Transaction History",
+      "subtitle": "SendAI",
+      "description": "Get the transaction history of your wallet",
       "mode": "view"
     }
   ],
@@ -408,7 +420,8 @@
         "sanctum",
         "lst",
         "apy",
-        "yield"
+        "yield",
+        "get LST APY"
       ]
     },
     {
@@ -428,20 +441,18 @@
       ]
     },
     {
-      "name": "launch-pump-fun-token",
-      "title": "Launch Pump Fun Token",
-      "description": "Launch a new token on Pump.fun with customizable metadata and initial liquidity",
+      "name": "launch-meteora-token",
+      "title": "Launch Meteora Token",
+      "description": "Launch a new token on Meteora with customizable metadata and initial liquidity",
       "keywords": [
-        "create pumpfun token",
-        "launch token on pumpfun",
-        "deploy pumpfun token",
+        "create token",
+        "launch token",
+        "deploy token",
         "create meme token",
         "launch memecoin",
-        "create pump token",
         "launch",
         "token",
-        "create",
-        "new"
+        "create"
       ]
     },
     {
@@ -481,10 +492,24 @@
         "price chart",
         "24hour price history"
       ]
+    },
+    {
+      "name": "get-transaction-history",
+      "title": "Get Transaction History",
+      "description": "Get the transaction history of your wallet. This action/tool retrieves all transactions including transfers, swaps, token mints, and other activities associated with your wallet address.",
+      "keywords": [
+        "get transaction history",
+        "fetch transaction history",
+        "wallet transactions",
+        "transaction list",
+        "show transactions",
+        "transaction log",
+        "wallet history"
+      ]
     }
   ],
   "ai": {
-    "instructions": "if asked to buy or sell tokens, then do a deep think, check if user is asking to buy which token, is it a token address (token address is usually 44 or more characters long) or a ticker (ticker is usually 3-8 characters long), if ticker then get token info of that ticker then fetch the price of token in usdc and then find how many sol is required for that usdc amount and then buy the token, if user mentions the number of tokens to be bought then first fetch the price of token calculate the input amount in sol by multiplying the number of tokens by the priceInSol and then pass it to buy or sell token function if user mentions input amount in sol then pass it to buy or sell token function directly/\n do not render the images in the response for anything except the price history chart, if you are not sure about anything reask the user for more information",
+    "instructions": "if asked to buy or sell tokens, then do a deep think, check if user is asking to buy which token, is it a token address (token address is usually 44 or more characters long) or a ticker (ticker is usually 3-8 characters long), if ticker then get token info of that ticker then fetch the price of token in usdc and then find how many sol is required for that usdc amount and then buy the token, if user mentions the number of tokens to be bought then first fetch the price of token calculate the input amount in sol by multiplying the number of tokens by the priceInSol and then pass it to buy or sell token function if user mentions input amount in sol then pass it to buy or sell token function directly/\n do not render the images in the response for anything except the price history chart, if you are not sure about anything reask the user for more information. if user says staking he means buying/n before calling launch-meteora-token tool, ask the user for the name, symbol, description and image url of the token don't fill those fields with any default values",
     "evals": [
       {
         "input": "@send-ai buy 10 Send coins",
@@ -716,14 +741,14 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
+    "@types/axios": "^0.14.4",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "20.8.10",
     "@types/plist": "^3.0.5",
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2",
-    "@types/axios": "^0.14.4"
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

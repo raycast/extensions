@@ -1,8 +1,8 @@
 import { LocalStorage, OAuth } from "@raycast/api";
 import { BackendAuthResponse } from "../type";
-import { BACKEND_CALLBACK_URL, STORAGE_KEYS } from "./constants";
 import { CacheAdapter } from "./cache";
 import { URL_ENDPOINTS } from "../constants/endpoints";
+import { STORAGE_KEYS } from "./constants";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.AppURI,
@@ -113,7 +113,7 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
 }
 
 async function fetchBackendToken(googleIdToken: string): Promise<string> {
-  const res = await fetch(BACKEND_CALLBACK_URL, {
+  const res = await fetch(URL_ENDPOINTS.BACKEND_CALLBACK_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
