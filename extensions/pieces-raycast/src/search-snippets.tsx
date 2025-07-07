@@ -26,12 +26,16 @@ export default function Command() {
   const [value, setValue] = useState(0);
 
   useEffect(() => {
-    if (!preflightCheck.isReady) return;
+    if (!preflightCheck.isReady) return () => {};
 
-    return AssetsController.getInstance().controller.listen((assets) => {
-      setItems(assets.assets);
-      setValue((v) => v + 1);
-    });
+    const cleanup = AssetsController.getInstance().controller.listen(
+      (assets) => {
+        setItems(assets.assets);
+        setValue((v) => v + 1);
+      },
+    );
+
+    return cleanup;
   }, [preflightCheck.isReady]);
 
   // Show preflight check UI if not ready

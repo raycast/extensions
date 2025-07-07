@@ -31,16 +31,32 @@ export function usePiecesPreflightCheck(
   useEffect(() => {
     async function checkHealth() {
       const service = PiecesPreflightService.getInstance();
-      const result = await service.performCheck();
-      setPreflightResult(result);
+      try {
+        const result = await service.performCheck();
+        setPreflightResult(result);
+      } catch (error) {
+        setPreflightResult({
+          healthy: false,
+          authenticated: false,
+          error: PreflightErrorType.NOT_INSTALLED,
+        });
+      }
     }
     checkHealth();
   }, []);
 
   const retryCheck = async () => {
     const service = PiecesPreflightService.getInstance();
-    const result = await service.performCheck();
-    setPreflightResult(result);
+    try {
+      const result = await service.performCheck();
+      setPreflightResult(result);
+    } catch (error) {
+      setPreflightResult({
+        healthy: false,
+        authenticated: false,
+        error: PreflightErrorType.NOT_INSTALLED,
+      });
+    }
   };
 
   // Show loading state while checking

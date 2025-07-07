@@ -6,9 +6,10 @@ import { UpdatingStatusEnum } from "@pieces.app/pieces-os-client";
 import { pollForConnection } from "./piecesHealthCheck";
 import sleep from "../../utils/sleep";
 import BrowserUrl from "../../utils/BrowserUrl";
+import { PIECES_URLS, PIECES_CONFIG } from "../../utils/constants";
 
-const MIN_VERSION = "12.0.0";
-const MAX_VERSION = "13.0.0";
+const MIN_VERSION = PIECES_CONFIG.MIN_VERSION;
+const MAX_VERSION = PIECES_CONFIG.MAX_VERSION;
 
 /**
  * Checks if the Pieces version is up to date and handles necessary updates.
@@ -73,7 +74,7 @@ async function updatePieces(): Promise<boolean> {
         toast.primaryAction = {
           title: "Contact Support",
           onAction() {
-            BrowserUrl.open("https://docs.pieces.app/products/support");
+            BrowserUrl.open(PIECES_URLS.SUPPORT);
           },
         };
       }
@@ -107,7 +108,7 @@ function getStatusText(status: UpdatingStatusEnum | undefined) {
     case UpdatingStatusEnum.Available:
       return "Update detected...";
     case UpdatingStatusEnum.ContactSupport:
-      return "Something went wrong. Please contact support at https://docs.pieces.app/products/support";
+      return `Something went wrong. Please contact support at ${PIECES_URLS.SUPPORT}`;
     case UpdatingStatusEnum.Downloading:
       return "Update is downloading...";
     case UpdatingStatusEnum.ReadyToRestart:
@@ -119,7 +120,7 @@ function getStatusText(status: UpdatingStatusEnum | undefined) {
     case UpdatingStatusEnum.UpToDate:
       return "PiecesOS is up to date.";
     case undefined:
-      return "Failed to get update status, please contact support at https://docs.pieces.app/products/support";
+      return `Failed to get update status, please contact support at ${PIECES_URLS.SUPPORT}`;
   }
 }
 

@@ -301,7 +301,7 @@ export default class ConnectorSingleton {
 
       default:
         Notifications.getInstance().errorToast(
-          `Pieces for Obsidian extension does not support platform: ${process.platform}`,
+          `Pieces for Raycast extension does not support platform: ${process.platform}`,
         );
         return null;
     }

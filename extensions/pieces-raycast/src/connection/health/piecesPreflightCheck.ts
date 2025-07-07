@@ -83,6 +83,7 @@ export async function piecesPreflightCheck(): Promise<boolean> {
   const result = await service.performCheck();
 
   if (!result.healthy) {
+    await showPreflightError(result, () => piecesPreflightCheck());
     return false;
   }
 
@@ -116,6 +117,10 @@ export async function piecesHealthOnlyCheck(): Promise<boolean> {
   const service = PiecesPreflightService.getInstance();
   const result = await service.performCheck();
 
+  if (!result.healthy) {
+    await showPreflightError(result, () => piecesHealthOnlyCheck());
+  }
+
   return result.healthy;
 }
 
@@ -134,6 +139,61 @@ export async function piecesAuthCheck(): Promise<boolean> {
   }
 
   return true;
+}
+
+/**
+ * Helper function to show appropriate error message based on preflight result
+ */
+async function showPreflightError(
+  result: PreflightResult,
+  retryAction?: () => void,
+): Promise<void> {
+  if (result.error === PreflightErrorType.NOT_INSTALLED) {
+    await showToast({
+      title: "PiecesOS Not Found",
+      message:
+        "PiecesOS needs to be installed and running to use this feature.",
+      style: Toast.Style.Failure,
+      primaryAction: {
+        title: "Install PiecesOS",
+        shortcut: Keyboard.Shortcut.Common.Open,
+        onAction: () => {
+          // This will trigger the installation flow
+          piecesInstalledCheck();
+        },
+      },
+    });
+  } else if (result.error === PreflightErrorType.NEEDS_UPDATE) {
+    await showToast({
+      title: "PiecesOS Update Required",
+      message: "PiecesOS needs to be updated to use this feature.",
+      style: Toast.Style.Failure,
+      primaryAction: {
+        title: "Update PiecesOS",
+        shortcut: Keyboard.Shortcut.Common.Open,
+        onAction: () => {
+          // This will trigger the update flow
+          piecesUpToDateCheck();
+        },
+      },
+    });
+  } else {
+    await showToast({
+      title: "Connection Error",
+      message: "Unable to connect to PiecesOS. Please check that it's running.",
+      style: Toast.Style.Failure,
+      primaryAction: {
+        title: "Retry",
+        shortcut: Keyboard.Shortcut.Common.Open,
+        onAction:
+          retryAction ||
+          (() => {
+            // Default retry action
+            piecesPreflightCheck();
+          }),
+      },
+    });
+  }
 }
 
 export default PiecesPreflightService;

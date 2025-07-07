@@ -24,7 +24,7 @@ export default function Command() {
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
-    if (!preflightCheck.isReady) return;
+    if (!preflightCheck.isReady) return () => {};
 
     BrowserController.getInstance()
       .updateHistory()
@@ -33,10 +33,14 @@ export default function Command() {
       });
 
     // return the unsubscription call for the controller so it doesn't end up spamming event listeners
-    return BrowserController.getInstance().controller.listen((assets) => {
-      setItems(assets);
-      setVersion((v) => v + 1);
-    });
+    const cleanup = BrowserController.getInstance().controller.listen(
+      (assets) => {
+        setItems(assets);
+        setVersion((v) => v + 1);
+      },
+    );
+
+    return cleanup;
   }, [preflightCheck.isReady]);
 
   // Show preflight check UI if not ready
