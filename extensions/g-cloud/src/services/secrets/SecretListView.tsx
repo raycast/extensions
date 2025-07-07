@@ -16,13 +16,15 @@ import { SecretManagerService, Secret } from "./SecretManagerService";
 import SecretDetailView from "./SecretDetailView";
 import CreateSecretForm from "./components/CreateSecretForm";
 import { showFailureToast } from "@raycast/utils";
+import { QuickProjectSwitcher } from "../../utils/QuickProjectSwitcher";
 
 interface SecretListViewProps {
   projectId: string;
   gcloudPath: string;
+  onProjectChange: (projectId: string) => void;
 }
 
-export default function SecretListView({ projectId, gcloudPath }: SecretListViewProps) {
+export default function SecretListView({ projectId, gcloudPath, onProjectChange }: SecretListViewProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [secrets, setSecrets] = useState<Secret[]>([]);
   const [filteredSecrets, setFilteredSecrets] = useState<Secret[]>([]);
@@ -274,6 +276,7 @@ export default function SecretListView({ projectId, gcloudPath }: SecretListView
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search secrets by name or labels..."
+      searchBarAccessory={<QuickProjectSwitcher gcloudPath={gcloudPath} onProjectSelect={onProjectChange} />}
       actions={
         <ActionPanel>
           <Action title="Create Secret" icon={Icon.Plus} onAction={handleCreateSecret} />

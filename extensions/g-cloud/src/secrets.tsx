@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { List, Icon, getPreferenceValues, useNavigation } from "@raycast/api";
+import { List, Icon, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { SecretListView } from "./services/secrets";
+import SecretListView from "./services/secrets";
 import { CacheManager } from "./utils/CacheManager";
-import { initializeQuickLink } from "./utils/QuickLinks";
 
 interface ExtensionPreferences {
   gcloudPath: string;
@@ -12,7 +11,7 @@ interface ExtensionPreferences {
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { push } = useNavigation();
+  const [projectId, setProjectId] = useState<string | null>(null);
   const GCLOUD_PATH = getPreferenceValues<ExtensionPreferences>().gcloudPath;
 
   useEffect(() => {
@@ -21,47 +20,33 @@ export default function Command() {
 
   function loadLastUsedProject() {
     const recentlyUsed = CacheManager.getRecentlyUsedProjects();
-
     if (recentlyUsed.length > 0) {
-      const lastProjectId = recentlyUsed[0];
-
-      try {
-        initializeQuickLink(lastProjectId);
-      } catch (error) {
-        console.error("Failed to initialize quick link:", error);
-        showFailureToast({
-          title: "Warning: Quick Link Initialization Failed",
-          message: "Some features may be limited",
-        });
-      }
-
-      viewSecrets(lastProjectId);
-      setIsLoading(false);
+      setProjectId(recentlyUsed[0]);
     } else {
       setError("No recent projects found. Please open the main extension first.");
       showFailureToast({
         title: "No recent projects",
         message: "Please open the main extension first",
       });
-      setIsLoading(false);
     }
+    setIsLoading(false);
   }
 
-  function viewSecrets(projectId: string) {
-    push(<SecretListView projectId={projectId} gcloudPath={GCLOUD_PATH} />);
+  function handleProjectChange(newProjectId: string) {
+    setProjectId(newProjectId);
   }
 
-  return (
-    <List isLoading={isLoading} searchBarPlaceholder="Loading Secret Manager...">
-      {error ? (
-        <List.EmptyView icon={{ source: Icon.Warning, tintColor: "red" }} title="Error" description={error} />
-      ) : (
-        <List.EmptyView
-          icon={{ source: Icon.Lock }}
-          title="Loading Secrets"
-          description="Please wait while we load your secrets..."
-        />
-      )}
-    </List>
-  );
+  if (isLoading) {
+    return <List isLoading={true} searchBarPlaceholder="Loading Secret Manager..." />;
+  }
+
+  if (error) {
+    return <List searchBarPlaceholder="Loading Secret Manager..."><List.EmptyView icon={{ source: Icon.Warning, tintColor: "red" }} title="Error" description={error} /></List>;
+  }
+
+  if (!projectId) {
+    return <List searchBarPlaceholder="Loading Secret Manager..."><List.EmptyView icon={{ source: Icon.Warning, tintColor: "red" }} title="Error" description={"Project ID not found"} /></List>;
+  }
+
+  return <SecretListView projectId={projectId} gcloudPath={GCLOUD_PATH} onProjectChange={handleProjectChange} />;
 }
