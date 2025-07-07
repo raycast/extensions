@@ -1,6 +1,6 @@
 # Sanity Changelog
 
-## [Update Sanity Logo] - {PR_MERGE_DATE}
+## [Update Sanity Logo] - 2025-07-07
 
 - Update extension logo ([link](https://github.com/sanity-io/sanity/blob/main/packages/sanity/static/favicons/favicon-512.png))
 - Modernize to use latest Raycast config
