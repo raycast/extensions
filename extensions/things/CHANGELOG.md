@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Enhanced Error Handling] - {PR_MERGE_DATE}
+## [Enhanced Error Handling] - 2025-07-07
 
 - Improved error messages with specific troubleshooting steps for Things connection issues
 - Added detailed guidance for permission errors and automation setup in System Settings
