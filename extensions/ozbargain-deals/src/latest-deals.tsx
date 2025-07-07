@@ -89,8 +89,14 @@ const sanitizeOptions = {
     "blockquote",
   ],
   allowedAttributes: {
-    a: ["href", "title"],
+    a: ["href", "title", "rel"],
     img: ["src", "alt", "title", "width", "height"],
+  },
+  transformTags: {
+    'a': (tagName, attribs) => ({
+      tagName,
+      attribs: { ...attribs, rel: 'noopener noreferrer' }
+    })
   },
   allowedSchemes: ["http", "https", "mailto"],
 };
