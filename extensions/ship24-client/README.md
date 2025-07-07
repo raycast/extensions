@@ -24,25 +24,20 @@
    - Enter your Ship24 API key in extension preferences
 
 3. **Start Tracking**
-   - Use "Add Package" command to track new shipments
-   - Use "My Packages" command to view all tracked packages
+   - Use "My Packages" command to view and manage all your tracked packages
+   - Press ⌘N to quickly add new packages from anywhere in the extension
 
-## 📋 Commands
-
-### Add Package
-Add a new package to track by entering the tracking number. The extension will:
-- Validate the tracking number with Ship24's API
-- Show immediate tracking results
-- Save the package to your local collection
-- Allow you to assign a custom name for easy identification
+## 📋 Command
 
 ### My Packages
-View and manage all your tracked packages with:
-- Real-time delivery status updates
-- Package renaming for organization
-- Detailed tracking information
-- Complete event timeline and history
-- Quick refresh capabilities
+A unified command that provides complete package management:
+- **View All Packages** - See all your tracked packages with real-time status
+- **Add New Packages** - Press ⌘N to quickly add packages by tracking number
+- **Package Management** - Rename, remove (⌃X), and organize your packages
+- **Detailed Tracking** - View complete timeline of package events and movements
+- **Quick Actions** - Copy tracking numbers, open web tracking, refresh status
+- **Smart Status Detection** - Automatically prioritizes active shipments over delivered ones
+- **Keyboard Shortcuts** - ⌘N to add packages, ⌃X to remove packages
 
 
 ## 🌍 Supported Carriers
