@@ -1,18 +1,20 @@
 import { Color, Icon, Image, List, environment } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
-import { EstimatedCall, SjEstimatedCall } from "../types";
+import { SjEstimatedCall } from "../types";
 import {
   formatAsClock,
   formatDestinationDisplay,
   getSubModeText,
   getTransportIcon,
 } from "../utils";
+import { Departure } from "../api/departuresQuery";
 
 type DetailProps = {
-  ec: EstimatedCall;
+  ec: Departure;
+  destinationQuayId?: string;
 };
 
-export function Detail({ ec }: DetailProps) {
+export function Detail({ ec, destinationQuayId }: DetailProps) {
   const theme = environment.appearance;
   return (
     <List.Item.Detail
@@ -77,7 +79,12 @@ export function Detail({ ec }: DetailProps) {
             )}
         </List.Item.Detail.Metadata>
       }
-      markdown={getEstimatedCallsMarkdown(ec.serviceJourney.estimatedCalls, ec.quay.id, theme)}
+      markdown={getEstimatedCallsMarkdown(
+        ec.serviceJourney.estimatedCalls,
+        ec.quay.id,
+        theme,
+        destinationQuayId,
+      )}
     />
   );
 }
@@ -91,22 +98,30 @@ function getEstimatedCallsMarkdown(
   ec: Array<SjEstimatedCall>,
   quayId: string,
   theme: "light" | "dark",
+  destinationQuayId?: string,
 ) {
   const currentIndex = ec.findIndex((a) => a.quay.id === quayId);
+  const destinationIndex = ec.findIndex((a) => a.quay.id === destinationQuayId);
   if (!ec.length || currentIndex < 0) return;
 
-  const upcomingEstimatedCalls = ec.slice(currentIndex);
+  const upcomingEstimatedCalls =
+    destinationIndex >= 0 ? ec.slice(currentIndex, destinationIndex + 1) : ec.slice(currentIndex);
   const numberOfTruncatedStops = currentIndex - 1;
+  const numberOfRemainingStops = destinationIndex >= 0 ? ec.length - destinationIndex - 2 : 0;
+  const lastStop =
+    destinationIndex >= 0 && destinationIndex < ec.length - 1 ? ec[ec.length - 1] : undefined;
 
   const lines: Array<string | false> = [
     currentIndex > 0 && `${estimatedCallText(ec[0])}`,
     numberOfTruncatedStops === 1 && `${estimatedCallText(ec[1])}`,
     numberOfTruncatedStops > 1 && `••• ${numberOfTruncatedStops} intermediate stops •••`,
     ...upcomingEstimatedCalls.map((e) => {
-      return e.quay.id === quayId
+      return e.quay.id === quayId || e.quay.id === destinationQuayId
         ? `---\n\n## ${estimatedCallText(e)}\n\n---`
         : estimatedCallText(e);
     }),
+    numberOfRemainingStops > 0 && `••• ${numberOfRemainingStops} remaining stops •••`,
+    !!lastStop && `${estimatedCallText(lastStop)}`,
   ].filter(Boolean);
 
   const content = lines.join("\n\n");

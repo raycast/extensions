@@ -1,14 +1,18 @@
-import { List, Toast, clearSearchBar, useNavigation } from "@raycast/api";
+import { List, Toast, clearSearchBar } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { addFavoriteStop, loadFavoriteStops, removeFavoriteStop } from "../storage";
 import { Feature } from "../types";
 import { getVenueCategoryIcon } from "../utils";
 import { Actions } from "./Actions";
 import { useDebouncedVenues } from "./use-debounced-venues";
-import StopPlacePage from "../StopPlace/StopPlacePage";
 
-export default function SearchPage() {
-  const { push } = useNavigation();
+type Props = {
+  searchBarPlaceholder: string;
+  onSubmit: (venue: Feature) => void;
+  primaryActionTitle: string;
+};
+
+export default function Search({ searchBarPlaceholder, onSubmit, primaryActionTitle }: Props) {
   const [query, setQuery] = useState<string>("");
   const [toast, setToast] = useState<Promise<Toast>>();
   const { venueResults, isLoading } = useDebouncedVenues(query, toast, setToast);
@@ -16,18 +20,26 @@ export default function SearchPage() {
   const [favoritesIsLoading, setFavoritesIsLoading] = useState(true);
   const [favorites, setFavorites] = useState<Feature[]>([]);
   useEffect(() => {
+    setFavoritesIsLoading(true);
     loadFavoriteStops().then((preferredVenues) => {
       if (preferredVenues) setFavorites(preferredVenues);
       setFavoritesIsLoading(false);
     });
   }, []);
   if (favoritesIsLoading) {
-    return <List isLoading searchBarPlaceholder="Search by stop name" />;
+    return (
+      <List
+        isLoading
+        searchBarPlaceholder={searchBarPlaceholder}
+        searchText={query}
+        onSearchTextChange={setQuery}
+      />
+    );
   }
 
   return (
     <List
-      searchBarPlaceholder="Search by stop name"
+      searchBarPlaceholder={searchBarPlaceholder}
       searchText={query}
       onSearchTextChange={setQuery}
       isLoading={isLoading}
@@ -42,11 +54,12 @@ export default function SearchPage() {
             return (
               <VenueListItem
                 key={venue.properties.id}
+                primaryActionTitle={primaryActionTitle}
                 onAction={() => {
                   clearSearchBar();
                   // Re-add favorite to bump it to the top of the list
                   addFavoriteStop(venue);
-                  push(<StopPlacePage venue={venue} />);
+                  onSubmit(venue);
                 }}
                 venue={venue}
                 onSave={() => removeFavoriteStop(venue).then(setFavorites)}
@@ -61,11 +74,12 @@ export default function SearchPage() {
           return (
             <VenueListItem
               key={venue.properties.id}
+              primaryActionTitle={primaryActionTitle}
               onAction={() => {
                 clearSearchBar();
                 // Re-add favorite to bump it to the top of the list
                 if (isSaved) addFavoriteStop(venue);
-                push(<StopPlacePage venue={venue} />);
+                onSubmit(venue);
               }}
               venue={venue}
               onSave={() =>
@@ -87,11 +101,13 @@ const VenueListItem = ({
   isFavorite,
   onAction,
   onSave,
+  primaryActionTitle,
 }: {
   venue: Feature;
   isFavorite: boolean;
   onAction: () => void;
   onSave: () => void;
+  primaryActionTitle: string;
 }) => {
   return (
     <List.Item
@@ -102,7 +118,13 @@ const VenueListItem = ({
       }}
       icon={getVenueCategoryIcon(venue.properties.category)}
       actions={
-        <Actions venue={venue} onAction={onAction} isFavorite={isFavorite} onSave={onSave} />
+        <Actions
+          venue={venue}
+          onAction={onAction}
+          isFavorite={isFavorite}
+          onSave={onSave}
+          primaryActionTitle={primaryActionTitle}
+        />
       }
     />
   );
