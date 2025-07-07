@@ -10,7 +10,7 @@ import Style = Toast.Style;
 
 export default function EditLink(props: {
   shortLink: ShortLink;
-  mutate: MutatePromise<ShortLink[] | undefined, ShortLink[] | undefined>;
+  mutate: MutatePromise<ShortLink[]>;
 }) {
   const { shortLink, mutate } = props;
   const [slug, setSlug] = useState<string>(shortLink.path);

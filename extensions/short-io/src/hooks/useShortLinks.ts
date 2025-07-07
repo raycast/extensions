@@ -3,19 +3,22 @@ import { ListLinksResponse, ShortLink } from "../types/types";
 import { LIST_LINK_API } from "../utils/constants";
 import { apiKey } from "../types/preferences";
 import axios from "axios";
+import { getDefaultDomain } from "../utils/common-utils";
 
-export const useShortLinks = (domainId: string) => {
-  return useCachedPromise((domainId) => {
+export const useShortLinks = (domainId?: string) => {
+  return useCachedPromise((domainId?: string) => {
     return getShortLinks(domainId) as Promise<ShortLink[]>;
-  }, [domainId]);
+  }, [domainId], {
+    initialData: []
+  });
 };
 
-const getShortLinks = async (domainId: string) => {
-  if (!domainId) return [];
+const getShortLinks = async (domainId?: string) => {
+  const id = domainId || (await getDefaultDomain())?.id;
   const listLinksResponse = (
     await axios.get(LIST_LINK_API, {
       params: {
-        domain_id: domainId,
+        domain_id: id,
         limit: "150",
         offset: "0",
       },

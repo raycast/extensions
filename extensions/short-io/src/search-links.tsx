@@ -15,13 +15,10 @@ import { getFavicon } from "@raycast/utils";
 export default function SearchLinks() {
   const [domainId, setDomainId] = useState("");
   const { data: domains, isLoading: isLoadingDomains } = useDomains();
-  const { data, isLoading, mutate } = useShortLinks(domainId);
-  const shortLinks = useMemo(() => {
-    return data || [];
-  }, [data]);
-
+  const { data: shortLinks, isLoading: isLoadingLinks, mutate } = useShortLinks(domainId);
+  
   return (
-    <List isLoading={isLoading || isLoadingDomains} isShowingDetail={shortLinks.length !== 0} searchBarPlaceholder={"Search links"} searchBarAccessory={<List.Dropdown tooltip="Domain" onChange={setDomainId}>
+    <List isLoading={isLoadingLinks || isLoadingDomains} isShowingDetail={shortLinks.length !== 0} searchBarPlaceholder={"Search links"} searchBarAccessory={<List.Dropdown tooltip="Domain" onChange={setDomainId} storeValue>
       {domains?.map(domain => <List.Dropdown.Item key={domain.id} icon={getFavicon(`https://domain.hostname`)} title={domain.hostname} value={domain.id.toString()} />)}
     </List.Dropdown>}>
       <ListEmptyView
