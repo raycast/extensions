@@ -51,6 +51,7 @@ async function installAVIFEnc(): Promise<boolean> {
       style: Toast.Style.Animated,
     });
     try {
+      // Use '|| true' to ignore intermediate errors; we verify installation separately
       execSync(`/bin/zsh -ilc '${brewPath} install --quiet libavif || true'`);
 
       if (!verifyInstall()) {
@@ -78,18 +79,18 @@ async function installAVIFEnc(): Promise<boolean> {
 }
 
 async function verifyInstall() {
+  const MAX_VERIFICATION_ATTEMPTS = 7;
+  const ATTEMPT_DELAY_DURATION = 1000;
+
   let exists = false;
   let attempts = 0;
-  while (!exists && attempts < 7) {
+  while (!exists && attempts < MAX_VERIFICATION_ATTEMPTS) {
     const encoderPath = execSync(`/bin/zsh -lc 'command -v avifenc'`).toString().trim();
-    // if (result.length > 0) {
-    //   exists = true;
-    // }
     if (existsSync(encoderPath)) {
       exists = true;
       break;
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, ATTEMPT_DELAY_DURATION));
     attempts++;
   }
   return exists;
