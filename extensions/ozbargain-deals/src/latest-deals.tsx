@@ -1,10 +1,11 @@
-import { Action, ActionPanel, List, Detail, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, Detail, Icon, getPreferenceValues } from "@raycast/api";
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import * as xml2js from "xml2js";
 import TurndownService from "turndown";
 import sanitizeHtml from "sanitize-html";
 import he from "he"; // HTML entity encoder/decoder
+import { showFailureToast } from "@raycast/utils";
 
 // --- Type Definitions ---
 
@@ -230,7 +231,7 @@ export default function LatestDeals() {
 
   // Get user preferences (e.g., how many items to display)
   const preferences = getPreferenceValues<Preferences>();
-  const itemLimit = parseInt(preferences.itemLimit || "50"); // Default to 50 if preference is not set or invalid
+  const itemLimit = parseInt(preferences.itemLimit);
 
   // Callback function to fetch deals, memoized for efficiency
   const fetchDeals = useCallback(async () => {
@@ -295,7 +296,6 @@ export default function LatestDeals() {
       setDeals(parsedDeals);
     } catch (error: unknown) {
       console.error("Failed to fetch OzBargain deals:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       setError("Failed to load deals. Please check your internet connection or try again later.");
       showFailureToast(error, { title: "Failed to Load Deals" });
     } finally {
