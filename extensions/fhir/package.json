@@ -14,6 +14,7 @@
     {
       "name": "search-documentation",
       "title": "Search Documentation",
+      "subtitle": "FHIR",
       "description": "Search and browse FHIR documentation",
       "mode": "view"
     }
