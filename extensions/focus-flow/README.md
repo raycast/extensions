@@ -28,6 +28,15 @@ Want to track progress as a group, compete on a leaderboard, or just motivate ea
 
 ---
 
+## 🌐 Use FocusFlow on the Web
+
+Have a fussy friend who would prefer not to download Raycast? You can also use **FocusFlow** directly in your browser:  
+👉 [focusflowweb.vercel.app](https://focusflowweb.vercel.app)
+
+no installation required — exact same features 👍
+
+---
+
 ## ⚙️ Why Discord Webhooks? (The Technical Bit)
 
 FocusFlow uses Discord webhooks not just for sending updates, but as a **lightweight serverless backend**.
