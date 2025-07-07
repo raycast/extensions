@@ -19,7 +19,7 @@ export default function JobList() {
       if (key === "salary") return !!job.salary;
       return true;
     });
-  }, [filter]);
+  }, [data, filter]);
 
   return (
     <List
