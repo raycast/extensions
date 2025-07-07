@@ -1,4 +1,5 @@
 import { Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 interface HeaderKey {
   [key: string]: string | number;
@@ -102,6 +103,7 @@ export function extractParametersFromUrl(urlString: string): Parameter[] {
 
     return params;
   } catch (e) {
+    showFailureToast(e, { title: "Failed to parse URL parameters" });
     return [];
   }
 };
