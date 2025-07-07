@@ -18,7 +18,7 @@
   "preferences": [
     {
       "name": "jsonFilePath",
-      "type": "textfield",
+      "type": "file",
       "placeholder": "e.g., /path/to/your/file.json",
       "title": "JSON File Path",
       "required": true,
