@@ -19,6 +19,13 @@
   ],
   "commands": [
     {
+      "name": "api-quota",
+      "title": "API Quota",
+      "subtitle": "MailerSend",
+      "description": "View API Quota",
+      "mode": "no-view"
+    },
+    {
       "name": "domains",
       "title": "Domains",
       "subtitle": "MailerSend",
@@ -30,6 +37,13 @@
       "title": "Templates",
       "subtitle": "MailerSend",
       "description": "View Templates",
+      "mode": "view"
+    },
+    {
+      "name": "tokens",
+      "title": "Tokens",
+      "subtitle": "MailerSend",
+      "description": "View API Tokens",
       "mode": "view"
     },
     {
