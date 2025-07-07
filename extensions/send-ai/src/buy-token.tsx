@@ -21,9 +21,12 @@ function BuyToken(props: LaunchProps<{ arguments: BuyTokenFormValues }>) {
   }, [props.arguments.outputMint, props.arguments.inputAmount]);
 
   async function handleSubmit(values: BuyTokenFormValues) {
-    try {
-      setIsLoading(true);
+    if (isLoading) {
+      return;
+    }
+    setIsLoading(true);
 
+    try {
       const inputAmount = parseFloat(values.inputAmount);
 
       // Validation
@@ -55,7 +58,7 @@ function BuyToken(props: LaunchProps<{ arguments: BuyTokenFormValues }>) {
     } catch (error) {
       await showToast(createErrorToast("Error", error, "Failed to execute token purchase"));
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   }
 

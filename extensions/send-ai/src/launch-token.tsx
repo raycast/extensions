@@ -25,6 +25,9 @@ function LaunchTokenForm() {
 
   const { handleSubmit, itemProps } = useForm<LaunchTokenFormValues>({
     async onSubmit(values) {
+      if (isLoading) {
+        return;
+      }
       try {
         setIsLoading(true);
         // Prepare params
