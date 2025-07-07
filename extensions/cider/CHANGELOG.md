@@ -1,6 +1,6 @@
 # Cider Changelog
 
-## [Windows] - {PR_MERGE_DATE}
+## [Windows] - 2025-07-07
 - Added support for Windows
 
 ## [Fixes & Improvements] - 2025-01-26
