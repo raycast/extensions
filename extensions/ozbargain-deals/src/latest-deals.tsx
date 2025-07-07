@@ -11,7 +11,7 @@ import { showFailureToast } from "@raycast/utils";
 
 // Define preferences interface for type safety
 interface Preferences {
-  itemLimit: number; // Stored as string, will be parsed to number
+  itemLimit: string; // Stored as string, will be parsed to number
 }
 
 // Define the structure that matches the actual OzBargain RSS feed
@@ -231,7 +231,7 @@ export default function LatestDeals() {
 
   // Get user preferences (e.g., how many items to display)
   const preferences = getPreferenceValues<Preferences>();
-  const itemLimit = preferences.itemLimit;
+  const itemLimit = Number(preferences.itemLimit);
 
   // Callback function to fetch deals, memoized for efficiency
   const fetchDeals = useCallback(async () => {
