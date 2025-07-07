@@ -1,11 +1,3 @@
-export interface Preferences {
-  apiKey: string;
-  model: string;
-  temperature: string;
-  maxTokens: string;
-  historyLimit: string;
-}
-
 // Enhanced types for image support
 interface ImageData {
   base64: string;

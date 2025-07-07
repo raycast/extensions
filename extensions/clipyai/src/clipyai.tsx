@@ -15,7 +15,7 @@ import {
   LocalStorage,
 } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
-import { Preferences, ChatMessage, HotKey, EnhancedClipboardData, HistoryItem } from "./types";
+import { ChatMessage, HotKey, EnhancedClipboardData, HistoryItem } from "./types";
 import { HotkeysSettingsView } from "./components/settings";
 import { HistoryView } from "./components/history";
 import { ResultView } from "./components/ResultView";
