@@ -1,7 +1,8 @@
 import { exec } from "child_process";
 import { promisify } from "util";
 import fetch from "node-fetch";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   DNSInfo,
   PingInfo,
@@ -29,21 +30,23 @@ class DomainAnalyzerAPI {
   }
 
   private async showError(title: string, message: string) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title,
-      message,
-    });
+    await showFailureToast(title, { message });
   }
 
   private validateDomain(domain: string): boolean {
+    // More strict domain validation
     const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])*$/;
-    return domainRegex.test(domain);
+    return domainRegex.test(domain) && domain.length <= 253;
   }
 
   private escapeDomain(domain: string): string {
-    // Escape domain to prevent command injection
-    return domain.replace(/[^a-zA-Z0-9.-]/g, "");
+    // More secure domain escaping - only allow valid domain characters
+    return domain.replace(/[^a-zA-Z0-9.-]/g, "").substring(0, 253);
+  }
+
+  private escapeShellArg(arg: string): string {
+    // Additional shell argument escaping
+    return arg.replace(/[^\w.-]/g, "");
   }
 
   async getDNSInfo(domain: string): Promise<DNSInfo> {
@@ -103,8 +106,13 @@ class DomainAnalyzerAPI {
 
   private async queryDNS(domain: string, type: string): Promise<DNSRecord[]> {
     try {
-      const safeDomain = this.escapeDomain(domain);
+      const safeDomain = this.escapeShellArg(this.escapeDomain(domain));
       const safeType = type.replace(/[^A-Z]/g, ""); // Only allow uppercase letters for DNS types
+
+      // Validate inputs
+      if (!safeDomain || !safeType) {
+        return [];
+      }
 
       const { stdout } = await execAsync(`dig +short ${safeType} ${safeDomain}`, {
         timeout: this.timeout * 1000,
@@ -136,7 +144,13 @@ class DomainAnalyzerAPI {
     }
 
     try {
-      const safeDomain = this.escapeDomain(domain);
+      const safeDomain = this.escapeShellArg(this.escapeDomain(domain));
+
+      // Validate escaped domain
+      if (!safeDomain) {
+        throw new Error("Invalid domain after sanitization");
+      }
+
       // Use full path for ping on macOS
       const pingCommand = process.platform === "darwin" ? "/sbin/ping" : "ping";
       const { stdout } = await execAsync(`${pingCommand} -c 4 -W ${this.timeout * 1000} ${safeDomain}`, {
@@ -257,7 +271,13 @@ class DomainAnalyzerAPI {
     }
 
     try {
-      const safeDomain = this.escapeDomain(domain);
+      const safeDomain = this.escapeShellArg(this.escapeDomain(domain));
+
+      // Validate escaped domain
+      if (!safeDomain) {
+        throw new Error("Invalid domain after sanitization");
+      }
+
       const { stdout } = await execAsync(`whois ${safeDomain}`, {
         timeout: this.timeout * 1000,
       });
@@ -391,7 +411,7 @@ class DomainAnalyzerAPI {
 
   private async getReverseDNS(ip: string): Promise<string | undefined> {
     try {
-      const safeIP = this.isValidIP(ip) ? ip : "";
+      const safeIP = this.isValidIP(ip) ? this.escapeShellArg(ip) : "";
       if (!safeIP) return undefined;
 
       const { stdout } = await execAsync(`dig +short -x ${safeIP}`, {

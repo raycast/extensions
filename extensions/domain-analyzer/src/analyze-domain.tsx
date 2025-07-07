@@ -1,17 +1,7 @@
 // @ts-nocheck
 import React, { useState, useEffect } from "react";
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Form,
-  Icon,
-  useNavigation,
-  showToast,
-  Toast,
-  LaunchProps,
-  List,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, useNavigation, LaunchProps, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { domainAnalyzerAPI } from "./lib/api";
 import { DomainAnalysis } from "./types";
 
@@ -95,11 +85,7 @@ function DomainAnalysisView({ domain }: { domain: string }) {
               loading: { ...prev.loading, dns: false },
               errors: { ...prev.errors, dns: (error as Error).message },
             }));
-            showToast({
-              style: Toast.Style.Failure,
-              title: "DNS Error",
-              message: (error as Error).message,
-            });
+            showFailureToast("DNS Error", { message: (error as Error).message });
           },
         ),
         domainAnalyzerAPI.getPingInfo(domain).then(
@@ -115,11 +101,7 @@ function DomainAnalysisView({ domain }: { domain: string }) {
               loading: { ...prev.loading, ping: false },
               errors: { ...prev.errors, ping: (error as Error).message },
             }));
-            showToast({
-              style: Toast.Style.Failure,
-              title: "Ping Error",
-              message: (error as Error).message,
-            });
+            showFailureToast("Ping Error", { message: (error as Error).message });
           },
         ),
         domainAnalyzerAPI.getDomainStatus(domain).then(
@@ -135,11 +117,7 @@ function DomainAnalysisView({ domain }: { domain: string }) {
               loading: { ...prev.loading, status: false },
               errors: { ...prev.errors, status: (error as Error).message },
             }));
-            showToast({
-              style: Toast.Style.Failure,
-              title: "Status Error",
-              message: (error as Error).message,
-            });
+            showFailureToast("Status Error", { message: (error as Error).message });
           },
         ),
         domainAnalyzerAPI.getWhoisInfo(domain).then(
@@ -155,11 +133,7 @@ function DomainAnalysisView({ domain }: { domain: string }) {
               loading: { ...prev.loading, whois: false },
               errors: { ...prev.errors, whois: (error as Error).message },
             }));
-            showToast({
-              style: Toast.Style.Failure,
-              title: "Whois Error",
-              message: (error as Error).message,
-            });
+            showFailureToast("Whois Error", { message: (error as Error).message });
           },
         ),
         domainAnalyzerAPI.getIPInfo(domain).then(
@@ -175,11 +149,7 @@ function DomainAnalysisView({ domain }: { domain: string }) {
               loading: { ...prev.loading, ip_info: false },
               errors: { ...prev.errors, ip_info: (error as Error).message },
             }));
-            showToast({
-              style: Toast.Style.Failure,
-              title: "IP Info Error",
-              message: (error as Error).message,
-            });
+            showFailureToast("IP Info Error", { message: (error as Error).message });
           },
         ),
         domainAnalyzerAPI.getTechnologyInfo(domain).then(
@@ -195,11 +165,7 @@ function DomainAnalysisView({ domain }: { domain: string }) {
               loading: { ...prev.loading, technologies: false },
               errors: { ...prev.errors, technologies: (error as Error).message },
             }));
-            showToast({
-              style: Toast.Style.Failure,
-              title: "Technology Error",
-              message: (error as Error).message,
-            });
+            showFailureToast("Technology Error", { message: (error as Error).message });
           },
         ),
       ];
