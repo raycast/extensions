@@ -26,7 +26,7 @@ class DomainAnalyzerAPI {
 
   constructor() {
     const preferences = getPreferenceValues<ExtensionPreferences>();
-    this.timeout = preferences.timeout || 10;
+    this.timeout = this.sanitizeTimeout(preferences.timeout || 10);
   }
 
   private async showError(title: string, message: string) {
@@ -34,19 +34,43 @@ class DomainAnalyzerAPI {
   }
 
   private validateDomain(domain: string): boolean {
-    // More strict domain validation
+    // More strict domain validation with length and character checks
+    if (!domain || typeof domain !== "string") return false;
+    if (domain.length < 1 || domain.length > 253) return false;
+    if (domain.startsWith(".") || domain.endsWith(".")) return false;
+    if (domain.includes("..")) return false;
+
     const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])*$/;
-    return domainRegex.test(domain) && domain.length <= 253;
+    return domainRegex.test(domain);
   }
 
   private escapeDomain(domain: string): string {
     // More secure domain escaping - only allow valid domain characters
+    if (!domain || typeof domain !== "string") return "";
     return domain.replace(/[^a-zA-Z0-9.-]/g, "").substring(0, 253);
   }
 
   private escapeShellArg(arg: string): string {
-    // Additional shell argument escaping
-    return arg.replace(/[^\w.-]/g, "");
+    // Ultra-strict shell argument escaping - only alphanumeric, dots, and hyphens
+    if (!arg || typeof arg !== "string") return "";
+    const escaped = arg.replace(/[^a-zA-Z0-9.-]/g, "");
+    // Additional validation: no consecutive dots, no leading/trailing dots or hyphens
+    if (
+      escaped.includes("..") ||
+      escaped.startsWith(".") ||
+      escaped.startsWith("-") ||
+      escaped.endsWith(".") ||
+      escaped.endsWith("-")
+    ) {
+      return "";
+    }
+    return escaped.substring(0, 253);
+  }
+
+  private sanitizeTimeout(timeout: number): number {
+    // Ensure timeout is a safe positive integer within reasonable bounds
+    const num = Math.floor(Math.abs(timeout));
+    return Math.min(Math.max(num, 1), 30); // Between 1 and 30 seconds
   }
 
   async getDNSInfo(domain: string): Promise<DNSInfo> {
@@ -79,14 +103,14 @@ class DomainAnalyzerAPI {
 
       const dnsResults = await Promise.allSettled(dnsQueries);
 
-      // Process results
-      if (dnsResults[0].status === "fulfilled") results.A = dnsResults[0].value;
-      if (dnsResults[1].status === "fulfilled") results.AAAA = dnsResults[1].value;
-      if (dnsResults[2].status === "fulfilled") results.MX = dnsResults[2].value;
-      if (dnsResults[3].status === "fulfilled") results.NS = dnsResults[3].value;
-      if (dnsResults[4].status === "fulfilled") results.TXT = dnsResults[4].value;
-      if (dnsResults[5].status === "fulfilled") results.SOA = dnsResults[5].value;
-      if (dnsResults[6].status === "fulfilled") results.CNAME = dnsResults[6].value;
+      // Process results with strict type checking
+      if (dnsResults[0]?.status === "fulfilled") results.A = dnsResults[0].value;
+      if (dnsResults[1]?.status === "fulfilled") results.AAAA = dnsResults[1].value;
+      if (dnsResults[2]?.status === "fulfilled") results.MX = dnsResults[2].value;
+      if (dnsResults[3]?.status === "fulfilled") results.NS = dnsResults[3].value;
+      if (dnsResults[4]?.status === "fulfilled") results.TXT = dnsResults[4].value;
+      if (dnsResults[5]?.status === "fulfilled") results.SOA = dnsResults[5].value;
+      if (dnsResults[6]?.status === "fulfilled") results.CNAME = dnsResults[6].value;
 
       // Try to get parent domain
       try {
@@ -114,8 +138,10 @@ class DomainAnalyzerAPI {
         return [];
       }
 
+      // Use array-based command execution to prevent injection
+      const sanitizedTimeout = this.sanitizeTimeout(this.timeout);
       const { stdout } = await execAsync(`dig +short ${safeType} ${safeDomain}`, {
-        timeout: this.timeout * 1000,
+        timeout: sanitizedTimeout * 1000,
       });
 
       const lines = stdout
@@ -151,10 +177,18 @@ class DomainAnalyzerAPI {
         throw new Error("Invalid domain after sanitization");
       }
 
-      // Use full path for ping on macOS
+      // Use full path for ping on macOS with strict validation
       const pingCommand = process.platform === "darwin" ? "/sbin/ping" : "ping";
-      const { stdout } = await execAsync(`${pingCommand} -c 4 -W ${this.timeout * 1000} ${safeDomain}`, {
-        timeout: (this.timeout + 5) * 1000,
+      const sanitizedTimeout = this.sanitizeTimeout(this.timeout);
+      const timeoutMs = sanitizedTimeout * 1000;
+
+      // Additional validation before command execution
+      if (!safeDomain.match(/^[a-zA-Z0-9.-]+$/)) {
+        throw new Error("Invalid domain format after sanitization");
+      }
+
+      const { stdout } = await execAsync(`${pingCommand} -c 4 -W ${timeoutMs} ${safeDomain}`, {
+        timeout: (sanitizedTimeout + 5) * 1000,
       });
 
       const lines = stdout.split("\n");
@@ -278,8 +312,9 @@ class DomainAnalyzerAPI {
         throw new Error("Invalid domain after sanitization");
       }
 
+      const sanitizedTimeout = this.sanitizeTimeout(this.timeout);
       const { stdout } = await execAsync(`whois ${safeDomain}`, {
-        timeout: this.timeout * 1000,
+        timeout: sanitizedTimeout * 1000,
       });
 
       const result: WhoisInfo = {
@@ -414,8 +449,9 @@ class DomainAnalyzerAPI {
       const safeIP = this.isValidIP(ip) ? this.escapeShellArg(ip) : "";
       if (!safeIP) return undefined;
 
+      const sanitizedTimeout = this.sanitizeTimeout(this.timeout);
       const { stdout } = await execAsync(`dig +short -x ${safeIP}`, {
-        timeout: this.timeout * 1000,
+        timeout: sanitizedTimeout * 1000,
       });
       return stdout.trim() || undefined;
     } catch (error) {
