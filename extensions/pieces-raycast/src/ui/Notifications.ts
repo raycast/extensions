@@ -1,5 +1,6 @@
-import { Keyboard, showHUD, showToast, open, Toast } from "@raycast/api";
+import { Keyboard, showHUD, showToast, Toast } from "@raycast/api";
 import launchRuntime from "../utils/launchRuntime";
+import BrowserUrl from "../utils/BrowserUrl";
 
 export default class Notifications {
   private static instance: Notifications;
@@ -22,15 +23,22 @@ export default class Notifications {
       primaryAction: {
         title: "Launch PiecesOS",
         shortcut: Keyboard.Shortcut.Common.Open,
-        onAction: () => {
-          launchRuntime();
+        onAction: async () => {
+          const launched = await launchRuntime();
+          if (!launched) {
+            await showToast({
+              title: "Failed to launch PiecesOS",
+              message: "Please try launching PiecesOS manually",
+              style: Toast.Style.Failure,
+            });
+          }
         },
       },
       secondaryAction: {
         title: "Contact Support",
         shortcut: Keyboard.Shortcut.Common.OpenWith,
         onAction: () => {
-          open("https://docs.pieces.app/support");
+          BrowserUrl.open("https://docs.pieces.app/products/support");
         },
       },
       style: Toast.Style.Failure,
@@ -45,7 +53,7 @@ export default class Notifications {
         title: "Contact Support",
         shortcut: Keyboard.Shortcut.Common.Open,
         onAction: () => {
-          open("https://docs.pieces.app/support");
+          BrowserUrl.open("https://docs.pieces.app/products/support");
         },
       },
     });

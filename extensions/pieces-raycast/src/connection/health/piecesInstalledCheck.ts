@@ -1,9 +1,10 @@
 import * as os from "os";
-import { confirmAlert, showToast, Toast, open } from "@raycast/api";
+import { confirmAlert, showToast, Toast } from "@raycast/api";
 import launchRuntime from "../../utils/launchRuntime";
 import ConnectorSingleton from "../ConnectorSingleton";
 import { exec } from "child_process";
 import { pollForConnection } from "./piecesHealthCheck";
+import BrowserUrl from "../../utils/BrowserUrl";
 
 /**
  * Checks the health of PiecesOS and attempts to install it if necessary.
@@ -27,7 +28,7 @@ export default async function piecesInstalledCheck() {
     primaryAction: {
       title: "Contact Support",
       onAction() {
-        open("https://docs.pieces.app/support");
+        BrowserUrl.open("https://docs.pieces.app/products/support");
       },
     },
     style: Toast.Style.Animated,
@@ -42,7 +43,10 @@ export default async function piecesInstalledCheck() {
   }
 
   toast.title = "Attempting to launch PiecesOS";
-  await launchRuntime();
+  const launched = await launchRuntime();
+  if (!launched) {
+    toast.title = "Failed to launch PiecesOS";
+  }
   const connected = await pollForConnection();
 
   if (connected) {
