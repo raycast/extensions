@@ -1,6 +1,6 @@
 # Spaceship Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-07-07
 
 - In "Domains"
     1. Get Auth Code
