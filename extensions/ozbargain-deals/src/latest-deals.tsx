@@ -297,7 +297,7 @@ export default function LatestDeals() {
       console.error("Failed to fetch OzBargain deals:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       setError("Failed to load deals. Please check your internet connection or try again later.");
-      showToast(Toast.Style.Failure, "Failed to Load Deals", errorMessage);
+      showFailureToast(error, { title: "Failed to Load Deals" });
     } finally {
       setLoading(false);
     }
