@@ -21,6 +21,18 @@ interface ResponseHeaders {
   get(name: string): string | null;
 }
 
+// Rate limiting state
+interface ApiCall {
+  lastCall: number;
+  callCount: number;
+  backoffUntil?: number;
+}
+
+const API_RATE_LIMITS: Record<string, ApiCall> = {};
+const MIN_DELAY_MS = 100; // Minimum delay between calls
+const MAX_DELAY_MS = 5000; // Maximum backoff delay
+const MAX_CALLS_PER_MINUTE = 30; // Rate limit
+
 class DomainAnalyzerAPI {
   private timeout: number;
 
@@ -31,6 +43,70 @@ class DomainAnalyzerAPI {
 
   private async showError(title: string, message: string) {
     await showFailureToast(title, { message });
+  }
+
+  private async rateLimit(apiName: string): Promise<void> {
+    const now = Date.now();
+    const apiCall = API_RATE_LIMITS[apiName] || { lastCall: 0, callCount: 0 };
+
+    // Check if we're in backoff period
+    if (apiCall.backoffUntil && now < apiCall.backoffUntil) {
+      const waitTime = apiCall.backoffUntil - now;
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
+      return this.rateLimit(apiName); // Recursive call after waiting
+    }
+
+    // Reset call count if more than a minute has passed
+    if (now - apiCall.lastCall > 60000) {
+      apiCall.callCount = 0;
+    }
+
+    // Check rate limit
+    if (apiCall.callCount >= MAX_CALLS_PER_MINUTE) {
+      const backoffTime = Math.min(MIN_DELAY_MS * Math.pow(2, apiCall.callCount - MAX_CALLS_PER_MINUTE), MAX_DELAY_MS);
+      apiCall.backoffUntil = now + backoffTime;
+      await new Promise((resolve) => setTimeout(resolve, backoffTime));
+      return this.rateLimit(apiName); // Recursive call after backoff
+    }
+
+    // Ensure minimum delay between calls
+    const timeSinceLastCall = now - apiCall.lastCall;
+    if (timeSinceLastCall < MIN_DELAY_MS) {
+      await new Promise((resolve) => setTimeout(resolve, MIN_DELAY_MS - timeSinceLastCall));
+    }
+
+    // Update API call tracking
+    apiCall.lastCall = Date.now();
+    apiCall.callCount++;
+    API_RATE_LIMITS[apiName] = apiCall;
+  }
+
+  private async retryWithBackoff<T>(operation: () => Promise<T>, apiName: string, maxRetries: number = 3): Promise<T> {
+    let lastError: Error;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        await this.rateLimit(apiName);
+        return await operation();
+      } catch (error) {
+        lastError = error as Error;
+
+        // Don't retry on validation errors
+        if (lastError.message.includes("Invalid domain") || lastError.message.includes("Invalid format")) {
+          throw lastError;
+        }
+
+        if (attempt === maxRetries) {
+          throw lastError;
+        }
+
+        // Exponential backoff for retries
+        const backoffTime = Math.min(MIN_DELAY_MS * Math.pow(2, attempt), MAX_DELAY_MS);
+        await new Promise((resolve) => setTimeout(resolve, backoffTime));
+      }
+    }
+
+    throw lastError!;
   }
 
   private validateDomain(domain: string): boolean {
@@ -263,9 +339,17 @@ class DomainAnalyzerAPI {
       if (url.startsWith("https://")) {
         try {
           const urlObj = new URL(url);
+          const safeHostname = this.escapeShellArg(urlObj.hostname);
+
+          // Validate hostname after sanitization
+          if (!safeHostname || !this.validateDomain(safeHostname)) {
+            throw new Error("Invalid hostname for SSL check");
+          }
+
+          const sanitizedTimeout = this.sanitizeTimeout(this.timeout);
           const { stdout } = await execAsync(
-            `echo | openssl s_client -connect ${urlObj.hostname}:443 -servername ${urlObj.hostname} 2>/dev/null | openssl x509 -noout -dates`,
-            { timeout: this.timeout * 1000 },
+            `echo | openssl s_client -connect ${safeHostname}:443 -servername ${safeHostname} 2>/dev/null | openssl x509 -noout -dates`,
+            { timeout: sanitizedTimeout * 1000 },
           );
 
           if (stdout.includes("notAfter")) {
@@ -394,7 +478,7 @@ class DomainAnalyzerAPI {
       throw new Error("Invalid IP address");
     }
 
-    try {
+    return this.retryWithBackoff(async () => {
       // Using ip-api.com which is more reliable and has higher limits
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout * 1000);
@@ -439,9 +523,7 @@ class DomainAnalyzerAPI {
         as: data.as,
         timezone: data.timezone,
       };
-    } catch (error) {
-      throw new Error(`Geolocation API error: ${(error as Error).message}`);
-    }
+    }, "geolocation");
   }
 
   private async getReverseDNS(ip: string): Promise<string | undefined> {
@@ -470,7 +552,7 @@ class DomainAnalyzerAPI {
       throw new Error("Invalid domain");
     }
 
-    try {
+    return this.retryWithBackoff(async () => {
       const url = domain.startsWith("http") ? domain : `https://${domain}`;
 
       const controller = new AbortController();
@@ -507,13 +589,11 @@ class DomainAnalyzerAPI {
         languages,
         frameworks,
       };
-    } catch (error) {
-      return {
-        domain,
-        technologies: [],
-        error: `Technology detection error: ${(error as Error).message}`,
-      };
-    }
+    }, "technology").catch((error) => ({
+      domain,
+      technologies: [],
+      error: `Technology detection error: ${(error as Error).message}`,
+    }));
   }
 
   private detectTechnologies(html: string, _headers: ResponseHeaders): Technology[] {
