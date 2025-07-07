@@ -4,6 +4,14 @@ import { fetchServerLocations, selectRandomServerFromCity, CountryLocation, City
 import { runCommand, checkVpnStatus } from "../utils/vpnService";
 import { fetchCurrentIP } from "../utils/fetchCurrentIP";
 
+// Timing constants for VPN operations
+const DISCONNECT_DELAY_MS = 4000;
+const CONNECT_DELAY_MS = 2000;
+const SERVER_SWITCH_DELAY_MS = 4000;
+const RETRY_DELAY_MS = 2000;
+const RETRY_CONNECT_DELAY_MS = 3000;
+const MAX_CONNECTION_RETRIES = 2;
+
 type VpnControlInput = {
   action?: 'connect' | 'disconnect' | 'status' | 'list' | 'list_cities' | 'list_servers' | 'change_server';
   country?: string;
@@ -176,7 +184,7 @@ export default async function tool(input: VpnControlInput): Promise<string> {
     case 'disconnect': {
       try {
         await runCommand("deactivate");
-        await new Promise((resolve) => setTimeout(resolve, 4000));
+        await new Promise((resolve) => setTimeout(resolve, DISCONNECT_DELAY_MS));
         const status = await checkVpnStatus();
         if (!status.isActive) {
           return "Mozilla VPN disconnected successfully.";
@@ -224,7 +232,7 @@ export default async function tool(input: VpnControlInput): Promise<string> {
       if (!input.country || ['connect', 'activate', 'start', 'vpn'].includes(input.country.trim().toLowerCase())) {
         try {
           await runCommand("activate");
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, CONNECT_DELAY_MS));
           const status = await checkVpnStatus();
           if (status.isActive) {
             const newIp = await fetchCurrentIP();
@@ -263,16 +271,15 @@ export default async function tool(input: VpnControlInput): Promise<string> {
       if (shouldConnect) {
         try {
           await runCommand("activate");
-          await new Promise((resolve) => setTimeout(resolve, 4000));
+          await new Promise((resolve) => setTimeout(resolve, SERVER_SWITCH_DELAY_MS));
           
           let status = await checkVpnStatus();
           let retries = 0;
-          const maxRetries = 2;
           
-          while (!status.isActive && retries < maxRetries) {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+          while (!status.isActive && retries < MAX_CONNECTION_RETRIES) {
+            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
             await runCommand("activate");
-            await new Promise((resolve) => setTimeout(resolve, 3000));
+            await new Promise((resolve) => setTimeout(resolve, RETRY_CONNECT_DELAY_MS));
             status = await checkVpnStatus();
             retries++;
           }
@@ -281,7 +288,7 @@ export default async function tool(input: VpnControlInput): Promise<string> {
             const newIp = await fetchCurrentIP();
             return `${message}\nVPN connected successfully.\nServer: ${status.serverCity}, ${status.serverCountry}\nNew IP address: ${newIp}`;
           } else {
-            return `${message}\nServer changed but failed to connect after ${maxRetries + 1} attempts. Please try connecting manually or check the VPN app.`;
+            return `${message}\nServer changed but failed to connect after ${MAX_CONNECTION_RETRIES + 1} attempts. Please try connecting manually or check the VPN app.`;
           }
         } catch (error) {
           return `${message}\nFailed to connect VPN: ${error instanceof Error ? error.message : String(error)}`;
