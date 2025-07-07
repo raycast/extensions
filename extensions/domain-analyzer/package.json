@@ -1,0 +1,62 @@
+{
+  "name": "domain-analyzer",
+  "title": "Domain Analyzer",
+  "description": "Complete domain analysis: DNS, ping, status, whois, geolocation and technologies",
+  "icon": "domain-icon.png",
+  "author": "robert",
+  "categories": ["Developer Tools", "System", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "analyze-domain",
+      "title": "Analyze Domain",
+      "description": "Complete analysis of a domain with DNS information, ping, whois and more",
+      "mode": "view",
+      "keywords": ["domain", "dns", "ping", "whois", "analysis", "analyzer"],
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "example.com",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "timeout",
+      "title": "Timeout (seconds)",
+      "description": "Time limit for DNS queries and ping",
+      "type": "textfield",
+      "default": "10",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2",
+    "dns-packet": "^5.6.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~20.17.0",
+    "@types/react": "^18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "raycast": "^1.83.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+} 
