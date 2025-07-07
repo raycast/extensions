@@ -1,5 +1,14 @@
 # Google Translate Changelog
 
+## [Feature] - 2025-07-01
+
+- Added instant translate commands for selected text translation
+- Added "Instant Translate View" command to display translation in HUD
+- Added "Instant Translate Copy" command to copy translation to clipboard
+- Added "Instant Translate Paste" command to paste translation directly
+- Implemented smart HUD duration that adjusts based on text length for better readability
+- Added reusable base instant translate function for consistent translation logic
+
 ## [Feature] - 2025-06-25
 
 - Show Auto-Detected language in Quick Translate
