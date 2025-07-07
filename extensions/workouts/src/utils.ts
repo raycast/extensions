@@ -1,7 +1,8 @@
 import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
 import { ActivityType, SportType } from "./api/types";
 import { createWriteStream } from "fs";
-import path from "path";
+import path, { resolve } from "path";
+import { homedir } from "os";
 
 export const formatDuration = (duration: number) => {
   return new Date(duration * 1000).toISOString().substring(11, 19);
@@ -167,7 +168,7 @@ export const saveFileToDesktop = (
   fileStream: NodeJS.ReadableStream | null,
 ) => {
   if (fileStream) {
-    const desktopDir = process.env.HOME + "/Desktop";
+    const desktopDir = resolve(homedir(), "Desktop");
     const downloadPath = path.join(desktopDir, `${fileName}.${fileType}`);
     const writeStream = createWriteStream(downloadPath);
     fileStream.pipe(writeStream);

@@ -36,7 +36,8 @@
     "sushichan044",
     "luarmr",
     "nicolas-marien",
-    "iontea"
+    "iontea",
+    "ridemountainpig"
   ],
   "categories": [
     "Developer Tools",
@@ -889,5 +890,9 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }
