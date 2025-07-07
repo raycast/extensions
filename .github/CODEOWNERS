@@ -797,7 +797,7 @@
 /extensions/host-switch                                             @ewgenius
 /extensions/hostloc                                                 @J3n5en
 /extensions/hotcorner                                               @Makiclin
-/extensions/houdahspot-search                                       @blackspike
+/extensions/houdahspot-search                                       @blackspike @xmok
 /extensions/how-long-to-beat                                        @Cronos87 @whitespacecode @ridemountainpig @7splay
 /extensions/hsdecks                                                 @sergigp
 /extensions/html-colors                                             @comatory
@@ -945,7 +945,7 @@
 /extensions/laliga                                                  @anhthang @pernielsentikaer
 /extensions/language-detector                                       @LitoMore
 /extensions/laracasts                                               @danyelkeddah
-/extensions/larajobs-search                                         @JustSteveKing @pernielsentikaer
+/extensions/larajobs-search                                         @JustSteveKing @pernielsentikaer @xmok
 /extensions/laravel-artisan                                         @KevinBatdorf
 /extensions/laravel-docs                                            @indykoning @aglipanci @Erth0
 /extensions/laravel-forge                                           @KevinBatdorf @macbookandrew
@@ -1800,6 +1800,7 @@
 /extensions/spring-initializr                                       @danvega
 /extensions/spryker-docs                                            @DinisEsteves
 /extensions/sql-format                                              @tonngw @jfkisafk
+/extensions/squeeze                                                 @DanielAmCa
 /extensions/ssh-manager                                             @scopsy @LenoxFro @RtiM0 @shelken @emiara @ViGeng @alshchetinin
 /extensions/ssh-tunnel-manager                                      @MinatoHikari
 /extensions/st-andrews-main-library-occupancy                       @Alleluia23
@@ -2029,6 +2030,7 @@
 /extensions/uplabs                                                  @gebeto
 /extensions/uploadthing                                             @juliusmarminge @xmok
 /extensions/upnote                                                  @Ujjwal1998
+/extensions/upstash                                                 @xmok
 /extensions/uptime                                                  @yarnaid
 /extensions/uptime-kuma                                             @MarlBurroW @pernielsentikaer @xmok
 /extensions/uptime-robot                                            @xmok
@@ -2181,7 +2183,7 @@
 /extensions/yubikey-code                                            @yoyoyeti
 /extensions/zalgo-text                                              @petermiles
 /extensions/zeabur                                                  @ridemountainpig
-/extensions/zed-recent-projects                                     @ewgenius @tleo19 @jylamont @pernielsentikaer @tmwrnr @true-real-michael
+/extensions/zed-recent-projects                                     @ewgenius @tleo19 @jylamont @pernielsentikaer @tmwrnr @true-real-michael @remorses
 /extensions/zefix                                                   @cimnine
 /extensions/zeitraum                                                @KennethWussmann
 /extensions/zen-browser                                             @Keyruu @theherk @walker-tx @Jimmy-b36 @sdaza @elliothco @ridemountainpig
