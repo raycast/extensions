@@ -1,17 +1,18 @@
-import { ActionPanel, Action, Form, showToast } from "@raycast/api";
-import { useState } from "react";
+import { ActionPanel, Action, Form, showToast, Image } from "@raycast/api";
+import { useCallback, useMemo, useState } from "react";
 import { executeAction, ApiParams, provider, createErrorToast, createSuccessToast } from "./utils";
 import { withAccessToken, useForm } from "@raycast/utils";
 import { validateTokenAddress, validateNumberInput, validateIntegerInput } from "./utils/validation";
-import { DCARequest } from "./type";
+import { DCARequest, PortfolioToken } from "./type";
 import { OwnedTokensDropdown } from "./components/owned-tokens-dropdown";
-import { SOL, WRAPPED_SOL_ADDRESS } from "./constants/tokenAddress";
+import { SOL, USDC, WRAPPED_SOL_ADDRESS } from "./constants/tokenAddress";
 
 function CreateDCA() {
   const [isLoading, setIsLoading] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [inputMintValue, setInputMintValue] = useState<"sol" | "usdc" | "other">("other");
 
-  const { handleSubmit, itemProps, reset } = useForm<DCARequest>({
+  const { handleSubmit, itemProps, reset, setValue } = useForm<DCARequest>({
     async onSubmit(values) {
       await handleCreateDCA(values);
     },
@@ -63,6 +64,17 @@ function CreateDCA() {
     }
   }
 
+  const isInputMintSolOrUsdc = useMemo(() => inputMintValue === "sol" || inputMintValue === "usdc", [inputMintValue]);
+
+  const handleInputMintChange = useCallback(
+    (value: PortfolioToken | undefined) => {
+      const mintType = value?.address === SOL.address ? "sol" : value?.address === USDC.address ? "usdc" : "other";
+      setInputMintValue(mintType);
+      setValue("outputMint", "");
+    },
+    [setValue],
+  );
+
   return (
     <Form
       isLoading={isLoading}
@@ -76,11 +88,27 @@ function CreateDCA() {
       }
     >
       <OwnedTokensDropdown
+        onChange={handleInputMintChange}
         title="Selling"
-        placeholder="Enter input token CA (e.g., SOL)"
+        placeholder="Enter input token name"
         itemProps={itemProps.inputMint}
       />
-      <Form.TextField {...itemProps.outputMint} title="Buying" placeholder="Enter output token CA" />
+      {!isInputMintSolOrUsdc ? (
+        <Form.Dropdown {...itemProps.outputMint} title="Buying" placeholder="Enter output token CA">
+          <Form.Dropdown.Item
+            value={SOL.address}
+            title={SOL.name}
+            icon={{ source: SOL.logoURI, mask: Image.Mask.Circle }}
+          />
+          <Form.Dropdown.Item
+            value={USDC.address}
+            title={USDC.name}
+            icon={{ source: USDC.logoURI, mask: Image.Mask.Circle }}
+          />
+        </Form.Dropdown>
+      ) : (
+        <Form.TextField {...itemProps.outputMint} title="Buying" placeholder="Enter output token CA" />
+      )}
       <Form.TextField {...itemProps.inAmount} title="Allocate" placeholder="Enter amount to allocate" />
       <Form.TextField {...itemProps.numberOfOrders} title="Over" placeholder="Enter total number of orders" />
       <Form.TextField {...itemProps.interval} title="Every" placeholder="Enter interval between orders in minutes" />
