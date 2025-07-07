@@ -1,6 +1,6 @@
 # MailerSend Changelog
 
-## [Manage Tokens + Filter Activity + API Quota] - {PR_MERGE_DATE}
+## [Manage Tokens + Filter Activity + API Quota] - 2025-07-07
 
 - View API Quota
 - Filter Domain Activity by Type
