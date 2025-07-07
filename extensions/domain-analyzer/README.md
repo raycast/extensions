@@ -22,7 +22,6 @@ Complete domain analysis with DNS information, ping, status, whois, geolocation 
 - Response status codes
 - Response time
 - SSL certificate validation
-- Optional screenshots
 
 ### 📄 Whois Information
 - Domain registrar
@@ -61,7 +60,6 @@ Complete domain analysis with DNS information, ping, status, whois, geolocation 
 ### Available Preferences
 
 - **Timeout**: Time limit in seconds for queries (default: 10s)
-- **Screenshots**: Enable website screenshots
 
 ## Dependencies
 
@@ -82,7 +80,6 @@ These tools are available by default on macOS.
 
 ## Limitations
 
-- Screenshots depend on external services
 - Some domains may block automated queries
 - Whois information may be limited depending on domain extension
 - Queries are subject to the configured timeout

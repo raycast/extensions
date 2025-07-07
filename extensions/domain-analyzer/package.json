@@ -18,7 +18,7 @@
           "name": "domain",
           "placeholder": "example.com",
           "type": "text",
-          "required": false
+          "required": true
         }
       ]
     }
