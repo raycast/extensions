@@ -21,7 +21,7 @@
     "tools": [
       {
         "name": "mozilla-vpn-control",
-        "title": "Mozilla VPN control",
+        "title": "Mozilla VPN Control",
         "description": "Ai Enablement of the extension Mozilla VPN Connect."
       }
     ],
