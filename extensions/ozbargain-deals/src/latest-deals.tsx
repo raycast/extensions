@@ -93,10 +93,10 @@ const sanitizeOptions = {
     img: ["src", "alt", "title", "width", "height"],
   },
   transformTags: {
-    'a': (tagName, attribs) => ({
+    a: (tagName: string, attribs: { [key: string]: string }) => ({
       tagName,
-      attribs: { ...attribs, rel: 'noopener noreferrer' }
-    })
+      attribs: { ...attribs, rel: "noopener noreferrer" },
+    }),
   },
   allowedSchemes: ["http", "https", "mailto"],
 };
