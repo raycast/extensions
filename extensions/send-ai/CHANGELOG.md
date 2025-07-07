@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.0.2] - {PR_MERGE_DATE}
+## [0.0.2] - 2025-07-07
 
 - Added a new command to launch a token on SendShot
 - Added a new command to view transaction history
