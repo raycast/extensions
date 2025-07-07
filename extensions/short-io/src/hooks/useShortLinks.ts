@@ -1,34 +1,29 @@
 import { useCachedPromise } from "@raycast/utils";
 import { ListLinksResponse, ShortLink } from "../types/types";
 import { LIST_LINK_API } from "../utils/constants";
-import axios from "axios";
 import { apiKey } from "../types/preferences";
-import { getDefaultDomain } from "../utils/common-utils";
+import axios from "axios";
 
-export const useShortLinks = () => {
-  return useCachedPromise(() => {
-    return getShortLinks() as Promise<ShortLink[]>;
-  }, []);
+export const useShortLinks = (domainId: string) => {
+  return useCachedPromise((domainId) => {
+    return getShortLinks(domainId) as Promise<ShortLink[]>;
+  }, [domainId]);
 };
 
-const getShortLinks = async () => {
-  const domain = await getDefaultDomain();
-  if (domain != undefined) {
-    const listLinksResponse = (
-      await axios.get(LIST_LINK_API, {
-        params: {
-          domain_id: domain.id,
-          limit: "150",
-          offset: "0",
-        },
-        headers: {
-          accept: "application/json",
-          authorization: apiKey,
-        },
-      })
-    ).data as ListLinksResponse;
-    return listLinksResponse.links;
-  } else {
-    return [];
-  }
+const getShortLinks = async (domainId: string) => {
+  if (!domainId) return [];
+  const listLinksResponse = (
+    await axios.get(LIST_LINK_API, {
+      params: {
+        domain_id: domainId,
+        limit: "150",
+        offset: "0",
+      },
+      headers: {
+        accept: "application/json",
+        authorization: apiKey,
+      },
+    })
+  ).data as ListLinksResponse;
+  return listLinksResponse.links;
 };
