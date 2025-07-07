@@ -1,6 +1,6 @@
 # HoudahSpot Search Changelog
 
-## [Fix text "undefined" when empty + Modernize] - {PR_MERGE_DATE}
+## [Fix text "undefined" when empty + Modernize] - 2025-07-07
 
 - fix: text passed as "undefined" when Argument is empty (ref: [Issue #20238](https://github.com/raycast/extensions/issues/20238))
 - add `metadata` image
