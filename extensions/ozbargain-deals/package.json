@@ -12,9 +12,9 @@
       "preferences": [
         {
           "name": "itemLimit",
-          "type": "textfield",
+          "type": "number",
           "required": false,
-          "default": "50",
+          "default": 50,
           "title": "Number of Deals",
           "description": "The maximum number of deals to fetch and display (e.g., 20, 50, 100). Default is 50. Note: The OzBargain RSS feed typically provides a fixed number of recent items, so setting a very high limit may not yield more results."
         }
