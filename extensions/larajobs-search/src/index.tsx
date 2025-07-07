@@ -16,7 +16,8 @@ export default function JobList() {
     return data.filter((job) => {
       if (key === "type") return job.type === val;
       if (key === "tag") return job.tags.find((tag) => tag.name === val);
-      if (key === "salary") return job.salary;
+      if (key === "salary") return !!job.salary;
+      return true;
     });
   }, [filter]);
 
