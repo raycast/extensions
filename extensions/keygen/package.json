@@ -27,21 +27,21 @@
   "commands": [
     {
       "name": "licenses",
-      "title": "Licenses",
+      "title": "Voew Licenses",
       "subtitle": "Keygen",
       "description": "List Licenses and Create new ones",
       "mode": "view"
     },
     {
       "name": "policies",
-      "title": "Policies",
+      "title": "List Policies",
       "subtitle": "Keygen",
       "description": "List Policies and Create new ones",
       "mode": "view"
     },
     {
       "name": "products",
-      "title": "Products",
+      "title": "View Products",
       "subtitle": "Keygen",
       "description": "List Products and Create new ones",
       "mode": "view"
