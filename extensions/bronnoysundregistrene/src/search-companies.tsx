@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Detail, showToast, Toast, LocalStorage, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Company } from "./types";
 import { searchCompanies, getCompanyDetails } from "./brreg-api";
 
@@ -26,7 +26,7 @@ export default function SearchCompanies() {
       if (storedFavorites) {
         setFavorites(JSON.parse(storedFavorites));
       }
-    } catch {
+    } catch (error) {
       await showFailureToast(error, { title: "Failed to load favorites" });
     } finally {
       setIsLoadingFavorites(false);
@@ -74,7 +74,7 @@ export default function SearchCompanies() {
       try {
         const results = await searchCompanies(searchText.trim());
         setCompanies(results.companies);
-      } catch {
+      } catch (error) {
         await showFailureToast(error, {
           title: "Search Failed",
           message: "Could not search for companies. Please try again.",
@@ -102,7 +102,7 @@ export default function SearchCompanies() {
         } else {
           setDetailedCompany(company);
         }
-      } catch {
+      } catch (error) {
         await showFailureToast(error, { title: "Failed to Load Details", message: "Could not load company details." });
         // Show basic data as fallback
         setDetailedCompany(company);
