@@ -13,7 +13,7 @@
     {
       "name": "search-companies",
       "title": "Search Brønnøysundregistrene",
-      "subtitle": "Norwegian Company Registry",
+      "subtitle": "Search for companies via official Brreg API",
       "description": "Search Norwegian companies by name or organization number. View detailed business information including financial data, contact details, and company structure.",
       "mode": "view"
     }
