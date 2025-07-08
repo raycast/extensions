@@ -22,8 +22,6 @@
 - Smart search detection automatically determines if input is company name or organization number
 - Professional UI with balanced two-column layout
 - Support for both Norwegian and English interfaces
-
-### Features
 - Real-time search with debouncing
 - Financial metrics prominently displayed
 - Empty state guidance for new users

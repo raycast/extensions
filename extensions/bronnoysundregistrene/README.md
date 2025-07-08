@@ -1,4 +1,4 @@
-# Norwegian Business Register
+# Brønnøysundregistrene
 
 Search and explore Norwegian companies with comprehensive business intelligence data from Brønnøysundregistrene - the official Norwegian Business Register.
 
@@ -57,7 +57,7 @@ This extension uses the official Brønnøysundregistrene API, which provides aut
 
 ## Support
 
-For issues or questions, please visit the [GitHub repository](https://github.com/your-username/norwegian-business-register).
+For issues or questions, please visit the [GitHub repository](https://github.com/raycast/extensions/tree/main/extensions/bronnoysundregistrene).
 
 ## License
 

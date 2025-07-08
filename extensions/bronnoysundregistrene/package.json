@@ -13,7 +13,7 @@
     {
       "name": "search-companies",
       "title": "Search Brønnøysundregistrene",
-      "subtitle": "Access comprehensive business data from The Brønnøysund Register Centre",
+      "subtitle": "Norwegian Company Registry",
       "description": "Search Norwegian companies by name or organization number. View detailed business information including financial data, contact details, and company structure.",
       "mode": "view"
     }

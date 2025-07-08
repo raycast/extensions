@@ -166,8 +166,21 @@ export default function SearchCompanies() {
                   <Action title="View Details" onAction={() => handleCompanySelection(company)} />
                   <Action.OpenInBrowser
                     title="Open in Brreg"
-                    url={company.bregUrl}
+                    url={company.bregUrl || "https://www.brreg.no"}
                     shortcut={{ modifiers: ["cmd"], key: "b" }}
+                    onOpen={(url) => {
+                      try {
+                        new URL(url);
+                        return true;
+                      } catch {
+                        showToast({
+                          style: Toast.Style.Failure,
+                          title: "Invalid URL",
+                          message: "Could not open company page.",
+                        });
+                        return false;
+                      }
+                    }}
                   />
                   {company.website && (
                     <Action.OpenInBrowser
@@ -227,8 +240,21 @@ export default function SearchCompanies() {
                 <Action title="View Details" onAction={() => handleCompanySelection(company)} />
                 <Action.OpenInBrowser
                   title="Open in Brreg"
-                  url={company.bregUrl}
+                  url={company.bregUrl || "https://www.brreg.no"}
                   shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                  onOpen={(url) => {
+                    try {
+                      new URL(url);
+                      return true;
+                    } catch {
+                      showToast({
+                        style: Toast.Style.Failure,
+                        title: "Invalid URL",
+                        message: "Could not open company page.",
+                      });
+                      return false;
+                    }
+                  }}
                 />
                 {company.website && (
                   <Action.OpenInBrowser
