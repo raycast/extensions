@@ -1,6 +1,6 @@
 # HoudahSpot Search Changelog
 
-## [Fix text not used in fallback mode] - {PR_MERGE_DATE}
+## [Fix text not used in fallback mode] - 2025-07-08
 
 - fix: text passed in fallback mode is now used if present
 
