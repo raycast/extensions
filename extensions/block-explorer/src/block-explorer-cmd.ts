@@ -1,10 +1,5 @@
-import {
-  LaunchProps,
-  open,
-  showToast,
-  Toast,
-  LocalStorage,
-} from "@raycast/api";
+import { LaunchProps, open, LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { chains, ChainConfig } from "./chains";
 
 type QueryTypes = "address" | "transaction" | "block";
@@ -15,7 +10,13 @@ export default async function Command(props: LaunchProps) {
   try {
     // Get custom chains from LocalStorage
     const customChainsStr = await LocalStorage.getItem<string>("custom-chains");
-    const customChains = customChainsStr ? JSON.parse(customChainsStr) : {};
+    let customChains: Record<string, ChainConfig> = {};
+    try {
+      customChains = customChainsStr ? JSON.parse(customChainsStr) : {};
+    } catch (error) {
+      showFailureToast(error, { title: "Error Parsing Custom Chains" });
+    }
+
     const allChains = { ...chains, ...customChains };
 
     // Get default chain from LocalStorage if no chain is specified
@@ -29,12 +30,7 @@ export default async function Command(props: LaunchProps) {
     const url = getEtherscanUrl(query, selectedChain, allChains);
     open(url);
   } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Something went wrong",
-      message:
-        error instanceof Error ? error.message : "An unexpected error occurred",
-    });
+    showFailureToast(error, { title: "Something went wrong" });
   }
 }
 

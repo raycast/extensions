@@ -1,4 +1,4 @@
-# Block Chain Explorers
+# Blockchain Explorers
 
 Directly search any EVM chain explorer by entering an Address, Transaction Hash, or Block.
 

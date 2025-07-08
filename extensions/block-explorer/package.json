@@ -16,6 +16,7 @@
     {
       "name": "block-explorer-cmd",
       "title": "Block Explorer",
+      "subtitle": "Search EVM block explorers",
       "description": "Quickly search block explorers for transactions, addresses, and blocks.",
       "mode": "no-view",
       "arguments": [
@@ -24,7 +25,7 @@
           "type": "text",
           "placeholder": "Enter address, transaction hash, or block number",
           "defaultValue": "",
-          "description": "The query to search for on Etherscan (e.g., address, transaction hash, block number).",
+          "description": "The query to search for on block explorers (e.g., address, transaction hash, block number).",
           "required": true
         },
         {
