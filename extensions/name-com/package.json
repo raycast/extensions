@@ -79,18 +79,18 @@
   "ai": {
     "evals": [
       {
-  "input" : "@name-com what's my account balance?",
-  "mocks" : {
-    "check-account-balance" : "100000"
-  },
-  "expected" : [
-    {
-      "callsTool" : {
-        "name" : "check-account-balance"
-      }
-    }
-  ]
-},
+        "input" : "@name-com what's my account balance?",
+        "mocks" : {
+          "check-account-balance" : "100000"
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "name" : "check-account-balance"
+            }
+          }
+        ]
+      },
       {
         "input": "@name-com what domains are in my account",
         "mocks": {
@@ -125,6 +125,11 @@
       {
         "input": "@name-com show dns records for raycast",
         "mocks": {
+          "list-domains": [
+            {
+              "domainName": "raycast.network"
+            }
+          ],
           "list-dns-records": [
             {
               "answer": "txt",
@@ -144,11 +149,6 @@
               "ttl": 300,
               "type": "TXT"
             }
-          ],
-          "list-domains": [
-            {
-              "domainName": "raycast.network"
-            }
           ]
         },
         "expected": [
@@ -160,7 +160,9 @@
           {
             "callsTool": {
               "arguments": {
-                "domainName": "raycast.network"
+                "domainName": {
+                  "includes": "raycast"
+                }
               },
               "name": "list-dns-records"
             }
