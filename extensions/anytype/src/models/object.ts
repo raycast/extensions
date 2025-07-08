@@ -27,7 +27,6 @@ export interface CreateObjectRequest {
 export interface UpdateObjectRequest {
   name?: string;
   icon?: ObjectIcon;
-  type_key?: string; // TODO: add support in forms
   properties?: PropertyLinkWithValue[];
 }
 
