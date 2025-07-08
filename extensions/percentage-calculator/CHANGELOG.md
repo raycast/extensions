@@ -1,6 +1,6 @@
 # Percentage Calculator Changelog
 
-## [Initial Release] - {PR_MERGE_DATE} 
+## [Initial Release] - 2025-07-08 
 
 ### Added
 - Initial release of Percentage Calculator
