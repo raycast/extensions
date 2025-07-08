@@ -87,8 +87,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
   return executeJxa(`
   const things = Application('${preferences.thingsAppIdentifier}');
   const todos = things.lists.byId('${commandListNameToListIdMapping[commandListName]}').toDos();
-  const projectConstructor = things.projects()[0]?.constructor;
-  
+
   return todos.map(todo => ({
     id: todo.id(),
     name: todo.name(),
@@ -97,7 +96,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
     tags: todo.tagNames(),
     dueDate: todo.dueDate() && todo.dueDate().toISOString(),
     activationDate: todo.activationDate() && todo.activationDate().toISOString(),
-    isProject: projectConstructor && todo.constructor === projectConstructor,
+    isProject: todo.properties().pcls === "project",
     project: todo.project() && {
       id: todo.project().id(),
       name: todo.project().name(),

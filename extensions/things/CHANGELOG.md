@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Improved Project Detection] - {PR_MERGE_DATE}
+
+- Improve detection mechanism for projects to not depend on the existence of a project
+
 ## [Enhanced Error Handling] - 2025-07-07
 
 - Improved error messages with specific troubleshooting steps for Things connection issues
