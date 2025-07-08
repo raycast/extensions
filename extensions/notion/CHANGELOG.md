@@ -1,6 +1,6 @@
 # Notion Changelog
 
-## [Show page properties in page previews] - {PR_MERGE_DATE}
+## [Show page properties in page previews] - 2025-07-08
 
 - Page previews now display page properties
 - Added a checkbox to the extension preferences to control this behaviour, defaults to off.
