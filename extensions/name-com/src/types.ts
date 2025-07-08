@@ -21,7 +21,7 @@ export type Domain = {
     billing: Contact;
     registrant: Contact;
     tech: Contact;
-  }
+  };
   nameservers: string[];
   renewalPrice: number;
 };

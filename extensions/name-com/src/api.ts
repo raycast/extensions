@@ -12,7 +12,7 @@ export const headers = {
 };
 
 export const parseResponse = async (response: Response) => {
-  if (response.status===204) return;
+  if (response.status === 204) return;
   const result = await response.json();
   if (!response.ok) {
     const error = result as { message: string; details?: string };
@@ -21,12 +21,15 @@ export const parseResponse = async (response: Response) => {
   return result;
 };
 
-export const callCoreApi = async <T>(endpoint: string, {method, body}: {method: string; body?: Record<string, string>} = {method: "GET"}) => {
+export const callCoreApi = async <T>(
+  endpoint: string,
+  { method, body }: { method: string; body?: Record<string, string> } = { method: "GET" },
+) => {
   const response = await fetch(API_URL + endpoint, {
     method,
     headers,
-    body: body && JSON.stringify(body)
-  })
+    body: body && JSON.stringify(body),
+  });
   const result = await parseResponse(response);
   return result as T;
-}
+};

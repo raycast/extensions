@@ -4,8 +4,8 @@ import { DNSRecord } from "../types";
 type Input = {
   /**
    * The domain name
-  */
- domainName: string;
+   */
+  domainName: string;
 };
 
 /**

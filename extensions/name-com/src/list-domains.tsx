@@ -23,9 +23,8 @@ export default function ListDomains() {
     headers,
     parseResponse,
     mapResult(result) {
-      const res = result as { domains: Domain[] };
       return {
-        data: res.domains,
+        data: (result as { domains: Domain[] }).domains,
       };
     },
     initialData: [],
@@ -118,8 +117,14 @@ function DNSRecords({ domainName }: { domainName: string }) {
       try {
         await mutate(
           callCoreApi(`domains/${domainName}/records/${recordId}`, {
-            method: "DELETE"
-          })
+            method: "DELETE",
+          }),
+          {
+            optimisticUpdate(data) {
+              return data.filter((r) => r.id !== recordId);
+            },
+            shouldRevalidateAfter: false,
+          },
         );
         toast.style = Toast.Style.Success;
         toast.title = "Deleted DNS Record";

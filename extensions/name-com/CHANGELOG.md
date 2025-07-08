@@ -3,8 +3,9 @@
 ## [✨ AI Enhancements + Migrate API + Modernize] - {PR_MERGE_DATE}
 
 - ✨ AI Tools:
-    1. `list-domains`
-    2. `list-dns-records`
+    1. `check-account-balance`
+    2. `list-domains`
+    3. `list-dns-records`
 - Migrate API from **Legacy v4** to **Core v1** ([v4 To Core API Migration Guide](https://docs.name.com/migration-guide))
 - Modernize to use latest Raycast config
 
