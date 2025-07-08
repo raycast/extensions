@@ -1,11 +1,11 @@
-// src/app-detail-view.tsx - Detail view for an app
 // Displays comprehensive information about an iOS app with metadata and actions
-import { Detail, Color, Icon } from "@raycast/api";
+import { Detail, Color, Icon, showToast, Toast } from "@raycast/api";
 import { AppDetails } from "./types";
 import { formatPrice } from "./utils/paths";
 import { renderStarRating, formatDate } from "./utils/common";
 import { AppActionPanel } from "./components/app-action-panel";
 import { useAppDetails, useAppDownload } from "./hooks";
+import { logger } from "./utils/logger";
 
 interface AppDetailViewProps {
   app: AppDetails;
@@ -35,12 +35,12 @@ export default function AppDetailView({ app: initialApp }: AppDetailViewProps) {
   // Get the app icon URL with fallbacks (prioritizing higher resolution)
   // Uses artworkUrl512 first, then falls back to artworkUrl60, then iconUrl
   const iconUrl = app.artworkUrl512 || app.artworkUrl60 || app.iconUrl || "";
-  console.log(`[AppDetailView] Rendering app: ${app.name}, version: ${app.version}, bundleId: ${app.bundleId}`);
-  console.log("[AppDetailView] Using icon URL:", iconUrl);
+  logger.log(`[AppDetailView] Rendering app: ${app.name}, version: ${app.version}, bundleId: ${app.bundleId}`);
+  logger.log("[AppDetailView] Using icon URL:", iconUrl);
 
   // Create a fallback App Store URL if trackViewUrl is not available
   const appStoreUrl = app.trackViewUrl || `https://apps.apple.com/app/id${app.id}`;
-  console.log("[AppDetailView] Using App Store URL:", appStoreUrl);
+  logger.log("[AppDetailView] Using App Store URL:", appStoreUrl);
 
   // Get the app rating
   const rating = app.averageUserRatingForCurrentVersion || app.averageUserRating;
@@ -64,13 +64,13 @@ export default function AppDetailView({ app: initialApp }: AppDetailViewProps) {
   const currentVersionReleaseDate = formatDate(app.currentVersionReleaseDate);
 
   // Debug information - helps troubleshoot missing or incorrect data
-  console.log("[AppDetailView] App genres:", app.genres);
-  console.log("[AppDetailView] App sellerName:", app.sellerName);
-  console.log("[AppDetailView] App price:", app.price, "formatted as:", formatPrice(app.price));
-  console.log("[AppDetailView] App size:", app.size, "formatted as:", formatFileSize(app.size));
+  logger.log("[AppDetailView] App genres:", app.genres);
+  logger.log("[AppDetailView] App sellerName:", app.sellerName);
+  logger.log("[AppDetailView] App price:", app.price, "formatted as:", formatPrice(app.price));
+  logger.log("[AppDetailView] App size:", app.size, "formatted as:", formatFileSize(app.size));
   // Log the full app object for comprehensive debugging (only in development)
   if (process.env.NODE_ENV === "development") {
-    console.log("[AppDetailView] Full app object:", JSON.stringify(app, null, 2));
+    logger.log("[AppDetailView] Full app object:", JSON.stringify(app, null, 2));
   }
 
   return (
@@ -136,7 +136,13 @@ ${app.screenshotUrls.map((url, index) => `![Screenshot ${index + 1}](${url}?rayc
       actions={
         <AppActionPanel
           app={app}
-          onDownload={() => downloadApp(app.bundleId, app.name, app.version, app.price, true)}
+          onDownload={() => {
+            if (!app.bundleId) {
+              showToast(Toast.Style.Failure, "Cannot download app", "Bundle ID is missing");
+              return Promise.resolve(null);
+            }
+            return downloadApp(app.bundleId, app.name, app.version, app.price, true);
+          }}
           showViewDetails={false}
         />
       }

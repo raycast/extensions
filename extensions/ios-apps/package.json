@@ -23,7 +23,6 @@
       "name": "search-apps",
       "title": "Search iOS Apps",
       "description": "Search for iOS apps on the App Store by name or keyword",
-      "path": "./src/tools/search-apps.ts",
       "arguments": [
         {
           "name": "query",
@@ -43,7 +42,6 @@
       "name": "get-app-details",
       "title": "Get iOS App Details",
       "description": "Get detailed information about an iOS app by name or search term",
-      "path": "./src/tools/get-app-details.ts",
       "arguments": [
         {
           "name": "query",
@@ -63,7 +61,19 @@
       "name": "download-app",
       "title": "Download iOS App",
       "description": "Download an iOS app",
-      "path": "./src/tools/download-app.ts",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "string",
+          "description": "The name or search term for the iOS app",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-current-version",
+      "title": "Get Current Version",
+      "description": "Lookup an app's current version.",
       "arguments": [
         {
           "name": "query",
@@ -112,74 +122,116 @@
       "type": "textfield",
       "default": "/opt/homebrew/bin/ipatool",
       "required": false
+    },
+    {
+      "name": "includeIPhone",
+      "title": "Include Screenshots From:",
+      "description": "Download screenshots for iPhone devices",
+      "type": "checkbox",
+      "label": "iPhone",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeIPad",
+      "title": "",
+      "description": "Download screenshots for iPad devices",
+      "type": "checkbox",
+      "label": "iPad",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeMac",
+      "title": "",
+      "description": "Download screenshots for Mac devices",
+      "type": "checkbox",
+      "label": "Mac",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "includeAppleTV",
+      "title": "",
+      "description": "Download screenshots for Apple TV devices",
+      "type": "checkbox",
+      "label": "Apple TV",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "includeAppleWatch",
+      "title": "",
+      "description": "Download screenshots for Apple Watch devices",
+      "type": "checkbox",
+      "label": "Apple Watch",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "includeIMessage",
+      "title": "",
+      "description": "Download screenshots for iMessage devices",
+      "type": "checkbox",
+      "label": "iMessage",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "includeVisionPro",
+      "title": "",
+      "description": "Download screenshots for Vision Pro devices",
+      "type": "checkbox",
+      "label": "Vision Pro",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "downloadTimeoutSeconds",
+      "title": "Download Timeout",
+      "description": "Timeout for individual screenshot downloads in seconds",
+      "type": "textfield",
+      "default": "90",
+      "required": false
+    },
+    {
+      "name": "maxConcurrentDownloads",
+      "title": "Max Concurrent Downloads",
+      "description": "Maximum number of concurrent screenshot downloads",
+      "type": "textfield",
+      "default": "5",
+      "required": false
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Verbose Logging",
+      "description": "Enable detailed console logging for debugging purposes",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
     }
   ],
-  "ai": {
-    "evals": [
-      {
-        "input": "@ios-apps search for Twitter",
-        "mocks": {
-          "search-apps": "Here are iOS apps matching \"Twitter\":\n\n- **X**\n  Developer: X Corp.\n  Category: Social Networking\n  Rating: 4.5/5 (2.3M reviews)\n  Price: Free\n  [View on App Store](https://apps.apple.com/us/app/x/id333903271)\n\n- **Threads**\n  Developer: Instagram, Inc.\n  Category: Social Networking\n  Rating: 4.2/5 (245K reviews)\n  Price: Free\n  [View on App Store](https://apps.apple.com/us/app/threads/id6446901002)\n\n- **Bluesky Social**\n  Developer: Bluesky PBC\n  Category: Social Networking\n  Rating: 4.6/5 (42K reviews)\n  Price: Free\n  [View on App Store](https://apps.apple.com/us/app/bluesky-social/id6444370199)"
-        },
-        "expected": [
-          {
-            "callsTool": "search-apps"
-          }
-        ]
-      },
-      {
-        "input": "@ios-apps tell me about Minecraft",
-        "mocks": {
-          "get-app-details": "# Minecraft\n\n**Developer**: Mojang\n**Category**: Games\n**Size**: 456.8 MB\n**Age Rating**: 9+\n**Price**: $6.99\n**Rating**: ★★★★★ (4.8) based on 1.2M reviews\n\n**Version**: 1.20.51\n**Last Updated**: March 5, 2025\n\n**Description**:\nExplore infinite worlds and build everything from the simplest of homes to the grandest of castles. Create, explore and survive alone or with friends on mobile devices or Windows 10.\n\n**What's New in the Latest Version**:\n- Added new biomes: Cherry Grove and Bamboo Jungle\n- New mobs: Camels and Sniffers\n- Performance improvements and bug fixes\n\n**Screenshots**:\n[View Screenshots on App Store]\n\n**Links**:\n- [View on App Store](https://apps.apple.com/us/app/minecraft/id479516143)\n- [Developer Website](https://www.minecraft.net/)"
-        },
-        "expected": [
-          {
-            "callsTool": "get-app-details"
-          }
-        ]
-      },
-      {
-        "input": "@ios-apps download Spotify",
-        "mocks": {
-          "download-app": "Downloading Spotify...\n\nApp found: Spotify - Music and Podcasts\nDeveloper: Spotify AB\nBundle ID: com.spotify.client\n\nDownload started to ~/Downloads/Spotify.ipa\nDownload completed successfully!\n\nYou can install this app using:\n1. Sideloadly (https://sideloadly.io/)\n2. AltStore (https://altstore.io/)\n3. Apple Configurator 2 (for developers)\n\nThe IPA file is located at: ~/Downloads/Spotify.ipa"
-        },
-        "expected": [
-          {
-            "callsTool": "download-app"
-          }
-        ]
-      },
-      {
-        "input": "@ios-apps search for games with limit 5",
-        "mocks": {
-          "search-apps": "Here are top iOS games:\n\n- **Roblox**\n  Developer: Roblox Corporation\n  Category: Games\n  Rating: 4.4/5 (3.8M reviews)\n  Price: Free (In-App Purchases)\n  [View on App Store](https://apps.apple.com/us/app/roblox/id431946152)\n\n- **Minecraft**\n  Developer: Mojang\n  Category: Games\n  Rating: 4.8/5 (1.2M reviews)\n  Price: $6.99\n  [View on App Store](https://apps.apple.com/us/app/minecraft/id479516143)\n\n- **Genshin Impact**\n  Developer: miHoYo Limited\n  Category: Games\n  Rating: 4.7/5 (278K reviews)\n  Price: Free (In-App Purchases)\n  [View on App Store](https://apps.apple.com/us/app/genshin-impact/id1517783697)\n\n- **Candy Crush Saga**\n  Developer: King\n  Category: Games\n  Rating: 4.7/5 (1.5M reviews)\n  Price: Free (In-App Purchases)\n  [View on App Store](https://apps.apple.com/us/app/candy-crush-saga/id553834731)\n\n- **Among Us!**\n  Developer: InnerSloth LLC\n  Category: Games\n  Rating: 4.3/5 (635K reviews)\n  Price: Free (In-App Purchases)\n  [View on App Store](https://apps.apple.com/us/app/among-us/id1351168404)"
-        },
-        "expected": [
-          {
-            "callsTool": "search-apps"
-          }
-        ]
-      }
-    ]
-  },
   "dependencies": {
     "@raycast/api": "^1.93.1",
     "@raycast/utils": "^1.17.0",
-    "@types/react-dom": "^19.1.2",
-    "@types/stream-json": "^1.7.8",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "stream-chain": "^2.2.5",
-    "stream-json": "^1.9.1"
+    "p-limit": "^6.2.0",
+    "react": "^19.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
+    "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.16",
     "@types/node": "^20.10.2",
+    "@types/p-limit": "^2.1.0",
     "eslint": "^8.57.0",
+    "jest": "^30.0.4",
+    "nock": "^14.0.5",
     "prettier": "^3.3.3",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "scripts": {
@@ -187,6 +239,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "evals": "ray evals",
+    "test": "jest",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

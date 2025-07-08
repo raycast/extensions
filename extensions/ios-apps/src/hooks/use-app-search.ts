@@ -1,12 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
-import { execFile } from "child_process";
-import { promisify } from "util";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { debounce } from "lodash";
-import { AppDetails } from "../types";
-import { IpaToolSearchApp } from "../types";
+import type { AppDetails, IpaToolSearchApp } from "../types";
 import { IPATOOL_PATH } from "../utils/paths";
-import { ensureAuthenticated } from "../utils/common";
+import { ensureAuthenticated } from "../utils/auth";
 import { enrichAppDetails } from "../utils/itunes-api";
 
 const execFileAsync = promisify(execFile);
@@ -16,6 +15,7 @@ interface UseAppSearchResult {
   isLoading: boolean;
   error: string | null;
   totalResults: number;
+  searchText: string;
   setSearchText: (text: string) => void;
 }
 
@@ -32,6 +32,28 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500, limit = 2
   const [apps, setApps] = useState<AppDetails[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [totalResults, setTotalResults] = useState<number>(0);
+
+  // Handle enrichment errors
+  const handleEnrichmentError = (err: unknown) => {
+    process.stderr.write(`App enrichment failed: ${err instanceof Error ? err.message : String(err)}\n`);
+    // Continue with unenriched apps rather than failing the whole search
+    setApps((prevApps) => [...prevApps]);
+  };
+
+  // Handle search errors
+  const handleSearchError = (err: unknown) => {
+    let errorMessage = "An unknown error occurred";
+    if (err instanceof Error) {
+      errorMessage = err.message;
+      process.stderr.write(`Search error: ${err.message}\n`);
+    }
+    setError(errorMessage);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Search Failed",
+      message: errorMessage,
+    });
+  };
 
   // Define the search function
   const performSearch = async (query: string) => {
@@ -70,7 +92,8 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500, limit = 2
       );
 
       if (stderr) {
-        console.error("ipatool search stderr:", stderr);
+        // Log to stderr instead of console
+        process.stderr.write(`ipatool search stderr: ${stderr}\n`);
       }
 
       // Parse the JSON response
@@ -85,7 +108,7 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500, limit = 2
       const mappedApps: AppDetails[] = ipaApps.map((app) => ({
         id: app.id.toString(),
         name: app.name,
-        bundleId: app.bundleId.toLowerCase(), // Use lowercase bundleId as per AppDetails interface
+        bundleId: app.bundleId || app.bundleID || "", // Handle both bundleId and bundleID formats from ipatool
         version: app.version,
         price: app.price.toString(),
         artistName: app.developer,
@@ -111,35 +134,87 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500, limit = 2
         userRatingCountForCurrentVersion: 0,
       }));
 
-      // Enrich the app details with iTunes API data
-      const enrichedApps = await Promise.all(
-        mappedApps.map(async (app) => {
-          try {
-            return await enrichAppDetails(app);
-          } catch (error) {
-            console.error(`Error enriching app ${app.name}:`, error);
-            return app;
-          }
-        }),
-      );
+      // Show progress for enrichment if we have multiple apps
+      let enrichmentToast: Toast | null = null;
+      if (mappedApps.length > 1) {
+        enrichmentToast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Enriching results",
+          message: `Processing ${mappedApps.length} apps...`,
+        });
+      }
 
-      setApps(enrichedApps);
+      let completedEnrichments = 0;
+      let failedEnrichments = 0;
+
+      // Enrich the app details with iTunes API data and track progress
+      const enrichmentPromises = mappedApps.map(async (app) => {
+        try {
+          const enriched = await enrichAppDetails(app);
+
+          completedEnrichments++;
+          if (enrichmentToast) {
+            const progressPercent = Math.round((completedEnrichments / mappedApps.length) * 100);
+            enrichmentToast.message = `${completedEnrichments}/${mappedApps.length} (${progressPercent}%) enriched`;
+          }
+
+          return enriched;
+        } catch (err) {
+          completedEnrichments++;
+          failedEnrichments++;
+
+          if (enrichmentToast) {
+            const progressPercent = Math.round((completedEnrichments / mappedApps.length) * 100);
+            enrichmentToast.message = `${completedEnrichments}/${mappedApps.length} (${progressPercent}%) - ${failedEnrichments} failed`;
+          }
+
+          handleEnrichmentError(err);
+          return app;
+        }
+      });
+
+      const enrichedApps = await Promise.allSettled(enrichmentPromises);
+      const finalApps = enrichedApps
+        .map((result) => (result.status === "fulfilled" ? result.value : null))
+        .filter((app): app is NonNullable<typeof app> => app !== null);
+
+      // Update final enrichment status
+      if (enrichmentToast) {
+        if (failedEnrichments === 0) {
+          enrichmentToast.style = Toast.Style.Success;
+          enrichmentToast.title = "Results enriched";
+          enrichmentToast.message = `Successfully enriched all ${mappedApps.length} results`;
+        } else if (failedEnrichments < mappedApps.length) {
+          enrichmentToast.style = Toast.Style.Success;
+          enrichmentToast.title = "Results partially enriched";
+          enrichmentToast.message = `Enriched ${mappedApps.length - failedEnrichments}/${mappedApps.length} results`;
+        } else {
+          enrichmentToast.style = Toast.Style.Failure;
+          enrichmentToast.title = "Enrichment failed";
+          enrichmentToast.message = "Could not enrich any results";
+        }
+      }
+
+      setApps(finalApps);
       setTotalResults(count);
-    } catch (error) {
-      console.error("Error searching for apps:", error);
-      setError(`Error: ${error instanceof Error ? error.message : String(error)}`);
-      showToast(Toast.Style.Failure, "Search Failed", String(error));
+    } catch (err) {
+      handleSearchError(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Create a debounced version of the search function
+  // Create a debounced version of the search function that doesn't change on re-renders
   const debouncedSearch = useCallback(
     debounce((query: string) => {
-      performSearch(query);
+      // Wrap in a try/catch to handle errors locally
+      try {
+        performSearch(query);
+      } catch (err) {
+        handleSearchError(err);
+      }
     }, debounceMs),
-    [performSearch, debounceMs], // Include all external dependencies to prevent stale closures
+    [], // Empty dependency array to ensure stability
   );
 
   // Update search when text changes
@@ -148,7 +223,7 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500, limit = 2
       debouncedSearch(searchText);
     } else {
       setApps([]);
-      setTotalResults(0);
+      setError(null);
     }
 
     // Cleanup function to cancel any pending debounced calls
@@ -162,6 +237,7 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500, limit = 2
     isLoading,
     error,
     totalResults,
-    setSearchText,
+    searchText,
+    setSearchText: (text: string) => setSearchText(text),
   };
 }

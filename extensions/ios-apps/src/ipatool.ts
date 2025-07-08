@@ -1,16 +1,19 @@
 import { promisify } from "util";
 import { showToast, Toast, showHUD } from "@raycast/api";
 import { IPATOOL_PATH, getDownloadsDirectory } from "./utils/paths";
-import { ensureAuthenticated, safeJsonParse, extractFilePath } from "./utils/common";
+import { ensureAuthenticated } from "./utils/auth";
+import { safeJsonParse, extractFilePath } from "./utils/common";
 import { fetchITunesAppDetails, convertITunesResultToAppDetails } from "./utils/itunes-api";
 import path from "path";
 import fs from "fs";
 import { spawn, execFile } from "child_process";
 import { AppDetails, IpaToolSearchApp, IpaToolSearchResponse } from "./types";
+import { logger } from "./utils/logger";
 
 // Retry configuration for handling transient network errors
 const MAX_RETRIES = 3; // Maximum number of retry attempts
 const INITIAL_RETRY_DELAY = 2000; // Initial delay between retries (2 seconds)
+const MAX_RETRY_DELAY = 10000; // Maximum delay between retries (10 seconds)
 
 const execFileAsync = promisify(execFile);
 
@@ -22,19 +25,19 @@ const execFileAsync = promisify(execFile);
  */
 export async function searchApps(query: string, limit = 20): Promise<IpaToolSearchApp[]> {
   try {
-    console.log(`[ipatool] Searching for apps with query: "${query}", limit: ${limit}`);
+    logger.log(`[ipatool] Searching for apps with query: "${query}", limit: ${limit}`);
 
     // Ensure we're authenticated before proceeding
     const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) {
-      console.error("[ipatool] Authentication failed during app search");
+      logger.error("[ipatool] Authentication failed during app search");
       showToast(Toast.Style.Failure, "Authentication failed", "Please check your Apple ID credentials");
       return [];
     }
 
     // Execute the search command with proper formatting and non-interactive mode
     // Using execFile with array arguments to prevent command injection
-    console.log(`[ipatool] Executing search for query: ${query} with limit: ${limit}`);
+    logger.log(`[ipatool] Executing search for query: ${query} with limit: ${limit}`);
     const { stdout } = await execFileAsync(IPATOOL_PATH, [
       "search",
       query,
@@ -46,13 +49,13 @@ export async function searchApps(query: string, limit = 20): Promise<IpaToolSear
     ]);
 
     // Parse the JSON output with fallback to empty response if parsing fails
-    console.log(`[ipatool] Received search response, parsing JSON...`);
+    logger.log(`[ipatool] Received search response, parsing JSON...`);
     const searchResponse = safeJsonParse<IpaToolSearchResponse>(stdout, { count: 0, apps: [] });
-    console.log(`[ipatool] Found ${searchResponse.apps?.length || 0} apps in search results`);
+    logger.log(`[ipatool] Found ${searchResponse.apps?.length || 0} apps in search results`);
 
     return searchResponse.apps || [];
   } catch (error) {
-    console.error("Error searching apps:", error);
+    logger.error("Error searching apps:", error);
     showToast(Toast.Style.Failure, "Error searching apps", String(error));
     return [];
   }
@@ -77,12 +80,12 @@ export async function downloadIPA(
   retryDelay = INITIAL_RETRY_DELAY,
 ) {
   try {
-    console.log(`[ipatool] Starting download for bundleId: ${bundleId}, app: ${appName}, version: ${appVersion}`);
+    logger.log(`[ipatool] Starting download for bundleId: ${bundleId}, app: ${appName}, version: ${appVersion}`);
 
     // Ensure we're authenticated before proceeding with download
     const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) {
-      console.error("[ipatool] Authentication failed during app download");
+      logger.error("[ipatool] Authentication failed during app download");
       showToast(Toast.Style.Failure, "Authentication failed", "Please check your Apple ID credentials");
       return null;
     }
@@ -96,7 +99,7 @@ export async function downloadIPA(
 
     // Check if the app is paid based on price value
     const isPaid = price !== "0" && price !== "";
-    console.log(`[ipatool] Downloading app: ${appName || bundleId}, isPaid: ${isPaid}, price: ${price}${retryInfo}`);
+    logger.log(`[ipatool] Downloading app: ${appName || bundleId}, isPaid: ${isPaid}, price: ${price}${retryInfo}`);
 
     // Use spawn instead of exec to get real-time output
     return new Promise<string | null>((resolve, reject) => {
@@ -115,11 +118,11 @@ export async function downloadIPA(
 
       // Add purchase flag for paid apps
       if (isPaid) {
-        console.log("Adding --purchase flag for paid app");
+        logger.log("Adding --purchase flag for paid app");
         args.push("--purchase");
       }
 
-      console.log(`[ipatool] Executing download command: ${IPATOOL_PATH} ${args.join(" ")}`);
+      logger.log(`[ipatool] Executing download command: ${IPATOOL_PATH} ${args.join(" ")}`);
 
       // Spawn the process
       const child = spawn(IPATOOL_PATH, args);
@@ -132,16 +135,16 @@ export async function downloadIPA(
       child.stdout.on("data", (data) => {
         const chunk = data.toString();
         stdout += chunk;
-        console.log(`[ipatool] stdout: ${chunk.trim()}`);
+        logger.log(`[ipatool] stdout: ${chunk.trim()}`);
 
         // Log any authentication or purchase confirmation prompts for debugging
         if (chunk.includes("password") || chunk.includes("authentication") || chunk.includes("purchase")) {
-          console.log(`[ipatool] Authentication/Purchase prompt detected: ${chunk.trim()}`);
+          logger.log(`[ipatool] Authentication/Purchase prompt detected: ${chunk.trim()}`);
         }
 
         // Try to extract progress information
         const progressMatch = chunk.match(/downloading\s+(\d+)%/);
-        if (progressMatch && progressMatch[1]) {
+        if (progressMatch?.[1]) {
           const progress = parseInt(progressMatch[1], 10) / 100;
           if (progress > lastProgress) {
             lastProgress = progress;
@@ -154,73 +157,89 @@ export async function downloadIPA(
       child.stderr.on("data", (data) => {
         const chunk = data.toString();
         stderr += chunk;
-        console.error(`[ipatool] stderr: ${chunk.trim()}`);
+        logger.error(`[ipatool] stderr: ${chunk.trim()}`);
 
         // Log specific error types for better debugging
         if (chunk.includes("network") || chunk.includes("connection") || chunk.includes("tls")) {
-          console.error(`[ipatool] Network-related error detected: ${chunk.trim()}`);
+          logger.error(`[ipatool] Network-related error detected: ${chunk.trim()}`);
         } else if (chunk.includes("authentication") || chunk.includes("login")) {
-          console.error(`[ipatool] Authentication error detected: ${chunk.trim()}`);
+          logger.error(`[ipatool] Authentication error detected: ${chunk.trim()}`);
         }
       });
 
       // Handle process completion
       child.on("close", async (code) => {
-        console.log(`[ipatool] Download process exited with code ${code}`);
+        logger.log(`[ipatool] Download process exited with code ${code}`);
 
         // Only log full output in development or when there's an error
         if (process.env.NODE_ENV === "development" || code !== 0) {
-          console.log(`[ipatool] Full stdout: ${stdout}`);
-          console.log(`[ipatool] Full stderr: ${stderr}`);
+          logger.log(`[ipatool] Full stdout: ${stdout}`);
+          logger.log(`[ipatool] Full stderr: ${stderr}`);
         }
 
         if (code !== 0) {
-          console.error(`[ipatool] Download failed with code ${code}. Error: ${stderr}`);
+          logger.error(`[ipatool] Download failed with code ${code}. Error: ${stderr}`);
+          logger.error(`[ipatool] Full stdout content: "${stdout}"`);
 
-          // Log specific error information for troubleshooting
-          if (stderr.includes("not found") || stderr.includes("no app")) {
-            console.error(`[ipatool] App not found error detected for bundleId: ${bundleId}`);
-          } else if (stderr.includes("permission") || stderr.includes("access")) {
-            console.error(`[ipatool] Permission error detected, check file system permissions`);
-          }
+          // Parse JSON output from stdout to get specific error information
+          let errorMessage = `Process exited with code ${code}`;
+          let specificError = "";
 
-          // Check if this is a TLS error or other network error that might be transient
-          const isTlsError =
-            stdout.includes("tls: bad record MAC") ||
-            stderr.includes("tls: bad record MAC") ||
-            stdout.includes("network error") ||
-            stderr.includes("network error") ||
-            stdout.includes("connection reset") ||
-            stderr.includes("connection reset");
-
-          // If we have retries left and it's a TLS error, retry with backoff
-          if (isTlsError && retryCount < MAX_RETRIES) {
-            const nextRetryCount = retryCount + 1;
-            const nextRetryDelay = retryDelay * 1.5; // Exponential backoff
-
-            console.log(
-              `[ipatool] TLS/Network error detected. Retrying in ${retryDelay}ms (Attempt ${nextRetryCount}/${MAX_RETRIES})`,
-            );
-            await showHUD(`Network error. Retrying in ${Math.round(retryDelay / 1000)}s...`, { clearRootSearch: true });
-            console.log(`[ipatool] Waiting ${retryDelay}ms before retry attempt ${nextRetryCount}/${MAX_RETRIES}`);
-
-            // Wait for the retry delay
-            setTimeout(async () => {
-              try {
-                // Retry the download
-                const result = await downloadIPA(bundleId, appName, appVersion, price, nextRetryCount, nextRetryDelay);
-                resolve(result);
-              } catch (retryError) {
-                reject(retryError);
+          try {
+            // ipatool often outputs multiple JSON lines, check each line
+            const lines = stdout
+              .trim()
+              .split("\n")
+              .filter((line) => line.trim());
+            for (const line of lines) {
+              if (line.includes('"error"')) {
+                const jsonData = JSON.parse(line);
+                if (jsonData.error) {
+                  specificError = jsonData.error;
+                  logger.error(`[ipatool] Parsed error from JSON: ${specificError}`);
+                  break;
+                }
               }
-            }, retryDelay);
-            return;
+            }
+          } catch (parseError) {
+            logger.error(`[ipatool] Could not parse JSON from stdout: ${parseError}`);
           }
 
-          // If we're out of retries or it's not a TLS error, fail normally
-          await showHUD("Download failed", { clearRootSearch: true });
-          showToast(Toast.Style.Failure, "Download Failed", `Process exited with code ${code}`);
-          reject(new Error(`Process exited with code ${code}`));
+          // Check if this is a network error that might be transient
+          if (stderr.includes("TLS") || stderr.includes("network") || stderr.includes("connection")) {
+            if (retryCount < MAX_RETRIES) {
+              logger.log(
+                `[ipatool] Network error detected, retrying in ${retryDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`,
+              );
+              await new Promise((resolve) => setTimeout(resolve, retryDelay));
+              return downloadIPA(
+                bundleId,
+                appName,
+                appVersion,
+                price,
+                retryCount + 1,
+                Math.min(retryDelay * 2, MAX_RETRY_DELAY),
+              );
+            }
+          }
+
+          // Determine user-friendly error message based on specific error
+          if (specificError === "license is required") {
+            errorMessage = `The app "${appName}" requires a purchase or is not available for download. It may be a paid app or not available in your region.`;
+          } else if (specificError.includes("not found") || specificError.includes("no app")) {
+            errorMessage = `The app "${appName}" was not found in the App Store. It may not be available in your region or may have been removed.`;
+          } else if (specificError.includes("authentication") || specificError.includes("login")) {
+            errorMessage = `Authentication failed. Please check your Apple ID credentials in the extension preferences.`;
+          } else if (specificError.includes("permission") || specificError.includes("access")) {
+            errorMessage = `Permission denied. Please check file system permissions for the download directory.`;
+          } else if (specificError.includes("network") || specificError.includes("connection")) {
+            errorMessage = `Network error occurred during download. Please check your internet connection.`;
+          } else if (specificError) {
+            errorMessage = `Download failed: ${specificError}`;
+          }
+
+          showToast(Toast.Style.Failure, "Download Failed", errorMessage);
+          reject(new Error(errorMessage));
           return;
         }
 
@@ -239,11 +258,11 @@ export async function downloadIPA(
               const jsonOutput = safeJsonParse<{ output: string }>(line, { output: "" });
               if (jsonOutput.output) {
                 filePath = jsonOutput.output;
-                console.log(`[ipatool] Found file path in JSON output: ${filePath}`);
+                logger.log(`[ipatool] Found file path in JSON output: ${filePath}`);
                 break;
               }
             } catch (e) {
-              console.error("Error parsing JSON line:", e);
+              logger.error("Error parsing JSON line:", e);
               // Continue to next line if this one fails
             }
           }
@@ -251,7 +270,7 @@ export async function downloadIPA(
 
         // If no filePath found in JSON, try to extract it from the stdout
         if (!filePath) {
-          console.log("[ipatool] No JSON output found, trying to extract file path from stdout using regex patterns");
+          logger.log("[ipatool] No JSON output found, trying to extract file path from stdout using regex patterns");
           filePath = extractFilePath(stdout, "");
 
           // If still no file path, try a fallback approach
@@ -260,7 +279,7 @@ export async function downloadIPA(
             const defaultPath = path.join(downloadsDir, `${bundleId}.ipa`);
             if (fs.existsSync(defaultPath)) {
               filePath = defaultPath;
-              console.log(`[ipatool] Using default file path based on bundleId: ${filePath}`);
+              logger.log(`[ipatool] Using default file path based on bundleId: ${filePath}`);
             } else {
               // Try to find any recently created .ipa file in the downloads directory
               try {
@@ -276,16 +295,16 @@ export async function downloadIPA(
 
                 if (files.length > 0) {
                   filePath = files[0].path;
-                  console.log(`[ipatool] Found most recent .ipa file in downloads directory: ${filePath}`);
+                  logger.log(`[ipatool] Found most recent .ipa file in downloads directory: ${filePath}`);
                 }
               } catch (e) {
-                console.error("Error finding .ipa files:", e);
+                logger.error("Error finding .ipa files:", e);
               }
             }
           }
         }
 
-        console.log(`[ipatool] Original downloaded file path: ${filePath}`);
+        logger.log(`[ipatool] Original downloaded file path: ${filePath}`);
 
         // Rename the file if we have app name and version and the file exists
         if (filePath && fs.existsSync(filePath) && appName && appVersion) {
@@ -295,15 +314,15 @@ export async function downloadIPA(
           const newFileName = `${sanitizedAppName} ${appVersion}.ipa`;
           const newFilePath = path.join(directory, newFileName);
 
-          console.log(`[ipatool] Attempting to rename file to: ${newFilePath}`);
+          logger.log(`[ipatool] Attempting to rename file to: ${newFilePath}`);
 
           try {
             fs.renameSync(filePath, newFilePath);
-            console.log(`[ipatool] Successfully renamed file to: ${newFilePath}`);
-            console.log(`[ipatool] Download and rename complete for ${appName} v${appVersion}`);
+            logger.log(`[ipatool] Successfully renamed file to: ${newFilePath}`);
+            logger.log(`[ipatool] Download and rename complete for ${appName} v${appVersion}`);
             filePath = newFilePath;
           } catch (e) {
-            console.error("Error renaming file:", e);
+            logger.error("Error renaming file:", e);
             // Continue with the original file path if rename fails
           }
         }
@@ -313,7 +332,7 @@ export async function downloadIPA(
 
       // Handle process errors
       child.on("error", async (error) => {
-        console.error(`[ipatool] Process error during download: ${error.message}`);
+        logger.error(`[ipatool] Process error during download: ${error.message}`);
 
         // Check if this is a TLS error or other network error that might be transient
         const isTlsError =
@@ -326,11 +345,11 @@ export async function downloadIPA(
           const nextRetryCount = retryCount + 1;
           const nextRetryDelay = retryDelay * 1.5; // Exponential backoff
 
-          console.log(
+          logger.log(
             `[ipatool] TLS/Network error detected in process error handler. Retrying in ${retryDelay}ms (Attempt ${nextRetryCount}/${MAX_RETRIES})`,
           );
           await showHUD(`Network error. Retrying in ${Math.round(retryDelay / 1000)}s...`, { clearRootSearch: true });
-          console.log(`[ipatool] Waiting ${retryDelay}ms before retry attempt ${nextRetryCount}/${MAX_RETRIES}`);
+          logger.log(`[ipatool] Waiting ${retryDelay}ms before retry attempt ${nextRetryCount}/${MAX_RETRIES}`);
 
           // Wait for the retry delay
           setTimeout(async () => {
@@ -352,8 +371,8 @@ export async function downloadIPA(
       });
     });
   } catch (error) {
-    console.error(`[ipatool] Unhandled download error: ${error}`);
-    console.error(`[ipatool] Error stack: ${(error as Error).stack || "No stack trace available"}`);
+    logger.error(`[ipatool] Unhandled download error: ${error}`);
+    logger.error(`[ipatool] Error stack: ${(error as Error).stack || "No stack trace available"}`);
     await showHUD("Download failed", { clearRootSearch: true });
     showToast(Toast.Style.Failure, "Download Failed", String(error));
     return null;
@@ -367,48 +386,49 @@ export async function downloadIPA(
  */
 export async function getAppDetails(bundleId: string) {
   try {
-    console.log(`[ipatool] Getting app details for bundleId: ${bundleId}`);
+    logger.log(`[ipatool] Getting app details for bundleId: ${bundleId}`);
 
     // Ensure we're authenticated before proceeding
     const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) {
-      console.error("[ipatool] Authentication failed during app details lookup");
+      logger.error("[ipatool] Authentication failed during app details lookup");
       showToast(Toast.Style.Failure, "Authentication failed", "Please check your Apple ID credentials");
       return null;
     }
 
     // Try to get details directly from iTunes API first
-    console.log(`[ipatool] Trying to fetch details directly from iTunes API for ${bundleId}`);
+    logger.log(`[ipatool] Trying to fetch details directly from iTunes API for ${bundleId}`);
     const itunesDetails = await fetchITunesAppDetails(bundleId);
 
     if (itunesDetails) {
-      console.log(`[ipatool] Successfully retrieved details from iTunes API for ${bundleId}`);
+      logger.log(`[ipatool] Successfully retrieved details from iTunes API for ${bundleId}`);
 
       // Use the utility function to convert iTunes data to AppDetails
       const result = convertITunesResultToAppDetails(itunesDetails);
 
-      console.log(`[ipatool] Successfully parsed app details from iTunes API for ${bundleId}`);
+      logger.log(`[ipatool] Successfully parsed app details from iTunes API for ${bundleId}`);
       return result;
     }
 
     // If iTunes API fails, fall back to ipatool search
-    console.log(`[ipatool] iTunes API lookup failed, falling back to ipatool search for ${bundleId}`);
+    logger.log(`[ipatool] iTunes API lookup failed, falling back to ipatool search for ${bundleId}`);
 
     // Try a more general search if the bundle ID is very specific
     // This helps with cases where the exact bundle ID doesn't yield results
     let searchTerm = bundleId;
-    if (bundleId.split(".").length > 2) {
+    // Ensure bundleId is defined before trying to split it
+    if (bundleId && bundleId.split(".").length > 2) {
       // Extract the app name part from the bundle ID (usually the last part)
       const bundleParts = bundleId.split(".");
       const possibleAppName = bundleParts[bundleParts.length - 1];
       if (possibleAppName && possibleAppName.length > 3) {
         searchTerm = possibleAppName;
-        console.log(`[ipatool] Using extracted app name from bundle ID: ${searchTerm}`);
+        logger.log(`[ipatool] Using extracted app name from bundle ID: ${searchTerm}`);
       }
     }
 
     // Execute the search command using execFile to prevent command injection
-    console.log(`[ipatool] Executing search for term: ${searchTerm}`);
+    logger.log(`[ipatool] Executing search for term: ${searchTerm}`);
     const { stdout } = await execFileAsync(IPATOOL_PATH, [
       "search",
       searchTerm,
@@ -420,20 +440,20 @@ export async function getAppDetails(bundleId: string) {
     ]);
 
     // Parse the JSON output with fallback to null if parsing fails
-    console.log(`[ipatool] Received search response, parsing JSON...`);
+    logger.log(`[ipatool] Received search response, parsing JSON...`);
     const searchResponse = safeJsonParse<IpaToolSearchResponse>(stdout, { count: 0, apps: [] });
 
     if (!searchResponse.apps || searchResponse.apps.length === 0) {
-      console.log(`[ipatool] No apps found for search term: ${searchTerm}`);
+      logger.log(`[ipatool] No apps found for search term: ${searchTerm}`);
       return null;
     }
 
     // Find the exact bundle ID match in the search results
-    const exactMatch = searchResponse.apps.find((app) => app.bundleId === bundleId);
+    const exactMatch = searchResponse.apps.find((app) => (app.bundleId || app.bundleID) === bundleId);
 
     // If no exact match is found, use the first result as a fallback
     const app = exactMatch || searchResponse.apps[0];
-    console.log(
+    logger.log(
       `[ipatool] ${exactMatch ? "Found exact match" : "No exact match found, using first result"}: ${app.name} (${app.bundleId})`,
     );
 
@@ -442,7 +462,7 @@ export async function getAppDetails(bundleId: string) {
       id: app.id.toString(),
       name: app.name,
       version: app.version,
-      bundleId: app.bundleId,
+      bundleId: app.bundleId || app.bundleID || "", // Handle both bundleId and bundleID formats
       artworkUrl60: "",
       description: "",
       iconUrl: "",
@@ -461,25 +481,26 @@ export async function getAppDetails(bundleId: string) {
     };
 
     // Try to fetch additional details from iTunes API for the app we found
-    if (app.bundleId !== bundleId) {
-      console.log(`[ipatool] Trying to fetch iTunes data for found app: ${app.bundleId}`);
-      const appItunesDetails = await fetchITunesAppDetails(app.bundleId);
+    const appBundleId = app.bundleId || app.bundleID || "";
+    if (appBundleId !== bundleId && appBundleId) {
+      logger.log(`[ipatool] Trying to fetch iTunes data for found app: ${appBundleId}`);
+      const appItunesDetails = await fetchITunesAppDetails(appBundleId);
 
       if (appItunesDetails) {
-        console.log(`[ipatool] Enriching app details with iTunes data for ${app.bundleId}`);
+        logger.log(`[ipatool] Enriching app details with iTunes data for ${app.bundleId}`);
 
         // Use the utility function to convert iTunes data to AppDetails
         result = convertITunesResultToAppDetails(appItunesDetails, result);
       } else {
-        console.log(`[ipatool] Could not fetch iTunes data for ${app.bundleId}, using basic details only`);
+        logger.log(`[ipatool] Could not fetch iTunes data for ${app.bundleId}, using basic details only`);
       }
     }
 
-    console.log(`[ipatool] Successfully parsed app details for ${bundleId}`);
+    logger.log(`[ipatool] Successfully parsed app details for ${bundleId}`);
     return result;
   } catch (error) {
-    console.error(`[ipatool] Error getting app details for ${bundleId}: ${error}`);
-    console.error(`[ipatool] Error stack: ${(error as Error).stack || "No stack trace available"}`);
+    logger.error(`[ipatool] Error getting app details for ${bundleId}: ${error}`);
+    logger.error(`[ipatool] Error stack: ${(error as Error).stack || "No stack trace available"}`);
     showToast(Toast.Style.Failure, "Error getting app details", String(error));
     return null;
   }

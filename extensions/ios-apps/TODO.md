@@ -1,4 +1,4 @@
 # TODO
 
-- [ ] Make ipatool use optional
 - [ ] Allow app searching without triggering auth
+- [X] Migrate AI evals to ai.yaml

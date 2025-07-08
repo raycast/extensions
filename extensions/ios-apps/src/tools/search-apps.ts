@@ -1,6 +1,8 @@
 import { searchApps } from "../ipatool";
 import { enrichAppDetails } from "../utils/itunes-api";
 import { AppDetails } from "../types";
+import { logger } from "../utils/logger";
+import { showToast, Toast } from "@raycast/api";
 
 // No initial confirmation - search will execute immediately
 
@@ -19,7 +21,7 @@ type Input = {
  * Search for iOS apps by name or keyword
  */
 export default async function searchIosApps(input: Input) {
-  console.log(`[search-apps tool] Searching for apps with query: "${input.query}", limit: ${input.limit || 10}`);
+  logger.log(`[search-apps tool] Searching for apps with query: "${input.query}", limit: ${input.limit || 10}`);
 
   // Ensure limit is within bounds
   const validLimit = Math.min(Math.max(1, Number(input.limit) || 10), 20);
@@ -27,14 +29,24 @@ export default async function searchIosApps(input: Input) {
   try {
     // Search for apps using ipatool
     const apps = await searchApps(input.query, validLimit);
-    console.log(`[search-apps tool] Found ${apps.length} apps`);
+    logger.log(`[search-apps tool] Found ${apps.length} apps`);
 
-    // Map the results to a more user-friendly format
+    // Show progress toast for enrichment
+    const enrichmentToast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Enriching app details",
+      message: `Processing ${apps.length} apps from iTunes API...`,
+    });
+
+    let completedApps = 0;
+    let failedEnrichments = 0;
+
+    // Map the results to a more user-friendly format with progress tracking
     const appPromises = apps.map(async (app) => {
       // Convert from ipatool format to AppDetails format
       const appDetails: AppDetails = {
         id: String(app.id),
-        bundleId: app.bundleId,
+        bundleId: app.bundleId || app.bundleID || "",
         name: app.name,
         version: app.version,
         price: String(app.price),
@@ -59,6 +71,11 @@ export default async function searchIosApps(input: Input) {
       try {
         // Try to enrich with additional details from iTunes API
         const enriched = await enrichAppDetails(appDetails);
+
+        completedApps++;
+        const progressPercent = Math.round((completedApps / apps.length) * 100);
+        enrichmentToast.message = `${completedApps}/${apps.length} (${progressPercent}%) - Latest: ${app.name}`;
+
         return {
           id: enriched.id,
           bundleId: enriched.bundleId,
@@ -71,7 +88,13 @@ export default async function searchIosApps(input: Input) {
           description: enriched.description?.substring(0, 200) + (enriched.description?.length > 200 ? "..." : ""),
         };
       } catch (error) {
-        console.error(`[search-apps tool] Error enriching app details for ${app.name}:`, error);
+        completedApps++;
+        failedEnrichments++;
+
+        const progressPercent = Math.round((completedApps / apps.length) * 100);
+        enrichmentToast.message = `${completedApps}/${apps.length} (${progressPercent}%) - ${failedEnrichments} failed`;
+
+        logger.error(`[search-apps tool] Error enriching app details for ${app.name || "unknown app"}:`, error);
         // Return basic info if enrichment fails
         return {
           id: appDetails.id,
@@ -89,9 +112,25 @@ export default async function searchIosApps(input: Input) {
       .map((result) => (result.status === "fulfilled" ? result.value : null))
       .filter((app): app is NonNullable<typeof app> => app !== null);
 
+    // Update final enrichment status
+    if (failedEnrichments === 0) {
+      enrichmentToast.style = Toast.Style.Success;
+      enrichmentToast.title = "Apps enriched";
+      enrichmentToast.message = `Successfully enriched all ${apps.length} apps`;
+    } else if (failedEnrichments < apps.length) {
+      enrichmentToast.style = Toast.Style.Success;
+      enrichmentToast.title = "Apps partially enriched";
+      enrichmentToast.message = `Enriched ${apps.length - failedEnrichments}/${apps.length} apps`;
+    } else {
+      enrichmentToast.style = Toast.Style.Failure;
+      enrichmentToast.title = "Enrichment failed";
+      enrichmentToast.message = "Could not enrich any app details";
+    }
+
     return { apps: formattedApps };
   } catch (error) {
-    console.error(`[search-apps tool] Error: ${error}`);
+    logger.error(`[search-apps tool] Error: ${error}`);
+    await showToast(Toast.Style.Failure, "Search Error", `Failed to search for apps: ${error}`);
     throw new Error(`Failed to search for apps: ${error}`);
   }
 }

@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { showFailureToast } from "@raycast/utils";
 import { AppDetails } from "../types";
-import { downloadScreenshots } from "../utils/itunes-api";
+import { downloadScreenshots } from "../utils/screenshot-downloader";
 
 /**
  * Interface for the screenshot download state

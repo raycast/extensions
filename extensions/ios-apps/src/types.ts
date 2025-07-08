@@ -1,4 +1,13 @@
 // src/types.ts - Type definitions for the extension
+import path from "path";
+
+// =============================================================================
+// CORE APP DATA TYPES
+// =============================================================================
+
+/**
+ * Main app details interface combining data from multiple sources
+ */
 export interface AppDetails {
   artistName: string;
   artworkUrl60: string;
@@ -26,27 +35,41 @@ export interface AppDetails {
   screenshotUrls?: string[];
   ipadScreenshotUrls?: string[];
   appletvScreenshotUrls?: string[];
+  // Raw iTunes API response data
+  itunesData?: {
+    screenshotUrls?: string[];
+    ipadScreenshotUrls?: string[];
+    appletvScreenshotUrls?: string[];
+    watchScreenshotUrls?: string[];
+    messageScreenshotUrls?: string[];
+    [key: string]: unknown;
+  };
 }
 
+/**
+ * Version history item for app updates
+ */
 export interface VersionHistoryItem {
   version: string;
   releaseDate: string;
   releaseNotes: string;
 }
 
-export interface ExtensionPreferences {
-  appleId: string;
-  password: string;
-  downloadPath?: string;
-  homebrewPath?: string;
-  ipatoolPath?: string;
-}
+// =============================================================================
+// ITUNES API TYPES
+// =============================================================================
 
+/**
+ * iTunes Search API response wrapper
+ */
 export interface ITunesResponse {
   resultCount: number;
   results: ITunesResult[];
 }
 
+/**
+ * Complete iTunes Search API result structure
+ */
 export interface ITunesResult {
   artistId: number;
   artistName: string;
@@ -66,7 +89,6 @@ export interface ITunesResult {
   formattedPrice: string;
   genreIds: string[];
   genres: string[];
-  ipadScreenshotUrls: string[];
   isGameCenterEnabled: boolean;
   kind: string;
   languageCodesISO2A: string[];
@@ -75,7 +97,12 @@ export interface ITunesResult {
   primaryGenreName: string;
   releaseDate: string;
   releaseNotes: string;
+  // Screenshot URLs for different platforms
   screenshotUrls: string[];
+  ipadScreenshotUrls: string[];
+  appletvScreenshotUrls?: string[];
+  watchScreenshotUrls?: string[];
+  messageScreenshotUrls?: string[];
   sellerName: string;
   sellerUrl: string;
   trackCensoredName: string;
@@ -87,19 +114,91 @@ export interface ITunesResult {
   userRatingCountForCurrentVersion: number;
   version: string;
   wrapperType: string;
+  // Index signature to allow accessing any property
+  [key: string]: unknown;
 }
 
-// Interface for ipatool search results
+// =============================================================================
+// IPATOOL TYPES
+// =============================================================================
+
+/**
+ * ipatool search result for individual apps
+ */
 export interface IpaToolSearchApp {
   id: number;
-  bundleId: string;
+  bundleId?: string;
+  bundleID?: string; // Add support for both casing variants from ipatool output
   name: string;
   version: string;
   price: number;
   developer: string;
 }
 
+/**
+ * ipatool search response wrapper
+ */
 export interface IpaToolSearchResponse {
   count: number;
   apps: IpaToolSearchApp[];
+}
+
+// =============================================================================
+// PLATFORM & SCREENSHOT TYPES
+// =============================================================================
+
+/**
+ * Supported Apple platforms for screenshots
+ */
+export type PlatformType = "iPhone" | "iPad" | "Mac" | "AppleTV" | "AppleWatch" | "VisionPro" | "iMessage";
+
+/**
+ * Screenshot information with platform context
+ */
+export interface ScreenshotInfo {
+  url: string;
+  type: PlatformType;
+  index: number;
+}
+
+/**
+ * Platform preferences for screenshot downloads
+ */
+export interface PlatformPreferences {
+  includeIPhone: boolean;
+  includeIPad: boolean;
+  includeMac: boolean;
+  includeAppleTV: boolean;
+  includeAppleWatch: boolean;
+  includeVisionPro: boolean;
+  includeIMessage: boolean;
+}
+
+/**
+ * Platform directory mapping for organizing screenshots
+ */
+export const PlatformDirectories = (screenshotsDir: string): Record<PlatformType, string> => ({
+  iPhone: path.join(screenshotsDir, "iPhone"),
+  iPad: path.join(screenshotsDir, "iPad"),
+  Mac: path.join(screenshotsDir, "Mac"),
+  AppleTV: path.join(screenshotsDir, "TV"),
+  AppleWatch: path.join(screenshotsDir, "Apple Watch"),
+  VisionPro: path.join(screenshotsDir, "Vision Pro"),
+  iMessage: path.join(screenshotsDir, "iMessage"),
+});
+
+// =============================================================================
+// EXTENSION CONFIGURATION TYPES
+// =============================================================================
+
+/**
+ * Raycast extension preferences
+ */
+export interface ExtensionPreferences {
+  appleId: string;
+  password: string;
+  downloadPath?: string;
+  homebrewPath?: string;
+  ipatoolPath?: string;
+  verboseLogging?: boolean;
 }

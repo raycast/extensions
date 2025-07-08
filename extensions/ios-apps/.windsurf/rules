@@ -1,0 +1,125 @@
+# Windsurf Extension Development & AI Collaboration Guide
+
+## 🌊 Core Principles
+
+- **Simplicity First:** Prioritize clear, maintainable solutions. Avoid over-engineering.
+- **Iterate Intelligently:** Build on working code unless a rewrite is necessary or requested.
+- **Stay Focused:** Work only on the defined task. Avoid scope creep.
+- **Code Quality:** Maintain a clean, secure, and well-tested codebase.
+- **Human + AI Collaboration:** These rules guide both developers and AI for effective teamwork.
+
+---
+
+## 📁 Project Structure & Documentation
+
+- **Documentation First:** Always review `README.md`, `docs/architecture.md`, `docs/technical.md`, and `tasks/tasks.md` before starting.
+- **Respect Architecture:** Follow module boundaries, data flow, and component relationships.
+- **Pattern Awareness:** Use existing patterns and technologies before introducing new ones.
+- **Directory Structure:** Organize code into `components/`, `hooks/`, `types/`, `utils/`, and `tools/` using lowercase-dash naming.
+- **Clean Organization:**
+
+  - Use `docs/` for general documentation, `docs/implementation/` for technical details
+  - Place utility scripts in `scripts/utils/` with proper README documentation
+  - Keep project root clean by organizing files into logical subdirectories
+  - Document script usage and purpose in dedicated README files
+
+---
+
+## ⚙ Task Execution Workflow
+
+- **Understand Requirements:** Clarify task goals, dependencies, and acceptance criteria.
+- **Plan Before You Code:** Identify affected components and outline steps.
+- **Test-First Mindset:** Define how changes will be tested before implementation.
+- **Track Progress:** Update `docs/status.md` and `tasks/tasks.md` as work progresses.
+
+---
+
+## 🤖 AI Collaboration Guidelines
+
+- **Be Specific:** Provide clear, focused prompts with context and constraints.
+- **Reference Context:** Remind the AI of prior decisions or code when needed.
+- **Suggest vs. Apply:** Use “Suggestion:” for review or “Applying fix:” for confident changes.
+- **Review AI Output:** Always verify logic and assumptions in AI-generated code.
+- **Incremental Steps:** Break down complex tasks and confirm each step before proceeding.
+- **Use AI Strategically:** Leverage AI for boilerplate, refactoring, and test generation—not for architectural decisions.
+- **Tool Confirmations:** Use proper Raycast `Tool.Confirmation<Input>` pattern for disambiguation:
+  - Export confirmation function that runs before main tool execution
+  - Show confirmation dialog for ambiguous queries (multiple reasonable matches)
+  - Format options clearly (e.g., "App Name by Developer")
+  - Keep confirmation logic separate from main tool function
+
+---
+
+## 🧱 Code Quality & Style
+
+- **TypeScript Strict Mode:** Use strict typing; avoid `any`.
+- **Component Design:** Use functional components with clearly defined prop interfaces.
+- **File Size:** Keep files under 300 lines. Split large components.
+- **Naming Conventions:** Use PascalCase for components, camelCase for functions, and descriptive file names.
+- **Avoid Duplication:** Reuse existing logic and refactor when needed.
+- **Linting & Formatting:** Follow ESLint and Prettier rules.
+- **Constants & Types:** Place constants at the top; use `types/` with barrel exports.
+- **ES Module Compatibility:**
+
+  - Use `import.meta.url` instead of `require.main === module` for main module detection
+  - Use `fileURLToPath` and `dirname` to replace `__dirname` in ES modules
+  - Prefer `export default` over `module.exports`
+- **Dependency Management:** Regularly audit and remove unused dependencies to keep bundle lean
+
+---
+
+## 🧪 Testing & Validation
+
+- **TDD Approach:** Write failing tests before implementing features or fixes.
+- **Comprehensive Coverage:** Include unit, integration, and edge case tests.
+- **No Mock Data in Dev:** Use real or realistic data outside of test environments.
+- **Manual Checks:** Perform UI verification alongside automated tests.
+- **All Tests Must Pass:** Never commit failing tests.
+- **AI Evals Best Practices:**
+
+  - Keep eval expectations aligned with actual tool behavior
+  - Remove unnecessary parameters from test cases (e.g., limit parameters)
+  - Test realistic user queries and edge cases
+  - Aim for 100% pass rate on AI evaluations
+  - Fix failing evals promptly to maintain quality standards
+
+---
+
+## 🐞 Debugging & Troubleshooting
+
+- **Root Cause First:** Fix underlying issues, not just symptoms.
+- **Console Logs:** Use targeted logs for debugging and remove them after resolution.
+- **Check `fixes/`:** Review past solutions before deep-diving into bugs.
+- **Document Fixes:** For complex issues, create a markdown file in `fixes/` with investigation and resolution details.
+- **Error Handling Best Practices:**
+  - Provide specific, user-friendly error messages instead of generic ones
+  - Include stderr details and detect common error patterns
+  - Log detailed errors for debugging while showing clean messages to users
+- **Dynamic Configuration:** Avoid caching preference values; read them dynamically to respect real-time changes
+- **TypeScript Configuration:** Ensure test directories are included in `tsconfig.json` and proper Jest types are configured
+
+---
+
+## 🔐 Security Practices
+
+- **Server-Side Logic:** Keep sensitive operations on the backend.
+- **Input Validation:** Sanitize all user input server-side.
+- **Secrets Management:** Use environment variables—never hardcode credentials.
+- **Dependency Awareness:** Evaluate security implications of new packages.
+
+---
+
+## 🌍 Environment & Git Hygiene
+
+- **Clean Commits:** Use atomic, descriptive commit messages.
+- **Branching Strategy:** Follow the project’s branching model.
+- **.env Handling:** Never commit `.env` files. Use `.env.example` templates.
+- **Cross-Environment Support:** Ensure code works across dev, test, and prod.
+- **Server Management:** Restart servers after config or backend changes.
+
+---
+
+## 📄 Documentation Maintenance
+
+- **Keep Docs Updated:** Reflect changes in `README.md`, `docs/`, and `tasks/`.
+- **Evolve the Rules:** Periodically review and refine this guide as the project grows.

@@ -53,6 +53,7 @@ export function CopyActions({ app }: CopyActionsProps) {
       <Action
         title="Copy App Store URL"
         icon={Icon.Link}
+        shortcut={{ modifiers: ["cmd"], key: "c" }}
         onAction={() => copyToClipboard(appStoreUrl, "App Store URL")}
       />
       {app.artistViewUrl && (

@@ -1,30 +1,18 @@
-import { List, Icon } from "@raycast/api";
-import { useState, useCallback } from "react";
+import { Icon, List } from "@raycast/api";
 import { formatPrice } from "./utils/paths";
 import { renderStarRating, formatDate } from "./utils/common";
 import { AppActionPanel } from "./components/app-action-panel";
 import { useAppSearch, useAppDownload } from "./hooks";
 
 export default function Search() {
-  const [searchText, setSearchText] = useState("");
-
-  // Use the custom hooks
-  const { apps, isLoading, error, totalResults, setSearchText: setSearchFromHook } = useAppSearch(searchText, 500);
+  // Use the custom hooks - let useAppSearch manage the search text state
+  const { apps, isLoading, error, totalResults, searchText, setSearchText } = useAppSearch("", 500);
   const { downloadApp } = useAppDownload();
-
-  // Create a reusable search handler to avoid duplicate code
-  const handleSearchTextChange = useCallback(
-    (text: string) => {
-      setSearchText(text);
-      setSearchFromHook(text);
-    },
-    [setSearchText, setSearchFromHook],
-  );
 
   // If no search text has been entered yet, show a custom empty view
   if (!searchText) {
     return (
-      <List onSearchTextChange={handleSearchTextChange} isLoading={isLoading}>
+      <List onSearchTextChange={setSearchText} isLoading={isLoading}>
         <List.EmptyView
           title="Type Query to Search"
           description="Search for apps by name, developer, or bundle Id."
@@ -37,17 +25,22 @@ export default function Search() {
   return (
     <List
       isLoading={isLoading}
-      onSearchTextChange={handleSearchTextChange}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search for iOS apps..."
       throttle
       navigationTitle="Search iOS Apps"
     >
-      {error ? (
-        <List.EmptyView title={error} icon={{ source: Icon.Warning }} />
-      ) : apps.length === 0 && searchText ? (
+      {/* Handle error state */}
+      {error && <List.EmptyView title={error} icon={{ source: Icon.Warning }} />}
+
+      {/* Handle empty results */}
+      {!error && apps.length === 0 && searchText && (
         <List.EmptyView title="No results found" icon={{ source: Icon.MagnifyingGlass }} />
-      ) : (
-        <List.Section title={totalResults > 0 ? `Results (${totalResults})` : ""}>
+      )}
+
+      {/* Show results when available */}
+      {!error && apps.length > 0 && (
+        <List.Section key="search-results" title={totalResults > 0 ? `Results (${totalResults})` : ""}>
           {apps.map((app) => {
             // Get the app rating
             const rating = app.averageUserRatingForCurrentVersion || app.averageUserRating;
@@ -95,13 +88,13 @@ export default function Search() {
                     `}
                     metadata={
                       <List.Item.Detail.Metadata>
-                        <List.Item.Detail.Metadata.Label title="Name" text={app.name} />
-                        <List.Item.Detail.Metadata.Label title="Version" text={app.version} />
-                        <List.Item.Detail.Metadata.Label title="Developer" text={app.sellerName} />
-                        <List.Item.Detail.Metadata.Label title="Price" text={formatPrice(app.price)} />
-                        <List.Item.Detail.Metadata.Label title="Rating" text={ratingText} />
-                        <List.Item.Detail.Metadata.Label title="Bundle ID" text={app.bundleId} />
-                        <List.Item.Detail.Metadata.Label title="Release Date" text={releaseDate} />
+                        <List.Item.Detail.Metadata.Label key="name" title="Name" text={app.name} />
+                        <List.Item.Detail.Metadata.Label key="version" title="Version" text={app.version} />
+                        <List.Item.Detail.Metadata.Label key="developer" title="Developer" text={app.sellerName} />
+                        <List.Item.Detail.Metadata.Label key="price" title="Price" text={formatPrice(app.price)} />
+                        <List.Item.Detail.Metadata.Label key="rating" title="Rating" text={ratingText} />
+                        <List.Item.Detail.Metadata.Label key="bundleId" title="Bundle ID" text={app.bundleId} />
+                        <List.Item.Detail.Metadata.Label key="releaseDate" title="Release Date" text={releaseDate} />
                       </List.Item.Detail.Metadata>
                     }
                   />
