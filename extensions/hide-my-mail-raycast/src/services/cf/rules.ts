@@ -1,4 +1,4 @@
-import { EmailRoutingRule } from "cloudflare/resources/email-routing.mjs";
+import { EmailRoutingRule } from "cloudflare/resources/email-routing/rules/rules";
 import { fetchWithAuth } from "../api/client";
 import { getApiConfig } from "../api/config";
 import { AliasRule, ParsedAliasMeta } from "../../types";

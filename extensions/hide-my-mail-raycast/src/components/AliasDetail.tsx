@@ -1,6 +1,5 @@
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List } from "@raycast/api";
 import { AliasRule } from "../types";
-import CreateAlias from "../commands/create-alias";
 
 interface AliasDetailProps {
   alias: AliasRule;
@@ -27,34 +26,5 @@ export function AliasDetail({ alias }: AliasDetailProps) {
     </List.Item.Detail.Metadata>
   );
 
-  return (
-    <List.Item.Detail
-      metadata={metadata}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Email Address"
-            content={alias.email}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
-          <Action.Push
-            title="Edit Alias"
-            icon={Icon.Pencil}
-            target={<CreateAlias alias={alias} />}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Forwarding Address"
-            content={alias.forwardsToEmail}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Rule ID"
-            content={alias.id}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
+  return <List.Item.Detail metadata={metadata} />;
 }
