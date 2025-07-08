@@ -226,6 +226,8 @@
     "@types/lodash": "^4.17.16",
     "@types/node": "^20.10.2",
     "@types/p-limit": "^2.1.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
     "eslint": "^8.57.0",
     "jest": "^30.0.4",
     "nock": "^14.0.5",

@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "include": ["src/**/*", "__tests__/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "types": ["jest", "node"],
+    "types": ["jest", "node", "react", "react-dom"],
     "lib": ["ES2023"],
     "module": "commonjs",
     "target": "ES2022",
