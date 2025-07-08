@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.0.3] - {{PR_MERGE_DATE}}
+## [0.0.3] - {PR_MERGE_DATE}
 
 - Fixed typescript errors - no new features added
 
