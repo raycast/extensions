@@ -1,4 +1,4 @@
 # Lightshot Gallery Changelog
 
-## [Windows] - {PR_MERGE_DATE}
+## [Windows] - 2025-07-08
 - Added support for Windows
