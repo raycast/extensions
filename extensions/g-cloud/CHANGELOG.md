@@ -6,7 +6,7 @@
 - Add version management for secrets (create, enable, disable, destroy)
 - Add search and filtering capabilities for secrets
 
-## [0.1.31] - {PR_MERGE_DATE}
+## [0.1.31] - 2025-03-24
 - feature: Commands for each service.
 - feature: QuickSwitcher, quick switch between projects inside same service.
 - fix: Storage Service now retrieves folders and sub-folders.
