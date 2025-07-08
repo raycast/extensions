@@ -58,7 +58,7 @@ function BuyToken(props: LaunchProps<{ arguments: BuyTokenFormValues }>) {
     } catch (error) {
       await showToast(createErrorToast("Error", error, "Failed to execute token purchase"));
     } finally {
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   }
 
