@@ -46,7 +46,11 @@ export const executeJxa = async (script: string) => {
       humanReadableOutput: false,
       language: 'JavaScript',
     });
-    return JSON.parse(result);
+
+    // JXA's non-human-readable output is similar to JSON, but is actually a JSON-like representation of the JavaScript object.
+    // While values should not be `undefined`, JXA will include {"key": undefined} in its output if they are.
+    // This is not valid JSON, so we replace those values with `null` to make it valid JSON.
+    return JSON.parse(result.replace(/:\s*undefined/g, ': null'));
   } catch (err: unknown) {
     const errorMessage = typeof err === 'string' ? err : err instanceof Error ? err.message : String(err);
     const message = errorMessage.replace('execution error: Error: ', '');
@@ -88,7 +92,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
   const things = Application('${preferences.thingsAppIdentifier}');
   const todos = things.lists.byId('${commandListNameToListIdMapping[commandListName]}').toDos();
 
-  return todos.map(todo => ({
+  return JSON.stringify(todos.map(todo => ({
     id: todo.id(),
     name: todo.name(),
     status: todo.status(),
@@ -112,7 +116,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
       name: todo.area().name(),
       tags: todo.area().tagNames(),
     },
-  }));
+  })));
 `);
 };
 
@@ -140,7 +144,7 @@ export const getTodo = (todoId: string) =>
     if (foundTodo) break;
   }
 
-  return foundTodo;
+  return JSON.stringify(foundTodo);
 `);
 
 export const setTodoProperty = (todoId: string, key: string, value: string) =>
@@ -158,7 +162,7 @@ export const deleteTodo = (todoId: string) =>
 export const getTags = (): Promise<string[]> =>
   executeJxa(`
   const things = Application('${preferences.thingsAppIdentifier}');
-  return things.tags().map(tag => tag.name());
+  return JSON.stringify(things.tags().map(tag => tag.name()));
 `);
 
 export type Project = {
@@ -172,13 +176,13 @@ export const getProjects = async (): Promise<Project[]> => {
     const things = Application('${preferences.thingsAppIdentifier}');
     const projects = things.projects();
 
-    return projects.map(project => ({
+    return JSON.stringify(projects.map(project => ({
       id: project.id(),
       name: project.name(),
       area: project.area() && {
         id: project.area().id(),
       },
-    }));
+    })));
   `);
 };
 
@@ -192,10 +196,10 @@ export const getAreas = async (): Promise<Area[]> => {
     const things = Application('${preferences.thingsAppIdentifier}');
     const areas = things.areas();
 
-    return areas.map(area => ({
+    return JSON.stringify(areas.map(area => ({
       id: area.id(),
       name: area.name(),
-    }));
+    })));
   `);
 };
 

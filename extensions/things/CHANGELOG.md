@@ -3,6 +3,7 @@
 ## [Improved Project Detection] - {PR_MERGE_DATE}
 
 - Improve detection mechanism for projects to not depend on the existence of a project
+- Prevent crashes when receiving an `undefined` value from Things via JavaScript for Automation (JXA)
 
 ## [Enhanced Error Handling] - 2025-07-07
 
