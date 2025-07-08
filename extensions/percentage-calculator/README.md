@@ -1,4 +1,4 @@
-# Percentage Calculator - Raycast Extension
+# Percentage Calculator
 
 A comprehensive percentage calculator for Raycast that provides a **Full Statistics** view with colorful card-based results. Enter any two values and get a complete breakdown of all possible percentage calculations in one go!
 
